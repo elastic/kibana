@@ -18,7 +18,9 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { I18nProvider } from '@kbn/i18n/react';
+import { shallowWithI18nProvider, mountWithI18nProvider, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field } from './field';
@@ -184,7 +186,7 @@ describe('Field', () => {
     describe(`for ${type} setting`, () => {
       it('should render default value if there is no user value set', async () => {
         const component = shallowWithI18nProvider(
-          <Field.WrappedComponent
+          <Field
             setting={setting}
             save={save}
             clear={clear}
@@ -197,7 +199,7 @@ describe('Field', () => {
 
       it('should render as read only with help text if overridden', async () => {
         const component = shallowWithI18nProvider(
-          <Field.WrappedComponent
+          <Field
             setting={{
               ...setting,
               value: userValues[type],
@@ -214,7 +216,7 @@ describe('Field', () => {
 
       it('should render as read only if saving is disabled', async () => {
         const component = shallowWithI18nProvider(
-          <Field.WrappedComponent
+          <Field
             setting={setting}
             save={save}
             clear={clear}
@@ -227,7 +229,7 @@ describe('Field', () => {
 
       it('should render user value if there is user value is set', async () => {
         const component = shallowWithI18nProvider(
-          <Field.WrappedComponent
+          <Field
             setting={{
               ...setting,
               value: userValues[type],
@@ -243,7 +245,7 @@ describe('Field', () => {
 
       it('should render custom setting icon if it is custom', async () => {
         const component = shallowWithI18nProvider(
-          <Field.WrappedComponent
+          <Field
             setting={{
               ...setting,
               isCustom: true,
@@ -260,8 +262,8 @@ describe('Field', () => {
 
     if(type === 'select') {
       it('should use options for rendering values', () => {
-        const component = mountWithIntl(
-          <Field.WrappedComponent
+        const component = mountWithI18nProvider(
+          <Field
             setting={{
               ...setting,
               isCustom: true,
@@ -277,8 +279,8 @@ describe('Field', () => {
       });
 
       it('should use optionLabels for rendering labels', () => {
-        const component = mountWithIntl(
-          <Field.WrappedComponent
+        const component = mountWithI18nProvider(
+          <Field
             setting={{
               ...setting,
               isCustom: true,
@@ -455,16 +457,16 @@ describe('Field', () => {
       ...settings.string,
       requiresPageReload: true,
     };
-    const wrapper = mountWithIntl(
-      <Field.WrappedComponent
+    const wrapper = mountWithI18nProvider(
+      <Field
         setting={setting}
         save={save}
         clear={clear}
       />
     );
     wrapper.instance().onFieldChange({ target: { value: 'a new value' } });
-    wrapper.update();
-    findTestSubject(wrapper, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
+    const updated = wrapper.update();
+    findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
     expect(save).toHaveBeenCalled();
     await save();
     expect(toastNotifications.add).toHaveBeenCalledWith(
