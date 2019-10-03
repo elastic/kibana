@@ -492,16 +492,20 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               })}
 
               {!localState.isLoading && paginatedFields.length === 0 && (
-                <EuiText>
-                  {showEmptyFields
-                    ? i18n.translate('xpack.lens.indexPatterns.hiddenFieldsLabel', {
-                        defaultMessage:
-                          'No fields have data with the current filters. You can show fields without data using the filters above.',
-                      })
-                    : i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
-                        defaultMessage: 'No fields can be visualized from {title}',
-                        values: { title: currentIndexPattern.title },
-                      })}
+                <EuiText size="s" color="subdued">
+                  <p>
+                    <strong>
+                      {showEmptyFields
+                        ? i18n.translate('xpack.lens.indexPatterns.hiddenFieldsLabel', {
+                            defaultMessage:
+                              'No fields have data with the current filters. You can show fields without data using the filters above.',
+                          })
+                        : i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
+                            defaultMessage: 'No fields in {title} can be visualized.',
+                            values: { title: currentIndexPattern.title },
+                          })}
+                    </strong>
+                  </p>
                 </EuiText>
               )}
             </div>

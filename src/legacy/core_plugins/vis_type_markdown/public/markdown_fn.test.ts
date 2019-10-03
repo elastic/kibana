@@ -30,7 +30,7 @@ describe('interpreter/functions#markdown', () => {
   };
 
   it('returns an object with the correct structure', async () => {
-    const actual = await fn(undefined, args);
+    const actual = await fn(undefined, args, undefined);
     expect(actual).toMatchSnapshot();
   });
 });

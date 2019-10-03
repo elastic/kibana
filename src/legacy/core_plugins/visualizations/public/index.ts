@@ -50,7 +50,7 @@ export { Status } from 'ui/vis/update_status';
  *
  * @public
  */
-export * from './np_ready';
+export * from './np_ready/public';
 
 // for backwards compatibility with 7.3
-export { setup as visualizations } from './legacy';
+export { setup as visualizations } from './np_ready/public/legacy';
