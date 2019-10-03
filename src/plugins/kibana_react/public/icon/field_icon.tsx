@@ -24,7 +24,7 @@ interface IconMapEntry {
   icon: string;
   color: string;
 }
-interface FieldNameIconProps {
+interface FieldIconProps {
   type:
     | 'boolean'
     | 'conflict'
@@ -37,9 +37,10 @@ interface FieldNameIconProps {
     | '_source'
     | 'string'
     | string;
-  label: string;
+  label?: string;
   size?: IconSize;
   useColor?: boolean;
+  className?: string;
 }
 
 const { colors } = palettes.euiPaletteColorBlind;
@@ -63,9 +64,15 @@ const typeToEuiIconMap: Partial<Record<string, IconMapEntry>> = {
 };
 
 /**
- * Field icon displayed in discover doc_viewer + side bar
+ * Field icon used across the app
  */
-export function FieldNameIcon({ type, label, size = 's', useColor = false }: FieldNameIconProps) {
+export function FieldIcon({
+  type,
+  label,
+  size = 's',
+  useColor = false,
+  className = undefined,
+}: FieldIconProps) {
   const euiIcon = typeToEuiIconMap[type] || defaultIcon;
 
   return (
@@ -74,6 +81,7 @@ export function FieldNameIcon({ type, label, size = 's', useColor = false }: Fie
       aria-label={label || type}
       size={size as IconSize}
       color={useColor || type === 'conflict' ? euiIcon.color : undefined}
+      className={className}
     />
   );
 }

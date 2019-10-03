@@ -16,10 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export * from './saved_objects';
-export * from './exit_full_screen_button';
-export * from './context';
-export * from './overlays';
-export * from './ui_settings';
-export * from './icon';
+export * from './field_icon';
