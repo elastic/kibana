@@ -1,17 +1,15 @@
 
-import {
-  bdd
-} from '../../../support';
+export default function({ getService, loadTestFile }) {
 
-import PageObjects from '../../../support/page_objects';
+  describe('reporting app', function() {
+    const browser = getService('browser');
 
-bdd.describe('reporting app', function () {
+    before(async () => {
+      await browser.setWindowSize(1200, 800);
+    });
 
-  bdd.before(function () {
-    return PageObjects.remote.setWindowSize(1200,800);
+    // require('./_reporting');  //currently broke in 6.6 because you have to save the visualization before you can pdf it
+    loadTestFile(require.resolve('./reporting_watcher_png'));
+    loadTestFile(require.resolve('./reporting_watcher'));
   });
-
-  // require('./_reporting');  //currently broke in 6.6 because you have to save the visualization before you can pdf it
-  require('./reporting_watcher_png');
-  require('./reporting_watcher');
-});
+}
