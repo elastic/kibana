@@ -34,14 +34,23 @@ const getMockServer = (getCluster = sinon.stub(), kibanaUsage = {}) => ({
   log(tags, message) {
     console.log({ tags, message });
   },
+  config() {
+    return {
+      get(item) {
+        switch(item) {
+          case 'pkg.version': return  '8675309-snapshot';
+          default: throw Error(`unexpected config.get('${item}') received.`);
+        }
+      }
+    };
+  },
   usage: { collectorSet: { bulkFetch: () => kibanaUsage, toObject: data => data } },
   plugins: {
-    xpack_main: { status: { plugin: { kbnServer: { version: '8675309-snapshot' } } } },
     elasticsearch: { getCluster },
   },
 });
 
-function mockGetLocalStats(callCluster, clusterInfo, clusterStats, license, usage, req) {
+function mockGetLocalStats(callCluster, clusterInfo, clusterStats, req) {
   mockGetClusterInfo(callCluster, clusterInfo, req);
   mockGetClusterStats(callCluster, clusterStats, req);
 }
@@ -64,8 +73,6 @@ describe('get_local_stats', () => {
     nodes: { yup: 'abc' },
     random: 123
   };
-  const license = { fancy: 'license' };
-  const xpack = { also: 'fancy' };
   const kibana = {
     kibana: {
       great: 'googlymoogly',
@@ -92,9 +99,6 @@ describe('get_local_stats', () => {
     collection: 'local',
     cluster_uuid: clusterUuid,
     cluster_name: clusterName,
-    license: {
-      fancy: 'license'
-    },
     version,
     cluster_stats: omit(clusterStats, '_nodes', 'cluster_name'),
     stack_stats: {
@@ -119,7 +123,6 @@ describe('get_local_stats', () => {
           snow: { chances: 0 },
         }
       },
-      xpack: { also: 'fancy' },
     }
   };
 
@@ -132,11 +135,11 @@ describe('get_local_stats', () => {
       expect(result.version).to.be('2.3.4');
       expect(result.collection).to.be('local');
       expect(result.license).to.be(undefined);
-      expect(result.stack_stats).to.eql({ kibana: undefined, xpack: undefined });
+      expect(result.stack_stats).to.eql({ kibana: undefined });
     });
 
     it('returns expected object with xpack', () => {
-      const result = handleLocalStats(getMockServer(), clusterInfo, clusterStats, license, xpack);
+      const result = handleLocalStats(getMockServer(), clusterInfo, clusterStats);
       const { stack_stats: stack, ...cluster } = result;
       expect(cluster.collection).to.be(combinedStatsResult.collection);
       expect(cluster.cluster_uuid).to.be(combinedStatsResult.cluster_uuid);
@@ -158,8 +161,6 @@ describe('get_local_stats', () => {
         callClusterUsageFailed,
         Promise.resolve(clusterInfo),
         Promise.resolve(clusterStats),
-        Promise.resolve(license),
-        Promise.reject('usage failed')
       );
 
       const result = await getLocalStatsWithCaller(getMockServer(), callClusterUsageFailed);
@@ -181,8 +182,6 @@ describe('get_local_stats', () => {
         callCluster,
         Promise.resolve(clusterInfo),
         Promise.resolve(clusterStats),
-        Promise.resolve(license),
-        Promise.resolve(xpack)
       );
 
       const result = await getLocalStatsWithCaller(getMockServer(callCluster, kibana), callCluster);
@@ -203,8 +202,6 @@ describe('get_local_stats', () => {
         callWithInternalUser,
         Promise.resolve(clusterInfo),
         Promise.resolve(clusterStats),
-        Promise.resolve(license),
-        Promise.resolve(xpack)
       );
 
       const result = await getLocalStats(req, { useInternalUser: true });
@@ -224,8 +221,6 @@ describe('get_local_stats', () => {
         callWithRequest,
         Promise.resolve(clusterInfo),
         Promise.resolve(clusterStats),
-        Promise.resolve(license),
-        Promise.resolve(xpack),
         req
       );
 

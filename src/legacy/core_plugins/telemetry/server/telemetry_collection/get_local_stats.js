@@ -38,7 +38,6 @@ export function handleLocalStats(server, clusterInfo, clusterStats, kibana) {
     version: get(clusterInfo, 'version.number'),
     cluster_stats: omit(clusterStats, '_nodes', 'cluster_name'),
     collection: 'local',
-    license: null,
     stack_stats: {
       kibana: handleKibanaStats(server, kibana),
     }
