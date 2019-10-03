@@ -630,18 +630,29 @@ export default function SenseEditor($el) {
         const firstLine = session.getLine(startRow);
         const maxLineLength = session.getWrapLimit() - 5;
         const isWrapping = firstLine.length > maxLineLength;
-        const topOfReq = editor.renderer.textToScreenCoordinates(startRow, startColumn).pageY - offsetFromPage;
+        const getScreenCoords = (row) => editor.renderer.textToScreenCoordinates(row, startColumn).pageY - offsetFromPage;
+        const topOfReq = getScreenCoords(startRow);
 
         if (topOfReq >= 0) {
           let offset = 0;
           if (isWrapping) {
             // Try get the line height of the text area in pixels.
             const textArea = editor.$el.find('textArea');
-            if (textArea) {
+            const hasRoomOnNextLine = session.getLine(startRow + 1).length < maxLineLength;
+            if (textArea && hasRoomOnNextLine) {
+              // Line height + the number of wraps we have on a line.
               offset += (session.getRowLength(startRow) * textArea.height());
+            } else {
+              if (startRow > 0) {
+                set(getScreenCoords(startRow - 1, startColumn));
+                return;
+              }
+              set(getScreenCoords(startRow + 1, startColumn));
+              return;
             }
           }
-          return set(topOfReq + offset);
+          set(topOfReq + offset);
+          return;
         }
 
         const bottomOfReq = editor.renderer.textToScreenCoordinates(
@@ -650,7 +661,8 @@ export default function SenseEditor($el) {
         ).pageY - offsetFromPage;
 
         if (bottomOfReq >= 0) {
-          return set(0);
+          set(0);
+          return;
         }
       }
 
