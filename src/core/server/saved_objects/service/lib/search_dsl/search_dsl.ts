@@ -17,12 +17,14 @@
  * under the License.
  */
 
+import { KueryNode } from '@kbn/es-query';
 import Boom from 'boom';
 
 import { IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
+import { SavedObjectsIndexPattern } from '../cache_index_patterns';
 
 interface GetSearchDslOptions {
   type: string | string[];
@@ -36,6 +38,8 @@ interface GetSearchDslOptions {
     type: string;
     id: string;
   };
+  kueryNode?: KueryNode;
+  indexPattern?: SavedObjectsIndexPattern;
 }
 
 export function getSearchDsl(
@@ -52,6 +56,8 @@ export function getSearchDsl(
     sortOrder,
     namespace,
     hasReference,
+    kueryNode,
+    indexPattern,
   } = options;
 
   if (!type) {
@@ -63,7 +69,7 @@ export function getSearchDsl(
   }
 
   return {
-    ...getQueryParams(
+    ...getQueryParams({
       mappings,
       schema,
       namespace,
@@ -71,8 +77,10 @@ export function getSearchDsl(
       search,
       searchFields,
       defaultSearchOperator,
-      hasReference
-    ),
+      hasReference,
+      kueryNode,
+      indexPattern,
+    }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }
