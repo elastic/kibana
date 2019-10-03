@@ -49,43 +49,43 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
     async clickNameCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_NAME_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      return await button.click();
     }
 
     async clickStatusCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_STATUS_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      return await button.click();
     }
 
     async clickCpuCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_CPU_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      return await button.click();
     }
 
     async clickLoadCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_LOAD_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      return await button.click();
     }
 
     async clickMemoryCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_MEM_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      return await button.click();
     }
 
     async clickDiskCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_DISK_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      return await button.click();
     }
 
     async clickShardsCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_SHARDS_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      return await button.click();
     }
 
     getRows() {
