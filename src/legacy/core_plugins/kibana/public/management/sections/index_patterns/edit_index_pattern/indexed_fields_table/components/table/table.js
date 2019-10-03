@@ -24,7 +24,7 @@ import { EuiIcon, EuiInMemoryTable, EuiIconTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-export class TableComponent extends PureComponent {
+export class Table extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     items: PropTypes.array.isRequired,
