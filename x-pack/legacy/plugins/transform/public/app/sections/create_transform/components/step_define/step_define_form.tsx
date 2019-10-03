@@ -33,15 +33,14 @@ import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
 import { SourceIndexPreview } from '../source_index_preview';
 import { PivotPreview } from './pivot_preview';
-// @ts-ignore: could not find declaration file for module
-import { KqlFilterBar } from '../../../../../../../ml/public/components/kql_filter_bar';
+import { KqlFilterBar } from '../../../../../shared_imports';
 import { SwitchModal } from './switch_modal';
 
-import { SavedSearchQuery } from '../../../../../../../ml/public/contexts/kibana';
 import {
   isKibanaContextInitialized,
   KibanaContext,
   KibanaContextValue,
+  SavedSearchQuery,
 } from '../../../../lib/kibana';
 
 import {

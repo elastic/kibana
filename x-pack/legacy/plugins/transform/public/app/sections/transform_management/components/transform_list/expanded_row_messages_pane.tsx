@@ -12,8 +12,7 @@ import { formatDate } from '@elastic/eui/lib/services/format';
 import { i18n } from '@kbn/i18n';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { api } from '../../../../services/api_service';
-// @ts-ignore
-import { JobIcon } from '../../../../../../../ml/public/components/job_message_icon';
+import { JobIcon } from '../../../../components/job_icon';
 import { TransformMessage } from '../../../../../../common/types/messages';
 import { useRefreshTransformList } from '../../../../common';
 

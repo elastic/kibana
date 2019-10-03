@@ -10,8 +10,8 @@ import { SearchResponse } from 'elasticsearch';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { ml } from '../../../../../../../ml/public/services/ml_api_service';
-import { getNestedProperty } from '../../../../../../../ml/public/util/object_utils';
+import { api } from '../../../../services/api_service';
+import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import {
   getDefaultSelectableFields,
@@ -53,7 +53,7 @@ export const useSourceIndexData = (
     setStatus(SOURCE_INDEX_STATUS.LOADING);
 
     try {
-      const resp: SearchResponse<any> = await ml.esSearch({
+      const resp: SearchResponse<any> = await api.esSearch({
         index: indexPattern.title,
         size: SEARCH_SIZE,
         // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.

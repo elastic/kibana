@@ -21,6 +21,7 @@ import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui
 import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
 export interface AppCore {
+  chrome: typeof chrome;
   i18n: {
     [i18nPackage: string]: any;
     Context: typeof I18nContext;

@@ -5,6 +5,10 @@
  */
 import { LICENSE_TYPE_BASIC, LicenseType } from '../../../common/constants';
 
+export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
+export const MINIMUM_REFRESH_INTERVAL_MS = 1000;
+export const PROGRESS_REFRESH_INTERVAL_MS = 2000;
+
 export const PLUGIN = {
   ID: 'transform',
   MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,

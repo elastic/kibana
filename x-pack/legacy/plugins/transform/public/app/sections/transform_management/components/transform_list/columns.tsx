@@ -22,7 +22,7 @@ import {
   ComputedColumnType,
   ExpanderColumnType,
   FieldDataColumnType,
-} from '../../../../../../../ml/public/components/ml_in_memory_table';
+} from '../../../../../shared_imports';
 
 import {
   getTransformProgress,

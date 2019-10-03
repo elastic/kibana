@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface AuditMessageBase {
+export interface AuditMessageBase {
   message: string;
   level: string;
   timestamp: number;

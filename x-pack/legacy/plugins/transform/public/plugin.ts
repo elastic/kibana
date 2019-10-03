@@ -110,7 +110,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { i18n, notification, savedSearches: coreSavedSearches } as AppCore,
+              { chrome, i18n, notification, savedSearches: coreSavedSearches } as AppCore,
               { management: { sections: management.sections } } as AppPlugins
             );
           }

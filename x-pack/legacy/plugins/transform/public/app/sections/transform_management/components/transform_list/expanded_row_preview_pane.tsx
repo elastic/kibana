@@ -7,11 +7,7 @@
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
-import {
-  SortDirection,
-  SORT_DIRECTION,
-  FieldDataColumnType,
-} from '../../../../../../../ml/public/components/ml_in_memory_table';
+import { SortDirection, SORT_DIRECTION, FieldDataColumnType } from '../../../../../shared_imports';
 
 import { api } from '../../../../services/api_service';
 

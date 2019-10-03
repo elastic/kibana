@@ -6,7 +6,7 @@
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import { wrapEsError } from '../../../../../server/lib/create_router/error_wrappers';
-import { Plugins } from '../../../shim';
+import { Plugins } from '../../shim';
 import { TRANSFORM_STATE } from '../../../public/app/common';
 import {
   TransformEndpointRequest,
@@ -39,10 +39,11 @@ export function registerTransformsRoutes(router: Router, plugins: Plugins) {
   router.get('transforms/{transformId}/_stats', getTransformStatsHandler);
   router.get('transforms/{transformId}/messages', getTransformMessagesHandler);
   router.put('transforms/{transformId}', putTransformHandler);
-  router.delete('transforms/delete_transforms', deleteTransformsHandler);
+  router.post('delete_transforms', deleteTransformsHandler);
   router.post('transforms/_preview', previewTransformHandler);
-  router.post('transforms/start_transforms', startTransformsHandler);
-  router.post('transforms/stop_transforms', stopTransformsHandler);
+  router.post('start_transforms', startTransformsHandler);
+  router.post('stop_transforms', stopTransformsHandler);
+  router.post('es_search', esSearchHandler);
 }
 
 const getTransformHandler: RouterRouteHandler = async (req, callWithRequest) => {
@@ -72,27 +73,13 @@ const getTransformStatsHandler: RouterRouteHandler = async (req, callWithRequest
 };
 
 const deleteTransformsHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const { transformsInfo } = req.payload as {
-    transformsInfo: TransformEndpointRequest[];
-  };
+  const transformsInfo = req.payload as TransformEndpointRequest[];
 
-  const response: {
-    transformsDeleted: Array<{ transform: string }>;
-    errors: any[];
-  } = {
-    transformsDeleted: [],
-    errors: [],
-  };
-
-  await deleteTransforms(transformsInfo, callWithRequest)
-    .then(() => (response.transformsDeleted = transformsInfo.map(d => ({ transform: d.id }))))
-    .catch(e =>
-      response.errors.push({
-        error: wrapEsError(e),
-      })
-    );
-
-  return response;
+  try {
+    return await deleteTransforms(transformsInfo, callWithRequest);
+  } catch (e) {
+    return { error: wrapEsError(e) };
+  }
 };
 
 const putTransformHandler: RouterRouteHandler = async (req, callWithRequest) => {
@@ -129,7 +116,7 @@ async function deleteTransforms(
     try {
       if (transformInfo.state === TRANSFORM_STATE.FAILED) {
         try {
-          await callWithRequest('ml.stopTransform', {
+          await callWithRequest('transform.stopTransform', {
             transformId,
             force: true,
             waitForCompletion: true,
@@ -230,7 +217,7 @@ async function stopTransforms(
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      await callWithRequest('ml.stopTransform', {
+      await callWithRequest('transform.stopTransform', {
         transformId,
         force:
           transformInfo.state !== undefined
@@ -262,5 +249,13 @@ const getTransformMessagesHandler: RouterRouteHandler = async (req, callWithRequ
     return await getTransformAuditMessages(transformId);
   } catch (e) {
     return wrapEsError(e);
+  }
+};
+
+const esSearchHandler: RouterRouteHandler = async (req, callWithRequest) => {
+  try {
+    return await callWithRequest('search', req.payload);
+  } catch (e) {
+    return { error: wrapEsError(e) };
   }
 };

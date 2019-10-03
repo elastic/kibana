@@ -10,6 +10,7 @@ exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] 
       Array [
         <EuiButtonEmpty
           isDisabled={true}
+          onClick={[MockFunction]}
         >
           Create your first transform
         </EuiButtonEmpty>,

@@ -5,6 +5,7 @@
  */
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
+import { Redirect } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -13,6 +14,8 @@ import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiModal,
+  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
@@ -23,14 +26,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { VisType } from 'ui/vis';
+import { SearchSelection } from '../../../../../../../../src/legacy/core_plugins/kibana/public/visualize/wizard/search_selection';
+
 import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
-import { PrivilegesWrapper } from '../../lib/authorization';
 import { useRefreshTransformList, TransformListRow } from '../../common';
+import { CLIENT_BASE_PATH } from '../../constants';
+import { PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
+
 import { CreateTransformButton } from './components/create_transform_button';
 import { TransformList } from './components/transform_list';
 import { RefreshTransformListButton } from './components/refresh_transform_list_button';
-import { TransformStatsBar } from '../transform_management/components/transform_list/transforms_stats_bar';
+import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 import { getTransformsFactory } from './services/transform_service';
 import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
 
@@ -58,9 +66,23 @@ export const TransformManagement: FC = () => {
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
 
+  const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
+  const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
+
+  if (savedObjectId !== null) {
+    return <Redirect to={`${CLIENT_BASE_PATH}/create_transform/${savedObjectId}`} />;
+  }
+
+  const onCloseModal = () => setIsSearchSelectionVisible(false);
+  const onOpenModal = () => setIsSearchSelectionVisible(true);
+
+  const fakeVisType = {
+    name: 'transform',
+    title: 'transform',
+  } as VisType;
+
   return (
     <Fragment>
-      <TransformStatsBar transformsList={transforms} />
       <EuiPage data-test-subj="transformPageTransform">
         <EuiPageBody>
           <EuiPageContentHeader>
@@ -94,24 +116,34 @@ export const TransformManagement: FC = () => {
                 </EuiFlexItem>
                 {/* grow={false} fixes IE11 issue with nested flex */}
                 <EuiFlexItem grow={false}>
-                  <CreateTransformButton />
+                  <CreateTransformButton onClick={onOpenModal} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
             <EuiSpacer size="l" />
+            <TransformStatsBar transformsList={transforms} />
+            <EuiSpacer size="s" />
             <EuiPanel>
               <TransformList
-                transforms={transforms}
-                isInitialized={isInitialized}
                 errorMessage={errorMessage}
+                isInitialized={isInitialized}
+                onCreateTransform={onOpenModal}
+                transforms={transforms}
                 transformsLoading={transformsLoading}
               />
             </EuiPanel>
           </EuiPageContentBody>
         </EuiPageBody>
       </EuiPage>
+      {isSearchSelectionVisible && (
+        <EuiOverlayMask>
+          <EuiModal onClose={onCloseModal} className="transformCreateTransformSearchDialog">
+            <SearchSelection onSearchSelected={setSavedObjectId} visType={fakeVisType} />
+          </EuiModal>
+        </EuiOverlayMask>
+      )}
     </Fragment>
   );
 };

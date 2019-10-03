@@ -11,19 +11,14 @@ interface Stats {
   total: StatsBarStat;
   failed: StatsBarStat;
 }
-export interface JobStatsBarStats extends Stats {
-  activeNodes: StatsBarStat;
-  open: StatsBarStat;
-  closed: StatsBarStat;
-  activeDatafeeds: StatsBarStat;
-}
 
-export interface AnalyticStatsBarStats extends Stats {
+export interface TransformStatsBarStats extends Stats {
+  batch: StatsBarStat;
+  continuous: StatsBarStat;
   started: StatsBarStat;
-  stopped: StatsBarStat;
 }
 
-type StatsBarStats = JobStatsBarStats | AnalyticStatsBarStats;
+type StatsBarStats = TransformStatsBarStats;
 type StatsKey = keyof StatsBarStats;
 
 interface StatsBarProps {
@@ -34,7 +29,7 @@ interface StatsBarProps {
 export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
   const statsList = Object.keys(stats).map(k => stats[k as StatsKey]);
   return (
-    <div className="mlStatsBar" data-test-subj={dataTestSub}>
+    <div className="transformStatsBar" data-test-subj={dataTestSub}>
       {statsList
         .filter((s: StatsBarStat) => s.show)
         .map((s: StatsBarStat) => (

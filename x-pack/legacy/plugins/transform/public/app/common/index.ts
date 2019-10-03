@@ -37,7 +37,7 @@ export {
   TRANSFORM_MODE,
   TRANSFORM_STATE,
 } from './transform_stats';
-export { moveToTransformWizard, getDiscoverUrl } from './navigation';
+export { getDiscoverUrl } from './navigation';
 export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,

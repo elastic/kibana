@@ -8,7 +8,7 @@ import React, { SFC } from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 
-import { ml } from '../../../../../../../ml/public/services/ml_api_service';
+import { api } from '../../../../services/api_service';
 import { SimpleQuery } from '../../../../common';
 import {
   SOURCE_INDEX_STATUS,
@@ -16,7 +16,7 @@ import {
   UseSourceIndexDataReturnType,
 } from './use_source_index_data';
 
-jest.mock('../../../../../../../ml/public/services/ml_api_service');
+jest.mock('../../../../services/api_service');
 
 type Callback = () => void;
 interface TestHookProps {
@@ -61,9 +61,9 @@ describe('useSourceIndexData', () => {
     expect(sourceIndexObj.errorMessage).toBe('');
     expect(sourceIndexObj.status).toBe(SOURCE_INDEX_STATUS.LOADING);
     expect(sourceIndexObj.tableItems).toEqual([]);
-    expect(ml.esSearch).toHaveBeenCalledTimes(1);
+    expect(api.esSearch).toHaveBeenCalledTimes(1);
   });
 
-  // TODO add more tests to check data retrieved via `ml.esSearch()`.
+  // TODO add more tests to check data retrieved via `api.esSearch()`.
   // This needs more investigation in regards to jest/enzyme's React Hooks support.
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useState } from 'react';
+import React, { Fragment, MouseEventHandler, FC, useContext, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,16 +18,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  OnTableChangeArg,
-  SortDirection,
-  SORT_DIRECTION,
-} from '../../../../../../../ml/public/components/ml_in_memory_table';
+import { OnTableChangeArg, SortDirection, SORT_DIRECTION } from '../../../../../shared_imports';
 
 import {
   TransformId,
   TransformListRow,
-  moveToTransformWizard,
   TRANSFORM_MODE,
   TRANSFORM_LIST_COLUMN,
   TRANSFORM_STATE,
@@ -68,16 +63,18 @@ function stringMatch(str: string | undefined, substr: string) {
 }
 
 interface Props {
-  isInitialized: boolean;
-  transforms: TransformListRow[];
   errorMessage: any;
+  isInitialized: boolean;
+  onCreateTransform: MouseEventHandler<HTMLButtonElement>;
+  transforms: TransformListRow[];
   transformsLoading: boolean;
 }
 
-export const TransformList: SFC<Props> = ({
-  isInitialized,
-  transforms,
+export const TransformList: FC<Props> = ({
   errorMessage,
+  isInitialized,
+  onCreateTransform,
+  transforms,
   transformsLoading,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -214,7 +211,7 @@ export const TransformList: SFC<Props> = ({
             </h2>
           }
           actions={[
-            <EuiButtonEmpty onClick={moveToTransformWizard} isDisabled={disabled}>
+            <EuiButtonEmpty onClick={onCreateTransform} isDisabled={disabled}>
               {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
                 defaultMessage: 'Create your first transform',
               })}

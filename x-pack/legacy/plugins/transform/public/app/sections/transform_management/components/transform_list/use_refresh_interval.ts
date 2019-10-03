@@ -11,7 +11,7 @@ import { timefilter } from 'ui/timefilter';
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
   MINIMUM_REFRESH_INTERVAL_MS,
-} from '../../../../../../../ml/common/constants/jobs_list';
+} from '../../../../../../common/constants';
 
 import { useRefreshTransformList } from '../../../../common';
 

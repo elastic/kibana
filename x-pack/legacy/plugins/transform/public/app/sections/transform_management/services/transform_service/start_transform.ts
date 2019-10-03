@@ -19,8 +19,6 @@ import {
   TransformEndpointResult,
 } from '../../components/transform_list/common';
 
-import { mlMessageBarService } from '../../../../../../../ml/public/components/messagebar/messagebar_service';
-
 export const startTransforms = async (transforms: TransformListRow[]) => {
   const transformsInfo: TransformEndpointRequest[] = transforms.map(tf => ({
     id: tf.config.id,
@@ -45,7 +43,6 @@ export const startTransforms = async (transforms: TransformListRow[]) => {
             values: { transformId },
           })
         );
-        mlMessageBarService.notify.error(results[transformId].error);
       }
     }
   }

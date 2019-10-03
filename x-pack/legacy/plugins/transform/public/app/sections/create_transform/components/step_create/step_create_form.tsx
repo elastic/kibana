@@ -31,8 +31,8 @@ import {
 
 import { api } from '../../../../services/api_service';
 import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
-import { useUiChromeContext } from '../../../../../../../ml/public/contexts/ui/use_ui_chrome_context';
-import { PROGRESS_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../../ml/common/constants/jobs_list';
+import { useAppDependencies } from '../../../../app_dependencies';
+import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
 
@@ -79,7 +79,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
       return null;
     }
 
-    const baseUrl = useUiChromeContext().addBasePath(kibanaContext.kbnBaseUrl);
+    const baseUrl = useAppDependencies().core.chrome.addBasePath(kibanaContext.kbnBaseUrl);
 
     async function createTransform() {
       setCreated(true);
@@ -220,7 +220,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
             );
             clearInterval(interval);
           }
-        }, PROGRESS_JOBS_REFRESH_INTERVAL_MS);
+        }, PROGRESS_REFRESH_INTERVAL_MS);
         setProgressPercentComplete(0);
       }
 

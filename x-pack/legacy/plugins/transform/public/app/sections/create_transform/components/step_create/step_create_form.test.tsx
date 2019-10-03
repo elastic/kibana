@@ -11,8 +11,6 @@ import { KibanaContext } from '../../../../lib/kibana';
 
 import { StepCreateForm } from './step_create_form';
 
-jest.mock('../../../../../../../ml/public/contexts/ui/use_ui_chrome_context');
-
 jest.mock('ui/new_platform');
 
 // workaround to make React.memo() work with enzyme

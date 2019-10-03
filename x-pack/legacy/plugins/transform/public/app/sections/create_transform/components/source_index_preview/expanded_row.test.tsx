@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { getNestedProperty } from '../../../../../../../ml/public/util/object_utils';
+import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 import { getFlattenedFields } from '../../../../common';
 
 import { ExpandedRow } from './expanded_row';

@@ -13,10 +13,9 @@ import { toastNotifications } from 'ui/notify';
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
-import { isValidIndexName } from '../../../../../../../ml/common/util/es_utils';
+import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { api } from '../../../../services/api_service';
-import { ml } from '../../../../../../../ml/public/services/ml_api_service';
 
 import { isTransformIdValid, TransformId, TransformPivotConfig } from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
@@ -94,7 +93,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
         }
 
         try {
-          setIndexNames((await ml.getIndices()).map(index => index.name));
+          setIndexNames((await api.getIndices()).map(index => index.name));
         } catch (e) {
           toastNotifications.addDanger(
             i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {

@@ -81,6 +81,6 @@ describe('usePivotPreviewData', () => {
     expect(api.getTransformsPreview).toHaveBeenCalledTimes(0);
   });
 
-  // TODO add more tests to check data retrieved via `ml.esSearch()`.
+  // TODO add more tests to check data retrieved via `api.esSearch()`.
   // This needs more investigation in regards to jest/enzyme's React Hooks support.
 });

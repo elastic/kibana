@@ -21,12 +21,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  ColumnType,
-  MlInMemoryTableBasic,
-  SORT_DIRECTION,
-} from '../../../../../../../ml/public/components/ml_in_memory_table';
-import { dictionaryToArray } from '../../../../../../../ml/common/types/common';
+import { ColumnType, MlInMemoryTableBasic, SORT_DIRECTION } from '../../../../../shared_imports';
+import { dictionaryToArray } from '../../../../../../common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 

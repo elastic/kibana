@@ -17,6 +17,10 @@ import { http } from './http_service';
 
 const basePath = chrome.addBasePath('/api/transform');
 
+interface EsIndex {
+  name: string;
+}
+
 export const api = {
   getTransforms(transformId?: TransformId): Promise<any> {
     const transformIdString = transformId !== undefined ? `/${transformId}` : '';
@@ -45,14 +49,11 @@ export const api = {
       data: transformConfig,
     });
   },
-
   deleteTransforms(transformsInfo: TransformEndpointRequest[]) {
     return http({
-      url: `${basePath}/transforms/delete_transforms`,
+      url: `${basePath}/delete_transforms`,
       method: 'POST',
-      data: {
-        transformsInfo,
-      },
+      data: transformsInfo,
     }) as Promise<TransformEndpointResult>;
   },
   getTransformsPreview(obj: PreviewRequestBody): Promise<any> {
@@ -64,7 +65,7 @@ export const api = {
   },
   startTransforms(transformsInfo: TransformEndpointRequest[]) {
     return http({
-      url: `${basePath}/transforms/start_transforms`,
+      url: `${basePath}/start_transforms`,
       method: 'POST',
       data: {
         transformsInfo,
@@ -73,7 +74,7 @@ export const api = {
   },
   stopTransforms(transformsInfo: TransformEndpointRequest[]) {
     return http({
-      url: `${basePath}/transforms/stop_transforms`,
+      url: `${basePath}/stop_transforms`,
       method: 'POST',
       data: {
         transformsInfo,
@@ -85,5 +86,19 @@ export const api = {
       url: `${basePath}/transforms/${transformId}/messages`,
       method: 'GET',
     });
+  },
+  esSearch(payload: any) {
+    return http({
+      url: `${basePath}/es_search`,
+      method: 'POST',
+      data: payload,
+    }) as Promise<any>;
+  },
+  getIndices() {
+    const tempBasePath = chrome.addBasePath('/api');
+    return http({
+      url: `${tempBasePath}/index_management/indices`,
+      method: 'GET',
+    }) as Promise<EsIndex[]>;
   },
 };

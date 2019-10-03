@@ -9,17 +9,20 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-// @ts-ignore
-import { isJobIdValid } from '../../../../ml/common/util/job_utils';
-
 import { PivotAggDict } from './pivot_aggs';
 import { PivotGroupByDict } from './pivot_group_by';
-
-export const isTransformIdValid = isJobIdValid;
 
 export type IndexName = string;
 export type IndexPattern = string;
 export type TransformId = string;
+
+// Transform name must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores;
+// It must also start and end with an alphanumeric character.
+export function isTransformIdValid(transformId: TransformId) {
+  return transformId.match(/^[a-z0-9\-\_]+$/g) && !transformId.match(/^([_-].*)?(.*[_-])?$/g)
+    ? true
+    : false;
+}
 
 export interface PreviewRequestBody {
   pivot: {

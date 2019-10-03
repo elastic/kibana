@@ -11,7 +11,7 @@ exports[`Transform: Transform List <CreateTransformButton /> Minimal initializat
     disabled={true}
     fill={true}
     iconType="plusInCircle"
-    onClick={[Function]}
+    onClick={[MockFunction]}
     size="s"
   >
     <FormattedMessage

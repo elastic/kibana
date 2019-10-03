@@ -13,7 +13,7 @@ jest.mock('ui/new_platform');
 
 describe('Transform: Transform List <CreateTransformButton />', () => {
   test('Minimal initialization', () => {
-    const wrapper = shallow(<CreateTransformButton />);
+    const wrapper = shallow(<CreateTransformButton onClick={jest.fn()} />);
 
     expect(wrapper).toMatchSnapshot();
   });

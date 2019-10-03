@@ -16,3 +16,21 @@ export {
   CronEditor,
   DAY,
 } from '../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
+
+// Custom version of EuiInMemoryTable with TypeScript
+// support and a fix for updating sorting props.
+export {
+  ActionsColumnType,
+  ComputedColumnType,
+  ExpanderColumnType,
+  FieldDataColumnType,
+  ColumnType,
+  MlInMemoryTableBasic,
+  OnTableChangeArg,
+  SortingPropType,
+  SortDirection,
+  SORT_DIRECTION,
+} from '../../ml/public/components/ml_in_memory_table';
+
+// @ts-ignore: could not find declaration file for module
+export { KqlFilterBar } from '../../ml/public/components/kql_filter_bar';
