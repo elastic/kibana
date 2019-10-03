@@ -125,7 +125,7 @@ export class VisualizeLoader {
     const dataAttrs = params.dataAttrs;
     if (dataAttrs) {
       Object.keys(dataAttrs).forEach(key => {
-        element.setAttribute(`data-${key}`, dataAttrs[key]);
+        container.setAttribute(`data-${key}`, dataAttrs[key]);
       });
     }
 
