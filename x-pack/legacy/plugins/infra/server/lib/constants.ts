@@ -14,11 +14,13 @@ export const NAME_FIELDS = {
   [InfraNodeType.host]: 'host.name',
   [InfraNodeType.pod]: 'kubernetes.pod.name',
   [InfraNodeType.container]: 'container.name',
+  [InfraNodeType.ec2]: 'host.name',
 };
 export const IP_FIELDS = {
   [InfraNodeType.host]: 'host.ip',
   [InfraNodeType.pod]: 'kubernetes.pod.ip',
   [InfraNodeType.container]: 'container.ip_address',
+  [InfraNodeType.ec2]: 'aws.ec2.public.ip',
 };
 
 export const CLOUD_METRICS_MODULES = ['aws'];

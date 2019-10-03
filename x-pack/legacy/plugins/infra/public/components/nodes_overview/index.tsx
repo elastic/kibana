@@ -66,6 +66,14 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',
   },
+  [InfraSnapshotMetricType.diskRead]: {
+    formatter: InfraFormatterType.abbreviatedNumber,
+    template: '{{value}}/s',
+  },
+  [InfraSnapshotMetricType.diskWrite]: {
+    formatter: InfraFormatterType.abbreviatedNumber,
+    template: '{{value}}/s',
+  },
 };
 
 const calculateBoundsFromNodes = (nodes: InfraSnapshotNode[]): InfraWaffleMapBounds => {

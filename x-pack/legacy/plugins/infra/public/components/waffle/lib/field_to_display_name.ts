@@ -36,6 +36,21 @@ export const fieldToName = (field: string) => {
     'service.type': i18n.translate('xpack.infra.groupByDisplayNames.serviceType', {
       defaultMessage: 'Service type',
     }),
+    'aws.cloud.availability_zone': i18n.translate(
+      'xpack.infra.groupByDisplayNames.availabilityZone',
+      {
+        defaultMessage: 'Availability zone',
+      }
+    ),
+    'aws.cloud.machine.type': i18n.translate('xpack.infra.groupByDisplayNames.machineType', {
+      defaultMessage: 'Instance type',
+    }),
+    'aws.ec2.instance.image.id': i18n.translate('xpack.infra.groupByDisplayNames.imageID', {
+      defaultMessage: 'Image',
+    }),
+    'aws.ec2.instance.state.name': i18n.translate('xpack.infra.groupByDisplayNames.stateName', {
+      defaultMessage: 'State',
+    }),
   };
   return LOOKUP[field] || field;
 };

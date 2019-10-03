@@ -11,12 +11,14 @@ interface MetricFields {
   [InfraNodeType.container]: string;
   [InfraNodeType.pod]: string;
   [InfraNodeType.host]: string;
+  [InfraNodeType.ec2]: string;
 }
 
 interface InterfaceFields {
   [InfraNodeType.container]: string;
   [InfraNodeType.pod]: null;
   [InfraNodeType.host]: string;
+  [InfraNodeType.ec2]: null;
 }
 
 export const networkTraffic = (
@@ -26,9 +28,9 @@ export const networkTraffic = (
 ) => {
   const rateAggregations = rate(id, metricFields);
   return (nodeType: InfraNodeType) => {
-    // Metricbeat doesn't collect interface data for Kubernetes Pods,
+    // Metricbeat doesn't collect interface data for Kubernetes Pods or EC2 instances
     // for these we'll use a standard rate calculation.
-    if (nodeType === InfraNodeType.pod) {
+    if (nodeType === InfraNodeType.pod || nodeType === InfraNodeType.ec2) {
       return rateAggregations(nodeType);
     }
     const metricField = metricFields[nodeType];

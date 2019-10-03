@@ -16,6 +16,7 @@ export const defaultSourceConfiguration: InfraSourceConfiguration = {
     host: 'host.name',
     message: ['message', '@message'],
     pod: 'kubernetes.pod.uid',
+    ec2: 'cloud.instance.id',
     tiebreaker: '_doc',
     timestamp: '@timestamp',
   },

@@ -38,8 +38,9 @@ export const WaffleInventorySwitcher = (props: Props) => {
   const goToHost = useCallback(() => goToNodeType('host' as InfraNodeType), [goToNodeType]);
   const goToK8 = useCallback(() => goToNodeType('pod' as InfraNodeType), [goToNodeType]);
   const goToDocker = useCallback(() => goToNodeType('container' as InfraNodeType), [goToNodeType]);
-  const panels = useMemo(
-    () => [
+  const goToEC2 = useCallback(() => goToNodeType('ec2' as InfraNodeType), [goToNodeType]);
+  const panels = useMemo(() => {
+    return [
       {
         id: 0,
         items: [
@@ -60,11 +61,27 @@ export const WaffleInventorySwitcher = (props: Props) => {
             icon: 'docker',
             onClick: goToDocker,
           },
+          {
+            name: 'AWS',
+            icon: 'aws',
+            panel: 1,
+            // onClick: goToEC2,
+          },
         ],
       },
-    ],
-    []
-  );
+      {
+        id: 1,
+        title: 'AWS',
+        items: [
+          {
+            name: 'EC2',
+            icon: 'aws',
+            onClick: goToEC2,
+          },
+        ],
+      },
+    ];
+  }, []);
   const selectedText = useMemo(() => {
     switch (props.nodeType) {
       case InfraNodeType.host:
@@ -75,6 +92,8 @@ export const WaffleInventorySwitcher = (props: Props) => {
         return 'Kubernetes';
       case InfraNodeType.container:
         return 'Docker';
+      case InfraNodeType.ec2:
+        return 'AWS EC2';
     }
   }, [props.nodeType]);
 

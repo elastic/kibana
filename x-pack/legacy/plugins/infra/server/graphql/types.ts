@@ -98,6 +98,8 @@ export interface InfraSourceFields {
   message: string[];
   /** The field to identify a pod by */
   pod: string;
+  /** The field to identify an ec2 instance by */
+  ec2: string;
   /** The field to use as a tiebreaker for log events that have identical timestamps */
   tiebreaker: string;
   /** The field to use as a timestamp for metrics and logs */
@@ -580,6 +582,7 @@ export enum InfraNodeType {
   pod = 'pod',
   container = 'container',
   host = 'host',
+  ec2 = 'ec2',
 }
 
 export enum InfraSnapshotMetricType {
@@ -590,6 +593,8 @@ export enum InfraSnapshotMetricType {
   tx = 'tx',
   rx = 'rx',
   logRate = 'logRate',
+  diskRead = 'diskRead',
+  diskWrite = 'diskWrite'
 }
 
 export enum InfraMetric {

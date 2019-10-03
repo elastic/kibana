@@ -9,6 +9,7 @@ import { InfraNodeType } from '../../../graphql/types';
 import { HostToolbar } from './host_toolbar';
 import { PodToolbar } from './pod_toolbar';
 import { ContainerToolbar } from './container_toolbar';
+import { EC2Toolbar } from './ec2_toolbar';
 
 export interface ToolbarProps {
   nodeType: InfraNodeType;
@@ -22,6 +23,8 @@ export const Toolbar = (props: ToolbarProps) => {
       return <PodToolbar {...props} />;
     case InfraNodeType.container:
       return <ContainerToolbar {...props} />;
+    case InfraNodeType.ec2:
+      return <EC2Toolbar {...props} />;
     default:
       return null;
   }

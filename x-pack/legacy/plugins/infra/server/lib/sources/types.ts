@@ -35,6 +35,7 @@ const SavedSourceConfigurationFieldsRuntimeType = runtimeTypes.partial({
   container: runtimeTypes.string,
   host: runtimeTypes.string,
   pod: runtimeTypes.string,
+  ec2: runtimeTypes.string,
   tiebreaker: runtimeTypes.string,
   timestamp: runtimeTypes.string,
 });
@@ -80,14 +81,14 @@ export const pickSavedSourceConfiguration = (
   value: InfraSourceConfiguration
 ): InfraSavedSourceConfiguration => {
   const { name, description, metricAlias, logAlias, fields, logColumns } = value;
-  const { container, host, pod, tiebreaker, timestamp } = fields;
+  const { container, host, pod, ec2, tiebreaker, timestamp } = fields;
 
   return {
     name,
     description,
     metricAlias,
     logAlias,
-    fields: { container, host, pod, tiebreaker, timestamp },
+    fields: { container, host, pod, ec2, tiebreaker, timestamp },
     logColumns,
   };
 };

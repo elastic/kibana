@@ -5,17 +5,15 @@
  */
 
 import { InfraNodeType } from '../../../graphql/types';
+import { rate } from './rate';
 
 const FIELDS = {
-  [InfraNodeType.host]: 'system.load.5',
+  [InfraNodeType.host]: '',
   [InfraNodeType.pod]: '',
   [InfraNodeType.container]: '',
-  [InfraNodeType.ec2]: '',
+  [InfraNodeType.ec2]: 'aws.ec2.diskio.write.bytes',
 };
 
-export const load = (nodeType: InfraNodeType) => {
-  const field = FIELDS[nodeType];
-  if (field) {
-    return { load: { avg: { field } } };
-  }
+export const diskWrite = (nodeType: InfraNodeType) => {
+  return rate('diskWrite', FIELDS)(nodeType);
 };

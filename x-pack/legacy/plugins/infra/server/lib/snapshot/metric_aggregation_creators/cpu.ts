@@ -10,6 +10,7 @@ const FIELDS = {
   [InfraNodeType.host]: 'system.cpu.user.pct',
   [InfraNodeType.pod]: 'kubernetes.pod.cpu.usage.node.pct',
   [InfraNodeType.container]: 'docker.cpu.total.pct',
+  [InfraNodeType.ec2]: 'aws.ec2.cpu.total.pct',
 };
 
 export const cpu = (nodeType: InfraNodeType) => {

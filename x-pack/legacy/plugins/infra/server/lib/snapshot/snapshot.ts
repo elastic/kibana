@@ -68,6 +68,27 @@ const requestGroupedNodes = async (
   options: InfraSnapshotRequestOptions,
   framework: InfraBackendFrameworkAdapter
 ): Promise<InfraSnapshotNodeGroupByBucket[]> => {
+  const filter = [
+    ...createQueryFilterClauses(options.filterQuery),
+    {
+      range: {
+        [options.sourceConfiguration.fields.timestamp]: {
+          gte: options.timerange.from,
+          lte: options.timerange.to,
+          format: 'epoch_millis',
+        },
+      },
+    },
+  ];
+
+  if (options.nodeType === 'ec2') {
+    filter.push({
+      match: {
+        'event.dataset': 'aws.ec2',
+      },
+    });
+  }
+
   const query = {
     allowNoIndices: true,
     index: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
@@ -75,18 +96,7 @@ const requestGroupedNodes = async (
     body: {
       query: {
         bool: {
-          filter: [
-            ...createQueryFilterClauses(options.filterQuery),
-            {
-              range: {
-                [options.sourceConfiguration.fields.timestamp]: {
-                  gte: options.timerange.from,
-                  lte: options.timerange.to,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-          ],
+          filter,
         },
       },
       size: 0,
@@ -111,7 +121,6 @@ const requestGroupedNodes = async (
       },
     },
   };
-
   return await getAllCompositeAggregationData<InfraSnapshotNodeGroupByBucket>(
     framework,
     request,
@@ -129,6 +138,26 @@ const requestNodeMetrics = async (
       ? `${options.sourceConfiguration.logAlias}`
       : `${options.sourceConfiguration.metricAlias}`;
 
+  const filter: any = [
+    {
+      range: {
+        [options.sourceConfiguration.fields.timestamp]: {
+          gte: options.timerange.from,
+          lte: options.timerange.to,
+          format: 'epoch_millis',
+        },
+      },
+    },
+  ];
+
+  if (options.nodeType === 'ec2') {
+    filter.push({
+      match: {
+        'event.dataset': 'aws.ec2',
+      },
+    });
+  }
+
   const query = {
     allowNoIndices: true,
     index,
@@ -136,17 +165,7 @@ const requestNodeMetrics = async (
     body: {
       query: {
         bool: {
-          filter: [
-            {
-              range: {
-                [options.sourceConfiguration.fields.timestamp]: {
-                  gte: options.timerange.from,
-                  lte: options.timerange.to,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-          ],
+          filter,
         },
       },
       size: 0,
@@ -214,7 +233,6 @@ const getAllCompositeAggregationData = async <BucketType>(
   }
 
   const currentBuckets = response.aggregations.nodes.buckets;
-
   // if there are no currentBuckets then we are finished paginating through the results
   if (currentBuckets.length === 0) {
     return previousBuckets;

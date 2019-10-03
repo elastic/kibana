@@ -10,6 +10,7 @@ interface Fields {
   [InfraNodeType.container]: string;
   [InfraNodeType.pod]: string;
   [InfraNodeType.host]: string;
+  [InfraNodeType.ec2]: string;
 }
 
 export const rate = (id: string, fields: Fields) => {

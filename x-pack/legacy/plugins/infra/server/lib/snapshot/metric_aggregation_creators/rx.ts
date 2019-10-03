@@ -11,12 +11,14 @@ const METRIC_FIELDS = {
   [InfraNodeType.host]: 'system.network.in.bytes',
   [InfraNodeType.pod]: 'kubernetes.pod.network.rx.bytes',
   [InfraNodeType.container]: 'docker.network.in.bytes',
+  [InfraNodeType.ec2]: 'aws.ec2.network.in.bytes',
 };
 
 const INTERFACE_FIELDS = {
   [InfraNodeType.host]: 'system.network.name',
   [InfraNodeType.pod]: null,
   [InfraNodeType.container]: 'docker.network.interface',
+  [InfraNodeType.ec2]: null,
 };
 
 export const rx = networkTraffic('rx', METRIC_FIELDS, INTERFACE_FIELDS);

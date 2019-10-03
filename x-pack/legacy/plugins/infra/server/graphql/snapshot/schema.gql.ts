@@ -42,6 +42,8 @@ export const snapshotSchema: any = gql`
     tx
     rx
     logRate
+    diskRead
+    diskWrite
   }
 
   input InfraSnapshotMetricInput {

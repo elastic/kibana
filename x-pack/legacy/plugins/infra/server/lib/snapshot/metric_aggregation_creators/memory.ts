@@ -10,6 +10,7 @@ const FIELDS = {
   [InfraNodeType.host]: 'system.memory.actual.used.pct',
   [InfraNodeType.pod]: 'kubernetes.pod.memory.usage.node.pct',
   [InfraNodeType.container]: 'docker.memory.usage.pct',
+  [InfraNodeType.ec2]: '',
 };
 
 export const memory = (nodeType: InfraNodeType) => {

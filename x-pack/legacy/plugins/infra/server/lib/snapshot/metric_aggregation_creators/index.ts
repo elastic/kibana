@@ -12,6 +12,8 @@ import { logRate } from './log_rate';
 import { memory } from './memory';
 import { rx } from './rx';
 import { tx } from './tx';
+import { diskRead } from './disk_read';
+import { diskWrite } from './disk_write';
 
 export const metricAggregationCreators = {
   [InfraSnapshotMetricType.count]: count,
@@ -21,4 +23,6 @@ export const metricAggregationCreators = {
   [InfraSnapshotMetricType.tx]: tx,
   [InfraSnapshotMetricType.load]: load,
   [InfraSnapshotMetricType.logRate]: logRate,
+  [InfraSnapshotMetricType.diskRead]: diskRead,
+  [InfraSnapshotMetricType.diskWrite]: diskWrite,
 };
