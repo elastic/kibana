@@ -122,6 +122,11 @@ export class AbstractSource {
   supportsElasticsearchFilters() {
     return false;
   }
+
+  // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
+  async getPreIndexedShape(/* properties */) {
+    return null;
+  }
 }
 
 
