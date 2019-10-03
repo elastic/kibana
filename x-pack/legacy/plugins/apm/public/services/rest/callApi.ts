@@ -31,7 +31,7 @@ function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
 
 const cache = new LRU<string, any>({ max: 100, maxAge: 1000 * 60 * 60 });
 
-export function _clearCache() {
+export function clearCache() {
   cache.reset();
 }
 
