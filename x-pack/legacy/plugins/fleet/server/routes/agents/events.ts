@@ -8,6 +8,7 @@ import * as Joi from 'joi';
 import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeList } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
+import { AgentEvent } from '../../../common/types/domain_data';
 
 export const createGETAgentEventsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
@@ -31,7 +32,7 @@ export const createGETAgentEventsRoute = (libs: FleetServerLib) => ({
       params: { agentId: string };
       query: { page: string; per_page: string };
     }>
-  ): Promise<ReturnTypeList<any>> => {
+  ): Promise<ReturnTypeList<AgentEvent>> => {
     const page = parseInt(request.query.page, 10);
     const perPage = parseInt(request.query.per_page, 10);
 

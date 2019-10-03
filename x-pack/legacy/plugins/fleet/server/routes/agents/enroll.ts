@@ -8,6 +8,7 @@ import * as Joi from 'joi';
 import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeCreate } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
+import { Agent } from '../../../common/types/domain_data';
 
 export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
   method: 'POST',
@@ -46,7 +47,7 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
         'kbn-fleet-enrollment-token': string;
       };
     }>
-  ): Promise<ReturnTypeCreate<any>> => {
+  ): Promise<ReturnTypeCreate<Agent>> => {
     const enrollmentToken = request.headers['kbn-fleet-enrollment-token'];
     const { sharedId, type, metadata } = request.payload;
     const agent = await libs.agents.enroll(
