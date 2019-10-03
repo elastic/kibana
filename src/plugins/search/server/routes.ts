@@ -25,7 +25,7 @@ import { IRouter } from '../../../core/server';
 export function registerSearchRoute(router: IRouter): void {
   router.post(
     {
-      path: '/api/search/{strategy}',
+      path: '/internal/search/{strategy}',
       validate: {
         params: schema.object({ strategy: schema.string() }),
 

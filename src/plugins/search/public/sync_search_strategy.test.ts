@@ -44,7 +44,9 @@ describe('Sync search strategy', () => {
       },
       {}
     );
-    expect(mockCoreSetup.http.fetch.mock.calls[0][0]).toBe(`/api/search/${SYNC_SEARCH_STRATEGY}`);
+    expect(mockCoreSetup.http.fetch.mock.calls[0][0]).toBe(
+      `/internal/search/${SYNC_SEARCH_STRATEGY}`
+    );
     expect(mockCoreSetup.http.fetch.mock.calls[0][1]).toEqual({
       body: JSON.stringify({
         serverStrategy: 'SYNC_SEARCH_STRATEGY',
