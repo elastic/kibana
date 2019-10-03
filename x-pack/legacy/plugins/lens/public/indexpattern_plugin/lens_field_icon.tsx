@@ -31,6 +31,8 @@ export function getColorForDataType(type: string) {
   return colors[colorIndex];
 }
 
+export type UnwrapArray<T> = T extends Array<infer P> ? P : T;
+
 export function LensFieldIcon({ type }: { type: DataType }) {
   const classes = classNames(
     'lnsFieldListPanel__fieldIcon',
