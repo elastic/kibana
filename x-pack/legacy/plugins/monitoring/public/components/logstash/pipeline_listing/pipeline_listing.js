@@ -11,7 +11,7 @@ import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, Eui
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
-import { EuiMonitoringTable } from '../../table';
+import { EuiMonitoringSSPTable } from '../../table';
 import { i18n } from '@kbn/i18n';
 
 export class PipelineListing extends Component {
@@ -137,6 +137,7 @@ export class PipelineListing extends Component {
       sorting,
       pagination,
       onTableChange,
+      fetchMoreData,
       upgradeMessage,
       className
     } = this.props;
@@ -151,31 +152,22 @@ export class PipelineListing extends Component {
           </EuiPanel>
           <EuiSpacer size="m" />
           <EuiPageContent>
-            <EuiMonitoringTable
+            <EuiMonitoringSSPTable
               className={className || 'logstashNodesTable'}
               rows={data}
               columns={columns}
-              sorting={{
-                ...sorting,
-                sort: {
-                  ...sorting.sort,
-                  field: 'id'
-                }
-              }}
+              sorting={sorting}
               message={upgradeMessage}
               pagination={pagination}
+              fetchMoreData={fetchMoreData}
               search={{
                 box: {
-                  incremental: true,
                   placeholder: i18n.translate('xpack.monitoring.logstash.filterPipelinesPlaceholder', {
                     defaultMessage: 'Filter Pipelines…'
                   })
                 },
               }}
               onTableChange={onTableChange}
-              executeQueryOptions={{
-                defaultFields: ['id']
-              }}
             />
           </EuiPageContent>
         </EuiPageBody>

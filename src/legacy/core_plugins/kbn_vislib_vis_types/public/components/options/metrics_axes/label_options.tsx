@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, Axis } from '../../../types';
 import { SelectOption, SwitchOption, TruncateLabelsOption } from '../../common';
-import { rotateOptions } from '../../../utils/collections';
+import { getRotateOptions } from '../../../utils/collections';
 
-interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
+export interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
   axis: Axis;
   axesName: 'categoryAxes' | 'valueAxes';
   index: number;
@@ -56,8 +56,11 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
     [setAxisLabel]
   );
 
+  const rotateOptions = useMemo(getRotateOptions, []);
+
   return (
     <>
+      <EuiSpacer size="m" />
       <EuiTitle size="xxs">
         <h3>
           <FormattedMessage
@@ -66,6 +69,7 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
           />
         </h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
 
       <SwitchOption
         label={i18n.translate(
@@ -92,6 +96,8 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
         value={axis.labels.filter}
         setValue={setAxisLabel}
       />
+
+      <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>

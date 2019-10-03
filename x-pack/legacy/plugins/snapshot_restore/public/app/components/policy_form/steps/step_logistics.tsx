@@ -401,7 +401,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               }}
               onBlur={() => setTouched({ ...touched, schedule: true })}
               placeholder={DEFAULT_POLICY_SCHEDULE}
-              data-test-subj="snapshotNameInput"
+              data-test-subj="advancedCronInput"
             />
           </EuiFormRow>
 

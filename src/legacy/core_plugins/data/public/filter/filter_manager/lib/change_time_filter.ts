@@ -18,14 +18,18 @@
  */
 
 import moment from 'moment';
-import _ from 'lodash';
+import { keys } from 'lodash';
+import { RangeFilter, isRangeFilter } from '@kbn/es-query';
 import { TimefilterContract } from '../../../timefilter';
 
-export function changeTimeFilter(timefilter: TimefilterContract, filter: any) {
-  const key = _.keys(filter.range)[0];
-  const values = filter.range[key];
-  timefilter.setTime({
-    from: moment(values.gt || values.gte),
-    to: moment(values.lt || values.lte),
-  });
+export function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
+  if (isRangeFilter(filter)) {
+    const key = keys(filter.range)[0];
+    const values = filter.range[key];
+
+    timeFilter.setTime({
+      from: moment(values.gt || values.gte),
+      to: moment(values.lt || values.lte),
+    });
+  }
 }

@@ -6,14 +6,13 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ loadTestFile }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/46674
-  describe.skip('machine learning', function() {
+  describe('machine learning', function() {
     this.tags('ciGroup3');
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./pages'));
-    loadTestFile(require.resolve('./create_single_metric_job'));
-    loadTestFile(require.resolve('./create_multi_metric_job'));
-    loadTestFile(require.resolve('./create_population_job'));
+    loadTestFile(require.resolve('./single_metric_job'));
+    loadTestFile(require.resolve('./multi_metric_job'));
+    loadTestFile(require.resolve('./population_job'));
   });
 }

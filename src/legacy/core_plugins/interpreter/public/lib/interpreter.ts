@@ -17,44 +17,19 @@
  * under the License.
  */
 
-import { interpreterProvider, serializeProvider } from '../../common';
+import { interpreterProvider } from '../../common';
 import { createHandlers } from './create_handlers';
-import { batchedFetch } from './batched_fetch';
-import { FUNCTIONS_URL } from './consts';
-import { CoreStart } from '../../../../../core/public';
+import { registries } from '../registries';
 
-interface Config {
-  http: CoreStart['http'];
-  ajaxStream: any; // TODO: Import this from kibana_utils/ajax_stream
-  typesRegistry: any;
-  functionsRegistry: any;
-}
-
-export async function initializeInterpreter(config: Config) {
-  const { http, ajaxStream, typesRegistry, functionsRegistry } = config;
-  const serverFunctionList = await http.get(FUNCTIONS_URL);
-  const types = typesRegistry.toJS();
-  const { serialize } = serializeProvider(types);
-  const batch = batchedFetch({ ajaxStream, serialize });
-
-  // For every sever-side function, register a client-side
-  // function that matches its definition, but which simply
-  // calls the server-side function endpoint.
-  Object.keys(serverFunctionList).forEach(functionName => {
-    functionsRegistry.register(() => ({
-      ...serverFunctionList[functionName],
-      fn: (context: any, args: any) => batch({ functionName, args, context }),
-    }));
-  });
-
+export async function initializeInterpreter() {
   const interpretAst = async (ast: any, context: any, handlers: any) => {
     const interpretFn = await interpreterProvider({
-      types: typesRegistry.toJS(),
+      types: registries.types.toJS(),
       handlers: { ...handlers, ...createHandlers() },
-      functions: functionsRegistry.toJS(),
+      functions: registries.browserFunctions.toJS(),
     });
     return interpretFn(ast, context);
   };
 
-  return { interpretAst };
+  return { interpreter: { interpretAst } };
 }

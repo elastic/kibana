@@ -20,6 +20,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import { uiModules } from './modules';
+import { DebounceProvider } from 'ui/directives/debounce';
 
 const SCROLLER_HEIGHT = 20;
 
@@ -30,7 +31,9 @@ const SCROLLER_HEIGHT = 20;
  */
 uiModules
   .get('kibana')
-  .directive('fixedScroll', function (debounce) {
+  .directive('fixedScroll', function (Private) {
+    const debounce = Private(DebounceProvider);
+
     return {
       restrict: 'A',
       link: function ($scope, $el) {

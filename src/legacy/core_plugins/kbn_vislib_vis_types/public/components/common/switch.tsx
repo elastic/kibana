@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
 interface SwitchOptionProps<ParamName extends string> {
   dataTestSubj?: string;
@@ -27,7 +27,6 @@ interface SwitchOptionProps<ParamName extends string> {
   tooltip?: string;
   disabled?: boolean;
   value?: boolean;
-  noStyle?: boolean;
   paramName: ParamName;
   setValue: (paramName: ParamName, value: boolean) => void;
 }
@@ -37,13 +36,12 @@ function SwitchOption<ParamName extends string>({
   tooltip,
   label,
   disabled,
-  noStyle = false,
   paramName,
   value = false,
   setValue,
 }: SwitchOptionProps<ParamName>) {
   return (
-    <div className={noStyle ? undefined : 'visEditorSidebar__switchOptionFormRow'}>
+    <EuiFormRow fullWidth={true}>
       <EuiToolTip content={tooltip} delay="long" position="right">
         <EuiSwitch
           label={label}
@@ -53,7 +51,7 @@ function SwitchOption<ParamName extends string>({
           onChange={ev => setValue(paramName, ev.target.checked)}
         />
       </EuiToolTip>
-    </div>
+    </EuiFormRow>
   );
 }
 
