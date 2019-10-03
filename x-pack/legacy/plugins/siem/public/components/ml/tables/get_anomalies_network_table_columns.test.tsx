@@ -8,7 +8,7 @@ import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_
 import { NetworkType } from '../../../store/network/model';
 import * as i18n from './translations';
 import { AnomaliesByNetwork, Anomaly } from '../types';
-import { Columns } from '../../load_more_table';
+import { Columns } from '../../paginated_table';
 import { mount } from 'enzyme';
 import React from 'react';
 import { TestProviders } from '../../../mock';

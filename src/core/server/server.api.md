@@ -10,6 +10,7 @@ import { ConfigOptions } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { IncomingHttpHeaders } from 'http';
+import { IndexPatternsService } from 'src/legacy/server/index_patterns';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Logger as Logger_2 } from 'src/core/server/logging';
 import { ObjectType } from '@kbn/config-schema';
@@ -840,6 +841,8 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
+    // (undocumented)
+    filter?: string;
     // (undocumented)
     hasReference?: {
         type: string;

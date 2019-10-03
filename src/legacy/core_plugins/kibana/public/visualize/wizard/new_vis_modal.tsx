@@ -28,7 +28,7 @@ import { VisualizeConstants } from '../visualize_constants';
 
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
-import { TypesStart } from '../../../../visualizations/public/np_ready/types';
+import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
 interface TypeSelectionProps {
   isOpen: boolean;

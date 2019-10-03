@@ -26,6 +26,7 @@ import { store } from './state';
 export interface UptimeAppColors {
   danger: string;
   success: string;
+  gray: string;
   range: string;
   mean: string;
   warning: string;
@@ -67,6 +68,7 @@ const Application = (props: UptimeAppProps) => {
     colors = {
       danger: euiDarkVars.euiColorDanger,
       mean: euiDarkVars.euiColorPrimary,
+      gray: euiDarkVars.euiColorLightShade,
       range: euiDarkVars.euiFocusBackgroundColor,
       success: euiDarkVars.euiColorSuccess,
       warning: euiDarkVars.euiColorWarning,
@@ -75,6 +77,7 @@ const Application = (props: UptimeAppProps) => {
     colors = {
       danger: euiLightVars.euiColorDanger,
       mean: euiLightVars.euiColorPrimary,
+      gray: euiLightVars.euiColorLightShade,
       range: euiLightVars.euiFocusBackgroundColor,
       success: euiLightVars.euiColorSuccess,
       warning: euiLightVars.euiColorWarning,
