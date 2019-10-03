@@ -11,8 +11,12 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
           parallel([
             'kibana-intake-agent': kibanaPipeline.withWorkers('kibana-intake', { }, [
               'oss-unit': kibanaPipeline.getPostBuildWorker('unit', { runbld './test/scripts/jenkins_unit.sh' }),
-              // 'oss-eslint': kibanaPipeline.getPostBuildWorker('eslint', { runbld './test/scripts/jenkins_unit_eslint.sh' }),
-              // 'oss-jest_integration': kibanaPipeline.getPostBuildWorker('jest_integration', { runbld './test/scripts/jenkins_unit_jest_integration.sh' }),
+              'oss-eslint': kibanaPipeline.getPostBuildWorker('eslint', { runbld './test/scripts/jenkins_unit_eslint.sh' }),
+              'oss-jest_integration': kibanaPipeline.getPostBuildWorker('jest_integration', {
+                withWorkerKibanaDir('jest_integration') {
+                  runbld './test/scripts/jenkins_unit_jest_integration.sh'
+                }
+              }),
             ], 'linux && immutable'),
             // 'x-pack-intake-agent': kibanaPipeline.legacyJobRunner('x-pack-intake'),
             // 'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
@@ -53,3 +57,33 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
   }
 }
 
+def withWorkerKibanaDir(workerId, closure) {
+  def workerDir = "${WORKSPACE}/kibana-${workerId}"
+  dir(workerDir) {
+    sh "rsync -a ${WORKSPACE}/kibana/* . --exclude node_modules; rsync -a ${WORKSPACE}/kibana/.??* ."
+    sh "cd ${WORKSPACE}/kibana; find . -type d -name node_modules -prune -print0 | xargs -0I % ln -s '${WORKSPACE}/kibana/%' '${workerDir}/%'"
+
+    sh "ls -alh ."
+    sh "ls -alh node_modules/"
+
+    try {
+      closure()
+    } finally {
+      catchError {
+        uploadAllGcsArtifacts(workerId)
+      }
+
+      catchError {
+        runbld.junit()
+      }
+
+      catchError {
+        publishJunit()
+      }
+
+      catchError {
+        runErrorReporter()
+      }
+    }
+  }
+}
