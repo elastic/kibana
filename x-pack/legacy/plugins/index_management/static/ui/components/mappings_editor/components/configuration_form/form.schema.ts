@@ -35,15 +35,6 @@ export const schema: FormSchema<MappingsConfiguration> = {
     defaultValue: [],
     validations: [
       {
-        validator: ({ value }) => {
-          if ((value as string[]).length === 0) {
-            return {
-              message: 'Add at least one',
-            };
-          }
-        },
-      },
-      {
         validator: containsCharsField({
           message: 'Spaces are not allowed.',
           chars: ' ',
