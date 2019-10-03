@@ -43,27 +43,26 @@ export function GraphApp(props: GraphAppProps) {
         }}
       >
         <Provider store={reduxStore}>
-        <div className="gphGraph__bar">
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <SearchBar {...searchBarProps} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FieldManager pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-        {!props.isInitialized && (
-          <GuidancePanel
-            onFillWorkspace={props.onFillWorkspace}
-            onOpenFieldPicker={() => {
-              setPickerOpen(true);
-            }}
-            onOpenDatasourcePicker={() => {
-              openSourceModal(props.coreStart, props.onIndexPatternSelected);
-            }}
-          />
-        )}
+          <>
+            <div className="gphGraph__bar">
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem>
+                  <SearchBar {...searchBarProps} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <FieldManager pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+            {!props.isInitialized && (
+              <GuidancePanel
+                onFillWorkspace={props.onFillWorkspace}
+                onOpenFieldPicker={() => {
+                  setPickerOpen(true);
+                }}
+              />
+            )}
+          </>
         </Provider>
       </KibanaContextProvider>
     </I18nProvider>

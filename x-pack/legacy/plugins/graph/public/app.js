@@ -50,7 +50,6 @@ import { GraphVisualization } from './components/graph_visualization';
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
-import { openSourceModal } from './services/source_modal';
 import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
 import { urlTemplateRegex } from  './helpers/url_template';
 import {
@@ -59,7 +58,7 @@ import {
 import { fetchTopNodes } from './services/fetch_top_nodes';
 import {
   createGraphStore,
-  requestDatasource,
+  selectedFieldsSelector,
   datasourceSelector,
   hasFieldsSelector
 } from './state_management';
@@ -388,14 +387,14 @@ app.controller('graphuiPlugin', function (
       const fields = selectedFieldsSelector(store.getState());
       const topTermNodes = await fetchTopNodes(
         npStart.core.http.post,
-        $scope.selectedIndex.title,
+        datasourceSelector(store.getState()).current.title,
         fields
       );
-      initWorkspaceIfRequired();
       $scope.workspace.mergeGraph({
         nodes: topTermNodes,
         edges: []
       });
+      $scope.workspaceInitialized = true;
       $scope.workspace.fillInGraph(fields.length * 10);
     } catch (e) {
       toastNotifications.addDanger({
@@ -408,6 +407,7 @@ app.controller('graphuiPlugin', function (
   };
 
   $scope.submit = function (searchTerm) {
+    $scope.workspaceInitialized = true;
     const numHops = 2;
     if (searchTerm.startsWith('{')) {
       try {
@@ -618,7 +618,6 @@ app.controller('graphuiPlugin', function (
       payload: $route.current.locals.savedWorkspace,
     });
   } else {
-<<<<<<< HEAD
     const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
     const url = `${managementUrl}/kibana/index_patterns`;
 
@@ -646,24 +645,9 @@ app.controller('graphuiPlugin', function (
           </p>
         ),
       });
-=======
-    $route.current.locals.SavedWorkspacesProvider.get().then(function (newWorkspace) {
-      $scope.savedWorkspace = newWorkspace;
-    });
-  }
->>>>>>> upstream/master
-
-      return;
     }
-    openSourceModal(npStart.core, indexPattern => {
-      store.dispatch(
-        requestDatasource({
-          type: 'indexpattern',
-          id: indexPattern.id,
-          title: indexPattern.attributes.title
-        })
-      );
-    });
   }
+
+  $scope.savedWorkspace = $route.current.locals.savedWorkspace;
 });
 

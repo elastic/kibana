@@ -60,7 +60,7 @@ describe('field_manager', () => {
 
     instance = shallow(
       <Provider store={store}>
-        <FieldManager pickerOpen={false} setPickerOpen={openSpy} />
+        <FieldManager pickerOpen={true} setPickerOpen={() => {}} />
       </Provider>
     );
 
@@ -88,33 +88,21 @@ describe('field_manager', () => {
   });
 
   it('should select fields from picker', () => {
-    const fieldPicker = getInstance()
-      .find(FieldPicker)
-      .dive();
-
-    act(() => {
-      (instance
+    expect(
+      getInstance()
         .find(FieldPicker)
         .dive()
-        .find(EuiPopover)
-        .prop('button')! as ReactElement).props.onClick();
-    });
-
-    expect(openSpy).toHaveBeenCalled();
-
-    instance.setProps({ pickerOpen: true });
-
-    const fieldPicker = instance.find(FieldPicker).dive();
-
-    expect(
-      fieldPicker
         .find(EuiSelectable)
         .prop('options')
         .map((option: { label: string }) => option.label)
     ).toEqual(['field1', 'field2', 'field3']);
 
     act(() => {
-      fieldPicker.find(EuiSelectable).prop('onChange')([{ checked: 'on', label: 'field3' }]);
+      getInstance()
+        .find(FieldPicker)
+        .dive()
+        .find(EuiSelectable)
+        .prop('onChange')([{ checked: 'on', label: 'field3' }]);
     });
 
     expect(dispatchSpy).toHaveBeenCalledWith({
