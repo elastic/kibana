@@ -5,13 +5,13 @@
  */
 
 import angular from 'angular';
+import { AppMountContext } from 'kibana/public';
+import { DataSetup } from 'src/legacy/core_plugins/data/public';
+import { AngularHttpError } from 'ui/notify/lib/format_angular_http_error';
 // @ts-ignore
 import { initAngularModule } from './app';
-import { AppMountContext } from 'kibana/public';
-import { MinimalSaveModalProps } from 'ui/saved_objects/show_saved_object_save_modal';
-import { DataSetup } from 'src/legacy/core_plugins/data/public';
 
-const mainTemplate = (basePath: string) => `
+const mainTemplate = (basePath: string) => `<div>
   <!-- This base tag is key to making this work -->
   <base href="${basePath}" />
   <div ng-view></div>
@@ -20,46 +20,67 @@ const mainTemplate = (basePath: string) => `
 
 const moduleName = 'app/graph';
 
-  // const {
-  //   xpackInfo,
-  //   addAppRedirectMessageToUrl,
-  //   fatalError,
-  // X chrome,
-  // I savedGraphWorkspaces,
-  // X toastNotifications,
-  // I savedObjectsClient, //Private(SavedObjectsClientProvider)
-  // X indexPatterns, //data.indexPatterns.indexPatterns
-  // I savedWorkspacesClient, //Private(SavedWorkspacesProvider)
-  // I kbnBaseUrl,
-  // I kbnUrl,
-  // X config, //uiSettings?
-  // I savedObjectRegistry, //Private(SavedObjectRegistryProvider)
-  // X capabilities,
-  // X coreStart, //npStart.core
-  // I confirmModal,
-  // X http, //$http
-  // X showSaveModal,
-  // } = deps;
-
-export interface GraphDeps {
-  showSaveModal: (saveModal: React.ReactElement<MinimalSaveModalProps>) => void;
- element: HTMLElement; appBasePath: string; data: DataSetup
+export interface GraphDependencies {
+  element: HTMLElement;
+  appBasePath: string;
+  data: DataSetup;
+  fatalError: (error: AngularHttpError | Error | string, location?: string) => void;
+  xpackInfo: { get(path: string): unknown };
 }
 
-export const renderApp = ({ core }: AppMountContext, { element , appBasePath, showSaveModal, data }: GraphDeps) => {
+export interface LegacyAngularInjectedDependencies {
+  /**
+   * angular $http service
+   */
+  $http: any;
+  /**
+   * src/legacy/ui/public/modals/confirm_modal.js
+   */
+  confirmModal: any;
+  /**
+   * Private(SavedObjectRegistryProvider)
+   */
+  savedObjectRegistry: any;
+  kbnUrl: any;
+  kbnBaseUrl: any;
+  /**
+   * Private(SavedWorkspacesProvider)
+   */
+
+  savedWorkspacesClient: any;
+  savedGraphWorkspaces: any;
+  /**
+   * Private(SavedObjectsClientProvider)
+   */
+
+  savedObjectsClient: any;
+
+  // These are static values currently fetched from ui/chrome
+  canEditDrillDownUrls: string;
+  graphSavePolicy: string;
+}
+
+export const renderApp = (
+  { core }: AppMountContext,
+  { element, appBasePath, data, fatalError, xpackInfo }: GraphDependencies,
+  angularDeps: LegacyAngularInjectedDependencies
+) => {
   const deps = {
     capabilities: core.application.capabilities.graph,
     coreStart: core,
-    http: core.http,
     chrome: core.chrome,
     config: core.uiSettings,
-    showSaveModal: showSaveModal,
     toastNotifications: core.notifications.toasts,
-    indexPatterns: data.indexPatterns.indexPatterns
-  }
+    indexPatterns: data.indexPatterns.indexPatterns,
+    fatalError,
+    xpackInfo,
+    ...angularDeps,
+  };
   initAngularModule(moduleName, deps);
+  const mountpoint = document.createElement('div');
   // eslint-disable-next-line
-  element.innerHTML = mainTemplate(appBasePath);
-  const $injector = angular.bootstrap(element, [moduleName]);
+  mountpoint.innerHTML = mainTemplate(appBasePath);
+  const $injector = angular.bootstrap(mountpoint, [moduleName]);
+  element.appendChild(mountpoint);
   return () => $injector.get('$rootScope').$destroy();
 };

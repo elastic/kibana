@@ -10,6 +10,9 @@ import 'ace';
 import rison from 'rison-node';
 import React from 'react';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { formatAngularHttpError } from 'ui/notify/lib';
+import { addAppRedirectMessageToUrl } from 'ui/notify';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -53,7 +56,6 @@ import './angular/directives/graph_inspect';
 export function initAngularModule(moduleName, deps) {
   const {
     xpackInfo,
-    addAppRedirectMessageToUrl,
     fatalError,
     chrome,
     savedGraphWorkspaces,
@@ -68,11 +70,12 @@ export function initAngularModule(moduleName, deps) {
     capabilities,
     coreStart, //npStart.core
     confirmModal,
-    http, //$http
-    showSaveModal,
+    $http, //$http
+    canEditDrillDownUrls,
+    graphSavePolicy
   } = deps;
 
-  const app = angular.module(moduleName, ['ngRoute']);
+  const app = angular.module(moduleName, ['ngRoute', 'react']);
 
   function checkLicense(Promise, kbnBaseUrl) {
     const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
@@ -134,13 +137,13 @@ export function initAngularModule(moduleName, deps) {
 
         $scope.listingLimit = config.get('savedObjects:listingLimit');
         $scope.create = () => {
-          kbnUrl.redirect(getNewPath());
+          $location.url(getNewPath());
         };
         $scope.find = (search) => {
           return graphService.find(search, $scope.listingLimit);
         };
         $scope.editItem = (workspace) => {
-          kbnUrl.redirect(getEditPath(workspace));
+          $location.url(getEditPath(workspace));
         };
         $scope.getViewUrl = (workspace) => getEditUrl(chrome, workspace);
         $scope.delete = (workspaces) => {
@@ -223,8 +226,7 @@ export function initAngularModule(moduleName, deps) {
     function handleHttpError(error) {
       return checkLicense(Promise, kbnBaseUrl)
         .then(() => {
-          // TODO format this
-          toastNotifications.addDanger(error);
+          toastNotifications.addDanger(formatAngularHttpError(error));
         });
     }
 
@@ -256,9 +258,9 @@ export function initAngularModule(moduleName, deps) {
     $scope.outlinkEncoders = outlinkEncoders;
 
     $scope.fields = [];
-    $scope.canEditDrillDownUrls = chrome.getInjected('canEditDrillDownUrls');
+    $scope.canEditDrillDownUrls = canEditDrillDownUrls;
 
-    $scope.graphSavePolicy = chrome.getInjected('graphSavePolicy');
+    $scope.graphSavePolicy = graphSavePolicy;
     $scope.allSavingDisabled = $scope.graphSavePolicy === 'none';
     $scope.searchTerm = '';
 
@@ -391,7 +393,7 @@ export function initAngularModule(moduleName, deps) {
         query: query
       };
       $scope.loading = true;
-      return http.post('../api/graph/graphExplore', request)
+      return $http.post('../api/graph/graphExplore', request)
         .then(function (resp) {
           if (resp.data.resp.timed_out) {
             toastNotifications.addWarning(
@@ -416,7 +418,7 @@ export function initAngularModule(moduleName, deps) {
         body: query
       };
       $scope.loading = true;
-      http.post('../api/graph/searchProxy', request)
+      $http.post('../api/graph/searchProxy', request)
         .then(function (resp) {
           responseHandler(resp.data.resp);
         })

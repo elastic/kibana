@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import the uiExports that we want to "use"
+// legacy imports currently necessary to power Graph
+// for a cutover all of these have to be resolved
 import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
-
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
@@ -15,30 +15,67 @@ import 'ui/directives/input_focus';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
 import 'uiExports/autocompleteProviders';
 import chrome from 'ui/chrome';
-import { uiModules } from 'ui/modules';
-import uiRoutes from 'ui/routes';
-import { addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
-import { formatAngularHttpError } from 'ui/notify/lib';
-import { setup as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
+import { fatalError } from 'ui/notify';
+// @ts-ignore
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { capabilities } from 'ui/capabilities';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-
+// @ts-ignore
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
+import { IPrivate } from 'ui/private';
 
+// NP type imports
 import { CoreSetup } from 'src/core/public';
+import { DataSetup } from 'src/legacy/core_plugins/data/public';
+// @ts-ignore
+import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
+
+/**
+ * Get dependencies relying on the global angular context.
+ * They also have to get resolved together with the legacy imports above
+ */
+async function getAngularInjectedDependencies() {
+  const injector = await chrome.dangerouslyGetActiveInjector();
+
+  const Private = injector.get<IPrivate>('Private');
+
+  return {
+    $http: injector.get('$http'),
+    confirmModal: injector.get('confirmModal'),
+    savedObjectRegisty: Private(SavedObjectRegistryProvider),
+    kbnUrl: injector.get('kbnUrl'),
+    kbnBaseUrl: injector.get('kbnBaseUrl'),
+    savedWorkspacesClient: Private(SavedWorkspacesProvider),
+    savedGraphWorkspaces: injector.get('savedGraphWorkspaces'),
+    savedObjectsClient: Private(SavedObjectsClientProvider),
+    savedObjectRegistry: Private(SavedObjectRegistryProvider),
+    canEditDrillDownUrls: chrome.getInjected('canEditDrillDownUrls'),
+    graphSavePolicy: chrome.getInjected('graphSavePolicy'),
+  };
+}
+
+export interface GraphPluginSetupDependencies {
+  data: DataSetup;
+}
 
 export class GraphPlugin {
-  setup(core: CoreSetup) {
+  setup(core: CoreSetup, { data }: GraphPluginSetupDependencies) {
     core.application.register({
-      id: 'angularDemo',
-      title: 'Angular Demo',
+      id: 'graph',
+      title: 'Graph',
       async mount(context, params) {
         const { renderApp } = await import('./render_app');
-        return renderApp(context, params);
+        const angularDependencies = await getAngularInjectedDependencies();
+        return renderApp(
+          context,
+          {
+            ...params,
+            data,
+            fatalError,
+            xpackInfo,
+            // TODO pass in npStart.core.http.basePath for getBasePath and addBasePath
+          },
+          angularDependencies
+        );
       },
     });
   }

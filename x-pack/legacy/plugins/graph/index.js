@@ -23,7 +23,7 @@ export function graph(kibana) {
         order: 9000,
         icon: 'plugins/graph/icon.png',
         euiIconType: 'graphApp',
-        main: 'plugins/graph/app',
+        main: 'plugins/graph/index',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/graph/hacks/toggle_app_link_in_nav'],
