@@ -32,7 +32,7 @@ import { setup as data } from '../../../../core_plugins/data/public/legacy';
 
 const { getQueryLog } = data.query.helpers;
 const config = chrome.getUiSettingsClient();
-const storage = new Storage(localStorage);
+const storage = new Storage(window.localStorage);
 
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
