@@ -134,6 +134,7 @@ export class AddTooltipFieldPopover extends Component {
 
   _onAdd = () => {
     this.props.onAdd(this.state.checkedFields);
+    this.setState({ checkedFields: [] });
     this._closePopover();
   }
 
