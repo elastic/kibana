@@ -64,7 +64,8 @@ export function initAngularModule(moduleName, deps) {
     indexPatterns, //data.indexPatterns.indexPatterns
     savedWorkspacesClient, //Private(SavedWorkspacesProvider)
     kbnBaseUrl,
-    kbnUrl,
+    addBasePath,
+    getBasePath,
     config, //uiSettings?
     savedObjectRegistry, //Private(SavedObjectRegistryProvider)
     capabilities,
@@ -75,14 +76,14 @@ export function initAngularModule(moduleName, deps) {
     graphSavePolicy
   } = deps;
 
-  const app = angular.module(moduleName, ['ngRoute', 'react']);
+  const app = angular.module(moduleName, ['ngRoute', 'react', 'graphI18n', 'ngSanitize']);
 
   function checkLicense(Promise, kbnBaseUrl) {
     const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
       xpackInfo.get('features.graph.enableAppLink');
     if (!licenseAllowsToShowThisPage) {
       const message = xpackInfo.get('features.graph.message');
-      const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
+      const newUrl = addAppRedirectMessageToUrl(addBasePath(kbnBaseUrl), message);
       window.location.href = newUrl;
       return Promise.halt();
     }
@@ -197,7 +198,7 @@ export function initAngularModule(moduleName, deps) {
 
 
   //========  Controller for basic UI ==================
-  app.controller('graphuiPlugin', function ($scope, $route) {
+  app.controller('graphuiPlugin', function ($scope, $route, $location) {
     function handleSuccess(data) {
       return checkLicense(Promise, kbnBaseUrl)
         .then(() => data);
@@ -239,7 +240,7 @@ export function initAngularModule(moduleName, deps) {
           // but the check is too simple right now. Change this
           // once actual state-diffing is in place.
           $scope.$evalAsync(() => {
-            kbnUrl.changePath(getHomePath());
+            $location.url(getHomePath());
           });
         }
       });
@@ -555,7 +556,7 @@ export function initAngularModule(moduleName, deps) {
 
         const kUrl = new KibanaParsedUrl({
           appId: 'kibana',
-          basePath: chrome.getBasePath(),
+          basePath: getBasePath(),
           appPath: '/discover'
         });
 
@@ -676,7 +677,7 @@ export function initAngularModule(moduleName, deps) {
       run: function () {
         canWipeWorkspace(function () {
           $scope.$evalAsync(() => {
-            kbnUrl.change('/workspace/', {});
+            $location.url('/workspace/');
           });
         });  },
       testId: 'graphNewButton',
@@ -882,7 +883,7 @@ export function initAngularModule(moduleName, deps) {
             'data-test-subj': 'saveGraphSuccess',
           });
           if ($scope.savedWorkspace.id !== $route.current.params.id) {
-            kbnUrl.change(getEditPath($scope.savedWorkspace));
+            $location.url(getEditPath($scope.savedWorkspace));
           }
         }
         return { id };

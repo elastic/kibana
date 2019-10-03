@@ -6,6 +6,7 @@
 
 import angular from 'angular';
 import { AppMountContext } from 'kibana/public';
+import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { DataSetup } from 'src/legacy/core_plugins/data/public';
 import { AngularHttpError } from 'ui/notify/lib/format_angular_http_error';
 // @ts-ignore
@@ -26,6 +27,8 @@ export interface GraphDependencies {
   data: DataSetup;
   fatalError: (error: AngularHttpError | Error | string, location?: string) => void;
   xpackInfo: { get(path: string): unknown };
+  addBasePath: (url: string) => string;
+  getBasePath: () => string;
 }
 
 export interface LegacyAngularInjectedDependencies {
@@ -62,7 +65,7 @@ export interface LegacyAngularInjectedDependencies {
 
 export const renderApp = (
   { core }: AppMountContext,
-  { element, appBasePath, data, fatalError, xpackInfo }: GraphDependencies,
+  { element, appBasePath, data, fatalError, xpackInfo, addBasePath, getBasePath }: GraphDependencies,
   angularDeps: LegacyAngularInjectedDependencies
 ) => {
   const deps = {
@@ -74,8 +77,14 @@ export const renderApp = (
     indexPatterns: data.indexPatterns.indexPatterns,
     fatalError,
     xpackInfo,
+    addBasePath,
+    getBasePath,
     ...angularDeps,
   };
+  angular.module('graphI18n', [])
+    .provider('i18n', I18nProvider)
+    .filter('i18n', i18nFilter)
+    .directive('i18nId', i18nDirective);
   initAngularModule(moduleName, deps);
   const mountpoint = document.createElement('div');
   // eslint-disable-next-line

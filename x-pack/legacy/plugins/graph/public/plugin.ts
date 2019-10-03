@@ -72,7 +72,8 @@ export class GraphPlugin {
             data,
             fatalError,
             xpackInfo,
-            // TODO pass in npStart.core.http.basePath for getBasePath and addBasePath
+            addBasePath: core.http.basePath.prepend,
+            getBasePath: core.http.basePath.get
           },
           angularDependencies
         );
