@@ -94,9 +94,6 @@ export class JsonUploadAndParse extends Component {
     this._setSelectedType(this.state);
     this._setIndexReady({ ...this.state, ...this.props });
     this._indexData({ ...this.state, ...this.props });
-    if (!this._isMounted) {
-      return;
-    }
     if (
       this.props.isIndexingTriggered &&
       !this.state.showImportProgress &&
