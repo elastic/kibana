@@ -5,3 +5,4 @@
  */
 
 export { initSpaceSelectorView } from './space_selector';
+export { initEnterSpaceView } from './enter_space';

@@ -266,7 +266,7 @@ export function SuggestionPanel({
               }}
             >
               {i18n.translate('xpack.lens.sugegstion.confirmSuggestionLabel', {
-                defaultMessage: 'Confirm and reload suggestions',
+                defaultMessage: 'Reload suggestions',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>

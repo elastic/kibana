@@ -21,7 +21,7 @@ export const MlCapabilitiesContext = React.createContext<MlCapabilities>(emptyMl
 MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
 export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ children }) => {
-  const [capabilities, setCapabilities] = useState(emptyMlCapabilities);
+  const [capabilities, setCapabilities] = useState<MlCapabilities>(emptyMlCapabilities);
   const [, dispatchToaster] = useStateToaster();
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
