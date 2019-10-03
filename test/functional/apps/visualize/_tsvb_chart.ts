@@ -61,7 +61,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('gauge', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/46677
+    describe.skip('gauge', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickGauge();
@@ -93,8 +94,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/44132
-    describe.skip('switch index patterns', () => {
+    describe('switch index patterns', () => {
       beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');

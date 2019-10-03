@@ -4,7 +4,6 @@ exports[`Logs should render a default message 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title="No log data found"
 >
   <p>
@@ -35,7 +34,6 @@ exports[`Logs should render with a no cluster found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title="No logs for this cluster"
 >
   <p>
@@ -62,7 +60,6 @@ exports[`Logs should render with a no index found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title="No logs for this index"
 >
   <p>
@@ -89,7 +86,6 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title="No log data found"
 >
   <p>
@@ -116,7 +112,6 @@ exports[`Logs should render with a no node found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title="No logs for this Elasticsearch node"
 >
   <p>
@@ -143,7 +138,6 @@ exports[`Logs should render with a no type found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title="No logs for Elasticsearch"
 >
   <p>
@@ -170,7 +164,6 @@ exports[`Logs should render with a time period reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title="No logs for the selected time"
 >
   <p>
@@ -187,7 +180,6 @@ exports[`Logs should render with a time period reason for both scenarios 1`] = `
 <EuiCallOut
   color="warning"
   iconType="help"
-  size="m"
   title="No logs for the selected time"
 >
   <p>

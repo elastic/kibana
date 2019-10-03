@@ -70,8 +70,12 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./dashboard_filtering'));
       loadTestFile(require.resolve('./panel_expand_toggle'));
       loadTestFile(require.resolve('./dashboard_grid'));
-      loadTestFile(require.resolve('./dashboard_snapshots'));
       loadTestFile(require.resolve('./view_edit'));
+      // Order of test suites *shouldn't* be important but there's a bug for the view_edit test above
+      // https://github.com/elastic/kibana/issues/46752
+      // The dashboard_snapshot test below requires the timestamped URL which breaks the view_edit test.
+      // If we don't use the timestamp in the URL, the colors in the charts will be different.
+      loadTestFile(require.resolve('./dashboard_snapshots'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load

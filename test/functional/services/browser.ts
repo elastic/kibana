@@ -21,6 +21,7 @@ import { cloneDeep } from 'lodash';
 import { IKey, logging } from 'selenium-webdriver';
 import { takeUntil } from 'rxjs/operators';
 
+import Jimp, { Bitmap } from 'jimp';
 import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -116,6 +117,60 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async setWindowSize(...args: number[]): Promise<void>;
     public async setWindowSize(...args: unknown[]): Promise<void> {
       await (driver.manage().window() as any).setRect({ width: args[0], height: args[1] });
+    }
+
+    /**
+     * Gets a screenshot of the focused window and returns it as a Bitmap object
+     */
+    public async getScreenshotAsBitmap(): Promise<Bitmap> {
+      const screenshot = await this.takeScreenshot();
+      const buffer = Buffer.from(screenshot.toString(), 'base64');
+      const session = (await Jimp.read(buffer)).clone();
+      return session.bitmap;
+    }
+
+    /**
+     * Sets the dimensions of a window to get the right size screenshot.
+     *
+     * @param {number} width
+     * @param {number} height
+     * @return {Promise<void>}
+     */
+    public async setScreenshotSize(width: number, height: number): Promise<void> {
+      log.debug(`======browser======== setWindowSize ${width} ${height}`);
+      // We really want to set the Kibana app to a specific size without regard to the browser chrome (borders)
+      // But that means we first need to figure out the display scaling factor.
+      // NOTE: None of this is required when running Chrome headless because there's no scaling and no borders.
+      await this.setWindowSize(1200, 800);
+      const bitmap1 = await this.getScreenshotAsBitmap();
+      log.debug(
+        `======browser======== actual initial screenshot size width=${bitmap1.width}, height=${bitmap1.height}`
+      );
+
+      // drasticly change the window size so we can calculate the scaling
+      await this.setWindowSize(600, 400);
+      const bitmap2 = await this.getScreenshotAsBitmap();
+      log.debug(
+        `======browser======== actual second screenshot size width= ${bitmap2.width}, height=${bitmap2.height}`
+      );
+
+      const xScaling = (bitmap1.width - bitmap2.width) / 600;
+      const yScaling = (bitmap1.height - bitmap2.height) / 400;
+      const xBorder = Math.round(600 - bitmap2.width / xScaling);
+      const yBorder = Math.round(400 - bitmap2.height / yScaling);
+      log.debug(
+        `======browser======== calculated values xBorder= ${xBorder}, yBorder=${yBorder}, xScaling=${xScaling}, yScaling=${yScaling}`
+      );
+      log.debug(
+        `======browser======== setting browser size to ${width + xBorder} x ${height + yBorder}`
+      );
+      await this.setWindowSize(width + xBorder, height + yBorder);
+
+      const bitmap3 = await this.getScreenshotAsBitmap();
+      // when there is display scaling this won't show the expected size.  It will show expected size * scaling factor
+      log.debug(
+        `======browser======== final screenshot size width=${bitmap3.width}, height=${bitmap3.height}`
+      );
     }
 
     /**

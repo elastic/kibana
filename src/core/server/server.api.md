@@ -10,6 +10,9 @@ import { ConfigOptions } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { IncomingHttpHeaders } from 'http';
+import { IndexPatternsService } from 'src/legacy/server/index_patterns';
+import { KibanaConfigType } from 'src/core/server/kibana_config';
+import { Logger as Logger_2 } from 'src/core/server/logging';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PeerCertificate } from 'tls';
@@ -52,6 +55,17 @@ export enum AuthStatus {
 // @public
 export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
+}
+
+// @public
+export class BasePath {
+    // @internal
+    constructor(serverBasePath?: string);
+    get: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest) => string;
+    prepend: (path: string) => string;
+    remove: (path: string) => string;
+    readonly serverBasePath: string;
+    set: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -230,12 +244,7 @@ export interface HttpServerSetup {
         getAuthHeaders: GetAuthHeaders;
     };
     // (undocumented)
-    basePath: {
-        get: (request: KibanaRequest | LegacyRequest) => string;
-        set: (request: KibanaRequest | LegacyRequest, basePath: string) => void;
-        prepend: (url: string) => string;
-        remove: (url: string) => string;
-    };
+    basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
@@ -256,6 +265,9 @@ export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
 export interface HttpServiceStart {
     isListening: (port: number) => boolean;
 }
+
+// @public
+export type IBasePath = Pick<BasePath, keyof BasePath>;
 
 // @public
 export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
@@ -290,8 +302,12 @@ export interface InternalCoreSetup {
     http: HttpServiceSetup;
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface InternalCoreStart {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsServiceStart" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    savedObjects: SavedObjectsServiceStart;
 }
 
 // @public
@@ -387,6 +403,8 @@ export interface LegacyServiceSetupDeps {
 
 // @public @deprecated (undocumented)
 export interface LegacyServiceStartDeps {
+    // Warning: (ae-incompatible-release-tags) The symbol "core" is marked as @public, but its signature references "InternalCoreStart" which is marked as @internal
+    // 
     // (undocumented)
     core: InternalCoreStart & {
         plugins: PluginsServiceStart;
@@ -824,6 +842,8 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // (undocumented)
+    filter?: string;
+    // (undocumented)
     hasReference?: {
         type: string;
         id: string;
@@ -946,6 +966,31 @@ export interface SavedObjectsImportUnsupportedTypeError {
     type: 'unsupported_type';
 }
 
+// @internal @deprecated (undocumented)
+export interface SavedObjectsLegacyService<Request = any> {
+    // Warning: (ae-forgotten-export) The symbol "ScopedSavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<Request>['addClientWrapperFactory'];
+    // (undocumented)
+    getSavedObjectsRepository(...rest: any[]): any;
+    // (undocumented)
+    getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+    // (undocumented)
+    importExport: {
+        objectLimit: number;
+        importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+        resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+        getSortedObjectsForExport(options: SavedObjectsExportOptions): Promise<Readable>;
+    };
+    // (undocumented)
+    SavedObjectsClient: typeof SavedObjectsClient;
+    // (undocumented)
+    schema: SavedObjectsSchema;
+    // (undocumented)
+    types: string[];
+}
+
 // @public (undocumented)
 export interface SavedObjectsMigrationLogger {
     // (undocumented)
@@ -994,9 +1039,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
     supportedTypes: string[];
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsSchema" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @internal (undocumented)
 export class SavedObjectsSchema {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
     constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
@@ -1010,9 +1053,7 @@ export class SavedObjectsSchema {
     isNamespaceAgnostic(type: string): boolean;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsSerializer" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @internal (undocumented)
 export class SavedObjectsSerializer {
     constructor(schema: SavedObjectsSchema);
     generateRawId(namespace: string | undefined, type: string, id?: string): string;
@@ -1021,33 +1062,6 @@ export class SavedObjectsSerializer {
     rawToSavedObject(doc: SavedObjectsRawDoc): SanitizedSavedObjectDoc;
     savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): SavedObjectsRawDoc;
     }
-
-// @public (undocumented)
-export interface SavedObjectsService<Request = any> {
-    // Warning: (ae-forgotten-export) The symbol "ScopedSavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<Request>['addClientWrapperFactory'];
-    // (undocumented)
-    getSavedObjectsRepository(...rest: any[]): any;
-    // (undocumented)
-    getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
-    // (undocumented)
-    importExport: {
-        objectLimit: number;
-        importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
-        resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
-        getSortedObjectsForExport(options: SavedObjectsExportOptions): Promise<Readable>;
-    };
-    // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClient" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
-    // 
-    // (undocumented)
-    SavedObjectsClient: typeof SavedObjectsClient;
-    // (undocumented)
-    schema: SavedObjectsSchema;
-    // (undocumented)
-    types: string[];
-}
 
 // @public (undocumented)
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
