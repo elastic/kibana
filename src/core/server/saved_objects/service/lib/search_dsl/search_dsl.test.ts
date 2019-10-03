@@ -72,16 +72,16 @@ describe('getSearchDsl', () => {
 
       getSearchDsl(MAPPINGS, SCHEMA, opts);
       expect(getQueryParams).toHaveBeenCalledTimes(1);
-      expect(getQueryParams).toHaveBeenCalledWith(
-        MAPPINGS,
-        SCHEMA,
-        opts.namespace,
-        opts.type,
-        opts.search,
-        opts.searchFields,
-        opts.defaultSearchOperator,
-        opts.hasReference
-      );
+      expect(getQueryParams).toHaveBeenCalledWith({
+        mappings: MAPPINGS,
+        schema: SCHEMA,
+        namespace: opts.namespace,
+        type: opts.type,
+        search: opts.search,
+        searchFields: opts.searchFields,
+        defaultSearchOperator: opts.defaultSearchOperator,
+        hasReference: opts.hasReference,
+      });
     });
 
     it('passes (mappings, type, sortField, sortOrder) to getSortingParams', () => {
