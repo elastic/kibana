@@ -25,12 +25,12 @@ import { DashboardPanelState } from 'src/legacy/core_plugins/dashboard_embeddabl
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
-import { IContainer } from '../../../../../../embeddable_api/public/np_ready/public/lib/containers';
+import { IContainer } from '../../../../../../embeddable_api/public/np_ready/public';
 import {
   IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
-} from '../../../../../../embeddable_api/public/np_ready/public/lib/embeddables';
+} from '../../../../../../embeddable_api/public/np_ready/public';
 
 import { start } from '../../../../../../embeddable_api/public/np_ready/public/legacy';
 

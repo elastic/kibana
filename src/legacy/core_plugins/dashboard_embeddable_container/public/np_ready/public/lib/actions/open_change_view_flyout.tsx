@@ -24,9 +24,9 @@ import {
   IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
-} from '../../../../../../embeddable_api/public/np_ready/public/lib/embeddables';
+} from '../../../../../../embeddable_api/public/np_ready/public';
 
-import { IContainer } from '../../../../../../embeddable_api/public/np_ready/public/lib/containers';
+import { IContainer } from '../../../../../../embeddable_api/public/np_ready/public';
 import { NotificationsStart } from '../../../../../../../../core/public';
 
 export async function openChangeViewFlyout(options: {
