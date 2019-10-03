@@ -19,6 +19,7 @@ export const FileForm = ({ loading, onChange }) =>
       initialPromptText={strings.getFileUploadPrompt()}
       onChange={onChange}
       compressed
+      display="default"
       className="canvasImageUpload"
       accept="image/*"
     />

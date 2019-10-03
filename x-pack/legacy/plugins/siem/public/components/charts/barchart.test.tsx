@@ -219,7 +219,7 @@ describe.each([
   });
 });
 
-describe.each([
+const table: Array<[ChartSeriesData[] | undefined | null]> = [
   [],
   null,
   [
@@ -281,7 +281,9 @@ describe.each([
       },
     ],
   ],
-])('renders prompt', (data: ChartSeriesData[] | [] | null | undefined) => {
+] as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+describe.each(table)('renders prompt', data => {
   let shallowWrapper: ShallowWrapper;
   beforeAll(() => {
     shallowWrapper = shallow(

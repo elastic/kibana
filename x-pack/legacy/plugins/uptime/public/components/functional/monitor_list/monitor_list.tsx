@@ -105,8 +105,16 @@ export const MonitorListComponent = (props: Props) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiBasicTable
+          aria-label={i18n.translate('xpack.uptime.monitorList.table.description', {
+            defaultMessage:
+              'Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying {length} items.',
+            values: { length: items.length },
+          })}
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
-          loading={loading}
+          // Only set loading to true when there are no items present to prevent the bug outlined in
+          // in https://github.com/elastic/eui/issues/2393 . Once that is fixed we can simply set the value here to
+          // loading={loading}
+          loading={loading && (!items || items.length < 1)}
           isExpandable={true}
           hasActions={true}
           itemId="monitor_id"

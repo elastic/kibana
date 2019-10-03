@@ -150,6 +150,9 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
         singleSelection={false}
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiFlexGroup>
       <EuiFlexItem
         grow={false}
@@ -353,6 +356,9 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
         singleSelection={false}
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiFlexGroup>
       <EuiFlexItem
         grow={false}
@@ -589,6 +595,9 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
         singleSelection={false}
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiFlexGroup>
       <EuiFlexItem
         grow={false}
@@ -819,6 +828,9 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
         singleSelection={false}
       />
     </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
     <EuiFlexGroup>
       <EuiFlexItem
         grow={false}

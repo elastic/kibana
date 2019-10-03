@@ -8,6 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
@@ -28,12 +30,13 @@ import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } f
 
 interface OverviewPageProps {
   basePath: string;
-  logOverviewPageLoad: () => void;
+  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
   history: any;
   location: {
     pathname: string;
     search: string;
   };
+  logOverviewPageLoad: () => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -44,7 +47,21 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
   queryText?: string;
 }) => void;
 
-export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
+const EuiFlexItemStyled = styled(EuiFlexItem)`
+  && {
+    min-width: 598px;
+    @media only screen and (max-width: 630px) {
+      min-width: initial;
+    }
+  }
+`;
+
+export const OverviewPage = ({
+  basePath,
+  autocomplete,
+  logOverviewPageLoad,
+  setBreadcrumbs,
+}: Props) => {
   const { colors, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
@@ -117,11 +134,11 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   return (
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem>
-            <KueryBar />
+        <EuiFlexGroup gutterSize="xs" wrap responsive>
+          <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
+            <KueryBar autocomplete={autocomplete} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItemStyled grow={true}>
             <FilterGroup
               currentFilter={urlFilters}
               onFilterUpdate={(filtersKuery: string) => {
@@ -131,7 +148,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
               }}
               variables={sharedProps}
             />
-          </EuiFlexItem>
+          </EuiFlexItemStyled>
           {error && <OverviewPageParsingErrorCallout error={error} />}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
@@ -143,8 +160,6 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
             <SnapshotHistogram
               absoluteStartDate={absoluteDateRangeStart}
               absoluteEndDate={absoluteDateRangeEnd}
-              successColor={colors.success}
-              dangerColor={colors.danger}
               variables={sharedProps}
               height="120px"
             />

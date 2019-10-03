@@ -210,26 +210,8 @@ describe('AreaChartWithCustomPrompt', () => {
           color: '#490092',
         },
       ],
-      [
-        [
-          {
-            key: 'uniqueSourceIpsHistogram',
-            value: [],
-            color: '#DB1374',
-          },
-          {
-            key: 'uniqueDestinationIpsHistogram',
-            value: [
-              { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-              { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-              { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
-            ],
-            color: '#490092',
-          },
-        ],
-      ],
     ],
-  ])('renders areachart', (data: ChartSeriesData[] | [] | null | undefined) => {
+  ] as Array<[ChartSeriesData[]]>)('renders areachart', data => {
     beforeAll(() => {
       shallowWrapper = shallow(
         <AreaChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />
@@ -321,7 +303,7 @@ describe('AreaChartWithCustomPrompt', () => {
         },
       ],
     ],
-  ])('renders prompt', (data: ChartSeriesData[] | [] | null | undefined) => {
+  ] as Array<[ChartSeriesData[] | null | undefined]>)('renders prompt', data => {
     beforeAll(() => {
       shallowWrapper = shallow(
         <AreaChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />

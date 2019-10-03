@@ -17,37 +17,37 @@
  * under the License.
  */
 
-import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
+import { Alignments, GaugeTypes } from './utils/collections';
+import { ColorSchemaVislibParams } from './types';
+
+interface Gauge extends ColorSchemaVislibParams {
+  backStyle: 'Full';
+  gaugeStyle: 'Full';
+  orientation: 'vertical';
+  type: 'meter';
+  alignment: Alignments;
+  colorsRange: RangeValues[];
+  extendRange: boolean;
+  gaugeType: GaugeTypes;
+  labels: {
+    show: boolean;
+  };
+  percentageMode: boolean;
+  scale: {
+    show: boolean;
+    labels: false;
+    color: 'rgba(105,112,125,0.2)';
+  };
+  style: {
+    subText: string;
+  };
+}
 
 export interface GaugeVisParams {
-  readonly type: 'gauge';
+  type: 'gauge';
   addTooltip: boolean;
   addLegend: boolean;
   isDisplayWarning: boolean;
-  gauge: {
-    readonly backStyle: 'Full';
-    readonly gaugeStyle: 'Full';
-    readonly orientation: 'vertical';
-    readonly type: 'meter';
-    alignment: 'automatic' | 'horizontal' | 'vertical';
-    colorsRange: Array<{ from?: number; to?: number }>;
-    colorSchema: ColorSchemas;
-    extendRange: boolean;
-    invertColors: boolean;
-    gaugeType: 'Arc' | 'Circle';
-    labels: {
-      show: boolean;
-    };
-    minAngle?: number;
-    maxAngle?: number;
-    percentageMode: boolean;
-    scale: {
-      show: boolean;
-      readonly labels: false;
-      readonly color: 'rgba(105,112,125,0.2)';
-    };
-    style: {
-      subText: string;
-    };
-  };
+  gauge: Gauge;
 }

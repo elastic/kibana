@@ -18,14 +18,17 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SearchBar } from './search_bar';
 import { IndexPattern } from '../../../index_patterns';
+
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { I18nProvider } from '@kbn/i18n/react';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
+import { mount } from 'enzyme';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 
 jest.mock('../../../../../data/public', () => {
@@ -40,13 +43,6 @@ jest.mock('../../../query/query_bar', () => {
     QueryBarTopRow: () => <div className="queryBar"></div>,
   };
 });
-
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addSuccess: () => {},
-    addDanger: () => {},
-  },
-}));
 
 const noop = jest.fn();
 
@@ -87,6 +83,30 @@ const kqlQuery = {
   language: 'kuery',
 };
 
+function wrapSearchBarInContext(testProps: any) {
+  const defaultOptions = {
+    appName: 'test',
+    timeHistory: timefilterSetupMock.history,
+    intl: null as any,
+  };
+
+  const services = {
+    uiSettings: startMock.uiSettings,
+    savedObjects: startMock.savedObjects,
+    notifications: startMock.notifications,
+    http: startMock.http,
+    store: createMockStorage(),
+  };
+
+  return (
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <SearchBar.WrappedComponent {...defaultOptions} {...testProps} />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+}
+
 describe('SearchBar', () => {
   const SEARCH_BAR_ROOT = '.globalQueryBar';
   const FILTER_BAR = '.filterBar';
@@ -97,17 +117,10 @@ describe('SearchBar', () => {
   });
 
   it('Should render query bar when no options provided (in reality - timepicker)', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        savedObjectsClient={startMock.savedObjects.client}
-        uiSettings={startMock.uiSettings}
-        timeHistory={timefilterSetupMock.history}
-        toasts={startMock.notifications.toasts}
-        appName={'test'}
-        indexPatterns={[mockIndexPattern]}
-        intl={null as any}
-        http={startMock.http}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -116,18 +129,11 @@ describe('SearchBar', () => {
   });
 
   it('Should render empty when timepicker is off and no options provided', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        savedObjectsClient={startMock.savedObjects.client}
-        uiSettings={startMock.uiSettings}
-        timeHistory={timefilterSetupMock.history}
-        toasts={startMock.notifications.toasts}
-        appName={'test'}
-        indexPatterns={[mockIndexPattern]}
-        intl={null as any}
-        http={startMock.http}
-        showDatePicker={false}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        showDatePicker: false,
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -136,20 +142,13 @@ describe('SearchBar', () => {
   });
 
   it('Should render filter bar, when required fields are provided', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        savedObjectsClient={startMock.savedObjects.client}
-        uiSettings={startMock.uiSettings}
-        timeHistory={timefilterSetupMock.history}
-        toasts={startMock.notifications.toasts}
-        appName={'test'}
-        indexPatterns={[mockIndexPattern]}
-        intl={null as any}
-        http={startMock.http}
-        filters={[]}
-        onFiltersUpdated={noop}
-        showDatePicker={false}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        showDatePicker: false,
+        onFiltersUpdated: noop,
+        filters: [],
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -158,21 +157,14 @@ describe('SearchBar', () => {
   });
 
   it('Should NOT render filter bar, if disabled', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        savedObjectsClient={startMock.savedObjects.client}
-        uiSettings={startMock.uiSettings}
-        timeHistory={timefilterSetupMock.history}
-        toasts={startMock.notifications.toasts}
-        appName={'test'}
-        indexPatterns={[mockIndexPattern]}
-        intl={null as any}
-        http={startMock.http}
-        showFilterBar={false}
-        filters={[]}
-        onFiltersUpdated={noop}
-        showDatePicker={false}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        showFilterBar: false,
+        filters: [],
+        onFiltersUpdated: noop,
+        showDatePicker: false,
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -181,21 +173,13 @@ describe('SearchBar', () => {
   });
 
   it('Should render query bar, when required fields are provided', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        savedObjectsClient={startMock.savedObjects.client}
-        uiSettings={startMock.uiSettings}
-        timeHistory={timefilterSetupMock.history}
-        toasts={startMock.notifications.toasts}
-        appName={'test'}
-        indexPatterns={[mockIndexPattern]}
-        intl={null as any}
-        http={startMock.http}
-        screenTitle={'test screen'}
-        store={createMockStorage()}
-        onQuerySubmit={noop}
-        query={kqlQuery}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        query: kqlQuery,
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -204,22 +188,14 @@ describe('SearchBar', () => {
   });
 
   it('Should NOT render query bar, if disabled', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        timeHistory={timefilterSetupMock.history}
-        toasts={startMock.notifications.toasts}
-        appName={'test'}
-        indexPatterns={[mockIndexPattern]}
-        intl={null as any}
-        http={startMock.http}
-        screenTitle={'test screen'}
-        store={createMockStorage()}
-        onQuerySubmit={noop}
-        query={kqlQuery}
-        showQueryBar={false}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        query: kqlQuery,
+        showQueryBar: false,
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -228,23 +204,15 @@ describe('SearchBar', () => {
   });
 
   it('Should render query bar and filter bar', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        timeHistory={timefilterSetupMock.history}
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        toasts={startMock.notifications.toasts}
-        appName={'test'}
-        indexPatterns={[mockIndexPattern]}
-        intl={null as any}
-        http={startMock.http}
-        screenTitle={'test screen'}
-        store={createMockStorage()}
-        onQuerySubmit={noop}
-        query={kqlQuery}
-        filters={[]}
-        onFiltersUpdated={noop}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        query: kqlQuery,
+        filters: [],
+        onFiltersUpdated: noop,
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
