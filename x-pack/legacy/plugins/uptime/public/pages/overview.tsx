@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
@@ -29,12 +30,13 @@ import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } f
 
 interface OverviewPageProps {
   basePath: string;
-  logOverviewPageLoad: () => void;
+  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
   history: any;
   location: {
     pathname: string;
     search: string;
   };
+  logOverviewPageLoad: () => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -54,7 +56,12 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
+export const OverviewPage = ({
+  basePath,
+  autocomplete,
+  logOverviewPageLoad,
+  setBreadcrumbs,
+}: Props) => {
   const { colors, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
@@ -129,7 +136,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
-            <KueryBar />
+            <KueryBar autocomplete={autocomplete} />
           </EuiFlexItem>
           <EuiFlexItemStyled grow={true}>
             <FilterGroup
