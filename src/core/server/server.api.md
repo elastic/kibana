@@ -609,10 +609,10 @@ export interface RequestHandlerContext {
 }
 
 // @public
-export type RequestHandlerContextContainer = IContextContainer<RequestHandler<ObjectType<any>, ObjectType<any>, ObjectType<any>>>;
+export type RequestHandlerContextContainer = IContextContainer<RequestHandler<any, any, any>>;
 
 // @public
-export type RequestHandlerContextProvider<TContextName extends keyof RequestHandlerContext> = IContextProvider<RequestHandler<ObjectType<any>, ObjectType<any>, ObjectType<any>>, TContextName>;
+export type RequestHandlerContextProvider<TContextName extends keyof RequestHandlerContext> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
 
 // @public
 export type ResponseError = string | Error | {
