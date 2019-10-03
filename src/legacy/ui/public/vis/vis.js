@@ -34,7 +34,7 @@ import { AggConfigs } from '../agg_types/agg_configs';
 import { PersistedState } from '../persisted_state';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSource } from '../courier';
-import { start as visualizations } from '../../../core_plugins/visualizations/public/legacy';
+import { start as visualizations } from '../../../core_plugins/visualizations/public/np_ready/public/legacy';
 
 import '../directives/bind';
 
