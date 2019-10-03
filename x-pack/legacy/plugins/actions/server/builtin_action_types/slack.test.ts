@@ -6,9 +6,8 @@
 
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { validateParams, validateSecrets } from '../lib';
+import { validateParams, validateSecrets, TaskRunnerFactory } from '../lib';
 import { getActionType } from './slack';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 
@@ -22,14 +21,8 @@ const services: Services = {
   savedObjectsClient: SavedObjectsClientMock.create(),
 };
 
-function getServices(): Services {
-  return services;
-}
-
 let actionTypeRegistry: ActionTypeRegistry;
 let actionType: ActionType;
-
-const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 
 async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<any> {
   const { params } = options;
@@ -49,12 +42,8 @@ async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<an
 
 beforeAll(() => {
   actionTypeRegistry = new ActionTypeRegistry({
-    getServices,
-    isSecurityEnabled: true,
     taskManager: taskManagerMock.create(),
-    encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
-    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    getBasePath: jest.fn().mockReturnValue(undefined),
+    taskRunnerFactory: new TaskRunnerFactory(),
   });
   actionTypeRegistry.register(getActionType({ executor: mockSlackExecutor }));
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);

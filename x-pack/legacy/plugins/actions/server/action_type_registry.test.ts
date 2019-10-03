@@ -35,7 +35,7 @@ describe('register()', () => {
       Array [
         Object {
           "actions:my-action-type": Object {
-            "createTaskRunner": [MockFunction],
+            "createTaskRunner": [Function],
             "getRetry": [Function],
             "maxAttempts": 1,
             "title": "My action type",

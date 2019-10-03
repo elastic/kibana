@@ -23,10 +23,9 @@ import {
 import { registerBuiltInActionTypes } from './builtin_action_types';
 
 export function init(server: Server) {
-  const { initializerContext, coreSetup, coreStart, pluginsSetup, pluginsStart } = shim(server);
+  const { coreSetup, coreStart, pluginsSetup, pluginsStart } = shim(server);
 
   const config = server.config();
-  const taskManager = server.plugins.task_manager;
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
 
   pluginsSetup.xpack_main.registerFeature({
@@ -87,13 +86,13 @@ export function init(server: Server) {
 
   const taskRunnerFactory = new TaskRunnerFactory();
   const actionTypeRegistry = new ActionTypeRegistry({
-    taskManager,
     taskRunnerFactory,
+    taskManager: pluginsSetup.task_manager,
   });
   taskRunnerFactory.initialize({
     getServices,
     actionTypeRegistry,
-    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects,
+    encryptedSavedObjectsPlugin: pluginsStart.encrypted_saved_objects,
     getBasePath,
     spaceIdToNamespace,
     isSecurityEnabled: config.get('xpack.security.enabled'),
@@ -105,13 +104,13 @@ export function init(server: Server) {
   );
 
   // Routes
-  server.route(createActionRoute);
-  server.route(deleteActionRoute);
-  server.route(getActionRoute);
-  server.route(findActionRoute);
-  server.route(updateActionRoute);
-  server.route(listActionTypesRoute);
-  server.route(
+  coreSetup.http.route(createActionRoute);
+  coreSetup.http.route(deleteActionRoute);
+  coreSetup.http.route(getActionRoute);
+  coreSetup.http.route(findActionRoute);
+  coreSetup.http.route(updateActionRoute);
+  coreSetup.http.route(listActionTypesRoute);
+  coreSetup.http.route(
     getExecuteActionRoute({
       actionTypeRegistry,
       getServices,
@@ -121,7 +120,7 @@ export function init(server: Server) {
   );
 
   const executeFn = createExecuteFunction({
-    taskManager,
+    taskManager: pluginsStart.task_manager,
     getScopedSavedObjectsClient: coreStart.savedObjects.getScopedSavedObjectsClient,
     getBasePath,
     isSecurityEnabled: config.get('xpack.security.enabled'),

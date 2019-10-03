@@ -11,14 +11,14 @@ import {
   Services,
 } from '../types';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
-import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { EncryptedSavedObjectsStartContract } from '../shim';
 
 interface ExecuteOptions {
   actionId: string;
   namespace?: string;
   services: Services;
   params: Record<string, any>;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 

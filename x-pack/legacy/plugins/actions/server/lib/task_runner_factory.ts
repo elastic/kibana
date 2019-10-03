@@ -7,7 +7,7 @@
 import { execute } from './execute';
 import { ExecutorError } from './executor_error';
 import { RunContext } from '../../../task_manager';
-import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { EncryptedSavedObjectsStartContract } from '../shim';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -19,7 +19,7 @@ import {
 export interface TaskRunnerContext {
   getServices: GetServicesFunction;
   actionTypeRegistry: ActionTypeRegistryContract;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
   isSecurityEnabled: boolean;
@@ -49,7 +49,7 @@ export class TaskRunnerFactory {
       spaceIdToNamespace,
       getBasePath,
       isSecurityEnabled,
-    } = this.taskRunnerContext;
+    } = this.taskRunnerContext!;
 
     return {
       async run() {
