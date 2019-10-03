@@ -29,11 +29,11 @@ import {
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
-import { parseInterval } from 'ui/utils/parse_interval';
 import { toastNotifications } from 'ui/notify';
 import { ResizeChecker } from 'ui/resize_checker';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../common/constants/search';
+import { parseInterval } from '../../common/util/parse_interval';
 import {
   isModelPlotEnabled,
   isSourceDataChartableForDetector,
