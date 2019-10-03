@@ -8,15 +8,17 @@ import React, { createContext } from 'react';
 import { useRequest } from '../../../services/http/use_request';
 import { hasPrivilegeFactory, Capabilities, Privileges } from './common';
 
+interface ApiError {
+  data: {
+    error: string;
+    cause?: string[];
+    message?: string;
+  };
+}
+
 interface Authorization {
   isLoading: boolean;
-  apiError: {
-    data: {
-      error: string;
-      cause?: string[];
-      message?: string;
-    };
-  } | null;
+  apiError: ApiError | null;
   privileges: Privileges;
   capabilities: Capabilities;
 }
@@ -56,7 +58,7 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
     isLoading,
     privileges: isLoading ? { ...initialValue.privileges } : privilegesData,
     capabilities: { ...initialCapabalities },
-    apiError: error ? error : null,
+    apiError: error ? (error as ApiError) : null,
   };
 
   const hasPrivilege = hasPrivilegeFactory(value.privileges);
