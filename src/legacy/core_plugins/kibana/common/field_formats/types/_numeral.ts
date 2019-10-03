@@ -30,8 +30,8 @@ numeralLanguages.forEach(function(numeralLanguage: Record<any, any>) {
   numeral.language(numeralLanguage.id, numeralLanguage.lang);
 });
 
-export function createNumeralFormat(BaseFieldFormat: typeof FieldFormat, opts: Record<any, any>) {
-  class NumeralFormat extends BaseFieldFormat {
+export function createNumeralFormat(opts: Record<any, any>) {
+  class NumeralFormat extends FieldFormat {
     static id = opts.id;
     static title = opts.title;
     static fieldType = 'number';

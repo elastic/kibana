@@ -18,10 +18,9 @@
  */
 
 import { createNumeralFormat } from './_numeral';
-import { FieldFormat } from '../../../../../../plugins/data/common/';
 
 export function createNumberFormat() {
-  return createNumeralFormat(FieldFormat, {
+  return createNumeralFormat({
     id: 'number',
     title: 'Number',
   });

@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { FieldFormat } from '../../../../../../plugins/data/common/';
 import { createNumeralFormat } from './_numeral';
 
 export function createPercentFormat() {
-  return createNumeralFormat(FieldFormat, {
+  return createNumeralFormat({
     id: 'percent',
     title: 'Percentage',
     getParamDefaults: (getConfig: Function) => {
