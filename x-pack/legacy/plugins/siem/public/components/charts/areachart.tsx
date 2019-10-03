@@ -18,18 +18,18 @@ import {
   RecursivePartial,
 } from '@elastic/charts';
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
+import { AutoSizer } from '../auto_sizer';
+import { ChartHolder } from './chart_holder';
 import {
-  ChartSeriesData,
-  ChartHolder,
-  getSeriesStyle,
-  WrappedByAutoSizer,
-  ChartSeriesConfigs,
   browserTimezone,
   chartDefaultSettings,
+  ChartSeriesConfigs,
+  ChartSeriesData,
   getChartHeight,
   getChartWidth,
+  getSeriesStyle,
+  WrappedByAutoSizer,
 } from './common';
-import { AutoSizer } from '../auto_sizer';
 
 // custom series styles: https://ela.st/areachart-styling
 const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
@@ -136,7 +136,11 @@ export const AreaChart = React.memo<{
       )}
     </AutoSizer>
   ) : (
-    <ChartHolder height={getChartHeight(customHeight)} width={getChartWidth(customWidth)} />
+    <ChartHolder
+      height={getChartHeight(customHeight)}
+      width={getChartWidth(customWidth)}
+      data={areaChart}
+    />
   );
 });
 

@@ -3,18 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { shallow, ShallowWrapper } from 'enzyme';
-import * as React from 'react';
+import { shallow } from 'enzyme';
+import React from 'react';
 import {
-  ChartHolder,
+  checkIfAllValuesAreZero,
+  defaultChartHeight,
   getChartHeight,
   getChartWidth,
-  WrappedByAutoSizer,
-  defaultChartHeight,
   getSeriesStyle,
-  SeriesType,
   getTheme,
+  SeriesType,
+  WrappedByAutoSizer,
 } from './common';
 import 'jest-styled-components';
 import { mergeWithDefaultTheme, LIGHT_THEME } from '@elastic/charts';
@@ -24,30 +23,6 @@ jest.mock('@elastic/charts', () => {
     getSpecId: jest.fn(() => {}),
     mergeWithDefaultTheme: jest.fn(),
   };
-});
-
-describe('ChartHolder', () => {
-  let shallowWrapper: ShallowWrapper;
-
-  it('should render with default props', () => {
-    const height = `100%`;
-    const width = `100%`;
-    shallowWrapper = shallow(<ChartHolder />);
-    expect(shallowWrapper.props()).toMatchObject({
-      height,
-      width,
-    });
-  });
-
-  it('should render with given props', () => {
-    const height = `100px`;
-    const width = `100px`;
-    shallowWrapper = shallow(<ChartHolder height={height} width={width} />);
-    expect(shallowWrapper.props()).toMatchObject({
-      height,
-      width,
-    });
-  });
 });
 
 describe('WrappedByAutoSizer', () => {
@@ -128,5 +103,38 @@ describe('getChartWidth', () => {
   it('should render defaultChartHeight if no custom data is given', () => {
     const height = getChartWidth();
     expect(height).toEqual(defaultChartHeight);
+  });
+});
+
+describe('checkIfAllValuesAreZero', () => {
+  const mockInvalidDataSets = [
+    [{ key: 'mockKey', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 1 }] }],
+    [
+      { key: 'mockKeyA', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 1 }] },
+      { key: 'mockKeyB', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 0 }] },
+    ],
+  ];
+  const mockValidDataSets = [[{ key: 'mockKey', color: 'mockColor', value: [{ x: 1, y: 0 }] }]];
+
+  describe.each(mockInvalidDataSets)('return false', data => {
+    let result: boolean;
+    beforeAll(() => {
+      result = checkIfAllValuesAreZero(data);
+    });
+
+    it(`with data ${JSON.stringify(data)}`, () => {
+      expect(result).toBeFalsy();
+    });
+  });
+
+  describe.each(mockValidDataSets)('return true', data => {
+    let result: boolean;
+    beforeAll(() => {
+      result = checkIfAllValuesAreZero(data);
+    });
+
+    it(`with data ${JSON.stringify(data)}`, () => {
+      expect(result).toBeFalsy();
+    });
   });
 });

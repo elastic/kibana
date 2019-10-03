@@ -17,26 +17,29 @@ import {
   Settings,
 } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
+import { AutoSizer } from '../auto_sizer';
+import { ChartHolder } from './chart_holder';
 import {
-  ChartSeriesData,
-  WrappedByAutoSizer,
-  ChartHolder,
-  SeriesType,
-  getSeriesStyle,
-  ChartSeriesConfigs,
   browserTimezone,
   chartDefaultSettings,
+  ChartSeriesConfigs,
+  ChartSeriesData,
+  checkIfAllValuesAreZero,
+  getSeriesStyle,
   getChartHeight,
   getChartWidth,
+  SeriesType,
+  WrappedByAutoSizer,
 } from './common';
-import { AutoSizer } from '../auto_sizer';
 
 const checkIfAllTheDataInTheSeriesAreValid = (series: unknown): series is ChartSeriesData =>
   !!get('value.length', series) &&
-  get('value', series).every(({ x, y }: { x: unknown; y: unknown }) => isNumber(y) && y > 0);
+  get('value', series).every(({ x, y }: { x: unknown; y: unknown }) => isNumber(y) && y >= 0);
 
 const checkIfAnyValidSeriesExist = (data: unknown): data is ChartSeriesData[] =>
-  Array.isArray(data) && data.some(checkIfAllTheDataInTheSeriesAreValid);
+  Array.isArray(data) &&
+  !checkIfAllValuesAreZero(data) &&
+  data.some(checkIfAllTheDataInTheSeriesAreValid);
 
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = React.memo<{
@@ -114,7 +117,11 @@ export const BarChart = React.memo<{
       )}
     </AutoSizer>
   ) : (
-    <ChartHolder height={getChartHeight(customHeight)} width={getChartWidth(customWidth)} />
+    <ChartHolder
+      height={getChartHeight(customHeight)}
+      width={getChartWidth(customWidth)}
+      data={barChart}
+    />
   );
 });
 
