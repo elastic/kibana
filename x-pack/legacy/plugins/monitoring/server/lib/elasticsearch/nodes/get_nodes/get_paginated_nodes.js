@@ -38,8 +38,8 @@ export async function getPaginatedNodes(
   // Add `isOnline` and shards from the cluster state and shard stats
   const clusterState = get(clusterStats, 'cluster_state', { nodes: {} });
   for (const node of nodes) {
-    node.isOnline = !isUndefined(get(clusterState, [ 'nodes', node.name ]));
-    node.shardCount = get(shardStats, `nodes[${node.name}].shardCount`, 0);
+    node.isOnline = !isUndefined(get(clusterState, [ 'nodes', node.uuid ]));
+    node.shardCount = get(shardStats, `nodes[${node.uuid}].shardCount`, 0);
   }
 
   // `metricSet` defines a list of metrics that are sortable in the UI
@@ -60,7 +60,6 @@ export async function getPaginatedNodes(
     size: config.get('xpack.monitoring.max_bucket_size')
   };
   const metricSeriesData = await getMetrics(req, esIndexPattern, metricSet, filters, { nodes }, 4, groupBy);
-  // console.log(JSON.stringify(metricSeriesData));
   for (const metricName in metricSeriesData) {
     if (!metricSeriesData.hasOwnProperty(metricName)) {
       continue;
@@ -70,7 +69,6 @@ export async function getPaginatedNodes(
     for (const metricItem of metricList[0]) {
       const node = nodes.find(node => node.uuid === metricItem.groupedBy);
       if (!node) {
-        console.log('no node found for', metricItem.groupedBy);
         continue;
       }
 
