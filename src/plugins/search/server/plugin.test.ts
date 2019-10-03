@@ -17,18 +17,24 @@
  * under the License.
  */
 
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock } from '../../../core/server/mocks';
 
-import { SearchPublicPlugin } from './plugin';
-import { CoreSetup } from '../../../core/public';
+import { SearchServerPlugin } from './plugin';
+import { CoreSetup } from '../../../core/server';
+
+const mockSearchApi = { search: jest.fn() };
+jest.mock('./create_api', () => ({
+  createApi: () => mockSearchApi,
+}));
 
 describe('Search service', () => {
-  let plugin: SearchPublicPlugin;
+  let plugin: SearchServerPlugin;
   let mockCoreSetup: MockedKeys<CoreSetup>;
-  const opaqueId = Symbol();
+
   beforeEach(() => {
-    plugin = new SearchPublicPlugin({ opaqueId });
+    plugin = new SearchServerPlugin(coreMock.createPluginInitializerContext({}));
     mockCoreSetup = coreMock.createSetup();
+    mockSearchApi.search.mockClear();
   });
 
   describe('setup()', () => {
@@ -36,6 +42,15 @@ describe('Search service', () => {
       const setup = plugin.setup(mockCoreSetup);
       expect(setup).toHaveProperty('registerSearchStrategyContext');
       expect(setup).toHaveProperty('registerSearchStrategyProvider');
+      expect(setup).toHaveProperty('__LEGACY');
+    });
+  });
+
+  describe('__LEGACY', () => {
+    it('calls searchAPI.search', async () => {
+      const setup = plugin.setup(mockCoreSetup);
+      setup.__LEGACY.search(jest.fn(), {}, 'foo');
+      expect(mockSearchApi.search).toBeCalled();
     });
   });
 });

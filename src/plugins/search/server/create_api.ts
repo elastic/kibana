@@ -38,9 +38,6 @@ export function createApi({
       }
       // Give providers access to other search strategies by injecting this function
       const strategy = await strategyProvider(caller, api.search);
-      if (!strategy) {
-        throw new Error(`No strategy named ${name}`);
-      }
       return strategy.search(request);
     },
   };

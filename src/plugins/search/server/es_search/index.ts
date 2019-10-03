@@ -18,10 +18,10 @@
  */
 
 import { PluginInitializerContext } from '../../../../core/server';
-import { EsSearchServerPlugin } from './plugin';
+import { EsSearchService } from './plugin';
 
 export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../common';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new EsSearchServerPlugin(initializerContext);
+  return new EsSearchService(initializerContext);
 }

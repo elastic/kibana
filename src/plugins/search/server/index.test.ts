@@ -17,26 +17,11 @@
  * under the License.
  */
 
-import { ISearchSetup } from '../i_search_setup';
-import { PluginInitializerContext, CoreSetup, Plugin } from '../../../../core/server';
-import { esSearchStrategyProvider } from './es_search_strategy';
-import { ES_SEARCH_STRATEGY } from '../../common';
+import { plugin } from '.';
+import { coreMock } from '../../../core/server/mocks';
 
-interface IEsSearchDependencies {
-  search: ISearchSetup;
-}
-
-export class EsSearchService implements Plugin<void, void, IEsSearchDependencies> {
-  constructor(private initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup, deps: IEsSearchDependencies) {
-    deps.search.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
-      ES_SEARCH_STRATEGY,
-      esSearchStrategyProvider
-    );
-  }
-
-  public start() {}
-  public stop() {}
-}
+it('search service is instantiated', () => {
+  const context = coreMock.createPluginInitializerContext({});
+  const searchPlugin = plugin(context);
+  expect(searchPlugin).toBeDefined();
+});

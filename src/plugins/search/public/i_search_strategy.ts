@@ -61,7 +61,3 @@ export type TRegisterSearchStrategyProvider = <T extends TStrategyTypes>(
 export type TSearchStrategiesMap = {
   [K in TStrategyTypes]?: TSearchStrategyProviderEnhanced<K>;
 };
-
-export type TGetSearchStrategy = <K extends TStrategyTypes>(
-  strategyName: K
-) => Promise<ISearchStrategy<K>>;

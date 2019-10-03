@@ -22,7 +22,7 @@ import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../common';
 import { SYNC_SEARCH_STRATEGY } from '../sync_search_strategy';
 import { TSearchStrategyProvider, ISearchStrategy, ISearchGeneric, ISearchContext } from '..';
 
-export const esClientSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
+export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext,
   search: ISearchGeneric
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {

@@ -32,10 +32,6 @@ export interface ISyncSearchRequest extends IKibanaSearchRequest {
 export const syncSearchStrategyProvider: TSearchStrategyProvider<typeof SYNC_SEARCH_STRATEGY> = (
   context: ISearchContext
 ) => {
-  if (!context.core) {
-    throw new Error('core undefined!');
-  }
-
   const search: ISearch<typeof SYNC_SEARCH_STRATEGY> = (
     request: ISyncSearchRequest,
     options: ISearchOptions
