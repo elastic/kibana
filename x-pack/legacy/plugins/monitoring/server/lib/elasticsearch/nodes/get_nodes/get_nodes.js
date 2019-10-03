@@ -107,5 +107,5 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, s
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
 
-  return handleResponse(response, clusterStats, shardStats, { min, max, bucketSize });
+  return handleResponse(response, clusterStats, shardStats, pageOfNodes, { min, max, bucketSize });
 }
