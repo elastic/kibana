@@ -56,6 +56,9 @@ export interface ActionsCoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
   http: {
     route: (route: Hapi.ServerRoute) => void;
+    basePath: {
+      serverBasePath: string;
+    };
   };
 }
 export interface ActionsCoreStart {
@@ -98,6 +101,7 @@ export function shim(
     elasticsearch: newPlatform.setup.core.elasticsearch,
     http: {
       route: server.route.bind(server),
+      basePath: newPlatform.setup.core.http.basePath,
     },
   };
 
