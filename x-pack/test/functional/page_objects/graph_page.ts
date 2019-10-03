@@ -150,7 +150,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
           const [sourcePosition, targetPosition] = await this.getLinePositions(element);
           const lineStyle = await element.getAttribute('style');
           // grep out the width of the connection from the style attribute
-          const strokeWidth = Number(/stroke-width: (\d+(\.\d+)?)px/.exec(lineStyle)![1]);
+          const strokeWidth = Number(/stroke-width: ?(\d+(\.\d+)?)/.exec(lineStyle)![1]);
           edges.push({
             element,
             width: strokeWidth,
