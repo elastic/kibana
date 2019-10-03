@@ -563,8 +563,15 @@ describe('TaskStore', () => {
       hits?: any[];
       claimingOpts: OwnershipClaimingOpts;
     }) {
+      const versionConflicts = 2;
       const callCluster = sinon.spy(async (name: string, params?: any) =>
-        name === 'updateByQuery' ? { total: hits.length } : { hits: { hits } }
+        name === 'updateByQuery'
+          ? {
+              total: hits.length + versionConflicts,
+              updated: hits.length,
+              version_conflicts: versionConflicts,
+            }
+          : { hits: { hits } }
       );
       const store = new TaskStore({
         callCluster,
@@ -590,7 +597,10 @@ describe('TaskStore', () => {
     }
 
     test('it returns normally with no tasks when the index does not exist.', async () => {
-      const callCluster = sinon.spy(async (name: string, params?: any) => ({ total: 0 }));
+      const callCluster = sinon.spy(async (name: string, params?: any) => ({
+        total: 0,
+        updated: 0,
+      }));
       const store = new TaskStore({
         index: 'tasky',
         kibanaId: '',
@@ -600,7 +610,10 @@ describe('TaskStore', () => {
         maxAttempts: 2,
         savedObjectsRepository: savedObjectsClient,
       });
-      const { docs } = await store.claimAvailableTasks({ retryAt: new Date(), size: 10 });
+      const { docs } = await store.claimAvailableTasks({
+        claimOwnershipUntil: new Date(),
+        size: 10,
+      });
       sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWithMatch(callCluster, 'updateByQuery', {
         ignoreUnavailable: true,
@@ -635,7 +648,7 @@ describe('TaskStore', () => {
             },
           },
         },
-        claimingOpts: { retryAt: new Date(), size: 10 },
+        claimingOpts: { claimOwnershipUntil: new Date(), size: 10 },
       });
       expect(query).toMatchObject({
         bool: {
@@ -718,7 +731,7 @@ describe('TaskStore', () => {
 
     test('it claims tasks by setting their owner, status and retryAt', async () => {
       const kibanaId = uuid.v1();
-      const retryAt = new Date(Date.now());
+      const claimOwnershipUntil = new Date(Date.now());
       const {
         args: {
           updateByQuery: {
@@ -730,7 +743,7 @@ describe('TaskStore', () => {
           kibanaId,
         },
         claimingOpts: {
-          retryAt,
+          claimOwnershipUntil,
           size: 10,
         },
       });
@@ -739,7 +752,7 @@ describe('TaskStore', () => {
         lang: 'painless',
         params: {
           ownerId: kibanaId,
-          retryAt,
+          retryAt: claimOwnershipUntil,
           status: 'claiming',
         },
       });
@@ -747,7 +760,7 @@ describe('TaskStore', () => {
 
     test('it returns task objects', async () => {
       const kibanaId = uuid.v1();
-      const retryAt = new Date(Date.now());
+      const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
       const tasks = [
         {
@@ -805,7 +818,7 @@ describe('TaskStore', () => {
           kibanaId,
         },
         claimingOpts: {
-          retryAt,
+          claimOwnershipUntil,
           size: 10,
         },
         hits: tasks,
