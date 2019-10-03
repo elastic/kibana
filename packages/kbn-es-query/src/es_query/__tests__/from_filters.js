@@ -121,49 +121,63 @@ describe('build query', function () {
 
       expect(result.filter).to.eql(expectedESQueries);
     });
-    it('should convert a saved query into an ES query', function () {
-      expect(new Error('implement me'));
-      // const savedQueryFilter = {
-      //   meta: {
-      //     type: 'savedQuery',
-      //     params: {
-      //       savedQuery: {
-      //         description: 'success filter',
-      //         id: 'Ok responses',
-      //         attributes: {
-      //           query: { query: { 'response.keyword': '200' } },
-      //           filters: [],
-      //         }
-      //       }
-      //     }
-      //   },
-      //   saved_query: 'Ok responses'
-      // };
-      // const expectedESQueries = [{
-      //   query: {
-      //     bool: {
-      //       must: [],
-      //       filter: [
-      //         {
-      //           bool: {
-      //             should: [
-      //               {
-      //                 match_phrase: {
-      //                   'response.keyword': '200'
-      //                 }
-      //               }
-      //             ],
-      //             minimum_should_match: 1
-      //           }
-      //         }
-      //       ],
-      //       should: [],
-      //       must_not: []
-      //     }
-      //   }
-      // }, ];
-      // const result = buildQueryFromFilters([savedQueryFilter]);
-      // expect(result.filter).to.eql(expectedESQueries);
+
+    it('should convert a saved query filter into an ES query', function () {
+      const savedQueryFilter = {
+        '$state': {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'Bytes more than 2000 onlu',
+          negate: false,
+          params: {
+            savedQuery: {
+              attributes: {
+                description: 'no filters at all',
+                query: {
+                  language: 'kuery',
+                  query: 'bytes >= 2000'
+                },
+                title: 'Bytes more than 2000 only',
+              },
+              id: 'Bytes more than 2000 only',
+            }
+          },
+          type: 'savedQuery',
+          value: undefined,
+        },
+        saved_query: 'Bytes more than 2000 only'
+      };
+      const expectedESQueries = [
+        {
+          query: {
+            bool: {
+              must: [],
+              filter: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        range: {
+                          bytes: {
+                            gte: 2000
+                          }
+                        }
+                      }
+                    ],
+                    minimum_should_match: 1
+                  }
+                }
+              ],
+              should: [],
+              must_not: []
+            }
+          }
+        }];
+      const result = buildQueryFromFilters([savedQueryFilter]);
+      expect(result.filter).to.eql(expectedESQueries);
     });
   });
 });
