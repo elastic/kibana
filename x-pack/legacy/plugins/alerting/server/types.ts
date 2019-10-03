@@ -6,6 +6,7 @@
 
 import { AlertInstance } from './lib';
 import { AlertTypeRegistry } from './alert_type_registry';
+import { PluginSetupContract, PluginStartContract } from './plugin';
 import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../../src/core/server';
 
 export type State = Record<string, any>;
@@ -89,8 +90,8 @@ export interface RawAlert extends SavedObjectAttributes {
 }
 
 export interface AlertingPlugin {
-  registerType: AlertTypeRegistry['register'];
-  listTypes: AlertTypeRegistry['list'];
+  setup: PluginSetupContract;
+  start: PluginStartContract;
 }
 
 export type AlertTypeRegistry = PublicMethodsOf<AlertTypeRegistry>;

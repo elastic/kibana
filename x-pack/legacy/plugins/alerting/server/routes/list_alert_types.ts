@@ -13,6 +13,6 @@ export const listAlertTypesRoute = {
     tags: ['access:alerting-read'],
   },
   async handler(request: Hapi.Request) {
-    return request.server.plugins.alerting!.listTypes();
+    return request.server.plugins.alerting!.start.listTypes();
   },
 };

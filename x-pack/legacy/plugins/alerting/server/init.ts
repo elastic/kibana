@@ -9,6 +9,7 @@ import { Legacy } from 'kibana';
 import KbnServer from 'src/legacy/server/kbn_server';
 import { Plugin } from './plugin';
 import { ActionsPlugin } from '../../actions';
+import { AlertingPlugin } from './types';
 import { TaskManager } from '../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../plugins/security/server';
@@ -56,8 +57,10 @@ export async function init(server: Server) {
   server.decorate('request', 'getAlertsClient', function() {
     return startContract.getAlertsClientWithRequest(this);
   });
-  server.expose({
-    ...setupContract,
-    ...startContract,
-  });
+
+  const exposedFunctions: AlertingPlugin = {
+    setup: setupContract,
+    start: startContract,
+  };
+  server.expose(exposedFunctions);
 }

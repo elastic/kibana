@@ -124,7 +124,7 @@ export function siem(kibana: any) {
     init(server: Server) {
       const newPlatform = ((server as unknown) as KbnServer).newPlatform;
       if (server.plugins.alerting != null) {
-        server.plugins.alerting.registerType(
+        server.plugins.alerting.setup.registerType(
           getSignalsAlertType({ logger: newPlatform.coreContext.logger.get('plugins', APP_ID) })
         );
       }
