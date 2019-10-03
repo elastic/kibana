@@ -110,7 +110,7 @@ describe('create()', () => {
       retryAt: null,
       state: {},
       params: {},
-      owner: null,
+      ownerId: null,
     });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
@@ -492,7 +492,7 @@ describe('create()', () => {
       retryAt: null,
       state: {},
       params: {},
-      owner: null,
+      ownerId: null,
     });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
@@ -570,7 +570,7 @@ describe('enable()', () => {
       taskType: '',
       startedAt: null,
       retryAt: null,
-      owner: null,
+      ownerId: null,
     });
 
     await alertsClient.enable({ id: '1' });
@@ -646,7 +646,7 @@ describe('enable()', () => {
       taskType: '',
       startedAt: null,
       retryAt: null,
-      owner: null,
+      ownerId: null,
     });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       created: true,

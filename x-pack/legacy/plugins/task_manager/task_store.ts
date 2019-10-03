@@ -325,7 +325,7 @@ export class TaskStore {
         },
         seq_no_primary_term: true,
         script: {
-          source: `ctx._source.task.owner=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
+          source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
           lang: 'painless',
           params: {
             ownerId: this.kibanaId,
@@ -353,7 +353,7 @@ export class TaskStore {
           must: [
             {
               term: {
-                'task.owner': this.kibanaId,
+                'task.ownerId': this.kibanaId,
               },
             },
             { term: { 'task.status': 'claiming' } },

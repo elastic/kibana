@@ -729,7 +729,7 @@ describe('TaskStore', () => {
       });
     });
 
-    test('it claims tasks by setting their owner, status and retryAt', async () => {
+    test('it claims tasks by setting their ownerId, status and retryAt', async () => {
       const kibanaId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
       const {
@@ -748,7 +748,7 @@ describe('TaskStore', () => {
         },
       });
       expect(script).toMatchObject({
-        source: `ctx._source.task.owner=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
+        source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
         lang: 'painless',
         params: {
           ownerId: kibanaId,
@@ -777,7 +777,7 @@ describe('TaskStore', () => {
               state: '{ "baby": "Henhen" }',
               user: 'jimbo',
               scope: ['reporting'],
-              owner: kibanaId,
+              ownerId: kibanaId,
             },
           },
           _seq_no: 1,
@@ -798,7 +798,7 @@ describe('TaskStore', () => {
               state: '{ "henry": "The 8th" }',
               user: 'dabo',
               scope: ['reporting', 'ceo'],
-              owner: kibanaId,
+              ownerId: kibanaId,
             },
           },
           _seq_no: 3,
@@ -829,7 +829,7 @@ describe('TaskStore', () => {
           must: [
             {
               term: {
-                'task.owner': kibanaId,
+                'task.ownerId': kibanaId,
               },
             },
             { term: { 'task.status': 'claiming' } },
@@ -849,7 +849,7 @@ describe('TaskStore', () => {
           status: 'idle',
           taskType: 'foo',
           user: 'jimbo',
-          owner: kibanaId,
+          ownerId: kibanaId,
         },
         {
           attempts: 2,
@@ -862,7 +862,7 @@ describe('TaskStore', () => {
           status: 'running',
           taskType: 'bar',
           user: 'dabo',
-          owner: kibanaId,
+          ownerId: kibanaId,
         },
       ]);
     });
@@ -882,7 +882,7 @@ describe('TaskStore', () => {
         attempts: 3,
         status: 'idle' as TaskStatus,
         version: '123',
-        owner: null,
+        ownerId: null,
       };
 
       savedObjectsClient.update.mockImplementation(
@@ -925,7 +925,7 @@ describe('TaskStore', () => {
           status: task.status,
           taskType: task.taskType,
           user: undefined,
-          owner: null,
+          ownerId: null,
         },
         { version: '123' }
       );

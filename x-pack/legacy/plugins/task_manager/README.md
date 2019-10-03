@@ -214,7 +214,7 @@ The data stored for a task instance looks something like this:
   scope: ['alerting'],
 
   // The Kibana UUID of the Kibana instance who last claimed ownership for running this task.
-  owner: '123e4567-e89b-12d3-a456-426655440000'
+  ownerId: '123e4567-e89b-12d3-a456-426655440000'
 }
 ```
 

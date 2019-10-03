@@ -270,7 +270,7 @@ export class TaskManagerRunner implements TaskRunner {
       status,
       startedAt: null,
       retryAt: null,
-      owner: null,
+      ownerId: null,
       attempts: result.error ? this.instance.attempts : 0,
     });
 

@@ -37,7 +37,7 @@
       "scope": {
         "type": "keyword"
       },
-      "owner": {
+      "ownerId": {
         "type": "keyword"
       }
     }

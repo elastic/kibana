@@ -213,7 +213,7 @@ export interface TaskInstance {
   /**
    * The random uuid of the Kibana instance which claimed ownership of the task last
    */
-  owner?: string | null;
+  ownerId?: string | null;
 }
 
 /**
@@ -277,5 +277,5 @@ export interface ConcreteTaskInstance extends TaskInstance {
   /**
    * The random uuid of the Kibana instance which claimed ownership of the task last
    */
-  owner: string | null;
+  ownerId: string | null;
 }

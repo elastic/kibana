@@ -33,7 +33,7 @@ beforeAll(() => {
     params: {
       alertId: '1',
     },
-    owner: null,
+    ownerId: null,
   };
 });
 

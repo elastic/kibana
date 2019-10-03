@@ -31,7 +31,7 @@ const getMockConcreteTaskInstance = () => {
     state: any;
     taskType: string;
     params: any;
-    owner: string | null;
+    ownerId: string | null;
   } = {
     id: 'hy8o99o83',
     sequenceNumber: 1,
@@ -45,7 +45,7 @@ const getMockConcreteTaskInstance = () => {
     state: {},
     taskType: 'nice_task',
     params: { abc: 'def' },
-    owner: null,
+    ownerId: null,
   };
   return concrete;
 };
@@ -155,7 +155,7 @@ describe('addMiddlewareToChain', () => {
             "taskInstance": Object {
               "attempts": 0,
               "id": "hy8o99o83",
-              "owner": null,
+              "ownerId": null,
               "params": Object {
                 "abc": "def",
               },
