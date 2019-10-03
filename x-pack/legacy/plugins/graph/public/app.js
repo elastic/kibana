@@ -107,7 +107,7 @@ app.directive('graphApp', function (reactDirective) {
     ['confirmWipeWorkspace', { watchDepth: 'reference' }],
     ['autocompleteStart', { watchDepth: 'reference' }],
     ['coreStart', { watchDepth: 'reference' }],
-    ['store', { watchDepth: 'reference' }]
+    ['reduxStore', { watchDepth: 'reference' }]
   ]);
 });
 
@@ -330,9 +330,6 @@ app.controller('graphuiPlugin', function (
   const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
 
   $scope.reduxStore = store;
-  $scope.pluginDependencies = npStart.core;
-  $scope.loading = false;
-  $scope.pluginDependencies = npStart.core;
 
   $scope.nodeClick = function (n, $event) {
 

@@ -5,7 +5,7 @@
  */
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { SearchBar, SearchBarProps } from './search_bar';
+import { SearchBar, OuterSearchBarProps } from './search_bar';
 import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
 import { act } from 'react-dom/test-utils';
@@ -21,7 +21,6 @@ import { GraphStore, setDatasource } from '../state_management';
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 jest.mock('../../../../../../src/legacy/core_plugins/data/public', () => ({
@@ -30,7 +29,7 @@ jest.mock('../../../../../../src/legacy/core_plugins/data/public', () => ({
 
 const waitForIndexPatternFetch = () => new Promise(r => setTimeout(r));
 
-function wrapSearchBarInContext(testProps: SearchBarProps) {
+function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
   const services = {
     uiSettings: {
       get: (key: string) => {
@@ -79,13 +78,8 @@ describe('search_bar', () => {
 
   function mountSearchBar() {
     jest.clearAllMocks();
-    const WrappedSearchBar = wrapSearchBarInContext({ ...defaultProps });
-    instance = mountWithIntl(
-      <Provider store={store}>
-        <WrappedSearchBar {...defaultProps} />
-      </Provider>
-  }
-    );
+    const wrappedSearchBar = wrapSearchBarInContext({ ...defaultProps });
+    instance = mountWithIntl(<Provider store={store}>{wrappedSearchBar}</Provider>);
   }
 
   it('should render search bar and fetch index pattern', () => {

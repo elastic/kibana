@@ -26,17 +26,19 @@ import {
   IndexpatternDatasource,
 } from '../state_management';
 
-const localStorage = new Storage(window.localStorage);
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
-export interface SearchBarProps {
+export interface OuterSearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
-  currentDatasource?: IndexpatternDatasource;
-  onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   onQuerySubmit: (query: string) => void;
   confirmWipeWorkspace: (onConfirm: () => void) => void;
   indexPatternProvider: IndexPatternProvider;
+}
+
+export interface SearchBarProps extends OuterSearchBarProps {
+  currentDatasource?: IndexpatternDatasource;
+  onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
 }
 
 function queryToString(query: Query, indexPattern: IndexPattern) {
