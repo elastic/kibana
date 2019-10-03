@@ -3,7 +3,7 @@
 set -e
 
 if [[ "$CI_ENV_SETUP" ]]; then
-  exit 0
+  return 0
 fi
 
 installNode=$1
