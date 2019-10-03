@@ -36,6 +36,7 @@ exports[`DataMissing component renders basePath and headingMessage 1`] = `
             />
           </p>
         }
+        iconColor="subdued"
         iconType="uptimeApp"
         title={
           <EuiTitle

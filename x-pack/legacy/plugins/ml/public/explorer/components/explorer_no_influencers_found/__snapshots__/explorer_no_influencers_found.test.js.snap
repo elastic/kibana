@@ -2,6 +2,7 @@
 
 exports[`ExplorerNoInfluencersFound snapshot 1`] = `
 <EuiEmptyPrompt
+  iconColor="subdued"
   title={
     <h2>
       <FormattedMessage

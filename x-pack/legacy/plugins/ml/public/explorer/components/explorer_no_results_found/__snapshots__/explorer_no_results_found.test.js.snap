@@ -13,6 +13,7 @@ exports[`ExplorerNoInfluencersFound snapshot 1`] = `
       </p>
     </React.Fragment>
   }
+  iconColor="subdued"
   iconType="iInCircle"
   title={
     <h2>

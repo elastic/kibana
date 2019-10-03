@@ -6,7 +6,7 @@
 
 // utility functions for managing which links get added to kibana's recently accessed list
 
-import { recentlyAccessed } from 'ui/persisted_log';
+import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 
 export function addItemToRecentlyAccessed(page: string, itemId: string, url: string) {

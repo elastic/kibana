@@ -33,6 +33,7 @@ exports[`NoServicesMessage status: pending and historicalDataFound: false 1`] = 
       </p>
     </React.Fragment>
   }
+  iconColor="subdued"
   title={
     <div>
       Looks like you don't have any APM services installed. Let's add some!
@@ -44,6 +45,7 @@ exports[`NoServicesMessage status: pending and historicalDataFound: false 1`] = 
 
 exports[`NoServicesMessage status: pending and historicalDataFound: true 1`] = `
 <EuiEmptyPrompt
+  iconColor="subdued"
   title={
     <div>
       No services found
@@ -78,6 +80,7 @@ exports[`NoServicesMessage status: success and historicalDataFound: false 1`] = 
       </p>
     </React.Fragment>
   }
+  iconColor="subdued"
   title={
     <div>
       Looks like you don't have any APM services installed. Let's add some!
@@ -89,6 +92,7 @@ exports[`NoServicesMessage status: success and historicalDataFound: false 1`] = 
 
 exports[`NoServicesMessage status: success and historicalDataFound: true 1`] = `
 <EuiEmptyPrompt
+  iconColor="subdued"
   title={
     <div>
       No services found
