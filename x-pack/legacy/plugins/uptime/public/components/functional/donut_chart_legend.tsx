@@ -6,34 +6,38 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useContext } from 'react';
 import { DonutChartLegendRow } from './donut_chart_legend_row';
+import { UptimeSettingsContext } from '../../contexts';
 
 interface Props {
   down: number;
   up: number;
 }
 
-export const DonutChartLegend = ({ down, up }: Props) => (
-  <div style={{ maxWidth: '150px' }}>
-    <DonutChartLegendRow
-      // TODO: use context danger color
-      color="#AD392D"
-      content={down}
-      message={i18n.translate('xpack.uptime.donutChart.legend.downRowLabel', {
-        defaultMessage: 'Down',
-      })}
-    />
-    <EuiFlexItem>
-      <EuiSpacer size="l" />
-    </EuiFlexItem>
-    <DonutChartLegendRow
-      // TODO: use context gray color
-      color="#D5DAE4"
-      content={up}
-      message={i18n.translate('xpack.uptime.donutChart.legend.upRowLabel', {
-        defaultMessage: 'Up',
-      })}
-    />
-  </div>
-);
+export const DonutChartLegend = ({ down, up }: Props) => {
+  const {
+    colors: { gray, danger },
+  } = useContext(UptimeSettingsContext);
+  return (
+    <div style={{ maxWidth: '150px' }}>
+      <DonutChartLegendRow
+        color={danger}
+        content={down}
+        message={i18n.translate('xpack.uptime.donutChart.legend.downRowLabel', {
+          defaultMessage: 'Down',
+        })}
+      />
+      <EuiFlexItem>
+        <EuiSpacer size="l" />
+      </EuiFlexItem>
+      <DonutChartLegendRow
+        color={gray}
+        content={up}
+        message={i18n.translate('xpack.uptime.donutChart.legend.upRowLabel', {
+          defaultMessage: 'Up',
+        })}
+      />
+    </div>
+  );
+};

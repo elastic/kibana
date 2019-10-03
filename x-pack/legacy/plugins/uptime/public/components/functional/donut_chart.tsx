@@ -5,19 +5,23 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { DonutChartLegend } from './donut_chart_legend';
+import { UptimeSettingsContext } from '../../contexts';
 
 interface DonutChartProps {
-  up: number;
   down: number;
-  width: number;
   height: number;
+  width: number;
+  up: number;
 }
 
 export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
   const chartElement = useRef<SVGSVGElement | null>(null);
+  const {
+    colors: { danger, gray },
+  } = useContext(UptimeSettingsContext);
   useEffect(() => {
     if (chartElement.current !== null) {
       const svg = d3
@@ -29,7 +33,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
         // @ts-ignore this function exists
         .scaleOrdinal()
         .domain(data)
-        .range(['#D5DAE4', '#AD392D']);
+        .range([gray, danger]);
       // @ts-ignore this function exists
       const pie = d3.pie().value((d: any) => d.value);
       const dataReady = pie(d3.entries(data));
