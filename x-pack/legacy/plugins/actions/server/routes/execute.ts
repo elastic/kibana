@@ -7,7 +7,9 @@
 import Joi from 'joi';
 import Hapi from 'hapi';
 import { execute } from '../lib';
+import { SpacesPlugin } from '../../../spaces';
 import { ActionTypeRegistryContract, GetServicesFunction } from '../types';
+import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 
 interface ExecuteRequest extends Hapi.Request {
   params: {
@@ -19,16 +21,22 @@ interface ExecuteRequest extends Hapi.Request {
 }
 
 interface ExecuteRouteOptions {
-  server: Hapi.Server;
+  spaces?: SpacesPlugin;
   actionTypeRegistry: ActionTypeRegistryContract;
   getServices: GetServicesFunction;
+  encryptedSavedObjects: EncryptedSavedObjectsPlugin;
 }
 
-export function executeRoute({ server, actionTypeRegistry, getServices }: ExecuteRouteOptions) {
-  server.route({
+export function getExecuteActionRoute({
+  actionTypeRegistry,
+  getServices,
+  encryptedSavedObjects,
+  spaces,
+}: ExecuteRouteOptions) {
+  return {
     method: 'POST',
     path: '/api/action/{id}/_execute',
-    options: {
+    config: {
       tags: ['access:actions-read'],
       response: {
         emptyStatusCode: 204,
@@ -52,16 +60,16 @@ export function executeRoute({ server, actionTypeRegistry, getServices }: Execut
     async handler(request: ExecuteRequest, h: Hapi.ResponseToolkit) {
       const { id } = request.params;
       const { params } = request.payload;
-      const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
+      const namespace = spaces && spaces.getSpaceId(request);
       const result = await execute({
         params,
         actionTypeRegistry,
         actionId: id,
         namespace: namespace === 'default' ? undefined : namespace,
         services: getServices(request),
-        encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
+        encryptedSavedObjectsPlugin: encryptedSavedObjects,
       });
       return result;
     },
-  });
+  };
 }

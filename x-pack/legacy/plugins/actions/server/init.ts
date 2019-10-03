@@ -14,13 +14,13 @@ import { ActionsPlugin, Services } from './types';
 import { ActionsKibanaConfig, getActionsConfigurationUtilities } from './actions_config';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import {
-  createRoute,
-  deleteRoute,
-  findRoute,
-  getRoute,
-  updateRoute,
+  createActionRoute,
+  deleteActionRoute,
+  findActionRoute,
+  getActionRoute,
+  updateActionRoute,
   listActionTypesRoute,
-  executeRoute,
+  getExecuteActionRoute,
 } from './routes';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { SpacesPlugin } from '../../spaces';
@@ -117,17 +117,20 @@ export function init(server: Server) {
   );
 
   // Routes
-  createRoute(server);
-  deleteRoute(server);
-  getRoute(server);
-  findRoute(server);
-  updateRoute(server);
-  listActionTypesRoute(server);
-  executeRoute({
-    server,
-    actionTypeRegistry,
-    getServices,
-  });
+  server.route(createActionRoute);
+  server.route(deleteActionRoute);
+  server.route(getActionRoute);
+  server.route(findActionRoute);
+  server.route(updateActionRoute);
+  server.route(listActionTypesRoute);
+  server.route(
+    getExecuteActionRoute({
+      actionTypeRegistry,
+      getServices,
+      encryptedSavedObjects: server.plugins.encrypted_saved_objects,
+      spaces: server.plugins.spaces,
+    })
+  );
 
   const executeFn = createExecuteFunction({
     taskManager,

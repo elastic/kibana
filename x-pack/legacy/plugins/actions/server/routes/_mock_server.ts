@@ -59,5 +59,5 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
   server.decorate('request', 'getActionsClient', () => actionsClient);
   server.decorate('request', 'getBasePath', () => '/s/my-space');
 
-  return { server, savedObjectsClient, actionsClient, actionTypeRegistry };
+  return { server, savedObjectsClient, actionsClient, actionTypeRegistry, encryptedSavedObjects };
 }
