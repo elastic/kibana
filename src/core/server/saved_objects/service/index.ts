@@ -56,6 +56,7 @@ export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
+  SavedObjectsCacheIndexPatterns,
 } from './lib';
 
 export * from './saved_objects_client';
