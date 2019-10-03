@@ -31,6 +31,9 @@ function wrapSearchBarInContext(testProps: SearchBarProps) {
     notifications: {} as CoreStart['notifications'],
     http: {} as CoreStart['http'],
     overlays: {} as CoreStart['overlays'],
+    store: {
+      get: () => {},
+    },
   };
 
   return (
