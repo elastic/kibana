@@ -131,27 +131,26 @@ export const AnalysisResultsContent = ({
       ) : (
         <>
           <EuiPage>
-            <EuiPanel paddingSize="l">
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem></EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSuperDatePicker
-                    start={selectedTimeRange.startTime}
-                    end={selectedTimeRange.endTime}
-                    onTimeChange={handleSelectedTimeRangeChange}
-                    isPaused={autoRefresh.isPaused}
-                    refreshInterval={autoRefresh.interval}
-                    onRefreshChange={handleAutoRefreshChange}
-                    onRefresh={handleQueryTimeRangeChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiPage>
-          <ExpandingPage>
-            <EuiPageBody>
-              <EuiPageContent>
-                <EuiPageContentBody>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiPanel paddingSize="l">
+                  <EuiFlexGroup justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiSuperDatePicker
+                        start={selectedTimeRange.startTime}
+                        end={selectedTimeRange.endTime}
+                        onTimeChange={handleSelectedTimeRangeChange}
+                        isPaused={autoRefresh.isPaused}
+                        refreshInterval={autoRefresh.interval}
+                        onRefreshChange={handleAutoRefreshChange}
+                        onRefresh={handleQueryTimeRangeChange}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPanel paddingSize="l">
                   {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
                   <LogRateResults
                     isLoading={isLoading}
@@ -159,10 +158,13 @@ export const AnalysisResultsContent = ({
                     setTimeRange={handleChartTimeRangeChange}
                     timeRange={queryTimeRange}
                   />
-                </EuiPageContentBody>
-              </EuiPageContent>
-            </EuiPageBody>
-          </ExpandingPage>
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiPanel paddingSize="l">Anomalies</EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPage>
         </>
       )}
     </>
