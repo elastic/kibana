@@ -59,12 +59,12 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.pointSeries.gridAxis.gridText"
             defaultMessage="Grid"
           />
-        </h2>
+        </h3>
       </EuiTitle>
 
       <EuiSpacer size="m" />

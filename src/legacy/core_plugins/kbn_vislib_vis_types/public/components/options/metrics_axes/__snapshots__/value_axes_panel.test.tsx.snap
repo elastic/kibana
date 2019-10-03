@@ -1,0 +1,502 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ValueAxesPanel component should init with the default set of props 1`] = `
+<EuiPanel
+  paddingSize="s"
+>
+  <EuiFlexGroup
+    alignItems="baseline"
+    gutterSize="none"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTitle
+        size="xs"
+      >
+        <h3>
+          <FormattedMessage
+            defaultMessage="Y-axes"
+            id="kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle"
+            values={Object {}}
+          />
+        </h3>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="Add Y-axis"
+        delay="regular"
+        position="bottom"
+      >
+        <EuiButtonIcon
+          aria-label="Add Y-axis"
+          data-test-subj="visualizeAddYAxisButton"
+          iconType="plusInCircleFilled"
+          onClick={[MockFunction]}
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiAccordion
+    aria-label="Toggle ValueAxis-1 options"
+    buttonClassName="eui-textTruncate"
+    buttonContent={
+      <React.Fragment>
+        ValueAxis-1
+         
+        <EuiToolTip
+          content="Count"
+          delay="regular"
+          position="top"
+        >
+          <React.Fragment>
+            Count
+          </React.Fragment>
+        </EuiToolTip>
+      </React.Fragment>
+    }
+    buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
+    className="visEditorSidebar__section visEditorSidebar__collapsible"
+    data-test-subj="toggleYAxisOptions-ValueAxis-1"
+    extraAction={
+      <EuiToolTip
+        content="Remove Y-axis"
+        delay="regular"
+        position="bottom"
+      >
+        <EuiButtonIcon
+          aria-label="Remove Y-axis"
+          color="danger"
+          data-test-subj="removeValueAxisBtn"
+          iconType="cross"
+          onClick={[Function]}
+        />
+      </EuiToolTip>
+    }
+    id="yAxisAccordionValueAxis-1"
+    initialIsOpen={false}
+    key="ValueAxis-1"
+    paddingSize="none"
+  >
+    <EuiSpacer
+      size="m"
+    />
+    <ValueAxisOptions
+      addValueAxis={[MockFunction]}
+      axis={
+        Object {
+          "id": "ValueAxis-1",
+          "labels": Object {
+            "color": "black",
+            "filter": true,
+            "show": true,
+            "truncate": 0,
+          },
+          "name": "ValueAxis-1",
+          "position": "left",
+          "scale": Object {
+            "boundsMargin": 1,
+            "defaultYExtents": true,
+            "max": 2,
+            "min": 1,
+            "setYExtents": true,
+            "type": "linear",
+          },
+          "show": true,
+          "style": Object {},
+          "title": Object {
+            "text": "",
+          },
+          "type": "value",
+        }
+      }
+      index={0}
+      isCategoryAxisHorizontal={false}
+      onValueAxisPositionChanged={[MockFunction]}
+      removeValueAxis={[MockFunction]}
+      setMultipleValidity={[MockFunction]}
+      setParamByIndex={[MockFunction]}
+      stateParams={
+        Object {
+          "seriesParams": Array [
+            Object {
+              "data": Object {
+                "id": "1",
+                "label": "Count",
+              },
+              "drawLinesBetweenPoints": true,
+              "interpolate": "linear",
+              "lineWidth": 2,
+              "mode": "stacked",
+              "show": true,
+              "showCircles": true,
+              "type": "histogram",
+              "valueAxis": "ValueAxis-1",
+            },
+            Object {
+              "data": Object {
+                "id": "1",
+                "label": "Average",
+              },
+              "drawLinesBetweenPoints": true,
+              "interpolate": "linear",
+              "lineWidth": 2,
+              "mode": "stacked",
+              "show": true,
+              "showCircles": true,
+              "type": "histogram",
+              "valueAxis": "ValueAxis-2",
+            },
+          ],
+          "valueAxes": Array [
+            Object {
+              "id": "ValueAxis-1",
+              "labels": Object {
+                "color": "black",
+                "filter": true,
+                "show": true,
+                "truncate": 0,
+              },
+              "name": "ValueAxis-1",
+              "position": "left",
+              "scale": Object {
+                "boundsMargin": 1,
+                "defaultYExtents": true,
+                "max": 2,
+                "min": 1,
+                "setYExtents": true,
+                "type": "linear",
+              },
+              "show": true,
+              "style": Object {},
+              "title": Object {
+                "text": "",
+              },
+              "type": "value",
+            },
+            Object {
+              "id": "ValueAxis-2",
+              "labels": Object {
+                "color": "black",
+                "filter": true,
+                "show": true,
+                "truncate": 0,
+              },
+              "name": "ValueAxis-1",
+              "position": "right",
+              "scale": Object {
+                "boundsMargin": 1,
+                "defaultYExtents": true,
+                "max": 2,
+                "min": 1,
+                "setYExtents": true,
+                "type": "linear",
+              },
+              "show": true,
+              "style": Object {},
+              "title": Object {
+                "text": "",
+              },
+              "type": "value",
+            },
+          ],
+        }
+      }
+      vis={
+        Object {
+          "type": Object {
+            "editorConfig": Object {
+              "collections": Object {
+                "axisModes": Array [
+                  Object {
+                    "text": "Normal",
+                    "value": "normal",
+                  },
+                  Object {
+                    "text": "Percentage",
+                    "value": "percentage",
+                  },
+                  Object {
+                    "text": "Wiggle",
+                    "value": "wiggle",
+                  },
+                  Object {
+                    "text": "Silhouette",
+                    "value": "silhouette",
+                  },
+                ],
+                "positions": Array [
+                  Object {
+                    "text": "Top",
+                    "value": "top",
+                  },
+                  Object {
+                    "text": "Left",
+                    "value": "left",
+                  },
+                  Object {
+                    "text": "Right",
+                    "value": "right",
+                  },
+                  Object {
+                    "text": "Bottom",
+                    "value": "bottom",
+                  },
+                ],
+                "scaleTypes": Array [
+                  Object {
+                    "text": "Linear",
+                    "value": "linear",
+                  },
+                  Object {
+                    "text": "Log",
+                    "value": "log",
+                  },
+                  Object {
+                    "text": "Square root",
+                    "value": "square root",
+                  },
+                ],
+              },
+            },
+          },
+        }
+      }
+    />
+  </EuiAccordion>
+  <EuiAccordion
+    aria-label="Toggle ValueAxis-1 options"
+    buttonClassName="eui-textTruncate"
+    buttonContent={
+      <React.Fragment>
+        ValueAxis-1
+         
+        <EuiToolTip
+          content="Average"
+          delay="regular"
+          position="top"
+        >
+          <React.Fragment>
+            Average
+          </React.Fragment>
+        </EuiToolTip>
+      </React.Fragment>
+    }
+    buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
+    className="visEditorSidebar__section visEditorSidebar__collapsible"
+    data-test-subj="toggleYAxisOptions-ValueAxis-2"
+    extraAction={
+      <EuiToolTip
+        content="Remove Y-axis"
+        delay="regular"
+        position="bottom"
+      >
+        <EuiButtonIcon
+          aria-label="Remove Y-axis"
+          color="danger"
+          data-test-subj="removeValueAxisBtn"
+          iconType="cross"
+          onClick={[Function]}
+        />
+      </EuiToolTip>
+    }
+    id="yAxisAccordionValueAxis-2"
+    initialIsOpen={false}
+    key="ValueAxis-2"
+    paddingSize="none"
+  >
+    <EuiSpacer
+      size="m"
+    />
+    <ValueAxisOptions
+      addValueAxis={[MockFunction]}
+      axis={
+        Object {
+          "id": "ValueAxis-2",
+          "labels": Object {
+            "color": "black",
+            "filter": true,
+            "show": true,
+            "truncate": 0,
+          },
+          "name": "ValueAxis-1",
+          "position": "right",
+          "scale": Object {
+            "boundsMargin": 1,
+            "defaultYExtents": true,
+            "max": 2,
+            "min": 1,
+            "setYExtents": true,
+            "type": "linear",
+          },
+          "show": true,
+          "style": Object {},
+          "title": Object {
+            "text": "",
+          },
+          "type": "value",
+        }
+      }
+      index={1}
+      isCategoryAxisHorizontal={false}
+      onValueAxisPositionChanged={[MockFunction]}
+      removeValueAxis={[MockFunction]}
+      setMultipleValidity={[MockFunction]}
+      setParamByIndex={[MockFunction]}
+      stateParams={
+        Object {
+          "seriesParams": Array [
+            Object {
+              "data": Object {
+                "id": "1",
+                "label": "Count",
+              },
+              "drawLinesBetweenPoints": true,
+              "interpolate": "linear",
+              "lineWidth": 2,
+              "mode": "stacked",
+              "show": true,
+              "showCircles": true,
+              "type": "histogram",
+              "valueAxis": "ValueAxis-1",
+            },
+            Object {
+              "data": Object {
+                "id": "1",
+                "label": "Average",
+              },
+              "drawLinesBetweenPoints": true,
+              "interpolate": "linear",
+              "lineWidth": 2,
+              "mode": "stacked",
+              "show": true,
+              "showCircles": true,
+              "type": "histogram",
+              "valueAxis": "ValueAxis-2",
+            },
+          ],
+          "valueAxes": Array [
+            Object {
+              "id": "ValueAxis-1",
+              "labels": Object {
+                "color": "black",
+                "filter": true,
+                "show": true,
+                "truncate": 0,
+              },
+              "name": "ValueAxis-1",
+              "position": "left",
+              "scale": Object {
+                "boundsMargin": 1,
+                "defaultYExtents": true,
+                "max": 2,
+                "min": 1,
+                "setYExtents": true,
+                "type": "linear",
+              },
+              "show": true,
+              "style": Object {},
+              "title": Object {
+                "text": "",
+              },
+              "type": "value",
+            },
+            Object {
+              "id": "ValueAxis-2",
+              "labels": Object {
+                "color": "black",
+                "filter": true,
+                "show": true,
+                "truncate": 0,
+              },
+              "name": "ValueAxis-1",
+              "position": "right",
+              "scale": Object {
+                "boundsMargin": 1,
+                "defaultYExtents": true,
+                "max": 2,
+                "min": 1,
+                "setYExtents": true,
+                "type": "linear",
+              },
+              "show": true,
+              "style": Object {},
+              "title": Object {
+                "text": "",
+              },
+              "type": "value",
+            },
+          ],
+        }
+      }
+      vis={
+        Object {
+          "type": Object {
+            "editorConfig": Object {
+              "collections": Object {
+                "axisModes": Array [
+                  Object {
+                    "text": "Normal",
+                    "value": "normal",
+                  },
+                  Object {
+                    "text": "Percentage",
+                    "value": "percentage",
+                  },
+                  Object {
+                    "text": "Wiggle",
+                    "value": "wiggle",
+                  },
+                  Object {
+                    "text": "Silhouette",
+                    "value": "silhouette",
+                  },
+                ],
+                "positions": Array [
+                  Object {
+                    "text": "Top",
+                    "value": "top",
+                  },
+                  Object {
+                    "text": "Left",
+                    "value": "left",
+                  },
+                  Object {
+                    "text": "Right",
+                    "value": "right",
+                  },
+                  Object {
+                    "text": "Bottom",
+                    "value": "bottom",
+                  },
+                ],
+                "scaleTypes": Array [
+                  Object {
+                    "text": "Linear",
+                    "value": "linear",
+                  },
+                  Object {
+                    "text": "Log",
+                    "value": "log",
+                  },
+                  Object {
+                    "text": "Square root",
+                    "value": "square root",
+                  },
+                ],
+              },
+            },
+          },
+        }
+      }
+    />
+  </EuiAccordion>
+</EuiPanel>
+`;

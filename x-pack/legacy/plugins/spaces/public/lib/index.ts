@@ -5,3 +5,4 @@
  */
 
 export { SpacesManager } from './spaces_manager';
+export { getSpaceInitials, getSpaceColor, getSpaceImageUrl } from './space_attributes';

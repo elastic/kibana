@@ -30,7 +30,7 @@ import { SetParamByIndex, ChangeValueAxis } from './';
 
 export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 
-interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
+export interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
   chart: SeriesParam;
   index: number;
   changeValueAxis: ChangeValueAxis;

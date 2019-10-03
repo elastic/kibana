@@ -43,7 +43,6 @@ import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects'
 import { snapshotRestore } from './legacy/plugins/snapshot_restore';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
-import { advancedUiActions } from './legacy/plugins/advanced_ui_actions';
 import { lens } from './legacy/plugins/lens';
 
 module.exports = function (kibana) {
@@ -88,6 +87,5 @@ module.exports = function (kibana) {
     snapshotRestore(kibana),
     actions(kibana),
     alerting(kibana),
-    advancedUiActions(kibana),
   ];
 };
