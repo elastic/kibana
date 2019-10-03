@@ -168,7 +168,9 @@ export function createUrlFormat(FieldFormat) {
             }
             // Handle urls like: `../app/kibana`
             else {
-              prefix = `${parsedUrl.origin}${parsedUrl.basePath}/app/`;
+              const prefixEnd = url[0] === '/' ? '' : '/';
+
+              prefix = `${parsedUrl.origin}${parsedUrl.basePath || ''}/app${prefixEnd}`;
             }
           }
 

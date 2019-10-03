@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { Logger, SavedObjectsService } from 'src/core/server';
+import { Logger, SavedObjectsLegacyService } from 'src/core/server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { initDeleteSpacesApi } from './delete';
@@ -20,7 +20,7 @@ type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 interface RouteDeps {
   xpackMain: XPackMainPlugin;
   legacyRouter: Legacy.Server['route'];
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
   spacesService: SpacesServiceSetup;
   log: Logger;
 }
