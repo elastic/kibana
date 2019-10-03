@@ -7,11 +7,10 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import * as i18n from './translations';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
-import { Row } from '../helpers';
 import { SystemGenericDetails } from './generic_details';
 import { SystemGenericFileDetails } from './generic_file_details';
+import * as i18n from './translations';
 
 export const createGenericSystemRowRenderer = ({
   actionName,
@@ -31,7 +30,7 @@ export const createGenericSystemRowRenderer = ({
     );
   },
   renderRow: ({ browserFields, data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <SystemGenericDetails
@@ -42,7 +41,7 @@ export const createGenericSystemRowRenderer = ({
           timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 
@@ -64,7 +63,7 @@ export const createGenericFileRowRenderer = ({
     );
   },
   renderRow: ({ browserFields, data, children, timelineId }) => (
-    <Row className="euiTableRow">
+    <>
       {children}
       <RowRendererContainer>
         <SystemGenericFileDetails
@@ -75,7 +74,7 @@ export const createGenericFileRowRenderer = ({
           timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 

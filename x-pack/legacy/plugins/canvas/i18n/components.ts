@@ -251,6 +251,33 @@ export const ComponentStrings = {
         defaultMessage: 'Closes keyboard shortcuts reference',
       }),
   },
+  PageManager: {
+    getPageNumberAriaLabel: (pageNumber: number) =>
+      i18n.translate('xpack.canvas.pageManager.pageNumberAriaLabel', {
+        defaultMessage: 'Load page number {pageNumber}',
+        values: {
+          pageNumber,
+        },
+      }),
+  },
+  PagePreviewPageControls: {
+    getClonePageAriaLabel: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageAriaLabel', {
+        defaultMessage: 'Clone page',
+      }),
+    getClonePageTooltip: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageTooltip', {
+        defaultMessage: 'Clone',
+      }),
+    getDeletePageAriaLabel: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageAriaLabel', {
+        defaultMessage: 'Delete page',
+      }),
+    getDeletePageTooltip: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageTooltip', {
+        defaultMessage: 'Delete',
+      }),
+  },
   Toolbar: {
     getEditorButtonLabel: () =>
       i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {

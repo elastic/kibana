@@ -64,9 +64,9 @@ export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
     {({ style, isSticky }) => (
       <Aside isSticky={isSticky} style={style}>
         <EuiFlexGroup>
-          <EuiFlexItem grow={8}>{children}</EuiFlexItem>
+          <EuiFlexItem grow={7}>{children}</EuiFlexItem>
 
-          <FlexItemWithDatePickerFix grow={4} data-test-subj="globalDatePicker">
+          <FlexItemWithDatePickerFix grow={5} data-test-subj="globalDatePicker">
             <SuperDatePicker id="global" />
           </FlexItemWithDatePickerFix>
         </EuiFlexGroup>

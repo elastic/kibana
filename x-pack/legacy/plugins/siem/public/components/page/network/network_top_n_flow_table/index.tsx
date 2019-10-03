@@ -79,26 +79,45 @@ const rowItems: ItemsPerRow[] = [
 
 export const NetworkTopNFlowTableId = 'networkTopSourceFlow-top-talkers';
 
-class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowTableProps> {
-  public render() {
-    const {
-      activePage,
-      data,
-      fakeTotalCount,
-      flowTargeted,
-      id,
-      indexPattern,
-      isInspect,
-      limit,
-      loading,
-      loadPage,
-      showMorePagesIndicator,
-      topNFlowSort,
-      totalCount,
-      type,
-      updateTopNFlowLimit,
-      updateTableActivePage,
-    } = this.props;
+const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
+  ({
+    activePage,
+    data,
+    fakeTotalCount,
+    flowTargeted,
+    id,
+    indexPattern,
+    isInspect,
+    limit,
+    loading,
+    loadPage,
+    showMorePagesIndicator,
+    topNFlowSort,
+    totalCount,
+    type,
+    updateTopNFlowLimit,
+    updateTopNFlowSort,
+    updateTableActivePage,
+  }) => {
+    const onChange = (criteria: Criteria, tableType: networkModel.TopNTableType) => {
+      if (criteria.sort != null) {
+        const splitField = criteria.sort.field.split('.');
+        const field = last(splitField);
+        const newSortDirection =
+          field !== topNFlowSort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
+        const newTopNFlowSort: NetworkTopNFlowSortField = {
+          field: field as NetworkTopNFlowFields,
+          direction: newSortDirection,
+        };
+        if (!isEqual(newTopNFlowSort, topNFlowSort)) {
+          updateTopNFlowSort({
+            topNFlowSort: newTopNFlowSort,
+            networkType: type,
+            tableType,
+          });
+        }
+      }
+    };
 
     let tableType: networkModel.TopNTableType;
     let headerTitle: string;
@@ -136,7 +155,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         limit={limit}
         loading={loading}
         loadPage={newActivePage => loadPage(newActivePage)}
-        onChange={criteria => this.onChange(criteria, tableType)}
+        onChange={criteria => onChange(criteria, tableType)}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={{ field, direction: topNFlowSort.direction }}
@@ -153,27 +172,9 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       />
     );
   }
+);
 
-  private onChange = (criteria: Criteria, tableType: networkModel.TopNTableType) => {
-    if (criteria.sort != null) {
-      const splitField = criteria.sort.field.split('.');
-      const field = last(splitField);
-      const newSortDirection =
-        field !== this.props.topNFlowSort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-      const newTopNFlowSort: NetworkTopNFlowSortField = {
-        field: field as NetworkTopNFlowFields,
-        direction: newSortDirection,
-      };
-      if (!isEqual(newTopNFlowSort, this.props.topNFlowSort)) {
-        this.props.updateTopNFlowSort({
-          topNFlowSort: newTopNFlowSort,
-          networkType: this.props.type,
-          tableType,
-        });
-      }
-    }
-  };
-}
+NetworkTopNFlowTableComponent.displayName = 'NetworkTopNFlowTableComponent';
 
 const mapStateToProps = (state: State, ownProps: OwnProps) =>
   networkSelectors.topNFlowSelector(ownProps.flowTargeted);
