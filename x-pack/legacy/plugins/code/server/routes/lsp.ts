@@ -7,8 +7,8 @@
 import Boom from 'boom';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
-
 import { SymbolLocator } from '@elastic/lsp-extension';
+
 import {
   LanguageServerStartFailed,
   ServerNotInitialized,
@@ -32,9 +32,9 @@ const LANG_SERVER_ERROR = 'language server error';
 export function lspRoute(
   server: CodeServerRouter,
   codeServices: CodeServices,
-  serverOptions: ServerOptions
+  serverOptions: ServerOptions,
+  log: Logger
 ) {
-  const log = new Logger(server.server);
   const lspService = codeServices.serviceFor(LspServiceDefinition);
   const gitService = codeServices.serviceFor(GitServiceDefinition);
 
