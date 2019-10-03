@@ -3353,6 +3353,11 @@
   resolved "https://registry.yarnpkg.com/@types/getopts/-/getopts-2.0.1.tgz#b7e5478fe7571838b45aff736a59ab69b8bcda18"
   integrity sha512-JsQJHtzLYKunMz7acYOX6x5IJ/42CsjjHFfLCmis1Hn/qFoD/y0kJFUIAg8HoDigQpKUcWj55d8rxZQBnvz1Pw==
 
+"@types/getos@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/getos/-/getos-3.0.0.tgz#582c758e99e9d634f31f471faf7ce59cf1c39a71"
+  integrity sha512-g5O9kykBPMaK5USwU+zM5AyXaztqbvHjSQ7HaBjqgO3f5lKGChkRhLP58Z/Nrr4RBGNNPrBcJkWZwnmbmi9YjQ==
+
 "@types/git-url-parse@^9.0.0":
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/@types/git-url-parse/-/git-url-parse-9.0.0.tgz#aac1315a44fa4ed5a52c3820f6c3c2fb79cbd12d"
@@ -4200,7 +4205,7 @@
     "@types/unist" "*"
     "@types/vfile-message" "*"
 
-"@types/vinyl-fs@*":
+"@types/vinyl-fs@*", "@types/vinyl-fs@^2.4.11":
   version "2.4.11"
   resolved "https://registry.yarnpkg.com/@types/vinyl-fs/-/vinyl-fs-2.4.11.tgz#b98119b8bb2494141eaf649b09fbfeb311161206"
   integrity sha512-2OzQSfIr9CqqWMGqmcERE6Hnd2KY3eBVtFaulVo3sJghplUcaeMdL9ZjEiljcQQeHjheWY9RlNmumjIAvsBNaA==

@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import pluginHelpers from '@kbn/plugin-helpers';
-// @ts-ignore
 import { createAutoJUnitReporter } from '@kbn/test';
-// @ts-ignore
+// @ts-ignore no types available
 import mocha from 'gulp-mocha';
 import gulp from 'gulp';
 

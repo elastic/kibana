@@ -14,14 +14,13 @@ import { asyncMap } from './util';
 import { download } from './download';
 import { clean } from './clean';
 
-
 /**
  * Check for the downloaded archive of each requested browser type and
  * download them if they are missing or their checksum is invalid
  * @param  {String} browserType
  * @return {Promise<undefined>}
  */
-export async function ensureBrowserDownloaded(browserType) {
+export async function ensureBrowserDownloaded(browserType: keyof typeof BROWSERS_BY_TYPE) {
   await ensureDownloaded([BROWSERS_BY_TYPE[browserType]]);
 }
 
@@ -33,7 +32,6 @@ export async function ensureAllBrowsersDownloaded() {
   await ensureDownloaded(Object.values(BROWSERS_BY_TYPE));
 }
 
-
 /**
  * Clears the unexpected files in the browsers archivesPath
  * and ensures that all packages/archives are downloaded and
@@ -41,20 +39,29 @@ export async function ensureAllBrowsersDownloaded() {
  * @param  {BrowserSpec} browsers
  * @return {Promise<undefined>}
  */
-async function ensureDownloaded(browsers) {
-  await asyncMap(Object.values(browsers), async (browser) => {
+async function ensureDownloaded(
+  browsers: Array<{
+    paths: {
+      archivesPath: string;
+      baseUrl: string;
+      packages: Array<{ archiveFilename: string; archiveChecksum: string }>;
+    };
+  }>
+) {
+  await asyncMap(browsers, async browser => {
     const { archivesPath } = browser.paths;
 
-    await clean(archivesPath, browser.paths.packages.map(p => (
-      resolvePath(archivesPath, p.archiveFilename)
-    )));
+    await clean(
+      archivesPath,
+      browser.paths.packages.map(p => resolvePath(archivesPath, p.archiveFilename))
+    );
 
-    const invalidChecksums = [];
+    const invalidChecksums: string[] = [];
     await asyncMap(browser.paths.packages, async ({ archiveFilename, archiveChecksum }) => {
       const url = `${browser.paths.baseUrl}${archiveFilename}`;
       const path = resolvePath(archivesPath, archiveFilename);
 
-      if (existsSync(path) && await md5(path) === archiveChecksum) {
+      if (existsSync(path) && (await md5(path)) === archiveChecksum) {
         return;
       }
 
@@ -65,7 +72,11 @@ async function ensureDownloaded(browsers) {
     });
 
     if (invalidChecksums.length) {
-      throw new Error(`Error downloading browsers, checksums incorrect for:\n    - ${invalidChecksums.join('\n    - ')}`);
+      throw new Error(
+        `Error downloading browsers, checksums incorrect for:\n    - ${invalidChecksums.join(
+          '\n    - '
+        )}`
+      );
     }
   });
 }

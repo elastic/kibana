@@ -9,9 +9,9 @@ import { createHash } from 'crypto';
 import { dirname } from 'path';
 
 import mkdirp from 'mkdirp';
-import request from 'request';
+import Axios from 'axios';
 
-import { log, readableEnd } from './util';
+import { log } from './util';
 
 /**
  * Download a url and calculate it's checksum
@@ -19,7 +19,7 @@ import { log, readableEnd } from './util';
  * @param  {String} path
  * @return {Promise<String>} checksum of the downloaded file
  */
-export async function download(url, path) {
+export async function download(url: string, path: string) {
   log(`Downloading ${url}`);
 
   const hash = createHash('md5');
@@ -28,11 +28,20 @@ export async function download(url, path) {
   const handle = openSync(path, 'w');
 
   try {
-    const readable = request(url).on('data', chunk => {
+    const resp = await Axios.request({
+      url,
+      method: 'GET',
+      responseType: 'stream',
+    });
+
+    resp.data.on('data', (chunk: Buffer) => {
       writeSync(handle, chunk);
       hash.update(chunk);
     });
-    await readableEnd(readable);
+
+    await new Promise((resolve, reject) => {
+      resp.data.on('error', reject).on('end', resolve);
+    });
   } finally {
     closeSync(handle);
   }

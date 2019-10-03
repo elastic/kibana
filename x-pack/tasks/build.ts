@@ -15,7 +15,6 @@ import del from 'del';
 import fancyLog from 'fancy-log';
 import chalk from 'chalk';
 
-// @ts-ignore
 import { generateNoticeFromSource } from '../../src/dev';
 import { prepareTask } from './prepare';
 import { gitInfo } from './helpers/git_info';

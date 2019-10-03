@@ -10,7 +10,7 @@ import log from 'fancy-log';
 import getopts from 'getopts';
 import { toArray } from 'rxjs/operators';
 
-// @ts-ignore
+// @ts-ignore complicated module doesn't have types yet
 import { findPluginSpecs } from '../../../src/legacy/plugin_discovery';
 
 /*

@@ -14,12 +14,9 @@ import { log, asyncMap } from './util';
 
 /**
  * Delete any file in the `dir` that is not in the expectedPaths
- * @param  {String} dir
- * @param  {Array<String>} expectedPaths
- * @return {Promise<undefined>}
  */
-export async function clean(dir, expectedPaths) {
-  let filenames;
+export async function clean(dir: string, expectedPaths: string[]) {
+  let filenames: string[];
   try {
     filenames = await readdirSync(dir);
   } catch (error) {
