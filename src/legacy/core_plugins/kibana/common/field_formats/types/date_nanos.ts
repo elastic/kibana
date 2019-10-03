@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import { memoize } from 'lodash';
+import { memoize, noop } from 'lodash';
 import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common/';
 
 /**
@@ -69,8 +69,8 @@ export function createDateNanosFormat() {
     static fieldType = KBN_FIELD_TYPES.DATE;
 
     private getConfig: Function;
-    private memoizedConverter: any;
-    private memoizedPattern: any;
+    private memoizedConverter: Function = noop;
+    private memoizedPattern: string = '';
     private timeZone: string = '';
 
     constructor(params: any, getConfig: Function) {
