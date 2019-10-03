@@ -5,9 +5,11 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
+import { Filter } from '@kbn/es-query';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'src/core/public';
 import { Query } from 'src/plugins/data/common';
+import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { KibanaDatatable } from '../../../../../src/legacy/core_plugins/interpreter/common';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
@@ -25,9 +27,14 @@ export interface EditorFrameProps {
     toDate: string;
   };
   query: Query;
+  filters: Filter[];
+  savedQuery?: SavedQuery;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
-  onChange: (newState: { indexPatternTitles: string[]; doc: Document }) => void;
+  onChange: (newState: {
+    filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
+    doc: Document;
+  }) => void;
 }
 export interface EditorFrameInstance {
   mount: (element: Element, props: EditorFrameProps) => void;
@@ -165,6 +172,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
   dateRange: FramePublicAPI['dateRange'];
+  filters: Filter[];
 }
 
 // The only way a visualization has to restrict the query building
@@ -278,11 +286,13 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
+
   dateRange: {
     fromDate: string;
     toDate: string;
   };
   query: Query;
+  filters: Filter[];
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
