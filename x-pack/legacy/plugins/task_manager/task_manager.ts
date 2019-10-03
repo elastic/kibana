@@ -130,7 +130,7 @@ export class TaskManager {
   private async claimAvailableTasks() {
     const { docs, claimedTasks } = await this.store.claimAvailableTasks({
       size: this.pool.availableWorkers,
-      claimOwnershipUntil: intervalFromNow('5s')!,
+      claimOwnershipUntil: intervalFromNow('30s')!,
     });
 
     if (docs.length !== claimedTasks) {
