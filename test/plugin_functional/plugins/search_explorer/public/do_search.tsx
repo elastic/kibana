@@ -24,7 +24,7 @@ import { Observable } from 'rxjs';
 import {
   IKibanaSearchResponse,
   IKibanaSearchRequest,
-} from '../../../../../src/plugins/search/common';
+} from '../../../../../src/plugins/data/public';
 
 interface Props {
   request: IKibanaSearchRequest;

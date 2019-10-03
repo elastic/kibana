@@ -17,18 +17,21 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { Observable } from 'rxjs';
+import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../../common/search';
+import { SYNC_SEARCH_STRATEGY } from '../sync_search_strategy';
+import { TSearchStrategyProvider, ISearchStrategy, ISearchGeneric, ISearchContext } from '..';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
-
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
-}
-
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
-}
+export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
+  context: ISearchContext,
+  search: ISearchGeneric
+): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
+  return {
+    search: (request, options) =>
+      search(
+        { ...request, serverStrategy: ES_SEARCH_STRATEGY },
+        options,
+        SYNC_SEARCH_STRATEGY
+      ) as Observable<IEsSearchResponse>,
+  };
+};

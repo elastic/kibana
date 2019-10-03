@@ -17,18 +17,25 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { Plugin, CoreSetup, PluginInitializerContext } from '../../../../../core/public';
+import { ES_SEARCH_STRATEGY } from '../../../common/search/es_search';
+import { esSearchStrategyProvider } from './es_search_strategy';
+import { ISearchSetup } from '../i_search_setup';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
-
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
+export interface IEsSearchSetupDependencies {
+  search: ISearchSetup;
 }
 
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
+export class EsSearchService implements Plugin {
+  constructor(private initializerContext: PluginInitializerContext) {}
+  public setup(core: CoreSetup, deps: IEsSearchSetupDependencies) {
+    deps.search.registerSearchStrategyProvider(
+      this.initializerContext.opaqueId,
+      ES_SEARCH_STRATEGY,
+      esSearchStrategyProvider
+    );
+  }
+
+  public start() {}
+  public stop() {}
 }

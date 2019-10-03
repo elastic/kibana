@@ -18,15 +18,15 @@
  */
 
 import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
-import { ISearchSetup } from '../../../../../src/plugins/search/server';
+import { DataPluginSetup } from 'src/plugins/data/server/plugin';
 import { demoSearchStrategyProvider } from './demo_search_strategy';
 import { DEMO_SEARCH_STRATEGY, IDemoRequest, IDemoResponse } from '../common';
 
 interface IDemoSearchExplorerDeps {
-  search: ISearchSetup;
+  data: DataPluginSetup;
 }
 
-declare module '../../../../../src/plugins/search/server' {
+declare module '../../../../../src/plugins/data/server' {
   export interface IRequestTypesMap {
     [DEMO_SEARCH_STRATEGY]: IDemoRequest;
   }
@@ -40,7 +40,7 @@ export class DemoDataPlugin implements Plugin<void, void, IDemoSearchExplorerDep
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: IDemoSearchExplorerDeps) {
-    deps.search.registerSearchStrategyProvider(
+    deps.data.search.registerSearchStrategyProvider(
       this.initializerContext.opaqueId,
       DEMO_SEARCH_STRATEGY,
       demoSearchStrategyProvider

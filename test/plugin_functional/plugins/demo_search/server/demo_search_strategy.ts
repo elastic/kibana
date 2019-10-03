@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TSearchStrategyProvider } from 'src/plugins/search/server/i_search_strategy';
+import { TSearchStrategyProvider } from 'src/plugins/data/server';
 import { DEMO_SEARCH_STRATEGY } from '../common';
 
 export const demoSearchStrategyProvider: TSearchStrategyProvider<

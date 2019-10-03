@@ -29,19 +29,19 @@ import {
   ISearchGeneric,
   IEsSearchResponse,
   IEsSearchRequest,
-} from '../../../../../src/plugins/search/public';
+} from '../../../../../src/plugins/data/public';
 import { DoSearch } from './do_search';
 import { GuideSection } from './guide_section';
 
 // @ts-ignore
-import serverPlugin from '!!raw-loader!./../../../../../src/plugins/search/server/es_search/plugin';
+import serverPlugin from '!!raw-loader!./../../../../../src/plugins/data/server/search/es_search/es_search_service';
 // @ts-ignore
-import serverStrategy from '!!raw-loader!./../../../../../src/plugins/search/server/es_search/es_search_strategy';
+import serverStrategy from '!!raw-loader!./../../../../../src/plugins/data/server/search/es_search/es_search_strategy';
 
 // @ts-ignore
-import publicPlugin from '!!raw-loader!./../../../../../src/plugins/search/public/es_search/plugin';
+import publicPlugin from '!!raw-loader!./../../../../../src/plugins/data/public/search/es_search/es_search_service';
 // @ts-ignore
-import publicStrategy from '!!raw-loader!./../../../../../src/plugins/search/public/es_search/es_search_strategy';
+import publicStrategy from '!!raw-loader!./../../../../../src/plugins/data/public/search/es_search/es_search_strategy';
 
 interface Props {
   search: ISearchGeneric;
@@ -126,14 +126,14 @@ export class EsSearchTest extends React.Component<Props, State> {
             {
               title: 'Public',
               code: [
-                { description: 'plugin.ts', snippet: publicPlugin },
+                { description: 'es_search_service.ts', snippet: publicPlugin },
                 { description: 'es_search_strategy.ts', snippet: publicStrategy },
               ],
             },
             {
               title: 'Server',
               code: [
-                { description: 'plugin.ts', snippet: serverPlugin },
+                { description: 'es_search_service.ts', snippet: serverPlugin },
                 { description: 'es_search_strategy.ts', snippet: serverStrategy },
               ],
             },

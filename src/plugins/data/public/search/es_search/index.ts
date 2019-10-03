@@ -17,18 +17,9 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { EsSearchService } from './es_search_service';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
-
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
-}
-
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
-}
+export const esSearchService: PluginInitializer<void, void> = (
+  initializerContext: PluginInitializerContext
+) => new EsSearchService(initializerContext);

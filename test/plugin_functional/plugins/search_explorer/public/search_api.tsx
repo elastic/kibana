@@ -20,22 +20,22 @@ import React from 'react';
 import { GuideSection } from './guide_section';
 
 // @ts-ignore
-import publicSetupContract from '!!raw-loader!./../../../../../src/plugins/search/public/i_search_setup';
+import publicSetupContract from '!!raw-loader!./../../../../../src/plugins/data/public/search/i_search_setup';
 // @ts-ignore
-import publicSearchStrategy from '!!raw-loader!./../../../../../src/plugins/search/public/i_search_strategy';
+import publicSearchStrategy from '!!raw-loader!./../../../../../src/plugins/data/public/search/i_search_strategy';
 // @ts-ignore
-import publicSearch from '!!raw-loader!./../../../../../src/plugins/search/public/i_search';
+import publicSearch from '!!raw-loader!./../../../../../src/plugins/data/public/search/i_search';
 // @ts-ignore
-import publicPlugin from '!!raw-loader!./../../../../../src/plugins/search/public/plugin';
+import publicPlugin from '!!raw-loader!./../../../../../src/plugins/data/public/search/search_service';
 
 // @ts-ignore
-import serverSetupContract from '!!raw-loader!./../../../../../src/plugins/search/server/i_search_setup';
+import serverSetupContract from '!!raw-loader!./../../../../../src/plugins/data/server/search/i_search_setup';
 // @ts-ignore
-import serverSearchStrategy from '!!raw-loader!./../../../../../src/plugins/search/server/i_search_strategy';
+import serverSearchStrategy from '!!raw-loader!./../../../../../src/plugins/data/server/search/i_search_strategy';
 // @ts-ignore
-import serverSearch from '!!raw-loader!./../../../../../src/plugins/search/server/i_search';
+import serverSearch from '!!raw-loader!./../../../../../src/plugins/data/server/search/i_search';
 // @ts-ignore
-import serverPlugin from '!!raw-loader!./../../../../../src/plugins/search/server/plugin';
+import serverPlugin from '!!raw-loader!./../../../../../src/plugins/data/server/search/search_service';
 
 export const SearchApiPage = () => (
   <GuideSection
@@ -44,7 +44,7 @@ export const SearchApiPage = () => (
         title: 'Public',
         code: [
           {
-            description: 'plugin.ts',
+            description: 'search_service.ts',
             snippet: publicPlugin,
           },
           {
@@ -65,7 +65,7 @@ export const SearchApiPage = () => (
         title: 'Server',
         code: [
           {
-            description: 'plugin.ts',
+            description: 'search_service.ts',
             snippet: serverPlugin,
           },
           {

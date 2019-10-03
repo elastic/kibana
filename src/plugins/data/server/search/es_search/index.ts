@@ -17,18 +17,11 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { PluginInitializerContext } from '../../../../../core/server';
+import { EsSearchService } from './es_search_service';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
+export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../common/search';
 
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
-}
-
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
+export function esSearchService(initializerContext: PluginInitializerContext) {
+  return new EsSearchService(initializerContext);
 }

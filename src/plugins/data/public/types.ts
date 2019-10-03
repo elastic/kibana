@@ -20,8 +20,10 @@
 export * from './autocomplete_provider/types';
 
 import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
+import { ISearchSetup } from './search';
 export interface DataPublicPluginSetup {
   autocomplete: AutocompletePublicPluginSetup;
+  search: ISearchSetup;
 }
 
 export interface DataPublicPluginStart {

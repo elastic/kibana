@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { PluginInitializerContext } from '../../../../core/server';
+import { SearchService } from './search_service';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
-
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
+export function searchService(initializerContext: PluginInitializerContext) {
+  return new SearchService(initializerContext);
 }
 
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
-}
+export { ISearchSetup } from './i_search_setup';
+export * from '../../common';
+
+export { ISearchContext } from './i_search_context';
+
+export { IRequestTypesMap, IResponseTypesMap } from './i_search';
+
+export { TStrategyTypes } from './strategy_types';
+
+export { TSearchStrategyProvider } from './i_search_strategy';

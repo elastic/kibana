@@ -17,18 +17,26 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
+import { TStrategyTypes } from './strategy_types';
+import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../common/search/es_search';
+import { IEsSearchRequest } from './es_search';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
-
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
+export interface IRequestTypesMap {
+  [ES_SEARCH_STRATEGY]: IEsSearchRequest;
+  [key: string]: IKibanaSearchRequest;
 }
 
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
+export interface IResponseTypesMap {
+  [ES_SEARCH_STRATEGY]: IEsSearchResponse;
+  [key: string]: IKibanaSearchResponse;
 }
+
+export type ISearchGeneric = <T extends TStrategyTypes = typeof ES_SEARCH_STRATEGY>(
+  request: IRequestTypesMap[T],
+  strategy?: T
+) => Promise<IResponseTypesMap[T]>;
+
+export type ISearch<T extends TStrategyTypes> = (
+  request: IRequestTypesMap[T]
+) => Promise<IResponseTypesMap[T]>;

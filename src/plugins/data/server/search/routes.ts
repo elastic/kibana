@@ -17,18 +17,30 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from '../../../../core/server';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
+export function registerSearchRoute(router: IRouter): void {
+  router.post(
+    {
+      path: '/internal/search/{strategy}',
+      validate: {
+        params: schema.object({ strategy: schema.string() }),
 
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
-}
+        query: schema.object({}, { allowUnknowns: true }),
 
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
+        body: schema.object({}, { allowUnknowns: true }),
+      },
+    },
+    async (context, request, res) => {
+      const searchRequest = request.body;
+      const strategy = request.params.strategy;
+      try {
+        const response = await context.search!.search(searchRequest, strategy);
+        return res.ok({ body: response });
+      } catch (err) {
+        return res.internalError({ body: err });
+      }
+    }
+  );
 }

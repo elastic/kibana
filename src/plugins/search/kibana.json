@@ -1,6 +1,0 @@
-{
-  "id": "search",
-  "version": "kibana",
-  "server": true,
-  "ui": true
-}

@@ -17,18 +17,23 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { ES_SEARCH_STRATEGY } from '../../common/search/es_search';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
-
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
-}
-
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
-}
+/**
+ * Contains all known strategy type identifiers that will be used to map to
+ * request and response shapes. Plugins that wish to add their own custom search
+ * strategies should extend this type via:
+ *
+ * const MY_STRATEGY = 'MY_STRATEGY';
+ *
+ * declare module 'src/plugins/search/server' {
+ *  export interface IRequestTypesMap {
+ *    [MY_STRATEGY]: IMySearchRequest;
+ *  }
+ *
+ *  export interface IResponseTypesMap {
+ *   [MY_STRATEGY]: IMySearchResponse
+ *  }
+ * }
+ */
+export type TStrategyTypes = typeof ES_SEARCH_STRATEGY | string;

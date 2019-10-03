@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Plugin } from '.';
+import { searchSetupMock } from './search/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
@@ -30,6 +31,7 @@ const autocompleteMock: any = {
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     autocomplete: autocompleteMock as Setup['autocomplete'],
+    search: searchSetupMock,
   };
 
   return setupContract;

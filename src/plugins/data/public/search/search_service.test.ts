@@ -17,18 +17,25 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { coreMock } from '../../../../core/public/mocks';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
+import { SearchService } from './search_service';
+import { CoreSetup } from '../../../../core/public';
 
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
-}
+describe('Search service', () => {
+  let searchService: SearchService;
+  let mockCoreSetup: MockedKeys<CoreSetup>;
+  const opaqueId = Symbol();
+  beforeEach(() => {
+    searchService = new SearchService({ opaqueId });
+    mockCoreSetup = coreMock.createSetup();
+  });
 
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
-}
+  describe('setup()', () => {
+    it('exposes proper contract', async () => {
+      const setup = searchService.setup(mockCoreSetup);
+      expect(setup).toHaveProperty('registerSearchStrategyContext');
+      expect(setup).toHaveProperty('registerSearchStrategyProvider');
+    });
+  });
+});

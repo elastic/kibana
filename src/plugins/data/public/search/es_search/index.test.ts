@@ -17,18 +17,9 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+import { esSearchService } from '.';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
-
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
-}
-
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
-}
+it('es search service is instantiated', () => {
+  const esSearch = esSearchService({ opaqueId: Symbol() });
+  expect(esSearch).toBeDefined();
+});

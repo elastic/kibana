@@ -88,7 +88,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
           })
         );
         if (!foundInSpans.find(foundInSpan => foundInSpan)) {
-          throw new Error('String not found. Trying again.');
+          throw new Error(`"${stringToFind}" was not found. Trying again...`);
         }
       });
     }

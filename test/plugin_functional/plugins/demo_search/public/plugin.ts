@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { ISearchSetup } from '../../../../../src/plugins/search/public';
+import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
 import { Plugin, CoreSetup, PluginInitializerContext } from '../../../../../src/core/public';
 import { DEMO_SEARCH_STRATEGY } from '../common';
 import { demoClientSearchStrategyProvider } from './demo_search_strategy';
 import { IDemoRequest, IDemoResponse } from '../common';
 
 interface DemoDataSearchSetupDependencies {
-  search: ISearchSetup;
+  data: DataPublicPluginSetup;
 }
 
-declare module '../../../../../src/plugins/search/public' {
+declare module '../../../../../src/plugins/data/public' {
   export interface IRequestTypesMap {
     [DEMO_SEARCH_STRATEGY]: IDemoRequest;
   }
@@ -40,7 +40,7 @@ declare module '../../../../../src/plugins/search/public' {
 export class DemoDataPlugin implements Plugin {
   constructor(private initializerContext: PluginInitializerContext) {}
   public setup(core: CoreSetup, deps: DemoDataSearchSetupDependencies) {
-    deps.search.registerSearchStrategyProvider(
+    deps.data.search.registerSearchStrategyProvider(
       this.initializerContext.opaqueId,
       DEMO_SEARCH_STRATEGY,
       demoClientSearchStrategyProvider

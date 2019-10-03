@@ -16,19 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CoreSetup } from '../../../../core/server';
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
-
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
-
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
-}
-
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
+export interface ISearchContext {
+  core: CoreSetup;
 }
