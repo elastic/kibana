@@ -522,10 +522,8 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    error={null}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    isInvalid={false}
     label={
       <FormattedMessage
         defaultMessage="Width"
@@ -547,10 +545,8 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    error={null}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    isInvalid={false}
     label={
       <FormattedMessage
         defaultMessage="Height"

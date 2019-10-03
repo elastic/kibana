@@ -121,15 +121,12 @@ export class UrlFormatEditor extends DefaultFormatEditor {
   }
 
   renderWidthHeightParameters = () => {
-    const { error } = this.state;
     const width = this.sanitizeNumericValue(this.props.formatParams.width);
     const height = this.sanitizeNumericValue(this.props.formatParams.height);
     return (
       <Fragment>
         <EuiFormRow
           label={<FormattedMessage id="common.ui.fieldEditor.url.widthLabel" defaultMessage="Width" />}
-          isInvalid={!!error}
-          error={error}
         >
           <EuiFieldNumber
             data-test-subj="urlEditorWidth"
@@ -141,8 +138,6 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         </EuiFormRow>
         <EuiFormRow
           label={<FormattedMessage id="common.ui.fieldEditor.url.heightLabel" defaultMessage="Height" />}
-          isInvalid={!!error}
-          error={error}
         >
           <EuiFieldNumber
             data-test-subj="urlEditorHeight"
