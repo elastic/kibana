@@ -6,13 +6,7 @@
 
 import * as rt from 'io-ts';
 
-import {
-  badRequestErrorRT,
-  conflictErrorRT,
-  forbiddenErrorRT,
-  metricStatisticsRT,
-  timeRangeRT,
-} from '../../shared';
+import { badRequestErrorRT, conflictErrorRT, forbiddenErrorRT, timeRangeRT } from '../../shared';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH =
   '/api/infra/log_analysis/results/log_entry_rate';
@@ -43,12 +37,15 @@ export const logEntryRateAnomaly = rt.type({
   typicalLogEntryRate: rt.number,
 });
 
-export const logEntryRateHistogramBucket = rt.type({
+export const logEntryRateDataSetRT = rt.type({
+  analysisBucketCount: rt.number,
   anomalies: rt.array(logEntryRateAnomaly),
-  duration: rt.number,
-  logEntryRateStats: metricStatisticsRT,
-  modelLowerBoundStats: metricStatisticsRT,
-  modelUpperBoundStats: metricStatisticsRT,
+  averageActualLogEntryRate: rt.number,
+  dataSetId: rt.string,
+});
+
+export const logEntryRateHistogramBucket = rt.type({
+  dataSets: rt.array(logEntryRateDataSetRT),
   startTime: rt.number,
 });
 
