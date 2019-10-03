@@ -1,26 +1,23 @@
+import expect from '@kbn/expect';
 
-import expect from 'expect.js';
+export default function({ getService, getPageObjects }) {
+  describe('eCommerce Sample Data', function sampleData () {
+    const browser = getService('browser');
+    const PageObjects = getPageObjects(['common']);
+    const testSubjects = getService('testSubjects');
 
-import {
-  bdd,
-  config
-} from '../../../support';
+    before(async () => {
+      await browser.setWindowSize(1200, 800);
+      await PageObjects.common.navigateToApp('sampledata');
+      await PageObjects.common.sleep(3000);
+    });
 
-import PageObjects from '../../../support/page_objects';
+    it('install eCommerce sample data', async function installECommerceData () {
+      await testSubjects.click('addSampleDataSetecommerce');
+      await PageObjects.common.sleep(5000);
+      // verify it's installed by finding the remove link
+      await testSubjects.find('removeSampleDataSetecommerce');
+    });
 
-bdd.describe('eCommerce Sample Data', function sampleData() {
-
-  bdd.before(async function () {
-    // PageObjects.common.debug('navigateToApp visualize');
-    await PageObjects.common.navigateToApp('sampledata');
-    await PageObjects.common.sleep(3000);
   });
-
-  bdd.it('install eCommerce sample data', async function installECommerceData() {
-    await PageObjects.common.findTestSubject('addSampleDataSetecommerce').click();
-    await PageObjects.common.sleep(5000);
-    // verify it's installed by finding the remove link
-    await PageObjects.common.findTestSubject('removeSampleDataSetecommerce');
-  });
-
-});
+}
