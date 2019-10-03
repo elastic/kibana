@@ -42,6 +42,8 @@
   // Adjust for possible scrollbars
   right: $euiSize;
   line-height: 1;
+  // For IE11
+  min-width: 40px;
 }
 
 .conApp__editorActionButton {
