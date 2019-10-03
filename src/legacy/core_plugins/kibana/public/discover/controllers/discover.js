@@ -1037,7 +1037,7 @@ function discoverController(
     );
     visSavedObject.vis = $scope.vis;
 
-    $scope.searchSource.onRequestStart((searchSource, searchRequest, options) => {
+    $scope.searchSource.onRequestStart((searchSource, options) => {
       return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, options);
     });
 

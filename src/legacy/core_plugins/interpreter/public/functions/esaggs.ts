@@ -99,11 +99,9 @@ const handleCourierRequest = async ({
     return aggs.toDsl(metricsAtAllLevels);
   });
 
-  requestSearchSource.onRequestStart(
-    (paramSearchSource: SearchSource, searchRequest: unknown, options: any) => {
-      return aggs.onSearchRequestStart(paramSearchSource, searchRequest, options);
-    }
-  );
+  requestSearchSource.onRequestStart((paramSearchSource: SearchSource, options: any) => {
+    return aggs.onSearchRequestStart(paramSearchSource, options);
+  });
 
   if (timeRange) {
     timeFilterSearchSource.setField('filter', () => {

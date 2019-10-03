@@ -226,14 +226,14 @@ export class AggConfig {
    *  @param {Courier.SearchRequest} searchRequest
    *  @return {Promise<undefined>}
    */
-  onSearchRequestStart(searchSource: any, searchRequest: any, options: any) {
+  onSearchRequestStart(searchSource: any, options: any) {
     if (!this.type) {
       return Promise.resolve();
     }
 
     return Promise.all(
       this.type.params.map((param: any) =>
-        param.modifyAggConfigOnSearchRequestStart(this, searchSource, searchRequest, options)
+        param.modifyAggConfigOnSearchRequestStart(this, searchSource, options)
       )
     );
   }

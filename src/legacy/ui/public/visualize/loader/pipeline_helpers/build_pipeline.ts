@@ -441,7 +441,7 @@ export const buildVislibDimensions = async (
     } else if (xAgg.type.name === 'histogram') {
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
-      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, params.searchSource, null, {
+      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, params.searchSource, {
         abortSignal: params.abortSignal,
       });
       intervalParam.write(xAgg, output);

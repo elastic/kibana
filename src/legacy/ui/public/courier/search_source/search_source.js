@@ -284,8 +284,10 @@ export class SearchSource {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const es = $injector.get('es');
 
+    await this.requestIsStarting(options);
+
     const searchRequest = await this._flatten();
-    await this.requestIsStarting(searchRequest, options);
+    this.history = [searchRequest];
 
     const response = await fetchSoon(searchRequest, {
       ...(this._searchStrategyId && { searchStrategyId: this._searchStrategyId }),
@@ -314,10 +316,7 @@ export class SearchSource {
      *  @param options
      *  @return {Promise<undefined>}
      */
-  requestIsStarting(request, options) {
-    this.activeFetchCount = (this.activeFetchCount || 0) + 1;
-    this.history = [request];
-
+  requestIsStarting(options) {
     const handlers = [...this._requestStartHandlers];
     // If callparentStartHandlers has been set to true, we also call all
     // handlers of parent search sources.
@@ -329,7 +328,7 @@ export class SearchSource {
       }
     }
 
-    return Promise.all(handlers.map(fn => fn(this, request, options)));
+    return Promise.all(handlers.map(fn => fn(this, options)));
   }
 
   async getSearchRequestBody() {
