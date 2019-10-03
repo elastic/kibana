@@ -63,8 +63,11 @@ export interface AgentEventsRepository {
   getEventsForAgent(
     user: FrameworkUser,
     agentId: string,
-    page?: number,
-    perPage?: number
+    options?: {
+      search?: string;
+      page?: number;
+      perPage?: number;
+    }
   ): Promise<{ items: AgentEvent[]; total: number }>;
   deleteEventsForAgent(user: FrameworkUser, agentId: string): Promise<void>;
 }

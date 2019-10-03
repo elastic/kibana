@@ -40,15 +40,27 @@ export class AgentEventsRepository implements AgentEventsRepositoryType {
   public async getEventsForAgent(
     user: FrameworkUser,
     agentId: string,
-    page: number = 1,
-    perPage: number = 25
+    options: {
+      search?: string;
+      page: number;
+      perPage: number;
+    } = {
+      page: 1,
+      perPage: 25,
+    }
   ) {
+    const { page, perPage, search } = options;
+    if (search && search !== '') {
+      throw new Error('Search with options.search is not implemented');
+    }
     const { total, saved_objects } = await this.soAdapter.find<AgentEventSOAttributes>(user, {
       type: SO_TYPE,
       search: agentId,
       searchFields: ['agent_id'],
       perPage,
       page,
+      sortField: 'timestamp',
+      sortOrder: 'DESC',
     });
 
     const items: AgentEvent[] = saved_objects.map(so => {

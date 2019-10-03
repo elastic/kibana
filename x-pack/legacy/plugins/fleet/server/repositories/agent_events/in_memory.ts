@@ -27,9 +27,16 @@ export class InMemoryAgentEventsRepository implements AgentEventsRepositoryType 
   public async getEventsForAgent(
     user: FrameworkUser,
     agentId: string,
-    page: number = 1,
-    perPage: number = 25
+    options: {
+      search?: string;
+      page: number;
+      perPage: number;
+    } = {
+      page: 1,
+      perPage: 25,
+    }
   ) {
+    const { page, perPage } = options;
     const allItems = this.events.filter(e => e.agentId === agentId);
 
     const items = allItems.slice((page - 1) * perPage, page * perPage).map(e => ({ ...e.event }));

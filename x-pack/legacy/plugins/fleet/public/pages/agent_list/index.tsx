@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiEmptyPrompt,
-  EuiLink,
   // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
@@ -30,6 +29,7 @@ import {
 import { Agent } from '../../../common/types/domain_data';
 import { FrontendLibs } from '../../lib/types';
 import { AgentHealth } from '../../components/agent_health';
+import { ConnectedLink } from '../../components/navigation/connected_link';
 
 interface RouterProps {
   libs: FrontendLibs;
@@ -134,14 +134,14 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
       }),
       actions: [
         {
-          render: () => {
+          render: (agent: Agent) => {
             return (
-              <EuiLink color="primary" onClick={() => {}}>
+              <ConnectedLink color="primary" path={`/agents/${agent.id}`}>
                 <FormattedMessage
                   id="xpack.fleet.agentList.viewActionLinkText"
                   defaultMessage="view"
                 />
-              </EuiLink>
+              </ConnectedLink>
             );
           },
         },

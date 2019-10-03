@@ -16,6 +16,7 @@ export const createGETAgentEventsRoute = (libs: FleetServerLib) => ({
   config: {
     validate: {
       query: Joi.object({
+        search: Joi.string().optional(),
         page: Joi.number()
           .optional()
           .min(1)
@@ -30,7 +31,7 @@ export const createGETAgentEventsRoute = (libs: FleetServerLib) => ({
   handler: async (
     request: FrameworkRequest<{
       params: { agentId: string };
-      query: { page: string; per_page: string };
+      query: { page: string; per_page: string; search: string };
     }>
   ): Promise<ReturnTypeList<AgentEvent>> => {
     const page = parseInt(request.query.page, 10);
@@ -39,6 +40,7 @@ export const createGETAgentEventsRoute = (libs: FleetServerLib) => ({
     const { items, total } = await libs.agents.getEventsById(
       request.user,
       request.params.agentId,
+      request.query.search,
       page,
       perPage
     );

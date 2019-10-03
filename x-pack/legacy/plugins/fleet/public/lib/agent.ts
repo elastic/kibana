@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { ReturnTypeList } from '../../common/return_types';
-import { Agent } from '../../common/types/domain_data';
+import { Agent, AgentEvent } from '../../common/types/domain_data';
 import { AgentAdapter } from './adapters/agent/memory_agent_adapter';
 import { ElasticsearchLib } from './elasticsearch';
 
@@ -14,10 +15,26 @@ export class AgentsLib {
     private readonly elasticsearch: ElasticsearchLib
   ) {}
 
-  /** Get a single beat using it's ID for lookup */
+  /**
+   * Get an agent by id
+   * @param id
+   */
   public async get(id: string): Promise<Agent | null> {
     const agent = await this.adapter.get(id);
     return agent;
+  }
+
+  /**
+   * Get an agent by id
+   * @param id
+   */
+  public async getAgentEvents(
+    id: string,
+    search: string,
+    page: number,
+    perPage: number
+  ): Promise<{ total: number; list: AgentEvent[] }> {
+    return await this.adapter.getAgentEvents(id, search, page, perPage);
   }
 
   /** Get a single agent using the token it was enrolled in for lookup */
