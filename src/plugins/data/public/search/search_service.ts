@@ -46,7 +46,7 @@ import { esSearchService } from './es_search';
  */
 declare module 'kibana/public' {
   interface AppMountContext {
-    search: ISearchAppMountContext;
+    search?: ISearchAppMountContext;
   }
 }
 

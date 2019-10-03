@@ -22,7 +22,7 @@ import { ISearchAppMountContext } from '../../../../../src/plugins/data/public';
 
 declare module 'kibana/public' {
   interface AppMountContext {
-    search: ISearchAppMountContext;
+    search?: ISearchAppMountContext;
   }
 }
 export class SearchExplorerPlugin implements Plugin {
