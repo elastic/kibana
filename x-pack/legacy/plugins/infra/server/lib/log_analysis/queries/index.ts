@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from '../lib/compose/kibana_compose';
-import { startApp } from './start_app';
-
-startApp(compose());
+export * from './log_entry_rate';
