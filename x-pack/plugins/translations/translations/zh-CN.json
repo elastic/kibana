@@ -11391,7 +11391,6 @@
     "xpack.advancedUiActions.customizeTimeRange.modal.headerTitle": "定制面板时间范围",
     "xpack.advancedUiActions.customizeTimeRangeMenuItem.displayName": "定制时间范围",
     "xpack.fileUpload.fileParser.errorReadingFile": "读取文件时出错",
-    "xpack.fileUpload.fileParser.noFileProvided": "错误，未提供任何文件",
-    "xpack.fileUpload.jsonIndexFilePicker.errorGettingIndexName": "检索索引名称时出错：{errorMessage}"
+    "xpack.fileUpload.fileParser.noFileProvided": "错误，未提供任何文件"
   }
 }
