@@ -16,16 +16,13 @@ import {
 
 const getServiceNodes = async ({
   setup,
-  serviceName,
-  sortField = '_key',
-  sortDirection = 'asc'
+  serviceName
 }: {
   setup: Setup;
   serviceName: string;
-  sortField?: string;
-  sortDirection?: string;
 }) => {
   const { client } = setup;
+
   const projection = mergeProjection(
     getServiceNodesProjection({ setup, serviceName }),
     {
@@ -33,9 +30,7 @@ const getServiceNodes = async ({
         aggs: {
           nodes: {
             terms: {
-              order: {
-                [sortField]: sortDirection
-              }
+              size: 10000
             },
             aggs: {
               cpu: {

@@ -29,17 +29,4 @@ describe('service node queries', () => {
 
     expect(mock.params).toMatchSnapshot();
   });
-
-  it('fetches jvms with sortField and sortDirection defined', async () => {
-    mock = await inspectSearchParams(setup =>
-      getServiceNodes({
-        setup,
-        serviceName: 'foo',
-        sortField: 'foo',
-        sortDirection: 'desc'
-      })
-    );
-
-    expect(mock.params).toMatchSnapshot();
-  });
 });

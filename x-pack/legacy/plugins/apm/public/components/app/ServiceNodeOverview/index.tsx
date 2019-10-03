@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { ManagedTable } from '../../shared/ManagedTable';
+import { ManagedTable, ITableColumn } from '../../shared/ManagedTable';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { callApmApi } from '../../../services/rest/callApmApi';
 import {
@@ -21,13 +21,17 @@ import {
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { truncate, px, unit } from '../../../style/variables';
 
+const INITIAL_PAGE_SIZE = 10;
+const INITIAL_SORT_FIELD = 'name';
+const INITIAL_SORT_DIRECTION = 'asc';
+
 const ServiceNodeName = styled.div`
   ${truncate(px(8 * unit))}
 `;
 
 const ServiceNodeOverview = () => {
   const { uiFilters, urlParams } = useUrlParams();
-  const { serviceName, start, end, sortField, sortDirection } = urlParams;
+  const { serviceName, start, end } = urlParams;
 
   const localFiltersConfig: React.ComponentProps<
     typeof LocalUIFilters
@@ -55,19 +59,17 @@ const ServiceNodeOverview = () => {
         query: {
           start,
           end,
-          uiFilters: JSON.stringify(uiFilters),
-          sortField,
-          sortDirection
+          uiFilters: JSON.stringify(uiFilters)
         }
       }
     });
-  }, [end, serviceName, start, uiFilters, sortField, sortDirection]);
+  }, [serviceName, start, end, uiFilters]);
 
   if (!serviceName) {
     return null;
   }
 
-  const columns = [
+  const columns: Array<ITableColumn<typeof items[0]>> = [
     {
       name: i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
         defaultMessage: 'Name'
@@ -134,10 +136,9 @@ const ServiceNodeOverview = () => {
             })}
             items={items || []}
             columns={columns}
-            initialPageSize={10}
-            initialSortField="name"
-            initialSortDirection="desc"
-            sortItems={false}
+            initialPageSize={INITIAL_PAGE_SIZE}
+            initialSortField={INITIAL_SORT_FIELD}
+            initialSortDirection={INITIAL_SORT_DIRECTION}
             hidePerPageOptions={false}
           />
         </EuiPanel>

@@ -1,70 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`service node queries fetches jvms with sortField and sortDirection defined 1`] = `
-Object {
-  "body": Object {
-    "aggs": Object {
-      "nodes": Object {
-        "aggs": Object {
-          "cpu": Object {
-            "avg": Object {
-              "field": "system.process.cpu.total.norm.pct",
-            },
-          },
-          "heapMemory": Object {
-            "avg": Object {
-              "field": "jvm.memory.heap.used",
-            },
-          },
-          "nonHeapMemory": Object {
-            "avg": Object {
-              "field": "jvm.memory.non_heap.used",
-            },
-          },
-          "threadCount": Object {
-            "max": Object {
-              "field": "jvm.thread.count",
-            },
-          },
-        },
-        "terms": Object {
-          "field": "service.node.name",
-          "order": Object {
-            "foo": "desc",
-          },
-        },
-      },
-    },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "term": Object {
-              "service.name": "foo",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "prod",
-            },
-          },
-        ],
-      },
-    },
-  },
-  "index": "myIndex",
-}
-`;
-
 exports[`service node queries fetches services nodes 1`] = `
 Object {
   "body": Object {
@@ -94,9 +29,7 @@ Object {
         },
         "terms": Object {
           "field": "service.node.name",
-          "order": Object {
-            "_key": "asc",
-          },
+          "size": 10000,
         },
       },
     },
