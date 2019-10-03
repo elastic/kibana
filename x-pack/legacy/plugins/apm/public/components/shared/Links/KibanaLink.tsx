@@ -8,16 +8,21 @@ import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import React from 'react';
 import url from 'url';
 import { useKibanaCore } from '../../../../../observability/public';
+import { LegacyCoreStart } from '../../../../../../../../src/core/public/';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;
   children?: React.ReactNode;
+  core?: LegacyCoreStart;
 }
 
-export function KibanaLink({ path, ...rest }: Props) {
-  const core = useKibanaCore();
+export function KibanaLink({ path, core, ...rest }: Props) {
+  const coreFromContext = useKibanaCore();
+  if (!core && !coreFromContext) {
+    return null;
+  }
   const href = url.format({
-    pathname: core.http.basePath.prepend('/app/kibana'),
+    pathname: (core || coreFromContext).http.basePath.prepend('/app/kibana'),
     hash: path
   });
   return <EuiLink {...rest} href={href} />;

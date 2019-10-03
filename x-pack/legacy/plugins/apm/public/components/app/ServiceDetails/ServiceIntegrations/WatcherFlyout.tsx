@@ -260,7 +260,8 @@ export class WatcherFlyout extends Component<
             }
           )}{' '}
           <KibanaLink
-            path={`/management/elasticsearch/watcher/watches/watch/${id}`}
+            path={`/management/elasticsearch/watcher/watches/watch/${id}/status`}
+            core={this.context}
           >
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
