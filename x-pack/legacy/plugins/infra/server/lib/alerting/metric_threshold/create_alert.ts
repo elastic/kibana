@@ -11,7 +11,10 @@ import { ActionsClient } from '../../../../../actions';
 import { AlertsClient } from '../../../../../alerting';
 
 interface Properties {
-  hostName: string;
+  searchField: {
+    name: string;
+    value: string;
+  };
   metric: string;
   comparator: Comparator;
   aggregation: MetricsExplorerAggregation;
@@ -80,7 +83,7 @@ const createAlert = async (
     metric,
     comparator,
     aggregation,
-    hostName,
+    searchField,
     threshold,
     interval,
     indexPattern,
@@ -92,7 +95,8 @@ const createAlert = async (
 
   const values = {
     metric,
-    hostName,
+    searchFieldName: searchField.name,
+    searchFieldValue: searchField.value,
     threshold,
     interval,
     comparator: comparatorNames[comparator],
@@ -110,13 +114,13 @@ const createAlert = async (
 
     const firedMessage = i18n.translate('xpack.infra.alerting.metricThreshold.log', {
       defaultMessage:
-        '{hostName} has reported {aggregation} {metric} value {comparator} {threshold} within {interval} - {value}',
+        '{searchFieldValue} has reported {aggregation} {metric} value {comparator} {threshold} within {interval} - {value}',
       values,
     });
 
     const recoveredMessage = i18n.translate('xpack.infra.alerting.metricThreshold.logRecovered', {
       defaultMessage:
-        '[RECOVERED] - {hostName} no longer reports {aggregation} {metric} value {comparator} {threshold} within {interval} - {value}',
+        '[RECOVERED] - {searchFieldValue} no longer reports {aggregation} {metric} value {comparator} {threshold} within {interval} - {value}',
       values,
     });
 
@@ -140,8 +144,8 @@ const createAlert = async (
 
   if (email) {
     const subject = i18n.translate('xpack.infra.alerting.metricThreshold.emailSubjectText', {
-      defaultMessage: '{metric} on {hostName} has crossed the threshold',
-      values: { hostName, metric },
+      defaultMessage: '{metric} on {searchFieldValue} has crossed the threshold',
+      values,
     });
     const recoveryPrefix = i18n.translate(
       'xpack.infra.alerting.metricThreshold.emailSubjectRecoveryPrefix',
@@ -153,7 +157,7 @@ const createAlert = async (
       'xpack.infra.alerting.metricThreshold.emailTemplateAlertText',
       {
         defaultMessage:
-          'Your host {hostName} has reported {aggregation} {metric} value {comparator} {threshold} within {interval}<br/>' +
+          '{searchFieldName} {searchFieldValue} has reported {aggregation} {metric} value {comparator} {threshold} within {interval}<br/>' +
           '<br/>' +
           'The current value is {value}',
         values,
@@ -163,7 +167,7 @@ const createAlert = async (
       'xpack.infra.alerting.metricThreshold.emailTemplateRecoveryText',
       {
         defaultMessage:
-          'Your host {hostName} has recovered from an alert state in which {aggregation} {metric} value was {comparator} {threshold} within {interval}<br/>' +
+          '{searchFieldName} {searchFieldValue} has recovered from an alert state in which {aggregation} {metric} value was {comparator} {threshold} within {interval}<br/>' +
           '<br/>' +
           'The current value is {value}',
         values,
@@ -213,7 +217,7 @@ const createAlert = async (
       'xpack.infra.alerting.metricThreshold.slackTemplateAlertText',
       {
         defaultMessage:
-          'Your host *{hostName}* has reported {aggregation} `{metric}` value {comparator} {threshold} within {interval}.\n\nThe current value is *{value}*',
+          '{searchFieldName} *{searchFieldValue}* has reported {aggregation} `{metric}` value {comparator} {threshold} within {interval}.\n\nThe current value is *{value}*',
         values,
       }
     );
@@ -221,7 +225,7 @@ const createAlert = async (
       'xpack.infra.alerting.metricThreshold.slackTemplateRecoveryText',
       {
         defaultMessage:
-          'Your host *{hostName}* has recovered from an alert state in which {aggregation} `{metric}` value was {comparator} {threshold} within {interval}\n\nThe current value is *{value}*',
+          '{searchFieldName} *{searchFieldValue}* has recovered from an alert state in which {aggregation} `{metric}` value was {comparator} {threshold} within {interval}\n\nThe current value is *{value}*',
         values,
       }
     );
@@ -280,7 +284,7 @@ const createAlert = async (
     data: {
       alertTypeId: METRIC_THRESHOLD_ALERT_TYPE_ID,
       alertTypeParams: {
-        hostName,
+        searchField,
         threshold,
         interval,
         comparator,

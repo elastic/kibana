@@ -12,7 +12,10 @@ import { MetricsExplorerAggregation } from '../../../routes/metrics_explorer/typ
 interface ExecutorParams {
   aggregation: MetricsExplorerAggregation;
   metric: string;
-  hostName: string;
+  searchField: {
+    name: string;
+    value: string;
+  };
   interval: string;
   indexPattern: string;
   threshold: number;
@@ -21,7 +24,7 @@ interface ExecutorParams {
 
 async function getMetric(
   { callCluster }: AlertServices,
-  { metric, hostName, aggregation, interval, indexPattern }: ExecutorParams
+  { metric, searchField, aggregation, interval, indexPattern }: ExecutorParams
 ) {
   const searchBody = {
     query: {
@@ -39,7 +42,7 @@ async function getMetric(
               should: [
                 {
                   match_phrase: {
-                    'host.name': hostName,
+                    [searchField.name]: searchField.value,
                   },
                 },
                 {
@@ -104,7 +107,10 @@ export async function registerMetricThresholdAlertType(server: Server) {
         threshold: schema.number(),
         comparator: schema.string(),
         aggregation: schema.string(),
-        hostName: schema.string(),
+        searchField: schema.object({
+          name: schema.string(),
+          value: schema.string(),
+        }),
         metric: schema.string(),
         interval: schema.string(),
         indexPattern: schema.string(),
@@ -112,8 +118,10 @@ export async function registerMetricThresholdAlertType(server: Server) {
     },
     actionGroups: ['fired', 'recovered'],
     async executor({ services, params }) {
-      const { threshold, comparator, hostName } = params as ExecutorParams;
-      const alertInstance = services.alertInstanceFactory(hostName);
+      const { threshold, comparator, searchField } = params as ExecutorParams;
+      const alertInstance = services.alertInstanceFactory(
+        `${searchField.name}:${searchField.value}`
+      );
       const { isAlertInFiredState } = alertInstance.getState();
       const currentValue = await getMetric(services, params as ExecutorParams);
       if (typeof currentValue === 'undefined')
