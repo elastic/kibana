@@ -68,6 +68,17 @@
         ],
       },
       {
+        groupSlug: '@elastic/charts',
+        groupName: '@elastic/charts related packages',
+        packageNames: [
+          '@elastic/charts',
+          '@types/elastic__charts',
+        ],
+        reviewers: [
+          'markov00',
+        ],
+      },
+      {
         groupSlug: 'mocha',
         groupName: 'mocha related packages',
         packagePatterns: [

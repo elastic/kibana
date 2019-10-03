@@ -18,6 +18,13 @@
  */
 
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { AutocompleteProviderRegister } from '.';
+
+export type AutocompletePublicPluginSetup = Pick<
+  AutocompleteProviderRegister,
+  'addProvider' | 'getProvider'
+>;
+export type AutocompletePublicPluginStart = Pick<AutocompleteProviderRegister, 'getProvider'>;
 
 /** @public **/
 export type AutocompleteProvider = (args: {

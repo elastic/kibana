@@ -13,10 +13,10 @@ import 'ace';
 import 'ui/angular_ui_select';
 import 'ui/directives/input_focus';
 
-import { parseInterval } from 'ui/utils/parse_interval';
 import { timefilter } from 'ui/timefilter';
-
 import uiRoutes from 'ui/routes';
+
+import { parseInterval } from '../../../../common/util/parse_interval';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import template from './new_job.html';

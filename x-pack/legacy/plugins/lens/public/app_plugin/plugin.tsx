@@ -11,6 +11,8 @@ import chrome from 'ui/chrome';
 import { Storage } from 'ui/storage';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
+import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
+import { start as dataStart } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { SavedObjectIndexStore } from '../persistence';
@@ -23,13 +25,16 @@ import {
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
 
+export interface LensPluginStartDependencies {
+  data: DataStart;
+}
 export class AppPlugin {
   private instance: EditorFrameInstance | null = null;
   private store: SavedObjectIndexStore | null = null;
 
   constructor() {}
 
-  setup(core: CoreSetup) {
+  setup(core: CoreSetup, plugins: {}) {
     // TODO: These plugins should not be called from the top level, but since this is the
     // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
@@ -39,13 +44,13 @@ export class AppPlugin {
     const editorFrameSetupInterface = editorFrameSetup();
     this.store = new SavedObjectIndexStore(chrome!.getSavedObjectsClient());
 
-    editorFrameSetupInterface.registerDatasource('indexpattern', indexPattern);
     editorFrameSetupInterface.registerVisualization(xyVisualization);
     editorFrameSetupInterface.registerVisualization(datatableVisualization);
     editorFrameSetupInterface.registerVisualization(metricVisualization);
+    editorFrameSetupInterface.registerDatasource('indexpattern', indexPattern);
   }
 
-  start(core: CoreStart) {
+  start(core: CoreStart, { data }: LensPluginStartDependencies) {
     if (this.store === null) {
       throw new Error('Start lifecycle called before setup lifecycle');
     }
@@ -60,6 +65,7 @@ export class AppPlugin {
       return (
         <App
           core={core}
+          data={data}
           editorFrame={this.instance!}
           store={new Storage(localStorage)}
           docId={routeProps.match.params.id}
@@ -108,6 +114,6 @@ export class AppPlugin {
 
 const app = new AppPlugin();
 
-export const appSetup = () => app.setup(npSetup.core);
-export const appStart = () => app.start(npStart.core);
+export const appSetup = () => app.setup(npSetup.core, {});
+export const appStart = () => app.start(npStart.core, { data: dataStart });
 export const appStop = () => app.stop();

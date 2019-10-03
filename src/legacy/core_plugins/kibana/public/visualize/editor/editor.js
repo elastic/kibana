@@ -45,7 +45,6 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
@@ -55,7 +54,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
 import { setup as data } from '../../../../../core_plugins/data/public/legacy';
-import { start as visualizations } from '../../../../visualizations/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
@@ -100,7 +99,7 @@ uiRoutes
       savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
         return savedVisualizations.get($route.current.params.id)
           .then((savedVis) => {
-            recentlyAccessed.add(
+            npStart.core.chrome.recentlyAccessed.add(
               savedVis.getFullPath(),
               savedVis.title,
               savedVis.id);
