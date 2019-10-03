@@ -67,9 +67,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
       <withApollo(Component)
         absoluteEndDate={20}
         absoluteStartDate={20}
-        dangerColor="#bd271e"
         height="400px"
-        successColor="#017d73"
         variables={
           Object {
             "dateRangeEnd": "2011-12-03T10:15:30+01:00",
