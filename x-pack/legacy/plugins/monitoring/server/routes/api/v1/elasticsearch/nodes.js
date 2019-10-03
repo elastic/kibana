@@ -48,18 +48,10 @@ export function esNodesRoute(server) {
       const clusterUuid = req.params.clusterUuid;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
-      const times = [];
-
-
-      times.push({ id: 'start', time: +new Date() });
-
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
-        times.push({ id: 'cluster stats', time: +new Date() });
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats, { includeNodes: true });
-        times.push({ id: 'shard stats', time: +new Date() });
         const clusterStatus = getClusterStatus(clusterStats, shardStats);
-        times.push({ id: 'cluster stats', time: +new Date() });
 
         const metricSet = LISTING_METRICS_NAMES;
         const { pageOfNodes, totalNodeCount } = await getPaginatedNodes(
@@ -69,18 +61,8 @@ export function esNodesRoute(server) {
             shardStats,
           }
         );
-        times.push({ id: 'paginated nodes', time: +new Date() });
 
         const nodes = await getNodes(req, esIndexPattern, pageOfNodes, clusterStats, shardStats);
-        times.push({ id: 'nodes', time: +new Date() });
-        for (let i = 0; i < times.length; i++) {
-          const thisOne = times[i];
-          const lastOne = i > 0 ? times[i - 1] : null;
-          if (!lastOne) {
-            continue;
-          }
-          console.log(`From ${thisOne.id} to ${lastOne.id} took ${thisOne.time - lastOne.time}ms...`);
-        }
         return { clusterStatus, nodes, totalNodeCount };
       } catch(err) {
         throw handleError(err, req);

@@ -9,30 +9,6 @@ import { mapNodesInfo } from './map_nodes_info';
 import { mapNodesMetrics } from './map_nodes_metrics';
 import { uncovertMetricNames } from '../../convert_metric_names';
 
-function isObject(value) {
-  return typeof value === 'object' && !!value && !Array.isArray(value);
-}
-
-function countBuckets(data, count = 0) {
-  if (data.buckets) {
-    count += data.buckets.length;
-    for (const bucket of data.buckets) {
-      for (const key of Object.keys(bucket)) {
-        if (isObject(bucket[key])) {
-          count = countBuckets(bucket[key], count);
-        }
-      }
-    }
-  } else {
-    for (const key of Object.keys(data)) {
-      if (isObject(data[key])) {
-        count = countBuckets(data[key], count);
-      }
-    }
-  }
-  return count;
-}
-
 /*
  * Process the response from the get_nodes query
  * @param {Object} response: response data from get_nodes
@@ -48,8 +24,6 @@ export function handleResponse(response, clusterStats, shardStats, pageOfNodes, 
 
   const nodeHits = get(response, 'hits.hits', []);
   const nodesInfo = mapNodesInfo(nodeHits, clusterStats, shardStats);
-
-  console.log(`get_nodes buckets: ${countBuckets(get(response, 'aggregations.nodes'))}`);
 
   /*
    * Every node bucket is an object with a field for nodeId and fields for
