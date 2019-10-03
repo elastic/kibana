@@ -227,7 +227,7 @@ export type HttpBody = BodyInit | null | any;
 
 /** @public */
 export interface HttpResponse {
-  request?: Request;
+  request: Readonly<Request>;
   response?: Response;
   body?: HttpBody;
 }
@@ -250,7 +250,7 @@ export interface IHttpFetchError extends Error {
 /** @public */
 export interface HttpErrorResponse {
   error: Error | IHttpFetchError;
-  request?: Request;
+  request: Readonly<Request>;
   response?: Response;
   body?: HttpBody;
 }
@@ -294,6 +294,7 @@ export interface HttpInterceptor {
    */
   response?(
     httpResponse: HttpResponse,
+<<<<<<< HEAD
     controller: IHttpInterceptController
   ): Promise<HttpResponse> | HttpResponse | void;
 
@@ -302,6 +303,10 @@ export interface HttpInterceptor {
    * @param httpErrorResponse {@link HttpErrorResponse}
    * @param controller {@link IHttpInterceptController}
    */
+=======
+    controller: HttpInterceptController
+  ): Promise<Partial<HttpResponse>> | Partial<HttpResponse> | void;
+>>>>>>> 892173856f... Pass along request object to all HTTP interceptors
   responseError?(
     httpErrorResponse: HttpErrorResponse,
     controller: IHttpInterceptController

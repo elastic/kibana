@@ -459,7 +459,7 @@ describe('interception', () => {
   });
 
   describe('request availability during interception', () => {
-    it('should not be available to responseError when request throws', async () => {
+    it('should be available to responseError when request throws', async () => {
       expect.assertions(3);
 
       let spiedRequest: Request | undefined;
@@ -475,7 +475,7 @@ describe('interception', () => {
 
       await expect(http.fetch('/my/path')).rejects.toThrow();
       expect(fetchMock.called()).toBe(false);
-      expect(spiedRequest).toBeUndefined();
+      expect(spiedRequest).toBeDefined();
     });
 
     it('should be available to responseError when response throws', async () => {

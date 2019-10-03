@@ -100,48 +100,51 @@ export const setup = (
 
   // Request/response interceptors are called in opposite orders.
   // Request hooks start from the newest interceptor and end with the oldest.
-  function interceptRequest(
+  async function interceptRequest(
     request: Request,
     controller: HttpInterceptController
   ): Promise<Request> {
     let next = request;
 
-    return [...interceptors].reduceRight(
-      (promise, interceptor) =>
-        promise.then(
-          async (current: Request) => {
-            checkHalt(controller);
+    try {
+      return await [...interceptors].reduceRight(
+        (promise, interceptor) =>
+          promise.then(
+            async (current: Request) => {
+              next = current;
+              checkHalt(controller);
 
-            if (!interceptor.request) {
-              return current;
+              if (!interceptor.request) {
+                return current;
+              }
+
+              return (await interceptor.request(current, controller)) || current;
+            },
+            async error => {
+              checkHalt(controller, error);
+
+              if (!interceptor.requestError) {
+                throw error;
+              }
+
+              const nextRequest = await interceptor.requestError(
+                { error, request: next },
+                controller
+              );
+
+              if (!nextRequest) {
+                throw error;
+              }
+
+              next = nextRequest;
+              return next;
             }
-
-            next = (await interceptor.request(current, controller)) || current;
-
-            return next;
-          },
-          async error => {
-            checkHalt(controller, error);
-
-            if (!interceptor.requestError) {
-              throw error;
-            }
-
-            const nextRequest = await interceptor.requestError(
-              { error, request: next },
-              controller
-            );
-
-            if (!nextRequest) {
-              throw error;
-            }
-
-            next = nextRequest;
-            return next;
-          }
-        ),
-      Promise.resolve(request)
-    );
+          ),
+        Promise.resolve(request)
+      );
+    } catch (innerError) {
+      throw Object.assign(new Error(), { request: next, innerError });
+    }
   }
 
   // Response hooks start from the oldest interceptor and end with the newest.
@@ -155,17 +158,28 @@ export const setup = (
       (promise, interceptor) =>
         promise.then(
           async httpResponse => {
+            current = httpResponse;
             checkHalt(controller);
 
             if (!interceptor.response) {
               return httpResponse;
             }
 
-            current = (await interceptor.response(httpResponse, controller)) || httpResponse;
-
-            return current;
+            return Object.assign(
+              (await interceptor.response(httpResponse, controller)) || {},
+              httpResponse
+            );
           },
           async error => {
+            const request =
+              error.request ||
+              (error.innerError && error.innerError.request) ||
+              (current && current.request);
+
+            if (error.innerError) {
+              error = error.innerError;
+            }
+
             checkHalt(controller, error);
 
             if (!interceptor.responseError) {
@@ -176,7 +190,7 @@ export const setup = (
               const next = await interceptor.responseError(
                 {
                   error,
-                  request: error.request || (current && current.request),
+                  request,
                   response: error.response || (current && current.response),
                   body: error.body || (current && current.body),
                 },
@@ -196,10 +210,7 @@ export const setup = (
             }
           }
         ),
-      responsePromise.then(httpResponse => {
-        current = httpResponse;
-        return httpResponse;
-      })
+      responsePromise
     );
 
     return finalHttpResponse.body;
