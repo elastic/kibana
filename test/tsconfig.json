@@ -14,7 +14,7 @@
     "**/*.ts",
     "**/*.tsx",
     "../typings/lodash.topath/*.ts",
-    "typings/**/*",
+    "typings/**/*"
   ],
   "exclude": [
     "plugin_functional/plugins/**/*"
