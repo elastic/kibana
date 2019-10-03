@@ -55,7 +55,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
 import { setup as data } from '../../../../../core_plugins/data/public/legacy';
-import { start as visualizations } from '../../../../visualizations/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
