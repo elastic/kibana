@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { PersistedLog } from './persisted_log';
-export { recentlyAccessed } from './recently_accessed';
+import { npStart } from '../new_platform';
+
+export const recentlyAccessed = npStart.core.chrome.recentlyAccessed;

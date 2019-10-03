@@ -17,16 +17,5 @@
  * under the License.
  */
 
-import { PersistedLog } from 'ui/persisted_log';
-import { UiSettingsClientContract } from 'src/core/public';
-
-export function getQueryLog(
-  uiSettings: UiSettingsClientContract,
-  appName: string,
-  language: string
-) {
-  return new PersistedLog(`typeahead:${appName}-${language}`, {
-    maxLength: uiSettings.get('history:limit'),
-    filterDuplicates: true,
-  });
-}
+export * from './persisted_log';
+export * from './get_query_log';

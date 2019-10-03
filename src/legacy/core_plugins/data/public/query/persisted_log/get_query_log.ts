@@ -17,6 +17,22 @@
  * under the License.
  */
 
-import { npStart } from '../new_platform';
+import { UiSettingsClientContract } from 'src/core/public';
+import { PersistedLog } from './persisted_log';
+import { Storage } from '../../types';
 
-export const recentlyAccessed = npStart.core.chrome.recentlyAccessed;
+export function getQueryLog(
+  uiSettings: UiSettingsClientContract,
+  store: Storage,
+  appName: string,
+  language: string
+) {
+  return new PersistedLog(
+    `typeahead:${appName}-${language}`,
+    {
+      maxLength: uiSettings.get('history:limit'),
+      filterDuplicates: true,
+    },
+    store
+  );
+}

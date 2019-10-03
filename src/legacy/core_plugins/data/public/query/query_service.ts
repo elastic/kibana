@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { fromUser, toUser, getQueryLog } from './query_bar';
+import { fromUser, toUser } from './query_bar';
+import { getQueryLog } from './persisted_log';
 
 /**
  * Query Service
