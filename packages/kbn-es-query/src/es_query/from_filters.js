@@ -76,6 +76,14 @@ const filterNegate = function (reverse) {
     return filter.meta && filter.meta.negate === reverse;
   };
 };
+/**
+ * Check if a filter is a saved query
+ * @param {Object} filter The filter we're checking the type of
+ * @returns {boolean}
+ */
+const isSavedQueryFilter = function (filter) {
+  return filter.meta && filter.meta.type && filter.meta.type === 'savedQuery';
+};
 
 /**
  * Translate a filter into a query to support es 5+
@@ -95,13 +103,25 @@ const translateToQuery = function (filter, {
     // we have dsl so we simply return it
     return filter.query;
   }
-  if (filter.meta && filter.meta.type && filter.meta.type === 'savedQuery') {
+  if (isSavedQueryFilter(filter)) {
     // generate raw dsl from the savedQuery filter
+    // Maybe TODO: move to an extractSavedQuery function
     const savedQuery = filter.meta.params.savedQuery;
     const query = _.get(savedQuery, 'attributes.query');
     let filters = _.get(savedQuery, 'attributes.filters', []);
-    let timefilter = _.get(savedQuery, 'attributes.timefilter');
+    // at this point we need to check if the filters themselves are saved queries and extract the contents if they are (we're recursively extracting and translating each filter)
+    filters = filters.map((filter) => {
+      if (isSavedQueryFilter(filter)) {
+        return translateToQuery(
+          filter,
+          { indexPattern, allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex },
+        );
+      } else {
+        return filter;
+      }
+    });
     // timefilter addition
+    let timefilter = _.get(savedQuery, 'attributes.timefilter');
     if (timefilter) {
       const timeRange = { from: timefilter.from, to: timefilter.to };
       timefilter = getEsTimeFilter(indexPattern, timeRange);
@@ -111,7 +131,9 @@ const translateToQuery = function (filter, {
       indexPattern,
       [query],
       filters,
-      { allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex });
+      { allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex },
+    );
+
     filter.query = { ...convertedQuery };
   }
 
