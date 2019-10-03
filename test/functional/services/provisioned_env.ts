@@ -20,8 +20,7 @@
 import { DotenvParseOutput } from 'dotenv';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export async function ProvisionedEnvProvider({ getService }: FtrProviderContext) {
-  // const log = getService('log');
+export function ProvisionedEnvProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
 
   class ProvisionedEnv {
@@ -33,5 +32,5 @@ export async function ProvisionedEnvProvider({ getService }: FtrProviderContext)
     }
   }
 
-  return new ProvisionedEnv();
+  return new ProvisionedEnv().envObj;
 }
