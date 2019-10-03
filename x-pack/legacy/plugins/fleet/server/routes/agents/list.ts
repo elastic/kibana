@@ -8,6 +8,7 @@ import * as Joi from 'joi';
 import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeList } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
+import { Agent } from '../../../common/types/domain_data';
 
 export const createListAgentsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
@@ -21,7 +22,7 @@ export const createListAgentsRoute = (libs: FleetServerLib) => ({
   },
   handler: async (
     request: FrameworkRequest<{ query: { page: string } }>
-  ): Promise<ReturnTypeList<any>> => {
+  ): Promise<ReturnTypeList<Agent>> => {
     const page = parseInt(request.query.page, 10);
 
     const { agents, total } = await libs.agents.list(request.user);
