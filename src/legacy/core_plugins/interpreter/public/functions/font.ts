@@ -33,14 +33,14 @@ import {
 } from '../types';
 
 interface Arguments {
-  align: TextAlignment;
-  color: string;
-  family: FontFamily;
-  italic: boolean;
-  lHeight: number | null;
-  size: number;
-  underline: boolean;
-  weight: FontWeight;
+  align?: TextAlignment;
+  color?: string;
+  family?: FontFamily;
+  italic?: boolean;
+  lHeight?: number | null;
+  size?: number;
+  underline?: boolean;
+  weight?: FontWeight;
 }
 
 export function font(): ExpressionFunction<'font', null, Arguments, Style> {
@@ -88,6 +88,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
         types: ['boolean'],
       },
       lHeight: {
+        default: null,
         aliases: ['lineHeight'],
         help: i18n.translate('interpreter.functions.font.args.lHeightHelpText', {
           defaultMessage: 'The line height in pixels',
