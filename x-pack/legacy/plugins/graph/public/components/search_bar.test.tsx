@@ -4,19 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchBar } from './search_bar';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { SearchBar, SearchBarProps } from './search_bar';
 import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
 import { act } from 'react-dom/test-utils';
 import { QueryBarInput, IndexPattern } from 'src/legacy/core_plugins/data/public';
 
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { I18nProvider } from '@kbn/i18n/react';
+
 jest.mock('ui/new_platform');
+
 import { openSourceModal } from '../services/source_modal';
 import { GraphStore, setDatasource } from '../state_management';
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
+import { mount } from 'enzyme';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 jest.mock('../../../../../../src/legacy/core_plugins/data/public', () => ({
@@ -25,14 +30,32 @@ jest.mock('../../../../../../src/legacy/core_plugins/data/public', () => ({
 
 const waitForIndexPatternFetch = () => new Promise(r => setTimeout(r));
 
+function wrapSearchBarInContext(testProps: SearchBarProps) {
+  const services = {
+    uiSettings: {
+      get: (key: string) => {
+        return 10;
+      },
+    } as CoreStart['uiSettings'],
+    savedObjects: {} as CoreStart['savedObjects'],
+    notifications: {} as CoreStart['notifications'],
+    http: {} as CoreStart['http'],
+    overlays: {} as CoreStart['overlays'],
+  };
+
+  return (
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <SearchBar {...testProps} />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+}
+
 describe('search_bar', () => {
   const defaultProps = {
     isLoading: false,
     onQuerySubmit: jest.fn(),
-    savedObjects: {} as CoreStart['savedObjects'],
-    uiSettings: {} as CoreStart['uiSettings'],
-    http: {} as CoreStart['http'],
-    overlays: {} as CoreStart['overlays'],
     indexPatternProvider: {
       get: jest.fn(() => Promise.resolve(({ fields: [] } as unknown) as IndexPattern)),
     },
@@ -56,10 +79,12 @@ describe('search_bar', () => {
 
   function mountSearchBar() {
     jest.clearAllMocks();
+    const WrappedSearchBar = wrapSearchBarInContext({ ...defaultProps });
     instance = mountWithIntl(
       <Provider store={store}>
-        <SearchBar {...defaultProps} />
+        <WrappedSearchBar {...defaultProps} />
       </Provider>
+  }
     );
   }
 

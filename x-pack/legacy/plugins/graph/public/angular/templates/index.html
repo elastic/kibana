@@ -10,15 +10,14 @@
   <graph-app
     current-index-pattern="selectedIndex"
     on-query-submit="submit"
-    saved-objects="pluginDependencies.savedObjects"
-    ui-settings="pluginDependencies.uiSettings"
-    http="pluginDependencies.http"
     index-pattern-provider="indexPatternProvider"
-    overlays="pluginDependencies.overlays"
+    redux-store="reduxStore"
+    confirm-wipe-workspace="confirmWipeWorkspace"
     is-loading="loading"
     initial-query="initialQuery"
-    store="reduxStore"
-    confirm-wipe-workspace="confirmWipeWorkspace"
+    autocomplete-start="autocompleteStart"
+    core-start="coreStart"
+    store="store"
   ></graph-app>
 
   <div class="gphGraph__container" id="GraphSvgContainer" ng-click="hideAllConfigPanels()">

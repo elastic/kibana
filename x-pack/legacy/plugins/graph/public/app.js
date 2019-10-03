@@ -32,6 +32,7 @@ import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { capabilities } from 'ui/capabilities';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { Storage } from 'ui/storage';
 
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
@@ -102,12 +103,11 @@ app.directive('graphApp', function (reactDirective) {
     ['indexPatternProvider', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
-    ['savedObjects', { watchDepth: 'reference' }],
-    ['uiSettings', { watchDepth: 'reference' }],
-    ['http', { watchDepth: 'reference' }],
     ['initialQuery', { watchDepth: 'reference' }],
-    ['overlays', { watchDepth: 'reference' }],
     ['confirmWipeWorkspace', { watchDepth: 'reference' }],
+    ['autocompleteStart', { watchDepth: 'reference' }],
+    ['coreStart', { watchDepth: 'reference' }],
+    ['store', { watchDepth: 'reference' }]
   ]);
 });
 
@@ -319,6 +319,11 @@ app.controller('graphuiPlugin', function (
     },
     chrome,
   });
+
+  $scope.store = new Storage(window.localStorage);
+  $scope.coreStart = npStart.core;
+  $scope.autocompleteStart = npStart.plugins.data.autocomplete;
+  $scope.loading = false;
 
   $scope.spymode = 'request';
 

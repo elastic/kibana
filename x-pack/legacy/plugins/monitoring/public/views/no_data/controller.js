@@ -78,6 +78,8 @@ export class NoDataController extends MonitoringViewBaseController {
       }
       this.render(enabler);
     }, true);
+
+    this.changePath = path => kbnUrl.changePath(path);
   }
 
   getDefaultModel() {
@@ -94,9 +96,10 @@ export class NoDataController extends MonitoringViewBaseController {
 
   render(enabler) {
     const props = this;
+
     this.renderReact(
       <I18nContext>
-        <NoData {...props} enabler={enabler} />
+        <NoData {...props} enabler={enabler} changePath={this.changePath} />
       </I18nContext>
     );
   }
