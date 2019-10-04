@@ -29,6 +29,7 @@ import { NotificationsStart } from '../notifications';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
 import { UiSettingsClientContract } from '../ui_settings';
+import { InjectedMetadataStart } from '../injected_metadata';
 import { RecursiveReadonly } from '../../utils';
 
 /** @public */
@@ -114,6 +115,12 @@ export interface AppMountContext {
     overlays: OverlayStart;
     /** {@link UiSettingsClient} */
     uiSettings: UiSettingsClientContract;
+    /**
+     * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+     * use *only* to retrieve config values
+     * @deprecated
+     * */
+    injectedMetadata: Pick<InjectedMetadataStart, 'getInjectedVar'>;
   };
 }
 

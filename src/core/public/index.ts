@@ -145,6 +145,12 @@ export interface CoreSetup {
   notifications: NotificationsSetup;
   /** {@link UiSettingsClient} */
   uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values
+   * @deprecated
+   * */
+  injectedMetadata: Pick<InjectedMetadataSetup, 'getInjectedVar'>;
 }
 
 /**
@@ -175,6 +181,12 @@ export interface CoreStart {
   overlays: OverlayStart;
   /** {@link UiSettingsClient} */
   uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values
+   * @deprecated
+   * */
+  injectedMetadata: Pick<InjectedMetadataStart, 'getInjectedVar'>;
 }
 
 /**
