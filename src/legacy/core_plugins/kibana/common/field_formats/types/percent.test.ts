@@ -22,11 +22,11 @@ import { createPercentFormat } from './percent';
 const PercentFormat = createPercentFormat();
 
 describe('PercentFormat', () => {
-  const config: Record<any, any> = {};
+  const config: Record<string, any> = {};
 
   config['format:percent:defaultPattern'] = '0,0.[000]%';
 
-  const getConfig = (key: any) => config[key];
+  const getConfig = (key: string) => config[key];
 
   test('default pattern', () => {
     const formatter = new PercentFormat({}, getConfig);

@@ -24,14 +24,14 @@ const DateFormat = createDateFormat();
 
 describe('Date Format', () => {
   let convert: Function;
-  let mockConfig: Record<any, any>;
+  let mockConfig: Record<string, any>;
 
   beforeEach(() => {
     mockConfig = {};
     mockConfig.dateFormat = 'MMMM Do YYYY, HH:mm:ss.SSS';
     mockConfig['dateFormat:tz'] = 'Browser';
 
-    const getConfig = (key: any) => mockConfig[key];
+    const getConfig = (key: string) => mockConfig[key];
 
     const date = new DateFormat({}, getConfig);
 

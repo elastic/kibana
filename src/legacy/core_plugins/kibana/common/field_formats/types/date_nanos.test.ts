@@ -24,14 +24,14 @@ const DateFormat = createDateNanosFormat();
 
 describe('Date Nanos Format', () => {
   let convert: Function;
-  let mockConfig: Record<any, any>;
+  let mockConfig: Record<string, any>;
 
   beforeEach(() => {
     mockConfig = {};
     mockConfig.dateNanosFormat = 'MMMM Do YYYY, HH:mm:ss.SSSSSSSSS';
     mockConfig['dateFormat:tz'] = 'Browser';
 
-    const getConfig = (key: any) => mockConfig[key];
+    const getConfig = (key: string) => mockConfig[key];
     const date = new DateFormat({}, getConfig);
 
     convert = date.convert.bind(date);

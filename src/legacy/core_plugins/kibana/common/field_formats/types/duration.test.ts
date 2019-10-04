@@ -133,12 +133,12 @@ describe('Duration Format', () => {
     outputPrecision,
     fixtures,
   }: {
-    inputFormat: any;
-    outputFormat: any;
-    outputPrecision: any;
-    fixtures: any;
+    inputFormat: string;
+    outputFormat: string;
+    outputPrecision: number | undefined;
+    fixtures: any[];
   }) {
-    fixtures.forEach((fixture: any) => {
+    fixtures.forEach((fixture: Record<string, any>) => {
       const input = fixture.input;
       const output = fixture.output;
       it(`should format ${input} ${inputFormat} through ${outputFormat}${

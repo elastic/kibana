@@ -22,11 +22,11 @@ import { createBytesFormat } from './bytes';
 const BytesFormat = createBytesFormat();
 
 describe('BytesFormat', () => {
-  const config: Record<any, any> = {};
+  const config: Record<string, any> = {};
 
   config['format:bytes:defaultPattern'] = '0,0.[000]b';
 
-  const getConfig = (key: any) => config[key];
+  const getConfig = (key: string) => config[key];
 
   test('default pattern', () => {
     const formatter = new BytesFormat({}, getConfig);

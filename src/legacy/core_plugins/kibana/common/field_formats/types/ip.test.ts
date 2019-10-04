@@ -22,7 +22,7 @@ import { createIpFormat } from './ip';
 const IpFormat = createIpFormat();
 
 describe('IP Address Format', () => {
-  let ip: Record<any, any>;
+  let ip: Record<string, any>;
 
   beforeEach(() => {
     ip = new IpFormat();

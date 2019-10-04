@@ -22,11 +22,11 @@ import { createNumberFormat } from './number';
 const NumberFormat = createNumberFormat();
 
 describe('NumberFormat', () => {
-  const config: Record<any, any> = {};
+  const config: Record<string, any> = {};
 
   config['format:number:defaultPattern'] = '0,0.[000]';
 
-  const getConfig = (key: any) => config[key];
+  const getConfig = (key: string) => config[key];
 
   test('default pattern', () => {
     const formatter = new NumberFormat({}, getConfig);
