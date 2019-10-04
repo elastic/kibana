@@ -200,6 +200,7 @@ export class HttpServer {
 
     const basePathService = new BasePath(config.basePath);
     this.setupBasePathRewrite(config, basePathService);
+    this.setupBaseContentSecurityPolicy();
 
     return {
       registerRouter: this.registerRouter.bind(this),
@@ -276,6 +277,27 @@ export class HttpServer {
         return toolkit.rewriteUrl(newURL);
       }
       return response.notFound();
+    });
+  }
+
+  private setupBaseContentSecurityPolicy() {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+
+    this.server.ext('onPreResponse', (request, t) => {
+      if (
+        !request.response ||
+        request.response instanceof Error ||
+        'content-security-policy' in request.response.headers
+      ) {
+        return t.continue;
+      }
+      const headers = {
+        'content-security-policy': `default-src 'none'`,
+      };
+      this.extendResponseWithHeaders(request, headers);
+      return t.continue;
     });
   }
 
