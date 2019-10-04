@@ -15,7 +15,8 @@ export ELASTICSEARCH_USERNAME=${user}
 export ELASTICSEARCH_PASSWORD=${password}
 export ELASTICSEARCH_URL=https://${ip}:9200
 export KIBANA_URL=http://localhost:5601
-export SIGNALS_INDEX=.siem-signals-10-01-2019
+export SIGNALS_INDEX=.siem-signals-${your user id}
+export TASK_MANAGER_INDEX=.kibana-task-manager-${your user id}
 
 # This is for the kbn-action and kbn-alert tool
 export KBN_URLBASE=http://${user}:${password}@localhost:5601
@@ -106,8 +107,8 @@ server    log   [22:17:33.945] [info][alerting] SIEM Alert Fired
 
 See the scripts folder and the tools for more command line fun. 
 
-Add the `.siem-signals-10-01-2019` to your advanced SIEM settings to see any signals
+Add the `.siem-signals-${your user id}` to your advanced SIEM settings to see any signals
 created which should update once every 5 minutes at this point.
 
-Also add the `.siem-signals-10-01-2019` as a kibana index for Maps to be able to see the
+Also add the `.siem-signals-${your user id}` as a kibana index for Maps to be able to see the
 signals 

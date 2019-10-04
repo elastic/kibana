@@ -5,7 +5,7 @@
 curl -s -k \
   -H "Content-Type: application/json" \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X GET ${ELASTICSEARCH_URL}/.kibana_task_manager*/_search \
+  -X GET ${ELASTICSEARCH_URL}/${TASK_MANAGER_INDEX}*/_search \
   --data '{
     "query": {
       "term" : { "task.taskType" : "alerting:siem.signals" }

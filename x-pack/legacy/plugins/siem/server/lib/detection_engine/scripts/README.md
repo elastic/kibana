@@ -3,12 +3,17 @@ search which is not available in the DEV console for the detection engine.
 
 Before beginning ensure in your .zshrc/.bashrc you have your user, password, and url set:
 
+Open up your .zshrc/.bashrc and add these lines with the variables filled in:
 ```
 export ELASTICSEARCH_USERNAME=${user}
 export ELASTICSEARCH_PASSWORD=${password}
 export ELASTICSEARCH_URL=https://${ip}:9200
 export KIBANA_URL=http://localhost:5601
-export SIGNALS_INDEX=.siem-signals-10-01-2019
+export SIGNALS_INDEX=.siem-signals-${your user id}
+export TASK_MANAGER_INDEX=.kibana-task-manager-${your user id}
+
+# This is for the kbn-action and kbn-alert tool
+export KBN_URLBASE=http://${user}:${password}@localhost:5601
 ```
 
 And that you have the latest version of [NodeJS](https://nodejs.org/en/),

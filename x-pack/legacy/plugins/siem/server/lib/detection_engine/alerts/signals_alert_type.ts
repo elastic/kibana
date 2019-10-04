@@ -64,7 +64,7 @@ export const signalsAlertType: AlertType = {
       to,
       // TODO: Change this out once we have solved
       // https://github.com/elastic/kibana/issues/47002
-      signalsIndex: '.siem-signals-10-01-2019',
+      signalsIndex: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
       severity,
       description,
       name,
