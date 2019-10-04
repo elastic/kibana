@@ -15,7 +15,9 @@
     "test:browser": "gulp testbrowser",
     "test:jest": "node scripts/jest",
     "test:mocha": "node scripts/mocha",
-    "test:server": "gulp testserver"
+    "test:server": "gulp testserver",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "kibana": {
     "build": {
@@ -366,7 +368,8 @@
     "vscode-languageserver": "^5.2.1",
     "wellknown": "^0.5.0",
     "xml2js": "^0.4.22",
-    "xregexp": "4.2.4"
+    "xregexp": "4.2.4",
+    "snyk": "^1.230.5"
   },
   "engines": {
     "yarn": "^1.10.1"
@@ -378,5 +381,6 @@
       "**/mocha-multi-reporters",
       "**/mocha-multi-reporters/**"
     ]
-  }
+  },
+  "snyk": true
 }
