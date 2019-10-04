@@ -18,7 +18,7 @@
  */
 
 import { assign } from 'lodash';
-import { AggConfig } from 'ui/agg_types';
+import { IMetricAggConfig } from './metric_agg_type';
 
 /**
  * Get the ResponseAggConfig class for an aggConfig,
@@ -28,7 +28,7 @@ import { AggConfig } from 'ui/agg_types';
  * @param  {object} props - properties that the VAC should have
  * @return {Constructor} - a constructor for VAC objects that will inherit the aggConfig
  */
-export const getResponseAggConfigClass = (agg: any, props: any) => {
+export const getResponseAggConfigClass = (agg: any, props: Partial<IMetricAggConfig>) => {
   if (agg.$$_ResponseAggConfigClass) {
     return agg.$$_ResponseAggConfigClass;
   } else {
@@ -36,12 +36,15 @@ export const getResponseAggConfigClass = (agg: any, props: any) => {
   }
 };
 
-export interface IResponseAggConfig extends AggConfig {
+export interface IResponseAggConfig extends IMetricAggConfig {
   key: string | number;
-  parentId: AggConfig['id'];
+  parentId: IMetricAggConfig['id'];
 }
 
-export const create = (parentAgg: AggConfig, props: any): typeof AggConfig => {
+export const create = (
+  parentAgg: IMetricAggConfig,
+  props: Partial<IMetricAggConfig>
+): IMetricAggConfig => {
   /**
    * AggConfig "wrapper" for multi-value metric aggs which
    * need to modify AggConfig behavior for each value produced.
@@ -50,9 +53,9 @@ export const create = (parentAgg: AggConfig, props: any): typeof AggConfig => {
    *                            this part of the multi-value
    */
   class ResponseAggConfig {
-    id: AggConfig['id'];
+    id: IMetricAggConfig['id'];
     key: string | number;
-    parentId: AggConfig['id'];
+    parentId: IMetricAggConfig['id'];
 
     constructor(key: string) {
       this.key = key;
@@ -73,5 +76,5 @@ export const create = (parentAgg: AggConfig, props: any): typeof AggConfig => {
 
   assign(ResponseAggConfig.prototype, props);
 
-  return (ResponseAggConfig as unknown) as typeof AggConfig;
+  return (ResponseAggConfig as unknown) as IMetricAggConfig;
 };

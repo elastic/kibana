@@ -20,6 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 const averageTitle = i18n.translate('common.ui.aggTypes.metrics.averageTitle', {
   defaultMessage: 'Average',
@@ -38,7 +39,7 @@ export const avgMetricAgg = new MetricAggType({
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'number',
+      filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
     },
   ],
 });

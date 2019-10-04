@@ -41,13 +41,14 @@ export const bucketAvgMetricAgg = new MetricAggType({
   params: [...siblingPipelineAggHelper.params()],
   getFormat: siblingPipelineAggHelper.getFormat,
   getValue(agg, bucket) {
-    const customMetric = agg.params.customMetric;
+    const customMetric = agg.getParam('customMetric');
+    const customBucket = agg.getParam('customBucket');
     const scaleMetrics = customMetric.type && customMetric.type.isScalable();
 
     let value = bucket[agg.id] && bucket[agg.id].value;
 
-    if (scaleMetrics && agg.params.customBucket.type.name === 'date_histogram') {
-      const aggInfo = agg.params.customBucket.write();
+    if (scaleMetrics && customBucket.type.name === 'date_histogram') {
+      const aggInfo = customBucket.write();
 
       value *= get(aggInfo, 'bucketInterval.scale', 1);
     }

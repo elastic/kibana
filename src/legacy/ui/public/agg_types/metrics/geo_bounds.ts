@@ -20,6 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 const geoBoundsTitle = i18n.translate('common.ui.aggTypes.metrics.geoBoundsTitle', {
   defaultMessage: 'Geo Bounds',
@@ -37,7 +38,7 @@ export const geoBoundsMetricAgg = new MetricAggType({
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'geo_point',
+      filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
     },
   ],
 });

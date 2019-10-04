@@ -18,17 +18,19 @@
  */
 
 import { AggConfigs } from '../../agg_configs';
-import { AggConfig } from '../../../vis';
+import { IMetricAggConfig } from '../metric_agg_type';
 
 export const parentPipelineAggWriter = (
-  agg: AggConfig,
+  agg: IMetricAggConfig,
   output: Record<string, any>,
   aggConfigs?: AggConfigs
 ): void => {
-  const selectedMetric =
-    agg.params.customMetric || (aggConfigs && aggConfigs.getResponseAggById(agg.params.metricAgg));
+  const customMetric = agg.getParam('customMetric');
+  const metricAgg = agg.getParam('metricAgg');
 
-  if (agg.params.customMetric && agg.params.customMetric.type.name !== 'count') {
+  const selectedMetric = customMetric || (aggConfigs && aggConfigs.getResponseAggById(metricAgg));
+
+  if (customMetric && customMetric.type.name !== 'count') {
     output.parentAggs = (output.parentAggs || []).concat(selectedMetric);
   }
 

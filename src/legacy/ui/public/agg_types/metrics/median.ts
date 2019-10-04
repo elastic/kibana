@@ -22,6 +22,7 @@ import { METRIC_TYPES } from './metric_agg_types';
 
 // @ts-ignore
 import { percentilesMetricAgg } from './percentiles';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 const medianTitle = i18n.translate('common.ui.aggTypes.metrics.medianTitle', {
   defaultMessage: 'Median',
@@ -41,7 +42,7 @@ export const medianMetricAgg = new MetricAggType({
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: ['number', 'date'],
+      filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE],
     },
     {
       name: 'percents',

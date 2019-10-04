@@ -22,30 +22,33 @@ import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { getResponseAggConfigClass, IResponseAggConfig } from './get_response_agg_config_class';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 interface ValProp {
   valProp: string[];
   title: string;
 }
 
-interface IStdDevResponseAggConfig extends IResponseAggConfig {
+interface IStdDevAggConfig extends IResponseAggConfig {
   keyedDetails: (customLabel: string, fieldDisplayName?: string) => { [key: string]: ValProp };
   valProp: () => ValProp;
 }
 
 const responseAggConfigProps = {
-  valProp(this: IStdDevResponseAggConfig) {
-    const details = this.keyedDetails(this.params.customLabel)[this.key];
+  valProp(this: IStdDevAggConfig) {
+    const customLabel = this.getParam('customLabel');
+    const details = this.keyedDetails(customLabel)[this.key];
 
     return details.valProp;
   },
-  makeLabel(this: IStdDevResponseAggConfig) {
+  makeLabel(this: IStdDevAggConfig) {
     const fieldDisplayName = this.getFieldDisplayName();
-    const details = this.keyedDetails(this.params.customLabel, fieldDisplayName);
+    const customLabel = this.getParam('customLabel');
+    const details = this.keyedDetails(customLabel, fieldDisplayName);
 
     return get(details, [this.key, 'title']);
   },
-  keyedDetails(this: IStdDevResponseAggConfig, customLabel: string, fieldDisplayName: string) {
+  keyedDetails(this: IStdDevAggConfig, customLabel: string, fieldDisplayName: string) {
     const label =
       customLabel ||
       i18n.translate('common.ui.aggTypes.metrics.standardDeviation.keyDetailsLabel', {
@@ -72,7 +75,7 @@ const responseAggConfigProps = {
   },
 };
 
-export const stdDeviationMetricAgg = new MetricAggType<IStdDevResponseAggConfig>({
+export const stdDeviationMetricAgg = new MetricAggType<IStdDevAggConfig>({
   name: METRIC_TYPES.STD_DEV,
   dslName: 'extended_stats',
   title: i18n.translate('common.ui.aggTypes.metrics.standardDeviationTitle', {
@@ -88,7 +91,7 @@ export const stdDeviationMetricAgg = new MetricAggType<IStdDevResponseAggConfig>
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'number',
+      filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
     },
   ],
 

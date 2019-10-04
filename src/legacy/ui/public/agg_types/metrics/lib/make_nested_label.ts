@@ -18,13 +18,15 @@
  */
 
 import { startCase } from 'lodash';
-import { AggConfig } from '../../agg_config';
+import { IMetricAggConfig } from '../metric_agg_type';
 
-export const makeNestedLabel = (aggConfig: AggConfig, label: string) => {
+export const makeNestedLabel = (aggConfig: IMetricAggConfig, label: string) => {
   const uppercaseLabel = startCase(label);
+  const customMetric = aggConfig.getParam('customMetric');
+  const metricAgg = aggConfig.getParam('metricAgg');
 
-  if (aggConfig.params.customMetric) {
-    let metricLabel = aggConfig.params.customMetric.makeLabel();
+  if (customMetric) {
+    let metricLabel = customMetric.makeLabel();
 
     if (metricLabel.includes(`${uppercaseLabel} of `)) {
       metricLabel = metricLabel.substring(`${uppercaseLabel} of `.length);
@@ -37,7 +39,7 @@ export const makeNestedLabel = (aggConfig: AggConfig, label: string) => {
     return metricLabel;
   }
 
-  const metric = aggConfig.aggConfigs.byId(aggConfig.params.metricAgg);
+  const metric = aggConfig.aggConfigs.byId(metricAgg);
 
   if (!metric) {
     return '';

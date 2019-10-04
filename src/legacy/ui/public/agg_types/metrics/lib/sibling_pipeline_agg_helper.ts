@@ -22,9 +22,7 @@ import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import { SubMetricParamEditor } from '../../../vis/editors/default/controls/sub_metric';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 
-import { createMetricAggParam } from './create_metric_agg_param';
-
-import { AggConfig } from '../../agg_config';
+import { IMetricAggConfig } from '../metric_agg_type';
 
 // @ts-ignore
 import { Schemas } from '../../../vis/editors/default/schemas';
@@ -76,11 +74,11 @@ const siblingPipelineAggHelper = {
   }),
   params() {
     return [
-      createMetricAggParam({
+      {
         name: 'customBucket',
         type: 'agg',
         default: null,
-        makeAgg(agg: AggConfig, state: any) {
+        makeAgg(agg: IMetricAggConfig, state: any) {
           state = state || { type: 'date_histogram' };
           state.schema = bucketAggSchema;
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
@@ -93,12 +91,12 @@ const siblingPipelineAggHelper = {
           'customBucket'
         ),
         write: () => {},
-      }),
-      createMetricAggParam({
+      },
+      {
         name: 'customMetric',
         type: 'agg',
         default: null,
-        makeAgg(agg: AggConfig, state: any) {
+        makeAgg(agg: IMetricAggConfig, state: any) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
@@ -111,12 +109,14 @@ const siblingPipelineAggHelper = {
           'customMetric'
         ),
         write: siblingPipelineAggWriter,
-      }),
+      },
     ];
   },
 
-  getFormat(agg: AggConfig) {
-    return agg.params.customMetric.type.getFormat(agg.params.customMetric);
+  getFormat(agg: IMetricAggConfig) {
+    const customMetric = agg.getParam('customMetric');
+
+    return customMetric.type.getFormat(customMetric);
   },
 };
 

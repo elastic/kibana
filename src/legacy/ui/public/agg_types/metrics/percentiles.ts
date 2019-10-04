@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 
 import { MetricAggType } from './metric_agg_type';
-import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
 
 import { getResponseAggConfigClass, IResponseAggConfig } from './get_response_agg_config_class';
@@ -29,10 +28,14 @@ import { PercentilesEditor } from '../../vis/editors/default/controls/percentile
 
 // @ts-ignore
 import { ordinalSuffix } from '../../utils/ordinal_suffix';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+
+type IPercentileAggConfig = IResponseAggConfig;
 
 const valueProps = {
-  makeLabel(this: IResponseAggConfig) {
-    const label = this.params.customLabel || this.getFieldDisplayName();
+  makeLabel(this: IPercentileAggConfig) {
+    const customLabel = this.getParam('customLabel');
+    const label = customLabel || this.getFieldDisplayName();
 
     return i18n.translate('common.ui.aggTypes.metrics.percentiles.valuePropsLabel', {
       defaultMessage: '{percentile} percentile of {label}',
@@ -41,7 +44,7 @@ const valueProps = {
   },
 };
 
-export const percentilesMetricAgg = new MetricAggType<IResponseAggConfig>({
+export const percentilesMetricAgg = new MetricAggType<IPercentileAggConfig>({
   name: METRIC_TYPES.PERCENTILES,
   title: i18n.translate('common.ui.aggTypes.metrics.percentilesTitle', {
     defaultMessage: 'Percentiles',
@@ -56,7 +59,7 @@ export const percentilesMetricAgg = new MetricAggType<IResponseAggConfig>({
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: ['number', 'date'],
+      filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE],
     },
     {
       name: 'percents',
@@ -69,10 +72,10 @@ export const percentilesMetricAgg = new MetricAggType<IResponseAggConfig>({
       },
     },
   ],
-  getResponseAggs(agg: AggConfig) {
+  getResponseAggs(agg) {
     const ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
 
-    return agg.params.percents.map((percent: any) => new ValueAggConfig(percent));
+    return agg.getParam('percents').map((percent: any) => new ValueAggConfig(percent));
   },
 
   getValue: getPercentileValue,

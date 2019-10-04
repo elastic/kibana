@@ -25,28 +25,30 @@ import { METRIC_TYPES } from './metric_agg_types';
 
 // @ts-ignore
 import { fieldFormats } from '../../registry/field_formats';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
-export interface MetricAggTypeConfig<TResponseAggConfig extends AggConfig = AggConfig>
-  extends AggTypeConfig<MetricAggParam, AggConfig, AggConfig, TResponseAggConfig> {
+export interface IMetricAggConfig extends AggConfig {
+  params: MetricAggParam[];
+}
+
+export interface MetricAggTypeConfig<TMetricAggConfig extends IMetricAggConfig>
+  extends AggTypeConfig<TMetricAggConfig> {
   isScalable?: () => boolean;
   subtype?: string;
 }
 
 export interface MetricAggParam extends AggParamType {
-  filterFieldTypes?: string | string[];
+  filterFieldTypes?: KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
   onlyAggregatable?: boolean;
 }
 
-export class MetricAggType<TResponseAggConfig extends AggConfig = AggConfig> extends AggType<
-  MetricAggParam,
-  AggConfig,
-  AggConfig,
-  TResponseAggConfig
+export class MetricAggType<TMetricAggConfig extends IMetricAggConfig> extends AggType<
+  TMetricAggConfig
 > {
   subtype: string;
   isScalable: () => boolean;
 
-  constructor(config: MetricAggTypeConfig<TResponseAggConfig>) {
+  constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
     super(config);
 
     this.getValue =

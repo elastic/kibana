@@ -26,14 +26,18 @@ import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
 // @ts-ignore
 import { fieldFormats } from '../../registry/field_formats';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 // required by the values editor
 
+type IPercentileRanksAggConfig = IResponseAggConfig;
+
 const valueProps = {
-  makeLabel(this: IResponseAggConfig) {
+  makeLabel(this: IPercentileRanksAggConfig) {
     const field = this.getField();
     const format = (field && field.format) || fieldFormats.getDefaultInstance('number');
-    const label = this.params.customLabel || this.getFieldDisplayName();
+    const customLabel = this.getParam('customLabel');
+    const label = customLabel || this.getFieldDisplayName();
 
     return i18n.translate('common.ui.aggTypes.metrics.percentileRanks.valuePropsLabel', {
       defaultMessage: 'Percentile rank {format} of "{label}"',
@@ -42,7 +46,7 @@ const valueProps = {
   },
 };
 
-export const percentileRanksMetricAgg = new MetricAggType<IResponseAggConfig>({
+export const percentileRanksMetricAgg = new MetricAggType<IPercentileRanksAggConfig>({
   name: METRIC_TYPES.PERCENTILE_RANKS,
   title: i18n.translate('common.ui.aggTypes.metrics.percentileRanksTitle', {
     defaultMessage: 'Percentile Ranks',
@@ -57,7 +61,7 @@ export const percentileRanksMetricAgg = new MetricAggType<IResponseAggConfig>({
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'number',
+      filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
     },
     {
       name: 'values',
@@ -72,8 +76,9 @@ export const percentileRanksMetricAgg = new MetricAggType<IResponseAggConfig>({
   ],
   getResponseAggs(agg) {
     const ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
+    const values = agg.getParam('values');
 
-    return agg.params.values.map((value: any) => new ValueAggConfig(value));
+    return values.map((value: any) => new ValueAggConfig(value));
   },
   getFormat() {
     return fieldFormats.getInstance('percent') || fieldFormats.getDefaultInstance('number');

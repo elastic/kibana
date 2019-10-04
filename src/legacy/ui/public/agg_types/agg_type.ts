@@ -29,10 +29,8 @@ import { Adapters } from '../inspector';
 import { BaseParamType } from './param_types/base';
 
 export interface AggTypeConfig<
-  TAggParam extends AggParam = AggParam,
   TAggConfig extends AggConfig = AggConfig,
-  TRequestAggConfig extends AggConfig = AggConfig,
-  TResponseAggConfig extends AggConfig = AggConfig
+  TParam extends AggParam = TAggConfig['params'][number]
 > {
   name: string;
   title: string;
@@ -42,13 +40,9 @@ export interface AggTypeConfig<
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
   ordered?: any;
   hasNoDsl?: boolean;
-  params?: Array<Partial<TAggParam>>;
-  getRequestAggs?:
-    | ((aggConfig: TAggConfig) => TRequestAggConfig[])
-    | (() => TRequestAggConfig[] | void);
-  getResponseAggs?:
-    | ((aggConfig: TAggConfig) => TResponseAggConfig[])
-    | (() => TResponseAggConfig[] | void);
+  params?: Array<Partial<TParam>>;
+  getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
+  getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
   decorateAggConfig?: () => Record<string, any>;
   postFlightRequest?: (
@@ -59,7 +53,7 @@ export interface AggTypeConfig<
     inspectorAdapters: Adapters
   ) => Promise<any>;
   getFormat?: (agg: TAggConfig) => FieldFormat;
-  getValue?: (agg: TResponseAggConfig, bucket: any) => any;
+  getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
 
@@ -68,14 +62,7 @@ const getFormat = (agg: AggConfig) => {
   return field ? field.format : fieldFormats.getDefaultInstance('string');
 };
 
-const defaultGetValue = (agg: AggConfig, bucket: any) => {};
-
-export class AggType<
-  TAggParam extends AggParam = AggParam,
-  TAggConfig extends AggConfig = AggConfig,
-  TRequestAggConfig extends AggConfig = AggConfig,
-  TResponseAggConfig extends AggConfig = AggConfig
-> {
+export class AggType<TAggConfig extends AggConfig = AggConfig> {
   /**
    * the unique, unchanging, name that we have assigned this aggType
    *
@@ -144,7 +131,7 @@ export class AggType<
    * @property params
    * @type {AggParams}
    */
-  params: TAggParam[];
+  params: TAggConfig['params'];
   /**
    * Designed for multi-value metric aggs, this method can return a
    * set of AggConfigs that should replace this aggConfig in requests
@@ -154,9 +141,7 @@ export class AggType<
    *                                         that should replace this one,
    *                                         or undefined
    */
-  getRequestAggs:
-    | ((aggConfig: TAggConfig) => TRequestAggConfig[])
-    | (() => TRequestAggConfig[] | void);
+  getRequestAggs: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   /**
    * Designed for multi-value metric aggs, this method can return a
    * set of AggConfigs that should replace this aggConfig in result sets
@@ -167,9 +152,7 @@ export class AggType<
    *                                         that should replace this one,
    *                                         or undefined
    */
-  getResponseAggs:
-    | ((aggConfig: TAggConfig) => TResponseAggConfig[])
-    | (() => TResponseAggConfig[] | void);
+  getResponseAggs: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   /**
    * A function that will be called each time an aggConfig of this type
    * is created, giving the agg type a chance to modify the agg config
@@ -203,10 +186,10 @@ export class AggType<
    */
   getFormat: (agg: TAggConfig) => FieldFormat;
 
-  getValue: (agg: TResponseAggConfig, bucket: any) => any;
+  getValue: (agg: TAggConfig, bucket: any) => any;
 
   paramByName = (name: string) => {
-    return this.params.find(p => p.name === name);
+    return this.params.find((p: AggParam) => p.name === name);
   };
 
   /**
@@ -218,7 +201,7 @@ export class AggType<
    * @private
    * @param {object} config - used to set the properties of the AggType
    */
-  constructor(config: AggTypeConfig<TAggParam, TAggConfig, TRequestAggConfig, TResponseAggConfig>) {
+  constructor(config: AggTypeConfig<TAggConfig>) {
     this.name = config.name;
     this.type = config.type || 'metrics';
     this.dslName = config.dslName || config.name;
@@ -232,7 +215,7 @@ export class AggType<
     }
 
     if (config.params && config.params.length && config.params[0] instanceof BaseParamType) {
-      this.params = config.params as TAggParam[];
+      this.params = config.params as TAggConfig['params'];
     } else {
       // always append the raw JSON param
       const params: any[] = config.params ? [...config.params] : [];
@@ -262,6 +245,6 @@ export class AggType<
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || identity;
     this.getFormat = config.getFormat || getFormat;
-    this.getValue = config.getValue || defaultGetValue;
+    this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
   }
 }

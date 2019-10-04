@@ -19,25 +19,26 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { MetricAggType } from './metric_agg_type';
+import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { TopSortFieldParamEditor } from '../../vis/editors/default/controls/top_sort_field';
 import { OrderParamEditor } from '../../vis/editors/default/controls/order';
 import { TopFieldParamEditor } from '../../vis/editors/default/controls/top_field';
 import { TopSizeParamEditor } from '../../vis/editors/default/controls/top_size';
 import { TopAggregateParamEditor } from '../../vis/editors/default/controls/top_aggregate';
-import { AggConfig } from '../agg_config';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 // @ts-ignore
 import { wrapWithInlineComp } from '../buckets/_inline_comp_wrapper';
 
-const isNumericFieldSelected = (agg: any) => {
-  const fieldType = agg.params.field && agg.params.field.type;
-  return fieldType && fieldType === 'number';
+const isNumericFieldSelected = (agg: IMetricAggConfig) => {
+  const field = agg.getParam('field');
+
+  return field && field.type && field.type === KBN_FIELD_TYPES.NUMBER;
 };
 
-aggTypeFieldFilters.addFilter((field, aggConfig: AggConfig) => {
+aggTypeFieldFilters.addFilter((field, aggConfig: IMetricAggConfig) => {
   if (
     aggConfig.type.name !== METRIC_TYPES.TOP_HITS ||
     _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)
@@ -60,11 +61,18 @@ export const topHitMetricAgg = new MetricAggType({
     const firstPrefixLabel = i18n.translate('common.ui.aggTypes.metrics.topHit.firstPrefixLabel', {
       defaultMessage: 'First',
     });
-    let prefix = aggConfig.params.sortOrder.value === 'desc' ? lastPrefixLabel : firstPrefixLabel;
-    if (aggConfig.params.size !== 1) {
-      prefix += ` ${aggConfig.params.size}`;
+
+    let prefix =
+      aggConfig.getParam('sortOrder').value === 'desc' ? lastPrefixLabel : firstPrefixLabel;
+
+    const size = aggConfig.getParam('size');
+
+    if (size !== 1) {
+      prefix += ` ${size}`;
     }
-    const field = aggConfig.params.field;
+
+    const field = aggConfig.getParam('field');
+
     return `${prefix} ${field ? field.displayName : ''}`;
   },
   params: [
@@ -75,7 +83,7 @@ export const topHitMetricAgg = new MetricAggType({
       onlyAggregatable: false,
       filterFieldTypes: '*',
       write(agg, output) {
-        const field = agg.params.field;
+        const field = agg.getParam('field');
         output.params = {};
 
         if (field.scripted) {
@@ -92,7 +100,7 @@ export const topHitMetricAgg = new MetricAggType({
             // always format date fields as date_time to avoid
             // displaying unformatted dates like epoch_millis
             // or other not-accepted momentjs formats
-            const format = field.type === 'date' ? 'date_time' : 'use_field_mapping';
+            const format = field.type === KBN_FIELD_TYPES.DATE ? 'date_time' : 'use_field_mapping';
             output.params.docvalue_fields = [{ field: field.name, format }];
           }
           output.params._source = field.name === '_source' ? true : field.name;
@@ -140,7 +148,7 @@ export const topHitMetricAgg = new MetricAggType({
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.concatenateLabel', {
             defaultMessage: 'Concatenate',
           }),
-          isCompatible(aggConfig: AggConfig) {
+          isCompatible(aggConfig: IMetricAggConfig) {
             return _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false);
           },
           disabled: true,
@@ -158,8 +166,13 @@ export const topHitMetricAgg = new MetricAggType({
       name: 'sortField',
       type: 'field',
       editorComponent: TopSortFieldParamEditor,
-      filterFieldTypes: ['number', 'date', 'ip', 'string'],
-      default(agg: AggConfig) {
+      filterFieldTypes: [
+        KBN_FIELD_TYPES.NUMBER,
+        KBN_FIELD_TYPES.DATE,
+        KBN_FIELD_TYPES.IP,
+        KBN_FIELD_TYPES.STRING,
+      ],
+      default(agg: IMetricAggConfig) {
         return agg.getIndexPattern().timeFieldName;
       },
       write: _.noop, // prevent default write, it is handled below
@@ -217,12 +230,12 @@ export const topHitMetricAgg = new MetricAggType({
     if (!hits || !hits.length) {
       return null;
     }
-    const path = agg.params.field.name;
+    const path = agg.getParam('field').name;
 
     let values = _.flatten(
-      hits.map(hit => {
-        return path === '_source' ? hit._source : agg.getIndexPattern().flattenHit(hit, true)[path];
-      })
+      hits.map(hit =>
+        path === '_source' ? hit._source : agg.getIndexPattern().flattenHit(hit, true)[path]
+      )
     );
 
     if (values.length === 1) {
@@ -233,7 +246,10 @@ export const topHitMetricAgg = new MetricAggType({
       if (!_.compact(values).length) {
         return null;
       }
-      switch (agg.params.aggregate.value) {
+
+      const aggregate = agg.getParam('aggregate');
+
+      switch (aggregate.value) {
         case 'max':
           return _.max(values);
         case 'min':

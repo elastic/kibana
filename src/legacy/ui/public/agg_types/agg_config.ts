@@ -194,6 +194,10 @@ export class AggConfig {
     });
   }
 
+  getParam(key: string): any {
+    return _.get(this.params, key);
+  }
+
   write(aggs?: AggConfigs) {
     return writeParams(this.type.params, this, aggs);
   }

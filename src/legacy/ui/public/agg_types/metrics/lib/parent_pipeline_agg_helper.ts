@@ -22,11 +22,8 @@ import { noop } from 'lodash';
 import { MetricAggParamEditor } from '../../../vis/editors/default/controls/metric_agg';
 import { SubAggParamEditor } from '../../../vis/editors/default/controls/sub_agg';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
-import { AggConfig } from '../../agg_config';
-import { MetricAggParam } from '../metric_agg_type';
+import { IMetricAggConfig } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
-
-import { createMetricAggParam } from './create_metric_agg_param';
 
 // @ts-ignore
 import { Schemas } from '../../../vis/editors/default/schemas';
@@ -65,19 +62,19 @@ const [metricAggSchema] = new Schemas([
 export const parentPipelineAggHelper = {
   subtype: subtypeLabel,
 
-  params(): MetricAggParam[] {
+  params() {
     return [
-      createMetricAggParam({
+      {
         name: 'metricAgg',
         editorComponent: MetricAggParamEditor,
         default: 'custom',
         write: parentPipelineAggWriter,
-      }),
-      createMetricAggParam({
+      },
+      {
         name: 'customMetric',
         editorComponent: SubAggParamEditor,
         type: 'agg',
-        makeAgg(termsAgg: AggConfig, state: any) {
+        makeAgg(termsAgg: IMetricAggConfig, state: any) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
 
@@ -91,21 +88,22 @@ export const parentPipelineAggHelper = {
           'customMetric'
         ),
         write: noop,
-      }),
-      createMetricAggParam({
+      },
+      {
         name: 'buckets_path',
         write: noop,
-      }),
+      },
     ];
   },
 
-  getFormat(agg: AggConfig) {
+  getFormat(agg: IMetricAggConfig) {
     let subAgg;
+    const customMetric = agg.getParam('customMetric');
 
-    if (agg.params.customMetric) {
-      subAgg = agg.params.customMetric;
+    if (customMetric) {
+      subAgg = customMetric;
     } else {
-      subAgg = agg.aggConfigs.byId(agg.params.metricAgg);
+      subAgg = agg.aggConfigs.byId(agg.getParam('metricAgg'));
     }
     return subAgg.type.getFormat(subAgg);
   },
