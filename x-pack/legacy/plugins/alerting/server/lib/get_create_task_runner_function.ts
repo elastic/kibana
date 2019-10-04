@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionsPlugin } from '../../../actions';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
 import { ConcreteTaskInstance } from '../../../task_manager';
 import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
@@ -25,7 +25,7 @@ export interface CreateTaskRunnerFunctionOptions {
   isSecurityEnabled: boolean;
   getServices: GetServicesFunction;
   alertType: AlertType;
-  executeAction: ActionsPlugin['execute'];
+  executeAction: ActionsPluginStartContract['execute'];
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;

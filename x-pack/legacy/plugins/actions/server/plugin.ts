@@ -1,0 +1,187 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import Hapi from 'hapi';
+import { first } from 'rxjs/operators';
+import { Services } from './types';
+import { TaskRunnerFactory } from './lib';
+import { ActionsClient } from './actions_client';
+import { ActionTypeRegistry } from './action_type_registry';
+import { ExecuteOptions } from './create_execute_function';
+import { createExecuteFunction } from './create_execute_function';
+import { registerBuiltInActionTypes } from './builtin_action_types';
+import { ClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
+import { ActionsKibanaConfig, getActionsConfigurationUtilities } from './actions_config';
+import {
+  ActionsPluginInitializerContext,
+  ActionsCoreSetup,
+  ActionsCoreStart,
+  ActionsPluginsSetup,
+  ActionsPluginsStart,
+} from './shim';
+import {
+  createActionRoute,
+  deleteActionRoute,
+  findActionRoute,
+  getActionRoute,
+  updateActionRoute,
+  listActionTypesRoute,
+  // getExecuteActionRoute,
+} from './routes';
+
+export interface PluginSetupContract {
+  registerType: ActionTypeRegistry['register'];
+}
+
+export interface PluginStartContract {
+  listTypes: ActionTypeRegistry['list'];
+  execute(options: ExecuteOptions): Promise<void>;
+  getActionsClientWithRequest(request: Hapi.Request): ActionsClient;
+}
+
+export class Plugin {
+  private readonly logger: Logger;
+  private serverBasePath?: string;
+  private adminClient?: ClusterClient;
+  private taskRunnerFactory?: TaskRunnerFactory;
+  private actionTypeRegistry?: ActionTypeRegistry;
+
+  constructor(initializerContext: ActionsPluginInitializerContext) {
+    this.logger = initializerContext.logger.get('plugins', 'alerting');
+  }
+
+  public async setup(
+    core: ActionsCoreSetup,
+    plugins: ActionsPluginsSetup
+  ): Promise<PluginSetupContract> {
+    // TODO: Real config
+    const config = {};
+    this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
+
+    plugins.xpack_main.registerFeature({
+      id: 'actions',
+      name: 'Actions',
+      app: ['actions', 'kibana'],
+      privileges: {
+        all: {
+          savedObject: {
+            all: ['action', 'action_task_params'],
+            read: [],
+          },
+          ui: [],
+          api: ['actions-read', 'actions-all'],
+        },
+        read: {
+          savedObject: {
+            all: ['action_task_params'],
+            read: ['action'],
+          },
+          ui: [],
+          api: ['actions-read'],
+        },
+      },
+    });
+
+    // Encrypted attributes
+    // - `secrets` properties will be encrypted
+    // - `config` will be included in AAD
+    // - everything else excluded from AAD
+    plugins.encrypted_saved_objects.registerType({
+      type: 'action',
+      attributesToEncrypt: new Set(['secrets']),
+      attributesToExcludeFromAAD: new Set(['description']),
+    });
+    plugins.encrypted_saved_objects.registerType({
+      type: 'action_task_params',
+      attributesToEncrypt: new Set(['apiKey']),
+    });
+
+    const taskRunnerFactory = new TaskRunnerFactory();
+    const actionTypeRegistry = new ActionTypeRegistry({
+      taskRunnerFactory,
+      taskManager: plugins.task_manager,
+    });
+    this.taskRunnerFactory = taskRunnerFactory;
+    this.actionTypeRegistry = actionTypeRegistry;
+    this.serverBasePath = core.http.basePath.serverBasePath;
+
+    registerBuiltInActionTypes({
+      logger: this.logger,
+      actionTypeRegistry,
+      actionsConfigUtils: getActionsConfigurationUtilities(config as ActionsKibanaConfig),
+    });
+
+    // Routes
+    core.http.route(createActionRoute);
+    core.http.route(deleteActionRoute);
+    core.http.route(getActionRoute);
+    core.http.route(findActionRoute);
+    core.http.route(updateActionRoute);
+    core.http.route(listActionTypesRoute);
+    // core.http.route(
+    //   getExecuteActionRoute({
+    //     logger: this.logger,
+    //     actionTypeRegistry,
+    //     getServices,
+    //     encryptedSavedObjects: server.plugins.encrypted_saved_objects,
+    //     spaces: server.plugins.spaces,
+    //   })
+    // );
+
+    return {
+      registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
+    };
+  }
+
+  public start(core: ActionsCoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+    const { actionTypeRegistry, adminClient, serverBasePath, taskRunnerFactory } = this;
+
+    function getServices(request: any): Services {
+      return {
+        callCluster: (...args) =>
+          adminClient!.asScoped(KibanaRequest.from(request)).callAsCurrentUser(...args),
+        savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(request),
+      };
+    }
+    function spaceIdToNamespace(spaceId?: string): string | undefined {
+      const spacesPlugin = plugins.spaces();
+      return spacesPlugin && spaceId ? spacesPlugin.spaceIdToNamespace(spaceId) : undefined;
+    }
+    function getBasePath(spaceId?: string): string {
+      const spacesPlugin = plugins.spaces();
+      return spacesPlugin && spaceId ? spacesPlugin.getBasePath(spaceId) : serverBasePath!;
+    }
+
+    taskRunnerFactory!.initialize({
+      logger: this.logger,
+      getServices,
+      actionTypeRegistry: actionTypeRegistry!,
+      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
+      getBasePath,
+      spaceIdToNamespace,
+      isSecurityEnabled: !!plugins.security,
+    });
+
+    const executeFn = createExecuteFunction({
+      taskManager: plugins.task_manager,
+      getScopedSavedObjectsClient: core.savedObjects.getScopedSavedObjectsClient,
+      getBasePath,
+      isSecurityEnabled: !!plugins.security,
+    });
+
+    return {
+      execute: executeFn,
+      listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
+      getActionsClientWithRequest(request: Hapi.Request) {
+        const savedObjectsClient = request.getSavedObjectsClient();
+        return new ActionsClient({
+          savedObjectsClient,
+          actionTypeRegistry: actionTypeRegistry!,
+        });
+      },
+    };
+  }
+}

@@ -5,12 +5,12 @@
  */
 
 import { AlertAction, State, Context, AlertType, Log } from '../types';
-import { ActionsPlugin } from '../../../actions';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
 import { transformActionParams } from './transform_action_params';
 
 interface CreateExecutionHandlerOptions {
   alertId: string;
-  executeAction: ActionsPlugin['execute'];
+  executeAction: ActionsPluginStartContract['execute'];
   actions: AlertAction[];
   spaceId: string;
   apiKey?: string;

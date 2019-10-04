@@ -6,8 +6,8 @@
 
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
-import { ExecuteOptions } from './create_execute_function';
 import { ActionsKibanaConfig } from './actions_config';
+import { PluginSetupContract, PluginStartContract } from './plugin';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
@@ -21,9 +21,8 @@ export interface Services {
 }
 
 export interface ActionsPlugin {
-  registerType: ActionTypeRegistry['register'];
-  listTypes: ActionTypeRegistry['list'];
-  execute(options: ExecuteOptions): Promise<void>;
+  setup: PluginSetupContract;
+  start: PluginStartContract;
 }
 
 // the parameters passed to an action type executor function

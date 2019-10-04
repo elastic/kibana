@@ -13,6 +13,6 @@ export const listActionTypesRoute = {
     tags: ['access:actions-read'],
   },
   async handler(request: Hapi.Request) {
-    return request.server.plugins.actions!.listTypes();
+    return request.server.plugins.actions!.start.listTypes();
   },
 };

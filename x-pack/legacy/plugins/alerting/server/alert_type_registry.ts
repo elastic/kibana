@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { TaskManager } from '../../task_manager';
 import { getCreateTaskRunnerFunction } from './lib';
-import { ActionsPlugin } from '../../actions';
+import { PluginStartContract as ActionsPluginStartContract } from '../../actions';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import {
   AlertType,
@@ -21,7 +21,7 @@ interface ConstructorOptions {
   isSecurityEnabled: boolean;
   getServices: GetServicesFunction;
   taskManager: TaskManager;
-  executeAction: ActionsPlugin['execute'];
+  executeAction: ActionsPluginStartContract['execute'];
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
@@ -30,7 +30,7 @@ interface ConstructorOptions {
 export class AlertTypeRegistry {
   private readonly getServices: GetServicesFunction;
   private readonly taskManager: TaskManager;
-  private readonly executeAction: ActionsPlugin['execute'];
+  private readonly executeAction: ActionsPluginStartContract['execute'];
   private readonly alertTypes: Map<string, AlertType> = new Map();
   private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   private readonly spaceIdToNamespace: SpaceIdToNamespaceFunction;

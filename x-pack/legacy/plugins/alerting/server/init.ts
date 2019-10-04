@@ -120,7 +120,7 @@ export function init(server: Server) {
     getServices,
     isSecurityEnabled: security.isEnabled,
     taskManager,
-    executeAction: server.plugins.actions.execute,
+    executeAction: server.plugins.actions.start.execute,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects,
     getBasePath,
     spaceIdToNamespace,
