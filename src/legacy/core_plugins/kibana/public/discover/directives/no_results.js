@@ -119,12 +119,12 @@ export class DiscoverNoResults extends Component {
           <EuiSpacer size="xl" />
 
           <EuiText>
-            <h3 data-test-subj="discoverNoResultsTimefilter">
+            <h2 data-test-subj="discoverNoResultsTimefilter">
               <FormattedMessage
                 id="kbn.discover.noResults.expandYourTimeRangeTitle"
                 defaultMessage="Expand your time range"
               />
-            </h3>
+            </h2>
 
             <p>
               <FormattedMessage

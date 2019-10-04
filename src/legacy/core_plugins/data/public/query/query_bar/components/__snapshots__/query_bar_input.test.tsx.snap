@@ -583,10 +583,9 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                 onOutsideClick={[Function]}
               >
                 <div
-                  aria-controls="kbnTypeahead__items"
                   aria-expanded={false}
                   aria-haspopup="true"
-                  aria-owns="kbnTypeahead__items"
+                  aria-label="Search and filter the test page"
                   onMouseDown={[Function]}
                   onMouseUp={[Function]}
                   onTouchEnd={[Function]}
@@ -611,10 +610,8 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                             onSelectLanguage={[Function]}
                           />
                         }
-                        aria-activedescendant=""
                         aria-autocomplete="list"
-                        aria-controls="kbnTypeahead__items"
-                        aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                        aria-label="Start typing to search and filter the test page"
                         autoComplete="off"
                         autoFocus={false}
                         compressed={false}
@@ -651,10 +648,8 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                             >
                               <EuiValidatableControl>
                                 <input
-                                  aria-activedescendant=""
                                   aria-autocomplete="list"
-                                  aria-controls="kbnTypeahead__items"
-                                  aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                                  aria-label="Start typing to search and filter the test page"
                                   autoComplete="off"
                                   autoFocus={false}
                                   className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
@@ -1357,10 +1352,9 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                 onOutsideClick={[Function]}
               >
                 <div
-                  aria-controls="kbnTypeahead__items"
                   aria-expanded={false}
                   aria-haspopup="true"
-                  aria-owns="kbnTypeahead__items"
+                  aria-label="Search and filter the test page"
                   onMouseDown={[Function]}
                   onMouseUp={[Function]}
                   onTouchEnd={[Function]}
@@ -1385,10 +1379,8 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                             onSelectLanguage={[Function]}
                           />
                         }
-                        aria-activedescendant=""
                         aria-autocomplete="list"
-                        aria-controls="kbnTypeahead__items"
-                        aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                        aria-label="Start typing to search and filter the test page"
                         autoComplete="off"
                         autoFocus={true}
                         compressed={false}
@@ -1425,10 +1417,8 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                             >
                               <EuiValidatableControl>
                                 <input
-                                  aria-activedescendant=""
                                   aria-autocomplete="list"
-                                  aria-controls="kbnTypeahead__items"
-                                  aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                                  aria-label="Start typing to search and filter the test page"
                                   autoComplete="off"
                                   autoFocus={true}
                                   className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
@@ -2131,10 +2121,9 @@ exports[`QueryBarInput Should render the given query 1`] = `
                 onOutsideClick={[Function]}
               >
                 <div
-                  aria-controls="kbnTypeahead__items"
                   aria-expanded={false}
                   aria-haspopup="true"
-                  aria-owns="kbnTypeahead__items"
+                  aria-label="Search and filter the test page"
                   onMouseDown={[Function]}
                   onMouseUp={[Function]}
                   onTouchEnd={[Function]}
@@ -2159,10 +2148,8 @@ exports[`QueryBarInput Should render the given query 1`] = `
                             onSelectLanguage={[Function]}
                           />
                         }
-                        aria-activedescendant=""
                         aria-autocomplete="list"
-                        aria-controls="kbnTypeahead__items"
-                        aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                        aria-label="Start typing to search and filter the test page"
                         autoComplete="off"
                         autoFocus={true}
                         compressed={false}
@@ -2199,10 +2186,8 @@ exports[`QueryBarInput Should render the given query 1`] = `
                             >
                               <EuiValidatableControl>
                                 <input
-                                  aria-activedescendant=""
                                   aria-autocomplete="list"
-                                  aria-controls="kbnTypeahead__items"
-                                  aria-label="You are on search box of Another Screen page. Start typing to search and filter the test"
+                                  aria-label="Start typing to search and filter the test page"
                                   autoComplete="off"
                                   autoFocus={true}
                                   className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"

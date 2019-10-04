@@ -17,13 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import {
-  // @ts-ignore
-  EuiCard,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexItem, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 
 import { Subscription } from 'rxjs';
 import { EuiButton } from '@elastic/eui';
@@ -96,7 +90,12 @@ export class ContactCardEmbeddableComponent extends React.Component<Props, State
 
   render() {
     return (
-      <EuiCard textAlign="left" title={this.state.fullName} footer={this.getCardFooterContent()} />
+      <EuiCard
+        textAlign="left"
+        title={this.state.fullName}
+        footer={this.getCardFooterContent()}
+        description=""
+      />
     );
   }
 }

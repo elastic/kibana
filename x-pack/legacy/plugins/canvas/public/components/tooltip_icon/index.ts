@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from '../lib/compose/kibana_compose';
-import { startApp } from './start_app';
+import { pure } from 'recompose';
+import { TooltipIcon as Component } from './tooltip_icon';
+export { IconType } from './tooltip_icon';
 
-startApp(compose());
+export const TooltipIcon = pure(Component);

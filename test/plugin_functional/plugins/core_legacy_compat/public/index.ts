@@ -17,10 +17,13 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-import { PersistedLog } from './persisted_log';
+import { npSetup } from 'ui/new_platform';
 
-uiModules.get('kibana/persisted_log')
-  .factory('PersistedLog', function () {
-    return PersistedLog;
-  });
+npSetup.core.application.register({
+  id: 'core_legacy_compat',
+  title: 'Core Legacy Compat',
+  async mount(...args) {
+    const { renderApp } = await import('./application');
+    return renderApp(...args);
+  },
+});
