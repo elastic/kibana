@@ -168,28 +168,26 @@ describe('build query', function () {
           must: [],
           filter: [
             {
-              query: {
-                bool: {
-                  must: [],
-                  filter: [
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              bytes: {
-                                gte: 2000
-                              }
+              bool: {
+                must: [],
+                filter: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          range: {
+                            bytes: {
+                              gte: 2000
                             }
                           }
-                        ],
-                        minimum_should_match: 1
-                      }
+                        }
+                      ],
+                      minimum_should_match: 1
                     }
-                  ],
-                  should: [],
-                  must_not: []
-                }
+                  }
+                ],
+                should: [],
+                must_not: []
               }
             }
           ],

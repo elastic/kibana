@@ -173,28 +173,26 @@ describe('build query', function () {
       };
       const expectedESQueries = [
         {
-          query: {
-            bool: {
-              must: [],
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      {
-                        range: {
-                          bytes: {
-                            gte: 2000
-                          }
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      range: {
+                        bytes: {
+                          gte: 2000
                         }
                       }
-                    ],
-                    minimum_should_match: 1
-                  }
+                    }
+                  ],
+                  minimum_should_match: 1
                 }
-              ],
-              should: [],
-              must_not: []
-            }
+              }
+            ],
+            should: [],
+            must_not: []
           }
         }];
       const result = buildQueryFromFilters([savedQueryFilter]);
@@ -231,41 +229,19 @@ describe('build query', function () {
         saved_query: 'Bytes more than 2000 only'
       };
       const expectedResult = {
-        '$state': { store: 'appState' },
-        meta: {
-          alias: null,
-          disabled: false,
-          key: 'Bytes more than 2000 only',
-          negate: false,
-          params: {
-            savedQuery: {
-              attributes: {
-                description: 'no filters at all',
-                query: { language: 'kuery', query: 'bytes >= 2000' },
-                title: 'Bytes more than 2000 only'
-              },
-              id: 'Bytes more than 2000 only',
-            }
-          },
-          type: 'savedQuery',
-          value: undefined,
-        },
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  minimum_should_match: 1,
-                  should: [{ range: { bytes: { gte: 2000 } } }],
-                }
+        bool: {
+          filter: [
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [{ range: { bytes: { gte: 2000 } } }],
               }
-            ],
-            must: [],
-            must_not: [],
-            should: [],
-          }
-        },
-        saved_query: 'Bytes more than 2000 only'
+            }
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        }
       };
       const result = translateToQuery(savedQueryFilter, { indexPattern });
       expect(result).to.eql(expectedResult);
@@ -328,114 +304,37 @@ describe('build query', function () {
         saved_query: 'Compound'
       };
       const expectedResult = {
-        '$state': {
-          store: 'appState'
-        },
-        meta: {
-          alias: null,
-          disabled: false,
-          key: 'Compound',
-          negate: false,
-          params: {
-            savedQuery: {
-              attributes: {
-                description: 'Compound saved query',
-                filters: [
+        bool: {
+          filter: [
+            {
+              match_all: {}
+            },
+            {
+              bool: {
+                filter: [
                   {
-                    '$state': {
-                      store: 'appState'
-                    },
-                    meta: {
-                      alias: null,
-                      disabled: false,
-                      key: 'Ok response',
-                      negate: false,
-                      params: {
-                        savedQuery: {
-                          attributes: {
-                            description: 'saved query',
-                            query: {
-                              language: 'kuery',
-                              query: 'response.keyword: 200'
-                            },
-                            title: 'Ok response',
-                          },
-                          id: 'Ok response',
-                        }
-                      },
-                      type: 'savedQuery',
-                      value: undefined,
-                    },
-                    query: {
-                      bool: {
-                        filter: [
-                          {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  match: {
-                                    'response.keyword': 200
-                                  }
-                                }
-                              ]
-                            }
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          match: {
+                            'response.keyword': 200
                           }
-                        ],
-                        must: [],
-                        must_not: [],
-                        should: []
-                      }
-                    },
-                    saved_query: 'Ok response'
+                        }
+                      ]
+                    }
                   }
                 ],
-                query: {
-                  language: 'kuery',
-                  query: ''
-                },
-                title: 'Compound'
-              },
-              id: 'Compound'
-            }
-          },
-          type: 'savedQuery',
-          value: undefined
-        },
-        query: {
-          bool: {
-            filter: [
-              {
-                match_all: {}
-              },
-              {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            match: {
-                              'response.keyword': 200
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  ],
-                  must: [],
-                  must_not: [],
-                  should: [],
-                }
+                must: [],
+                must_not: [],
+                should: [],
               }
-            ],
-            must: [],
-            must_not: [],
-            should: [],
-          }
-        },
-        saved_query: 'Compound'
+            }
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        }
       };
       const result = translateToQuery(savedQueryFilter, { indexPattern });
       expect(result).to.eql(expectedResult);

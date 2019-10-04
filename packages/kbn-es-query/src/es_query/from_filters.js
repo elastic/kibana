@@ -134,7 +134,7 @@ export const translateToQuery = function (filter, {
       { allowLeadingWildcards, queryStringOptions, dateFormatTZ, ignoreFilterIfFieldNotInIndex },
     );
 
-    filter.query = { ...convertedQuery };
+    filter = { ...convertedQuery };
   }
 
   return filter;
