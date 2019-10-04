@@ -7,7 +7,7 @@
 
 
 import _ from 'lodash';
-import { parseInterval } from 'ui/utils/parse_interval';
+import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
 
 import template from './create_watch.html';
