@@ -195,7 +195,7 @@ describe('TaskPool', () => {
     return {
       isExpired: false,
       cancel: async () => undefined,
-      claimOwnership: async () => true,
+      markTaskAsRunning: async () => true,
       run: mockRun(),
     };
   }
