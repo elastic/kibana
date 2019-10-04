@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mockManagementPlugin } from '../../../../../../../../../../management/public/np_ready/mocks';
 
 import { Flyout } from '../flyout';
 
@@ -46,6 +47,11 @@ jest.mock('../../../../../lib/resolve_saved_objects', () => ({
   resolveSavedSearches: jest.fn(),
   resolveIndexPatternConflicts: jest.fn(),
   saveObjects: jest.fn(),
+}));
+
+jest.mock('../../../../../../../../../../management/public/legacy', () => ({
+  setup: mockManagementPlugin.createSetupContract(),
+  start: mockManagementPlugin.createStartContract(),
 }));
 
 jest.mock('ui/notify', () => ({}));

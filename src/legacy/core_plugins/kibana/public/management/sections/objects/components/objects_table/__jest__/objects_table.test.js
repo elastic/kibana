@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mockManagementPlugin } from '../../../../../../../../management/public/np_ready/mocks';
 
 import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
 import { Flyout } from '../components/flyout/';
@@ -26,6 +27,11 @@ import { Relationships } from '../components/relationships/';
 import { findObjects } from '../../../lib';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+
+jest.mock('../../../../../../../../management/public/legacy', () => ({
+  setup: mockManagementPlugin.createSetupContract(),
+  start: mockManagementPlugin.createStartContract(),
+}));
 
 jest.mock('../../../lib/find_objects', () => ({
   findObjects: jest.fn(),
