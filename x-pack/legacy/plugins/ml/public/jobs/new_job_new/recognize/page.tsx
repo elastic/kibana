@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, FormEvent, useEffect, useState } from 'react';
+import React, { FC, FormEvent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiPage,
   EuiPageBody,
@@ -22,28 +23,50 @@ import {
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiFieldText,
-  EuiComboBox,
   EuiListGroupItem,
   EuiListGroup,
   EuiCheckbox,
   EuiAccordion,
   EuiButton,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiIcon,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ml } from 'plugins/ml/services/ml_api_service';
-import _ from 'lodash';
+import { merge } from 'lodash';
 import { flatten } from 'lodash';
 import { useKibanaContext } from '../../../contexts/kibana';
-import { KibanaObjects, Module, ModuleJob } from '../../../../common/types/modules';
+import {
+  DataRecognizerConfigResponse,
+  KibanaObject,
+  KibanaObjectResponse,
+  Module,
+  ModuleJob,
+} from '../../../../common/types/modules';
 import { TimeRangePicker } from '../pages/components/time_range_step/time_range_picker';
 import { TimeRange } from '../pages/components/time_range_step/time_range';
 import { getTimeFilterRange } from '../../../components/full_time_range_selector';
 import { JobGroupsInput } from '../pages/components/job_details_step/components/groups/job_groups_input';
+import { mlJobService } from '../../../services/job_service';
+
+type KibanaObjectUi = KibanaObject & KibanaObjectResponse;
+
+export interface KibanaObjects {
+  [objectType: string]: KibanaObjectUi[];
+}
 
 interface PageProps {
   module: Module;
   existingGroupIds: string[];
+}
+
+enum SAVE_STATE {
+  NOT_SAVED = 'NOT_SAVED',
+  SAVING = 'SAVING',
+  SAVED = 'SAVED',
+  FAILED = 'FAILED',
+  PARTIAL_FAILURE = 'PARTIAL_FAILURE',
 }
 
 export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
@@ -60,9 +83,7 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
     }),
   };
 
-  const { jobs, kibana: kibanaObjects } = module;
-
-  // region state
+  // region State
   const [jobPrefix, setJobPrefix] = useState<string>('');
   const [startDatafeedAfterSave, setStartDatafeedAfterSave] = useState<boolean>(true);
   const [useFullIndexData, setUseFullIndexData] = useState<boolean>(true);
@@ -74,6 +95,10 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
   const [jobGroups, setJobGroups] = useState<string[]>([
     ...new Set(flatten(module.jobs.map(({ config: { groups = [] } }) => groups))),
   ]);
+  const [jobs, setJobs] = useState<ModuleJob[]>(module.jobs);
+  const [kibanaObjects, setKibanaObjects] = useState<KibanaObjects>(module.kibana as KibanaObjects);
+  const [saveState, setSaveState] = useState<SAVE_STATE>(SAVE_STATE.NOT_SAVED);
+  const [resultsUrl, setResultsUrl] = useState<string>('');
   // endregion
 
   const onJobPrefixChange = (value: string) => {
@@ -100,8 +125,9 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
 
   const save = async (event: FormEvent) => {
     event.preventDefault();
+    setSaveState(SAVE_STATE.SAVING);
     try {
-      const response = await ml.setupDataRecognizerConfig({
+      const response: DataRecognizerConfigResponse = await ml.setupDataRecognizerConfig({
         moduleId: module.id,
         prefix: jobPrefix,
         groups: jobGroups,
@@ -110,8 +136,18 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
         useDedicatedIndex,
         startDatafeed: startDatafeedAfterSave,
       });
+      setSaveState(SAVE_STATE.SAVED);
+      // eslint-disable-next-line no-console
       console.info(response);
+
+      const { datafeeds: datafeedsResponse, jobs: jobsResponse, kibana: kibanaResponse } = response;
+
+      setKibanaObjects(merge(kibanaObjects, kibanaResponse));
+
+      setResultsUrl(mlJobService.createResultsUrl([], timeRange.start, timeRange.end, 'explorer'));
     } catch (ex) {
+      setSaveState(SAVE_STATE.FAILED);
+      // eslint-disable-next-line no-console
       console.error(ex);
     }
   };
@@ -274,7 +310,82 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
                     </EuiFormRow>
                   </EuiAccordion>
                   <EuiSpacer size="l" />
-                  <EuiButton fill type="submit">
+                  {saveState === SAVE_STATE.SAVED && (
+                    <EuiCallOut
+                      title={
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.jobsCreatedTitle"
+                          defaultMessage="Jobs created"
+                        />
+                      }
+                      color="success"
+                      iconType="checkInCircleFilled"
+                    />
+                  )}
+                  {saveState === SAVE_STATE.FAILED && (
+                    <EuiCallOut
+                      title={
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.jobsCreationFailed.saveFailedAriaLabel"
+                          defaultMessage="Save failed"
+                        />
+                      }
+                      color="danger"
+                      iconType="alert"
+                    >
+                      <EuiButton
+                        color="danger"
+                        aria-label={i18n.translate(
+                          'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
+                          { defaultMessage: 'Reset' }
+                        )}
+                      >
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.jobsCreationFailed.resetButtonLabel"
+                          defaultMessage="Jobs creation failed"
+                        />
+                      </EuiButton>
+                    </EuiCallOut>
+                  )}
+                  {saveState === SAVE_STATE.PARTIAL_FAILURE && (
+                    <EuiCallOut
+                      title={
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.someJobsCreationFailedTitle"
+                          defaultMessage="Some jobs failed to be created"
+                        />
+                      }
+                      color="warning"
+                      iconType="alert"
+                    >
+                      <EuiButton
+                        color="warning"
+                        aria-label={i18n.translate(
+                          'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
+                          { defaultMessage: 'Reset' }
+                        )}
+                      >
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.someJobsCreationFailed.resetButtonLabel"
+                          defaultMessage="Reset"
+                        />
+                      </EuiButton>
+                      <EuiLink
+                        href={resultsUrl}
+                        aria-label={i18n.translate(
+                          'xpack.ml.newJob.simple.recognize.viewResultsAriaLabel',
+                          { defaultMessage: 'View Results' }
+                        )}
+                      >
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.viewResultsLinkText"
+                          defaultMessage="View Results"
+                        />
+                      </EuiLink>
+                    </EuiCallOut>
+                  )}
+                  <EuiSpacer size="l" />
+                  <EuiButton fill type="submit" isLoading={saveState === SAVE_STATE.SAVING}>
                     <FormattedMessage
                       id="xpack.ml.newJob.simple.recognize.createJobButtonAriaLabel"
                       defaultMessage="Create Job"
@@ -300,15 +411,20 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
                   <EuiListGroupItem
                     key={id}
                     label={
-                      <>
-                        <EuiText size="s" color="secondary">
-                          {jobPrefix}
-                          {id}
-                        </EuiText>
-                        <EuiText size="s" color="subdued">
-                          {description}
-                        </EuiText>
-                      </>
+                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                        <EuiFlexItem>
+                          {saveState === SAVE_STATE.SAVING && <EuiLoadingSpinner size="m" />}
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="s" color="secondary">
+                            {jobPrefix}
+                            {id}
+                          </EuiText>
+                          <EuiText size="s" color="subdued">
+                            {description}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     }
                   />
                 ))}
@@ -325,21 +441,40 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
                   <h4>{kibanaObjectLabels[objectType]}</h4>
                 </EuiTitle>
                 <EuiListGroup bordered={false} flush={true}>
-                  {kibanaObjects[objectType].map(({ id, title }) => (
-                    <EuiListGroupItem
-                      key={id}
-                      label={
-                        <>
-                          <EuiText size="s" color="secondary">
-                            {id}
-                          </EuiText>
-                          <EuiText size="s" color="subdued">
-                            {title}
-                          </EuiText>
-                        </>
-                      }
-                    />
-                  ))}
+                  {Array.isArray(kibanaObjects[objectType]) &&
+                    kibanaObjects[objectType].map(({ id, title, exists, success }) => (
+                      <EuiListGroupItem
+                        key={id}
+                        label={
+                          <EuiFlexGroup alignItems="center" gutterSize="s">
+                            <EuiFlexItem>
+                              {saveState === SAVE_STATE.SAVING ? (
+                                <EuiLoadingSpinner size="m" />
+                              ) : null}
+                              {success !== undefined ? (
+                                <EuiIcon
+                                  type={success ? 'check' : 'cross'}
+                                  color={success ? 'success' : 'danger'}
+                                />
+                              ) : null}
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <EuiText size="s" color="secondary">
+                                {title}
+                              </EuiText>
+                              {exists && (
+                                <EuiText size="xs" color="danger">
+                                  <FormattedMessage
+                                    id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
+                                    defaultMessage="(already exists)"
+                                  />
+                                </EuiText>
+                              )}
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        }
+                      />
+                    ))}
                 </EuiListGroup>
               </EuiPanel>
             </EuiFlexItem>

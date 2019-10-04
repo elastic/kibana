@@ -24,9 +24,6 @@ export interface KibanaObject {
 
 export interface KibanaObjects {
   [objectType: string]: KibanaObject[] | undefined;
-  search?: KibanaObject[];
-  visualization?: KibanaObject[];
-  dashboard?: KibanaObject[];
 }
 
 /**
@@ -43,4 +40,42 @@ export interface Module {
   jobs: ModuleJob[];
   datafeeds: Datafeed[];
   kibana: KibanaObjects;
+}
+
+export interface KibanaObjectResponse {
+  exists?: boolean;
+  success?: boolean;
+  id: string;
+}
+
+export interface SetupError {
+  body: string;
+  msg: string;
+  path: string;
+  query: {};
+  response: string;
+  statusCode: number;
+}
+
+export interface DatafeedResponse {
+  id: string;
+  success: boolean;
+  started: boolean;
+  error?: SetupError;
+}
+
+export interface JobdResponse {
+  id: string;
+  success: boolean;
+  error?: SetupError;
+}
+
+export interface DataRecognizerConfigResponse {
+  datafeeds: DatafeedResponse[];
+  jobs: JobdResponse[];
+  kibana: {
+    search: KibanaObjectResponse;
+    visualization: KibanaObjectResponse;
+    dashboard: KibanaObjectResponse;
+  };
 }
