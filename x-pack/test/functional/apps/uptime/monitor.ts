@@ -12,6 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const archive = 'uptime/full_heartbeat';
 
   describe('monitor page', function() {
+    this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.load(archive);
     });
