@@ -117,6 +117,7 @@ export function getCreateTaskRunnerFunction({
         };
 
         const alertTypeState = await alertType.executor({
+          id: alertId,
           services: alertTypeServices,
           params: validatedAlertTypeParams,
           state: taskInstance.state.alertTypeState || {},
