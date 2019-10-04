@@ -24,7 +24,7 @@ import elasticsearch from 'elasticsearch';
 import { DEFAULT_API_VERSION } from '../../../src/core/server/elasticsearch/elasticsearch_config';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function EsProvider({ getService }: FtrProviderContext): elasticsearch.Client {
+export function LegacyEsProvider({ getService }: FtrProviderContext): elasticsearch.Client {
   const config = getService('config');
 
   return new elasticsearch.Client({
