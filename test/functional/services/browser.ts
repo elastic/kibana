@@ -322,6 +322,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Moves forwards in the browser history.
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#forward
+     */
+    public async goForward() {
+      await driver.navigate().forward();
+    }
+
+    /**
      * Sends a sequance of keyboard keys. For each key, this will record a pair of keyDown and keyUp actions
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#sendKeys
      *
