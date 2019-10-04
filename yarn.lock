@@ -26763,7 +26763,7 @@ tape@^4.5.1:
     string.prototype.trim "~1.1.2"
     through "~2.3.8"
 
-tar-fs@^1.16.2, tar-fs@^1.16.3:
+tar-fs@^1.16.3:
   version "1.16.3"
   resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-1.16.3.tgz#966a628841da2c4010406a82167cbd5e0c72d509"
   integrity sha512-NvCeXpYx7OsmOh8zIOP/ebG55zZmxLE0etfWRbWok+q2Qo8x/vOR/IJT1taADXPe+jsiu9axDb3X4B+iIgNlKw==
