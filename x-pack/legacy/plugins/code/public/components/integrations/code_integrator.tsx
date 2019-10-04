@@ -28,7 +28,7 @@ export const CodeIntegrator = ({ onRepoSelect, onImportSuccess, repos }: Props) 
 
   const link = (
     <EuiButtonEmpty
-      className="integrations__link--external"
+      className="codeIntegrations__link--external"
       iconType="codeApp"
       onClick={handleClick}
     >
@@ -43,7 +43,7 @@ export const CodeIntegrator = ({ onRepoSelect, onImportSuccess, repos }: Props) 
       isOpen={showSelector}
       closePopover={() => setShowSelector(false)}
     >
-      <EuiText size="s" className="integrations__popover">
+      <EuiText size="s" className="codeIntegrations__popover">
         <h3>No repository mapping found</h3>
         <p>
           We can't find the mapping between service and the source code. Select the repository or

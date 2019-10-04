@@ -15,7 +15,7 @@ import { externalFileURI } from './helpers';
 import { frames, results } from './data';
 
 export const Integrations = () => (
-  <div className="codeContainer__root integrations__container">
+  <div className="codeContainer__root codeIntegrations__container">
     {frames.map(frame => {
       const { fileName, lineNumber } = frame;
       const key = `${fileName}#L${lineNumber}`;
@@ -27,7 +27,7 @@ export const Integrations = () => (
         const fileUrl = externalFileURI(uri, filePath);
 
         return (
-          <div key={key} className="integrations__frame">
+          <div key={key} className="codeIntegrations__frame">
             <RepoTitle uri={snippet.uri} />
             <CodeBlock
               content={content}
@@ -46,11 +46,11 @@ export const Integrations = () => (
       }
 
       return (
-        <div key={key} className="integrations__frame">
+        <div key={key} className="codeIntegrations__frame">
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
-            <EuiText size="s" className="integrations__code">
+            <EuiText size="s" className="codeIntegrations__code">
               <span>{fileName}</span>
-              <span className="integrations__preposition">at</span>
+              <span className="codeIntegrations__preposition">at</span>
               <span>line {lineNumber}</span>
             </EuiText>
           </EuiFlexGroup>

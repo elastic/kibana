@@ -1,43 +1,43 @@
-.integrations__container {
+.codeIntegrations__container {
   padding: $euiSize;
 }
 
-.integrations__frame {
+.codeIntegrations__frame {
   margin: $euiSizeS 0;
 }
 
-.integrations__code {
+.codeIntegrations__code {
   @include euiCodeFont;
 }
 
-.integrations__link--external {
+.codeIntegrations__link--external {
   margin-left: $euiSizeS;
 }
 
-.integrations__preposition {
+.codeIntegrations__preposition {
   margin: 0 $euiSizeS;
   color: $euiColorMediumShade;
 }
 
-.integrations__button-icon {
+.codeIntegrations__button-icon {
   padding: $euiSizeXS;
   background-color: $euiColorLightestShade;
   border: 1px solid $euiColorLightShade;
 }
 
-.integrations__snippet-info {
+.codeIntegrations__snippet-info {
   margin-bottom: $euiSizeS;
 }
 
-.integrations__snippet-title {
+.codeIntegrations__snippet-title {
   margin-bottom: $euiSizeS;
 }
 
-.integrations__text--bold {
+.codeIntegrations__text--bold {
   font-weight: $euiFontWeightBold;
 }
 
-.integrations__popover {
+.codeIntegrations__popover {
   margin-bottom: 1rem;
   width: 300px;
 }
