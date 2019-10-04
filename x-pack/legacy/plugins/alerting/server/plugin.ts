@@ -54,7 +54,10 @@ export class Plugin {
     this.taskRunnerFactory = new TaskRunnerFactory();
   }
 
-  public async setup(core: AlertingCoreSetup, plugins: AlertingPluginsSetup) {
+  public async setup(
+    core: AlertingCoreSetup,
+    plugins: AlertingPluginsSetup
+  ): Promise<PluginSetupContract> {
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
     plugins.xpack_main.registerFeature({
@@ -120,7 +123,7 @@ export class Plugin {
     };
   }
 
-  public start(core: AlertingCoreStart, plugins: AlertingPluginsStart) {
+  public start(core: AlertingCoreStart, plugins: AlertingPluginsStart): PluginStartContract {
     const { adminClient, serverBasePath } = this;
 
     const alertsClientFactory = new AlertsClientFactory({
