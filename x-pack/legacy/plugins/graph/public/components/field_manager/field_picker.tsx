@@ -28,8 +28,6 @@ export function FieldPicker({
   setOpen,
 }: FieldPickerProps) {
   const allFields = Object.values(fieldMap);
-  const unselectedFields = allFields.filter(field => !field.selected);
-  const hasSelectedFields = unselectedFields.length < allFields.length;
 
   const hasFields = allFields.length > 0;
 
