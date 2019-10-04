@@ -698,6 +698,23 @@ export class SavedObjectsRepository {
 
     const { version, namespace, references, refresh = DEFAULT_REFRESH_SETTING } = options;
 
+    // Instead of the get, we could always do an _update_by_query
+    const getResponse = await this._callCluster('get', {
+      id: this._serializer.generateRawId(namespace, type, id),
+      index: this.getIndexForType(type),
+      ignore: [404],
+    });
+
+    const getDocNotFound = getResponse.found === false;
+    const getIndexNotFound = getResponse.status === 404;
+    if (
+      getDocNotFound ||
+      getIndexNotFound ||
+      !this._rawInNamespace(getResponse, options.namespace)
+    ) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
     const time = this._getCurrentTime();
 
     const doc = {
@@ -709,7 +726,7 @@ export class SavedObjectsRepository {
       delete doc.references;
     }
 
-    const response = await this._writeToCluster('update', {
+    const updateResponse = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
       ...(version && decodeRequestVersion(version)),
@@ -720,7 +737,7 @@ export class SavedObjectsRepository {
       },
     });
 
-    if (response.status === 404) {
+    if (updateResponse.status === 404) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -729,7 +746,7 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
-      version: encodeHitVersion(response),
+      version: encodeHitVersion(updateResponse),
       references,
       attributes,
     };
