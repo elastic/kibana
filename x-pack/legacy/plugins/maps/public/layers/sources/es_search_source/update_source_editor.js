@@ -201,8 +201,8 @@ export class UpdateSourceEditor extends Component {
               <EuiSelect
                 disabled={!this.props.sortField}
                 options={[
-                  { label: 'ASC', value: SORT_ORDER.ASC },
-                  { label: 'DESC', value: SORT_ORDER.DESC }
+                  { text: 'ASC', value: SORT_ORDER.ASC },
+                  { text: 'DESC', value: SORT_ORDER.DESC }
                 ]}
                 value={this.props.sortOrder}
                 onChange={this.onSortOrderChange}
