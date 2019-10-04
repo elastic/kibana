@@ -7,12 +7,12 @@
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecutorType } from './types';
-import { ExecutorError, TaskRunnerFactory } from './lib';
+import { ActionExecutor, ExecutorError, TaskRunnerFactory } from './lib';
 
 const mockTaskManager = taskManagerMock.create();
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
-  taskRunnerFactory: new TaskRunnerFactory(),
+  taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
 };
 
 beforeEach(() => jest.resetAllMocks());

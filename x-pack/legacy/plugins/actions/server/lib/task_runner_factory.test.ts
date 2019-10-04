@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./execute', () => ({
-  execute: jest.fn(),
-}));
-
 import sinon from 'sinon';
 import { ExecutorError } from './executor_error';
+import { ActionExecutor } from './action_executor';
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
+import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import {
   SavedObjectsClientMock,
@@ -22,6 +20,7 @@ import {
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
+const mockedActionExecutor = actionExecutorMock.create();
 
 let fakeTimer: sinon.SinonFakeTimers;
 let taskRunnerFactory: TaskRunnerFactory;
@@ -44,7 +43,8 @@ beforeAll(() => {
     },
     taskType: 'actions:1',
   };
-  taskRunnerFactory = new TaskRunnerFactory();
+  taskRunnerFactory = new TaskRunnerFactory(mockedActionExecutor);
+  mockedActionExecutor.initialize(actionExecutorInitializerParams);
   taskRunnerFactory.initialize(taskRunnerFactoryInitializerParams);
 });
 
@@ -55,10 +55,14 @@ const services = {
   callCluster: jest.fn(),
   savedObjectsClient: SavedObjectsClientMock.create(),
 };
-const taskRunnerFactoryInitializerParams = {
+const actionExecutorInitializerParams = {
   logger: loggingServiceMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
+  spaces: () => undefined,
+  encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
+};
+const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
   getBasePath: jest.fn().mockReturnValue(undefined),
@@ -67,18 +71,18 @@ const taskRunnerFactoryInitializerParams = {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  taskRunnerFactoryInitializerParams.getServices.mockReturnValue(services);
+  actionExecutorInitializerParams.getServices.mockReturnValue(services);
 });
 
 test(`throws an error if factory isn't initialized`, () => {
-  const factory = new TaskRunnerFactory();
+  const factory = new TaskRunnerFactory(new ActionExecutor());
   expect(() =>
     factory.create({ taskInstance: mockedTaskInstance })
   ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
 });
 
 test(`throws an error if factory is already initialized`, () => {
-  const factory = new TaskRunnerFactory();
+  const factory = new TaskRunnerFactory(new ActionExecutor());
   factory.initialize(taskRunnerFactoryInitializerParams);
   expect(() =>
     factory.initialize(taskRunnerFactoryInitializerParams)
@@ -86,12 +90,11 @@ test(`throws an error if factory is already initialized`, () => {
 });
 
 test('executes the task by calling the executor with proper parameters', async () => {
-  const { execute: mockExecute } = jest.requireMock('./execute');
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
 
-  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -113,18 +116,20 @@ test('executes the task by calling the executor with proper parameters', async (
     '3',
     { namespace: 'namespace-test' }
   );
-  expect(mockExecute).toHaveBeenCalledWith({
-    namespace: 'namespace-test',
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
-    actionTypeRegistry,
-    encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
-    services: expect.anything(),
     params: { baz: true },
+    request: {
+      getBasePath: expect.any(Function),
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    },
   });
 });
 
 test('throws an error with suggested retry logic when return status is error', async () => {
-  const { execute: mockExecute } = jest.requireMock('./execute');
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -139,7 +144,7 @@ test('throws an error with suggested retry logic when return status is error', a
     },
     references: [],
   });
-  mockExecute.mockResolvedValueOnce({
+  mockedActionExecutor.execute.mockResolvedValueOnce({
     status: 'error',
     message: 'Error message',
     data: { foo: true },
@@ -157,12 +162,11 @@ test('throws an error with suggested retry logic when return status is error', a
 });
 
 test('uses API key when provided', async () => {
-  const { execute: mockExecute } = jest.requireMock('./execute');
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
 
-  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -177,25 +181,28 @@ test('uses API key when provided', async () => {
 
   await taskRunner.run();
 
-  expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith({
-    getBasePath: expect.anything(),
-    headers: {
-      // base64 encoded "123:abc"
-      authorization: 'ApiKey MTIzOmFiYw==',
-    },
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '2',
+    params: { baz: true },
+    request: {
+      getBasePath: expect.anything(),
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    }
   });
 });
 
 test(`doesn't use API key when not provided`, async () => {
-  const { execute: mockExecute } = jest.requireMock('./execute');
-  const factory = new TaskRunnerFactory();
+  const factory = new TaskRunnerFactory(mockedActionExecutor);
   factory.initialize({
     ...taskRunnerFactoryInitializerParams,
     isSecurityEnabled: false,
   });
   const taskRunner = factory.create({ taskInstance: mockedTaskInstance });
 
-  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -209,22 +216,25 @@ test(`doesn't use API key when not provided`, async () => {
 
   await taskRunner.run();
 
-  expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith({
-    getBasePath: expect.anything(),
-    headers: {},
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '2',
+    params: { baz: true },
+    request: {
+      getBasePath: expect.anything(),
+      headers: {},
+    },
   });
 });
 
 test(`doesn't use API key when provided and isSecurityEnabled is set to false`, async () => {
-  const { execute: mockExecute } = jest.requireMock('./execute');
-  const factory = new TaskRunnerFactory();
+  const factory = new TaskRunnerFactory(mockedActionExecutor);
   factory.initialize({
     ...taskRunnerFactoryInitializerParams,
     isSecurityEnabled: false,
   });
   const taskRunner = factory.create({ taskInstance: mockedTaskInstance });
 
-  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -239,19 +249,22 @@ test(`doesn't use API key when provided and isSecurityEnabled is set to false`, 
 
   await taskRunner.run();
 
-  expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith({
-    getBasePath: expect.anything(),
-    headers: {},
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '2',
+    params: { baz: true },
+    request: {
+      getBasePath: expect.anything(),
+      headers: {},
+    },
   });
 });
 
 test(`throws an error when isSecurityEnabled is true but key isn't provided`, async () => {
-  const { execute: mockExecute } = jest.requireMock('./execute');
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
 
-  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',

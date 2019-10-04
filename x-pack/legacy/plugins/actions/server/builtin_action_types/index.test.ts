@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaskRunnerFactory } from '../lib';
+import { ActionExecutor, TaskRunnerFactory } from '../lib';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
@@ -27,7 +27,7 @@ export function createActionTypeRegistry(): {
   const logger = loggingServiceMock.create().get() as jest.Mocked<Logger>;
   const actionTypeRegistry = new ActionTypeRegistry({
     taskManager: taskManagerMock.create(),
-    taskRunnerFactory: new TaskRunnerFactory(),
+    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
   });
   registerBuiltInActionTypes({
     logger,

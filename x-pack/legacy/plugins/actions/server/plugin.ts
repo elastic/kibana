@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { first } from 'rxjs/operators';
 import { Services } from './types';
-import { TaskRunnerFactory } from './lib';
+import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
@@ -29,7 +29,7 @@ import {
   getActionRoute,
   updateActionRoute,
   listActionTypesRoute,
-  // getExecuteActionRoute,
+  getExecuteActionRoute,
 } from './routes';
 
 export interface PluginSetupContract {
@@ -48,6 +48,7 @@ export class Plugin {
   private adminClient?: ClusterClient;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
+  private actionExecutor?: ActionExecutor;
 
   constructor(initializerContext: ActionsPluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
@@ -99,7 +100,8 @@ export class Plugin {
       attributesToEncrypt: new Set(['apiKey']),
     });
 
-    const taskRunnerFactory = new TaskRunnerFactory();
+    const actionExecutor = new ActionExecutor();
+    const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
     const actionTypeRegistry = new ActionTypeRegistry({
       taskRunnerFactory,
       taskManager: plugins.task_manager,
@@ -107,6 +109,7 @@ export class Plugin {
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
     this.serverBasePath = core.http.basePath.serverBasePath;
+    this.actionExecutor = actionExecutor;
 
     registerBuiltInActionTypes({
       logger: this.logger,
@@ -121,15 +124,7 @@ export class Plugin {
     core.http.route(findActionRoute);
     core.http.route(updateActionRoute);
     core.http.route(listActionTypesRoute);
-    // core.http.route(
-    //   getExecuteActionRoute({
-    //     logger: this.logger,
-    //     actionTypeRegistry,
-    //     getServices,
-    //     encryptedSavedObjects: server.plugins.encrypted_saved_objects,
-    //     spaces: server.plugins.spaces,
-    //   })
-    // );
+    core.http.route(getExecuteActionRoute(actionExecutor));
 
     return {
       registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
@@ -137,7 +132,14 @@ export class Plugin {
   }
 
   public start(core: ActionsCoreStart, plugins: ActionsPluginsStart): PluginStartContract {
-    const { actionTypeRegistry, adminClient, serverBasePath, taskRunnerFactory } = this;
+    const {
+      logger,
+      actionExecutor,
+      actionTypeRegistry,
+      adminClient,
+      serverBasePath,
+      taskRunnerFactory,
+    } = this;
 
     function getServices(request: any): Services {
       return {
@@ -155,10 +157,14 @@ export class Plugin {
       return spacesPlugin && spaceId ? spacesPlugin.getBasePath(spaceId) : serverBasePath!;
     }
 
-    taskRunnerFactory!.initialize({
-      logger: this.logger,
+    actionExecutor!.initialize({
+      logger,
+      spaces: plugins.spaces,
       getServices,
+      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
       actionTypeRegistry: actionTypeRegistry!,
+    });
+    taskRunnerFactory!.initialize({
       encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
       getBasePath,
       spaceIdToNamespace,

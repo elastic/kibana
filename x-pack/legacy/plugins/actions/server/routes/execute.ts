@@ -6,11 +6,7 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
-import { execute } from '../lib';
-import { SpacesPlugin } from '../../../spaces';
-import { ActionTypeRegistryContract, GetServicesFunction } from '../types';
-import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
-import { Logger } from '../../../../../../src/core/server';
+import { ActionExecutorContract } from '../lib';
 
 interface ExecuteRequest extends Hapi.Request {
   params: {
@@ -21,21 +17,7 @@ interface ExecuteRequest extends Hapi.Request {
   };
 }
 
-interface ExecuteRouteOptions {
-  logger: Logger;
-  spaces?: SpacesPlugin;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  getServices: GetServicesFunction;
-  encryptedSavedObjects: EncryptedSavedObjectsPlugin;
-}
-
-export function getExecuteActionRoute({
-  logger,
-  actionTypeRegistry,
-  getServices,
-  encryptedSavedObjects,
-  spaces,
-}: ExecuteRouteOptions) {
+export function getExecuteActionRoute(actionExecutor: ActionExecutorContract) {
   return {
     method: 'POST',
     path: '/api/action/{id}/_execute',
@@ -63,17 +45,11 @@ export function getExecuteActionRoute({
     async handler(request: ExecuteRequest, h: Hapi.ResponseToolkit) {
       const { id } = request.params;
       const { params } = request.payload;
-      const namespace = spaces && spaces.getSpaceId(request);
-      const result = await execute({
-        logger,
+      return await actionExecutor.execute({
         params,
-        actionTypeRegistry,
+        request,
         actionId: id,
-        namespace: namespace === 'default' ? undefined : namespace,
-        services: getServices(request),
-        encryptedSavedObjectsPlugin: encryptedSavedObjects,
       });
-      return result;
     },
   };
 }

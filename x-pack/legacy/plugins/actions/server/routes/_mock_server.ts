@@ -38,8 +38,14 @@ export function createMockServer(config: Record<string, any> = defaultConfig) {
   server.register({
     name: 'actions',
     register(pluginServer: Hapi.Server) {
-      pluginServer.expose('registerType', actionTypeRegistry.register);
-      pluginServer.expose('listTypes', actionTypeRegistry.list);
+      pluginServer.expose({
+        setup: {
+          registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
+        },
+        start: {
+          listTypes: actionTypeRegistry.list.bind(actionTypeRegistry),
+        },
+      });
     },
   });
 

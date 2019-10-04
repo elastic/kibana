@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ActionsClient } from './actions_client';
 import { ExecutorType } from './types';
-import { TaskRunnerFactory } from './lib';
+import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
@@ -19,7 +19,7 @@ const mockTaskManager = taskManagerMock.create();
 
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
-  taskRunnerFactory: new TaskRunnerFactory(),
+  taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
 };
 
 const executor: ExecutorType = async options => {

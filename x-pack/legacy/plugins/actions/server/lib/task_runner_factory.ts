@@ -4,23 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { execute } from './execute';
+import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
 import { RunContext } from '../../../task_manager';
 import { EncryptedSavedObjectsStartContract } from '../shim';
-import { Logger } from '../../../../../../src/core/server';
-import {
-  ActionTaskParams,
-  ActionTypeRegistryContract,
-  GetBasePathFunction,
-  GetServicesFunction,
-  SpaceIdToNamespaceFunction,
-} from '../types';
+import { ActionTaskParams, GetBasePathFunction, SpaceIdToNamespaceFunction } from '../types';
 
 export interface TaskRunnerContext {
-  logger: Logger;
-  getServices: GetServicesFunction;
-  actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
@@ -30,6 +20,11 @@ export interface TaskRunnerContext {
 export class TaskRunnerFactory {
   private isInitialized = false;
   private taskRunnerContext?: TaskRunnerContext;
+  private readonly actionExecutor: ActionExecutorContract;
+
+  constructor(actionExecutor: ActionExecutorContract) {
+    this.actionExecutor = actionExecutor;
+  }
 
   public initialize(taskRunnerContext: TaskRunnerContext) {
     if (this.isInitialized) {
@@ -44,10 +39,8 @@ export class TaskRunnerFactory {
       throw new Error('TaskRunnerFactory not initialized');
     }
 
+    const { actionExecutor } = this;
     const {
-      logger,
-      getServices,
-      actionTypeRegistry,
       encryptedSavedObjectsPlugin,
       spaceIdToNamespace,
       getBasePath,
@@ -81,14 +74,10 @@ export class TaskRunnerFactory {
           getBasePath: () => getBasePath(spaceId),
         };
 
-        const executorResult = await execute({
-          logger,
-          namespace,
-          actionTypeRegistry,
-          encryptedSavedObjectsPlugin,
-          actionId,
-          services: getServices(fakeRequest),
+        const executorResult = await actionExecutor.execute({
           params,
+          actionId,
+          request: fakeRequest,
         });
         if (executorResult.status === 'error') {
           // Task manager error handler only kicks in when an error thrown (at this time)
