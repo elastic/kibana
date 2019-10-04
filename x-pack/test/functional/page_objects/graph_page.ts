@@ -28,6 +28,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
 
   class GraphPage {
     async selectIndexPattern(pattern: string) {
+      await testSubjects.click('graphDatasourceButton');
       await testSubjects.click(`savedObjectTitle${pattern.split(' ').join('-')}`);
     }
 
