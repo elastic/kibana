@@ -56,8 +56,10 @@ export abstract class FieldFormat {
   /**
    * @property {FieldFormatConvert}
    * @private
+   * have to remove the private because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
    */
-  private convertObject: FieldFormatConvert | undefined;
+  convertObject: FieldFormatConvert | undefined;
 
   /**
    * @property {Function} - ref to child class
@@ -171,7 +173,11 @@ export abstract class FieldFormat {
     return createCustomFieldFormat(convertFn);
   }
 
-  private static setupContentType(
+  /*
+   * have to remove the private because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
+  static setupContentType(
     fieldFormat: IFieldFormat,
     convert: Partial<FieldFormatConvert> | FieldFormatConvertFunction = {}
   ): FieldFormatConvert {
@@ -185,7 +191,11 @@ export abstract class FieldFormat {
     };
   }
 
-  private static toConvertObject(convert: FieldFormatConvertFunction): Partial<FieldFormatConvert> {
+  /*
+   * have to remove the private because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
+  static toConvertObject(convert: FieldFormatConvertFunction): Partial<FieldFormatConvert> {
     if (isFieldFormatConvertFn(convert)) {
       return {
         [TEXT_CONTEXT_TYPE]: convert,

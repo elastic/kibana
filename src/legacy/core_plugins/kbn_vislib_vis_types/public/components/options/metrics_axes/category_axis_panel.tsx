@@ -59,12 +59,12 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.xAxisTitle"
             defaultMessage="X-axis"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 

@@ -18,6 +18,7 @@
  */
 
 import { delay } from 'bluebird';
+
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
@@ -272,6 +273,10 @@ describe('SavedObjectsRepository', () => {
 
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
+      cacheIndexPatterns: {
+        setIndexPatterns: jest.fn(),
+        getIndexPatterns: () => undefined,
+      },
       mappings,
       callCluster: callAdminCluster,
       migrator,
@@ -285,7 +290,7 @@ describe('SavedObjectsRepository', () => {
     getSearchDslNS.getSearchDsl.mockReset();
   });
 
-  afterEach(() => {});
+  afterEach(() => { });
 
   describe('#create', () => {
     beforeEach(() => {
@@ -993,7 +998,7 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
-    it('should return objects in the same order regardless of type', () => {});
+    it('should return objects in the same order regardless of type', () => { });
   });
 
   describe('#delete', () => {
@@ -1154,6 +1159,13 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
+    it('requires index pattern to be defined if filter is defined', async () => {
+      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
+      expect(savedObjectsRepository.find({ type: 'foo', filter: 'foo.type: hello' }))
+        .rejects
+        .toThrowErrorMatchingInlineSnapshot('"options.filter is missing index pattern to work correctly: Bad Request"');
+    });
+
     it('passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl',
       async () => {
         callAdminCluster.mockReturnValue(namespacedSearchResults);
@@ -1169,6 +1181,8 @@ describe('SavedObjectsRepository', () => {
             type: 'foo',
             id: '1',
           },
+          indexPattern: undefined,
+          kueryNode: null,
         };
 
         await savedObjectsRepository.find(relevantOpts);
