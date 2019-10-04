@@ -49,7 +49,7 @@ def getPostBuildWorker(name, closure) {
     def esTransportPort = "61${workerNumber}3"
 
     withEnv([
-      "CI_WORKER_NUMBER=${workerNumber}",
+      "PARALLEL_PIPELINE_WORKER_INDEX=${workerNumber}",
       "TEST_KIBANA_HOST=localhost",
       "TEST_KIBANA_PORT=${kibanaPort}",
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
