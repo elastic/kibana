@@ -13,8 +13,11 @@ import { ExecutorError } from './executor_error';
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
+import {
+  SavedObjectsClientMock,
+  loggingServiceMock,
+} from '../../../../../../src/core/server/mocks';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -53,6 +56,7 @@ const services = {
   savedObjectsClient: SavedObjectsClientMock.create(),
 };
 const taskRunnerFactoryInitializerParams = {
+  logger: loggingServiceMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
   spaceIdToNamespace,

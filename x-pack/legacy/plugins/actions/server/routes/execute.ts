@@ -10,6 +10,7 @@ import { execute } from '../lib';
 import { SpacesPlugin } from '../../../spaces';
 import { ActionTypeRegistryContract, GetServicesFunction } from '../types';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { Logger } from '../../../../../../src/core/server';
 
 interface ExecuteRequest extends Hapi.Request {
   params: {
@@ -21,6 +22,7 @@ interface ExecuteRequest extends Hapi.Request {
 }
 
 interface ExecuteRouteOptions {
+  logger: Logger;
   spaces?: SpacesPlugin;
   actionTypeRegistry: ActionTypeRegistryContract;
   getServices: GetServicesFunction;
@@ -28,6 +30,7 @@ interface ExecuteRouteOptions {
 }
 
 export function getExecuteActionRoute({
+  logger,
   actionTypeRegistry,
   getServices,
   encryptedSavedObjects,
@@ -62,6 +65,7 @@ export function getExecuteActionRoute({
       const { params } = request.payload;
       const namespace = spaces && spaces.getSpaceId(request);
       const result = await execute({
+        logger,
         params,
         actionTypeRegistry,
         actionId: id,

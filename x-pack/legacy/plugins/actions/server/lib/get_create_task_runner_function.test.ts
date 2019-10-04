@@ -10,9 +10,12 @@ jest.mock('./execute', () => ({
 
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { ExecutorError } from './executor_error';
+import {
+  SavedObjectsClientMock,
+  loggingServiceMock,
+} from '../../../../../../src/core/server/mocks';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -32,6 +35,7 @@ const services = {
 actionTypeRegistry.get.mockReturnValue(actionType);
 
 const getCreateTaskRunnerFunctionParams = {
+  logger: loggingServiceMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
   spaceIdToNamespace,

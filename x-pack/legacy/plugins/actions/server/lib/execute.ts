@@ -12,8 +12,10 @@ import {
 } from '../types';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import { EncryptedSavedObjectsStartContract } from '../shim';
+import { Logger } from '../../../../../../src/core/server';
 
 interface ExecuteOptions {
+  logger: Logger;
   actionId: string;
   namespace?: string;
   services: Services;
@@ -23,6 +25,7 @@ interface ExecuteOptions {
 }
 
 export async function execute({
+  logger,
   actionId,
   namespace,
   actionTypeRegistry,
@@ -67,14 +70,11 @@ export async function execute({
       secrets: validatedSecrets,
     });
   } catch (err) {
-    services.log(
-      ['warning', 'x-pack', 'actions'],
-      `action executed unsuccessfully: ${actionLabel} - ${err.message}`
-    );
+    logger.warn(`action executed unsuccessfully: ${actionLabel} - ${err.message}`);
     throw err;
   }
 
-  services.log(['debug', 'x-pack', 'actions'], `action executed successfully: ${actionLabel}`);
+  logger.debug(`action executed successfully: ${actionLabel}`);
 
   // return basic response if none provided
   if (result == null) return { status: 'ok' };

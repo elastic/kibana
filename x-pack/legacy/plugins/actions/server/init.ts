@@ -23,9 +23,10 @@ import {
 import { registerBuiltInActionTypes } from './builtin_action_types';
 
 export function init(server: Server) {
-  const { coreSetup, coreStart, pluginsSetup, pluginsStart } = shim(server);
+  const { initializerContext, coreSetup, coreStart, pluginsSetup, pluginsStart } = shim(server);
 
   const config = server.config();
+  const logger = initializerContext.logger.get('plugins', 'actions');
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
 
   pluginsSetup.xpack_main.registerFeature({
@@ -68,7 +69,6 @@ export function init(server: Server) {
 
   function getServices(request: any): Services {
     return {
-      log: (...args) => server.log(...args),
       callCluster: (...args) => callWithRequest(request, ...args),
       savedObjectsClient: coreStart.savedObjects.getScopedSavedObjectsClient(request),
     };
@@ -90,6 +90,7 @@ export function init(server: Server) {
     taskManager: pluginsSetup.task_manager,
   });
   taskRunnerFactory.initialize({
+    logger,
     getServices,
     actionTypeRegistry,
     encryptedSavedObjectsPlugin: pluginsStart.encrypted_saved_objects,
@@ -98,10 +99,13 @@ export function init(server: Server) {
     isSecurityEnabled: !!pluginsStart.security,
   });
 
-  registerBuiltInActionTypes(
+  registerBuiltInActionTypes({
+    logger,
     actionTypeRegistry,
-    getActionsConfigurationUtilities(config.get('xpack.actions') as ActionsKibanaConfig)
-  );
+    actionsConfigUtils: getActionsConfigurationUtilities(config.get(
+      'xpack.actions'
+    ) as ActionsKibanaConfig),
+  });
 
   // Routes
   coreSetup.http.route(createActionRoute);
@@ -112,6 +116,7 @@ export function init(server: Server) {
   coreSetup.http.route(listActionTypesRoute);
   coreSetup.http.route(
     getExecuteActionRoute({
+      logger,
       actionTypeRegistry,
       getServices,
       encryptedSavedObjects: server.plugins.encrypted_saved_objects,

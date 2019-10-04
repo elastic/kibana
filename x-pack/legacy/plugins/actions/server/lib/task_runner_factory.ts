@@ -8,6 +8,7 @@ import { execute } from './execute';
 import { ExecutorError } from './executor_error';
 import { RunContext } from '../../../task_manager';
 import { EncryptedSavedObjectsStartContract } from '../shim';
+import { Logger } from '../../../../../../src/core/server';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -17,6 +18,7 @@ import {
 } from '../types';
 
 export interface TaskRunnerContext {
+  logger: Logger;
   getServices: GetServicesFunction;
   actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
@@ -43,6 +45,7 @@ export class TaskRunnerFactory {
     }
 
     const {
+      logger,
       getServices,
       actionTypeRegistry,
       encryptedSavedObjectsPlugin,
@@ -79,6 +82,7 @@ export class TaskRunnerFactory {
         };
 
         const executorResult = await execute({
+          logger,
           namespace,
           actionTypeRegistry,
           encryptedSavedObjectsPlugin,

@@ -13,10 +13,7 @@ import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 
 const ACTION_TYPE_ID = '.slack';
 
-const NO_OP_FN = () => {};
-
 const services: Services = {
-  log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
   savedObjectsClient: SavedObjectsClientMock.create(),
 };

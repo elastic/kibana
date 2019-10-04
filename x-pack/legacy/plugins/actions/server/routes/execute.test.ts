@@ -10,11 +10,19 @@ jest.mock('../lib/execute', () => ({
 
 import { createMockServer } from './_mock_server';
 import { getExecuteActionRoute } from './execute';
+import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
 
 const getServices = jest.fn();
 
 const { server, actionTypeRegistry, encryptedSavedObjects } = createMockServer();
-server.route(getExecuteActionRoute({ actionTypeRegistry, getServices, encryptedSavedObjects }));
+server.route(
+  getExecuteActionRoute({
+    actionTypeRegistry,
+    getServices,
+    encryptedSavedObjects,
+    logger: loggingServiceMock.create().get(),
+  })
+);
 
 beforeEach(() => jest.resetAllMocks());
 

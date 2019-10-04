@@ -8,6 +8,7 @@ import { execute } from './execute';
 import { ExecutorError } from './executor_error';
 import { TaskInstance } from '../../../task_manager';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { Logger } from '../../../../../../src/core/server';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -17,6 +18,7 @@ import {
 } from '../types';
 
 interface CreateTaskRunnerFunctionOptions {
+  logger: Logger;
   getServices: GetServicesFunction;
   actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
@@ -30,6 +32,7 @@ interface TaskRunnerOptions {
 }
 
 export function getCreateTaskRunnerFunction({
+  logger,
   getServices,
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
@@ -66,6 +69,7 @@ export function getCreateTaskRunnerFunction({
         };
 
         const executorResult = await execute({
+          logger,
           namespace,
           actionTypeRegistry,
           encryptedSavedObjectsPlugin,

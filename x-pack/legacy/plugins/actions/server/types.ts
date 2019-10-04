@@ -18,7 +18,6 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
-  log: (tags: string | string[], data?: string | object | (() => any), timestamp?: number) => void;
 }
 
 export interface ActionsPlugin {

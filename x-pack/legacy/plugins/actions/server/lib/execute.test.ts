@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { execute } from './execute';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { SavedObjectsClientMock, loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 
 const savedObjectsClient = SavedObjectsClientMock.create();
@@ -31,6 +31,7 @@ const executeParams = {
   },
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
+  logger: loggingServiceMock.create().get(),
 };
 
 beforeEach(() => jest.resetAllMocks());
