@@ -72,7 +72,7 @@ describe('Filter Manager', function () {
           }
         }
       };
-      expected = { meta: { type: 'savedQuery', key: 'foo', params: { savedQuery: { ...savedQueryTestItem } }, saved_query: 'foo' } };
+      expected = { meta: { type: 'savedQuery', key: 'foo', params: { savedQuery: { ...savedQueryTestItem } } }, saved_query: 'foo' };
       const actual = buildSavedQueryFilter(savedQueryTestItem);
       expect(actual).to.eql(expected);
     });

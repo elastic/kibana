@@ -134,6 +134,73 @@ describe('build query', function () {
       expect(result).to.eql(expectedResult);
     });
 
+    it('should build an Elasticsearch query from a saved query', function () {
+      const filters = {
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'Bytes more than 2000 onlu',
+          negate: false,
+          params: {
+            savedQuery: {
+              attributes: {
+                description: 'no filters at all',
+                query: {
+                  language: 'kuery',
+                  query: 'bytes >= 2000'
+                },
+                title: 'Bytes more than 2000 only',
+              },
+              id: 'Bytes more than 2000 only',
+            }
+          },
+          type: 'savedQuery',
+          value: undefined,
+        },
+        saved_query: 'Bytes more than 2000 only'
+      };
+      const config = {
+        allowLeadingWildcards: true,
+        queryStringOptions: {},
+      };
+      const expectedResult = {
+        bool: {
+          must: [],
+          filter: [
+            {
+              query: {
+                bool: {
+                  must: [],
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              bytes: {
+                                gte: 2000
+                              }
+                            }
+                          }
+                        ],
+                        minimum_should_match: 1
+                      }
+                    }
+                  ],
+                  should: [],
+                  must_not: []
+                }
+              }
+            }
+          ],
+          should: [],
+          must_not: [],
+        }
+      };
+      const result = buildEsQuery(indexPattern, [], [filters], config);
+
+      expect(result).to.eql(expectedResult);
+    });
   });
 
 });
