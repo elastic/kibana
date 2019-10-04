@@ -23,7 +23,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import KbnServer from '../../../../../server/kbn_server';
 import { createTestServers } from '../../../../../../test_utils/kbn_server';
 import { CallCluster } from '../../../../../../legacy/core_plugins/elasticsearch';
-import { IUiSettingsService } from '../../../ui_settings_service';
+import { IUiSettingsClient } from '../../../ui_settings_service';
 
 let kbnServer: KbnServer;
 let servers: ReturnType<typeof createTestServers>;
@@ -34,7 +34,7 @@ interface AllServices {
   kbnServer: KbnServer;
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallCluster;
-  uiSettings: IUiSettingsService;
+  uiSettings: IUiSettingsClient;
   deleteKibanaIndex: typeof deleteKibanaIndex;
 }
 

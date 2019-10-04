@@ -18,7 +18,7 @@
  */
 import { Legacy } from 'kibana';
 import {
-  IUiSettingsService,
+  IUiSettingsClient,
   UiSettingsService,
   UiSettingsServiceOptions,
 } from './ui_settings_service';
@@ -31,12 +31,12 @@ export type UiSettingsServiceFactoryOptions = Pick<
  *  Create an instance of UiSettingsService that will use the
  *  passed `savedObjectsClient` to communicate with elasticsearch
  *
- *  @return {IUiSettingsService}
+ *  @return {IUiSettingsClient}
  */
 export function uiSettingsServiceFactory(
   server: Legacy.Server,
   options: UiSettingsServiceFactoryOptions
-): IUiSettingsService {
+): IUiSettingsClient {
   const config = server.config();
 
   const { savedObjectsClient, getDefaults, overrides } = options;

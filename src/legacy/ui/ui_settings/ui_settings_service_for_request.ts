@@ -19,7 +19,7 @@
 
 import { Legacy } from 'kibana';
 import { uiSettingsServiceFactory } from './ui_settings_service_factory';
-import { IUiSettingsService, UiSettingsServiceOptions } from './ui_settings_service';
+import { IUiSettingsClient, UiSettingsServiceOptions } from './ui_settings_service';
 
 type Options = Pick<UiSettingsServiceOptions, 'getDefaults' | 'overrides'>;
 /**
@@ -32,13 +32,13 @@ type Options = Pick<UiSettingsServiceOptions, 'getDefaults' | 'overrides'>;
  *  @param {Hapi.Request} request
  *  @param {Object} [options={}]
 
- *  @return {IUiSettingsService}
+ *  @return {IUiSettingsClient}
  */
 export function getUiSettingsServiceForRequest(
   server: Legacy.Server,
   request: Legacy.Request,
   options: Options
-): IUiSettingsService {
+): IUiSettingsClient {
   const { getDefaults, overrides } = options;
 
   const uiSettingsService = uiSettingsServiceFactory(server, {

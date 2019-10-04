@@ -62,7 +62,7 @@ interface UiSettingsParams {
   type?: UiSettingsType;
 }
 
-export interface IUiSettingsService {
+export interface IUiSettingsClient {
   getDefaults: () => Promise<Record<string, UiSettingsParams>>;
   get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
   getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
@@ -77,7 +77,7 @@ export interface IUiSettingsService {
  *  Service that provides access to the UiSettings stored in elasticsearch.
  *  @class UiSettingsService
  */
-export class UiSettingsService implements IUiSettingsService {
+export class UiSettingsService implements IUiSettingsClient {
   private readonly _type: UiSettingsServiceOptions['type'];
   private readonly _id: UiSettingsServiceOptions['id'];
   private readonly _buildNum: UiSettingsServiceOptions['buildNum'];

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { IUiSettingsService } from './ui_settings_service';
+import { IUiSettingsClient } from './ui_settings_service';
 
 const createServiceMock = () => {
-  const mocked: jest.Mocked<IUiSettingsService> = {
+  const mocked: jest.Mocked<IUiSettingsClient> = {
     getDefaults: jest.fn(),
     get: jest.fn(),
     getAll: jest.fn(),
