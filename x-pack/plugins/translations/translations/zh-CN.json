@@ -5764,8 +5764,6 @@
     "xpack.maps.source.esSearch.topHitsSizeLabel": "每个实体的文档",
     "xpack.maps.source.esSearch.topHitsSplitFieldLabel": "实体",
     "xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder": "选择实体字段",
-    "xpack.maps.source.esSearch.topHitsTimeFieldLabel": "时间",
-    "xpack.maps.source.esSearch.topHitsTimeFieldSelectPlaceholder": "选择时间字段",
     "xpack.maps.source.esSearch.useTopHitsLabel": "按实体显示最近的文档",
     "xpack.maps.source.esSearchDescription": "Kibana 索引模式的地理空间数据",
     "xpack.maps.source.esSearchTitle": "文档",
