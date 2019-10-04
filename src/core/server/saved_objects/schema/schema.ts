@@ -21,6 +21,7 @@ import { Config } from '../../config';
 
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
+  isNamespaceIsolated: boolean;
   hidden?: boolean;
   indexPattern?: ((config: Config) => string) | string;
   convertToAliasScript?: string;
@@ -73,5 +74,17 @@ export class SavedObjectsSchema {
       return false;
     }
     return Boolean(typeSchema.isNamespaceAgnostic);
+  }
+
+  public isNamespaceIsolated(type: string) {
+    if (!this.definition) {
+      return false;
+    }
+
+    const typeSchema = this.definition[type];
+    if (!typeSchema) {
+      return false;
+    }
+    return Boolean(typeSchema.isNamespaceIsolated);
   }
 }

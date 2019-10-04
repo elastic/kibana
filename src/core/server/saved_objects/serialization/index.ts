@@ -92,7 +92,7 @@ export class SavedObjectsSerializer {
   public isRawSavedObject(rawDoc: RawDoc) {
     const { type, namespace } = rawDoc._source;
     const namespacePrefix =
-      namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
+      namespace && this.schema.isNamespaceIsolated(type) ? `${namespace}:` : '';
     return (
       type &&
       rawDoc._id.startsWith(`${namespacePrefix}${type}:`) &&
@@ -167,7 +167,7 @@ export class SavedObjectsSerializer {
    */
   public generateRawId(namespace: string | undefined, type: string, id?: string) {
     const namespacePrefix =
-      namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
+      namespace && this.schema.isNamespaceIsolated(type) ? `${namespace}:` : '';
     return `${namespacePrefix}${type}:${id || uuid.v1()}`;
   }
 
@@ -176,7 +176,7 @@ export class SavedObjectsSerializer {
     assertNonEmptyString(type, 'saved object type');
 
     const namespacePrefix =
-      namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
+      namespace && this.schema.isNamespaceIsolated(type) ? `${namespace}:` : '';
     const prefix = `${namespacePrefix}${type}:`;
 
     if (!id.startsWith(prefix)) {
