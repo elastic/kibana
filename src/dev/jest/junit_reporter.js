@@ -18,9 +18,8 @@
  */
 
 import { resolve, dirname, relative } from 'path';
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 
-import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
 import { escapeCdata } from '@kbn/test';
@@ -111,7 +110,7 @@ export default class JestJUnitReporter {
     );
 
     const reportXML = root.end();
-    mkdirp.sync(dirname(reportPath));
+    mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   }
 }

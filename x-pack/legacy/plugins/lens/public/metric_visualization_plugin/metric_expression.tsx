@@ -106,18 +106,7 @@ export function MetricChart({
   }
 
   return (
-    <VisualizationContainer
-      reportTitle={title}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        maxWidth: '100%',
-        maxHeight: '100%',
-        textAlign: 'center',
-      }}
-    >
+    <VisualizationContainer reportTitle={title} className="lnsMetricExpression__container">
       <AutoScale>
         <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
           {value}

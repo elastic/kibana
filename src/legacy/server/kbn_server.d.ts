@@ -26,7 +26,7 @@ import {
   ElasticsearchServiceSetup,
   LoggerFactory,
   SavedObjectsClientContract,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
 } from '../../core/server';
 
 import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
@@ -39,6 +39,8 @@ import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/ela
 import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/public';
+import { IUiSettingsClient } from '../../legacy/ui/ui_settings/ui_settings_service';
+import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -62,7 +64,7 @@ declare module 'hapi' {
   interface Server {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
-    savedObjects: SavedObjectsService;
+    savedObjects: SavedObjectsLegacyService;
     usage: { collectorSet: any };
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
@@ -77,13 +79,15 @@ declare module 'hapi' {
       name: string,
       factoryFn: (request: Request) => Record<string, any>
     ) => void;
-    uiSettingsServiceFactory: (options: any) => any;
+    uiSettingsServiceFactory: (options?: UiSettingsServiceFactoryOptions) => IUiSettingsClient;
+    logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
   }
 
   interface Request {
     getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     getBasePath(): string;
-    getUiSettingsService(): any;
+    getDefaultRoute(): Promise<string>;
+    getUiSettingsService(): IUiSettingsClient;
     getCapabilities(): Promise<Capabilities>;
   }
 
@@ -127,4 +131,4 @@ export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
 export { IndexPatternsService } from './index_patterns';
-export { SavedObjectsService, SavedObjectsClient } from 'src/core/server';
+export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';

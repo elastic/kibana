@@ -146,7 +146,6 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                 Before you can add a pipeline, we need to upgrade your configuration.
               </p>
             }
-            iconColor="subdued"
             title={
               <UpgradeFailureTitle
                 titleText="Upgrade failed"
@@ -487,7 +486,6 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                 Before you can add a pipeline, we need to upgrade your configuration.
               </p>
             }
-            iconColor="subdued"
             title={
               <UpgradeFailureTitle
                 titleText="Time for an upgrade!"
@@ -828,7 +826,6 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                 Before you can edit this pipeline, we need to upgrade your configuration.
               </p>
             }
-            iconColor="subdued"
             title={
               <UpgradeFailureTitle
                 titleText="Upgrade failed"
@@ -1054,7 +1051,6 @@ exports[`UpgradeFailure component renders component as expected 1`] = `
           Before you can add a pipeline, we need to upgrade your configuration.
         </p>
       }
-      iconColor="subdued"
       title={
         <UpgradeFailureTitle
           titleText="Upgrade failed"

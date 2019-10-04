@@ -21,10 +21,10 @@ import { SpaceSelector } from './space_selector';
 const module = uiModules.get('spaces_selector', []);
 module.controller(
   'spacesSelectorController',
-  ($scope: any, spaces: Space[], spaceSelectorURL: string) => {
+  ($scope: any, spaces: Space[], serverBasePath: string) => {
     const domNode = document.getElementById('spaceSelectorRoot');
 
-    const spacesManager = new SpacesManager(spaceSelectorURL);
+    const spacesManager = new SpacesManager(serverBasePath);
 
     render(
       <I18nContext>
