@@ -42,7 +42,7 @@ export interface ExpressionFunction<Name extends string, Context, Arguments, Ret
 
 // TODO: Handlers can be passed to the `fn` property of the Function.  At the moment, these Functions
 // are not strongly defined.
-interface FunctionHandlers {
+export interface FunctionHandlers {
   [key: string]: (...args: any) => any;
 }
 

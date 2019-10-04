@@ -25,7 +25,7 @@ export {
   UnmappedTypeStrings,
   UnwrapPromise,
 } from './common';
-export { ExpressionFunction, AnyExpressionFunction } from './functions';
+export { ExpressionFunction, AnyExpressionFunction, FunctionHandlers } from './functions';
 export { ExpressionType, AnyExpressionType } from './types';
 export * from '../expression_types';
 
