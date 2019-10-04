@@ -10,7 +10,7 @@ import * as Rx from 'rxjs';
 import Boom from 'boom';
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { createDefaultSpace } from './create_default_space';
-import { SavedObjectsService } from 'src/core/server';
+import { SavedObjectsLegacyService } from 'src/core/server';
 import { ElasticsearchServiceSetup } from 'src/core/server';
 
 let mockCallWithRequest;
@@ -83,7 +83,7 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
 
   return {
     config: mockServer.config(),
-    savedObjects: (mockServer.savedObjects as unknown) as SavedObjectsService,
+    savedObjects: (mockServer.savedObjects as unknown) as SavedObjectsLegacyService,
     elasticsearch: ({
       dataClient$: Rx.of({
         callAsInternalUser: jest.fn(),

@@ -48,7 +48,7 @@ export const createRouter = (server, pluginId, apiBasePath = '', config) => {
   return (['get', 'post', 'put', 'delete', 'patch'].reduce((router, methodName) => {
     router[methodName] = (subPath, handler) => {
       const method = methodName.toUpperCase();
-      const path = `${apiBasePath}${subPath}`;
+      const path = apiBasePath + subPath;
       server.route({
         path,
         method,

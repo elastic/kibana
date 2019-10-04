@@ -10,6 +10,9 @@ import { EuiSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ExpressionAST } from '../../../../types';
+import { ArgumentStrings } from '../../../strings';
+
+const { AxisConfig: strings } = ArgumentStrings;
 
 const { set } = immutable;
 
@@ -72,8 +75,8 @@ export class ExtendedTemplate extends PureComponent<Props> {
     }
 
     const positions = {
-      xaxis: ['bottom', 'top'],
-      yaxis: ['left', 'right'],
+      xaxis: [strings.getPositionBottom(), strings.getPositionTop()],
+      yaxis: [strings.getPositionLeft(), strings.getPositionRight()],
     };
     const argName = this.props.typeInstance.name;
     const position = this.getArgValue('position', positions[argName][0]);
@@ -82,7 +85,7 @@ export class ExtendedTemplate extends PureComponent<Props> {
 
     return (
       <Fragment>
-        <EuiFormRow label="Position" display="rowCompressed">
+        <EuiFormRow label={strings.getPositionLabel()} display="rowCompressed">
           <EuiSelect
             compressed
             value={position}

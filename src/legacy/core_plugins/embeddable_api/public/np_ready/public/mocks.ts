@@ -17,46 +17,5 @@
  * under the License.
  */
 
-import { Plugin } from '.';
-import { coreMock } from '../../../../../../core/public/mocks';
-
 // eslint-disable-next-line
-import { uiActionsPluginMock } from '../../../../../../plugins/ui_actions/public/mocks';
-
-export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
-
-const createSetupContract = (): Setup => {
-  const setupContract: Setup = {
-    registerEmbeddableFactory: jest.fn(),
-  };
-  return setupContract;
-};
-
-const createStartContract = (): Start => {
-  const startContract: Start = {
-    registerEmbeddableFactory: jest.fn(),
-    getEmbeddableFactories: jest.fn(),
-    getEmbeddableFactory: jest.fn(),
-  };
-  return startContract;
-};
-
-const createInstance = () => {
-  const plugin = new Plugin({} as any);
-  const setup = plugin.setup(coreMock.createSetup(), {
-    uiActions: uiActionsPluginMock.createSetupContract(),
-  });
-  const doStart = () => plugin.start(coreMock.createStart());
-  return {
-    plugin,
-    setup,
-    doStart,
-  };
-};
-
-export const embeddablePluginMock = {
-  createSetupContract,
-  createStartContract,
-  createInstance,
-};
+export * from '../../../../../../plugins/embeddable/public/mocks';

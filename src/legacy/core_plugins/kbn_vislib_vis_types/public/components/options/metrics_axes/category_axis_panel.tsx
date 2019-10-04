@@ -28,7 +28,7 @@ import { SelectOption, SwitchOption } from '../../common';
 import { LabelOptions } from './label_options';
 import { Positions } from '../../../utils/collections';
 
-interface CategoryAxisPanelProps extends VisOptionsProps<BasicVislibParams> {
+export interface CategoryAxisPanelProps extends VisOptionsProps<BasicVislibParams> {
   axis: Axis;
   onPositionChanged: (position: Positions) => void;
   setCategoryAxis: (value: Axis) => void;
@@ -59,12 +59,12 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.xAxisTitle"
             defaultMessage="X-axis"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 

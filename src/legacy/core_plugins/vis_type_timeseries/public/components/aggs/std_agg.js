@@ -33,14 +33,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ES_TYPES } from '../../../common/es_types';
+import { ES_FIELD_TYPES } from '../../../../../../plugins/data/common';
 import { METRIC_TYPES } from '../../../common/metric_types';
 
 export function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
-  const restrictFields = model.type === METRIC_TYPES.CARDINALITY ? [] : [ES_TYPES.NUMBER];
+  const restrictFields = model.type === METRIC_TYPES.CARDINALITY ? [] : [ES_FIELD_TYPES.NUMBER];
 
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
