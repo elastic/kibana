@@ -66,7 +66,9 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             nextActive={nextActive}
           >
-            <JsonEditorFlyout isDisabled={false} jobCreator={jobCreator} />
+            {jobType === JOB_TYPE.ADVANCED && (
+              <JsonEditorFlyout isDisabled={false} jobCreator={jobCreator} />
+            )}
           </WizardNav>
         </Fragment>
       )}
