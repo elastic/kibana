@@ -7,7 +7,7 @@
 
 import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
-import mockRolledUpData, { mockIndices } from './rollup_helpers';
+import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
 
@@ -97,7 +97,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
-
       await es.indices.delete({ index: 'rollup*' });
       await es.indices.delete({ index: 'live*' });
       await es.indices.delete({ index: 'live*,rollup-to-be*' });

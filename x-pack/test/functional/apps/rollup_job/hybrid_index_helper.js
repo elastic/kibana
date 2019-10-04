@@ -18,3 +18,15 @@ export default async function mockRolledUpData(jobName, day) {
     }
   };
 }
+
+//This function just adds some stub indices that includes a timestamp and an arbritary metric. This is fine since we are not actually testing
+//rollup functionality.
+export function mockIndices(day, prepend = 'to-be-rolled-up') {
+  return {
+    index: `${prepend}-${day.format('MM-DD-YYYY')}`,
+    body: {
+      '@timestamp': day.toISOString(),
+      foo_metric: 1
+    }
+  };
+}
