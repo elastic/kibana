@@ -54,7 +54,7 @@ import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
-import { recentlyAccessed } from 'ui/persisted_log';
+
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
@@ -72,6 +72,7 @@ import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/buil
 import 'ui/capabilities/route_setup';
 
 import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
 
 const { savedQueryService } = data.search.services;
 
@@ -149,7 +150,7 @@ uiRoutes
         return savedSearches.get(savedSearchId)
           .then((savedSearch) => {
             if (savedSearchId) {
-              recentlyAccessed.add(
+              npStart.core.chrome.recentlyAccessed.add(
                 savedSearch.getFullPath(),
                 savedSearch.title,
                 savedSearchId);

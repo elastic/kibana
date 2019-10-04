@@ -27,12 +27,9 @@ import { AppRouter } from './ui';
 import { HttpStart } from '../http';
 import { ContextSetup, IContextContainer } from '../context';
 import {
-  AppMountContext,
   App,
   LegacyApp,
   AppMounter,
-  AppUnmount,
-  AppMountParameters,
   InternalApplicationSetup,
   InternalApplicationStart,
 } from './types';
@@ -64,11 +61,7 @@ export class ApplicationService {
   private readonly apps$ = new BehaviorSubject<ReadonlyMap<string, AppBox>>(new Map());
   private readonly legacyApps$ = new BehaviorSubject<ReadonlyMap<string, LegacyApp>>(new Map());
   private readonly capabilities = new CapabilitiesService();
-  private mountContext?: IContextContainer<
-    AppMountContext,
-    AppUnmount | Promise<AppUnmount>,
-    [AppMountParameters]
-  >;
+  private mountContext?: IContextContainer<App['mount']>;
 
   public setup({ context }: SetupDeps): InternalApplicationSetup {
     this.mountContext = context.createContextContainer();
@@ -98,7 +91,7 @@ export class ApplicationService {
 
         this.legacyApps$.next(new Map([...this.legacyApps$.value.entries(), [app.id, app]]));
       },
-      registerMountContext: this.mountContext.registerContext,
+      registerMountContext: this.mountContext!.registerContext,
     };
   }
 
