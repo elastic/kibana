@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { openSync, writeSync, closeSync } from 'fs';
+import { openSync, writeSync, closeSync, mkdirSync } from 'fs';
 import { createHash } from 'crypto';
 import { dirname } from 'path';
 
-import mkdirp from 'mkdirp';
 import Axios from 'axios';
 
 import { log } from './util';
@@ -24,7 +23,7 @@ export async function download(url: string, path: string) {
 
   const hash = createHash('md5');
 
-  mkdirp.sync(dirname(path));
+  mkdirSync(dirname(path), { recursive: true });
   const handle = openSync(path, 'w');
 
   try {

@@ -16,11 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Legacy } from 'kibana';
 
-export const ES_TYPES = {
-  NUMBER: 'number',
-  STRING: 'string',
-  KEYWORD: 'keyword',
-  TEXT: 'text',
-  DATE: 'date',
+async function handleRequest(request: Legacy.Request) {
+  const uiSettings = request.getUiSettingsService();
+  return {
+    settings: await uiSettings.getUserProvided(),
+  };
+}
+
+export const getRoute = {
+  path: '/api/kibana/settings',
+  method: 'GET',
+  handler(request: Legacy.Request) {
+    return handleRequest(request);
+  },
 };
