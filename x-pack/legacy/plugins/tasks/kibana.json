@@ -1,0 +1,6 @@
+{
+  "id": "tasks",
+  "version": "kibana",
+  "server": true,
+  "ui": true
+}
