@@ -18,13 +18,13 @@
  */
 
 import { memoize, forOwn, isFunction } from 'lodash';
-import chrome from '../chrome';
+import { npStart } from 'ui/new_platform';
 import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 
 class FieldFormatRegistry {
   constructor() {
     this.fieldFormats = new Map();
-    this._uiSettings = chrome.getUiSettingsClient();
+    this._uiSettings = npStart.core.uiSettings;
     this.getConfig = (...args) => this._uiSettings.get(...args);
     this._defaultMap = [];
     this.init();

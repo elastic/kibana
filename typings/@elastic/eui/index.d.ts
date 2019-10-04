@@ -25,7 +25,6 @@ declare module '@elastic/eui' {
   export const EuiDescribedFormGroup: React.SFC<any>;
   export const EuiCodeEditor: React.SFC<any>;
   export const Query: any;
-  export const EuiCard: any;
 
   export interface EuiTableCriteria {
     page: { index: number; size: number };

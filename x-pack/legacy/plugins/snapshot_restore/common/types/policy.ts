@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotConfig, SnapshotConfigEs } from './snapshot';
-
+import {
+  SnapshotConfig,
+  SnapshotConfigEs,
+  SnapshotRetention,
+  SnapshotRetentionEs,
+} from './snapshot';
 export interface SlmPolicyPayload {
   name: string;
   snapshotName: string;
   schedule: string;
   repository: string;
   config?: SnapshotConfig;
+  retention?: SnapshotRetention;
 }
 
 export interface SlmPolicy extends SlmPolicyPayload {
@@ -34,6 +39,12 @@ export interface SlmPolicy extends SlmPolicyPayload {
   inProgress?: {
     snapshotName: string;
   };
+  stats?: {
+    snapshotsTaken: number;
+    snapshotsFailed: number;
+    snapshotsDeleted: number;
+    snapshotDeletionFailures: number;
+  };
 }
 
 export interface SlmPolicyEs {
@@ -45,6 +56,7 @@ export interface SlmPolicyEs {
     schedule: string;
     repository: string;
     config?: SnapshotConfigEs;
+    retention?: SnapshotRetentionEs;
   };
   next_execution: string;
   next_execution_millis: number;
@@ -65,5 +77,11 @@ export interface SlmPolicyEs {
     state: string;
     start_time: string;
     start_time_millis: number;
+  };
+  stats?: {
+    snapshots_taken: number;
+    snapshots_failed: number;
+    snapshots_deleted: number;
+    snapshot_deletion_failures: number;
   };
 }

@@ -194,7 +194,6 @@ export default function (program) {
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Optimize and then stop the server');
 
-
   if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
   }
@@ -240,7 +239,7 @@ export default function (program) {
           repl: !!opts.repl,
           basePath: !!opts.basePath,
           optimize: !!opts.optimize,
-          oss: !!opts.oss,
+          oss: !!opts.oss
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,

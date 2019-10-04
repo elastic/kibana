@@ -24,7 +24,7 @@
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-import": "2.18.2",
     "eslint-plugin-jest": "^22.17.0",
-    "eslint-plugin-mocha": "^5.3.0",
+    "eslint-plugin-mocha": "^6.1.1",
     "eslint-plugin-no-unsanitized": "3.0.2",
     "eslint-plugin-prefer-object-spread": "1.2.1",
     "eslint-plugin-react": "7.13.0",

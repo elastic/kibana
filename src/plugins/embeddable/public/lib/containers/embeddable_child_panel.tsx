@@ -86,12 +86,12 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   }
 
   public render() {
-    const classes = classNames('embPanel embPanel__content', {
-      'embPanel__content-isLoading': this.state.loading,
+    const classes = classNames('embPanel', {
+      'embPanel-isLoading': this.state.loading,
     });
 
     return (
-      <div id="embeddedPanel" className={classes}>
+      <div className={classes}>
         {this.state.loading || !this.embeddable ? (
           <EuiLoadingChart size="l" mono />
         ) : (
