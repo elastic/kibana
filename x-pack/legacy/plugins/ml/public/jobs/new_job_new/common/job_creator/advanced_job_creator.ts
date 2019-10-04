@@ -14,6 +14,7 @@ import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL, DEFAULT_MODEL_MEMORY_LIMIT } from './util/constants';
 import { ml } from '../../../../services/ml_api_service';
 import { getRichDetectors } from './util/general';
+import { isValidJson } from '../../../../../common/util/validation_utils';
 
 export interface RichDetector {
   agg: Aggregation | null;
@@ -28,10 +29,13 @@ export interface RichDetector {
 export class AdvancedJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.ADVANCED;
   private _richDetectors: RichDetector[] = [];
+  private _queryString: string;
 
   // TODO - remove constructor if it isn't needed
   constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
     super(indexPattern, savedSearch, query);
+
+    this._queryString = JSON.stringify(this._datafeed_config.query);
   }
 
   public addDetector(
@@ -122,6 +126,18 @@ export class AdvancedJobCreator extends JobCreator {
 
   public get richDetectors(): RichDetector[] {
     return this._richDetectors;
+  }
+
+  public get queryString(): string {
+    return this._queryString;
+  }
+
+  public set queryString(qs: string) {
+    this._queryString = qs;
+  }
+
+  public get isValidQueryString(): boolean {
+    return isValidJson(this._queryString);
   }
 
   public get aggFieldPairs(): AggFieldPair[] {

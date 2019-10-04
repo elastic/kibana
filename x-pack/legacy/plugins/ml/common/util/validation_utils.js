@@ -39,3 +39,12 @@ export function addJobValidationMethods($scope, service) {
     return service.getJobFromConfig($scope.formConfig);
   };
 }
+
+export function isValidJson(json) {
+  try {
+    JSON.parse(json);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}

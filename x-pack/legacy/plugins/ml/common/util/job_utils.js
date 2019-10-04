@@ -13,6 +13,7 @@ import numeral from '@elastic/numeral';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
+// import { isValidJson } from './validation_utils';
 
 // work out the default frequency based on the bucket_span in seconds
 export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
@@ -428,6 +429,31 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
 
   } else {
     valid = false;
+  }
+
+  return {
+    messages,
+    valid,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
+export function basicDatafeedValidation(datafeed) {
+  const messages = [];
+  const valid = true;
+
+  if (datafeed) {
+    // if (_.isEmpty(datafeed.query)) {
+    //   messages.push({ id: 'query_empty' });
+    //   valid = false;
+    // } else if (isValidJson(datafeed.query) === false) {
+    //   messages.push({ id: 'query_invalid' });
+    //   valid = false;
+    // } else {
+    //   messages.push({ id: 'query_valid' });
+    // }
+    messages.push({ id: 'query_delay_valid' });
   }
 
   return {

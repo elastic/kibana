@@ -5,7 +5,7 @@
  */
 
 import { ReactElement } from 'react';
-import { basicJobValidation } from '../../../../../common/util/job_utils';
+import { basicJobValidation, basicDatafeedValidation } from '../../../../../common/util/job_utils';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
 import { JobCreatorType } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
@@ -32,6 +32,10 @@ export interface BasicValidations {
   modelMemoryLimit: Validation;
   bucketSpan: Validation;
   duplicateDetectors: Validation;
+  query: Validation;
+  queryDelay: Validation;
+  frequency: Validation;
+  scrollSize: Validation;
 }
 
 export class JobValidator {
@@ -46,6 +50,10 @@ export class JobValidator {
     modelMemoryLimit: { valid: true },
     bucketSpan: { valid: true },
     duplicateDetectors: { valid: true },
+    query: { valid: true },
+    queryDelay: { valid: true },
+    frequency: { valid: true },
+    scrollSize: { valid: true },
   };
   private _validating: boolean = false;
 
@@ -94,11 +102,15 @@ export class JobValidator {
     this._resetBasicValidations();
 
     const jobConfig = this._jobCreator.jobConfig;
+    const datafeedConfig = this._jobCreator.datafeedConfig;
     const limits = newJobLimits();
 
     // run standard basic validation
-    const basicResults = basicJobValidation(jobConfig, undefined, limits);
-    populateValidationMessages(basicResults, this._basicValidations, jobConfig);
+    const basicJobResults = basicJobValidation(jobConfig, undefined, limits);
+    populateValidationMessages(basicJobResults, this._basicValidations, jobConfig);
+
+    const basicDatafeedResults = basicDatafeedValidation(datafeedConfig);
+    populateValidationMessages(basicDatafeedResults, this._basicValidations, jobConfig);
 
     // run addition job and group id validation
     const idResults = checkForExistingJobAndGroupIds(
@@ -137,6 +149,22 @@ export class JobValidator {
 
   public get modelMemoryLimit(): Validation {
     return this._basicValidations.modelMemoryLimit;
+  }
+
+  public get query(): Validation {
+    return this._basicValidations.query;
+  }
+
+  public get queryDelay(): Validation {
+    return this._basicValidations.queryDelay;
+  }
+
+  public get frequency(): Validation {
+    return this._basicValidations.frequency;
+  }
+
+  public get scrollSize(): Validation {
+    return this._basicValidations.scrollSize;
   }
 
   public set advancedValid(valid: boolean) {
