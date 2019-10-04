@@ -358,27 +358,49 @@ export class SavedObjectsRepository {
 
     const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
-    const response = await this._writeToCluster('delete', {
+    // Instead of the get, we could always do a _delete_by_query
+    const getResponse = await this._callCluster('get', {
+      id: this._serializer.generateRawId(namespace, type, id),
+      index: this.getIndexForType(type),
+      ignore: [404],
+    });
+
+    const getDocNotFound = getResponse.found === false;
+    const getIndexNotFound = getResponse.status === 404;
+    if (
+      getDocNotFound ||
+      getIndexNotFound ||
+      !this._rawInNamespace(getResponse, options.namespace)
+    ) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    const deleteResponse = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
       refresh,
       ignore: [404],
     });
 
-    const deleted = response.result === 'deleted';
+    const deleted = deleteResponse.result === 'deleted';
     if (deleted) {
       return {};
     }
 
-    const docNotFound = response.result === 'not_found';
-    const indexNotFound = response.error && response.error.type === 'index_not_found_exception';
-    if (docNotFound || indexNotFound) {
+    const deleteDocNotFound = deleteResponse.result === 'not_found';
+    const deleteIndexNotFound =
+      deleteResponse.error && deleteResponse.error.type === 'index_not_found_exception';
+    if (deleteDocNotFound || deleteIndexNotFound) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
     throw new Error(
-      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response })}`
+      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
+        type,
+        id,
+        response: deleteResponse,
+      })}`
     );
   }
 
