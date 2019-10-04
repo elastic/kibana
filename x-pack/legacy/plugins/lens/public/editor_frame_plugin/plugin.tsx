@@ -76,7 +76,7 @@ export class EditorFramePlugin {
     const createInstance = (): EditorFrameInstance => {
       let domElement: Element;
       return {
-        mount: (element, { doc, onError, dateRange, query, onChange }) => {
+        mount: (element, { doc, onError, dateRange, query, filters, savedQuery, onChange }) => {
           domElement = element;
           const firstDatasourceId = Object.keys(this.datasources)[0];
           const firstVisualizationId = Object.keys(this.visualizations)[0];
@@ -97,6 +97,8 @@ export class EditorFramePlugin {
                 doc={doc}
                 dateRange={dateRange}
                 query={query}
+                filters={filters}
+                savedQuery={savedQuery}
                 onChange={onChange}
               />
             </I18nProvider>,

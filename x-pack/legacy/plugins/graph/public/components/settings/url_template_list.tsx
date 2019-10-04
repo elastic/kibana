@@ -14,10 +14,10 @@ import { useListKeys } from './use_list_keys';
 const generateId = htmlIdGenerator();
 
 export function UrlTemplateList({
-  removeUrlTemplate,
-  saveUrlTemplate,
+  removeTemplate,
+  saveTemplate,
   urlTemplates,
-}: Pick<SettingsProps, 'removeUrlTemplate' | 'saveUrlTemplate' | 'urlTemplates'>) {
+}: Pick<SettingsProps, 'removeTemplate' | 'saveTemplate' | 'urlTemplates'>) {
   const [uncommittedForms, setUncommittedForms] = useState<string[]>([]);
   const getListKey = useListKeys(urlTemplates);
 
@@ -40,10 +40,10 @@ export function UrlTemplateList({
           id={getListKey(template)}
           initialTemplate={template}
           onSubmit={newTemplate => {
-            saveUrlTemplate(index, newTemplate);
+            saveTemplate({ index, template: newTemplate });
           }}
           onRemove={() => {
-            removeUrlTemplate(template);
+            removeTemplate(template);
           }}
         />
       ))}
@@ -53,7 +53,7 @@ export function UrlTemplateList({
           id={`accordion-new-${id}`}
           key={id}
           onSubmit={newTemplate => {
-            saveUrlTemplate(-1, newTemplate);
+            saveTemplate({ index: -1, template: newTemplate });
             removeUncommittedForm(id);
           }}
           onRemove={removeUncommittedForm.bind(undefined, id)}

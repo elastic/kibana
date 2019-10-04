@@ -47,10 +47,15 @@ const chartBase: ChartBase = {
   series
 };
 
-export async function getNonHeapMemoryChart(setup: Setup, serviceName: string) {
+export async function getNonHeapMemoryChart(
+  setup: Setup,
+  serviceName: string,
+  serviceNodeName?: string
+) {
   return fetchAndTransformMetrics({
     setup,
     serviceName,
+    serviceNodeName,
     chartBase,
     aggs: {
       nonHeapMemoryMax: { avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_MAX } },

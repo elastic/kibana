@@ -16,30 +16,28 @@ export const Icon = styled(EuiIcon)`
 
 Icon.displayName = 'Icon';
 
-export class HelpMenuComponent extends React.PureComponent {
-  public render() {
-    return (
-      <>
-        <EuiHorizontalRule margin="none" />
+export const HelpMenuComponent = React.memo(() => (
+  <>
+    <EuiHorizontalRule margin="none" />
 
-        <EuiSpacer />
+    <EuiSpacer />
 
-        <EuiTitle size="xxs">
-          <h6>
-            <Icon type="securityAnalyticsApp" />
-            <FormattedMessage
-              id="xpack.siem.chrome.help.title"
-              defaultMessage="SIEM Application Help"
-            />
-          </h6>
-        </EuiTitle>
+    <EuiTitle size="xxs">
+      <h6>
+        <Icon type="securityAnalyticsApp" />
+        <FormattedMessage
+          id="xpack.siem.chrome.help.title"
+          defaultMessage="SIEM Application Help"
+        />
+      </h6>
+    </EuiTitle>
 
-        <EuiSpacer />
+    <EuiSpacer />
 
-        <EuiButton iconType="popout" href="https://discuss.elastic.co/c/siem" target="_blank">
-          <FormattedMessage id="xpack.siem.chrome.help.feedback" defaultMessage="Submit feedback" />
-        </EuiButton>
-      </>
-    );
-  }
-}
+    <EuiButton iconType="popout" href="https://discuss.elastic.co/c/siem" target="_blank">
+      <FormattedMessage id="xpack.siem.chrome.help.feedback" defaultMessage="Submit feedback" />
+    </EuiButton>
+  </>
+));
+
+HelpMenuComponent.displayName = 'HelpMenuComponent';

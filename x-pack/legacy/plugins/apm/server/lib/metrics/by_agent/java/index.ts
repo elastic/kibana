@@ -11,13 +11,17 @@ import { getThreadCountChart } from './thread_count';
 import { getCPUChartData } from '../shared/cpu';
 import { getMemoryChartData } from '../shared/memory';
 
-export async function getJavaMetricsCharts(setup: Setup, serviceName: string) {
+export async function getJavaMetricsCharts(
+  setup: Setup,
+  serviceName: string,
+  serviceNodeName?: string
+) {
   const charts = await Promise.all([
-    getCPUChartData(setup, serviceName),
-    getMemoryChartData(setup, serviceName),
-    getHeapMemoryChart(setup, serviceName),
-    getNonHeapMemoryChart(setup, serviceName),
-    getThreadCountChart(setup, serviceName)
+    getCPUChartData(setup, serviceName, serviceNodeName),
+    getMemoryChartData(setup, serviceName, serviceNodeName),
+    getHeapMemoryChart(setup, serviceName, serviceNodeName),
+    getNonHeapMemoryChart(setup, serviceName, serviceNodeName),
+    getThreadCountChart(setup, serviceName, serviceNodeName)
   ]);
 
   return { charts };
