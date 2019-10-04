@@ -15,7 +15,7 @@ export const DocumentFields = () => {
   const dispatch = useDispatch();
   const {
     fields: { byId, rootLevelFields },
-    documentFields: { status, fieldPathToAddField },
+    documentFields: { status, fieldPathToAddField, fieldToEdit },
   } = useState();
 
   const getField = (propId: string) => byId[propId];
@@ -50,7 +50,8 @@ export const DocumentFields = () => {
     if (status !== 'editingField') {
       return null;
     }
-    return <EditField />;
+    const field = byId[fieldToEdit!].source;
+    return <EditField field={field} />;
   };
 
   return (

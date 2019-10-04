@@ -76,7 +76,7 @@ export const getTypeFromSubType = (subType: SubType): MainType =>
 
 /**
  * In order to better work with the recursive pattern of the mappings `properties`, this method flatten the fields
- * to a `byId` object where the key is the path to the field and the value is a `NormalizedField`.
+ * to a `byId` object where the key is the **path** to the field and the value is a `NormalizedField`.
  * The `NormalizedField` contains the field data under `source` and meta information about the capability of the field.
  *
  * @example

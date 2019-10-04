@@ -9,68 +9,54 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
-  // EuiButton,
-  // EuiFlexGroup,
-  // EuiFlexItem,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
-// import {
-// useForm,
-// Form,
-// TextField,
-// SelectField,
-// UseField,
-// fieldValidators,
-// } from '../../../shared_imports';
-// import { FIELD_TYPES_OPTIONS } from '../../../constants';
-// import { useDispatch } from '../../../mappings_state';
+import {
+  useForm,
+  Form,
+  TextField,
+  SelectField,
+  UseField,
+  fieldValidators,
+} from '../../../shared_imports';
+import { FIELD_TYPES_OPTIONS } from '../../../constants';
+import { useDispatch } from '../../../mappings_state';
 import { Field } from '../../../types';
 
-// const formWrapper = (props: any) => <form {...props} />;
+const formWrapper = (props: any) => <form {...props} />;
 
 interface Props {
-  field?: Field;
+  field: Field;
 }
 
 export const EditField = ({ field }: Props) => {
-  // const { form } = useForm<Field>({ defaultValue: field });
-  // const dispatch = useDispatch();
+  const { form } = useForm<Field>({ defaultValue: field });
+  const dispatch = useDispatch();
 
-  // const submitForm = async (e?: React.FormEvent) => {
-  //   if (e) {
-  //     e.preventDefault();
-  //   }
-  //   const { isValid, data } = await form.submit();
-  //   if (isValid) {
-  //     dispatch({ type: 'field.add', value: data });
-  //     form.reset();
-  //   }
-  // };
+  const exitEdit = () => {
+    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+  };
 
-  // const cancel = () => {
-  //   dispatch({ type: 'documentField.changeStatus', value: 'idle' });
-  // };
+  const submitForm = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      dispatch({ type: 'field.edit', value: data });
+      exitEdit();
+    }
+  };
 
-  return (
-    <EuiFlyout
-      data-test-subj="autoFollowPatternDetail"
-      // onClose={closeDetailPanel}
-      onClose={() => undefined}
-      aria-labelledby="autoFollowPatternDetailsFlyoutTitle"
-      size="m"
-      maxWidth={400}
-    >
-      <EuiFlyoutHeader>
-        <EuiTitle size="m" data-test-subj="title">
-          <h2>Edit field</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>Content of the flyout</EuiFlyoutBody>
-    </EuiFlyout>
-  );
-};
+  const cancel = () => {
+    exitEdit();
+  };
 
-/* <Form form={form} style={{ padding: '20px 0' }} FormWrapper={formWrapper} onSubmit={submitForm}>
+  const renderTempForm = () => (
+    <Form form={form} style={{ padding: '20px 0' }} FormWrapper={formWrapper} onSubmit={submitForm}>
       <EuiFlexGroup>
         <EuiFlexItem>
           <UseField
@@ -91,6 +77,8 @@ export const EditField = ({ field }: Props) => {
             }}
           />
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiButton onClick={submitForm} type="submit">
             Add
@@ -100,4 +88,23 @@ export const EditField = ({ field }: Props) => {
           <EuiButton onClick={cancel}>Done</EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Form> */
+    </Form>
+  );
+
+  return (
+    <EuiFlyout
+      data-test-subj="mappingsEditorFieldEdit"
+      onClose={exitEdit}
+      aria-labelledby="mappingsEditorFieldEditTitle"
+      size="m"
+      maxWidth={400}
+    >
+      <EuiFlyoutHeader>
+        <EuiTitle size="m">
+          <h2>Edit field</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>{renderTempForm()}</EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};
