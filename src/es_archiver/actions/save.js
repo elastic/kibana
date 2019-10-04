@@ -18,10 +18,7 @@
  */
 
 import { resolve } from 'path';
-import { createWriteStream } from 'fs';
-
-import { fromNode } from 'bluebird';
-import mkdirp from 'mkdirp';
+import { createWriteStream, mkdirSync } from 'fs';
 
 import {
   createListStream,
@@ -42,7 +39,7 @@ export async function saveAction({ name, indices, client, dataDir, log, raw }) {
 
   log.info('[%s] Creating archive of %j', name, indices);
 
-  await fromNode(cb => mkdirp(outputDir, cb));
+  mkdirSync(outputDir, { recursive: true });
 
   const progress = new Progress();
   progress.activate(log);

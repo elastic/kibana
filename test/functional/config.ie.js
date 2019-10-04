@@ -17,35 +17,39 @@
  * under the License.
  */
 
-import Joi from 'joi';
-
-async function handleRequest(request) {
-  const { key } = request.params;
-  const { value } = request.payload;
-  const uiSettings = request.getUiSettingsService();
-
-  await uiSettings.set(key, value);
+export default async function ({ readConfigFile }) {
+  const defaultConfig = await readConfigFile(require.resolve('./config'));
 
   return {
-    settings: await uiSettings.getUserProvided()
+    ...defaultConfig.getAll(),
+
+    browser: {
+      type: 'ie',
+    },
+
+    junit: {
+      reportName: 'Internet Explorer UI Functional Tests'
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
+        'telemetry:optIn': false,
+        'state:storeInSessionStorage': true,
+        'notifications:lifetime:info': 10000,
+      },
+    },
+
+
+    kbnTestServer: {
+      ...defaultConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...defaultConfig.get('kbnTestServer.serverArgs'),
+        '--csp.strict=false',
+      ],
+    },
+
+
   };
 }
-
-export const setRoute = {
-  path: '/api/kibana/settings/{key}',
-  method: 'POST',
-  config: {
-    validate: {
-      params: Joi.object().keys({
-        key: Joi.string().required(),
-      }).default(),
-
-      payload: Joi.object().keys({
-        value: Joi.any().required()
-      }).required()
-    },
-    handler(request) {
-      return handleRequest(request);
-    }
-  }
-};

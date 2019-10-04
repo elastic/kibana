@@ -9,6 +9,7 @@ import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
+import { intervalFromNow } from './lib/intervals';
 import {
   TaskDefinition,
   TaskDictionary,
@@ -77,6 +78,7 @@ export class TaskManager {
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
+      kibanaId: opts.config.get('server.uuid'),
     });
     const pool = new TaskPool({
       logger: this.logger,
@@ -93,9 +95,7 @@ export class TaskManager {
     const poller = new TaskPoller({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work(): Promise<void> {
-        return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
-      },
+      work: (): Promise<void> => fillPool(pool.run, () => this.claimAvailableTasks(), createRunner),
     });
 
     this.pool = pool;
@@ -125,6 +125,20 @@ export class TaskManager {
       }
     };
     startPoller();
+  }
+
+  private async claimAvailableTasks() {
+    const { docs, claimedTasks } = await this.store.claimAvailableTasks({
+      size: this.pool.availableWorkers,
+      claimOwnershipUntil: intervalFromNow('30s')!,
+    });
+
+    if (docs.length !== claimedTasks) {
+      this.logger.warn(
+        `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) tasks were fetched`
+      );
+    }
+    return docs;
   }
 
   private async waitUntilStarted() {
