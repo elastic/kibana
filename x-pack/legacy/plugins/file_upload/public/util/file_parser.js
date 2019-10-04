@@ -9,7 +9,7 @@ import { geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
 import { i18n } from '@kbn/i18n';
 const oboe = require('oboe');
 
-const FILE_BUFFER = 1024 * 50;
+export const FILE_BUFFER = 1024 * 50;
 
 const readSlice = (fileReader, file, start, stop) => {
   const blob = file.slice(start, stop);
@@ -28,9 +28,10 @@ const createOboeStreamAndPatterns = cleanAndValidate => {
 };
 
 let previousFileReader;
-const fileHandler = (
+export const fileHandler = (
   file, chunkHandler, cleanAndValidate, getFileParseActive,
-  fileReader = new FileReader(), fileBuffer = FILE_BUFFER
+  fileReader = new FileReader(), fileBuffer = FILE_BUFFER,
+  oboeStream = createOboeStreamAndPatterns(cleanAndValidate)
 ) => {
 
   if (!file) {
@@ -42,8 +43,6 @@ const fileHandler = (
       )
     );
   }
-
-  const oboeStream = createOboeStreamAndPatterns(cleanAndValidate);
 
   // Halt any previous file reading activity
   if (previousFileReader) {

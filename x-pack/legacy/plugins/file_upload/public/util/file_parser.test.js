@@ -4,61 +4,103 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parseFile } from './file_parser';
+import { fileHandler, FILE_BUFFER } from './file_parser';
 
 describe('parse file', () => {
   const cleanAndValidate = jest.fn(a => a);
-  const previewFunction = jest.fn();
-  const transformDetails = {
-    cleanAndValidate
+  const chunkHandler = jest.fn(a => a);
+  const fileReader = {
+    abort: jest.fn(),
   };
-  const getFileRef = fileContent =>
-    new File([fileContent], 'test.json', { type: 'text/json' });
+  fileReader.readAsBinaryString = jest.fn(
+    (binaryString = '123') => fileReader.onloadend(
+      { target: { readyState: FileReader.DONE, result: binaryString } }
+    )
+  );
+
+  const oboeStream = {
+    abort: jest.fn(),
+    emit: jest.fn(),
+    done: jest.fn(),
+  };
+
+  const testJson = {
+    'type': 'Feature',
+    'geometry': {
+      'type': 'Polygon',
+      'coordinates': [[
+        [-104.05, 78.99],
+        [-87.22, 78.98],
+        [-86.58, 75.94],
+        [-104.03, 75.94],
+        [-104.05, 78.99]
+      ]]
+    },
+  };
+
+  const getFileRef = (geoJsonObj = testJson) => {
+    const fileContent = JSON.stringify(geoJsonObj);
+    return new File([fileContent], 'test.json', { type: 'text/json' });
+  };
+
+  const getFileParseActiveFactory = (boolActive = true) => {
+    return jest.fn(() => boolActive);
+  };
 
   beforeEach(() => {
-    cleanAndValidate.mockClear();
-    previewFunction.mockClear();
+    jest.clearAllMocks();
   });
 
-  it('should parse valid JSON', async () => {
-    const validJsonFileResult = JSON.stringify({
-      'type': 'Feature',
-      'geometry': {
-        'type': 'Polygon',
-        'coordinates': [[
-          [-104.05, 78.99],
-          [-87.22, 78.98],
-          [-86.58, 75.94],
-          [-104.03, 75.94],
-          [-104.05, 78.99]
-        ]]
-      },
-    });
-
-    await parseFile(getFileRef(validJsonFileResult), transformDetails);
-    // Confirm cleanAndValidate called
-    expect(cleanAndValidate.mock.calls.length).toEqual(1);
-    // Confirm preview function not called
-    expect(previewFunction.mock.calls.length).toEqual(0);
+  it('should reject and throw error if no file provided', async () => {
+    await expect(fileHandler(null)).rejects.toThrow();
   });
 
-  it('should call preview callback function if provided', async () => {
-    const validJsonFileResult = JSON.stringify({
-      'type': 'Feature',
-      'geometry': {
-        'type': 'Polygon',
-        'coordinates': [[
-          [-104.05, 78.99],
-          [-87.22, 78.98],
-          [-86.58, 75.94],
-          [-104.03, 75.94],
-          [-104.05, 78.99]
-        ]]
-      },
-    });
+  it('should abort on file reader error', () => {
+    fileReader.abort.mockReset();
+    const fileRef = getFileRef();
 
-    await parseFile(getFileRef(validJsonFileResult), transformDetails, previewFunction);
-    // Confirm preview function called
-    expect(previewFunction.mock.calls.length).toEqual(1);
+    const fileReaderWithErrorCall = {
+      ...fileReader,
+    };
+    // Trigger on error on read
+    fileReaderWithErrorCall.readAsBinaryString =
+      () => fileReaderWithErrorCall.onerror();
+    const getFileParseActive = getFileParseActiveFactory();
+    expect(fileHandler(
+      fileRef, chunkHandler, cleanAndValidate, getFileParseActive,
+      fileReaderWithErrorCall, FILE_BUFFER, oboeStream
+    )).rejects.toThrow();
+
+    expect(fileReader.abort.mock.calls.length).toEqual(1);
+    expect(oboeStream.abort.mock.calls.length).toEqual(1);
+  });
+
+  it('should abort and resolve to null if file parse cancelled', async () => {
+    const fileRef = getFileRef();
+
+    // Cancel file parse
+    const getFileParseActive = getFileParseActiveFactory(false);
+
+    const fileHandlerResult = await fileHandler(
+      fileRef, chunkHandler, cleanAndValidate, getFileParseActive,
+      fileReader, FILE_BUFFER, oboeStream
+    );
+
+    expect(fileHandlerResult).toBeNull();
+    expect(oboeStream.abort.mock.calls.length).toEqual(1);
+  });
+
+  // Expect 2 calls, one reads file, next is expected to be undefined to
+  // both fileReader and oboeStream
+  it('should normally read binary and emit to oboeStream for valid data', async () => {
+    const fileRef = getFileRef();
+    const getFileParseActive = getFileParseActiveFactory();
+    fileHandler(
+      fileRef, chunkHandler, cleanAndValidate, getFileParseActive,
+      fileReader, FILE_BUFFER, oboeStream
+    );
+
+    expect(fileReader.readAsBinaryString.mock.calls.length).toEqual(2);
+    expect(oboeStream.emit.mock.calls.length).toEqual(2);
   });
 });
