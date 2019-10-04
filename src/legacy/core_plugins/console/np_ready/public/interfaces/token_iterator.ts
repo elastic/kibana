@@ -34,4 +34,10 @@ export interface TokenIterator {
 
   // TODO: document
   getCurrentPosition(): Position;
+
+  // TODO: document
+  getCurrentTokenLineNumber(): number | null;
+
+  // TODO: document
+  getCurrentTokenColumn(): number | null;
 }

@@ -25,6 +25,12 @@ const MODE = {
   BETWEEN_REQUESTS: 32
 };
 
+/**
+ * The RowParser is still using Ace editor directly for now.
+ *
+ * This will be cleaned up when we implement the editor interface everywhere
+ * in the next pass.
+ */
 function RowParser(editor) {
   const defaultEditor = editor;
 

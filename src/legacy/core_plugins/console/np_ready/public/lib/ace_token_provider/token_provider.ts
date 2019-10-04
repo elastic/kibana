@@ -54,7 +54,7 @@ const extractTokenFromAceTokenRow = (
     acc += token.value;
     const end = acc.length;
     if (column < start) continue;
-    if (column > end) continue;
+    if (column > end + 1) continue;
     return toToken(lineNumber, start, token);
   }
   return null;

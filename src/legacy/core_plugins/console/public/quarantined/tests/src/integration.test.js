@@ -147,9 +147,10 @@ describe('Integration', () => {
             }
 
             const context = terms[0].context;
+            const { cursor: { row, column } } = testToRun;
             input.autocomplete._test.addReplacementInfoToContext(
               context,
-              testToRun.cursor,
+              { lineNumber: row + 1, column: column + 1 },
               terms[0].value
             );
 
@@ -164,7 +165,7 @@ describe('Integration', () => {
             }
 
             function posCompare(actual, expected) {
-              expect(actual.row).toEqual(expected.row + rowOffset);
+              expect(actual.lineNumber).toEqual(expected.lineNumber + rowOffset);
               expect(actual.column).toEqual(expected.column);
             }
 
@@ -241,8 +242,8 @@ describe('Integration', () => {
       prefixToAdd: '',
       suffixToAdd: '',
       rangeToReplace: {
-        start: { row: 0, column: 1 },
-        end: { row: 0, column: 1 },
+        start: { lineNumber: 1, column: 2 },
+        end: { lineNumber: 1, column: 2 },
       },
       autoCompleteSet: ['facets', 'query', 'size'],
     },
@@ -301,8 +302,8 @@ describe('Integration', () => {
         prefixToAdd: '',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { row: 1, column: 3 },
-          end: { row: 1, column: 10 },
+          start: { lineNumber: 2, column: 4 },
+          end: { lineNumber: 2, column: 11 },
         },
         autoCompleteSet: ['facets', 'query', 'size'],
       },
@@ -314,8 +315,8 @@ describe('Integration', () => {
         prefixToAdd: '',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { row: 2, column: 6 },
-          end: { row: 2, column: 13 },
+          start: { lineNumber: 3, column: 7 },
+          end: { lineNumber: 3, column: 14 },
         },
         autoCompleteSet: ['match_all', 'term'],
       },
@@ -327,8 +328,8 @@ describe('Integration', () => {
         prefixToAdd: '',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { row: 4, column: 3 },
-          end: { row: 4, column: 15 },
+          start: { lineNumber: 5, column: 4 },
+          end: { lineNumber: 5, column: 16 },
         },
         autoCompleteSet: ['facets', 'query', 'size'],
       },
@@ -339,6 +340,7 @@ describe('Integration', () => {
       },
     ]
   );
+
 
   contextTests(
     '{\n' +
@@ -360,8 +362,8 @@ describe('Integration', () => {
         prefixToAdd: '',
         suffixToAdd: ', ',
         rangeToReplace: {
-          start: { row: 4, column: 16 },
-          end: { row: 4, column: 16 },
+          start: { lineNumber: 5, column: 17 },
+          end: { lineNumber: 5, column: 17 },
         },
         autoCompleteSet: ['facets', 'query', 'size'],
       },
@@ -373,8 +375,8 @@ describe('Integration', () => {
         prefixToAdd: '',
         suffixToAdd: ', ',
         rangeToReplace: {
-          start: { row: 5, column: 1 },
-          end: { row: 5, column: 1 },
+          start: { lineNumber: 6, column: 2 },
+          end: { lineNumber: 6, column: 2 },
         },
         autoCompleteSet: ['facets', 'query', 'size'],
       },
@@ -386,8 +388,8 @@ describe('Integration', () => {
         prefixToAdd: ', ',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { row: 6, column: 0 },
-          end: { row: 6, column: 0 },
+          start: { lineNumber: 7, column: 1 },
+          end: { lineNumber: 7, column: 1 },
         },
         autoCompleteSet: ['facets', 'query', 'size'],
       },
@@ -399,13 +401,14 @@ describe('Integration', () => {
         prefixToAdd: ', ',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { row: 5, column: 14 },
-          end: { row: 5, column: 14 },
+          start: { lineNumber: 6, column: 15 },
+          end: { lineNumber: 6, column: 15 },
         },
         autoCompleteSet: ['facets', 'query', 'size'],
       },
     ]
   );
+
 
   contextTests(
     {
@@ -487,8 +490,8 @@ describe('Integration', () => {
         prefixToAdd: '',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { row: 5, column: 15 },
-          end: { row: 5, column: 15 },
+          start: { lineNumber: 6, column: 16 },
+          end: { lineNumber: 6, column: 16 },
         },
         autoCompleteSet: [{ name: 'terms', meta: 'API' }],
       },
@@ -571,6 +574,7 @@ describe('Integration', () => {
       },
     ]
   );
+
 
   contextTests(
     {
@@ -897,8 +901,8 @@ describe('Integration', () => {
         name: 'Replace an empty string',
         cursor: { row: 1, column: 4 },
         rangeToReplace: {
-          start: { row: 1, column: 3 },
-          end: { row: 1, column: 9 },
+          start: { lineNumber: 2, column: 4 },
+          end: { lineNumber: 2, column: 10 },
         },
       },
     ]
@@ -1207,8 +1211,8 @@ describe('Integration', () => {
       name: 'Params on existing param',
       cursor: { row: 0, column: 26 },
       rangeToReplace: {
-        start: { row: 0, column: 24 },
-        end: { row: 0, column: 30 },
+        start: { lineNumber: 1, column: 25 },
+        end: { lineNumber: 1, column: 31 },
       },
       autoCompleteSet: [
         { name: 'filter_path', meta: 'param', insertValue: 'filter_path=' },
@@ -1232,8 +1236,8 @@ describe('Integration', () => {
         name: 'Params on existing value',
         cursor: { row: 0, column: 37 },
         rangeToReplace: {
-          start: { row: 0, column: 36 },
-          end: { row: 0, column: 39 },
+          start: { lineNumber: 1, column: 37 },
+          end: { lineNumber: 1, column: 40 },
         },
         autoCompleteSet: [
           { name: 'count', meta: 'search_type' },
@@ -1244,6 +1248,7 @@ describe('Integration', () => {
       },
     ]
   );
+
   contextTests(
     null,
     MAPPING,
@@ -1254,8 +1259,8 @@ describe('Integration', () => {
         name: 'Params on just after = with existing value',
         cursor: { row: 0, column: 36 },
         rangeToReplace: {
-          start: { row: 0, column: 36 },
-          end: { row: 0, column: 36 },
+          start: { lineNumber: 1, column: 37 },
+          end: { lineNumber: 1, column: 37 },
         },
         autoCompleteSet: [
           { name: 'count', meta: 'search_type' },
@@ -1287,8 +1292,8 @@ describe('Integration', () => {
         prefixToAdd: '',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { row: 1, column: 3 },
-          end: { row: 1, column: 10 },
+          start: { lineNumber: 2, column: 4 },
+          end: { lineNumber: 2, column: 11 },
         },
         autoCompleteSet: ['facets', 'query', 'size'],
       },
@@ -1300,8 +1305,8 @@ describe('Integration', () => {
         prefixToAdd: '',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { row: 2, column: 6 },
-          end: { row: 2, column: 13 },
+          start: { lineNumber: 3, column: 7 },
+          end: { lineNumber: 3, column: 14 },
         },
         autoCompleteSet: ['match_all', 'term'],
       },
@@ -1313,8 +1318,8 @@ describe('Integration', () => {
         prefixToAdd: '',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { row: 4, column: 3 },
-          end: { row: 4, column: 15 },
+          start: { lineNumber: 5, column: 4 },
+          end: { lineNumber: 5, column: 16 },
         },
         autoCompleteSet: ['facets', 'query', 'size'],
       },

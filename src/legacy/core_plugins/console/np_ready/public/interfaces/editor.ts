@@ -100,5 +100,8 @@ export interface Editor {
   getLineState(args: { lineNumber: number }): string;
 
   // TODO: document
+  getLines(startLine: number, endLine: number): string[];
+
+  // TODO: document
   // getLineMode(args: { lineNumber: number }): LINE_MODE;
 }

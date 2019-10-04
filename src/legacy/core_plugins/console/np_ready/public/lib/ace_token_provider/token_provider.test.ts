@@ -23,7 +23,7 @@ import '../../../../public/quarantined/tests/src/setup_mocks';
 import { Editor } from 'brace';
 import $ from 'jquery';
 // @ts-ignore
-import { initializeInput } from '../../../../public/quarantined/src/input.js';
+import { initializeInput } from '../../../../public/quarantined/src/input.ts';
 
 import { AceTokensProvider } from '.';
 import { Position, Token, TokensProvider } from '../../interfaces';
@@ -201,9 +201,9 @@ describe('Ace (legacy) token provider', () => {
         runTest({
           input,
           expectedToken: {
-            position: { lineNumber: 1, column: 5 },
-            type: 'url.protocol_host',
-            value: 'http://test:user@somehost',
+            position: { lineNumber: 1, column: 4 },
+            type: 'whitespace',
+            value: ' ',
           },
           cb,
           position: { lineNumber: 1, column: 5 },
@@ -212,9 +212,9 @@ describe('Ace (legacy) token provider', () => {
         runTest({
           input,
           expectedToken: {
-            position: { lineNumber: 1, column: input.length },
-            type: 'url.slash',
-            value: '/',
+            position: { lineNumber: 1, column: 5 },
+            type: 'url.protocol_host',
+            value: 'http://test:user@somehost',
           },
           cb,
           position: { lineNumber: 1, column: input.length },

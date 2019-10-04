@@ -185,10 +185,11 @@ function getCurrentMethodAndTokenPaths(
     }
   }
 
-  if (walkedSomeBody && (!bodyTokenPath || bodyTokenPath.length === 1)) {
+  if (walkedSomeBody && (!bodyTokenPath || bodyTokenPath.length === 0)) {
     // we had some content and still no path -> the cursor is position after a closed body -> no auto complete
     return {};
   }
+
   ret.urlTokenPath = [];
   if (tokenIter.getCurrentPosition().lineNumber === startPos.lineNumber) {
     if (t && (t.type === 'url.part' || t.type === 'url.param' || t.type === 'url.value')) {
@@ -561,7 +562,9 @@ export default function({
     // in between request on an empty
     if ((editor.getLineValue({ lineNumber: pos.lineNumber }) || '').trim() === '') {
       // check if the previous line is a single line begging of a new request
-      rowMode = parser.getRowParseMode(pos.lineNumber - 1);
+      rowMode = parser.getRowParseMode(
+        pos.lineNumber - 1 - 1 /* see RowParser for why the added -1, for now */
+      );
       // eslint-disable-next-line no-bitwise
       if (
         // eslint-disable-next-line no-bitwise
@@ -620,7 +623,7 @@ export default function({
       case 'url.param':
       case 'url.value':
         context.rangeToReplace = {
-          start: { lineNumber: pos.lineNumber, column: anchorToken.column },
+          start: { lineNumber: pos.lineNumber, column: anchorToken.position.column },
           end: {
             lineNumber: pos.lineNumber,
             column: context.updatedForToken.position.column + context.updatedForToken.value.length,
@@ -708,7 +711,7 @@ export default function({
         // extend range to replace to include all up to token
         context.rangeToReplace.end.lineNumber = tokenIter.getCurrentTokenLineNumber();
         context.rangeToReplace.end.column =
-          parser.getCurrentTokenColumn(tokenIter) + nonEmptyToken.value.length;
+          tokenIter.getCurrentTokenColumn() + nonEmptyToken.value.length;
 
         // move one more time to check if we need a trailing comma
         nonEmptyToken = parser.nextNonEmptyToken(tokenIter);

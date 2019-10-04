@@ -32,104 +32,6 @@ const mockTokensProviderFactory = (tokenMtx: Token[][]): TokensProvider => {
 };
 
 describe('Token Iterator', () => {
-  // describe('detecting current position', () => {
-
-  //   it.only('knows what is at the current position #1', () => {
-  //     const it = new TokenIteratorImpl(tokenProvider, { lineNumber: 4, column: 3 });
-  //     expect(it.getCurrentPosition()).toEqual({ lineNumber: 4, column: 3 });
-  //     expect(it.getCurrentToken()).toEqual({
-  //       position: { lineNumber: 4, column: 3 },
-  //       type: 'paren.lparen',
-  //       value: '{',
-  //     });
-  //   });
-  //
-  //   it('knows what is at the current position #2', () => {
-  //     const input = `POST abc
-  //
-  //
-  // {  "abcd": 1`;
-  //     const it = new TokenIteratorImpl(input, { lineNumber: 4, column: 8 });
-  //     expect(it.getCurrentPosition()).toEqual({ lineNumber: 4, column: 8 });
-  //     expect(it.getCurrentToken()).toEqual({
-  //       position: { lineNumber: 4, column: 6 },
-  //       type: 'variable',
-  //       value: '"abcd"',
-  //     });
-  //     // Call again to make sure that we haven't broken anything by calculating current position
-  //     expect(it.getCurrentToken()).toEqual({
-  //       position: { lineNumber: 4, column: 6 },
-  //       type: 'variable',
-  //       value: '"abcd"',
-  //     });
-  //
-  //     it.stepForward();
-  //     it.stepBackward();
-  //
-  //     expect(it.getCurrentToken()).toEqual({
-  //       position: { lineNumber: 4, column: 6 },
-  //       type: 'variable',
-  //       value: '"abcd"',
-  //     });
-  //     // We step to the start column of a token
-  //     expect(it.getCurrentPosition()).toEqual({ lineNumber: 4, column: 6 });
-  //   });
-  //
-  //   it('gets the current token', () => {
-  //     const input = `POST abc`;
-  //     const it = new TokenIteratorImpl(input);
-  //
-  //     expect(it.getCurrentToken()).toEqual({
-  //       position: { lineNumber: 1, column: 1 },
-  //       value: 'POST',
-  //       type: 'method',
-  //     });
-  //
-  //     expect(it.getCurrentPosition()).toEqual({
-  //       lineNumber: 1,
-  //       column: 1,
-  //     });
-  //   });
-  //
-  //   it('recovers gracefully from bad starting positions', () => {
-  //     const input = `POST abc`;
-  //     const it = new TokenIteratorImpl(input, { lineNumber: 1000, column: 1000 });
-  //     // Nothing this way...
-  //     expect(it.stepForward()).toBeNull();
-  //     // We are at the end
-  //     expect(it.getCurrentToken()).toEqual({
-  //       position: { column: 6, lineNumber: 1 },
-  //       type: 'url.part',
-  //       value: 'abc',
-  //     });
-  //     expect(it.stepForward()).toBeNull();
-  //   });
-  // });
-  //
-  // describe('edge cases', () => {
-  //   it('recovers from being past the last line', () => {
-  //     const input = `POST abc`;
-  //     const it = new TokenIteratorImpl(input, { lineNumber: 1000, column: 1000 });
-  //     expect(it.getCurrentToken()).toBeNull();
-  //     expect(it.stepBackward()).toEqual({
-  //       position: { column: 6, lineNumber: 1 },
-  //       type: 'url.part',
-  //       value: 'abc',
-  //     });
-  //   });
-  //
-  //   it('recovers from being before the first line', () => {
-  //     const input = `POST abc`;
-  //     const it = new TokenIteratorImpl(input, { lineNumber: -1000, column: -1000 });
-  //     expect(it.getCurrentToken()).toBeNull();
-  //     expect(it.stepForward()).toEqual({
-  //       position: { column: 1, lineNumber: 1 },
-  //       type: 'method',
-  //       value: 'POST',
-  //     });
-  //   });
-  // });
-
   const tokensProvider = mockTokensProviderFactory([
     [
       { type: 'method', value: 'POST', position: { lineNumber: 1, column: 1 } },
@@ -271,11 +173,11 @@ describe('Token Iterator', () => {
   describe('detecting current position', () => {
     it('knows what is at the current position #1', () => {
       const it = new TokenIteratorImpl(tokensProvider, { lineNumber: 1, column: 6 });
-      expect(it.getCurrentPosition()).toEqual({ lineNumber: 1, column: 6 });
+      expect(it.getCurrentPosition()).toEqual({ lineNumber: 1, column: 5 });
       expect(it.getCurrentToken()).toEqual({
-        position: { lineNumber: 1, column: 6 },
-        type: 'url.part',
-        value: 'abc',
+        position: { lineNumber: 1, column: 5 },
+        type: 'whitespace',
+        value: ' ',
       });
     });
   });

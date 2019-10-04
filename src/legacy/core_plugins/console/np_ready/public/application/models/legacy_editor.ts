@@ -88,4 +88,9 @@ export class LegacyEditor implements Editor {
     const session = this.editor.getSession();
     session.replace(aceRange, value);
   }
+
+  getLines(startLine: number, endLine: number): string[] {
+    const session = this.editor.getSession();
+    return session.getLines(startLine - 1, endLine - 1);
+  }
 }

@@ -23,24 +23,26 @@ function isColumnInTokenRange(column: number, token: Token) {
   if (column < token.position.column) {
     return false;
   }
-  return column < token.position.column + token.value.length;
+  return column <= token.position.column + token.value.length;
 }
 
 export class TokenIteratorImpl implements TokenIterator {
   private currentTokenIdx = -1;
-  private currentPosition: Position;
+  private currentPosition: Position = { lineNumber: -1, column: -1 };
   private tokensLineCache: Token[];
 
   constructor(private readonly provider: TokensProvider, startPosition: Position) {
-    this.currentPosition = { ...startPosition };
     this.tokensLineCache = this.provider.getTokens(startPosition.lineNumber) || [];
     const tokenIdx = this.tokensLineCache.findIndex(token =>
       isColumnInTokenRange(startPosition.column, token)
     );
     if (tokenIdx > -1) {
-      this.updatePosition({ idx: tokenIdx, position: this.tokensLineCache[tokenIdx].position });
+      this.updatePosition({
+        tokenIdx,
+        position: this.tokensLineCache[tokenIdx].position,
+      });
     } else {
-      this.updatePosition({ idx: -1, position: startPosition });
+      this.updatePosition({ tokenIdx: -1, position: startPosition });
     }
   }
 
@@ -48,17 +50,13 @@ export class TokenIteratorImpl implements TokenIterator {
     this.tokensLineCache = tokens;
   }
 
-  private updatePosition(info: { idx: number; position: Position }) {
-    this.currentTokenIdx = info.idx;
+  private updatePosition(info: { tokenIdx: number; position: Position }) {
+    this.currentTokenIdx = info.tokenIdx;
     this.currentPosition = { ...info.position };
   }
 
   getCurrentToken(): Token | null {
-    return (
-      this.tokensLineCache.find(token =>
-        isColumnInTokenRange(this.currentPosition.column, token)
-      ) || null
-    );
+    return this.tokensLineCache[this.currentTokenIdx] || null;
   }
 
   private step(direction: 1 | -1): Token | null {
@@ -67,7 +65,10 @@ export class TokenIteratorImpl implements TokenIterator {
     let nextToken = this.tokensLineCache[nextIdx];
     // Check current row
     if (nextToken) {
-      this.updatePosition({ idx: this.currentTokenIdx + direction, position: nextToken.position });
+      this.updatePosition({
+        tokenIdx: this.currentTokenIdx + direction,
+        position: nextToken.position,
+      });
       return nextToken;
     }
 
@@ -91,7 +92,7 @@ export class TokenIteratorImpl implements TokenIterator {
       const nextPosition = nextToken
         ? nextToken.position
         : { column: 1, lineNumber: nextLineNumber };
-      this.updatePosition({ idx, position: nextPosition });
+      this.updatePosition({ tokenIdx: idx, position: nextPosition });
       return nextToken || null;
     }
 
@@ -112,6 +113,18 @@ export class TokenIteratorImpl implements TokenIterator {
   }
 
   getCurrentTokenLineNumber(): number | null {
-    return this.currentPosition.lineNumber;
+    const currentToken = this.getCurrentToken();
+    if (currentToken) {
+      return currentToken.position.lineNumber;
+    }
+    return null;
+  }
+
+  getCurrentTokenColumn(): number | null {
+    const currentToken = this.getCurrentToken();
+    if (currentToken) {
+      return currentToken.position.column;
+    }
+    return null;
   }
 }
