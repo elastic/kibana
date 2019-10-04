@@ -31,5 +31,23 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
     >
       <EuiIcon type={icon} color={color} />
     </EuiLink>
+  return !!pagination ? (
+    <EuiLink
+      onClick={() => {
+        updateUrlParams({ pagination });
+      }}
+    >
+      <EuiIcon type={icon} color={color} />
+    </EuiLink>
+  ) : (
+    <EuiButtonIcon
+      aria-label={i18n.translate('xpack.uptime.overviewPageLink.disabled.ariaLabel', {
+        defaultMessage:
+          'A disabled pagination button indicating that there cannot be any further navigation in the monitors list.',
+      })}
+      color={color}
+      disabled={true}
+      iconType={icon}
+    />
   );
 };
