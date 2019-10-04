@@ -16,29 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Legacy } from 'kibana';
+import {
+  IUiSettingsClient,
+  UiSettingsService,
+  UiSettingsServiceOptions,
+} from './ui_settings_service';
 
-import { UiSettingsService } from './ui_settings_service';
-
+export type UiSettingsServiceFactoryOptions = Pick<
+  UiSettingsServiceOptions,
+  'savedObjectsClient' | 'getDefaults' | 'overrides'
+>;
 /**
  *  Create an instance of UiSettingsService that will use the
- *  passed `callCluster` function to communicate with elasticsearch
+ *  passed `savedObjectsClient` to communicate with elasticsearch
  *
- *  @param {Hapi.Server} server
- *  @param {Object} options
- *  @property {AsyncFunction} options.callCluster function that accepts a method name and
- *                            param object which causes a request via some elasticsearch client
- *  @property {AsyncFunction} [options.getDefaults] async function that returns defaults/details about
- *                            the uiSettings.
- *  @return {UiSettingsService}
+ *  @return {IUiSettingsClient}
  */
-export function uiSettingsServiceFactory(server, options) {
+export function uiSettingsServiceFactory(
+  server: Legacy.Server,
+  options: UiSettingsServiceFactoryOptions
+): IUiSettingsClient {
   const config = server.config();
 
-  const {
-    savedObjectsClient,
-    getDefaults,
-    overrides,
-  } = options;
+  const { savedObjectsClient, getDefaults, overrides } = options;
 
   return new UiSettingsService({
     type: 'config',
@@ -47,6 +48,6 @@ export function uiSettingsServiceFactory(server, options) {
     savedObjectsClient,
     getDefaults,
     overrides,
-    logWithMetadata: (...args) => server.logWithMetadata(...args),
+    logWithMetadata: server.logWithMetadata,
   });
 }

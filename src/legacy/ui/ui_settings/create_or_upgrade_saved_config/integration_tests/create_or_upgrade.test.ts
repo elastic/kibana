@@ -24,7 +24,6 @@ import { SavedObjectsClientContract } from 'src/core/server';
 
 import KbnServer from '../../../../server/kbn_server';
 import { createTestServers } from '../../../../../test_utils/kbn_server';
-// @ts-ignore
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
 describe('createOrUpgradeSavedConfig()', () => {
