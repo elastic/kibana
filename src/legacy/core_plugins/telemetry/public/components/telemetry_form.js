@@ -41,8 +41,7 @@ export class TelemetryForm extends Component {
     telemetryOptInProvider: PropTypes.object.isRequired,
     query: PropTypes.object,
     onQueryMatchChange: PropTypes.func.isRequired,
-    spacesEnabled: PropTypes.bool.isRequired,
-    activeSpace: PropTypes.object,
+    showAppliesSettingMessage: PropTypes.bool.isRequired,
     enableSaving: PropTypes.bool.isRequired,
   };
 
@@ -106,7 +105,7 @@ export class TelemetryForm extends Component {
               </EuiFlexGroup>
             </EuiText>
 
-            {this.maybeGetSpacesWarning()}
+            {this.maybeGetAppliesSettingMessage()}
             <EuiSpacer size="s" />
             <Field
               setting={{
@@ -125,8 +124,8 @@ export class TelemetryForm extends Component {
     );
   }
 
-  maybeGetSpacesWarning = () => {
-    if (!this.props.spacesEnabled) {
+  maybeGetAppliesSettingMessage = () => {
+    if (!this.props.showAppliesSettingMessage) {
       return null;
     }
     return (
