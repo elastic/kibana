@@ -19,7 +19,6 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings']);
   const a11y = getService('a11y');
@@ -52,8 +51,5 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaSettings();
       await a11y.testAppSnapshot();
     });
-
-
-
   });
 }
