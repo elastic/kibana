@@ -17,8 +17,20 @@
  * under the License.
  */
 
-import { injectedMetadataServiceMock } from '../../../../../core/public/mocks';
+import {
+  injectedMetadataServiceMock,
+  notificationServiceMock,
+  overlayServiceMock,
+} from '../../../../../core/public/mocks';
 const injectedMetadataMock = injectedMetadataServiceMock.createStartContract();
+
+// export const MockNotificationsService = notificationServiceMock.create();
+// export const NotificationServiceConstructor = jest
+//   .fn()
+//   .mockImplementation(() => MockNotificationsService);
+// jest.doMock('./notifications', () => ({
+
+// }));
 
 export function mockInjectedMetadata({ telemetryOptedIn }) {
   const mockGetInjectedVar = jest.fn().mockImplementation((key) => {
@@ -32,9 +44,15 @@ export function mockInjectedMetadata({ telemetryOptedIn }) {
 }
 
 jest.doMock('ui/new_platform', () => ({
+  npSetup: {
+    core: {
+      notifications: notificationServiceMock.createSetupContract(),
+    }
+  },
   npStart: {
     core: {
-      injectedMetadata: injectedMetadataMock
+      injectedMetadata: injectedMetadataMock,
+      overlays: overlayServiceMock.createStartContract(),
     },
   },
 }));

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import '../../services/telemetry_opt_in.test.mocks';
 import { renderBanner } from './render_banner';
 
 describe('render_banner', () => {
