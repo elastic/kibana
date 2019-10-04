@@ -26,7 +26,7 @@ export function ClientMock() {
     }
 
     if (endpoint === 'get') {
-      if (params === elasticsearch.errors.NotFound) return elasticsearch.errors.NotFound;
+      if (params === legacyElasticsearch.errors.NotFound) return legacyElasticsearch.errors.NotFound;
 
       const _source = {
         jobtype: 'jobtype',
