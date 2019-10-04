@@ -18,7 +18,7 @@
  */
 
 import Fs from 'fs';
-import { promifify } from 'util';
+import { promisify } from 'util';
 
 import { download } from './download';
 import path from 'path';
@@ -30,7 +30,7 @@ import { errorIfXPackInstall } from '../lib/error_if_x_pack';
 import { existingInstall, assertVersion } from './kibana';
 import { prepareExternalProjectDependencies } from '@kbn/pm';
 
-const mkdir = promifify(Fs.mkdir);
+const mkdir = promisify(Fs.mkdir);
 
 export default async function install(settings, logger) {
   try {
