@@ -1,0 +1,173 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`graph_visualization should render to svg elements 1`] = `
+<svg
+  className="gphGraph"
+  height="100%"
+  id="graphSvg"
+  pointerEvents="all"
+  width="100%"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g>
+    <g>
+      <line
+        className="gphEdge gphEdge--selected"
+        key="A..1-B..2"
+        onClick={[Function]}
+        strokeLinecap="round"
+        style={
+          Object {
+            "strokeWidth": 2,
+          }
+        }
+        x1={5}
+        x2={7}
+        y1={5}
+        y2={9}
+      />
+      <line
+        className="gphEdge gphEdge--selected"
+        key="B..2-C..3"
+        onClick={[Function]}
+        strokeLinecap="round"
+        style={
+          Object {
+            "strokeWidth": 2.2,
+          }
+        }
+        x1={7}
+        x2={12}
+        y1={9}
+        y2={2}
+      />
+    </g>
+    <g
+      className="gphNode"
+      key="A..1"
+      onClick={[Function]}
+      onMouseDown={[Function]}
+    >
+      <circle
+        className="gphNode__circle gphNode__circle--selected"
+        cx={5}
+        cy={5}
+        r={10}
+        style={
+          Object {
+            "fill": "black",
+          }
+        }
+      />
+      <text
+        className="fa gphNode__text gphNode__text--inverse"
+        textAnchor="middle"
+        transform="translate(0,5)"
+        x={5}
+        y={5}
+      >
+        a
+      </text>
+      <text
+        className="gphNode__label"
+        textAnchor="middle"
+        transform="translate(0,22)"
+        x={5}
+        y={5}
+      >
+        1
+      </text>
+      <g>
+        <circle
+          className="gphNode__markerCircle"
+          cx={5}
+          cy={5}
+          r="5"
+          transform="translate(10,10)"
+        />
+        <text
+          className="gphNode__markerText"
+          textAnchor="middle"
+          transform="translate(10,12)"
+          x={5}
+          y={5}
+        >
+          1
+        </text>
+      </g>
+    </g>
+    <g
+      className="gphNode"
+      key="B..2"
+      onClick={[Function]}
+      onMouseDown={[Function]}
+    >
+      <circle
+        className="gphNode__circle"
+        cx={7}
+        cy={9}
+        r={10}
+        style={
+          Object {
+            "fill": "red",
+          }
+        }
+      />
+      <text
+        className="fa gphNode__text gphNode__text--inverse"
+        textAnchor="middle"
+        transform="translate(0,5)"
+        x={7}
+        y={9}
+      >
+        b
+      </text>
+      <text
+        className="gphNode__label"
+        textAnchor="middle"
+        transform="translate(0,22)"
+        x={7}
+        y={9}
+      >
+        2
+      </text>
+    </g>
+    <g
+      className="gphNode"
+      key="C..3"
+      onClick={[Function]}
+      onMouseDown={[Function]}
+    >
+      <circle
+        className="gphNode__circle"
+        cx={12}
+        cy={2}
+        r={10}
+        style={
+          Object {
+            "fill": "yellow",
+          }
+        }
+      />
+      <text
+        className="fa gphNode__text gphNode__text--inverse"
+        textAnchor="middle"
+        transform="translate(0,5)"
+        x={12}
+        y={2}
+      >
+        c
+      </text>
+      <text
+        className="gphNode__label"
+        textAnchor="middle"
+        transform="translate(0,22)"
+        x={12}
+        y={2}
+      >
+        3
+      </text>
+    </g>
+  </g>
+</svg>
+`;

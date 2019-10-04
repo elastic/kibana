@@ -21,7 +21,7 @@ import sinon from 'sinon';
 import nock from 'nock';
 import glob from 'glob-all';
 import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
+import Fs from 'fs';
 import Logger from '../lib/logger';
 import { UnsupportedProtocolError } from '../lib/errors';
 import { download, _downloadSingle, _getFilePath, _checkFilePathDeprecation } from './download';
@@ -64,7 +64,7 @@ describe('kibana cli', function () {
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
       rimraf.sync(testWorkingPath);
-      mkdirp.sync(testWorkingPath);
+      Fs.mkdirSync(testWorkingPath, { recursive: true });
     });
 
     afterEach(function () {
