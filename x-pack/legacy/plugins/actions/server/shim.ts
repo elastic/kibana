@@ -6,6 +6,8 @@
 
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
+import * as Rx from 'rxjs';
+import { ActionsConfigType } from './types';
 import { TaskManager } from '../../task_manager';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
@@ -51,6 +53,9 @@ export type EncryptedSavedObjectsStartContract = Pick<
  */
 export interface ActionsPluginInitializerContext {
   logger: LoggerFactory;
+  config: {
+    create(): Rx.Observable<ActionsConfigType>;
+  };
 }
 export interface ActionsCoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
@@ -95,6 +100,14 @@ export function shim(
 
   const initializerContext: ActionsPluginInitializerContext = {
     logger: newPlatform.coreContext.logger,
+    config: {
+      create() {
+        return Rx.of({
+          enabled: server.config().get('xpack.actions.enabled') as boolean,
+          whitelistedHosts: server.config().get('xpack.actions.whitelistedHosts') as string[],
+        }) as Rx.Observable<ActionsConfigType>;
+      },
+    },
   };
 
   const coreSetup: ActionsCoreSetup = {

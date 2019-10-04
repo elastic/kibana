@@ -6,7 +6,6 @@
 
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
-import { ActionsKibanaConfig } from './actions_config';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -23,6 +22,11 @@ export interface Services {
 export interface ActionsPlugin {
   setup: PluginSetupContract;
   start: PluginStartContract;
+}
+
+export interface ActionsConfigType {
+  enabled: boolean;
+  whitelistedHosts: string[];
 }
 
 // the parameters passed to an action type executor function
@@ -58,7 +62,7 @@ interface ValidatorType {
   validate<T>(value: any): any;
 }
 
-export type ActionTypeCreator = (config?: ActionsKibanaConfig) => ActionType;
+export type ActionTypeCreator = (config?: ActionsConfigType) => ActionType;
 export interface ActionType {
   id: string;
   name: string;

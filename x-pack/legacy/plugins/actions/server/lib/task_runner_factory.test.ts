@@ -125,6 +125,16 @@ test('executes the task by calling the executor with proper parameters', async (
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
     },
   });
 });
@@ -190,7 +200,17 @@ test('uses API key when provided', async () => {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
+    },
   });
 });
 
@@ -222,6 +242,16 @@ test(`doesn't use API key when not provided`, async () => {
     request: {
       getBasePath: expect.anything(),
       headers: {},
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
     },
   });
 });
@@ -255,6 +285,16 @@ test(`doesn't use API key when provided and isSecurityEnabled is set to false`, 
     request: {
       getBasePath: expect.anything(),
       headers: {},
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
     },
   });
 });

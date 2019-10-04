@@ -5,8 +5,9 @@
  */
 
 import Hapi from 'hapi';
+import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { Services } from './types';
+import { ActionsConfigType, Services } from './types';
 import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -14,7 +15,7 @@ import { ExecuteOptions } from './create_execute_function';
 import { createExecuteFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { ClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
-import { ActionsKibanaConfig, getActionsConfigurationUtilities } from './actions_config';
+import { getActionsConfigurationUtilities } from './actions_config';
 import {
   ActionsPluginInitializerContext,
   ActionsCoreSetup,
@@ -43,6 +44,7 @@ export interface PluginStartContract {
 }
 
 export class Plugin {
+  private readonly config$: Observable<ActionsConfigType>;
   private readonly logger: Logger;
   private serverBasePath?: string;
   private adminClient?: ClusterClient;
@@ -52,14 +54,14 @@ export class Plugin {
 
   constructor(initializerContext: ActionsPluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
+    this.config$ = initializerContext.config.create();
   }
 
   public async setup(
     core: ActionsCoreSetup,
     plugins: ActionsPluginsSetup
   ): Promise<PluginSetupContract> {
-    // TODO: Real config
-    const config = {};
+    const config = await this.config$.pipe(first()).toPromise();
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
     plugins.xpack_main.registerFeature({
@@ -114,7 +116,7 @@ export class Plugin {
     registerBuiltInActionTypes({
       logger: this.logger,
       actionTypeRegistry,
-      actionsConfigUtils: getActionsConfigurationUtilities(config as ActionsKibanaConfig),
+      actionsConfigUtils: getActionsConfigurationUtilities(config as ActionsConfigType),
     });
 
     // Routes

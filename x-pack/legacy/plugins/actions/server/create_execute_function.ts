@@ -42,6 +42,16 @@ export function createExecuteFunction({
     const fakeRequest: any = {
       headers: requestHeaders,
       getBasePath: () => getBasePath(spaceId),
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
     };
 
     const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
