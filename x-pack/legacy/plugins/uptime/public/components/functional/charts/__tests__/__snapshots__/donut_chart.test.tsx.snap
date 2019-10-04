@@ -38,7 +38,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
     class="euiFlexItem"
   >
     <div
-      style="max-width:150px"
+      class="sc-htpNat fzCrLw"
     >
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
@@ -83,12 +83,8 @@ exports[`DonutChart component renders a donut chart 1`] = `
         </span>
       </div>
       <div
-        class="euiFlexItem"
-      >
-        <div
-          class="euiSpacer euiSpacer--l"
-        />
-      </div>
+        class="euiSpacer euiSpacer--xl"
+      />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
       >
