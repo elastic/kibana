@@ -52,6 +52,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('index_patterns');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+
       // check for the index pattern info flyout that covers the
       // create index pattern button on smaller screens
       if (await testSubjects.exists('CreateIndexPatternPrompt')) {
