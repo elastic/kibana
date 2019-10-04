@@ -6,10 +6,10 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { PageContainer } from '../page.container';
+import { Page } from '../page';
 
 describe('<Page />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<PageContainer index={0} />).isEmptyRender());
+    expect(mount(<Page index={0} />).isEmptyRender());
   });
 });

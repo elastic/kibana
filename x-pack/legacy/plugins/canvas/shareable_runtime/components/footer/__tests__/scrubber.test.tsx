@@ -7,7 +7,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../../test/context_jest';
-import { ScrubberContainer } from '../scrubber.container';
+import { Scrubber } from '../scrubber';
 import {
   getScrubberSlideContainer as container,
   getRenderedElement as element,
@@ -15,12 +15,12 @@ import {
 
 describe('<Scrubber />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<ScrubberContainer />).isEmptyRender());
+    expect(mount(<Scrubber />).isEmptyRender());
   });
 
   const wrapper = mount(
     <JestContext>
-      <ScrubberContainer />
+      <Scrubber />
     </JestContext>
   );
 

@@ -4,22 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty, EuiText } from '@elastic/eui';
 
-export type onSetPageNumberProp = (page: number) => void;
-export type onToggleScrubberProp = () => void;
+import {
+  useCanvasShareableState,
+  setScrubberVisibleAction,
+  setPageAction,
+  setAutoplayAction,
+} from '../../context';
+
+type onSetPageNumberFn = (page: number) => void;
+type onToggleScrubberFn = () => void;
 
 interface Props {
   /**
    * The handler to invoke when the current page number is set.
    */
-  onSetPageNumber: onSetPageNumberProp;
+  onSetPageNumber: onSetPageNumberFn;
 
   /**
    * The handler to invoke when the scrubber visibility is toggled.
    */
-  onToggleScrubber: onToggleScrubberProp;
+  onToggleScrubber: onToggleScrubberFn;
 
   /**
    * The current page number.
@@ -35,7 +42,12 @@ interface Props {
 /**
  * The page count and paging controls within the footer of the Shareable Canvas Workpad.
  */
-export const PageControls = ({ onSetPageNumber, page, totalPages, onToggleScrubber }: Props) => {
+export const PageControlsComponent: FC<Props> = ({
+  onSetPageNumber,
+  page,
+  totalPages,
+  onToggleScrubber,
+}) => {
   const currentPage = page + 1;
 
   return (
@@ -75,4 +87,27 @@ export const PageControls = ({ onSetPageNumber, page, totalPages, onToggleScrubb
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+/**
+ * A store-connected container for the `PageControls` component.
+ */
+export const PageControls: FC<{}> = () => {
+  const [{ workpad, footer, stage }, dispatch] = useCanvasShareableState();
+
+  if (!workpad) {
+    return null;
+  }
+
+  const { isScrubberVisible } = footer;
+  const { page } = stage;
+  const totalPages = workpad.pages.length;
+
+  const onToggleScrubber = () => {
+    dispatch(setAutoplayAction(false));
+    dispatch(setScrubberVisibleAction(!isScrubberVisible));
+  };
+  const onSetPageNumber = (number: number) => dispatch(setPageAction(number));
+
+  return <PageControlsComponent {...{ onToggleScrubber, onSetPageNumber, page, totalPages }} />;
 };

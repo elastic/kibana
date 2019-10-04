@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { CanvasRenderedWorkpad, CanvasShareableState, Stage } from '../types';
 import { RendererSpec } from '../../types';
 import { initialCanvasShareableState, CanvasShareableStateProvider } from '../context';
-import { CanvasContainer } from './canvas.container';
+import { Canvas } from './canvas';
 import { renderFunctions } from '../supported_renderers';
 
 interface Props {
@@ -26,9 +26,7 @@ interface Props {
 /**
  * The overall Canvas Shareable Workpad app; the highest-layer component.
  */
-export const App = (props: Props) => {
-  const { workpad, stage } = props;
-
+export const App: FC<Props> = ({ workpad, stage }) => {
   const renderers: { [key: string]: RendererSpec } = {};
 
   renderFunctions.forEach(fn => {
@@ -45,7 +43,7 @@ export const App = (props: Props) => {
 
   return (
     <CanvasShareableStateProvider initialState={initialState}>
-      <CanvasContainer />
+      <Canvas />
     </CanvasShareableStateProvider>
   );
 };

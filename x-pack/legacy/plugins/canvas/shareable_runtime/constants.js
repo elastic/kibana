@@ -8,6 +8,7 @@ const path = require('path');
 
 const LIBRARY_NAME = 'KbnCanvas';
 const SHAREABLE_RUNTIME_NAME = 'kbn_canvas';
+const SHAREABLE_RUNTIME_CSS_NAME = 'kbn_canvas_css';
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../..');
 const SHAREABLE_RUNTIME_SRC = path.resolve(
   KIBANA_ROOT,
@@ -23,6 +24,7 @@ const STATS_OUTPUT = path.resolve(SHAREABLE_RUNTIME_OUTPUT, 'webpack_stats.json'
 module.exports = {
   KIBANA_ROOT,
   LIBRARY_NAME,
+  SHAREABLE_RUNTIME_CSS_NAME,
   SHAREABLE_RUNTIME_FILE,
   SHAREABLE_RUNTIME_NAME,
   SHAREABLE_RUNTIME_OUTPUT,

@@ -16,4 +16,6 @@
 .renderContainer {
   composes: canvasWorkpad--element_render from global;
   composes: canvasRenderEl from global;
+  height: 100%;
+  width: 100%;
 }

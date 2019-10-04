@@ -8,12 +8,12 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../../../test/context_jest';
 import { getToolbarCheckbox as checkbox } from '../../../../test/selectors';
-import { ToolbarSettingsContainer } from '../toolbar_settings.container';
+import { ToolbarSettings } from '../toolbar_settings';
 
 describe('<ToolbarSettings />', () => {
   const wrapper = mount(
     <JestContext>
-      <ToolbarSettingsContainer onSetAutohide={() => {}} />
+      <ToolbarSettings onSetAutohide={() => {}} />
     </JestContext>
   );
 

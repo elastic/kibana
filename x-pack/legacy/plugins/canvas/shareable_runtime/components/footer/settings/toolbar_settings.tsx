@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiSwitch, EuiFormRow } from '@elastic/eui';
+import { useCanvasShareableState, setToolbarAutohideAction } from '../../../context';
 
-export type onSetAutohideProp = (isAutohide: boolean) => void;
+export type onSetAutohideFn = (isAutohide: boolean) => void;
 
 export interface Props {
   /**
@@ -19,13 +20,13 @@ export interface Props {
   /**
    * The handler to invoke when autohide is set.
    */
-  onSetAutohide: onSetAutohideProp;
+  onSetAutohide: onSetAutohideFn;
 }
 
 /**
  * The settings panel for the Toolbar of a Shareable Canvas Workpad.
  */
-export const ToolbarSettings = ({ isAutohide, onSetAutohide }: Props) => {
+export const ToolbarSettingsComponent = ({ isAutohide, onSetAutohide }: Props) => {
   return (
     <div style={{ padding: 16 }}>
       <EuiFormRow helpText="Hide the toolbar when the mouse is not within the Canvas?">
@@ -40,4 +41,21 @@ export const ToolbarSettings = ({ isAutohide, onSetAutohide }: Props) => {
       </EuiFormRow>
     </div>
   );
+};
+
+/**
+ * A store-connected container for the `ToolbarSettings` component.
+ */
+export const ToolbarSettings: FC<Pick<Props, 'onSetAutohide'>> = ({ onSetAutohide }) => {
+  const [{ settings }, dispatch] = useCanvasShareableState();
+
+  const { toolbar } = settings;
+  const { isAutohide } = toolbar;
+
+  const onSetAutohideFn: onSetAutohideFn = (autohide: boolean) => {
+    onSetAutohide(autohide);
+    dispatch(setToolbarAutohideAction(autohide));
+  };
+
+  return <ToolbarSettingsComponent onSetAutohide={onSetAutohideFn} {...{ isAutohide }} />;
 };

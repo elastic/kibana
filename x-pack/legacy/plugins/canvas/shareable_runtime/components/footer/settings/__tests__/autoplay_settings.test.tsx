@@ -12,12 +12,12 @@ import {
   getAutoplayCheckbox as checkbox,
   getAutoplaySubmit as submit,
 } from '../../../../test/selectors';
-import { AutoplaySettingsContainer } from '../autoplay_settings.container';
+import { AutoplaySettings } from '../autoplay_settings';
 
 describe('<AutoplaySettings />', () => {
   const wrapper = mount(
     <JestContext>
-      <AutoplaySettingsContainer />
+      <AutoplaySettings />
     </JestContext>
   );
 

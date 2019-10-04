@@ -7,35 +7,16 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ExampleContext } from '../../../test/context_example';
 
-import { FooterContainer } from '../footer.container';
-import { TitleContainer } from '../title.container';
-import { PageControlsContainer } from '../page_controls.container';
-import { PagePreviewContainer } from '../page_preview.container';
-import { ScrubberContainer } from '../scrubber.container';
+import { Footer } from '../footer';
 
 storiesOf('shareables/Footer', module)
-  .add('Footer', () => (
-    <ExampleContext height={172}>
-      <FooterContainer />
+  .add('contextual: hello', () => (
+    <ExampleContext height={172} source="hello">
+      <Footer />
     </ExampleContext>
   ))
-  .add('Title', () => (
-    <ExampleContext style={{ background: '#333', padding: 10 }}>
-      <TitleContainer />
-    </ExampleContext>
-  ))
-  .add('Scrubber', () => (
-    <ExampleContext height={172} isScrubberVisible={true}>
-      <ScrubberContainer />
-    </ExampleContext>
-  ))
-  .add('PageControls', () => (
-    <ExampleContext style={{ background: '#333', padding: 10 }}>
-      <PageControlsContainer />
-    </ExampleContext>
-  ))
-  .add('PagePreview', () => (
-    <ExampleContext>
-      <PagePreviewContainer height={172} index={0} />
+  .add('contextual: austin', () => (
+    <ExampleContext height={172} source="austin">
+      <Footer />
     </ExampleContext>
   ));

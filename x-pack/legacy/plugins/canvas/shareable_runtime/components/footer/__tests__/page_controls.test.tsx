@@ -12,21 +12,21 @@ import {
   getPageControlsCenter as current,
   getPageControlsNext as next,
 } from '../../../test/selectors';
-import { PageControlsContainer } from '../page_controls.container';
+import { PageControls } from '../page_controls';
 
 describe('<PageControls />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<PageControlsContainer />).isEmptyRender());
+    expect(mount(<PageControls />).isEmptyRender());
   });
 
   const hello = mount(
     <JestContext source="hello">
-      <PageControlsContainer />
+      <PageControls />
     </JestContext>
   );
   const austin = mount(
     <JestContext source="austin">
-      <PageControlsContainer />
+      <PageControls />
     </JestContext>
   );
 

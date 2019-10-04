@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { useCanvasShareableState } from '../../../context';
 import { Refs } from '../../../types';
-import { ToolbarSettingsContainer } from './toolbar_settings.container';
-import { AutoplaySettingsContainer } from './autoplay_settings.container';
+import { ToolbarSettings } from './toolbar_settings';
+import { AutoplaySettings } from './autoplay_settings';
 
 interface Props {
   /**
@@ -20,7 +21,7 @@ interface Props {
 /**
  * The Settings Popover for Canvas Shareable Workpads.
  */
-export const Settings = ({ refs }: Props) => {
+export const SettingsComponent: FC<Props> = ({ refs }) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const button = (
     <EuiButtonIcon
@@ -56,7 +57,7 @@ export const Settings = ({ refs }: Props) => {
         panel: {
           id: 1,
           title: 'Auto Play',
-          content: <AutoplaySettingsContainer />,
+          content: <AutoplaySettings />,
         },
       },
       {
@@ -65,7 +66,7 @@ export const Settings = ({ refs }: Props) => {
         panel: {
           id: 2,
           title: 'Toolbar',
-          content: <ToolbarSettingsContainer onSetAutohide={() => setPopoverOpen(false)} />,
+          content: <ToolbarSettings onSetAutohide={() => setPopoverOpen(false)} />,
         },
       },
     ],
@@ -91,4 +92,13 @@ export const Settings = ({ refs }: Props) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+/**
+ * A store-connected container for the `Settings` component.
+ */
+export const Settings: FC<{}> = () => {
+  const [{ refs }] = useCanvasShareableState();
+
+  return <SettingsComponent refs={refs} />;
 };
