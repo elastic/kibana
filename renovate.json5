@@ -476,14 +476,6 @@
         ],
       },
       {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
-        ],
-      },
-      {
         groupSlug: 'mustache',
         groupName: 'mustache related packages',
         packageNames: [

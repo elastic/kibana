@@ -7,7 +7,7 @@
 import Git, { RemoteCallbacks } from '@elastic/nodegit';
 import del from 'del';
 import fs from 'fs';
-import mkdirp from 'mkdirp';
+import { promisify } from 'util';
 import moment from 'moment';
 import path from 'path';
 
@@ -33,6 +33,8 @@ const GIT_FETCH_PROGRESS_CANCEL = -1;
 const NODEGIT_CALLBACK_RETURN_VALUE_ERROR = -7;
 const GIT_INDEXER_PROGRESS_CALLBACK_RETURN_VALUE_ERROR_MSG = `indexer progress callback returned ${GIT_FETCH_PROGRESS_CANCEL}`;
 const SSH_AUTH_ERROR = new Error('Failed to authenticate SSH session');
+
+const mkdirAsync = promisify(fs.mkdir);
 
 function isCancelled(error: any) {
   return (
@@ -77,15 +79,7 @@ export class RepositoryService {
       } else {
         const parentDir = path.dirname(localPath);
         // on windows, git clone will failed if parent folder is not exists;
-        await new Promise((resolve, reject) =>
-          mkdirp(parentDir, err => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve();
-            }
-          })
-        );
+        await mkdirAsync(parentDir, { recursive: true });
       }
       // Go head with the actual clone.
       if (repo.protocol === 'ssh') {
