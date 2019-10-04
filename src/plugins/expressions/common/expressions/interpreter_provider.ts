@@ -94,7 +94,7 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
     args: Record<string, unknown>
   ): Promise<any> {
     // Check function input.
-    const acceptableContext = cast(context, (fnDef.context || {}).types);
+    const acceptableContext = cast(context, fnDef.context ? fnDef.context.types : undefined);
     const fnOutput = await fnDef.fn(acceptableContext, args, handlers);
 
     // Validate that the function returned the type it said it would.
