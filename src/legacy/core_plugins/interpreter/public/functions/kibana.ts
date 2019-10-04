@@ -30,9 +30,12 @@ export type ExpressionFunctionKibana = ExpressionFunction<
 export const kibana = (): ExpressionFunctionKibana => ({
   name: 'kibana',
   type: 'kibana_context',
-  context: {
-    types: ['kibana_context', 'null'],
-  },
+
+  context: {} as any,
+  // context: {
+  // types: ['kibana_context', 'null'],
+  // },
+
   help: i18n.translate('interpreter.functions.kibana.help', {
     defaultMessage: 'Gets kibana global context',
   }),
