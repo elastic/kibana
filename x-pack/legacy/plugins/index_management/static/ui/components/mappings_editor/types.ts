@@ -82,36 +82,36 @@ export type ParameterName =
   | 'ignore_above'
   | 'split_queries_on_whitespace';
 
-export interface Properties {
-  [key: string]: Omit<Property, 'name'>;
+export interface Fields {
+  [key: string]: Omit<Field, 'name'>;
 }
 
-export interface Property {
+export interface Field {
   name: string;
   type: DataType;
-  properties?: { [key: string]: Property };
-  fields?: { [key: string]: Property };
-  [key: string]: any;
+  properties?: { [key: string]: Field };
+  fields?: { [key: string]: Field };
+  // [key: string]: any;
 }
 
-export interface PropertyMeta {
+export interface FieldMeta {
   path: string;
   parentPath: string | undefined;
-  childPropertiesName: ChildPropertyName | undefined;
-  canHaveChildProperties: boolean;
-  hasChildProperties: boolean;
-  childProperties: string[] | undefined;
+  childFieldsName: ChildFieldName | undefined;
+  canHaveChildFields: boolean;
+  hasChildFields: boolean;
+  childFields: string[] | undefined;
 }
 
-export interface NormalizedProperties {
+export interface NormalizedFields {
   byId: {
-    [id: string]: NormalizedProperty;
+    [id: string]: NormalizedField;
   };
   rootLevelFields: string[];
 }
 
-export interface NormalizedProperty extends PropertyMeta {
-  resource: Property;
+export interface NormalizedField extends FieldMeta {
+  source: Omit<Field, 'properties' | 'fields'>;
 }
 
-export type ChildPropertyName = 'properties' | 'fields';
+export type ChildFieldName = 'properties' | 'fields';

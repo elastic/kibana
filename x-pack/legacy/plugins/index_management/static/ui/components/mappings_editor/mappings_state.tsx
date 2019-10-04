@@ -6,18 +6,18 @@
 
 import React, { useReducer, useEffect, createContext, useContext } from 'react';
 
-import { reducer, MappingsConfiguration, MappingsProperties, State, Dispatch } from './reducer';
-import { Property } from './types';
+import { reducer, MappingsConfiguration, MappingsFields, State, Dispatch } from './reducer';
+import { Field } from './types';
 import { normalize, deNormalize } from './lib';
 
 type Mappings = MappingsConfiguration & {
-  properties: MappingsProperties;
+  properties: MappingsFields;
 };
 
 export interface Types {
   Mappings: Mappings;
   MappingsConfiguration: MappingsConfiguration;
-  MappingsProperties: MappingsProperties;
+  MappingsFields: MappingsFields;
 }
 
 export interface OnUpdateHandlerArg {
@@ -33,12 +33,12 @@ const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 export interface Props {
   children: React.ReactNode;
-  defaultValue: { properties: { [key: string]: Property } };
+  defaultValue: { fields: { [key: string]: Field } };
   onUpdate: OnUpdateHandler;
 }
 
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
-  const { byId, rootLevelFields } = normalize(defaultValue.properties);
+  const { byId, rootLevelFields } = normalize(defaultValue.fields);
   const initialState: State = {
     isValid: undefined,
     configuration: {
@@ -48,7 +48,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       },
       validate: () => Promise.resolve(false),
     },
-    properties: {
+    fields: {
       byId,
       rootLevelFields,
       isValid: true,
@@ -64,7 +64,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     onUpdate({
       getData: () => ({
         ...state.configuration.data.format(),
-        properties: deNormalize(state.properties),
+        properties: deNormalize(state.fields),
       }),
       validate: () => {
         return state.configuration.validate();

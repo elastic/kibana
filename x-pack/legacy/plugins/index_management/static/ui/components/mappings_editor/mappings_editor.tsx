@@ -25,10 +25,10 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue = {} }: Props
       }),
       {} as Types['MappingsConfiguration']
     );
-  const propertiesDefaultValue = defaultValue.properties || {};
+  const fieldsDefaultValue = defaultValue.properties || {};
 
   return (
-    <MappingsState onUpdate={onUpdate} defaultValue={{ properties: propertiesDefaultValue }}>
+    <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
       <ConfigurationForm defaultValue={configurationDefaultValue} />
       <DocumentFields />
     </MappingsState>

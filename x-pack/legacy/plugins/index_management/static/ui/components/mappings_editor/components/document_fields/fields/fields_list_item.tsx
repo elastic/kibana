@@ -7,12 +7,12 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../../mappings_state';
-import { PropertiesList } from './properties_list';
-import { CreateProperty } from './create_property';
-import { NormalizedProperty } from '../../../types';
+import { FieldsList } from './fields_list';
+import { CreateField } from './create_field';
+import { NormalizedField } from '../../../types';
 
 interface Props {
-  property: NormalizedProperty;
+  field: NormalizedField;
   parentPath: string;
   treeDepth?: number;
 }
@@ -25,46 +25,49 @@ const inlineStyle = {
   alignItems: 'center',
 };
 
-export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Props) => {
+export const FieldsListItem = ({ field, parentPath, treeDepth = 0 }: Props) => {
   const dispatch = useDispatch();
   const {
-    documentFields: { status, fieldPathToAddProperty },
-    properties: { byId },
+    documentFields: { status, fieldPathToAddField },
+    fields: { byId },
   } = useState();
-  const getProperty = (propId: string) => byId[propId];
-  const { path, resource, childProperties, hasChildProperties, canHaveChildProperties } = property;
+  const getField = (propId: string) => byId[propId];
+  const { path, source, childFields, hasChildFields, canHaveChildFields } = field;
 
   const addField = () => {
     dispatch({
-      type: 'documentField.createProperty',
+      type: 'documentField.createField',
       value: path,
     });
   };
 
   const editField = () => {
-    // console.log('Editing', propertyPath);
-  };
-
-  const removeField = () => {
     dispatch({
-      type: 'property.remove',
+      type: 'documentField.editField',
       value: path,
     });
   };
 
-  const renderCreateProperty = () => {
-    if (status !== 'creatingProperty') {
+  const removeField = () => {
+    dispatch({
+      type: 'field.remove',
+      value: path,
+    });
+  };
+
+  const renderCreateField = () => {
+    if (status !== 'creatingField') {
       return null;
     }
 
-    // Root level (0) has does not have the "fieldPathToAddProperty" set
-    if (fieldPathToAddProperty !== path) {
+    // Root level (0) has does not have the "fieldPathToAddField" set
+    if (fieldPathToAddField !== path) {
       return null;
     }
 
     return (
       <div style={{ paddingLeft: '20px' }}>
-        <CreateProperty />
+        <CreateField />
       </div>
     );
   };
@@ -77,7 +80,7 @@ export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Prop
     return (
       <>
         <EuiButton onClick={editField}>Edit</EuiButton>
-        {canHaveChildProperties && <EuiButton onClick={addField}>Add field</EuiButton>}
+        {canHaveChildFields && <EuiButton onClick={addField}>Add field</EuiButton>}
         <EuiButton onClick={removeField}>Remove</EuiButton>
       </>
     );
@@ -86,18 +89,14 @@ export const PropertiesListItem = ({ property, parentPath, treeDepth = 0 }: Prop
   return (
     <>
       <div style={inlineStyle}>
-        {resource.name} | {resource.type} {renderActionButtons()}
+        {source.name} | {source.type} {renderActionButtons()}
       </div>
 
-      {renderCreateProperty()}
+      {renderCreateField()}
 
-      {hasChildProperties && (
+      {hasChildFields && (
         <div style={{ paddingLeft: '20px' }}>
-          <PropertiesList
-            properties={childProperties!.map(getProperty)}
-            treeDepth={treeDepth + 1}
-            path={path}
-          />
+          <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} path={path} />
         </div>
       )}
     </>

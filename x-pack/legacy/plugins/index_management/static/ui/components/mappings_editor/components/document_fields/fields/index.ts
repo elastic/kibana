@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './properties_list';
+export * from './fields_list';
 
-export * from './properties_list_item';
+export * from './fields_list_item';
 
-export * from './create_property';
+export * from './create_field';
+
+export * from './edit_field';

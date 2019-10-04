@@ -9,33 +9,33 @@ import { EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../mappings_state';
 import { DocumentFieldsHeaders } from './document_fields_header';
-import { PropertiesList, CreateProperty } from './properties';
+import { FieldsList, CreateField, EditField } from './fields';
 
 export const DocumentFields = () => {
   const dispatch = useDispatch();
   const {
-    properties: { byId, rootLevelFields },
-    documentFields: { status, fieldPathToAddProperty },
+    fields: { byId, rootLevelFields },
+    documentFields: { status, fieldPathToAddField },
   } = useState();
 
-  const getProperty = (propId: string) => byId[propId];
-  const properties = rootLevelFields.map(getProperty);
+  const getField = (propId: string) => byId[propId];
+  const fields = rootLevelFields.map(getField);
 
   const addField = () => {
-    dispatch({ type: 'documentField.createProperty' });
+    dispatch({ type: 'documentField.createField' });
   };
 
-  const renderCreateProperty = () => {
-    // Root level (0) does not have the "fieldPathToAddProperty" set
-    if (status !== 'creatingProperty' || fieldPathToAddProperty !== undefined) {
+  const renderCreateField = () => {
+    // Root level (0) does not have the "fieldPathToAddField" set
+    if (status !== 'creatingField' || fieldPathToAddField !== undefined) {
       return null;
     }
 
-    return <CreateProperty />;
+    return <CreateField />;
   };
 
   const renderAddFieldButton = () => {
-    if (status === 'creatingProperty') {
+    if (status !== 'idle') {
       return null;
     }
     return (
@@ -46,12 +46,20 @@ export const DocumentFields = () => {
     );
   };
 
+  const renderEditField = () => {
+    if (status !== 'editingField') {
+      return null;
+    }
+    return <EditField />;
+  };
+
   return (
     <>
       <DocumentFieldsHeaders />
-      <PropertiesList properties={properties} />
-      {renderCreateProperty()}
+      <FieldsList fields={fields} />
+      {renderCreateField()}
       {renderAddFieldButton()}
+      {renderEditField()}
     </>
   );
 };

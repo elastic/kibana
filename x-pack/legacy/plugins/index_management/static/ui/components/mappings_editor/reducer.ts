@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { OnFormUpdateArg } from './shared_imports';
-import { Property, NormalizedProperties } from './types';
-import { getPropertyMeta } from './lib';
+import { Field, NormalizedFields } from './types';
+import { getFieldMeta } from './lib';
 
 export interface MappingsConfiguration {
   dynamic: boolean | string;
@@ -14,11 +14,11 @@ export interface MappingsConfiguration {
   dynamic_date_formats: string[];
 }
 
-export interface MappingsProperties {
+export interface MappingsFields {
   [key: string]: any;
 }
 
-type DocumentFieldsStatus = 'idle' | 'editingProperty' | 'creatingProperty';
+type DocumentFieldsStatus = 'idle' | 'editingField' | 'creatingField';
 
 export interface State {
   isValid: boolean | undefined;
@@ -26,22 +26,22 @@ export interface State {
   documentFields: {
     status: DocumentFieldsStatus;
     propertyToEdit?: string;
-    fieldPathToAddProperty?: string;
+    fieldPathToAddField?: string;
   };
-  properties: {
-    byId: NormalizedProperties['byId'];
-    rootLevelFields: NormalizedProperties['rootLevelFields'];
+  fields: {
+    byId: NormalizedFields['byId'];
+    rootLevelFields: NormalizedFields['rootLevelFields'];
     isValid: boolean | undefined;
   };
 }
 
 export type Action =
   | { type: 'configuration.update'; value: OnFormUpdateArg<MappingsConfiguration> }
-  | { type: 'property.add'; value: Property }
-  | { type: 'property.remove'; value: any }
-  | { type: 'property.edit'; value: any }
-  | { type: 'documentField.createProperty'; value?: string }
-  | { type: 'documentField.editProperty'; value: string }
+  | { type: 'field.add'; value: Field }
+  | { type: 'field.remove'; value: any }
+  | { type: 'field.edit'; value: any }
+  | { type: 'documentField.createField'; value?: string }
+  | { type: 'documentField.editField'; value: string }
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus };
 
 export type Dispatch = (action: Action) => void;
@@ -50,86 +50,83 @@ export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'configuration.update':
       const isValid =
-        action.value.isValid === undefined || state.properties.isValid === undefined
+        action.value.isValid === undefined || state.fields.isValid === undefined
           ? undefined
-          : action.value.isValid && state.properties.isValid;
+          : action.value.isValid && state.fields.isValid;
 
       return {
         ...state,
         isValid,
         configuration: action.value,
       };
-    case 'documentField.createProperty':
+    case 'documentField.createField':
       return {
         ...state,
         documentFields: {
           ...state.documentFields,
-          fieldPathToAddProperty: action.value,
-          status: 'creatingProperty',
+          fieldPathToAddField: action.value,
+          status: 'creatingField',
         },
       };
-    case 'documentField.editProperty':
+    case 'documentField.editField':
       return {
         ...state,
         documentFields: {
           ...state.documentFields,
-          status: 'editingProperty',
+          status: 'editingField',
           propertyToEdit: action.value,
         },
       };
     case 'documentField.changeStatus':
       return { ...state, documentFields: { ...state.documentFields, status: action.value } };
-    case 'property.add': {
-      const { fieldPathToAddProperty } = state.documentFields;
+    case 'field.add': {
+      const { fieldPathToAddField } = state.documentFields;
       const { name } = action.value;
-      const addToRootLevel = fieldPathToAddProperty === undefined;
-      const propertyPath = addToRootLevel ? name : `${fieldPathToAddProperty}.${name}`;
+      const addToRootLevel = fieldPathToAddField === undefined;
+      const propertyPath = addToRootLevel ? name : `${fieldPathToAddField}.${name}`;
 
       const rootLevelFields = addToRootLevel
-        ? [...state.properties.rootLevelFields, name]
-        : state.properties.rootLevelFields;
+        ? [...state.fields.rootLevelFields, name]
+        : state.fields.rootLevelFields;
 
-      state.properties.byId[propertyPath] = {
-        resource: action.value,
-        ...getPropertyMeta(action.value, propertyPath, fieldPathToAddProperty),
+      state.fields.byId[propertyPath] = {
+        source: action.value,
+        ...getFieldMeta(action.value, propertyPath, fieldPathToAddField),
       };
 
       if (!addToRootLevel) {
-        const parentProperty = state.properties.byId[fieldPathToAddProperty!];
-        const childProperties = parentProperty.childProperties || [];
-        // TODO HERE: create a new Set() intead of an empty array?
+        const parentField = state.fields.byId[fieldPathToAddField!];
+        const childFields = parentField.childFields || [];
 
-        // Update parent property with new children
-        state.properties.byId[fieldPathToAddProperty!] = {
-          ...parentProperty,
-          childProperties: [propertyPath, ...childProperties],
-          hasChildProperties: true,
+        // Update parent field with new children
+        state.fields.byId[fieldPathToAddField!] = {
+          ...parentField,
+          childFields: [propertyPath, ...childFields],
+          hasChildFields: true,
         };
       }
 
       return {
         ...state,
-        properties: { ...state.properties, rootLevelFields },
+        fields: { ...state.fields, rootLevelFields },
       };
     }
-    case 'property.remove': {
-      const { parentPath, path } = state.properties.byId[action.value];
+    case 'field.remove': {
+      const { parentPath, path } = state.fields.byId[action.value];
       if (parentPath) {
-        // Deleting a child property
-        const parentProperty = state.properties.byId[parentPath];
-        parentProperty.childProperties = parentProperty.childProperties!.filter(
-          childPath => childPath !== path
-        );
+        // Deleting a child field
+        const parentField = state.fields.byId[parentPath];
+        parentField.childFields = parentField.childFields!.filter(childPath => childPath !== path);
       } else {
         // Deleting a root level field
-        state.properties.rootLevelFields = state.properties.rootLevelFields.filter(
+        state.fields.rootLevelFields = state.fields.rootLevelFields.filter(
           fieldPath => fieldPath !== path
         );
       }
 
-      delete state.properties.byId[path];
+      delete state.fields.byId[path];
     }
-    case 'property.edit': {
+    case 'field.edit': {
       return {
         ...state,
         documentFields: { ...state.documentFields, status: 'idle' },

@@ -16,12 +16,12 @@ import {
 } from '../../../shared_imports';
 import { FIELD_TYPES_OPTIONS } from '../../../constants';
 import { useDispatch } from '../../../mappings_state';
-import { Property } from '../../../types';
+import { Field } from '../../../types';
 
 const formWrapper = (props: any) => <form {...props} />;
 
-export const CreateProperty = () => {
-  const { form } = useForm<Property>();
+export const CreateField = () => {
+  const { form } = useForm<Field>();
   const dispatch = useDispatch();
 
   const submitForm = async (e?: React.FormEvent) => {
@@ -30,7 +30,7 @@ export const CreateProperty = () => {
     }
     const { isValid, data } = await form.submit();
     if (isValid) {
-      dispatch({ type: 'property.add', value: data });
+      dispatch({ type: 'field.add', value: data });
       form.reset();
     }
   };
@@ -63,11 +63,11 @@ export const CreateProperty = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton onClick={submitForm} type="submit">
-            Save
+            Add
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton onClick={cancel}>Done</EuiButton>
+          <EuiButton onClick={cancel}>Cancel</EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Form>
