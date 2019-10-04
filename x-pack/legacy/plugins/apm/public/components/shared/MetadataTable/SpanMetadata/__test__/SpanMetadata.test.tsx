@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React from 'react';
+import 'jest-dom/extend-expect';
+import { render, cleanup } from 'react-testing-library';
+import { SpanMetadata } from '..';
+import { Span } from '../../../../../../typings/es_schemas/ui/Span';
+import { expectTextsInDocument } from '../../../../../utils/testHelpers';
+
+describe('SpanMetadata', () => {
+  afterEach(cleanup);
+  it('should render', () => {
+    const span = ({
+      agent: {
+        ephemeral_id: 'ed8e3a4f-21d2-4a1f-bbc7-fa2064d94225',
+        name: 'java',
+        version: '1.9.1-SNAPSHOT'
+      },
+      service: {
+        name: 'opbeans-java'
+      }
+    } as unknown) as Span;
+    const output = render(<SpanMetadata span={span} />);
+    expectTextsInDocument(output, ['Service', 'Agent']);
+  });
+  it('should render with span', () => {
+    const span = ({
+      agent: {
+        ephemeral_id: 'ed8e3a4f-21d2-4a1f-bbc7-fa2064d94225',
+        name: 'java',
+        version: '1.9.1-SNAPSHOT'
+      },
+      service: {
+        name: 'opbeans-java'
+      },
+      span: {
+        http: {
+          response: { status_code: 200 }
+        },
+        subtype: 'http',
+        type: 'external'
+      }
+    } as unknown) as Span;
+    const output = render(<SpanMetadata span={span} />);
+    expectTextsInDocument(output, ['Service', 'Agent', 'Span']);
+  });
+});

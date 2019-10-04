@@ -16,12 +16,13 @@ import { get, has } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { Span } from '../../../../typings/es_schemas/ui/Span';
 import { APMError } from '../../../../typings/es_schemas/ui/APMError';
 import { StringMap } from '../../../../typings/common';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
-type MetadataItem = Transaction | APMError;
+type MetadataItem = Transaction | APMError | Span;
 
 interface Props {
   item: MetadataItem;

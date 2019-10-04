@@ -86,3 +86,9 @@ export const PAGE = i18n.translate(
     defaultMessage: 'Page'
   }
 );
+export const SPAN = i18n.translate(
+  'xpack.apm.metadataTable.section.spanLabel',
+  {
+    defaultMessage: 'Span'
+  }
+);

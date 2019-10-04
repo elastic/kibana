@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiBasicTable,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +19,7 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get, keys } from 'lodash';
+import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { idx } from '@kbn/elastic-idx';
@@ -37,6 +36,7 @@ import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
 import { HttpStatusBadge } from '../../../../../../shared/Summary/HttpStatusBadge';
+import { SpanMetadata } from '../../../../../../shared/MetadataTable/SpanMetadata';
 
 function formatType(type: string) {
   switch (type) {
@@ -76,10 +76,6 @@ function getSpanTypes(span: Span) {
 const getSpanHttpStatusCode = (span: Span): number | undefined =>
   get(span, 'span.http.response.status_code');
 
-const TagName = styled.div`
-  font-weight: bold;
-`;
-
 const SpanBadge = styled(EuiBadge)`
   display: inline-block;
   margin-right: ${px(units.quarter)};
@@ -106,11 +102,6 @@ export function SpanFlyout({
   const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
   const dbContext = idx(span, _ => _.span.db);
   const httpContext = idx(span, _ => _.span.http);
-  const spanLabels = span.labels;
-  const labels = keys(spanLabels).map(key => ({
-    key,
-    value: get(spanLabels, key)
-  }));
   const spanTypes = getSpanTypes(span);
   const spanHttpStatusCode = getSpanHttpStatusCode(span);
 
@@ -218,29 +209,16 @@ export function SpanFlyout({
                 )
               },
               {
-                id: 'labels',
+                id: 'metadata',
                 name: i18n.translate(
-                  'xpack.apm.propertiesTable.tabs.labelsLabel',
+                  'xpack.apm.propertiesTable.tabs.metadataLabel',
                   {
-                    defaultMessage: 'Labels'
+                    defaultMessage: 'Metadata'
                   }
                 ),
                 content: (
                   <Fragment>
-                    <EuiBasicTable
-                      columns={[
-                        {
-                          name: '',
-                          field: 'key',
-                          render: (key: string) => <TagName>{key}</TagName>
-                        },
-                        {
-                          name: '',
-                          field: 'value'
-                        }
-                      ]}
-                      items={labels}
-                    />
+                    <SpanMetadata span={span} />
                   </Fragment>
                 )
               }
