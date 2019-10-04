@@ -107,6 +107,7 @@ function LayerSettings({
           idSelected={layer.seriesType}
           onChange={seriesType => setSeriesType(seriesType as SeriesType)}
           isIconOnly
+          buttonSize="compressed"
         />
       </EuiFormRow>
       <EuiPopoverFooter className="eui-textCenter">
@@ -117,8 +118,8 @@ function LayerSettings({
           data-test-subj="lnsXY_layer_remove"
           onClick={removeLayer}
         >
-          {i18n.translate('xpack.lens.xyChart.removeLayer', {
-            defaultMessage: 'Remove layer',
+          {i18n.translate('xpack.lens.xyChart.deleteLayer', {
+            defaultMessage: 'Delete layer',
           })}
         </EuiButtonEmpty>
       </EuiPopoverFooter>

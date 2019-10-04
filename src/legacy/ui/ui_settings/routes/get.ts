@@ -16,21 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Legacy } from 'kibana';
 
-async function handleRequest(request) {
-  const { key } = request.params;
+async function handleRequest(request: Legacy.Request) {
   const uiSettings = request.getUiSettingsService();
-
-  await uiSettings.remove(key);
   return {
-    settings: await uiSettings.getUserProvided()
+    settings: await uiSettings.getUserProvided(),
   };
 }
 
-export const deleteRoute = {
-  path: '/api/kibana/settings/{key}',
-  method: 'DELETE',
-  handler: async (request, h) => {
-    return h.response(await handleRequest(request));
-  }
+export const getRoute = {
+  path: '/api/kibana/settings',
+  method: 'GET',
+  handler(request: Legacy.Request) {
+    return handleRequest(request);
+  },
 };
