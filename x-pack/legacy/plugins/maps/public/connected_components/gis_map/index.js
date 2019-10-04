@@ -9,7 +9,7 @@ import { GisMap } from './view';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { exitFullScreen } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
-import { triggerRefreshTimer } from '../../actions/map_actions';
+import { triggerRefreshTimer, cancelAllInFlightRequests } from '../../actions/map_actions';
 import {
   areLayersLoaded,
   getRefreshConfig,
@@ -35,6 +35,7 @@ function mapDispatchToProps(dispatch) {
   return {
     triggerRefreshTimer: () => dispatch(triggerRefreshTimer()),
     exitFullScreen: () => dispatch(exitFullScreen()),
+    cancelAllInFlightRequests: () => dispatch(cancelAllInFlightRequests()),
   };
 }
 

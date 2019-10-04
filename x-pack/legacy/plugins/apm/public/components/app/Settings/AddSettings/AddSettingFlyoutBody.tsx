@@ -166,6 +166,8 @@ export function AddSettingFlyoutBody({
           />
         </EuiFormRow>
 
+        <EuiSpacer />
+
         <EuiTitle size="xs">
           <h3>
             {i18n.translate(

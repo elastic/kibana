@@ -29,6 +29,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -52,6 +53,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -71,7 +73,7 @@ describe('Uncommon Process Table Component', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toBe(`Hosts${getEmptyValue()}`);
+      ).toBe(`Host names${getEmptyValue()}`);
     });
 
     test('it has a single host without any extra comma when the number of hosts is exactly 1', () => {
@@ -81,6 +83,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -101,7 +104,7 @@ describe('Uncommon Process Table Component', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toBe('Hostshello-world ');
+      ).toBe('Host nameshello-world ');
     });
 
     test('it has a single link when the number of hosts is exactly 1', () => {
@@ -111,6 +114,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -141,6 +145,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -161,7 +166,7 @@ describe('Uncommon Process Table Component', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toBe('Hostshello-world,hello-world-2 ');
+      ).toBe('Host nameshello-world,hello-world-2 ');
     });
 
     test('it has 2 links when the number of hosts is equal to 2', () => {
@@ -171,6 +176,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -201,6 +207,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -220,7 +227,7 @@ describe('Uncommon Process Table Component', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toBe(`Hosts${getEmptyValue()}`);
+      ).toBe(`Host names${getEmptyValue()}`);
     });
 
     test('it has no link when all hosts are invalid because they do not contain an id and a name', () => {
@@ -230,6 +237,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -259,6 +267,7 @@ describe('Uncommon Process Table Component', () => {
             data={mockData.UncommonProcess.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -278,7 +287,7 @@ describe('Uncommon Process Table Component', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toBe('Hostshello-world,hello-world-2 ');
+      ).toBe('Host nameshello-world,hello-world-2 ');
     });
   });
 

@@ -39,20 +39,20 @@ export class ExplainCollectionEnabled extends React.Component {
     const { enabler } = this.props;
     enabler.enableCollectionEnabled();
 
-    // wait 19 seconds, show link to reload
+    // wait 22 seconds, show link to reload
     this.waitedTooLongTimer = setTimeout(() => {
       this.setState({ waitedTooLong: true });
-    }, 19 * 1000);
+    }, 22 * 1000);
   }
 
   render() {
     const {
-      context,
-      property,
-      data,
+      reason,
       isCollectionEnabledUpdated,
       isCollectionEnabledUpdating
     } = this.props;
+
+    const { property, data, context } = reason;
 
     const renderButton = () => (
       <Fragment>
@@ -151,9 +151,7 @@ export class ExplainCollectionEnabled extends React.Component {
 
 ExplainCollectionEnabled.propTypes = {
   enabler: PropTypes.object.isRequired,
-  context: PropTypes.string.isRequired,
-  property: PropTypes.string.isRequired,
-  data: PropTypes.string.isRequired,
+  reason: PropTypes.object.isRequired,
   isCollectionEnabledUpdated: PropTypes.bool,
   isCollectionEnabledUpdating: PropTypes.bool
 };

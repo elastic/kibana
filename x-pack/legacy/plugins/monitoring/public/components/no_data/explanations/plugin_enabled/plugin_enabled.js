@@ -14,7 +14,8 @@ import {
 import { ChangesNeeded } from '../../blurbs';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function ExplainPluginEnabled({ context, property, data }) {
+export function ExplainPluginEnabled({ reason }) {
+  const { context, property, data } = reason;
   return (
     <Fragment>
       <ChangesNeeded />
@@ -41,7 +42,5 @@ export function ExplainPluginEnabled({ context, property, data }) {
 }
 
 ExplainPluginEnabled.propTypes = {
-  property: PropTypes.string.isRequired,
-  context: PropTypes.string.isRequired,
-  data: PropTypes.string.isRequired
+  reason: PropTypes.object.isRequired
 };

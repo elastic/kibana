@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiContextMenu, EuiIcon } from '@elastic/eui';
 // @ts-ignore Untyped local
 import { Popover } from '../../popover';
 import { DisabledPanel } from './disabled_panel';
 import { PDFPanel } from './pdf_panel';
+
+import { ComponentStrings } from '../../../../i18n';
+const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 type ClosePopoverFn = () => void;
 
@@ -78,10 +81,10 @@ export const WorkpadExport: FunctionComponent<Props> = ({
 
   const getPanelTree = (closePopover: ClosePopoverFn) => ({
     id: 0,
-    title: 'Share this workpad',
+    title: strings.getShareWorkpadMessage(),
     items: [
       {
-        name: 'Download as JSON',
+        name: strings.getShareDownloadJSONTitle(),
         icon: <EuiIcon type="exportAction" size="m" />,
         onClick: () => {
           onExport('json');
@@ -89,11 +92,11 @@ export const WorkpadExport: FunctionComponent<Props> = ({
         },
       },
       {
-        name: 'PDF reports',
+        name: strings.getShareDownloadPDFTitle(),
         icon: 'document',
         panel: {
           id: 1,
-          title: 'PDF reports',
+          title: strings.getShareDownloadPDFTitle(),
           content: enabled ? (
             getPDFPanel(closePopover)
           ) : (
@@ -109,15 +112,19 @@ export const WorkpadExport: FunctionComponent<Props> = ({
     ],
   });
 
-  const exportControl = (togglePopover: () => void) => (
-    <EuiButtonIcon iconType="share" aria-label="Share this workpad" onClick={togglePopover} />
+  const exportControl = (togglePopover: (ev: MouseEvent) => void) => (
+    <EuiButtonIcon
+      iconType="share"
+      aria-label={strings.getShareWorkpadMessage()}
+      onClick={togglePopover}
+    />
   );
 
   return (
     <Popover
       button={exportControl}
       panelPaddingSize="none"
-      tooltip="Share workpad"
+      tooltip={strings.getShareWorkpadMessage()}
       tooltipPosition="bottom"
     >
       {({ closePopover }: { closePopover: ClosePopoverFn }) => (

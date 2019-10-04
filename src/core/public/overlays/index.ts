@@ -17,4 +17,5 @@
  * under the License.
  */
 
+export { OverlayBannerMount, OverlayBannerUnmount, OverlayBannersStart } from './banners';
 export { OverlayService, OverlayStart, OverlayRef } from './overlay_service';

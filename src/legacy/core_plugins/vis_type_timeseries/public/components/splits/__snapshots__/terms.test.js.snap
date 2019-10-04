@@ -6,6 +6,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     <EuiFlexItem>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         id="42"
@@ -26,6 +27,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     <EuiFlexItem>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         id="42"
@@ -68,6 +70,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     <EuiFlexItem>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         id="42"
@@ -91,6 +94,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     <EuiFlexItem>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         id="42"
@@ -116,6 +120,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     <EuiFlexItem>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         id="42"
@@ -140,6 +145,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     <EuiFlexItem>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         id="42"
@@ -175,6 +181,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
     <EuiFlexItem>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         id="42"

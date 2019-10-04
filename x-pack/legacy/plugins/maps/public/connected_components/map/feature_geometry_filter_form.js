@@ -16,17 +16,47 @@ import { GeometryFilterForm } from '../../components/geometry_filter_form';
 
 export class FeatureGeometryFilterForm extends Component {
 
+  state = {
+    isLoading: false,
+  }
+
   componentDidMount() {
-    this.props.reevaluateTooltipPosition();
+    this._isMounted = true;
   }
 
-  componentDidUpdate() {
-    this.props.reevaluateTooltipPosition();
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
-  _createFilter = ({ geometryLabel, indexPatternId, geoFieldName, geoFieldType, relation }) => {
+  _loadPreIndexedShape = async () => {
+    this.setState({
+      isLoading: true,
+    });
+
+    let preIndexedShape;
+    try {
+      preIndexedShape = await this.props.loadPreIndexedShape();
+    } catch (err) {
+      // ignore error, just fall back to using geometry if preIndexedShape can not be fetched
+    }
+
+    if (this._isMounted) {
+      this.setState({ isLoading: false });
+    }
+
+    return preIndexedShape;
+  }
+
+  _createFilter = async ({ geometryLabel, indexPatternId, geoFieldName, geoFieldType, relation }) => {
+    const preIndexedShape = await this._loadPreIndexedShape();
+    if (!this._isMounted) {
+      // do not create filter if component is unmounted
+      return;
+    }
+
     const filter = createSpatialFilterWithGeometry({
-      geometry: this.props.feature.geometry,
+      preIndexedShape,
+      geometry: this.props.geometry,
       geometryLabel,
       indexPatternId,
       geoFieldName,
@@ -69,10 +99,11 @@ export class FeatureGeometryFilterForm extends Component {
           defaultMessage: 'Create filter'
         })}
         geoFields={this.props.geoFields}
-        intitialGeometryLabel={this.props.feature.geometry.type.toLowerCase()}
+        intitialGeometryLabel={this.props.geometry.type.toLowerCase()}
         onSubmit={this._createFilter}
-        isFilterGeometryClosed={this.props.feature.geometry.type !== GEO_JSON_TYPE.LINE_STRING
-          && this.props.feature.geometry.type !== GEO_JSON_TYPE.MULTI_LINE_STRING}
+        isFilterGeometryClosed={this.props.geometry.type !== GEO_JSON_TYPE.LINE_STRING
+          && this.props.geometry.type !== GEO_JSON_TYPE.MULTI_LINE_STRING}
+        isLoading={this.state.isLoading}
       />
     );
   }

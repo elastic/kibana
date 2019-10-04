@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../common/constants';
-import { WatchStatus, SectionError } from '../../../components';
+import { WatchStatus, SectionError, Error } from '../../../components';
 import { loadWatchHistory, loadWatchHistoryDetail } from '../../../lib/api';
 import { WatchDetailsContext } from '../watch_details_context';
 
@@ -107,7 +107,7 @@ export const WatchHistory = () => {
               defaultMessage="Error loading execution history"
             />
           }
-          error={historyError}
+          error={historyError as Error}
         />
       </Fragment>
     );
@@ -186,7 +186,7 @@ export const WatchHistory = () => {
                   defaultMessage="Error loading execution details"
                 />
               }
-              error={watchHistoryDetailsError}
+              error={watchHistoryDetailsError as Error}
               data-test-subj="errorMessage"
             />
           </EuiFlyoutBody>

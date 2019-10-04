@@ -13,7 +13,7 @@ import {
   NewJobCaps,
   METRIC_AGG_TYPE,
 } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations } from './aggregations';
@@ -30,6 +30,7 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.HALF_FLOAT,
   ES_FIELD_TYPES.SCALED_FLOAT,
   ES_FIELD_TYPES.SHORT,
+  ES_FIELD_TYPES.IP,
 ];
 
 export function fieldServiceProvider(

@@ -57,7 +57,7 @@ export class LanguageServerController implements ILanguageServerHandler {
     readonly repoConfigController: RepositoryConfigController
   ) {
     this.log = loggerFactory.getLogger([]);
-    this.languageServers = enabledLanguageServers(installManager.server).map(def => ({
+    this.languageServers = enabledLanguageServers(options).map(def => ({
       definition: def,
       builtinWorkspaceFolders: def.builtinWorkspaceFolders,
       languages: def.languages,
@@ -197,6 +197,9 @@ export class LanguageServerController implements ILanguageServerHandler {
     // installed, but is it running?
     if (status === LanguageServerStatus.READY) {
       const ls = this.languageServers.find(d => d.definition === def);
+      if (ls && ls.launcher.launchFailed) {
+        return LanguageServerStatus.LAUNCH_FAILED;
+      }
       if (ls && ls.launcher.running) {
         return LanguageServerStatus.RUNNING;
       }

@@ -31,6 +31,7 @@ import {
   EuiFormLabel,
   EuiFieldNumber,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -61,8 +62,12 @@ export const Static = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage id="visTypeTimeseries.static.aggregationLabel" defaultMessage="Aggregation" />
+            <FormattedMessage
+              id="visTypeTimeseries.static.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
           </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -75,7 +80,10 @@ export const Static = props => {
           <EuiFormRow
             id={htmlId('staticValue')}
             label={
-              <FormattedMessage id="visTypeTimeseries.static.staticValuesLabel" defaultMessage="Static Value" />
+              <FormattedMessage
+                id="visTypeTimeseries.static.staticValuesLabel"
+                defaultMessage="Static Value"
+              />
             }
           >
             <EuiFieldNumber

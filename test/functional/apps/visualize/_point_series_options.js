@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
     log.debug('adding axis');
     await pointSeriesVis.clickAddAxis();
     // set average count to use second value axis
-    await pointSeriesVis.toggleCollapsibleTitle('Average machine.ram');
+    await PageObjects.visualize.toggleAccordion('visEditorSeriesAccordion3');
     log.debug('Average memory value axis - ValueAxis-2');
     await pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
     await PageObjects.visualize.waitForVisualizationRenderingStabilized();
@@ -107,8 +107,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('multiple chart types', function () {
       it('should change average series type to histogram', async function () {
-        await pointSeriesVis.toggleCollapsibleTitle('RightAxis-1');
-        await pointSeriesVis.setSeriesType(1, 'bar');
+        await pointSeriesVis.setSeriesType(1, 'histogram');
         await PageObjects.visualize.clickGo();
         const length = await pointSeriesVis.getHistogramSeries();
         expect(length).to.be(1);

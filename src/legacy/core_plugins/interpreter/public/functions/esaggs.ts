@@ -20,7 +20,7 @@
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import chrome from 'ui/chrome';
 
@@ -44,14 +44,14 @@ import { RequestHandlerParams } from '../../../../ui/public/visualize/loader/emb
 import { tabifyAggResponse } from '../../../../ui/public/agg_response/tabify/tabify';
 import { KibanaContext, KibanaDatatable } from '../../common';
 import { ExpressionFunction, KibanaDatatableColumn } from '../../types';
-import { IndexPatternsProvider } from '../../../data/public';
+import { setup as data } from '../../../data/public/legacy';
 
 const name = 'esaggs';
 
 type Context = KibanaContext | null;
 
 interface Arguments {
-  index: string | null;
+  index: string;
   metricsAtAllLevels: boolean;
   partialRows: boolean;
   includeFormatHints: boolean;
@@ -221,8 +221,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
   }),
   args: {
     index: {
-      types: ['string', 'null'],
-      default: null,
+      types: ['string'],
       help: '',
     },
     metricsAtAllLevels: {
@@ -249,7 +248,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
   async fn(context, args, { inspectorAdapters, abortSignal }) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private: Function = $injector.get('Private');
-    const indexPatterns = Private(IndexPatternsProvider);
+    const { indexPatterns } = data.indexPatterns;
     const SearchSourceClass = Private(SearchSourceProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
 

@@ -35,16 +35,11 @@ import { getFiltersArray } from './test_helpers/get_filters_array';
 import { coreMock } from '../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
+import { timefilterServiceMock } from '../../timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
 setupMock.uiSettings.get.mockImplementation((key: string) => {
   return true;
-});
-
-jest.mock('ui/timefilter', () => {
-  return {
-    timefilter: {
-      setTime: jest.fn(),
-    },
-  };
 });
 
 describe('filter_manager', () => {
@@ -64,7 +59,11 @@ describe('filter_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns as IndexPatterns, setupMock.uiSettings);
+    filterManager = new FilterManager(
+      (indexPatterns as unknown) as IndexPatterns,
+      setupMock.uiSettings,
+      timefilterSetupMock.timefilter
+    );
     readyFilters = getFiltersArray();
 
     // FilterStateManager is tested indirectly.

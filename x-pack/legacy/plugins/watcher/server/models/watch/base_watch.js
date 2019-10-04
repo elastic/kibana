@@ -6,7 +6,7 @@
 
 import { get, map, pick } from 'lodash';
 import { badRequest } from 'boom';
-import { Action } from '../action';
+import { Action } from '../../../common/models/action';
 import { WatchStatus } from '../watch_status';
 import { i18n } from '@kbn/i18n';
 import { WatchErrors } from '../watch_errors';

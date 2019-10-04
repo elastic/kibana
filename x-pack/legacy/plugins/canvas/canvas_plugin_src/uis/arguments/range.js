@@ -8,6 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiRange } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../strings';
+
+const { Range: strings } = ArgumentStrings;
 
 const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
   const { min, max, step } = typeInstance.options;
@@ -44,7 +47,7 @@ RangeArgInput.propTypes = {
 
 export const range = () => ({
   name: 'range',
-  displayName: 'Range',
-  help: 'Slider for values within a range',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(RangeArgInput),
 });

@@ -65,7 +65,11 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
     );
 
     const button = (
-      <EuiButtonEmpty size="xs" onClick={this.togglePopover}>
+      <EuiButtonEmpty
+        size="xs"
+        onClick={this.togglePopover}
+        className="euiFormControlLayout__append"
+      >
         {this.props.language === 'lucene' ? luceneLabel : kqlLabel}
       </EuiButtonEmpty>
     );
@@ -73,7 +77,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
     return (
       <EuiPopover
         id="popover"
-        className="eui-displayBlock"
+        anchorClassName="euiFormControlLayout__append"
         ownFocus
         anchorPosition={this.props.anchorPosition || 'downRight'}
         button={button}

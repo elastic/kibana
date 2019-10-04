@@ -16,10 +16,11 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
 
   describe('Search', function() {
     this.tags('smoke');
-    const symbolTypeaheadListSelector = 'codeTypeaheadList-symbol codeTypeaheadItem';
-    const fileTypeaheadListSelector = 'codeTypeaheadList-file codeTypeaheadItem';
-    const searchResultListSelector = 'codeSearchResultList codeSearchResultFileItem';
-    const languageFilterListSelector = 'codeSearchLanguageFilterList codeSearchLanguageFilterItem';
+    const symbolTypeaheadListSelector = 'codeTypeaheadList-symbol > codeTypeaheadItem';
+    const fileTypeaheadListSelector = 'codeTypeaheadList-file > codeTypeaheadItem';
+    const searchResultListSelector = 'codeSearchResultList > codeSearchResultFileItem';
+    const languageFilterListSelector =
+      'codeSearchLanguageFilterList > codeSearchLanguageFilterItem';
 
     describe('Code Search', () => {
       before(async () => {
@@ -31,7 +32,7 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Ftr
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await esArchiver.unload('code/repositories/typescript_node_starter');
       });
 

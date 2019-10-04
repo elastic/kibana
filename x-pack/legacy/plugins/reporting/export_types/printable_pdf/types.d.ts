@@ -8,11 +8,11 @@ import { Request } from 'hapi';
 import { LayoutInstance } from '../common/layouts/layout';
 import { ConditionalHeaders, KbnServer, JobDocPayload } from '../../types';
 
-// Job params: structure of incoming user request data
+// Job params: structure of incoming user request data, after being parsed from RISON
 export interface JobParamsPDF {
   objectType: string;
   title: string;
-  relativeUrl: string;
+  relativeUrls: string[];
   browserTimezone: string;
   layout: LayoutInstance;
 }

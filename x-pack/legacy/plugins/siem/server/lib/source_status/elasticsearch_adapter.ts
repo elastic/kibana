@@ -32,13 +32,13 @@ export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
   }
 
   public async hasAlias(request: FrameworkRequest, aliasName: string): Promise<boolean> {
-    return await this.framework.callWithRequest(request, 'indices.existsAlias', {
+    return this.framework.callWithRequest(request, 'indices.existsAlias', {
       name: aliasName,
     });
   }
 
   public async hasIndices(request: FrameworkRequest, indexNames: string | string[]) {
-    return await this.framework
+    return this.framework
       .callWithRequest(request, 'search', {
         index: indexNames,
         size: 0,

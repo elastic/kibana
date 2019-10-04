@@ -22,6 +22,8 @@ import React from 'react';
 import { FlyoutService } from './flyout';
 import { ModalService } from './modal';
 import { I18nStart } from '../i18n';
+import { OverlayBannersStart, OverlayBannersService } from './banners';
+import { UiSettingsClientContract } from '../ui_settings';
 
 export interface OverlayRef {
   /**
@@ -43,30 +45,32 @@ export interface OverlayRef {
 interface StartDeps {
   i18n: I18nStart;
   targetDomElement: HTMLElement;
+  uiSettings: UiSettingsClientContract;
 }
 
 /** @internal */
 export class OverlayService {
-  private flyoutService?: FlyoutService;
-  private modalService?: ModalService;
-
-  public start({ i18n, targetDomElement }: StartDeps): OverlayStart {
+  public start({ i18n, targetDomElement, uiSettings }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
     const modalElement = document.createElement('div');
     targetDomElement.appendChild(flyoutElement);
     targetDomElement.appendChild(modalElement);
-    this.flyoutService = new FlyoutService(flyoutElement);
-    this.modalService = new ModalService(modalElement);
+    const flyoutService = new FlyoutService(flyoutElement);
+    const modalService = new ModalService(modalElement);
+    const bannersService = new OverlayBannersService();
 
     return {
-      openFlyout: this.flyoutService.openFlyout.bind(this.flyoutService, i18n),
-      openModal: this.modalService.openModal.bind(this.modalService, i18n),
+      banners: bannersService.start({ i18n, uiSettings }),
+      openFlyout: flyoutService.openFlyout.bind(flyoutService, i18n),
+      openModal: modalService.openModal.bind(modalService, i18n),
     };
   }
 }
 
 /** @public */
 export interface OverlayStart {
+  /** {@link OverlayBannersStart} */
+  banners: OverlayBannersStart;
   openFlyout: (
     flyoutChildren: React.ReactNode,
     flyoutProps?: {

@@ -19,7 +19,7 @@
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { dispatchRenderComplete } from '../../render_complete';
+import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 
 interface VisualizationNoResultsProps {
   onInit?: () => void;

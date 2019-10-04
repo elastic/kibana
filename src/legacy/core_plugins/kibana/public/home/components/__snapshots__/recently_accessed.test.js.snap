@@ -2,8 +2,6 @@
 
 exports[`render 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <EuiTitle

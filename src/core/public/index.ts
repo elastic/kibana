@@ -61,13 +61,20 @@ import {
   ToastInput,
   ToastsApi,
 } from './notifications';
-import { OverlayRef, OverlayStart } from './overlays';
+import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
+import {
+  IContextContainer,
+  IContextProvider,
+  ContextSetup,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+} from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -105,7 +112,16 @@ export {
   HttpResponse,
   HttpHandler,
   HttpBody,
+  HttpInterceptController,
 } from './http';
+
+export {
+  OverlayStart,
+  OverlayBannerMount,
+  OverlayBannerUnmount,
+  OverlayBannersStart,
+  OverlayRef,
+} from './overlays';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -208,7 +224,9 @@ export {
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
   IContextContainer,
-  IContextHandler,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
   IContextProvider,
   ContextSetup,
   DocLinksStart,
@@ -221,8 +239,6 @@ export {
   LegacyNavLink,
   NotificationsSetup,
   NotificationsStart,
-  OverlayRef,
-  OverlayStart,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,

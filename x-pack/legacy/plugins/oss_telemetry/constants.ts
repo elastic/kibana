@@ -7,5 +7,3 @@
 export const PLUGIN_ID = 'oss_telemetry'; // prefix used for registering properties with services from this plugin
 export const VIS_TELEMETRY_TASK = 'vis_telemetry'; // suffix for the _id of our task instance, which must be `get`-able
 export const VIS_USAGE_TYPE = 'visualization_types'; // suffix for the properties of data registered with the usage service
-
-export const VIS_TELEMETRY_TASK_NUM_WORKERS = 10; // by default it's 100% their workers. Users can scale up and set task manager's numWorkers higher for other tasks to be able to run concurrently in a single Kibana instance with this one

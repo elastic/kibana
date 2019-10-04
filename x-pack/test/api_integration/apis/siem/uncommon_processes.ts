@@ -14,7 +14,7 @@ const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
 const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 
 // typical values that have to change after an update from "scripts/es_archiver"
-const TOTAL_COUNT = 80;
+const TOTAL_COUNT = 3;
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -78,7 +78,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(UncommonProcesses.edges.length).to.be(2);
     });
 
-    it('should return a total count of 6 elements', async () => {
+    it('should return a total count of elements', async () => {
       const {
         data: {
           source: { UncommonProcesses },
@@ -130,18 +130,11 @@ export default function({ getService }: FtrProviderContext) {
         },
       });
       const expected: GetUncommonProcessesQuery.Node = {
-        _id: 'Ax5CB2kBR346wHgnUJ1s',
+        _id: 'HCFxB2kBR346wHgnL4ik',
         instances: 1,
         process: {
-          args: [
-            '/usr/bin/suricata',
-            '-c',
-            '/etc/suricata/suricata.yaml',
-            '-i',
-            'eth0',
-            '--init-errors-fatal',
-          ],
-          name: ['Suricata-Main'],
+          args: [],
+          name: ['kworker/u2:0'],
           __typename: 'ProcessEcsFields',
         },
         user: {
@@ -151,7 +144,7 @@ export default function({ getService }: FtrProviderContext) {
         },
         hosts: [
           {
-            name: ['suricata-zeek-sensor-toronto'],
+            name: ['zeek-sensor-san-francisco'],
             __typename: 'HostEcsFields',
           },
         ],

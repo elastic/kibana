@@ -47,6 +47,7 @@ describe('Domains Table Component', () => {
             id="domains"
             indexPattern={mockIndexPattern}
             ip={ip}
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -76,6 +77,7 @@ describe('Domains Table Component', () => {
               id="domains"
               indexPattern={mockIndexPattern}
               ip={ip}
+              isInspect={false}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(
@@ -110,7 +112,7 @@ describe('Domains Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('Domain nameClick to sort in ascending order');
+      ).toEqual('DomainClick to sort in ascending order');
       expect(
         wrapper
           .find('.euiTable thead tr th button')

@@ -190,20 +190,19 @@ export function uiRenderMixin(kbnServer, server, config) {
     });
   }
 
-  async function getLegacyKibanaPayload({ app, translations, request, includeUserProvidedConfig }) {
+  function getLegacyKibanaPayload({ app, basePath, uiSettings }) {
     return {
       app,
-      translations,
       bundleId: `app:${app.getId()}`,
       nav: server.getUiNavLinks(),
       version: kbnServer.version,
       branch: config.get('pkg.branch'),
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
-      basePath: request.getBasePath(),
       serverName: config.get('server.name'),
       devMode: config.get('env.dev'),
-      uiSettings: await getUiSettings({ request, includeUserProvidedConfig }),
+      basePath,
+      uiSettings,
     };
   }
 
@@ -213,11 +212,10 @@ export function uiRenderMixin(kbnServer, server, config) {
     const uiSettings = await getUiSettings({ request, includeUserProvidedConfig });
     app = app || { getId: () => 'core' };
 
-    const legacyMetadata = await getLegacyKibanaPayload({
+    const legacyMetadata = getLegacyKibanaPayload({
       app,
-      request,
-      includeUserProvidedConfig,
-      injectedVarsOverrides
+      basePath,
+      uiSettings
     });
 
     // Get the list of new platform plugins.

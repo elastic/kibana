@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { KpiHostsData, KpiHostDetailsData } from '../../../../graphql/types';
 import { StatItemsComponent, StatItemsProps, useKpiMatrixStatus } from '../../../stat_items';

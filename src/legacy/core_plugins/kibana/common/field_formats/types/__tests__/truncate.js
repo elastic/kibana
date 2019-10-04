@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import { createTruncateFormat } from '../truncate';
-import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
 
 const TruncateFormat = createTruncateFormat(FieldFormat);
 

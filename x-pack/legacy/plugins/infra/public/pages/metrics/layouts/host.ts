@@ -106,13 +106,55 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
           type: InfraMetricLayoutVisualizationType.area,
           formatter: InfraFormatterType.percent,
           seriesOverrides: {
-            user: { color: theme.eui.euiColorVis0 },
-            system: { color: theme.eui.euiColorVis2 },
-            steal: { color: theme.eui.euiColorVis9 },
-            irq: { color: theme.eui.euiColorVis4 },
-            softirq: { color: theme.eui.euiColorVis6 },
-            iowait: { color: theme.eui.euiColorVis7 },
-            nice: { color: theme.eui.euiColorVis5 },
+            user: {
+              color: theme.eui.euiColorVis0,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.hostMetricsLayout.cpuUsageSection.seriesLabel.user',
+                { defaultMessage: 'user' }
+              ),
+            },
+            system: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.hostMetricsLayout.cpuUsageSection.seriesLabel.system',
+                { defaultMessage: 'system' }
+              ),
+            },
+            steal: {
+              color: theme.eui.euiColorVis9,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.hostMetricsLayout.cpuUsageSection.seriesLabel.steal',
+                { defaultMessage: 'steal' }
+              ),
+            },
+            irq: {
+              color: theme.eui.euiColorVis4,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.hostMetricsLayout.cpuUsageSection.seriesLabel.irq',
+                { defaultMessage: 'irq' }
+              ),
+            },
+            softirq: {
+              color: theme.eui.euiColorVis6,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.hostMetricsLayout.cpuUsageSection.seriesLabel.softirq',
+                { defaultMessage: 'softirq' }
+              ),
+            },
+            iowait: {
+              color: theme.eui.euiColorVis7,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.hostMetricsLayout.cpuUsageSection.seriesLabel.iowait',
+                { defaultMessage: 'iowait' }
+              ),
+            },
+            nice: {
+              color: theme.eui.euiColorVis5,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.hostMetricsLayout.cpuUsageSection.seriesLabel.nice',
+                { defaultMessage: 'nice' }
+              ),
+            },
           },
         },
       },
@@ -173,9 +215,27 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
           formatter: InfraFormatterType.bytes,
           type: InfraMetricLayoutVisualizationType.area,
           seriesOverrides: {
-            used: { color: theme.eui.euiColorVis2 },
-            free: { color: theme.eui.euiColorVis0 },
-            cache: { color: theme.eui.euiColorVis1 },
+            used: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.hostMetricsLayout.memoryUsageSection.seriesLabel.used',
+                { defaultMessage: 'Used' }
+              ),
+            },
+            free: {
+              color: theme.eui.euiColorVis0,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.hostMetricsLayout.memoryUsageSection.seriesLabel.free',
+                { defaultMessage: 'Free' }
+              ),
+            },
+            cache: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.hostMetricsLayout.memoryUsageSection.seriesLabel.cache',
+                { defaultMessage: 'Cache' }
+              ),
+            },
           },
         },
       },
@@ -199,7 +259,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
               name: i18n.translate(
                 'xpack.infra.metricDetailPage.hostMetricsLayout.networkTrafficSection.networkRxRateSeriesLabel',
                 {
-                  defaultMessage: 'in',
+                  defaultMessage: 'In',
                 }
               ),
             },
@@ -208,7 +268,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
               name: i18n.translate(
                 'xpack.infra.metricDetailPage.hostMetricsLayout.networkTrafficSection.networkTxRateSeriesLabel',
                 {
-                  defaultMessage: 'out',
+                  defaultMessage: 'Out',
                 }
               ),
             },
@@ -303,8 +363,21 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           formatter: InfraFormatterType.abbreviatedNumber,
           seriesOverrides: {
-            capacity: { color: theme.eui.euiColorVis2 },
-            used: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
+            capacity: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeCpuCapacitySection.seriesLabel.capacity',
+                { defaultMessage: 'Capacity' }
+              ),
+            },
+            used: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeCpuCapacitySection.seriesLabel.used',
+                { defaultMessage: 'Used' }
+              ),
+              type: InfraMetricLayoutVisualizationType.area,
+            },
           },
         },
       },
@@ -321,8 +394,21 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           formatter: InfraFormatterType.bytes,
           seriesOverrides: {
-            capacity: { color: theme.eui.euiColorVis2 },
-            used: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
+            capacity: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeMemoryCapacitySection.seriesLabel.capacity',
+                { defaultMessage: 'Capacity' }
+              ),
+            },
+            used: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeMemoryCapacitySection.seriesLabel.used',
+                { defaultMessage: 'Used' }
+              ),
+              type: InfraMetricLayoutVisualizationType.area,
+            },
           },
         },
       },
@@ -339,8 +425,21 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           formatter: InfraFormatterType.bytes,
           seriesOverrides: {
-            capacity: { color: theme.eui.euiColorVis2 },
-            used: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
+            capacity: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeDiskCapacitySection.seriesLabel.capacity',
+                { defaultMessage: 'Capacity' }
+              ),
+            },
+            used: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeDiskCapacitySection.seriesLabel.used',
+                { defaultMessage: 'Used' }
+              ),
+              type: InfraMetricLayoutVisualizationType.area,
+            },
           },
         },
       },
@@ -357,9 +456,151 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           formatter: InfraFormatterType.number,
           seriesOverrides: {
-            capacity: { color: theme.eui.euiColorVis2 },
-            used: { color: theme.eui.euiColorVis1, type: InfraMetricLayoutVisualizationType.area },
+            capacity: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodePodCapacitySection.seriesLabel.capacity',
+                { defaultMessage: 'Capacity' }
+              ),
+            },
+            used: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodePodCapacitySection.seriesLabel.used',
+                { defaultMessage: 'Used' }
+              ),
+              type: InfraMetricLayoutVisualizationType.area,
+            },
           },
+        },
+      },
+    ],
+  },
+  {
+    id: 'dockerOverview',
+    label: 'Docker',
+    sections: [
+      {
+        id: InfraMetric.hostDockerOverview,
+        linkToId: 'dockerOverview',
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.dockerMetricsLayout.overviewSection.sectionLabel',
+          {
+            defaultMessage: 'Overview',
+          }
+        ),
+        requires: ['docker.info'],
+        type: InfraMetricLayoutSectionType.gauges,
+        visConfig: {
+          seriesOverrides: {
+            total: {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.dockerMetricsLayout.overviewSection.totalLabel',
+                {
+                  defaultMessage: 'Total',
+                }
+              ),
+              color: 'secondary',
+            },
+            running: {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.dockerMetricsLayout.overviewSection.runningLabel',
+                {
+                  defaultMessage: 'Running',
+                }
+              ),
+              color: 'secondary',
+            },
+            paused: {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.dockerMetricsLayout.overviewSection.pausedLabel',
+                {
+                  defaultMessage: 'Paused',
+                }
+              ),
+              color: 'secondary',
+            },
+            stopped: {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.dockerMetricsLayout.overviewSection.stoppedLabel',
+                {
+                  defaultMessage: 'Stopped',
+                }
+              ),
+              color: 'secondary',
+            },
+          },
+        },
+      },
+      {
+        id: InfraMetric.hostDockerInfo,
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.dockerMetricsLayout.containerStates.sectionLabel',
+          {
+            defaultMessage: 'Container States',
+          }
+        ),
+        requires: ['docker.info'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          formatter: InfraFormatterType.abbreviatedNumber,
+          stacked: true,
+          seriesOverrides: {
+            running: {
+              color: theme.eui.euiColorVis2,
+              type: InfraMetricLayoutVisualizationType.bar,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.containerStates.seriesLabel.running',
+                { defaultMessage: 'Running' }
+              ),
+            },
+            stopped: {
+              color: theme.eui.euiColorVis1,
+              type: InfraMetricLayoutVisualizationType.bar,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.containerStates.seriesLabel.stopped',
+                { defaultMessage: 'Stopped' }
+              ),
+            },
+            paused: {
+              color: theme.eui.euiColorVis7,
+              type: InfraMetricLayoutVisualizationType.bar,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.containerStates.seriesLabel.paused',
+                { defaultMessage: 'Paused' }
+              ),
+            },
+          },
+        },
+      },
+      {
+        id: InfraMetric.hostDockerTop5ByCpu,
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.dockerMetricsLayout.top5Cpu.sectionLabel',
+          {
+            defaultMessage: 'Top 5 Containers by CPU',
+          }
+        ),
+        requires: ['docker.cpu'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          formatter: InfraFormatterType.percent,
+          seriesOverrides: {},
+        },
+      },
+      {
+        id: InfraMetric.hostDockerTop5ByMemory,
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.dockerMetricsLayout.top5Memory.sectionLabel',
+          {
+            defaultMessage: 'Top 5 Containers by Memory',
+          }
+        ),
+        requires: ['docker.memory'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          formatter: InfraFormatterType.percent,
+          seriesOverrides: {},
         },
       },
     ],

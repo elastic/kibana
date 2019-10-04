@@ -8,12 +8,11 @@ import del from 'del';
 // @ts-ignore
 import extractZip from 'extract-zip';
 import fs from 'fs';
-import mkdirp from 'mkdirp';
 import path from 'path';
 import { promisify } from 'util';
 
 const asyncExtractZip = promisify(extractZip);
-const asyncMkdirp = promisify(mkdirp);
+const asyncMkdir = promisify(fs.mkdir);
 
 const archiveFilePath = (zipFileName: string) => {
   return path.resolve(__dirname, `./fixtures/${zipFileName}.zip`);
@@ -29,7 +28,7 @@ const workspaceDir = (repoUri: string, kibanaDir: string) => {
 
 const unzip = async (filepath: string, target: string) => {
   if (!fs.existsSync(target)) {
-    await asyncMkdirp(target);
+    await asyncMkdir(target, { recursive: true });
   }
   await asyncExtractZip(filepath, { dir: target });
 };

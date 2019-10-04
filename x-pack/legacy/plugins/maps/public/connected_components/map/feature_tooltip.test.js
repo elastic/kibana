@@ -21,26 +21,14 @@ const MULTI_FEATURE_MULTI_LAYER = [
   {
     id: 'feature1',
     layerId: 'layer1',
-    geometry: {
-      type: 'Point',
-      coordinates: [102.0, 0.5]
-    }
   },
   {
     id: 'feature2',
     layerId: 'layer1',
-    geometry: {
-      type: 'Point',
-      coordinates: [102.0, 0.5]
-    }
   },
   {
     id: 'feature1',
     layerId: 'layer2',
-    geometry: {
-      type: 'Point',
-      coordinates: [102.0, 0.5]
-    }
   }
 ];
 
@@ -48,20 +36,21 @@ const SINGLE_FEATURE = [
   {
     id: 'feature1',
     layerId: 'layer1',
-    geometry: {
-      type: 'Point',
-      coordinates: [102.0, 0.5]
-    }
   }
 ];
 
 const defaultProps = {
   loadFeatureProperties: () => { return []; },
+  loadFeatureGeometry: () => {
+    return {
+      type: 'Point',
+      coordinates: [102.0, 0.5]
+    };
+  },
   findLayerById: (id) => {
     return new MockLayer(id);
   },
   closeTooltip: () => {},
-  showFilterButtons: false,
   isLocked: false,
 };
 

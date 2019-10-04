@@ -135,7 +135,7 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
-  async _getTopHits(layerName, searchFilters) {
+  async _getTopHits(layerName, searchFilters, registerCancelCallback) {
     const {
       topHitsSplitField,
       topHitsTimeField,
@@ -185,7 +185,7 @@ export class ESSearchSource extends AbstractESSource {
       }
     });
 
-    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document top hits request');
+    const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document top hits request');
 
     let hasTrimmedResults = false;
     const allHits = [];
@@ -209,7 +209,7 @@ export class ESSearchSource extends AbstractESSource {
     };
   }
 
-  async _getSearchHits(layerName, searchFilters) {
+  async _getSearchHits(layerName, searchFilters, registerCancelCallback) {
     const searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT);
     // Setting "fields" instead of "source: { includes: []}"
     // because SearchSource automatically adds the following by default
@@ -218,7 +218,7 @@ export class ESSearchSource extends AbstractESSource {
     // By setting "fields", SearchSource removes all of defaults
     searchSource.setField('fields', searchFilters.fieldNames);
 
-    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document request');
+    const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document request');
 
     return {
       hits: resp.hits.hits,
@@ -233,14 +233,14 @@ export class ESSearchSource extends AbstractESSource {
     return !!(useTopHits && topHitsSplitField && topHitsTimeField);
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const { hits, meta } = this._isTopHits()
-      ? await this._getTopHits(layerName, searchFilters)
-      : await this._getSearchHits(layerName, searchFilters);
+      ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
+      : await this._getSearchHits(layerName, searchFilters, registerCancelCallback);
 
     const indexPattern = await this._getIndexPattern();
     const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
-      return metaField !== '_id';
+      return !['_id', '_index'].includes(metaField);
     });
     const flattenHit = hit => {
       const properties = indexPattern.flattenHit(hit);
@@ -410,6 +410,16 @@ export class ESSearchSource extends AbstractESSource {
       topHitsSplitField: this._descriptor.topHitsSplitField,
       topHitsTimeField: this._descriptor.topHitsTimeField,
       topHitsSize: this._descriptor.topHitsSize,
+    };
+  }
+
+  async getPreIndexedShape(properties) {
+    const geoField = await this._getGeoField();
+
+    return {
+      index: properties._index, // Can not use index pattern title because it may reference many indices
+      id: properties._id,
+      path: geoField.name,
     };
   }
 }

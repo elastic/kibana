@@ -8,15 +8,25 @@ import Mustache from 'mustache';
 import { isString, cloneDeep } from 'lodash';
 import { AlertActionParams, State, Context } from '../types';
 
-export function transformActionParams(
-  params: AlertActionParams,
-  state: State,
-  context: Context
-): AlertActionParams {
+interface TransformActionParamsOptions {
+  alertId: string;
+  alertInstanceId: string;
+  params: AlertActionParams;
+  state: State;
+  context: Context;
+}
+
+export function transformActionParams({
+  alertId,
+  alertInstanceId,
+  context,
+  params,
+  state,
+}: TransformActionParamsOptions): AlertActionParams {
   const result = cloneDeep(params, (value: any) => {
     if (!isString(value)) return;
 
-    return Mustache.render(value, { context, state });
+    return Mustache.render(value, { alertId, alertInstanceId, context, state });
   });
 
   // The return type signature for `cloneDeep()` ends up taking the return

@@ -20,17 +20,26 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
+import { embeddablePluginMock } from '../../../../../plugins/embeddable/public/mocks';
+import { expressionsPluginMock } from '../../../../../plugins/expressions/public/mocks';
 import { inspectorPluginMock } from '../../../../../plugins/inspector/public/mocks';
+import { uiActionsPluginMock } from '../../../../../plugins/ui_actions/public/mocks';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const pluginsMock = {
   createSetup: () => ({
     data: dataPluginMock.createSetupContract(),
+    embeddable: embeddablePluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
+    expressions: expressionsPluginMock.createSetupContract(),
+    uiActions: uiActionsPluginMock.createSetupContract(),
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
+    embeddable: embeddablePluginMock.createStartContract(),
     inspector: inspectorPluginMock.createStartContract(),
+    expressions: expressionsPluginMock.createStartContract(),
+    uiActions: uiActionsPluginMock.createStartContract(),
   }),
 };
 

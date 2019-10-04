@@ -25,6 +25,7 @@ import { metadata } from 'ui/metadata';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
 
 // based on code used by `ui/index_patterns` internally
 // remove the space character from the list of illegal characters
@@ -53,6 +54,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     jobIdEmpty,
     jobIdExists,
     jobIdValid,
+    jobIdInvalidMaxLength,
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
@@ -106,7 +108,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
               defaultMessage: 'Job ID',
             })}
-            isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
+            isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists || jobIdInvalidMaxLength}
             error={[
               ...(!jobIdEmpty && !jobIdValid
                 ? [
@@ -121,6 +123,20 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     i18n.translate('xpack.ml.dataframe.analytics.create.jobIdExistsError', {
                       defaultMessage: 'An analytics job with this ID already exists.',
                     }),
+                  ]
+                : []),
+              ...(jobIdInvalidMaxLength
+                ? [
+                    i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.jobIdInvalidMaxLengthErrorMessage',
+                      {
+                        defaultMessage:
+                          'Job ID must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
+                        values: {
+                          maxLength: JOB_ID_MAX_LENGTH,
+                        },
+                      }
+                    ),
                   ]
                 : []),
             ]}

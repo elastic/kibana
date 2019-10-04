@@ -18,7 +18,7 @@
  */
 
 import { AggParam } from '../';
-import { AggConfigs } from '../../vis/agg_configs';
+import { AggConfigs } from '../agg_configs';
 import { AggConfig } from '../../vis';
 import { SearchSource } from '../../courier';
 

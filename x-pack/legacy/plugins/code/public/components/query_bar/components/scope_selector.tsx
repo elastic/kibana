@@ -9,7 +9,6 @@ import React, { Component } from 'react';
 
 import { SearchScope } from '../../../../model';
 import { SearchScopeText } from '../../../common/types';
-import { pxToRem } from '../../../style/variables';
 
 interface Props {
   scope: SearchScope;
@@ -57,7 +56,6 @@ export class ScopeSelector extends Component<Props> {
   public render() {
     return (
       <EuiSuperSelect
-        style={{ width: pxToRem(200) }}
         options={this.scopeOptions}
         valueOfSelected={this.props.scope}
         onChange={this.props.onScopeChanged}

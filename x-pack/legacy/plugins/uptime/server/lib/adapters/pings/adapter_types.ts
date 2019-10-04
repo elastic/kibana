@@ -31,7 +31,8 @@ export interface UMPingsAdapter {
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null,
-    monitorId?: string | null
+    monitorId?: string | null,
+    statusFilter?: string | null
   ): Promise<HistogramDataPoint[]>;
 
   getDocCount(request: any): Promise<DocCount>;

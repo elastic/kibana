@@ -23,11 +23,13 @@ export default function codeIntelligenceFunctionalTests({
   const FIND_TIME = config.get('timeouts.find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
+  const exists = async (selector: string) =>
+    await testSubjects.exists(selector, { allowHidden: true });
 
-  describe('Code Intelligence', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/45094
+  describe.skip('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {
-      const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+      const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
       const testGoToDefinition = async () => {
         await retry.try(async () => {
           expect(await exists('codeSourceViewer')).to.be(true);
@@ -88,7 +90,7 @@ export default function codeIntelligenceFunctionalTests({
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await esArchiver.unload('code/repositories/typescript_node_starter');
         await repoUnload(
           'github.com/elastic/TypeScript-Node-Starter',

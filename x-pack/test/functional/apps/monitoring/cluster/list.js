@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }) {
           expect(await clusterOverview.isOnClusterOverview()).to.be(true);
           expect(await clusterOverview.getClusterName()).to.be('production');
 
-          await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters'); // reset for next test
+          await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters'); // reset for next test
         });
 
       });

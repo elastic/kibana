@@ -20,7 +20,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { toastNotifications } from '../../notify';
-import { RequestFailure } from '../../errors';
+import { RequestFailure } from './errors';
 import { RequestStatus } from './req_status';
 import { SearchError } from '../search_strategy/search_error';
 import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';

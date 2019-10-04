@@ -23,6 +23,7 @@ import {
   EuiButton,
   EuiCopy,
   EuiFlexGroup,
+  EuiSpacer,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
@@ -99,6 +100,8 @@ class UrlPanelContentUI extends Component<Props, State> {
         {this.renderExportAsRadioGroup()}
 
         {this.renderShortUrlSwitch()}
+
+        <EuiSpacer size="m" />
 
         <EuiCopy
           textToCopy={this.state.url || ''}

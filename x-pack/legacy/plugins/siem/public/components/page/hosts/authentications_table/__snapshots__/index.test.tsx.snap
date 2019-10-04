@@ -102,6 +102,7 @@ exports[`Authentication Table Component rendering it renders the authentication 
   }
   fakeTotalCount={50}
   id="authentication"
+  isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
   showMorePagesIndicator={true}

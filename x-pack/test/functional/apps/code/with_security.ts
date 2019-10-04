@@ -17,7 +17,7 @@ export default function testWithSecurity({ getService, getPageObjects }: FtrProv
   const dummyPassword = '123321';
   const codeAdmin = 'codeAdmin';
   const codeUser = 'codeUser';
-  const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
+  const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
   const manageButtonSelectors = ['indexRepositoryButton', 'deleteRepositoryButton'];
   const log = getService('log');
   const security = getService('security');
@@ -63,12 +63,12 @@ export default function testWithSecurity({ getService, getPageObjects }: FtrProv
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await esArchiver.unload('empty_kibana');
       });
 
       async function login(user: string) {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login(user, dummyPassword);
         await PageObjects.common.navigateToApp('code');
         await PageObjects.header.waitUntilLoadingHasFinished();

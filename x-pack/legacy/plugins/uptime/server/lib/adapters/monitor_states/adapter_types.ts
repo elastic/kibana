@@ -18,7 +18,8 @@ export interface UMMonitorStatesAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
+    filters?: string | null,
+    statusFilter?: string | null
   ): Promise<MonitorSummary[]>;
   statesIndexExists(request: any): Promise<StatesIndexStatus>;
 }

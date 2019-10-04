@@ -159,7 +159,10 @@ class TimeseriesPanelConfigUi extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="visTypeTimeseries.timeseries.optionsTab.dataLabel" defaultMessage="Data" />
+                <FormattedMessage
+                  id="visTypeTimeseries.timeseries.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -201,7 +204,7 @@ class TimeseriesPanelConfigUi extends Component {
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="m" />
                 <YesNo
                   value={model.ignore_global_filter}
                   name="ignore_global_filter"
@@ -295,7 +298,7 @@ class TimeseriesPanelConfigUi extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }}>
+                <EuiFormLabel>
                   <FormattedMessage
                     id="visTypeTimeseries.timeseries.optionsTab.backgroundColorLabel"
                     defaultMessage="Background color:"
@@ -310,7 +313,7 @@ class TimeseriesPanelConfigUi extends Component {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }}>
+                <EuiFormLabel>
                   <FormattedMessage
                     id="visTypeTimeseries.timeseries.optionsTab.showLegendLabel"
                     defaultMessage="Show legend?"
@@ -325,7 +328,7 @@ class TimeseriesPanelConfigUi extends Component {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={htmlId('legendPos')}>
+                <EuiFormLabel htmlFor={htmlId('legendPos')}>
                   <FormattedMessage
                     id="visTypeTimeseries.timeseries.optionsTab.legendPositionLabel"
                     defaultMessage="Legend position"
@@ -343,7 +346,7 @@ class TimeseriesPanelConfigUi extends Component {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }}>
+                <EuiFormLabel>
                   <FormattedMessage
                     id="visTypeTimeseries.timeseries.optionsTab.displayGridLabel"
                     defaultMessage="Display grid"
@@ -362,7 +365,10 @@ class TimeseriesPanelConfigUi extends Component {
       <div>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
-            <FormattedMessage id="visTypeTimeseries.timeseries.dataTab.dataButtonLabel" defaultMessage="Data" />
+            <FormattedMessage
+              id="visTypeTimeseries.timeseries.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}

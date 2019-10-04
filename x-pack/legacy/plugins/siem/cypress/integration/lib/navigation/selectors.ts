@@ -15,3 +15,11 @@ export const NAVIGATION_OVERVIEW = '[data-test-subj="navigation-link-overview"]'
 
 /** Top-level (global) navigation link to the `Timelines` page */
 export const NAVIGATION_TIMELINES = '[data-test-subj="navigation-link-timelines"]';
+
+export const HOSTS_PAGE_TABS = {
+  allHosts: '[data-test-subj="navigation-allHosts"]',
+  anomalies: '[data-test-subj="navigation-anomalies"]',
+  authentications: '[data-test-subj="navigation-authentications"]',
+  events: '[data-test-subj="navigation-events"]',
+  uncommonProcesses: '[data-test-subj="navigation-uncommonProcesses"]',
+};

@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { markdownVis } from './markdown_vis';
@@ -26,7 +26,7 @@ import { createMarkdownVisFn } from './markdown_fn';
 
 /** @internal */
 export interface MarkdownPluginSetupDependencies {
-  data: ReturnType<DataPublicPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
 }
 
@@ -38,9 +38,9 @@ export class MarkdownPlugin implements Plugin<void, void> {
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, { data, visualizations }: MarkdownPluginSetupDependencies) {
+  public setup(core: CoreSetup, { expressions, visualizations }: MarkdownPluginSetupDependencies) {
     visualizations.types.registerVisualization(() => markdownVis);
-    data.expressions.registerFunction(createMarkdownVisFn);
+    expressions.registerFunction(createMarkdownVisFn);
   }
 
   public start(core: CoreStart) {

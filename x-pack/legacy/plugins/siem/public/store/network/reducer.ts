@@ -36,8 +36,14 @@ import {
   updateTlsSort,
   updateUsersLimit,
   updateUsersSort,
+  setNetworkTablesActivePageToZero,
 } from './actions';
 import { IpDetailsTableType, NetworkModel, NetworkTableType, NetworkType } from './model';
+import {
+  setNetworkQueriesActivePageToZero,
+  setNetworkPageQueriesActivePageToZero,
+  setNetworkDetailsQueriesActivePageToZero,
+} from './helpers';
 
 export type NetworkState = NetworkModel;
 
@@ -108,6 +114,17 @@ export const initialNetworkState: NetworkState = {
 };
 
 export const networkReducer = reducerWithInitialState(initialNetworkState)
+  .case(setNetworkTablesActivePageToZero, state => ({
+    ...state,
+    page: {
+      ...state.page,
+      queries: setNetworkPageQueriesActivePageToZero(state),
+    },
+    details: {
+      ...state.details,
+      queries: setNetworkDetailsQueriesActivePageToZero(state),
+    },
+  }))
   .case(updateIpDetailsTableActivePage, (state, { activePage, tableType }) => ({
     ...state,
     [NetworkType.details]: {
@@ -210,6 +227,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
     ...state,
     [networkType]: {
       ...state[networkType],
+      queries: setNetworkQueriesActivePageToZero(state, networkType),
       filterQueryDraft: filterQuery.kuery,
       filterQuery,
     },

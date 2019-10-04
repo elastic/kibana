@@ -84,6 +84,7 @@ function NumberIntervalParamEditor({
         onChange={onChange}
         onBlur={setTouched}
         fullWidth={true}
+        compressed
         placeholder={i18n.translate('common.ui.aggTypes.numberInterval.selectIntervalPlaceholder', {
           defaultMessage: 'Enter an interval',
         })}

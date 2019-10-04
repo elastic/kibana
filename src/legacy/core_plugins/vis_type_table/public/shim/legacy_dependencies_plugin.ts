@@ -17,31 +17,13 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-
-// @ts-ignore
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-
 import { CoreStart, Plugin } from '../../../../../core/public';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 
 /** @internal */
-export interface LegacyDependenciesPluginSetup {
-  createAngularVisualization: Function;
-}
-
-/** @internal */
-export class LegacyDependenciesPlugin
-  implements Plugin<Promise<LegacyDependenciesPluginSetup>, void> {
-  public async setup() {
+export class LegacyDependenciesPlugin implements Plugin {
+  public setup() {
     initTableVisLegacyModule();
-
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-
-    return {
-      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
-    } as LegacyDependenciesPluginSetup;
   }
 
   public start(core: CoreStart) {

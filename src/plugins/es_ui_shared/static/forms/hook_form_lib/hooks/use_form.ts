@@ -24,12 +24,16 @@ import { FormHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types
 import { mapFormFields, flattenObject, unflattenObject, Subject } from '../lib';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
+const DEFAULT_OPTIONS = {
+  errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT,
+  stripEmptyFields: true,
+};
 
-interface UseFormReturn<T> {
+interface UseFormReturn<T extends object> {
   form: FormHook<T>;
 }
 
-export function useForm<T = FormData>(
+export function useForm<T extends object = FormData>(
   formConfig: FormConfig<T> | undefined = {}
 ): UseFormReturn<T> {
   const {
@@ -38,8 +42,9 @@ export function useForm<T = FormData>(
     defaultValue = {},
     serializer = (data: any) => data,
     deserializer = (data: any) => data,
-    options = { errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT, stripEmptyFields: true },
+    options = {},
   } = formConfig;
+  const formOptions = { ...DEFAULT_OPTIONS, ...options };
   const defaultValueDeserialized =
     Object.keys(defaultValue).length === 0 ? defaultValue : deserializer(defaultValue);
   const [isSubmitted, setSubmitted] = useState(false);
@@ -59,7 +64,7 @@ export function useForm<T = FormData>(
   const fieldsToArray = () => Object.values(fieldsRefs.current);
 
   const stripEmptyFields = (fields: FieldsMap): FieldsMap => {
-    if (options.stripEmptyFields) {
+    if (formOptions.stripEmptyFields) {
       return Object.entries(fields).reduce(
         (acc, [key, field]) => {
           if (typeof field.value !== 'string' || field.value.trim() !== '') {
@@ -191,7 +196,7 @@ export function useForm<T = FormData>(
     getFields,
     getFormData,
     getFieldDefaultValue,
-    __options: options,
+    __options: formOptions,
     __formData$: formData$,
     __updateFormDataAt: updateFormDataAt,
     __readFieldConfigFromSchema: readFieldConfigFromSchema,

@@ -22,6 +22,10 @@
       "disabledFeatures": {
         "type": "keyword"
       },
+      "imageUrl": {
+        "type": "text",
+        "index": false
+      },
       "_reserved": {
         "type": "boolean"
       }

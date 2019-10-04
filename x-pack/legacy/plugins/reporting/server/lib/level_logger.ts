@@ -13,19 +13,17 @@ const trimStr = (toTrim: string) => {
 export class LevelLogger {
   private _logger: any;
   private _tags: string[];
-  private _isVerbose: boolean;
 
   public warn: (msg: string, tags?: string[]) => void;
 
-  static createForServer(server: any, tags: string[], isVerbose = false) {
+  static createForServer(server: any, tags: string[]) {
     const serverLog: ServerLog = (tgs: string[], msg: string) => server.log(tgs, msg);
-    return new LevelLogger(serverLog, tags, isVerbose);
+    return new LevelLogger(serverLog, tags);
   }
 
-  constructor(logger: ServerLog, tags: string[], isVerbose: boolean) {
+  constructor(logger: ServerLog, tags: string[]) {
     this._logger = logger;
     this._tags = tags;
-    this._isVerbose = isVerbose;
 
     /*
      * This shortcut provides maintenance convenience: Reporting code has been
@@ -50,11 +48,7 @@ export class LevelLogger {
     this._logger([...this._tags, ...tags, 'info'], trimStr(msg));
   }
 
-  public get isVerbose() {
-    return this._isVerbose;
-  }
-
   public clone(tags: string[]) {
-    return new LevelLogger(this._logger, [...this._tags, ...tags], this._isVerbose);
+    return new LevelLogger(this._logger, [...this._tags, ...tags]);
   }
 }

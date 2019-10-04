@@ -4,9 +4,7 @@
 <titleabbrev>Bulk create objects</titleabbrev>
 ++++
 
-Create multiple {kib} saved objects.
-
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Create multiple {kib} saved objects.
 
 [[saved-objects-api-bulk-create-request]]
 ==== Request

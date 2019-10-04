@@ -3,8 +3,6 @@
 exports[`Data Frame: <GroupByListForm /> Minimal initialization 1`] = `
 <Fragment>
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="s"
   >
     <GroupByLabelForm

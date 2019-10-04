@@ -20,7 +20,7 @@ import {
   PageInfoPaginated,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { domainsQuery } from './index.gql_query';
@@ -31,6 +31,7 @@ export interface DomainsArgs {
   domains: DomainsEdges[];
   id: string;
   inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
@@ -77,10 +78,26 @@ class DomainsComponentQuery extends QueryTemplatePaginated<
       sourceId,
       startDate,
     } = this.props;
+    const variables: GetDomainsQuery.Variables = {
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      flowDirection,
+      flowTarget,
+      inspect: isInspected,
+      ip,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sort: domainsSortField,
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+    };
     return (
       <Query<GetDomainsQuery.Query, GetDomainsQuery.Variables>
         query={domainsQuery}
-        fetchPolicy="cache-and-network"
+        fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
         variables={{
@@ -100,7 +117,7 @@ class DomainsComponentQuery extends QueryTemplatePaginated<
           },
         }}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const domains = getOr([], `source.Domains.edges`, data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => ({
@@ -123,14 +140,16 @@ class DomainsComponentQuery extends QueryTemplatePaginated<
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             domains,
             id,
             inspect: getOr(null, 'source.Domains.inspect', data),
-            loading,
+            isInspected,
+            loading: isLoading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Domains.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.Domains.totalCount', data),
           });
         }}

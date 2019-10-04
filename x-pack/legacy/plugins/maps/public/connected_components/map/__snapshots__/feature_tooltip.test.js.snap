@@ -52,12 +52,9 @@ exports[`FeatureTooltip (multi) should show close button / should show count / s
     >
       <EuiButtonIcon
         aria-label="Close tooltip"
-        color="primary"
         data-test-subj="mapTooltipCloseButton"
-        iconSize="m"
         iconType="cross"
         onClick={[Function]}
-        type="button"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -118,12 +115,9 @@ exports[`FeatureTooltip (multi) should show close button / should show count 1`]
     >
       <EuiButtonIcon
         aria-label="Close tooltip"
-        color="primary"
         data-test-subj="mapTooltipCloseButton"
-        iconSize="m"
         iconType="cross"
         onClick={[Function]}
-        type="button"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -196,12 +190,9 @@ exports[`FeatureTooltip (single) should show close button 1`] = `
     >
       <EuiButtonIcon
         aria-label="Close tooltip"
-        color="primary"
         data-test-subj="mapTooltipCloseButton"
-        iconSize="m"
         iconType="cross"
         onClick={[Function]}
-        type="button"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

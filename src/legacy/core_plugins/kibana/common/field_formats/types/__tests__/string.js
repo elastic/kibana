@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import { createStringFormat } from '../string';
-import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
 
 const StringFormat = createStringFormat(FieldFormat);
 
