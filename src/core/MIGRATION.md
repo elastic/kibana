@@ -1199,6 +1199,7 @@ For these tests, we are maintaining a separate set of mocks. Files with a `.karm
 It is important to note that this behavior is different from `jest.mock('ui/new_platform')`, which only mocks tests on an individual basis. If you encounter any failures in karma tests as a result of new platform migration efforts, you may need to add a `.karma_mock.js` file for the affected services, or add to the existing karma mock we are maintaining in `ui/new_platform`.
 
 ### Provide Legacy Platform API to the New platform plugin
+#### On the server side
 During migration, you can face a problem that not all API is available in the New platform yet. You can work around this by extending your
 new platform plugin with Legacy API:
 - create New platform plugin
@@ -1241,3 +1242,8 @@ class MyPlugin {
   }
 }
 ```
+
+#### On the client side
+It's not currently possible to use a similar pattern on the client-side. 
+Because Legacy platform plugins heavily rely on global angular modules, which aren't available on the new platform. 
+So you can utilize the same approach for *stateless Angular components* only. 
