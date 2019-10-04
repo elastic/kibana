@@ -19,7 +19,7 @@
 
 import Url from 'url';
 
-import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import Axios, { AxiosRequestConfig } from 'axios';
 import parseLinkHeader from 'parse-link-header';
 import { ToolingLog } from '@kbn/dev-utils';
 
@@ -34,17 +34,19 @@ export interface GithubIssue {
 }
 
 export class GithubApi {
-  private readonly x: AxiosInstance;
+  private readonly x = Axios.create({
+    baseURL: 'https://api.github.com',
+    headers: {
+      Authentication: `token ${this.token}`,
+      'User-Agent': 'elastic/kibana#failed_test_reporter',
+    },
+  });
 
-  constructor(private readonly log: ToolingLog, private readonly token: string | undefined) {
-    this.x = Axios.create({
-      baseURL: 'https://api.github.com',
-      headers: {
-        ...(token !== undefined ? { Authentication: `token ${token}` } : {}),
-        'User-Agent': 'elastic/kibana#failed_test_reporter',
-      },
-    });
-  }
+  /**
+   * Create a GithubApi helper object, if token is undefined requests won't be
+   * sent, but will instead be logged.
+   */
+  constructor(private readonly log: ToolingLog, private readonly token: string | undefined) {}
 
   async getKibanaIssues() {
     const issues: GithubIssue[] = [];
