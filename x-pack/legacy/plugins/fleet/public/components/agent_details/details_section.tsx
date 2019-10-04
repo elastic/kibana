@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Agent } from '../../../common/types/domain_data';
-import { formatDate } from '../../utils/date';
+import { formatRelativeDate } from '../../utils/date';
 import { AgentHealth } from '../agent_health';
 
 const MAX_METADATA = 5;
@@ -63,10 +63,16 @@ export const AgentDetailSection: SFC<{ agent: Agent }> = ({ agent }) => {
       description: agent.id,
     },
     {
+      title: i18n.translate('xpack.fleet.agentDetails.typeLabel', {
+        defaultMessage: 'Agent Type',
+      }),
+      description: agent.type,
+    },
+    {
       title: i18n.translate('xpack.fleet.agentDetails.lastCheckinLabel', {
         defaultMessage: 'Last checkin',
       }),
-      description: agent.last_checkin ? formatDate(agent.last_checkin) : '-',
+      description: agent.last_checkin ? formatRelativeDate(agent.last_checkin) : '-',
     },
   ].concat(metadataItems);
 

@@ -14,3 +14,12 @@ export function formatDate(timestamp: string) {
     return timestamp;
   }
 }
+
+export function formatRelativeDate(timestamp: string) {
+  try {
+    return moment(timestamp).fromNow();
+  } catch (error) {
+    // swallow error and display raw timestamp
+    return timestamp;
+  }
+}

@@ -19,6 +19,7 @@ import { AgentsLib } from '../agent';
 import { FrameworkLib } from '../framework';
 import { FrontendLibs } from '../types';
 import { MemoryElasticsearchAdapter } from '../adapters/elasticsearch/memory';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 import { ElasticsearchLib } from '../elasticsearch';
 
 const onKibanaReady = uiModules.get('kibana').run;
