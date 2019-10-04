@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-import { TooltipIcon as Component } from './tooltip_icon';
+import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
+import { Plugin } from './plugin';
 
-export const TooltipIcon = pure(Component);
+new Plugin({ opaqueId: Symbol('uptime') }, chrome).start(npStart);
