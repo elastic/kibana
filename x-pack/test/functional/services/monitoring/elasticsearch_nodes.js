@@ -91,12 +91,14 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
       return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_BODY);
     }
 
-    setFilter(text) {
-      return PageObjects.monitoring.tableSetFilter(SUBJ_SEARCH_BAR, text);
+    async setFilter(text) {
+      await PageObjects.monitoring.tableSetFilter(SUBJ_SEARCH_BAR, text);
+      await this.waitForTableToFinishLoading();
     }
 
-    clearFilter() {
-      return PageObjects.monitoring.tableClearFilter(SUBJ_SEARCH_BAR);
+    async clearFilter() {
+      await PageObjects.monitoring.tableClearFilter(SUBJ_SEARCH_BAR);
+      await this.waitForTableToFinishLoading();
     }
 
     assertNoData() {
