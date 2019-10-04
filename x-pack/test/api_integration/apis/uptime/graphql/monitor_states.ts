@@ -12,14 +12,16 @@ import { makeChecks } from './helpers/make_checks';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  let dateRangeStart: string;
+  let dateRangeEnd: string;
 
   const getMonitorStates = async (variables: { [key: string]: any } = {}) => {
     const query = {
       operationName: 'MonitorStates',
       query: monitorStatesQueryString,
       variables: {
-        dateRangeStart: '2019-09-11T03:31:04.380Z',
-        dateRangeEnd: '2019-09-11T03:40:34.410Z',
+        dateRangeStart,
+        dateRangeEnd,
         ...variables,
       },
     };
@@ -40,6 +42,11 @@ export default function({ getService }: FtrProviderContext) {
       after('unload heartbeat index', () =>
         getService('esArchiver').unload('uptime/full_heartbeat')
       );
+
+      before('set start/end', () => {
+        dateRangeStart = '2019-09-11T03:31:04.380Z';
+        dateRangeEnd = '2019-09-11T03:40:34.410Z';
+      });
 
       it('will fetch monitor state data for the given filters and range', async () => {
         const data: any = await getMonitorStates({
@@ -84,7 +91,7 @@ export default function({ getService }: FtrProviderContext) {
         let checks: any[] = [];
         let nonSummaryIp: string | null = null;
         const testMonitorId = 'scope-test-id';
-        const makeApiParams = (monitorId: string, filterClauses: any[]): any => {
+        const makeApiParams = (monitorId: string, filterClauses: any[] = []): any => {
           return {
             filters: JSON.stringify({
               bool: {
@@ -98,6 +105,7 @@ export default function({ getService }: FtrProviderContext) {
           const index = 'heartbeat-8.0.0';
 
           const es = getService('es');
+          dateRangeStart = new Date().toISOString();
           checks = await makeChecks(es, index, testMonitorId, 1, 2, {}, d => {
             if (d.summary) {
               d.monitor.status = 'down';
@@ -106,6 +114,7 @@ export default function({ getService }: FtrProviderContext) {
             }
             return d;
           });
+          dateRangeEnd = new Date().toISOString();
           nonSummaryIp = checks[0][0].monitor.ip;
         });
 
@@ -130,6 +139,28 @@ export default function({ getService }: FtrProviderContext) {
 
           const nonSummaryRes = await getMonitorStates(params);
           expect(nonSummaryRes.monitorStates.summaries.length).to.eql(0);
+        });
+
+        describe('matching outside of the date range', async () => {
+          before('set date range to future', () => {
+            const futureDate = new Date();
+
+            // Set dateRangeStart to one day from now
+            futureDate.setDate(futureDate.getDate() + 1);
+            dateRangeStart = futureDate.toISOString();
+
+            // Set dateRangeStart to two days from now
+            futureDate.setDate(futureDate.getDate() + 1);
+            dateRangeEnd = futureDate.toISOString();
+          });
+
+          it('should not match any documents', async () => {
+            const params = makeApiParams(testMonitorId);
+            params.statusFilter = 'up';
+
+            const nonSummaryRes = await getMonitorStates(params);
+            expect(nonSummaryRes.monitorStates.summaries.length).to.eql(0);
+          });
         });
       });
     });

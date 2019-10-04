@@ -33,7 +33,7 @@ export function createParseArchiveStreams({ gzip = false } = {}) {
     gzip ? createGunzip() : new PassThrough(),
     createReplaceStream('\r\n', '\n'),
     createSplitStream(RECORD_SEPARATOR),
-    createFilterStream(l => typeof (l) === 'string' && !l.match(/[^\s]/)),
+    createFilterStream(l => l.match(/[^\s]/)),
     createMapStream(json => JSON.parse(json.trim())),
   ];
 }
