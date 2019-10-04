@@ -87,7 +87,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       attributes: {
         name: 'My second favorite',
       },
-      references: [],
     });
   };
 
