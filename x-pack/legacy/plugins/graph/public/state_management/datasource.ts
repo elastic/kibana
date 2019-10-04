@@ -9,6 +9,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { takeLatest, put, call, select } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { createSelector } from 'reselect';
 import { GraphState, GraphStoreDependencies } from './store';
 import { reset } from './global';
 import { loadFields } from './fields';
@@ -69,6 +70,10 @@ export const datasourceReducer = reducerWithInitialState<DatasourceState>(initia
   .build();
 
 export const datasourceSelector = (state: GraphState) => state.datasource;
+export const hasDatasourceSelector = createSelector(
+  datasourceSelector,
+  datasource => datasource.current.type !== 'none'
+);
 
 /**
  * Saga loading field information when the datasource is switched. This will overwrite current settings

@@ -56,6 +56,6 @@ export const syncBreadcrumbSaga = ({ chrome, changeUrl }: GraphStoreDependencies
   return function*() {
     // initial sync
     yield call(syncBreadcrumb);
-    yield takeLatest(updateMetaData, syncBreadcrumb);
+    yield takeLatest(updateMetaData.match, syncBreadcrumb);
   };
 };

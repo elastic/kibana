@@ -5,7 +5,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiPopover, EuiButton } from '@elastic/eui';
+import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiButton } from '@elastic/eui';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';
 import { GraphStore, loadFields } from '../../state_management';
@@ -59,7 +59,7 @@ describe('field_manager', () => {
 
     instance = shallow(
       <Provider store={store}>
-        <FieldManager />
+        <FieldManager pickerOpen={true} setPickerOpen={() => {}} />
       </Provider>
     );
 
@@ -87,25 +87,21 @@ describe('field_manager', () => {
   });
 
   it('should select fields from picker', () => {
-    const fieldPicker = getInstance()
-      .find(FieldPicker)
-      .dive();
-
-    act(() => {
-      (fieldPicker.find(EuiPopover).prop('button')! as ReactElement).props.onClick();
-    });
-
-    fieldPicker.update();
-
     expect(
-      fieldPicker
+      getInstance()
+        .find(FieldPicker)
+        .dive()
         .find(EuiSelectable)
         .prop('options')
         .map((option: { label: string }) => option.label)
     ).toEqual(['field1', 'field2', 'field3']);
 
     act(() => {
-      fieldPicker.find(EuiSelectable).prop('onChange')([{ checked: 'on', label: 'field3' }]);
+      getInstance()
+        .find(FieldPicker)
+        .dive()
+        .find(EuiSelectable)
+        .prop('onChange')([{ checked: 'on', label: 'field3' }]);
     });
 
     expect(dispatchSpy).toHaveBeenCalledWith({

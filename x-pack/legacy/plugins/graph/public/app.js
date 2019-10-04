@@ -23,15 +23,15 @@ import 'uiExports/autocompleteProviders';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
-import { addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
+import { addAppRedirectMessageToUrl, toastNotifications } from 'ui/notify';
 import { formatAngularHttpError } from 'ui/notify/lib';
 import { setup as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { capabilities } from 'ui/capabilities';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { Storage } from 'ui/storage';
 
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
@@ -49,15 +49,15 @@ import { GraphVisualization } from './components/graph_visualization';
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
-import { openSourceModal } from './services/source_modal';
 import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
 import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
 } from './helpers/as_observable';
+import { fetchTopNodes } from './services/fetch_top_nodes';
 import {
   createGraphStore,
-  requestDatasource,
+  selectedFieldsSelector,
   datasourceSelector,
   hasFieldsSelector
 } from './state_management';
@@ -98,16 +98,17 @@ app.directive('graphListing', function (reactDirective) {
 app.directive('graphApp', function (reactDirective) {
   return reactDirective(GraphApp, [
     ['store', { watchDepth: 'reference' }],
+    ['onFillWorkspace', { watchDepth: 'reference' }],
+    ['isInitialized', { watchDepth: 'reference' }],
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['indexPatternProvider', { watchDepth: 'reference' }],
     ['isLoading', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
-    ['savedObjects', { watchDepth: 'reference' }],
-    ['uiSettings', { watchDepth: 'reference' }],
-    ['http', { watchDepth: 'reference' }],
     ['initialQuery', { watchDepth: 'reference' }],
-    ['overlays', { watchDepth: 'reference' }],
     ['confirmWipeWorkspace', { watchDepth: 'reference' }],
+    ['autocompleteStart', { watchDepth: 'reference' }],
+    ['coreStart', { watchDepth: 'reference' }],
+    ['reduxStore', { watchDepth: 'reference' }]
   ]);
 });
 
@@ -320,14 +321,16 @@ app.controller('graphuiPlugin', function (
     chrome,
   });
 
+  $scope.store = new Storage(window.localStorage);
+  $scope.coreStart = npStart.core;
+  $scope.autocompleteStart = npStart.plugins.data.autocomplete;
+  $scope.loading = false;
+
   $scope.spymode = 'request';
 
   const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
 
   $scope.reduxStore = store;
-  $scope.pluginDependencies = npStart.core;
-  $scope.loading = false;
-  $scope.pluginDependencies = npStart.core;
 
   $scope.nodeClick = function (n, $event) {
 
@@ -378,7 +381,32 @@ app.controller('graphuiPlugin', function (
   };
 
 
+  $scope.fillWorkspace = async () => {
+    try {
+      const fields = selectedFieldsSelector(store.getState());
+      const topTermNodes = await fetchTopNodes(
+        npStart.core.http.post,
+        datasourceSelector(store.getState()).current.title,
+        fields
+      );
+      $scope.workspace.mergeGraph({
+        nodes: topTermNodes,
+        edges: []
+      });
+      $scope.workspaceInitialized = true;
+      $scope.workspace.fillInGraph(fields.length * 10);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.graph.fillWorkspaceError',
+          { defaultMessage: 'Fetching top terms failed: {message}', values: { message: e.message } }
+        ),
+      });
+    }
+  };
+
   $scope.submit = function (searchTerm) {
+    $scope.workspaceInitialized = true;
     const numHops = 2;
     if (searchTerm.startsWith('{')) {
       try {
@@ -616,18 +644,9 @@ app.controller('graphuiPlugin', function (
           </p>
         ),
       });
-
-      return;
     }
-    openSourceModal(npStart.core, indexPattern => {
-      store.dispatch(
-        requestDatasource({
-          type: 'indexpattern',
-          id: indexPattern.id,
-          title: indexPattern.attributes.title
-        })
-      );
-    });
   }
+
+  $scope.savedWorkspace = $route.current.locals.savedWorkspace;
 });
 

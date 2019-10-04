@@ -155,28 +155,41 @@ function showModal(
       },
       canSaveData
     );
-    const id = await savedWorkspace.save(saveOptions);
-    if (id) {
-      const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
-        defaultMessage: 'Saved "{workspaceTitle}"',
-        values: { workspaceTitle: savedWorkspace.title },
-      });
-      deps.notifications.toasts.addSuccess({
-        title,
-        text:
-          !canSaveData && workspace.nodes.length > 0
-            ? i18n.translate('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
-                defaultMessage: 'The configuration was saved, but the data was not saved',
-              })
-            : undefined,
-        'data-test-subj': 'saveGraphSuccess',
-      });
-      if (savedWorkspace.id !== metaDataSelector(state).savedObjectId) {
-        deps.changeUrl(getEditPath(savedWorkspace));
+    try {
+      const id = await savedWorkspace.save(saveOptions);
+      if (id) {
+        const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
+          defaultMessage: 'Saved "{workspaceTitle}"',
+          values: { workspaceTitle: savedWorkspace.title },
+        });
+        let text;
+        if (!canSaveData && workspace.nodes.length > 0) {
+          text = i18n.translate('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
+            defaultMessage: 'The configuration was saved, but the data was not saved',
+          });
+        }
+        deps.notifications.toasts.addSuccess({
+          title,
+          text,
+          'data-test-subj': 'saveGraphSuccess',
+        });
+        if (savedWorkspace.id !== metaDataSelector(state).savedObjectId) {
+          deps.changeUrl(getEditPath(savedWorkspace));
+        }
       }
+      savingCallback(null, id);
+      return { id };
+    } catch (error) {
+      deps.notifications.toasts.addDanger(
+        i18n.translate('xpack.graph.saveWorkspace.savingErrorMessage', {
+          defaultMessage: 'Failed to save workspace: {message}',
+          values: {
+            message: error,
+          },
+        })
+      );
+      return { error };
     }
-    savingCallback(null, id);
-    return { id };
   };
 
   openSaveModal({

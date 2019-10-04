@@ -33,6 +33,8 @@ export function FieldManagerComponent(props: {
   }) => void;
   selectField: (fieldName: string) => void;
   deselectField: (fieldName: string) => void;
+  pickerOpen: boolean;
+  setPickerOpen: (open: boolean) => void;
 }) {
   return (
     <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center">
@@ -42,7 +44,7 @@ export function FieldManagerComponent(props: {
         </EuiFlexItem>
       ))}
       <EuiFlexItem grow={false}>
-        <FieldPicker {...props} />
+        <FieldPicker {...props} open={props.pickerOpen} setOpen={props.setPickerOpen} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
