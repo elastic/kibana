@@ -1246,4 +1246,4 @@ class MyPlugin {
 #### On the client side
 It's not currently possible to use a similar pattern on the client-side. 
 Because Legacy platform plugins heavily rely on global angular modules, which aren't available on the new platform. 
-So you can utilize the same approach for *stateless Angular components* only. 
+So you can utilize the same approach for only *stateless Angular components*, as long as they are not consumed by a New Platform application. When New Platform applications are on the page, no legacy code is executed, so the `registerLegacyAPI` function would not be called.
