@@ -43,7 +43,7 @@ interface Props {
   onRemove: () => void;
   intl: InjectedIntl;
   uiSettings: UiSettingsClientContract;
-  savedQueryService: SavedQueryService;
+  savedQueryService?: SavedQueryService;
   showSaveQuery?: boolean;
 }
 
@@ -175,7 +175,7 @@ class FilterItemUI extends Component<Props, State> {
               onSubmit={this.onSubmit}
               onCancel={this.closePopover}
               uiSettings={this.props.uiSettings}
-              savedQueryService={this.props.savedQueryService}
+              savedQueryService={this.props.savedQueryService!}
             />
           </div>
         ),

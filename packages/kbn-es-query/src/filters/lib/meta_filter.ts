@@ -42,6 +42,7 @@ export interface Filter {
   $state?: FilterState;
   meta: FilterMeta;
   query?: any;
+  saved_query?: string;
 }
 
 export interface LatLon {

@@ -37,7 +37,7 @@ import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
-import { createSavedQueryService } from '../../search/search_bar/lib/saved_query_service';
+import { SavedQueryService } from '../../search/search_bar/lib/saved_query_service';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 
 interface Props {
@@ -48,6 +48,7 @@ interface Props {
   intl: InjectedIntl;
   savedObjects?: CoreStart['savedObjects'];
   showSaveQuery?: boolean;
+  savedQueryService?: SavedQueryService;
   // Only for directives!
   uiSettings?: UiSettingsClientContract;
 }
@@ -56,10 +57,6 @@ function FilterBarUI(props: Props) {
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const kibana = useKibana();
   let { uiSettings } = kibana.services;
-  const { savedObjects } = kibana.services;
-  const savedQueryService = savedObjects
-    ? createSavedQueryService(savedObjects!.client)
-    : createSavedQueryService(props.savedObjects!.client);
 
   if (!uiSettings) {
     // Only for directives!
@@ -82,7 +79,7 @@ function FilterBarUI(props: Props) {
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}
-          savedQueryService={savedQueryService}
+          savedQueryService={props.savedQueryService!}
           showSaveQuery={props.showSaveQuery}
         />
       </EuiFlexItem>
@@ -130,7 +127,7 @@ function FilterBarUI(props: Props) {
                 onCancel={() => setIsAddFilterPopoverOpen(false)}
                 key={JSON.stringify(newFilter)}
                 uiSettings={uiSettings!}
-                savedQueryService={savedQueryService}
+                savedQueryService={props.savedQueryService!}
                 showSaveQuery={props.showSaveQuery}
               />
             </div>

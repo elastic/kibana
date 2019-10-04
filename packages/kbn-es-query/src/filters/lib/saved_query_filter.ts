@@ -50,12 +50,11 @@ interface SavedQueryParams {
   savedQuery: SavedQuery;
 }
 export type SavedQueryFilterMeta = FilterMeta & {
-  params: SavedQueryParams; // the full saved query
+  params?: SavedQueryParams; // the full saved query
 };
 
 export type SavedQueryFilter = Filter & {
   meta: SavedQueryFilterMeta;
-  saved_query: string;
 };
 
 export const isSavedQueryFilter = (filter: any): filter is SavedQueryFilter =>
