@@ -127,13 +127,6 @@ describe('discover field chooser directives', function () {
     };
   };
 
-  describe('Index list', function () {
-    it('should be in alphabetical order', function () {
-      $elem.find('.ui-select-toggle').click();
-      expect($elem.find('[role=option]').text().replace(/\W+/g, '')).to.be('abc');
-    });
-  });
-
   describe('Field listing', function () {
     it('should have Selected Fields, Fields and Popular Fields sections', function () {
       const headers = $elem.find('.sidebar-list-header');

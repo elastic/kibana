@@ -25,6 +25,7 @@ import Boom from 'boom';
 import { setupVersionCheck } from './version_check';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
+import { setupDefaultRouteProvider } from './setup_default_route_provider';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
@@ -32,6 +33,8 @@ export default async function (kbnServer, server, config) {
   server = kbnServer.server;
 
   setupBasePathProvider(kbnServer);
+
+  setupDefaultRouteProvider(server);
 
   await registerHapiPlugins(server);
 
@@ -86,10 +89,8 @@ export default async function (kbnServer, server, config) {
   server.route({
     path: '/',
     method: 'GET',
-    handler(req, h) {
-      const basePath = req.getBasePath();
-      const defaultRoute = config.get('server.defaultRoute');
-      return h.redirect(`${basePath}${defaultRoute}`);
+    async handler(req, h) {
+      return h.redirect(await req.getDefaultRoute());
     }
   });
 

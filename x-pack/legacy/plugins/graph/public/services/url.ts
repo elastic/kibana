@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { Chrome } from 'ui/chrome';
 import { GraphWorkspaceSavedObject } from '../types';
+import { MetaDataState } from '../state_management';
 
 export function getHomePath() {
   return '/home';
@@ -30,12 +31,12 @@ export type SetBreadcrumbOptions =
     }
   | {
       chrome: Chrome;
-      savedWorkspace?: GraphWorkspaceSavedObject;
+      metaData: MetaDataState;
       navigateTo: (path: string) => void;
     };
 
 export function setBreadcrumbs(options: SetBreadcrumbOptions) {
-  if ('savedWorkspace' in options) {
+  if ('metaData' in options) {
     options.chrome.breadcrumbs.set([
       {
         text: i18n.translate('xpack.graph.home.breadcrumb', {
@@ -47,11 +48,7 @@ export function setBreadcrumbs(options: SetBreadcrumbOptions) {
         'data-test-subj': 'graphHomeBreadcrumb',
       },
       {
-        text: options.savedWorkspace
-          ? options.savedWorkspace.title
-          : i18n.translate('xpack.graph.newWorkspaceTitle', {
-              defaultMessage: 'Unsaved workspace',
-            }),
+        text: options.metaData.title,
         'data-test-subj': 'graphCurrentWorkspaceBreadcrumb',
       },
     ]);

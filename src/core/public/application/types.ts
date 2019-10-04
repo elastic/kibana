@@ -193,7 +193,7 @@ export interface ApplicationSetup {
    */
   registerMountContext<T extends keyof AppMountContext>(
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 }
 
@@ -224,7 +224,7 @@ export interface InternalApplicationSetup {
   registerMountContext<T extends keyof AppMountContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 }
 
@@ -261,7 +261,7 @@ export interface ApplicationStart {
    */
   registerMountContext<T extends keyof AppMountContext>(
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 }
 
@@ -291,7 +291,7 @@ export interface InternalApplicationStart
   registerMountContext<T extends keyof AppMountContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
-    provider: IContextProvider<AppMountContext, T>
+    provider: IContextProvider<App['mount'], T>
   ): void;
 
   // Internal APIs

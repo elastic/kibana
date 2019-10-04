@@ -40,7 +40,8 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
       onClick: (item) => {
         showStartDatafeedModal([item]);
         closeMenu();
-      }
+      },
+      'data-test-subj': 'mlActionButtonStartDatafeed'
     }, {
       name: i18n.translate('xpack.ml.jobsList.managementActions.stopDatafeedLabel', {
         defaultMessage: 'Stop datafeed'
@@ -54,7 +55,8 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
       onClick: (item) => {
         stopDatafeeds([item], refreshJobs);
         closeMenu(true);
-      }
+      },
+      'data-test-subj': 'mlActionButtonStopDatafeed'
     }, {
       name: i18n.translate('xpack.ml.jobsList.managementActions.closeJobLabel', {
         defaultMessage: 'Close job'
@@ -68,7 +70,8 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
       onClick: (item) => {
         closeJobs([item], refreshJobs);
         closeMenu(true);
-      }
+      },
+      'data-test-subj': 'mlActionButtonCloseJob'
     }, {
       name: i18n.translate('xpack.ml.jobsList.managementActions.cloneJobLabel', {
         defaultMessage: 'Clone job'
@@ -92,7 +95,8 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
       onClick: (item) => {
         cloneJob(item.id);
         closeMenu(true);
-      }
+      },
+      'data-test-subj': 'mlActionButtonCloneJob'
     }, {
       name: i18n.translate('xpack.ml.jobsList.managementActions.editJobLabel', {
         defaultMessage: 'Edit job'
@@ -105,7 +109,8 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
       onClick: (item) => {
         showEditJobFlyout(item);
         closeMenu();
-      }
+      },
+      'data-test-subj': 'mlActionButtonEditJob'
     }, {
       name: i18n.translate('xpack.ml.jobsList.managementActions.deleteJobLabel', {
         defaultMessage: 'Delete job'
@@ -119,7 +124,8 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
       onClick: (item) => {
         showDeleteJobModal([item]);
         closeMenu();
-      }
+      },
+      'data-test-subj': 'mlActionButtonDeleteJob'
     }
   ];
 }

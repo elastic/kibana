@@ -43,7 +43,7 @@ export class LspIndexer extends AbstractIndexer {
   // Batch index helper for documents
   protected docBatchIndexHelper: BatchIndexHelper;
 
-  private LSP_BATCH_INDEX_SIZE = 1000;
+  private LSP_BATCH_INDEX_SIZE = 50;
   private DOC_BATCH_INDEX_SIZE = 50;
 
   constructor(
