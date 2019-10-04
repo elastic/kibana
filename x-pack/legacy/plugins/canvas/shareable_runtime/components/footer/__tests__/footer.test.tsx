@@ -8,16 +8,16 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../../test/context_jest';
 import { getScrubber as scrubber, getPageControlsCenter as center } from '../../../test/selectors';
-import { FooterContainer } from '../footer.container';
+import { Footer } from '../footer';
 
 describe('<Footer />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<FooterContainer />).isEmptyRender());
+    expect(mount(<Footer />).isEmptyRender());
   });
 
   const wrapper = mount(
     <JestContext>
-      <FooterContainer />
+      <Footer />
     </JestContext>
   );
 

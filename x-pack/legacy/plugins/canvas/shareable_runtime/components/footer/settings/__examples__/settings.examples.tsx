@@ -4,27 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { storiesOf } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ExampleContext } from '../../../../test/context_example';
 
-import { AutoplaySettingsContainer } from '../autoplay_settings.container';
-import { SettingsContainer } from '../settings.container';
-import { ToolbarSettingsContainer } from '../toolbar_settings.container';
+import { Settings, SettingsComponent } from '../settings';
+import { initialCanvasShareableState } from '../../../../context';
 
-storiesOf('shareables/Settings', module)
-  .add('Settings', () => (
+storiesOf('shareables/Footer/Settings', module)
+  .add('contextual', () => (
     <ExampleContext style={{ background: '#333', padding: 10 }}>
-      <SettingsContainer />
+      <Settings />
     </ExampleContext>
   ))
-  .add('AutoplaySettings', () => (
-    <ExampleContext width={250} style={{ background: '#fff' }}>
-      <AutoplaySettingsContainer />
-    </ExampleContext>
-  ))
-  .add('ToolbarSettings', () => (
-    <ExampleContext width={250} style={{ background: '#fff' }}>
-      <ToolbarSettingsContainer onSetAutohide={action('onSetAutohide')} />
+  .add('component', () => (
+    <ExampleContext style={{ background: '#333', padding: 10 }}>
+      <SettingsComponent refs={initialCanvasShareableState.refs} />
     </ExampleContext>
   ));

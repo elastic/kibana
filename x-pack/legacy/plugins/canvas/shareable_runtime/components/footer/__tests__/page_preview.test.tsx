@@ -7,17 +7,17 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../../test/context_jest';
-import { PagePreviewContainer } from '../page_preview.container';
+import { PagePreview } from '../page_preview';
 import { getRenderedElement as element } from '../../../test/selectors';
 
 describe('<PagePreview />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<PagePreviewContainer height={100} index={0} />).isEmptyRender());
+    expect(mount(<PagePreview height={100} index={0} />).isEmptyRender());
   });
 
   const wrapper = mount(
     <JestContext>
-      <PagePreviewContainer height={100} index={0} />
+      <PagePreview height={100} index={0} />
     </JestContext>
   );
 

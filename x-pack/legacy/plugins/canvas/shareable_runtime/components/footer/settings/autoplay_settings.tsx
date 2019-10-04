@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiHorizontalRule, EuiSwitch } from '@elastic/eui';
+import {
+  useCanvasShareableState,
+  setAutoplayAction,
+  setAutoplayIntervalAction,
+} from '../../../context';
 import { createTimeInterval } from '../../../../public/lib/time_interval';
 // @ts-ignore Untyped local
 import { CustomInterval } from '../../../../public/components/workpad_header/control_settings/custom_interval';
 
-export type onSetAutoplayProp = (autoplay: boolean) => void;
-export type onSetIntervalProp = (interval: string) => void;
+export type onSetAutoplayFn = (autoplay: boolean) => void;
+export type onSetIntervalFn = (interval: string) => void;
 
 export interface Props {
   /**
@@ -27,18 +32,23 @@ export interface Props {
   /**
    * The handler to invoke when Autoplay is enabled or disabled.
    */
-  onSetAutoplay: onSetAutoplayProp;
+  onSetAutoplay: onSetAutoplayFn;
 
   /**
    * The handler to invoke when the autoplay interval is set.
    */
-  onSetInterval: onSetIntervalProp;
+  onSetInterval: onSetIntervalFn;
 }
 
 /**
  * The panel used to configure Autolay in Shareable Canvas Workpads.
  */
-export const AutoplaySettings = ({ isEnabled, interval, onSetAutoplay, onSetInterval }: Props) => (
+export const AutoplaySettingsComponent: FC<Props> = ({
+  isEnabled,
+  interval,
+  onSetAutoplay,
+  onSetInterval,
+}: Props) => (
   <div style={{ padding: 16 }}>
     <EuiSwitch
       name="cycle"
@@ -54,3 +64,20 @@ export const AutoplaySettings = ({ isEnabled, interval, onSetAutoplay, onSetInte
     />
   </div>
 );
+
+/**
+ * A store-connected container for the `AutoplaySettings` component.
+ */
+export const AutoplaySettings = () => {
+  const [{ settings }, dispatch] = useCanvasShareableState();
+
+  const { autoplay } = settings;
+  const { isEnabled, interval } = autoplay;
+
+  const onSetInterval: onSetIntervalFn = (newInterval: string) =>
+    dispatch(setAutoplayIntervalAction(newInterval));
+
+  const onSetAutoplay: onSetAutoplayFn = (enabled: boolean) => dispatch(setAutoplayAction(enabled));
+
+  return <AutoplaySettingsComponent {...{ isEnabled, interval, onSetAutoplay, onSetInterval }} />;
+};

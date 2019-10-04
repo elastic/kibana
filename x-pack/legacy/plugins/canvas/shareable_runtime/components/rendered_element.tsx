@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC, PureComponent } from 'react';
 // @ts-ignore Untyped library
 import Style from 'style-it';
 // @ts-ignore Untyped local
@@ -12,7 +12,7 @@ import { Positionable } from '../../public/components/positionable/positionable'
 // @ts-ignore Untyped local
 import { elementToShape } from '../../public/components/workpad_page/utils';
 import { CanvasRenderedElement } from '../types';
-import { CanvasShareableContext } from '../context';
+import { CanvasShareableContext, useCanvasShareableState } from '../context';
 import { RendererSpec } from '../../types';
 
 import css from './rendered_element.module.scss';
@@ -42,7 +42,7 @@ export interface Props {
  * datasources, and is just a simple expression to render the result.  This
  * component renders that "transient" element state.
  */
-export class RenderedElement extends React.PureComponent<Props> {
+export class RenderedElementComponent extends PureComponent<Props> {
   static contextType = CanvasShareableContext;
   protected ref: React.RefObject<HTMLDivElement>;
 
@@ -102,3 +102,17 @@ export class RenderedElement extends React.PureComponent<Props> {
     );
   }
 }
+
+/**
+ * A store-connected container for the `RenderedElement` component.
+ */
+export const RenderedElement: FC<Pick<Props, 'element' | 'index'>> = ({ index, element }) => {
+  const [{ renderers }] = useCanvasShareableState();
+
+  const { expressionRenderable } = element;
+  const { value } = expressionRenderable;
+  const { as } = value;
+  const fn = renderers[as];
+
+  return <RenderedElementComponent {...{ element, fn, index }} />;
+};
