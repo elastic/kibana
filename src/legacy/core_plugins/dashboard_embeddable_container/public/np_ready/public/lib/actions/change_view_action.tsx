@@ -54,7 +54,7 @@ export class ChangeViewAction implements IAction<ActionContext> {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    return i18n.translate('embeddableApi.panel.removePanel.replaceView', {
+    return i18n.translate('dashboardEmbeddableContainer.panel.removePanel.replaceView', {
       defaultMessage: 'Replace visualization',
     });
   }

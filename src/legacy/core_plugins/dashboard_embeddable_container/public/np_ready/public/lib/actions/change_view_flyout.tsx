@@ -58,7 +58,7 @@ export class ChangeViewFlyout extends React.Component<Props> {
 
     this.lastToast = this.props.notifications.toasts.addSuccess({
       title: i18n.translate(
-        'embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle',
+        'dashboardEmbeddableContainer.addPanel.savedObjectAddedToContainerSuccessMessageTitle',
         {
           defaultMessage: '{savedObjectName} was added',
           values: {
@@ -103,9 +103,12 @@ export class ChangeViewFlyout extends React.Component<Props> {
     const SavedObjectFinder = this.props.sof;
     const savedObjectsFinder = (
       <SavedObjectFinder
-        noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
-          defaultMessage: 'No matching objects found.',
-        })}
+        noItemsMessage={i18n.translate(
+          'dashboardEmbeddableContainer.addPanel.noMatchingObjectsMessage',
+          {
+            defaultMessage: 'No matching objects found.',
+          }
+        )}
         savedObjectMetaData={[...start.getEmbeddableFactories()]
           .filter(
             embeddableFactory =>
