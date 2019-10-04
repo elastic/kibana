@@ -19,14 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { AutocompleteProviderRegister } from './autocomplete_provider';
-
-export interface DataPublicPluginSetup {
-  autocomplete: Pick<AutocompleteProviderRegister, 'addProvider' | 'getProvider'>;
-}
-
-export interface DataPublicPluginStart {
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
-}
+import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteProviderRegister();

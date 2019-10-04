@@ -41,7 +41,7 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
 
 const THRESHOLD = 0.1;
@@ -93,7 +93,7 @@ describe('VegaVisualizations', () => {
       imageComparator.destroy();
     });
 
-    it('should show vegalite graph and update on resize', async function () {
+    it('should show vegalite graph and update on resize (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -116,7 +116,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vega graph', async function () {
+    it('should show vega graph (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -132,7 +132,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vegatooltip on mouseover over a vega graph', async () => {
+    it('should show vegatooltip on mouseover over a vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
