@@ -1,0 +1,17 @@
+{
+  "name": "ui_action_samples",
+  "version": "1.0.0",
+  "main": "target/test/plugin_functional/plugins/ui_action_samples",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "kbn": "node ../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && tsc"
+  },
+  "devDependencies": {
+    "typescript": "3.5.3"
+  }
+}

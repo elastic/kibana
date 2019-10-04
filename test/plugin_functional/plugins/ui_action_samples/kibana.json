@@ -1,0 +1,10 @@
+{
+  "id": "uiActionSamples",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["ui_action_samples"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["uiActions"],
+  "optionalPlugins": []
+}

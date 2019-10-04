@@ -27,6 +27,12 @@ export interface IUiActionsSetup {
   registerTrigger: IUiActionsApi['registerTrigger'];
 }
 
+declare module 'kibana/public' {
+  interface AppMountContext {
+    uiActions?: IUiActionsApi;
+  }
+}
+
 export type IUiActionsStart = IUiActionsApi;
 
 export class UiActionsPlugin implements Plugin<IUiActionsSetup, IUiActionsStart> {
@@ -39,6 +45,10 @@ export class UiActionsPlugin implements Plugin<IUiActionsSetup, IUiActionsStart>
   }
 
   public setup(core: CoreSetup): IUiActionsSetup {
+    core.application.registerMountContext<'uiActions'>('uiActions', () => {
+      return this.api;
+    });
+
     return {
       registerTrigger: this.api.registerTrigger,
       registerAction: this.api.registerAction,

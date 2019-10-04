@@ -1,0 +1,10 @@
+{
+  "id": "livingDocumentation",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["living_documentation"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}
