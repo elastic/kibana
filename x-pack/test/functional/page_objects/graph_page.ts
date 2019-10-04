@@ -182,8 +182,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
         await testSubjects.existOrFail('confirmModal', { timeout: 3000 });
       });
       await PageObjects.common.clickConfirmOnModal();
-      // wait for route change to complete
-      await PageObjects.common.sleep(3000);
+      await testSubjects.existOrFail('graphGuidancePanel');
     }
 
     async saveGraph(name: string) {
