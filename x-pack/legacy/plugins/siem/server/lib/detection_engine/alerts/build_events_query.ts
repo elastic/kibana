@@ -8,10 +8,24 @@ import { defaultIndexPattern } from '../../../../default_index_pattern';
 
 // TODO: See build_events_reindex.ts for all the spots to make things "configurable"
 // here but this is intended to replace the build_events_reindex.ts
-export const buildEventsQuery = () => {
+export const buildEventsScrollQuery = ({
+  index,
+  from,
+  to,
+  severity,
+  description,
+  name,
+  timeDetected,
+  ruleRevision,
+  ruleId,
+  ruleType,
+  references,
+}: BuildEventsScrollQuery) => {
   return {
     allowNoIndices: true,
     index: defaultIndexPattern,
+    scroll: '30s',
+    size: 10,
     ignoreUnavailable: true,
     body: {
       query: {
@@ -41,7 +55,7 @@ export const buildEventsQuery = () => {
                               {
                                 range: {
                                   '@timestamp': {
-                                    gte: 1567317600000,
+                                    gte: from,
                                   },
                                 },
                               },
@@ -55,7 +69,7 @@ export const buildEventsQuery = () => {
                               {
                                 range: {
                                   '@timestamp': {
-                                    lte: 1569909599999,
+                                    lte: to,
                                   },
                                 },
                               },
@@ -78,9 +92,6 @@ export const buildEventsQuery = () => {
       size: 26,
       track_total_hits: true,
       sort: [
-        {
-          '@timestamp': 'desc',
-        },
         {
           _doc: 'desc',
         },
