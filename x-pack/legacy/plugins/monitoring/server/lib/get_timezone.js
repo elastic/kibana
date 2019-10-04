@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EuiMonitoringTable } from './eui_table';
-export { EuiMonitoringSSPTable } from './eui_table_ssp';
-export { tableStorageGetter, tableStorageSetter, euiTableStorageGetter, euiTableStorageSetter } from './storage';
+export async function getTimezone(req) {
+  return await req.getUiSettingsService().get('dateFormat:tz');
+}
