@@ -31,14 +31,10 @@ export interface TaskManagerOpts {
   serializer: SavedObjectsSerializer;
 }
 
-function ensureTaskManagerUUID(configuredUUID: string | undefined, logger: Logger): string {
-  if (!configuredUUID) {
-    const taskManagerUUID = uuid.v4();
-    logger.info(`Initialising Task Manager with UUID: ${taskManagerUUID}`);
-    return taskManagerUUID;
-  }
-  logger.info(`Initialising Task Manager using the configured Kibana UUID: ${configuredUUID}`);
-  return configuredUUID;
+function generateTaskManagerUUID(logger: Logger): string {
+  const taskManagerUUID = uuid.v4();
+  logger.info(`Initialising Task Manager with UUID: ${taskManagerUUID}`);
+  return taskManagerUUID;
 }
 
 /*
@@ -89,7 +85,7 @@ export class TaskManager {
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
-      kibanaId: ensureTaskManagerUUID(opts.config.get('server.uuid'), this.logger),
+      taskManagerId: generateTaskManagerUUID(this.logger),
     });
 
     const pool = new TaskPool({
