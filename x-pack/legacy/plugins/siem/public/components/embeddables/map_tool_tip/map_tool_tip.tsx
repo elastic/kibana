@@ -6,30 +6,16 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  EuiBadge,
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiOutsideClickDetector,
-  EuiToolTip,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import { FeatureGeometry, FeatureProperty, MapFeature, MapToolTipProps } from '../types';
-import { getOrEmptyTagFromValue } from '../../empty_value';
-import { DefaultDraggable } from '../../draggables';
-import { SourceDestinationArrows } from '../../source_destination/source_destination_arrows';
 import { DraggablePortalContext } from '../../drag_and_drop/draggable_wrapper';
 import { MapToolTipFooter } from './tooltip_footer';
-
-const SUM_OF_SOURCE_BYTES = 'sum_of_source.bytes';
-const SUM_OF_DESTINATION_BYTES = 'sum_of_destination.bytes';
-
-const FlowBadge = styled(EuiBadge)`
-  height: 45px;
-  min-width: 85px;
-`;
+import { LineToolTipContent } from './line_tool_tip_content';
+import { PointToolTipContent } from './point_tool_tip_content';
 
 export const MapToolTip = React.memo<MapToolTipProps>(
   ({
@@ -42,22 +28,19 @@ export const MapToolTip = React.memo<MapToolTipProps>(
     loadFeatureGeometry,
   }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [featureIndex, setFeatureIndex] = useState<number>(0);
     const [featureProps, setFeatureProps] = useState<FeatureProperty[]>([]);
+    const [featurePropsFilters, setFeaturePropsFilters] = useState<Record<string, object>>({});
     const [featureGeometry, setFeatureGeometry] = useState<FeatureGeometry | null>(null);
     const [, setLayerName] = useState<string>('');
-    const [currentFeature, setCurrentFeature] = useState<number>(1);
+
+    // Keep a ref of features to determine the render of one feature from the next to ensure the loader is displayed
     const featuresRef = useRef<MapFeature[] | null>(null);
 
-    const featureIndex = currentFeature - 1;
-
-    // console.group('MapToolTip Render');
-    // console.log('isLocked', isLocked);
-    // console.log('isLoading', isLoading);
-
     useEffect(() => {
-      // Keep a ref of features to determine the render of one feature from the next to ensure the loader is displayed
       featuresRef.current = features;
 
+      // Early return if component doesn't yet have props -- result of mounting in portal before actual rendering
       if (
         features.length === 0 ||
         getLayerName == null ||
@@ -82,12 +65,21 @@ export const MapToolTip = React.memo<MapToolTipProps>(
             }),
             getLayerName(features[featureIndex].layerId),
           ]);
-          // console.group('MapToolTip initial useEffect()');
-          // console.log('featureProps', featureProperties);
-          // console.log('featureGeometry', featureGeo);
-          // console.log('layerName', layerName);
-          // console.groupEnd();
+
+          // Fetch ES filters in advance while loader is present to prevent lag when user clicks to add filter
+          const featurePropsPromises = await Promise.all(
+            featureProperties.map(property => property.getESFilters())
+          );
+          const featurePropsESFilters = featureProperties.reduce(
+            (acc, property, index) => ({
+              ...acc,
+              [property._propertyKey]: featurePropsPromises[index],
+            }),
+            {}
+          );
+
           setFeatureProps(featureProperties);
+          setFeaturePropsFilters(featurePropsESFilters);
           setFeatureGeometry(featureGeo);
           setLayerName(layerNameString);
           setIsLoading(false);
@@ -96,47 +88,12 @@ export const MapToolTip = React.memo<MapToolTipProps>(
 
       fetchFeatureProps();
     }, [
-      currentFeature,
+      featureIndex,
       features
         .map(f => `${f.id}-${f.layerId}`)
         .sort()
         .join(),
     ]);
-
-    const featureDescriptionListItems = featureProps.map(property => ({
-      title: property._propertyKey,
-      description: (
-        <span>
-          <DefaultDraggable
-            data-test-subj="port"
-            field={property._propertyKey}
-            id={`port-default-draggable-map-${property._propertyKey}-${property._rawValue}`}
-            tooltipContent={property._propertyKey}
-            value={property._rawValue}
-          >
-            {getOrEmptyTagFromValue(property._rawValue)}
-          </DefaultDraggable>
-          <EuiToolTip content={'Filter for value'}>
-            <EuiIcon
-              type="filter"
-              onClick={async () => {
-                if (closeTooltip != null && addFilters != null) {
-                  closeTooltip();
-                  const filters = await property.getESFilters();
-                  addFilters(filters);
-                }
-              }}
-            />
-          </EuiToolTip>
-        </span>
-      ),
-    }));
-
-    // Extract props of line feature // TODO Put in renderLineStringTooltip
-    const lineProps = featureProps.reduce<Record<string, string>>(
-      (acc, f) => ({ ...acc, ...{ [f._propertyKey]: f._rawValue } }),
-      {}
-    );
 
     const areSameFeatures = (oldFeatures: MapFeature[], newFeatures: MapFeature[]) => {
       return (
@@ -148,39 +105,6 @@ export const MapToolTip = React.memo<MapToolTipProps>(
           .map(f => `${f.id}-${f.layerId}`)
           .sort()
           .join()
-      );
-    };
-
-    // console.log('featureDescriptionListItems', featureDescriptionListItems);
-    // console.log('lineProps', lineProps);
-    // console.log('features', features);
-    // console.log('featuresRef', featuresRef.current);
-    // console.groupEnd();
-
-    const renderLineStringTooltip = (): React.ReactElement => {
-      return (
-        <EuiFlexGroup justifyContent="center" gutterSize="none">
-          <EuiFlexItem>
-            <FlowBadge color="hollow">
-              <EuiFlexGroup direction="column" justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>{'Source'}</EuiFlexItem>
-              </EuiFlexGroup>
-            </FlowBadge>
-          </EuiFlexItem>
-          <SourceDestinationArrows
-            contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}`}
-            destinationBytes={[lineProps[SUM_OF_DESTINATION_BYTES]]}
-            eventId={`source-destination-line-${features[featureIndex].layerId}`}
-            sourceBytes={[lineProps[SUM_OF_SOURCE_BYTES]]}
-          />
-          <EuiFlexItem>
-            <FlowBadge color="hollow">
-              <EuiFlexGroup direction="column" justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>{'Destination'}</EuiFlexItem>
-              </EuiFlexGroup>
-            </FlowBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
       );
     };
 
@@ -204,16 +128,29 @@ export const MapToolTip = React.memo<MapToolTipProps>(
         >
           <div>
             {featureGeometry != null && featureGeometry.type === 'LineString' ? (
-              renderLineStringTooltip()
+              <LineToolTipContent
+                contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}`}
+                features={features}
+                featureProps={featureProps}
+                featureIndex={featureIndex}
+              />
             ) : (
-              <EuiDescriptionList textStyle="reverse" listItems={featureDescriptionListItems} />
+              <PointToolTipContent
+                contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}`}
+                featureProps={featureProps}
+                featurePropsFilters={featurePropsFilters}
+                addFilters={addFilters}
+                closeTooltip={closeTooltip}
+              />
             )}
-            <MapToolTipFooter
-              currentFeature={currentFeature}
-              totalFeatures={features.length}
-              previousFeature={() => setCurrentFeature(currentFeature - 1)}
-              nextFeature={() => setCurrentFeature(currentFeature + 1)}
-            />
+            {features.length > 1 && (
+              <MapToolTipFooter
+                featureIndex={featureIndex}
+                totalFeatures={features.length}
+                previousFeature={() => setFeatureIndex(featureIndex - 1)}
+                nextFeature={() => setFeatureIndex(featureIndex + 1)}
+              />
+            )}
           </div>
         </EuiOutsideClickDetector>
       </DraggablePortalContext.Provider>

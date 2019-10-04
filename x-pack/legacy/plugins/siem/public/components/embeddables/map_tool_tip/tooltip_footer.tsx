@@ -24,20 +24,22 @@ export const Icon = styled(EuiIcon)`
 Icon.displayName = 'Icon';
 
 interface MapToolTipFooterProps {
-  currentFeature: number;
+  featureIndex: number;
   totalFeatures: number;
   previousFeature: () => void;
   nextFeature: () => void;
 }
 
 export const MapToolTipFooter = React.memo<MapToolTipFooterProps>(
-  ({ currentFeature, totalFeatures, previousFeature, nextFeature }) => {
+  ({ featureIndex, totalFeatures, previousFeature, nextFeature }) => {
     return (
       <>
-        <EuiHorizontalRule />
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiHorizontalRule margin="s" />
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiText>{i18n.MAP_TOOL_TIP_FEATURES_FOOTER(currentFeature, totalFeatures)}</EuiText>
+            <EuiText size="xs">
+              {i18n.MAP_TOOL_TIP_FEATURES_FOOTER(featureIndex, totalFeatures)}
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <span>
@@ -46,14 +48,14 @@ export const MapToolTipFooter = React.memo<MapToolTipFooterProps>(
                 onClick={previousFeature}
                 iconType="arrowLeft"
                 aria-label="Next"
-                disabled={currentFeature === 1}
+                disabled={featureIndex === 0}
               />
               <EuiButtonIcon
                 color={'text'}
                 onClick={nextFeature}
                 iconType="arrowRight"
                 aria-label="Next"
-                disabled={currentFeature === totalFeatures}
+                disabled={featureIndex === totalFeatures - 1}
               />
             </span>
           </EuiFlexItem>

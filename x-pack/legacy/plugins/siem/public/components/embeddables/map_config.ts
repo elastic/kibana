@@ -7,6 +7,32 @@
 import uuid from 'uuid';
 import { IndexPatternMapping } from './types';
 
+// Update source/destination field mappings to modify what fields will be returned to map tooltip
+const sourceFieldMappings: Record<string, string> = {
+  'host.name': 'Host',
+  'source.ip': 'Source IP',
+  'source.domain': 'Source Domain',
+  'source.geo.country_iso_code': 'Location',
+  'source.as.organization.name': 'ASN',
+};
+const destinationFieldMappings: Record<string, string> = {
+  'host.name': 'Host',
+  'destination.ip': 'Destination IP',
+  'destination.domain': 'Destination Domain',
+  'destination.geo.country_iso_code': 'Location',
+  'destination.as.organization.name': 'ASN',
+};
+
+// Mapping of field -> display name for use within map tooltip
+export const sourceDestinationFieldMappings: Record<string, string> = {
+  ...sourceFieldMappings,
+  ...destinationFieldMappings,
+};
+
+// Field names of LineLayer props returned from Maps API
+export const SUM_OF_SOURCE_BYTES = 'sum_of_source.bytes';
+export const SUM_OF_DESTINATION_BYTES = 'sum_of_destination.bytes';
+
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
  * destination, and line layer for each of the provided indexPatterns
@@ -51,13 +77,7 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
     type: 'ES_SEARCH',
     geoField: 'source.geo.location',
     filterByMapBounds: false,
-    tooltipProperties: [
-      'host.name',
-      'source.ip',
-      'source.domain',
-      'source.geo.country_iso_code',
-      'source.as.organization.name',
-    ],
+    tooltipProperties: Object.keys(sourceFieldMappings),
     useTopHits: false,
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
@@ -99,13 +119,7 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
     type: 'ES_SEARCH',
     geoField: 'destination.geo.location',
     filterByMapBounds: true,
-    tooltipProperties: [
-      'host.name',
-      'destination.ip',
-      'destination.domain',
-      'destination.geo.country_iso_code',
-      'destination.as.organization.name',
-    ],
+    tooltipProperties: Object.keys(destinationFieldMappings),
     useTopHits: false,
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
