@@ -31,11 +31,6 @@ jest.spyOn(history, 'replace');
 jest.mock('ui/kfetch');
 
 const coreMock = ({
-  // http: {
-  //   basePath: {
-  //     prepend: (path: string) => `/basepath${path}`
-  //   }
-  // },
   notifications: { toasts: { addWarning: () => {} } }
 } as unknown) as LegacyCoreStart;
 
