@@ -11,7 +11,6 @@ import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
 
-  const log = getService('log');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
@@ -27,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
       datemath.parse('now-3d', { forceNow: now }),
     ];
 
-    before(async () => {
+    it('create hybrid index pattern', async () => {
       //Create data for rollup job to recognize.
       //Index past data to be used in the test.
       await pastDates.map(async (day) => {
@@ -39,12 +38,9 @@ export default function ({ getService, getPageObjects }) {
           index: 'to-be*',
           allow_no_indices: false
         });
-        await log.debug(response);
         return Object.keys(response).length === 3;
       });
-    });
 
-    it('create hybrid index pattern', async () => {
       await retry.try(async () => {
         //Create a rollup for kibana to recognize
         await es.transport.request({
@@ -68,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
 
-      pastDates.map(async (day) => {
+      await pastDates.map(async (day) => {
         await es.index(mockRolledUpData(rollupJobName, day));
       });
 
@@ -97,6 +93,11 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
+      // Delete the rollup job.
+      es.transport.request({
+        path: `/_rollup/job/${rollupJobName}`,
+        method: 'DELETE',
+      });
       await es.indices.delete({ index: 'rollup*' });
       await es.indices.delete({ index: 'live*' });
       await es.indices.delete({ index: 'live*,rollup-to-be*' });

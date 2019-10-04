@@ -5,7 +5,7 @@
  */
 
 
-export default async function mockRolledUpData(jobName, day) {
+export default function mockRolledUpData(jobName, day) {
   return {
     index: `rollup-to-be`,
     body: {
