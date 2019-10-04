@@ -43,8 +43,3 @@ const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, {});
 export const start = pluginInstance.start(npStart.core, {});
-
-export {
-  processImportResponse,
-  ProcessedImportResponse,
-} from '../../kibana/public/management/sections/objects/lib/process_import_response';

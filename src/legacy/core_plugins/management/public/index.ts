@@ -24,3 +24,8 @@
  * @public
  */
 export * from './np_ready';
+
+export {
+  processImportResponse,
+  ProcessedImportResponse,
+} from '../../kibana/public/management/sections/objects/lib/process_import_response';

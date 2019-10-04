@@ -26,7 +26,7 @@ import { SavedObjectsManagementRecord } from '../../../../../../../../../src/leg
 import {
   ProcessedImportResponse,
   processImportResponse,
-} from '../../../../../../../../../src/legacy/core_plugins/management/public/legacy';
+} from '../../../../../../../../../src/legacy/core_plugins/management/public';
 import { Space } from '../../../../../common/model/space';
 import { SpacesManager } from '../../../../lib';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';

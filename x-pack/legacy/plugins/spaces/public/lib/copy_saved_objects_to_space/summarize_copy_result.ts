@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsManagementRecord } from '../../../../../../../src/legacy/core_plugins/management/public';
-import { ProcessedImportResponse } from '../../../../../../../src/legacy/core_plugins/management/public/legacy';
+import { ProcessedImportResponse } from '../../../../../../../src/legacy/core_plugins/management/public';
 
 export interface SummarizedSavedObjectResult {
   type: string;
