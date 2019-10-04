@@ -108,7 +108,7 @@ export function SearchBarComponent(props: SearchBarProps) {
             prepend={
               <EuiToolTip
                 content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
-                  defaultMessage: 'Click here to pick another data source',
+                  defaultMessage: 'Select a data source to begin graphing relationships',
                 })}
               >
                 <EuiButtonEmpty
@@ -129,7 +129,7 @@ export function SearchBarComponent(props: SearchBarProps) {
                     : // This branch will be shown if the user exits the
                       // initial picker modal
                       i18n.translate('xpack.graph.bar.pickSourceLabel', {
-                        defaultMessage: 'Click here to pick a data source',
+                        defaultMessage: 'Select a data source',
                       })}
                 </EuiButtonEmpty>
               </EuiToolTip>

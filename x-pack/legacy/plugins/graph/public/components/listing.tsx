@@ -38,13 +38,13 @@ export function Listing(props: ListingProps) {
         initialFilter={props.initialFilter}
         noItemsFragment={getNoItemsMessage(props.capabilities.save === false, props.createItem)}
         entityName={i18n.translate('xpack.graph.listing.table.entityName', {
-          defaultMessage: 'workspace',
+          defaultMessage: 'graph',
         })}
         entityNamePlural={i18n.translate('xpack.graph.listing.table.entityNamePlural', {
-          defaultMessage: 'workspaces',
+          defaultMessage: 'graphs',
         })}
-        tableListTitle={i18n.translate('xpack.graph.listing.workspacesTitle', {
-          defaultMessage: 'Workspaces',
+        tableListTitle={i18n.translate('xpack.graph.listing.graphsTitle', {
+          defaultMessage: 'Graphs',
         })}
       />
     </I18nProvider>
@@ -61,7 +61,7 @@ function getNoItemsMessage(hideWriteControls: boolean, createItem: () => void) {
             <h2>
               <FormattedMessage
                 id="xpack.graph.listing.noItemsMessage"
-                defaultMessage="Looks like you don't have any Graph workspaces."
+                defaultMessage="Looks like you don't have any graphs."
               />
             </h2>
           }
@@ -77,8 +77,8 @@ function getNoItemsMessage(hideWriteControls: boolean, createItem: () => void) {
         title={
           <h2>
             <FormattedMessage
-              id="xpack.graph.listing.createNewWorkspace.title"
-              defaultMessage="Create your first Graph workspace"
+              id="xpack.graph.listing.createNewGraph.title"
+              defaultMessage="Create your first graph"
             />
           </h2>
         }
@@ -86,20 +86,20 @@ function getNoItemsMessage(hideWriteControls: boolean, createItem: () => void) {
           <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.graph.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                defaultMessage="You can discover patterns and relationships in your Kibana index patterns."
+                id="xpack.graph.listing.createNewGraph.combineDataViewFromKibanaAppDescription"
+                defaultMessage="You can discover patterns and relationships in your Elasticsearch indices."
               />
             </p>
             <p>
               <FormattedMessage
-                id="xpack.graph.listing.createNewDashboard.newToKibanaDescription"
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                id="xpack.graph.listing.createNewGraph.newToKibanaDescription"
+                defaultMessage="New to Kibana? Get started with {sampleDataInstallLink}."
                 values={{
                   sampleDataInstallLink: (
                     <EuiLink href="#/home/tutorial_directory/sampleData">
                       <FormattedMessage
-                        id="xpack.graph.listing.createNewDashboard.sampleDataInstallLinkText"
-                        defaultMessage="Install some sample data"
+                        id="xpack.graph.listing.createNewGraph.sampleDataInstallLinkText"
+                        defaultMessage="sample data"
                       />
                     </EuiLink>
                   ),
@@ -113,11 +113,11 @@ function getNoItemsMessage(hideWriteControls: boolean, createItem: () => void) {
             onClick={createItem}
             fill
             iconType="plusInCircle"
-            data-test-subj="graphCreateWorkspacePromptButton"
+            data-test-subj="graphCreateGraphPromptButton"
           >
             <FormattedMessage
-              id="xpack.graph.listing.createNewWorkspace.createButtonLabel"
-              defaultMessage="Create new graph workspace"
+              id="xpack.graph.listing.createNewGraph.createButtonLabel"
+              defaultMessage="Create new graph"
             />
           </EuiButton>
         }

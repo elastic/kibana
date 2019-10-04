@@ -108,6 +108,7 @@ app.directive('graphApp', function (reactDirective) {
     ['confirmWipeWorkspace', { watchDepth: 'reference' }],
     ['autocompleteStart', { watchDepth: 'reference' }],
     ['coreStart', { watchDepth: 'reference' }],
+    ['noIndexPatterns', { watchDepth: 'reference' }],
     ['reduxStore', { watchDepth: 'reference' }]
   ]);
 });
@@ -360,14 +361,17 @@ app.controller('graphuiPlugin', function (
       onConfirm: callback,
       onCancel: (() => {}),
       confirmButtonText: i18n.translate('xpack.graph.clearWorkspace.confirmButtonLabel', {
-        defaultMessage: 'Continue',
+        defaultMessage: 'Save changes',
+      }),
+      cancelButtonText: i18n.translate('xpack.graph.clearWorkspace.cancelButtonLabel', {
+        defaultMessage: 'Leave anyway',
       }),
       title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
-        defaultMessage: 'Discard changes to workspace?',
+        defaultMessage: 'Save changes before leaving graph?',
       }),
     };
     confirmModal(i18n.translate('xpack.graph.clearWorkspace.confirmText', {
-      defaultMessage: 'Once you discard changes made to a workspace, there is no getting them back.',
+      defaultMessage: 'If you don\'t save, your changes will be lost.',
     }), confirmModalOptions);
   }
   $scope.confirmWipeWorkspace = canWipeWorkspace;
@@ -617,34 +621,7 @@ app.controller('graphuiPlugin', function (
       payload: $route.current.locals.savedWorkspace,
     });
   } else {
-    const managementUrl = npStart.core.chrome.navLinks.get('kibana:management').url;
-    const url = `${managementUrl}/kibana/index_patterns`;
-
-    if ($route.current.locals.indexPatterns.length === 0) {
-      toastNotifications.addWarning({
-        title: i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
-          defaultMessage: 'No data source',
-        }),
-        text: (
-          <p>
-            <FormattedMessage
-              id="xpack.graph.noDataSourceNotificationMessageText"
-              defaultMessage="Go to {managementIndexPatternsLink} and create an index pattern"
-              values={{
-                managementIndexPatternsLink: (
-                  <a href={url}>
-                    <FormattedMessage
-                      id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
-                      defaultMessage="Management &gt; Index Patterns"
-                    />
-                  </a>
-                )
-              }}
-            />
-          </p>
-        ),
-      });
-    }
+    $scope.noIndexPatterns = $route.current.locals.indexPatterns.length === 0;
   }
 
   $scope.savedWorkspace = $route.current.locals.savedWorkspace;

@@ -23,6 +23,7 @@ import {
   EuiKeyboardAccessible,
   EuiForm,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -167,7 +168,7 @@ export function FieldEditor({
               },
               {
                 name: i18n.translate('xpack.graph.fieldManager.deleteFieldLabel', {
-                  defaultMessage: 'Delete field',
+                  defaultMessage: 'Deselect field',
                 }),
                 icon: <EuiIcon type="trash" size="m" />,
                 onClick: () => {
@@ -182,7 +183,7 @@ export function FieldEditor({
             title: i18n.translate('xpack.graph.fieldManager.displayFormTitle', {
               defaultMessage: 'Edit',
             }),
-            width: 280,
+            width: 380,
             content: (
               <EuiForm className="gphFieldEditor__displayForm">
                 {/* This is a workaround to prevent the field combo box from being focussed when opening the panel. */}
@@ -278,9 +279,23 @@ export function FieldEditor({
 
                 <EuiFormRow
                   display="columnCompressed"
-                  label={i18n.translate('xpack.graph.fieldManager.maxHopsLabel', {
-                    defaultMessage: 'Max hops',
-                  })}
+                  label={
+                    <>
+                      {i18n.translate('xpack.graph.fieldManager.maxTermsPerHopLabel', {
+                        defaultMessage: 'Terms per hop',
+                      })}{' '}
+                      <EuiIconTip
+                        content={i18n.translate(
+                          'xpack.graph.fieldManager.maxTermsPerHopDescription',
+                          {
+                            defaultMessage:
+                              'Controls the maximum number of terms returned each search step.',
+                          }
+                        )}
+                        position="right"
+                      />
+                    </>
+                  }
                 >
                   <EuiFieldNumber
                     step={1}
@@ -318,7 +333,7 @@ export function FieldEditor({
                       onClick={updateField}
                     >
                       {i18n.translate('xpack.graph.fieldManager.updateLabel', {
-                        defaultMessage: 'Update',
+                        defaultMessage: 'Save changes',
                       })}
                     </EuiButton>
                   </EuiFlexItem>
