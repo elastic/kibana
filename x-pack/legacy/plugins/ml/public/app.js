@@ -11,7 +11,6 @@ import 'uiExports/savedObjectTypes';
 
 import 'ui/courier';
 import 'ui/angular-bootstrap';
-import 'ui/persisted_log';
 import 'ui/autoload/all';
 
 import 'plugins/ml/components/transition/transition';

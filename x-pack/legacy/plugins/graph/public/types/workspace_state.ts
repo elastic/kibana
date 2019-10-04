@@ -69,6 +69,7 @@ export interface GraphData {
 }
 
 export interface Workspace {
+  options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
   nodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
@@ -89,6 +90,9 @@ export interface Workspace {
    * @param newData
    */
   mergeGraph(newData: GraphData): void;
+
+  runLayout(): void;
+  stopLayout(): void;
 }
 
 export type ExploreRequest = any;
