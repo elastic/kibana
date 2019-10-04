@@ -23,6 +23,10 @@ test('returns value is string and defined', () => {
   expect(schema.string().validate('test')).toBe('test');
 });
 
+test('allows empty strings', () => {
+  expect(schema.string().validate('')).toBe('');
+});
+
 test('is required by default', () => {
   expect(() => schema.string().validate(undefined)).toThrowErrorMatchingSnapshot();
 });
@@ -40,6 +44,10 @@ describe('#minLength', () => {
 
   test('returns error when shorter string', () => {
     expect(() => schema.string({ minLength: 4 }).validate('foo')).toThrowErrorMatchingSnapshot();
+  });
+
+  test('returns error when empty string', () => {
+    expect(() => schema.string({ minLength: 2 }).validate('')).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -83,6 +91,16 @@ describe('#hostname', () => {
 
     const tooLongHostName = 'a'.repeat(256);
     expect(() => hostNameSchema.validate(tooLongHostName)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('returns error when empty string', () => {
+    expect(() => schema.string({ hostname: true }).validate('')).toThrowErrorMatchingSnapshot();
+  });
+
+  test('supports string validation rules', () => {
+    expect(() =>
+      schema.string({ hostname: true, maxLength: 3 }).validate('www.example.com')
+    ).toThrowErrorMatchingSnapshot();
   });
 });
 
@@ -129,6 +147,12 @@ describe('#validate', () => {
     const validate = () => 'validator failure';
 
     expect(() => schema.string({ validate }).validate('foo')).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throw when empty string', () => {
+    const validate = () => 'validator failure';
+
+    expect(() => schema.string({ validate }).validate('')).toThrowErrorMatchingSnapshot();
   });
 });
 

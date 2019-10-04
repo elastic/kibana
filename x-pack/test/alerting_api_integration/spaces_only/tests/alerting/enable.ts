@@ -5,18 +5,18 @@
  */
 
 import expect from '@kbn/expect';
-import { getTestAlertData } from './utils';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { AlertUtils, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createEnableAlertTests({ getService }: FtrProviderContext) {
   const es = getService('es');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('enable', () => {
-    const objectRemover = new ObjectRemover(supertest);
+    const objectRemover = new ObjectRemover(supertestWithoutAuth);
+    const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
     after(() => objectRemover.removeAll());
 
@@ -28,19 +28,16 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
     }
 
     it('should handle enable alert request appropriately', async () => {
-      const { body: createdAlert } = await supertest
+      const { body: createdAlert } = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: false }))
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
-      await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/_enable`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
+      await alertUtils.enable(createdAlert.id);
 
-      const { body: updatedAlert } = await supertest
+      const { body: updatedAlert } = await supertestWithoutAuth
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
@@ -51,6 +48,21 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
       expect(JSON.parse(taskRecord.task.params)).to.eql({
         alertId: createdAlert.id,
         spaceId: Spaces.space1.id,
+      });
+    });
+
+    it(`shouldn't enable alert from another space`, async () => {
+      const { body: createdAlert } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.other.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ enabled: false }))
+        .expect(200);
+      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert');
+
+      await alertUtils.getEnableRequest(createdAlert.id).expect(404, {
+        statusCode: 404,
+        error: 'Not Found',
+        message: `Saved object [alert/${createdAlert.id}] not found`,
       });
     });
   });

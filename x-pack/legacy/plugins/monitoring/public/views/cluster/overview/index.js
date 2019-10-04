@@ -30,6 +30,7 @@ uiRoutes.when('/overview', {
       const kbnUrl = $injector.get('kbnUrl');
       const monitoringClusters = $injector.get('monitoringClusters');
       const globalState = $injector.get('globalState');
+      const showLicenseExpiration = $injector.get('showLicenseExpiration');
 
       super({
         title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
@@ -57,15 +58,16 @@ uiRoutes.when('/overview', {
             <SetupModeRenderer
               scope={$scope}
               injector={$injector}
-              render={({ setupMode, flyoutComponent }) => (
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
                 <Fragment>
                   {flyoutComponent}
                   <Overview
                     cluster={data}
                     setupMode={setupMode}
                     changeUrl={changeUrl}
-                    showLicenseExpiration={true}
+                    showLicenseExpiration={showLicenseExpiration}
                   />
+                  {bottomBarComponent}
                 </Fragment>
               )}
             />

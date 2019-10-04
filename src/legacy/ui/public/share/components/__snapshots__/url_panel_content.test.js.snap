@@ -7,6 +7,7 @@ exports[`render 1`] = `
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText={
@@ -37,7 +38,7 @@ exports[`render 1`] = `
           Object {
             "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
               responsive={false}
             >
@@ -66,13 +67,13 @@ exports[`render 1`] = `
                   position="bottom"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
           Object {
             "data-test-subj": "exportAsSavedObject",
             "disabled": true,
             "id": "savedObject",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
               responsive={false}
             >
@@ -101,7 +102,7 @@ exports[`render 1`] = `
                   position="bottom"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
         ]
       }
@@ -110,6 +111,7 @@ exports[`render 1`] = `
   <EuiFormRow
     data-test-subj="createShortUrl"
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -148,6 +150,9 @@ exports[`render 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiCopy
     afterMessage="Copied"
     anchorClassName="kbnShareContextMenu__copyAnchor"
@@ -165,6 +170,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -184,7 +190,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
           Object {
             "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
               responsive={false}
             >
@@ -213,13 +219,13 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                   position="bottom"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
           Object {
             "data-test-subj": "exportAsSavedObject",
             "disabled": false,
             "id": "savedObject",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
               responsive={false}
             >
@@ -248,7 +254,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                   position="bottom"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
         ]
       }
@@ -257,6 +263,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
   <EuiFormRow
     data-test-subj="createShortUrl"
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -295,6 +302,9 @@ exports[`should enable saved object export option when objectId is provided 1`] 
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiCopy
     afterMessage="Copied"
     anchorClassName="kbnShareContextMenu__copyAnchor"
@@ -312,6 +322,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
 >
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={
@@ -331,7 +342,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
           Object {
             "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
               responsive={false}
             >
@@ -360,13 +371,13 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                   position="bottom"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
           Object {
             "data-test-subj": "exportAsSavedObject",
             "disabled": false,
             "id": "savedObject",
-            "label": <EuiFlexGroup
+            "label": <ForwardRef
               gutterSize="none"
               responsive={false}
             >
@@ -395,12 +406,15 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                   position="bottom"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>,
+            </ForwardRef>,
           },
         ]
       }
     />
   </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiCopy
     afterMessage="Copied"
     anchorClassName="kbnShareContextMenu__copyAnchor"

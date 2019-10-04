@@ -11,11 +11,14 @@
   "exclude": [
     "test/**/*",
     "legacy/plugins/siem/cypress/**/*",
+    "legacy/plugins/apm/cypress/**/*",
     "**/typespec_tests.ts"
   ],
   "compilerOptions": {
     "outDir": ".",
     "paths": {
+      "kibana/public": ["src/core/public"],
+      "kibana/server": ["src/core/server"],
       "ui/*": [
         "src/legacy/ui/public/*"
       ],

@@ -25,7 +25,12 @@ export const NetworkContainer = React.memo<Props>(() => (
         },
       }) => <IPDetails detailName={detailName} />}
     />
-    <Redirect from="/network/" to="/network" />
+    <Route
+      path="/network/"
+      render={({ location: { search = '' } }) => (
+        <Redirect from="/network/" to={`/network${search}`} />
+      )}
+    />
   </Switch>
 ));
 

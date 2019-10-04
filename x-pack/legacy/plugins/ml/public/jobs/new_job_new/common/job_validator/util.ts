@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { BasicValidations } from './job_validator';
 import { Job } from '../job_creator/configs';
-import { ALLOWED_DATA_UNITS } from '../../../../../common/constants/validation';
+import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
 import { ValidationResults, ValidationMessage } from '../../../../../common/util/job_utils';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
@@ -27,11 +27,23 @@ export function populateValidationMessages(
       'xpack.ml.newJob.wizard.validateJob.jobNameAllowedCharactersDescription',
       {
         defaultMessage:
-          'Job name can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
+          'Job ID can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
           'must start and end with an alphanumeric character',
       }
     );
     basicValidations.jobId.message = msg;
+  } else if (validationResults.contains('job_id_invalid_max_length')) {
+    basicValidations.jobId.valid = false;
+    basicValidations.jobId.message = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.jobIdInvalidMaxLengthErrorMessage',
+      {
+        defaultMessage:
+          'Job ID must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
+        values: {
+          maxLength: JOB_ID_MAX_LENGTH,
+        },
+      }
+    );
   } else if (validationResults.contains('job_id_already_exists')) {
     basicValidations.jobId.valid = false;
     const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists', {
@@ -52,6 +64,18 @@ export function populateValidationMessages(
       }
     );
     basicValidations.groupIds.message = msg;
+  } else if (validationResults.contains('job_group_id_invalid_max_length')) {
+    basicValidations.groupIds.valid = false;
+    basicValidations.groupIds.message = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.jobGroupMaxLengthDescription',
+      {
+        defaultMessage:
+          'Job group name must be no more than {maxLength, plural, one {# character} other {# characters}} long.',
+        values: {
+          maxLength: JOB_ID_MAX_LENGTH,
+        },
+      }
+    );
   } else if (validationResults.contains('job_group_id_already_exists')) {
     basicValidations.groupIds.valid = false;
     const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.groupNameAlreadyExists', {

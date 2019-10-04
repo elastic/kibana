@@ -19,12 +19,11 @@
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import chrome from 'ui/chrome';
 import { fieldFormats } from 'ui/registry/field_formats';
-import { FieldFormat } from '../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
+import { npStart } from 'ui/new_platform';
 
-const config = chrome.getUiSettingsClient();
-
+const config = npStart.core.uiSettings;
 
 const formatIds = [
   'bytes',

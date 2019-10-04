@@ -42,7 +42,12 @@ export const Category = pure<Props>(
         timelineId={timelineId}
       />
 
-      <TableContainer data-test-subj="category-table-container" height={TABLE_HEIGHT} width={width}>
+      <TableContainer
+        className="euiTable--compressed"
+        data-test-subj="category-table-container"
+        height={TABLE_HEIGHT}
+        width={width}
+      >
         <EuiInMemoryTable
           items={fieldItems}
           columns={getFieldColumns()}

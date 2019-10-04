@@ -6,17 +6,14 @@
 
 import { ml } from '../../../../../services/ml_api_service';
 import {
-  DataFrameTransformPivotConfig,
-  refreshTransformList$,
-  REFRESH_TRANSFORM_LIST_STATE,
-} from '../../../../common';
-
-import {
   DataFrameTransformListRow,
   DataFrameTransformStats,
   DATA_FRAME_MODE,
   isDataFrameTransformStats,
-} from '../../components/transform_list/common';
+  DataFrameTransformPivotConfig,
+  refreshTransformList$,
+  REFRESH_TRANSFORM_LIST_STATE,
+} from '../../../../common';
 
 interface GetDataFrameTransformsResponse {
   count: number;

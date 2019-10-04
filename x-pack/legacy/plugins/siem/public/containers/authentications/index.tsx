@@ -29,6 +29,7 @@ export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
   id: string;
   inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
@@ -67,26 +68,27 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
       sourceId,
       startDate,
     } = this.props;
+    const variables: GetAuthenticationsQuery.Variables = {
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+      pagination: generateTablePaginationOptions(activePage, limit),
+      filterQuery: createFilter(filterQuery),
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      inspect: isInspected,
+    };
     return (
       <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
         query={authenticationsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
-        variables={{
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-          pagination: generateTablePaginationOptions(activePage, limit),
-          filterQuery: createFilter(filterQuery),
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          inspect: isInspected,
-        }}
+        variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const authentications = getOr([], 'source.Authentications.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => ({
@@ -109,14 +111,16 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             authentications,
             id,
             inspect: getOr(null, 'source.Authentications.inspect', data),
-            loading,
+            isInspected,
+            loading: isLoading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Authentications.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             totalCount: getOr(-1, 'source.Authentications.totalCount', data),
           });
         }}

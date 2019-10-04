@@ -17,29 +17,29 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
      * Indices and fields
      */
     async getNameInput(): Promise<WebElementWrapper> {
-      return await testSubjects.findDescendant('nameInput', await this.getForm());
+      return await testSubjects.findDescendant('~nameInput', await this.getForm());
     },
     async getLogIndicesInput(): Promise<WebElementWrapper> {
-      return await testSubjects.findDescendant('logIndicesInput', await this.getForm());
+      return await testSubjects.findDescendant('~logIndicesInput', await this.getForm());
     },
     async getMetricIndicesInput(): Promise<WebElementWrapper> {
-      return await testSubjects.findDescendant('metricIndicesInput', await this.getForm());
+      return await testSubjects.findDescendant('~metricIndicesInput', await this.getForm());
     },
 
     /**
      * Logs
      */
     async getAddLogColumnButton(): Promise<WebElementWrapper> {
-      return await testSubjects.findDescendant('addLogColumnButton', await this.getForm());
+      return await testSubjects.findDescendant('~addLogColumnButton', await this.getForm());
     },
     async getAddLogColumnPopover(): Promise<WebElementWrapper> {
-      return await testSubjects.find('addLogColumnPopover');
+      return await testSubjects.find('~addLogColumnPopover');
     },
     async addTimestampLogColumn() {
       await (await this.getAddLogColumnButton()).click();
       await retry.try(async () => {
         await (await testSubjects.findDescendant(
-          'addTimestampLogColumn',
+          '~addTimestampLogColumn',
           await this.getAddLogColumnPopover()
         )).click();
       });
@@ -48,19 +48,19 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
       await (await this.getAddLogColumnButton()).click();
       await retry.try(async () => {
         const popover = await this.getAddLogColumnPopover();
-        await (await testSubjects.findDescendant('fieldSearchInput', popover)).type(fieldName);
+        await (await testSubjects.findDescendant('~fieldSearchInput', popover)).type(fieldName);
         await (await testSubjects.findDescendant(
-          `addFieldLogColumn:${fieldName}`,
+          `~addFieldLogColumn:${fieldName}`,
           popover
         )).click();
       });
     },
     async getLogColumnPanels(): Promise<WebElementWrapper[]> {
-      return await testSubjects.findAllDescendant('logColumnPanel', await this.getForm());
+      return await testSubjects.findAllDescendant('~logColumnPanel', await this.getForm());
     },
     async removeLogColumn(columnIndex: number) {
       const logColumnPanel = (await this.getLogColumnPanels())[columnIndex];
-      await (await testSubjects.findDescendant('removeLogColumnButton', logColumnPanel)).click();
+      await (await testSubjects.findDescendant('~removeLogColumnButton', logColumnPanel)).click();
       await testSubjects.waitForDeleted(logColumnPanel);
     },
     async removeAllLogColumns() {
@@ -73,7 +73,7 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
 
       const logColumnPanel = (await this.getLogColumnPanels())[sourceIndex];
       const moveLogColumnHandle = await testSubjects.findDescendant(
-        'moveLogColumnHandle',
+        '~moveLogColumnHandle',
         logColumnPanel
       );
       await moveLogColumnHandle.focus();
@@ -95,17 +95,17 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
      * Form
      */
     async getForm(): Promise<WebElementWrapper> {
-      return await testSubjects.find('sourceConfigurationContent');
+      return await testSubjects.find('~sourceConfigurationContent');
     },
     async saveConfiguration() {
       await (await testSubjects.findDescendant(
-        'applySettingsButton',
+        '~applySettingsButton',
         await this.getForm()
       )).click();
 
       await retry.try(async () => {
         const element = await testSubjects.findDescendant(
-          'applySettingsButton',
+          '~applySettingsButton',
           await this.getForm()
         );
         return !(await element.isEnabled());

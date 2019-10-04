@@ -24,8 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
-import { useRefreshTransformList } from '../../common';
-import { DataFrameTransformListRow } from './components/transform_list/common';
+import { useRefreshTransformList, DataFrameTransformListRow } from '../../common';
 import { CreateTransformButton } from './components/create_transform_button';
 import { DataFrameTransformList } from './components/transform_list';
 import { RefreshTransformListButton } from './components/refresh_transform_list_button';

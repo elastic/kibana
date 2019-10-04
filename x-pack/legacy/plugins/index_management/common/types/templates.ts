@@ -20,11 +20,11 @@ export interface TemplateListItem {
 export interface Template {
   name: string;
   indexPatterns: string[];
-  version?: number | '';
-  order?: number | '';
-  settings?: string;
-  aliases?: string;
-  mappings?: string;
+  version?: number;
+  order?: number;
+  settings?: object;
+  aliases?: object;
+  mappings?: object;
   ilmPolicy?: {
     name: string;
   };

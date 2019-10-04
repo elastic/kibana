@@ -6,6 +6,9 @@
 
 import { useEffect } from 'react';
 import * as rt from 'io-ts';
+import { identity, constant } from 'fp-ts/lib/function';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { useUrlState } from '../../../utils/use_url_state';
 
 const autoRefreshRT = rt.union([
@@ -33,7 +36,11 @@ export const useLogAnalysisResultsUrlState = () => {
       startTime: 'now-2w',
       endTime: 'now',
     },
-    decodeUrlState: (value: unknown) => urlTimeRangeRT.decode(value).getOrElse(undefined),
+    decodeUrlState: (value: unknown) =>
+      pipe(
+        urlTimeRangeRT.decode(value),
+        fold(constant(undefined), identity)
+      ),
     encodeUrlState: urlTimeRangeRT.encode,
     urlStateKey: TIME_RANGE_URL_STATE_KEY,
   });
@@ -47,7 +54,11 @@ export const useLogAnalysisResultsUrlState = () => {
       isPaused: false,
       interval: 30000,
     },
-    decodeUrlState: (value: unknown) => autoRefreshRT.decode(value).getOrElse(undefined),
+    decodeUrlState: (value: unknown) =>
+      pipe(
+        autoRefreshRT.decode(value),
+        fold(constant(undefined), identity)
+      ),
     encodeUrlState: autoRefreshRT.encode,
     urlStateKey: AUTOREFRESH_URL_STATE_KEY,
   });

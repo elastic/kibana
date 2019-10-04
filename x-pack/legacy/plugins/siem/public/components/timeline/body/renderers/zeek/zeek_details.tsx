@@ -16,19 +16,20 @@ import { NetflowRenderer } from '../netflow';
 import { ZeekSignature } from './zeek_signature';
 
 const Details = styled.div`
-  margin: 10px 0;
+  margin: 5px 0;
 `;
 
 Details.displayName = 'Details';
 
-export const ZeekDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(({ data }) =>
-  data.zeek != null ? (
-    <Details>
-      <ZeekSignature data={data} />
-      <EuiSpacer size="s" />
-      <NetflowRenderer data={data} />
-    </Details>
-  ) : null
+export const ZeekDetails = pure<{ browserFields: BrowserFields; data: Ecs; timelineId: string }>(
+  ({ data, timelineId }) =>
+    data.zeek != null ? (
+      <Details>
+        <ZeekSignature data={data} timelineId={timelineId} />
+        <EuiSpacer size="s" />
+        <NetflowRenderer data={data} timelineId={timelineId} />
+      </Details>
+    ) : null
 );
 
 ZeekDetails.displayName = 'ZeekDetails';

@@ -14,8 +14,8 @@ export default function codeApp({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./explore_repository'));
     loadTestFile(require.resolve('./code_intelligence'));
-    loadTestFile(require.resolve('./with_security'));
     loadTestFile(require.resolve('./history'));
     loadTestFile(require.resolve('./file_tree'));
+    loadTestFile(require.resolve('./with_security'));
   });
 }

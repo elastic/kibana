@@ -11,10 +11,10 @@ import { HostDetailsBody, HostDetails } from './details';
 import {
   HostsQueryTabBody,
   AuthenticationsQueryTabBody,
-  UncommonProcessTabBody,
-  AnomaliesTabBody,
-  EventsTabBody,
-} from './hosts_navigations';
+  UncommonProcessQueryTabBody,
+  AnomaliesQueryTabBody,
+  EventsQueryTabBody,
+} from './navigation';
 import { HostsBody } from './hosts_body';
 import { HostsTableType } from '../../store/hosts/model';
 import { GlobalTime } from '../../containers/global_time';
@@ -41,7 +41,7 @@ type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 export const HostsContainer = React.memo<Props>(({ url }) => (
   <GlobalTime>
-    {({ to, from, setQuery, isInitializing }) => (
+    {({ to, from, setQuery, deleteQuery, isInitializing }) => (
       <Switch>
         <Route
           strict
@@ -54,6 +54,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 <>
                   <Hosts from={from} to={to} setQuery={setQuery} isInitializing={isInitializing} />
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -76,6 +77,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}
                 render={() => (
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -88,6 +90,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}
                 render={() => (
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -100,11 +103,12 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}
                 render={() => (
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    children={UncommonProcessTabBody}
+                    children={UncommonProcessQueryTabBody}
                   />
                 )}
               />
@@ -112,11 +116,12 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}
                 render={() => (
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    children={AnomaliesTabBody}
+                    children={AnomaliesQueryTabBody}
                   />
                 )}
               />
@@ -124,11 +129,12 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}
                 render={() => (
                   <HostsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    children={EventsTabBody}
+                    children={EventsQueryTabBody}
                   />
                 )}
               />
@@ -152,6 +158,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:detailName/:tabName(${HostsTableType.hosts})`}
                 render={() => (
                   <HostDetailsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -165,6 +172,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:detailName/:tabName(${HostsTableType.authentications})`}
                 render={() => (
                   <HostDetailsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
@@ -178,12 +186,13 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:detailName/:tabName(${HostsTableType.uncommonProcesses})`}
                 render={() => (
                   <HostDetailsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
                     detailName={props.match.params.detailName}
-                    children={UncommonProcessTabBody}
+                    children={UncommonProcessQueryTabBody}
                   />
                 )}
               />
@@ -191,12 +200,13 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                 path={`${hostsPagePath}/:detailName/:tabName(${HostsTableType.anomalies})`}
                 render={() => (
                   <HostDetailsBody
+                    deleteQuery={deleteQuery}
                     from={from}
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
                     detailName={props.match.params.detailName}
-                    children={AnomaliesTabBody}
+                    children={AnomaliesQueryTabBody}
                   />
                 )}
               />
@@ -209,18 +219,28 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                     setQuery={setQuery}
                     isInitializing={isInitializing}
                     detailName={props.match.params.detailName}
-                    children={EventsTabBody}
+                    children={EventsQueryTabBody}
                   />
                 )}
               />
             </>
           )}
         />
-        <Redirect
-          from={`${url}/:detailName`}
-          to={`${url}/:detailName/${HostsTableType.authentications}`}
+        <Route
+          path={`${url}/:detailName`}
+          render={({ location: { search = '' } }) => (
+            <Redirect
+              from={`${url}/:detailName`}
+              to={`${url}/:detailName/${HostsTableType.authentications}${search}`}
+            />
+          )}
         />
-        <Redirect from="/hosts/" to={`/hosts/${HostsTableType.hosts}`} />
+        <Route
+          path="/hosts/"
+          render={({ location: { search = '' } }) => (
+            <Redirect from={`/hosts/"`} to={`/hosts/${HostsTableType.hosts}${search}`} />
+          )}
+        />
       </Switch>
     )}
   </GlobalTime>

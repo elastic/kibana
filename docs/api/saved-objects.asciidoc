@@ -1,26 +1,21 @@
 [[saved-objects-api]]
-== Saved Objects API
+== Saved objects APIs
 
-The saved objects API allows people to manage Kibana saved objects, including
-but not limited to dashboards, visualizations, and index patterns.
+Manage {kib} saved objects, including dashboards, visualizations, index patterns, and more.
 
-Traditionally, developers would perform this level of integration by writing
-documents directly to the `.kibana` index. *Do not do this!* Writing directly
-to the `.kibana` index is not safe and it _will_ result in corrupted data that
-permanently breaks Kibana in a future version.
+WARNING: Do not write documents directly to the `.kibana` index. When you write directly
+to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
-NOTE: You cannot access these endpoints via the Console in Kibana.
-
-* <<saved-objects-api-get>>
-* <<saved-objects-api-bulk-get>>
-* <<saved-objects-api-find>>
-* <<saved-objects-api-create>>
-* <<saved-objects-api-bulk-create>>
-* <<saved-objects-api-update>>
-* <<saved-objects-api-delete>>
-* <<saved-objects-api-export>>
-* <<saved-objects-api-import>>
-* <<saved-objects-api-resolve-import-errors>>
+* <<saved-objects-api-get, Get object API>>
+* <<saved-objects-api-bulk-get, Bulk get objects API>>
+* <<saved-objects-api-find, Find objects API>>
+* <<saved-objects-api-create, Create saved object API>>
+* <<saved-objects-api-bulk-create, Bulk create saved objects API>>
+* <<saved-objects-api-update, Update object API>>
+* <<saved-objects-api-delete, Delete object API>>
+* <<saved-objects-api-export, Export objects API>>
+* <<saved-objects-api-import, Import objects API>>
+* <<saved-objects-api-resolve-import-errors, Resolve import errors API>>
 
 include::saved-objects/get.asciidoc[]
 include::saved-objects/bulk_get.asciidoc[]

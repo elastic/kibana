@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export interface VisualizationListItem {
+interface VisualizationListItem {
   editUrl: string;
   icon: string;
   id: string;
@@ -27,7 +27,7 @@ export interface VisualizationListItem {
   typeTitle: string;
 }
 
-export interface VisualizationsAppExtension {
+interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
   toListItem: (savedObject: {
@@ -42,6 +42,7 @@ export interface VisTypeAlias {
   name: string;
   title: string;
   icon: string;
+  isPromoted?: boolean;
   description: string;
 
   appExtensions?: {
@@ -52,14 +53,14 @@ export interface VisTypeAlias {
 
 const registry: VisTypeAlias[] = [];
 
-export interface VisTypeAliasRegistry {
+interface VisTypeAliasRegistry {
   get: () => VisTypeAlias[];
   add: (newVisTypeAlias: VisTypeAlias) => void;
 }
 
 export const visTypeAliasRegistry: VisTypeAliasRegistry = {
   get: () => [...registry],
-  add: (newVisTypeAlias: VisTypeAlias) => {
+  add: newVisTypeAlias => {
     if (registry.find(visTypeAlias => visTypeAlias.name === newVisTypeAlias.name)) {
       throw new Error(`${newVisTypeAlias.name} already registered`);
     }

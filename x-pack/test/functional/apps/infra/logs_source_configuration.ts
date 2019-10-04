@@ -14,8 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'infraLogs']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/42696
-  describe.skip('Logs Source Configuration', function() {
+  describe('Logs Source Configuration', function() {
     this.tags('smoke');
     before(async () => {
       await esArchiver.load('empty_kibana');

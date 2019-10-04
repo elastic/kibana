@@ -2884,7 +2884,7 @@ export const mockTimelineDetailsResult = {
   },
   data: [
     {
-      category: '@timestamp',
+      category: 'base',
       field: '@timestamp',
       values: '2019-03-29T19:01:23.420Z',
       originalValue: '2019-03-29T19:01:23.420Z',

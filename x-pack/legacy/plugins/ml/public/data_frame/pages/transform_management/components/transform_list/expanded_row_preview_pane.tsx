@@ -11,7 +11,7 @@ import {
   SortDirection,
   SORT_DIRECTION,
   FieldDataColumnType,
-} from '../../../../../../common/types/eui/in_memory_table';
+} from '../../../../../components/ml_in_memory_table';
 
 import { ml } from '../../../../../services/ml_api_service';
 
@@ -21,7 +21,7 @@ import {
   PreviewRequestBody,
   DataFrameTransformPivotConfig,
 } from '../../../../common';
-import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { TransformTable } from './transform_table';
 

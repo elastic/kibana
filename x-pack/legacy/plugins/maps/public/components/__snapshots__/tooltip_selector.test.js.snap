@@ -3,6 +3,7 @@
 exports[`TooltipSelector should create eui row component 1`] = `
 <EuiFormRow
   describedByIds={Array []}
+  display="row"
   fullWidth={false}
   hasEmptyLabelSpace={false}
   label="Fields to display in tooltip"

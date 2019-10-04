@@ -32,27 +32,43 @@ export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false):
   const [, dispatchToaster] = useStateToaster();
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
-  const fetchFunc = async () => {
-    if (userPermissions) {
-      try {
-        const data: Job[] = await jobsSummary(jobIds, {
-          'kbn-version': kbnVersion,
-        });
+  useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
+    setLoading(true);
 
-        // TODO: API returns all jobs even though we specified jobIds -- jobsSummary call seems to match request in ML App?
-        const siemJobs = getSiemJobsFromJobsSummary(data);
+    async function fetchSiemJobsFromJobsSummary() {
+      if (userPermissions) {
+        try {
+          const data: Job[] = await jobsSummary(
+            jobIds,
+            {
+              'kbn-version': kbnVersion,
+            },
+            abortCtrl.signal
+          );
 
-        setJobSummaryData(siemJobs);
-      } catch (error) {
-        errorToToaster({ title: i18n.JOB_SUMMARY_FETCH_FAILURE, error, dispatchToaster });
+          // TODO: API returns all jobs even though we specified jobIds -- jobsSummary call seems to match request in ML App?
+          const siemJobs = getSiemJobsFromJobsSummary(data);
+          if (isSubscribed) {
+            setJobSummaryData(siemJobs);
+          }
+        } catch (error) {
+          if (isSubscribed) {
+            errorToToaster({ title: i18n.JOB_SUMMARY_FETCH_FAILURE, error, dispatchToaster });
+          }
+        }
+      }
+      if (isSubscribed) {
+        setLoading(false);
       }
     }
-    setLoading(false);
-  };
 
-  useEffect(() => {
-    setLoading(true);
-    fetchFunc();
+    fetchSiemJobsFromJobsSummary();
+    return () => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
   }, [refreshToggle, userPermissions]);
 
   return [loading, jobSummaryData];

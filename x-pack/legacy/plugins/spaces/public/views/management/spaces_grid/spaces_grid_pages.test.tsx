@@ -7,6 +7,7 @@ jest.mock('ui/kfetch', () => ({
   kfetch: () => Promise.resolve([]),
 }));
 import '../../../__mocks__/ui_capabilities';
+import '../../../__mocks__/xpack_info';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { SpaceAvatar } from '../../../components';

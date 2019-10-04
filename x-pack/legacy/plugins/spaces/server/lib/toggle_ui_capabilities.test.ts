@@ -5,7 +5,7 @@
  */
 
 import { UICapabilities } from 'ui/capabilities';
-import { Feature } from '../../../xpack_main/types';
+import { Feature } from '../../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { toggleUICapabilities } from './toggle_ui_capabilities';
 

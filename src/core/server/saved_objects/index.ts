@@ -30,3 +30,7 @@ export { getSortedObjectsForExport, SavedObjectsExportOptions } from './export';
 export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serialization';
 
 export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
+
+export { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects_service';
+
+export { config } from './saved_objects_config';

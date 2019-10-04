@@ -29,7 +29,21 @@ const workspaceDir = path.join(baseDir, 'workspace');
 // @ts-ignore
 const options: ServerOptions = sinon.createStubInstance(ServerOptions);
 // @ts-ignore
-options.lsp = { detach: false };
+options.lsp = {
+  TypeScript: {
+    enabled: true,
+  },
+  Java: {
+    enabled: true,
+  },
+  Go: {
+    enabled: true,
+  },
+  Ctags: {
+    enabled: true,
+  },
+  detach: false,
+};
 // @ts-ignore
 options.maxWorkspace = 2;
 const server = createTestHapiServer();
@@ -59,6 +73,8 @@ class LauncherStub implements ILanguageServerLauncher {
   ): Promise<ILanguageServerHandler> {
     return Promise.resolve(launcherSpy(builtinWorkspace, maxWorkspace, installationPath));
   }
+
+  launchFailed: boolean = false;
 }
 
 TYPESCRIPT.launcher = LauncherStub;

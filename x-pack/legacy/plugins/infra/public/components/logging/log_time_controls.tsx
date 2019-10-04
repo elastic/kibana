@@ -5,7 +5,8 @@
  */
 
 import { EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
 
@@ -13,19 +14,17 @@ const noop = () => undefined;
 
 interface LogTimeControlsProps {
   currentTime: number | null;
-  startLiveStreaming: (interval: number) => any;
+  startLiveStreaming: () => any;
   stopLiveStreaming: () => any;
   isLiveStreaming: boolean;
   jumpToTime: (time: number) => any;
-  intl: InjectedIntl;
 }
 
-class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
+export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
   public render() {
-    const { currentTime, isLiveStreaming, intl } = this.props;
+    const { currentTime, isLiveStreaming } = this.props;
 
     const currentMoment = currentTime ? moment(currentTime) : null;
-
     if (isLiveStreaming) {
       return (
         <EuiFlexGroup gutterSize="s">
@@ -33,8 +32,7 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
             <EuiDatePicker
               disabled
               onChange={noop}
-              value={intl.formatMessage({
-                id: 'xpack.infra.logs.streamingDescription',
+              value={i18n.translate('xpack.infra.logs.streamingDescription', {
                 defaultMessage: 'Streaming new entries…',
               })}
             />
@@ -89,12 +87,10 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
   };
 
   private startLiveStreaming = () => {
-    this.props.startLiveStreaming(5000);
+    this.props.startLiveStreaming();
   };
 
   private stopLiveStreaming = () => {
     this.props.stopLiveStreaming();
   };
 }
-
-export const LogTimeControls = injectI18n(LogTimeControlsUI);

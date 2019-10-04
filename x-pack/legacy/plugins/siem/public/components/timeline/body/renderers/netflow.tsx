@@ -51,9 +51,9 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../../../source_destination/field_names';
 
-export const NetflowRenderer = pure<{ data: Ecs }>(({ data }) => (
+export const NetflowRenderer = pure<{ data: Ecs; timelineId: string }>(({ data, timelineId }) => (
   <Netflow
-    contextId="auditd-netflow"
+    contextId={`netflow-renderer-${timelineId}-${data._id}`}
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
     destinationGeoContinentName={asArrayIfExists(
       get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, data)

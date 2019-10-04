@@ -20,17 +20,17 @@ import { EuiTab } from '@elastic/eui';
 import React, { Component } from 'react';
 import { CoreStart } from 'src/core/public';
 import {
-  GetActionsCompatibleWithTrigger,
   GetEmbeddableFactory,
   GetEmbeddableFactories,
 } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
 import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';
 import { HelloWorldContainerExample } from './hello_world_container_example';
 import { DashboardContainerExample } from './dashboard_container_example';
 import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
 
 export interface AppProps {
-  getActions: GetActionsCompatibleWithTrigger;
+  getActions: TGetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];

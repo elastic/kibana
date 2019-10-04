@@ -6,18 +6,12 @@
 
 import React from 'react';
 
-import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
-import { pure } from 'recompose';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
 import { replaceKqlQueryLocationForNetworkPage } from './replace_kql_query_location_for_network_page';
-
-interface MlNetworkConditionalProps {
-  match: RouteMatch<{}>;
-  location: Location;
-}
 
 interface QueryStringType {
   '?_g': string;
@@ -25,12 +19,14 @@ interface QueryStringType {
   timerange: string | null;
 }
 
-export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ match }) => (
+type MlNetworkConditionalProps = Partial<RouteComponentProps<{}>> & { url: string };
+
+export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProps>(({ url }) => (
   <Switch>
     <Route
       strict
       exact
-      path={match.url}
+      path={url}
       render={({ location }) => {
         const queryStringDecoded: QueryStringType = QueryString.decode(
           location.search.substring(1)
@@ -43,7 +39,7 @@ export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ 
       }}
     />
     <Route
-      path={`${match.url}/ip/:ip`}
+      path={`${url}/ip/:ip`}
       render={({
         location,
         match: {
@@ -84,7 +80,12 @@ export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ 
         }
       }}
     />
-    <Redirect from="/ml-network/" to="/ml-network" />
+    <Route
+      path="/ml-network/"
+      render={({ location: { search = '' } }) => (
+        <Redirect from="/ml-network/" to={`/ml-network${search}`} />
+      )}
+    />
   </Switch>
 ));
 

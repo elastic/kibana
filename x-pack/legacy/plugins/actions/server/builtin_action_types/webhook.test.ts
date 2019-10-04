@@ -7,7 +7,10 @@
 import { getActionType } from './webhook';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { ActionType } from '../types';
+import { createActionTypeRegistry } from './index.test';
 
+const ACTION_TYPE_ID = '.webhook';
 const configUtilsMock: ActionsConfigurationUtilities = {
   isWhitelistedHostname: _ => true,
   isWhitelistedUri: _ => true,
@@ -15,9 +18,15 @@ const configUtilsMock: ActionsConfigurationUtilities = {
   ensureWhitelistedUri: _ => {},
 };
 
+let actionType: ActionType;
+
+beforeAll(() => {
+  const actionTypeRegistry = createActionTypeRegistry();
+  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+});
+
 describe('actionType', () => {
   test('exposes the action as `webhook` on its Id and Name', () => {
-    const actionType = getActionType(configUtilsMock);
     expect(actionType.id).toEqual('.webhook');
     expect(actionType.name).toEqual('webhook');
   });
@@ -25,7 +34,6 @@ describe('actionType', () => {
 
 describe('secrets validation', () => {
   test('succeeds when secrets is valid', () => {
-    const actionType = getActionType(configUtilsMock);
     const secrets: Record<string, any> = {
       user: 'bob',
       password: 'supersecret',
@@ -35,7 +43,6 @@ describe('secrets validation', () => {
 
   test('fails when secret password is omitted', () => {
     expect(() => {
-      const actionType = getActionType(configUtilsMock);
       validateSecrets(actionType, { user: 'bob' });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [password]: expected value of type [string] but got [undefined]"`
@@ -44,7 +51,6 @@ describe('secrets validation', () => {
 
   test('fails when secret user is omitted', () => {
     expect(() => {
-      const actionType = getActionType(configUtilsMock);
       validateSecrets(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [user]: expected value of type [string] but got [undefined]"`
@@ -59,7 +65,6 @@ describe('config validation', () => {
   };
 
   test('config validation passes when only required fields are provided', () => {
-    const actionType = getActionType(configUtilsMock);
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
     };
@@ -70,7 +75,6 @@ describe('config validation', () => {
   });
 
   test('config validation passes when valid methods are provided', () => {
-    const actionType = getActionType(configUtilsMock);
     ['post', 'put'].forEach(method => {
       const config: Record<string, any> = {
         url: 'http://mylisteningserver:9200/endpoint',
@@ -84,7 +88,6 @@ describe('config validation', () => {
   });
 
   test('should validate and throw error when method on config is invalid', () => {
-    const actionType = getActionType(configUtilsMock);
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
       method: 'https',
@@ -99,7 +102,6 @@ describe('config validation', () => {
   });
 
   test('config validation passes when a url is specified', () => {
-    const actionType = getActionType(configUtilsMock);
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
     };
@@ -110,7 +112,6 @@ describe('config validation', () => {
   });
 
   test('config validation passes when valid headers are provided', () => {
-    const actionType = getActionType(configUtilsMock);
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
       headers: {
@@ -124,7 +125,6 @@ describe('config validation', () => {
   });
 
   test('should validate and throw error when headers on config is invalid', () => {
-    const actionType = getActionType(configUtilsMock);
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
       headers: 'application/json',
@@ -139,8 +139,6 @@ describe('config validation', () => {
   });
 
   test('config validation passes when kibana config whitelists the url', () => {
-    const actionType = getActionType(configUtilsMock);
-
     const config: Record<string, any> = {
       url: 'http://mylisteningserver.com:9200/endpoint',
       headers: {
@@ -155,7 +153,7 @@ describe('config validation', () => {
   });
 
   test('config validation returns an error if the specified URL isnt whitelisted', () => {
-    const actionType = getActionType({
+    actionType = getActionType({
       ...configUtilsMock,
       ensureWhitelistedUri: _ => {
         throw new Error(`target url is not whitelisted`);
@@ -179,13 +177,11 @@ describe('config validation', () => {
 
 describe('params validation', () => {
   test('param validation passes when no fields are provided as none are required', () => {
-    const actionType = getActionType(configUtilsMock);
     const params: Record<string, any> = {};
     expect(validateParams(actionType, params)).toEqual({});
   });
 
   test('params validation passes when a valid body is provided', () => {
-    const actionType = getActionType(configUtilsMock);
     const params: Record<string, any> = {
       body: 'count: {{ctx.payload.hits.total}}',
     };

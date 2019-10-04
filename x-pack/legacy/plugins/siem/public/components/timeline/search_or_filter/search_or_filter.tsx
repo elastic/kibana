@@ -19,12 +19,22 @@ import * as i18n from './translations';
 import { KqlMode } from '../../../store/timeline/model';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
+const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
+const searchOrFilterPopoverWidth = '352px';
 
 // SIDE EFFECT: the following creates a global class selector
 // eslint-disable-next-line no-unused-expressions
 injectGlobal`
   .${timelineSelectModeItemsClassName} {
     width: 350px !important;
+  }
+
+  .${searchOrFilterPopoverClassName}__popoverPanel {
+    width: ${searchOrFilterPopoverWidth};
+
+    .euiSuperSelect__listbox {
+      width: ${searchOrFilterPopoverWidth} !important;
+    }
   }
 `;
 
@@ -74,6 +84,7 @@ export const SearchOrFilter = pure<Props>(
               itemClassName={timelineSelectModeItemsClassName}
               onChange={(mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode })}
               options={options}
+              popoverClassName={searchOrFilterPopoverClassName}
               valueOfSelected={kqlMode}
             />
           </EuiToolTip>

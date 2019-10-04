@@ -1,29 +1,26 @@
 [[features-api-get]]
-=== Get Features
+=== Get features API
+++++
+<titleabbrev>Get features</titleabbrev>
+++++
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieves all {kib} features.
 
-Retrieves all {kib} features.
+[[features-api-get-request]]
+==== Request
 
-Note: You cannot access this endpoint via the Console in {kib}.
+`GET /api/features`
 
-==== Get all {kib} features
+[[features-api-get-codes]]
+==== Response code
 
-===== Request
+`200`::
+  Indicates a successful call.
 
-To retrieve all features, issue a GET request to the
-/api/features/v1 endpoint.
+[[features-api-get-example]]
+==== Example
 
-[source,js]
---------------------------------------------------
-GET /api/features/v1
---------------------------------------------------
-// KIBANA
-
-===== Response
-
-A successful call returns a response code of `200` and a response body containing a JSON 
-representation of the features.
+The API returns the following:
 
 [source,js]
 --------------------------------------------------

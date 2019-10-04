@@ -4,7 +4,6 @@ exports[`DetailView should render Discover button 1`] = `
 <DiscoverErrorLink
   error={
     Object {
-      "@timestamp": "myTimestamp",
       "error": Object {
         "exception": Object {
           "handled": true,
@@ -17,6 +16,9 @@ exports[`DetailView should render Discover button 1`] = `
       },
       "service": Object {
         "name": "myService",
+      },
+      "timestamp": Object {
+        "us": 0,
       },
       "transaction": Object {
         "id": "myTransactionId",
@@ -32,10 +34,7 @@ exports[`DetailView should render Discover button 1`] = `
   }
 >
   <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
     iconType="discoverApp"
-    type="button"
   >
     View 10 occurrences in Discover
   </EuiButtonEmpty>
@@ -52,8 +51,10 @@ exports[`DetailView should render TabContent 1`] = `
   }
   error={
     Object {
-      "@timestamp": "myTimestamp",
       "context": Object {},
+      "timestamp": Object {
+        "us": 0,
+      },
     }
   }
 />
@@ -66,7 +67,6 @@ exports[`DetailView should render tabs 1`] = `
   size="m"
 >
   <EuiTab
-    disabled={false}
     isSelected={true}
     key="exception_stacktrace"
     onClick={[Function]}
@@ -74,7 +74,6 @@ exports[`DetailView should render tabs 1`] = `
     Exception stacktrace
   </EuiTab>
   <EuiTab
-    disabled={false}
     isSelected={false}
     key="metadata"
     onClick={[Function]}

@@ -20,7 +20,7 @@ import {
   PageInfoPaginated,
 } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 
 import { HostsTableQuery } from './hosts_table.gql_query';
@@ -35,6 +35,7 @@ export interface HostsArgs {
   hosts: HostsEdges[];
   id: string;
   inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
@@ -110,12 +111,12 @@ class HostsComponentQuery extends QueryTemplatePaginated<
     return (
       <Query<GetHostsTableQuery.Query, GetHostsTableQuery.Variables>
         query={HostsTableQuery}
-        fetchPolicy="cache-first"
+        fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         variables={variables}
         skip={skip}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
@@ -137,15 +138,17 @@ class HostsComponentQuery extends QueryTemplatePaginated<
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             endDate,
             hosts: this.memoizedHosts(JSON.stringify(variables), get('source', data)),
             id,
             inspect: getOr(null, 'source.Hosts.inspect', data),
-            loading,
+            isInspected,
+            loading: isLoading,
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
-            refetch,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
             startDate,
             totalCount: getOr(-1, 'source.Hosts.totalCount', data),
           });

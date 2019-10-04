@@ -85,11 +85,7 @@ export function Home({ tab }: Props) {
       </ApmHeader>
       <EuiTabs>
         {homeTabs.map(homeTab => (
-          <EuiTabLink
-            onClick={() => null}
-            isSelected={homeTab === selectedTab}
-            key={homeTab.name}
-          >
+          <EuiTabLink isSelected={homeTab === selectedTab} key={homeTab.name}>
             {homeTab.link}
           </EuiTabLink>
         ))}

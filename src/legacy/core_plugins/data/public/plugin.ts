@@ -18,16 +18,16 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { ExpressionsService, ExpressionsSetup, ExpressionsStart } from './expressions';
-import { SearchService, SearchSetup } from './search';
+import { SearchService, SearchSetup, createSearchBar, StatetfulSearchBarProps } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
+import { TimefilterService, TimefilterSetup } from './timefilter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
-import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin';
 import {
-  Start as InspectorStart,
-  Setup as InspectorSetup,
-} from '../../../../plugins/inspector/public';
+  LegacyDependenciesPluginSetup,
+  LegacyDependenciesPluginStart,
+} from './shim/legacy_dependencies_plugin';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
 /**
  * Interface for any dependencies on other plugins' `setup` contracts.
@@ -36,11 +36,11 @@ import {
  */
 export interface DataPluginSetupDependencies {
   __LEGACY: LegacyDependenciesPluginSetup;
-  inspector: InspectorSetup;
 }
 
 export interface DataPluginStartDependencies {
-  inspector: InspectorStart;
+  data: DataPublicPluginStart;
+  __LEGACY: LegacyDependenciesPluginStart;
 }
 
 /**
@@ -49,15 +49,27 @@ export interface DataPluginStartDependencies {
  * @public
  */
 export interface DataSetup {
-  expressions: ExpressionsSetup;
   indexPatterns: IndexPatternsSetup;
   filter: FilterSetup;
   query: QuerySetup;
   search: SearchSetup;
+  timefilter: TimefilterSetup;
 }
 
+/**
+ * Interface for this plugin's returned `start` contract.
+ *
+ * @public
+ */
 export interface DataStart {
-  expressions: ExpressionsStart;
+  indexPatterns: IndexPatternsSetup;
+  filter: FilterSetup;
+  query: QuerySetup;
+  search: SearchSetup;
+  timefilter: TimefilterSetup;
+  ui: {
+    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
+  };
 }
 
 /**
@@ -71,45 +83,68 @@ export interface DataStart {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin implements Plugin<DataSetup, DataStart, DataPluginSetupDependencies> {
+export class DataPlugin
+  implements
+    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
   // Exposed services, sorted alphabetically
-  private readonly expressions: ExpressionsService = new ExpressionsService();
   private readonly filter: FilterService = new FilterService();
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
   private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
+  private readonly timefilter: TimefilterService = new TimefilterService();
+
+  private setupApi!: DataSetup;
 
   public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
-    const { uiSettings } = core;
+    const { uiSettings, http } = core;
     const savedObjectsClient = __LEGACY.savedObjectsClient;
 
     const indexPatternsService = this.indexPatterns.setup({
       uiSettings,
       savedObjectsClient,
+      http,
     });
-    return {
-      expressions: this.expressions.setup(),
+
+    const timefilterService = this.timefilter.setup({
+      uiSettings,
+    });
+    this.setupApi = {
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
         indexPatterns: indexPatternsService.indexPatterns,
+        timefilter: timefilterService.timefilter,
       }),
       query: this.query.setup(),
       search: this.search.setup(savedObjectsClient),
+      timefilter: timefilterService,
     };
+
+    return this.setupApi;
   }
 
-  public start(core: CoreStart, plugins: DataPluginStartDependencies) {
+  public start(core: CoreStart, { __LEGACY, data }: DataPluginStartDependencies) {
+    const SearchBar = createSearchBar({
+      core,
+      store: __LEGACY.storage,
+      timefilter: this.setupApi.timefilter,
+      filterManager: this.setupApi.filter.filterManager,
+      autocomplete: data.autocomplete,
+    });
+
     return {
-      expressions: this.expressions.start({ inspector: plugins.inspector }),
+      ...this.setupApi!,
+      ui: {
+        SearchBar,
+      },
     };
   }
 
   public stop() {
-    this.expressions.stop();
     this.indexPatterns.stop();
     this.filter.stop();
     this.query.stop();
     this.search.stop();
+    this.timefilter.stop();
   }
 }

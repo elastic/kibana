@@ -44,19 +44,20 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');
     const includeFrozen = await internalRequest.getUiSettingsService().get('search:includeFrozen');
-
-    if (endpoint === 'msearch') {
-      const maxConcurrentShardRequests = await internalRequest
-        .getUiSettingsService()
-        .get('courier:maxConcurrentShardRequests');
-      if (maxConcurrentShardRequests > 0) {
-        params = { ...params, max_concurrent_shard_requests: maxConcurrentShardRequests };
-      }
-    }
+    const maxConcurrentShardRequests =
+      endpoint === 'msearch'
+        ? await internalRequest.getUiSettingsService().get('courier:maxConcurrentShardRequests')
+        : 0;
     const fields = await callWithRequest(
       internalRequest,
       endpoint,
-      { ...params, ignore_throttled: !includeFrozen },
+      {
+        ...params,
+        ignore_throttled: !includeFrozen,
+        ...(maxConcurrentShardRequests > 0
+          ? { max_concurrent_shard_requests: maxConcurrentShardRequests }
+          : {}),
+      },
       ...rest
     );
     return fields;

@@ -81,6 +81,57 @@ export default function findActionTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it(`shouldn't find action from another space`, async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, createdAction.id, 'action');
+
+          const response = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                'other'
+              )}/api/action/_find?search=test.index-record&search_fields=actionTypeId`
+            )
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                page: 1,
+                perPage: 20,
+                total: 0,
+                data: [],
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });

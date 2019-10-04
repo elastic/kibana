@@ -6,8 +6,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../strings';
+
+const { Toggle: strings } = ArgumentStrings;
 
 const ToggleArgInput = ({ onValueChange, argValue, argId, renderError }) => {
   const handleChange = () => onValueChange(!argValue);
@@ -15,7 +18,11 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError }) => {
     renderError();
     return null;
   }
-  return <EuiSwitch id={argId} checked={argValue} onChange={handleChange} />;
+  return (
+    <EuiFormRow display="rowCompressed">
+      <EuiSwitch compressed id={argId} checked={argValue} onChange={handleChange} />
+    </EuiFormRow>
+  );
 };
 
 ToggleArgInput.propTypes = {
@@ -27,8 +34,8 @@ ToggleArgInput.propTypes = {
 
 export const toggle = () => ({
   name: 'toggle',
-  displayName: 'Toggle',
-  help: 'A true/false toggle switch',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(ToggleArgInput),
   default: 'false',
 });

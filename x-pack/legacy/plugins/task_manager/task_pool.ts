@@ -42,8 +42,7 @@ export class TaskPool {
    * Gets how many workers are currently in use.
    */
   public get occupiedWorkers() {
-    const running = Array.from(this.running); // get array from a Set
-    return running.reduce((total, { numWorkers }) => (total += numWorkers), 0);
+    return this.running.size;
   }
 
   /**
@@ -75,18 +74,18 @@ export class TaskPool {
 
   private async attemptToRun(tasks: TaskRunner[]) {
     for (const task of tasks) {
-      if (this.availableWorkers < task.numWorkers) {
+      if (this.availableWorkers > 0) {
+        if (await task.claimOwnership()) {
+          this.running.add(task);
+          task
+            .run()
+            .catch(err => {
+              this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
+            })
+            .then(() => this.running.delete(task));
+        }
+      } else {
         return false;
-      }
-
-      if (await task.claimOwnership()) {
-        this.running.add(task);
-        task
-          .run()
-          .catch(err => {
-            this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
-          })
-          .then(() => this.running.delete(task));
       }
     }
 

@@ -120,12 +120,11 @@ function getApmBreadcrumbs(mainInstance) {
 
 export function breadcrumbsProvider() {
   return function createBreadcrumbs(clusterName, mainInstance) {
-    let breadcrumbs = [ createCrumb('#/home',
-      i18n.translate(
-        'xpack.monitoring.breadcrumbs.clustersLabel', { defaultMessage: 'Clusters' }
-      ),
-      'breadcrumbClusters')
-    ];
+    const homeCrumb = i18n.translate(
+      'xpack.monitoring.breadcrumbs.clustersLabel', { defaultMessage: 'Clusters' }
+    );
+
+    let breadcrumbs = [ createCrumb('#/home', homeCrumb, 'breadcrumbClusters')];
 
     if (!mainInstance.inOverview && clusterName) {
       breadcrumbs.push(createCrumb('#/overview', clusterName));

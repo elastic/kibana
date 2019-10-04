@@ -1,46 +1,46 @@
 [[saved-objects-api-bulk-get]]
-=== Bulk Get Objects
+=== Bulk get objects API
+++++
+<titleabbrev>Bulk get objects</titleabbrev>
+++++
 
-beta[This functionality is *beta*. It's on track to become a stable, permanent feature of {kib}. Caution should be exercised because it is possible a breaking change to these APIs will occur in a minor version, but we’ll avoid this wherever possible. ]
+experimental[] Retrieves multiple {kib} saved objects by ID.
 
-The bulk-get saved object API enables you to retrieve multiple Kibana saved
-objects by id.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-bulk-get-request]]
 ==== Request
 
 `POST /api/saved_objects/_bulk_get`
 
+[[saved-objects-api-bulk-get-request-body]]
 ==== Request Body
 
-The request body must be a JSON array containing objects, each of which
-contains the following properties:
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+`id`::
+  (Required, string) ID of the retrieved object.
 
-`id` (required)::
-  (string) ID of object to retrieve
-
-`fields` (optional)::
-  (array) The fields to return in the object's response
-
+`fields`::
+  (Optional, array) The fields returned in the object response.
+  
+[[saved-objects-api-bulk-get-response-body]]
 ==== Response body
 
-The response body will have a top level `saved_objects` property that contains
-an array of objects, which represent the response for each of the requested
-objects. The order of the objects in the response is identical to the order of
-the objects in the request.
+`saved_objects`:: 
+  (array) Top-level property the contains objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
 
-For any saved object that could not be found, an error object will exist in its
-place.
+Saved objects that are unable to persist are replaced with an error object.
 
-==== Examples
+[[saved-objects-api-bulk-get-body-codes]]
+==== Response code
 
-The following example attempts to retrieve an index pattern with id
-`my-pattern` and a dashboard with id `my-dashboard`, but only the index pattern
-exists.
+`200`:: 
+  Indicates a successfully call.
+
+[[saved-objects-api-bulk-get-body-example]]
+==== Example
+
+Retrieve an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID: 
 
 [source,js]
 --------------------------------------------------
@@ -58,8 +58,7 @@ POST api/saved_objects/_bulk_get
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------
@@ -84,3 +83,5 @@ containing a JSON structure similar to the following example:
   ]
 }
 --------------------------------------------------
+
+Only the index pattern exists.

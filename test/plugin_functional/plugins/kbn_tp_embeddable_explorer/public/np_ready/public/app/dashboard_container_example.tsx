@@ -19,27 +19,26 @@
 import React from 'react';
 import { EuiButton, EuiLoadingChart } from '@elastic/eui';
 import {
+  ErrorEmbeddable,
+  ViewMode,
+  isErrorEmbeddable,
+  EmbeddablePanel,
+  GetEmbeddableFactory,
+  GetEmbeddableFactories,
+} from '../embeddable_api';
+import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
   DashboardContainerFactory,
 } from '../../../../../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
-import {
-  ErrorEmbeddable,
-  ViewMode,
-  isErrorEmbeddable,
-  EmbeddablePanel,
-  GetActionsCompatibleWithTrigger,
-  GetEmbeddableFactory,
-  GetEmbeddableFactories,
-} from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { dashboardInput } from './dashboard_input';
 import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
+import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
 
 interface Props {
-  getActions: GetActionsCompatibleWithTrigger;
+  getActions: TGetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];

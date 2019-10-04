@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { createFiltersFromEvent } from '../vis_filters';
+import { createFiltersFromEvent, onBrushEvent } from '../vis_filters';
 
 export class BaseVisType {
   constructor(opts = {}) {
@@ -61,6 +61,10 @@ export class BaseVisType {
       events: {
         filterBucket: {
           defaultAction: createFiltersFromEvent,
+        },
+        brush: {
+          defaultAction: onBrushEvent,
+          disabled: true,
         }
       },
       stage: 'production',

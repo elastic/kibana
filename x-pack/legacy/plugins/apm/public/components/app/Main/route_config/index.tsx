@@ -13,8 +13,14 @@ import { TransactionDetails } from '../../TransactionDetails';
 import { Home } from '../../Home';
 import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
 import { RouteName } from './route_names';
-import { SettingsList } from '../../Settings/SettingsList';
+import { Settings } from '../../Settings';
 import { toQuery } from '../../../shared/Links/url_helpers';
+import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
+import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUrlParams';
+
+const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
+  defaultMessage: 'Metrics'
+});
 
 interface RouteParams {
   serviceName: string;
@@ -60,7 +66,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/settings',
-    component: SettingsList,
+    component: Settings,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
       defaultMessage: 'Settings'
     }),
@@ -76,7 +82,6 @@ export const routes: BreadcrumbRoute[] = [
       )(props),
     name: RouteName.SERVICE
   },
-
   // errors
   {
     exact: true,
@@ -94,7 +99,6 @@ export const routes: BreadcrumbRoute[] = [
     }),
     name: RouteName.ERRORS
   },
-
   // transactions
   {
     exact: true,
@@ -110,10 +114,29 @@ export const routes: BreadcrumbRoute[] = [
     exact: true,
     path: '/services/:serviceName/metrics',
     component: () => <ServiceDetails tab="metrics" />,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
-      defaultMessage: 'Metrics'
-    }),
+    breadcrumb: metricsBreadcrumb,
     name: RouteName.METRICS
+  },
+  // service nodes, only enabled for java agents for now
+  {
+    exact: true,
+    path: '/services/:serviceName/nodes',
+    component: () => <ServiceDetails tab="nodes" />,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.nodesTitle', {
+      defaultMessage: 'JVMs'
+    }),
+    name: RouteName.SERVICE_NODES
+  },
+  // node metrics
+  {
+    exact: true,
+    path: '/services/:serviceName/nodes/:serviceNodeName/metrics',
+    component: () => <ServiceNodeMetrics />,
+    breadcrumb: ({ location }) => {
+      const { serviceNodeName } = resolveUrlParams(location, {});
+      return serviceNodeName || '';
+    },
+    name: RouteName.SERVICE_NODE_METRICS
   },
   {
     exact: true,

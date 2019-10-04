@@ -1,6 +1,7 @@
 node_modules
 bower_components
 /data
+/optimize
 /build
 /target
 /.es
@@ -37,6 +38,7 @@ bower_components
 /x-pack/legacy/plugins/infra/common/graphql/types.ts
 /x-pack/legacy/plugins/infra/public/graphql/types.ts
 /x-pack/legacy/plugins/infra/server/graphql/types.ts
+/x-pack/legacy/plugins/apm/cypress/**/snapshots.js
 **/graphql/types.ts
 **/*.js.snap
 !/.eslintrc.js

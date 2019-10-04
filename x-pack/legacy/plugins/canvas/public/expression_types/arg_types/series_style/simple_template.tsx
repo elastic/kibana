@@ -6,12 +6,11 @@
 
 import React, { Fragment, FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
-// @ts-ignore Untyped local
-import { TooltipIcon } from '../../../components/tooltip_icon';
+import { TooltipIcon, IconType } from '../../../components/tooltip_icon';
 import { ExpressionAST, CanvasWorkpad } from '../../../../types';
 
 const { set, del } = immutable;
@@ -49,18 +48,22 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
       {!color || color.length === 0 ? (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <span>Color&nbsp;</span>
+            <EuiText size="s">Color&nbsp;</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink aria-label="Color: Auto" onClick={() => handleChange('color', '#000000')}>
-              Auto <EuiIcon type="bolt" />
-            </EuiLink>
+            <EuiText size="s">
+              <EuiLink aria-label="Color: Auto" onClick={() => handleChange('color', '#000000')}>
+                Auto <EuiIcon type="bolt" />
+              </EuiLink>
+            </EuiText>
           </EuiFlexItem>
         </Fragment>
       ) : (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <label htmlFor="series-style">Color&nbsp;</label>
+            <label htmlFor="series-style">
+              <EuiText size="s">Color&nbsp;</EuiText>
+            </label>
           </EuiFlexItem>
           <EuiFlexItem style={{ fontSize: 0 }}>
             <ColorPickerPopover
@@ -84,7 +87,7 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
         <EuiFlexItem grow={false}>
           <TooltipIcon
             position="left"
-            icon="warning"
+            icon={IconType.warning}
             content="Data has no series to style, add a color dimension"
           />
         </EuiFlexItem>

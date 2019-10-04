@@ -234,15 +234,21 @@ export class LspTestRunner {
     const launcher = new TypescriptServerLauncher(
       '127.0.0.1',
       serverOptions,
-      new ConsoleLoggerFactory()
+      new ConsoleLoggerFactory(),
+      TYPESCRIPT.embedPath!
     );
-    return await launcher.launch(false, 1, TYPESCRIPT.embedPath!);
+    return await launcher.launch(false, 1);
   }
 
   private async launchJavaLanguageServer() {
-    const launcher = new JavaLauncher('127.0.0.1', serverOptions, new ConsoleLoggerFactory());
     // @ts-ignore
     const installManager = new InstallManager(null, serverOptions);
-    return await launcher.launch(false, 1, installManager.installationPath(JAVA));
+    const launcher = new JavaLauncher(
+      '127.0.0.1',
+      serverOptions,
+      new ConsoleLoggerFactory(),
+      installManager.installationPath(JAVA)
+    );
+    return await launcher.launch(false, 1);
   }
 }

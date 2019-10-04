@@ -56,6 +56,11 @@ interface PackageGroup {
    * https://renovatebot.com/docs/configuration-options/#allowedversions
    */
   readonly allowedVersions?: string;
+
+  /**
+   * An array of users to request reviews from
+   */
+  readonly reviewers?: string[];
 }
 
 export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
@@ -73,6 +78,12 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
   {
     name: 'jest',
     packageWords: ['jest'],
+  },
+
+  {
+    name: '@elastic/charts',
+    packageNames: ['@elastic/charts'],
+    reviewers: ['markov00'],
   },
 
   {
@@ -109,6 +120,11 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     name: 'react',
     packageWords: ['react', 'redux', 'enzyme'],
     packageNames: ['ngreact', 'recompose', 'prop-types', 'typescript-fsa-reducers', 'reselect'],
+  },
+
+  {
+    name: 'moment',
+    packageWords: ['moment'],
   },
 
   {

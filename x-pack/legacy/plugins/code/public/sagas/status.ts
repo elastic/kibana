@@ -28,7 +28,7 @@ import {
 } from '../actions';
 import * as ROUTES from '../components/routes';
 import { RootState } from '../reducers';
-import { mainRoutePattern } from './patterns';
+import { adminRoutePattern, mainRoutePattern } from './patterns';
 import { RepoFileStatus, StatusReport } from '../../common/repo_file_status';
 import { statusSelector } from '../selectors';
 
@@ -92,10 +92,16 @@ function* handleMainRouteChange(action: Action<Match>) {
 const STATUS_POLLING_FREQ_HIGH_MS = 3000;
 const STATUS_POLLING_FREQ_LOW_MS = 10000;
 
+let polling: boolean = false;
+
+function stopPollingStatus() {
+  polling = false;
+}
 function* startPollingStatus(location: FetchFilePayload) {
   yield put(FetchRepoFileStatus(location));
+  polling = true;
   let currentStatusPath = yield select((state: RootState) => state.status.currentStatusPath);
-  while (isEqual(location, currentStatusPath)) {
+  while (polling && isEqual(location, currentStatusPath)) {
     const previousStatus: StatusReport = yield select(statusSelector);
     const newStatus: StatusReport = yield call(fetchStatus, location);
     let delayMs = STATUS_POLLING_FREQ_LOW_MS;
@@ -143,4 +149,5 @@ function requestStatus(location: FetchFilePayload) {
 
 export function* watchStatusChange() {
   yield takeLatest(mainRoutePattern, handleMainRouteChange);
+  yield takeLatest(adminRoutePattern, stopPollingStatus);
 }

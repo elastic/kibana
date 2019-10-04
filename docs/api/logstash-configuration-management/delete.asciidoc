@@ -1,32 +1,34 @@
 [role="xpack"]
 [[logstash-configuration-management-api-delete]]
-=== Delete Pipeline
+=== Delete Logstash pipeline API
+++++
+<titleabbrev>Delete pipeline</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Delete a centrally-managed Logstash pipeline.
 
-The Delete Pipeline API enables you to delete a centrally-managed Logstash pipeline.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
-[float]
+[[logstash-configuration-management-api-delete-request]]
 ==== Request
 
 `DELETE /api/logstash/pipeline/<id>`
 
-[float]
-==== Path Parameters
+[[logstash-configuration-management-api-delete-params]]
+==== Path parameters
 
-`id` (required)::
-  (string) ID for pipeline.
+`id`::
+  (Required, string) The pipeline ID.
 
+[[logstash-configuration-management-api-delete-codes]]
+==== Response code
 
-[float]
-==== Examples
+`204 No Content`::
+    Indicates a successful call.
+
+[[logstash-configuration-management-api-delete-example]]
+==== Example
 
 [source,js]
 --------------------------------------------------
 DELETE api/logstash/pipeline/hello-world
 --------------------------------------------------
 // KIBANA
-
-A successful call returns an HTTP `204 No Content` response.

@@ -14,8 +14,7 @@ import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
 import { ID_FIELD_NAME } from '../event_details/event_id';
-import { DESTINATION_IP_FIELD_NAME } from '../ip';
-import { SOURCE_IP_FIELD_NAME } from '../ip';
+import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
 import {
   DESTINATION_BYTES_FIELD_NAME,

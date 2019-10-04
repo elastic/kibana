@@ -17,7 +17,20 @@
  * under the License.
  */
 
-export type Ast = unknown;
+export type ExpressionArgAST = string | boolean | number | Ast;
+
+export interface ExpressionFunctionAST {
+  type: 'function';
+  function: string;
+  arguments: {
+    [key: string]: ExpressionArgAST[];
+  };
+}
+
+export interface Ast {
+  type: 'expression';
+  chain: ExpressionFunctionAST[];
+}
 
 export declare function fromExpression(expression: string): Ast;
 export declare function toExpression(astObj: Ast, type?: string): string;

@@ -8,10 +8,13 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { ml } from '../../../../../services/ml_api_service';
 
-import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
-
 import {
   DataFrameTransformListRow,
+  refreshTransformList$,
+  REFRESH_TRANSFORM_LIST_STATE,
+} from '../../../../common';
+
+import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../components/transform_list/common';

@@ -22,7 +22,7 @@ import html from './doc_table.html';
 import './infinite_scroll';
 import './components/table_header';
 import './components/table_row';
-import { dispatchRenderComplete } from 'ui/render_complete';
+import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
 import { uiModules } from 'ui/modules';
 import './components/pager';
 import './lib/pager';

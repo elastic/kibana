@@ -47,6 +47,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
+  const [bucketSpanMs, setBucketSpanMs] = useState(jobCreator.bucketSpanMs);
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
     setSelectedOptions(selectedOptionsIn);
@@ -73,6 +74,11 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
     if (jobCreator.start !== start || jobCreator.end !== end) {
       setStart(jobCreator.start);
       setEnd(jobCreator.end);
+      loadChart();
+    }
+
+    if (jobCreator.bucketSpanMs !== bucketSpanMs) {
+      setBucketSpanMs(jobCreator.bucketSpanMs);
       loadChart();
     }
   }, [jobCreatorUpdated]);

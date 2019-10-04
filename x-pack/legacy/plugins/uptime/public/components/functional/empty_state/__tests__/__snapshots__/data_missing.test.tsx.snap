@@ -10,11 +10,7 @@ exports[`DataMissing component renders basePath and headingMessage 1`] = `
     <EuiSpacer
       size="xs"
     />
-    <EuiPanel
-      grow={true}
-      hasShadow={false}
-      paddingSize="m"
-    >
+    <EuiPanel>
       <EuiEmptyPrompt
         body={
           <p>
@@ -40,7 +36,6 @@ exports[`DataMissing component renders basePath and headingMessage 1`] = `
             />
           </p>
         }
-        iconColor="subdued"
         iconType="uptimeApp"
         title={
           <EuiTitle

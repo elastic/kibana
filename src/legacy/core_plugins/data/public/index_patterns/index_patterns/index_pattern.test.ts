@@ -21,8 +21,7 @@ import { defaults, pluck, last, get } from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
 import { IndexPattern } from './index_pattern';
 
-// @ts-ignore
-import { DuplicateField } from 'ui/errors';
+import { DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 // @ts-ignore
 import mockLogStashFields from '../../../../../../fixtures/logstash_fields';
 // @ts-ignore
@@ -180,6 +179,39 @@ describe('IndexPattern', () => {
       const respNames = pluck(indexPattern.getScriptedFields(), 'name');
 
       expect(respNames).toEqual(scriptedNames);
+    });
+  });
+
+  describe('getComputedFields', () => {
+    test('should be a function', () => {
+      expect(indexPattern.getComputedFields).toBeInstanceOf(Function);
+    });
+
+    test('should request all stored fields', () => {
+      expect(indexPattern.getComputedFields().storedFields).toContain('*');
+    });
+
+    test('should request date fields as docvalue_fields', () => {
+      const { docvalueFields } = indexPattern.getComputedFields();
+      const docValueFieldNames = docvalueFields.map(field => field.field);
+
+      expect(Object.keys(docValueFieldNames).length).toBe(3);
+      expect(docValueFieldNames).toContain('@timestamp');
+      expect(docValueFieldNames).toContain('time');
+      expect(docValueFieldNames).toContain('utc_time');
+    });
+
+    test('should request date field doc values in date_time format', () => {
+      const { docvalueFields } = indexPattern.getComputedFields();
+      const timestampField = docvalueFields.find(field => field.field === '@timestamp');
+
+      expect(timestampField).toHaveProperty('format', 'date_time');
+    });
+
+    test('should not request scripted date fields as docvalue_fields', () => {
+      const { docvalueFields } = indexPattern.getComputedFields();
+
+      expect(docvalueFields).not.toContain('script date');
     });
   });
 

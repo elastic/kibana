@@ -22,6 +22,7 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
     namespaceToSpaceId: jest.fn(),
     getBasePath: jest.fn(),
     getScopedSpacesClient: jest.fn(),
+    getActiveSpace: jest.fn(),
   } as OptionalPlugin<SpacesPlugin>;
   const request = Symbol();
   const privilegeOrPrivileges = ['foo', 'bar'];

@@ -44,6 +44,12 @@ export function DocViewer(renderProps: DocViewRenderProps) {
     };
   });
 
+  if (!tabs.length) {
+    // There there's a minimum of 2 tabs active in Discover.
+    // This condition takes care of unit tests with 0 tabs.
+    return null;
+  }
+
   return (
     <div className="kbnDocViewer">
       <EuiTabbedContent tabs={tabs} />

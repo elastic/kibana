@@ -20,9 +20,10 @@
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
-import { SerializedFieldFormat } from 'src/plugins/data/common/expressions/types/common';
-// @ts-ignore
-import { FieldFormat } from '../../../../field_formats/field_format';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
+
+import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
+
 // @ts-ignore
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
@@ -47,7 +48,7 @@ const getConfig = (...args: any[]): any => config.get(...args);
 const getDefaultFieldFormat = () => ({ convert: identity });
 
 const getFieldFormat = (id: string | undefined, params: object = {}) => {
-  const Format = fieldFormats.byId[id];
+  const Format = fieldFormats.getType(id);
   if (Format) {
     return new Format(params, getConfig);
   } else {
@@ -98,10 +99,14 @@ export const getFormat: FormatFactory = (mapping = {}) => {
   if (id === 'range') {
     const RangeFormat = FieldFormat.from((range: any) => {
       const format = getFieldFormat(id, mapping.params);
+      const gte = '\u2265';
+      const lt = '\u003c';
       return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
-        defaultMessage: '{from} to {to}',
+        defaultMessage: '{gte} {from} and {lt} {to}',
         values: {
+          gte,
           from: format.convert(range.gte),
+          lt,
           to: format.convert(range.lt),
         },
       });

@@ -31,10 +31,11 @@ exports[`render correctly with empty query string 1`] = `
       className="euiFlexGroup euiFlexGroup--directionRow"
     >
       <EuiFlexItem
+        className="codeQueryBar__scope"
         grow={false}
       >
         <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
+          className="euiFlexItem euiFlexItem--flexGrowZero codeQueryBar__scope"
         >
           <ScopeSelector
             onScopeChanged={[Function]}
@@ -99,11 +100,6 @@ exports[`render correctly with empty query string 1`] = `
                     "value": "file",
                   },
                 ]
-              }
-              style={
-                Object {
-                  "width": "14.285714285714286rem",
-                }
               }
               valueOfSelected="default"
             >
@@ -171,11 +167,6 @@ exports[`render correctly with empty query string 1`] = `
                           "value": "file",
                         },
                       ]
-                    }
-                    style={
-                      Object {
-                        "width": "14.285714285714286rem",
-                      }
                     }
                     value="default"
                   />
@@ -266,11 +257,6 @@ exports[`render correctly with empty query string 1`] = `
                               "value": "file",
                             },
                           ]
-                        }
-                        style={
-                          Object {
-                            "width": "14.285714285714286rem",
-                          }
                         }
                         value="default"
                       >
@@ -381,11 +367,6 @@ exports[`render correctly with empty query string 1`] = `
                                 onClick={[Function]}
                                 onKeyDown={[Function]}
                                 role="option"
-                                style={
-                                  Object {
-                                    "width": "14.285714285714286rem",
-                                  }
-                                }
                                 type="button"
                               >
                                 <div>
@@ -517,7 +498,7 @@ exports[`render correctly with empty query string 1`] = `
                       aria-label="Search input"
                       autoComplete="off"
                       autoFocus={true}
-                      className="kuiLocalSearchAssistedInput__input codeSearchBar__input"
+                      className="kuiLocalSearchAssistedInput__input codeQueryBar__input"
                       compressed={false}
                       data-test-subj="queryInput"
                       fullWidth={true}
@@ -552,7 +533,7 @@ exports[`render correctly with empty query string 1`] = `
                                 aria-label="Search input"
                                 autoComplete="off"
                                 autoFocus={true}
-                                className="euiFieldText kuiLocalSearchAssistedInput__input codeSearchBar__input euiFieldText--fullWidth"
+                                className="euiFieldText kuiLocalSearchAssistedInput__input codeQueryBar__input euiFieldText--fullWidth"
                                 data-test-subj="queryInput"
                                 onChange={[Function]}
                                 onClick={[Function]}
@@ -590,11 +571,8 @@ exports[`render correctly with empty query string 1`] = `
                           className="kuiLocalSearchAssistedInput__assistance"
                         >
                           <EuiButtonEmpty
-                            color="primary"
-                            iconSide="left"
                             onClick={[Function]}
                             size="xs"
-                            type="button"
                           >
                             <button
                               className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
@@ -608,11 +586,11 @@ exports[`render correctly with empty query string 1`] = `
                                   className="euiButtonEmpty__text"
                                 >
                                   <EuiNotificationBadge
-                                    className="code-notification-badge"
+                                    className="codeQueryBar__filter-badge"
                                     size="m"
                                   >
                                     <span
-                                      className="euiNotificationBadge euiNotificationBadge--medium code-notification-badge"
+                                      className="euiNotificationBadge euiNotificationBadge--medium codeQueryBar__filter-badge"
                                     >
                                       0
                                     </span>
@@ -624,7 +602,7 @@ exports[`render correctly with empty query string 1`] = `
                                       className="euiTextColor euiTextColor--secondary"
                                     >
                                       <FormattedMessage
-                                        defaultMessage=" {filterCount, plural, one {Search Filter} other {Search Filters}} "
+                                        defaultMessage="{filterCount, plural, one {Advanced Filter} other {Advanced Filters}}"
                                         id="xpack.code.searchBar.searchFilterTitle"
                                         values={
                                           Object {
@@ -633,7 +611,7 @@ exports[`render correctly with empty query string 1`] = `
                                         }
                                       >
                                         <span>
-                                           Search Filters 
+                                          Advanced Filters
                                         </span>
                                       </FormattedMessage>
                                     </span>
@@ -752,10 +730,11 @@ exports[`render correctly with input query string changed 1`] = `
           className="euiFlexGroup euiFlexGroup--directionRow"
         >
           <EuiFlexItem
+            className="codeQueryBar__scope"
             grow={false}
           >
             <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
+              className="euiFlexItem euiFlexItem--flexGrowZero codeQueryBar__scope"
             >
               <ScopeSelector
                 onScopeChanged={[Function]}
@@ -820,11 +799,6 @@ exports[`render correctly with input query string changed 1`] = `
                         "value": "file",
                       },
                     ]
-                  }
-                  style={
-                    Object {
-                      "width": "14.285714285714286rem",
-                    }
                   }
                   valueOfSelected="default"
                 >
@@ -892,11 +866,6 @@ exports[`render correctly with input query string changed 1`] = `
                               "value": "file",
                             },
                           ]
-                        }
-                        style={
-                          Object {
-                            "width": "14.285714285714286rem",
-                          }
                         }
                         value="default"
                       />
@@ -987,11 +956,6 @@ exports[`render correctly with input query string changed 1`] = `
                                   "value": "file",
                                 },
                               ]
-                            }
-                            style={
-                              Object {
-                                "width": "14.285714285714286rem",
-                              }
                             }
                             value="default"
                           >
@@ -1102,11 +1066,6 @@ exports[`render correctly with input query string changed 1`] = `
                                     onClick={[Function]}
                                     onKeyDown={[Function]}
                                     role="option"
-                                    style={
-                                      Object {
-                                        "width": "14.285714285714286rem",
-                                      }
-                                    }
                                     type="button"
                                   >
                                     <div>
@@ -1238,7 +1197,7 @@ exports[`render correctly with input query string changed 1`] = `
                           aria-label="Search input"
                           autoComplete="off"
                           autoFocus={true}
-                          className="kuiLocalSearchAssistedInput__input codeSearchBar__input"
+                          className="kuiLocalSearchAssistedInput__input codeQueryBar__input"
                           compressed={false}
                           data-test-subj="queryInput"
                           fullWidth={true}
@@ -1273,7 +1232,7 @@ exports[`render correctly with input query string changed 1`] = `
                                     aria-label="Search input"
                                     autoComplete="off"
                                     autoFocus={true}
-                                    className="euiFieldText kuiLocalSearchAssistedInput__input codeSearchBar__input euiFieldText--fullWidth"
+                                    className="euiFieldText kuiLocalSearchAssistedInput__input codeQueryBar__input euiFieldText--fullWidth"
                                     data-test-subj="queryInput"
                                     onChange={[Function]}
                                     onClick={[Function]}
@@ -1311,11 +1270,8 @@ exports[`render correctly with input query string changed 1`] = `
                               className="kuiLocalSearchAssistedInput__assistance"
                             >
                               <EuiButtonEmpty
-                                color="primary"
-                                iconSide="left"
                                 onClick={[Function]}
                                 size="xs"
-                                type="button"
                               >
                                 <button
                                   className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
@@ -1329,11 +1285,11 @@ exports[`render correctly with input query string changed 1`] = `
                                       className="euiButtonEmpty__text"
                                     >
                                       <EuiNotificationBadge
-                                        className="code-notification-badge"
+                                        className="codeQueryBar__filter-badge"
                                         size="m"
                                       >
                                         <span
-                                          className="euiNotificationBadge euiNotificationBadge--medium code-notification-badge"
+                                          className="euiNotificationBadge euiNotificationBadge--medium codeQueryBar__filter-badge"
                                         >
                                           0
                                         </span>
@@ -1345,7 +1301,7 @@ exports[`render correctly with input query string changed 1`] = `
                                           className="euiTextColor euiTextColor--secondary"
                                         >
                                           <FormattedMessage
-                                            defaultMessage=" {filterCount, plural, one {Search Filter} other {Search Filters}} "
+                                            defaultMessage="{filterCount, plural, one {Advanced Filter} other {Advanced Filters}}"
                                             id="xpack.code.searchBar.searchFilterTitle"
                                             values={
                                               Object {
@@ -1354,7 +1310,7 @@ exports[`render correctly with input query string changed 1`] = `
                                             }
                                           >
                                             <span>
-                                               Search Filters 
+                                              Advanced Filters
                                             </span>
                                           </FormattedMessage>
                                         </span>

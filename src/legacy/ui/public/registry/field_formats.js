@@ -17,22 +17,16 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import chrome from '../chrome';
-import { FieldFormat } from '../../field_formats/field_format';
-import { IndexedArray } from '../indexed_array';
+import { memoize, forOwn, isFunction } from 'lodash';
+import { npStart } from 'ui/new_platform';
+import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 
-class FieldFormatRegistry extends IndexedArray {
+class FieldFormatRegistry {
   constructor() {
-    super({
-      group: ['fieldType'],
-      index: ['id', 'name']
-    });
-
-    this._uiSettings = chrome.getUiSettingsClient();
+    this.fieldFormats = new Map();
+    this._uiSettings = npStart.core.uiSettings;
     this.getConfig = (...args) => this._uiSettings.get(...args);
     this._defaultMap = [];
-    this._providers = [];
     this.init();
   }
 
@@ -66,7 +60,7 @@ class FieldFormatRegistry extends IndexedArray {
    * @return {Function}
    */
   getType = (formatId) => {
-    return this.byId[formatId];
+    return this.fieldFormats.get(formatId);
   };
   /**
    * Get the default FieldFormat type (class) for
@@ -79,7 +73,7 @@ class FieldFormatRegistry extends IndexedArray {
    */
   getDefaultType = (fieldType, esTypes) => {
     const config = this.getDefaultConfig(fieldType, esTypes);
-    return this.byId[config.id];
+    return this.getType(config.id);
   };
 
   /**
@@ -113,8 +107,8 @@ class FieldFormatRegistry extends IndexedArray {
    * @param  {String} formatId
    * @return {FieldFormat}
    */
-  getInstance = _.memoize(function (formatId) {
-    const FieldFormat = this.byId[formatId];
+  getInstance = memoize(function (formatId) {
+    const FieldFormat = this.getType(formatId);
     if (!FieldFormat) {
       throw new Error(`Field Format '${formatId}' not found!`);
     }
@@ -131,7 +125,7 @@ class FieldFormatRegistry extends IndexedArray {
   getDefaultInstancePlain(fieldType, esTypes) {
     const conf = this.getDefaultConfig(fieldType, esTypes);
 
-    const FieldFormat = this.byId[conf.id];
+    const FieldFormat = this.getType(conf.id);
     return new FieldFormat(conf.params, this.getConfig);
   }
   /**
@@ -152,6 +146,18 @@ class FieldFormatRegistry extends IndexedArray {
   }
 
   /**
+   * Get filtered list of field formats by format type
+   *
+   * @param  {String} fieldType
+   * @return {FieldFormat[]}
+   */
+
+  getByFieldType(fieldType) {
+    return [ ...this.fieldFormats.values()]
+      .filter(format => format.fieldType.indexOf(fieldType) !== -1);
+  }
+
+  /**
    * Get the default fieldFormat instance for a field format.
    * It's a memoized function that builds and reads a cache
    *
@@ -159,24 +165,21 @@ class FieldFormatRegistry extends IndexedArray {
    * @param  {String[]} esTypes
    * @return {FieldFormat}
    */
-  getDefaultInstance = _.memoize(this.getDefaultInstancePlain, this.getDefaultInstanceCacheResolver);
-
+  getDefaultInstance = memoize(this.getDefaultInstancePlain, this.getDefaultInstanceCacheResolver);
 
   parseDefaultTypeMap(value) {
     this._defaultMap = value;
-    _.forOwn(this, function (fn) {
-      if (_.isFunction(fn) && fn.cache) {
+    forOwn(this, function (fn) {
+      if (isFunction(fn) && fn.cache) {
         // clear all memoize caches
-        fn.cache = new _.memoize.Cache();
+        fn.cache = new memoize.Cache();
       }
     });
   }
 
-  name = 'fieldFormats';
-  displayName = '[registry ' + this.name + ']';
-
   register = (module) => {
-    this.push(module(FieldFormat));
+    const fieldFormatInstance = module(FieldFormat);
+    this.fieldFormats.set(fieldFormatInstance.id, fieldFormatInstance);
     return this;
   };
 }

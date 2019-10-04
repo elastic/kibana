@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { MetricAggParamEditor } from '../../controls/metric_agg';
-import { SubAggParamEditor } from '../../controls/sub_agg';
+import { MetricAggParamEditor } from '../../../vis/editors/default/controls/metric_agg';
+import { SubAggParamEditor } from '../../../vis/editors/default/controls/sub_agg';
 import _ from 'lodash';
 import { Schemas } from '../../../vis/editors/default/schemas';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';

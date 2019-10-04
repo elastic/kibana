@@ -31,7 +31,7 @@ import { round } from 'lodash';
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { createTableVisTypeDefinition } from '../../table_vis_type';
-import { setup } from '../../../../visualizations/public/np_ready/public/legacy';
+import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
 
 describe('Table Vis - AggTable Directive', function () {
   let $rootScope;
@@ -99,16 +99,18 @@ describe('Table Vis - AggTable Directive', function () {
     );
   };
 
+  ngMock.inject(function (Private) {
+    legacyDependencies = {
+      // eslint-disable-next-line new-cap
+      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
+    };
+
+    visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
+  });
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(function ($injector, Private, config) {
-      legacyDependencies = {
-        // eslint-disable-next-line new-cap
-        createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
-      };
-
-      setup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
-
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       Vis = Private(VisProvider);

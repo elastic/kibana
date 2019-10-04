@@ -7,6 +7,7 @@
 
 // TODO: Cleanup everything above this line
 
+@import "./style/variables";
 @import "./style/utilities";
 @import "./style/buttons";
 @import "./style/layout";
@@ -16,4 +17,5 @@
 @import "./style/monaco";
 @import "./style/filetree";
 @import "./style/query_bar";
+@import "./style/commits";
 @import "./style/filters";

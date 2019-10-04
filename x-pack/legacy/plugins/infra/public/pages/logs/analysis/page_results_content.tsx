@@ -6,7 +6,6 @@
 
 import datemath from '@elastic/datemath';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -17,7 +16,6 @@ import {
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -101,6 +99,17 @@ export const AnalysisResultsContent = ({
     [setSelectedTimeRange, handleQueryTimeRangeChange]
   );
 
+  const handleChartTimeRangeChange = useCallback(
+    ({ startTime, endTime }: TimeRange) => {
+      handleSelectedTimeRangeChange({
+        end: new Date(endTime).toISOString(),
+        isInvalid: false,
+        start: new Date(startTime).toISOString(),
+      });
+    },
+    [handleSelectedTimeRangeChange]
+  );
+
   const handleAutoRefreshChange = useCallback(
     ({ isPaused, refreshInterval: interval }: { isPaused: boolean; refreshInterval: number }) => {
       setAutoRefresh({
@@ -110,21 +119,6 @@ export const AnalysisResultsContent = ({
     },
     [setAutoRefresh]
   );
-
-  const anomaliesDetected = useMemo(() => {
-    if (!logEntryRate) {
-      return null;
-    } else {
-      if (logEntryRate.histogramBuckets && logEntryRate.histogramBuckets.length) {
-        return logEntryRate.histogramBuckets.reduce(
-          (acc, bucket) => acc + bucket.anomalies.length,
-          0
-        );
-      } else {
-        return null;
-      }
-    }
-  }, [logEntryRate]);
 
   return (
     <>
@@ -139,29 +133,8 @@ export const AnalysisResultsContent = ({
           <EuiPage>
             <EuiPanel paddingSize="l">
               <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={7}>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      {anomaliesDetected !== null ? (
-                        <span>
-                          <FormattedMessage
-                            id="xpack.infra.logs.analysis.anomaliesDetectedText"
-                            defaultMessage="Detected {formattedNumber} {number, plural, one {anomaly} other {anomalies}}"
-                            values={{
-                              formattedNumber: (
-                                <EuiBadge color={anomaliesDetected === 0 ? 'default' : 'warning'}>
-                                  {anomaliesDetected}
-                                </EuiBadge>
-                              ),
-                              number: anomaliesDetected,
-                            }}
-                          />
-                        </span>
-                      ) : null}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem></EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiSuperDatePicker
                     start={selectedTimeRange.startTime}
                     end={selectedTimeRange.endTime}
@@ -183,6 +156,7 @@ export const AnalysisResultsContent = ({
                   <LogRateResults
                     isLoading={isLoading}
                     results={logEntryRate}
+                    setTimeRange={handleChartTimeRangeChange}
                     timeRange={queryTimeRange}
                   />
                 </EuiPageContentBody>

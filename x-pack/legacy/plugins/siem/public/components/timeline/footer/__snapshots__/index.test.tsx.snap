@@ -33,33 +33,25 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
               Array [
                 <EuiContextMenuItem
                   icon="empty"
-                  layoutAlign="center"
                   onClick={[Function]}
-                  toolTipPosition="right"
                 >
                   1 rows
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="empty"
-                  layoutAlign="center"
                   onClick={[Function]}
-                  toolTipPosition="right"
                 >
                   5 rows
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="empty"
-                  layoutAlign="center"
                   onClick={[Function]}
-                  toolTipPosition="right"
                 >
                   10 rows
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="empty"
-                  layoutAlign="center"
                   onClick={[Function]}
-                  toolTipPosition="right"
                 >
                   20 rows
                 </EuiContextMenuItem>,

@@ -493,5 +493,6 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
       },
     }
   }
+  timelineId="test"
 />
 `;

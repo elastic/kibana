@@ -34,6 +34,7 @@ describe('get_column_renderer', () => {
       eventId: _id,
       values: getValues(columnName, nonSuricata),
       field: defaultHeaders[1],
+      timelineId: 'test',
     });
 
     const wrapper = shallow(<span>{column}</span>);
@@ -48,6 +49,7 @@ describe('get_column_renderer', () => {
       eventId: _id,
       values: getValues(columnName, nonSuricata),
       field: defaultHeaders[1],
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -67,6 +69,7 @@ describe('get_column_renderer', () => {
       eventId: _id,
       values: getValues(columnName, nonSuricata),
       field: defaultHeaders[7],
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -84,6 +87,7 @@ describe('get_column_renderer', () => {
       eventId: _id,
       values: getValues(columnName, nonSuricata),
       field: defaultHeaders[7],
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>

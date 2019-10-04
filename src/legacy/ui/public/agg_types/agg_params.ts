@@ -23,8 +23,8 @@ import { OptionedParamType } from './param_types/optioned';
 import { StringParamType } from './param_types/string';
 import { JsonParamType } from './param_types/json';
 import { BaseParamType } from './param_types/base';
-import { AggConfig } from '../vis/agg_config';
-import { AggConfigs } from '../vis/agg_configs';
+import { AggConfig } from './agg_config';
+import { AggConfigs } from './agg_configs';
 
 export type AggParam = BaseParamType;
 

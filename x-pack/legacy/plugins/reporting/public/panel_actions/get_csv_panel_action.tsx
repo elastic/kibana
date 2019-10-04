@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
@@ -11,16 +10,15 @@ import moment from 'moment-timezone';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
-import { EuiIcon } from '@elastic/eui';
+
+import { npSetup } from 'ui/new_platform';
+import { IAction, IncompatibleActionError } from '../../../../../../src/plugins/ui_actions/public';
 
 import {
-  Action,
   ViewMode,
-  IncompatibleActionError,
   IEmbeddable,
   CONTEXT_MENU_TRIGGER,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   ISearchEmbeddable,
   SEARCH_EMBEDDABLE_TYPE,
@@ -41,18 +39,17 @@ interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
-class GetCsvReportPanelAction extends Action<ActionContext> {
+class GetCsvReportPanelAction implements IAction<ActionContext> {
   private isDownloading: boolean;
   public readonly type = CSV_REPORTING_ACTION;
+  public readonly id = CSV_REPORTING_ACTION;
 
   constructor() {
-    super(CSV_REPORTING_ACTION);
-
     this.isDownloading = false;
   }
 
-  public getIcon() {
-    return <EuiIcon type="document" />;
+  public getIconType() {
+    return 'document';
   }
 
   public getDisplayName() {
@@ -179,5 +176,5 @@ class GetCsvReportPanelAction extends Action<ActionContext> {
 }
 
 const action = new GetCsvReportPanelAction();
-setup.registerAction(action);
-setup.attachAction(CONTEXT_MENU_TRIGGER, action.id);
+npSetup.plugins.uiActions.registerAction(action);
+npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);

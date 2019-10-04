@@ -21,6 +21,12 @@ export interface CanvasElement {
   filter: string;
 }
 
+export interface CanvasGroup {
+  id: string;
+  position: ElementPosition;
+  expression?: string;
+}
+
 export interface CanvasPage {
   id: string;
   style: {
@@ -28,7 +34,7 @@ export interface CanvasPage {
   };
   transition: {}; // Fix
   elements: CanvasElement[];
-  groups: CanvasElement[][];
+  groups: CanvasGroup[];
 }
 
 export interface CanvasWorkpad {

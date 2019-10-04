@@ -5,9 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tryCatch, fromNullable } from 'fp-ts/lib/Option';
+import { tryCatch, fromNullable, isSome, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
 import { URL } from 'url';
 import { curry } from 'lodash';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 export enum WhitelistedHosts {
   Any = '*',
@@ -47,20 +48,24 @@ function doesValueWhitelistAnyHostname(whitelistedHostname: string): boolean {
 function isWhitelisted({ whitelistedHosts }: ActionsKibanaConfig, hostname: string): boolean {
   return (
     Array.isArray(whitelistedHosts) &&
-    fromNullable(
-      whitelistedHosts.find(
-        whitelistedHostname =>
-          doesValueWhitelistAnyHostname(whitelistedHostname) || whitelistedHostname === hostname
+    isSome(
+      fromNullable(
+        whitelistedHosts.find(
+          whitelistedHostname =>
+            doesValueWhitelistAnyHostname(whitelistedHostname) || whitelistedHostname === hostname
+        )
       )
-    ).isSome()
+    )
   );
 }
 
 function isWhitelistedHostnameInUri(config: ActionsKibanaConfig, uri: string): boolean {
-  return tryCatch(() => new URL(uri))
-    .map(url => url.hostname)
-    .mapNullable(hostname => isWhitelisted(config, hostname))
-    .getOrElse(false);
+  return pipe(
+    tryCatch(() => new URL(uri)),
+    map(url => url.hostname),
+    mapNullable(hostname => isWhitelisted(config, hostname)),
+    getOrElse(() => false)
+  );
 }
 
 export function getActionsConfigurationUtilities(

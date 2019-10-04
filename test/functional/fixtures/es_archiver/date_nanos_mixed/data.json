@@ -1,0 +1,95 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:timestamp-*",
+    "index": ".kibana",
+    "source": {
+      "index-pattern": {
+        "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"timestamp\",\"type\":\"date\",\"esTypes\":[\"date\",\"date_nanos\"],\"count\":2,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+        "timeFieldName": "timestamp",
+        "title": "timestamp-*",
+        "fieldFormatMap": "{\"timestamp\":{\"id\":\"date_nanos\"}}"
+      },
+      "type": "index-pattern"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "search:82116b30-d407-11e9-8004-932185690e7b",
+    "index": ".kibana",
+    "source": {
+      "search": {
+        "columns": [
+          "_source"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"key\":\"number\",\"negate\":false,\"params\":{\"query\":123},\"type\":\"phrase\",\"value\":\"123\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"number\":{\"query\":123,\"type\":\"phrase\"}}}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [
+          [
+            "@timestamp",
+            "desc"
+          ]
+        ],
+        "title": "New Saved Search",
+        "version": 1
+      },
+      "type": "search"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "timestamp-millis",
+    "source": {
+      "timestamp": "2019-01-01T12:10:30.124Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "timestamp-millis",
+    "source": {
+      "timestamp": "2019-01-01T12:10:30.123Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "timestamp-nanos",
+    "source": {
+      "timestamp": "2019-01-01T12:10:30.123456789Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "timestamp-nanos",
+    "source": {
+      "timestamp": "2019-01-01T12:10:30.123498765Z"
+    },
+    "type": "_doc"
+  }
+}

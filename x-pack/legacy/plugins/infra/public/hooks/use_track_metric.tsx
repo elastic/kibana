@@ -72,3 +72,14 @@ export function useTrackPageview(
 ) {
   useTrackMetric({ ...rest, metric: `pageview__${path}` }, effectDependencies);
 }
+
+interface TrackEventProps {
+  app: ObservabilityApp;
+  name: string;
+  metricType?: METRIC_TYPE;
+}
+
+export function trackEvent({ app, name, metricType = METRIC_TYPE.CLICK }: TrackEventProps) {
+  const trackUiMetric = getTrackerForApp(app);
+  trackUiMetric(metricType, `event__${name}`);
+}

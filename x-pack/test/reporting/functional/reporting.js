@@ -73,7 +73,8 @@ export default function ({ getService, getPageObjects }) {
           await expectDisabledGenerateReportButton();
         });
 
-        it('becomes available when saved', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/45499
+        it.skip('becomes available when saved', async () => {
           await PageObjects.dashboard.saveDashboard('mypdfdash');
           await PageObjects.reporting.openPdfReportingPanel();
           await expectEnabledGenerateReportButton();
@@ -187,7 +188,8 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('Print PNG button', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/43131
+      describe.skip('Print PNG button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.clickNewDashboard();
@@ -252,7 +254,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('Discover', () => {
-      describe('Generate CSV button', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/31379
+      describe.skip('Generate CSV button', () => {
         beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
         it('is not available if new', async () => {

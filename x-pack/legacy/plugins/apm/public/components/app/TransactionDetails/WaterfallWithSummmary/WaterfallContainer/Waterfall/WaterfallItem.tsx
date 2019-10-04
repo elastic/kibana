@@ -222,12 +222,13 @@ export function WaterfallItem({
           >
             <EuiToolTip content={tooltipContent}>
               <ErrorCountBadge
-                errorCount={errorCount}
                 onClick={event => {
                   event.stopPropagation();
                 }}
                 onClickAriaLabel={tooltipContent}
-              />
+              >
+                {errorCount}
+              </ErrorCountBadge>
             </EuiToolTip>
           </ErrorOverviewLink>
         ) : null}
