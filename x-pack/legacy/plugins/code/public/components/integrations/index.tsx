@@ -11,8 +11,14 @@ import { CodeBlock } from '../codeblock/codeblock';
 import { history } from '../../utils/url';
 import { FrameHeader } from './frame_header';
 import { RepoTitle } from './repo_title';
+import { CodeIntegrator } from './code_integrator';
 import { externalFileURI } from './helpers';
-import { frames, results } from './data';
+import { frames, Frame, repos, results } from './data';
+
+const associateToService = (frame: Frame) => (repo: string) =>
+  alert(`repo ${repo} associated with service ${JSON.stringify(frame)}`);
+
+const handleImport = (repo: string) => alert(`import done: ${repo}`);
 
 export const Integrations = () => (
   <div className="codeContainer__root codeIntegrations__container">
@@ -53,6 +59,11 @@ export const Integrations = () => (
               <span className="codeIntegrations__preposition">at</span>
               <span>line {lineNumber}</span>
             </EuiText>
+            <CodeIntegrator
+              onRepoSelect={associateToService(frame)}
+              onImportSuccess={handleImport}
+              repos={repos}
+            />
           </EuiFlexGroup>
         </div>
       );
