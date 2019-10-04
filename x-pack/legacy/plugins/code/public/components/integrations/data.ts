@@ -8,16 +8,9 @@ export interface Snippet {
   uri: string;
   filePath: string;
   language?: string;
-  hits: number;
   compositeContent: {
     content: string;
     lineMapping: string[];
-    ranges: Array<{
-      startColumn: number;
-      startLineNumber: number;
-      endColumn: number;
-      endLineNumber: number;
-    }>;
   };
 }
 
@@ -28,7 +21,6 @@ export const results: Results = {
     uri: 'github.com/rylnd/ringside',
     filePath: 'src/ringside.ts',
     language: 'typescript',
-    hits: 4,
     compositeContent: {
       content:
         "\nimport { fitsInside, fitsOutside } from './fitting';\n\nexport interface RingsideInterface {\n  positions(): FittedPosition[];\n}\n\nclass Ringside implements RingsideInterface {\n  readonly innerBounds: FullRect;\n  readonly outerBounds: FullRect;\n\n}\n\nexport default Ringside;\n",
@@ -49,39 +41,12 @@ export const results: Results = {
         '69',
         '70',
       ],
-      ranges: [
-        {
-          startColumn: 18,
-          startLineNumber: 4,
-          endColumn: 26,
-          endLineNumber: 4,
-        },
-        {
-          startColumn: 7,
-          startLineNumber: 8,
-          endColumn: 15,
-          endLineNumber: 8,
-        },
-        {
-          startColumn: 27,
-          startLineNumber: 8,
-          endColumn: 35,
-          endLineNumber: 8,
-        },
-        {
-          startColumn: 16,
-          startLineNumber: 14,
-          endColumn: 24,
-          endLineNumber: 14,
-        },
-      ],
     },
   },
   'ringside.story.tsx#L12': {
     uri: 'github.com/rylnd/ringside',
     filePath: 'stories/ringside.story.tsx',
     language: 'typescript',
-    hits: 11,
     compositeContent: {
       content:
         "\nimport { interpolateRainbow } from 'd3-scale-chromatic';\n\nimport { Ringside } from '../src';\nimport { XAlignment, YAlignment, XBasis, YBasis } from '../src/types';\n\nlet ringside: Ringside;\n\nconst enumKeys: (e: any) => string[] = e =>\n\n\nconst color = position => {\n  const combos = ringside.positions().map(p => JSON.stringify(p));\n  const hash = combos.indexOf(JSON.stringify(position)) / combos.length;\n\n\n};\n\nconst Stories = storiesOf('Ringside', module).addDecorator(withKnobs);\n\nStories.add('Ringside', () => {\n",
@@ -109,44 +74,6 @@ export const results: Results = {
         '24',
         '..',
       ],
-      ranges: [
-        {
-          startColumn: 10,
-          startLineNumber: 4,
-          endColumn: 18,
-          endLineNumber: 4,
-        },
-        {
-          startColumn: 5,
-          startLineNumber: 7,
-          endColumn: 13,
-          endLineNumber: 7,
-        },
-        {
-          startColumn: 15,
-          startLineNumber: 7,
-          endColumn: 23,
-          endLineNumber: 7,
-        },
-        {
-          startColumn: 18,
-          startLineNumber: 13,
-          endColumn: 26,
-          endLineNumber: 13,
-        },
-        {
-          startColumn: 28,
-          startLineNumber: 19,
-          endColumn: 36,
-          endLineNumber: 19,
-        },
-        {
-          startColumn: 14,
-          startLineNumber: 21,
-          endColumn: 22,
-          endLineNumber: 21,
-        },
-      ],
     },
   },
 
@@ -154,7 +81,6 @@ export const results: Results = {
     uri: 'github.com/rylnd/ringside',
     filePath: 'stories/ringside.story.tsx',
     language: 'typescript',
-    hits: 7,
     compositeContent: {
       content:
         "import { Ringside } from '../src';\n\ndescribe('Ringside', () => {\n  let inner;\n  let outer;\n  let height;\n  let width;\n  let ringside: Ringside;\n\n  beforeEach(() => {\n\n    width = 50;\n\n    ringside = new Ringside(inner, outer, height, width);\n  });\n\n",
@@ -176,44 +102,6 @@ export const results: Results = {
         '17',
         '18',
         '..',
-      ],
-      ranges: [
-        {
-          startColumn: 10,
-          startLineNumber: 1,
-          endColumn: 18,
-          endLineNumber: 1,
-        },
-        {
-          startColumn: 11,
-          startLineNumber: 3,
-          endColumn: 19,
-          endLineNumber: 3,
-        },
-        {
-          startColumn: 7,
-          startLineNumber: 8,
-          endColumn: 15,
-          endLineNumber: 8,
-        },
-        {
-          startColumn: 17,
-          startLineNumber: 8,
-          endColumn: 25,
-          endLineNumber: 8,
-        },
-        {
-          startColumn: 5,
-          startLineNumber: 14,
-          endColumn: 13,
-          endLineNumber: 14,
-        },
-        {
-          startColumn: 20,
-          startLineNumber: 14,
-          endColumn: 28,
-          endLineNumber: 14,
-        },
       ],
     },
   },
@@ -222,7 +110,6 @@ export const results: Results = {
     uri: 'github.com/rylnd/ringside',
     filePath: 'stories/ringside.story.tsx',
     language: 'typescript',
-    hits: 7,
     compositeContent: {
       content:
         "import { Ringside } from '../src';\n\ndescribe('Ringside', () => {\n  let inner;\n  let outer;\n  let height;\n  let width;\n  let ringside: Ringside;\n\n  beforeEach(() => {\n\n    width = 50;\n\n    ringside = new Ringside(inner, outer, height, width);\n  });\n\n",
@@ -244,44 +131,6 @@ export const results: Results = {
         '17',
         '18',
         '..',
-      ],
-      ranges: [
-        {
-          startColumn: 10,
-          startLineNumber: 1,
-          endColumn: 18,
-          endLineNumber: 1,
-        },
-        {
-          startColumn: 11,
-          startLineNumber: 3,
-          endColumn: 19,
-          endLineNumber: 3,
-        },
-        {
-          startColumn: 7,
-          startLineNumber: 8,
-          endColumn: 15,
-          endLineNumber: 8,
-        },
-        {
-          startColumn: 17,
-          startLineNumber: 8,
-          endColumn: 25,
-          endLineNumber: 8,
-        },
-        {
-          startColumn: 5,
-          startLineNumber: 14,
-          endColumn: 13,
-          endLineNumber: 14,
-        },
-        {
-          startColumn: 20,
-          startLineNumber: 14,
-          endColumn: 28,
-          endLineNumber: 14,
-        },
       ],
     },
   },

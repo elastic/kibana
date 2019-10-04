@@ -23,8 +23,7 @@ export const Integrations = () => (
 
       if (snippet) {
         const { compositeContent, filePath, language, uri } = snippet;
-        const { content, lineMapping, ranges } = compositeContent;
-        const lineNumberFn = (i: number) => lineMapping[i];
+        const { content, lineMapping } = compositeContent;
         const fileUrl = externalFileURI(uri, filePath);
 
         return (
@@ -40,8 +39,7 @@ export const Integrations = () => (
                 />
               }
               language={language}
-              lineNumber={lineNumberFn}
-              highlightRanges={ranges}
+              lineNumber={i => lineMapping[i]}
             />
           </div>
         );
