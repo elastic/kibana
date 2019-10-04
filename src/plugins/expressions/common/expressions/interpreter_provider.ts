@@ -24,7 +24,7 @@ import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { fromExpression, getType, getByAlias, castProvider } from '@kbn/interpreter/common';
 
 import { createError } from './create_error';
-import { ExpressionAST } from './types';
+import { ExpressionAST, ExpressionFunctionAST, AnyExpressionFunction, ArgumentType } from './types';
 
 export { createError };
 
@@ -34,15 +34,21 @@ export interface InterpreterConfig {
   handlers: any;
 }
 
-export type ExpressionInterpret = (ast: ExpressionAST, context?: any) => any;
+export type ExpressionInterpret = (
+  ast: ExpressionAST,
+  context?: AnyExpressionFunction['context'] | null
+) => any;
 
 export function interpreterProvider(config: InterpreterConfig): ExpressionInterpret {
   const { functions, types } = config;
   const handlers = { ...config.handlers, types };
   const cast = castProvider(types);
 
-  async function invokeChain(chainArr: any, context: any): Promise<any> {
-    if (!chainArr.length) return Promise.resolve(context);
+  async function invokeChain(
+    chainArr: ExpressionFunctionAST[],
+    context: AnyExpressionFunction['context'] | null
+  ): Promise<any> {
+    if (!chainArr.length) return context;
 
     // if execution was aborted return error
     if (handlers.abortSignal && handlers.abortSignal.aborted) {
@@ -54,6 +60,7 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
 
     const chain = clone(chainArr);
     const link = chain.shift(); // Every thing in the chain will always be a function right?
+    if (!link) throw Error('Function chain is empty.');
     const { function: fnName, arguments: fnArgs } = link;
     const fnDef = getByAlias(functions, fnName);
 
@@ -81,9 +88,13 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
     }
   }
 
-  async function invokeFunction(fnDef: any, context: any, args: any): Promise<any> {
+  async function invokeFunction(
+    fnDef: AnyExpressionFunction,
+    context: AnyExpressionFunction['context'] | null,
+    args: Record<string, unknown>
+  ): Promise<any> {
     // Check function input.
-    const acceptableContext = cast(context, fnDef.context.types);
+    const acceptableContext = cast(context, (fnDef.context || {}).types);
     const fnOutput = await fnDef.fn(acceptableContext, args, handlers);
 
     // Validate that the function returned the type it said it would.
@@ -111,7 +122,11 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
   }
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
-  async function resolveArgs(fnDef: any, context: any, argAsts: any): Promise<any> {
+  async function resolveArgs(
+    fnDef: AnyExpressionFunction,
+    context: AnyExpressionFunction['context'] | null,
+    argAsts: any
+  ): Promise<any> {
     const argDefs = fnDef.args;
 
     // Use the non-alias name from the argument definition
@@ -132,13 +147,15 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
 
     // Check for missing required arguments
     each(argDefs, argDef => {
-      const { aliases, default: argDefault, name: argName, required } = argDef;
+      const { aliases, default: argDefault, name: argName, required } = argDef as (ArgumentType<
+        any
+      > & { name: string });
       if (
         typeof argDefault === 'undefined' &&
         required &&
         typeof dealiasedArgAsts[argName] === 'undefined'
       ) {
-        if (aliases.length === 0) {
+        if (!aliases || aliases.length === 0) {
           throw new Error(`${fnDef.name} requires an argument`);
         } else {
           const errorArg = argName === '_' ? aliases[0] : argName; // use an alias if _ is the missing arg
