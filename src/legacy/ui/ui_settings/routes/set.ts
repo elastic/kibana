@@ -16,21 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Legacy } from 'kibana';
+import Joi from 'joi';
 
-async function handleRequest(request) {
+async function handleRequest(request: Legacy.Request) {
   const { key } = request.params;
+  const { value } = request.payload as any;
   const uiSettings = request.getUiSettingsService();
 
-  await uiSettings.remove(key);
+  await uiSettings.set(key, value);
+
   return {
-    settings: await uiSettings.getUserProvided()
+    settings: await uiSettings.getUserProvided(),
   };
 }
 
-export const deleteRoute = {
+export const setRoute = {
   path: '/api/kibana/settings/{key}',
-  method: 'DELETE',
-  handler: async (request, h) => {
-    return h.response(await handleRequest(request));
-  }
+  method: 'POST',
+  config: {
+    validate: {
+      params: Joi.object()
+        .keys({
+          key: Joi.string().required(),
+        })
+        .default(),
+
+      payload: Joi.object()
+        .keys({
+          value: Joi.any().required(),
+        })
+        .required(),
+    },
+    handler(request: Legacy.Request) {
+      return handleRequest(request);
+    },
+  },
 };

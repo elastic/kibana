@@ -30,9 +30,10 @@ import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
 import { LegacyIcon } from '../legacy_icon';
 import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
+import { UpdateableFieldProperties } from './field_manager';
+
 import { isEqual } from '../helpers';
 
-type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
 export interface FieldPickerProps {
   field: WorkspaceField;
   allFields: WorkspaceField[];
