@@ -1,5 +1,6 @@
 import { uniqueId, times, random } from 'lodash';
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
+
 import { constants } from '../../constants';
 
 export function ClientMock() {

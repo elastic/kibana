@@ -6,7 +6,7 @@
 
 import { format as formatUrl } from 'url';
 
-import { elasticsearch as legacyElasticsearch } from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 
 import shieldPlugin from '../../../../legacy/server/lib/esjs_shield_plugin';
 

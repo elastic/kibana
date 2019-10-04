@@ -6,7 +6,7 @@
 
 import { format as formatUrl } from 'url';
 
-import { elasticsearch as legacyElasticsearch } from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 
 export function LegacyEsProvider({ getService }) {
   const config = getService('config');
