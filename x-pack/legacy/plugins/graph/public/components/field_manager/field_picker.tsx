@@ -16,11 +16,17 @@ export interface FieldPickerProps {
   fieldMap: Record<string, WorkspaceField>;
   selectField: (fieldName: string) => void;
   deselectField: (fieldName: string) => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }
 
-export function FieldPicker({ fieldMap, selectField, deselectField }: FieldPickerProps) {
-  const [open, setOpen] = useState(false);
-
+export function FieldPicker({
+  fieldMap,
+  selectField,
+  deselectField,
+  open,
+  setOpen,
+}: FieldPickerProps) {
   const allFields = Object.values(fieldMap);
   const unselectedFields = allFields.filter(field => !field.selected);
   const hasSelectedFields = unselectedFields.length < allFields.length;

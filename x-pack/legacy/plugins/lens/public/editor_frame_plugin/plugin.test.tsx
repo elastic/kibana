@@ -59,6 +59,7 @@ describe('editor_frame plugin', () => {
         onChange: jest.fn(),
         dateRange: { fromDate: '', toDate: '' },
         query: { query: '', language: 'lucene' },
+        filters: [],
       });
       instance.unmount();
     }).not.toThrowError();
@@ -73,6 +74,7 @@ describe('editor_frame plugin', () => {
       onChange: jest.fn(),
       dateRange: { fromDate: '', toDate: '' },
       query: { query: '', language: 'lucene' },
+      filters: [],
     });
     instance.unmount();
 

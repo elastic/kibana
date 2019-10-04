@@ -12,15 +12,17 @@
     on-index-pattern-selected="uiSelectIndex"
     on-query-submit="submit"
     is-loading="loading"
+    is-initialized="!!workspace || savedWorkspace.id"
     initial-query="initialQuery"
     state="reduxState"
     dispatch="reduxDispatch"
+    on-fill-workspace="fillWorkspace"
     autocomplete-start="autocompleteStart"
     core-start="coreStart"
     store="store"
   ></graph-app>
 
-  <div class="gphGraph__container" id="GraphSvgContainer" ng-click="hideAllConfigPanels()">
+  <div class="gphGraph__container" id="GraphSvgContainer" ng-if="workspace">
     <graph-visualization
       nodes="workspace.nodes"
       edges="workspace.edges"
