@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
+import { first } from 'rxjs/operators';
 import { shim, Server } from './shim';
 import { TaskRunnerFactory } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecuteFunction } from './create_execute_function';
 import { ActionsPlugin, Services } from './types';
+import { KibanaRequest } from '../../../../../src/core/server';
 import { ActionsKibanaConfig, getActionsConfigurationUtilities } from './actions_config';
 import {
   createActionRoute,
@@ -22,12 +25,16 @@ import {
 } from './routes';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 
-export function init(server: Server) {
+export async function init(server: Server) {
   const { initializerContext, coreSetup, coreStart, pluginsSetup, pluginsStart } = shim(server);
 
-  const config = server.config();
+  const config$ = Rx.of({
+    enabled: server.config().get('xpack.actions.enabled'),
+    whitelistedHosts: server.config().get('xpack.actions.whitelistedHosts'),
+  });
+  const config = await config$.pipe(first()).toPromise();
   const logger = initializerContext.logger.get('plugins', 'actions');
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+  const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(first()).toPromise();
 
   pluginsSetup.xpack_main.registerFeature({
     id: 'actions',
@@ -69,7 +76,8 @@ export function init(server: Server) {
 
   function getServices(request: any): Services {
     return {
-      callCluster: (...args) => callWithRequest(request, ...args),
+      callCluster: (...args) =>
+        adminClient.asScoped(KibanaRequest.from(request)).callAsCurrentUser(...args),
       savedObjectsClient: coreStart.savedObjects.getScopedSavedObjectsClient(request),
     };
   }
@@ -102,9 +110,7 @@ export function init(server: Server) {
   registerBuiltInActionTypes({
     logger,
     actionTypeRegistry,
-    actionsConfigUtils: getActionsConfigurationUtilities(config.get(
-      'xpack.actions'
-    ) as ActionsKibanaConfig),
+    actionsConfigUtils: getActionsConfigurationUtilities(config as ActionsKibanaConfig),
   });
 
   // Routes
