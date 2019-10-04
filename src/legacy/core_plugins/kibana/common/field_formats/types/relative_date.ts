@@ -22,6 +22,7 @@ import {
   FieldFormat,
   TEXT_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
+  FieldFormatConvert,
 } from '../../../../../../plugins/data/common/';
 
 export function createRelativeDateFormat() {
@@ -34,8 +35,8 @@ export function createRelativeDateFormat() {
       super(params);
     }
 
-    _convert = {
-      [TEXT_CONTEXT_TYPE](val: any) {
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](val) {
         if (val === null || val === undefined) {
           return '-';
         }

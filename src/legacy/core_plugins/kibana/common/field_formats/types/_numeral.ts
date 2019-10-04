@@ -26,6 +26,7 @@ import {
   FieldFormat,
   TEXT_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
+  FieldFormatConvert,
 } from '../../../../../../plugins/data/common/';
 
 const numeralInst = numeral();
@@ -57,8 +58,8 @@ export function createNumeralFormat(opts: Record<string, any>) {
       };
     }
 
-    _convert = {
-      [TEXT_CONTEXT_TYPE](this: NumeralFormat, val: any) {
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](this: NumeralFormat, val) {
         if (val === -Infinity) return '-∞';
         if (val === +Infinity) return '+∞';
         if (typeof val !== 'number') {

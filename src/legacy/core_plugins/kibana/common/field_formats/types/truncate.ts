@@ -22,6 +22,7 @@ import {
   FieldFormat,
   TEXT_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
+  FieldFormatConvert,
 } from '../../../../../../plugins/data/common/';
 
 const omission = '...';
@@ -32,9 +33,9 @@ export function createTruncateFormat() {
     static title = 'Truncated String';
     static fieldType = KBN_FIELD_TYPES.STRING;
 
-    _convert = {
-      [TEXT_CONTEXT_TYPE](this: TruncateFormat, val: any) {
-        const length = this.param('fieldLength') as any;
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](this: TruncateFormat, val) {
+        const length = this.param('fieldLength');
         if (length > 0) {
           return trunc(val, {
             length: length + omission.length,

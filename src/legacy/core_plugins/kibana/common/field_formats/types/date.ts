@@ -19,7 +19,12 @@
 
 import { memoize, noop } from 'lodash';
 import moment from 'moment';
-import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common/';
+import {
+  FieldFormat,
+  FieldFormatConvert,
+  KBN_FIELD_TYPES,
+  TEXT_CONTEXT_TYPE,
+} from '../../../../../../plugins/data/common/';
 
 export function createDateFormat() {
   return class DateFormat extends FieldFormat {
@@ -45,34 +50,36 @@ export function createDateFormat() {
       };
     }
 
-    _convert(val: any) {
-      // don't give away our ref to converter so
-      // we can hot-swap when config changes
-      const pattern = this.param('pattern');
-      const timezone = this.param('timezone');
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](this: DateFormat, val) {
+        // don't give away our ref to converter so
+        // we can hot-swap when config changes
+        const pattern = this.param('pattern');
+        const timezone = this.param('timezone');
 
-      const timezoneChanged = this.timeZone !== timezone;
-      const datePatternChanged = this.memoizedPattern !== pattern;
-      if (timezoneChanged || datePatternChanged) {
-        this.timeZone = timezone;
-        this.memoizedPattern = pattern;
+        const timezoneChanged = this.timeZone !== timezone;
+        const datePatternChanged = this.memoizedPattern !== pattern;
+        if (timezoneChanged || datePatternChanged) {
+          this.timeZone = timezone;
+          this.memoizedPattern = pattern;
 
-        this.memoizedConverter = memoize(function converter(value: any) {
-          if (value === null || value === undefined) {
-            return '-';
-          }
+          this.memoizedConverter = memoize(function converter(value: any) {
+            if (value === null || value === undefined) {
+              return '-';
+            }
 
-          const date = moment(value);
+            const date = moment(value);
 
-          if (date.isValid()) {
-            return date.format(pattern);
-          } else {
-            return value;
-          }
-        });
-      }
+            if (date.isValid()) {
+              return date.format(pattern);
+            } else {
+              return value;
+            }
+          });
+        }
 
-      return this.memoizedConverter(val);
-    }
+        return this.memoizedConverter(val);
+      },
+    };
   };
 }

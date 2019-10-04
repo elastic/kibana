@@ -21,6 +21,7 @@ import {
   FieldFormat,
   TEXT_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
+  FieldFormatConvert,
 } from '../../../../../../plugins/data/common/';
 
 function convertLookupEntriesToMap(lookupEntries: any) {
@@ -48,8 +49,8 @@ export function createStaticLookupFormat() {
       };
     }
 
-    _convert = {
-      [TEXT_CONTEXT_TYPE](this: StaticLookupFormat, val: any) {
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](this: StaticLookupFormat, val) {
         const lookupEntries = this.param('lookupEntries');
         const unknownKeyValue = this.param('unknownKeyValue');
 

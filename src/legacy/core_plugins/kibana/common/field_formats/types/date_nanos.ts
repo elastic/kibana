@@ -17,9 +17,14 @@
  * under the License.
  */
 
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { memoize, noop } from 'lodash';
-import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common/';
+import {
+  FieldFormat,
+  FieldFormatConvert,
+  KBN_FIELD_TYPES,
+  TEXT_CONTEXT_TYPE,
+} from '../../../../../../plugins/data/common/';
 
 /**
  * Analyse the given moment.js format pattern for the fractional sec part (S,SS,SSS...)
@@ -43,7 +48,11 @@ export function analysePatternForFract(pattern: string) {
  * Since momentjs would loose the exact value for fractional seconds with a higher resolution than
  * milliseconds, the fractional pattern is replaced by the fractional value of the raw timestamp
  */
-export function formatWithNanos(dateMomentObj: any, valRaw: any, fracPatternObj: any) {
+export function formatWithNanos(
+  dateMomentObj: Moment,
+  valRaw: string,
+  fracPatternObj: Record<string, any>
+) {
   if (fracPatternObj.length <= 3) {
     // S,SS,SSS is formatted correctly by moment.js
     return dateMomentObj.format(fracPatternObj.pattern);
@@ -87,40 +96,42 @@ export function createDateNanosFormat() {
       };
     }
 
-    _convert(val: any) {
-      // don't give away our ref to converter so
-      // we can hot-swap when config changes
-      const pattern = this.param('pattern');
-      const timezone = this.param('timezone');
-      const fractPattern = analysePatternForFract(pattern);
-      const fallbackPattern = this.param('patternFallback');
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](this: DateNanosFormat, val) {
+        // don't give away our ref to converter so
+        // we can hot-swap when config changes
+        const pattern = this.param('pattern');
+        const timezone = this.param('timezone');
+        const fractPattern = analysePatternForFract(pattern);
+        const fallbackPattern = this.param('patternFallback');
 
-      const timezoneChanged = this.timeZone !== timezone;
-      const datePatternChanged = this.memoizedPattern !== pattern;
-      if (timezoneChanged || datePatternChanged) {
-        this.timeZone = timezone;
-        this.memoizedPattern = pattern;
+        const timezoneChanged = this.timeZone !== timezone;
+        const datePatternChanged = this.memoizedPattern !== pattern;
+        if (timezoneChanged || datePatternChanged) {
+          this.timeZone = timezone;
+          this.memoizedPattern = pattern;
 
-        this.memoizedConverter = memoize(function converter(value: any) {
-          if (value === null || value === undefined) {
-            return '-';
-          }
+          this.memoizedConverter = memoize(function converter(value: any) {
+            if (value === null || value === undefined) {
+              return '-';
+            }
 
-          const date = moment(value);
+            const date = moment(value);
 
-          if (typeof value !== 'string' && date.isValid()) {
-            // fallback for max/min aggregation, where unixtime in ms is returned as a number
-            // aggregations in Elasticsearch generally just return ms
-            return date.format(fallbackPattern);
-          } else if (date.isValid()) {
-            return formatWithNanos(date, value, fractPattern);
-          } else {
-            return value;
-          }
-        });
-      }
+            if (typeof value !== 'string' && date.isValid()) {
+              // fallback for max/min aggregation, where unixtime in ms is returned as a number
+              // aggregations in Elasticsearch generally just return ms
+              return date.format(fallbackPattern);
+            } else if (date.isValid()) {
+              return formatWithNanos(date, value, fractPattern);
+            } else {
+              return value;
+            }
+          });
+        }
 
-      return this.memoizedConverter(val);
-    }
+        return this.memoizedConverter(val);
+      },
+    };
   };
 }

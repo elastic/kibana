@@ -24,6 +24,7 @@ import {
   TEXT_CONTEXT_TYPE,
   HTML_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
+  FieldFormatConvert,
 } from '../../../../../../plugins/data/common/';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
@@ -65,7 +66,7 @@ export function createUrlFormat() {
       };
     }
 
-    private formatLabel(value: any, url?: any) {
+    private formatLabel(value: string, url?: string): string {
       const template = this.param('labelTemplate');
       if (url == null) url = this.formatUrl(value);
       if (!template) return url;
@@ -76,7 +77,7 @@ export function createUrlFormat() {
       });
     }
 
-    private formatUrl(value: any) {
+    private formatUrl(value: string): string {
       const template = this.param('urlTemplate');
       if (!template) return value;
 
@@ -86,13 +87,11 @@ export function createUrlFormat() {
       });
     }
 
-    private compileTemplate(template: string) {
-      const parts = template.split(templateMatchRE).map(function(part: string, i: number) {
-        // trim all the odd bits, the variable names
-        return i % 2 ? part.trim() : part;
-      });
+    private compileTemplate(template: string): Function {
+      // trim all the odd bits, the variable names
+      const parts = template.split(templateMatchRE).map((part, i) => (i % 2 ? part.trim() : part));
 
-      return function(locals: Record<any, any>) {
+      return function(locals: Record<string, any>): string {
         // replace all the odd bits with their local var
         let output = '';
         let i = -1;
@@ -111,18 +110,12 @@ export function createUrlFormat() {
       };
     }
 
-    _convert = {
-      [TEXT_CONTEXT_TYPE](this: UrlFormat, value: any): string {
+    _convert: FieldFormatConvert = {
+      [TEXT_CONTEXT_TYPE](this: UrlFormat, value) {
         return this.formatLabel(value);
       },
 
-      [HTML_CONTEXT_TYPE](
-        this: UrlFormat,
-        rawValue: any,
-        field: { name: string | number },
-        hit: { highlight: { [x: string]: any } },
-        parsedUrl: { origin: any; pathname: any; basePath: any }
-      ) {
+      [HTML_CONTEXT_TYPE](this: UrlFormat, rawValue, field, hit, parsedUrl) {
         const url = escape(this.formatUrl(rawValue));
         const label = escape(this.formatLabel(rawValue, url));
 

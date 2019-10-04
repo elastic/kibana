@@ -19,7 +19,12 @@
 
 import { memoize, noop } from 'lodash';
 import moment from 'moment-timezone';
-import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common/';
+import {
+  FieldFormat,
+  KBN_FIELD_TYPES,
+  FieldFormatConvert,
+  TEXT_CONTEXT_TYPE,
+} from '../../../../../../plugins/data/common/';
 
 export function createDateOnServerFormat() {
   return class DateFormat extends FieldFormat {
@@ -70,19 +75,21 @@ export function createDateOnServerFormat() {
       };
     }
 
-    _convert(val: any) {
-      // don't give away our ref to converter so we can hot-swap when config changes
-      const pattern = this.param('pattern');
-      const timezone = this.param('timezone');
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](this: DateFormat, val) {
+        // don't give away our ref to converter so we can hot-swap when config changes
+        const pattern = this.param('pattern');
+        const timezone = this.param('timezone');
 
-      const timezoneChanged = this.timeZone !== timezone;
-      const datePatternChanged = this.memoizedPattern !== pattern;
-      if (timezoneChanged || datePatternChanged) {
-        this.timeZone = timezone;
-        this.memoizedPattern = pattern;
-      }
+        const timezoneChanged = this.timeZone !== timezone;
+        const datePatternChanged = this.memoizedPattern !== pattern;
+        if (timezoneChanged || datePatternChanged) {
+          this.timeZone = timezone;
+          this.memoizedPattern = pattern;
+        }
 
-      return this.memoizedConverter(val);
-    }
+        return this.memoizedConverter(val);
+      },
+    };
   };
 }

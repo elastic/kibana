@@ -27,6 +27,7 @@ import {
   TEXT_CONTEXT_TYPE,
   HTML_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
+  FieldFormatConvert,
 } from '../../../../../../plugins/data/common/';
 
 const templateHtml = `
@@ -53,18 +54,13 @@ export function createSourceFormat() {
       this.getConfig = getConfig;
     }
 
-    _convert = {
-      [TEXT_CONTEXT_TYPE]: (value: any) => JSON.stringify(value),
-      [HTML_CONTEXT_TYPE]: function sourceToHtml(
-        this: SourceFormat,
-        source: any,
-        field: any,
-        hit: any
-      ) {
+    _convert: FieldFormatConvert = {
+      [TEXT_CONTEXT_TYPE]: value => JSON.stringify(value),
+      [HTML_CONTEXT_TYPE]: function sourceToHtml(this: SourceFormat, value, field, hit) {
         if (!field) {
           const converter = this.getConverterFor('text') as Function;
 
-          return escape(converter(source));
+          return escape(converter(value));
         }
 
         const highlights = (hit && hit.highlight) || {};

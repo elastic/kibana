@@ -22,6 +22,7 @@ import {
   FieldFormat,
   TEXT_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
+  FieldFormatConvert,
 } from '../../../../../../plugins/data/common/';
 // @ts-ignore
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
@@ -62,7 +63,7 @@ export function createStringFormat() {
       };
     }
 
-    private base64Decode(val: any) {
+    private base64Decode(val: string) {
       try {
         return Buffer.from(val, 'base64').toString('utf8');
       } catch (e) {
@@ -76,8 +77,8 @@ export function createStringFormat() {
       });
     }
 
-    _convert = {
-      [TEXT_CONTEXT_TYPE](this: StringFormat, val: any) {
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](this: StringFormat, val) {
         switch (this.param('transform')) {
           case 'lower':
             return String(val).toLowerCase();

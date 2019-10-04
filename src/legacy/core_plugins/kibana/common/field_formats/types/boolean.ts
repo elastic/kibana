@@ -21,6 +21,8 @@ import {
   FieldFormat,
   asPrettyString,
   KBN_FIELD_TYPES,
+  FieldFormatConvert,
+  TEXT_CONTEXT_TYPE,
 } from '../../../../../../plugins/data/common';
 
 export function createBoolFormat() {
@@ -29,25 +31,27 @@ export function createBoolFormat() {
     static title = 'Boolean';
     static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 
-    _convert(value: any): string {
-      if (typeof value === 'string') {
-        value = value.trim().toLowerCase();
-      }
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](value) {
+        if (typeof value === 'string') {
+          value = value.trim().toLowerCase();
+        }
 
-      switch (value) {
-        case false:
-        case 0:
-        case 'false':
-        case 'no':
-          return 'false';
-        case true:
-        case 1:
-        case 'true':
-        case 'yes':
-          return 'true';
-        default:
-          return asPrettyString(value);
-      }
-    }
+        switch (value) {
+          case false:
+          case 0:
+          case 'false':
+          case 'no':
+            return 'false';
+          case true:
+          case 1:
+          case 'true':
+          case 'yes':
+            return 'true';
+          default:
+            return asPrettyString(value);
+        }
+      },
+    };
   };
 }

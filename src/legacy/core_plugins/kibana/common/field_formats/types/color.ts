@@ -21,6 +21,7 @@ import { findLast, cloneDeep, template, escape } from 'lodash';
 import {
   asPrettyString,
   FieldFormat,
+  FieldFormatConvert,
   HTML_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
 } from '../../../../../../plugins/data/common/';
@@ -60,8 +61,8 @@ export function createColorFormat() {
       }
     }
 
-    _convert = {
-      [HTML_CONTEXT_TYPE](this: ColorFormat, val: any) {
+    _convert: Partial<FieldFormatConvert> = {
+      [HTML_CONTEXT_TYPE](this: ColorFormat, val) {
         const color = this.findColorRuleForVal(val) as typeof DEFAULT_COLOR;
         if (!color) return escape(asPrettyString(val));
 

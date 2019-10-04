@@ -18,7 +18,12 @@
  */
 
 import moment, { unitOfTime, Duration } from 'moment';
-import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common/';
+import {
+  FieldFormat,
+  KBN_FIELD_TYPES,
+  FieldFormatConvert,
+  TEXT_CONTEXT_TYPE,
+} from '../../../../../../plugins/data/common/';
 
 const ratioToSeconds: Record<string, number> = {
   picoseconds: 0.000000000001,
@@ -80,16 +85,18 @@ export function createDurationFormat() {
         outputPrecision: DEFAULT_OUTPUT_PRECISION,
       };
     }
-    _convert(val: number) {
-      const inputFormat = this.param('inputFormat');
-      const outputFormat = this.param('outputFormat') as keyof Duration;
-      const outputPrecision = this.param('outputPrecision');
-      const human = this.isHuman();
-      const prefix = val < 0 && human ? 'minus ' : '';
-      const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
-      const formatted = duration[outputFormat]();
-      const precise = human ? formatted : formatted.toFixed(outputPrecision);
-      return prefix + precise;
-    }
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](this: DurationFormat, val) {
+        const inputFormat = this.param('inputFormat');
+        const outputFormat = this.param('outputFormat') as keyof Duration;
+        const outputPrecision = this.param('outputPrecision');
+        const human = this.isHuman();
+        const prefix = val < 0 && human ? 'minus ' : '';
+        const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
+        const formatted = duration[outputFormat]();
+        const precise = human ? formatted : formatted.toFixed(outputPrecision);
+        return prefix + precise;
+      },
+    };
   };
 }

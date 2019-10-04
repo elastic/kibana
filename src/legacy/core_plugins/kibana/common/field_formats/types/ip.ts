@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../../plugins/data/common/';
+import {
+  FieldFormat,
+  FieldFormatConvert,
+  KBN_FIELD_TYPES,
+  TEXT_CONTEXT_TYPE,
+} from '../../../../../../plugins/data/common/';
 
 export function createIpFormat() {
   return class IpFormat extends FieldFormat {
@@ -25,13 +30,15 @@ export function createIpFormat() {
     static title = 'IP Address';
     static fieldType = KBN_FIELD_TYPES.IP;
 
-    _convert(val: any) {
-      if (val === undefined || val === null) return '-';
-      if (!isFinite(val)) return val;
+    _convert: Partial<FieldFormatConvert> = {
+      [TEXT_CONTEXT_TYPE](val) {
+        if (val === undefined || val === null) return '-';
+        if (!isFinite(val)) return val;
 
-      // shazzam!
-      // eslint-disable-next-line no-bitwise
-      return [val >>> 24, (val >>> 16) & 0xff, (val >>> 8) & 0xff, val & 0xff].join('.');
-    }
+        // shazzam!
+        // eslint-disable-next-line no-bitwise
+        return [val >>> 24, (val >>> 16) & 0xff, (val >>> 8) & 0xff, val & 0xff].join('.');
+      },
+    };
   };
 }
