@@ -32,8 +32,6 @@ export const StatusPanel = ({
         <SnapshotHistogram
           absoluteStartDate={absoluteDateRangeStart}
           absoluteEndDate={absoluteDateRangeEnd}
-          successColor={success}
-          dangerColor={danger}
           variables={sharedProps}
           height="160px"
         />
