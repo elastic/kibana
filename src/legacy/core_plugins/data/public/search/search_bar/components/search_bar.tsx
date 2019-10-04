@@ -66,14 +66,18 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
-  showSaveQuery?: boolean;
-
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
+  // Show when user has privileges to save
+  showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
   onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
+  // User has modified the saved query, your app should persist the update
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
+  // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
 }
 

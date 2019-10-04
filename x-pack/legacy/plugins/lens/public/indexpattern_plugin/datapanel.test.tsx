@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
 import React, { ChangeEvent } from 'react';
 import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
 import { createMockedDragDropContext } from './mocks';
@@ -12,6 +11,7 @@ import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } 
 import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 
 jest.mock('ui/new_platform');
@@ -220,6 +220,7 @@ describe('IndexPattern Data Panel', () => {
         toDate: 'now',
       },
       query: { query: '', language: 'lucene' },
+      filters: [],
       showEmptyFields: false,
       onToggleEmptyFields: jest.fn(),
     };
@@ -231,7 +232,7 @@ describe('IndexPattern Data Panel', () => {
       ...initialState,
       layers: { first: { indexPatternId: '1', columnOrder: [], columns: {} } },
     };
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <IndexPatternDataPanel
         {...defaultProps}
         state={state}
@@ -258,7 +259,7 @@ describe('IndexPattern Data Panel', () => {
         second: { indexPatternId: '1', columnOrder: [], columns: {} },
       },
     };
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <IndexPatternDataPanel
         {...defaultProps}
         state={state}
@@ -287,7 +288,7 @@ describe('IndexPattern Data Panel', () => {
         },
       },
     };
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <IndexPatternDataPanel
         {...defaultProps}
         state={state}
@@ -305,14 +306,14 @@ describe('IndexPattern Data Panel', () => {
   });
 
   it('should render a warning if there are no index patterns', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <InnerIndexPatternDataPanel {...defaultProps} currentIndexPatternId="" indexPatterns={{}} />
     );
     expect(wrapper.find('[data-test-subj="indexPattern-no-indexpatterns"]')).toHaveLength(1);
   });
 
   it('should call setState when the index pattern is switched', async () => {
-    const wrapper = shallow(<InnerIndexPatternDataPanel {...defaultProps} />);
+    const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
 
     wrapper.find(ChangeIndexPattern).prop('onChangeIndexPattern')('2');
 
@@ -333,7 +334,9 @@ describe('IndexPattern Data Panel', () => {
         },
       });
       const updateFields = jest.fn();
-      mount(<InnerIndexPatternDataPanel {...defaultProps} updateFieldsWithCounts={updateFields} />);
+      mountWithIntl(
+        <InnerIndexPatternDataPanel {...defaultProps} updateFieldsWithCounts={updateFields} />
+      );
 
       await waitForPromises();
 
@@ -400,7 +403,9 @@ describe('IndexPattern Data Panel', () => {
 
       const props = { ...defaultProps, indexPatterns: newIndexPatterns };
 
-      mount(<InnerIndexPatternDataPanel {...props} updateFieldsWithCounts={updateFields} />);
+      mountWithIntl(
+        <InnerIndexPatternDataPanel {...props} updateFieldsWithCounts={updateFields} />
+      );
 
       await waitForPromises();
 
@@ -410,7 +415,7 @@ describe('IndexPattern Data Panel', () => {
 
   describe('while showing empty fields', () => {
     it('should list all supported fields in the pattern sorted alphabetically', async () => {
-      const wrapper = shallow(
+      const wrapper = shallowWithIntl(
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
@@ -424,7 +429,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should filter down by name', () => {
-      const wrapper = shallow(
+      const wrapper = shallowWithIntl(
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
@@ -440,7 +445,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should filter down by type', () => {
-      const wrapper = mount(
+      const wrapper = mountWithIntl(
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
@@ -461,7 +466,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should toggle type if clicked again', () => {
-      const wrapper = mount(
+      const wrapper = mountWithIntl(
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
@@ -489,7 +494,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should filter down by type and by name', () => {
-      const wrapper = mount(
+      const wrapper = mountWithIntl(
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
@@ -537,7 +542,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should list all supported fields in the pattern sorted alphabetically', async () => {
-      const wrapper = shallow(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
+      const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
         'bytes',
@@ -546,7 +551,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should filter down by name', () => {
-      const wrapper = shallow(
+      const wrapper = shallowWithIntl(
         <InnerIndexPatternDataPanel {...emptyFieldsTestProps} showEmptyFields={true} />
       );
 
@@ -562,7 +567,7 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('should allow removing the filter for data', () => {
-      const wrapper = mount(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
 
       wrapper
         .find('[data-test-subj="lnsIndexPatternFiltersToggle"]')
