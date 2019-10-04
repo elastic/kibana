@@ -23,7 +23,9 @@ export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelP
         data-test-subj="indexPattern-switcher"
         trigger={{
           label: state.indexPatterns[state.layers[layerId].indexPatternId].title,
+          title: state.indexPatterns[state.layers[layerId].indexPatternId].title,
           'data-test-subj': 'lns_layerIndexPatternLabel',
+          size: 'xs',
         }}
         layer={state.layers[layerId]}
         indexPatterns={state.indexPatterns}
