@@ -15,13 +15,18 @@ import {
   fieldValidators,
 } from '../../../shared_imports';
 import { FIELD_TYPES_OPTIONS } from '../../../constants';
-import { useDispatch } from '../../../mappings_state';
+import { useState, useDispatch } from '../../../mappings_state';
 import { Field } from '../../../types';
+import { validateUniqueName } from '../../../lib';
 
 const formWrapper = (props: any) => <form {...props} />;
 
 export const CreateField = () => {
   const { form } = useForm<Field>();
+  const {
+    documentFields: { fieldToAddFieldTo },
+    fields,
+  } = useState();
   const dispatch = useDispatch();
 
   const submitForm = async (e?: React.FormEvent) => {
@@ -39,15 +44,26 @@ export const CreateField = () => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });
   };
 
+  const nameValidations = [
+    {
+      validator: fieldValidators.emptyField('Cannot be empty'),
+    },
+    {
+      validator: fieldValidators.containsCharsField({
+        chars: '.',
+        message: 'Cannot contain a dot (.)',
+      }),
+    },
+    {
+      validator: validateUniqueName(fields, undefined, fieldToAddFieldTo),
+    },
+  ];
+
   return (
     <Form form={form} style={{ padding: '20px 0' }} FormWrapper={formWrapper} onSubmit={submitForm}>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <UseField
-            path="name"
-            config={{ validations: [{ validator: fieldValidators.emptyField('Cannot be empty') }] }}
-            component={TextField}
-          />
+          <UseField path="name" config={{ validations: nameValidations }} component={TextField} />
         </EuiFlexItem>
         <EuiFlexItem>
           <UseField

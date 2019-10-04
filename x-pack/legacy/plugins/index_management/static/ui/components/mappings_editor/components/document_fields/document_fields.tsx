@@ -50,7 +50,7 @@ export const DocumentFields = () => {
     if (status !== 'editingField') {
       return null;
     }
-    const field = byId[fieldToEdit!].source;
+    const field = byId[fieldToEdit!];
     return <EditField field={field} />;
   };
 

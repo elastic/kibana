@@ -13,6 +13,7 @@ export {
   FIELD_TYPES,
   VALIDATION_TYPES,
   OnFormUpdateArg,
+  ValidationFunc,
 } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
