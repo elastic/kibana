@@ -10,7 +10,6 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiContextMenuPanelProps,
@@ -26,7 +25,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Query } from 'src/plugins/data/common';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
@@ -66,6 +64,7 @@ export function IndexPatternDataPanel({
   dragDropContext,
   core,
   query,
+  filters,
   dateRange,
 }: DatasourceDataPanelProps<IndexPatternPrivateState>) {
   const { indexPatterns, currentIndexPatternId } = state;
@@ -114,6 +113,7 @@ export function IndexPatternDataPanel({
       indexPatterns={indexPatterns}
       query={query}
       dateRange={dateRange}
+      filters={filters}
       dragDropContext={dragDropContext}
       showEmptyFields={state.showEmptyFields}
       onToggleEmptyFields={onToggleEmptyFields}
@@ -146,18 +146,16 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   indexPatterns,
   query,
   dateRange,
+  filters,
   dragDropContext,
   onChangeIndexPattern,
   updateFieldsWithCounts,
   showEmptyFields,
   onToggleEmptyFields,
   core,
-}: Partial<DatasourceDataPanelProps> & {
+}: Pick<DatasourceDataPanelProps, Exclude<keyof DatasourceDataPanelProps, 'state' | 'setState'>> & {
   currentIndexPatternId: string;
   indexPatterns: Record<string, IndexPattern>;
-  dateRange: DatasourceDataPanelProps['dateRange'];
-  query: Query;
-  core: DatasourceDataPanelProps['core'];
   dragDropContext: DragContextState;
   showEmptyFields: boolean;
   onToggleEmptyFields: () => void;
@@ -325,31 +323,26 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       >
         <EuiFlexItem grow={null}>
           <div className="lnsInnerIndexPatternDataPanel__header">
-            <EuiTitle size="xxs" className="eui-textTruncate">
-              <h4 title={currentIndexPattern.title}>{currentIndexPattern.title} </h4>
-            </EuiTitle>
-            <div className="lnsInnerIndexPatternDataPanel__changeLink">
-              <ChangeIndexPattern
-                data-test-subj="indexPattern-switcher"
-                trigger={{
-                  label: i18n.translate('xpack.lens.indexPatterns.changePatternLabel', {
-                    defaultMessage: '(change)',
-                  }),
-                  'data-test-subj': 'indexPattern-switch-link',
-                }}
-                currentIndexPatternId={currentIndexPatternId}
-                indexPatterns={indexPatterns}
-                onChangeIndexPattern={(newId: string) => {
-                  onChangeIndexPattern(newId);
+            <ChangeIndexPattern
+              data-test-subj="indexPattern-switcher"
+              trigger={{
+                label: currentIndexPattern.title,
+                title: currentIndexPattern.title,
+                'data-test-subj': 'indexPattern-switch-link',
+                className: 'lnsInnerIndexPatternDataPanel__triggerButton',
+              }}
+              currentIndexPatternId={currentIndexPatternId}
+              indexPatterns={indexPatterns}
+              onChangeIndexPattern={(newId: string) => {
+                onChangeIndexPattern(newId);
 
-                  setLocalState(s => ({
-                    ...s,
-                    nameFilter: '',
-                    typeFilter: [],
-                  }));
-                }}
-              />
-            </div>
+                setLocalState(s => ({
+                  ...s,
+                  nameFilter: '',
+                  typeFilter: [],
+                }));
+              }}
+            />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -487,6 +480,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     exists={overallField ? !!overallField.exists : false}
                     dateRange={dateRange}
                     query={query}
+                    filters={filters}
                   />
                 );
               })}
