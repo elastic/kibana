@@ -290,7 +290,8 @@ export const ml = {
       'groups',
       'indexPatternName',
       'query',
-      'useDedicatedIndex'
+      'useDedicatedIndex',
+      'startDatafeed'
     ]);
 
     return http({
