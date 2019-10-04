@@ -17,8 +17,39 @@
  * under the License.
  */
 
-export enum Browsers {
-  Chrome = 'chrome',
-  Firefox = 'firefox',
-  InternetExplorer = 'ie',
+export default async function ({ readConfigFile }) {
+  const defaultConfig = await readConfigFile(require.resolve('./config'));
+
+  return {
+    ...defaultConfig.getAll(),
+
+    browser: {
+      type: 'ie',
+    },
+
+    junit: {
+      reportName: 'Internet Explorer UI Functional Tests'
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
+        'telemetry:optIn': false,
+        'state:storeInSessionStorage': true,
+        'notifications:lifetime:info': 10000,
+      },
+    },
+
+
+    kbnTestServer: {
+      ...defaultConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...defaultConfig.get('kbnTestServer.serverArgs'),
+        '--csp.strict=false',
+      ],
+    },
+
+
+  };
 }
