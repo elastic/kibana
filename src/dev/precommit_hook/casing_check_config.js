@@ -42,7 +42,8 @@ export const IGNORE_FILE_GLOBS = [
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
   'src/legacy/ui/public/assets/fonts/**/*',
-  'Jenkinsfile',
+  '**/Jenkinsfile*',
+  'vars/*',
 
   // Files in this directory must match a pre-determined name in some cases.
   'x-pack/legacy/plugins/canvas/.storybook/*',
