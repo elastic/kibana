@@ -61,8 +61,7 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'baz.keyword',
               readFromDocValues: true,
-              parent: 'baz',
-              subType: 'multi',
+              subType: { multi: { parent: 'baz' } }
             },
             {
               type: 'number',
@@ -124,8 +123,7 @@ export default function ({ getService }) {
               aggregatable: true,
               name: 'baz.keyword',
               readFromDocValues: true,
-              parent: 'baz',
-              subType: 'multi',
+              subType: { multi: { parent: 'baz' } }
             },
             {
               aggregatable: false,

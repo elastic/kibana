@@ -40,7 +40,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         expect(fields).toHaveLength(22);
       });
 
-      it('includes only name, type, esTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, parent, ' +
+      it('includes only name, type, esTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, ' +
         'and subType of each field', () => {
         const responseClone = cloneDeep(esResponse);
         // try to trick it into including an extra field
@@ -48,7 +48,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         const fields = readFieldCapsResponse(responseClone);
 
         fields.forEach(field => {
-          const fieldWithoutOptionalKeys = omit(field, 'conflictDescriptions', 'parent', 'subType');
+          const fieldWithoutOptionalKeys = omit(field, 'conflictDescriptions', 'subType');
 
           expect(Object.keys(fieldWithoutOptionalKeys)).toEqual([
             'name',
@@ -132,20 +132,22 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         expect(mixSearchableOther.searchable).toBe(true);
       });
 
-      it('returns multi fields with parent and subType keys describing the relationship', () => {
+      it('returns multi fields with a subType key describing the relationship', () => {
         const fields = readFieldCapsResponse(esResponse);
         const child = fields.find(f => f.name === 'multi_parent.child');
-        expect(child).toHaveProperty('parent', 'multi_parent');
-        expect(child).toHaveProperty('subType', 'multi');
+        expect(child).toHaveProperty('subType', { multi: { parent: 'multi_parent' } });
       });
 
-      it('should not confuse object children for multi field children', () => {
+      it('returns nested sub-fields with a subType key describing the relationship', () => {
+        throw new Error('implement me');
+      });
+
+      it('should not confuse object children for multi or nested field children', () => {
         // We detect multi fields by finding fields that have a dot in their name and then looking
-        // to see if their parents are *not* object or nested fields. In the future we may want to
-        // add parent and subType info for object and nested fields but for now we don't need it.
+        // to see if their parents are *not* object fields. In the future we may want to
+        // add subType info for object fields but for now we don't need it.
         const fields = readFieldCapsResponse(esResponse);
         const child = fields.find(f => f.name === 'object_parent.child');
-        expect(child).not.toHaveProperty('parent');
         expect(child).not.toHaveProperty('subType');
       });
     });
