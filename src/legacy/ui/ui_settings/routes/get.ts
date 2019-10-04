@@ -16,18 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Legacy } from 'kibana';
 
-async function handleRequest(request) {
+async function handleRequest(request: Legacy.Request) {
   const uiSettings = request.getUiSettingsService();
   return {
-    settings: await uiSettings.getUserProvided()
+    settings: await uiSettings.getUserProvided(),
   };
 }
 
 export const getRoute = {
   path: '/api/kibana/settings',
   method: 'GET',
-  handler: function (request) {
+  handler(request: Legacy.Request) {
     return handleRequest(request);
-  }
+  },
 };

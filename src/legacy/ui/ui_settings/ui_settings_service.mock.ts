@@ -17,35 +17,24 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import { IUiSettingsClient } from './ui_settings_service';
 
-async function handleRequest(request) {
-  const { key } = request.params;
-  const { value } = request.payload;
-  const uiSettings = request.getUiSettingsService();
-
-  await uiSettings.set(key, value);
-
-  return {
-    settings: await uiSettings.getUserProvided()
+const createServiceMock = () => {
+  const mocked: jest.Mocked<IUiSettingsClient> = {
+    getDefaults: jest.fn(),
+    get: jest.fn(),
+    getAll: jest.fn(),
+    getUserProvided: jest.fn(),
+    setMany: jest.fn(),
+    set: jest.fn(),
+    remove: jest.fn(),
+    removeMany: jest.fn(),
+    isOverridden: jest.fn(),
   };
-}
+  mocked.get.mockResolvedValue(false);
+  return mocked;
+};
 
-export const setRoute = {
-  path: '/api/kibana/settings/{key}',
-  method: 'POST',
-  config: {
-    validate: {
-      params: Joi.object().keys({
-        key: Joi.string().required(),
-      }).default(),
-
-      payload: Joi.object().keys({
-        value: Joi.any().required()
-      }).required()
-    },
-    handler(request) {
-      return handleRequest(request);
-    }
-  }
+export const uiSettingsServiceMock = {
+  create: createServiceMock,
 };
