@@ -37,10 +37,7 @@ describe('Integration', () => {
 
     input = initializeInput(
       $('#ConAppEditor'),
-      $('#ConAppEditorActions'),
-      {},
-      { applyCurrentSettings: () => {} },
-      null,
+      $('#ConAppEditorActions')
     );
     input.$el.show();
     input.autocomplete._test.removeChangeListener();

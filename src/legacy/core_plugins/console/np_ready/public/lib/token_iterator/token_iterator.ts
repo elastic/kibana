@@ -23,21 +23,25 @@ function isColumnInTokenRange(column: number, token: Token) {
   if (column < token.position.column) {
     return false;
   }
-
-  return column <= token.position.column + token.value.length;
+  return column < token.position.column + token.value.length;
 }
 
 export class TokenIteratorImpl implements TokenIterator {
-  private currentTokenIdx: number;
+  private currentTokenIdx = -1;
   private currentPosition: Position;
   private tokensLineCache: Token[];
 
   constructor(private readonly provider: TokensProvider, startPosition: Position) {
     this.currentPosition = { ...startPosition };
     this.tokensLineCache = this.provider.getTokens(startPosition.lineNumber) || [];
-    this.currentTokenIdx = this.tokensLineCache.findIndex(token =>
+    const tokenIdx = this.tokensLineCache.findIndex(token =>
       isColumnInTokenRange(startPosition.column, token)
     );
+    if (tokenIdx > -1) {
+      this.updatePosition({ idx: tokenIdx, position: this.tokensLineCache[tokenIdx].position });
+    } else {
+      this.updatePosition({ idx: -1, position: startPosition });
+    }
   }
 
   private updateLineTokens(tokens: Token[]) {

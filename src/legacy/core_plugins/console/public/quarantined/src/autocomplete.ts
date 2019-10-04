@@ -968,7 +968,7 @@ export default function({
   }
 
   function getCompletions(
-    aceEditor: AceEditor,
+    DO_NOT_USE: AceEditor,
     session: IEditSession,
     pos: any,
     prefix: any,
