@@ -17,6 +17,15 @@ import {
 } from '../types';
 import { DATA_TYPE_DEFINITION } from '../constants';
 
+export const getUniqueId = () => {
+  return (
+    '_' +
+    (Number(String(Math.random()).slice(2)) + Date.now() + Math.round(performance.now())).toString(
+      36
+    )
+  );
+};
+
 const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
   if (dataType === 'text' || dataType === 'keyword') {
     return 'fields';
@@ -26,7 +35,7 @@ const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
   return undefined;
 };
 
-export const getFieldMeta = (field: Field, path: string, parentPath?: string): FieldMeta => {
+export const getFieldMeta = (field: Field): FieldMeta => {
   const childFieldsName = getChildFieldsName(field.type);
   const canHaveChildFields = Boolean(childFieldsName);
   const hasChildFields =
@@ -34,17 +43,10 @@ export const getFieldMeta = (field: Field, path: string, parentPath?: string): F
     Boolean(field[childFieldsName]) &&
     Object.keys(field[childFieldsName]!).length > 0;
 
-  const childFields = hasChildFields
-    ? Object.keys(field[childFieldsName!]!).map(propertyName => `${path}.${propertyName}`)
-    : undefined;
-
   return {
-    path,
-    parentPath,
     hasChildFields,
     childFieldsName,
     canHaveChildFields,
-    childFields,
   };
 };
 
@@ -95,21 +97,21 @@ export const getTypeFromSubType = (subType: SubType): MainType =>
 
 // normalized
 {
-  rootLevelFields: ['myObject'],
+  rootLevelFields: ['_uniqueId123'],
   byId: {
-    myObject: {
+    '_uniqueId123': {
       source: { type: 'object' },
-      path: 'myObject',
-      parentPath: undefined,
+      id: '_uniqueId123',
+      parentId: undefined,
       hasChildFields: true,
       childFieldsName: 'properties', // "object" type have their child fields under "properties"
       canHaveChildFields: true,
-      childFields: ['myObject.name'],
+      childFields: ['_uniqueId456'],
     },
-    'myObject.name': {
+    '_uniqueId456': {
       source: { type: 'text' },
-      path: 'myObject.name',
-      parentPath: 'myObject',
+      id: '_uniqueId456',
+      parentId: '_uniqueId123',
       hasChildFields: false,
       childFieldsName: 'fields', // "text" type have their child fields under "fields"
       canHaveChildFields: true,
@@ -124,43 +126,48 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
   const normalizeFields = (
     props: Fields,
     to: NormalizedFields['byId'] = {},
-    paths: string[] = []
+    idsArray: string[],
+    parentId?: string
   ): Record<string, any> =>
     Object.entries(props).reduce((acc, [propName, value]) => {
-      const parentPath = paths.length ? paths.join('.') : undefined;
-      const propertyPathArray = [...paths, propName];
-      const propertyPath = propertyPathArray.join('.');
+      const id = getUniqueId();
+      idsArray.push(id);
       const field = { name: propName, ...value } as Field;
-      const meta = getFieldMeta(field, propertyPath, parentPath);
+      const meta = getFieldMeta(field);
+      const { childFieldsName } = meta;
+
+      if (childFieldsName && field[childFieldsName]) {
+        meta.childFields = [];
+        normalizeFields(field[meta.childFieldsName!]!, to, meta.childFields, id);
+      }
+
       const { properties, fields, ...rest } = field;
 
       const normalizedField: NormalizedField = {
+        id,
+        parentId,
         source: rest,
         ...meta,
       };
 
-      acc[propertyPath] = normalizedField;
+      acc[id] = normalizedField;
 
-      if (meta.hasChildFields) {
-        return normalizeFields(field[meta.childFieldsName!]!, to, propertyPathArray);
-      }
-
-      acc[propertyPath] = normalizedField;
       return acc;
     }, to);
 
-  const byId = normalizeFields(fieldsToNormalize);
+  const rootLevelFields: string[] = [];
+  const byId = normalizeFields(fieldsToNormalize, {}, rootLevelFields);
 
   return {
     byId,
-    rootLevelFields: Object.keys(fieldsToNormalize),
+    rootLevelFields,
   };
 };
 
 export const deNormalize = (normalized: NormalizedFields): Fields => {
-  const deNormalizePaths = (paths: string[], to: Fields = {}) => {
-    paths.forEach(path => {
-      const { source, childFields, childFieldsName } = normalized.byId[path];
+  const deNormalizePaths = (ids: string[], to: Fields = {}) => {
+    ids.forEach(id => {
+      const { source, childFields, childFieldsName } = normalized.byId[id];
       const { name, ...normalizedField } = source;
       const field: Omit<Field, 'name'> = normalizedField;
       to[name] = field;

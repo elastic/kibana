@@ -15,10 +15,10 @@ export const DocumentFields = () => {
   const dispatch = useDispatch();
   const {
     fields: { byId, rootLevelFields },
-    documentFields: { status, fieldPathToAddField, fieldToEdit },
+    documentFields: { status, fieldToAddFieldTo, fieldToEdit },
   } = useState();
 
-  const getField = (propId: string) => byId[propId];
+  const getField = (fieldId: string) => byId[fieldId];
   const fields = rootLevelFields.map(getField);
 
   const addField = () => {
@@ -26,8 +26,8 @@ export const DocumentFields = () => {
   };
 
   const renderCreateField = () => {
-    // Root level (0) does not have the "fieldPathToAddField" set
-    if (status !== 'creatingField' || fieldPathToAddField !== undefined) {
+    // Root level (0) does not have the "fieldToAddFieldTo" set
+    if (status !== 'creatingField' || fieldToAddFieldTo !== undefined) {
       return null;
     }
 

@@ -91,16 +91,13 @@ export interface Field {
   type: DataType;
   properties?: { [key: string]: Field };
   fields?: { [key: string]: Field };
-  // [key: string]: any;
 }
 
 export interface FieldMeta {
-  path: string;
-  parentPath: string | undefined;
   childFieldsName: ChildFieldName | undefined;
   canHaveChildFields: boolean;
   hasChildFields: boolean;
-  childFields: string[] | undefined;
+  childFields?: string[];
 }
 
 export interface NormalizedFields {
@@ -111,6 +108,8 @@ export interface NormalizedFields {
 }
 
 export interface NormalizedField extends FieldMeta {
+  id: string;
+  parentId?: string;
   source: Omit<Field, 'properties' | 'fields'>;
 }
 

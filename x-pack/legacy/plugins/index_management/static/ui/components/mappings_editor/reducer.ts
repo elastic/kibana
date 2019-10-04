@@ -5,7 +5,7 @@
  */
 import { OnFormUpdateArg } from './shared_imports';
 import { Field, NormalizedFields, NormalizedField } from './types';
-import { getFieldMeta } from './lib';
+import { getFieldMeta, getUniqueId } from './lib';
 
 export interface MappingsConfiguration {
   dynamic: boolean | string;
@@ -26,7 +26,7 @@ export interface State {
   documentFields: {
     status: DocumentFieldsStatus;
     fieldToEdit?: string;
-    fieldPathToAddField?: string;
+    fieldToAddFieldTo?: string;
   };
   fields: {
     byId: NormalizedFields['byId'];
@@ -64,7 +64,7 @@ export const reducer = (state: State, action: Action): State => {
         ...state,
         documentFields: {
           ...state.documentFields,
-          fieldPathToAddField: action.value,
+          fieldToAddFieldTo: action.value,
           status: 'creatingField',
         },
       };
@@ -80,28 +80,29 @@ export const reducer = (state: State, action: Action): State => {
     case 'documentField.changeStatus':
       return { ...state, documentFields: { ...state.documentFields, status: action.value } };
     case 'field.add': {
-      const { fieldPathToAddField } = state.documentFields;
-      const { name } = action.value;
-      const addToRootLevel = fieldPathToAddField === undefined;
-      const fieldPath = addToRootLevel ? name : `${fieldPathToAddField}.${name}`;
+      const id = getUniqueId();
+      const { fieldToAddFieldTo } = state.documentFields;
+      const addToRootLevel = fieldToAddFieldTo === undefined;
 
       const rootLevelFields = addToRootLevel
-        ? [...state.fields.rootLevelFields, name]
+        ? [...state.fields.rootLevelFields, id]
         : state.fields.rootLevelFields;
 
-      state.fields.byId[fieldPath] = {
+      state.fields.byId[id] = {
+        id,
+        parentId: fieldToAddFieldTo,
         source: action.value,
-        ...getFieldMeta(action.value, fieldPath, fieldPathToAddField),
+        ...getFieldMeta(action.value),
       };
 
       if (!addToRootLevel) {
-        const parentField = state.fields.byId[fieldPathToAddField!];
+        const parentField = state.fields.byId[fieldToAddFieldTo!];
         const childFields = parentField.childFields || [];
 
         // Update parent field with new children
-        state.fields.byId[fieldPathToAddField!] = {
+        state.fields.byId[fieldToAddFieldTo!] = {
           ...parentField,
-          childFields: [fieldPath, ...childFields],
+          childFields: [id, ...childFields],
           hasChildFields: true,
         };
       }
@@ -112,69 +113,61 @@ export const reducer = (state: State, action: Action): State => {
       };
     }
     case 'field.remove': {
-      const { parentPath, path } = state.fields.byId[action.value];
-      if (parentPath) {
+      const { id, parentId } = state.fields.byId[action.value];
+      let { rootLevelFields } = state.fields;
+      if (parentId) {
         // Deleting a child field
-        const parentField = state.fields.byId[parentPath];
-        parentField.childFields = parentField.childFields!.filter(childPath => childPath !== path);
+        const parentField = state.fields.byId[parentId];
+        parentField.childFields = parentField.childFields!.filter(childId => childId !== id);
       } else {
         // Deleting a root level field
-        state.fields.rootLevelFields = state.fields.rootLevelFields.filter(
-          fieldPath => fieldPath !== path
-        );
+        rootLevelFields = rootLevelFields.filter(childId => childId !== id);
       }
 
-      delete state.fields.byId[path];
-      return state;
+      delete state.fields.byId[id];
+      return {
+        ...state,
+        fields: {
+          ...state.fields,
+          rootLevelFields,
+        },
+      };
     }
     case 'field.edit': {
       const fieldToEdit = state.documentFields.fieldToEdit!;
       const previousField = state.fields.byId[fieldToEdit!];
-      const { parentPath, source: previousFieldSource } = previousField;
 
-      // As the "name" might have changed, we first calculate the field path that we are editing
-      const newFieldPath = parentPath ? `${parentPath}.${action.value.name}` : action.value.name;
-
-      const newField: NormalizedField = {
+      let newField: NormalizedField = {
+        ...previousField,
         source: action.value,
-        ...getFieldMeta(action.value, newFieldPath, parentPath),
       };
 
-      // Check if the name has changed
-      if (newFieldPath !== fieldToEdit) {
-        // The name has changed...
-        if (parentPath) {
-          // ---> Update the parent `childFields` array
-          const parentField = state.fields.byId[parentPath];
-          // swap old field path with new one
-          parentField.childFields = parentField.childFields!.map(path =>
-            path === fieldToEdit ? newFieldPath : path
-          );
-        } else {
-          // ---> Update the root level fields
-          state.fields.rootLevelFields = state.fields.rootLevelFields.map(path =>
-            path === fieldToEdit ? newFieldPath : path
-          );
+      if (newField.source.type !== previousField.source.type) {
+        // The field `type` has changed, we need to update its meta information
+        // and delete all its children fields.
+
+        newField = {
+          ...newField,
+          ...getFieldMeta(action.value),
+          childFields: undefined,
+        };
+
+        if (previousField.childFields) {
+          previousField.childFields.forEach(fieldId => {
+            delete state.fields.byId[fieldId];
+          });
         }
-
-        // We need to update all the ids of the child fields
-
-        // Make sure to delete the old normalized field
-        // delete state.fields.byId[fieldToEdit];
       }
-
-      // Check if the type has changed. If it has we need to delete
-      // recursively all child properties
-      if (newField.source.type !== previousFieldSource.type) {
-        // const allChildFields = getAllChildFields(fieldToEdit, state.fields.byId);
-        // debugger;
-      }
-
-      state.fields.byId[newFieldPath] = newField;
 
       return {
         ...state,
-        documentFields: { ...state.documentFields, status: 'idle' },
+        fields: {
+          ...state.fields,
+          byId: {
+            ...state.fields.byId,
+            [fieldToEdit]: newField,
+          },
+        },
       };
     }
     default:

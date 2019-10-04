@@ -68,7 +68,6 @@ export const EditField = ({ field }: Props) => {
         <EuiFlexItem>
           <UseField
             path="type"
-            defaultValue="text"
             component={SelectField}
             componentProps={{
               euiFieldProps: {
@@ -81,11 +80,11 @@ export const EditField = ({ field }: Props) => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiButton onClick={submitForm} type="submit">
-            Add
+            Update
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton onClick={cancel}>Done</EuiButton>
+          <EuiButton onClick={cancel}>Cancel</EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Form>

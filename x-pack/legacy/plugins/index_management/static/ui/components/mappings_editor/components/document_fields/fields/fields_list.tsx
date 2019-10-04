@@ -10,16 +10,15 @@ import { NormalizedField } from '../../../types';
 
 interface Props {
   fields?: NormalizedField[];
-  path?: string;
   treeDepth?: number;
 }
 
-export const FieldsList = React.memo(({ fields = [], treeDepth = 0, path = '' }: Props) => {
+export const FieldsList = React.memo(({ fields = [], treeDepth = 0 }: Props) => {
   return (
     <ul>
       {fields.map(field => (
-        <li key={field.path}>
-          <FieldsListItem field={field} treeDepth={treeDepth} parentPath={path} />
+        <li key={field.id}>
+          <FieldsListItem field={field} treeDepth={treeDepth} />
         </li>
       ))}
     </ul>

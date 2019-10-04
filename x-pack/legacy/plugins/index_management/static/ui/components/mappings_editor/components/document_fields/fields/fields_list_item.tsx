@@ -13,7 +13,6 @@ import { NormalizedField } from '../../../types';
 
 interface Props {
   field: NormalizedField;
-  parentPath: string;
   treeDepth?: number;
 }
 
@@ -25,33 +24,33 @@ const inlineStyle = {
   alignItems: 'center',
 };
 
-export const FieldsListItem = ({ field, parentPath, treeDepth = 0 }: Props) => {
+export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   const dispatch = useDispatch();
   const {
-    documentFields: { status, fieldPathToAddField },
+    documentFields: { status, fieldToAddFieldTo },
     fields: { byId },
   } = useState();
   const getField = (propId: string) => byId[propId];
-  const { path, source, childFields, hasChildFields, canHaveChildFields } = field;
+  const { id, source, childFields, hasChildFields, canHaveChildFields } = field;
 
   const addField = () => {
     dispatch({
       type: 'documentField.createField',
-      value: path,
+      value: id,
     });
   };
 
   const editField = () => {
     dispatch({
       type: 'documentField.editField',
-      value: path,
+      value: id,
     });
   };
 
   const removeField = () => {
     dispatch({
       type: 'field.remove',
-      value: path,
+      value: id,
     });
   };
 
@@ -60,8 +59,8 @@ export const FieldsListItem = ({ field, parentPath, treeDepth = 0 }: Props) => {
       return null;
     }
 
-    // Root level (0) has does not have the "fieldPathToAddField" set
-    if (fieldPathToAddField !== path) {
+    // Root level (0) has does not have the "fieldToAddFieldTo" set
+    if (fieldToAddFieldTo !== id) {
       return null;
     }
 
@@ -96,7 +95,7 @@ export const FieldsListItem = ({ field, parentPath, treeDepth = 0 }: Props) => {
 
       {hasChildFields && (
         <div style={{ paddingLeft: '20px' }}>
-          <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} path={path} />
+          <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} />
         </div>
       )}
     </>
