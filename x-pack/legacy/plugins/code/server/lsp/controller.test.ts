@@ -5,7 +5,6 @@
  */
 
 import fs from 'fs';
-import mkdirp from 'mkdirp';
 import * as os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
@@ -83,7 +82,7 @@ JAVA.launcher = LauncherStub;
 let controller: typeof LanguageServerController;
 
 beforeAll(() => {
-  mkdirp.sync(workspaceDir);
+  fs.mkdirSync(workspaceDir, { recursive: true });
 });
 beforeEach(async () => {
   sinon.reset();
@@ -115,7 +114,7 @@ afterAll(() => {
 
 function mockRequest(repo: string, file: string) {
   const repoPath = path.join(workspaceDir, repo);
-  mkdirp.sync(repoPath);
+  fs.mkdirSync(repoPath, { recursive: true });
   return {
     method: 'request',
     params: [],
