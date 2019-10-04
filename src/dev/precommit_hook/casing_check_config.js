@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /**
  * These patterns are used to identify files that are not supposed
  * to be snake_case because their names are determined by other
@@ -43,13 +42,13 @@ export const IGNORE_FILE_GLOBS = [
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
   'src/dev/tslint/rules/*',
-  'Jenkinsfile',
+  '**/Jenkinsfile*',
   'Dockerfile*',
+  'vars/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 ];
-
 
 /**
  * These patterns are matched against directories and indicate
@@ -57,11 +56,7 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = [
-  'packages/*',
-  'x-pack',
-];
-
+export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
 
 /**
  * These patterns are matched against directories and indicate
@@ -90,7 +85,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
 ];
-
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!
