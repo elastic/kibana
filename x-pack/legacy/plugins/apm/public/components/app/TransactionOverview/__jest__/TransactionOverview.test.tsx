@@ -22,11 +22,22 @@ import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTra
 import { fromQuery } from '../../../shared/Links/url_helpers';
 import { Router } from 'react-router-dom';
 import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
+import { KibanaCoreContext } from '../../../../../../observability/public';
+import { LegacyCoreStart } from 'kibana/public';
 
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
 
 jest.mock('ui/kfetch');
+
+const coreMock = ({
+  // http: {
+  //   basePath: {
+  //     prepend: (path: string) => `/basepath${path}`
+  //   }
+  // },
+  notifications: { toasts: { addWarning: () => {} } }
+} as unknown) as LegacyCoreStart;
 
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */
@@ -59,11 +70,13 @@ function setup({
     .mockReturnValue(serviceTransactionTypes);
 
   return render(
-    <Router history={history}>
-      <UrlParamsProvider>
-        <TransactionOverview />
-      </UrlParamsProvider>
-    </Router>
+    <KibanaCoreContext.Provider value={coreMock}>
+      <Router history={history}>
+        <UrlParamsProvider>
+          <TransactionOverview />
+        </UrlParamsProvider>
+      </Router>
+    </KibanaCoreContext.Provider>
   );
 }
 
