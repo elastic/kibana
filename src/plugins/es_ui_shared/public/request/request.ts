@@ -21,13 +21,13 @@ import { useEffect, useState, useRef } from 'react';
 
 export interface SendRequestConfig {
   path: string;
-  method: string;
+  method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
   body?: any;
 }
 
 export interface SendRequestResponse {
   data: any;
-  error: Error;
+  error: Error | null;
 }
 
 export interface UseRequestConfig extends SendRequestConfig {
@@ -36,10 +36,18 @@ export interface UseRequestConfig extends SendRequestConfig {
   deserializer?: (data: any) => any;
 }
 
+export interface UseRequestResponse {
+  isInitialRequest: boolean;
+  isLoading: boolean;
+  error: null | unknown;
+  data: any;
+  sendRequest: (...args: any[]) => Promise<SendRequestResponse>;
+}
+
 export const sendRequest = async (
   httpClient: ng.IHttpService,
   { path, method, body }: SendRequestConfig
-): Promise<Partial<SendRequestResponse>> => {
+): Promise<SendRequestResponse> => {
   try {
     const response = await (httpClient as any)[method](path, body);
 
@@ -47,9 +55,10 @@ export const sendRequest = async (
       throw new Error(response.statusText);
     }
 
-    return { data: response.data };
+    return { data: response.data, error: null };
   } catch (e) {
     return {
+      data: null,
       error: e.response ? e.response : e,
     };
   }
@@ -65,7 +74,7 @@ export const useRequest = (
     initialData,
     deserializer = (data: any): any => data,
   }: UseRequestConfig
-) => {
+): UseRequestResponse => {
   // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -112,7 +121,7 @@ export const useRequest = (
     // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
     // to execute side effects like update telemetry.
     if (isOutdatedRequest) {
-      return;
+      return { data: null, error: null };
     }
 
     setError(responseError);
@@ -123,6 +132,8 @@ export const useRequest = (
     // If we're on an interval, we need to schedule the next request. This also allows us to reset
     // the interval if the user has manually requested the data, to avoid doubled-up requests.
     scheduleRequest();
+
+    return { data: serializedResponseData, error: responseError };
   };
 
   useEffect(() => {

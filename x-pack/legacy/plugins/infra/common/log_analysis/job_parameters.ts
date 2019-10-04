@@ -16,3 +16,7 @@ export const getJobId = (spaceId: string, sourceId: string, jobType: JobType) =>
 
 export const getDatafeedId = (spaceId: string, sourceId: string, jobType: JobType) =>
   `datafeed-${getJobId(spaceId, sourceId, jobType)}`;
+
+export const getAllModuleJobIds = (spaceId: string, sourceId: string) => [
+  getJobId(spaceId, sourceId, 'log-entry-rate'),
+];

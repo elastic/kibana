@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 
@@ -27,78 +27,23 @@ import { TabNavigation } from './tab_navigation';
 import { TabNavigationProps } from './tab_navigation/types';
 import { SiemNavigationComponentProps } from './types';
 
-export class SiemNavigationComponent extends React.Component<TabNavigationProps & RouteSpyState> {
-  public shouldComponentUpdate(nextProps: Readonly<TabNavigationProps & RouteSpyState>): boolean {
-    if (
-      this.props.pathName === nextProps.pathName &&
-      this.props.search === nextProps.search &&
-      isEqual(this.props.hosts, nextProps.hosts) &&
-      isEqual(this.props.hostDetails, nextProps.hostDetails) &&
-      isEqual(this.props.network, nextProps.network) &&
-      isEqual(this.props.navTabs, nextProps.navTabs) &&
-      isEqual(this.props.timerange, nextProps.timerange) &&
-      isEqual(this.props.timelineId, nextProps.timelineId)
-    ) {
-      return false;
-    }
-    return true;
-  }
-
-  public componentWillMount(): void {
-    const {
-      detailName,
-      hosts,
-      hostDetails,
-      navTabs,
-      network,
-      pageName,
-      pathName,
-      search,
-      tabName,
-      timerange,
-      timelineId,
-    } = this.props;
-    if (pathName) {
-      setBreadcrumbs({
-        detailName,
-        hosts,
-        hostDetails,
-        navTabs,
-        network,
-        pageName,
-        pathName,
-        search,
-        tabName,
-        timerange,
-        timelineId,
-      });
-    }
-  }
-
-  public componentWillReceiveProps(nextProps: Readonly<RouteSpyState & TabNavigationProps>): void {
-    if (
-      this.props.pathName !== nextProps.pathName ||
-      this.props.search !== nextProps.search ||
-      !isEqual(this.props.hosts, nextProps.hosts) ||
-      !isEqual(this.props.hostDetails, nextProps.hostDetails) ||
-      !isEqual(this.props.network, nextProps.network) ||
-      !isEqual(this.props.navTabs, nextProps.navTabs) ||
-      !isEqual(this.props.timerange, nextProps.timerange) ||
-      !isEqual(this.props.timelineId, nextProps.timelineId)
-    ) {
-      const {
-        detailName,
-        hosts,
-        hostDetails,
-        navTabs,
-        network,
-        pageName,
-        pathName,
-        search,
-        tabName,
-        timelineId,
-        timerange,
-      } = nextProps;
+export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyState>(
+  ({
+    detailName,
+    display,
+    hostDetails,
+    hosts,
+    navTabs,
+    network,
+    pageName,
+    pathName,
+    search,
+    showBorder,
+    tabName,
+    timelineId,
+    timerange,
+  }) => {
+    useEffect(() => {
       if (pathName) {
         setBreadcrumbs({
           detailName,
@@ -114,23 +59,8 @@ export class SiemNavigationComponent extends React.Component<TabNavigationProps 
           timelineId,
         });
       }
-    }
-  }
+    }, [pathName, search, hosts, hostDetails, network, navTabs, timerange, timelineId]);
 
-  public render() {
-    const {
-      display,
-      hostDetails,
-      hosts,
-      navTabs,
-      network,
-      pageName,
-      pathName,
-      showBorder,
-      tabName,
-      timelineId,
-      timerange,
-    } = this.props;
     return (
       <TabNavigation
         display={display}
@@ -146,8 +76,22 @@ export class SiemNavigationComponent extends React.Component<TabNavigationProps 
         timerange={timerange}
       />
     );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.pathName === nextProps.pathName &&
+      prevProps.search === nextProps.search &&
+      isEqual(prevProps.hosts, nextProps.hosts) &&
+      isEqual(prevProps.hostDetails, nextProps.hostDetails) &&
+      isEqual(prevProps.network, nextProps.network) &&
+      isEqual(prevProps.navTabs, nextProps.navTabs) &&
+      isEqual(prevProps.timerange, nextProps.timerange) &&
+      isEqual(prevProps.timelineId, nextProps.timelineId)
+    );
   }
-}
+);
+
+SiemNavigationComponent.displayName = 'SiemNavigationComponent';
 
 const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();

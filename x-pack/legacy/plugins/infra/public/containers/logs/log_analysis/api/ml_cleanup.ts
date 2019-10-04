@@ -5,8 +5,12 @@
  */
 
 import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { kfetch } from 'ui/kfetch';
-import { getJobId, getDatafeedId } from '../../../../../common/log_analysis';
+import { getAllModuleJobIds, getDatafeedId } from '../../../../../common/log_analysis';
+import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 
 export const callDeleteJobs = async (spaceId: string, sourceId: string) => {
   // NOTE: Deleting the jobs via this API will delete the datafeeds at the same time
@@ -15,12 +19,27 @@ export const callDeleteJobs = async (spaceId: string, sourceId: string) => {
     pathname: '/api/ml/jobs/delete_jobs',
     body: JSON.stringify(
       deleteJobsRequestPayloadRT.encode({
-        jobIds: [getJobId(spaceId, sourceId, 'log-entry-rate')],
+        jobIds: getAllModuleJobIds(spaceId, sourceId),
       })
     ),
   });
 
-  return deleteJobsResponse;
+  return pipe(
+    deleteJobsResponsePayloadRT.decode(deleteJobsResponse),
+    fold(throwErrors(createPlainError), identity)
+  );
+};
+
+export const callGetJobDeletionTasks = async () => {
+  const jobDeletionTasksResponse = await kfetch({
+    method: 'GET',
+    pathname: '/api/ml/jobs/deleting_jobs_tasks',
+  });
+
+  return pipe(
+    getJobDeletionTasksResponsePayloadRT.decode(jobDeletionTasksResponse),
+    fold(throwErrors(createPlainError), identity)
+  );
 };
 
 export const callStopDatafeed = async (spaceId: string, sourceId: string) => {
@@ -30,7 +49,10 @@ export const callStopDatafeed = async (spaceId: string, sourceId: string) => {
     pathname: `/api/ml/datafeeds/${getDatafeedId(spaceId, sourceId, 'log-entry-rate')}/_stop`,
   });
 
-  return stopDatafeedResponse;
+  return pipe(
+    stopDatafeedResponsePayloadRT.decode(stopDatafeedResponse),
+    fold(throwErrors(createPlainError), identity)
+  );
 };
 
 export const deleteJobsRequestPayloadRT = rt.type({
@@ -38,3 +60,18 @@ export const deleteJobsRequestPayloadRT = rt.type({
 });
 
 export type DeleteJobsRequestPayload = rt.TypeOf<typeof deleteJobsRequestPayloadRT>;
+
+export const deleteJobsResponsePayloadRT = rt.record(
+  rt.string,
+  rt.type({
+    deleted: rt.boolean,
+  })
+);
+
+export const getJobDeletionTasksResponsePayloadRT = rt.type({
+  jobIds: rt.array(rt.string),
+});
+
+export const stopDatafeedResponsePayloadRT = rt.type({
+  stopped: rt.boolean,
+});

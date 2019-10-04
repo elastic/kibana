@@ -39,7 +39,7 @@ import {
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
-import { TimeBuckets } from 'ui/time_buckets';
+import { TimeBuckets } from '../../../util/time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';

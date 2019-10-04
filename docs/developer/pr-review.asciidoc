@@ -75,7 +75,7 @@ Reviewers are not simply evaluating the code itself, they are also evaluating th
 
 Having a relatively consistent codebase is an important part of us building a sustainable project. With dozens of active contributors at any given time, we rely on automation to help ensure consistency - we enforce a comprehensive set of linting rules through CI. We're also rolling out prettier to make this even more automatic.
 
-For things that can't be easily automated, we maintain various link:https://github.com/elastic/kibana/tree/master/style_guides[styleguides] that authors should adhere to and reviewers should keep in mind when they review a pull request.
+For things that can't be easily automated, we maintain a link:https://github.com/elastic/kibana/blob/master/STYLEGUIDE.md[style guide] that authors should adhere to and reviewers should keep in mind when they review a pull request.
 
 Beyond that, we're into subjective territory. Statements like "this isn't very readable" are hardly helpful since they can't be qualified, but that doesn't mean a reviewer should outright ignore code that is hard to understand due to how it is written. There isn't one definitively "best" way to write any particular code, so pursuing such shouldn't be our goal. Instead, reviewers and authors alike must accept that there are likely many different appropriate ways to accomplish the same thing with code, and so long as the contribution is utilizing one of those ways, then we're in good shape.
 

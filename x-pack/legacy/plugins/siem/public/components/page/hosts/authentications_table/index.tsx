@@ -104,6 +104,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     <PaginatedTable
       activePage={activePage}
       columns={getAuthenticationColumnsCurated(type)}
+      dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
       headerUnit={i18n.UNIT(totalCount)}

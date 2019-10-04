@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as Rx from 'rxjs';
+import Boom from 'boom';
 import { Legacy } from 'kibana';
 // @ts-ignore
 import { kibanaTestUser } from '@kbn/test';
@@ -11,7 +12,8 @@ import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import {
   HttpServiceSetup,
   CoreSetup,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
+  SavedObjectsErrorHelpers,
 } from '../../../../../../../src/core/server';
 import {
   elasticsearchServiceMock,
@@ -106,7 +108,7 @@ describe('onPostAuthInterceptor', () => {
   async function request(
     path: string,
     availableSpaces: any[],
-    testOptions = { simulateGetSpacesFailure: false }
+    testOptions = { simulateGetSpacesFailure: false, simulateGetSingleSpaceFailure: false }
   ) {
     const { http } = await root.setup();
 
@@ -143,9 +145,7 @@ describe('onPostAuthInterceptor', () => {
 
     const savedObjectsService = {
       SavedObjectsClient: {
-        errors: {
-          isNotFoundError: (e: Error) => e.message === 'space not found',
-        },
+        errors: SavedObjectsErrorHelpers,
       },
       getSavedObjectsRepository: jest.fn().mockImplementation(() => {
         return {
@@ -155,7 +155,7 @@ describe('onPostAuthInterceptor', () => {
               if (space) {
                 return space;
               }
-              throw new Error('space not found');
+              throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
             }
           },
           create: () => null,
@@ -168,7 +168,7 @@ describe('onPostAuthInterceptor', () => {
         serverDefaultRoute: defaultRoute,
         serverBasePath: '',
       },
-      savedObjects: (savedObjectsService as unknown) as SavedObjectsService,
+      savedObjects: (savedObjectsService as unknown) as SavedObjectsLegacyService,
     } as LegacyAPI;
 
     const service = new SpacesService(loggingMock, () => legacyAPI);
@@ -184,14 +184,17 @@ describe('onPostAuthInterceptor', () => {
     spacesService.scopedClient = jest.fn().mockResolvedValue({
       getAll() {
         if (testOptions.simulateGetSpacesFailure) {
-          throw new Error('unknown error retrieving all spaces');
+          throw Boom.unauthorized('missing credendials', 'Protected Elasticsearch');
         }
         return Promise.resolve(availableSpaces.map(convertSavedObjectToSpace));
       },
       get(spaceId: string) {
+        if (testOptions.simulateGetSingleSpaceFailure) {
+          throw Boom.unauthorized('missing credendials', 'Protected Elasticsearch');
+        }
         const space = availableSpaces.find(s => s.id === spaceId);
         if (!space) {
-          throw new Error('space not found');
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError('space', spaceId);
         }
         return Promise.resolve(convertSavedObjectToSpace(space));
       },
@@ -314,7 +317,7 @@ describe('onPostAuthInterceptor', () => {
     }, 30000);
   });
 
-  it('handles space retrieval errors gracefully', async () => {
+  it('handles space retrieval errors gracefully when requesting the root, responding with headers returned from ES', async () => {
     const spaces = [
       {
         id: 'a-space',
@@ -327,14 +330,59 @@ describe('onPostAuthInterceptor', () => {
 
     const { response, spacesService } = await request('/', spaces, {
       simulateGetSpacesFailure: true,
+      simulateGetSingleSpaceFailure: false,
     });
 
-    expect(response.status).toEqual(500);
+    expect(response.status).toEqual(401);
+
+    expect(response.header).toMatchObject({
+      'www-authenticate': `Protected Elasticsearch error="missing credendials"`,
+    });
+
+    expect(response.body).toMatchInlineSnapshot(`
+                        Object {
+                          "error": "Unauthorized",
+                          "message": "missing credendials",
+                          "statusCode": 401,
+                        }
+                `);
+
+    expect(spacesService.scopedClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          authorization: headers.authorization,
+        }),
+      })
+    );
+  });
+
+  it('handles space retrieval errors gracefully when requesting an app, responding with headers returned from ES', async () => {
+    const spaces = [
+      {
+        id: 'a-space',
+        type: 'space',
+        attributes: {
+          name: 'a space',
+        },
+      },
+    ];
+
+    const { response, spacesService } = await request('/app/kibana', spaces, {
+      simulateGetSpacesFailure: false,
+      simulateGetSingleSpaceFailure: true,
+    });
+
+    expect(response.status).toEqual(401);
+
+    expect(response.header).toMatchObject({
+      'www-authenticate': `Protected Elasticsearch error="missing credendials"`,
+    });
+
     expect(response.body).toMatchInlineSnapshot(`
       Object {
-        "error": "Internal Server Error",
-        "message": "unknown error retrieving all spaces",
-        "statusCode": 500,
+        "error": "Unauthorized",
+        "message": "missing credendials",
+        "statusCode": 401,
       }
     `);
 
@@ -380,7 +428,7 @@ describe('onPostAuthInterceptor', () => {
     );
   }, 30000);
 
-  it('allows the request to continue when accessing the root of a non-default space', async () => {
+  it('redirects to the "enter space" endpoint when accessing the root of a non-default space', async () => {
     const spaces = [
       {
         id: 'default',
@@ -401,9 +449,8 @@ describe('onPostAuthInterceptor', () => {
 
     const { response, spacesService } = await request('/s/a-space', spaces);
 
-    // OSS handles this redirection for us
     expect(response.status).toEqual(302);
-    expect(response.header.location).toEqual(`/s/a-space${defaultRoute}`);
+    expect(response.header.location).toEqual(`/s/a-space/spaces/enter`);
 
     expect(spacesService.scopedClient).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -415,7 +462,7 @@ describe('onPostAuthInterceptor', () => {
   }, 30000);
 
   describe('with a single available space', () => {
-    it('it redirects to the defaultRoute within the context of the single Space when navigating to Kibana root', async () => {
+    it('it redirects to the "enter space" endpoint within the context of the single Space when navigating to Kibana root', async () => {
       const spaces = [
         {
           id: 'a-space',
@@ -429,7 +476,7 @@ describe('onPostAuthInterceptor', () => {
       const { response, spacesService } = await request('/', spaces);
 
       expect(response.status).toEqual(302);
-      expect(response.header.location).toEqual(`/s/a-space${defaultRoute}`);
+      expect(response.header.location).toEqual(`/s/a-space/spaces/enter`);
 
       expect(spacesService.scopedClient).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -440,7 +487,7 @@ describe('onPostAuthInterceptor', () => {
       );
     });
 
-    it('it redirects to the defaultRoute within the context of the Default Space when navigating to Kibana root', async () => {
+    it('it redirects to the "enter space" endpoint within the context of the Default Space when navigating to Kibana root', async () => {
       // This is very similar to the test above, but this handles the condition where the only available space is the Default Space,
       // which does not have a URL Context. In this scenario, the end result is the same as the other test, but the final URL the user
       // is redirected to does not contain a space identifier (e.g., /s/foo)
@@ -458,7 +505,7 @@ describe('onPostAuthInterceptor', () => {
       const { response, spacesService } = await request('/', spaces);
 
       expect(response.status).toEqual(302);
-      expect(response.header.location).toEqual(defaultRoute);
+      expect(response.header.location).toEqual('/spaces/enter');
       expect(spacesService.scopedClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({

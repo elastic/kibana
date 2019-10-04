@@ -240,3 +240,7 @@ Videos are (optionally) output to:
 ```
 target/kibana-siem/cypress/videos
 ```
+
+## Linting 
+
+Optional linting rules for Cypress and linting setup can be found [here](https://github.com/cypress-io/eslint-plugin-cypress#usage)

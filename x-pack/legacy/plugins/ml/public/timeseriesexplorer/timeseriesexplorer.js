@@ -29,11 +29,11 @@ import {
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
-import { parseInterval } from 'ui/utils/parse_interval';
 import { toastNotifications } from 'ui/notify';
 import { ResizeChecker } from 'ui/resize_checker';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../common/constants/search';
+import { parseInterval } from '../../common/util/parse_interval';
 import {
   isModelPlotEnabled,
   isSourceDataChartableForDetector,
@@ -66,7 +66,7 @@ import { mlResultsService } from '../services/results_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 import { getIndexPatterns } from '../util/index_utils';
-import { getBoundsRoundedToInterval } from '../util/ml_time_buckets';
+import { getBoundsRoundedToInterval } from '../util/time_buckets';
 
 import { APP_STATE_ACTION, CHARTS_POINT_TARGET, TIME_FIELD_NAME } from './timeseriesexplorer_constants';
 import { mlTimeSeriesSearchService } from './timeseries_search_service';

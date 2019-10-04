@@ -6,7 +6,7 @@
 
 import { createContext } from 'react';
 import { Field, Aggregation } from '../../../../../common/types/fields';
-import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
+import { TimeBuckets } from '../../../../util/time_buckets';
 import { JobCreatorType, SingleMetricJobCreator } from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
@@ -19,7 +19,7 @@ export interface JobCreatorContextValue {
   jobCreator: JobCreatorType;
   chartLoader: ChartLoader;
   resultsLoader: ResultsLoader;
-  chartInterval: MlTimeBuckets;
+  chartInterval: TimeBuckets;
   jobValidator: JobValidator;
   jobValidatorUpdated: number;
   fields: Field[];
@@ -33,7 +33,7 @@ export const JobCreatorContext = createContext<JobCreatorContextValue>({
   jobCreator: {} as SingleMetricJobCreator,
   chartLoader: {} as ChartLoader,
   resultsLoader: {} as ResultsLoader,
-  chartInterval: {} as MlTimeBuckets,
+  chartInterval: {} as TimeBuckets,
   jobValidator: {} as JobValidator,
   jobValidatorUpdated: 0,
   fields: [],
