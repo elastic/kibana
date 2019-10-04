@@ -14,7 +14,6 @@ interface OverviewPageLinkProps {
 }
 
 export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
-  children,
   pagination,
   direction,
 }) => {
