@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiIcon } from '@elastic/eui';
+import { EuiLink, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../hooks';
 
 interface OverviewPageLinkProps {
@@ -21,17 +22,18 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
 
   const color = pagination ? 'primary' : 'ghost';
+  const ariaLabel =
+    direction === 'next'
+      ? i18n.translate('xpack.uptime.overviewPageLink.next.ariaLabel', {
+          defaultMessage: 'Next page of results',
+        })
+      : i18n.translate('xpack.uptime.overviewPageLink.prev.ariaLabel', {
+          defaultMessage: 'Prev page of results',
+        });
 
-  return (
-    <EuiLink
-      onClick={() => {
-        updateUrlParams({ pagination });
-      }}
-    >
-      <EuiIcon type={icon} color={color} />
-    </EuiLink>
   return !!pagination ? (
     <EuiLink
+      aria-label={ariaLabel}
       onClick={() => {
         updateUrlParams({ pagination });
       }}
