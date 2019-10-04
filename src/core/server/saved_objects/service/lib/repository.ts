@@ -175,8 +175,36 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const method = id && !overwrite ? 'create' : 'index';
+    // This used to be using `method = id && !overwrite ? 'create' : 'index'`;
+    // This meant that when we were generating the IDs ourselves using uuid.v1(), that if
+    // there was a conflict for some reason, we'd be hiding it and not throwing a Conflict.
+    // We can leave it the old way, it just feels wrong because now we could potentially
+    // be overwriting a saved-object which exists in another namespace
+    //
+    // ID      |   overwrite | old operation | new operation
+    // null        true        index           create
+    // null        false       index           create
+    // something   true        index           index
+    // something   false       create          create
+    const method = id && overwrite ? 'index' : 'create';
     const time = this._getCurrentTime();
+
+    if (method === 'index') {
+      // TODO: When switching from namespace to namespaces, we'll want to use the namespaces returned
+      // from this to ensure we aren't dropping an existing namespace. However, it's somewhat awkward that
+      // a create with overwrite=true would maintain existing spaces it's been shared to.
+      const response = await this._callCluster('get', {
+        id: this._serializer.generateRawId(namespace, type, id),
+        index: this.getIndexForType(type),
+        ignore: [404],
+      });
+
+      const docFound = response.found === true;
+      const indexFound = response.status !== 404;
+      if (docFound && indexFound && !this._rawInNamespace(response, options.namespace)) {
+        throw SavedObjectsErrorHelpers.createConflictError(type, id!);
+      }
+    }
 
     try {
       const migrated = this._migrator.migrateDocument({
