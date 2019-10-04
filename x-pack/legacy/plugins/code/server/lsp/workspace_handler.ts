@@ -17,8 +17,8 @@ import Boom from 'boom';
 import del from 'del';
 import fs from 'fs';
 import { delay } from 'lodash';
-import mkdirp from 'mkdirp';
 import path from 'path';
+import { promisify } from 'util';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
 
@@ -34,6 +34,8 @@ import { RepositoryObjectClient } from '../search';
 import { LoggerFactory } from '../utils/log_factory';
 
 export const MAX_RESULT_COUNT = 20;
+
+const mkdirAsync = promisify(fs.mkdir);
 
 export class WorkspaceHandler {
   private revisionMap: { [uri: string]: string } = {};
@@ -396,15 +398,7 @@ export class WorkspaceHandler {
     this.log.info(`Create workspace ${workspaceDir} from url ${bareRepo.path()}`);
     const parentDir = path.dirname(workspaceDir);
     // on windows, git clone will failed if parent folder is not exists;
-    await new Promise((resolve, reject) =>
-      mkdirp(parentDir, err => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      })
-    );
+    await mkdirAsync(parentDir, { recursive: true });
     const workTreeName = this.workspaceWorktreeBranchName(revision);
     await this.pruneWorktree(bareRepo, workTreeName);
     // Create the worktree and open it as Repository.
