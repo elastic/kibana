@@ -921,6 +921,10 @@ export class SavedObjectsRepository {
           },
         },
         upsert: raw._source,
+        ...getSearchDsl(this._mappings, this._schema, {
+          type,
+          namespace,
+        }),
       },
     });
 
