@@ -22,10 +22,6 @@ import { AgentConfigurationListAPIResponse } from '../../../../../server/lib/set
 import { Config } from '.';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { px, units } from '../../../../style/variables';
-const t = (id: string, defaultMessage: string) =>
-  i18n.translate(`xpack.apm.settings.agentConf.configTable.${id}`, {
-    defaultMessage
-  });
 
 export function AgentConfigurationList({
   status,
@@ -49,8 +45,14 @@ export function AgentConfigurationList({
         <EuiToolTip
           content={
             isApplied
-              ? t('appliedTooltipMessage', 'Applied by at least one agent')
-              : t('notAppliedTooltipMessage', 'Not yet applied by any agents')
+              ? i18n.translate(
+                  'xpack.apm.settings.agentConf.configTable.appliedTooltipMessage',
+                  { defaultMessage: 'Applied by at least one agent' }
+                )
+              : i18n.translate(
+                  'xpack.apm.settings.agentConf.configTable.notAppliedTooltipMessage',
+                  { defaultMessage: 'Not yet applied by any agents' }
+                )
           }
         >
           <EuiHealth color={isApplied ? 'success' : theme.euiColorLightShade} />
@@ -59,7 +61,10 @@ export function AgentConfigurationList({
     },
     {
       field: 'service.name',
-      name: t('serviceNameColumnLabel', 'Service name'),
+      name: i18n.translate(
+        'xpack.apm.settings.agentConf.configTable.serviceNameColumnLabel',
+        { defaultMessage: 'Service name' }
+      ),
       sortable: true,
       render: (_, config: Config) => (
         <EuiButtonEmpty
@@ -77,26 +82,43 @@ export function AgentConfigurationList({
     },
     {
       field: 'service.environment',
-      name: t('environmentColumnLabel', 'Service environment'),
+      name: i18n.translate(
+        'xpack.apm.settings.agentConf.configTable.environmentColumnLabel',
+        { defaultMessage: 'Service environment' }
+      ),
       sortable: true,
-      render: (value: string) => value || t('environmentNotSetLabel', 'Not set')
+      render: (value: string) =>
+        value ||
+        i18n.translate(
+          'xpack.apm.settings.agentConf.configTable.environmentNotSetLabel',
+          { defaultMessage: 'Not set' }
+        )
     },
     {
       field: 'settings.transaction_sample_rate',
-      name: t('sampleRateColumnLabel', 'Sample rate'),
+      name: i18n.translate(
+        'xpack.apm.settings.agentConf.configTable.sampleRateColumnLabel',
+        { defaultMessage: 'Sample rate' }
+      ),
       dataType: 'number',
       sortable: true,
       render: (value: number) => value
     },
     {
       field: 'settings.capture_body',
-      name: t('captureBodyColumnLabel', 'Capture body'),
+      name: i18n.translate(
+        'xpack.apm.settings.agentConf.configTable.captureBodyColumnLabel',
+        { defaultMessage: 'Capture body' }
+      ),
       sortable: true,
       render: (value: string) => value
     },
     {
       field: 'settings.transaction_max_spans',
-      name: t('transactionMaxSpansColumnLabel', 'Transaction max spans'),
+      name: i18n.translate(
+        'xpack.apm.settings.agentConf.configTable.transactionMaxSpansColumnLabel',
+        { defaultMessage: 'Transaction max spans' }
+      ),
       dataType: 'number',
       sortable: true,
       render: (value: number) => value
@@ -104,7 +126,10 @@ export function AgentConfigurationList({
     {
       align: 'right',
       field: '@timestamp',
-      name: t('lastUpdatedColumnLabel', 'Last updated'),
+      name: i18n.translate(
+        'xpack.apm.settings.agentConf.configTable.lastUpdatedColumnLabel',
+        { defaultMessage: 'Last updated' }
+      ),
       sortable: true,
       render: (value: number) => (
         <TimestampTooltip time={value} precision="minutes" />
@@ -115,8 +140,14 @@ export function AgentConfigurationList({
       name: '',
       actions: [
         {
-          name: t('editButtonLabel', 'Edit'),
-          description: t('editButtonDescription', 'Edit this config'),
+          name: i18n.translate(
+            'xpack.apm.settings.agentConf.configTable.editButtonLabel',
+            { defaultMessage: 'Edit' }
+          ),
+          description: i18n.translate(
+            'xpack.apm.settings.agentConf.configTable.editButtonDescription',
+            { defaultMessage: 'Edit this config' }
+          ),
           icon: 'pencil',
           color: 'primary',
           type: 'icon',
@@ -132,20 +163,33 @@ export function AgentConfigurationList({
   const emptyStatePrompt = (
     <EuiEmptyPrompt
       iconType="controlsHorizontal"
-      title={<h2>{t('emptyPromptTitle', 'No configurations found.')}</h2>}
+      title={
+        <h2>
+          {i18n.translate(
+            'xpack.apm.settings.agentConf.configTable.emptyPromptTitle',
+            { defaultMessage: 'No configurations found.' }
+          )}
+        </h2>
+      }
       body={
         <>
           <p>
-            {t(
-              'emptyPromptText',
-              "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration."
+            {i18n.translate(
+              'xpack.apm.settings.agentConf.configTable.emptyPromptText',
+              {
+                defaultMessage:
+                  "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration."
+              }
             )}
           </p>
         </>
       }
       actions={
         <EuiButton color="primary" fill onClick={() => setIsFlyoutOpen(true)}>
-          {t('createConfigButtonLabel', 'Create configuration')}
+          {i18n.translate(
+            'xpack.apm.settings.agentConf.configTable.createConfigButtonLabel',
+            { defaultMessage: 'Create configuration' }
+          )}
         </EuiButton>
       }
     />
@@ -157,9 +201,12 @@ export function AgentConfigurationList({
       body={
         <>
           <p>
-            {t(
-              'configTable.failurePromptText',
-              'The list of agent configurations could not be fetched. Your user may not have the sufficient permissions.'
+            {i18n.translate(
+              'xpack.apm.settings.agentConf.configTable.configTable.failurePromptText',
+              {
+                defaultMessage:
+                  'The list of agent configurations could not be fetched. Your user may not have the sufficient permissions.'
+              }
             )}
           </p>
         </>

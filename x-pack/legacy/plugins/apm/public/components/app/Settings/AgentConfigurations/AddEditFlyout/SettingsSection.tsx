@@ -15,10 +15,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
-const t = (id: string, defaultMessage: string) =>
-  i18n.translate(`xpack.apm.settings.agentConf.flyOut.settingsSection.${id}`, {
-    defaultMessage
-  });
 
 interface Props {
   isRumService: boolean;
@@ -58,30 +54,38 @@ export function SettingsSection({
   return (
     <>
       <EuiTitle size="xs">
-        <h3>{t('title', 'Options')}</h3>
+        <h3>
+          {i18n.translate(
+            'xpack.apm.settings.agentConf.flyOut.settingsSection.title',
+            { defaultMessage: 'Options' }
+          )}
+        </h3>
       </EuiTitle>
 
       <EuiSpacer size="m" />
 
       <EuiFormRow
-        label={t(
-          'sampleRateConfigurationInputLabel',
-          'Transaction sample rate'
+        label={i18n.translate(
+          'xpack.apm.settings.agentConf.flyOut.settingsSection.sampleRateConfigurationInputLabel',
+          { defaultMessage: 'Transaction sample rate' }
         )}
-        helpText={t(
-          'sampleRateConfigurationInputHelpText',
-          'Choose a rate between 0.000 and 1.0. Default is 1.0 (100% of traces).'
+        helpText={i18n.translate(
+          'xpack.apm.settings.agentConf.flyOut.settingsSection.sampleRateConfigurationInputHelpText',
+          {
+            defaultMessage:
+              'Choose a rate between 0.000 and 1.0. Default is 1.0 (100% of traces).'
+          }
         )}
-        error={t(
-          'sampleRateConfigurationInputErrorText',
-          'Sample rate must be between 0.000 and 1'
+        error={i18n.translate(
+          'xpack.apm.settings.agentConf.flyOut.settingsSection.sampleRateConfigurationInputErrorText',
+          { defaultMessage: 'Sample rate must be between 0.000 and 1' }
         )}
         isInvalid={!isEmpty(sampleRate) && !isSampleRateValid}
       >
         <EuiFieldText
-          placeholder={t(
-            'sampleRateConfigurationInputPlaceholderText',
-            'Set sample rate'
+          placeholder={i18n.translate(
+            'xpack.apm.settings.agentConf.flyOut.settingsSection.sampleRateConfigurationInputPlaceholderText',
+            { defaultMessage: 'Set sample rate' }
           )}
           value={sampleRate}
           onChange={e => {
@@ -95,14 +99,23 @@ export function SettingsSection({
 
       {!isRumService && (
         <EuiFormRow
-          label={t('captureBodyInputLabel', 'Capture body')}
-          helpText={t(
-            'captureBodyInputHelpText',
-            'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "off".'
+          label={i18n.translate(
+            'xpack.apm.settings.agentConf.flyOut.settingsSection.captureBodyInputLabel',
+            { defaultMessage: 'Capture body' }
+          )}
+          helpText={i18n.translate(
+            'xpack.apm.settings.agentConf.flyOut.settingsSection.captureBodyInputHelpText',
+            {
+              defaultMessage:
+                'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "off".'
+            }
           )}
         >
           <SelectWithPlaceholder
-            placeholder={t('captureBodyInputPlaceholderText', 'Select option')}
+            placeholder={i18n.translate(
+              'xpack.apm.settings.agentConf.flyOut.settingsSection.captureBodyInputPlaceholderText',
+              { defaultMessage: 'Select option' }
+            )}
             options={[
               { value: 'off', text: 'off' },
               { value: 'errors', text: 'errors' },
@@ -120,26 +133,29 @@ export function SettingsSection({
 
       {!isRumService && (
         <EuiFormRow
-          label={t(
-            'transactionMaxSpansConfigInputLabel',
-            'Transaction max spans'
+          label={i18n.translate(
+            'xpack.apm.settings.agentConf.flyOut.settingsSection.transactionMaxSpansConfigInputLabel',
+            { defaultMessage: 'Transaction max spans' }
           )}
-          helpText={t(
-            'transactionMaxSpansConfigInputHelpText',
-            'Limits the amount of spans that are recorded per transaction. Default is 500.'
+          helpText={i18n.translate(
+            'xpack.apm.settings.agentConf.flyOut.settingsSection.transactionMaxSpansConfigInputHelpText',
+            {
+              defaultMessage:
+                'Limits the amount of spans that are recorded per transaction. Default is 500.'
+            }
           )}
-          error={t(
-            'transactionMaxSpansConfigInputErrorText',
-            'Must be between 0 and 32000'
+          error={i18n.translate(
+            'xpack.apm.settings.agentConf.flyOut.settingsSection.transactionMaxSpansConfigInputErrorText',
+            { defaultMessage: 'Must be between 0 and 32000' }
           )}
           isInvalid={
             !isEmpty(transactionMaxSpans) && !isTransactionMaxSpansValid
           }
         >
           <EuiFieldNumber
-            placeholder={t(
-              'transactionMaxSpansConfigInputPlaceholderText',
-              'Set transaction max spans'
+            placeholder={i18n.translate(
+              'xpack.apm.settings.agentConf.flyOut.settingsSection.transactionMaxSpansConfigInputPlaceholderText',
+              { defaultMessage: 'Set transaction max spans' }
             )}
             value={
               transactionMaxSpans === '' ? '' : Number(transactionMaxSpans)

@@ -23,8 +23,6 @@ import { HomeLink } from '../../../shared/Links/apm/HomeLink';
 import { AgentConfigurationList } from './AgentConfigurationList';
 import { useTrackPageview } from '../../../../../../infra/public';
 import { AddEditFlyout } from './AddEditFlyout';
-const t = (id: string, defaultMessage: string) =>
-  i18n.translate(`xpack.apm.settings.agentConf.${id}`, { defaultMessage });
 
 export type Config = AgentConfigurationListAPIResponse[0];
 
@@ -67,13 +65,20 @@ export function AgentConfigurations() {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="l">
-            <h1>{t('pageTitle', 'Settings')}</h1>
+            <h1>
+              {i18n.translate('xpack.apm.settings.agentConf.pageTitle', {
+                defaultMessage: 'Settings'
+              })}
+            </h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <HomeLink>
             <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-              {t('returnToOverviewLinkLabel', 'Return to overview')}
+              {i18n.translate(
+                'xpack.apm.settings.agentConf.returnToOverviewLinkLabel',
+                { defaultMessage: 'Return to overview' }
+              )}
             </EuiButtonEmpty>
           </HomeLink>
         </EuiFlexItem>
@@ -86,7 +91,10 @@ export function AgentConfigurations() {
           <EuiFlexItem grow={false}>
             <EuiTitle>
               <h2>
-                {t('configurationsPanelTitle', 'Agent remote configuration')}
+                {i18n.translate(
+                  'xpack.apm.settings.agentConf.configurationsPanelTitle',
+                  { defaultMessage: 'Agent remote configuration' }
+                )}
               </h2>
             </EuiTitle>
           </EuiFlexItem>
@@ -120,7 +128,10 @@ function CreateConfigurationButton({ onClick }: { onClick: () => void }) {
             iconType="plusInCircle"
             onClick={onClick}
           >
-            {t('createConfigButtonLabel', 'Create configuration')}
+            {i18n.translate(
+              'xpack.apm.settings.agentConf.createConfigButtonLabel',
+              { defaultMessage: 'Create configuration' }
+            )}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

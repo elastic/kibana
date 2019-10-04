@@ -35,11 +35,6 @@ import { DeleteSection } from './DeleteSection';
 import { transactionMaxSpansRt } from '../../../../../../common/runtime_types/transaction_max_spans_rt';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { isRumAgentName } from '../../../../../../common/agent_name';
-const t = (id: string, defaultMessage: string, values?: Record<string, any>) =>
-  i18n.translate(`xpack.apm.settings.agentConf.${id}`, {
-    defaultMessage,
-    values
-  });
 
 interface Settings {
   transaction_sample_rate: number;
@@ -154,8 +149,14 @@ export function AddEditFlyout({
           <EuiTitle>
             <h2>
               {selectedConfig
-                ? t('editConfigTitle', 'Edit configuration')
-                : t('createConfigTitle', 'Create configuration')}
+                ? i18n.translate(
+                    'xpack.apm.settings.agentConf.editConfigTitle',
+                    { defaultMessage: 'Edit configuration' }
+                  )
+                : i18n.translate(
+                    'xpack.apm.settings.agentConf.createConfigTitle',
+                    { defaultMessage: 'Create configuration' }
+                  )}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
@@ -223,7 +224,10 @@ export function AddEditFlyout({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={onClose}>
-                {t('cancelButtonLabel', 'Cancel')}
+                {i18n.translate(
+                  'xpack.apm.settings.agentConf.cancelButtonLabel',
+                  { defaultMessage: 'Cancel' }
+                )}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -235,7 +239,10 @@ export function AddEditFlyout({
                 isDisabled={!isFormValid}
                 onClick={handleSubmitEvent}
               >
-                {t('saveConfigurationButtonLabel', 'Save configuration')}
+                {i18n.translate(
+                  'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
+                  { defaultMessage: 'Save configuration' }
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -304,20 +311,35 @@ async function saveConfig({
     }
 
     toastNotifications.addSuccess({
-      title: t('saveConfig.succeeded.title', 'Configuration saved'),
-      text: t(
-        'saveConfig.succeeded.text',
-        'The configuration for {serviceName} was saved. It will take some time to propagate to the agents.',
-        { serviceName: `"${serviceName}"` }
+      title: i18n.translate(
+        'xpack.apm.settings.agentConf.saveConfig.succeeded.title',
+        { defaultMessage: 'Configuration saved' }
+      ),
+      text: i18n.translate(
+        'xpack.apm.settings.agentConf.saveConfig.succeeded.text',
+        {
+          defaultMessage:
+            'The configuration for {serviceName} was saved. It will take some time to propagate to the agents.',
+          values: { serviceName: `"${serviceName}"` }
+        }
       )
     });
   } catch (error) {
     toastNotifications.addDanger({
-      title: t('saveConfig.failed.title', 'Configuration could not be saved'),
-      text: t(
-        'saveConfig.failed.text',
-        'Something went wrong when saving the configuration for {serviceName}. Error: {errorMessage}',
-        { serviceName: `"${serviceName}"`, errorMessage: `"${error.message}"` }
+      title: i18n.translate(
+        'xpack.apm.settings.agentConf.saveConfig.failed.title',
+        { defaultMessage: 'Configuration could not be saved' }
+      ),
+      text: i18n.translate(
+        'xpack.apm.settings.agentConf.saveConfig.failed.text',
+        {
+          defaultMessage:
+            'Something went wrong when saving the configuration for {serviceName}. Error: {errorMessage}',
+          values: {
+            serviceName: `"${serviceName}"`,
+            errorMessage: `"${error.message}"`
+          }
+        }
       )
     });
   }

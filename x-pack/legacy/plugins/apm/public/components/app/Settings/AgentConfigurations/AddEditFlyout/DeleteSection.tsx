@@ -16,11 +16,6 @@ import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { Config } from '../index';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
-const t = (id: string, defaultMessage: string, values?: Record<string, any>) =>
-  i18n.translate(`xpack.apm.settings.agentConf.flyout.deleteSection.${id}`, {
-    defaultMessage,
-    values
-  });
 
 interface Props {
   onDeleted: () => void;
@@ -35,7 +30,12 @@ export function DeleteSection({ onDeleted, selectedConfig }: Props) {
       <EuiHorizontalRule margin="m" />
       <EuiTitle size="xs">
         <h3>
-          <EuiText color="danger">{t('title', 'Delete configuration')}</EuiText>
+          <EuiText color="danger">
+            {i18n.translate(
+              'xpack.apm.settings.agentConf.flyout.deleteSection.title',
+              { defaultMessage: 'Delete configuration' }
+            )}
+          </EuiText>
         </h3>
       </EuiTitle>
 
@@ -43,9 +43,12 @@ export function DeleteSection({ onDeleted, selectedConfig }: Props) {
 
       <EuiText>
         <p>
-          {t(
-            'helpText',
-            'If you wish to delete this configuration, please be aware that the agents will continue to use the existing configuration until they sync with the APM Server.'
+          {i18n.translate(
+            'xpack.apm.settings.agentConf.flyout.deleteSection.helpText',
+            {
+              defaultMessage:
+                'If you wish to delete this configuration, please be aware that the agents will continue to use the existing configuration until they sync with the APM Server.'
+            }
           )}
         </p>
       </EuiText>
@@ -64,7 +67,10 @@ export function DeleteSection({ onDeleted, selectedConfig }: Props) {
           onDeleted();
         }}
       >
-        {t('buttonLabel', 'Delete')}
+        {i18n.translate(
+          'xpack.apm.settings.agentConf.flyout.deleteSection.buttonLabel',
+          { defaultMessage: 'Delete' }
+        )}
       </EuiButton>
 
       <EuiSpacer size="m" />
@@ -82,22 +88,34 @@ async function deleteConfig(selectedConfig: Config) {
       }
     });
     toastNotifications.addSuccess({
-      title: t('deleteConfigSucceededTitle', 'Configuration was deleted'),
-      text: t(
-        'deleteConfigSucceededText',
-        'You have successfully deleted a configuration for {serviceName}. It will take some time to propagate to the agents.',
-        { serviceName: `"${selectedConfig.service.name}"` }
+      title: i18n.translate(
+        'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigSucceededTitle',
+        { defaultMessage: 'Configuration was deleted' }
+      ),
+      text: i18n.translate(
+        'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigSucceededText',
+        {
+          defaultMessage:
+            'You have successfully deleted a configuration for {serviceName}. It will take some time to propagate to the agents.',
+          values: { serviceName: `"${selectedConfig.service.name}"` }
+        }
       )
     });
   } catch (error) {
     toastNotifications.addDanger({
-      title: t('deleteConfigFailedTitle', 'Configuration could not be deleted'),
-      text: t(
-        'deleteConfigFailedText',
-        'Something went wrong when deleting a configuration for {serviceName}. Error: {errorMessage}',
+      title: i18n.translate(
+        'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigFailedTitle',
+        { defaultMessage: 'Configuration could not be deleted' }
+      ),
+      text: i18n.translate(
+        'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigFailedText',
         {
-          serviceName: `"${selectedConfig.service.name}"`,
-          errorMessage: `"${error.message}"`
+          defaultMessage:
+            'Something went wrong when deleting a configuration for {serviceName}. Error: {errorMessage}',
+          values: {
+            serviceName: `"${selectedConfig.service.name}"`,
+            errorMessage: `"${error.message}"`
+          }
         }
       )
     });

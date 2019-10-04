@@ -11,12 +11,11 @@ import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder'
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../../common/environment_filter_values';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
-const t = (id: string, defaultMessage: string) =>
-  i18n.translate(`xpack.apm.settings.agentConf.flyOut.serviceSection.${id}`, {
-    defaultMessage
-  });
 
-const SELECT_PLACEHOLDER_LABEL = `- ${t('selectPlaceholder', 'Select')} -`;
+const SELECT_PLACEHOLDER_LABEL = `- ${i18n.translate(
+  'xpack.apm.settings.agentConf.flyOut.serviceSection.selectPlaceholder',
+  { defaultMessage: 'Select' }
+)} -`;
 
 interface Props {
   isReadOnly: boolean;
@@ -28,7 +27,10 @@ interface Props {
 
 function getEnvironmentNameLabel(name: string | undefined) {
   return name === ENVIRONMENT_NOT_DEFINED
-    ? t('serviceEnvironmentNotSetOptionLabel', 'Not set')
+    ? i18n.translate(
+        'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceEnvironmentNotSetOptionLabel',
+        { defaultMessage: 'Not set' }
+      )
     : name;
 }
 
@@ -74,18 +76,26 @@ export function ServiceSection({
   return (
     <>
       <EuiTitle size="xs">
-        <h3>{t('title', 'Service')}</h3>
+        <h3>
+          {i18n.translate(
+            'xpack.apm.settings.agentConf.flyOut.serviceSection.title',
+            { defaultMessage: 'Service' }
+          )}
+        </h3>
       </EuiTitle>
 
       <EuiSpacer size="m" />
 
       <EuiFormRow
-        label={t('serviceNameSelectLabel', 'Name')}
+        label={i18n.translate(
+          'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceNameSelectLabel',
+          { defaultMessage: 'Name' }
+        )}
         helpText={
           !isReadOnly &&
-          t(
-            'serviceNameSelectHelpText',
-            'Choose the service you want to configure.'
+          i18n.translate(
+            'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceNameSelectHelpText',
+            { defaultMessage: 'Choose the service you want to configure.' }
           )
         }
       >
@@ -108,12 +118,18 @@ export function ServiceSection({
       </EuiFormRow>
 
       <EuiFormRow
-        label={t('serviceEnvironmentSelectLabel', 'Environment')}
+        label={i18n.translate(
+          'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceEnvironmentSelectLabel',
+          { defaultMessage: 'Environment' }
+        )}
         helpText={
           !isReadOnly &&
-          t(
-            'serviceEnvironmentSelectHelpText',
-            'Only a single environment per configuration is supported.'
+          i18n.translate(
+            'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceEnvironmentSelectHelpText',
+            {
+              defaultMessage:
+                'Only a single environment per configuration is supported.'
+            }
           )
         }
       >
