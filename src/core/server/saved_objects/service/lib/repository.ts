@@ -556,7 +556,7 @@ export class SavedObjectsRepository {
         .map((doc, i) => {
           const { id, type } = supportedTypeObjects[i];
 
-          if (!doc.found) {
+          if (!doc.found || !this._rawInNamespace(doc, namespace)) {
             return ({
               id,
               type,
