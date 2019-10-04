@@ -8,6 +8,7 @@ import { get, set } from 'lodash';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { CursorDirection } from '../../../../../common/graphql/types';
 import { INDEX_NAMES } from '../../../../../common/constants';
+import { makeDateRangeFilter } from '../../../helper/make_date_rate_filter';
 
 // This is the first phase of the query. In it, we find the most recent check groups that matched the given query.
 // Note that these check groups may not be the most recent groups for the matching monitor ID! We'll filter those
@@ -65,7 +66,7 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
 const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) => {
   const compositeOrder = cursorDirectionToOrder(queryContext.pagination.cursorDirection);
 
-  const filters = [];
+  const filters = [makeDateRangeFilter(queryContext.dateRangeStart, queryContext.dateRangeEnd)];
   if (queryContext.filterClause) {
     filters.push(queryContext.filterClause);
   }
