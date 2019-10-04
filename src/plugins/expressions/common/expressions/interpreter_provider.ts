@@ -28,26 +28,18 @@ import { ExpressionAST } from './types';
 
 export { createError };
 
-export function interpreterProvider(config: any) {
+export interface InterpreterConfig {
+  functions: any;
+  types: any;
+  handlers: any;
+}
+
+export type ExpressionInterpret = (ast: ExpressionAST, context?: any) => any;
+
+export function interpreterProvider(config: InterpreterConfig): ExpressionInterpret {
   const { functions, types } = config;
   const handlers = { ...config.handlers, types };
   const cast = castProvider(types);
-
-  return interpret;
-
-  async function interpret(node: ExpressionAST, context = null) {
-    switch (getType(node)) {
-      case 'expression':
-        return invokeChain(node.chain, context);
-      case 'string':
-      case 'number':
-      case 'null':
-      case 'boolean':
-        return node;
-      default:
-        throw new Error(`Unknown AST object: ${JSON.stringify(node)}`);
-    }
-  }
 
   async function invokeChain(chainArr: any, context: any): Promise<any> {
     if (!chainArr.length) return Promise.resolve(context);
@@ -204,4 +196,20 @@ export function interpreterProvider(config: any) {
     // function which would be treated as a promise
     return { resolvedArgs };
   }
+
+  const interpret: ExpressionInterpret = async function interpret(ast, context = null) {
+    switch (getType(ast)) {
+      case 'expression':
+        return invokeChain(ast.chain, context);
+      case 'string':
+      case 'number':
+      case 'null':
+      case 'boolean':
+        return ast;
+      default:
+        throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
+    }
+  };
+
+  return interpret;
 }
