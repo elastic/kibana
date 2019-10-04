@@ -150,7 +150,9 @@ export interface CoreSetup {
    * use *only* to retrieve config values
    * @deprecated
    * */
-  injectedMetadata: Pick<InjectedMetadataSetup, 'getInjectedVar'>;
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
 /**
@@ -186,7 +188,9 @@ export interface CoreStart {
    * use *only* to retrieve config values
    * @deprecated
    * */
-  injectedMetadata: Pick<InjectedMetadataStart, 'getInjectedVar'>;
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
 /**
