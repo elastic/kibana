@@ -17,35 +17,17 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import { filterDocvalueFields } from './filter_docvalue_fields';
 
-async function handleRequest(request) {
-  const { key } = request.params;
-  const { value } = request.payload;
-  const uiSettings = request.getUiSettingsService();
-
-  await uiSettings.set(key, value);
-
-  return {
-    settings: await uiSettings.getUserProvided()
-  };
-}
-
-export const setRoute = {
-  path: '/api/kibana/settings/{key}',
-  method: 'POST',
-  config: {
-    validate: {
-      params: Joi.object().keys({
-        key: Joi.string().required(),
-      }).default(),
-
-      payload: Joi.object().keys({
-        value: Joi.any().required()
-      }).required()
-    },
-    handler(request) {
-      return handleRequest(request);
-    }
-  }
-};
+test('Should exclude docvalue_fields that are not contained in fields', () => {
+  const docvalueFields = [
+    'my_ip_field',
+    { field: 'my_keyword_field' },
+    { field: 'my_date_field', 'format': 'epoch_millis' }
+  ];
+  const out = filterDocvalueFields(docvalueFields, ['my_ip_field', 'my_keyword_field']);
+  expect(out).toEqual([
+    'my_ip_field',
+    { field: 'my_keyword_field' },
+  ]);
+});
