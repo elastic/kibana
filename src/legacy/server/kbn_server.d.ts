@@ -39,6 +39,8 @@ import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/ela
 import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/public';
+import { IUiSettingsClient } from '../../legacy/ui/ui_settings/ui_settings_service';
+import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -77,14 +79,15 @@ declare module 'hapi' {
       name: string,
       factoryFn: (request: Request) => Record<string, any>
     ) => void;
-    uiSettingsServiceFactory: (options: any) => any;
+    uiSettingsServiceFactory: (options?: UiSettingsServiceFactoryOptions) => IUiSettingsClient;
+    logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
   }
 
   interface Request {
     getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     getBasePath(): string;
     getDefaultRoute(): Promise<string>;
-    getUiSettingsService(): any;
+    getUiSettingsService(): IUiSettingsClient;
     getCapabilities(): Promise<Capabilities>;
   }
 

@@ -16,28 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Legacy } from 'kibana';
+import Joi from 'joi';
 
-import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
+async function handleRequest(request: Legacy.Request) {
+  const { changes } = request.payload as any;
+  const uiSettings = request.getUiSettingsService();
 
-/**
- *  Find the most recent SavedConfig that is upgradeable to the specified version
- *  @param {Object} options
- *  @property {SavedObjectsClient} savedObjectsClient
- *  @property {string} version
- *  @return {Promise<SavedConfig|undefined>}
- */
-export async function getUpgradeableConfig({ savedObjectsClient, version }) {
-  // attempt to find a config we can upgrade
-  const { saved_objects: savedConfigs } = await savedObjectsClient.find({
-    type: 'config',
-    page: 1,
-    perPage: 1000,
-    sortField: 'buildNum',
-    sortOrder: 'desc'
-  });
+  await uiSettings.setMany(changes);
 
-  // try to find a config that we can upgrade
-  return savedConfigs.find(savedConfig => (
-    isConfigVersionUpgradeable(savedConfig.id, version)
-  ));
+  return {
+    settings: await uiSettings.getUserProvided(),
+  };
 }
+
+export const setManyRoute = {
+  path: '/api/kibana/settings',
+  method: 'POST',
+  config: {
+    validate: {
+      payload: Joi.object()
+        .keys({
+          changes: Joi.object()
+            .unknown(true)
+            .required(),
+        })
+        .required(),
+    },
+    handler(request: Legacy.Request) {
+      return handleRequest(request);
+    },
+  },
+};
