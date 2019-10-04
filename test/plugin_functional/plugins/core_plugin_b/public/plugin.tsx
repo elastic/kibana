@@ -23,6 +23,7 @@ import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
 declare global {
   interface Window {
     corePluginB?: string;
+    hasAccessToInjectedMetadata?: boolean;
   }
 }
 
@@ -34,6 +35,7 @@ export class CorePluginBPlugin
   implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps> {
   public setup(core: CoreSetup, deps: CorePluginBDeps) {
     window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
+    window.hasAccessToInjectedMetadata = 'getInjectedVar' in core.injectedMetadata;
 
     core.application.register({
       id: 'bar',

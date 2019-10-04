@@ -17,10 +17,17 @@
  * under the License.
  */
 
-export const ES_TYPES = {
-  NUMBER: 'number',
-  STRING: 'string',
-  KEYWORD: 'keyword',
-  TEXT: 'text',
-  DATE: 'date',
-};
+import { filterDocvalueFields } from './filter_docvalue_fields';
+
+test('Should exclude docvalue_fields that are not contained in fields', () => {
+  const docvalueFields = [
+    'my_ip_field',
+    { field: 'my_keyword_field' },
+    { field: 'my_date_field', 'format': 'epoch_millis' }
+  ];
+  const out = filterDocvalueFields(docvalueFields, ['my_ip_field', 'my_keyword_field']);
+  expect(out).toEqual([
+    'my_ip_field',
+    { field: 'my_keyword_field' },
+  ]);
+});
