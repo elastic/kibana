@@ -82,4 +82,4 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
       instance.scheduleActions('default');
     },
   };
-}
+};
