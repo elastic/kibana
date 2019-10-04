@@ -13,15 +13,17 @@ import { UptimeSettingsContext } from '../../../contexts';
 interface DonutChartProps {
   down: number;
   height: number;
-  width: number;
   up: number;
+  width: number;
 }
 
 export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
   const chartElement = useRef<SVGSVGElement | null>(null);
+
   const {
     colors: { danger, gray },
   } = useContext(UptimeSettingsContext);
+
   useEffect(() => {
     if (chartElement.current !== null) {
       const svgElement = d3
@@ -32,7 +34,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
         .ordinal()
         .domain(['up', 'down'])
         .range([gray, danger]);
-      const pie = d3.layout
+      const pieGenerator = d3.layout
         .pie()
         .value((d: any) => d.value)
         .startAngle(2 * Math.PI)
@@ -41,15 +43,15 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
       svgElement
         .selectAll('key')
         .data(
-          // @ts-ignore pie type expects number[] but works with
-          // output of d3.entries, Array<{ key: string, value: number }>
-          pie(d3.entries({ up, down }))
+          // @ts-ignore pie generator expects param of type number[], but only works with
+          // output of d3.entries, which is like Array<{ key: string, value: number }>
+          pieGenerator(d3.entries({ up, down }))
         )
         .enter()
         .append('path')
         .attr(
           'd',
-          // @ts-ignore typing does not accept arc generator output
+          // @ts-ignore attr does not expect a param of type Arc<Arc> but it behaves as desired
           d3.svg
             .arc()
             .innerRadius(width * 0.2)

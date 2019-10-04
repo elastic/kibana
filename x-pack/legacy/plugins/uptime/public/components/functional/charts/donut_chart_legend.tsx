@@ -5,10 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
+import styled from 'styled-components';
 import { DonutChartLegendRow } from './donut_chart_legend_row';
 import { UptimeSettingsContext } from '../../../contexts';
+
+const LegendContainer = styled.div`
+  margin-right: 32px;
+  max-width: 150px;
+`;
 
 interface Props {
   down: number;
@@ -20,7 +26,7 @@ export const DonutChartLegend = ({ down, up }: Props) => {
     colors: { gray, danger },
   } = useContext(UptimeSettingsContext);
   return (
-    <div style={{ maxWidth: '150px' }}>
+    <LegendContainer>
       <DonutChartLegendRow
         color={danger}
         content={down}
@@ -28,9 +34,7 @@ export const DonutChartLegend = ({ down, up }: Props) => {
           defaultMessage: 'Down',
         })}
       />
-      <EuiFlexItem>
-        <EuiSpacer size="l" />
-      </EuiFlexItem>
+      <EuiSpacer size="xl" />
       <DonutChartLegendRow
         color={gray}
         content={up}
@@ -38,6 +42,6 @@ export const DonutChartLegend = ({ down, up }: Props) => {
           defaultMessage: 'Up',
         })}
       />
-    </div>
+    </LegendContainer>
   );
 };

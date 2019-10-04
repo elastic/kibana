@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-const EuiFlexItemReducedPadding = styled(EuiFlexItem)`
+const EuiFlexItemReducedMargin = styled(EuiFlexItem)`
   && {
     margin-left: 0px;
     margin-right: 0px;
@@ -27,12 +27,12 @@ interface Props {
 
 export const DonutChartLegendRow = ({ color, content, message }: Props) => (
   <EuiFlexGroup gutterSize="l" responsive={false}>
-    <EuiFlexItemReducedPadding component="span" grow={false}>
+    <EuiFlexItemReducedMargin component="span" grow={false}>
       <EuiHealth color={color} />
-    </EuiFlexItemReducedPadding>
-    <EuiFlexItemReducedPadding component="span" grow={false}>
+    </EuiFlexItemReducedMargin>
+    <EuiFlexItemReducedMargin component="span" grow={false}>
       {message}
-    </EuiFlexItemReducedPadding>
+    </EuiFlexItemReducedMargin>
     <EuiFlexItemAlignRight component="span">{content}</EuiFlexItemAlignRight>
   </EuiFlexGroup>
 );
