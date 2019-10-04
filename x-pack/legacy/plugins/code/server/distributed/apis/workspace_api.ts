@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { ServiceHandlerFor } from '../service_definition';
 import { WorkspaceHandler } from '../../lsp/workspace_handler';
 import { RepoConfig } from '../../../model';
 import { WorkspaceCommand } from '../../lsp/workspace_command';
-import { Logger } from '../../log';
+import { LoggerFactory as CodeLoggerFactory } from '../../utils/log_factory';
 
 export const WorkspaceDefinition = {
   initCmd: {
@@ -19,7 +18,7 @@ export const WorkspaceDefinition = {
 };
 
 export const getWorkspaceHandler = (
-  server: Server,
+  loggerFactory: CodeLoggerFactory,
   workspaceHandler: WorkspaceHandler
 ): ServiceHandlerFor<typeof WorkspaceDefinition> => ({
   async initCmd({ repoUri, revision, repoConfig, force }) {
@@ -28,9 +27,13 @@ export const getWorkspaceHandler = (
         repoUri,
         revision
       );
-      const log = new Logger(server, ['workspace', repoUri]);
 
-      const workspaceCmd = new WorkspaceCommand(repoConfig, workspaceDir, workspaceRevision, log);
+      const workspaceCmd = new WorkspaceCommand(
+        repoConfig,
+        workspaceDir,
+        workspaceRevision,
+        loggerFactory.getLogger(['workspace', repoUri])
+      );
       await workspaceCmd.runInit(force);
       return {};
     } catch (e) {
