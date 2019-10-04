@@ -607,7 +607,7 @@ export class SavedObjectsRepository {
 
     const docNotFound = response.found === false;
     const indexNotFound = response.status === 404;
-    if (docNotFound || indexNotFound) {
+    if (docNotFound || indexNotFound || !this._rawInNamespace(response, namespace)) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -916,6 +916,20 @@ export class SavedObjectsRepository {
   private _rawToSavedObject(raw: RawDoc): SavedObject {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
+  }
+
+  private _rawInNamespace(raw: RawDoc, namespace?: string) {
+    const rawDocType = raw._source.type;
+    const rawDocNamespace = raw._source.namespace;
+    if (this._schema.isNamespaceAgnostic(rawDocType)) {
+      if (rawDocNamespace !== undefined) {
+        throw new Error('Found a document for a space-agnostic type, which has a namespace');
+      }
+
+      return true;
+    }
+
+    return rawDocNamespace === namespace;
   }
 }
 
