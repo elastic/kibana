@@ -705,14 +705,17 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
     version?: string;
 }
 
-// @public (undocumented)
-export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+// @public
+export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
 
 // @public
 export interface SavedObjectAttributes {
     // (undocumented)
-    [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
+    [key: string]: SavedObjectAttribute;
 }
+
+// @public
+export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
 
 // @public
 export interface SavedObjectReference {
