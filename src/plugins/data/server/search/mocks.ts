@@ -20,5 +20,7 @@
 export const searchSetupMock = {
   registerSearchStrategyContext: jest.fn(),
   registerSearchStrategyProvider: jest.fn(),
-  __LEGACY: jest.fn(),
+  __LEGACY: {
+    search: jest.fn(),
+  },
 };
