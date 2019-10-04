@@ -10,5 +10,6 @@ export default function({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./single_metric_job'));
     loadTestFile(require.resolve('./multi_metric_job'));
     loadTestFile(require.resolve('./population_job'));
+    loadTestFile(require.resolve('./saved_search_job'));
   });
 }
