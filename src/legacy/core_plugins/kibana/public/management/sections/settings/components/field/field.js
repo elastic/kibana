@@ -166,7 +166,7 @@ class FieldUI extends PureComponent {
 
   onFieldChange = (e) => {
     const value = e.target.value;
-    const { type } = this.props.setting;
+    const { type, validation } = this.props.setting;
     const { unsavedValue } = this.state;
 
     let newUnsavedValue = undefined;
@@ -181,8 +181,21 @@ class FieldUI extends PureComponent {
       default:
         newUnsavedValue = value;
     }
+
+    let isInvalid = false;
+    let error = undefined;
+
+    if (validation && validation.regex) {
+      if (!validation.regex.test(newUnsavedValue)) {
+        error = validation.message;
+        isInvalid = true;
+      }
+    }
+
     this.setState({
       unsavedValue: newUnsavedValue,
+      isInvalid,
+      error
     });
   }
 

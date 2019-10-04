@@ -68,6 +68,17 @@
         ],
       },
       {
+        groupSlug: '@elastic/charts',
+        groupName: '@elastic/charts related packages',
+        packageNames: [
+          '@elastic/charts',
+          '@types/elastic__charts',
+        ],
+        reviewers: [
+          'markov00',
+        ],
+      },
+      {
         groupSlug: 'mocha',
         groupName: 'mocha related packages',
         packagePatterns: [
@@ -246,6 +257,18 @@
         groupName: 'storybook related packages',
         packagePatterns: [
           '(\\b|_)storybook(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'typescript',
+        groupName: 'typescript related packages',
+        packagePatterns: [
+          '(\\b|_)ts(\\b|_)',
+          '(\\b|_)typescript(\\b|_)',
+        ],
+        packageNames: [
+          'tslib',
+          '@types/tslib',
         ],
       },
       {
@@ -462,14 +485,6 @@
         packageNames: [
           'minimatch',
           '@types/minimatch',
-        ],
-      },
-      {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
         ],
       },
       {

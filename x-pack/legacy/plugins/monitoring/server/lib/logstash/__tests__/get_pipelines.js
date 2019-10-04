@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import {
-  _handleResponse,
+  handleGetPipelinesResponse,
   processPipelinesAPIResponse } from '../get_pipelines';
 
 describe('processPipelinesAPIResponse', () => {
@@ -71,7 +71,7 @@ describe('get_pipelines', () => {
     });
 
     it ('returns an empty array', () => {
-      const result = _handleResponse(fetchPipelinesWithMetricsResult);
+      const result = handleGetPipelinesResponse(fetchPipelinesWithMetricsResult);
       expect(result).to.eql([]);
     });
   });
@@ -97,7 +97,7 @@ describe('get_pipelines', () => {
     });
 
     it ('returns the correct structure for a non-empty response', () => {
-      const result = _handleResponse(fetchPipelinesWithMetricsResult);
+      const result = handleGetPipelinesResponse(fetchPipelinesWithMetricsResult);
       expect(result).to.eql([
         {
           id: 'apache_logs',
