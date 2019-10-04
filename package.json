@@ -70,7 +70,9 @@
     "core:acceptApiChanges": "node scripts/check_core_api_changes.js --accept",
     "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook",
     "spec_to_console": "node scripts/spec_to_console",
-    "backport-skip-ci": "backport --prDescription \"[skip-ci]\""
+    "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -262,7 +264,8 @@
     "webpack": "4.39.2",
     "webpack-merge": "4.2.1",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "2.10.0"
+    "yauzl": "2.10.0",
+    "snyk": "^1.230.5"
   },
   "devDependencies": {
     "@babel/parser": "^7.5.5",
@@ -454,5 +457,6 @@
   "engines": {
     "node": "10.15.2",
     "yarn": "^1.10.1"
-  }
+  },
+  "snyk": true
 }
