@@ -18,13 +18,13 @@
  */
 
 import { format as formatUrl } from 'url';
-import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig } from '@kbn/test';
+import { OPTIMIZE_BUNDLE_DIR, legacyEsTestConfig, kbnTestConfig } from '@kbn/test';
 import { services } from './services';
 
 export default function () {
   const servers = {
     kibana: kbnTestConfig.getUrlParts(),
-    elasticsearch: esTestConfig.getUrlParts(),
+    elasticsearch: legacyEsTestConfig.getUrlParts(),
   };
 
   return {

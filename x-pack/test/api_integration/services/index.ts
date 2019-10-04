@@ -10,7 +10,7 @@ import { services as kibanaCommonServices } from '../../../../test/common/servic
 import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
 
 // @ts-ignore not ts yet
-import { LegacyEsProvider } from './es';
+import { LegacyEsProvider } from './legacy_es';
 // @ts-ignore not ts yet
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 // @ts-ignore not ts yet

@@ -22,7 +22,7 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
-import { esTestConfig } from '@kbn/test';
+import { legacyEsTestConfig } from '@kbn/test';
 import { ensureEsVersion } from '../ensure_es_version';
 
 describe('plugins/elasticsearch', () => {
@@ -41,7 +41,7 @@ describe('plugins/elasticsearch', () => {
             status: {
               red: sinon.stub()
             },
-            url: esTestConfig.getUrl()
+            url: legacyEsTestConfig.getUrl()
           }
         },
         config() {

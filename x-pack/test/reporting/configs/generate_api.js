@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esTestConfig, kbnTestConfig } from '@kbn/test';
+import { legacyEsTestConfig, kbnTestConfig } from '@kbn/test';
 import { format as formatUrl } from 'url';
 import { getApiIntegrationConfig } from '../../api_integration/config';
 import { getReportingApiConfig } from './api';
@@ -12,7 +12,7 @@ import { getReportingApiConfig } from './api';
 export default async function ({ readConfigFile }) {
   const servers = {
     kibana: kbnTestConfig.getUrlParts(),
-    elasticsearch: esTestConfig.getUrlParts(),
+    elasticsearch: legacyEsTestConfig.getUrlParts(),
   };
 
   const apiTestConfig = await getApiIntegrationConfig({ readConfigFile });

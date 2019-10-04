@@ -21,7 +21,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 import {
   createEsTestCluster,
   DEFAULT_SUPERUSER_PASS,
-  esTestConfig,
+  legacyEsTestConfig,
   kbnTestConfig,
   kibanaServerTestUser,
   kibanaTestUser,
@@ -54,7 +54,7 @@ const DEFAULTS_SETTINGS = {
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
   plugins: { scanDirs: [resolve(__dirname, '../legacy/core_plugins')] },
   elasticsearch: {
-    hosts: [esTestConfig.getUrl()],
+    hosts: [legacyEsTestConfig.getUrl()],
     username: kibanaServerTestUser.username,
     password: kibanaServerTestUser.password,
   },
@@ -226,11 +226,11 @@ export function createTestServers({
       if (['gold', 'trial'].includes(license)) {
         await setupUsers({
           log,
-          esPort: esTestConfig.getUrlParts().port,
+          esPort: legacyEsTestConfig.getUrlParts().port,
           updates: [
             ...usersToBeAdded,
             // user elastic
-            esTestConfig.getUrlParts(),
+            legacyEsTestConfig.getUrlParts(),
             // user kibana
             kbnTestConfig.getUrlParts(),
           ],
@@ -238,18 +238,18 @@ export function createTestServers({
 
         // Override provided configs, we know what the elastic user is now
         kbnSettings.elasticsearch = {
-          hosts: [esTestConfig.getUrl()],
-          username: esTestConfig.getUrlParts().username,
-          password: esTestConfig.getUrlParts().password,
+          hosts: [legacyEsTestConfig.getUrl()],
+          username: legacyEsTestConfig.getUrlParts().username,
+          password: legacyEsTestConfig.getUrlParts().password,
         };
       }
 
       return {
         stop: async () => await es.cleanup(),
         es,
-        hosts: [esTestConfig.getUrl()],
-        username: esTestConfig.getUrlParts().username,
-        password: esTestConfig.getUrlParts().password,
+        hosts: [legacyEsTestConfig.getUrl()],
+        username: legacyEsTestConfig.getUrlParts().username,
+        password: legacyEsTestConfig.getUrlParts().password,
       };
     },
     startKibana: async () => {
