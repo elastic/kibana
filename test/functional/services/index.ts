@@ -45,11 +45,11 @@ import { SnapshotsProvider } from './snapshots';
 import { TableProvider } from './table';
 import { TestSubjectsProvider } from './test_subjects';
 import { ToastsProvider } from './toasts';
+import { ProvisionedEnvProvider } from './provisioned_env';
 // @ts-ignore not TS yet
 import { PieChartProvider } from './visualizations';
 import { VisualizeListingTableProvider } from './visualize_listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
-import { ProvisionedEnvProvider } from './provisioned_env';
 export const services = {
   ...commonServiceProviders,
 

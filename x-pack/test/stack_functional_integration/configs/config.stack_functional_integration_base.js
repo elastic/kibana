@@ -19,7 +19,6 @@
 
 
 import getAllConfigs from './get_all_configs';
-import serverConfig from './server_config';
 import { resolve } from 'path';
 import buildState from './build_state';
 
@@ -30,7 +29,7 @@ const stateFilePath = '../../../../../integration-test/qa/envvars.sh';
 const prepend = testFile => require.resolve(`${testsFolder}/${testFile}`);
 
 export default async ({ readConfigFile }) => {
-  const { servers, apps } = serverConfig;
+  const { servers, apps } = await getAllConfigs(readConfigFile, './config.server.js');
   const { tests, ...provisionedConfigs } = buildState(resolve(__dirname, stateFilePath));
 
   return {
