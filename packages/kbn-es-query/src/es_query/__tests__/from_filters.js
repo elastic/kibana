@@ -17,8 +17,29 @@
  * under the License.
  */
 
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import expect from '@kbn/expect';
-import { buildQueryFromFilters } from '../from_filters';
+import { buildQueryFromFilters, translateToQuery } from '../from_filters';
+import indexPattern from '../../__fixtures__/index_pattern_response.json';
 
 describe('build query', function () {
   describe('buildQueryFromFilters', function () {
@@ -180,4 +201,245 @@ describe('build query', function () {
       expect(result.filter).to.eql(expectedESQueries);
     });
   });
+  describe('translateToQuery', function () {
+    it('should extract the contents of a saved query', function () {
+      const savedQueryFilter = {
+        '$state': {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'Bytes more than 2000 only',
+          negate: false,
+          params: {
+            savedQuery: {
+              attributes: {
+                description: 'no filters at all',
+                query: {
+                  language: 'kuery',
+                  query: 'bytes >= 2000'
+                },
+                title: 'Bytes more than 2000 only',
+              },
+              id: 'Bytes more than 2000 only',
+            }
+          },
+          type: 'savedQuery',
+          value: undefined,
+        },
+        saved_query: 'Bytes more than 2000 only'
+      };
+      const expectedResult = {
+        '$state': { store: 'appState' },
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'Bytes more than 2000 only',
+          negate: false,
+          params: {
+            savedQuery: {
+              attributes: {
+                description: 'no filters at all',
+                query: { language: 'kuery', query: 'bytes >= 2000' },
+                title: 'Bytes more than 2000 only'
+              },
+              id: 'Bytes more than 2000 only',
+            }
+          },
+          type: 'savedQuery',
+          value: undefined,
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [{ range: { bytes: { gte: 2000 } } }],
+                }
+              }
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          }
+        },
+        saved_query: 'Bytes more than 2000 only'
+      };
+      const result = translateToQuery(savedQueryFilter, { indexPattern });
+      expect(result).to.eql(expectedResult);
+    });
+
+    it('should extract and translate saved query filters that contain saved query filters', function () {
+      const savedQueryFilter = {
+        '$state': {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'Compound',
+          negate: false,
+          params: {
+            savedQuery: {
+              attributes: {
+                description: 'Compound saved query',
+                filters: [
+                  {
+                    '$state': {
+                      store: 'appState',
+                    },
+                    meta: {
+                      alias: null,
+                      disabled: false,
+                      key: 'Ok response',
+                      negate: false,
+                      params: {
+                        savedQuery: {
+                          attributes: {
+                            description: 'saved query',
+                            query: {
+                              language: 'kuery',
+                              query: 'response.keyword: 200'
+                            },
+                            title: 'Ok response',
+                          },
+                          id: 'Ok response',
+                        }
+                      },
+                      type: 'savedQuery',
+                      value: undefined,
+                    },
+                    saved_query: 'Ok response'
+                  }],
+                query: {
+                  language: 'kuery',
+                  query: ''
+                },
+                title: 'Compound',
+              },
+              id: 'Compound',
+            }
+          },
+          type: 'savedQuery',
+          value: undefined,
+        },
+        saved_query: 'Compound'
+      };
+      const expectedResult = {
+        '$state': {
+          store: 'appState'
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'Compound',
+          negate: false,
+          params: {
+            savedQuery: {
+              attributes: {
+                description: 'Compound saved query',
+                filters: [
+                  {
+                    '$state': {
+                      store: 'appState'
+                    },
+                    meta: {
+                      alias: null,
+                      disabled: false,
+                      key: 'Ok response',
+                      negate: false,
+                      params: {
+                        savedQuery: {
+                          attributes: {
+                            description: 'saved query',
+                            query: {
+                              language: 'kuery',
+                              query: 'response.keyword: 200'
+                            },
+                            title: 'Ok response',
+                          },
+                          id: 'Ok response',
+                        }
+                      },
+                      type: 'savedQuery',
+                      value: undefined,
+                    },
+                    query: {
+                      bool: {
+                        filter: [
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match: {
+                                    'response.keyword': 200
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        must: [],
+                        must_not: [],
+                        should: []
+                      }
+                    },
+                    saved_query: 'Ok response'
+                  }
+                ],
+                query: {
+                  language: 'kuery',
+                  query: ''
+                },
+                title: 'Compound'
+              },
+              id: 'Compound'
+            }
+          },
+          type: 'savedQuery',
+          value: undefined
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                match_all: {}
+              },
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              'response.keyword': 200
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  must: [],
+                  must_not: [],
+                  should: [],
+                }
+              }
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          }
+        },
+        saved_query: 'Compound'
+      };
+      const result = translateToQuery(savedQueryFilter, { indexPattern });
+      expect(result).to.eql(expectedResult);
+    });
+  });
 });
+

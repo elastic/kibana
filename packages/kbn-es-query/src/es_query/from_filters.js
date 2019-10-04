@@ -90,7 +90,7 @@ const isSavedQueryFilter = function (filter) {
  * @param  {Object} filter - The filter to translate
  * @return {Object} the query version of that filter
  */
-const translateToQuery = function (filter, {
+export const translateToQuery = function (filter, {
   indexPattern,
   allowLeadingWildcards = true,
   queryStringOptions = {},
