@@ -9,7 +9,7 @@ Register a context provider for application mounting. Will only be available to 
 <b>Signature:</b>
 
 ```typescript
-registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
+registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  contextName | <code>T</code> | The key of [AppMountContext](./kibana-plugin-public.appmountcontext.md) this provider's return value should be attached to. |
-|  provider | <code>IContextProvider&lt;AppMountContext, T&gt;</code> | A [IContextProvider](./kibana-plugin-public.icontextprovider.md) function |
+|  provider | <code>IContextProvider&lt;App['mount'], T&gt;</code> | A [IContextProvider](./kibana-plugin-public.icontextprovider.md) function |
 
 <b>Returns:</b>
 
