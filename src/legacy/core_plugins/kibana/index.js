@@ -229,6 +229,9 @@ export default function (kibana) {
         'kql-telemetry': {
           isNamespaceAgnostic: true,
         },
+        'config': { // TODO: THIS DOESNT BELONG HERE. IDK WHERE THE CONFIG MAPPINGS ARE SPECIFIED
+          isNamespaceIsolated: true
+        }
       },
 
       injectDefaultVars(server, options) {
