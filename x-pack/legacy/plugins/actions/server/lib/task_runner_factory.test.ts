@@ -33,6 +33,7 @@ beforeAll(() => {
     runAt: new Date(),
     state: {},
     attempts: 0,
+    ownerId: '',
     status: 'running' as TaskStatus,
     startedAt: new Date(),
     scheduledAt: new Date(),
