@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const urlTemplatePlaceholder = '{{gquery}}';
 export const urlTemplateRegex = /\{\{gquery\}\}/g;
 const defaultKibanaQuery = /,query:\(language:kuery,query:'.*?'\)/g;
 
@@ -34,5 +35,8 @@ export function isKibanaUrl(url: string) {
  * @param url The url to turn into an url template
  */
 export function replaceKibanaUrlParam(url: string) {
-  return url.replace(defaultKibanaQuery, ',query:(language:kuery,query:{{gquery}})');
+  return url.replace(
+    defaultKibanaQuery,
+    `,query:(language:kuery,query:{{${urlTemplatePlaceholder}}})`
+  );
 }

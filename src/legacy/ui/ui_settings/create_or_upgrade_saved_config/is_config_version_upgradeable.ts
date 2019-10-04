@@ -20,14 +20,12 @@
 import semver from 'semver';
 const rcVersionRegex = /^(\d+\.\d+\.\d+)\-rc(\d+)$/i;
 
-function extractRcNumber(version) {
+function extractRcNumber(version: string): [string, number] {
   const match = version.match(rcVersionRegex);
-  return match
-    ? [match[1], parseInt(match[2], 10)]
-    : [version, Infinity];
+  return match ? [match[1], parseInt(match[2], 10)] : [version, Infinity];
 }
 
-export function isConfigVersionUpgradeable(savedVersion, kibanaVersion) {
+export function isConfigVersionUpgradeable(savedVersion: string, kibanaVersion: string): boolean {
   if (
     typeof savedVersion !== 'string' ||
     typeof kibanaVersion !== 'string' ||
