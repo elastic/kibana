@@ -38,8 +38,7 @@ export class RestAgentAdapter extends AgentAdapter {
 
   public async getAll(ESQuery?: string): Promise<Agent[]> {
     try {
-      return (await this.REST.get<ReturnTypeList<Agent>>('/api/fleet/agents/all', { ESQuery }))
-        .list;
+      return (await this.REST.get<ReturnTypeList<Agent>>('/api/fleet/agents', { ESQuery })).list;
     } catch (e) {
       return [];
     }

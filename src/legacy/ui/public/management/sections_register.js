@@ -45,8 +45,16 @@ management.register('kibana', {
   icon: 'logoKibana',
 });
 
+management.register('ingest', {
+  display: i18n.translate('common.ui.management.dataIngestionDisplayName', {
+    defaultMessage: 'Data Ingestion',
+  }),
+  order: 30,
+  icon: 'logoAPM',
+});
+
 management.register('logstash', {
   display: 'Logstash',
-  order: 30,
+  order: 40,
   icon: 'logoLogstash',
 });
