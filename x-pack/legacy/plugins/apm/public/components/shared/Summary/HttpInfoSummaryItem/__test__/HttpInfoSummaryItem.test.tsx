@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { HttpInfoSummaryItem } from '../';
 import * as exampleTransactions from '../../__fixtures__/transactions';
 
@@ -27,9 +26,7 @@ describe('HttpInfoSummaryItem', () => {
       it('shows a success color', () => {
         const wrapper = mount(<HttpInfoSummaryItem {...props} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          theme.euiColorDarkShade
-        );
+        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(100);
       });
     });
 
@@ -38,9 +35,7 @@ describe('HttpInfoSummaryItem', () => {
         const p = { ...props, status: 200 };
         const wrapper = mount(<HttpInfoSummaryItem {...p} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          theme.euiColorSecondary
-        );
+        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(200);
       });
     });
 
@@ -50,9 +45,7 @@ describe('HttpInfoSummaryItem', () => {
 
         const wrapper = mount(<HttpInfoSummaryItem {...p} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          theme.euiColorDarkShade
-        );
+        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(301);
       });
     });
 
@@ -62,9 +55,7 @@ describe('HttpInfoSummaryItem', () => {
 
         const wrapper = mount(<HttpInfoSummaryItem {...p} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          theme.euiColorWarning
-        );
+        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(404);
       });
     });
 
@@ -74,9 +65,7 @@ describe('HttpInfoSummaryItem', () => {
 
         const wrapper = mount(<HttpInfoSummaryItem {...p} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          theme.euiColorDanger
-        );
+        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(502);
       });
     });
 
@@ -86,9 +75,7 @@ describe('HttpInfoSummaryItem', () => {
 
         const wrapper = mount(<HttpInfoSummaryItem {...p} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          'default'
-        );
+        expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(700);
       });
     });
   });

@@ -36,6 +36,7 @@ import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
+import { HttpStatusBadge } from '../../../../../../shared/Summary/HttpStatusBadge';
 
 function formatType(type: string) {
   switch (type) {
@@ -71,6 +72,9 @@ function getSpanTypes(span: Span) {
     spanAction: action
   };
 }
+
+const getSpanHttpStatusCode = (span: Span): number | undefined =>
+  get(span, 'span.http.response.status_code');
 
 const TagName = styled.div`
   font-weight: bold;
@@ -108,6 +112,7 @@ export function SpanFlyout({
     value: get(spanLabels, key)
   }));
   const spanTypes = getSpanTypes(span);
+  const spanHttpStatusCode = getSpanHttpStatusCode(span);
 
   return (
     <EuiPortal>
@@ -182,6 +187,9 @@ export function SpanFlyout({
                   >
                     <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
                   </EuiToolTip>
+                )}
+                {spanHttpStatusCode && (
+                  <HttpStatusBadge status={spanHttpStatusCode} />
                 )}
               </>
             ]}
