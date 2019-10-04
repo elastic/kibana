@@ -31,7 +31,7 @@ const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.dateHistogramOf', {
-    defaultMessage: 'Date Histogram of {name}',
+    defaultMessage: 'Date histogram of {name}',
     values: { name },
   });
 }
@@ -51,7 +51,7 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
 export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatternColumn> = {
   type: 'date_histogram',
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
-    defaultMessage: 'Date Histogram',
+    defaultMessage: 'Date histogram',
   }),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
@@ -196,7 +196,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
-                defaultMessage: 'Customize level of detail',
+                defaultMessage: 'Customize time intervals',
               })}
               checked={currentColumn.params.interval !== autoInterval}
               onChange={onChangeAutoInterval}
@@ -206,7 +206,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
         {currentColumn.params.interval !== autoInterval && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-              defaultMessage: 'Level of detail',
+              defaultMessage: 'Time intervals',
             })}
           >
             {intervalIsRestricted ? (
@@ -242,7 +242,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                   )
                 }
                 aria-label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-                  defaultMessage: 'Level of detail',
+                  defaultMessage: 'Time intervals',
                 })}
               />
             )}

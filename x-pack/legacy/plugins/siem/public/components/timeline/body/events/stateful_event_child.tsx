@@ -5,16 +5,18 @@
  */
 
 import * as React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import uuid from 'uuid';
-import { EventColumnView } from './event_column_view';
-import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import { OnPinEvent, OnColumnResized, OnUnPinEvent } from '../../events';
-import { ColumnHeader } from '../column_headers/column_header';
-import { ColumnRenderer } from '../renderers/column_renderer';
+
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
+import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { NoteCards } from '../../../notes/note_cards';
+import { OnPinEvent, OnColumnResized, OnUnPinEvent } from '../../events';
+import { EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
+import { useTimelineWidthContext } from '../../timeline_context';
+import { ColumnHeader } from '../column_headers/column_header';
+import { ColumnRenderer } from '../renderers/column_renderer';
+import { EventColumnView } from './event_column_view';
 
 interface Props {
   id: string;
@@ -71,9 +73,14 @@ export const StatefulEventChild = React.memo<Props>(
     timelineId,
     onToggleShowNotes,
     updateNote,
-  }) => (
-    <EuiFlexGroup data-test-subj="event-rows" direction="column" gutterSize="none">
-      <EuiFlexItem data-test-subj="event-column-data" grow={false}>
+  }) => {
+    const width = useTimelineWidthContext();
+
+    // Passing the styles directly to the component because the width is
+    // being calculated and is recommended by Styled Components for performance
+    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+    return (
+      <>
         <EventColumnView
           id={id}
           actionsColumnWidth={actionsColumnWidth}
@@ -96,22 +103,25 @@ export const StatefulEventChild = React.memo<Props>(
           toggleShowNotes={onToggleShowNotes(id)}
           updateNote={updateNote}
         />
-      </EuiFlexItem>
 
-      <EuiFlexItem data-test-subj="event-notes-flex-item" grow={false}>
-        <NoteCards
-          associateNote={associateNote(id, addNoteToEvent, onPinEvent)}
-          data-test-subj="note-cards"
-          getNewNoteId={getNewNoteId}
-          getNotesByIds={getNotesByIds}
-          noteIds={eventIdToNoteIds[id] || emptyNotes}
-          showAddNote={showNotes}
-          toggleShowAddNote={onToggleShowNotes(id)}
-          updateNote={updateNote}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  )
+        <EventsTrSupplement
+          className="siemEventsTable__trSupplement--notes"
+          data-test-subj="event-notes-flex-item"
+          style={{ width: `${width - OFFSET_SCROLLBAR}px` }}
+        >
+          <NoteCards
+            associateNote={associateNote(id, addNoteToEvent, onPinEvent)}
+            data-test-subj="note-cards"
+            getNewNoteId={getNewNoteId}
+            getNotesByIds={getNotesByIds}
+            noteIds={eventIdToNoteIds[id] || emptyNotes}
+            showAddNote={showNotes}
+            toggleShowAddNote={onToggleShowNotes(id)}
+            updateNote={updateNote}
+          />
+        </EventsTrSupplement>
+      </>
+    );
+  }
 );
-
 StatefulEventChild.displayName = 'StatefulEventChild';

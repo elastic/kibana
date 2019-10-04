@@ -33,6 +33,7 @@ beforeAll(() => {
     params: {
       alertId: '1',
     },
+    ownerId: null,
   };
 });
 
@@ -68,6 +69,7 @@ const mockedAlertTypeSavedObject = {
     enabled: true,
     alertTypeId: '123',
     interval: '10s',
+    mutedInstanceIds: [],
     alertTypeParams: {
       bar: true,
     },

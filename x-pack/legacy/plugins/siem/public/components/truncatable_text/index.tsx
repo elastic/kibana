@@ -4,21 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 /**
  * Applies CSS styling to enable text to be truncated with an ellipsis.
  * Example: "Don't leave me hanging..."
  *
- * Width is required, because CSS will not truncate the text unless a width is
- * specified.
+ * Note: Requires a parent container with a defined width or max-width.
  */
-export const TruncatableText = styled(EuiText)<{ width: string }>`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: ${({ width }) => width};
-`;
 
+export const TruncatableText = styled.span`
+  &,
+  & * {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+`;
 TruncatableText.displayName = 'TruncatableText';
