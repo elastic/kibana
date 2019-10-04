@@ -79,8 +79,8 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   } = props;
 
   const kibana = useKibana<IDataPluginServices>();
-  const { overlays, savedObjects, uiSettings, chrome } = kibana.services;
-  if (!overlays || !chrome) return null;
+  const { overlays, savedObjects, uiSettings, chrome, application } = kibana.services;
+  if (!overlays || !chrome || !application) return null;
 
   const onOpenDatasourcePicker = () => {
     openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected);
@@ -163,7 +163,10 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   if (noIndexPatterns) {
     const managementUrl = chrome.navLinks.get('kibana:management')!.url;
-    const url = `${managementUrl}/kibana/index_patterns`;
+    const indexPatternUrl = `${managementUrl}/kibana/index_patterns`;
+    const sampleDataUrl = `${application.getUrlForApp(
+      'kibana'
+    )}#/home/tutorial_directory/sampleData`;
     content = (
       <EuiPanel paddingSize="none">
         <EuiCallOut
@@ -176,10 +179,10 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           <p>
             <FormattedMessage
               id="xpack.graph.noDataSourceNotificationMessageText"
-              defaultMessage="Not data sources found. Go to {managementIndexPatternsLink} and create an index pattern for your Elasticsearch indices."
+              defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create an index pattern for your Elasticsearch indices."
               values={{
                 managementIndexPatternsLink: (
-                  <a href={url}>
+                  <a href={indexPatternUrl}>
                     <FormattedMessage
                       id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
                       defaultMessage="Management &gt; Index Patterns"
@@ -195,7 +198,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
               defaultMessage="New to Kibana? You can also use our {sampleDataInstallLink}."
               values={{
                 sampleDataInstallLink: (
-                  <EuiLink href="#/home/tutorial_directory/sampleData">
+                  <EuiLink href={sampleDataUrl}>
                     <FormattedMessage
                       id="xpack.graph.listing.noDataSource.sampleDataInstallLinkText"
                       defaultMessage="sample data"

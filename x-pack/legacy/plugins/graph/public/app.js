@@ -148,6 +148,7 @@ uiRoutes
       };
       $scope.capabilities = capabilities.get().graph;
       $scope.initialFilter = ($location.search()).filter || '';
+      $scope.coreStart = npStart.core;
       setBreadcrumbs({ chrome });
     }
   })

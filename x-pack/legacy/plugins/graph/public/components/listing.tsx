@@ -9,11 +9,13 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
+import { CoreStart, ApplicationStart } from 'kibana/public';
 // @ts-ignore
 import { TableListView } from '../../../../../../src/legacy/core_plugins/kibana/public/table_list_view/table_list_view';
 import { GraphWorkspaceSavedObject } from '../types';
 
 export interface ListingProps {
+  coreStart: CoreStart;
   createItem: () => void;
   findItems: (query: string, limit: number) => Promise<GraphWorkspaceSavedObject[]>;
   deleteItems: (ids: string[]) => Promise<void>;
@@ -36,7 +38,11 @@ export function Listing(props: ListingProps) {
         tableColumns={getTableColumns(props.getViewUrl)}
         listingLimit={props.listingLimit}
         initialFilter={props.initialFilter}
-        noItemsFragment={getNoItemsMessage(props.capabilities.save === false, props.createItem)}
+        noItemsFragment={getNoItemsMessage(
+          props.capabilities.save === false,
+          props.createItem,
+          props.coreStart.application
+        )}
         entityName={i18n.translate('xpack.graph.listing.table.entityName', {
           defaultMessage: 'graph',
         })}
@@ -51,7 +57,11 @@ export function Listing(props: ListingProps) {
   );
 }
 
-function getNoItemsMessage(hideWriteControls: boolean, createItem: () => void) {
+function getNoItemsMessage(
+  hideWriteControls: boolean,
+  createItem: () => void,
+  application: ApplicationStart
+) {
   if (hideWriteControls) {
     return (
       <div>
@@ -69,6 +79,8 @@ function getNoItemsMessage(hideWriteControls: boolean, createItem: () => void) {
       </div>
     );
   }
+
+  const sampleDataUrl = `${application.getUrlForApp('kibana')}#/home/tutorial_directory/sampleData`;
 
   return (
     <div>
@@ -96,7 +108,7 @@ function getNoItemsMessage(hideWriteControls: boolean, createItem: () => void) {
                 defaultMessage="New to Kibana? Get started with {sampleDataInstallLink}."
                 values={{
                   sampleDataInstallLink: (
-                    <EuiLink href="#/home/tutorial_directory/sampleData">
+                    <EuiLink href={sampleDataUrl}>
                       <FormattedMessage
                         id="xpack.graph.listing.createNewGraph.sampleDataInstallLinkText"
                         defaultMessage="sample data"
