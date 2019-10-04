@@ -8,6 +8,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
+import { ComponentStrings } from '../../../i18n';
+
+const { PagePreviewPageControls: strings } = ComponentStrings;
+
 export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
   const handleDuplicate = ev => {
     ev.preventDefault();
@@ -26,20 +30,20 @@ export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
       justifyContent="spaceBetween"
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Duplicate">
+        <EuiToolTip content={strings.getClonePageTooltip()}>
           <EuiButtonIcon
-            iconType="document"
-            aria-label="Duplicate Page"
+            iconType="copy"
+            aria-label={strings.getClonePageAriaLabel()}
             onClick={handleDuplicate}
           />
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Delete">
+        <EuiToolTip content={strings.getDeletePageTooltip()}>
           <EuiButtonIcon
             color="danger"
             iconType="trash"
-            aria-label="Delete Page"
+            aria-label={strings.getDeletePageAriaLabel()}
             onClick={handleDelete}
           />
         </EuiToolTip>

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { EuiContextMenuPanelDescriptor, EuiPanel } from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
@@ -65,6 +65,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   private parentSubscription?: Subscription;
   private subscription?: Subscription;
   private mounted: boolean = false;
+  private generateId = htmlIdGenerator();
+
   constructor(props: Props) {
     super(props);
     const { embeddable } = this.props;
@@ -153,8 +155,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       'embPanel--editing': !viewOnlyMode,
     });
     const title = this.props.embeddable.getTitle();
+    const headerId = this.generateId();
     return (
-      <EuiPanel className={classes} data-test-subj="embeddablePanel" paddingSize="none">
+      <EuiPanel
+        className={classes}
+        data-test-subj="embeddablePanel"
+        paddingSize="none"
+        role="figure"
+        aria-labelledby={headerId}
+      >
         <PanelHeader
           getActionContextMenuPanel={this.getActionContextMenuPanel}
           hidePanelTitles={this.state.hidePanelTitles}
@@ -163,6 +172,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           title={title}
           badges={this.state.badges}
           embeddable={this.props.embeddable}
+          headerId={headerId}
         />
         <div className="embPanel__content" ref={this.embeddableRoot} />
       </EuiPanel>
