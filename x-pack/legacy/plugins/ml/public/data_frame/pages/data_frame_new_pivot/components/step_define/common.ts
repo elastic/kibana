@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { get } from 'lodash';
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 
 import { IndexPattern } from 'ui/index_patterns';
 
-import { KBN_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   PreviewRequestBody,
@@ -79,7 +79,8 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
 
   fields.forEach(field => {
     // Group by
-    const availableGroupByAggs = pivotGroupByFieldSupport[field.type];
+    const availableGroupByAggs: [] = get(pivotGroupByFieldSupport, field.type);
+
     if (availableGroupByAggs !== undefined) {
       availableGroupByAggs.forEach(groupByAgg => {
         // Aggregation name for the group-by is the plain field name. Illegal characters will be removed.
@@ -99,7 +100,8 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
 
     // Aggregations
     const aggOption: DropDownOption = { label: field.name, options: [] };
-    const availableAggs = pivotAggsFieldSupport[field.type];
+    const availableAggs: [] = get(pivotAggsFieldSupport, field.type);
+
     if (availableAggs !== undefined) {
       availableAggs.forEach(agg => {
         // Aggregation name is formatted like `fieldname.sum`. Illegal characters will be removed.

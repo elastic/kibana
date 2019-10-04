@@ -25,7 +25,7 @@ jest.mock('ui/chrome', () => ({
   }),
 }));
 
-jest.mock('ui/time_buckets', () => ({
+jest.mock('../../../util/time_buckets', () => ({
   TimeBuckets: function () {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
@@ -45,7 +45,8 @@ function getTimeseriesChartPropsMock() {
     showForecast: true,
     showModelBounds: true,
     svgWidth: 1600,
-    timefilter: {}
+    timefilter: {},
+    skipRefresh: false
   };
 }
 

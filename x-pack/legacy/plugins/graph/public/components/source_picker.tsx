@@ -9,10 +9,11 @@ import React from 'react';
 
 import { CoreStart } from 'src/core/public';
 import { SavedObjectFinder } from '../../../../../../src/plugins/kibana_react/public';
+import { IndexPattern } from '../../../../../../src/legacy/core_plugins/data/public';
 import { IndexPatternSavedObject } from '../types';
 
 export interface SourcePickerProps {
-  currentIndexPattern?: IndexPatternSavedObject;
+  currentIndexPattern?: IndexPattern;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];

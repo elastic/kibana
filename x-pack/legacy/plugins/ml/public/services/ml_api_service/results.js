@@ -45,6 +45,23 @@ export const results = {
     });
   },
 
+  getMaxAnomalyScore(
+    jobIds,
+    earliestMs,
+    latestMs
+  ) {
+
+    return http({
+      url: `${basePath}/results/max_anomaly_score`,
+      method: 'POST',
+      data: {
+        jobIds,
+        earliestMs,
+        latestMs
+      }
+    });
+  },
+
   getCategoryDefinition(jobId, categoryId) {
     return http({
       url: `${basePath}/results/category_definition`,

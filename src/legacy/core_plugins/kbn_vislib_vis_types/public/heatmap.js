@@ -20,10 +20,11 @@
 import { visFactory } from '../../../ui/public/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import heatmapTemplate from './editors/heatmap.html';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { AggGroupNames } from 'ui/vis/editors/default';
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { AxisTypes, getHeatmapCollections, Positions, ScaleTypes } from './utils/collections';
+import { HeatmapOptions } from './components/options';
 import { vislibVisController } from './controller';
-import './controls/heatmap_options';
 
 export default function HeatmapVisType() {
 
@@ -39,10 +40,10 @@ export default function HeatmapVisType() {
         addTooltip: true,
         addLegend: true,
         enableHover: false,
-        legendPosition: 'right',
+        legendPosition: Positions.RIGHT,
         times: [],
         colorsNumber: 4,
-        colorSchema: 'Greens',
+        colorSchema: ColorSchemas.Greens,
         setColorRange: false,
         colorsRange: [],
         invertColors: false,
@@ -50,9 +51,9 @@ export default function HeatmapVisType() {
         valueAxes: [{
           show: false,
           id: 'ValueAxis-1',
-          type: 'value',
+          type: AxisTypes.VALUE,
           scale: {
-            type: 'linear',
+            type: ScaleTypes.LINEAR,
             defaultYExtents: false,
           },
           labels: {
@@ -68,27 +69,11 @@ export default function HeatmapVisType() {
       brush: { disabled: false },
     },
     editorConfig: {
-      collections: {
-        legendPositions: [{
-          value: 'left',
-          text: 'left',
-        }, {
-          value: 'right',
-          text: 'right',
-        }, {
-          value: 'top',
-          text: 'top',
-        }, {
-          value: 'bottom',
-          text: 'bottom',
-        }],
-        scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
-      },
-      optionsTemplate: heatmapTemplate,
+      collections: getHeatmapCollections(),
+      optionsTemplate: HeatmapOptions,
       schemas: new Schemas([
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'metric',
           title: i18n.translate('kbnVislibVisTypes.heatmap.metricTitle', { defaultMessage: 'Value' }),
           min: 1,
@@ -99,7 +84,7 @@ export default function HeatmapVisType() {
           ]
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'segment',
           title: i18n.translate('kbnVislibVisTypes.heatmap.segmentTitle', { defaultMessage: 'X-axis' }),
           min: 0,
@@ -107,7 +92,7 @@ export default function HeatmapVisType() {
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'group',
           title: i18n.translate('kbnVislibVisTypes.heatmap.groupTitle', { defaultMessage: 'Y-axis' }),
           min: 0,
@@ -115,7 +100,7 @@ export default function HeatmapVisType() {
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'split',
           title: i18n.translate('kbnVislibVisTypes.heatmap.splitTitle', { defaultMessage: 'Split chart' }),
           min: 0,

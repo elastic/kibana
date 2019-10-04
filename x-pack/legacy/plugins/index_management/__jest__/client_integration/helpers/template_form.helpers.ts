@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestBed } from '../../../../../../test_utils';
+import { TestBed, SetupFunc } from '../../../../../../test_utils';
 import { Template } from '../../../common/types';
+import { nextTick } from './index';
 
 export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
   actions: {
@@ -13,14 +14,16 @@ export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
     clickBackButton: () => void;
     clickSubmitButton: () => void;
     completeStepOne: ({ name, indexPatterns, order, version }: Partial<Template>) => void;
-    completeStepTwo: ({ settings }: Partial<Template>) => void;
-    completeStepThree: ({ mappings }: Partial<Template>) => void;
-    completeStepFour: ({ aliases }: Partial<Template>) => void;
+    completeStepTwo: (settings: string) => void;
+    completeStepThree: (mappings: string) => void;
+    completeStepFour: (aliases: string) => void;
     selectSummaryTab: (tab: 'summary' | 'request') => void;
   };
 }
 
-export const formSetup = async (initTestBed: any): Promise<TemplateFormTestBed> => {
+export const formSetup = async (
+  initTestBed: SetupFunc<TestSubjects>
+): Promise<TemplateFormTestBed> => {
   const testBed = await initTestBed();
 
   // User actions
@@ -36,11 +39,11 @@ export const formSetup = async (initTestBed: any): Promise<TemplateFormTestBed> 
     testBed.find('submitButton').simulate('click');
   };
 
-  const completeStepOne = ({ name, indexPatterns, order, version }: Partial<Template>) => {
-    const { form, find } = testBed;
+  const completeStepOne = async ({ name, indexPatterns, order, version }: Partial<Template>) => {
+    const { form, find, component } = testBed;
 
     if (name) {
-      form.setInputValue('nameInput', name);
+      form.setInputValue('nameField.input', name);
     }
 
     if (indexPatterns) {
@@ -50,53 +53,68 @@ export const formSetup = async (initTestBed: any): Promise<TemplateFormTestBed> 
       }));
 
       find('mockComboBox').simulate('change', indexPatternsFormatted); // Using mocked EuiComboBox
+      await nextTick();
     }
 
     if (order) {
-      form.setInputValue('orderInput', JSON.stringify(order));
+      form.setInputValue('orderField.input', JSON.stringify(order));
     }
 
     if (version) {
-      form.setInputValue('versionInput', JSON.stringify(version));
+      form.setInputValue('versionField.input', JSON.stringify(version));
     }
 
     clickNextButton();
+    await nextTick();
+    component.update();
   };
 
-  const completeStepTwo = ({ settings }: Partial<Template>) => {
-    const { find } = testBed;
+  const completeStepTwo = async (settings: string) => {
+    const { find, component } = testBed;
 
     if (settings) {
       find('mockCodeEditor').simulate('change', {
         jsonString: settings,
       }); // Using mocked EuiCodeEditor
+      await nextTick();
+      component.update();
     }
 
     clickNextButton();
+    await nextTick();
+    component.update();
   };
 
-  const completeStepThree = ({ mappings }: Partial<Template>) => {
-    const { find } = testBed;
+  const completeStepThree = async (mappings: string) => {
+    const { find, component } = testBed;
 
     if (mappings) {
       find('mockCodeEditor').simulate('change', {
         jsonString: mappings,
       }); // Using mocked EuiCodeEditor
+      await nextTick(50);
+      component.update();
     }
 
     clickNextButton();
+    await nextTick(50); // hooks updates cycles are tricky, adding some latency is needed
+    component.update();
   };
 
-  const completeStepFour = ({ aliases }: Partial<Template>) => {
-    const { find } = testBed;
+  const completeStepFour = async (aliases: string) => {
+    const { find, component } = testBed;
 
     if (aliases) {
       find('mockCodeEditor').simulate('change', {
         jsonString: aliases,
       }); // Using mocked EuiCodeEditor
+      await nextTick(50);
+      component.update();
     }
 
     clickNextButton();
+    await nextTick(50);
+    component.update();
   };
 
   const selectSummaryTab = (tab: 'summary' | 'request') => {
@@ -126,17 +144,19 @@ export const formSetup = async (initTestBed: any): Promise<TemplateFormTestBed> 
 
 export type TemplateFormTestSubjects = TestSubjects;
 
-type TestSubjects =
+export type TestSubjects =
   | 'backButton'
   | 'codeEditorContainer'
-  | 'indexPatternsComboBox'
+  | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
   | 'mockCodeEditor'
   | 'mockComboBox'
-  | 'nameInput'
+  | 'nameField'
+  | 'nameField.input'
   | 'nextButton'
-  | 'orderInput'
+  | 'orderField'
+  | 'orderField.input'
   | 'pageTitle'
   | 'requestTab'
   | 'saveTemplateError'
@@ -153,4 +173,5 @@ type TestSubjects =
   | 'templateForm'
   | 'templateFormContainer'
   | 'testingEditor'
-  | 'versionInput';
+  | 'versionField'
+  | 'versionField.input';

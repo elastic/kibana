@@ -15,8 +15,6 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
-import { parseInterval } from 'ui/utils/parse_interval';
-
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
@@ -25,11 +23,12 @@ import {
   isTimeSeriesViewJob,
   mlFunctionToESAggregation,
 } from '../../common/util/job_utils';
+import { parseInterval } from '../../common/util/parse_interval';
 
 import { ml } from '../services/ml_api_service';
 import { mlForecastService } from '../services/forecast_service';
 import { mlResultsService } from '../services/results_service';
-import { MlTimeBuckets, getBoundsRoundedToInterval } from '../util/ml_time_buckets';
+import { TimeBuckets, getBoundsRoundedToInterval } from '../util/time_buckets';
 
 import { mlTimeSeriesSearchService } from './timeseries_search_service';
 
@@ -461,7 +460,7 @@ export function calculateAggregationInterval(
   const barTarget = (bucketsTarget !== undefined ? bucketsTarget : 100);
   // Use a maxBars of 10% greater than the target.
   const maxBars = Math.floor(1.1 * barTarget);
-  const buckets = new MlTimeBuckets();
+  const buckets = new TimeBuckets();
   buckets.setInterval('auto');
   buckets.setBounds(bounds);
   buckets.setBarTarget(Math.floor(barTarget));
@@ -551,7 +550,7 @@ export function getAutoZoomDuration(jobs, selectedJob) {
 
   // Use a maxBars of 10% greater than the target.
   const maxBars = Math.floor(1.1 * CHARTS_POINT_TARGET);
-  const buckets = new MlTimeBuckets();
+  const buckets = new TimeBuckets();
   buckets.setInterval('auto');
   buckets.setBarTarget(Math.floor(CHARTS_POINT_TARGET));
   buckets.setMaxBars(maxBars);

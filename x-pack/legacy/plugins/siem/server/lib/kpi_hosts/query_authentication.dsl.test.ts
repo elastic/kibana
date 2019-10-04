@@ -12,10 +12,18 @@ import {
 } from './mock';
 import { buildAuthQuery } from './query_authentication.dsl';
 
-describe.each([
-  [mockKpiHostsOptions, mockKpiHostsAuthQuery],
-  [mockKpiHostDetailsOptions, mockKpiHostDetailsAuthQuery],
-])('buildAuthQuery', (option, expected) => {
+const table = [
+  [mockKpiHostsOptions, mockKpiHostsAuthQuery] as [
+    typeof mockKpiHostsOptions,
+    typeof mockKpiHostsAuthQuery
+  ],
+  [mockKpiHostDetailsOptions, mockKpiHostDetailsAuthQuery] as [
+    typeof mockKpiHostDetailsOptions,
+    typeof mockKpiHostDetailsAuthQuery
+  ],
+];
+
+describe.each(table)('buildAuthQuery', (option, expected) => {
   test(`returns correct query by option type`, () => {
     expect(buildAuthQuery(option)).toMatchObject(expected);
   });

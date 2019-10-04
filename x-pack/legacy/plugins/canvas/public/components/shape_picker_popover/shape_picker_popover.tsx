@@ -4,38 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink } from '@elastic/eui';
-// @ts-ignore untyped local
 import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';
 
-export enum AnchorPosition {
-  TOP = 'top',
-  BOTTOM = 'bottom',
-  LEFT = 'left',
-  RIGHT = 'right',
-}
 interface Props {
   shapes: {
     [key: string]: string;
   };
   onChange?: (key: string) => void;
   value?: string;
-  anchorPosition?: AnchorPosition;
 }
 
-export const ShapePickerPopover = ({ shapes, onChange, value, anchorPosition }: Props) => {
-  const button = (handleClick: () => unknown) => (
+export const ShapePickerPopover = ({ shapes, onChange, value }: Props) => {
+  const button = (handleClick: (ev: MouseEvent) => void) => (
     <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
       <ShapePreview shape={value ? shapes[value] : undefined} />
     </EuiLink>
   );
 
   return (
-    <Popover panelClassName="canvas" button={button} anchorPosition={anchorPosition}>
+    <Popover panelClassName="canvas" button={button}>
       {() => <ShapePicker onChange={onChange} shapes={shapes} />}
     </Popover>
   );
@@ -45,5 +37,4 @@ ShapePickerPopover.propTypes = {
   shapes: PropTypes.object.isRequired,
   value: PropTypes.string,
   onChange: PropTypes.func,
-  anchorPosition: PropTypes.string,
 };

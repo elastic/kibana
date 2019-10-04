@@ -35,12 +35,13 @@ export interface FilterMeta {
   alias: string | null;
   key?: string;
   value?: string;
+  params?: any;
 }
 
 export interface Filter {
   $state?: FilterState;
   meta: FilterMeta;
-  query?: object;
+  query?: any;
 }
 
 export interface LatLon {

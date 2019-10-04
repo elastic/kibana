@@ -29,6 +29,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+
+import { Storage } from 'ui/storage';
+const localStorage = new Storage(window.localStorage);
+
+// This import will eventually become a dependency injected by the fully deangularized NP plugin.
+import { npStart } from 'ui/new_platform';
 
 export class LayerPanel extends React.Component {
 
@@ -144,75 +151,84 @@ export class LayerPanel extends React.Component {
     }
 
     return (
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
+      <KibanaContextProvider
+        services={{
+          appName: 'maps',
+          store: localStorage,
+          autocomplete: npStart.plugins.autocomplete,
+          ...npStart.core,
+        }}
       >
-        <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={
-                  i18n.translate('xpack.maps.layerPanel.fitToBoundsAriaLabel', {
-                    defaultMessage: 'Fit to bounds'
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+        >
+          <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  aria-label={
+                    i18n.translate('xpack.maps.layerPanel.fitToBoundsAriaLabel', {
+                      defaultMessage: 'Fit to bounds'
+                    })
+                  }
+                  iconType={selectedLayer.getLayerTypeIconName()}
+                  onClick={this.props.fitToBounds}
+                >
+                  <FormattedMessage
+                    id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
+                    defaultMessage="Fit"
+                  />
+
+                </EuiButtonIcon>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h2>{this.state.displayName}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <div className="mapLayerPanel__sourceDetails">
+              <EuiAccordion
+                id="accordion1"
+                buttonContent={
+                  i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
+                    defaultMessage: 'Source details'
                   })
                 }
-                iconType={selectedLayer.getLayerTypeIconName()}
-                onClick={this.props.fitToBounds}
               >
-                <FormattedMessage
-                  id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
-                  defaultMessage="Fit"
-                />
+                <EuiText color="subdued" size="s">
+                  <EuiSpacer size="xs" />
+                  {this._renderSourceProperties()}
+                </EuiText>
+              </EuiAccordion>
+            </div>
+          </EuiFlyoutHeader>
 
-              </EuiButtonIcon>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h2>{this.state.displayName}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <div className="mapLayerPanel__sourceDetails">
-            <EuiAccordion
-              id="accordion1"
-              buttonContent={
-                i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
-                  defaultMessage: 'Source details'
-                })
-              }
-            >
-              <EuiText color="subdued" size="s">
-                <EuiSpacer size="xs" />
-                {this._renderSourceProperties()}
-              </EuiText>
-            </EuiAccordion>
+          <div className="mapLayerPanel__body">
+            <div className="mapLayerPanel__bodyOverflow">
+
+              <LayerErrors/>
+
+              <LayerSettings/>
+
+              <SourceSettings/>
+
+              {this._renderFilterSection()}
+
+              {this._renderJoinSection()}
+
+              <StyleSettings/>
+
+            </div>
           </div>
-        </EuiFlyoutHeader>
 
-        <div className="mapLayerPanel__body">
-          <div className="mapLayerPanel__bodyOverflow">
-
-            <LayerErrors/>
-
-            <LayerSettings/>
-
-            <SourceSettings/>
-
-            {this._renderFilterSection()}
-
-            {this._renderJoinSection()}
-
-            <StyleSettings/>
-
-          </div>
-        </div>
-
-        <EuiFlyoutFooter className="mapLayerPanel__footer">
-          <FlyoutFooter />
-        </EuiFlyoutFooter>
-      </EuiFlexGroup>
+          <EuiFlyoutFooter className="mapLayerPanel__footer">
+            <FlyoutFooter />
+          </EuiFlyoutFooter>
+        </EuiFlexGroup>
+      </KibanaContextProvider>
     );
   }
 }

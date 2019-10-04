@@ -183,14 +183,18 @@ export class ESGeoGridSource extends AbstractESSource {
     });
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this._getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
-    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-      defaultMessage: 'Elasticsearch geo grid aggregation request'
-    }));
+    const esResponse = await this._runEsQuery(
+      layerName,
+      searchSource,
+      registerCancelCallback,
+      i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
+        defaultMessage: 'Elasticsearch geo grid aggregation request'
+      }));
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
     const { featureCollection } = convertToGeoJson({

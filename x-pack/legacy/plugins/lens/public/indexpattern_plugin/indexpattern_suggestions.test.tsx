@@ -5,9 +5,6 @@
  */
 
 import chromeMock from 'ui/chrome';
-import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data/public/setup';
-import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import { SavedObjectsClientContract } from 'src/core/public';
 import {
   getIndexPatternDatasource,
   IndexPatternPersistedState,
@@ -135,12 +132,9 @@ describe('IndexPattern Data Source suggestions', () => {
 
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
-      core: coreMock.createSetup(),
+      core: coreMock.createStart(),
       chrome: chromeMock,
       storage: {} as Storage,
-      interpreter: { functionsRegistry },
-      data: dataMock,
-      savedObjectsClient: {} as SavedObjectsClientContract,
     });
 
     persistedState = {
@@ -190,39 +184,40 @@ describe('IndexPattern Data Source suggestions', () => {
           field: { name: 'source', type: 'string', aggregatable: true, searchable: true },
           indexPatternId: '1',
         });
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              suggestedLayer: expect.objectContaining({
-                columnOrder: ['col1', 'col2'],
-                columns: {
-                  col1: expect.objectContaining({
-                    operationType: 'terms',
-                    sourceField: 'source',
-                  }),
-                  col2: expect.objectContaining({
-                    operationType: 'count',
-                  }),
-                },
-              }),
+            state: expect.objectContaining({
+              layers: {
+                suggestedLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'col2'],
+                  columns: {
+                    col1: expect.objectContaining({
+                      operationType: 'terms',
+                      sourceField: 'source',
+                    }),
+                    col2: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'col1',
+                }),
+                expect.objectContaining({
+                  columnId: 'col2',
+                }),
+              ],
+              layerId: 'suggestedLayer',
             },
           })
         );
-        expect(suggestions[0].table).toEqual({
-          changeType: 'initial',
-          label: undefined,
-          isMultiRow: true,
-          columns: [
-            expect.objectContaining({
-              columnId: 'col1',
-            }),
-            expect.objectContaining({
-              columnId: 'col2',
-            }),
-          ],
-          layerId: 'suggestedLayer',
-        });
       });
 
       it('should apply a bucketed aggregation for a date field', () => {
@@ -231,39 +226,40 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              suggestedLayer: expect.objectContaining({
-                columnOrder: ['col1', 'col2'],
-                columns: {
-                  col1: expect.objectContaining({
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
-                  }),
-                  col2: expect.objectContaining({
-                    operationType: 'count',
-                  }),
-                },
-              }),
+            state: expect.objectContaining({
+              layers: {
+                suggestedLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'col2'],
+                  columns: {
+                    col1: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'timestamp',
+                    }),
+                    col2: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'col1',
+                }),
+                expect.objectContaining({
+                  columnId: 'col2',
+                }),
+              ],
+              layerId: 'suggestedLayer',
             },
           })
         );
-        expect(suggestions[0].table).toEqual({
-          changeType: 'initial',
-          label: undefined,
-          isMultiRow: true,
-          columns: [
-            expect.objectContaining({
-              columnId: 'col1',
-            }),
-            expect.objectContaining({
-              columnId: 'col2',
-            }),
-          ],
-          layerId: 'suggestedLayer',
-        });
       });
 
       it('should select a metric for a number field', () => {
@@ -272,43 +268,44 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              suggestedLayer: expect.objectContaining({
-                columnOrder: ['col1', 'col2'],
-                columns: {
-                  col1: expect.objectContaining({
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
-                  }),
-                  col2: expect.objectContaining({
-                    operationType: 'avg',
-                    sourceField: 'bytes',
-                  }),
-                },
-              }),
+            state: expect.objectContaining({
+              layers: {
+                suggestedLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'col2'],
+                  columns: {
+                    col1: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'timestamp',
+                    }),
+                    col2: expect.objectContaining({
+                      operationType: 'avg',
+                      sourceField: 'bytes',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'col1',
+                }),
+                expect.objectContaining({
+                  columnId: 'col2',
+                }),
+              ],
+              layerId: 'suggestedLayer',
             },
           })
         );
-        expect(suggestions[0].table).toEqual({
-          changeType: 'initial',
-          label: undefined,
-          isMultiRow: true,
-          columns: [
-            expect.objectContaining({
-              columnId: 'col1',
-            }),
-            expect.objectContaining({
-              columnId: 'col2',
-            }),
-          ],
-          layerId: 'suggestedLayer',
-        });
       });
 
-      it('should not make any suggestions for a number without a time field', async () => {
+      it('should make a metric suggestion for a number field if there is no time field', async () => {
         const state: IndexPatternPrivateState = {
           currentIndexPatternId: '1',
           showEmptyFields: false,
@@ -340,7 +337,23 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(0);
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                first: expect.objectContaining({
+                  columnOrder: ['suggestedLayer'],
+                  columns: {
+                    suggestedLayer: expect.objectContaining({
+                      operationType: 'avg',
+                      sourceField: 'bytes',
+                    }),
+                  },
+                }),
+              },
+            }),
+          })
+        );
       });
     });
 
@@ -369,39 +382,40 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              previousLayer: expect.objectContaining({
-                columnOrder: ['col1', 'col2'],
-                columns: {
-                  col1: expect.objectContaining({
-                    operationType: 'terms',
-                    sourceField: 'source',
-                  }),
-                  col2: expect.objectContaining({
-                    operationType: 'count',
-                  }),
-                },
-              }),
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'col2'],
+                  columns: {
+                    col1: expect.objectContaining({
+                      operationType: 'terms',
+                      sourceField: 'source',
+                    }),
+                    col2: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'col1',
+                }),
+                expect.objectContaining({
+                  columnId: 'col2',
+                }),
+              ],
+              layerId: 'previousLayer',
             },
           })
         );
-        expect(suggestions[0].table).toEqual({
-          changeType: 'initial',
-          label: undefined,
-          isMultiRow: true,
-          columns: [
-            expect.objectContaining({
-              columnId: 'col1',
-            }),
-            expect.objectContaining({
-              columnId: 'col2',
-            }),
-          ],
-          layerId: 'previousLayer',
-        });
       });
 
       it('should apply a bucketed aggregation for a date field', () => {
@@ -410,39 +424,40 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              previousLayer: expect.objectContaining({
-                columnOrder: ['col1', 'col2'],
-                columns: {
-                  col1: expect.objectContaining({
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
-                  }),
-                  col2: expect.objectContaining({
-                    operationType: 'count',
-                  }),
-                },
-              }),
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'col2'],
+                  columns: {
+                    col1: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'timestamp',
+                    }),
+                    col2: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'col1',
+                }),
+                expect.objectContaining({
+                  columnId: 'col2',
+                }),
+              ],
+              layerId: 'previousLayer',
             },
           })
         );
-        expect(suggestions[0].table).toEqual({
-          changeType: 'initial',
-          label: undefined,
-          isMultiRow: true,
-          columns: [
-            expect.objectContaining({
-              columnId: 'col1',
-            }),
-            expect.objectContaining({
-              columnId: 'col2',
-            }),
-          ],
-          layerId: 'previousLayer',
-        });
       });
 
       it('should select a metric for a number field', () => {
@@ -451,43 +466,44 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              previousLayer: expect.objectContaining({
-                columnOrder: ['col1', 'col2'],
-                columns: {
-                  col1: expect.objectContaining({
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
-                  }),
-                  col2: expect.objectContaining({
-                    operationType: 'avg',
-                    sourceField: 'bytes',
-                  }),
-                },
-              }),
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'col2'],
+                  columns: {
+                    col1: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'timestamp',
+                    }),
+                    col2: expect.objectContaining({
+                      operationType: 'avg',
+                      sourceField: 'bytes',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'col1',
+                }),
+                expect.objectContaining({
+                  columnId: 'col2',
+                }),
+              ],
+              layerId: 'previousLayer',
             },
           })
         );
-        expect(suggestions[0].table).toEqual({
-          changeType: 'initial',
-          label: undefined,
-          isMultiRow: true,
-          columns: [
-            expect.objectContaining({
-              columnId: 'col1',
-            }),
-            expect.objectContaining({
-              columnId: 'col2',
-            }),
-          ],
-          layerId: 'previousLayer',
-        });
       });
 
-      it('should not make any suggestions for a number without a time field', async () => {
+      it('should make a metric suggestion for a number field if there is no time field', async () => {
         const state: IndexPatternPrivateState = {
           currentIndexPatternId: '1',
           showEmptyFields: false,
@@ -519,7 +535,23 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(0);
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: expect.objectContaining({
+                  columnOrder: ['col1'],
+                  columns: {
+                    col1: expect.objectContaining({
+                      operationType: 'avg',
+                      sourceField: 'bytes',
+                    }),
+                  },
+                }),
+              },
+            }),
+          })
+        );
       });
     });
 
@@ -602,22 +634,23 @@ describe('IndexPattern Data Source suggestions', () => {
           }
         );
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              previousLayer: initialState.layers.previousLayer,
-              currentLayer: expect.objectContaining({
-                columnOrder: ['newId', 'col2'],
-                columns: {
-                  newId: expect.objectContaining({
-                    operationType: 'date_histogram',
-                    sourceField: 'start_date',
-                  }),
-                  col2: initialState.layers.currentLayer.columns.col2,
-                },
-              }),
-            },
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: initialState.layers.previousLayer,
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['newId', 'col2'],
+                  columns: {
+                    newId: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'start_date',
+                    }),
+                    col2: initialState.layers.currentLayer.columns.col2,
+                  },
+                }),
+              },
+            }),
           })
         );
       });
@@ -628,41 +661,42 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              previousLayer: initialState.layers.previousLayer,
-              currentLayer: expect.objectContaining({
-                columnOrder: ['col1', 'newId', 'col2'],
-                columns: {
-                  ...initialState.layers.currentLayer.columns,
-                  newId: expect.objectContaining({
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
-                  }),
-                },
-              }),
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: initialState.layers.previousLayer,
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'newId', 'col2'],
+                  columns: {
+                    ...initialState.layers.currentLayer.columns,
+                    newId: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'timestamp',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'extended',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'col1',
+                }),
+                expect.objectContaining({
+                  columnId: 'newId',
+                }),
+                expect.objectContaining({
+                  columnId: 'col2',
+                }),
+              ],
+              layerId: 'currentLayer',
             },
           })
         );
-        expect(suggestions[0].table).toEqual({
-          changeType: 'extended',
-          label: undefined,
-          isMultiRow: true,
-          columns: [
-            expect.objectContaining({
-              columnId: 'col1',
-            }),
-            expect.objectContaining({
-              columnId: 'newId',
-            }),
-            expect.objectContaining({
-              columnId: 'col2',
-            }),
-          ],
-          layerId: 'currentLayer',
-        });
       });
 
       it('does not use the same field for bucketing multiple times', () => {
@@ -680,22 +714,23 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              previousLayer: initialState.layers.previousLayer,
-              currentLayer: expect.objectContaining({
-                columnOrder: ['newId', 'col1', 'col2'],
-                columns: {
-                  ...initialState.layers.currentLayer.columns,
-                  newId: expect.objectContaining({
-                    operationType: 'terms',
-                    sourceField: 'dest',
-                  }),
-                },
-              }),
-            },
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: initialState.layers.previousLayer,
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['newId', 'col1', 'col2'],
+                  columns: {
+                    ...initialState.layers.currentLayer.columns,
+                    newId: expect.objectContaining({
+                      operationType: 'terms',
+                      sourceField: 'dest',
+                    }),
+                  },
+                }),
+              },
+            }),
           })
         );
       });
@@ -706,22 +741,23 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              previousLayer: initialState.layers.previousLayer,
-              currentLayer: expect.objectContaining({
-                columnOrder: ['col1', 'col2', 'newId'],
-                columns: {
-                  ...initialState.layers.currentLayer.columns,
-                  newId: expect.objectContaining({
-                    operationType: 'avg',
-                    sourceField: 'memory',
-                  }),
-                },
-              }),
-            },
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: initialState.layers.previousLayer,
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'col2', 'newId'],
+                  columns: {
+                    ...initialState.layers.currentLayer.columns,
+                    newId: expect.objectContaining({
+                      operationType: 'avg',
+                      sourceField: 'memory',
+                    }),
+                  },
+                }),
+              },
+            }),
           })
         );
       });
@@ -732,22 +768,23 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              previousLayer: initialState.layers.previousLayer,
-              currentLayer: expect.objectContaining({
-                columnOrder: ['col1', 'col2', 'newId'],
-                columns: {
-                  ...initialState.layers.currentLayer.columns,
-                  newId: expect.objectContaining({
-                    operationType: 'sum',
-                    sourceField: 'bytes',
-                  }),
-                },
-              }),
-            },
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: initialState.layers.previousLayer,
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'col2', 'newId'],
+                  columns: {
+                    ...initialState.layers.currentLayer.columns,
+                    newId: expect.objectContaining({
+                      operationType: 'sum',
+                      sourceField: 'bytes',
+                    }),
+                  },
+                }),
+              },
+            }),
           })
         );
       });
@@ -796,40 +833,41 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '2',
         });
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              previousLayer: initialState.layers.previousLayer,
-              currentLayer: expect.objectContaining({
-                columnOrder: ['col1', 'col2'],
-                columns: {
-                  col1: expect.objectContaining({
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
-                  }),
-                  col2: expect.objectContaining({
-                    operationType: 'count',
-                  }),
-                },
-              }),
+            state: expect.objectContaining({
+              layers: {
+                previousLayer: initialState.layers.previousLayer,
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'col2'],
+                  columns: {
+                    col1: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'timestamp',
+                    }),
+                    col2: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
+            table: {
+              changeType: 'initial',
+              label: undefined,
+              isMultiRow: true,
+              columns: [
+                expect.objectContaining({
+                  columnId: 'col1',
+                }),
+                expect.objectContaining({
+                  columnId: 'col2',
+                }),
+              ],
+              layerId: 'currentLayer',
             },
           })
         );
-        expect(suggestions[0].table).toEqual({
-          changeType: 'initial',
-          label: undefined,
-          isMultiRow: true,
-          columns: [
-            expect.objectContaining({
-              columnId: 'col1',
-            }),
-            expect.objectContaining({
-              columnId: 'col2',
-            }),
-          ],
-          layerId: 'currentLayer',
-        });
       });
 
       it('suggests on the layer with the fewest columns that matches by indexPatternId', () => {
@@ -850,24 +888,25 @@ describe('IndexPattern Data Source suggestions', () => {
           }
         );
 
-        expect(suggestions).toHaveLength(1);
-        expect(suggestions[0].state).toEqual(
+        expect(suggestions).toContainEqual(
           expect.objectContaining({
-            layers: {
-              currentLayer: initialState.layers.currentLayer,
-              previousLayer: expect.objectContaining({
-                columnOrder: ['col1', 'col2'],
-                columns: {
-                  col1: expect.objectContaining({
-                    operationType: 'date_histogram',
-                    sourceField: 'timestamp',
-                  }),
-                  col2: expect.objectContaining({
-                    operationType: 'count',
-                  }),
-                },
-              }),
-            },
+            state: expect.objectContaining({
+              layers: {
+                currentLayer: initialState.layers.currentLayer,
+                previousLayer: expect.objectContaining({
+                  columnOrder: ['col1', 'col2'],
+                  columns: {
+                    col1: expect.objectContaining({
+                      operationType: 'date_histogram',
+                      sourceField: 'timestamp',
+                    }),
+                    col2: expect.objectContaining({
+                      operationType: 'count',
+                    }),
+                  },
+                }),
+              },
+            }),
           })
         );
       });
@@ -992,7 +1031,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'col2',
                 operation: {
-                  label: 'Date Histogram of timestamp',
+                  label: 'Date histogram of timestamp',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',
@@ -1068,7 +1107,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'newCol',
                 operation: {
-                  label: 'Date Histogram of timestamp',
+                  label: 'Date histogram of timestamp',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',

@@ -17,6 +17,11 @@ import {
   getTooltipState
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
+import {
+  cancelRequest,
+  registerCancelCallback,
+  unregisterCancelCallback
+} from '../reducers/non_serializable_instances';
 import { updateFlyout } from '../actions/ui_actions';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
@@ -64,7 +69,8 @@ function getLayerLoadingCallbacks(dispatch, layerId) {
     onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
     updateSourceData: (newData) => {
       dispatch(updateSourceDataRequest(layerId, newData));
-    }
+    },
+    registerCancelCallback: (requestToken, callback) => dispatch(registerCancelCallback(requestToken, callback)),
   };
 }
 
@@ -82,6 +88,16 @@ async function syncDataForAllLayers(getState, dispatch, dataFilters) {
     return layer.syncData({ ...loadingFunctions, dataFilters });
   });
   await Promise.all(syncs);
+}
+
+export function cancelAllInFlightRequests() {
+  return (dispatch, getState) => {
+    getLayerList(getState()).forEach(layer => {
+      layer.getInFlightRequestTokens().forEach(requestToken => {
+        dispatch(cancelRequest(requestToken));
+      });
+    });
+  };
 }
 
 export function setMapInitError(errorMessage) {
@@ -408,13 +424,20 @@ export function clearGoto() {
 }
 
 export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
-  return ({
-    meta,
-    type: LAYER_DATA_LOAD_STARTED,
-    layerId,
-    dataId,
-    requestToken
-  });
+  return (dispatch, getState) => {
+    const layer = getLayerById(layerId, getState());
+    if (layer) {
+      dispatch(cancelRequest(layer.getPrevRequestToken(dataId)));
+    }
+
+    dispatch({
+      meta,
+      type: LAYER_DATA_LOAD_STARTED,
+      layerId,
+      dataId,
+      requestToken
+    });
+  };
 }
 
 export function updateSourceDataRequest(layerId, newData) {
@@ -432,6 +455,7 @@ export function updateSourceDataRequest(layerId, newData) {
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
   return async (dispatch) => {
+    dispatch(unregisterCancelCallback(requestToken));
     dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
@@ -453,6 +477,7 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
   return async (dispatch) => {
+    dispatch(unregisterCancelCallback(requestToken));
     dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
@@ -570,6 +595,10 @@ export function removeLayer(layerId) {
     if (!layerGettingRemoved) {
       return;
     }
+
+    layerGettingRemoved.getInFlightRequestTokens().forEach(requestToken => {
+      dispatch(cancelRequest(requestToken));
+    });
     dispatch(clearTooltipStateForLayer(layerId));
     layerGettingRemoved.destroy();
     dispatch({

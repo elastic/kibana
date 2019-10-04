@@ -11,10 +11,10 @@ import { HostDetailsBody, HostDetails } from './details';
 import {
   HostsQueryTabBody,
   AuthenticationsQueryTabBody,
-  UncommonProcessTabBody,
-  AnomaliesTabBody,
-  EventsTabBody,
-} from './hosts_navigations';
+  UncommonProcessQueryTabBody,
+  AnomaliesQueryTabBody,
+  EventsQueryTabBody,
+} from './navigation';
 import { HostsBody } from './hosts_body';
 import { HostsTableType } from '../../store/hosts/model';
 import { GlobalTime } from '../../containers/global_time';
@@ -108,7 +108,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    children={UncommonProcessTabBody}
+                    children={UncommonProcessQueryTabBody}
                   />
                 )}
               />
@@ -121,7 +121,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    children={AnomaliesTabBody}
+                    children={AnomaliesQueryTabBody}
                   />
                 )}
               />
@@ -134,7 +134,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                     to={to}
                     setQuery={setQuery}
                     isInitializing={isInitializing}
-                    children={EventsTabBody}
+                    children={EventsQueryTabBody}
                   />
                 )}
               />
@@ -192,7 +192,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                     setQuery={setQuery}
                     isInitializing={isInitializing}
                     detailName={props.match.params.detailName}
-                    children={UncommonProcessTabBody}
+                    children={UncommonProcessQueryTabBody}
                   />
                 )}
               />
@@ -206,7 +206,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                     setQuery={setQuery}
                     isInitializing={isInitializing}
                     detailName={props.match.params.detailName}
-                    children={AnomaliesTabBody}
+                    children={AnomaliesQueryTabBody}
                   />
                 )}
               />
@@ -219,7 +219,7 @@ export const HostsContainer = React.memo<Props>(({ url }) => (
                     setQuery={setQuery}
                     isInitializing={isInitializing}
                     detailName={props.match.params.detailName}
-                    children={EventsTabBody}
+                    children={EventsQueryTabBody}
                   />
                 )}
               />

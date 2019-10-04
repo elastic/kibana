@@ -8,13 +8,13 @@ import { Filter } from '@kbn/es-query';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { IAction } from 'src/plugins/ui_actions/public';
+import { IEmbeddable } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
-import { IEmbeddable } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/embeddables';
 
 export const APPLY_SIEM_FILTER_ACTION_ID = 'APPLY_SIEM_FILTER_ACTION_ID';
 
-interface ActionContext {
+export interface ActionContext {
   embeddable: IEmbeddable;
   filters: Filter[];
 }
@@ -48,7 +48,7 @@ export class ApplySiemFilterAction implements IAction<ActionContext> {
 
   public async execute({ embeddable, filters }: ActionContext) {
     if (!filters) {
-      throw new Error('Applying a filter requires a filter as context');
+      throw new TypeError('Applying a filter requires a filter as context');
     }
 
     // Parse queryExpression from queryDSL and apply to SIEM global KQL Bar via redux

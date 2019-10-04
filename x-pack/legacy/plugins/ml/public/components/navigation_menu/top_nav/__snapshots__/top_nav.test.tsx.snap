@@ -5,7 +5,7 @@ exports[`Navigation Menu: <TopNav /> Minimal initialization. 1`] = `
   <div
     className="mlNavigationMenu__topNav"
   >
-    <MlSuperDatePickerWithUpdate
+    <EuiSuperDatePicker
       commonlyUsedRanges={
         Array [
           Object {

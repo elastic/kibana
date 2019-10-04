@@ -7,15 +7,23 @@
 import { appStateToSavedWorkspace } from './serialize';
 import {
   GraphWorkspaceSavedObject,
-  IndexPatternSavedObject,
   Workspace,
   WorkspaceEdge,
-  AppState,
+  UrlTemplate,
+  AdvancedSettings,
+  WorkspaceField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { IndexpatternDatasource } from '../../state_management';
 
 describe('serialize', () => {
-  let appState: AppState;
+  let appState: {
+    workspace: Workspace;
+    urlTemplates: UrlTemplate[];
+    advancedSettings: AdvancedSettings;
+    selectedIndex: IndexpatternDatasource;
+    selectedFields: WorkspaceField[];
+  };
 
   beforeEach(() => {
     appState = {
@@ -26,45 +34,27 @@ describe('serialize', () => {
         maxValuesPerDoc: 1,
         minDocCount: 3,
       },
-      allFields: [
-        {
-          color: 'black',
-          icon: { class: 'a', code: '', label: '' },
-          name: 'field1',
-          selected: true,
-        },
-        {
-          color: 'black',
-          icon: { class: 'b', code: '', label: '' },
-          name: 'field2',
-          selected: true,
-        },
-        {
-          color: 'black',
-          icon: { class: 'c', code: '', label: '' },
-          name: 'field3',
-          selected: false,
-        },
-      ],
       selectedFields: [
         {
           color: 'black',
           icon: { class: 'a', code: '', label: '' },
           name: 'field1',
           selected: true,
+          type: 'string',
         },
         {
           color: 'black',
           icon: { class: 'b', code: '', label: '' },
           name: 'field2',
           selected: true,
+          type: 'string',
         },
       ],
       selectedIndex: {
-        attributes: {
-          title: 'Testindexpattern',
-        },
-      } as IndexPatternSavedObject,
+        type: 'indexpattern',
+        id: '123',
+        title: 'Testindexpattern',
+      },
       urlTemplates: [
         {
           description: 'Template',

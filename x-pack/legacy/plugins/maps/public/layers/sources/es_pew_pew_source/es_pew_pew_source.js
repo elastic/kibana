@@ -183,7 +183,7 @@ export class ESPewPewSource extends AbstractESSource {
     return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this._getIndexPattern();
     const metricAggConfigs = this.getMetricFields().map(metric => {
       const metricAggConfig = {
@@ -233,9 +233,13 @@ export class ESPewPewSource extends AbstractESSource {
       }
     });
 
-    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
-      defaultMessage: 'Source-destination connections request'
-    }));
+    const esResponse = await this._runEsQuery(
+      layerName,
+      searchSource,
+      registerCancelCallback,
+      i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
+        defaultMessage: 'Source-destination connections request'
+      }));
 
     const { featureCollection } = convertToLines(esResponse);
 

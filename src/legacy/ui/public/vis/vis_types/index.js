@@ -18,7 +18,6 @@
  */
 
 import { BaseVisType } from './base_vis_type';
-import { AngularVisTypeProvider } from './angular_vis_type';
 import { ReactVisType } from './react_vis_type';
 
-export { BaseVisType, AngularVisTypeProvider, ReactVisType };
+export { BaseVisType, ReactVisType };

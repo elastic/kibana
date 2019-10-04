@@ -21,11 +21,10 @@ import styled, { css } from 'styled-components';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { OnUpdateColumns } from '../timeline/events';
+import { TimelineContext } from '../timeline/timeline_context';
 import { WithHoverActions } from '../with_hover_actions';
-
 import { LoadingSpinner } from './helpers';
 import * as i18n from './translations';
-import { TimelineContext } from '../timeline/timeline_context';
 
 /**
  * The name of a (draggable) field

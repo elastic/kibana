@@ -9,7 +9,7 @@ import { HostDetailsBody } from './body';
 import React from 'react';
 
 import '../../../mock/ui_settings';
-import { CommonChildren } from '../hosts';
+import { CommonChildren } from '../navigation/types';
 import toJson from 'enzyme-to-json';
 import { TestProviders } from '../../../mock/test_providers';
 

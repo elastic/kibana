@@ -26,7 +26,7 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
 } from 'ui/courier/utils/courier_inspector_utils';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from 'ui/index_patterns';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';
 import { Subscription } from 'rxjs';
@@ -35,10 +35,10 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-import { timefilter, getTime } from 'ui/timefilter';
 import { TimeRange } from 'src/plugins/data/public';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
+import { setup as data } from '../../../../data/public/legacy';
+import { Query, onlyDisabledFiltersChanged, getTime } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
@@ -48,8 +48,8 @@ import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { getSort } from '../doc_table/lib/get_sort';
 import { SortOrder } from '../doc_table/components/table_header/helpers';
+import { getSortForSearchSource } from '../doc_table/lib/get_sort_for_search_source';
 
 const config = chrome.getUiSettingsClient();
 
@@ -65,7 +65,7 @@ interface SearchScope extends ng.IScope {
   moveColumn?: (column: string, index: number) => void;
   filter?: (field: { name: string; scripted: boolean }, value: string[], operator: string) => void;
   hits?: any[];
-  indexPattern?: StaticIndexPattern;
+  indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
 }
@@ -87,7 +87,7 @@ interface SearchEmbeddableConfig {
   $compile: ng.ICompileService;
   savedSearch: SavedSearch;
   editUrl: string;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IndexPattern[];
   editable: boolean;
   queryFilter: unknown;
 }
@@ -141,7 +141,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
-    this.autoRefreshFetchSubscription = timefilter.getAutoRefreshFetch$().subscribe(this.fetch);
+    this.autoRefreshFetchSubscription = data.timefilter.timefilter
+      .getAutoRefreshFetch$()
+      .subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
@@ -163,7 +165,6 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   /**
    *
    * @param {Element} domNode
-   * @param {ContainerState} containerState
    */
   public render(domNode: HTMLElement) {
     if (!this.searchScope) {
@@ -275,7 +276,10 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchSource.cancelQueued();
 
     searchSource.setField('size', config.get('discover:sampleSize'));
-    searchSource.setField('sort', getSort(this.searchScope.sort, this.searchScope.indexPattern));
+    searchSource.setField(
+      'sort',
+      getSortForSearchSource(this.searchScope.sort, this.searchScope.indexPattern)
+    );
 
     // Log request to inspector
     this.inspectorAdaptors.requests.reset();

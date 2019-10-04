@@ -49,6 +49,7 @@ export class GisMap extends Component {
   componentWillUnmount() {
     this._isMounted = false;
     this._clearRefreshTimer();
+    this.props.cancelAllInFlightRequests();
   }
 
   // Reporting uses both a `data-render-complete` attribute and a DOM event listener to determine
@@ -153,6 +154,7 @@ export class GisMap extends Component {
       isFullScreen,
       exitFullScreen,
       mapInitError,
+      renderTooltipContent,
     } = this.props;
 
     const { domId } = this.state;
@@ -209,6 +211,7 @@ export class GisMap extends Component {
           <MBMapContainer
             addFilters={addFilters}
             geoFields={this.state.geoFields}
+            renderTooltipContent={renderTooltipContent}
           />
           <ToolbarOverlay
             addFilters={addFilters}
