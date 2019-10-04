@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement', 'settings', 'discover']);
 
-  describe('rollup job', function () {
+  describe('hybrid index pattern', function () {
     const rollupJobName = 'rollup-to-be-' + Math.floor(Math.random() * 10000);
     const indexName = 'rollup-to-be';
     const now = new Date();
