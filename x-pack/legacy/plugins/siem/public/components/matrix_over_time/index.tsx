@@ -53,7 +53,7 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
     showLegend: true,
     theme: {
       scales: {
-        barsPadding: 0.05,
+        barsPadding: 0.08,
       },
       chartMargins: {
         left: 0,

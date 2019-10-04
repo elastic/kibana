@@ -13,7 +13,8 @@ import {
   SPAN_SELF_TIME_SUM,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-  TRANSACTION_BREAKDOWN_COUNT
+  TRANSACTION_BREAKDOWN_COUNT,
+  PROCESSOR_EVENT
 } from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
@@ -82,6 +83,7 @@ export async function getTransactionBreakdown({
   const filters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
+    { term: { [PROCESSOR_EVENT]: 'metric' } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES
   ];

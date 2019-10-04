@@ -33,7 +33,6 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (_.isUndefined(value)) {
     throw new Error('value is a required argument');
   }
-
   const fieldNode = typeof fieldName === 'string' ? ast.fromLiteralExpression(fieldName) : literal.buildNode(fieldName);
   const valueNode = typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
   const isPhraseNode = literal.buildNode(isPhrase);
@@ -43,7 +42,7 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
 }
 
 export function toElasticsearchQuery(node, indexPattern = null, config = {}, context = {}) {
-  const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
+  const { arguments: [fieldNameArg, valueArg, isPhraseArg] } = node;
   const fullFieldNameArg = getFullFieldNameNode(fieldNameArg, indexPattern, context.nested ? context.nested.path : undefined);
   const fieldName = ast.toElasticsearchQuery(fullFieldNameArg);
   const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;

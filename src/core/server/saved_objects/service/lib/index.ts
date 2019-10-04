@@ -26,3 +26,5 @@ export {
 } from './scoped_client_provider';
 
 export { SavedObjectsErrorHelpers } from './errors';
+
+export { SavedObjectsCacheIndexPatterns } from './cache_index_patterns';
