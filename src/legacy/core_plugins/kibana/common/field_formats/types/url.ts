@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { escape, memoize } from 'lodash';
 import {
   getHighlightHtml,
@@ -31,9 +32,24 @@ const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
 
 const URL_TYPES = [
-  { kind: 'a', text: 'Link' },
-  { kind: 'img', text: 'Image' },
-  { kind: 'audio', text: 'Audio' },
+  {
+    kind: 'a',
+    text: i18n.translate('kbn.common.fieldFormats.url.types.link', {
+      defaultMessage: 'Link',
+    }),
+  },
+  {
+    kind: 'img',
+    text: i18n.translate('kbn.common.fieldFormats.url.types.img', {
+      defaultMessage: 'Image',
+    }),
+  },
+  {
+    kind: 'audio',
+    text: i18n.translate('kbn.common.fieldFormats.url.types.audio', {
+      defaultMessage: 'Audio',
+    }),
+  },
 ];
 const DEFAULT_URL_TYPE = 'a';
 

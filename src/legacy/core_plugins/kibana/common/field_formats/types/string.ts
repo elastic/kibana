@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
 import {
   FieldFormat,
@@ -28,13 +29,48 @@ import {
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
 
 const TRANSFORM_OPTIONS = [
-  { kind: false, text: '- None -' },
-  { kind: 'lower', text: 'Lower Case' },
-  { kind: 'upper', text: 'Upper Case' },
-  { kind: 'title', text: 'Title Case' },
-  { kind: 'short', text: 'Short Dots' },
-  { kind: 'base64', text: 'Base64 Decode' },
-  { kind: 'urlparam', text: 'URL Param Decode' },
+  {
+    kind: false,
+    text: i18n.translate('kbn.common.fieldFormats.string.transformOptions.none', {
+      defaultMessage: '- None -',
+    }),
+  },
+  {
+    kind: 'lower',
+    text: i18n.translate('kbn.common.fieldFormats.string.transformOptions.lower', {
+      defaultMessage: 'Lower Case',
+    }),
+  },
+  {
+    kind: 'upper',
+    text: i18n.translate('kbn.common.fieldFormats.string.transformOptions.upper', {
+      defaultMessage: 'Upper Case',
+    }),
+  },
+  {
+    kind: 'title',
+    text: i18n.translate('kbn.common.fieldFormats.string.transformOptions.title', {
+      defaultMessage: 'Title Case',
+    }),
+  },
+  {
+    kind: 'short',
+    text: i18n.translate('kbn.common.fieldFormats.string.transformOptions.short', {
+      defaultMessage: 'Short Dots',
+    }),
+  },
+  {
+    kind: 'base64',
+    text: i18n.translate('kbn.common.fieldFormats.string.transformOptions.base64', {
+      defaultMessage: 'Base64 Decode',
+    }),
+  },
+  {
+    kind: 'urlparam',
+    text: i18n.translate('kbn.common.fieldFormats.string.transformOptions.url', {
+      defaultMessage: 'URL Param Decode',
+    }),
+  },
 ];
 const DEFAULT_TRANSFORM_OPTION = false;
 
