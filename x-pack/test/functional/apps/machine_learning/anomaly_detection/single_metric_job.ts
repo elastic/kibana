@@ -93,7 +93,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('loads the job type selection page', async () => {
-        await ml.jobSourceSelection.selectSourceIndexPattern('farequote');
+        await ml.jobSourceSelection.selectSource('farequote');
       });
 
       it('loads the single metric job wizard page', async () => {

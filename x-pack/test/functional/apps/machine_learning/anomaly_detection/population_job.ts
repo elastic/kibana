@@ -108,7 +108,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('loads the job type selection page', async () => {
-        await ml.jobSourceSelection.selectSourceIndexPattern('ecommerce');
+        await ml.jobSourceSelection.selectSource('ecommerce');
       });
 
       it('loads the population job wizard page', async () => {
