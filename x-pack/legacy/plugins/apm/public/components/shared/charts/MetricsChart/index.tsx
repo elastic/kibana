@@ -5,18 +5,18 @@
  */
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { GenericMetricsChart } from '../../../../server/lib/metrics/transform_metrics_chart';
+import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
 // @ts-ignore
-import CustomPlot from '../../shared/charts/CustomPlot';
+import CustomPlot from '../CustomPlot';
 import {
   asDynamicBytes,
   asPercent,
   getFixedByteFormatter,
   asDecimal
-} from '../../../utils/formatters';
-import { Coordinate } from '../../../../typings/timeseries';
-import { isValidCoordinateValue } from '../../../utils/isValidCoordinateValue';
-import { useChartsSync } from '../../../hooks/useChartsSync';
+} from '../../../../utils/formatters';
+import { Coordinate } from '../../../../../typings/timeseries';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import { useChartsSync } from '../../../../hooks/useChartsSync';
 
 interface Props {
   start: number | string | undefined;
