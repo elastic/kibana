@@ -21,7 +21,6 @@ import {
   EuiAccordion,
   EuiText,
   EuiButton,
-  EuiFormRowhasEmptyLabelSpace,
 } from '@elastic/eui';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { ComponentStrings } from '../../../i18n';
@@ -91,7 +90,7 @@ export class WorkpadConfig extends PureComponent {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRowhasEmptyLabelSpace display="rowCompressed" hasEmptyLabelSpace>
+            <EuiFormRow display="rowCompressed" hasEmptyLabelSpace>
               <EuiToolTip position="bottom" content={strings.getFlipDimensionTooltip()}>
                 <EuiButtonIcon
                   iconType="merge"
@@ -100,7 +99,7 @@ export class WorkpadConfig extends PureComponent {
                   aria-label={strings.getFlipDimensionAriaLabel()}
                 />
               </EuiToolTip>
-            </EuiFormRowhasEmptyLabelSpace>
+            </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow label={strings.getPageHeightLabel()} display="rowCompressed">
