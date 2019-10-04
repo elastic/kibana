@@ -7,7 +7,7 @@
 
 import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
-import { mockIndices } from './rollup_helpers';
+import { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
 
