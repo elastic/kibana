@@ -9,13 +9,25 @@ import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { connect } from 'react-redux';
+import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
+import {
+  GraphState,
+  hasDatasourceSelector,
+  hasFieldsSelector,
+  requestDatasource,
+} from '../../state_management';
+import { IndexPatternSavedObject } from '../../types';
+import { openSourceModal } from '../../services/source_modal';
+
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface GuidancePanelProps {
   onFillWorkspace: () => void;
   onOpenFieldPicker: () => void;
-  onOpenDatasourcePicker: () => void;
   hasDatasource: boolean;
   hasFields: boolean;
+  onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
 }
 
 function ListItem({
@@ -47,14 +59,22 @@ function ListItem({
   );
 }
 
-export function GuidancePanel(props: GuidancePanelProps) {
+function GuidancePanelComponent(props: GuidancePanelProps) {
   const {
     onFillWorkspace,
     onOpenFieldPicker,
-    onOpenDatasourcePicker,
+    onIndexPatternSelected,
     hasDatasource,
     hasFields,
   } = props;
+
+  const kibana = useKibana<IDataPluginServices>();
+  const { overlays, savedObjects, uiSettings } = kibana.services;
+  if (!overlays) return null;
+
+  const onOpenDatasourcePicker = () => {
+    openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected);
+  };
 
   return (
     <EuiFlexGroup justifyContent="center">
@@ -141,3 +161,23 @@ export function GuidancePanel(props: GuidancePanelProps) {
     </EuiFlexGroup>
   );
 }
+
+export const GuidancePanel = connect(
+  (state: GraphState) => {
+    return {
+      hasDatasource: hasDatasourceSelector(state),
+      hasFields: hasFieldsSelector(state),
+    };
+  },
+  dispatch => ({
+    onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => {
+      dispatch(
+        requestDatasource({
+          type: 'indexpattern',
+          id: indexPattern.id,
+          title: indexPattern.attributes.title,
+        })
+      );
+    },
+  })
+)(GuidancePanelComponent);
