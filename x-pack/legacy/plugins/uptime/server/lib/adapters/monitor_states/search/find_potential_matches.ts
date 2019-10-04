@@ -66,7 +66,9 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
 const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) => {
   const compositeOrder = cursorDirectionToOrder(queryContext.pagination.cursorDirection);
 
-  const filters = [makeDateRangeFilter(queryContext.dateRangeStart, queryContext.dateRangeEnd)];
+  const filters: any[] = [
+    makeDateRangeFilter(queryContext.dateRangeStart, queryContext.dateRangeEnd),
+  ];
   if (queryContext.filterClause) {
     filters.push(queryContext.filterClause);
   }
