@@ -35,7 +35,6 @@ export const createSignalsRoute = (server: Hapi.Server) => {
     options: {
       tags: ['access:signals-all'],
       validate: {
-        // TODO: Remove these options as I don't think we will need them
         options: {
           abortEarly: false,
         },

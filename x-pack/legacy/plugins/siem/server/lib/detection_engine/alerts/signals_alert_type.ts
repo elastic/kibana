@@ -37,8 +37,6 @@ export const signalsAlertType: AlertType = {
   },
   // TODO: Type the params as it is all filled with any
   async executor({ services, params, state }: AlertExecutorOptions) {
-    // TODO: We need to swap out this arbitrary number of siem-signal id for an injected
-    // data driven instance id through passed in parameters.
     const instance = services.alertInstanceFactory('siem-signals');
 
     // TODO: Comment this in eventually and use the buildEventsQuery()
@@ -85,7 +83,6 @@ export const signalsAlertType: AlertType = {
       // TODO: Comment this in eventually and use this for manual insertion of the
       // signals instead of the ReIndex() api
       // const result = await services.callCluster('search', query);
-      // eslint-disable-next-line
       const result = await services.callCluster('reindex', reIndex);
 
       // TODO: Error handling here and writing of any errors that come back from ES by

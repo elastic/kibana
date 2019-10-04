@@ -27,6 +27,6 @@ Example to add a signal to the system
 
 ```
 cd ./scripts
-./post_signal.sh signals/root_or_admin_1.json
+./post_signal.sh ./signals/root_or_admin_1.json
 ```
 

@@ -5,7 +5,7 @@
   "interval": "5m",
   "name": "Detect Root/Admin Users",
   "severity": 1,
-  "type": "kql",
+  "type": "filter",
   "from": "now-6m",
   "to": "now",
   "filter": {
