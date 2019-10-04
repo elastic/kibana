@@ -21,6 +21,14 @@ import { BehaviorSubject, throwError } from 'rxjs';
 
 jest.mock('../../../legacy/server/kbn_server');
 jest.mock('../../../cli/cluster/cluster_manager');
+jest.mock('./plugins/find_legacy_plugin_specs.ts', () => ({
+  findLegacyPluginSpecs: (settings: Record<string, any>) => ({
+    pluginSpecs: [],
+    pluginExtendedConfig: settings,
+    disabledPluginSpecs: [],
+    uiExports: [],
+  }),
+}));
 
 import { LegacyService } from '.';
 // @ts-ignore: implicit any for JS file
@@ -36,6 +44,8 @@ import { HttpServiceStart, BasePathProxyServer } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins/plugins_service';
+import { SavedObjectsServiceStart } from 'src/core/server/saved_objects/saved_objects_service';
+import { KibanaMigrator } from '../saved_objects/migrations';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -55,6 +65,7 @@ let setupDeps: {
 let startDeps: {
   core: {
     http: HttpServiceStart;
+    savedObjects: SavedObjectsServiceStart;
     plugins: PluginsServiceStart;
   };
   plugins: Record<string, unknown>;
@@ -95,6 +106,9 @@ beforeEach(() => {
       http: {
         isListening: () => true,
       },
+      savedObjects: {
+        migrator: {} as KibanaMigrator,
+      },
       plugins: { contracts: new Map() },
     },
     plugins: {},
@@ -131,12 +145,14 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
+      { server: { autoListen: true } },
       {
         setupDeps,
         startDeps,
         handledConfigPaths: ['foo.bar'],
         logger,
-      }
+      },
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
@@ -159,12 +175,14 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
+      { server: { autoListen: true } },
       {
         setupDeps,
         startDeps,
         handledConfigPaths: ['foo.bar'],
         logger,
-      }
+      },
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
@@ -184,7 +202,9 @@ describe('once LegacyService is set up with connection info', () => {
     });
 
     await legacyService.setup(setupDeps);
-    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"something failed"`
+    );
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
     expect(mockKbnServer.listen).toHaveBeenCalled();
@@ -200,8 +220,12 @@ describe('once LegacyService is set up with connection info', () => {
       configService: configService as any,
     });
 
-    await legacyService.setup(setupDeps);
-    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(legacyService.setup(setupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"something failed"`
+    );
+    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Legacy service is not setup yet."`
+    );
 
     expect(MockKbnServer).not.toHaveBeenCalled();
     expect(MockClusterManager).not.toHaveBeenCalled();
@@ -286,12 +310,14 @@ describe('once LegacyService is set up without connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
+      { server: { autoListen: true } },
       {
         setupDeps,
         startDeps,
         handledConfigPaths: ['foo.bar'],
         logger,
-      }
+      },
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
   });
 
@@ -332,9 +358,9 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
-    expect(MockClusterManager.create.mock.calls).toMatchSnapshot(
-      'cluster manager without base path proxy'
-    );
+    const [[cliArgs, , basePathProxy]] = MockClusterManager.create.mock.calls;
+    expect(cliArgs.basePath).toBe(false);
+    expect(basePathProxy).not.toBeDefined();
   });
 
   test('creates ClusterManager with base path proxy.', async () => {
@@ -355,9 +381,8 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
 
     expect(MockClusterManager.create).toBeCalledTimes(1);
 
-    const [[cliArgs, config, basePathProxy]] = MockClusterManager.create.mock.calls;
-    expect(cliArgs).toMatchSnapshot('cli args. cluster manager with base path proxy');
-    expect(config).toMatchSnapshot('config. cluster manager with base path proxy');
+    const [[cliArgs, , basePathProxy]] = MockClusterManager.create.mock.calls;
+    expect(cliArgs.basePath).toEqual(true);
     expect(basePathProxy).toBeInstanceOf(BasePathProxyServer);
   });
 });

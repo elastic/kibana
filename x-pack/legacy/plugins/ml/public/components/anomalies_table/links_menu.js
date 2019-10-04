@@ -22,7 +22,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
-import { ES_FIELD_TYPES } from '../../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { checkPermission } from '../../privilege/check_privilege';
 import { isRuleSupported } from '../../../common/util/anomaly_utils';
 import { parseInterval } from '../../../common/util/parse_interval';

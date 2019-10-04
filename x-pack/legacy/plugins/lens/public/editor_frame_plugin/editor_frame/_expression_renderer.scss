@@ -1,0 +1,11 @@
+.lnsExpressionRenderer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow-x: hidden;
+  padding: $euiSize;
+}
+
+.lnsExpressionRenderer > * {
+  flex: 1;
+}

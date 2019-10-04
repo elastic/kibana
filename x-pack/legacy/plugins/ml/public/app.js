@@ -11,9 +11,7 @@ import 'uiExports/savedObjectTypes';
 
 import 'ui/courier';
 import 'ui/angular-bootstrap';
-import 'ui/persisted_log';
 import 'ui/autoload/all';
-import 'ui/kbn_top_nav';
 
 import 'plugins/ml/components/transition/transition';
 import 'plugins/ml/components/modal/modal';
@@ -34,7 +32,6 @@ import 'plugins/ml/components/confirm_modal';
 import 'plugins/ml/components/navigation_menu';
 import 'plugins/ml/components/loading_indicator';
 import 'plugins/ml/settings';
-import 'uiExports/autocompleteProviders';
 
 import uiRoutes from 'ui/routes';
 

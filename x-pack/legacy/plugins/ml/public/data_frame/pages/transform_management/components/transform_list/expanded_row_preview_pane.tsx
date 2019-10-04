@@ -21,7 +21,7 @@ import {
   PreviewRequestBody,
   DataFrameTransformPivotConfig,
 } from '../../../../common';
-import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 import { TransformTable } from './transform_table';
 

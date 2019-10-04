@@ -1,7 +1,7 @@
 [[pdf-layout-modes]]
-== PDF Layout Modes
+== PDF layout modes
 
-When creating a PDF report of a dashboard, there are two layout modes: *Optimize PDF for printing* and *Preserve existing layout in PDF*
+When you create a PDF report of a dashboard, you can use the *Optimize PDF for printing* or *Preserve existing layout in PDF* modes.
 
 --
 [role="screenshot"]
@@ -11,7 +11,7 @@ image:user/reporting/images/preserve-layout-switch.png["PDF Reporting",link="pre
 [float]
 [[optimize-pdf-for-printing]]
 === Optimize PDF for printing
-This will create a print friendly PDF with multiple A4 portrait pages, with 2 visualizations per page. This is the layout mode that was always used prior to Kibana 6.1, and will create PDFs similar to the following:
+Create a print friendly PDF with multiple A4 portrait pages and two visualizations per page.
 
 --
 [role="screenshot"]
@@ -21,11 +21,11 @@ image:user/reporting/images/print-layout.png["optimize-pdf-for-printing",link="p
 [float]
 [[preserve-existing-layout-in-pdf]]
 === Preserve existing layout in PDF
-This will create a PDF preserving the existing layout and size of the Visualization or Dashboard, and will create PDFs similar to the following:
+Create a PDF with the existing layout and size of the Visualization or Dashboard.
 
 --
 [role="screenshot"]
 image:user/reporting/images/preserve-layout.png["Preserve existing layout in PDF",link="preserve-layout.png"]
 --
 
-When creating a PNG or a PDF report of a visualization, the "Optimize for printing" option will automatically be used.
+When you create a PNG or a PDF report of a visualization, the *Optimize for printing* option is used.

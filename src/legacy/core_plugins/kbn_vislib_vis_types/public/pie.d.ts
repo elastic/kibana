@@ -20,6 +20,7 @@
 import { CommonVislibParams } from './types';
 
 export interface PieVisParams extends CommonVislibParams {
+  type: 'pie';
   addLegend: boolean;
   isDonut: boolean;
   labels: {

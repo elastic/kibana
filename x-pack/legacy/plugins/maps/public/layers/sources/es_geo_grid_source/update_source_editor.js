@@ -93,7 +93,7 @@ export class UpdateSourceEditor extends Component {
     return (
       <Fragment>
         <ResolutionEditor resolution={this.props.resolution} onChange={this._onResolutionChange} />
-        <EuiSpacer />
+        <EuiSpacer size="m" />
         {this._renderMetricsEditor()}
       </Fragment>
     );

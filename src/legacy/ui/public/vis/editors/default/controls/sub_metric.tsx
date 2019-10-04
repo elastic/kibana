@@ -64,6 +64,7 @@ function SubMetricParamEditor({
 
   return (
     <>
+      <EuiSpacer size="m" />
       <EuiFormLabel>{aggTitle}</EuiFormLabel>
       <EuiSpacer size="s" />
       <DefaultEditorAggParams

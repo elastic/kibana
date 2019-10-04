@@ -8,6 +8,8 @@ import { DatabaseAdapter } from '../../database';
 import exampleFilter from './example_filter.json';
 import monitorState from './monitor_states_docs.json';
 import { ElasticsearchMonitorStatesAdapter } from '../elasticsearch_monitor_states_adapter';
+import { get, set } from 'lodash';
+import { assertCloseTo } from '../../../helper';
 
 describe('ElasticsearchMonitorStatesAdapter', () => {
   let database: DatabaseAdapter;
@@ -37,6 +39,7 @@ describe('ElasticsearchMonitorStatesAdapter', () => {
   });
 
   it('applies an appropriate filter section to the query based on filters', async () => {
+    expect.assertions(3);
     const adapter = new ElasticsearchMonitorStatesAdapter(database);
     await adapter.legacyGetMonitorStates(
       {},
@@ -44,6 +47,28 @@ describe('ElasticsearchMonitorStatesAdapter', () => {
       'now',
       JSON.stringify(exampleFilter),
       'down'
+    );
+    expect(searchMock).toHaveBeenCalledTimes(3);
+    const fixedInterval = parseInt(
+      get(
+        searchMock.mock.calls[2][1],
+        'body.aggs.by_id.aggs.histogram.date_histogram.fixed_interval',
+        ''
+      ).split('ms')[0],
+      10
+    );
+    expect(fixedInterval).not.toBeNaN();
+    /**
+     * This value can sometimes be off by 1 as a result of fuzzy calculation.
+     *
+     * It had no implications in practice, but from a test standpoint can cause flaky
+     * snapshot failures.
+     */
+    assertCloseTo(fixedInterval, 36000, 100);
+    set(
+      searchMock.mock.calls[2][1],
+      'body.aggs.by_id.aggs.histogram.date_histogram.fixed_interval',
+      '36000ms'
     );
     expect(searchMock.mock.calls).toMatchSnapshot();
   });

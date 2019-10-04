@@ -26,7 +26,7 @@ import { indexManagement } from './legacy/plugins/index_management';
 import { indexLifecycleManagement } from './legacy/plugins/index_lifecycle_management';
 import { consoleExtensions } from './legacy/plugins/console_extensions';
 import { spaces } from './legacy/plugins/spaces';
-import { kueryAutocomplete } from './legacy/plugins/kuery_autocomplete';
+import { kueryAutocompleteInitializer } from './legacy/plugins/kuery_autocomplete';
 import { canvas } from './legacy/plugins/canvas';
 import { infra } from './legacy/plugins/infra';
 import { taskManager } from './legacy/plugins/task_manager';
@@ -43,9 +43,8 @@ import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects'
 import { snapshotRestore } from './legacy/plugins/snapshot_restore';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
-import { ingest } from './legacy/plugins/ingest';
-import { advancedUiActions } from './legacy/plugins/advanced_ui_actions';
 import { lens } from './legacy/plugins/lens';
+import { ingest } from './legacy/plugins/ingest';
 import { fleet } from './legacy/plugins/fleet';
 
 module.exports = function (kibana) {
@@ -74,7 +73,7 @@ module.exports = function (kibana) {
     indexManagement(kibana),
     consoleExtensions(kibana),
     indexLifecycleManagement(kibana),
-    kueryAutocomplete(kibana),
+    kueryAutocompleteInitializer(kibana),
     infra(kibana),
     taskManager(kibana),
     rollup(kibana),
@@ -91,7 +90,6 @@ module.exports = function (kibana) {
     actions(kibana),
     alerting(kibana),
     ingest(kibana),
-    advancedUiActions(kibana),
     fleet(kibana),
   ];
 };

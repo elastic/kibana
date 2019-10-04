@@ -17,26 +17,6 @@
  * under the License.
  */
 
-import './brush_event.test.mocks';
-
-jest.mock('ui/chrome',
-  () => ({
-    getBasePath: () => `/some/base/path`,
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    },
-  }), { virtual: true });
 
 import _ from 'lodash';
 import moment from 'moment';

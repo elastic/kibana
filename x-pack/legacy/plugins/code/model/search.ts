@@ -109,12 +109,22 @@ export interface SymbolSearchRequest extends SearchRequest {
   repoScope?: RepositoryUri[];
 }
 
-export interface CodeIntegrationRequest {
-  repoUri: RepositoryUri;
-  revision?: string;
+export interface StackTraceItem {
+  filePath: string;
+  lineNumStart: number;
+  lineNumEnd?: number;
+  // We could add more in here in the future, e.g. qname.
 }
 
-export interface ResolveSnippetsIntegrationRequest extends CodeIntegrationRequest {
+export interface StackTraceSnippetsRequest {
+  repoUris: RepositoryUri[];
+  revision?: string; // Not used for now.
+  stacktraceItems: StackTraceItem[];
+}
+
+export interface ResolveSnippetsRequest {
+  repoUris: RepositoryUri[];
+  revision?: string; // Not used for now.
   filePath: string;
   lineNumStart: number;
   lineNumEnd?: number;
@@ -134,7 +144,7 @@ export interface RepositorySearchResult extends SearchResult {
 }
 
 export interface SymbolSearchResult extends SearchResult {
-  // TODO: we migit need an additional data structure for symbol search result.
+  // TODO: we might need an additional data structure for symbol search result.
   symbols: DetailSymbolInformation[];
 }
 
@@ -189,6 +199,7 @@ export interface CommitSearchResult extends DocumentSearchResult {
 
 export interface IntegrationsSearchResult extends SearchResult {
   results?: SearchResultItem[];
+  fallback: boolean;
 }
 
 export interface SourceLocation {

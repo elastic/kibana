@@ -55,6 +55,9 @@ const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
                     to: fromTo.to,
                   });
                 },
+                updateDateRange: (min: number, max: number) => {
+                  setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                },
               })}
             </>
           ) : null

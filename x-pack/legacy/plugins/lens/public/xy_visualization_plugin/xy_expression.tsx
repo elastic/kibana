@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Chart,
@@ -26,6 +26,8 @@ import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/
 import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
+import { VisualizationContainer } from '../visualization_container';
+import { isHorizontalChart } from './state_helpers';
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -37,6 +39,16 @@ export interface XYRender {
   as: 'lens_xy_chart_renderer';
   value: XYChartProps;
 }
+
+export interface XYChartProps {
+  data: LensMultiTable;
+  args: XYArgs;
+}
+
+type XYChartRenderProps = XYChartProps & {
+  formatFactory: FormatFactory;
+  timeZone: string;
+};
 
 export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
@@ -64,10 +76,6 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
       help: 'Layers of visual series',
       multi: true,
     },
-    isHorizontal: {
-      types: ['boolean'],
-      help: 'Render horizontally',
-    },
   },
   context: {
     types: ['lens_multitable'],
@@ -85,11 +93,6 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
   // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
 } as unknown) as ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender>;
 
-export interface XYChartProps {
-  data: LensMultiTable;
-  args: XYArgs;
-}
-
 export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   timeZone: string;
@@ -104,7 +107,7 @@ export const getXyChartRenderer = (dependencies: {
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
     ReactDOM.render(
       <I18nProvider>
-        <XYChart {...config} {...dependencies} />
+        <XYChartReportable {...config} {...dependencies} />
       </I18nProvider>,
       domNode
     );
@@ -115,16 +118,26 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
   return visualizationTypes.find(c => c.id === seriesType)!.icon || 'empty';
 }
 
-export function XYChart({
-  data,
-  args,
-  formatFactory,
-  timeZone,
-}: XYChartProps & {
-  formatFactory: FormatFactory;
-  timeZone: string;
-}) {
-  const { legend, layers, isHorizontal } = args;
+const MemoizedChart = React.memo(XYChart);
+
+export function XYChartReportable(props: XYChartRenderProps) {
+  const [isReady, setIsReady] = useState(false);
+
+  // It takes a cycle for the XY chart to render. This prevents
+  // reporting from printing a blank chart placeholder.
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
+
+  return (
+    <VisualizationContainer className="lnsXyExpression__container" isReady={isReady}>
+      <MemoizedChart {...props} />
+    </VisualizationContainer>
+  );
+}
+
+export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderProps) {
+  const { legend, layers } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
@@ -160,18 +173,20 @@ export function XYChart({
     }
   }
 
+  const shouldRotate = isHorizontalChart(layers);
+
   return (
-    <Chart className="lnsChart">
+    <Chart>
       <Settings
         showLegend={legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}
-        rotation={isHorizontal ? 90 : 0}
+        rotation={shouldRotate ? 90 : 0}
       />
 
       <Axis
         id={getAxisId('x')}
-        position={isHorizontal ? Position.Left : Position.Bottom}
+        position={shouldRotate ? Position.Left : Position.Bottom}
         title={args.xTitle}
         showGridLines={false}
         hide={layers[0].hide}
@@ -180,7 +195,7 @@ export function XYChart({
 
       <Axis
         id={getAxisId('y')}
-        position={isHorizontal ? Position.Bottom : Position.Left}
+        position={shouldRotate ? Position.Bottom : Position.Left}
         title={args.yTitle}
         showGridLines={false}
         hide={layers[0].hide}
@@ -242,7 +257,10 @@ export function XYChart({
 
           return seriesType === 'line' ? (
             <LineSeries {...seriesProps} />
-          ) : seriesType === 'bar' || seriesType === 'bar_stacked' ? (
+          ) : seriesType === 'bar' ||
+            seriesType === 'bar_stacked' ||
+            seriesType === 'bar_horizontal' ||
+            seriesType === 'bar_horizontal_stacked' ? (
             <BarSeries {...seriesProps} />
           ) : (
             <AreaSeries {...seriesProps} />

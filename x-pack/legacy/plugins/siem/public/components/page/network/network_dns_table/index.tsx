@@ -94,6 +94,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
       <PaginatedTable
         activePage={activePage}
         columns={getNetworkDnsColumns(type)}
+        dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerSupplement={
           <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={this.onChangePtrIncluded} />

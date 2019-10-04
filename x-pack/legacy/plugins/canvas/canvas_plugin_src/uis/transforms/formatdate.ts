@@ -6,14 +6,17 @@
 
 import { TransformFactory } from '../../../types/transforms';
 import { Arguments } from '../../functions/common/formatdate';
+import { TransformStrings } from '../../strings';
+
+const { FormatDate: strings } = TransformStrings;
 
 export const formatdate: TransformFactory<Arguments> = () => ({
   name: 'formatdate',
-  displayName: 'Date format',
+  displayName: strings.getDisplayName(),
   args: [
     {
       name: 'format',
-      displayName: 'Format',
+      displayName: strings.getFormatDisplayName(),
       argType: 'dateformat',
     },
   ],
