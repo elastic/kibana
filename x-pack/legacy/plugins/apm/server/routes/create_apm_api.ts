@@ -12,7 +12,8 @@ import {
 import {
   serviceAgentNameRoute,
   serviceTransactionTypesRoute,
-  servicesRoute
+  servicesRoute,
+  serviceNodeMetadataRoute
 } from './services';
 import {
   agentConfigurationRoute,
@@ -24,6 +25,7 @@ import {
   updateAgentConfigurationRoute
 } from './settings';
 import { metricsChartsRoute } from './metrics';
+import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
 import {
   transactionGroupsBreakdownRoute,
@@ -39,6 +41,7 @@ import {
   tracesLocalFiltersRoute,
   transactionGroupsLocalFiltersRoute,
   transactionsLocalFiltersRoute,
+  serviceNodesLocalFiltersRoute,
   uiFiltersEnvironmentsRoute
 } from './ui_filters';
 import { createApi } from './create_api';
@@ -49,10 +52,10 @@ const createApmApi = () => {
     .add(errorDistributionRoute)
     .add(errorGroupsRoute)
     .add(errorsRoute)
-    .add(metricsChartsRoute)
     .add(serviceAgentNameRoute)
     .add(serviceTransactionTypesRoute)
     .add(servicesRoute)
+    .add(serviceNodeMetadataRoute)
     .add(agentConfigurationRoute)
     .add(agentConfigurationSearchRoute)
     .add(createAgentConfigurationRoute)
@@ -60,6 +63,8 @@ const createApmApi = () => {
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
     .add(updateAgentConfigurationRoute)
+    .add(metricsChartsRoute)
+    .add(serviceNodesRoute)
     .add(tracesRoute)
     .add(tracesByIdRoute)
     .add(transactionGroupsBreakdownRoute)
@@ -73,6 +78,7 @@ const createApmApi = () => {
     .add(tracesLocalFiltersRoute)
     .add(transactionGroupsLocalFiltersRoute)
     .add(transactionsLocalFiltersRoute)
+    .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute);
 
   return api;

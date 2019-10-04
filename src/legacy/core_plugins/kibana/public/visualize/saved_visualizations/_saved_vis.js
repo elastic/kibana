@@ -26,7 +26,6 @@
  */
 
 import { VisProvider } from 'ui/vis';
-import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { updateOldState } from 'ui/vis/vis_update_state';
 import { VisualizeConstants } from '../visualize_constants';
@@ -58,9 +57,7 @@ uiModules
         id: opts.id,
         indexPattern: opts.indexPattern,
         defaults: {
-          title: i18n.translate('kbn.visualize.defaultVisualizationTitle', {
-            defaultMessage: 'New Visualization',
-          }),
+          title: '',
           visState: (function () {
             if (!opts.type) return null;
             const def = {};
