@@ -5,8 +5,8 @@ Before beginning ensure in your .zshrc/.bashrc you have your user, password, and
 
 ```
 export ELASTICSEARCH_USERNAME=${user}
-export ELASTICSEARCH_PASSWORD=${PASSWORD}
-export ELASTICSEARCH_URL=https://${IP}:9200
+export ELASTICSEARCH_PASSWORD=${password}
+export ELASTICSEARCH_URL=https://${ip}:9200
 export KIBANA_URL=http://localhost:5601
 export SIGNALS_INDEX=.siem-signals-10-01-2019
 ```
