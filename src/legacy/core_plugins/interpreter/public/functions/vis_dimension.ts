@@ -64,11 +64,11 @@ export const visDimension = (): ExpressionFunction<typeof name, Context, Argumen
       }),
     },
   },
-  fn: (context, args, handlers) => {
+  fn: (context, args) => {
     const accessor =
       typeof args.accessor === 'number'
         ? args.accessor
-        : context!.columns.find((c: any) => c.id === args.accessor);
+        : context!.columns.find(c => c.id === args.accessor);
     if (accessor === undefined) {
       throw new Error(
         i18n.translate('interpreter.function.visDimension.error.accessor', {

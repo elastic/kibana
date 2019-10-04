@@ -20,14 +20,14 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction, KibanaContext } from '../../types';
 
-export type ExpressionFunctionKibanaContext = ExpressionFunction<
+export type ExpressionFunctionKibana = ExpressionFunction<
   'kibana',
   KibanaContext | null,
   object,
   KibanaContext
 >;
 
-export const kibana = (): ExpressionFunctionKibanaContext => ({
+export const kibana = (): ExpressionFunctionKibana => ({
   name: 'kibana',
   type: 'kibana_context',
   context: {
