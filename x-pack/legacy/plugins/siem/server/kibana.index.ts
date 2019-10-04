@@ -16,6 +16,8 @@ import {
   timelineSavedObjectType,
 } from './saved_objects';
 
+import { createSignalsRoute } from './lib/detection_engine/routes/create_signals_route';
+
 const APP_ID = 'siem';
 
 export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
@@ -34,7 +36,7 @@ export const initServerWithKibana = (kbnServer: Server) => {
 
   const libs = compose(kbnServer);
   initServer(libs, { mocking, logger });
-
+  createSignalsRoute(kbnServer);
   logger.info('Plugin done initializing');
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
