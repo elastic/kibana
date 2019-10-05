@@ -17,9 +17,6 @@
  * under the License.
  */
 
+export { generateNoticeFromSource } from './generate_notice_from_source';
 // @ts-ignore not typed yet
-export { createAutoJUnitReporter } from './auto_junit_reporter';
-// @ts-ignore not typed yet
-export { setupJUnitReportGeneration } from './junit_report_generation';
-// @ts-ignore not typed yet
-export { runMochaCli } from './run_mocha_cli';
+export { generateBuildNoticeText } from './generate_build_notice_text';

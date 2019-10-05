@@ -9,7 +9,7 @@ import { promisify } from 'util';
 
 const getos = promisify(getosSync);
 
-const distroSupportsUnprivilegedUsernamespaces = (distro) => {
+const distroSupportsUnprivilegedUsernamespaces = (distro: string) => {
   // Debian 7 and 8 don't support usernamespaces by default
   // this should be reevaluated when Debian 9 is available
   if (distro.toLowerCase() === 'debian') {
