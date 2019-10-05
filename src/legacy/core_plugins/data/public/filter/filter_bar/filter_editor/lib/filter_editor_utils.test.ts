@@ -30,6 +30,8 @@ import {
   getOperatorOptions,
   getQueryDslFromFilter,
   isFilterValid,
+  buildFilterFromSavedQuery,
+  getSavedQueryFromFilter,
 } from './filter_editor_utils';
 import {
   doesNotExistOperator,
@@ -364,6 +366,38 @@ describe('Filter editor utils', () => {
       if (filter.$state) {
         expect(filter.$state.store).toBe(state);
       }
+    });
+  });
+
+  describe('buildFilterFromSavedQuery', () => {
+    it('should build saved query filters', () => {
+      const state = FilterStateStore.APP_STATE;
+      const disabled = false;
+      const params = {
+        id: 'foo',
+        attributes: { title: 'foo', description: '', query: { language: 'kuery', query: 'bar' } },
+      };
+      const filter = buildFilterFromSavedQuery(disabled, params, '', state);
+      expect(filter.meta.type).toBe('savedQuery');
+    });
+  });
+
+  describe('getSavedQueryFromFilter', () => {
+    it('should get a saved query from the filter params', () => {
+      const state = FilterStateStore.APP_STATE;
+      const disabled = false;
+      const params = {
+        id: 'foo',
+        attributes: { title: 'foo', description: '', query: { language: 'kuery', query: 'bar' } },
+      };
+      const filter = buildFilterFromSavedQuery(disabled, params, '', state);
+      const result = getSavedQueryFromFilter(filter);
+      expect(result[0]).toHaveProperty('id', 'foo');
+      expect(result[0]).toHaveProperty('attributes', {
+        title: 'foo',
+        description: '',
+        query: { language: 'kuery', query: 'bar' },
+      });
     });
   });
 });

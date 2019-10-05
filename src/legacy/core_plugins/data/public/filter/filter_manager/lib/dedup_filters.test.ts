@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { Filter, buildRangeFilter, FilterStateStore, buildQueryFilter } from '@kbn/es-query';
+import {
+  Filter,
+  buildRangeFilter,
+  FilterStateStore,
+  buildQueryFilter,
+  buildSavedQueryFilter,
+} from '@kbn/es-query';
 import { dedupFilters } from './dedup_filters';
 
 describe('filter manager utilities', () => {
@@ -74,6 +80,56 @@ describe('filter manager utilities', () => {
 
       expect(results).toContain(filters[0]);
       expect(results).not.toContain(filters[1]);
+    });
+
+    test('should deduplicate saved query filters', () => {
+      const savedQueryTestItem = {
+        id: 'foo',
+        attributes: {
+          title: 'foo',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: 'response:200',
+          },
+          filters: [],
+        },
+      };
+      const savedQueryTestItem2 = {
+        id: 'baz',
+        attributes: {
+          title: 'baz',
+          description: 'qux',
+          query: {
+            language: 'kuery',
+            query: 'response:200',
+          },
+          filters: [],
+        },
+      };
+      const savedQueryTestItem3 = {
+        id: 'qux',
+        attributes: {
+          title: 'qux',
+          description: 'blah',
+          query: {
+            language: 'kuery',
+            query: 'response:200',
+          },
+          filters: [],
+        },
+      };
+      const existing: Filter[] = [
+        buildSavedQueryFilter(savedQueryTestItem),
+        buildSavedQueryFilter(savedQueryTestItem2),
+      ];
+      const filter: Filter[] = [
+        buildSavedQueryFilter(savedQueryTestItem2),
+        buildSavedQueryFilter(savedQueryTestItem3),
+      ];
+      const results = dedupFilters(existing, filter);
+      expect(results).toContain(filter[1]);
+      expect(results).not.toContain(filter[0]);
     });
   });
 });

@@ -79,6 +79,16 @@ describe('filter manager utilities', () => {
       expect(after.meta).toHaveProperty('negate', false);
     });
 
+    test('should map saved query filters', async () => {
+      const before: any = {
+        meta: { params: { savedQuery: { id: 'foo', attributes: {} } }, type: 'savedQuery' },
+        saved_query: 'foo',
+      };
+      const after = await mapFilter(indexPatterns, before as Filter);
+      expect(after).toHaveProperty('meta');
+      expect(after.meta).toHaveProperty('type', 'savedQuery');
+    });
+
     test('should finish with a catch', async done => {
       const before: any = { meta: { index: 'logstash-*' } };
 
