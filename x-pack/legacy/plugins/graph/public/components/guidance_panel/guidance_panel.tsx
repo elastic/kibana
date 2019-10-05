@@ -94,13 +94,9 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
-            <h1
-              aria-label={i18n.translate('xpack.graph.guidancePanel.ariaLabel', {
-                defaultMessage: "Let's get started building your first graph!",
-              })}
-            >
+            <h1>
               {i18n.translate('xpack.graph.guidancePanel.title', {
-                defaultMessage: "Let's get started!",
+                defaultMessage: 'Three steps to your graph',
               })}
             </h1>
           </EuiText>
@@ -110,14 +106,14 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
             <ListItem state={hasDatasource ? 'done' : 'active'}>
               <FormattedMessage
                 id="xpack.graph.guidancePanel.datasourceItem.description"
-                defaultMessage="Choose an {indexpattern}"
+                defaultMessage="Select a {indexpattern}"
                 values={{
                   indexpattern: (
                     <EuiLink onClick={onOpenDatasourcePicker}>
                       {i18n.translate(
                         'xpack.graph.guidancePanel.datasourceItem.indexPatternButtonLabel',
                         {
-                          defaultMessage: 'index pattern',
+                          defaultMessage: 'data source',
                         }
                       )}
                     </EuiLink>
@@ -126,29 +122,21 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
               />
             </ListItem>
             <ListItem state={hasFields ? 'done' : hasDatasource ? 'active' : 'disabled'}>
-              <FormattedMessage
-                id="xpack.graph.guidancePanel.fieldsItem.description"
-                defaultMessage="{fields} to explore"
-                values={{
-                  fields: (
-                    <EuiLink onClick={onOpenFieldPicker}>
-                      {i18n.translate('xpack.graph.guidancePanel.fieldsItem.fieldsButtonLabel', {
-                        defaultMessage: 'Select fields',
-                      })}
-                    </EuiLink>
-                  ),
-                }}
-              />
+              <EuiLink onClick={onOpenFieldPicker}>
+                {i18n.translate('xpack.graph.guidancePanel.fieldsItem.fieldsButtonLabel', {
+                  defaultMessage: 'Add fields',
+                })}
+              </EuiLink>
             </ListItem>
             <ListItem state={hasFields ? 'active' : 'disabled'}>
               <FormattedMessage
                 id="xpack.graph.guidancePanel.nodesItem.description"
-                defaultMessage="Search for something in the search bar above to begin exploration. If you don't know where to start, you can also {topTerms}"
+                defaultMessage="Search and graph your data. Don't know where to start? Graph the {topTerms}"
                 values={{
                   topTerms: (
                     <EuiLink onClick={onFillWorkspace}>
                       {i18n.translate('xpack.graph.guidancePanel.nodesItem.topTermsButtonLabel', {
-                        defaultMessage: 'show correlations of the top terms',
+                        defaultMessage: 'top terms',
                       })}
                     </EuiLink>
                   ),

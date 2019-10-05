@@ -115,7 +115,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         isUpdateForm(props)
           ? props.initialTemplate.description
           : i18n.translate('xpack.graph.templates.addLabel', {
-              defaultMessage: 'New drill-down',
+              defaultMessage: 'New drilldown',
             })
       }
       extraAction={
@@ -185,7 +185,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
               )}
               {i18n.translate('xpack.graph.settings.drillDowns.urlInputHelpText', {
                 defaultMessage:
-                  'Define template URLs using {gquery} where the selected vertex terms are inserted',
+                  'Define template URLs using {gquery} where the selected vertex terms are inserted.',
                 values: { gquery: '{{gquery}}' },
               })}
             </>
@@ -279,9 +279,13 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                 }}
                 data-test-subj="graphRemoveUrlTemplate"
               >
-                {i18n.translate('xpack.graph.settings.drillDowns.removeButtonLabel', {
-                  defaultMessage: 'Remove',
-                })}
+                {isUpdateForm(props)
+                  ? i18n.translate('xpack.graph.settings.drillDowns.removeButtonLabel', {
+                      defaultMessage: 'Remove',
+                    })
+                  : i18n.translate('xpack.graph.settings.drillDowns.cancelButtonLabel', {
+                      defaultMessage: 'Cancel',
+                    })}
               </EuiButtonEmpty>
             }
           </EuiFlexItem>
@@ -297,10 +301,10 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             <EuiButton type="submit" fill isDisabled={urlPlaceholderMissing || formIncomplete}>
               {isUpdateForm(props)
                 ? i18n.translate('xpack.graph.settings.drillDowns.updateSaveButtonLabel', {
-                    defaultMessage: 'Update drill-down',
+                    defaultMessage: 'Update drilldown',
                   })
                 : i18n.translate('xpack.graph.settings.drillDowns.newSaveButtonLabel', {
-                    defaultMessage: 'Add drill-down',
+                    defaultMessage: 'Save drilldown',
                   })}
             </EuiButton>
           </EuiFlexItem>

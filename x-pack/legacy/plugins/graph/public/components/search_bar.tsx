@@ -102,13 +102,13 @@ export function SearchBarComponent(props: SearchBarProps) {
             bubbleSubmitEvent
             indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}
             placeholder={i18n.translate('xpack.graph.bar.searchFieldPlaceholder', {
-              defaultMessage: 'Search your data and add to your graph',
+              defaultMessage: 'Search your data and add to graph',
             })}
             query={query}
             prepend={
               <EuiToolTip
                 content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
-                  defaultMessage: 'Select a data source to begin graphing relationships',
+                  defaultMessage: 'Select a data source to begin graphing relationships.',
                 })}
               >
                 <EuiButtonEmpty
@@ -139,7 +139,7 @@ export function SearchBarComponent(props: SearchBarProps) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton fill type="submit" disabled={isLoading || !currentIndexPattern}>
-            {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Explore' })}
+            {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Graph' })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

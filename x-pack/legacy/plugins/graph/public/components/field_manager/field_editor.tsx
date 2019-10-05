@@ -289,7 +289,7 @@ export function FieldEditor({
                           'xpack.graph.fieldManager.maxTermsPerHopDescription',
                           {
                             defaultMessage:
-                              'Controls the maximum number of terms returned each search step.',
+                              'Controls the maximum number of terms to return for each search step.',
                           }
                         )}
                         position="right"

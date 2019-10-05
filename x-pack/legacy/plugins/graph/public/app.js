@@ -38,7 +38,6 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphApp } from './components/app';
 import { VennDiagram } from './components/venn_diagram';
@@ -92,7 +91,18 @@ app.directive('vennDiagram', function (reactDirective) {
 });
 
 app.directive('graphListing', function (reactDirective) {
-  return reactDirective(Listing);
+  return reactDirective(Listing, [
+    ['coreStart', { watchDepth: 'reference' }],
+    ['createItem', { watchDepth: 'reference' }],
+    ['findItems', { watchDepth: 'reference' }],
+    ['deleteItems', { watchDepth: 'reference' }],
+    ['editItem', { watchDepth: 'reference' }],
+    ['getViewUrl', { watchDepth: 'reference' }],
+    ['listingLimit', { watchDepth: 'reference' }],
+    ['hideWriteControls', { watchDepth: 'reference' }],
+    ['capabilities', { watchDepth: 'reference' }],
+    ['initialFilter', { watchDepth: 'reference' }],
+  ]);
 });
 
 app.directive('graphApp', function (reactDirective) {
@@ -361,14 +371,11 @@ app.controller('graphuiPlugin', function (
     const confirmModalOptions = {
       onConfirm: callback,
       onCancel: (() => {}),
-      confirmButtonText: i18n.translate('xpack.graph.clearWorkspace.confirmButtonLabel', {
-        defaultMessage: 'Save changes',
-      }),
       cancelButtonText: i18n.translate('xpack.graph.clearWorkspace.cancelButtonLabel', {
         defaultMessage: 'Leave anyway',
       }),
       title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
-        defaultMessage: 'Save changes before leaving graph?',
+        defaultMessage: 'Save changes to graph',
       }),
     };
     confirmModal(i18n.translate('xpack.graph.clearWorkspace.confirmText', {

@@ -99,7 +99,7 @@ function getNoItemsMessage(
             <p>
               <FormattedMessage
                 id="xpack.graph.listing.createNewGraph.combineDataViewFromKibanaAppDescription"
-                defaultMessage="You can discover patterns and relationships in your Elasticsearch indices."
+                defaultMessage="Discover patterns and relationships in your Elasticsearch indices."
               />
             </p>
             <p>
@@ -129,7 +129,7 @@ function getNoItemsMessage(
           >
             <FormattedMessage
               id="xpack.graph.listing.createNewGraph.createButtonLabel"
-              defaultMessage="Create new graph"
+              defaultMessage="Create graph"
             />
           </EuiButton>
         }

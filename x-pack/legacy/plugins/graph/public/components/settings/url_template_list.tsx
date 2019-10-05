@@ -30,7 +30,7 @@ export function UrlTemplateList({
       <EuiText size="s">
         {i18n.translate('xpack.graph.drilldowns.description', {
           defaultMessage:
-            'Configure drilldown links to other applications. The selected vertices become part of the URL.',
+            'Use drilldowns to link to other applications. The selected vertices become part of the URL.',
         })}
       </EuiText>
       <EuiSpacer />

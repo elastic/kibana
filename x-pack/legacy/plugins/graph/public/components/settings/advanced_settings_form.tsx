@@ -42,7 +42,7 @@ export function AdvancedSettingsForm({
         fullWidth
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.sampleSizeInputHelpText', {
           defaultMessage:
-            'Terms are identified from samples of the most relevant documents. Bigger is not necessarily better—it can be slower and less relevant.',
+            'Terms are identified from samples of the most relevant documents. Bigger samples are not necessarily better—they can be slower and less relevant.',
         })}
         label={i18n.translate('xpack.graph.settings.advancedSettings.sampleSizeInputLabel', {
           defaultMessage: 'Sample size',
