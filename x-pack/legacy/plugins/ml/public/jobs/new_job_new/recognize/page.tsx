@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, FormEvent, useState } from 'react';
+import React, { FC, FormEvent, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -31,6 +31,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiIcon,
+  EuiTextAlign,
 } from '@elastic/eui';
 // @ts-ignore
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -49,6 +50,7 @@ import { TimeRange } from '../pages/components/time_range_step/time_range';
 import { getTimeFilterRange } from '../../../components/full_time_range_selector';
 import { JobGroupsInput } from '../pages/components/job_details_step/components/groups/job_groups_input';
 import { mlJobService } from '../../../services/job_service';
+import { CreateResultCallout } from './components/create_result_callout';
 
 type KibanaObjectUi = KibanaObject & KibanaObjectResponse;
 
@@ -61,7 +63,7 @@ interface PageProps {
   existingGroupIds: string[];
 }
 
-enum SAVE_STATE {
+export enum SAVE_STATE {
   NOT_SAVED = 'NOT_SAVED',
   SAVING = 'SAVING',
   SAVED = 'SAVED',
@@ -152,6 +154,8 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
     }
   };
 
+  const isFormVisible = [SAVE_STATE.NOT_SAVED, SAVE_STATE.SAVING].includes(saveState);
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -193,8 +197,8 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
           </>
         )}
 
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
+        <EuiFlexGroup wrap={true} gutterSize="s">
+          <EuiFlexItem>
             <EuiPanel>
               <EuiTitle size="s">
                 <h4>
@@ -207,195 +211,125 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
 
               <EuiSpacer size="m" />
 
-              <form onSubmit={save}>
-                <EuiForm>
-                  <EuiDescribedFormGroup
-                    idAria="ml_aria_label_new_job_recognizer_job_prefix"
-                    title={
-                      <h4>
+              {isFormVisible && (
+                <form onSubmit={save}>
+                  <EuiForm>
+                    <EuiDescribedFormGroup
+                      idAria="ml_aria_label_new_job_recognizer_job_prefix"
+                      title={
+                        <h4>
+                          <FormattedMessage
+                            id="xpack.ml.newJob.simple.recognize.jobIdPrefixLabel"
+                            defaultMessage="Job ID prefix"
+                          />
+                        </h4>
+                      }
+                      description={
                         <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.jobIdPrefixLabel"
-                          defaultMessage="Job ID prefix"
-                        />
-                      </h4>
-                    }
-                    description={
-                      <FormattedMessage
-                        id="xpack.ml.tooltips.newJobRecognizerJobPrefixTooltip"
-                        defaultMessage="A prefix which will be added to the beginning of each job ID."
-                      />
-                    }
-                  >
-                    <EuiFormRow
-                      label={
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.jobIdPrefixLabel"
-                          defaultMessage="Job ID prefix"
+                          id="xpack.ml.tooltips.newJobRecognizerJobPrefixTooltip"
+                          defaultMessage="A prefix which will be added to the beginning of each job ID."
                         />
                       }
-                      describedByIds={['ml_aria_label_new_job_recognizer_job_prefix']}
                     >
-                      <EuiFieldText
-                        name="jobPrefix"
-                        value={jobPrefix}
-                        onChange={({ target: { value } }) => onJobPrefixChange(value)}
-                      />
-                    </EuiFormRow>
-                  </EuiDescribedFormGroup>
-                  <JobGroupsInput
-                    existingGroups={existingGroupIds}
-                    selectedGroups={jobGroups}
-                    onChange={setJobGroups}
-                  />
-                  <EuiSpacer size="l" />
-                  <EuiFormRow>
-                    <EuiCheckbox
-                      id="startDataFeed"
-                      label={
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.startDatafeedAfterSaveLabel"
-                          defaultMessage="Start datafeed after save"
-                        />
-                      }
-                      checked={startDatafeedAfterSave}
-                      onChange={({ target: { checked } }) => {
-                        setStartDatafeedAfterSave(checked);
-                      }}
-                    />
-                  </EuiFormRow>
-                  <EuiFormRow>
-                    <EuiCheckbox
-                      id="useFullData"
-                      label={
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.useFullDataLabel"
-                          defaultMessage="Use full {indexPatternTitle} data"
-                          values={{ indexPatternTitle: indexPattern.title }}
-                        />
-                      }
-                      checked={useFullIndexData}
-                      onChange={({ target: { checked } }) => {
-                        setUseFullIndexData(checked);
-                      }}
-                    />
-                  </EuiFormRow>
-                  {!useFullIndexData && (
-                    <TimeRangePicker setTimeRange={setTimeRange} timeRange={timeRange} />
-                  )}
-                  <EuiSpacer size="l" />
-                  <EuiAccordion
-                    id="advancedOptions"
-                    buttonContent={
-                      <FormattedMessage
-                        id="xpack.ml.newJob.simple.recognize.advancedLabel"
-                        defaultMessage="Advanced"
-                      />
-                    }
-                    paddingSize="l"
-                  >
-                    <EuiFormRow>
-                      <EuiCheckbox
-                        id="ml_aria_label_new_job_dedicated_index"
+                      <EuiFormRow
                         label={
                           <FormattedMessage
-                            id="xpack.ml.newJob.simple.recognize.useDedicatedIndexLabel"
-                            defaultMessage="Use dedicated index"
+                            id="xpack.ml.newJob.simple.recognize.jobIdPrefixLabel"
+                            defaultMessage="Job ID prefix"
                           />
                         }
-                        checked={useDedicatedIndex}
+                        describedByIds={['ml_aria_label_new_job_recognizer_job_prefix']}
+                      >
+                        <EuiFieldText
+                          name="jobPrefix"
+                          value={jobPrefix}
+                          onChange={({ target: { value } }) => onJobPrefixChange(value)}
+                        />
+                      </EuiFormRow>
+                    </EuiDescribedFormGroup>
+                    <JobGroupsInput
+                      existingGroups={existingGroupIds}
+                      selectedGroups={jobGroups}
+                      onChange={setJobGroups}
+                    />
+                    <EuiSpacer size="l" />
+                    <EuiFormRow>
+                      <EuiCheckbox
+                        id="startDataFeed"
+                        label={
+                          <FormattedMessage
+                            id="xpack.ml.newJob.simple.recognize.startDatafeedAfterSaveLabel"
+                            defaultMessage="Start datafeed after save"
+                          />
+                        }
+                        checked={startDatafeedAfterSave}
                         onChange={({ target: { checked } }) => {
-                          setUseDedicatedIndex(checked);
+                          setStartDatafeedAfterSave(checked);
                         }}
                       />
                     </EuiFormRow>
-                  </EuiAccordion>
-                  <EuiSpacer size="l" />
-                  {saveState === SAVE_STATE.SAVED && (
-                    <EuiCallOut
-                      title={
+                    <EuiFormRow>
+                      <EuiCheckbox
+                        id="useFullData"
+                        label={
+                          <FormattedMessage
+                            id="xpack.ml.newJob.simple.recognize.useFullDataLabel"
+                            defaultMessage="Use full {indexPatternTitle} data"
+                            values={{ indexPatternTitle: indexPattern.title }}
+                          />
+                        }
+                        checked={useFullIndexData}
+                        onChange={({ target: { checked } }) => {
+                          setUseFullIndexData(checked);
+                        }}
+                      />
+                    </EuiFormRow>
+                    {!useFullIndexData && (
+                      <TimeRangePicker setTimeRange={setTimeRange} timeRange={timeRange} />
+                    )}
+                    <EuiSpacer size="l" />
+                    <EuiAccordion
+                      id="advancedOptions"
+                      buttonContent={
                         <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.jobsCreatedTitle"
-                          defaultMessage="Jobs created"
+                          id="xpack.ml.newJob.simple.recognize.advancedLabel"
+                          defaultMessage="Advanced"
                         />
                       }
-                      color="success"
-                      iconType="checkInCircleFilled"
-                    />
-                  )}
-                  {saveState === SAVE_STATE.FAILED && (
-                    <EuiCallOut
-                      title={
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.jobsCreationFailed.saveFailedAriaLabel"
-                          defaultMessage="Save failed"
-                        />
-                      }
-                      color="danger"
-                      iconType="alert"
+                      paddingSize="l"
                     >
-                      <EuiButton
-                        color="danger"
-                        aria-label={i18n.translate(
-                          'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
-                          { defaultMessage: 'Reset' }
-                        )}
-                      >
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.jobsCreationFailed.resetButtonLabel"
-                          defaultMessage="Jobs creation failed"
+                      <EuiFormRow>
+                        <EuiCheckbox
+                          id="ml_aria_label_new_job_dedicated_index"
+                          label={
+                            <FormattedMessage
+                              id="xpack.ml.newJob.simple.recognize.useDedicatedIndexLabel"
+                              defaultMessage="Use dedicated index"
+                            />
+                          }
+                          checked={useDedicatedIndex}
+                          onChange={({ target: { checked } }) => {
+                            setUseDedicatedIndex(checked);
+                          }}
                         />
-                      </EuiButton>
-                    </EuiCallOut>
-                  )}
-                  {saveState === SAVE_STATE.PARTIAL_FAILURE && (
-                    <EuiCallOut
-                      title={
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.someJobsCreationFailedTitle"
-                          defaultMessage="Some jobs failed to be created"
-                        />
-                      }
-                      color="warning"
-                      iconType="alert"
-                    >
-                      <EuiButton
-                        color="warning"
-                        aria-label={i18n.translate(
-                          'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
-                          { defaultMessage: 'Reset' }
-                        )}
-                      >
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.someJobsCreationFailed.resetButtonLabel"
-                          defaultMessage="Reset"
-                        />
-                      </EuiButton>
-                      <EuiLink
-                        href={resultsUrl}
-                        aria-label={i18n.translate(
-                          'xpack.ml.newJob.simple.recognize.viewResultsAriaLabel',
-                          { defaultMessage: 'View Results' }
-                        )}
-                      >
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.viewResultsLinkText"
-                          defaultMessage="View Results"
-                        />
-                      </EuiLink>
-                    </EuiCallOut>
-                  )}
-                  <EuiSpacer size="l" />
-                  <EuiButton fill type="submit" isLoading={saveState === SAVE_STATE.SAVING}>
-                    <FormattedMessage
-                      id="xpack.ml.newJob.simple.recognize.createJobButtonAriaLabel"
-                      defaultMessage="Create Job"
-                    />
-                  </EuiButton>
-                </EuiForm>
-              </form>
+                      </EuiFormRow>
+                    </EuiAccordion>
+                    <EuiSpacer size="l" />
+                  </EuiForm>
+                  <EuiTextAlign textAlign="right">
+                    <EuiButton fill type="submit" isLoading={saveState === SAVE_STATE.SAVING}>
+                      <FormattedMessage
+                        id="xpack.ml.newJob.simple.recognize.createJobButtonAriaLabel"
+                        defaultMessage="Create Job"
+                      />
+                    </EuiButton>
+                  </EuiTextAlign>
+                </form>
+              )}
+              <CreateResultCallout saveState={saveState} resultsUrl={resultsUrl} />
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem>
             <EuiPanel>
               <EuiTitle size="s">
                 <h4>
@@ -406,7 +340,7 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
                 </h4>
               </EuiTitle>
 
-              <EuiListGroup bordered={false} flush={true}>
+              <EuiListGroup bordered={false} flush={true} wrapText={true} maxWidth={false}>
                 {jobs.map(({ id, config: { description } }) => (
                   <EuiListGroupItem
                     key={id}
@@ -431,55 +365,56 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
               </EuiListGroup>
             </EuiPanel>
           </EuiFlexItem>
+          <EuiFlexItem>
+            {Object.keys(kibanaObjects).map((objectType, i) => (
+              <Fragment key={objectType}>
+                <EuiPanel>
+                  <EuiTitle size="s">
+                    <h4>{kibanaObjectLabels[objectType]}</h4>
+                  </EuiTitle>
+                  <EuiListGroup bordered={false} flush={true} wrapText={true}>
+                    {Array.isArray(kibanaObjects[objectType]) &&
+                      kibanaObjects[objectType].map(({ id, title, exists, success }) => (
+                        <EuiListGroupItem
+                          key={id}
+                          label={
+                            <EuiFlexGroup alignItems="center" gutterSize="s">
+                              <EuiFlexItem>
+                                {saveState === SAVE_STATE.SAVING ? (
+                                  <EuiLoadingSpinner size="m" />
+                                ) : null}
+                                {success !== undefined ? (
+                                  <EuiIcon
+                                    type={success ? 'check' : 'cross'}
+                                    color={success ? 'success' : 'danger'}
+                                  />
+                                ) : null}
+                              </EuiFlexItem>
+                              <EuiFlexItem>
+                                <EuiText size="s" color="secondary">
+                                  {title}
+                                </EuiText>
+                                {exists && (
+                                  <EuiText size="xs" color="danger">
+                                    <FormattedMessage
+                                      id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
+                                      defaultMessage="(already exists)"
+                                    />
+                                  </EuiText>
+                                )}
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          }
+                        />
+                      ))}
+                  </EuiListGroup>
+                </EuiPanel>
+                {i < Object.keys(kibanaObjects).length - 1 && <EuiSpacer size="s" />}
+              </Fragment>
+            ))}
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <EuiFlexGroup>
-          {Object.keys(kibanaObjects).map(objectType => (
-            <EuiFlexItem key={objectType}>
-              <EuiPanel>
-                <EuiTitle size="s">
-                  <h4>{kibanaObjectLabels[objectType]}</h4>
-                </EuiTitle>
-                <EuiListGroup bordered={false} flush={true}>
-                  {Array.isArray(kibanaObjects[objectType]) &&
-                    kibanaObjects[objectType].map(({ id, title, exists, success }) => (
-                      <EuiListGroupItem
-                        key={id}
-                        label={
-                          <EuiFlexGroup alignItems="center" gutterSize="s">
-                            <EuiFlexItem>
-                              {saveState === SAVE_STATE.SAVING ? (
-                                <EuiLoadingSpinner size="m" />
-                              ) : null}
-                              {success !== undefined ? (
-                                <EuiIcon
-                                  type={success ? 'check' : 'cross'}
-                                  color={success ? 'success' : 'danger'}
-                                />
-                              ) : null}
-                            </EuiFlexItem>
-                            <EuiFlexItem>
-                              <EuiText size="s" color="secondary">
-                                {title}
-                              </EuiText>
-                              {exists && (
-                                <EuiText size="xs" color="danger">
-                                  <FormattedMessage
-                                    id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
-                                    defaultMessage="(already exists)"
-                                  />
-                                </EuiText>
-                              )}
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        }
-                      />
-                    ))}
-                </EuiListGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
       </EuiPageBody>
     </EuiPage>
   );
