@@ -6,6 +6,8 @@
 
 import * as chromium from './chromium';
 
+export type BrowserType = keyof typeof BROWSERS_BY_TYPE;
+
 export const BROWSERS_BY_TYPE = {
   chromium,
 };

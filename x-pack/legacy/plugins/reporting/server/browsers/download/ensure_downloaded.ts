@@ -7,7 +7,7 @@
 import { resolve as resolvePath } from 'path';
 import { existsSync } from 'fs';
 
-import { BROWSERS_BY_TYPE } from '../browsers';
+import { BROWSERS_BY_TYPE, BrowserType } from '../browsers';
 
 import { md5 } from './checksum';
 import { asyncMap } from './util';
@@ -20,7 +20,7 @@ import { clean } from './clean';
  * @param  {String} browserType
  * @return {Promise<undefined>}
  */
-export async function ensureBrowserDownloaded(browserType: keyof typeof BROWSERS_BY_TYPE) {
+export async function ensureBrowserDownloaded(browserType: BrowserType) {
   await ensureDownloaded([BROWSERS_BY_TYPE[browserType]]);
 }
 
