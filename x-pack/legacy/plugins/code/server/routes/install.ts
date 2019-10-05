@@ -12,8 +12,13 @@ import { CodeServerRouter } from '../security';
 import { CodeServices } from '../distributed/code_services';
 import { LspServiceDefinition } from '../distributed/apis';
 import { Endpoint } from '../distributed/resource_locator';
+import { ServerOptions } from '../server_options';
 
-export function installRoute(router: CodeServerRouter, codeServices: CodeServices) {
+export function installRoute(
+  router: CodeServerRouter,
+  codeServices: CodeServices,
+  options: ServerOptions
+) {
   const lspService = codeServices.serviceFor(LspServiceDefinition);
   const kibanaVersion = router.server.config().get('pkg.version') as string;
   const status = async (endpoint: Endpoint, def: LanguageServerDefinition) => ({
@@ -32,9 +37,7 @@ export function installRoute(router: CodeServerRouter, codeServices: CodeService
     path: '/api/code/install',
     async handler(req: RequestFacade) {
       const endpoint = await codeServices.locate(req, '');
-      return await Promise.all(
-        enabledLanguageServers(router.server).map(def => status(endpoint, def))
-      );
+      return await Promise.all(enabledLanguageServers(options).map(def => status(endpoint, def)));
     },
     method: 'GET',
   });
@@ -43,7 +46,7 @@ export function installRoute(router: CodeServerRouter, codeServices: CodeService
     path: '/api/code/install/{name}',
     async handler(req: RequestFacade) {
       const name = req.params.name;
-      const def = enabledLanguageServers(router.server).find(d => d.name === name);
+      const def = enabledLanguageServers(options).find(d => d.name === name);
       const endpoint = await codeServices.locate(req, '');
       if (def) {
         return await status(endpoint, def);

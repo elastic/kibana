@@ -5,7 +5,12 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
-import { get } from 'lodash';
+import { get, contains } from 'lodash';
+import chrome from 'ui/chrome';
+
+function isOnPage(hash) {
+  return contains(window.location.hash, hash);
+}
 
 const angularState = {
   injector: null,
@@ -111,70 +116,63 @@ export const disableElasticsearchInternalCollection = async () => {
 };
 
 export const toggleSetupMode = inSetupMode => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      checkAngularState();
-    } catch (err) {
-      return reject(err);
-    }
-
-    const globalState = angularState.injector.get('globalState');
-    setupModeState.enabled = inSetupMode;
-    globalState.inSetupMode = inSetupMode;
-    globalState.save();
-    setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
-    notifySetupModeDataChange();
-
-    if (inSetupMode) {
-      await updateSetupModeData();
-    }
-
-    resolve();
-  });
-};
-
-const setSetupModeMenuItem = () => {
-  // Disabling this for this initial release. This will be added back in
-  // in a subsequent PR
-  // checkAngularState();
-
-  // const globalState = angularState.injector.get('globalState');
-  // const navItems = globalState.inSetupMode
-  //   ? [
-  //     {
-  //       key: 'exit',
-  //       label: 'Exit Setup Mode',
-  //       description: 'Exit setup mode',
-  //       run: () => toggleSetupMode(false),
-  //       testId: 'exitSetupMode'
-  //     },
-  //     {
-  //       key: 'refresh',
-  //       label: 'Refresh Setup Data',
-  //       description: 'Refresh data used for setup mode',
-  //       run: () => updateSetupModeData(),
-  //       testId: 'refreshSetupModeData'
-  //     }
-  //   ]
-  //   : [{
-  //     key: 'enter',
-  //     label: 'Enter Setup Mode',
-  //     description: 'Enter setup mode',
-  //     run: () => toggleSetupMode(true),
-  //     testId: 'enterSetupMode'
-  //   }];
-
-  // angularState.scope.topNavMenu = [...navItems];
-};
-
-export const initSetupModeState = ($scope, $injector, callback) => {
-  angularState.scope = $scope;
-  angularState.injector = $injector;
-  setSetupModeMenuItem();
-  callback && setupModeState.callbacks.push(callback);
+  checkAngularState();
 
   const globalState = angularState.injector.get('globalState');
-  if (globalState.inSetupMode) {
-    toggleSetupMode(true);
+  setupModeState.enabled = inSetupMode;
+  globalState.inSetupMode = inSetupMode;
+  globalState.save();
+  setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
+  notifySetupModeDataChange();
+
+  if (inSetupMode) {
+    // Intentionally do not await this so we don't block UI operations
+    updateSetupModeData();
   }
+};
+
+export const setSetupModeMenuItem = () => {
+  checkAngularState();
+
+  if (isOnPage('no-data')) {
+    return;
+  }
+
+  const globalState = angularState.injector.get('globalState');
+  const navItems = globalState.inSetupMode
+    ? []
+    : [{
+      id: 'enter',
+      label: 'Enter Setup Mode',
+      description: 'Enter setup',
+      run: () => toggleSetupMode(true),
+      testId: 'enterSetupMode'
+    }];
+
+  angularState.scope.topNavMenu = [...navItems];
+  // LOL angular
+  if (!angularState.scope.$$phase) {
+    angularState.scope.$apply();
+  }
+};
+
+export const initSetupModeState = async ($scope, $injector, callback) => {
+  angularState.scope = $scope;
+  angularState.injector = $injector;
+  callback && setupModeState.callbacks.push(callback);
+
+  const globalState = $injector.get('globalState');
+  if (globalState.inSetupMode) {
+    await toggleSetupMode(true);
+  }
+};
+
+export const isInSetupMode = async () => {
+  if (setupModeState.enabled) {
+    return true;
+  }
+
+  const $injector = angularState.injector || await chrome.dangerouslyGetActiveInjector();
+  const globalState = $injector.get('globalState');
+  return globalState.inSetupMode;
 };

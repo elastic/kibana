@@ -23,7 +23,7 @@ import { FieldFormatConvert } from './types';
 import { asPrettyString } from './utils/as_pretty_string';
 
 const getTestFormat = (
-  _convert: FieldFormatConvert = {
+  _convert: Partial<FieldFormatConvert> = {
     text: (val: string) => asPrettyString(val),
   },
   _params?: any
@@ -32,9 +32,7 @@ const getTestFormat = (
     static id = 'test-format';
     static title = 'Test Format';
 
-    public get _convert() {
-      return _convert;
-    }
+    _convert = _convert;
   })(_params);
 
 describe('FieldFormat class', () => {

@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`service node queries fetches services nodes 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "nodes": Object {
+        "aggs": Object {
+          "cpu": Object {
+            "avg": Object {
+              "field": "system.process.cpu.total.norm.pct",
+            },
+          },
+          "heapMemory": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.used",
+            },
+          },
+          "nonHeapMemory": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.used",
+            },
+          },
+          "threadCount": Object {
+            "max": Object {
+              "field": "jvm.thread.count",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "service.node.name",
+          "size": 10000,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "index": "myIndex",
+}
+`;

@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { Filter, isFilterPinned, FilterStateStore } from '@kbn/es-query';
+import { Filter, isFilterPinned, isRangeFilter, FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
 import { UiSettingsClientContract } from 'src/core/public';
-// @ts-ignore
-import { compareFilters } from './lib/compare_filters';
-// @ts-ignore
-import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-// @ts-ignore
-import { uniqFilters } from './lib/uniq_filters';
 
+import { compareFilters } from './lib/compare_filters';
+import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
+import { uniqFilters } from './lib/uniq_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
@@ -194,7 +191,10 @@ export class FilterManager {
 
   public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
     const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
-    if (timeFilter) changeTimeFilter(this.timefilter, timeFilter);
+
+    if (isRangeFilter(timeFilter)) {
+      changeTimeFilter(this.timefilter, timeFilter);
+    }
     return this.addFilters(filters.filter(filter => filter !== timeFilter));
   }
 

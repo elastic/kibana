@@ -121,7 +121,8 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
   async createFromState(
     state,
     input,
-    parent
+    parent,
+    renderTooltipContent,
   ) {
     const layerList = state && state.layerList ? state.layerList : getInitialLayers();
     const indexPatterns = await this._getIndexPatterns(layerList);
@@ -135,7 +136,8 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
         editable: false,
       },
       input,
-      parent
+      parent,
+      renderTooltipContent
     );
   }
 

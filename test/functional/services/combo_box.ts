@@ -75,7 +75,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
         return;
       }
 
-      comboBoxElement.scrollIntoViewIfNecessary();
+      await comboBoxElement.scrollIntoViewIfNecessary();
       await this.setFilterValue(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
 
@@ -280,6 +280,17 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
         .toArray()
         .map(option => $(option).text());
       return selectedOptions.length === 1 && selectedOptions[0] === value;
+    }
+
+    /**
+     * Clears input field
+     * @param comboBoxSelector data-test-subj selector
+     */
+    public async clearInputField(comboBoxSelector: string): Promise<void> {
+      log.debug(`comboBox.clearInputField, comboBoxSelector:${comboBoxSelector}`);
+      const comboBoxElement = await testSubjects.find(comboBoxSelector);
+      const input = await comboBoxElement.findByTagName('input');
+      await input.clearValueWithKeyboard();
     }
   }
 

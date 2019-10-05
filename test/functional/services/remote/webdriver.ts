@@ -27,6 +27,8 @@ import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriv
 import chrome from 'selenium-webdriver/chrome';
 // @ts-ignore types not available
 import firefox from 'selenium-webdriver/firefox';
+// @ts-ignore types not available
+import ie from 'selenium-webdriver/ie';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 // @ts-ignore internal modules are not typed
@@ -34,6 +36,7 @@ import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
 
+import { resolve, delimiter } from 'path';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
@@ -89,6 +92,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .withCapabilities(chromeCapabilities)
           .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
           .build();
+
       case 'firefox':
         const firefoxOptions = new firefox.Options();
         firefoxOptions.setPreference('devtools.console.stdout.content', true);
@@ -101,6 +105,30 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .setFirefoxOptions(firefoxOptions)
           .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).setStdio('inherit'))
           .build();
+
+      case 'ie':
+        // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
+        const driverPath = resolve(
+          __dirname,
+          '..\\..\\..\\..\\node_modules\\iedriver\\lib\\iedriver'
+        );
+        process.env.PATH = driverPath + delimiter + process.env.PATH;
+
+        const ieCapabilities = Capabilities.ie();
+        ieCapabilities.set('se:ieOptions', {
+          'ie.ensureCleanSession': true,
+          ignoreProtectedModeSettings: true,
+          ignoreZoomSetting: false, // requires us to have 100% zoom level
+          nativeEvents: true, // need this for values to stick but it requires 100% scaling and window focus
+          requireWindowFocus: true,
+          logLevel: 'TRACE',
+        });
+
+        return new Builder()
+          .forBrowser(browserType)
+          .withCapabilities(ieCapabilities)
+          .build();
+
       default:
         throw new Error(`${browserType} is not supported yet`);
     }

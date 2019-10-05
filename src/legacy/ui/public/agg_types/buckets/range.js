@@ -66,12 +66,16 @@ export const rangeBucketAgg = new BucketAggType({
 
     const RangeFormat = FieldFormat.from(function (range) {
       const format = agg.fieldOwnFormatter();
+      const gte = '\u2265';
+      const lt = '\u003c';
       return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
-        defaultMessage: '{from} to {to}',
+        defaultMessage: '{gte} {from} and {lt} {to}',
         values: {
+          gte,
           from: format(range.gte),
-          to: format(range.lt)
-        }
+          lt,
+          to: format(range.lt),
+        },
       });
     });
 

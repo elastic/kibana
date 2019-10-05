@@ -18,12 +18,17 @@
  */
 
 import chrome from 'ui/chrome';
-import { CoreStart, Plugin } from '../../../../../../src/core/public';
+import { Storage } from 'ui/storage';
+import { Plugin } from '../../../../../../src/core/public';
 import { initLegacyModule } from './legacy_module';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
   savedObjectsClient: any;
+}
+
+export interface LegacyDependenciesPluginStart {
+  storage: Storage;
 }
 
 export class LegacyDependenciesPlugin implements Plugin<any, any> {
@@ -35,7 +40,9 @@ export class LegacyDependenciesPlugin implements Plugin<any, any> {
     } as LegacyDependenciesPluginSetup;
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public start() {
+    return {
+      storage: new Storage(window.localStorage),
+    } as LegacyDependenciesPluginStart;
   }
 }
