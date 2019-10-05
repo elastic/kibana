@@ -59,33 +59,16 @@ export class RepositoryObjectClient {
     if (uris.length === 0) {
       return [];
     }
-    const res = await this.esClient.search({
-      index: RepositorySearchIndexWithScope(uris),
-      body: {
-        query: {
-          bool: {
-            filter: {
-              exists: {
-                field: RepositoryReservedField,
-              },
-            },
-          },
-        },
-      },
-      from: 0,
-      size: 10000,
-    });
-    const hits: any[] = res.hits.hits;
-    const repos: Repository[] = hits.map(hit => {
-      const repo: Repository = hit._source[RepositoryReservedField];
-      return repo;
-    });
-    return repos;
+    return this.getRepositoriesInternal(RepositorySearchIndexWithScope(uris));
   }
 
   public async getAllRepositories(): Promise<Repository[]> {
+    return await this.getRepositoriesInternal(`${RepositoryIndexNamePrefix}*`);
+  }
+
+  private async getRepositoriesInternal(index: string) {
     const res = await this.esClient.search({
-      index: `${RepositoryIndexNamePrefix}*`,
+      index,
       body: {
         query: {
           exists: {
