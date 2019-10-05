@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
@@ -28,6 +29,12 @@ export interface TaskManagerOpts {
   callWithInternalUser: any;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
+}
+
+function generateTaskManagerUUID(logger: Logger): string {
+  const taskManagerUUID = uuid.v4();
+  logger.info(`Initialising Task Manager with UUID: ${taskManagerUUID}`);
+  return taskManagerUUID;
 }
 
 /*
@@ -78,8 +85,9 @@ export class TaskManager {
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
-      kibanaId: opts.config.get('server.uuid'),
+      taskManagerId: generateTaskManagerUUID(this.logger),
     });
+
     const pool = new TaskPool({
       logger: this.logger,
       maxWorkers: this.maxWorkers,
