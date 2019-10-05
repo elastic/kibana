@@ -21,7 +21,7 @@ To control how data is collected from your {es} nodes, you configure
 {ref}/monitoring-settings.html[`xpack.monitoring.collection`
 settings] in `elasticsearch.yml`. To control how monitoring data is collected
 from Logstash, you configure
-{logstash-ref}/configuring-logstash.html#monitoring-settings[`xpack.monitoring` settings]
+{logstash-ref}/monitoring-internal-collection.html#monitoring-settings[`xpack.monitoring` settings]
 in `logstash.yml`.
 
 For more information, see
