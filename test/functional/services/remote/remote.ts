@@ -27,7 +27,12 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
 
-  const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
+  const { driver, By, Key, until, LegacyActionSequence, consoleLog$ } = await initWebDriver(
+    log,
+    browserType,
+    lifecycle,
+    config.get('browser.logPollingMs')
+  );
   const isW3CEnabled = (driver as any).executor_.w3c;
 
   const caps = await driver.getCapabilities();
@@ -63,5 +68,5 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   lifecycle.on('cleanup', async () => await driver.quit());
 
-  return { driver, By, Key, until, LegacyActionSequence, browserType };
+  return { driver, By, Key, until, LegacyActionSequence, browserType, consoleLog$ };
 }
