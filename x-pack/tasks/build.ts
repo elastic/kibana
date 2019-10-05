@@ -7,7 +7,6 @@
 import { resolve } from 'path';
 import { writeFileSync } from 'fs';
 
-// @ts-ignore
 import pluginHelpers from '@kbn/plugin-helpers';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import gulp from 'gulp';
