@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve, delimiter } from 'path';
+import { delimiter } from 'path';
 
 import * as Rx from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
