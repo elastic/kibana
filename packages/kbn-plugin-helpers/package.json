@@ -21,7 +21,7 @@
     "globby": "^8.0.1",
     "gulp-babel": "^8.0.0",
     "gulp-rename": "1.4.0",
-    "gulp-zip": "4.2.0",
+    "gulp-zip": "5.0.0",
     "inquirer": "^1.2.2",
     "minimatch": "^3.0.4",
     "node-sass": "^4.9.4",
