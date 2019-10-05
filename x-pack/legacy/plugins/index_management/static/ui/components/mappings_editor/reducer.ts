@@ -5,7 +5,7 @@
  */
 import { OnFormUpdateArg } from './shared_imports';
 import { Field, NormalizedFields, NormalizedField } from './types';
-import { getFieldMeta, getUniqueId } from './lib';
+import { getFieldMeta, getUniqueId, shouldDeleteChildFieldsAfterTypeChange } from './lib';
 
 export interface MappingsConfiguration {
   dynamic: boolean | string;
@@ -119,6 +119,7 @@ export const reducer = (state: State, action: Action): State => {
         // Deleting a child field
         const parentField = state.fields.byId[parentId];
         parentField.childFields = parentField.childFields!.filter(childId => childId !== id);
+        parentField.hasChildFields = Boolean(parentField.childFields.length);
       } else {
         // Deleting a root level field
         rootLevelFields = rootLevelFields.filter(childId => childId !== id);
@@ -149,18 +150,32 @@ export const reducer = (state: State, action: Action): State => {
         newField = {
           ...newField,
           ...getFieldMeta(action.value),
-          childFields: undefined,
+          hasChildFields: previousField.hasChildFields, // we need to put that back from our previous field
         };
 
-        if (previousField.childFields) {
-          previousField.childFields.forEach(fieldId => {
-            delete state.fields.byId[fieldId];
-          });
+        const shouldDeleteChildFields = shouldDeleteChildFieldsAfterTypeChange(
+          previousField.source.type,
+          newField.source.type
+        );
+
+        if (shouldDeleteChildFields) {
+          newField.childFields = undefined;
+          newField.hasChildFields = false;
+
+          if (previousField.childFields) {
+            previousField.childFields.forEach(fieldId => {
+              delete state.fields.byId[fieldId];
+            });
+          }
         }
       }
 
       return {
         ...state,
+        documentFields: {
+          ...state.documentFields,
+          status: 'idle',
+        },
         fields: {
           ...state.fields,
           byId: {

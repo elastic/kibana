@@ -181,3 +181,20 @@ export const deNormalize = (normalized: NormalizedFields): Fields => {
 
   return deNormalizePaths(normalized.rootLevelFields);
 };
+
+export const shouldDeleteChildFieldsAfterTypeChange = (
+  oldType: DataType,
+  newType: DataType
+): boolean => {
+  if (oldType === 'text' && newType !== 'keyword') {
+    return true;
+  } else if (oldType === 'keyword' && newType !== 'text') {
+    return true;
+  } else if (oldType === 'object' && newType !== 'nested') {
+    return true;
+  } else if (oldType === 'nested' && newType !== 'object') {
+    return true;
+  }
+
+  return false;
+};

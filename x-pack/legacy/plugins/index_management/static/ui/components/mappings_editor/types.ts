@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FieldConfig } from './shared_imports';
 
 export interface DataTypeDefinition {
   label: string;
@@ -81,6 +82,12 @@ export type ParameterName =
   | 'normalizer'
   | 'ignore_above'
   | 'split_queries_on_whitespace';
+
+export interface Parameter {
+  fieldConfig?: FieldConfig | { [key: string]: FieldConfig };
+  paramName?: string;
+  docs?: string;
+}
 
 export interface Fields {
   [key: string]: Omit<Field, 'name'>;

@@ -7,3 +7,5 @@
 export * from './field_options';
 
 export * from './data_types_definition';
+
+export * from './parameters_definition';

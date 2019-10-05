@@ -9,6 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import { useState, useDispatch } from '../../../mappings_state';
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
+import { DeleteFieldProvider } from './delete_field_provider';
 import { NormalizedField } from '../../../types';
 
 interface Props {
@@ -47,13 +48,6 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
     });
   };
 
-  const removeField = () => {
-    dispatch({
-      type: 'field.remove',
-      value: id,
-    });
-  };
-
   const renderCreateField = () => {
     if (status !== 'creatingField') {
       return null;
@@ -80,7 +74,9 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
       <>
         <EuiButton onClick={editField}>Edit</EuiButton>
         {canHaveChildFields && <EuiButton onClick={addField}>Add field</EuiButton>}
-        <EuiButton onClick={removeField}>Remove</EuiButton>
+        <DeleteFieldProvider>
+          {deleteField => <EuiButton onClick={() => deleteField(field)}>Remove</EuiButton>}
+        </DeleteFieldProvider>
       </>
     );
   };

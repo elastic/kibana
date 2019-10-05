@@ -21,7 +21,7 @@ export const validateUniqueName = (
 
     if (existingNames.filter(name => name !== initialName).includes(value as string)) {
       return {
-        message: 'There is already a field with this name',
+        message: 'There is already a field with this name.',
       };
     }
   };

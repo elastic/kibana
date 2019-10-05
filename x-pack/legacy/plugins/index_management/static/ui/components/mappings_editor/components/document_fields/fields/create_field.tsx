@@ -12,14 +12,17 @@ import {
   TextField,
   SelectField,
   UseField,
-  fieldValidators,
+  FieldConfig,
 } from '../../../shared_imports';
-import { FIELD_TYPES_OPTIONS } from '../../../constants';
+import { FIELD_TYPES_OPTIONS, PARAMETERS_DEFINITION } from '../../../constants';
 import { useState, useDispatch } from '../../../mappings_state';
-import { Field } from '../../../types';
+import { Field, ParameterName } from '../../../types';
 import { validateUniqueName } from '../../../lib';
 
 const formWrapper = (props: any) => <form {...props} />;
+
+const getFieldConfig = (param: ParameterName): FieldConfig =>
+  PARAMETERS_DEFINITION[param].fieldConfig || {};
 
 export const CreateField = () => {
   const { form } = useForm<Field>();
@@ -44,31 +47,27 @@ export const CreateField = () => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });
   };
 
-  const nameValidations = [
-    {
-      validator: fieldValidators.emptyField('Cannot be empty'),
-    },
-    {
-      validator: fieldValidators.containsCharsField({
-        chars: '.',
-        message: 'Cannot contain a dot (.)',
-      }),
-    },
-    {
-      validator: validateUniqueName(fields, undefined, fieldToAddFieldTo),
-    },
-  ];
+  const { validations, ...rest } = getFieldConfig('name');
+  const nameConfig: FieldConfig = {
+    ...rest,
+    validations: [
+      ...validations!,
+      {
+        validator: validateUniqueName(fields, undefined, fieldToAddFieldTo),
+      },
+    ],
+  };
 
   return (
     <Form form={form} style={{ padding: '20px 0' }} FormWrapper={formWrapper} onSubmit={submitForm}>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <UseField path="name" config={{ validations: nameValidations }} component={TextField} />
+          <UseField path="name" config={nameConfig} component={TextField} />
         </EuiFlexItem>
         <EuiFlexItem>
           <UseField
             path="type"
-            defaultValue="text"
+            config={getFieldConfig('type')}
             component={SelectField}
             componentProps={{
               euiFieldProps: {
