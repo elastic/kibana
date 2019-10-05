@@ -79,6 +79,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         dimension:
           '[data-test-subj="lnsXY_xDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
         operation: 'date_histogram',
+        field: '@timestamp',
       });
 
       await PageObjects.lens.configureDimension({
@@ -86,6 +87,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
           '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
         operation: 'avg',
         field: 'bytes',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension:
+          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
+        operation: 'terms',
+        field: 'ip',
       });
 
       await PageObjects.lens.setTitle('Afancilenstest');
@@ -102,10 +110,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
-      await PageObjects.lens.assertExpectedText(
-        '.echLegendItem__title',
-        legendText => !!legendText && legendText.includes('Average of bytes')
-      );
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(3);
     });
   });
 }

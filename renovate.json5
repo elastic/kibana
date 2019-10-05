@@ -260,6 +260,18 @@
         ],
       },
       {
+        groupSlug: 'typescript',
+        groupName: 'typescript related packages',
+        packagePatterns: [
+          '(\\b|_)ts(\\b|_)',
+          '(\\b|_)typescript(\\b|_)',
+        ],
+        packageNames: [
+          'tslib',
+          '@types/tslib',
+        ],
+      },
+      {
         groupSlug: 'json-stable-stringify',
         groupName: 'json-stable-stringify related packages',
         packageNames: [

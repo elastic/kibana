@@ -22,7 +22,7 @@ export async function createBrowserDriverFactory(
 
   const DATA_DIR = config.get('path.data');
   const CAPTURE_CONFIG = config.get('xpack.reporting.capture');
-  const BROWSER_TYPE = CAPTURE_CONFIG.browser.type;
+  const BROWSER_TYPE: keyof typeof BROWSERS_BY_TYPE = CAPTURE_CONFIG.browser.type;
   const BROWSER_AUTO_DOWNLOAD = CAPTURE_CONFIG.browser.autoDownload;
   const BROWSER_CONFIG = CAPTURE_CONFIG.browser[BROWSER_TYPE];
   const REPORTING_TIMEOUT = config.get('xpack.reporting.queue.timeout');

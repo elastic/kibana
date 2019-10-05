@@ -41,7 +41,6 @@ export { readConfigFile } from './functional_test_runner/lib/config/read_config_
 // @ts-ignore not typed yet
 export { runFtrCli } from './functional_test_runner/cli';
 
-// @ts-ignore not typed yet
 export {
   createAutoJUnitReporter,
   runMochaCli,

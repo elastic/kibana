@@ -85,7 +85,7 @@
     "@types/pngjs": "^3.3.2",
     "@types/prop-types": "^15.5.3",
     "@types/proper-lockfile": "^3.0.1",
-    "@types/puppeteer": "^1.19.0",
+    "@types/puppeteer": "^1.20.1",
     "@types/react": "^16.8.0",
     "@types/react-dom": "^16.8.0",
     "@types/react-redux": "^6.0.6",

@@ -17,8 +17,17 @@
  * under the License.
  */
 
-export { createAutoJUnitReporter } from './auto_junit_reporter';
-export { setupJUnitReportGeneration } from './junit_report_generation';
-export { runMochaCli } from './run_mocha_cli';
-export { recordLog, snapshotLogsForRunnable } from './log_cache';
-export { escapeCdata } from './xml';
+import { filterDocvalueFields } from './filter_docvalue_fields';
+
+test('Should exclude docvalue_fields that are not contained in fields', () => {
+  const docvalueFields = [
+    'my_ip_field',
+    { field: 'my_keyword_field' },
+    { field: 'my_date_field', 'format': 'epoch_millis' }
+  ];
+  const out = filterDocvalueFields(docvalueFields, ['my_ip_field', 'my_keyword_field']);
+  expect(out).toEqual([
+    'my_ip_field',
+    { field: 'my_keyword_field' },
+  ]);
+});

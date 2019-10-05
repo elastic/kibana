@@ -18,4 +18,5 @@
  */
 
 export { generateNoticeFromSource } from './generate_notice_from_source';
+// @ts-ignore not typed yet
 export { generateBuildNoticeText } from './generate_build_notice_text';
