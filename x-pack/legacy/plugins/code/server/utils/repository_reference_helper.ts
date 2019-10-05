@@ -136,7 +136,7 @@ class SharedObjectReferenceHelper implements RepositoryReferenceHelper {
 
   async ensureReference(uri: string): Promise<void> {
     if (!(await this.hasReference(uri))) {
-      throw new Error();
+      throw new Error(`Space [${this.namespace()}] has no reference of [${uri}]`);
     }
   }
 
