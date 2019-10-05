@@ -51,7 +51,7 @@
     "log-symbols": "^2.2.0",
     "ncp": "^2.0.0",
     "ora": "^1.4.0",
-    "prettier": "^1.14.3",
+    "prettier": "^1.18.2",
     "read-pkg": "^5.2.0",
     "rxjs": "^6.2.1",
     "spawn-sync": "^1.0.15",
