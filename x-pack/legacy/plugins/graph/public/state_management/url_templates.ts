@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import actionCreatorFactory from 'typescript-fsa';
+import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
-import { GraphState } from './store';
+import { takeEvery, select } from 'redux-saga/effects';
+import { GraphState, GraphStoreDependencies } from './store';
 import { UrlTemplate } from '../types';
 import { reset } from './global';
 import { setDatasource, IndexpatternDatasource, requestDatasource } from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';
+import { matchesOne } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 
@@ -90,3 +92,20 @@ export const urlTemplatesReducer = (basePath: string) =>
     .build();
 
 export const templatesSelector = (state: GraphState) => state.urlTemplates;
+
+/**
+ * Saga making sure the templates are always synced up to the scope.
+ *
+ * Won't be necessary once the side bar is moved to redux
+ */
+export const syncTemplatesSaga = ({ setUrlTemplates, notifyAngular }: GraphStoreDependencies) => {
+  function* syncTemplates() {
+    const templates = templatesSelector(yield select());
+    setUrlTemplates(templates);
+    notifyAngular();
+  }
+
+  return function*() {
+    yield takeEvery(matchesOne(loadTemplates, saveTemplate, removeTemplate), syncTemplates);
+  };
+};
