@@ -20,7 +20,7 @@
 import Net from 'net';
 
 import * as Rx from 'rxjs';
-import { mergeMap, takeUntil, take } from 'rxjs/operators';
+import { map, takeUntil, take } from 'rxjs/operators';
 
 export async function createStdoutSocket() {
   const chunk$ = new Rx.Subject<Buffer>();
@@ -28,28 +28,28 @@ export async function createStdoutSocket() {
 
   const server = Net.createServer();
   server.on('connection', socket => {
-    const data$ = Rx.fromEvent<Buffer>(socket, 'data').pipe(
-      mergeMap(chunk => {
-        chunk$.next(chunk);
-        return [];
-      })
-    );
-
-    const error$ = Rx.fromEvent<Error>(socket, 'error').pipe(
-      mergeMap(error => {
-        throw error;
-      })
-    );
-
+    const data$ = Rx.fromEvent<Buffer>(socket, 'data');
     const end$ = Rx.fromEvent(socket, 'end');
+    const error$ = Rx.fromEvent<Error>(socket, 'error');
 
     Rx.merge(data$, error$)
       .pipe(takeUntil(Rx.merge(end$, cleanup$)))
       .subscribe({
+        next(chunkOrError) {
+          if (Buffer.isBuffer(chunkOrError)) {
+            chunk$.next(chunkOrError);
+          } else {
+            chunk$.error(chunkOrError);
+          }
+        },
         error(error) {
           chunk$.error(error);
         },
         complete() {
+          if (!socket.destroyed) {
+            socket.destroy();
+          }
+
           chunk$.complete();
         },
       });
@@ -58,7 +58,7 @@ export async function createStdoutSocket() {
   const readyPromise = Rx.race(
     Rx.fromEvent<void>(server, 'listening').pipe(take(1)),
     Rx.fromEvent<Error>(server, 'error').pipe(
-      mergeMap(error => {
+      map(error => {
         throw error;
       })
     )
