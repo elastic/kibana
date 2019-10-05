@@ -20,7 +20,7 @@
 import { delimiter } from 'path';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map } from 'rxjs/operators';
+import { mergeMap, map, takeUntil } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test/src/functional_test_runner/lib/lifecycle';
 import { ToolingLog } from '@kbn/dev-utils';
 import { delay } from 'bluebird';
@@ -108,6 +108,7 @@ async function attemptToCreateCommand(
         return {
           session,
           consoleLog$: pollForLogEntry$(session, logging.Type.BROWSER, logPollingMs).pipe(
+            takeUntil(lifecycle.cleanup$),
             map(({ message, level: { name: level } }) => ({
               message: message.replace(/\\n/g, '\n'),
               level,
