@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function getFlags() {
-  return process.argv.slice(3);
-}
+import * as chromium from './chromium';
+
+export type BrowserType = keyof typeof BROWSERS_BY_TYPE;
+
+export const BROWSERS_BY_TYPE = {
+  chromium,
+};

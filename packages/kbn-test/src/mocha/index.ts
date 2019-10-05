@@ -17,8 +17,13 @@
  * under the License.
  */
 
+// @ts-ignore not typed yet
 export { createAutoJUnitReporter } from './auto_junit_reporter';
+// @ts-ignore not typed yet
 export { setupJUnitReportGeneration } from './junit_report_generation';
+// @ts-ignore not typed yet
 export { runMochaCli } from './run_mocha_cli';
+// @ts-ignore not typed yet
 export { recordLog, snapshotLogsForRunnable } from './log_cache';
+// @ts-ignore not typed yet
 export { escapeCdata } from './xml';
