@@ -250,6 +250,9 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
             "i18n": Object {
               "Context": [MockFunction],
             },
+            "injectedMetadata": Object {
+              "getInjectedVar": [MockFunction],
+            },
             "notifications": Object {
               "toasts": Object {
                 "add": [MockFunction],
@@ -792,6 +795,9 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                     "i18n": Object {
                       "Context": [MockFunction],
                     },
+                    "injectedMetadata": Object {
+                      "getInjectedVar": [MockFunction],
+                    },
                     "notifications": Object {
                       "toasts": Object {
                         "add": [MockFunction],
@@ -1321,6 +1327,9 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
             },
             "i18n": Object {
               "Context": [MockFunction],
+            },
+            "injectedMetadata": Object {
+              "getInjectedVar": [MockFunction],
             },
             "notifications": Object {
               "toasts": Object {
@@ -1861,6 +1870,9 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                     "i18n": Object {
                       "Context": [MockFunction],
                     },
+                    "injectedMetadata": Object {
+                      "getInjectedVar": [MockFunction],
+                    },
                     "notifications": Object {
                       "toasts": Object {
                         "add": [MockFunction],
@@ -2390,6 +2402,9 @@ exports[`QueryBarInput Should render the given query 1`] = `
             },
             "i18n": Object {
               "Context": [MockFunction],
+            },
+            "injectedMetadata": Object {
+              "getInjectedVar": [MockFunction],
             },
             "notifications": Object {
               "toasts": Object {
@@ -2929,6 +2944,9 @@ exports[`QueryBarInput Should render the given query 1`] = `
                     },
                     "i18n": Object {
                       "Context": [MockFunction],
+                    },
+                    "injectedMetadata": Object {
+                      "getInjectedVar": [MockFunction],
                     },
                     "notifications": Object {
                       "toasts": Object {
