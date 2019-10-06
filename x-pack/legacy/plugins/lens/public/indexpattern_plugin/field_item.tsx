@@ -20,6 +20,7 @@ import {
   EuiPopoverTitle,
   EuiIconTip,
 } from '@elastic/eui';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import {
   Chart,
   Axis,
@@ -210,6 +211,9 @@ export function FieldItem(props: FieldItemProps) {
 function FieldItemPopoverContents(props: State & FieldItemProps) {
   const { histogram, topValues, indexPattern, field, dateRange, core, sampledValues } = props;
 
+  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+  const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
+
   if (props.isLoading) {
     return <EuiLoadingSpinner />;
   } else if (
@@ -371,7 +375,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: 300 - 32 }}>
           <Settings
             tooltip={{ type: TooltipType.None }}
-            theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
+            theme={chartTheme}
             xDomain={
               fromDate && toDate
                 ? {
@@ -409,11 +413,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     } else if (showingHistogram || !topValues || !topValues.buckets.length) {
       return wrapInPopover(
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: '100%' }}>
-          <Settings
-            rotation={90}
-            tooltip={{ type: TooltipType.None }}
-            theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
-          />
+          <Settings rotation={90} tooltip={{ type: TooltipType.None }} theme={chartTheme} />
 
           <Axis
             id={getAxisId('key')}
