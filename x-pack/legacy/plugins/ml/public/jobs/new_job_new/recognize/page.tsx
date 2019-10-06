@@ -23,15 +23,10 @@ import {
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiFieldText,
-  EuiListGroupItem,
-  EuiListGroup,
   EuiCheckbox,
   EuiAccordion,
   EuiButton,
-  EuiLoadingSpinner,
-  EuiIcon,
   EuiTextAlign,
-  EuiBadge,
 } from '@elastic/eui';
 // @ts-ignore
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -53,13 +48,15 @@ import { getTimeFilterRange } from '../../../components/full_time_range_selector
 import { JobGroupsInput } from '../pages/components/job_details_step/components/groups/job_groups_input';
 import { mlJobService } from '../../../services/job_service';
 import { CreateResultCallout } from './components/create_result_callout';
-
-type KibanaObjectUi = KibanaObject & KibanaObjectResponse;
+import { KibanaObjects } from './components/kibana_objects';
+import { ModuleJobs } from './components/module_jobs';
 
 interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
   setupResult?: JobResponse;
 }
+
+export type KibanaObjectUi = KibanaObject & KibanaObjectResponse;
 
 export interface KibanaObjects {
   [objectType: string]: KibanaObjectUi[];
@@ -80,17 +77,6 @@ export enum SAVE_STATE {
 
 export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
   const { from, to } = getTimeFilterRange();
-  const kibanaObjectLabels: { [key: string]: string } = {
-    dashboard: i18n.translate('xpack.ml.newJob.simple.recognize.dashboardsLabel', {
-      defaultMessage: 'Dashboards',
-    }),
-    search: i18n.translate('xpack.ml.newJob.simple.recognize.searchesLabel', {
-      defaultMessage: 'Searches',
-    }),
-    visualization: i18n.translate('xpack.ml.newJob.simple.recognize.visualizationsLabel', {
-      defaultMessage: 'Visualizations',
-    }),
-  };
 
   // region State
   const [jobPrefix, setJobPrefix] = useState<string>('');
@@ -145,9 +131,6 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
         useDedicatedIndex,
         startDatafeed: startDatafeedAfterSave,
       });
-      // eslint-disable-next-line no-console
-      console.info(response);
-
       const { datafeeds: datafeedsResponse, jobs: jobsResponse, kibana: kibanaResponse } = response;
 
       setJobs(
@@ -180,8 +163,6 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
       );
     } catch (ex) {
       setSaveState(SAVE_STATE.FAILED);
-      // eslint-disable-next-line no-console
-      console.error(ex);
     }
   };
 
@@ -362,127 +343,22 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel>
-              <EuiTitle size="s">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.ml.newJob.simple.recognize.jobsTitle"
-                    defaultMessage="Jobs"
-                  />
-                </h4>
-              </EuiTitle>
-
-              <EuiListGroup bordered={false} flush={true} wrapText={true} maxWidth={false}>
-                {jobs.map(({ id, config: { description }, setupResult, datafeedResult }) => (
-                  <EuiListGroupItem
-                    key={id}
-                    label={
-                      <EuiFlexGroup alignItems="center" gutterSize="s">
-                        <EuiFlexItem>
-                          <EuiFlexGroup>
-                            <EuiFlexItem grow={false}>
-                              <EuiText size="s" color="secondary">
-                                {jobPrefix}
-                                {id}
-                              </EuiText>
-                            </EuiFlexItem>
-                            <EuiFlexItem>
-                              {setupResult && datafeedResult && (
-                                <EuiFlexGroup gutterSize="none">
-                                  <EuiBadge
-                                    color={setupResult.success ? 'secondary' : 'danger'}
-                                    iconType={setupResult.success ? 'check' : 'cross'}
-                                  >
-                                    <FormattedMessage
-                                      id="xpack.ml.newJob.simple.recognize.jobLabel"
-                                      defaultMessage="Job"
-                                    />
-                                  </EuiBadge>
-                                  <EuiBadge
-                                    color={datafeedResult.success ? 'secondary' : 'danger'}
-                                    iconType={datafeedResult.success ? 'check' : 'cross'}
-                                  >
-                                    <FormattedMessage
-                                      id="xpack.ml.newJob.simple.recognize.datafeedLabel"
-                                      defaultMessage="Datafeed"
-                                    />
-                                  </EuiBadge>
-                                  <EuiBadge
-                                    color={datafeedResult.started ? 'secondary' : 'danger'}
-                                    iconType={datafeedResult.started ? 'check' : 'cross'}
-                                  >
-                                    <FormattedMessage
-                                      id="xpack.ml.newJob.simple.recognize.runningLabel"
-                                      defaultMessage="Running"
-                                    />
-                                  </EuiBadge>
-                                </EuiFlexGroup>
-                              )}
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-
-                          <EuiText size="s" color="subdued">
-                            {description}
-                          </EuiText>
-
-                          {setupResult && setupResult.error && (
-                            <EuiText size="xs" color="danger">
-                              {setupResult.error.msg}
-                            </EuiText>
-                          )}
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          {saveState === SAVE_STATE.SAVING && <EuiLoadingSpinner size="m" />}
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    }
-                  />
-                ))}
-              </EuiListGroup>
+              <ModuleJobs
+                jobs={jobs}
+                jobPrefix={jobPrefix}
+                isSaving={saveState === SAVE_STATE.SAVING}
+              />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
             {Object.keys(kibanaObjects).map((objectType, i) => (
               <Fragment key={objectType}>
                 <EuiPanel>
-                  <EuiTitle size="s">
-                    <h4>{kibanaObjectLabels[objectType]}</h4>
-                  </EuiTitle>
-                  <EuiListGroup bordered={false} flush={true} wrapText={true}>
-                    {Array.isArray(kibanaObjects[objectType]) &&
-                      kibanaObjects[objectType].map(({ id, title, exists, success }) => (
-                        <EuiListGroupItem
-                          key={id}
-                          label={
-                            <EuiFlexGroup alignItems="center" gutterSize="s">
-                              <EuiFlexItem>
-                                {saveState === SAVE_STATE.SAVING ? (
-                                  <EuiLoadingSpinner size="m" />
-                                ) : null}
-                                {success !== undefined ? (
-                                  <EuiIcon
-                                    type={success ? 'check' : 'cross'}
-                                    color={success ? 'success' : 'danger'}
-                                  />
-                                ) : null}
-                              </EuiFlexItem>
-                              <EuiFlexItem>
-                                <EuiText size="s" color="secondary">
-                                  {title}
-                                </EuiText>
-                                {exists && (
-                                  <EuiText size="xs" color="danger">
-                                    <FormattedMessage
-                                      id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
-                                      defaultMessage="(already exists)"
-                                    />
-                                  </EuiText>
-                                )}
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          }
-                        />
-                      ))}
-                  </EuiListGroup>
+                  <KibanaObjects
+                    objectType={objectType}
+                    kibanaObjects={kibanaObjects[objectType]}
+                    isSaving={saveState === SAVE_STATE.SAVING}
+                  />
                 </EuiPanel>
                 {i < Object.keys(kibanaObjects).length - 1 && <EuiSpacer size="s" />}
               </Fragment>
