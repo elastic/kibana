@@ -17,14 +17,36 @@
  * under the License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';
-
-import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { coreMock } from '../../../../../../../core/public/mocks';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 const startMock = coreMock.createStart();
+
+jest.mock('@elastic/eui', () => {
+  // This simplifies rendering and decouples interaction testing from EUI implementation
+  const MockUiComponent = (props: any) => {
+    return props.children || null;
+  };
+  const MockButtonComponent = (props: any) => {
+    const { children, onChange } = props;
+    return <button onClick={onChange}>{children}</button>;
+  };
+
+  return {
+    EuiButtonEmpty: MockUiComponent,
+    EuiForm: MockUiComponent,
+    EuiFormRow: MockUiComponent,
+    EuiLink: MockButtonComponent,
+    EuiPopover: MockUiComponent,
+    EuiPopoverTitle: MockUiComponent,
+    EuiSpacer: MockUiComponent,
+    EuiSwitch: MockButtonComponent,
+    EuiText: MockUiComponent,
+    PopoverAnchorPosition: MockUiComponent,
+  };
+});
 
 describe('LanguageSwitcher', () => {
   function wrapInContext(testProps: any) {
@@ -34,16 +56,14 @@ describe('LanguageSwitcher', () => {
     };
 
     return (
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <QueryLanguageSwitcher {...testProps} />
-        </KibanaContextProvider>
-      </I18nProvider>
+      <KibanaContextProvider services={services}>
+        <QueryLanguageSwitcher {...testProps} />
+      </KibanaContextProvider>
     );
   }
 
   it('should toggle off if language is lucene', () => {
-    const component = shallow(
+    const component = mountWithIntl(
       wrapInContext({
         language: 'lucene',
         onSelectLanguage: () => {
@@ -56,7 +76,7 @@ describe('LanguageSwitcher', () => {
   });
 
   it('should toggle on if language is kuery', () => {
-    const component = shallow(
+    const component = mountWithIntl(
       wrapInContext({
         language: 'kuery',
         onSelectLanguage: () => {
@@ -70,13 +90,14 @@ describe('LanguageSwitcher', () => {
 
   it('call onSelectLanguage when the toggle is clicked', () => {
     const callback = jest.fn();
-    const component = shallow(
+    const component = mountWithIntl(
       wrapInContext({
         language: 'kuery',
         onSelectLanguage: callback,
       })
     );
-    component.find(QueryLanguageSwitcher).simulate('change');
+
+    component.find('[data-test-subj="languageToggle"]').simulate('click');
     expect(callback).toHaveBeenCalledTimes(1);
   });
 });
