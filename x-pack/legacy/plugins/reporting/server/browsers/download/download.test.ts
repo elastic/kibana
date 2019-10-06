@@ -7,6 +7,7 @@
 import { createHash } from 'crypto';
 import { resolve as resolvePath } from 'path';
 import { readFileSync } from 'fs';
+import { Readable } from 'stream';
 
 import del from 'del';
 import { download } from './download';
@@ -14,41 +15,27 @@ import { download } from './download';
 const TEMP_DIR = resolvePath(__dirname, '__tmp__');
 const TEMP_FILE = resolvePath(TEMP_DIR, 'foo/bar/download');
 
-jest.mock('request', () => {
-  let resp = '';
-  const sinon = require('sinon');
-  const Readable = require('stream').Readable;
-  const request = sinon.spy(function () {
-    return new Readable({
-      read() {
-        if (resp instanceof Error) {
-          this.emit('error', resp);
-          return;
-        }
+class ReadableOf extends Readable {
+  constructor(private readonly responseBody: string) {
+    super();
+  }
 
-        this.push(resp.shift());
+  _read() {
+    this.push(this.responseBody);
+    this.push(null);
+  }
+}
 
-        if (resp.length === 0) {
-          this.push(null);
-        }
-      }
-    });
-  });
-
-  request._setResponse = (chunks) => {
-    if (typeof chunks === 'string') {
-      chunks = chunks.split('');
-    }
-
-    resp = chunks;
-  };
-
-  return request;
-});
+jest.mock('axios');
+const request: jest.Mock = jest.requireMock('axios').request;
 
 test('downloads the url to the path', async () => {
   const BODY = 'abdcefg';
-  require('request')._setResponse(BODY);
+  request.mockImplementationOnce(async () => {
+    return {
+      data: new ReadableOf(BODY),
+    };
+  });
 
   await download('url', TEMP_FILE);
   expect(readFileSync(TEMP_FILE, 'utf8')).toEqual(BODY);
@@ -56,18 +43,25 @@ test('downloads the url to the path', async () => {
 
 test('returns the md5 hex hash of the http body', async () => {
   const BODY = 'foobar';
-  const HASH = createHash('md5').update(BODY).digest('hex');
-  require('request')._setResponse(BODY);
+  const HASH = createHash('md5')
+    .update(BODY)
+    .digest('hex');
+  request.mockImplementationOnce(async () => {
+    return {
+      data: new ReadableOf(BODY),
+    };
+  });
 
   const returned = await download('url', TEMP_FILE);
   expect(returned).toEqual(HASH);
 });
 
 test('throws if request emits an error', async () => {
-  require('request')._setResponse(new Error('foo'));
+  request.mockImplementationOnce(async () => {
+    throw new Error('foo');
+  });
+
   return expect(download('url', TEMP_FILE)).rejects.toThrow('foo');
 });
 
-afterEach(async () => (
-  await del(TEMP_DIR)
-));
+afterEach(async () => await del(TEMP_DIR));
