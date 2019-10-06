@@ -14250,10 +14250,10 @@ gulp-cli@^2.2.0:
     v8flags "^3.0.1"
     yargs "^7.1.0"
 
-gulp-mocha@^7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/gulp-mocha/-/gulp-mocha-7.0.1.tgz#cd29f2fc214a8c08c7d96bf13927d539385a856d"
-  integrity sha512-LYBEWdOw52kvP+si91iR00LYX9iKXLTBjcKh9b3ChHvVmKtpoITjeRFslPEzDubEk+z6VI1ONEwn9ABqW9/tig==
+gulp-mocha@^7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/gulp-mocha/-/gulp-mocha-7.0.2.tgz#c7e13d133b3fde96d777e877f90b46225255e408"
+  integrity sha512-ZXBGN60TXYnFhttr19mfZBOtlHYGx9SvCSc+Kr/m2cMIGloUe176HBPwvPqlakPuQgeTGVRS47NmcdZUereKMQ==
   dependencies:
     dargs "^7.0.0"
     execa "^2.0.4"
@@ -14291,10 +14291,10 @@ gulp-sourcemaps@2.6.5:
     strip-bom-string "1.X"
     through2 "2.X"
 
-gulp-zip@5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/gulp-zip/-/gulp-zip-5.0.0.tgz#ba1af3247e7acc4dc01a72a77c568654cfb1dd1f"
-  integrity sha512-oR3t8kn+ccHkSyRcBV5kBLPXrhqTh5d6wBAR7r7wqjNQNBhYvOwPedCwlAaGcNl1qSeXNDn6qOk1Qyxvx9Wrow==
+gulp-zip@5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/gulp-zip/-/gulp-zip-5.0.1.tgz#0dba5094901b0d91bcc8b53b3f6ff797c0f2002d"
+  integrity sha512-M/IWLh9RvOpuofDZkgDirtiyz9J3yIqnDOJ3muzk2D/XnZ1ruqPlPLRIpXnl/aZU+xXwKPdOIxjRzkUcVEQyZQ==
   dependencies:
     get-stream "^5.1.0"
     plugin-error "^1.0.1"
