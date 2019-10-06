@@ -22,14 +22,13 @@ import { notInNodeModulesOrWebpackShims, notInNodeModules, inDllPluginPublic } f
 import { fromRoot } from '../../legacy/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
-import mkdirp from 'mkdirp';
 import webpack from 'webpack';
 import { promisify } from 'util';
 import path from 'path';
 import rimraf from 'rimraf';
 
 const readFileAsync = promisify(fs.readFile);
-const mkdirpAsync = promisify(mkdirp);
+const mkdirAsync = promisify(fs.mkdir);
 const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 const rimrafAsync = promisify(rimraf);
@@ -132,7 +131,7 @@ export class DllCompiler {
     const exists = await existsAsync(filePath);
 
     if (!exists) {
-      await mkdirpAsync(path.dirname(filePath));
+      await mkdirAsync(path.dirname(filePath), { recursive: true });
     }
 
     return exists;
