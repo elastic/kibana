@@ -29,9 +29,10 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
   }) {
     const fields = allFields.filter(field => field.name === fieldName);
     const query = `${prefix}${suffix}`;
+    const { getSuggestions } = npStart.plugins.data;
 
     const suggestionsByField = fields.map(field => {
-      return npStart.data.getSuggestions(field.indexPatternTitle, field, query, boolFilter).then(data => {
+      return getSuggestions(field.indexPatternTitle, field, query, boolFilter).then(data => {
         const quotedValues = data.map(value => typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`);
         return wrapAsSuggestions(start, end, query, quotedValues);
       });

@@ -108,7 +108,6 @@ app.directive('graphApp', function (reactDirective) {
     ['pluginDataStart', { watchDepth: 'reference' }],
     ['store', { watchDepth: 'reference' }],
     ['confirmWipeWorkspace', { watchDepth: 'reference' }],
-    ['autocompleteStart', { watchDepth: 'reference' }],
     ['coreStart', { watchDepth: 'reference' }],
     ['reduxStore', { watchDepth: 'reference' }],
   ]);
@@ -326,7 +325,6 @@ app.controller('graphuiPlugin', function (
   $scope.pluginDataStart = npStart.plugins.data;
   $scope.store = new Storage(window.localStorage);
   $scope.coreStart = npStart.core;
-
   $scope.loading = false;
 
   $scope.spymode = 'request';
