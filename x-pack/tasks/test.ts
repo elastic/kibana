@@ -5,11 +5,12 @@
  */
 
 import pluginHelpers from '@kbn/plugin-helpers';
-import { createAutoJUnitReporter } from '@kbn/test';
 // @ts-ignore no types available
 import mocha from 'gulp-mocha';
 import gulp from 'gulp';
 
+// @ts-ignore untyped, converted in a different location in master
+import { createAutoJUnitReporter } from '../../src/dev/mocha';
 import { getEnabledPlugins } from './helpers/flags';
 
 export const testServerTask = async () => {
