@@ -107,6 +107,7 @@ export class DataPlugin
 
     const timefilterService = this.timefilter.setup({
       uiSettings,
+      store: __LEGACY.storage,
     });
     this.setupApi = {
       indexPatterns: indexPatternsService,

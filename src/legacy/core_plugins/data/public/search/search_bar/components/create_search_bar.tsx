@@ -20,8 +20,8 @@
 import React from 'react';
 import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
-import { Storage } from 'ui/storage';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { Storage } from '../../../types';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimefilterSetup } from '../../../timefilter';
 import { FilterManager, SearchBar } from '../../../';
