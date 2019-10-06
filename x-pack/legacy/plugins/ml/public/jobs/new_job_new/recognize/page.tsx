@@ -379,7 +379,7 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
                       <EuiFlexGroup alignItems="center" gutterSize="s">
                         <EuiFlexItem>
                           <EuiFlexGroup>
-                            <EuiFlexItem>
+                            <EuiFlexItem grow={false}>
                               <EuiText size="s" color="secondary">
                                 {jobPrefix}
                                 {id}
@@ -387,7 +387,7 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
                             </EuiFlexItem>
                             <EuiFlexItem>
                               {setupResult && datafeedResult && (
-                                <EuiFlexGroup>
+                                <EuiFlexGroup gutterSize="none">
                                   <EuiBadge
                                     color={setupResult.success ? 'secondary' : 'danger'}
                                     iconType={setupResult.success ? 'check' : 'cross'}
@@ -423,6 +423,12 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
                           <EuiText size="s" color="subdued">
                             {description}
                           </EuiText>
+
+                          {setupResult && setupResult.error && (
+                            <EuiText size="xs" color="danger">
+                              {setupResult.error.msg}
+                            </EuiText>
+                          )}
                         </EuiFlexItem>
                         <EuiFlexItem>
                           {saveState === SAVE_STATE.SAVING && <EuiLoadingSpinner size="m" />}
