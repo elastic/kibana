@@ -105,10 +105,10 @@ app.directive('graphApp', function (reactDirective) {
     ['isLoading', { watchDepth: 'reference' }],
     ['onQuerySubmit', { watchDepth: 'reference' }],
     ['initialQuery', { watchDepth: 'reference' }],
-    ['pluginDataStart', { watchDepth: 'reference' }],
-    ['store', { watchDepth: 'reference' }],
     ['confirmWipeWorkspace', { watchDepth: 'reference' }],
     ['coreStart', { watchDepth: 'reference' }],
+    ['pluginDataStart', { watchDepth: 'reference' }],
+    ['store', { watchDepth: 'reference' }],
     ['reduxStore', { watchDepth: 'reference' }],
   ]);
 });
