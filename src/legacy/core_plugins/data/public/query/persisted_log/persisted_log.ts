@@ -20,9 +20,7 @@
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Storage } from 'ui/storage';
-
-const localStorage = new Storage(window.localStorage);
+import { Storage } from '../../types';
 
 const defaultIsDuplicate = (oldItem: any, newItem: any) => {
   return _.isEqual(oldItem, newItem);
@@ -44,7 +42,7 @@ export class PersistedLog<T = any> {
 
   private update$ = new Rx.BehaviorSubject(undefined);
 
-  constructor(name: string, options: PersistedLogOptions<T> = {}, storage = localStorage) {
+  constructor(name: string, options: PersistedLogOptions<T> = {}, storage: Storage) {
     this.name = name;
     this.maxLength =
       typeof options.maxLength === 'string'
