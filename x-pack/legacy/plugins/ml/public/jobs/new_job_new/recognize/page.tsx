@@ -28,10 +28,10 @@ import {
   EuiCheckbox,
   EuiAccordion,
   EuiButton,
-  EuiLink,
   EuiLoadingSpinner,
   EuiIcon,
   EuiTextAlign,
+  EuiBadge,
 } from '@elastic/eui';
 // @ts-ignore
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -39,7 +39,9 @@ import { merge } from 'lodash';
 import { flatten } from 'lodash';
 import { useKibanaContext } from '../../../contexts/kibana';
 import {
+  DatafeedResponse,
   DataRecognizerConfigResponse,
+  JobResponse,
   KibanaObject,
   KibanaObjectResponse,
   Module,
@@ -53,6 +55,11 @@ import { mlJobService } from '../../../services/job_service';
 import { CreateResultCallout } from './components/create_result_callout';
 
 type KibanaObjectUi = KibanaObject & KibanaObjectResponse;
+
+interface ModuleJobUI extends ModuleJob {
+  datafeedResult?: DatafeedResponse;
+  setupResult?: JobResponse;
+}
 
 export interface KibanaObjects {
   [objectType: string]: KibanaObjectUi[];
@@ -97,7 +104,7 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
   const [jobGroups, setJobGroups] = useState<string[]>([
     ...new Set(flatten(module.jobs.map(({ config: { groups = [] } }) => groups))),
   ]);
-  const [jobs, setJobs] = useState<ModuleJob[]>(module.jobs);
+  const [jobs, setJobs] = useState<ModuleJobUI[]>(module.jobs);
   const [kibanaObjects, setKibanaObjects] = useState<KibanaObjects>(module.kibana as KibanaObjects);
   const [saveState, setSaveState] = useState<SAVE_STATE>(SAVE_STATE.NOT_SAVED);
   const [resultsUrl, setResultsUrl] = useState<string>('');
@@ -138,15 +145,39 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
         useDedicatedIndex,
         startDatafeed: startDatafeedAfterSave,
       });
-      setSaveState(SAVE_STATE.SAVED);
       // eslint-disable-next-line no-console
       console.info(response);
 
       const { datafeeds: datafeedsResponse, jobs: jobsResponse, kibana: kibanaResponse } = response;
 
+      setJobs(
+        jobs.map(job => {
+          return {
+            ...job,
+            datafeedResult: datafeedsResponse.find(({ id }) => id.endsWith(job.id)),
+            setupResult: jobsResponse.find(({ id }) => id === job.id),
+          };
+        })
+      );
       setKibanaObjects(merge(kibanaObjects, kibanaResponse));
-
-      setResultsUrl(mlJobService.createResultsUrl([], timeRange.start, timeRange.end, 'explorer'));
+      setResultsUrl(
+        mlJobService.createResultsUrl(
+          jobsResponse.filter(({ success }) => success).map(({ id }) => id),
+          timeRange.start,
+          timeRange.end,
+          'explorer'
+        )
+      );
+      const failedJobsCount = jobsResponse.reduce((count, { success }) => {
+        return success ? count : count + 1;
+      }, 0);
+      setSaveState(
+        failedJobsCount === 0
+          ? SAVE_STATE.SAVED
+          : failedJobsCount === jobs.length
+          ? SAVE_STATE.FAILED
+          : SAVE_STATE.PARTIAL_FAILURE
+      );
     } catch (ex) {
       setSaveState(SAVE_STATE.FAILED);
       // eslint-disable-next-line no-console
@@ -341,22 +372,60 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
               </EuiTitle>
 
               <EuiListGroup bordered={false} flush={true} wrapText={true} maxWidth={false}>
-                {jobs.map(({ id, config: { description } }) => (
+                {jobs.map(({ id, config: { description }, setupResult, datafeedResult }) => (
                   <EuiListGroupItem
                     key={id}
                     label={
                       <EuiFlexGroup alignItems="center" gutterSize="s">
                         <EuiFlexItem>
-                          {saveState === SAVE_STATE.SAVING && <EuiLoadingSpinner size="m" />}
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s" color="secondary">
-                            {jobPrefix}
-                            {id}
-                          </EuiText>
+                          <EuiFlexGroup>
+                            <EuiFlexItem>
+                              <EuiText size="s" color="secondary">
+                                {jobPrefix}
+                                {id}
+                              </EuiText>
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              {setupResult && datafeedResult && (
+                                <EuiFlexGroup>
+                                  <EuiBadge
+                                    color={setupResult.success ? 'secondary' : 'danger'}
+                                    iconType={setupResult.success ? 'check' : 'cross'}
+                                  >
+                                    <FormattedMessage
+                                      id="xpack.ml.newJob.simple.recognize.jobLabel"
+                                      defaultMessage="Job"
+                                    />
+                                  </EuiBadge>
+                                  <EuiBadge
+                                    color={datafeedResult.success ? 'secondary' : 'danger'}
+                                    iconType={datafeedResult.success ? 'check' : 'cross'}
+                                  >
+                                    <FormattedMessage
+                                      id="xpack.ml.newJob.simple.recognize.datafeedLabel"
+                                      defaultMessage="Datafeed"
+                                    />
+                                  </EuiBadge>
+                                  <EuiBadge
+                                    color={datafeedResult.started ? 'secondary' : 'danger'}
+                                    iconType={datafeedResult.started ? 'check' : 'cross'}
+                                  >
+                                    <FormattedMessage
+                                      id="xpack.ml.newJob.simple.recognize.runningLabel"
+                                      defaultMessage="Running"
+                                    />
+                                  </EuiBadge>
+                                </EuiFlexGroup>
+                              )}
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+
                           <EuiText size="s" color="subdued">
                             {description}
                           </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          {saveState === SAVE_STATE.SAVING && <EuiLoadingSpinner size="m" />}
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     }

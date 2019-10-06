@@ -64,7 +64,7 @@ export interface DatafeedResponse {
   error?: SetupError;
 }
 
-export interface JobdResponse {
+export interface JobResponse {
   id: string;
   success: boolean;
   error?: SetupError;
@@ -72,7 +72,7 @@ export interface JobdResponse {
 
 export interface DataRecognizerConfigResponse {
   datafeeds: DatafeedResponse[];
-  jobs: JobdResponse[];
+  jobs: JobResponse[];
   kibana: {
     search: KibanaObjectResponse;
     visualization: KibanaObjectResponse;
