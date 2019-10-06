@@ -185,13 +185,17 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
     method: 'POST',
     async handler(req: RequestFacade) {
       const reqs: StackTraceSnippetsRequest[] = (req.payload as any).requests;
+      const scopes = new Set(
+        await getReferenceHelper(req.getSavedObjectsClient()).findReferences()
+      );
       return await Promise.all(
         reqs.map((stacktraceReq: StackTraceSnippetsRequest) => {
           const integClient = new IntegrationsSearchClient(new EsClientWithRequest(req), log);
           return Promise.all(
             stacktraceReq.stacktraceItems.map((stacktrace: StackTraceItem) => {
+              const repoUris = stacktraceReq.repoUris.filter(uri => scopes.has(uri));
               const integrationReq: ResolveSnippetsRequest = {
-                repoUris: stacktraceReq.repoUris,
+                repoUris,
                 revision: stacktraceReq.revision,
                 filePath: stacktrace.filePath,
                 lineNumStart: stacktrace.lineNumStart,
