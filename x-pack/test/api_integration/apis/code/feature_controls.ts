@@ -12,7 +12,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const supertest = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
   const spaces: SpacesService = getService('spaces');
-  const log = getService('log');
 
   const expect404 = (result: any) => {
     expect(result.error).to.be(undefined);
