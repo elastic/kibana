@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { kfetch } from 'ui/kfetch';
-import { getSuggestionsProvider } from './value_suggestions';
+// Should be import { Field } from './index_patterns';
+export type Field = any;
 
-export const getSuggestions = getSuggestionsProvider(chrome.getUiSettingsClient(), kfetch);
+export type IGetSuggestions = (index: string, field: Field, query: string, boolFilter?: any) => any;

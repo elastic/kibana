@@ -17,6 +17,4 @@
  * under the License.
  */
 
-import { npStart } from '../new_platform';
-
-export const recentlyAccessed = npStart.core.chrome.recentlyAccessed;
+export { getSuggestionsProvider } from './value_suggestions';
