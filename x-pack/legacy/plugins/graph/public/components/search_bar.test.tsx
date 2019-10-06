@@ -17,6 +17,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 jest.mock('ui/new_platform');
 
 import { openSourceModal } from '../services/source_modal';
+
 import { GraphStore, setDatasource } from '../state_management';
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
@@ -89,6 +90,7 @@ describe('search_bar', () => {
   function mountSearchBar() {
     jest.clearAllMocks();
     const wrappedSearchBar = wrapSearchBarInContext({ ...defaultProps });
+
     instance = mountWithIntl(<Provider store={store}>{wrappedSearchBar}</Provider>);
   }
 

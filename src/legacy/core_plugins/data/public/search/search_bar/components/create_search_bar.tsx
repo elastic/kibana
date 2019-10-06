@@ -20,7 +20,7 @@
 import React from 'react';
 import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
-import { AutocompletePublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Storage } from '../../../types';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimefilterSetup } from '../../../timefilter';
@@ -29,10 +29,10 @@ import { SearchBarOwnProps } from '.';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
+  data: DataPublicPluginStart;
   store: Storage;
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
-  autocomplete: AutocompletePublicPluginStart;
 }
 
 export type StatetfulSearchBarProps = SearchBarOwnProps & {
@@ -59,7 +59,7 @@ export function createSearchBar({
   store,
   timefilter,
   filterManager,
-  autocomplete,
+  data,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -71,7 +71,7 @@ export function createSearchBar({
       <KibanaContextProvider
         services={{
           appName: props.appName,
-          autocomplete,
+          data,
           store,
           ...core,
         }}
