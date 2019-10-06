@@ -47,6 +47,7 @@ export {
   FilterManager,
   FilterStateManager,
   uniqFilters,
+  extractTimeFilter,
   onlyDisabledFiltersChanged,
 } from './filter/filter_manager';
 export {

@@ -53,7 +53,8 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
-import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+import { extractTimeFilter } from '../../../../data/public';
+import { start as data } from '../../../../data/public/legacy';
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
@@ -343,7 +344,9 @@ function VisEditor(
   };
 
   $scope.onApplyFilters = filters => {
-    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    const { timeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
+    queryFilter.setFilters(restOfFilters);
+    timefilter.setTime(timeFilter);
     $scope.state.$newFilters = [];
   };
 

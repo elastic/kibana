@@ -72,7 +72,8 @@ import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/buil
 import 'ui/capabilities/route_setup';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 
-import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+import { extractTimeFilter } from '../../../../data/public';
+import { setup as data } from '../../../../data/public/legacy';
 import { npStart } from 'ui/new_platform';
 
 const { savedQueryService } = data.search.services;
@@ -423,7 +424,10 @@ function discoverController(
   };
 
   $scope.applyFilters = filters => {
-    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    const { timeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
+    queryFilter.setFilters(restOfFilters);
+    timefilter.setTime(timeFilter);
+
     $scope.state.$newFilters = [];
   };
 

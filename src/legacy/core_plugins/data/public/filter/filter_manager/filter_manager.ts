@@ -189,15 +189,6 @@ export class FilterManager {
     await this.setFilters([]);
   }
 
-  public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
-    const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
-
-    if (isRangeFilter(timeFilter)) {
-      changeTimeFilter(this.timefilter, timeFilter);
-    }
-    return this.addFilters(filters.filter(filter => filter !== timeFilter));
-  }
-
   public static setFiltersStore(filters: Filter[], store: FilterStateStore) {
     _.map(filters, (filter: Filter) => {
       // Override status only for filters that didn't have state in the first place.

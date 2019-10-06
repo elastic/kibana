@@ -694,12 +694,4 @@ describe('filter_manager', () => {
       expect(updateStub).toBeCalledTimes(1);
     });
   });
-
-  describe('addFiltersAndChangeTimeFilter', () => {
-    test('should just add filters if there is no time filter in array', async () => {
-      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      await filterManager.addFiltersAndChangeTimeFilter([f1]);
-      expect(filterManager.getFilters()).toHaveLength(1);
-    });
-  });
 });
