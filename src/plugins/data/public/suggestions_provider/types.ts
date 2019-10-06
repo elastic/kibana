@@ -17,22 +17,7 @@
  * under the License.
  */
 
-import { UiSettingsClientContract, CoreStart } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+// Should be import { Field } from './index_patterns';
+export type Field = any;
 
-export interface Storage {
-  get: (key: string) => any;
-  set: (key: string, value: any) => void;
-  remove: (key: string) => any;
-  clear: () => void;
-}
-
-export interface IDataPluginServices extends Partial<CoreStart> {
-  appName: string;
-  uiSettings: UiSettingsClientContract;
-  savedObjects: CoreStart['savedObjects'];
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-  store: Storage;
-  data: DataPublicPluginStart;
-}
+export type IGetSuggestions = (index: string, field: Field, query: string, boolFilter?: any) => any;
