@@ -96,7 +96,7 @@ describe('Users Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('NameClick to sort in ascending order');
+      ).toEqual('UserClick to sort in ascending order');
     });
   });
 });

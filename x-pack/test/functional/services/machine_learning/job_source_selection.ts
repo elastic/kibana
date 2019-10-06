@@ -11,8 +11,7 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
 
   return {
     async selectSourceIndexPattern(indexPattern: string) {
-      const subj = 'paginatedListItem-' + indexPattern;
-      await testSubjects.clickWhenNotDisabled(subj);
+      await testSubjects.clickWhenNotDisabled(`savedObjectTitle${indexPattern}`);
       await testSubjects.existOrFail('mlPageJobTypeSelection');
     },
   };
