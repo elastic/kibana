@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { PersistedLog } from './persisted_log';
-export { recentlyAccessed } from './recently_accessed';
+export * from './persisted_log';
