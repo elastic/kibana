@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, FormEvent, useState, Fragment } from 'react';
+import React, { FC, FormEvent, useState, Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -63,7 +63,7 @@ export interface KibanaObjects {
 }
 
 interface PageProps {
-  module: Module;
+  moduleId: string;
   existingGroupIds: string[];
 }
 
@@ -75,7 +75,7 @@ export enum SAVE_STATE {
   PARTIAL_FAILURE = 'PARTIAL_FAILURE',
 }
 
-export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
+export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const { from, to } = getTimeFilterRange();
 
   // region State
@@ -87,11 +87,9 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
     end: to,
   });
   const [useDedicatedIndex, setUseDedicatedIndex] = useState<boolean>(false);
-  const [jobGroups, setJobGroups] = useState<string[]>([
-    ...new Set(flatten(module.jobs.map(({ config: { groups = [] } }) => groups))),
-  ]);
-  const [jobs, setJobs] = useState<ModuleJobUI[]>(module.jobs);
-  const [kibanaObjects, setKibanaObjects] = useState<KibanaObjects>(module.kibana as KibanaObjects);
+  const [jobGroups, setJobGroups] = useState<string[]>([]);
+  const [jobs, setJobs] = useState<ModuleJobUI[]>([]);
+  const [kibanaObjects, setKibanaObjects] = useState<KibanaObjects>({} as KibanaObjects);
   const [saveState, setSaveState] = useState<SAVE_STATE>(SAVE_STATE.NOT_SAVED);
   const [resultsUrl, setResultsUrl] = useState<string>('');
   // endregion
@@ -117,6 +115,25 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
         });
   const displayQueryWarning = savedSearch.id !== undefined;
   const tempQuery = savedSearch.id === undefined ? undefined : combinedQuery;
+
+  const loadModule = async () => {
+    try {
+      const response: Module = await ml.getDataRecognizerModule({ moduleId });
+      setJobs(response.jobs);
+      setKibanaObjects(response.kibana as KibanaObjects);
+      setJobGroups([
+        ...new Set(flatten(response.jobs.map(({ config: { groups = [] } }) => groups))),
+      ]);
+      setSaveState(SAVE_STATE.NOT_SAVED);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    loadModule();
+  }, []);
 
   const save = async (event: FormEvent) => {
     event.preventDefault();
@@ -338,7 +355,11 @@ export const Page: FC<PageProps> = ({ module, existingGroupIds }) => {
                   </EuiTextAlign>
                 </form>
               )}
-              <CreateResultCallout saveState={saveState} resultsUrl={resultsUrl} />
+              <CreateResultCallout
+                saveState={saveState}
+                resultsUrl={resultsUrl}
+                onReset={loadModule}
+              />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>

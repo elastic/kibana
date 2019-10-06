@@ -13,10 +13,11 @@ import { SAVE_STATE } from '../page';
 interface CreateResultCalloutProps {
   saveState: SAVE_STATE;
   resultsUrl: string;
+  onReset: () => {};
 }
 
 export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
-  ({ saveState, resultsUrl }) => {
+  ({ saveState, resultsUrl, onReset }) => {
     return (
       <>
         {saveState === SAVE_STATE.SAVED && (
@@ -48,6 +49,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
                 'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
                 { defaultMessage: 'Reset' }
               )}
+              onClick={onReset}
             >
               <FormattedMessage
                 id="xpack.ml.newJob.simple.recognize.jobsCreationFailed.resetButtonLabel"
@@ -73,6 +75,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
                 'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
                 { defaultMessage: 'Reset' }
               )}
+              onClick={onReset}
             >
               <FormattedMessage
                 id="xpack.ml.newJob.simple.recognize.someJobsCreationFailed.resetButtonLabel"

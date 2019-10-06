@@ -37,7 +37,7 @@ module.directive('mlRecognizePage', ($injector: InjectorService) => {
       const Private = $injector.get<IPrivate>('Private');
       const $route = $injector.get<any>('$route');
 
-      const recognizeModule = $route.current.locals.module;
+      const moduleId = $route.current.params.id;
       const existingGroupIds: string[] = $route.current.locals.existingJobsAndGroups.groupIds;
 
       const createSearchItems = Private(SearchItemsProvider);
@@ -54,7 +54,7 @@ module.directive('mlRecognizePage', ($injector: InjectorService) => {
       ReactDOM.render(
         <I18nContext>
           <KibanaContext.Provider value={kibanaContext}>
-            {React.createElement(Page, { module: recognizeModule, existingGroupIds })}
+            {React.createElement(Page, { moduleId, existingGroupIds })}
           </KibanaContext.Provider>
         </I18nContext>,
         element[0]
