@@ -230,7 +230,7 @@ describe('Lens App', () => {
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(args.data.indexPatterns.indexPatterns.get).toHaveBeenCalledWith('1');
+      expect(args.dataShim.indexPatterns.indexPatterns.get).toHaveBeenCalledWith('1');
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
@@ -498,7 +498,7 @@ describe('Lens App', () => {
 
       const instance = mount(<App {...args} />);
 
-      args.data.filter.filterManager.setFilters([
+      args.dataShim.filter.filterManager.setFilters([
         buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
 
@@ -629,7 +629,7 @@ describe('Lens App', () => {
         query: { query: 'new', language: 'lucene' },
       });
 
-      args.data.filter.filterManager.setFilters([
+      args.dataShim.filter.filterManager.setFilters([
         buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
       instance.update();
