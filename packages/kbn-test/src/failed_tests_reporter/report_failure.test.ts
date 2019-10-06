@@ -72,13 +72,7 @@ describe('createFailureIssue()', () => {
     `);
     expect(writer.messages).toMatchInlineSnapshot(`
       Array [
-        Object {
-          "args": Array [
-            "Created issue undefined",
-          ],
-          "indent": 0,
-          "type": "info",
-        },
+        " [34minfo[39m Created issue undefined",
       ]
     `);
   });
@@ -145,13 +139,7 @@ describe('updatedFailureIssue()', () => {
     `);
     expect(writer.messages).toMatchInlineSnapshot(`
       Array [
-        Object {
-          "args": Array [
-            "Updated issue https://github.com/issues/1234, failCount: 11",
-          ],
-          "indent": 0,
-          "type": "info",
-        },
+        " [34minfo[39m Updated issue https://github.com/issues/1234, failCount: 11",
       ]
     `);
   });

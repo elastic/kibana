@@ -17,16 +17,20 @@
  * under the License.
  */
 
-import { Writer } from './writer';
-import { Message } from './message';
+import { ToolingLogTextWriter } from './tooling_log_text_writer';
 
-export class ToolingLogCollectingWriter implements Writer {
-  messages: Message[] = [];
+export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
+  messages: string[] = [];
 
-  constructor() {}
-
-  write(message: Message) {
-    this.messages.push(message);
-    return true;
+  constructor() {
+    super({
+      level: 'verbose',
+      writeTo: {
+        write: msg => {
+          // trim trailing new line
+          this.messages.push(msg.slice(0, -1));
+        },
+      },
+    });
   }
 }
