@@ -34,12 +34,12 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
     <>
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
-          <h2>
+          <h3>
             <FormattedMessage
               id="kbnVislibVisTypes.editors.pointSeries.settingsTitle"
               defaultMessage="Settings"
             />
-          </h2>
+          </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
 

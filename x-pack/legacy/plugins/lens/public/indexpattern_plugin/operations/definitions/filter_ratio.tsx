@@ -18,7 +18,7 @@ import { OperationDefinition } from '.';
 import { BaseIndexPatternColumn } from './column_types';
 
 const filterRatioLabel = i18n.translate('xpack.lens.indexPattern.filterRatio', {
-  defaultMessage: 'Filter Ratio',
+  defaultMessage: 'Filter ratio',
 });
 
 export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
@@ -35,7 +35,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   type: 'filter_ratio',
   priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.filterRatio', {
-    defaultMessage: 'Filter Ratio',
+    defaultMessage: 'Filter ratio',
   }),
   getPossibleOperationForDocument: () => {
     return {

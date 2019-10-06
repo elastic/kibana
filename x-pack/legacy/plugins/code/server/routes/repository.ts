@@ -25,7 +25,8 @@ export function repositoryRoute(
   codeServices: CodeServices,
   repoIndexInitializerFactory: RepositoryIndexInitializerFactory,
   repoConfigController: RepositoryConfigController,
-  options: ServerOptions
+  options: ServerOptions,
+  log: Logger
 ) {
   const repositoryService = codeServices.serviceFor(RepositoryServiceDefinition);
   // Clone a git repository
@@ -35,7 +36,6 @@ export function repositoryRoute(
     method: 'POST',
     async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       const repoUrl: string = (req.payload as any).url;
-      const log = new Logger(req.server);
 
       // Reject the request if the url is an invalid git url.
       try {
@@ -104,7 +104,6 @@ export function repositoryRoute(
     method: 'DELETE',
     async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       const repoUri: string = req.params.uri as string;
-      const log = new Logger(req.server);
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
         // Check if the repository already exists. If not, an error will be thrown.
@@ -146,7 +145,6 @@ export function repositoryRoute(
     method: 'GET',
     async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
-      const log = new Logger(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepository(repoUri);
@@ -164,7 +162,6 @@ export function repositoryRoute(
     method: 'GET',
     async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
-      const log = new Logger(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         let gitStatus = null;
@@ -206,7 +203,6 @@ export function repositoryRoute(
     path: '/api/code/repos',
     method: 'GET',
     async handler(req: RequestFacade) {
-      const log = new Logger(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getAllRepositories();
@@ -228,7 +224,6 @@ export function repositoryRoute(
     requireAdmin: true,
     async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
-      const log = new Logger(req.server);
       const reindex: boolean = (req.payload as any).reindex;
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
@@ -259,7 +254,6 @@ export function repositoryRoute(
     async handler(req: RequestFacade) {
       const config: RepositoryConfig = req.payload as RepositoryConfig;
       const repoUri: RepositoryUri = config.uri;
-      const log = new Logger(req.server);
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
 
       try {
