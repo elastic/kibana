@@ -17,20 +17,28 @@
  * under the License.
  */
 
+// @ts-ignore not typed yet
 export { runTestsCli, startServersCli } from './functional_tests/cli';
 
+// @ts-ignore not typed yet
 export { runTests, startServers } from './functional_tests/tasks';
 
+// @ts-ignore not typed yet
 export { OPTIMIZE_BUNDLE_DIR, KIBANA_ROOT } from './functional_tests/lib/paths';
 
+// @ts-ignore not typed yet
 export { esTestConfig, createEsTestCluster } from './es';
 
+// @ts-ignore not typed yet
 export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';
 
+// @ts-ignore not typed yet
 export { setupUsers, DEFAULT_SUPERUSER_PASS } from './functional_tests/lib/auth';
 
+// @ts-ignore not typed yet
 export { readConfigFile } from './functional_test_runner/lib/config/read_config_file';
 
+// @ts-ignore not typed yet
 export { runFtrCli } from './functional_test_runner/cli';
 
 export {

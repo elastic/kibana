@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export { generateNoticeFromSource } from './generate_notice_from_source';
-export { generateBuildNoticeText } from './generate_build_notice_text';
+export function babelRegister(): void;
+export function resolveKibanaPath(path: string): string;
+export function readFtrConfigFile(path: string): any;
+export function run(
+  task: 'build' | 'start' | 'testAll' | 'testBrowser' | 'testServer' | 'postinstall',
+  options: any
+): Promise<void>;
