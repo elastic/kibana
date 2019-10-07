@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
 
 import { InputsModelId } from '../../../store/inputs/constants';
@@ -12,6 +13,7 @@ import { HostsTableType } from '../../../store/hosts/model';
 import { HostsQueryProps } from '../hosts';
 import { NavTab } from '../../../components/navigation/types';
 import { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
+import { hostsModel } from '../../../store';
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;
@@ -49,3 +51,10 @@ type KeyHostDetailsNavTab =
   | KeyHostDetailsNavTabWithMlPermission;
 
 export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
+
+export type HostDetailsTabsProps = HostDetailsComponentReduxProps &
+  HostDetailsComponentDispatchProps &
+  HostsQueryProps & {
+    indexPattern: StaticIndexPattern;
+    type: hostsModel.HostsType;
+  };

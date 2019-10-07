@@ -84,6 +84,8 @@ describe('Hosts - rendering', () => {
       to: number;
     }>,
     filterQuery: '',
+    kqlQueryExpression: '',
+    hostsPagePath: '',
   };
 
   beforeAll(() => {
