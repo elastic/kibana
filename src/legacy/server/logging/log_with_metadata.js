@@ -19,6 +19,15 @@
 import { isPlainObject } from 'lodash';
 const symbol = Symbol('log message with metadata');
 
+export function attachMetaData(message, metadata = {}) {
+  return {
+    [symbol]: {
+      message,
+      metadata,
+    },
+  };
+}
+
 export const logWithMetadata = {
   isLogEvent(eventData) {
     return Boolean(isPlainObject(eventData) && eventData[symbol]);
@@ -34,12 +43,7 @@ export const logWithMetadata = {
 
   decorateServer(server) {
     server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
-      server.log(tags, {
-        [symbol]: {
-          message,
-          metadata,
-        },
-      });
+      server.log(tags, attachMetaData(message, metadata));
     });
   },
 };
