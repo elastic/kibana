@@ -18,19 +18,24 @@
  */
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FieldNameIcon } from './field_name_icon';
+import { FieldIcon } from './field_icon';
 
-test('FieldNameIcon renders a blackwhite icon for a string', () => {
-  const component = shallow(<FieldNameIcon type="string" label="test" />);
+test('FieldIcon renders a blackwhite icon for a string', () => {
+  const component = shallow(<FieldIcon type="string" />);
   expect(component).toMatchSnapshot();
 });
 
-test('FieldNameIcon renders a colored icon for a number', () => {
-  const component = shallow(<FieldNameIcon type="number" label="test" useColor />);
+test('FieldIcon renders a colored icon for a number', () => {
+  const component = shallow(<FieldIcon type="number" label="test" useColor />);
   expect(component).toMatchSnapshot();
 });
 
-test('FieldNameIcon renders an icon for an unknown type', () => {
-  const component = shallow(<FieldNameIcon type="sdfsdf" label="test" useColor />);
+test('FieldIcon renders an icon for an unknown type', () => {
+  const component = shallow(<FieldIcon type="sdfsdf" label="test" useColor />);
+  expect(component).toMatchSnapshot();
+});
+
+test('FieldIcon renders with className if provided', () => {
+  const component = shallow(<FieldIcon type="sdfsdf" label="test" className="myClass" useColor />);
   expect(component).toMatchSnapshot();
 });
