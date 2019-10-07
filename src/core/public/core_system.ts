@@ -236,6 +236,7 @@ export class CoreSystem {
         notifications,
         overlays,
         uiSettings,
+        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
       }));
 
       const core: InternalCoreStart = {
