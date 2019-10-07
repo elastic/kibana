@@ -19124,7 +19124,8 @@ function generateColors() {
 
 function spawn(command, args, opts) {
   return execa__WEBPACK_IMPORTED_MODULE_1___default()(command, args, _objectSpread({
-    stdio: 'inherit'
+    stdio: 'inherit',
+    preferLocal: true
   }, opts));
 }
 const nextColor = generateColors();
@@ -19132,7 +19133,8 @@ function spawnStreaming(command, args, opts, {
   prefix
 }) {
   const spawned = execa__WEBPACK_IMPORTED_MODULE_1___default()(command, args, _objectSpread({
-    stdio: ['ignore', 'pipe', 'pipe']
+    stdio: ['ignore', 'pipe', 'pipe'],
+    preferLocal: true
   }, opts));
   const color = nextColor();
   const prefixedStdout = strong_log_transformer__WEBPACK_IMPORTED_MODULE_3___default()({
