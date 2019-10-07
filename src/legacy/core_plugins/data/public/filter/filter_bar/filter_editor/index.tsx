@@ -480,16 +480,14 @@ class FilterEditorUI extends Component<Props, State> {
   };
   private renderSavedQueryEditor() {
     return (
-      <div>
-        <EuiFlexGroup responsive={false} gutterSize="s">
-          <EuiFlexItem>
-            <SavedQueryPicker
-              savedQueryService={this.props.savedQueryService}
-              onChange={this.onSavedQuerySelected}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexItem>
+          <SavedQueryPicker
+            savedQueryService={this.props.savedQueryService}
+            onChange={this.onSavedQuerySelected}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

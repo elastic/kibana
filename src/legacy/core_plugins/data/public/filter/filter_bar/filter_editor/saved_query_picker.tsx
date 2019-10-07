@@ -81,8 +81,8 @@ export function SavedQueryPicker({ savedQueryService, onChange }: SavedQueryPick
   };
   return (
     <Fragment>
-      {(!savedQueriesLoaded || !options.length) && <EuiLoadingContent lines={1} />}
-      {savedQueriesLoaded && !options.length && (
+      {!savedQueriesLoaded && <EuiLoadingContent lines={1} />}
+      {!options.length && (
         <EuiText size="s" color="subdued" className="kbnSavedQueryFilterEditor__text">
           <p>
             {i18n.translate('data.filter.filterEditor.savedQueryFilterPicker.noSavedQueriesText', {
