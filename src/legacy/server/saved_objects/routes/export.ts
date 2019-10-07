@@ -41,6 +41,7 @@ interface ExportRequest extends Hapi.Request {
       type: string;
       id: string;
     }>;
+    search?: string;
     includeReferencesDeep: boolean;
   };
 }
@@ -70,9 +71,11 @@ export const createExportRoute = (
             })
             .max(server.config().get('savedObjects.maxImportExportSize'))
             .optional(),
+          search: Joi.string().optional(),
           includeReferencesDeep: Joi.boolean().default(false),
         })
         .xor('type', 'objects')
+        .nand('search', 'objects')
         .default(),
     },
     async handler(request: ExportRequest, h: Hapi.ResponseToolkit) {
@@ -80,6 +83,7 @@ export const createExportRoute = (
       const exportStream = await getSortedObjectsForExport({
         savedObjectsClient,
         types: request.payload.type,
+        search: request.payload.search,
         objects: request.payload.objects,
         exportSizeLimit: server.config().get('savedObjects.maxImportExportSize'),
         includeReferencesDeep: request.payload.includeReferencesDeep,
