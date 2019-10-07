@@ -19,8 +19,7 @@
 
 import { IContextProvider } from 'kibana/public';
 import { ISearchContext } from './i_search_context';
-import { ISearchGeneric } from './i_search';
-import { TRegisterSearchStrategyProvider } from './i_search_strategy';
+import { TRegisterSearchStrategyProvider, TSearchStrategyProvider } from './i_search_strategy';
 
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
@@ -30,7 +29,7 @@ export interface ISearchSetup {
   registerSearchStrategyContext: <TContextName extends keyof ISearchContext>(
     pluginId: symbol,
     contextName: TContextName,
-    provider: IContextProvider<ISearchContext, TContextName, [ISearchGeneric]>
+    provider: IContextProvider<TSearchStrategyProvider<any>, TContextName extends keyof ISearchContext>
   ) => void;
 
   /**

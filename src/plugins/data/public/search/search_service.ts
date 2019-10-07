@@ -69,11 +69,7 @@ export class SearchService implements Plugin<ISearchSetup, void> {
   /**
    * Exposes context to the search strategies.
    */
-  private contextContainer?: IContextContainer<
-    ISearchContext,
-    ISearchStrategy<any>,
-    [ISearchGeneric]
-  >;
+  private contextContainer?: IContextContainer<TSearchStrategyProvider<any>>;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
