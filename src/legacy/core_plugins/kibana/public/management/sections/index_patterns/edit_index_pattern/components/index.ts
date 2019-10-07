@@ -18,3 +18,6 @@
  */
 
 export { IndexHeader } from './index_header';
+export { Badges } from './badges';
+export { GuideText } from './guide_text';
+export { Alerts } from './alerts';

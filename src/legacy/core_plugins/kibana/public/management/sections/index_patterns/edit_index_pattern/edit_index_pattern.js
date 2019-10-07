@@ -35,14 +35,15 @@ import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
-import { IndexHeader } from './components';
+import { EuiSpacer } from '@elastic/eui';
+import { IndexHeader, Badges, GuideText, Alerts } from './components';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
-const REACT_EDIT_INDEX_HEADER = 'reactEditIndexHeader';
+const REACT_EDIT_INDEX_REACT_COMPONENT = 'editIndexReactComponent';
 
 function updateSourceFiltersTable($scope, $state) {
   if ($state.tab === 'sourceFilters') {
@@ -158,9 +159,9 @@ function destroyIndexedFieldsTable() {
   node && unmountComponentAtNode(node);
 }
 
-function updateIndexHeader($scope, config) {
+function updateReactComponent($scope, config) {
   $scope.$$postDigest(() => {
-    const node = document.getElementById(REACT_EDIT_INDEX_HEADER);
+    const node = document.getElementById(REACT_EDIT_INDEX_REACT_COMPONENT);
     if (!node) {
       return;
     }
@@ -174,14 +175,25 @@ function updateIndexHeader($scope, config) {
           refreshFields={$scope.refreshFields}
           removePattern={$scope.removePattern}
         />
+        <EuiSpacer size="s" />
+
+        {$scope.indexPattern.timeFieldName || ($scope.indexPattern.tags && $scope.indexPattern.tags.length) ? (
+          <Badges indexPattern={$scope.indexPattern} />
+        ) : null}
+        <EuiSpacer size="m" />
+
+        <GuideText indexPattern={$scope.indexPattern} />
+        <EuiSpacer size="m" />
+
+        {$scope.conflictFields.length > 0 ? <Alerts conflictFields={$scope.conflictFields} /> : null}
       </I18nContext>,
       node
     );
   });
 }
 
-function destoryIndexHeader() {
-  const node = document.getElementById(REACT_EDIT_INDEX_HEADER);
+function destoryReactComponent() {
+  const node = document.getElementById(REACT_EDIT_INDEX_REACT_COMPONENT);
   node && unmountComponentAtNode(node);
 }
 
@@ -325,7 +337,7 @@ uiModules.get('apps/management')
     };
 
     $scope.$watch('defaultIndex', () => {
-      updateIndexHeader($scope, config);
+      updateReactComponent($scope, config);
     });
 
     $scope.$watch('fieldFilter', () => {
@@ -359,10 +371,10 @@ uiModules.get('apps/management')
     $scope.$on('$destroy', () => {
       destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
-      destoryIndexHeader();
+      destoryReactComponent();
     });
 
-    updateIndexHeader($scope, config);
+    updateReactComponent($scope, config);
     updateScriptedFieldsTable($scope, $state);
     updateSourceFiltersTable($scope, $state);
   });
