@@ -30,7 +30,6 @@ import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './partitioned_filters';
 import { IndexPatterns } from '../../index_patterns';
-import { TimefilterContract } from '../../timefilter';
 
 export class FilterManager {
   private indexPatterns: IndexPatterns;
@@ -38,16 +37,10 @@ export class FilterManager {
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
   private uiSettings: UiSettingsClientContract;
-  private timefilter: TimefilterContract;
 
-  constructor(
-    indexPatterns: IndexPatterns,
-    uiSettings: UiSettingsClientContract,
-    timefilter: TimefilterContract
-  ) {
+  constructor(indexPatterns: IndexPatterns, uiSettings: UiSettingsClientContract) {
     this.indexPatterns = indexPatterns;
     this.uiSettings = uiSettings;
-    this.timefilter = timefilter;
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
