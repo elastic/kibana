@@ -37,13 +37,39 @@ export interface Position {
 }
 
 export interface Range {
-  // TODO: document
+  /**
+   * The start point of the range.
+   */
   start: Position;
-  // TODO: document
+
+  /**
+   * The end point of the range.
+   */
   end: Position;
 }
 
-// TODO: document
+/**
+ * Enumeration of the different states the current position can be in.
+ *
+ * Current implementation uses low-level binary operations OR ('|') and AND ('&') to, respectively:
+ *
+ * - Create a combination of acceptable states.
+ * - Extract the states from the acceptable combination.
+ *
+ * E.g.
+ * ```ts
+ * const acceptableStates = LINE_MODE.REQUEST_START | LINE_MODE.IN_REQUEST; // binary '110'
+ *
+ * // Is MULTI_DOC_CUR_DOC_END ('1000') acceptable?
+ * Boolean(acceptableStates & LINE_MODE.MULTI_DOC_CUR_DOC_END) // false
+ *
+ * // Is REQUEST_START ('10') acceptable?
+ * Boolean(acceptableStates & LINE_MODE.REQUEST_START) // true
+ * ```
+ *
+ * This implementation will probably be changed to something more accessible in future but is documented
+ * here for reference.
+ */
 export enum LINE_MODE {
   REQUEST_START = 2,
   IN_REQUEST = 4,
