@@ -297,6 +297,7 @@ export function createSpatialFilterWithGeometry(options) {
 }
 
 function createGeometryFilterWithMeta({
+  preIndexedShape,
   geometry,
   geometryLabel,
   indexPatternId,
@@ -320,14 +321,21 @@ function createGeometryFilterWithMeta({
   };
 
   if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
+    const shapeQuery = {
+      relation
+    };
+
+    if (preIndexedShape) {
+      shapeQuery.indexed_shape = preIndexedShape;
+    } else {
+      shapeQuery.shape = geometry;
+    }
+
     return {
       meta,
       geo_shape: {
         ignore_unmapped: true,
-        [geoFieldName]: {
-          shape: geometry,
-          relation
-        }
+        [geoFieldName]: shapeQuery
       }
     };
   }

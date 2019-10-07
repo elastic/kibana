@@ -40,6 +40,7 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     autocomplete: autocompleteMock as Start['autocomplete'],
+    getSuggestions: jest.fn(),
   };
   return startContract;
 };

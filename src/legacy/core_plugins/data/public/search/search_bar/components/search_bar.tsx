@@ -66,7 +66,6 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
-  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
   // Show when user has privileges to save

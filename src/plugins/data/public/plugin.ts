@@ -20,8 +20,8 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { AutocompleteProviderRegister } from './autocomplete_provider';
 import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
-import { searchService } from './search';
 import { SearchService } from './search/search_service';
+import { getSuggestionsProvider } from './suggestions_provider';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteProviderRegister();
@@ -41,6 +41,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   public start(core: CoreStart): DataPublicPluginStart {
     return {
       autocomplete: this.autocomplete,
+      getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
     };
   }
 
