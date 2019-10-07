@@ -53,6 +53,12 @@ server    log   [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status chan
 server    log   [22:05:22.270] [info][status][plugin:actions@8.0.0] Status changed from uninitialized to green - Ready
 ```
 
+You should also see the SIEM detect the feature flags and start the API endpoints for signals
+
+```
+server    log   [11:39:05.561] [info][siem] Detected feature flags for actions and alerting and enabling signals API endpoints
+```
+
 Open a terminal and go into the scripts folder `cd kibana/x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts` and run:
 
 ```

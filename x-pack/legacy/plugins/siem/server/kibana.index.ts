@@ -36,7 +36,17 @@ export const initServerWithKibana = (kbnServer: Server) => {
 
   const libs = compose(kbnServer);
   initServer(libs, { mocking, logger });
-  createSignalsRoute(kbnServer);
+  if (
+    kbnServer.config().has('xpack.actions.enabled') &&
+    kbnServer.config().get('xpack.actions.enabled') === true &&
+    kbnServer.config().has('xpack.alerting.enabled') &&
+    kbnServer.config().has('xpack.alerting.enabled') === true
+  ) {
+    logger.info(
+      'Detected feature flags for actions and alerting and enabling signals API endpoints'
+    );
+    createSignalsRoute(kbnServer);
+  }
   logger.info('Plugin done initializing');
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
