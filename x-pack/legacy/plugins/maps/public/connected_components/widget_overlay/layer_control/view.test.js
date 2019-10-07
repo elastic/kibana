@@ -11,7 +11,7 @@ jest.mock('./layer_toc', () => ({
 }));
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 import { LayerControl } from './view';
 
@@ -20,43 +20,75 @@ const defaultProps = {
   closeLayerTOC: () => {},
   openLayerTOC: () => {},
   isLayerTOCOpen: true,
+  layerList: [],
 };
 
 describe('LayerControl', () => {
   test('is rendered', () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <LayerControl
         {...defaultProps}
       />
     );
 
-    expect(component)
-      .toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 
-  describe('props', () => {
-    test('isReadOnly', () => {
-      const component = shallowWithIntl(
-        <LayerControl
-          {...defaultProps}
-          isReadOnly={true}
-        />
-      );
+  test('isReadOnly', () => {
+    const component = shallow(
+      <LayerControl
+        {...defaultProps}
+        isReadOnly={true}
+      />
+    );
 
-      expect(component)
-        .toMatchSnapshot();
-    });
+    expect(component).toMatchSnapshot();
+  });
 
-    test('Should not render LayerTOC when isLayerTOCOpen is false', () => {
-      const component = shallowWithIntl(
+  describe('isLayerTOCOpen', () => {
+
+    test('Should render expand button', () => {
+      const component = shallow(
         <LayerControl
           {...defaultProps}
           isLayerTOCOpen={false}
         />
       );
 
-      expect(component)
-        .toMatchSnapshot();
+      expect(component).toMatchSnapshot();
+    });
+
+    test('Should render expand button with loading icon when layer is loading', () => {
+      const mockLayerThatIsLoading = {
+        hasErrors: () => { return false; },
+        isLayerLoading: () => { return true; }
+      };
+      const component = shallow(
+        <LayerControl
+          {...defaultProps}
+          isLayerTOCOpen={false}
+          layerList={[mockLayerThatIsLoading]}
+        />
+      );
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('Should render expand button with error icon when layer has error', () => {
+      const mockLayerThatHasError = {
+        hasErrors: () => { return true; },
+        isLayerLoading: () => { return false; }
+      };
+      const component = shallow(
+        <LayerControl
+          {...defaultProps}
+          isLayerTOCOpen={false}
+          layerList={[mockLayerThatHasError]}
+        />
+      );
+
+      expect(component).toMatchSnapshot();
     });
   });
+
 });

@@ -97,7 +97,7 @@ describe('metric_suggestions', () => {
     expect(rest).toHaveLength(0);
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
-        "previewIcon": "visMetric",
+        "previewIcon": "test-file-stub",
         "score": 0.5,
         "state": Object {
           "accessor": "bytes",

@@ -22,7 +22,6 @@ import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { useState, useEffect } from 'react';
 import { documentationLinks } from 'ui/documentation_links';
-import { PersistedLog } from 'ui/persisted_log';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
 // @ts-ignore
@@ -34,10 +33,10 @@ import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
-import { getQueryLog } from '../lib/get_query_log';
-import { Query } from '../index';
+import { Query, getQueryLog } from '../index';
 import { TimeHistoryContract } from '../../../timefilter';
 import { IDataPluginServices } from '../../../types';
+import { PersistedLog } from '../../persisted_log';
 
 interface Props {
   query?: Query;
@@ -72,7 +71,7 @@ function QueryBarTopRowUI(props: Props) {
 
   useEffect(() => {
     if (!props.query) return;
-    persistedLog = getQueryLog(uiSettings!, appName, props.query.language);
+    persistedLog = getQueryLog(uiSettings!, store, appName, props.query.language);
   }, [queryLanguage]);
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
