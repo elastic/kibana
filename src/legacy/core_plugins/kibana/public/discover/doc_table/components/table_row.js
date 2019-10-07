@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
-import 'plugins/kibana/doc_viewer';
+import '../../doc_viewer';
 import { noWhiteSpace } from '../../../../common/utils/no_white_space';
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
