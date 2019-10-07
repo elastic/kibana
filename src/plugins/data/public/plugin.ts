@@ -20,6 +20,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { AutocompleteProviderRegister } from './autocomplete_provider';
 import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
+import { searchService } from './search';
 import { SearchService } from './search/search_service';
 import { getSuggestionsProvider } from './suggestions_provider';
 

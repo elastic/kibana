@@ -22,16 +22,13 @@ import {
   Plugin,
   CoreSetup,
   IContextContainer,
-  APICaller,
 } from '../../../../core/server';
 import { registerSearchRoute } from './routes';
 import { ISearchSetup } from './i_search_setup';
-import { ISearchContext } from './i_search_context';
 import { createApi } from './create_api';
-import { ISearchGeneric } from './i_search';
 import {
   TSearchStrategiesMap,
-  ISearchStrategy,
+  TSearchStrategyProvider,
   TRegisterSearchStrategyProvider,
 } from './i_search_strategy';
 import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
@@ -46,11 +43,7 @@ declare module 'kibana/server' {
 export class SearchService implements Plugin<ISearchSetup, void> {
   private searchStrategies: TSearchStrategiesMap = {};
 
-  private contextContainer?: IContextContainer<
-    ISearchContext,
-    ISearchStrategy<any>,
-    [APICaller, ISearchGeneric]
-  >;
+  private contextContainer?: IContextContainer<TSearchStrategyProvider<any>>;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 

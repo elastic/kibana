@@ -20,7 +20,7 @@
 import { IContextProvider, APICaller } from 'kibana/server';
 import { ISearchContext } from './i_search_context';
 import { IResponseTypesMap, IRequestTypesMap } from './i_search';
-import { TRegisterSearchStrategyProvider } from './i_search_strategy';
+import { TRegisterSearchStrategyProvider, TSearchStrategyProvider } from './i_search_strategy';
 import { TStrategyTypes } from './strategy_types';
 import { DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 
@@ -32,7 +32,7 @@ export interface ISearchSetup {
   registerSearchStrategyContext: <TContextName extends keyof ISearchContext>(
     pluginId: symbol,
     strategyName: TContextName,
-    provider: IContextProvider<ISearchContext, TContextName, []>
+    provider: IContextProvider<TSearchStrategyProvider<any>, TContextName>
   ) => void;
 
   /**

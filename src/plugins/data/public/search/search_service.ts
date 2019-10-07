@@ -29,11 +29,8 @@ import { ISearchAppMountContext } from './i_search_app_mount_context';
 import { ISearchSetup } from './i_search_setup';
 import { createAppMountSearchContext } from './create_app_mount_context_search';
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
-import { ISearchContext } from './i_search_context';
-import { ISearchGeneric } from './i_search';
 import {
   TSearchStrategyProvider,
-  ISearchStrategy,
   TRegisterSearchStrategyProvider,
   TSearchStrategiesMap,
 } from './i_search_strategy';

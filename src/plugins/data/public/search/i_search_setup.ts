@@ -29,7 +29,7 @@ export interface ISearchSetup {
   registerSearchStrategyContext: <TContextName extends keyof ISearchContext>(
     pluginId: symbol,
     contextName: TContextName,
-    provider: IContextProvider<TSearchStrategyProvider<any>, TContextName extends keyof ISearchContext>
+    provider: IContextProvider<TSearchStrategyProvider<any>, TContextName>
   ) => void;
 
   /**
