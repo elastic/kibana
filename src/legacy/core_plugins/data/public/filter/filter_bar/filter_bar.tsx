@@ -33,12 +33,13 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 import { UiSettingsClientContract } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
 import { SavedQueryService } from '../../search/search_bar/lib/saved_query_service';
-import { useKibana } from '../../../../../../plugins/kibana_react/public';
+import { useKibana, KibanaContextProvider } from '../../../../../../plugins/kibana_react/public';
 
 interface Props {
   filters: Filter[];
@@ -49,18 +50,46 @@ interface Props {
   savedObjects?: CoreStart['savedObjects'];
   showSaveQuery?: boolean;
   savedQueryService?: SavedQueryService;
-  // Only for directives!
-  uiSettings?: UiSettingsClientContract;
+
+  // TODO: Only for filter-bar directive!
+  uiSettings?: CoreStart['uiSettings'];
+  docLinks?: CoreStart['docLinks'];
+  pluginDataStart?: DataPublicPluginStart;
 }
 
 function FilterBarUI(props: Props) {
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const kibana = useKibana();
-  let { uiSettings } = kibana.services;
 
-  if (!uiSettings) {
-    // Only for directives!
-    uiSettings = props.uiSettings;
+  const uiSettings = kibana.services.uiSettings || props.uiSettings;
+  if (!uiSettings) return null;
+
+  function hasContext() {
+    return Boolean(kibana.services.uiSettings);
+  }
+
+  function wrapInContextIfMissing(content: JSX.Element) {
+    // TODO: Relevant only as long as directives are used!
+    if (!hasContext()) {
+      if (props.docLinks && props.uiSettings && props.pluginDataStart) {
+        return (
+          <KibanaContextProvider
+            services={{
+              uiSettings: props.uiSettings,
+              docLinks: props.docLinks,
+              data: props.pluginDataStart,
+            }}
+          >
+            {content}
+          </KibanaContextProvider>
+        );
+      } else {
+        throw new Error(
+          'Rending filter bar requires providing sufficient context: uiSettings, docLinks and NP data plugin'
+        );
+      }
+    }
+    return content;
   }
 
   function onFiltersUpdated(filters: Filter[]) {
@@ -106,7 +135,7 @@ function FilterBarUI(props: Props) {
       </EuiButtonEmpty>
     );
 
-    return (
+    return wrapInContextIfMissing(
       <EuiFlexItem grow={false}>
         <EuiPopover
           id="addFilterPopover"

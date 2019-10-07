@@ -38,7 +38,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import { UiSettingsClientContract } from 'src/core/public';
+import { UiSettingsClientContract } from 'kibana/public';
 import { Field, IndexPattern } from '../../../index_patterns';
 import { SavedQuery } from '../../../search/search_bar/index';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
@@ -447,7 +447,6 @@ class FilterEditorUI extends Component<Props, State> {
             value={this.state.params}
             onChange={this.onParamsChange}
             data-test-subj="phraseValueInput"
-            uiSettings={this.props.uiSettings}
           />
         );
       case 'phrases':
@@ -457,7 +456,6 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             values={this.state.params}
             onChange={this.onParamsChange}
-            uiSettings={this.props.uiSettings}
           />
         );
       case 'range':
