@@ -25,7 +25,7 @@ import { NumberInputOption, SwitchOption } from '../../common';
 import { YExtents } from './y_extents';
 import { SetScale } from './value_axis_options';
 
-interface CustomExtentsOptionsProps {
+export interface CustomExtentsOptionsProps {
   axis: ValueAxis;
   setMultipleValidity(paramName: string, isValid: boolean): void;
   setValueAxis<T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]): void;
@@ -96,7 +96,7 @@ function CustomExtentsOptions({
       {axis.scale.defaultYExtents && (
         <>
           <NumberInputOption
-            error={!isBoundsMarginValid ? [invalidBoundsMarginMessage] : undefined}
+            error={!isBoundsMarginValid && invalidBoundsMarginMessage}
             isInvalid={!isBoundsMarginValid}
             label={i18n.translate(
               'kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.boundsMargin',

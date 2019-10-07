@@ -39,7 +39,7 @@ module.directive('mlExplorerReactWrapper', function (config, globalState) {
           dateFormatTz,
           globalState,
           jobSelectService,
-          MlTimeBuckets: scope.MlTimeBuckets,
+          TimeBuckets: scope.TimeBuckets,
         }}
         />
       </I18nContext>,

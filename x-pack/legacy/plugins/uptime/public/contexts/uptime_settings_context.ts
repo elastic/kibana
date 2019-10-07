@@ -54,6 +54,7 @@ const defaultContext: UMSettingsContextValues = {
     range: euiLightVars.euiFocusBackgroundColor,
     success: euiLightVars.euiColorSuccess,
     warning: euiLightVars.euiColorWarning,
+    gray: euiLightVars.euiColorLightShade,
   },
   dateRangeStart: DATE_RANGE_START,
   dateRangeEnd: DATE_RANGE_END,

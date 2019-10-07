@@ -143,7 +143,7 @@ export class FieldEditorComponent extends PureComponent {
     const DefaultFieldFormat = fieldFormats.getDefaultType(field.type, field.esTypes);
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
-      ...fieldFormats.byFieldType[field.type],
+      ...fieldFormats.getByFieldType(field.type),
     ];
 
     this.setState({
@@ -173,7 +173,7 @@ export class FieldEditorComponent extends PureComponent {
 
     const fieldTypeFormats = [
       getDefaultFormat(DefaultFieldFormat),
-      ...fieldFormats.byFieldType[field.type],
+      ...fieldFormats.getByFieldType(field.type),
     ];
 
     const FieldFormat = fieldTypeFormats[0];

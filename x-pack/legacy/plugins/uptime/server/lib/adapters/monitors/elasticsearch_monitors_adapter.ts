@@ -69,6 +69,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             filter: [
               { range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } },
               { term: { 'monitor.id': monitorId } },
+              { term: { 'monitor.status': 'up' } },
               // if location is truthy, add it as a filter. otherwise add nothing
               ...(!!location ? [{ term: { 'observer.geo.name': location } }] : []),
             ],
@@ -80,6 +81,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             date_histogram: {
               field: '@timestamp',
               fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
+              min_doc_count: 0,
             },
             aggs: {
               location: {
@@ -99,7 +101,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const dateBuckets = dropLatestBucket(get(result, 'aggregations.timeseries.buckets', []));
+    const dateHistogramBuckets = dropLatestBucket(
+      get(result, 'aggregations.timeseries.buckets', [])
+    );
 
     /**
      * The code below is responsible for formatting the aggregation data we fetched above in a way
@@ -119,26 +123,67 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       statusMaxCount: 0,
     };
 
-    const linesByLocation: { [key: string]: LocationDurationLine } = {};
-    dateBuckets.forEach(dateBucket => {
-      const x = get(dateBucket, 'key');
-      const docCount = get(dateBucket, 'doc_count', 0);
+    /**
+     * The following section of code enables us to provide buckets per location
+     * that have a `null` value if there is no data at the given timestamp.
+     *
+     * We maintain two `Set`s. One is per bucket, the other is persisted for the
+     * entire collection. At the end of a bucket's evaluation, if there was no object
+     * parsed for a given location line that was already started, we insert an element
+     * to the given line with a null value. Without this, our charts on the client will
+     * display a continuous line for each of the points they are provided.
+     */
 
-      dateBucket.location.buckets.forEach(
+    // a set of all the locations found for this result
+    const resultLocations = new Set<string>();
+    const linesByLocation: { [key: string]: LocationDurationLine } = {};
+    dateHistogramBuckets.forEach(dateHistogramBucket => {
+      const x = get(dateHistogramBucket, 'key');
+      const docCount = get(dateHistogramBucket, 'doc_count', 0);
+      // a set of all the locations for the current bucket
+      const bucketLocations = new Set<string>();
+
+      dateHistogramBucket.location.buckets.forEach(
         (locationBucket: { key: string; duration: { avg: number } }) => {
           const locationName = locationBucket.key;
-          let ldl: LocationDurationLine = get(linesByLocation, locationName);
-          if (!ldl) {
-            ldl = { name: locationName, line: [] };
-            linesByLocation[locationName] = ldl;
-            monitorChartsData.locationDurationLines.push(ldl);
+          // store the location name in each set
+          bucketLocations.add(locationName);
+          resultLocations.add(locationName);
+
+          // create a new line for this location if it doesn't exist
+          let currentLine: LocationDurationLine = get(linesByLocation, locationName);
+          if (!currentLine) {
+            currentLine = { name: locationName, line: [] };
+            linesByLocation[locationName] = currentLine;
+            monitorChartsData.locationDurationLines.push(currentLine);
           }
-          ldl.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
+          // add the entry for the current location's duration average
+          currentLine.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
         }
       );
 
+      // if there are more lines in the result than are represented in the current bucket,
+      // we must add null entries
+      if (dateHistogramBucket.location.buckets.length < resultLocations.size) {
+        resultLocations.forEach(resultLocation => {
+          // the current bucket has a value for this location, do nothing
+          if (location && location !== resultLocation) return;
+          // the current bucket had no value for this location, insert a null value
+          if (!bucketLocations.has(resultLocation)) {
+            const locationLine = monitorChartsData.locationDurationLines.find(
+              ({ name }) => name === resultLocation
+            );
+            // in practice, there should always be a line present, but `find` can return `undefined`
+            if (locationLine) {
+              // this will create a gap in the line like we desire
+              locationLine.line.push({ x, y: null });
+            }
+          }
+        });
+      }
+
       monitorChartsData.status.push(
-        formatStatusBuckets(x, get(dateBucket, 'status.buckets', []), docCount)
+        formatStatusBuckets(x, get(dateHistogramBucket, 'status.buckets', []), docCount)
       );
     });
 

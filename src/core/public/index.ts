@@ -67,7 +67,14 @@ import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './u
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
+import {
+  IContextContainer,
+  IContextProvider,
+  ContextSetup,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+} from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -105,6 +112,7 @@ export {
   HttpResponse,
   HttpHandler,
   HttpBody,
+  HttpInterceptController,
 } from './http';
 
 export {
@@ -137,6 +145,15 @@ export interface CoreSetup {
   notifications: NotificationsSetup;
   /** {@link UiSettingsClient} */
   uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
 /**
@@ -167,6 +184,15 @@ export interface CoreStart {
   overlays: OverlayStart;
   /** {@link UiSettingsClient} */
   uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
 /**
@@ -216,7 +242,9 @@ export {
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
   IContextContainer,
-  IContextHandler,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
   IContextProvider,
   ContextSetup,
   DocLinksStart,

@@ -96,7 +96,7 @@ describe('dateRanges', () => {
   });
 
   describe('#getDateRange', () => {
-    let dateSpy: jest.Mock<number, []>;
+    let dateSpy: jest.SpyInstance<number, []>;
 
     beforeEach(() => {
       dateSpy = jest

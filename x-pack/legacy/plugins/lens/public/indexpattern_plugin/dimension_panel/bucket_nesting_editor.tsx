@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiHorizontalRule, EuiSwitch, EuiSelect, EuiFormLabel } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternLayer } from '../indexpattern';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
@@ -44,39 +44,38 @@ export function BucketNestingEditor({
     const [target] = aggColumns;
 
     return (
-      <EuiFormRow>
-        <>
-          <EuiHorizontalRule margin="m" />
-          <EuiSwitch
-            data-test-subj="indexPattern-nesting-switch"
-            label={i18n.translate('xpack.lens.xyChart.nestUnderTarget', {
-              defaultMessage: 'Nest under {target}',
-              values: { target: target.text },
-            })}
-            checked={!!prevColumn}
-            onChange={() => {
-              if (prevColumn) {
-                setColumns(nestColumn(layer.columnOrder, columnId, target.value));
-              } else {
-                setColumns(nestColumn(layer.columnOrder, target.value, columnId));
-              }
-            }}
-          />
-        </>
-      </EuiFormRow>
+      <>
+        <EuiHorizontalRule margin="m" />
+        <EuiSwitch
+          data-test-subj="indexPattern-nesting-switch"
+          label={i18n.translate('xpack.lens.xyChart.nestUnderTarget', {
+            defaultMessage: 'Nest under {target}',
+            values: { target: target.text },
+          })}
+          checked={!!prevColumn}
+          onChange={() => {
+            if (prevColumn) {
+              setColumns(nestColumn(layer.columnOrder, columnId, target.value));
+            } else {
+              setColumns(nestColumn(layer.columnOrder, target.value, columnId));
+            }
+          }}
+        />
+      </>
     );
   }
 
   return (
-    <EuiFormRow>
-      <>
-        <EuiHorizontalRule margin="m" />
-        <EuiFormLabel>
-          {i18n.translate('xpack.lens.xyChart.nestUnder', {
-            defaultMessage: 'Nest under',
-          })}
-        </EuiFormLabel>
+    <>
+      <EuiHorizontalRule margin="m" />
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.xyChart.nestUnder', {
+          defaultMessage: 'Nest under',
+        })}
+        display="rowCompressed"
+      >
         <EuiSelect
+          compressed
           data-test-subj="indexPattern-nesting-select"
           options={[
             {
@@ -90,7 +89,7 @@ export function BucketNestingEditor({
           value={prevColumn}
           onChange={e => setColumns(nestColumn(layer.columnOrder, e.target.value, columnId))}
         />
-      </>
-    </EuiFormRow>
+      </EuiFormRow>
+    </>
   );
 }

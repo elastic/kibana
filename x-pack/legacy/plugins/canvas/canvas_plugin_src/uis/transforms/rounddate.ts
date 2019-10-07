@@ -6,16 +6,19 @@
 
 import { TransformFactory } from '../../../types/transforms';
 import { Arguments } from '../../functions/common/rounddate';
+import { TransformStrings } from '../../strings';
+
+const { RoundDate: strings } = TransformStrings;
 
 export const rounddate: TransformFactory<Arguments> = () => ({
   name: 'rounddate',
-  displayName: 'Round date',
+  displayName: strings.getDisplayName(),
   args: [
     {
       name: 'format',
-      displayName: 'Format',
+      displayName: strings.getFormatDisplayName(),
       argType: 'dateformat',
-      help: 'Select or enter a MomentJS format to round the date',
+      help: strings.getFormatHelp(),
     },
   ],
 });

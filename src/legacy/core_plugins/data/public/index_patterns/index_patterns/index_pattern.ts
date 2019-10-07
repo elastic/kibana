@@ -133,7 +133,7 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = fieldFormats.byId[mapping.id];
+    const FieldFormat = fieldFormats.getType(mapping.id);
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
 

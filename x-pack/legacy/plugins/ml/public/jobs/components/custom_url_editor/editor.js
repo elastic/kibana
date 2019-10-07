@@ -316,25 +316,27 @@ export const CustomUrlEditor = injectI18n(class CustomUrlEditor extends Componen
           }
 
           {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  label={<FormattedMessage
-                    id="xpack.ml.customUrlsEditor.timeRangeLabel"
-                    defaultMessage="Time range"
-                  />}
-                  className="url-time-range"
-                  compressed
-                >
-                  <EuiSelect
-                    options={timeRangeOptions}
-                    value={timeRange.type}
-                    onChange={this.onTimeRangeTypeChange}
+            <>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow
+                    label={<FormattedMessage
+                      id="xpack.ml.customUrlsEditor.timeRangeLabel"
+                      defaultMessage="Time range"
+                    />}
+                    className="url-time-range"
                     compressed
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              {(timeRange.type === TIME_RANGE_TYPE.INTERVAL) &&
+                  >
+                    <EuiSelect
+                      options={timeRangeOptions}
+                      value={timeRange.type}
+                      onChange={this.onTimeRangeTypeChange}
+                      compressed
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                {(timeRange.type === TIME_RANGE_TYPE.INTERVAL) &&
                 <EuiFlexItem>
                   <EuiFormRow
                     label={<FormattedMessage
@@ -354,8 +356,9 @@ export const CustomUrlEditor = injectI18n(class CustomUrlEditor extends Componen
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-              }
-            </EuiFlexGroup>
+                }
+              </EuiFlexGroup>
+            </>
           }
 
           {type === URL_TYPE.OTHER &&

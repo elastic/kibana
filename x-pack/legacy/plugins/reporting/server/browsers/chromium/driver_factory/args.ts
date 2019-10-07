@@ -11,16 +11,9 @@ interface LaunchArgs {
   viewport: BrowserConfig['viewport'];
   disableSandbox: BrowserConfig['disableSandbox'];
   proxy: BrowserConfig['proxy'];
-  verboseLogging: BrowserConfig['verboseLogging'];
 }
 
-export const args = ({
-  userDataDir,
-  viewport,
-  disableSandbox,
-  proxy: proxyConfig,
-  verboseLogging,
-}: LaunchArgs) => {
+export const args = ({ userDataDir, viewport, disableSandbox, proxy: proxyConfig }: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
@@ -59,11 +52,9 @@ export const args = ({
     flags.push('--no-sandbox');
   }
 
-  // TODO remove conditional
-  if (verboseLogging) {
-    flags.push('--enable-logging');
-    flags.push('--v=1');
-  }
+  // log to chrome_debug.log
+  flags.push('--enable-logging');
+  flags.push('--v=1');
 
   if (process.platform === 'linux') {
     flags.push('--disable-setuid-sandbox');

@@ -118,7 +118,10 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
       ),
       condition: true,
       path: `/link-to/logs`,
-      query: { time, filter: `trace.id:${transaction.trace.id}` }
+      query: {
+        time,
+        filter: `trace.id:"${transaction.trace.id}" OR ${transaction.trace.id}`
+      }
     },
     {
       icon: 'infraApp',

@@ -32,8 +32,8 @@ import  { globalsOnlyAutocompleteComponents, compileBodyDescription } from '../a
  * @param bodyParametrizedComponentFactories same as urlParametrizedComponentFactories but used for body compilation
  */
 function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories) {
-  this.globalRules = {};
-  this.endpoints = {};
+  this.globalRules = Object.create(null);
+  this.endpoints = Object.create(null);
   this.urlPatternMatcher = new UrlPatternMatcher(urlParametrizedComponentFactories);
   this.globalBodyComponentFactories = bodyParametrizedComponentFactories;
   this.name = '';
