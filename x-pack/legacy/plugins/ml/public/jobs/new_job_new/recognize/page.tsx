@@ -55,7 +55,8 @@ import {
   maxLengthValidator,
   patternValidator,
 } from '../../../../common/util/validators';
-import { JOB_ID_MAX_LENGTH, JOB_ID_PATTERN } from '../../../../common/constants/validation';
+import { JOB_ID_MAX_LENGTH } from '../../../../common/constants/validation';
+import { isJobIdValid } from '../../../../common/util/job_utils';
 
 interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -147,7 +148,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     maxLengthValidator(JOB_ID_MAX_LENGTH - Math.max(...jobs.map(({ id }) => id.length)))
   );
   const groupValidator = composeValidators(
-    patternValidator(JOB_ID_PATTERN),
+    (value: string) => (isJobIdValid(value) ? null : { pattern: true }),
     maxLengthValidator(JOB_ID_MAX_LENGTH)
   );
 
