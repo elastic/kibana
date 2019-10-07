@@ -30,7 +30,12 @@ import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../ver
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
 import { Config } from '../../../config';
-import { SavedObjectsSerializer, SanitizedSavedObjectDoc, RawDoc } from '../../serialization';
+import {
+  SavedObjectsSerializer,
+  RawSavedObjectDoc,
+  SanitizedSavedObjectDoc,
+  RawDoc,
+} from '../../serialization';
 import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -42,10 +47,12 @@ import {
 } from '../saved_objects_client';
 import {
   SavedObject,
+  SavedObjectDoc,
   SavedObjectAttributes,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
+  BulkOperation,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 
@@ -210,14 +217,88 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @property {string} [options.namespace]
-   * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
-   */
+   * @returns {promise} {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
+  -   */
   async bulkCreate<T extends SavedObjectAttributes = any>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     const { namespace, overwrite = false } = options;
     const time = this._getCurrentTime();
+
+    const onInvalidType = (object: SavedObjectsBulkCreateObject<T>) => ({
+      id: object.id,
+      type: object.type,
+      error: SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type).output.payload,
+    });
+
+    const asBulkOperation = (
+      object: SavedObjectsBulkCreateObject<T>
+    ): [BulkOperation, RawSavedObjectDoc] => {
+      const doc = this._serializer.savedObjectToRaw(this._migrator.migrateDocument({
+        id: object.id,
+        type: object.type,
+        attributes: object.attributes,
+        migrationVersion: object.migrationVersion,
+        namespace,
+        updated_at: time,
+        references: object.references || [],
+      }) as SanitizedSavedObjectDoc);
+      const bulkAction = {
+        _id: doc._id,
+        _index: this.getIndexForType(object.type),
+      };
+      const method =
+        object.id && !overwrite
+          ? {
+              create: bulkAction,
+            }
+          : {
+              index: bulkAction,
+            };
+      return [method, doc._source];
+    };
+    const processResponse = (
+      requestedId: string,
+      objectToSave: RawSavedObjectDoc,
+      responseObject: SavedObjectDoc
+    ) => {
+      const { _seq_no: seqNo, _primary_term: primaryTerm } = responseObject;
+
+      const { type, [type]: attributes, references = [] } = objectToSave;
+
+      const id = requestedId || responseObject._id;
+
+      return {
+        id,
+        type,
+        updated_at: time,
+        version: encodeVersion(seqNo, primaryTerm),
+        attributes,
+        references,
+      };
+    };
+
+    return await this.performBulkOperation(
+      objects,
+      onInvalidType,
+      asBulkOperation,
+      processResponse
+    );
+  }
+
+  private async performBulkOperation<T extends SavedObjectAttributes = any>(
+    objects: Array<SavedObjectsBulkCreateObject<T>>,
+    onInvalidType: (object: SavedObjectsBulkCreateObject<T>) => any,
+    asBulkOperation: (
+      object: SavedObjectsBulkCreateObject<T>
+    ) => [BulkOperation, RawSavedObjectDoc],
+    processResponse: (
+      requestedId: string,
+      objectToSave: RawSavedObjectDoc,
+      responseObject: SavedObjectDoc
+    ) => SavedObject<T>
+  ): Promise<SavedObjectsBulkResponse<T>> {
     const bulkCreateParams: object[] = [];
 
     let requestIndexCounter = 0;
@@ -225,40 +306,21 @@ export class SavedObjectsRepository {
       if (!this._allowedTypes.includes(object.type)) {
         return {
           tag: 'Left' as 'Left',
-          error: {
-            id: object.id,
-            type: object.type,
-            error: SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type).output.payload,
-          },
+          error: onInvalidType(object),
         };
       }
 
-      const method = object.id && !overwrite ? 'create' : 'index';
-      const expectedResult = {
-        esRequestIndex: requestIndexCounter++,
-        requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(this._migrator.migrateDocument({
-          id: object.id,
-          type: object.type,
-          attributes: object.attributes,
-          migrationVersion: object.migrationVersion,
-          namespace,
-          updated_at: time,
-          references: object.references || [],
-        }) as SanitizedSavedObjectDoc),
-      };
-
-      bulkCreateParams.push(
-        {
-          [method]: {
-            _id: expectedResult.rawMigratedDoc._id,
-            _index: this.getIndexForType(object.type),
-          },
+      const [bulkOperation, objectToSave] = asBulkOperation(object);
+      bulkCreateParams.push(bulkOperation, objectToSave);
+      return {
+        tag: 'Right' as 'Right',
+        value: {
+          esRequestIndex: requestIndexCounter++,
+          requestedId: object.id,
+          requestedType: object.type,
+          objectToSave,
         },
-        expectedResult.rawMigratedDoc._source
-      );
-
-      return { tag: 'Right' as 'Right', value: expectedResult };
+      };
     });
 
     const esResponse = await this._writeToCluster('bulk', {
@@ -272,45 +334,30 @@ export class SavedObjectsRepository {
           return expectedResult.error;
         }
 
-        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
+        const {
+          requestedId,
+          requestedType: type,
+          objectToSave,
+          esRequestIndex,
+        } = expectedResult.value;
         const response = esResponse.items[esRequestIndex];
-        const {
-          error,
-          _id: responseId,
-          _seq_no: seqNo,
-          _primary_term: primaryTerm,
-        } = Object.values(response)[0] as any;
+        const responseByMethod = Object.values(response)[0] as any;
+        const { error, _id: responseId } = responseByMethod;
 
-        const {
-          _source: { type, [type]: attributes, references = [] },
-        } = rawMigratedDoc;
-
-        const id = requestedId || responseId;
         if (error) {
-          if (error.type === 'version_conflict_engine_exception') {
-            return {
-              id,
-              type,
-              error: { statusCode: 409, message: 'version conflict, document already exists' },
-            };
-          }
           return {
-            id,
+            id: requestedId || responseId,
             type,
-            error: {
-              message: error.reason || JSON.stringify(error),
-            },
+            error:
+              error.type === 'version_conflict_engine_exception'
+                ? { statusCode: 409, message: 'version conflict, document already exists' }
+                : {
+                    message: error.reason || JSON.stringify(error),
+                  },
           };
         }
 
-        return {
-          id,
-          type,
-          updated_at: time,
-          version: encodeVersion(seqNo, primaryTerm),
-          attributes,
-          references,
-        };
+        return processResponse(requestedId, objectToSave, responseByMethod);
       }),
     };
   }
