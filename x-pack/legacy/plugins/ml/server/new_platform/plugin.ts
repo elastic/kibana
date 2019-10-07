@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ServerRoute } from 'hapi';
 import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
-import { HttpServiceSetup, Logger, PluginInitializerContext } from 'src/core/server';
+import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
@@ -61,7 +61,8 @@ import { fileDataVisualizerRoutes } from '../routes/file_data_visualizer';
 // @ts-ignore: could not find declaration file for module
 import { initMlServerLog, LogInitialization } from '../client/log';
 
-export interface MlHttpServiceSetup extends HttpServiceSetup {
+type CoreHttpSetup = CoreSetup['http'];
+export interface MlHttpServiceSetup extends CoreHttpSetup {
   route(route: ServerRoute | ServerRoute[]): void;
 }
 
