@@ -19,7 +19,7 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
-      await datePickerInput.type(Array(30).fill(browser.keys.BACK_SPACE));
+      await datePickerInput.clearValueWithKeyboard({ charByChar: true });
       await datePickerInput.type([time, browser.keys.RETURN]);
     },
 
