@@ -90,6 +90,12 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
     props.state.layers[layerId].columns[props.columnId] || null;
 
   function hasOperationForField(field: IndexPatternField) {
+    if (field.type === 'document') {
+      return Boolean(
+        operationFieldSupportMatrix.operationByDocument &&
+          operationFieldSupportMatrix.operationByDocument.length > 0
+      );
+    }
     return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
   }
 
@@ -117,7 +123,9 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           }
 
           const operationsForNewField =
-            operationFieldSupportMatrix.operationByField[droppedItem.field.name];
+            droppedItem.field.type === 'document'
+              ? operationFieldSupportMatrix.operationByDocument
+              : operationFieldSupportMatrix.operationByField[droppedItem.field.name];
 
           // We need to check if dragging in a new field, was just a field change on the same
           // index pattern and on the same operations (therefore checking if the new field supports

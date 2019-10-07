@@ -34,6 +34,7 @@ import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
 import { updateLayerIndexPattern } from './state_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
+import { documentField } from './document_field';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -44,7 +45,7 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.name.localeCompare(fieldB.name, undefined, { sensitivity: 'base' });
 }
 
-const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip']);
+const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);
 const PAGINATION_SIZE = 50;
 
 const fieldTypeNames: Record<DataType, string> = {
@@ -205,6 +206,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
   const allFields = currentIndexPattern.fields;
   const fieldByName = indexBy(allFields, 'name');
+  fieldByName.Document = documentField;
 
   const lazyScroll = () => {
     if (scrollContainer) {
@@ -258,9 +260,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
     return true;
   });
-
-  const paginatedFields = displayedFields.sort(sortFields).slice(0, pageSize);
-
+  const paginatedFields = displayedFields.sort(sortFields).slice(0, pageSize - 1);
+  paginatedFields.unshift(documentField);
   // Side effect: Fetch field existence data when the index pattern is switched
   useEffect(() => {
     if (localState.isLoading || currentIndexPattern.hasExistence || !updateFieldsWithCounts) {

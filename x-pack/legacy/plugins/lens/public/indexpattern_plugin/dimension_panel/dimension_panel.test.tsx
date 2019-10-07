@@ -200,7 +200,7 @@ describe('IndexPatternDimensionPanel', () => {
     ]);
   });
 
-  it('should indicate fields which are imcompatible for the operation of the current column', () => {
+  it('should indicate fields which are incompatible for the operation of the current column', () => {
     wrapper = mount(
       <IndexPatternDimensionPanel
         {...defaultProps}

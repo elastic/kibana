@@ -39,6 +39,7 @@ import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
+import { documentField } from '../document_field';
 
 const operationPanels = getOperationDisplay();
 
@@ -90,7 +91,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
     currentIndexPattern.fields.forEach(field => {
       fields[field.name] = field;
     });
-
+    fields.Document = documentField;
     return fields;
   }, [currentIndexPattern]);
 
