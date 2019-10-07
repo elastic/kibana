@@ -10,7 +10,7 @@ import { Services } from './types';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertsClientFactory, TaskRunnerFactory } from './lib';
-import { ClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
+import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import {
   AlertingPluginInitializerContext,
   AlertingCoreSetup,
@@ -46,7 +46,7 @@ export class Plugin {
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
-  private adminClient?: ClusterClient;
+  private adminClient?: IClusterClient;
   private serverBasePath?: string;
 
   constructor(initializerContext: AlertingPluginInitializerContext) {
