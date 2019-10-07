@@ -22,7 +22,7 @@ The agent continues posting events and recving updated policy chnages every 30 s
 
 3. The agent will stop polling and delete the localy cached policy.
 
-4. It is **/strongly/** recommended that if an agent is compermized, the outputs used on the given agent delete their ES access tokens, and regenerate them.
+4. It is **/strongly/** recommended that if an agent is compromised, the outputs used on the given agent delete their ES access tokens, and regenerate them.
 
 To re-enable the agent, it must be re-enrolled. Permanent and temprary agents maintain state in Fleet, if one is re-enrolled a new auth token is generatred and the agent is able to resume as it was. If this is not desired, the agent will be listed in a disabled state (`active: false`), and from the detials screen it can be deleted.
 
