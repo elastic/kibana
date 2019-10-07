@@ -61,6 +61,17 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
  *
  * @public
  */
+export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> {
+  type: string;
+  id: string;
+  attributes: Partial<T>;
+  options: SavedObjectsUpdateOptions;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
