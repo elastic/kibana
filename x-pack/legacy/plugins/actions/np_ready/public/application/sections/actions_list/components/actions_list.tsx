@@ -32,41 +32,20 @@ export const ActionsList = ({ api }: ActionsListProps) => {
   const alertsTableColumns = [
     {
       field: 'id',
-      name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.idHeader', {
-        defaultMessage: 'Title',
+      name: i18n.translate('xpack.actions.sections.actionTypesList.actionTypesTable.idHeader', {
+        defaultMessage: 'Id',
       }),
       sortable: true,
       truncateText: true,
     },
     {
-      field: 'alertTypeId',
-      name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.alertTypeIdHeader', {
-        defaultMessage: 'Type',
-      }),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'interval',
-      name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.intervalHeader', {
-        defaultMessage: 'Details',
-      }),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'createdBy',
-      name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.createdByHeader', {
-        defaultMessage: 'Last run',
-      }),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'updatedBy',
-      name: i18n.translate('xpack.alerting.sections.alertsList.alertTable.updatedByHeader', {
-        defaultMessage: 'Notification',
-      }),
+      field: 'name',
+      name: i18n.translate(
+        'xpack.alerting.sections.actionTypesList.actionTypesTable.actionTypeHeader',
+        {
+          defaultMessage: 'Action Type',
+        }
+      ),
       sortable: true,
       truncateText: true,
     },
@@ -82,8 +61,8 @@ export const ActionsList = ({ api }: ActionsListProps) => {
         isSelectable={true}
         message={
           <FormattedMessage
-            id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
-            defaultMessage="No actions to show"
+            id="xpack.actions.sections.actionTypesList.actionTypesTable.noActionTypesMessage"
+            defaultMessage="No action types to show"
           />
         }
         rowProps={() => ({
@@ -92,30 +71,30 @@ export const ActionsList = ({ api }: ActionsListProps) => {
         cellProps={() => ({
           'data-test-subj': 'cell',
         })}
-        data-test-subj="alertsTable"
+        data-test-subj="actionTypesTable"
       />
     );
   };
 
-  const ActionsLoadingIndicator = () => (
+  const ActionTypesLoadingIndicator = () => (
     <FormattedMessage
-      id="xpack.alerting.sections.alertsList.loadingAlertsDescription"
-      defaultMessage="Loading actions"
+      id="xpack.actions.sections.actionTypesList.loadingActionTypesDescription"
+      defaultMessage="Loading action types"
     />
   );
 
   return pipe(
     api,
-    flatMap((alertingApi: any) =>
+    flatMap((actionTypesApi: any) =>
       mapResult<
         RequestData<LoadActionTypesResponse>,
         LoadActionTypesErrorResponse,
         Option<JSX.Element>
       >(
-        loadActionTypes(alertingApi.api.http),
+        loadActionTypes(actionTypesApi.api.http),
         ({ isLoading: isAlertsLoading, data: alerts }) =>
           isAlertsLoading
-            ? some(<ActionsLoadingIndicator />)
+            ? some(<ActionTypesLoadingIndicator />)
             : map(alerts, (data: any) => (
                 <ContentWrapper>
                   <EuiSpacer size="m" />
@@ -130,14 +109,14 @@ export const ActionsList = ({ api }: ActionsListProps) => {
           )
       )
     ),
-    getOrElse(() => <NoAlerts />)
+    getOrElse(() => <NoActionTypes />)
   );
 };
 
-export const NoAlerts = () => {
+export const NoActionTypes = () => {
   const emptyPromptBody = (
     <EuiText color="subdued">
-      <p>ggjhgjh</p>
+      <p>No Action Types</p>
     </EuiText>
   );
 
@@ -148,8 +127,8 @@ export const NoAlerts = () => {
         title={
           <h1>
             <FormattedMessage
-              id="xpack.actions.sections.actoinsList.emptyPromptTitle"
-              defaultMessage="You don’t have any actions yet"
+              id="xpack.actions.sections.actoinsTypesList.emptyPromptTitle"
+              defaultMessage="You don’t have any action types yet"
             />
           </h1>
         }

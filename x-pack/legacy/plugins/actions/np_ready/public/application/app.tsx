@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 
 import { ActionsList } from './sections/actions_list/components/actions_list';
-import { registerRouter } from './lib/';
+import { registerRouter } from './lib/navigation';
 import { BASE_PATH } from './constants';
 
 class ShareRouter extends Component {

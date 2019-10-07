@@ -5,9 +5,9 @@
  */
 
 import { Legacy } from 'kibana';
-import { Root } from 'joi';
-import mappings from 'mappings.json';
 import { resolve } from 'path';
+import { Root } from 'joi';
+import mappings from './mappings.json';
 import { init } from './server';
 
 export { ActionsPlugin, ActionsClient, ActionType, ActionTypeExecutorOptions } from './server';
@@ -43,7 +43,7 @@ export function actions(kibana: any) {
     init,
     uiExports: {
       mappings,
-      styleSheetPaths: resolve(__dirname, 'public/np_ready/public/index.scss'),
+      // styleSheetPaths: resolve(__dirname, 'public/np_ready/public/index.scss'),
       hacks: ['plugins/actions/hacks/register'],
       managementSections: ['plugins/actions'],
     },
