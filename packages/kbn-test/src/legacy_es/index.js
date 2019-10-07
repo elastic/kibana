@@ -18,4 +18,4 @@
  */
 
 export { createLegacyEsTestCluster } from './legacy_es_test_cluster.js';
-export { legacyEsTestConfig } from './legacy_es_test_config';
+export { esTestConfig } from './es_test_config';

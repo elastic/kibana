@@ -21,7 +21,7 @@ import url, { format as formatUrl } from 'url';
 import pkg from '../../../../package.json';
 import { adminTestUser } from '../kbn';
 
-export const legacyEsTestConfig = new (class LegacyEsTestConfig {
+export const esTestConfig = new (class EsTestConfig {
   getVersion() {
     return process.env.TEST_ES_BRANCH || pkg.version;
   }
