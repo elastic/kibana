@@ -32,7 +32,7 @@ export interface AlertServices extends Services {
 }
 
 export interface AlertExecutorOptions {
-  id: string;
+  alertId: string;
   startedAt: Date;
   previousStartedAt?: Date;
   services: AlertServices;
