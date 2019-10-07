@@ -16,7 +16,6 @@ import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/
 const taskManager = taskManagerMock.create();
 
 const alertTypeRegistryParams = {
-  isSecurityEnabled: true,
   getServices() {
     return {
       log: jest.fn(),
@@ -78,7 +77,6 @@ describe('register()', () => {
     `);
     expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
       alertType,
-      isSecurityEnabled: true,
       getServices: alertTypeRegistryParams.getServices,
       encryptedSavedObjectsPlugin: alertTypeRegistryParams.encryptedSavedObjectsPlugin,
       getBasePath: alertTypeRegistryParams.getBasePath,

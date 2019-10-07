@@ -50,7 +50,6 @@ async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<an
 beforeAll(() => {
   actionTypeRegistry = new ActionTypeRegistry({
     getServices,
-    isSecurityEnabled: true,
     taskManager: taskManagerMock.create(),
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),

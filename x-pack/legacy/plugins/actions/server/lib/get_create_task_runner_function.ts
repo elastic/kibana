@@ -22,7 +22,6 @@ interface CreateTaskRunnerFunctionOptions {
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
-  isSecurityEnabled: boolean;
 }
 
 interface TaskRunnerOptions {
@@ -35,7 +34,6 @@ export function getCreateTaskRunnerFunction({
   encryptedSavedObjectsPlugin,
   spaceIdToNamespace,
   getBasePath,
-  isSecurityEnabled,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
@@ -52,9 +50,7 @@ export function getCreateTaskRunnerFunction({
         );
 
         const requestHeaders: Record<string, string> = {};
-        if (isSecurityEnabled && !apiKey) {
-          throw new ExecutorError('API key is required. The attribute "apiKey" is missing.');
-        } else if (isSecurityEnabled) {
+        if (apiKey) {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 

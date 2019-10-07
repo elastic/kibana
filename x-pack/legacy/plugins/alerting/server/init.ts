@@ -118,7 +118,6 @@ export function init(server: Server) {
 
   const alertTypeRegistry = new AlertTypeRegistry({
     getServices,
-    isSecurityEnabled: security.isEnabled,
     taskManager,
     executeAction: server.plugins.actions.execute,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects,
@@ -163,12 +162,17 @@ export function init(server: Server) {
         if (!security.isEnabled) {
           return { created: false };
         }
+        const createAPIKeyResult = await security.authc.createAPIKey(KibanaRequest.from(request), {
+          name: `source: alerting, generated uuid: "${uuid.v4()}"`,
+          role_descriptors: {},
+        });
+        // Kibana security plugin can be anbled when Elasticsearch security is disabled
+        if (!createAPIKeyResult) {
+          return { created: false };
+        }
         return {
           created: true,
-          result: (await security.authc.createAPIKey(KibanaRequest.from(request), {
-            name: `source: alerting, generated uuid: "${uuid.v4()}"`,
-            role_descriptors: {},
-          }))!,
+          result: createAPIKeyResult,
         };
       },
     });

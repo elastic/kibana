@@ -22,7 +22,6 @@ import {
 } from '../types';
 
 export interface CreateTaskRunnerFunctionOptions {
-  isSecurityEnabled: boolean;
   getServices: GetServicesFunction;
   alertType: AlertType;
   executeAction: ActionsPlugin['execute'];
@@ -42,7 +41,6 @@ export function getCreateTaskRunnerFunction({
   encryptedSavedObjectsPlugin,
   spaceIdToNamespace,
   getBasePath,
-  isSecurityEnabled,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
@@ -60,9 +58,7 @@ export function getCreateTaskRunnerFunction({
           { namespace }
         );
 
-        if (isSecurityEnabled && !apiKey) {
-          throw new Error('API key is required. The attribute "apiKey" is missing.');
-        } else if (isSecurityEnabled) {
+        if (apiKey) {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 

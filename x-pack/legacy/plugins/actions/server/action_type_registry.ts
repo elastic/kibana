@@ -17,7 +17,6 @@ import {
 } from './types';
 
 interface ConstructorOptions {
-  isSecurityEnabled: boolean;
   taskManager: TaskManager;
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
@@ -36,11 +35,9 @@ export class ActionTypeRegistry {
     encryptedSavedObjectsPlugin,
     spaceIdToNamespace,
     getBasePath,
-    isSecurityEnabled,
   }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.taskRunCreatorFunction = getCreateTaskRunnerFunction({
-      isSecurityEnabled,
       getServices,
       actionTypeRegistry: this,
       encryptedSavedObjectsPlugin,

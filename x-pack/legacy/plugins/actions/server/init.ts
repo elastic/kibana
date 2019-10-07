@@ -108,7 +108,6 @@ export function init(server: Server) {
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects,
     getBasePath,
     spaceIdToNamespace,
-    isSecurityEnabled: config.get('xpack.security.enabled'),
   });
 
   registerBuiltInActionTypes(
@@ -133,7 +132,6 @@ export function init(server: Server) {
     taskManager,
     getScopedSavedObjectsClient: server.savedObjects.getScopedSavedObjectsClient,
     getBasePath,
-    isSecurityEnabled: config.get('xpack.security.enabled'),
   });
 
   // Expose functions to server
