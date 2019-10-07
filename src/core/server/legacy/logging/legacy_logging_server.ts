@@ -37,6 +37,12 @@ export function attachMetaData(message: string, metadata: Record<string, any> = 
 }
 const isEmptyObject = (obj: object) => Object.keys(obj).length === 0;
 
+function getDataToLog(error: Error | undefined, metadata: object, message: string) {
+  if (error) return error;
+  if (!isEmptyObject(metadata)) return attachMetaData(message, metadata);
+  return message;
+}
+
 interface PluginRegisterParams {
   plugin: {
     register: (
@@ -102,14 +108,9 @@ export class LegacyLoggingServer {
 
   public log({ level, context, message, error, timestamp, meta = {} }: LogRecord) {
     const { tags = [], ...metadata } = meta;
-    const data = error
-      ? error
-      : isEmptyObject(metadata)
-      ? message
-      : attachMetaData(message, metadata);
 
     this.events.emit('log', {
-      data,
+      data: getDataToLog(error, metadata, message),
       tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
       timestamp: timestamp.getTime(),
     });
