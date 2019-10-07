@@ -718,8 +718,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       log.debug('Click Save Visualization button');
       await testSubjects.click('confirmSaveSavedObjectButton');
 
+      // if we wait for this, the success toast message could be gone :-()
       // wait for save to complete before completion
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      // await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
@@ -834,7 +835,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // by a bunch of 'L'ines from that point to the next.  Those points are
       // the values we're going to use to calculate the data values we're testing.
       // So git rid of the one 'M' and split the rest on the 'L's.
-      const tempArray = data.replace('M', '').split('L');
+      const tempArray = data.replace('M ', '').replace('M', '').replace(/ L /g, 'L').replace(/ /g, ',').split('L');
       const chartSections = tempArray.length / 2;
       // log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
       const chartData = [];
@@ -888,7 +889,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the visWrapper__chart elements
-      const svg = await find.byCssSelector('div.chart > svg');
+      const svg = await find.byCssSelector('div.chart');
       const $ = await svg.parseDomContent();
       const chartData = $(`g > g.series > rect[data-label="${dataLabel}"]`).toArray().map(chart => {
         const barHeight = $(chart).attr('height');

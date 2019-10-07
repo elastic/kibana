@@ -61,7 +61,7 @@ import {
   getRelationships,
   getSavedObjectLabel,
   fetchExportObjects,
-  fetchExportByType,
+  fetchExportByTypeAndSearch,
   findObjects,
 } from '../../lib';
 
@@ -304,17 +304,21 @@ export class ObjectsTable extends Component {
   };
 
   onExportAll = async () => {
-    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked } = this.state;
-    const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
-      if (selected) {
-        accum.push(id);
-      }
-      return accum;
-    }, []);
+    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
+    const { queryText } = parseQuery(activeQuery);
+    const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
+      (accum, [id, selected]) => {
+        if (selected) {
+          accum.push(id);
+        }
+        return accum;
+      },
+      []
+    );
 
     let blob;
     try {
-      blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
+      blob = await fetchExportByTypeAndSearch(exportTypes, queryText ? `${queryText}*` : undefined, isIncludeReferencesDeepChecked);
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate('kbn.management.objects.objectsTable.exportAll.dangerNotification', {

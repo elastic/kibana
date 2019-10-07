@@ -4520,7 +4520,6 @@
     "xpack.graph.savedWorkspace.workspaceNameTitle": "新建 Graph 工作空间",
     "xpack.graph.savedWorkspaces.graphWorkspaceLabel": "Graph 工作空间",
     "xpack.graph.savedWorkspaces.graphWorkspacesLabel": "Graph 工作空间",
-    "xpack.graph.saveWorkspace.disabledWarning": "已禁用保存",
     "xpack.graph.saveWorkspace.successNotification.noDataSavedText": "配置会被保存，但不保存数据",
     "xpack.graph.saveWorkspace.successNotificationTitle": "已保存“{workspaceTitle}”",
     "xpack.graph.serverSideErrors.expiredLicenseErrorMessage": "Graph 不可用 - 许可已过期。",
@@ -11388,7 +11387,6 @@
     "xpack.advancedUiActions.customizeTimeRange.modal.headerTitle": "定制面板时间范围",
     "xpack.advancedUiActions.customizeTimeRangeMenuItem.displayName": "定制时间范围",
     "xpack.fileUpload.fileParser.errorReadingFile": "读取文件时出错",
-    "xpack.fileUpload.fileParser.noFileProvided": "错误，未提供任何文件",
-    "xpack.fileUpload.jsonIndexFilePicker.errorGettingIndexName": "检索索引名称时出错：{errorMessage}"
+    "xpack.fileUpload.fileParser.noFileProvided": "错误，未提供任何文件"
   }
 }
