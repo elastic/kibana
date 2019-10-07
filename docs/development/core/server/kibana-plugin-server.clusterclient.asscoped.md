@@ -9,7 +9,7 @@ Creates an instance of `ScopedClusterClient` based on the configuration the curr
 <b>Signature:</b>
 
 ```typescript
-asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): ScopedClusterClient;
+asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
 ```
 
 ## Parameters
@@ -20,5 +20,5 @@ asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): ScopedClusterCl
 
 <b>Returns:</b>
 
-`ScopedClusterClient`
+`IScopedClusterClient`
 
