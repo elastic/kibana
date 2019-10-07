@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
-import { APP_ID } from '../../../../common/constants';
+import { schema } from '@kbn/config-schema';
+import { SIGNALS_ID } from '../../../../common/constants';
 import { AlertType, AlertExecutorOptions } from '../../../../../alerting';
 
 // TODO: Remove this for the build_events_query call eventually
@@ -16,47 +16,65 @@ import { buildEventsReIndex } from './build_events_reindex';
 // import { buildEventsQuery } from './build_events_query';
 
 export const signalsAlertType: AlertType = {
-  id: `${APP_ID}.signals`,
+  id: SIGNALS_ID,
   name: 'SIEM Signals',
   actionGroups: ['default'],
+  validate: {
+    params: schema.object({
+      description: schema.string(),
+      from: schema.string(),
+      filter: schema.maybe(schema.object({}, { allowUnknowns: true })),
+      id: schema.number(),
+      index: schema.arrayOf(schema.string()),
+      kql: schema.maybe(schema.string({ defaultValue: undefined })),
+      maxSignals: schema.number({ defaultValue: 100 }),
+      name: schema.string(),
+      severity: schema.number(),
+      to: schema.string(),
+      type: schema.string(),
+      references: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    }),
+  },
+  // TODO: Type the params as it is all filled with any
   async executor({ services, params, state }: AlertExecutorOptions) {
-    // TODO: We need to swap out this arbitrary number of siem-signal id for an injected
-    // data driven instance id through passed in parameters.
     const instance = services.alertInstanceFactory('siem-signals');
 
     // TODO: Comment this in eventually and use the buildEventsQuery()
     // for scrolling and other fun stuff instead of using the buildEventsReIndex()
     // const query = buildEventsQuery();
 
-    // TODO: Turn these options being sent in into a template for the alert type
+    const {
+      description,
+      filter,
+      from,
+      id,
+      index,
+      kql,
+      maxSignals,
+      name,
+      references,
+      severity,
+      to,
+      type,
+    } = params;
     const reIndex = buildEventsReIndex({
-      index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-      from: moment()
-        .subtract(5, 'minutes')
-        .valueOf(),
-      to: Date.now(),
-      signalsIndex: '.siem-signals-10-01-2019',
-      severity: 2,
-      description: 'User root activity',
-      name: 'User Rule',
+      index,
+      from,
+      kql,
+      to,
+      // TODO: Change this out once we have solved
+      // https://github.com/elastic/kibana/issues/47002
+      signalsIndex: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+      severity,
+      description,
+      name,
       timeDetected: Date.now(),
-      kqlFilter: {
-        bool: {
-          should: [
-            {
-              match_phrase: {
-                'user.name': 'root',
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      maxDocs: 100,
+      filter,
+      maxDocs: maxSignals,
       ruleRevision: 1,
-      ruleId: '1',
-      ruleType: 'KQL',
-      references: ['https://www.elastic.co', 'https://example.com'],
+      id,
+      type,
+      references,
     });
 
     try {
@@ -65,7 +83,6 @@ export const signalsAlertType: AlertType = {
       // TODO: Comment this in eventually and use this for manual insertion of the
       // signals instead of the ReIndex() api
       // const result = await services.callCluster('search', query);
-      // eslint-disable-next-line
       const result = await services.callCluster('reindex', reIndex);
 
       // TODO: Error handling here and writing of any errors that come back from ES by
