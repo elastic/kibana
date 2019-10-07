@@ -73,7 +73,12 @@ export async function getPaginatedNodes(
       }
 
       const dataSeries = metricItem.data;
-      node[metricName] = dataSeries[dataSeries.length - 1][1];
+      if (dataSeries && dataSeries.length) {
+        const lastItem = dataSeries[dataSeries.length - 1];
+        if (lastItem.length && lastItem.length === 2) {
+          node[metricName] = lastItem[1];
+        }
+      }
     }
   }
 
