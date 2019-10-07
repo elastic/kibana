@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -108,7 +109,7 @@ const SuggestionPreview = ({
   onSelect: () => void;
   preview: {
     expression?: Ast;
-    icon: string;
+    icon: IconType;
     title: string;
   };
   ExpressionRenderer: ExpressionRenderer;
@@ -266,7 +267,7 @@ export function SuggestionPanel({
               }}
             >
               {i18n.translate('xpack.lens.sugegstion.confirmSuggestionLabel', {
-                defaultMessage: 'Confirm and reload suggestions',
+                defaultMessage: 'Reload suggestions',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>

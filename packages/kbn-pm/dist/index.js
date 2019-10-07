@@ -2697,11 +2697,11 @@ async function linkProjectExecutables(projectsByName, projectGraph) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "readFile", function() { return readFile; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "chmod", function() { return chmod; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mkdirp", function() { return mkdirp; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "unlink", function() { return unlink; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "copyDirectory", function() { return copyDirectory; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "chmod", function() { return chmod; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "readFile", function() { return readFile; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mkdirp", function() { return mkdirp; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isSymlink", function() { return isSymlink; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isDirectory", function() { return isDirectory; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFile", function() { return isFile; });
@@ -2710,14 +2710,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var cmd_shim__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cmd_shim__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(fs__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var mkdirp__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(31);
-/* harmony import */ var mkdirp__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(mkdirp__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var ncp__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(33);
-/* harmony import */ var ncp__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(ncp__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(16);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(29);
-/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var ncp__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(33);
+/* harmony import */ var ncp__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(ncp__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(29);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_4__);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -2741,16 +2739,17 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-const lstat = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.lstat);
-const readFile = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.readFile);
-const symlink = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.symlink);
-const chmod = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.chmod);
-const cmdShim = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(cmd_shim__WEBPACK_IMPORTED_MODULE_0___default.a);
-const mkdirp = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(mkdirp__WEBPACK_IMPORTED_MODULE_2___default.a);
-const unlink = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.unlink);
-const copyDirectory = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(ncp__WEBPACK_IMPORTED_MODULE_3__["ncp"]);
-
+const lstat = Object(util__WEBPACK_IMPORTED_MODULE_4__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.lstat);
+const readFile = Object(util__WEBPACK_IMPORTED_MODULE_4__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.readFile);
+const symlink = Object(util__WEBPACK_IMPORTED_MODULE_4__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.symlink);
+const chmod = Object(util__WEBPACK_IMPORTED_MODULE_4__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.chmod);
+const cmdShim = Object(util__WEBPACK_IMPORTED_MODULE_4__["promisify"])(cmd_shim__WEBPACK_IMPORTED_MODULE_0___default.a);
+const mkdir = Object(util__WEBPACK_IMPORTED_MODULE_4__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.mkdir);
+const mkdirp = async path => await mkdir(path, {
+  recursive: true
+});
+const unlink = Object(util__WEBPACK_IMPORTED_MODULE_4__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.unlink);
+const copyDirectory = Object(util__WEBPACK_IMPORTED_MODULE_4__["promisify"])(ncp__WEBPACK_IMPORTED_MODULE_2__["ncp"]);
 
 async function statTest(path, block) {
   try {
@@ -2808,7 +2807,7 @@ async function createSymlink(src, dest, type) {
     }
   } else {
     const posixType = type === 'exec' ? 'file' : type;
-    const relativeSource = Object(path__WEBPACK_IMPORTED_MODULE_4__["relative"])(Object(path__WEBPACK_IMPORTED_MODULE_4__["dirname"])(dest), src);
+    const relativeSource = Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(Object(path__WEBPACK_IMPORTED_MODULE_3__["dirname"])(dest), src);
     await forceCreate(relativeSource, dest, posixType);
   }
 }

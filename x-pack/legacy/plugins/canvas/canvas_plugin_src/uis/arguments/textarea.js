@@ -11,6 +11,9 @@ import { EuiFormRow, EuiTextArea, EuiSpacer, EuiButton } from '@elastic/eui';
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../strings';
+
+const { Textarea: strings } = ArgumentStrings;
 
 const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError, argId }) => {
   if (typeof value !== 'string') {
@@ -66,7 +69,7 @@ EnhancedTextAreaArgInput.propTypes = {
 
 export const textarea = () => ({
   name: 'textarea',
-  displayName: 'Textarea',
-  help: 'Input long strings',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   template: templateFromReactComponent(EnhancedTextAreaArgInput),
 });

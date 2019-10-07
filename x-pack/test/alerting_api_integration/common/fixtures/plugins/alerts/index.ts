@@ -314,12 +314,12 @@ export default function(kibana: any) {
         actionGroups: [],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
-      server.plugins.alerting.registerType(alwaysFiringAlertType);
-      server.plugins.alerting.registerType(neverFiringAlertType);
-      server.plugins.alerting.registerType(failingAlertType);
-      server.plugins.alerting.registerType(validationAlertType);
-      server.plugins.alerting.registerType(authorizationAlertType);
-      server.plugins.alerting.registerType(noopAlertType);
+      server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
+      server.plugins.alerting.setup.registerType(neverFiringAlertType);
+      server.plugins.alerting.setup.registerType(failingAlertType);
+      server.plugins.alerting.setup.registerType(validationAlertType);
+      server.plugins.alerting.setup.registerType(authorizationAlertType);
+      server.plugins.alerting.setup.registerType(noopAlertType);
     },
   });
 }

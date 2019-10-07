@@ -26,7 +26,7 @@
 /* eslint-disable max-classes-per-file */
 import { clone, mapValues, includes } from 'lodash';
 import { Type } from '../../common/expressions/interpreter';
-import { ExpressionType } from '../../common/expressions/types';
+import { ExpressionType, AnyExpressionFunction } from '../../common/expressions/types';
 
 export class Registry<ItemSpec, Item> {
   _prop: string;
@@ -160,7 +160,7 @@ export class RenderFunctionsRegistry extends Registry<any, any> {
   }
 }
 
-export class FunctionsRegistry extends Registry<any, any> {
+export class FunctionsRegistry extends Registry<AnyExpressionFunction, any> {
   wrapper(obj: any) {
     return new (Fn as any)(obj);
   }

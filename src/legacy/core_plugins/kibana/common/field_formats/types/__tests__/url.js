@@ -39,11 +39,54 @@ describe('UrlFormat', function () {
       .to.be('<span ng-non-bindable><audio controls preload="none" src="http://elastic.co"></span>');
   });
 
-  it('outputs an <image> if type === "img"', function () {
-    const url = new UrlFormat({ type: 'img' });
+  describe('outputs an <image> if type === "img"', function () {
+    it('default', function () {
+      const url = new UrlFormat({ type: 'img' });
 
-    expect(url.convert('http://elastic.co', 'html'))
-      .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co"></span>');
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>');
+    });
+
+    it('with correct width and height set', function () {
+      const url = new UrlFormat({ type: 'img', width: '12', height: '55' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:12px; max-height:55px;"></span>');
+    });
+
+    it('with correct width and height set if no width specified', function () {
+      const url = new UrlFormat({ type: 'img', height: '55' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:55px;"></span>');
+    });
+
+    it('with correct width and height set if no height specified', function () {
+      const url = new UrlFormat({ type: 'img', width: '22' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:22px; max-height:none;"></span>');
+    });
+
+    it('only accepts valid numbers for width', function () {
+      const url = new UrlFormat({ type: 'img', width: 'not a number' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>');
+    });
+
+    it('only accepts valid numbers for height', function () {
+      const url = new UrlFormat({ type: 'img', height: 'not a number' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>');
+    });
   });
 
   describe('url template', function () {
@@ -188,6 +231,30 @@ describe('UrlFormat', function () {
 
       expect(converter('../foo/bar', null, null, parsedUrl))
         .to.be('<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/../foo/bar" target="_blank" rel="noopener noreferrer">../foo/bar</a></span>');
+    });
+
+    it('should support multiple types of urls w/o basePath', function () {
+      const url = new UrlFormat();
+      const parsedUrl = {
+        origin: 'http://kibana.host.com',
+        pathname: '/app/kibana',
+      };
+      const converter = url.getConverterFor('html');
+
+      expect(converter('10.22.55.66', null, null, parsedUrl))
+        .to.be('<span ng-non-bindable><a href="http://kibana.host.com/app/10.22.55.66" target="_blank" rel="noopener noreferrer">10.22.55.66</a></span>');
+
+      expect(converter('http://www.domain.name/app/kibana#/dashboard/', null, null, parsedUrl))
+        .to.be('<span ng-non-bindable><a href="http://www.domain.name/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">http://www.domain.name/app/kibana#/dashboard/</a></span>');
+
+      expect(converter('/app/kibana', null, null, parsedUrl))
+        .to.be('<span ng-non-bindable><a href="http://kibana.host.com/app/kibana" target="_blank" rel="noopener noreferrer">/app/kibana</a></span>');
+
+      expect(converter('kibana#/dashboard/', null, null, parsedUrl))
+        .to.be('<span ng-non-bindable><a href="http://kibana.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">kibana#/dashboard/</a></span>');
+
+      expect(converter('#/dashboard/', null, null, parsedUrl))
+        .to.be('<span ng-non-bindable><a href="http://kibana.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">#/dashboard/</a></span>');
     });
   });
 });
