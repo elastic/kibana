@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import './index_header';
 import './create_edit_field';
 import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
@@ -36,12 +35,14 @@ import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
+import { IndexHeader } from './components';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
+const REACT_EDIT_INDEX_HEADER = 'reactEditIndexHeader';
 
 function updateSourceFiltersTable($scope, $state) {
   if ($state.tab === 'sourceFilters') {
@@ -157,6 +158,33 @@ function destroyIndexedFieldsTable() {
   node && unmountComponentAtNode(node);
 }
 
+function updateIndexHeader($scope, config) {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_EDIT_INDEX_HEADER);
+    if (!node) {
+      return;
+    }
+
+    render(
+      <I18nContext>
+        <IndexHeader
+          defaultIndex={$scope.indexPattern.id === config.get('defaultIndex')}
+          indexPatternTitle={$scope.indexPattern.title}
+          setDefault={$scope.setDefaultPattern}
+          refreshFields={$scope.refreshFields}
+          removePattern={$scope.removePattern}
+        />
+      </I18nContext>,
+      node
+    );
+  });
+}
+
+function destoryIndexHeader() {
+  const node = document.getElementById(REACT_EDIT_INDEX_HEADER);
+  node && unmountComponentAtNode(node);
+}
+
 uiRoutes
   .when('/management/kibana/index_patterns/:indexPatternId', {
     template,
@@ -185,6 +213,7 @@ uiModules.get('apps/management')
       $scope.indexPattern,
       $scope.indexPattern.id === config.get('defaultIndex')
     );
+    config.bindToScope($scope, 'defaultIndex');
     $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
     docTitle.change($scope.indexPattern.title);
 
@@ -295,6 +324,10 @@ uiModules.get('apps/management')
       return $scope.indexPattern.save();
     };
 
+    $scope.$watch('defaultIndex', () => {
+      updateIndexHeader($scope, config);
+    });
+
     $scope.$watch('fieldFilter', () => {
       $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, indexPatternListProvider);
       if ($scope.fieldFilter === undefined) {
@@ -326,8 +359,10 @@ uiModules.get('apps/management')
     $scope.$on('$destroy', () => {
       destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
+      destoryIndexHeader();
     });
 
+    updateIndexHeader($scope, config);
     updateScriptedFieldsTable($scope, $state);
     updateSourceFiltersTable($scope, $state);
   });
