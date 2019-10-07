@@ -60,7 +60,7 @@ export async function execute({
 
   try {
     result = await actionType.executor({
-      id: actionId,
+      actionId,
       services,
       params: validatedParams,
       config: validatedConfig,

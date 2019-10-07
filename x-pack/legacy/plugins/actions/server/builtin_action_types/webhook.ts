@@ -85,7 +85,7 @@ export async function executor(
   const log = (level: string, msg: string) =>
     execOptions.services.log([level, 'actions', 'webhook'], msg);
 
-  const id = execOptions.id;
+  const actionId = execOptions.actionId;
   const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
   const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
@@ -107,7 +107,7 @@ export async function executor(
     const {
       value: { status, statusText },
     } = result;
-    log('debug', `response from webhook action "${id}": [HTTP ${status}] ${statusText}`);
+    log('debug', `response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
 
     return successResult(data);
   } else {
@@ -116,30 +116,30 @@ export async function executor(
     if (error.response) {
       const { status, statusText, headers: responseHeaders } = error.response;
       const message = `[${status}] ${statusText}`;
-      log(`warn`, `error on ${id} webhook event: ${message}`);
+      log(`warn`, `error on ${actionId} webhook event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // special handling for 5xx
       if (status >= 500) {
-        return retryResult(id, message);
+        return retryResult(actionId, message);
       }
 
       // special handling for rate limiting
       if (status === 429) {
         return pipe(
           getRetryAfterIntervalFromHeaders(responseHeaders),
-          map(retry => retryResultSeconds(id, message, retry)),
-          getOrElse(() => retryResult(id, message))
+          map(retry => retryResultSeconds(actionId, message, retry)),
+          getOrElse(() => retryResult(actionId, message))
         );
       }
-      return errorResultInvalid(id, message);
+      return errorResultInvalid(actionId, message);
     }
 
     const message = i18n.translate('xpack.actions.builtin.webhook.unreachableRemoteWebhook', {
       defaultMessage: 'Unreachable Remote Webhook, are you sure the address is correct?',
     });
-    log(`warn`, `error on ${id} webhook action: ${message}`);
-    return errorResultUnreachable(id, message);
+    log(`warn`, `error on ${actionId} webhook action: ${message}`);
+    return errorResultUnreachable(actionId, message);
   }
 }
 

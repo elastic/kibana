@@ -100,7 +100,7 @@ export function getActionType(): ActionType {
 // action executor
 
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
-  const id = execOptions.id;
+  const actionId = execOptions.actionId;
   const config = execOptions.config as ActionTypeConfigType;
   const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
@@ -111,16 +111,16 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
     'Content-Type': 'application/json',
     'X-Routing-Key': secrets.routingKey,
   };
-  const data = getBodyForEventAction(id, params);
+  const data = getBodyForEventAction(actionId, params);
 
   let response;
   try {
     response = await postPagerduty({ apiUrl, data, headers, services });
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingErrorMessage', {
-      defaultMessage: 'error in pagerduty action "{id}" posting event: {errorMessage}',
+      defaultMessage: 'error in pagerduty action "{actionId}" posting event: {errorMessage}',
       values: {
-        id,
+        actionId,
         errorMessage: err.message,
       },
     });
@@ -149,9 +149,9 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   if (response.status === 429 || response.status >= 500) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingRetryErrorMessage', {
       defaultMessage:
-        'error in pagerduty action "{id}" posting event: status {status}, retry later',
+        'error in pagerduty action "{actionId}" posting event: status {status}, retry later',
       values: {
-        id,
+        actionId,
         status: response.status,
       },
     });
@@ -164,9 +164,10 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   }
 
   const message = i18n.translate('xpack.actions.builtin.pagerduty.postingUnexpectedErrorMessage', {
-    defaultMessage: 'error in pagerduty action "{id}" posting event: unexpected status {status}',
+    defaultMessage:
+      'error in pagerduty action "{actionId}" posting event: unexpected status {status}',
     values: {
-      id,
+      actionId,
       status: response.status,
     },
   });

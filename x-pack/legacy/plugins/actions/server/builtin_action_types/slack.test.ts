@@ -123,7 +123,7 @@ describe('validateActionTypeSecrets()', () => {
 describe('execute()', () => {
   test('calls the mock executor with success', async () => {
     const response = await actionType.executor({
-      id: 'some-id',
+      actionId: 'some-id',
       services,
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
@@ -139,7 +139,7 @@ Object {
   test('calls the mock executor with failure', async () => {
     await expect(
       actionType.executor({
-        id: 'some-id',
+        actionId: 'some-id',
         services,
         config: {},
         secrets: { webhookUrl: 'http://example.com' },

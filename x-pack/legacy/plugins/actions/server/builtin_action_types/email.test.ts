@@ -183,8 +183,14 @@ describe('execute()', () => {
       message: 'a message to you',
     };
 
-    const id = 'some-id';
-    const executorOptions: ActionTypeExecutorOptions = { id, config, params, secrets, services };
+    const actionId = 'some-id';
+    const executorOptions: ActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
     sendEmailMock.mockReset();
     await actionType.executor(executorOptions);
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`

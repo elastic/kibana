@@ -86,9 +86,9 @@ describe('execute()', () => {
     const mockLog = jest.fn().mockResolvedValueOnce({ success: true });
 
     services.log = mockLog;
-    const id = 'some-id';
+    const actionId = 'some-id';
     await actionType.executor({
-      id,
+      actionId,
       services: {
         log: mockLog,
         callCluster: async (path: string, opts: any) => {},
