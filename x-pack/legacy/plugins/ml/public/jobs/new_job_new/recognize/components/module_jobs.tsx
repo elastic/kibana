@@ -7,14 +7,14 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
-  EuiListGroupItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
+  EuiSpacer,
+  EuiFlexGrid,
 } from '@elastic/eui';
 
 interface ModuleJobsProps {
@@ -32,71 +32,94 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) =
         </h4>
       </EuiTitle>
 
-      <EuiListGroup bordered={false} flush={true} wrapText={true} maxWidth={true}>
+      <ul>
         {jobs.map(({ id, config: { description }, setupResult, datafeedResult }) => (
-          <EuiListGroupItem
-            key={id}
-            label={
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" color="secondary">
-                        {jobPrefix}
-                        {id}
+          <li key={id}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiText size="s" color="secondary">
+                  {jobPrefix}
+                  {id}
+                </EuiText>
+
+                <EuiText size="s" color="subdued">
+                  {description}
+                </EuiText>
+
+                {setupResult && setupResult.error && (
+                  <EuiText size="xs" color="danger">
+                    {setupResult.error.msg}
+                  </EuiText>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {isSaving && <EuiLoadingSpinner size="m" />}
+                {setupResult && datafeedResult && (
+                  <EuiFlexGrid gutterSize="s" style={{ width: '200px' }}>
+                    <EuiFlexItem>
+                      <EuiText
+                        color={setupResult.success ? 'secondary' : 'danger'}
+                        size="xs"
+                        className="eui-textNoWrap"
+                        textAlign="center"
+                      >
+                        <EuiIcon
+                          type={setupResult.success ? 'check' : 'cross'}
+                          color={setupResult.success ? 'secondary' : 'danger'}
+                          size="s"
+                        />
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.jobLabel"
+                          defaultMessage="Job"
+                        />
                       </EuiText>
                     </EuiFlexItem>
+
                     <EuiFlexItem>
-                      {setupResult && datafeedResult && (
-                        <EuiFlexGroup gutterSize="none">
-                          <EuiBadge
-                            color={setupResult.success ? 'secondary' : 'danger'}
-                            iconType={setupResult.success ? 'check' : 'cross'}
-                          >
-                            <FormattedMessage
-                              id="xpack.ml.newJob.simple.recognize.jobLabel"
-                              defaultMessage="Job"
-                            />
-                          </EuiBadge>
-                          <EuiBadge
-                            color={datafeedResult.success ? 'secondary' : 'danger'}
-                            iconType={datafeedResult.success ? 'check' : 'cross'}
-                          >
-                            <FormattedMessage
-                              id="xpack.ml.newJob.simple.recognize.datafeedLabel"
-                              defaultMessage="Datafeed"
-                            />
-                          </EuiBadge>
-                          <EuiBadge
-                            color={datafeedResult.started ? 'secondary' : 'danger'}
-                            iconType={datafeedResult.started ? 'check' : 'cross'}
-                          >
-                            <FormattedMessage
-                              id="xpack.ml.newJob.simple.recognize.runningLabel"
-                              defaultMessage="Running"
-                            />
-                          </EuiBadge>
-                        </EuiFlexGroup>
-                      )}
+                      <EuiText
+                        color={datafeedResult.success ? 'secondary' : 'danger'}
+                        size="xs"
+                        className="eui-textNoWrap"
+                        textAlign="center"
+                      >
+                        <EuiIcon
+                          type={datafeedResult.success ? 'check' : 'cross'}
+                          color={datafeedResult.success ? 'secondary' : 'danger'}
+                          size="s"
+                        />
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.datafeedLabel"
+                          defaultMessage="Datafeed"
+                        />
+                      </EuiText>
                     </EuiFlexItem>
-                  </EuiFlexGroup>
 
-                  <EuiText size="s" color="subdued">
-                    {description}
-                  </EuiText>
-
-                  {setupResult && setupResult.error && (
-                    <EuiText size="xs" color="danger">
-                      {setupResult.error.msg}
-                    </EuiText>
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem>{isSaving && <EuiLoadingSpinner size="m" />}</EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          />
+                    <EuiFlexItem>
+                      <EuiText
+                        color={datafeedResult.started ? 'secondary' : 'danger'}
+                        size="xs"
+                        className="eui-textNoWrap"
+                        textAlign="center"
+                      >
+                        <EuiIcon
+                          type={datafeedResult.started ? 'check' : 'cross'}
+                          color={datafeedResult.started ? 'secondary' : 'danger'}
+                          size="s"
+                        />
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.runningLabel"
+                          defaultMessage="Running"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGrid>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </li>
         ))}
-      </EuiListGroup>
+      </ul>
     </>
   );
 };

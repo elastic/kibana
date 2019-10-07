@@ -143,7 +143,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   }, []);
 
   const jobPrefixValidator = composeValidators(
-    patternValidator(/^(?![\-_])[a-z0-9\-_]*/),
+    patternValidator(/^([a-z0-9]+[a-z0-9\-_]*)?$/),
     maxLengthValidator(JOB_ID_MAX_LENGTH - Math.max(...jobs.map(({ id }) => id.length)))
   );
   const groupValidator = composeValidators(
@@ -259,8 +259,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           </>
         )}
 
-        <EuiFlexGroup wrap={true} gutterSize="s">
-          <EuiFlexItem>
+        <EuiFlexGroup wrap={true} gutterSize="m">
+          <EuiFlexItem grow={1}>
             <EuiPanel>
               <EuiTitle size="s">
                 <h4>
@@ -442,7 +442,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
               />
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={2}>
             <EuiPanel>
               <ModuleJobs
                 jobs={jobs}
@@ -450,20 +450,19 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                 isSaving={saveState === SAVE_STATE.SAVING}
               />
             </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {Object.keys(kibanaObjects).map((objectType, i) => (
-              <Fragment key={objectType}>
-                <EuiPanel>
+            <EuiSpacer size="m" />
+            <EuiPanel>
+              {Object.keys(kibanaObjects).map((objectType, i) => (
+                <Fragment key={objectType}>
                   <KibanaObjects
                     objectType={objectType}
                     kibanaObjects={kibanaObjects[objectType]}
                     isSaving={saveState === SAVE_STATE.SAVING}
                   />
-                </EuiPanel>
-                {i < Object.keys(kibanaObjects).length - 1 && <EuiSpacer size="s" />}
-              </Fragment>
-            ))}
+                  {i < Object.keys(kibanaObjects).length - 1 && <EuiSpacer size="s" />}
+                </Fragment>
+              ))}
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />

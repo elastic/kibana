@@ -21,4 +21,4 @@ export const JOB_ID_MAX_LENGTH = 64;
  * Job ID must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores.
  * It must also start and end with an alphanumeric character.
  */
-export const JOB_ID_PATTERN = /^(?![\-_])[a-z0-9\-_]*(?<![\-_])$/;
+export const JOB_ID_PATTERN = /^([a-z0-9]+[a-z0-9\-_]*(?<![\-_]))?$/;
