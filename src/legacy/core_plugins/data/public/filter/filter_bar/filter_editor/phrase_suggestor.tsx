@@ -18,14 +18,17 @@
  */
 
 import { Component } from 'react';
-import { getSuggestions } from 'ui/value_suggestions';
-import { UiSettingsClientContract } from 'src/core/public';
 import { Field, IndexPattern } from '../../../index_patterns';
+import {
+  withKibana,
+  KibanaReactContextValue,
+} from '../../../../../../../plugins/kibana_react/public';
+import { IDataPluginServices } from '../../../types';
 
 export interface PhraseSuggestorProps {
+  kibana: KibanaReactContextValue<IDataPluginServices>;
   indexPattern: IndexPattern;
   field?: Field;
-  uiSettings: UiSettingsClientContract;
 }
 
 export interface PhraseSuggestorState {
@@ -38,10 +41,11 @@ export interface PhraseSuggestorState {
  * aggregatable), we pull out the common logic for requesting suggestions into this component
  * which both of them extend.
  */
-export class PhraseSuggestor<T extends PhraseSuggestorProps> extends Component<
+export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component<
   T,
   PhraseSuggestorState
 > {
+  private services = this.props.kibana.services;
   public state: PhraseSuggestorState = {
     suggestions: [],
     isLoading: false,
@@ -52,7 +56,7 @@ export class PhraseSuggestor<T extends PhraseSuggestorProps> extends Component<
   }
 
   protected isSuggestingValues() {
-    const shouldSuggestValues = this.props.uiSettings.get('filterEditor:suggestValues');
+    const shouldSuggestValues = this.services.uiSettings.get('filterEditor:suggestValues');
     const { field } = this.props;
     return shouldSuggestValues && field && field.aggregatable && field.type === 'string';
   }
@@ -67,7 +71,9 @@ export class PhraseSuggestor<T extends PhraseSuggestorProps> extends Component<
       return;
     }
     this.setState({ isLoading: true });
-    const suggestions = await getSuggestions(indexPattern.title, field, value);
+    const suggestions = await this.services.data.getSuggestions(indexPattern.title, field, value);
     this.setState({ suggestions, isLoading: false });
   }
 }
+
+export const PhraseSuggestor = withKibana(PhraseSuggestorUI);

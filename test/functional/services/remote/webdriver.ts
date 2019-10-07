@@ -22,18 +22,17 @@ import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriver';
-// @ts-ignore types not available
+import { Builder, Capabilities, By, logging, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
-// @ts-ignore types not available
 import firefox from 'selenium-webdriver/firefox';
-// @ts-ignore internal modules are not typed
-import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
+// @ts-ignore types not available
+import ie from 'selenium-webdriver/ie';
 // @ts-ignore internal modules are not typed
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
 
+import { resolve, delimiter } from 'path';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
@@ -89,17 +88,42 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .withCapabilities(chromeCapabilities)
           .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
           .build();
+
       case 'firefox':
         const firefoxOptions = new firefox.Options();
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
-          firefoxOptions.addArguments('-headless');
+          firefoxOptions.headless();
         }
         return new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
           .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
           .build();
+
+      case 'ie':
+        // https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/ie_exports_Options.html
+        const driverPath = resolve(
+          __dirname,
+          '..\\..\\..\\..\\node_modules\\iedriver\\lib\\iedriver'
+        );
+        process.env.PATH = driverPath + delimiter + process.env.PATH;
+
+        const ieCapabilities = Capabilities.ie();
+        ieCapabilities.set('se:ieOptions', {
+          'ie.ensureCleanSession': true,
+          ignoreProtectedModeSettings: true,
+          ignoreZoomSetting: false, // requires us to have 100% zoom level
+          nativeEvents: true, // need this for values to stick but it requires 100% scaling and window focus
+          requireWindowFocus: true,
+          logLevel: 'TRACE',
+        });
+
+        return new Builder()
+          .forBrowser(browserType)
+          .withCapabilities(ieCapabilities)
+          .build();
+
       default:
         throw new Error(`${browserType} is not supported yet`);
     }
@@ -123,7 +147,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
     return;
   } // abort
 
-  return { driver: session, By, Key, until, LegacyActionSequence };
+  return { driver: session, By, until };
 }
 
 export async function initWebDriver(log: ToolingLog, browserType: Browsers) {
