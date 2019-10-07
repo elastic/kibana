@@ -46,4 +46,4 @@ export interface FunctionHandlers {
   [key: string]: (...args: any) => any;
 }
 
-export type AnyExpressionFunction = ExpressionFunction<any, any, any, any>;
+export type AnyExpressionFunction = ExpressionFunction<string, any, any, any>;
