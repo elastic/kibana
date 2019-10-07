@@ -12,6 +12,7 @@ import { RedirectToHostsPage, RedirectToHostDetailsPage } from './redirect_to_ho
 import { RedirectToNetworkPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
 import { RedirectToTimelinesPage } from './redirect_to_timelines';
+import { RedirectToDetectionEnginePage } from './redirect_to_detection_engine';
 import { HostsTableType } from '../../store/hosts/model';
 
 interface LinkToPageProps {
@@ -41,6 +42,10 @@ export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
       component={RedirectToNetworkPage}
     />
     <Route path={`${match.url}/:pageName(timelines)`} component={RedirectToTimelinesPage} />
+    <Route
+      path={`${match.url}/:pageName(detection-engine)`}
+      component={RedirectToDetectionEnginePage}
+    />
     <Redirect to="/" />
   </Switch>
 ));

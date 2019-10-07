@@ -83,6 +83,8 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'overview';
   } else if (pageName === SiemPageName.timelines) {
     return 'timeline';
+  } else if (pageName === SiemPageName.detectionEngine) {
+    return 'detection-engine';
   }
   return 'overview';
 };
@@ -114,6 +116,8 @@ export const getCurrentLocation = (
     return CONSTANTS.overviewPage;
   } else if (pageName === SiemPageName.timelines) {
     return CONSTANTS.timelinePage;
+  } else if (pageName === SiemPageName.detectionEngine) {
+    return CONSTANTS.detectionEnginePage;
   }
   return CONSTANTS.unknown;
 };

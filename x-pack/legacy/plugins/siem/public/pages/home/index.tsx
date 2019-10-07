@@ -153,7 +153,7 @@ export const HomePage = pure(() => (
                         <NetworkContainer url={match.url} location={location} />
                       )}
                     />
-                    <Route path="/:pageName(detectionEngine)" render={() => <DetectionEngine />} />
+                    <Route path="/:pageName(detection-engine)" render={() => <DetectionEngine />} />
                     <Route path="/:pageName(timelines)" render={() => <Timelines />} />
                     <Route path="/link-to" component={LinkToPage} />
                     <Route

@@ -27,9 +27,11 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
   network: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
   timeline: [CONSTANTS.timelineId, CONSTANTS.timerange],
   overview: [CONSTANTS.timelineId, CONSTANTS.timerange],
+  'detection-engine': [],
 };
 
 export type LocationTypes =
+  | CONSTANTS.detectionEnginePage
   | CONSTANTS.networkDetails
   | CONSTANTS.networkPage
   | CONSTANTS.hostsDetails
