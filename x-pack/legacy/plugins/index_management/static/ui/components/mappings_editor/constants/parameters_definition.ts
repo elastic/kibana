@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FIELD_TYPES, fieldValidators, fieldFormatters } from '../shared_imports';
+import { FIELD_TYPES, fieldValidators, fieldFormatters, FieldConfig } from '../shared_imports';
 import { ParameterName, Parameter } from '../types';
 
 const { toInt } = fieldFormatters;
@@ -117,7 +117,7 @@ export const PARAMETERS_DEFINITION: {
           },
         },
       ],
-    },
+    } as FieldConfig,
   },
   dynamic: {
     fieldConfig: {
@@ -241,7 +241,7 @@ export const PARAMETERS_DEFINITION: {
           },
         },
       ],
-    },
+    } as FieldConfig,
   },
   index_prefixes: {
     fieldConfig: {
@@ -317,7 +317,7 @@ export const PARAMETERS_DEFINITION: {
           },
         ],
       },
-    },
+    } as { [key: string]: FieldConfig },
   },
   similarity: {
     fieldConfig: {
@@ -350,6 +350,6 @@ export const PARAMETERS_DEFINITION: {
           },
         },
       ],
-    },
+    } as FieldConfig,
   },
 };

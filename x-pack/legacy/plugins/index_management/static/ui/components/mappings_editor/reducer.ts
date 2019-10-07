@@ -104,7 +104,12 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         isValid,
-        documentFields: { ...state.documentFields, status: action.value },
+        documentFields: {
+          ...state.documentFields,
+          status: action.value,
+          fieldToAddFieldTo: undefined,
+          fieldToEdit: undefined,
+        },
       };
     case 'documentField.changeEditor':
       return { ...state, documentFields: { ...state.documentFields, editor: action.value } };
@@ -144,6 +149,7 @@ export const reducer = (state: State, action: Action): State => {
         ...state,
         isValid: state.configuration.isValid,
         fieldForm: undefined,
+        documentFields: { ...state.documentFields, fieldToAddFieldTo: undefined },
         fields: { ...state.fields, rootLevelFields, maxNestedDepth },
       };
     }
@@ -223,6 +229,7 @@ export const reducer = (state: State, action: Action): State => {
         fieldForm: undefined,
         documentFields: {
           ...state.documentFields,
+          fieldToEdit: undefined,
           status: 'idle',
         },
         fields: {
