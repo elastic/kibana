@@ -340,6 +340,57 @@ export const ComponentStrings = {
         defaultMessage: 'Select an element to show expression input',
       }),
   },
+  ExpressionInput: {
+    getArgReferenceAcceptsDetail: (required: boolean) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceAcceptsDetail', {
+        defaultMessage: '**Accepts**: {required}',
+        values: {
+          required,
+        },
+      }),
+    getArgReferenceAliasesDetail: (aliases: string) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceAliasesDetail', {
+        defaultMessage: '**Aliases**: {aliases}',
+        values: {
+          aliases,
+        },
+      }),
+    getArgReferenceDefaultDetail: (defaultVal: string) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceDefaultDetail', {
+        defaultMessage: '**Default**: {defaultVal}',
+        values: {
+          defaultVal,
+        },
+      }),
+    getArgReferenceRequiredDetail: (required: string) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceRequiredDetail', {
+        defaultMessage: '**Required**: {required}',
+        values: {
+          required,
+        },
+      }),
+    getArgReferenceTypesDetail: (types: string) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceTypesDetail', {
+        defaultMessage: '**Types**: {types}',
+        values: {
+          types,
+        },
+      }),
+    getFunctionReferenceAcceptsDetail: (types: string) =>
+      i18n.translate('xpack.canvas.expressionInput.functionReferenceAcceptsDetail', {
+        defaultMessage: '**Accepts**: {types}',
+        values: {
+          types,
+        },
+      }),
+    getFunctionReferenceReturnsDetail: (type: string) =>
+      i18n.translate('xpack.canvas.expressionInput.functionReferenceReturnsDetail', {
+        defaultMessage: '**Returns**: {type}',
+        values: {
+          type,
+        },
+      }),
+  },
   GroupSettings: {
     getSaveGroupDescription: () =>
       i18n.translate('xpack.canvas.groupSettings.saveGroupDescription', {
