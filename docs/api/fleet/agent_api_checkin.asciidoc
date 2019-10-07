@@ -38,14 +38,14 @@ Report current state of a Fleet agent.
 --------------------------------------------------
 POST /api/fleet/agents/a4937110-e53e-11e9-934f-47a8e38a522c/checkin
 {
-	"events": [{
-		"type": "STATE",
-		"subtype": "STARTING",
-		"message": "state changed from STOPPED to STARTING",
-		"timestamp": "2019-10-01T13:42:54.323Z",
-		"payload": {},
-		"data": "{}"
-	}]
+  "events": [{
+    "type": "STATE",
+    "subtype": "STARTING",
+    "message": "state changed from STOPPED to STARTING",
+    "timestamp": "2019-10-01T13:42:54.323Z",
+    "payload": {},
+    "data": "{}"
+  }]
 }
 --------------------------------------------------
 // KIBANA

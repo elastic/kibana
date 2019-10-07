@@ -36,10 +36,10 @@
 --------------------------------------------------
 POST /api/fleet/agents/enroll
 {
-	"type": "PERMANENT",
+  "type": "PERMANENT",
   "metadata": {
-	  "local": { "os": "macos"},
-	  "userProvided": { "region": "us-east"}
+    "local": { "os": "macos"},
+    "userProvided": { "region": "us-east"}
   }
 }
 --------------------------------------------------
