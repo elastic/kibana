@@ -1,6 +1,9 @@
 .mapTooltipSelector__propertyRow {
   display: flex;
 
+  padding-bottom: $euiSizeS;
+  border-bottom: 1px solid $euiColorLightShade;
+
   &:hover,
   &:focus,
   &:focus-within {
