@@ -8,45 +8,22 @@ import * as SECTION_LABELS from '../sectionLabels';
 
 export const ERROR_METADATA_SECTIONS = [
   {
-    key: 'labels',
-    label: SECTION_LABELS.LABELS,
+    ...SECTION_LABELS.LABELS,
+    required: true
+  },
+  SECTION_LABELS.HTTP,
+  SECTION_LABELS.HOST,
+  SECTION_LABELS.CONTAINER,
+  SECTION_LABELS.SERVICE,
+  SECTION_LABELS.PROCESS,
+  SECTION_LABELS.AGENT,
+  SECTION_LABELS.URL,
+  {
+    ...SECTION_LABELS.USER,
     required: true
   },
   {
-    key: 'http',
-    label: SECTION_LABELS.HTTP
-  },
-  {
-    key: 'host',
-    label: SECTION_LABELS.HOST
-  },
-  {
-    key: 'container',
-    label: SECTION_LABELS.CONTAINER
-  },
-  {
-    key: 'service',
-    label: SECTION_LABELS.SERVICE
-  },
-  {
-    key: 'process',
-    label: SECTION_LABELS.PROCESS
-  },
-  {
-    key: 'agent',
-    label: SECTION_LABELS.AGENT
-  },
-  {
-    key: 'url',
-    label: SECTION_LABELS.URL
-  },
-  {
-    key: 'user',
-    label: SECTION_LABELS.USER,
-    required: true
-  },
-  {
-    key: 'error.custom',
-    label: SECTION_LABELS.CUSTOM
+    ...SECTION_LABELS.CUSTOM,
+    key: 'error.custom'
   }
 ];

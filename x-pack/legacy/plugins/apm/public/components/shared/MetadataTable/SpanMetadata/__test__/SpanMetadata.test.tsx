@@ -13,39 +13,47 @@ import { expectTextsInDocument } from '../../../../../utils/testHelpers';
 
 describe('SpanMetadata', () => {
   afterEach(cleanup);
-  it('should render', () => {
-    const span = ({
-      agent: {
-        ephemeral_id: 'ed8e3a4f-21d2-4a1f-bbc7-fa2064d94225',
-        name: 'java',
-        version: '1.9.1-SNAPSHOT'
-      },
-      service: {
-        name: 'opbeans-java'
-      }
-    } as unknown) as Span;
-    const output = render(<SpanMetadata span={span} />);
-    expectTextsInDocument(output, ['Service', 'Agent']);
-  });
-  it('should render with span', () => {
-    const span = ({
-      agent: {
-        ephemeral_id: 'ed8e3a4f-21d2-4a1f-bbc7-fa2064d94225',
-        name: 'java',
-        version: '1.9.1-SNAPSHOT'
-      },
-      service: {
-        name: 'opbeans-java'
-      },
-      span: {
-        http: {
-          response: { status_code: 200 }
+  describe('render', () => {
+    it('renders', () => {
+      const span = ({
+        agent: {
+          ephemeral_id: 'ed8e3a4f-21d2-4a1f-bbc7-fa2064d94225',
+          name: 'java',
+          version: '1.9.1-SNAPSHOT'
         },
-        subtype: 'http',
-        type: 'external'
-      }
-    } as unknown) as Span;
-    const output = render(<SpanMetadata span={span} />);
-    expectTextsInDocument(output, ['Service', 'Agent', 'Span']);
+        service: {
+          name: 'opbeans-java'
+        },
+        span: {
+          id: '7efbc7056b746fcb'
+        }
+      } as unknown) as Span;
+      const output = render(<SpanMetadata span={span} />);
+      expectTextsInDocument(output, ['Service', 'Agent']);
+    });
+  });
+  describe('when a span is presented', () => {
+    it('renders the span', () => {
+      const span = ({
+        agent: {
+          ephemeral_id: 'ed8e3a4f-21d2-4a1f-bbc7-fa2064d94225',
+          name: 'java',
+          version: '1.9.1-SNAPSHOT'
+        },
+        service: {
+          name: 'opbeans-java'
+        },
+        span: {
+          id: '7efbc7056b746fcb',
+          http: {
+            response: { status_code: 200 }
+          },
+          subtype: 'http',
+          type: 'external'
+        }
+      } as unknown) as Span;
+      const output = render(<SpanMetadata span={span} />);
+      expectTextsInDocument(output, ['Service', 'Agent', 'Span']);
+    });
   });
 });

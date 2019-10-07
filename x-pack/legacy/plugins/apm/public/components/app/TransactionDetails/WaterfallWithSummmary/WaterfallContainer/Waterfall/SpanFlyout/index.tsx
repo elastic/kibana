@@ -19,7 +19,6 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { idx } from '@kbn/elastic-idx';
@@ -73,9 +72,6 @@ function getSpanTypes(span: Span) {
   };
 }
 
-const getSpanHttpStatusCode = (span: Span): number | undefined =>
-  get(span, 'span.http.response.status_code');
-
 const SpanBadge = styled(EuiBadge)`
   display: inline-block;
   margin-right: ${px(units.quarter)};
@@ -103,7 +99,7 @@ export function SpanFlyout({
   const dbContext = idx(span, _ => _.span.db);
   const httpContext = idx(span, _ => _.span.http);
   const spanTypes = getSpanTypes(span);
-  const spanHttpStatusCode = getSpanHttpStatusCode(span);
+  const spanHttpStatusCode = idx(span, _ => _.span.http.response.status_code);
 
   return (
     <EuiPortal>

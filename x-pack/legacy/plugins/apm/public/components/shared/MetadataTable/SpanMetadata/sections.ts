@@ -7,16 +7,10 @@
 import * as SECTION_LABELS from '../sectionLabels';
 
 export const SPAN_METADATA_SECTIONS = [
-  {
-    key: 'agent',
-    label: SECTION_LABELS.AGENT
-  },
-  {
-    key: 'service',
-    label: SECTION_LABELS.SERVICE
-  },
-  {
-    key: 'span',
-    label: SECTION_LABELS.SPAN
-  }
+  SECTION_LABELS.AGENT,
+  SECTION_LABELS.SERVICE,
+  SECTION_LABELS.SPAN,
+  SECTION_LABELS.LABELS,
+  SECTION_LABELS.TRANSACTION,
+  SECTION_LABELS.TRACE
 ];

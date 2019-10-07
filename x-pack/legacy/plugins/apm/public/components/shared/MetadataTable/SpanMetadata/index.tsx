@@ -14,10 +14,12 @@ interface Props {
 }
 
 export function SpanMetadata({ span }: Props) {
-  const clonedSpan: Span = JSON.parse(JSON.stringify(span));
-  if (clonedSpan && clonedSpan.span) {
-    delete clonedSpan.span.stacktrace;
-  }
+  const spanCopy = {
+    ...span,
+    span: {
+      id: span.span.id
+    }
+  };
 
-  return <MetadataTable item={clonedSpan} sections={SPAN_METADATA_SECTIONS} />;
+  return <MetadataTable item={spanCopy} sections={SPAN_METADATA_SECTIONS} />;
 }
