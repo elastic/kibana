@@ -41,10 +41,7 @@ export class HeadlessChromiumDriver {
   }
 
   private allowRequest(url: string, ip: string | null) {
-    return (
-      !this.networkPolicy.enabled ||
-      allowRequest(url, ip, this.networkPolicy.allow, this.networkPolicy.deny)
-    );
+    return !this.networkPolicy.enabled || allowRequest({ url, ip }, this.networkPolicy.rules);
   }
 
   private truncateUrl(url: string) {

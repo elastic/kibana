@@ -5,79 +5,54 @@
  */
 
 import * as _ from 'lodash';
-import { parse } from 'url';
+import * as url from 'url';
 
-type filterList = string[];
-type allowBy = (filterBy: string) => boolean;
+interface FirewallRequest {
+  ip: string | null;
+  url: string;
+}
 
-// Note we allow wildcards (*) in these
-const IP_REG = /(?:[0-9*]{1,3}\.){3}[0-9*]{1,3}$/;
+interface FirewallRule {
+  allow: boolean;
+  hosts?: string[];
+  protocols?: string[];
+  ips?: string[];
+}
 
-const isIp = (filter: string) => IP_REG.test(filter);
-const isProtocol = (filter: string) => filter.endsWith(':');
+export const allowRequest = (request: FirewallRequest, rules: FirewallRule[]) => {
+  const parsed = url.parse(request.url);
 
-const ipMatchFilter = (ip: string, filter: string) => {
-  const ipParts = ip.split('.');
-  const filterParts = filter.split('.');
-
-  return _.every(ipParts, (part, idx) => filterParts[idx] === part || filterParts[idx] === '*');
-};
-
-const isAllowed = (allowBy: allowBy, allowList: filterList, denyList: filterList) => {
-  return (!allowList.length || _.some(allowList, allowBy)) && !_.some(denyList, allowBy);
-};
-
-const allowProtocol = (url: string, allowList: filterList, denyList: filterList) => {
-  const allowBy: allowBy = filterPattern => url.startsWith(filterPattern);
-  return isAllowed(allowBy, allowList, denyList);
-};
-
-const allowIp = (ip: string, allowList: filterList, denyList: filterList) => {
-  const allowBy: allowBy = (filterPattern: string) => ipMatchFilter(ip, filterPattern);
-  return isAllowed(allowBy, allowList, denyList);
-};
-
-const allowUrl = (url: string, allowList: filterList, denyList: filterList) => {
-  const { host } = parse(url);
-
-  const allowBy: allowBy = filter => (host || '').endsWith(filter);
-  return isAllowed(allowBy, allowList, denyList);
-};
-
-export const allowRequest = (
-  url: string,
-  ip: string | null,
-  allowList: filterList,
-  denyList: filterList
-) => {
-  if (!allowList.length && !denyList.length) {
+  if (!rules.length) {
     return true;
   }
 
-  let isProtocolOk = true;
-  let isIPOk = true;
-  let isHostOK = true;
+  // Accumulator has three potential values here:
+  // True => allow request, don't check other rules
+  // False => reject request, don't check other rules
+  // Undefined => Not yet known, proceed to next rule
+  const allowed = rules.reduce((result: boolean | undefined, rule) => {
+    if (typeof result === 'boolean') {
+      return result;
+    }
 
-  const protocolAllowFilters = _.filter(allowList, isProtocol);
-  const protocolDenyFilters = _.filter(denyList, isProtocol);
+    const isHostMatch = rule.hosts
+      ? _.some(rule.hosts, host => (parsed.host || '').endsWith(host))
+      : false;
 
-  const ipAllowFilters = _.filter(allowList, isIp);
-  const ipDenyFilters = _.filter(denyList, isIp);
+    const isProtocolMatch = rule.protocols
+      ? _.some(rule.protocols, protocol => protocol === parsed.protocol)
+      : false;
 
-  const hostAllowFilters = _.difference(allowList, [...protocolAllowFilters, ...ipAllowFilters]);
-  const hostDenyFilters = _.difference(denyList, [...protocolDenyFilters, ...ipDenyFilters]);
+    const isIPMatch = rule.ips
+      ? request.ip
+        ? _.some(rule.ips, ip => ip === request.ip)
+        : rule.allow
+      : false;
 
-  if (protocolAllowFilters.length || protocolDenyFilters.length) {
-    isProtocolOk = allowProtocol(url, protocolAllowFilters, protocolDenyFilters);
-  }
+    const isRuleMatch = isHostMatch || isProtocolMatch || isIPMatch;
 
-  if (ipAllowFilters.length || ipDenyFilters.length) {
-    isIPOk = !ip || allowIp(ip, allowList, denyList);
-  }
+    return rule.allow || isRuleMatch ? rule.allow && isRuleMatch : undefined;
+  }, undefined);
 
-  if (hostAllowFilters.length || hostDenyFilters.length) {
-    isHostOK = allowUrl(url, allowList, denyList);
-  }
-
-  return isProtocolOk && isIPOk && isHostOK;
+  return typeof allowed === 'undefined' || allowed;
 };

@@ -12,10 +12,16 @@ interface UiSettings {
 
 type SavedObjectClient = any;
 
+export interface NetworkPolicyRule {
+  allow: boolean;
+  protocols: string[];
+  ips: string[];
+  hosts: string[];
+}
+
 export interface NetworkPolicy {
   enabled: boolean;
-  allow: string[];
-  deny: string[];
+  rules: NetworkPolicyRule[];
 }
 
 // these types shoud be in core kibana and are only here temporarily

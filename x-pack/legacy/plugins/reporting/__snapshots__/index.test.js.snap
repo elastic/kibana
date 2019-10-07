@@ -18,15 +18,19 @@ Object {
     "loadDelay": 3000,
     "maxAttempts": 1,
     "networkPolicy": Object {
-      "allow": Array [
-        "http:",
-        "https:",
-        "ws:",
-        "wss:",
-        "data:",
-      ],
-      "deny": Array [],
       "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocols": Array [
+            "http:",
+            "https:",
+            "ws:",
+            "wss:",
+            "data:",
+          ],
+        },
+      ],
     },
     "settleTime": 1000,
     "timeout": 20000,
@@ -92,15 +96,19 @@ Object {
     "loadDelay": 3000,
     "maxAttempts": 3,
     "networkPolicy": Object {
-      "allow": Array [
-        "http:",
-        "https:",
-        "ws:",
-        "wss:",
-        "data:",
-      ],
-      "deny": Array [],
       "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocols": Array [
+            "http:",
+            "https:",
+            "ws:",
+            "wss:",
+            "data:",
+          ],
+        },
+      ],
     },
     "settleTime": 1000,
     "timeout": 20000,
@@ -165,15 +173,19 @@ Object {
     "loadDelay": 3000,
     "maxAttempts": 1,
     "networkPolicy": Object {
-      "allow": Array [
-        "http:",
-        "https:",
-        "ws:",
-        "wss:",
-        "data:",
-      ],
-      "deny": Array [],
       "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocols": Array [
+            "http:",
+            "https:",
+            "ws:",
+            "wss:",
+            "data:",
+          ],
+        },
+      ],
     },
     "settleTime": 1000,
     "timeout": 20000,
@@ -239,15 +251,19 @@ Object {
     "loadDelay": 3000,
     "maxAttempts": 3,
     "networkPolicy": Object {
-      "allow": Array [
-        "http:",
-        "https:",
-        "ws:",
-        "wss:",
-        "data:",
-      ],
-      "deny": Array [],
       "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocols": Array [
+            "http:",
+            "https:",
+            "ws:",
+            "wss:",
+            "data:",
+          ],
+        },
+      ],
     },
     "settleTime": 1000,
     "timeout": 20000,

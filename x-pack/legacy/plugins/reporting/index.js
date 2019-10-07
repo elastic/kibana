@@ -94,8 +94,15 @@ export const reporting = (kibana) => {
         capture: Joi.object({
           networkPolicy: Joi.object({
             enabled: Joi.boolean().default(true),
-            allow: Joi.array().items(Joi.string().invalid('file:')).default(['http:', 'https:', 'ws:', 'wss:', 'data:']),
-            deny: Joi.array().items(Joi.string()).default([]),
+            rules: Joi.array().items(Joi.object({
+              allow: Joi.boolean().required(),
+              protocols: Joi.array().items(Joi.string()),
+              hosts: Joi.array().items(Joi.string()),
+              ips: Joi.array().items(Joi.string()),
+            })).default([{
+              allow: true,
+              protocols: ['http:', 'https:', 'ws:', 'wss:', 'data:'],
+            }]),
           }).default(),
           zoom: Joi.number().integer().default(2),
           viewport: Joi.object({
