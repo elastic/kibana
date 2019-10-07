@@ -10,7 +10,7 @@ import { LegacyPluginInitializer } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { CoreSetup } from 'src/core/server';
 import mappings from './mappings.json';
-import { PLUGIN_ID, getEditPath, BASE_API_URL } from './common';
+import { PLUGIN_ID, getEditPath } from './common';
 import { lensServerPlugin } from './server';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
@@ -87,7 +87,6 @@ export const lens: LegacyPluginInitializer = kibana => {
       plugin.setup(({
         http: {
           ...kbnServer.newPlatform.setup.core.http,
-          createRouter: () => kbnServer.newPlatform.setup.core.http.createRouter(BASE_API_URL),
         },
       } as unknown) as CoreSetup);
 
