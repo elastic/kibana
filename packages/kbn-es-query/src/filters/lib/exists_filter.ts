@@ -21,6 +21,13 @@ import { Filter, FilterMeta } from './meta_filter';
 
 export type ExistsFilterMeta = FilterMeta;
 
+export interface FilterExistsProperty {
+  field: any;
+}
+
 export type ExistsFilter = Filter & {
   meta: ExistsFilterMeta;
+  exists?: FilterExistsProperty;
 };
+
+export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
