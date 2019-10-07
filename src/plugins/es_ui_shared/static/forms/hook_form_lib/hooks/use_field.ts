@@ -360,12 +360,12 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
   };
 
   const reset = () => {
-    setValue(initialValue);
-    setErrors([]);
     setPristine(true);
     setValidating(false);
     setIsChangingValue(false);
     setIsValidated(false);
+    setErrors([]);
+    setValue(initialValue);
   };
 
   const serializeOutput: FieldHook['__serializeOutput'] = (rawValue = value) =>
