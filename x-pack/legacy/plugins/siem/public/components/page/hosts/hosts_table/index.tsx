@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import memoizeOne from 'memoize-one';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
@@ -38,8 +37,8 @@ interface OwnProps {
   data: HostsEdges[];
   fakeTotalCount: number;
   id: string;
-  isInspect: boolean;
   indexPattern: StaticIndexPattern;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -49,15 +48,15 @@ interface OwnProps {
 
 interface HostsTableReduxProps {
   activePage: number;
+  direction: Direction;
   limit: number;
   sortField: HostsFields;
-  direction: Direction;
 }
 
 interface HostsTableDispatchProps {
   updateHostsSort: ActionCreator<{
-    sort: HostsSortField;
     hostsType: hostsModel.HostsType;
+    sort: HostsSortField;
   }>;
   updateTableActivePage: ActionCreator<{
     activePage: number;
@@ -65,8 +64,8 @@ interface HostsTableDispatchProps {
     tableType: hostsModel.HostsTableType;
   }>;
   updateTableLimit: ActionCreator<{
-    limit: number;
     hostsType: hostsModel.HostsType;
+    limit: number;
     tableType: hostsModel.HostsTableType;
   }>;
 }
@@ -90,47 +89,58 @@ const rowItems: ItemsPerRow[] = [
     numberOfRow: 10,
   },
 ];
+const getSorting = (
+  trigger: string,
+  sortField: HostsFields,
+  direction: Direction
+): SortingBasicTable => ({ field: getNodeField(sortField), direction });
 
-class HostsTableComponent extends React.PureComponent<HostsTableProps> {
-  private memoizedColumns: (
-    type: hostsModel.HostsType,
-    indexPattern: StaticIndexPattern
-  ) => HostsTableColumns;
-  private memoizedSorting: (
-    trigger: string,
-    sortField: HostsFields,
-    direction: Direction
-  ) => SortingBasicTable;
+const HostsTableComponent = React.memo<HostsTableProps>(
+  ({
+    activePage,
+    data,
+    direction,
+    fakeTotalCount,
+    id,
+    indexPattern,
+    isInspect,
+    limit,
+    loading,
+    loadPage,
+    showMorePagesIndicator,
+    sortField,
+    totalCount,
+    type,
+    updateHostsSort,
+    updateTableActivePage,
+    updateTableLimit,
+  }) => {
+    const onChange = (criteria: Criteria) => {
+      if (criteria.sort != null) {
+        const sort: HostsSortField = {
+          field: getSortField(criteria.sort.field),
+          direction: criteria.sort.direction,
+        };
+        if (sort.direction !== direction || sort.field !== sortField) {
+          updateHostsSort({
+            sort,
+            hostsType: type,
+          });
+        }
+      }
+    };
 
-  constructor(props: HostsTableProps) {
-    super(props);
-    this.memoizedColumns = memoizeOne(this.getMemoizeHostsColumns);
-    this.memoizedSorting = memoizeOne(this.getSorting);
-  }
+    const hostsColumns = useMemo(() => getHostsColumns(type, indexPattern), [type, indexPattern]);
 
-  public render() {
-    const {
-      activePage,
-      data,
-      direction,
-      fakeTotalCount,
-      id,
-      isInspect,
-      indexPattern,
-      limit,
-      loading,
-      loadPage,
-      showMorePagesIndicator,
-      totalCount,
+    const sorting = useMemo(() => getSorting(`${sortField}-${direction}`, sortField, direction), [
       sortField,
-      type,
-      updateTableActivePage,
-      updateTableLimit,
-    } = this.props;
+      direction,
+    ]);
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={this.memoizedColumns(type, indexPattern)}
+        columns={hostsColumns}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={i18n.HOSTS}
@@ -141,10 +151,10 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         limit={limit}
         loading={loading}
         loadPage={newActivePage => loadPage(newActivePage)}
-        onChange={this.onChange}
+        onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
-        sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
+        sorting={sorting}
         totalCount={fakeTotalCount}
         updateLimitPagination={newLimit =>
           updateTableLimit({
@@ -163,33 +173,9 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
       />
     );
   }
+);
 
-  private getSorting = (
-    trigger: string,
-    sortField: HostsFields,
-    direction: Direction
-  ): SortingBasicTable => ({ field: getNodeField(sortField), direction });
-
-  private getMemoizeHostsColumns = (
-    type: hostsModel.HostsType,
-    indexPattern: StaticIndexPattern
-  ): HostsTableColumns => getHostsColumns(type, indexPattern);
-
-  private onChange = (criteria: Criteria) => {
-    if (criteria.sort != null) {
-      const sort: HostsSortField = {
-        field: getSortField(criteria.sort.field),
-        direction: criteria.sort.direction,
-      };
-      if (sort.direction !== this.props.direction || sort.field !== this.props.sortField) {
-        this.props.updateHostsSort({
-          sort,
-          hostsType: this.props.type,
-        });
-      }
-    }
-  };
-}
+HostsTableComponent.displayName = 'HostsTableComponent';
 
 const getSortField = (field: string): HostsFields => {
   switch (field) {

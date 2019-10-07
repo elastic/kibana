@@ -256,10 +256,6 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 `server.customResponseHeaders:`:: *Default: `{}`* Header names and values to
   send on all responses to the client from the Kibana server.
 
-[[server-default]]`server.defaultRoute:`:: *Default: "/app/kibana"* This setting
-specifies the default route when opening Kibana. You can use this setting to
-modify the landing page when opening Kibana. Supported on {ece}.
-
 `server.host:`:: *Default: "localhost"* This setting specifies the host of the
 back end server.
 
@@ -275,7 +271,7 @@ identifies this Kibana instance.
 `server.port:`:: *Default: 5601* Kibana is served by a back end server. This
 setting specifies the port to use.
 
-`server.rewriteBasePath:`:: *Default: true* Specifies whether Kibana should
+`server.rewriteBasePath:`:: *Default: false* Specifies whether Kibana should
 rewrite requests that are prefixed with `server.basePath` or require that they
 are rewritten by your reverse proxy.
 

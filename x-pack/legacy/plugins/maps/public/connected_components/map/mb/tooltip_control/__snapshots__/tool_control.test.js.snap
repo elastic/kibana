@@ -111,6 +111,7 @@ exports[`TooltipControl render tooltipState is provided should render tooltip po
       isLocked={false}
       loadFeatureGeometry={[Function]}
       loadFeatureProperties={[Function]}
+      loadPreIndexedShape={[Function]}
     />
   </EuiText>
 </EuiPopover>
