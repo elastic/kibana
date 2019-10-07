@@ -32,57 +32,6 @@
         </button>
       </div>
 
-      <!-- Field Filters -->
-      <form role="form" class="kuiFieldGroup kuiVerticalRhythm">
-        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
-          <div class="kuiSearchInput">
-            <div class="kuiSearchInput__icon kuiIcon fa-search"></div>
-            <input
-              class="kuiSearchInput__input"
-              type="text"
-              aria-label="{{::'kbn.management.editIndexPattern.fields.filterAria' | i18n: {defaultMessage: 'Filter'} }}"
-              ng-model="fieldFilter"
-              placeholder="{{::'kbn.management.editIndexPattern.fields.filterPlaceholder' | i18n: {defaultMessage: 'Filter'} }}"
-              data-test-subj="indexPatternFieldFilter"
-            >
-          </div>
-        </div>
-
-        <div
-          class="kuiFieldGroupSection"
-          ng-if="state.tab == 'indexedFields' && indexedFieldTypes.length > 0"
-        >
-          <select
-            data-test-subj="indexedFieldTypeFilterDropdown"
-            class="kuiSelect"
-            ng-model="indexedFieldTypeFilter"
-            ng-change="changeFilter('indexedFieldTypeFilter', indexedFieldTypeFilter)"
-            ng-options="o for o in indexedFieldTypes"
-          >
-            <option value=""
-                    i18n-id="kbn.management.editIndexPattern.fields.allTypesDropDown"
-                    i18n-default-message="All field types"></option>
-          </select>
-        </div>
-
-        <div
-          class="kuiFieldGroupSection"
-          ng-if="state.tab == 'scriptedFields' && scriptedFieldLanguages.length > 0"
-        >
-          <select
-            data-test-subj="scriptedFieldLanguageFilterDropdown"
-            class="kuiSelect"
-            ng-model="scriptedFieldLanguageFilter"
-            ng-change="changeFilter('scriptedFieldLanguageFilter', scriptedFieldLanguageFilter)"
-            ng-options="o for o in scriptedFieldLanguages"
-          >
-            <option value=""
-                    i18n-id="kbn.management.editIndexPattern.fields.allLangsDropDown"
-                    i18n-default-message="All languages"></option>
-          </select>
-        </div>
-      </form>
-
       <!-- Tab content -->
       <div class="kuiVerticalRhythm">
         <div id="reactIndexedFieldsTable"></div>

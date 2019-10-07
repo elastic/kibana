@@ -35,7 +35,7 @@ import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { IndexHeader, Badges, GuideText, Alerts } from './components';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
@@ -44,6 +44,22 @@ const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 const REACT_EDIT_INDEX_REACT_COMPONENT = 'editIndexReactComponent';
+
+const SearchField = ({ $scope }) => {
+  return (
+    <EuiFieldSearch
+      fullWidth={true}
+      placeholder={i18n.translate('kbn.management.editIndexPattern.fields.filterPlaceholder', { defaultMessage: 'Filter' })}
+      aria-label={i18n.translate('kbn.management.editIndexPattern.fields.filterAria', { defaultMessage: 'Filter' })}
+      data-test-subj="indexPatternFieldFilter"
+      value={$scope.fieldFilter}
+      onChange={(event) => {
+        $scope.fieldFilter = event.target.value;
+        $scope.$apply();
+      }}
+    />
+  );
+};
 
 function updateSourceFiltersTable($scope, $state) {
   if ($state.tab === 'sourceFilters') {
@@ -55,6 +71,11 @@ function updateSourceFiltersTable($scope, $state) {
 
       render(
         <I18nContext>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={1}>
+              <SearchField $scope={$scope} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <SourceFiltersTable
             indexPattern={$scope.indexPattern}
             filterFilter={$scope.fieldFilter}
@@ -90,6 +111,29 @@ function updateScriptedFieldsTable($scope, $state) {
 
       render(
         <I18nContext>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={1}>
+              <SearchField $scope={$scope} />
+            </EuiFlexItem>
+            {$scope.scriptedFieldLanguages.length > 0 ?
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  options={[
+                    { value: '', text: i18n.translate('kbn.management.editIndexPattern.fields.allLangsDropDown', {
+                      defaultMessage: 'All languages'
+                    }) },
+                  ].concat($scope.scriptedFieldLanguages.map(t => ({ value: t, text: t })))}
+                  value={$scope.scriptedFieldLanguageFilter}
+                  onChange={event => {
+                    $scope.scriptedFieldLanguageFilter = event.target.value;
+                    $scope.$apply();
+                  }}
+                  data-test-subj="scriptedFieldLanguageFilterDropdown"
+                />
+              </EuiFlexItem>
+              : null
+            }
+          </EuiFlexGroup>
           <ScriptedFieldsTable
             indexPattern={$scope.indexPattern}
             fieldFilter={$scope.fieldFilter}
@@ -131,6 +175,29 @@ function updateIndexedFieldsTable($scope, $state) {
 
       render(
         <I18nContext>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={1}>
+              <SearchField $scope={$scope} />
+            </EuiFlexItem>
+            {$scope.indexedFieldTypes.length > 0 ?
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  options={[
+                    { value: '', text: i18n.translate('kbn.management.editIndexPattern.fields.allTypesDropDown', {
+                      defaultMessage: 'All field types'
+                    }) },
+                  ].concat($scope.indexedFieldTypes.map(t => ({ value: t, text: t })))}
+                  value={$scope.indexedFieldTypeFilter}
+                  onChange={event => {
+                    $scope.indexedFieldTypeFilter = event.target.value;
+                    $scope.$apply();
+                  }}
+                  data-test-subj="indexedFieldTypeFilterDropdown"
+                />
+              </EuiFlexItem>
+              : null
+            }
+          </EuiFlexGroup>
           <IndexedFieldsTable
             fields={$scope.fields}
             indexPattern={$scope.indexPattern}
