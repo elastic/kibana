@@ -197,6 +197,7 @@ export class GeometryFilterForm extends Component {
             fill
             onClick={this._onSubmit}
             isDisabled={!this.state.geometryLabel || !this.state.geoFieldTag}
+            isLoading={this.props.isLoading}
           >
             {this.props.buttonLabel}
           </EuiButton>

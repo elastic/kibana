@@ -65,7 +65,9 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    data: {},
+    data: {
+      getSuggestions: sinon.fake(),
+    },
     inspector: {
       isAvailable: () => false,
       open: () => ({
