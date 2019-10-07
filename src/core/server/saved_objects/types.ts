@@ -22,6 +22,7 @@ import { SavedObjectsMapping } from './mappings';
 import { MigrationDefinition } from './migrations/core/document_migrator';
 import { SavedObjectsSchemaDefinition } from './schema';
 import { PropertyValidators } from './validation';
+import { RawDoc } from './serialization';
 
 /**
  * Information about the migrations that have been applied to this SavedObject.
@@ -88,6 +89,11 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
   references: SavedObjectReference[];
   /** {@inheritdoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+}
+
+export interface SavedObjectDoc extends RawDoc {
+  _seq_no: number;
+  _primary_term: number;
 }
 
 /**
@@ -218,3 +224,17 @@ export interface SavedObjectsLegacyUiExports {
   savedObjectSchemas: SavedObjectsSchemaDefinition;
   savedObjectValidations: PropertyValidators;
 }
+
+export interface BulkCreateOperation {
+  create: {
+    _id: string;
+    _index: string;
+  };
+}
+export interface BulkIndexOperation {
+  index: {
+    _id: string;
+    _index: string;
+  };
+}
+export type BulkOperation = BulkCreateOperation | BulkIndexOperation;

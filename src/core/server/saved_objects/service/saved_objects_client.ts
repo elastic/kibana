@@ -48,13 +48,23 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = any>
+  extends SavedObjectsBulkOperationObject<T> {
   id?: string;
   type: string;
   attributes: T;
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsBulkOperationObject<T> {
+  id?: string;
+  type: string;
 }
 
 /**
