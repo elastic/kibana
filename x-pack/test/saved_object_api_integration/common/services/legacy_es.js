@@ -10,7 +10,7 @@ import * as legacyElasticsearch from 'elasticsearch';
 
 import shieldPlugin from '../../../../legacy/server/lib/esjs_shield_plugin';
 
-export function EsProvider({ getService }) {
+export function LegacyEsProvider({ getService }) {
   const config = getService('config');
 
   return new legacyElasticsearch.Client({
