@@ -5,6 +5,7 @@
  */
 import * as i18n from './translations';
 import {
+  getDetectionEngineUrl,
   getOverviewUrl,
   getNetworkUrl,
   getTimelinesUrl,
@@ -16,6 +17,7 @@ export enum SiemPageName {
   overview = 'overview',
   hosts = 'hosts',
   network = 'network',
+  detectionEngine = 'detection-engine',
   timelines = 'timelines',
 }
 
@@ -23,6 +25,7 @@ export type SiemNavTabKey =
   | SiemPageName.overview
   | SiemPageName.hosts
   | SiemPageName.network
+  | SiemPageName.detectionEngine
   | SiemPageName.timelines;
 
 export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
@@ -48,6 +51,13 @@ export const navTabs: SiemNavTab = {
     href: getNetworkUrl(),
     disabled: false,
     urlKey: 'network',
+  },
+  [SiemPageName.detectionEngine]: {
+    id: SiemPageName.detectionEngine,
+    name: i18n.DETECTION_ENGINE,
+    href: getDetectionEngineUrl(),
+    disabled: false,
+    urlKey: 'detection-engine',
   },
   [SiemPageName.timelines]: {
     id: SiemPageName.timelines,

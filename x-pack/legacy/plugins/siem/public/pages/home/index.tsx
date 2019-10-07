@@ -20,6 +20,7 @@ import { SiemNavigation } from '../../components/navigation';
 import { StatefulTimeline } from '../../components/timeline';
 import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning';
 import { NotFoundPage } from '../404';
+import { DetectionEngine } from '../detection_engine';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
@@ -136,6 +137,7 @@ export const HomePage = pure(() => (
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </NavGlobal>
+
                   <Switch>
                     <Redirect from="/" exact={true} to="/overview" />
                     <Route path="/:pageName(overview)" render={() => <Overview />} />
@@ -151,6 +153,7 @@ export const HomePage = pure(() => (
                         <NetworkContainer url={match.url} location={location} />
                       )}
                     />
+                    <Route path="/:pageName(detectionEngine)" render={() => <DetectionEngine />} />
                     <Route path="/:pageName(timelines)" render={() => <Timelines />} />
                     <Route path="/link-to" component={LinkToPage} />
                     <Route

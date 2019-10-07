@@ -5,6 +5,7 @@
  */
 
 export enum CONSTANTS {
+  detectionEnginePage = 'detectionEngine.page',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
   kqlQuery = 'kqlQuery',
@@ -17,4 +18,4 @@ export enum CONSTANTS {
   unknown = 'unknown',
 }
 
-export type UrlStateType = 'host' | 'network' | 'overview' | 'timeline';
+export type UrlStateType = 'detection-engine' | 'host' | 'network' | 'overview' | 'timeline';
