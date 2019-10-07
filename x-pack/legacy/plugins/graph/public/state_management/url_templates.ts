@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import actionCreatorFactory, { Action } from 'typescript-fsa';
+import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { i18n } from '@kbn/i18n';
