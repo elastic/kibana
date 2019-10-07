@@ -11,12 +11,11 @@
   align-items: center;
   height: $euiSize * 3;
   margin-top: -$euiSizeS;
+}
 
-
-  & > .lnsInnerIndexPatternDataPanel__changeLink {
-    flex: 0 0 auto;
-    margin: 0 (-$euiSizeS) 0 $euiSizeXS;
-  }
+.lnsInnerIndexPatternDataPanel__triggerButton {
+  @include euiTitle('xs');
+  line-height: $euiSizeXXL;
 }
 
 .lnsInnerIndexPatternDataPanel__filterWrapper {

@@ -11,9 +11,7 @@ import 'uiExports/savedObjectTypes';
 
 import 'ui/courier';
 import 'ui/angular-bootstrap';
-import 'ui/persisted_log';
 import 'ui/autoload/all';
-import 'ui/kbn_top_nav';
 
 import 'plugins/ml/components/transition/transition';
 import 'plugins/ml/components/modal/modal';
