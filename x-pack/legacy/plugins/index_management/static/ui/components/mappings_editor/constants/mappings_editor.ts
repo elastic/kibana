@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './field_options';
-
-export * from './data_types_definition';
-
-export * from './parameters_definition';
-
-export * from './mappings_editor';
+/**
+ * The max nested depth allowed for child fields.
+ * Above this thresold, the user has to use the JSON editor.
+ */
+export const MAX_DEPTH_DEFAULT_EDITOR = 4;

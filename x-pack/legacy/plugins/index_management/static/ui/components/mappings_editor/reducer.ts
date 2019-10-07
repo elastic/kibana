@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { OnFormUpdateArg } from './shared_imports';
-import { Field, NormalizedFields, NormalizedField } from './types';
-import { getFieldMeta, getUniqueId, shouldDeleteChildFieldsAfterTypeChange } from './lib';
+import { Field, NormalizedFields, NormalizedField, FieldsEditor } from './types';
+import {
+  getFieldMeta,
+  getUniqueId,
+  shouldDeleteChildFieldsAfterTypeChange,
+  getAllChildFields,
+  getMaxNestedDepth,
+} from './lib';
 
 export interface MappingsConfiguration {
   dynamic: boolean | string;
@@ -20,45 +26,61 @@ export interface MappingsFields {
 
 type DocumentFieldsStatus = 'idle' | 'editingField' | 'creatingField';
 
+interface DocumentFieldsState {
+  status: DocumentFieldsStatus;
+  editor: FieldsEditor;
+  fieldToEdit?: string;
+  fieldToAddFieldTo?: string;
+}
+
 export interface State {
   isValid: boolean | undefined;
   configuration: OnFormUpdateArg<MappingsConfiguration>;
-  documentFields: {
-    status: DocumentFieldsStatus;
-    fieldToEdit?: string;
-    fieldToAddFieldTo?: string;
-  };
-  fields: {
-    byId: NormalizedFields['byId'];
-    rootLevelFields: NormalizedFields['rootLevelFields'];
-    isValid: boolean | undefined;
-  };
+  documentFields: DocumentFieldsState;
+  fields: NormalizedFields;
+  fieldForm?: OnFormUpdateArg<any>;
 }
 
 export type Action =
   | { type: 'configuration.update'; value: OnFormUpdateArg<MappingsConfiguration> }
+  | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
   | { type: 'field.edit'; value: Field }
   | { type: 'documentField.createField'; value?: string }
   | { type: 'documentField.editField'; value: string }
-  | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus };
+  | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
+  | { type: 'documentField.changeEditor'; value: FieldsEditor };
 
 export type Dispatch = (action: Action) => void;
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'configuration.update':
+    case 'configuration.update': {
+      const fieldFormValidity = state.fieldForm === undefined ? true : state.fieldForm.isValid;
       const isValid =
-        action.value.isValid === undefined || state.fields.isValid === undefined
+        action.value.isValid === undefined || fieldFormValidity === undefined
           ? undefined
-          : action.value.isValid && state.fields.isValid;
+          : action.value.isValid && fieldFormValidity;
 
       return {
         ...state,
         isValid,
         configuration: action.value,
       };
+    }
+    case 'fieldForm.update': {
+      const isValid =
+        action.value.isValid === undefined || state.configuration.isValid === undefined
+          ? undefined
+          : action.value.isValid && state.configuration.isValid;
+
+      return {
+        ...state,
+        isValid,
+        fieldForm: action.value,
+      };
+    }
     case 'documentField.createField':
       return {
         ...state,
@@ -78,25 +100,36 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
     case 'documentField.changeStatus':
-      return { ...state, documentFields: { ...state.documentFields, status: action.value } };
+      const isValid = action.value === 'idle' ? state.configuration.isValid : state.isValid;
+      return {
+        ...state,
+        isValid,
+        documentFields: { ...state.documentFields, status: action.value },
+      };
+    case 'documentField.changeEditor':
+      return { ...state, documentFields: { ...state.documentFields, editor: action.value } };
     case 'field.add': {
       const id = getUniqueId();
       const { fieldToAddFieldTo } = state.documentFields;
       const addToRootLevel = fieldToAddFieldTo === undefined;
+      const parentField = addToRootLevel ? undefined : state.fields.byId[fieldToAddFieldTo!];
 
       const rootLevelFields = addToRootLevel
         ? [...state.fields.rootLevelFields, id]
         : state.fields.rootLevelFields;
 
+      const nestedDepth = parentField ? parentField.nestedDepth + 1 : 0;
+      const maxNestedDepth = Math.max(state.fields.maxNestedDepth, nestedDepth);
+
       state.fields.byId[id] = {
         id,
         parentId: fieldToAddFieldTo,
         source: action.value,
+        nestedDepth,
         ...getFieldMeta(action.value),
       };
 
-      if (!addToRootLevel) {
-        const parentField = state.fields.byId[fieldToAddFieldTo!];
+      if (parentField) {
         const childFields = parentField.childFields || [];
 
         // Update parent field with new children
@@ -109,11 +142,14 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
-        fields: { ...state.fields, rootLevelFields },
+        isValid: state.configuration.isValid,
+        fieldForm: undefined,
+        fields: { ...state.fields, rootLevelFields, maxNestedDepth },
       };
     }
     case 'field.remove': {
-      const { id, parentId } = state.fields.byId[action.value];
+      const field = state.fields.byId[action.value];
+      const { id, parentId, hasChildFields } = field;
       let { rootLevelFields } = state.fields;
       if (parentId) {
         // Deleting a child field
@@ -125,12 +161,22 @@ export const reducer = (state: State, action: Action): State => {
         rootLevelFields = rootLevelFields.filter(childId => childId !== id);
       }
 
+      if (hasChildFields) {
+        const allChildFields = getAllChildFields(field, state.fields.byId);
+        allChildFields!.forEach(childField => {
+          delete state.fields.byId[childField.id];
+        });
+      }
       delete state.fields.byId[id];
+
+      const maxNestedDepth = getMaxNestedDepth(state.fields.byId);
+
       return {
         ...state,
         fields: {
           ...state.fields,
           rootLevelFields,
+          maxNestedDepth,
         },
       };
     }
@@ -163,8 +209,9 @@ export const reducer = (state: State, action: Action): State => {
           newField.hasChildFields = false;
 
           if (previousField.childFields) {
-            previousField.childFields.forEach(fieldId => {
-              delete state.fields.byId[fieldId];
+            const allChildFields = getAllChildFields(previousField, state.fields.byId);
+            allChildFields!.forEach(childField => {
+              delete state.fields.byId[childField.id];
             });
           }
         }
@@ -172,6 +219,8 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
+        isValid: state.configuration.isValid,
+        fieldForm: undefined,
         documentFields: {
           ...state.documentFields,
           status: 'idle',

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
@@ -13,33 +13,43 @@ import {
   SelectField,
   UseField,
   FieldConfig,
+  ValidationFunc,
 } from '../../../shared_imports';
 import { FIELD_TYPES_OPTIONS, PARAMETERS_DEFINITION } from '../../../constants';
-import { useState, useDispatch } from '../../../mappings_state';
+import { useDispatch } from '../../../mappings_state';
 import { Field, ParameterName } from '../../../types';
-import { validateUniqueName } from '../../../lib';
 
 const formWrapper = (props: any) => <form {...props} />;
 
 const getFieldConfig = (param: ParameterName): FieldConfig =>
   PARAMETERS_DEFINITION[param].fieldConfig || {};
 
-export const CreateField = () => {
+interface Props {
+  uniqueNameValidator: ValidationFunc;
+}
+
+export const CreateField = React.memo(({ uniqueNameValidator }: Props) => {
   const { form } = useForm<Field>();
-  const {
-    documentFields: { fieldToAddFieldTo },
-    fields,
-  } = useState();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const subscription = form.subscribe(updatedFieldForm => {
+      dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
+    });
+
+    return subscription.unsubscribe;
+  }, [form]);
 
   const submitForm = async (e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
     }
+
     const { isValid, data } = await form.submit();
+
     if (isValid) {
-      dispatch({ type: 'field.add', value: data });
       form.reset();
+      dispatch({ type: 'field.add', value: data });
     }
   };
 
@@ -53,7 +63,7 @@ export const CreateField = () => {
     validations: [
       ...validations!,
       {
-        validator: validateUniqueName(fields, undefined, fieldToAddFieldTo),
+        validator: uniqueNameValidator,
       },
     ],
   };
@@ -87,4 +97,4 @@ export const CreateField = () => {
       </EuiFlexGroup>
     </Form>
   );
-};
+});

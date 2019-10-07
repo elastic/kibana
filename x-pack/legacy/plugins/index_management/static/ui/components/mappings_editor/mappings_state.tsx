@@ -7,7 +7,8 @@
 import React, { useReducer, useEffect, createContext, useContext } from 'react';
 
 import { reducer, MappingsConfiguration, MappingsFields, State, Dispatch } from './reducer';
-import { Field } from './types';
+import { MAX_DEPTH_DEFAULT_EDITOR } from './constants';
+import { Field, FieldsEditor } from './types';
 import { normalize, deNormalize } from './lib';
 
 type Mappings = MappingsConfiguration & {
@@ -32,13 +33,14 @@ const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 export interface Props {
-  children: React.ReactNode;
+  children: (editor: FieldsEditor) => React.ReactNode;
   defaultValue: { fields: { [key: string]: Field } };
   onUpdate: OnUpdateHandler;
 }
 
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
-  const { byId, rootLevelFields } = normalize(defaultValue.fields);
+  const { byId, rootLevelFields, maxNestedDepth } = normalize(defaultValue.fields);
+
   const initialState: State = {
     isValid: undefined,
     configuration: {
@@ -46,19 +48,21 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
         raw: {},
         format: () => ({} as Mappings),
       },
-      validate: () => Promise.resolve(false),
+      validate: () => Promise.resolve(true),
     },
     fields: {
       byId,
       rootLevelFields,
-      isValid: true,
+      maxNestedDepth,
     },
     documentFields: {
       status: 'idle',
+      editor: maxNestedDepth >= MAX_DEPTH_DEFAULT_EDITOR ? 'json' : 'default',
     },
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);
+
   useEffect(() => {
     // console.log('State update', state);
     onUpdate({
@@ -66,8 +70,14 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
         ...state.configuration.data.format(),
         properties: deNormalize(state.fields),
       }),
-      validate: () => {
-        return state.configuration.validate();
+      validate: async () => {
+        if (state.fieldForm === undefined) {
+          return await state.configuration.validate();
+        }
+
+        return Promise.all([state.configuration.validate(), state.fieldForm.validate()]).then(
+          ([isConfigurationValid, isFormFieldValid]) => isConfigurationValid && isFormFieldValid
+        );
       },
       isValid: state.isValid,
     });
@@ -75,7 +85,9 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
 
   return (
     <StateContext.Provider value={state}>
-      <DispatchContext.Provider value={dispatch}>{children}</DispatchContext.Provider>
+      <DispatchContext.Provider value={dispatch}>
+        {children(state.documentFields.editor)}
+      </DispatchContext.Provider>
     </StateContext.Provider>
   );
 });

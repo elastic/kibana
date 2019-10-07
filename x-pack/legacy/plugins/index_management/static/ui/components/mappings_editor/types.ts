@@ -112,12 +112,16 @@ export interface NormalizedFields {
     [id: string]: NormalizedField;
   };
   rootLevelFields: string[];
+  maxNestedDepth: number;
 }
 
 export interface NormalizedField extends FieldMeta {
   id: string;
   parentId?: string;
+  nestedDepth: number;
   source: Omit<Field, 'properties' | 'fields'>;
 }
 
 export type ChildFieldName = 'properties' | 'fields';
+
+export type FieldsEditor = 'default' | 'json';

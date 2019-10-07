@@ -8,7 +8,7 @@ import { ValidationFunc } from '../shared_imports';
 import { NormalizedFields } from '../types';
 
 export const validateUniqueName = (
-  { rootLevelFields, byId }: NormalizedFields,
+  { rootLevelFields, byId }: Pick<NormalizedFields, 'rootLevelFields' | 'byId'>,
   initialName: string | undefined = '',
   parentId?: string
 ) => {

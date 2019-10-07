@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../mappings_state';
+import { validateUniqueName } from '../../lib';
 import { DocumentFieldsHeaders } from './document_fields_header';
 import { FieldsList, CreateField, EditField } from './fields';
 
@@ -21,17 +22,27 @@ export const DocumentFields = () => {
   const getField = (fieldId: string) => byId[fieldId];
   const fields = rootLevelFields.map(getField);
 
+  const uniqueNameValidatorCreate = useMemo(() => {
+    return validateUniqueName({ rootLevelFields, byId });
+  }, [byId, rootLevelFields]);
+
+  const uniqueNameValidatorEdit = useMemo(() => {
+    if (fieldToEdit === undefined) {
+      return;
+    }
+    return validateUniqueName({ rootLevelFields, byId }, byId[fieldToEdit!].source.name);
+  }, [byId, rootLevelFields, fieldToEdit]);
+
   const addField = () => {
     dispatch({ type: 'documentField.createField' });
   };
 
   const renderCreateField = () => {
-    // Root level (0) does not have the "fieldToAddFieldTo" set
+    // The "fieldToAddFieldTo" is undefined when adding to the top level "properties" object.
     if (status !== 'creatingField' || fieldToAddFieldTo !== undefined) {
       return null;
     }
-
-    return <CreateField />;
+    return <CreateField uniqueNameValidator={uniqueNameValidatorCreate} />;
   };
 
   const renderAddFieldButton = () => {
@@ -51,7 +62,7 @@ export const DocumentFields = () => {
       return null;
     }
     const field = byId[fieldToEdit!];
-    return <EditField field={field} />;
+    return <EditField field={field} uniqueNameValidator={uniqueNameValidatorEdit!} />;
   };
 
   return (

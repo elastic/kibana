@@ -123,10 +123,13 @@ export const getTypeFromSubType = (subType: SubType): MainType =>
  * @param fieldsToNormalize The "properties" object from the mappings (or "fields" object for `text` and `keyword` types)
  */
 export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
+  let maxNestedDepth = 0;
+
   const normalizeFields = (
     props: Fields,
     to: NormalizedFields['byId'] = {},
     idsArray: string[],
+    nestedDepth: number,
     parentId?: string
   ): Record<string, any> =>
     Object.entries(props).reduce((acc, [propName, value]) => {
@@ -138,7 +141,8 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
 
       if (childFieldsName && field[childFieldsName]) {
         meta.childFields = [];
-        normalizeFields(field[meta.childFieldsName!]!, to, meta.childFields, id);
+        maxNestedDepth = Math.max(maxNestedDepth, nestedDepth + 1);
+        normalizeFields(field[meta.childFieldsName!]!, to, meta.childFields, nestedDepth + 1, id);
       }
 
       const { properties, fields, ...rest } = field;
@@ -146,6 +150,7 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
       const normalizedField: NormalizedField = {
         id,
         parentId,
+        nestedDepth,
         source: rest,
         ...meta,
       };
@@ -156,11 +161,12 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
     }, to);
 
   const rootLevelFields: string[] = [];
-  const byId = normalizeFields(fieldsToNormalize, {}, rootLevelFields);
+  const byId = normalizeFields(fieldsToNormalize, {}, rootLevelFields, 0);
 
   return {
     byId,
     rootLevelFields,
+    maxNestedDepth,
   };
 };
 
@@ -182,6 +188,45 @@ export const deNormalize = (normalized: NormalizedFields): Fields => {
   return deNormalizePaths(normalized.rootLevelFields);
 };
 
+/**
+ * Retrieve recursively all the children fields of a field
+ *
+ * @param field The field to return the children from
+ * @param byId Map of all the document fields
+ */
+export const getAllChildFields = (
+  field: NormalizedField,
+  byId: NormalizedFields['byId']
+): NormalizedField[] => {
+  const getChildFields = (_field: NormalizedField, to: NormalizedField[] = []) => {
+    if (_field.hasChildFields) {
+      _field
+        .childFields!.map(fieldId => byId[fieldId])
+        .forEach(childField => {
+          to.push(childField);
+          getChildFields(childField, to);
+        });
+    }
+    return to;
+  };
+
+  return getChildFields(field);
+};
+
+/**
+ * Return the max nested depth of the document fields
+ *
+ * @param byId Map of all the document fields
+ */
+export const getMaxNestedDepth = (byId: NormalizedFields['byId']): number =>
+  Object.values(byId).reduce((maxDepth, field) => {
+    return Math.max(maxDepth, field.nestedDepth);
+  }, 0);
+
+/**
+ * When changing the type of a field, in most cases we want to delete all its child fields.
+ * There are some exceptions, when changing from "text" to "keyword" as both have the same "fields" property.
+ */
 export const shouldDeleteChildFieldsAfterTypeChange = (
   oldType: DataType,
   newType: DataType

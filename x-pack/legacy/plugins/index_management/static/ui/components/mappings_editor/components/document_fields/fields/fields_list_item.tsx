@@ -3,14 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../../mappings_state';
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
 import { NormalizedField } from '../../../types';
+import { MAX_DEPTH_DEFAULT_EDITOR } from '../../../constants';
+import { validateUniqueName } from '../../../lib';
 
 interface Props {
   field: NormalizedField;
@@ -18,21 +20,24 @@ interface Props {
 }
 
 const inlineStyle = {
-  padding: '20px 0',
   borderBottom: '1px solid #ddd',
-  height: '82px',
   display: 'flex',
-  alignItems: 'center',
+  flexDirection: 'column' as 'column',
 };
 
 export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   const dispatch = useDispatch();
   const {
     documentFields: { status, fieldToAddFieldTo },
-    fields: { byId },
+    fields: { byId, rootLevelFields },
   } = useState();
   const getField = (propId: string) => byId[propId];
   const { id, source, childFields, hasChildFields, canHaveChildFields } = field;
+  const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
+
+  const uniqueNameValidator = useMemo(() => {
+    return validateUniqueName({ rootLevelFields, byId }, undefined, id);
+  }, [byId, rootLevelFields]);
 
   const addField = () => {
     dispatch({
@@ -60,7 +65,7 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
 
     return (
       <div style={{ paddingLeft: '20px' }}>
-        <CreateField />
+        <CreateField uniqueNameValidator={uniqueNameValidator} />
       </div>
     );
   };
@@ -73,7 +78,13 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
     return (
       <>
         <EuiButton onClick={editField}>Edit</EuiButton>
-        {canHaveChildFields && <EuiButton onClick={addField}>Add field</EuiButton>}
+        {canHaveChildFields && (
+          <>
+            <EuiButton onClick={addField} disabled={isAddFieldBtnDisabled}>
+              Add field
+            </EuiButton>
+          </>
+        )}
         <DeleteFieldProvider>
           {deleteField => <EuiButton onClick={() => deleteField(field)}>Remove</EuiButton>}
         </DeleteFieldProvider>
@@ -84,7 +95,20 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   return (
     <>
       <div style={inlineStyle}>
-        {source.name} | {source.type} {renderActionButtons()}
+        <div style={{ display: 'flex', alignItems: 'center', height: '82px' }}>
+          {source.name} | {source.type} {renderActionButtons()}
+        </div>
+        {status === 'idle' && canHaveChildFields && isAddFieldBtnDisabled && (
+          <p style={{ fontSize: '12px', margin: '-10px 0 6px', color: '#777' }}>
+            You have reached the maximum depth for the mappings editor. Switch to the{' '}
+            <EuiButtonEmpty
+              onClick={() => dispatch({ type: 'documentField.changeEditor', value: 'json' })}
+            >
+              JSON editor
+            </EuiButtonEmpty>
+            to add more fields.
+          </p>
+        )}
       </div>
 
       {renderCreateField()}
