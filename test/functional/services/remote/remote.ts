@@ -27,7 +27,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
 
-  const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
+  const { driver, By, until } = await initWebDriver(log, browserType);
   const isW3CEnabled = (driver as any).executor_.w3c;
 
   const caps = await driver.getCapabilities();
@@ -44,24 +44,35 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   lifecycle.on('beforeTests', async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await (driver.manage().window() as any).setRect({ width: 1600, height: 1000 });
+    await driver
+      .manage()
+      .window()
+      .setRect({ width: 1600, height: 1000 });
   });
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.on('beforeTestSuite', async () => {
-    windowSizeStack.unshift(await (driver.manage().window() as any).getRect());
+    windowSizeStack.unshift(
+      await driver
+        .manage()
+        .window()
+        .getRect()
+    );
   });
 
   lifecycle.on('beforeEachTest', async () => {
-    await (driver.manage() as any).setTimeouts({ implicit: config.get('timeouts.find') });
+    await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
   lifecycle.on('afterTestSuite', async () => {
     const { width, height } = windowSizeStack.shift()!;
-    await (driver.manage().window() as any).setRect({ width, height });
+    await driver
+      .manage()
+      .window()
+      .setRect({ width, height });
   });
 
   lifecycle.on('cleanup', async () => await driver.quit());
 
-  return { driver, By, Key, until, LegacyActionSequence, browserType };
+  return { driver, By, until, browserType };
 }
