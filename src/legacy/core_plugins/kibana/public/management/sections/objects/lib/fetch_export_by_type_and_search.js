@@ -19,12 +19,13 @@
 
 import { kfetch } from 'ui/kfetch';
 
-export async function fetchExportByType(types, includeReferencesDeep = false) {
+export async function fetchExportByTypeAndSearch(types, search, includeReferencesDeep = false) {
   return await kfetch({
     method: 'POST',
     pathname: '/api/saved_objects/_export',
     body: JSON.stringify({
       type: types,
+      search,
       includeReferencesDeep,
     }),
   });
