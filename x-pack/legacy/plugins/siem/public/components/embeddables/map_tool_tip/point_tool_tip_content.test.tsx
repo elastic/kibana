@@ -8,8 +8,10 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { FeatureProperty } from '../types';
-import { PointToolTipContent } from './point_tool_tip_content';
+import { getRenderedFieldValue, PointToolTipContent } from './point_tool_tip_content';
 import { TestProviders } from '../../../mock';
+import { getEmptyStringTag } from '../../empty_value';
+import { HostDetailsLink, IPDetailsLink } from '../../links';
 
 describe('PointToolTipContent', () => {
   const mockFeatureProps: FeatureProperty[] = [
@@ -64,5 +66,35 @@ describe('PointToolTipContent', () => {
       .simulate('click');
     expect(closeTooltip).toHaveBeenCalledTimes(1);
     expect(addFilters).toHaveBeenCalledTimes(1);
+  });
+
+  describe('#getRenderedFieldValue', () => {
+    test('it returns empty tag if value is empty', () => {
+      expect(getRenderedFieldValue('host.name', '')).toStrictEqual(getEmptyStringTag());
+    });
+
+    test('it returns HostDetailsLink if field is host.name', () => {
+      const value = 'suricata-ross';
+      expect(getRenderedFieldValue('host.name', value)).toStrictEqual(
+        <HostDetailsLink hostName={value} />
+      );
+    });
+
+    test('it returns IPDetailsLink if field is source.ip', () => {
+      const value = '127.0.0.1';
+      expect(getRenderedFieldValue('source.ip', value)).toStrictEqual(<IPDetailsLink ip={value} />);
+    });
+
+    test('it returns IPDetailsLink if field is destination.ip', () => {
+      const value = '127.0.0.1';
+      expect(getRenderedFieldValue('destination.ip', value)).toStrictEqual(
+        <IPDetailsLink ip={value} />
+      );
+    });
+
+    test('it returns nothing if field is not host.name or source/destination.ip', () => {
+      const value = 'Kramerica.co';
+      expect(getRenderedFieldValue('destination.domain', value)).toStrictEqual();
+    });
   });
 });

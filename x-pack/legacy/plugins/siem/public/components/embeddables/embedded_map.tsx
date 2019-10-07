@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { createPortalNode, InPortal } from 'react-reverse-portal';

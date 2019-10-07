@@ -14,6 +14,7 @@ import { DefaultDraggable } from '../../draggables';
 import { getEmptyTagValue, getOrEmptyTagFromValue } from '../../empty_value';
 import { DescriptionListStyled } from '../../page';
 import { FeatureProperty } from '../types';
+import { HostDetailsLink, IPDetailsLink } from '../../links';
 
 interface PointToolTipContentProps {
   contextId: string;
@@ -54,7 +55,7 @@ export const PointToolTipContent = React.memo<PointToolTipContentProps>(
                 tooltipContent={property._propertyKey}
                 value={property._rawValue}
               >
-                {getOrEmptyTagFromValue(property._rawValue)}
+                {getRenderedFieldValue(property._propertyKey, property._rawValue)}
               </DefaultDraggable>
             ) : (
               getEmptyTagValue()
@@ -69,3 +70,13 @@ export const PointToolTipContent = React.memo<PointToolTipContentProps>(
 );
 
 PointToolTipContent.displayName = 'PointToolTipContent';
+
+export const getRenderedFieldValue = (field: string, value: string) => {
+  if (value === '') {
+    return getOrEmptyTagFromValue(value);
+  } else if (['host.name'].includes(field)) {
+    return <HostDetailsLink hostName={value} />;
+  } else if (['source.ip', 'destination.ip'].includes(field)) {
+    return <IPDetailsLink ip={value} />;
+  }
+};
