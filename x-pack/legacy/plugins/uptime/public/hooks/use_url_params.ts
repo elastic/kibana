@@ -43,14 +43,14 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
       pathname,
       search: qs.stringify(
         // drop any parameters that have no value
-        Object.keys(mergedParams).reduce((acc, cur) => {
-          const value = mergedParams[cur];
+        Object.keys(mergedParams).reduce((params, key) => {
+          const value = mergedParams[key];
           if (value === undefined || value === '') {
-            return acc;
+            return params;
           }
           return {
-            ...acc,
-            [cur]: value,
+            ...params,
+            [key]: value,
           };
         }, {})
       ),
