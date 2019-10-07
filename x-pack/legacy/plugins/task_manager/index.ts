@@ -73,7 +73,7 @@ export function taskManager(kibana: any) {
           // executing. Saved objects repository waits for migrations to finish before
           // finishing the request. To avoid this, we'll await within a separate
           // function block.
-          await this.kbnServer.server.kibanaMigrator.awaitMigration();
+          await this.kbnServer.server.kibanaMigrator.runMigrations();
           plugin.start();
         })();
       });

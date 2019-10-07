@@ -36,9 +36,15 @@
   align-items: center;
   justify-content: center;
   padding: $euiSizeS;
+
+  // Targeting img as this won't target normal EuiIcon's only the custom svgs's
+  > img {
+    @include size($euiSize * 4);
+  }
 }
 
 .lnsSuggestionPanel__chartWrapper {
+  display: flex;
   height: $lnsSuggestionHeight - $euiSize;
   pointer-events: none;
   margin: 0 $euiSizeS;

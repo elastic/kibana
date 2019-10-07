@@ -7,10 +7,9 @@
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'bluebird';
-import mkdirp from 'mkdirp';
 import { comparePngs } from '../../../../../test/functional/services/lib/compare_pngs';
 
-const mkdirAsync = promisify(mkdirp);
+const mkdirAsync = promisify(fs.mkdir);
 
 export async function checkIfPngsMatch(actualpngPath, baselinepngPath, screenshotsDirectory, log) {
   log.debug(`checkIfpngsMatch: ${actualpngPath} vs ${baselinepngPath}`);
@@ -19,8 +18,8 @@ export async function checkIfPngsMatch(actualpngPath, baselinepngPath, screensho
   const sessionDirectoryPath = path.resolve(screenshotsDirectory, 'session');
   const failureDirectoryPath = path.resolve(screenshotsDirectory, 'failure');
 
-  await mkdirAsync(sessionDirectoryPath);
-  await mkdirAsync(failureDirectoryPath);
+  await mkdirAsync(sessionDirectoryPath, { recursive: true });
+  await mkdirAsync(failureDirectoryPath, { recursive: true });
 
   const actualpngFileName = path.basename(actualpngPath, '.png');
   const baselinepngFileName = path.basename(baselinepngPath, '.png');

@@ -5,7 +5,7 @@
  */
 
 import { EuiAvatar, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import * as React from 'react';
+import React, { useState } from 'react';
 import styled, { injectGlobal } from 'styled-components';
 
 import { Note } from '../../../lib/note';
@@ -62,26 +62,21 @@ HiddenFlexItem.displayName = 'HiddenFlexItem';
 interface Props {
   associateNote: AssociateNote;
   createTimeline: CreateTimeline;
+  description: string;
+  getNotesByIds: (noteIds: string[]) => Note[];
   isDataInTimeline: boolean;
   isDatepickerLocked: boolean;
   isFavorite: boolean;
-  title: string;
-  description: string;
-  getNotesByIds: (noteIds: string[]) => Note[];
   noteIds: string[];
   timelineId: string;
+  title: string;
   toggleLock: ToggleLock;
   updateDescription: UpdateDescription;
   updateIsFavorite: UpdateIsFavorite;
-  updateTitle: UpdateTitle;
   updateNote: UpdateNote;
+  updateTitle: UpdateTitle;
   usersViewing: string[];
   width: number;
-}
-
-interface State {
-  showActions: boolean;
-  showNotes: boolean;
 }
 
 const rightGutter = 60; // px
@@ -96,51 +91,40 @@ const noteWidth = 130;
 const settingsWidth = 50;
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
-export class Properties extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
+export const Properties = React.memo<Props>(
+  ({
+    associateNote,
+    createTimeline,
+    description,
+    getNotesByIds,
+    isDataInTimeline,
+    isDatepickerLocked,
+    isFavorite,
+    noteIds,
+    timelineId,
+    title,
+    toggleLock,
+    updateDescription,
+    updateIsFavorite,
+    updateNote,
+    updateTitle,
+    usersViewing,
+    width,
+  }) => {
+    const [showActions, setShowActions] = useState(false);
+    const [showNotes, setShowNotes] = useState(false);
 
-    this.state = {
-      showActions: false,
-      showNotes: false,
+    const onButtonClick = () => {
+      setShowActions(!showActions);
     };
-  }
 
-  public onButtonClick = () => {
-    this.setState(prevState => ({
-      showActions: !prevState.showActions,
-    }));
-  };
+    const onToggleShowNotes = () => {
+      setShowNotes(!showNotes);
+    };
 
-  public onToggleShowNotes = () => {
-    this.setState(state => ({ showNotes: !state.showNotes }));
-  };
-
-  public onClosePopover = () => {
-    this.setState({
-      showActions: false,
-    });
-  };
-
-  public render() {
-    const {
-      associateNote,
-      createTimeline,
-      description,
-      getNotesByIds,
-      isFavorite,
-      isDataInTimeline,
-      isDatepickerLocked,
-      title,
-      noteIds,
-      timelineId,
-      updateDescription,
-      updateIsFavorite,
-      updateTitle,
-      updateNote,
-      usersViewing,
-      width,
-    } = this.props;
+    const onClosePopover = () => {
+      setShowActions(false);
+    };
 
     const datePickerWidth =
       width -
@@ -157,52 +141,52 @@ export class Properties extends React.PureComponent<Props, State> {
     return (
       <TimelineProperties style={{ width }} data-test-subj="timeline-properties">
         <PropertiesLeft
-          isFavorite={isFavorite}
-          timelineId={timelineId}
-          updateIsFavorite={updateIsFavorite}
-          showDescription={width >= showDescriptionThreshold}
-          description={description}
-          title={title}
-          updateTitle={updateTitle}
-          updateDescription={updateDescription}
-          showNotes={this.state.showNotes}
-          showNotesFromWidth={width >= showNotesThreshold}
           associateNote={associateNote}
-          getNotesByIds={getNotesByIds}
-          noteIds={noteIds}
-          onToggleShowNotes={this.onToggleShowNotes}
-          updateNote={updateNote}
-          isDatepickerLocked={isDatepickerLocked}
-          toggleLock={this.toggleLock}
           datePickerWidth={
             datePickerWidth > datePickerThreshold ? datePickerThreshold : datePickerWidth
           }
+          description={description}
+          getNotesByIds={getNotesByIds}
+          isDatepickerLocked={isDatepickerLocked}
+          isFavorite={isFavorite}
+          noteIds={noteIds}
+          onToggleShowNotes={onToggleShowNotes}
+          showDescription={width >= showDescriptionThreshold}
+          showNotes={showNotes}
+          showNotesFromWidth={width >= showNotesThreshold}
+          timelineId={timelineId}
+          title={title}
+          toggleLock={() => {
+            toggleLock({ linkToId: 'timeline' });
+          }}
+          updateDescription={updateDescription}
+          updateIsFavorite={updateIsFavorite}
+          updateNote={updateNote}
+          updateTitle={updateTitle}
         />
         <PropertiesRight
-          onButtonClick={this.onButtonClick}
-          onClosePopover={this.onClosePopover}
-          showActions={this.state.showActions}
-          createTimeline={createTimeline}
-          timelineId={timelineId}
-          isDataInTimeline={isDataInTimeline}
-          showNotesFromWidth={width < showNotesThreshold}
-          showNotes={this.state.showNotes}
-          showDescription={width < showDescriptionThreshold}
-          showUsersView={title.length > 0}
-          usersViewing={usersViewing}
-          description={description}
-          updateDescription={updateDescription}
           associateNote={associateNote}
+          createTimeline={createTimeline}
+          description={description}
           getNotesByIds={getNotesByIds}
+          isDataInTimeline={isDataInTimeline}
           noteIds={noteIds}
-          onToggleShowNotes={this.onToggleShowNotes}
+          onButtonClick={onButtonClick}
+          onClosePopover={onClosePopover}
+          onToggleShowNotes={onToggleShowNotes}
+          showActions={showActions}
+          showDescription={width < showDescriptionThreshold}
+          showNotes={showNotes}
+          showNotesFromWidth={width < showNotesThreshold}
+          showUsersView={title.length > 0}
+          timelineId={timelineId}
+          updateDescription={updateDescription}
           updateNote={updateNote}
+          usersViewing={usersViewing}
         />
       </TimelineProperties>
     );
   }
+);
 
-  private toggleLock = () => {
-    this.props.toggleLock({ linkToId: 'timeline' });
-  };
-}
+Properties.displayName = 'Properties';
