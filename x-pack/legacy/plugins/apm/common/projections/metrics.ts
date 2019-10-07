@@ -10,12 +10,18 @@ import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
 export function getMetricsProjection({
   setup,
-  serviceName
+  serviceName,
+  serviceNodeName
 }: {
   setup: Setup;
   serviceName: string;
+  serviceNodeName?: string;
 }) {
   const { start, end, uiFiltersES, config } = setup;
+
+  const serviceNodeNameFilters = serviceNodeName
+    ? [{ term: { [SERVICE_NAME]: serviceName } }]
+    : [];
 
   return {
     index: config.get<string>('apm_oss.metricsIndices'),
@@ -24,6 +30,7 @@ export function getMetricsProjection({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
+            ...serviceNodeNameFilters,
             { term: { [PROCESSOR_EVENT]: 'metric' } },
             {
               range: rangeFilter(start, end)

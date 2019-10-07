@@ -9,7 +9,10 @@ import { get } from 'lodash';
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { getSelectedPageIndex, getPages } from '../../state/selectors/workpad';
 import { stylePage, setPageTransition } from '../../state/actions/pages';
+import { ComponentStrings } from '../../../i18n';
 import { PageConfig as Component } from './page_config';
+
+const { PageConfig: strings } = ComponentStrings;
 
 const mapStateToProps = state => {
   const pageIndex = getSelectedPageIndex(state);
@@ -28,7 +31,7 @@ const mergeProps = (stateProps, dispatchProps) => {
     },
     background: get(stateProps, 'page.style.background'),
     transition: transitionsRegistry.get(get(stateProps, 'page.transition.name')),
-    transitions: [{ value: '', text: 'None' }].concat(
+    transitions: [{ value: '', text: strings.getNoTransitionDropDownOptionLabel() }].concat(
       transitionsRegistry.toArray().map(({ name, displayName }) => ({
         value: name,
         text: displayName,
