@@ -23,7 +23,8 @@ import { dirname } from 'path';
 import chalk from 'chalk';
 import { createHash } from 'crypto';
 import wreck from '@hapi/wreck';
-import mkdirp from 'mkdirp';
+
+import { mkdirp } from '../../lib';
 
 function tryUnlink(path) {
   try {
@@ -43,7 +44,7 @@ export async function download(options) {
   }
 
   // mkdirp and open file outside of try/catch, we don't retry for those errors
-  mkdirp.sync(dirname(destination));
+  await mkdirp(dirname(destination));
   const fileHandle = openSync(destination, 'w');
 
   let error;

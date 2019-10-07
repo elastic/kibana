@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { Query } from '@elastic/eui';
 
 import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
 import { Flyout } from '../components/flyout/';
@@ -44,8 +45,8 @@ jest.mock('../../../lib/fetch_export_objects', () => ({
   fetchExportObjects: jest.fn(),
 }));
 
-jest.mock('../../../lib/fetch_export_by_type', () => ({
-  fetchExportByType: jest.fn(),
+jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
+  fetchExportByTypeAndSearch: jest.fn(),
 }));
 
 jest.mock('../../../lib/get_saved_object_counts', () => ({
@@ -305,7 +306,7 @@ describe('ObjectsTable', () => {
     });
 
     it('should export all', async () => {
-      const { fetchExportByType } = require('../../../lib/fetch_export_by_type');
+      const { fetchExportByTypeAndSearch } = require('../../../lib/fetch_export_by_type_and_search');
       const { saveAs } = require('@elastic/filesaver');
       const component = shallowWithIntl(
         <ObjectsTable.WrappedComponent
@@ -320,11 +321,40 @@ describe('ObjectsTable', () => {
 
       // Set up mocks
       const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
-      fetchExportByType.mockImplementation(() => blob);
+      fetchExportByTypeAndSearch.mockImplementation(() => blob);
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByType).toHaveBeenCalledWith(POSSIBLE_TYPES, true);
+      expect(fetchExportByTypeAndSearch).toHaveBeenCalledWith(POSSIBLE_TYPES, undefined, true);
+      expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
+      expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
+    });
+
+    it('should export all, accounting for the current search criteria', async () => {
+      const { fetchExportByTypeAndSearch } = require('../../../lib/fetch_export_by_type_and_search');
+      const { saveAs } = require('@elastic/filesaver');
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+        />
+      );
+
+      component.instance().onQueryChange({
+        query: Query.parse('test')
+      });
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set up mocks
+      const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
+      fetchExportByTypeAndSearch.mockImplementation(() => blob);
+
+      await component.instance().onExportAll();
+
+      expect(fetchExportByTypeAndSearch).toHaveBeenCalledWith(POSSIBLE_TYPES, 'test*', true);
       expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
     });

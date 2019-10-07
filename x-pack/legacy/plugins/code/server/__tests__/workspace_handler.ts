@@ -8,7 +8,6 @@ import path from 'path';
 
 import Git from '@elastic/nodegit';
 import assert from 'assert';
-import mkdirp from 'mkdirp';
 import * as os from 'os';
 import rimraf from 'rimraf';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
@@ -51,7 +50,7 @@ describe('workspace_handler tests', () => {
     file = 'src/controllers/user.ts'
   ) {
     const fullPath = path.join(workspacePath, repo, '__randomString', revision, file);
-    mkdirp.sync(path.dirname(fullPath));
+    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
     fs.writeFileSync(fullPath, '');
     const strInUrl = fullPath
       .split(path.sep)
@@ -119,7 +118,7 @@ describe('workspace_handler tests', () => {
   });
 
   async function prepareProject(repoPath: string) {
-    mkdirp.sync(repoPath);
+    fs.mkdirSync(repoPath, { recursive: true });
     const repo = await Git.Repository.init(repoPath, 0);
     const content = 'console.log("test")';
     const subFolder = 'src';
@@ -173,8 +172,8 @@ describe('workspace_handler tests', () => {
 
   // @ts-ignore
   before(() => {
-    mkdirp.sync(workspaceDir);
-    mkdirp.sync(repoDir);
+    fs.mkdirSync(workspaceDir, { recursive: true });
+    fs.mkdirSync(repoDir, { recursive: true });
   });
 
   // @ts-ignore
