@@ -12,6 +12,7 @@ import { CoreSetup } from 'src/core/server';
 
 import { APP_TITLE } from './common/constants';
 import { codePlugin } from './server';
+import { PluginSetupContract } from '../../../plugins/code/server';
 
 export type RequestFacade = Legacy.Request;
 export type RequestQueryFacade = RequestQuery;
@@ -53,8 +54,7 @@ export const code = (kibana: any) =>
       }).default();
     },
     async init(server: ServerFacade) {
-      // @ts-ignore
-      const initializerContext = server.newPlatform.setup.plugins.code;
+      const initializerContext = server.newPlatform.setup.plugins.code as PluginSetupContract;
       if (!initializerContext.legacy.config.ui.enabled) {
         return;
       }
