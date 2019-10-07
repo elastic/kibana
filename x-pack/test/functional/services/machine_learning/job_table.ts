@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function MachineLearningJobTableProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   return new (class MlJobTable {
     public async parseJobTable() {
@@ -141,33 +140,33 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async ensureDetailsOpen(jobId: string) {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         if (!(await testSubjects.exists(this.detailsSelector(jobId)))) {
           await testSubjects.click(this.rowSelector(jobId, 'mlJobListRowDetailsToggle'));
         }
 
-        await testSubjects.existOrFail(this.detailsSelector(jobId));
+        await testSubjects.existOrFail(this.detailsSelector(jobId), { timeout: 1000 });
       });
     }
 
     public async ensureDetailsClosed(jobId: string) {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         if (await testSubjects.exists(this.detailsSelector(jobId))) {
           await testSubjects.click(this.rowSelector(jobId, 'mlJobListRowDetailsToggle'));
-          await testSubjects.missingOrFail(this.detailsSelector(jobId));
+          await testSubjects.missingOrFail(this.detailsSelector(jobId), { timeout: 1000 });
         }
       });
     }
 
     public async waitForJobsToLoad() {
-      await retry.waitFor(
-        'jobs table to exist',
-        async () => await testSubjects.exists('~mlJobListTable')
+      await retry.tryForTime(
+        60 * 1000,
+        async () => await testSubjects.existOrFail('~mlJobListTable', { timeout: 10000 })
       );
 
-      await retry.waitFor(
-        'jobs table to be done loading',
-        async () => await testSubjects.exists('mlJobListTable loaded')
+      await retry.tryForTime(
+        30 * 1000,
+        async () => await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 10000 })
       );
     }
 
@@ -216,9 +215,10 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
 
     public async clickActionsMenu(jobId: string) {
       await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
-      if (!(await find.existsByDisplayedByCssSelector('[class~=euiContextMenuPanel]'))) {
-        throw new Error(`expected euiContextMenuPanel to exist`);
-      }
+      await retry.tryForTime(
+        5000,
+        async () => await testSubjects.existOrFail('mlActionButtonDeleteJob', { timeout: 1000 })
+      );
     }
 
     public async clickCloneJobAction(jobId: string) {

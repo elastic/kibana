@@ -21,22 +21,22 @@ export function MachineLearningNavigationProvider({
     },
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
-      await retry.try(async () => {
+      await retry.tryForTime(10000, async () => {
         expect(await testSubjects.findAll(`~${tabTypeSubject}`, 3)).to.have.length(
           areaSubjects.length
         );
         for (const areaSubj of areaSubjects) {
-          await testSubjects.existOrFail(`~${tabTypeSubject}&~${areaSubj}`);
+          await testSubjects.existOrFail(`~${tabTypeSubject}&~${areaSubj}`, { timeout: 1000 });
         }
       });
     },
 
     async navigateToArea(linkSubject: string, pageSubject: string) {
-      await retry.try(async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         if ((await testSubjects.exists(`${linkSubject} selected`)) === false) {
           await testSubjects.click(linkSubject);
-          await testSubjects.existOrFail(`${linkSubject} selected`);
-          await testSubjects.existOrFail(pageSubject);
+          await testSubjects.existOrFail(`${linkSubject} selected`, { timeout: 5000 });
+          await testSubjects.existOrFail(pageSubject, { timeout: 5000 });
         }
       });
     },
