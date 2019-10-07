@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
@@ -153,7 +153,7 @@ describe('VegaVisualizations', () => {
 
         $el.find('canvas')[0].dispatchEvent(event);
 
-        await Promise.delay(10);
+        await Bluebird.delay(10);
 
         let tooltip = document.getElementById('vega-kibana-tooltip');
         expect(tooltip).to.be.ok();
