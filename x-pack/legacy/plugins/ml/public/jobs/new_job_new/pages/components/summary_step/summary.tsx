@@ -21,7 +21,7 @@ import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
-import { JsonEditorFlyout } from './components/json_editor_flyout';
+import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import { isSingleMetricJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './job_details';
 import { DetectorChart } from './detector_chart';
@@ -30,9 +30,13 @@ import { PostSaveOptions } from './components/post_save_options';
 import { convertToAdvancedJob, resetJob } from '../../../common/job_creator/util/general';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator,
+    jobCreatorUpdate,
+    jobValidator,
+    jobValidatorUpdated,
+    resultsLoader,
+  } = useContext(JobCreatorContext);
   const [progress, setProgress] = useState(resultsLoader.progress);
   const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
@@ -119,7 +123,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
             {creatingJob === false && (
               <Fragment>
                 <EuiFlexItem grow={false}>
-                  <JsonEditorFlyout jobCreator={jobCreator} isDisabled={progress > 0} />
+                  <JsonEditorFlyout
+                    isDisabled={progress > 0}
+                    jobEditorMode={EDITOR_MODE.READONLY}
+                    datafeedEditorMode={EDITOR_MODE.READONLY}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty onClick={convertToAdvanced}>

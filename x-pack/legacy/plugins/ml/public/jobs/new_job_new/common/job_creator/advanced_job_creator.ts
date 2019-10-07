@@ -149,26 +149,22 @@ export class AdvancedJobCreator extends JobCreator {
   }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
-    // this._overrideConfigs(job, datafeed);
-    // this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
-    // const detectors = getRichDetectors(job, datafeed);
-    // if (datafeed.aggregations !== undefined) {
-    //   // if we've converting from a single metric job,
-    //   // delete the aggregations.
-    //   delete datafeed.aggregations;
-    //   delete job.analysis_config.summary_count_field_name;
-    // }
-    // this.removeAllDetectors();
-    // detectors.forEach((d, i) => {
-    //   const dtr = detectors[i];
-    //   if (dtr.agg !== null && dtr.field !== null) {
-    //     this.addDetector(dtr.agg, dtr.field);
-    //   }
-    // });
-    // if (detectors.length) {
-    //   if (detectors[0].partitionField !== null) {
-    //     this.setSplitField(detectors[0].partitionField);
-    //   }
-    // }
+    this._overrideConfigs(job, datafeed);
+    const detectors = getRichDetectors(job, datafeed);
+
+    this.removeAllDetectors();
+    detectors.forEach((d, i) => {
+      const dtr = detectors[i];
+      if (dtr.agg !== null && dtr.field !== null) {
+        this.addDetector(
+          dtr.agg,
+          dtr.field,
+          dtr.byField,
+          dtr.overField,
+          dtr.partitionField,
+          dtr.excludeFrequent
+        );
+      }
+    });
   }
 }

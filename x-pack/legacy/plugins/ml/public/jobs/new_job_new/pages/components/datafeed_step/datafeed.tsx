@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WizardNav } from '../wizard_nav';
 import { QueryInput } from './components/query';
 import { QueryDelayInput } from './components/query_delay';
@@ -14,10 +14,12 @@ import { ScrollSizeInput } from './components/scroll_size';
 import { TimeField } from './components/time_field';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { JsonEditorFlyout } from '../summary_step/components/json_editor_flyout';
+import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 
 export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
+    JobCreatorContext
+  );
   const [nextActive, setNextActive] = useState(false);
   const [validQuery, setValidQuery] = useState(false);
 
@@ -51,7 +53,11 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
             next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)}
             nextActive={nextActive}
           >
-            <JsonEditorFlyout isDisabled={false} jobCreator={jobCreator} />
+            <JsonEditorFlyout
+              isDisabled={false}
+              jobEditorMode={EDITOR_MODE.HIDDEN}
+              datafeedEditorMode={EDITOR_MODE.EDITABLE}
+            />
           </WizardNav>
         </Fragment>
       )}

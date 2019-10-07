@@ -24,6 +24,10 @@ export const QueryDelayInput: FC = () => {
   }, [queryDelay]);
 
   useEffect(() => {
+    setQueryDelay(jobCreator.queryDelay === null ? '' : jobCreator.queryDelay);
+  }, [jobCreatorUpdate]);
+
+  useEffect(() => {
     setValidation(jobValidator.queryDelay);
   }, [jobValidatorUpdated]);
 

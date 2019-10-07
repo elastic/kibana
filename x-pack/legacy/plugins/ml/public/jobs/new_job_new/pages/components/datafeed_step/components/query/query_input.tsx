@@ -14,9 +14,22 @@ import { AdvancedJobCreator } from '../../../../../common/job_creator';
 const EDITOR_HEIGHT = '400px';
 
 export const QueryInput: FC<{ setValidQuery(v: boolean): void }> = ({ setValidQuery }) => {
-  const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
   const [queryString, setQueryString] = useState(JSON.stringify(jobCreator.query, null, 2));
+
+  useEffect(() => {
+    if (isValidJson(queryString)) {
+      // the query object may have changed outside of this component,
+      // compare the current query with the local queryString by reformatting both
+      const query = JSON.parse(queryString);
+      const newQueryString = JSON.stringify(query, null, 2);
+      const actualQuery = JSON.stringify(jobCreator.query, null, 2);
+      if (newQueryString !== actualQuery) {
+        setQueryString(actualQuery);
+      }
+    }
+  }, [jobCreatorUpdated]);
 
   useEffect(() => {
     const validJson = isValidJson(queryString);

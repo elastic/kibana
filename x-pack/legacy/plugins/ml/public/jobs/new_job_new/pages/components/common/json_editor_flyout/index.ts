@@ -3,4 +3,4 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { JsonEditorFlyout } from './json_editor_flyout';
+export { JsonEditorFlyout, EDITOR_MODE } from './json_editor_flyout';

@@ -8,7 +8,7 @@ import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
-import { Validation } from '../../../../../common/job_validator';
+import { Validation } from '../../../../common/job_validator';
 
 interface Props {
   children: JSX.Element;
@@ -16,17 +16,20 @@ interface Props {
 }
 
 export const Description: FC<Props> = memo(({ children, validation }) => {
-  const title = i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.title', {
-    defaultMessage: 'Groups',
-  });
+  const title = i18n.translate(
+    'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.modelMemoryLimit.title',
+    {
+      defaultMessage: 'Model memory limit',
+    }
+  );
   return (
     <EuiDescribedFormGroup
       idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
-          id="xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.description"
-          defaultMessage=" Optional grouping for jobs. New groups can be created or picked from the list of existing groups."
+          id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.modelMemoryLimit.description"
+          defaultMessage="Set an approximate upper limit for the amount of memory that can be used by the analytical models."
         />
       }
     >

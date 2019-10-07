@@ -31,6 +31,7 @@ export function getRichDetectors(job: Job, datafeed: Datafeed) {
         d.partition_field_name !== undefined
           ? newJobCapsService.getFieldById(d.partition_field_name)
           : null,
+      excludeFrequent: d.exclude_frequent || null,
     };
   });
 }

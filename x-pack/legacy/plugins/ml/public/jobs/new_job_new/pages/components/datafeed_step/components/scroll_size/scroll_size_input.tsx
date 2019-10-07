@@ -24,6 +24,10 @@ export const ScrollSizeInput: FC = () => {
   }, [scrollSizeString]);
 
   useEffect(() => {
+    setScrollSize(jobCreator.scrollSize === null ? '' : `${jobCreator.scrollSize}`);
+  }, [jobCreatorUpdate]);
+
+  useEffect(() => {
     setValidation(jobValidator.scrollSize);
   }, [jobValidatorUpdated]);
 

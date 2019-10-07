@@ -24,6 +24,10 @@ export const FrequencyInput: FC = () => {
   }, [frequency]);
 
   useEffect(() => {
+    setFrequency(jobCreator.frequency === null ? '' : jobCreator.frequency);
+  }, [jobCreatorUpdate]);
+
+  useEffect(() => {
     setValidation(jobValidator.frequency);
   }, [jobValidatorUpdated]);
 

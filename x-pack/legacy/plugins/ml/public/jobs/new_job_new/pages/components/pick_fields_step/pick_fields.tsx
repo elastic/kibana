@@ -14,19 +14,14 @@ import { SingleMetricView } from './components/single_metric_view';
 import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
 import { AdvancedView } from './components/advanced_view';
-import { JsonEditorFlyout } from '../summary_step/components/json_editor_flyout';
+import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const { jobCreator, jobCreatorUpdated, jobValidator, jobValidatorUpdated } = useContext(
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
     JobCreatorContext
   );
   const [nextActive, setNextActive] = useState(false);
-  const [jobType, setJobType] = useState(jobCreator.type);
-
-  useEffect(() => {
-    // this shouldn't really change, but just in case we need to...
-    setJobType(jobCreator.type);
-  }, [jobCreatorUpdated]);
+  const jobType = jobCreator.type;
 
   useEffect(() => {
     const active =
@@ -67,7 +62,11 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             nextActive={nextActive}
           >
             {jobType === JOB_TYPE.ADVANCED && (
-              <JsonEditorFlyout isDisabled={false} jobCreator={jobCreator} />
+              <JsonEditorFlyout
+                isDisabled={false}
+                jobEditorMode={EDITOR_MODE.EDITABLE}
+                datafeedEditorMode={EDITOR_MODE.HIDDEN}
+              />
             )}
           </WizardNav>
         </Fragment>

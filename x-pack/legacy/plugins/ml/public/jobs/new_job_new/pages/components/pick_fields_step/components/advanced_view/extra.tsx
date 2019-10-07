@@ -11,7 +11,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { SummaryCountField } from '../summary_count_field';
 import { CategorizationField } from '../categorization_field';
 import { Influencers } from '../influencers';
-import { ModelMemoryLimitInput } from '../../../job_details_step/components/advanced_section/components/model_memory_limit';
+import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;

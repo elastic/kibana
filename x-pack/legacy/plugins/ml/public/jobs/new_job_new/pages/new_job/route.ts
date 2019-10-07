@@ -15,6 +15,7 @@ import {
   getCreateSingleMetricJobBreadcrumbs,
   getCreateMultiMetricJobBreadcrumbs,
   getCreatePopulationJobBreadcrumbs,
+  getAdvancedJobConfigurationBreadcrumbs,
 } from '../../../breadcrumbs';
 
 import { Route } from '../../../../../common/types/kibana';
