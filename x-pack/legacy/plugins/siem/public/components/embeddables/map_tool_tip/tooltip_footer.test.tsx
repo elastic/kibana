@@ -30,137 +30,290 @@ describe('ToolTipFilter', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  test('previousButton is functioning and nextButton is not when featureIndex is 0', () => {
-    const wrapper = mount(
-      <ToolTipFooter
-        nextFeature={nextFeature}
-        previousFeature={previousFeature}
-        featureIndex={0}
-        totalFeatures={5}
-      />
-    );
+  describe('Lower bounds', () => {
+    test('previousButton is disabled when featureIndex is 0', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={0}
+          totalFeatures={5}
+        />
+      );
 
-    expect(
+      expect(
+        wrapper
+          .find('[data-test-subj="previous-feature-button"]')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
+    });
+
+    test('previousFeature is not called when featureIndex is 0', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={0}
+          totalFeatures={5}
+        />
+      );
+
       wrapper
         .find('[data-test-subj="previous-feature-button"]')
         .first()
-        .prop('disabled')
-    ).toBe(true);
-    wrapper
-      .find('[data-test-subj="previous-feature-button"]')
-      .first()
-      .simulate('click');
-    expect(previousFeature).toHaveBeenCalledTimes(0);
+        .simulate('click');
+      expect(previousFeature).toHaveBeenCalledTimes(0);
+    });
 
-    expect(
+    test('nextButton is enabled when featureIndex is < totalFeatures', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={0}
+          totalFeatures={5}
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="next-feature-button"]')
+          .first()
+          .prop('disabled')
+      ).toBe(false);
+    });
+
+    test('nextFeature is called when featureIndex is < totalFeatures', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={0}
+          totalFeatures={5}
+        />
+      );
+
       wrapper
         .find('[data-test-subj="next-feature-button"]')
         .first()
-        .prop('disabled')
-    ).toBe(false);
-    wrapper
-      .find('[data-test-subj="next-feature-button"]')
-      .first()
-      .simulate('click');
-    expect(nextFeature).toHaveBeenCalledTimes(1);
+        .simulate('click');
+      expect(nextFeature).toHaveBeenCalledTimes(1);
+    });
   });
 
-  test('previousButton is functioning and nextButton is functioning when featureIndex > 0 && featureIndex < totalFeatures', () => {
-    const wrapper = mount(
-      <ToolTipFooter
-        nextFeature={nextFeature}
-        previousFeature={previousFeature}
-        featureIndex={1}
-        totalFeatures={5}
-      />
-    );
-    expect(
+  describe('Upper bounds', () => {
+    test('previousButton is enabled when featureIndex >== totalFeatures', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={4}
+          totalFeatures={5}
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="previous-feature-button"]')
+          .first()
+          .prop('disabled')
+      ).toBe(false);
+    });
+
+    test('previousFunction is called when featureIndex >== totalFeatures', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={4}
+          totalFeatures={5}
+        />
+      );
+
       wrapper
         .find('[data-test-subj="previous-feature-button"]')
         .first()
-        .prop('disabled')
-    ).toBe(false);
-    wrapper
-      .find('[data-test-subj="previous-feature-button"]')
-      .first()
-      .simulate('click');
-    expect(previousFeature).toHaveBeenCalledTimes(1);
-    expect(
+        .simulate('click');
+      expect(previousFeature).toHaveBeenCalledTimes(1);
+    });
+
+    test('nextButton is disabled when featureIndex >== totalFeatures', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={4}
+          totalFeatures={5}
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="next-feature-button"]')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
+    });
+
+    test('nextFunction is not called when featureIndex >== totalFeatures', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={4}
+          totalFeatures={5}
+        />
+      );
       wrapper
         .find('[data-test-subj="next-feature-button"]')
         .first()
-        .prop('disabled')
-    ).toBe(false);
-    wrapper
-      .find('[data-test-subj="next-feature-button"]')
-      .first()
-      .simulate('click');
-    expect(nextFeature).toHaveBeenCalledTimes(1);
+        .simulate('click');
+      expect(nextFeature).toHaveBeenCalledTimes(0);
+    });
   });
 
-  test('previousButton is functioning and nextButton is not when featureIndex >== totalFeatures', () => {
-    const wrapper = mount(
-      <ToolTipFooter
-        nextFeature={nextFeature}
-        previousFeature={previousFeature}
-        featureIndex={4}
-        totalFeatures={5}
-      />
-    );
-    expect(
+  describe('Within bounds, single feature', () => {
+    test('previousButton is not enabled when only a single feature is provided', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={0}
+          totalFeatures={1}
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="previous-feature-button"]')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
+    });
+
+    test('previousFunction is not called when only a single feature is provided', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={0}
+          totalFeatures={1}
+        />
+      );
+
       wrapper
         .find('[data-test-subj="previous-feature-button"]')
         .first()
-        .prop('disabled')
-    ).toBe(false);
-    wrapper
-      .find('[data-test-subj="previous-feature-button"]')
-      .first()
-      .simulate('click');
-    expect(previousFeature).toHaveBeenCalledTimes(1);
-    expect(
+        .simulate('click');
+      expect(previousFeature).toHaveBeenCalledTimes(0);
+    });
+
+    test('nextButton is not enabled when only a single feature is provided', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={0}
+          totalFeatures={1}
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="next-feature-button"]')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
+    });
+
+    test('nextFunction is not called when only a single feature is provided', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={0}
+          totalFeatures={1}
+        />
+      );
+
       wrapper
         .find('[data-test-subj="next-feature-button"]')
         .first()
-        .prop('disabled')
-    ).toBe(true);
-    wrapper
-      .find('[data-test-subj="next-feature-button"]')
-      .first()
-      .simulate('click');
-    expect(nextFeature).toHaveBeenCalledTimes(0);
+        .simulate('click');
+      expect(nextFeature).toHaveBeenCalledTimes(0);
+    });
   });
 
-  test('previousButton and and nextButton are not functioning when only a single feature is provided', () => {
-    const wrapper = mount(
-      <ToolTipFooter
-        nextFeature={nextFeature}
-        previousFeature={previousFeature}
-        featureIndex={0}
-        totalFeatures={1}
-      />
-    );
-    expect(
+  describe('Within bounds, multiple features', () => {
+    test('previousButton is enabled when featureIndex > 0 && featureIndex < totalFeatures', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={1}
+          totalFeatures={5}
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="previous-feature-button"]')
+          .first()
+          .prop('disabled')
+      ).toBe(false);
+    });
+
+    test('previousFunction is called when featureIndex > 0 && featureIndex < totalFeatures', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={1}
+          totalFeatures={5}
+        />
+      );
+
       wrapper
         .find('[data-test-subj="previous-feature-button"]')
         .first()
-        .prop('disabled')
-    ).toBe(true);
-    wrapper
-      .find('[data-test-subj="previous-feature-button"]')
-      .first()
-      .simulate('click');
-    expect(previousFeature).toHaveBeenCalledTimes(0);
-    expect(
+        .simulate('click');
+      expect(previousFeature).toHaveBeenCalledTimes(1);
+    });
+
+    test('nextButton is enabled when featureIndex > 0 && featureIndex < totalFeatures', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={1}
+          totalFeatures={5}
+        />
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="next-feature-button"]')
+          .first()
+          .prop('disabled')
+      ).toBe(false);
+    });
+
+    test('nextFunction is called when featureIndex > 0 && featureIndex < totalFeatures', () => {
+      const wrapper = mount(
+        <ToolTipFooter
+          nextFeature={nextFeature}
+          previousFeature={previousFeature}
+          featureIndex={1}
+          totalFeatures={5}
+        />
+      );
+
       wrapper
         .find('[data-test-subj="next-feature-button"]')
         .first()
-        .prop('disabled')
-    ).toBe(true);
-    wrapper
-      .find('[data-test-subj="next-feature-button"]')
-      .first()
-      .simulate('click');
-    expect(nextFeature).toHaveBeenCalledTimes(0);
+        .simulate('click');
+      expect(nextFeature).toHaveBeenCalledTimes(1);
+    });
   });
 });

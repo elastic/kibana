@@ -20,8 +20,8 @@ interface PointToolTipContentProps {
   contextId: string;
   featureProps: FeatureProperty[];
   featurePropsFilters: Record<string, object>;
-  addFilters(filter: object): void;
-  closeTooltip(): void;
+  addFilters?(filter: object): void;
+  closeTooltip?(): void;
 }
 
 export const PointToolTipContent = React.memo<PointToolTipContentProps>(
@@ -38,8 +38,10 @@ export const PointToolTipContent = React.memo<PointToolTipContentProps>(
                   data-test-subj={`add-to-filter-${property._propertyKey}`}
                   type="filter"
                   onClick={() => {
-                    closeTooltip();
-                    addFilters(featurePropsFilters[property._propertyKey]);
+                    if (closeTooltip != null && addFilters != null) {
+                      closeTooltip();
+                      addFilters(featurePropsFilters[property._propertyKey]);
+                    }
                   }}
                 />
               </EuiToolTip>
