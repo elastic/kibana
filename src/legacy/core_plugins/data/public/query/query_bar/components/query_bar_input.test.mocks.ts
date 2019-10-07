@@ -45,7 +45,7 @@ export const mockFetchIndexPatterns = jest
   .fn()
   .mockReturnValue(Promise.resolve([mockIndexPattern]));
 
-jest.mock('ui/persisted_log', () => ({
+jest.mock('../../persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
 
