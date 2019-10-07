@@ -23,12 +23,14 @@ export function createPercentFormat() {
   return createNumeralFormat({
     id: 'percent',
     title: 'Percentage',
+
     getParamDefaults: (getConfig: Function) => {
       return {
         pattern: getConfig('format:percent:defaultPattern'),
         fractional: true,
       };
     },
+
     afterConvert(val: any) {
       return this.param('fractional') ? val : val / 100;
     },

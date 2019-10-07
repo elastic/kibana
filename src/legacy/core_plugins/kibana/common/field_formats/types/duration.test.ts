@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import { createDurationFormat } from './duration';
 
 const DurationFormat = createDurationFormat();
 
 describe('Duration Format', () => {
-  test({
+  testCase({
     inputFormat: 'seconds',
     outputFormat: 'humanize',
     outputPrecision: undefined,
@@ -43,7 +42,7 @@ describe('Duration Format', () => {
     ],
   });
 
-  test({
+  testCase({
     inputFormat: 'minutes',
     outputFormat: 'humanize',
     outputPrecision: undefined,
@@ -63,7 +62,7 @@ describe('Duration Format', () => {
     ],
   });
 
-  test({
+  testCase({
     inputFormat: 'minutes',
     outputFormat: 'asHours',
     outputPrecision: undefined,
@@ -83,7 +82,7 @@ describe('Duration Format', () => {
     ],
   });
 
-  test({
+  testCase({
     inputFormat: 'seconds',
     outputFormat: 'asSeconds',
     outputPrecision: 0,
@@ -103,7 +102,7 @@ describe('Duration Format', () => {
     ],
   });
 
-  test({
+  testCase({
     inputFormat: 'seconds',
     outputFormat: 'asSeconds',
     outputPrecision: 2,
@@ -127,7 +126,7 @@ describe('Duration Format', () => {
     ],
   });
 
-  function test({
+  function testCase({
     inputFormat,
     outputFormat,
     outputPrecision,
@@ -141,11 +140,12 @@ describe('Duration Format', () => {
     fixtures.forEach((fixture: Record<string, any>) => {
       const input = fixture.input;
       const output = fixture.output;
-      it(`should format ${input} ${inputFormat} through ${outputFormat}${
+
+      test(`should format ${input} ${inputFormat} through ${outputFormat}${
         outputPrecision ? `, ${outputPrecision} decimals` : ''
       }`, () => {
         const duration = new DurationFormat({ inputFormat, outputFormat, outputPrecision });
-        expect(duration.convert(input)).to.eql(output);
+        expect(duration.convert(input)).toBe(output);
       });
     });
   }

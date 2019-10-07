@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import { createBoolFormat } from './boolean';
 
 const BoolFormat = createBoolFormat();
@@ -66,14 +65,15 @@ describe('Boolean Format', () => {
       input: ' True  ', // should handle trailing and mixed case
       expected: 'true',
     },
-  ].forEach(test => {
-    it(`convert ${test.input} to boolean`, () => {
-      expect(boolean.convert(test.input)).to.be(test.expected);
+  ].forEach(data => {
+    test(`convert ${data.input} to boolean`, () => {
+      expect(boolean.convert(data.input)).toBe(data.expected);
     });
   });
 
-  it('does not convert non-boolean values, instead returning original value', () => {
+  test('does not convert non-boolean values, instead returning original value', () => {
     const s = 'non-boolean value!!';
-    expect(boolean.convert(s)).to.be(s);
+
+    expect(boolean.convert(s)).toBe(s);
   });
 });

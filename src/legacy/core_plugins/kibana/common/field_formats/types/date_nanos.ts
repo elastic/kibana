@@ -21,9 +21,8 @@ import moment, { Moment } from 'moment';
 import { memoize, noop } from 'lodash';
 import {
   FieldFormat,
-  FieldFormatConvert,
   KBN_FIELD_TYPES,
-  TEXT_CONTEXT_TYPE,
+  TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
 /**
@@ -96,42 +95,40 @@ export function createDateNanosFormat() {
       };
     }
 
-    _convert: Partial<FieldFormatConvert> = {
-      [TEXT_CONTEXT_TYPE](this: DateNanosFormat, val) {
-        // don't give away our ref to converter so
-        // we can hot-swap when config changes
-        const pattern = this.param('pattern');
-        const timezone = this.param('timezone');
-        const fractPattern = analysePatternForFract(pattern);
-        const fallbackPattern = this.param('patternFallback');
+    textConvert: TextContextTypeConvert = val => {
+      // don't give away our ref to converter so
+      // we can hot-swap when config changes
+      const pattern = this.param('pattern');
+      const timezone = this.param('timezone');
+      const fractPattern = analysePatternForFract(pattern);
+      const fallbackPattern = this.param('patternFallback');
 
-        const timezoneChanged = this.timeZone !== timezone;
-        const datePatternChanged = this.memoizedPattern !== pattern;
-        if (timezoneChanged || datePatternChanged) {
-          this.timeZone = timezone;
-          this.memoizedPattern = pattern;
+      const timezoneChanged = this.timeZone !== timezone;
+      const datePatternChanged = this.memoizedPattern !== pattern;
+      if (timezoneChanged || datePatternChanged) {
+        this.timeZone = timezone;
+        this.memoizedPattern = pattern;
 
-          this.memoizedConverter = memoize(function converter(value: any) {
-            if (value === null || value === undefined) {
-              return '-';
-            }
+        this.memoizedConverter = memoize(function converter(value: any) {
+          if (value === null || value === undefined) {
+            return '-';
+          }
 
-            const date = moment(value);
+          const date = moment(value);
 
-            if (typeof value !== 'string' && date.isValid()) {
-              // fallback for max/min aggregation, where unixtime in ms is returned as a number
-              // aggregations in Elasticsearch generally just return ms
-              return date.format(fallbackPattern);
-            } else if (date.isValid()) {
-              return formatWithNanos(date, value, fractPattern);
-            } else {
-              return value;
-            }
-          });
-        }
+          if (typeof value !== 'string' && date.isValid()) {
+            // fallback for max/min aggregation, where unixtime in ms is returned as a number
+            // aggregations in Elasticsearch generally just return ms
+            return date.format(fallbackPattern);
+          } else if (date.isValid()) {
+            return formatWithNanos(date, value, fractPattern);
+          } else {
+            return value;
+          }
+        });
+      }
 
-        return this.memoizedConverter(val);
-      },
+      return this.memoizedConverter(val);
     };
   };
 }

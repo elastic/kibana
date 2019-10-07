@@ -21,9 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
 import {
   FieldFormat,
-  TEXT_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
-  FieldFormatConvert,
+  TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 // @ts-ignore
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
@@ -113,25 +112,23 @@ export function createStringFormat() {
       });
     }
 
-    _convert: Partial<FieldFormatConvert> = {
-      [TEXT_CONTEXT_TYPE](this: StringFormat, val) {
-        switch (this.param('transform')) {
-          case 'lower':
-            return String(val).toLowerCase();
-          case 'upper':
-            return String(val).toUpperCase();
-          case 'title':
-            return this.toTitleCase(val);
-          case 'short':
-            return shortenDottedString(val);
-          case 'base64':
-            return this.base64Decode(val);
-          case 'urlparam':
-            return decodeURIComponent(val);
-          default:
-            return asPrettyString(val);
-        }
-      },
+    textConvert: TextContextTypeConvert = val => {
+      switch (this.param('transform')) {
+        case 'lower':
+          return String(val).toLowerCase();
+        case 'upper':
+          return String(val).toUpperCase();
+        case 'title':
+          return this.toTitleCase(val);
+        case 'short':
+          return shortenDottedString(val);
+        case 'base64':
+          return this.base64Decode(val);
+        case 'urlparam':
+          return decodeURIComponent(val);
+        default:
+          return asPrettyString(val);
+      }
     };
   }
 

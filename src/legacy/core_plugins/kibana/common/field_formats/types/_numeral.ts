@@ -24,9 +24,8 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { assign, has } from 'lodash';
 import {
   FieldFormat,
-  TEXT_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
-  FieldFormatConvert,
+  TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
 const numeralInst = numeral();
@@ -58,27 +57,25 @@ export function createNumeralFormat(opts: Record<string, any>) {
       };
     }
 
-    _convert: Partial<FieldFormatConvert> = {
-      [TEXT_CONTEXT_TYPE](this: NumeralFormat, val) {
-        if (val === -Infinity) return '-∞';
-        if (val === +Infinity) return '+∞';
-        if (typeof val !== 'number') {
-          val = parseFloat(val);
-        }
+    textConvert: TextContextTypeConvert = val => {
+      if (val === -Infinity) return '-∞';
+      if (val === +Infinity) return '+∞';
+      if (typeof val !== 'number') {
+        val = parseFloat(val);
+      }
 
-        if (isNaN(val)) return '';
+      if (isNaN(val)) return '';
 
-        const previousLocale = numeral.language();
-        const defaultLocale =
-          (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
-        numeral.language(defaultLocale);
+      const previousLocale = numeral.language();
+      const defaultLocale =
+        (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
+      numeral.language(defaultLocale);
 
-        const formatted = numeralInst.set(val).format(this.param('pattern'));
+      const formatted = numeralInst.set(val).format(this.param('pattern'));
 
-        numeral.language(previousLocale);
+      numeral.language(previousLocale);
 
-        return opts.afterConvert ? opts.afterConvert.call(this, formatted) : formatted;
-      },
+      return opts.afterConvert ? opts.afterConvert.call(this, formatted) : formatted;
     };
   }
 

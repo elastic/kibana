@@ -22,8 +22,7 @@ import moment from 'moment-timezone';
 import {
   FieldFormat,
   KBN_FIELD_TYPES,
-  FieldFormatConvert,
-  TEXT_CONTEXT_TYPE,
+  TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
 export function createDateOnServerFormat() {
@@ -75,21 +74,19 @@ export function createDateOnServerFormat() {
       };
     }
 
-    _convert: Partial<FieldFormatConvert> = {
-      [TEXT_CONTEXT_TYPE](this: DateFormat, val) {
-        // don't give away our ref to converter so we can hot-swap when config changes
-        const pattern = this.param('pattern');
-        const timezone = this.param('timezone');
+    textConvert: TextContextTypeConvert = val => {
+      // don't give away our ref to converter so we can hot-swap when config changes
+      const pattern = this.param('pattern');
+      const timezone = this.param('timezone');
 
-        const timezoneChanged = this.timeZone !== timezone;
-        const datePatternChanged = this.memoizedPattern !== pattern;
-        if (timezoneChanged || datePatternChanged) {
-          this.timeZone = timezone;
-          this.memoizedPattern = pattern;
-        }
+      const timezoneChanged = this.timeZone !== timezone;
+      const datePatternChanged = this.memoizedPattern !== pattern;
+      if (timezoneChanged || datePatternChanged) {
+        this.timeZone = timezone;
+        this.memoizedPattern = pattern;
+      }
 
-        return this.memoizedConverter(val);
-      },
+      return this.memoizedConverter(val);
     };
   };
 }

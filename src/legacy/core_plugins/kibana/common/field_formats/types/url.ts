@@ -22,10 +22,9 @@ import { escape, memoize } from 'lodash';
 import {
   getHighlightHtml,
   FieldFormat,
-  TEXT_CONTEXT_TYPE,
-  HTML_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
-  FieldFormatConvert,
+  TextContextTypeConvert,
+  HtmlContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
@@ -126,74 +125,70 @@ export function createUrlFormat() {
       };
     }
 
-    _convert: FieldFormatConvert = {
-      [TEXT_CONTEXT_TYPE](this: UrlFormat, value) {
-        return this.formatLabel(value);
-      },
+    textConvert: TextContextTypeConvert = value => this.formatLabel(value);
 
-      [HTML_CONTEXT_TYPE](this: UrlFormat, rawValue, field, hit, parsedUrl) {
-        const url = escape(this.formatUrl(rawValue));
-        const label = escape(this.formatLabel(rawValue, url));
+    htmlConvert: HtmlContextTypeConvert = (rawValue, field, hit, parsedUrl) => {
+      const url = escape(this.formatUrl(rawValue));
+      const label = escape(this.formatLabel(rawValue, url));
 
-        switch (this.param('type')) {
-          case 'audio':
-            return `<audio controls preload="none" src="${url}">`;
+      switch (this.param('type')) {
+        case 'audio':
+          return `<audio controls preload="none" src="${url}">`;
 
-          case 'img':
-            // If the URL hasn't been formatted to become a meaningful label then the best we can do
-            // is tell screen readers where the image comes from.
-            const imageLabel =
-              label === url ? `A dynamically-specified image located at ${url}` : label;
+        case 'img':
+          // If the URL hasn't been formatted to become a meaningful label then the best we can do
+          // is tell screen readers where the image comes from.
+          const imageLabel =
+            label === url ? `A dynamically-specified image located at ${url}` : label;
 
-            return `<img src="${url}" alt="${imageLabel}">`;
-          default:
-            const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
-            if (!inWhitelist && !parsedUrl) {
-              return url;
+          return `<img src="${url}" alt="${imageLabel}">`;
+        default:
+          const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+          if (!inWhitelist && !parsedUrl) {
+            return url;
+          }
+
+          let prefix = '';
+          /**
+           * This code attempts to convert a relative url into a kibana absolute url
+           *
+           * SUPPORTED:
+           *  - /app/kibana/
+           *  - ../app/kibana
+           *  - #/discover
+           *
+           * UNSUPPORTED
+           *  - app/kibana
+           */
+          if (!inWhitelist) {
+            // Handles urls like: `#/discover`
+            if (url[0] === '#') {
+              prefix = `${parsedUrl.origin}${parsedUrl.pathname}`;
             }
-
-            let prefix = '';
-            /**
-             * This code attempts to convert a relative url into a kibana absolute url
-             *
-             * SUPPORTED:
-             *  - /app/kibana/
-             *  - ../app/kibana
-             *  - #/discover
-             *
-             * UNSUPPORTED
-             *  - app/kibana
-             */
-            if (!inWhitelist) {
-              // Handles urls like: `#/discover`
-              if (url[0] === '#') {
-                prefix = `${parsedUrl.origin}${parsedUrl.pathname}`;
-              }
-              // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
-              else if (url.indexOf(parsedUrl.basePath || '/') === 0) {
-                prefix = `${parsedUrl.origin}`;
-              }
-              // Handle urls like: `../app/kibana`
-              else {
-                const prefixEnd = url[0] === '/' ? '' : '/';
-
-                prefix = `${parsedUrl.origin}${parsedUrl.basePath || ''}/app${prefixEnd}`;
-              }
+            // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
+            else if (url.indexOf(parsedUrl.basePath || '/') === 0) {
+              prefix = `${parsedUrl.origin}`;
             }
+            // Handle urls like: `../app/kibana`
+            else {
+              const prefixEnd = url[0] === '/' ? '' : '/';
 
-            let linkLabel;
-
-            if (hit && hit.highlight && hit.highlight[field.name]) {
-              linkLabel = getHighlightHtml(label, hit.highlight[field.name]);
-            } else {
-              linkLabel = label;
+              prefix = `${parsedUrl.origin}${parsedUrl.basePath || ''}/app${prefixEnd}`;
             }
+          }
 
-            const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
+          let linkLabel;
 
-            return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
-        }
-      },
+          if (hit && hit.highlight && hit.highlight[field.name]) {
+            linkLabel = getHighlightHtml(label, hit.highlight[field.name]);
+          } else {
+            linkLabel = label;
+          }
+
+          const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
+
+          return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
+      }
     };
   }
 

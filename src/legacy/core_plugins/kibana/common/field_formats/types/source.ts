@@ -24,10 +24,9 @@ import { noWhiteSpace } from '../../utils/no_white_space';
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
 import {
   FieldFormat,
-  TEXT_CONTEXT_TYPE,
-  HTML_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
-  FieldFormatConvert,
+  TextContextTypeConvert,
+  HtmlContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
 const templateHtml = `
@@ -54,30 +53,29 @@ export function createSourceFormat() {
       this.getConfig = getConfig;
     }
 
-    _convert: FieldFormatConvert = {
-      [TEXT_CONTEXT_TYPE]: value => JSON.stringify(value),
-      [HTML_CONTEXT_TYPE]: function sourceToHtml(this: SourceFormat, value, field, hit) {
-        if (!field) {
-          const converter = this.getConverterFor('text') as Function;
+    textConvert: TextContextTypeConvert = value => JSON.stringify(value);
 
-          return escape(converter(value));
-        }
+    htmlConvert: HtmlContextTypeConvert = (value, field, hit) => {
+      if (!field) {
+        const converter = this.getConverterFor('text') as Function;
 
-        const highlights = (hit && hit.highlight) || {};
-        const formatted = field.indexPattern.formatHit(hit);
-        const highlightPairs: any[] = [];
-        const sourcePairs: any[] = [];
+        return escape(converter(value));
+      }
 
-        const isShortDots = this.getConfig('shortDots:enable');
-        keys(formatted).forEach(key => {
-          const pairs = highlights[key] ? highlightPairs : sourcePairs;
-          const newField = isShortDots ? shortenDottedString(key) : key;
-          const val = formatted[key];
-          pairs.push([newField, val]);
-        }, []);
+      const highlights = (hit && hit.highlight) || {};
+      const formatted = field.indexPattern.formatHit(hit);
+      const highlightPairs: any[] = [];
+      const sourcePairs: any[] = [];
+      const isShortDots = this.getConfig('shortDots:enable');
 
-        return doTemplate({ defPairs: highlightPairs.concat(sourcePairs) });
-      },
+      keys(formatted).forEach(key => {
+        const pairs = highlights[key] ? highlightPairs : sourcePairs;
+        const newField = isShortDots ? shortenDottedString(key) : key;
+        const val = formatted[key];
+        pairs.push([newField, val]);
+      }, []);
+
+      return doTemplate({ defPairs: highlightPairs.concat(sourcePairs) });
     };
   }
 

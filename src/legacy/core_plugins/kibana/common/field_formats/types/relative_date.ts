@@ -20,9 +20,8 @@
 import moment from 'moment';
 import {
   FieldFormat,
-  TEXT_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
-  FieldFormatConvert,
+  TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
 export function createRelativeDateFormat() {
@@ -35,19 +34,17 @@ export function createRelativeDateFormat() {
       super(params);
     }
 
-    _convert: Partial<FieldFormatConvert> = {
-      [TEXT_CONTEXT_TYPE](val) {
-        if (val === null || val === undefined) {
-          return '-';
-        }
+    textConvert: TextContextTypeConvert = val => {
+      if (val === null || val === undefined) {
+        return '-';
+      }
 
-        const date = moment(val);
-        if (date.isValid()) {
-          return date.fromNow();
-        } else {
-          return val;
-        }
-      },
+      const date = moment(val);
+      if (date.isValid()) {
+        return date.fromNow();
+      } else {
+        return val;
+      }
     };
   }
 

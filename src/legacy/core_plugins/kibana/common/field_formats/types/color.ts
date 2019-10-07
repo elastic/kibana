@@ -21,9 +21,8 @@ import { findLast, cloneDeep, template, escape } from 'lodash';
 import {
   asPrettyString,
   FieldFormat,
-  FieldFormatConvert,
-  HTML_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
+  HtmlContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 import { DEFAULT_COLOR } from './color_default';
 
@@ -61,16 +60,14 @@ export function createColorFormat() {
       }
     }
 
-    _convert: Partial<FieldFormatConvert> = {
-      [HTML_CONTEXT_TYPE](this: ColorFormat, val) {
-        const color = this.findColorRuleForVal(val) as typeof DEFAULT_COLOR;
-        if (!color) return escape(asPrettyString(val));
+    htmlConvert: HtmlContextTypeConvert = val => {
+      const color = this.findColorRuleForVal(val) as typeof DEFAULT_COLOR;
+      if (!color) return escape(asPrettyString(val));
 
-        let style = '';
-        if (color.text) style += `color: ${color.text};`;
-        if (color.background) style += `background-color: ${color.background};`;
-        return convertTemplate({ val, style });
-      },
+      let style = '';
+      if (color.text) style += `color: ${color.text};`;
+      if (color.background) style += `background-color: ${color.background};`;
+      return convertTemplate({ val, style });
     };
   }
 

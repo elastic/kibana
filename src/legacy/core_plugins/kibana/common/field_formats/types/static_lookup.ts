@@ -19,9 +19,8 @@
 
 import {
   FieldFormat,
-  TEXT_CONTEXT_TYPE,
   KBN_FIELD_TYPES,
-  FieldFormatConvert,
+  TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
 function convertLookupEntriesToMap(lookupEntries: any) {
@@ -49,14 +48,12 @@ export function createStaticLookupFormat() {
       };
     }
 
-    _convert: Partial<FieldFormatConvert> = {
-      [TEXT_CONTEXT_TYPE](this: StaticLookupFormat, val) {
-        const lookupEntries = this.param('lookupEntries');
-        const unknownKeyValue = this.param('unknownKeyValue');
+    textConvert: TextContextTypeConvert = val => {
+      const lookupEntries = this.param('lookupEntries');
+      const unknownKeyValue = this.param('unknownKeyValue');
 
-        const lookupMap = convertLookupEntriesToMap(lookupEntries);
-        return lookupMap[val] || unknownKeyValue || val;
-      },
+      const lookupMap = convertLookupEntriesToMap(lookupEntries);
+      return lookupMap[val] || unknownKeyValue || val;
     };
   };
 }
