@@ -22,13 +22,9 @@ import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriver';
-// @ts-ignore types not available
+import { Builder, Capabilities, By, logging, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
-// @ts-ignore types not available
 import firefox from 'selenium-webdriver/firefox';
-// @ts-ignore internal modules are not typed
-import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 // @ts-ignore internal modules are not typed
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
@@ -93,7 +89,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
         const firefoxOptions = new firefox.Options();
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
-          firefoxOptions.addArguments('-headless');
+          firefoxOptions.headless();
         }
         return new Builder()
           .forBrowser(browserType)
@@ -123,7 +119,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
     return;
   } // abort
 
-  return { driver: session, By, Key, until, LegacyActionSequence };
+  return { driver: session, By, until };
 }
 
 export async function initWebDriver(log: ToolingLog, browserType: Browsers) {
