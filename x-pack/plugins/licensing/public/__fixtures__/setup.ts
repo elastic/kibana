@@ -5,8 +5,10 @@
  */
 
 import { take, skip } from 'rxjs/operators';
+import { CoreSetup } from '../../../../../src/core/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { licenseMerge } from '../../common/license_merge';
+import { SIGNATURE_HEADER } from '../../common/constants';
 import { Plugin } from '../plugin';
 
 export function setupOnly(pluginInitializerContext: any = {}) {
@@ -32,8 +34,32 @@ export async function setup(xpackInfo = {}, pluginInitializerContext: any = {}, 
     : license$.pipe(take(1)).toPromise());
 
   return {
+    coreSetup,
     plugin,
     license$,
     license,
   };
+}
+
+// NOTE: Since we don't have a real interceptor here due to mocks,
+// we fake the process and necessary objects.
+export function mockHttpInterception(coreSetup: MockedKeys<CoreSetup>) {
+  coreSetup.http.intercept.mockImplementation(interceptor => {
+    coreSetup.http.get.mockImplementation(path => {
+      const headers = new Map();
+
+      if (path.includes('fake')) {
+        headers.set(SIGNATURE_HEADER, 'fake-signature');
+      }
+
+      (interceptor.response as (_: any) => void)({
+        request: { url: path },
+        response: { headers },
+      });
+
+      return licenseMerge({});
+    });
+
+    return () => {};
+  });
 }

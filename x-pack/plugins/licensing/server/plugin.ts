@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject, Observable, Subscription, merge, of, timer } from 'rxjs';
-import { filter, first, map, pairwise, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, Subscription, merge, of, timer } from 'rxjs';
+import { filter, first, map, pairwise, switchMap, takeUntil, tap } from 'rxjs/operators';
 import moment from 'moment';
 import { createHash } from 'crypto';
 import { TypeOf } from '@kbn/config-schema';
@@ -34,6 +34,7 @@ declare module 'src/core/server' {
 type LicensingConfigType = TypeOf<typeof schema>;
 
 export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugin {
+  private stop$ = new Subject();
   private readonly logger: Logger;
   private readonly config$: Observable<LicensingConfig>;
   private configSubscription: Subscription;
@@ -123,7 +124,10 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
       filter(([previous, next]) => hasLicenseInfoChanged(previous, next)),
       map(([, next]) => next)
     );
-    const license$ = merge(initial$, updates$).pipe(tap(this.setSession));
+    const license$ = merge(initial$, updates$).pipe(
+      tap(this.setSession),
+      takeUntil(this.stop$)
+    );
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
@@ -138,6 +142,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
   public async start(core: CoreStart) {}
 
   public stop() {
+    this.stop$.next();
     this.configSubscription.unsubscribe();
   }
 }

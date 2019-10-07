@@ -9,7 +9,7 @@ export const LICENSING_SESSION = 'xpack.licensing';
 export const LICENSING_SESSION_SIGNATURE = 'xpack.licensing.signature';
 export const SIGNATURE_HEADER = 'kbn-xpack-sig';
 export const DEFAULT_POLLING_FREQUENCY = 30001; // 30 seconds
-export enum LICENSE_STATUS {
+export enum LICENSE_CHECK_STATE {
   Unavailable = 'UNAVAILABLE',
   Invalid = 'INVALID',
   Expired = 'EXPIRED',

@@ -11,12 +11,21 @@ export function hasLicenseInfoChanged(
   newLicense: License | undefined
 ) {
   if (currentLicense && newLicense) {
+    if (
+      (currentLicense.error && !newLicense.error) ||
+      (!currentLicense.error && newLicense.error) ||
+      (newLicense.error &&
+        currentLicense.error &&
+        newLicense.error.message !== currentLicense.error.message)
+    ) {
+      return true;
+    }
+
     return (
       newLicense.type !== currentLicense.type ||
       newLicense.status !== currentLicense.status ||
       newLicense.expiryDateInMillis !== currentLicense.expiryDateInMillis ||
-      newLicense.isAvailable !== currentLicense.isAvailable ||
-      newLicense.error !== currentLicense.error
+      newLicense.isAvailable !== currentLicense.isAvailable
     );
   }
 

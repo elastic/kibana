@@ -6,8 +6,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { LicenseFeature } from './license_feature';
-import { LICENSE_STATUS, LICENSE_TYPE } from './constants';
-import { LicenseType, ILicense, ILicensingPlugin, RawLicense, RawFeatures } from './types';
+import { LICENSE_CHECK_STATE, LICENSE_TYPE } from './constants';
+import {
+  LicenseType,
+  ILicense,
+  ILicensingPlugin,
+  ObjectifiedLicense,
+  RawLicense,
+  RawFeatures,
+} from './types';
 
 function toLicenseType(minimumLicenseRequired: LICENSE_TYPE | string) {
   if (typeof minimumLicenseRequired !== 'string') {
@@ -29,6 +36,29 @@ interface LicenseArgs {
   clusterSource?: string;
 }
 
+/*
+  uid?: string;
+  status?: string;
+  expiry_date_in_millis?: number;
+  type?: LicenseType;
+}
+
+export interface RawFeatures {
+  [key: string]: {
+    available: boolean;
+    enabled: boolean;
+  };
+}
+
+export interface ObjectifiedLicense {
+  license: {
+    type: LicenseType;
+    isActive: boolean;
+    expiryDateInMillis: number;
+  };
+  features: any[];
+*/
+
 export class License implements ILicense {
   private readonly plugin: ILicensingPlugin;
   private readonly hasLicense: boolean;
@@ -39,6 +69,38 @@ export class License implements ILicense {
   private readonly featuresMap: Map<string, LicenseFeature>;
   private clusterSource?: string;
   public error?: Error;
+
+  static fromObjectified(
+    objectified: ObjectifiedLicense,
+    { plugin, error, clusterSource }: LicenseArgs
+  ) {
+    const license = objectified.license && {
+      uid: objectified.license.uid,
+      status: objectified.license.status,
+      type: objectified.license.type,
+      expiry_date_in_millis: objectified.license.expiryDateInMillis,
+    };
+    const features =
+      objectified.features &&
+      objectified.features.reduce(
+        (map, feature) => ({
+          ...map,
+          [feature.name]: {
+            available: feature.isAvailable,
+            enabled: feature.isEnabled,
+          },
+        }),
+        {}
+      );
+
+    return new License({
+      plugin,
+      error,
+      clusterSource,
+      license,
+      features,
+    });
+  }
 
   constructor({ plugin, license, features, error, clusterSource }: LicenseArgs) {
     this.plugin = plugin;
@@ -125,7 +187,7 @@ export class License implements ILicense {
 
     if (!this.isAvailable) {
       return {
-        check: LICENSE_STATUS.Unavailable,
+        state: LICENSE_CHECK_STATE.Unavailable,
         message: i18n.translate('xpack.licensing.check.errorUnavailableMessage', {
           defaultMessage:
             'You cannot use {pluginName} because license information is not available at this time.',
@@ -138,7 +200,7 @@ export class License implements ILicense {
 
     if (!this.meetsMinimumOf(minimum)) {
       return {
-        check: LICENSE_STATUS.Invalid,
+        state: LICENSE_CHECK_STATE.Invalid,
         message: i18n.translate('xpack.licensing.check.errorUnsupportedMessage', {
           defaultMessage:
             'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
@@ -149,7 +211,7 @@ export class License implements ILicense {
 
     if (!this.isActive) {
       return {
-        check: LICENSE_STATUS.Expired,
+        state: LICENSE_CHECK_STATE.Expired,
         message: i18n.translate('xpack.licensing.check.errorExpiredMessage', {
           defaultMessage:
             'You cannot use {pluginName} because your {licenseType} license has expired.',
@@ -158,7 +220,7 @@ export class License implements ILicense {
       };
     }
 
-    return { check: LICENSE_STATUS.Valid };
+    return { state: LICENSE_CHECK_STATE.Valid };
   }
 
   toObject() {
@@ -169,6 +231,8 @@ export class License implements ILicense {
     this.objectified = {
       license: {
         type: this.type,
+        status: this.status,
+        uid: this.uid,
         isActive: this.isActive,
         expiryDateInMillis: this.expiryDateInMillis,
       },
@@ -182,7 +246,7 @@ export class License implements ILicense {
     let feature = this.featuresMap.get(name);
 
     if (!feature) {
-      feature = new LicenseFeature(name, this.features[name], this);
+      feature = new LicenseFeature(name, this.features[name]);
       this.featuresMap.set(name, feature);
     }
 

@@ -5,8 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { LICENSE_TYPE, LICENSE_STATUS } from './constants';
-import { License } from './license';
+import { LICENSE_TYPE, LICENSE_CHECK_STATE } from './constants';
 import { LicenseFeature } from './license_feature';
 
 /**
@@ -32,7 +31,7 @@ export interface RawLicense {
   /**
    * The license type, being usually one of basic, standard, gold, platinum, or trial.
    */
-  type?: string;
+  type?: LicenseType;
 }
 
 /**
@@ -49,11 +48,17 @@ export interface RawFeatures {
 /** @public */
 export interface ObjectifiedLicense {
   license: {
+    uid: string;
     type: LicenseType;
+    status: string;
     isActive: boolean;
     expiryDateInMillis: number;
   };
-  features: any[];
+  features: Array<{
+    name: string;
+    isAvailable: boolean;
+    isEnabled: boolean;
+  }>;
 }
 
 /**
@@ -63,9 +68,9 @@ export interface ObjectifiedLicense {
  */
 export interface ILicenseCheck {
   /**
-   * The status of checking the results of a license type meeting the license minimum.
+   * The state of checking the results of a license type meeting the license minimum.
    */
-  check: LICENSE_STATUS;
+  state: LICENSE_CHECK_STATE;
   /**
    * A message containing the reason for a license type not being valid.
    */
@@ -96,7 +101,7 @@ export interface ILicense {
   /**
    * The license type, being usually one of basic, standard, gold, platinum, or trial.
    */
-  type?: string;
+  type?: LicenseType;
 
   /**
    * Determine if the license container has information.
@@ -166,8 +171,6 @@ export interface LicensingPluginSetup {
 }
 /** @public */
 export type LicenseType = keyof typeof LICENSE_TYPE;
-/** @public */
-export type LicenseFeatureSerializer = (licensing: License) => any;
 
 /** @public */
 export interface LicensingRequestContext {

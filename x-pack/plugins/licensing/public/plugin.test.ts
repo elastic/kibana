@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { take, skip } from 'rxjs/operators';
+import { bufferCount, take, skip } from 'rxjs/operators';
 import { ILicense } from '../common/types';
 import { License } from '../common/license';
 import { licenseMerge } from '../common/license_merge';
 import { Plugin } from './plugin';
-import { setup, setupOnly } from './__fixtures__/setup';
+import { mockHttpInterception, setup, setupOnly } from './__fixtures__/setup';
 
 describe('licensing plugin', () => {
   let plugin: Plugin;
@@ -23,6 +23,45 @@ describe('licensing plugin', () => {
   test('returns instance of licensing setup', async () => {
     ({ plugin, license } = await setup());
     expect(license).toBeInstanceOf(License);
+  });
+
+  test('intercepted HTTP request changes license signature', async () => {
+    const { coreSetup, plugin: _plugin } = await setupOnly();
+
+    plugin = _plugin;
+    mockHttpInterception(coreSetup);
+
+    const { license$ } = await plugin.setup(coreSetup);
+
+    await license$
+      .pipe(
+        skip(1),
+        take(1)
+      )
+      .toPromise();
+    await coreSetup.http.get('/api/fake');
+
+    expect(plugin.sign()).toBe('fake-signature');
+  });
+
+  test('intercepted HTTP request causes a refresh if the signature changes', async () => {
+    const { coreSetup, plugin: _plugin } = await setupOnly();
+
+    plugin = _plugin;
+    mockHttpInterception(coreSetup);
+
+    const { license$ } = await plugin.setup(coreSetup);
+
+    // TODO: still need to check that a refresh was triggered
+    await license$
+      .pipe(
+        skip(1),
+        take(1)
+      )
+      .toPromise();
+    await coreSetup.http.get('/api/fake');
+
+    expect(plugin.sign()).toBe('fake-signature');
   });
 
   test('still returns instance of licensing setup when request fails', async () => {
@@ -45,38 +84,28 @@ describe('licensing plugin', () => {
   test('observable receives updated licenses', async () => {
     const { coreSetup, plugin: _plugin } = await setupOnly();
     const types = ['basic', 'gold', 'platinum'];
-    let iterations = 0;
 
     plugin = _plugin;
     plugin.pollingFrequency = 100;
-    coreSetup.http.get.mockImplementation(() => {
-      return Promise.resolve(
+    coreSetup.http.get.mockImplementation(() =>
+      Promise.resolve(
         licenseMerge({
           license: {
-            type: types[iterations++],
+            type: types.shift(),
           },
         })
-      );
-    });
+      )
+    );
 
     const { license$ } = await plugin.setup(coreSetup);
-    const licenseTypes: any[] = [];
+    const [first, second, third] = await license$
+      .pipe(
+        skip(1),
+        bufferCount(3),
+        take(1)
+      )
+      .toPromise();
 
-    await new Promise(resolve => {
-      const subscription = license$.subscribe(next => {
-        if (!next.type) {
-          return;
-        }
-
-        if (iterations > 3) {
-          subscription.unsubscribe();
-          resolve();
-        } else {
-          licenseTypes.push(next.type);
-        }
-      });
-    });
-
-    expect(licenseTypes).toEqual(['basic', 'gold', 'platinum']);
+    expect([first.type, second.type, third.type]).toEqual(['basic', 'gold', 'platinum']);
   });
 });

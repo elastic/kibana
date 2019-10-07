@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { take, skip } from 'rxjs/operators';
+import { bufferCount, take, skip } from 'rxjs/operators';
 import { ILicense } from '../common/types';
 import { License } from '../common/license';
 import { licenseMerge } from '../common/license_merge';
@@ -48,45 +48,34 @@ describe('licensing plugin', () => {
       },
     });
     const types = ['basic', 'gold', 'platinum'];
-    let iterations = 0;
 
     plugin = _plugin;
-    clusterClient.callAsInternalUser.mockImplementation(() => {
-      return Promise.resolve(
+    clusterClient.callAsInternalUser.mockImplementation(() =>
+      Promise.resolve(
         licenseMerge({
           license: {
-            type: types[iterations++],
+            type: types.shift(),
           },
         })
-      );
-    });
+      )
+    );
 
     const { license$ } = await plugin.setup(coreSetup);
-    const licenseTypes: any[] = [];
+    const [first, second, third] = await license$
+      .pipe(
+        skip(1),
+        bufferCount(3),
+        take(1)
+      )
+      .toPromise();
 
-    await new Promise(resolve => {
-      const subscription = license$.subscribe(next => {
-        if (!next.type) {
-          return;
-        }
-
-        if (iterations > 3) {
-          subscription.unsubscribe();
-          resolve();
-        } else {
-          licenseTypes.push(next.type);
-        }
-      });
-    });
-
-    expect(licenseTypes).toEqual(['basic', 'gold', 'platinum']);
+    expect([first.type, second.type, third.type]).toEqual(['basic', 'gold', 'platinum']);
   });
 
   test('provides a licensing context to http routes', async () => {
     const { coreSetup, plugin: _plugin } = await setupOnly();
 
     plugin = _plugin;
-
     await plugin.setup(coreSetup);
 
     expect(coreSetup.http.registerRouteHandlerContext.mock.calls).toMatchInlineSnapshot(`

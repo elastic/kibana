@@ -5,7 +5,7 @@
  */
 
 import { ILicense } from '../common/types';
-import { LICENSE_STATUS } from '../common/constants';
+import { LICENSE_CHECK_STATE } from '../common/constants';
 import { LicenseFeature } from '../common/license_feature';
 import { setup } from './__fixtures__/setup';
 import { Plugin } from './plugin';
@@ -94,24 +94,24 @@ describe('license', () => {
         },
       }));
 
-      expect(license.check('test', 'basic').check).toBe(LICENSE_STATUS.Valid);
-      expect(license.check('test', 'gold').check).toBe(LICENSE_STATUS.Valid);
+      expect(license.check('test', 'basic').state).toBe(LICENSE_CHECK_STATE.Valid);
+      expect(license.check('test', 'gold').state).toBe(LICENSE_CHECK_STATE.Valid);
     });
 
     test('should return Invalid if active and check does not match', async () => {
       ({ plugin, license } = await setup());
 
-      const { check } = license.check('test', 'gold');
+      const { state } = license.check('test', 'gold');
 
-      expect(check).toBe(LICENSE_STATUS.Invalid);
+      expect(state).toBe(LICENSE_CHECK_STATE.Invalid);
     });
 
     test('should return Unavailable if missing license', async () => {
       ({ plugin, license } = await setup({ license: null }, {}, false));
 
-      const { check } = license.check('test', 'gold');
+      const { state } = license.check('test', 'gold');
 
-      expect(check).toBe(LICENSE_STATUS.Unavailable);
+      expect(state).toBe(LICENSE_CHECK_STATE.Unavailable);
     });
 
     test('should return Expired if not active', async () => {
@@ -121,9 +121,9 @@ describe('license', () => {
         },
       }));
 
-      const { check } = license.check('test', 'basic');
+      const { state } = license.check('test', 'basic');
 
-      expect(check).toBe(LICENSE_STATUS.Expired);
+      expect(state).toBe(LICENSE_CHECK_STATE.Expired);
     });
   });
 
