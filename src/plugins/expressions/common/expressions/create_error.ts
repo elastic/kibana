@@ -17,11 +17,18 @@
  * under the License.
  */
 
-export const createError = (err: any) => ({
+type ErrorLike = Partial<Pick<Error, 'name' | 'message' | 'stack'>>;
+
+export const createError = (err: string | ErrorLike) => ({
   type: 'error',
   error: {
-    stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
+    stack:
+      process.env.NODE_ENV === 'production'
+        ? undefined
+        : typeof err === 'object'
+        ? err.stack
+        : undefined,
     message: typeof err === 'string' ? err : err.message,
-    name: (err && err.name) || 'Error',
+    name: typeof err === 'object' ? err.name || 'Error' : 'Error',
   },
 });

@@ -17,13 +17,9 @@
  * under the License.
  */
 
-import { Registry } from '@kbn/interpreter/common';
-import { RenderFunction } from './render_function';
-
-class RenderFunctionsRegistry extends Registry<any, any> {
-  wrapper(obj: any) {
-    return new (RenderFunction as any)(obj);
-  }
+export interface VisResponseValue {
+  visType: string;
+  visData: object;
+  visConfig: object;
+  params?: object;
 }
-
-export { RenderFunctionsRegistry };

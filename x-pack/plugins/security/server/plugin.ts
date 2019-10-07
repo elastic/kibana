@@ -6,7 +6,7 @@
 
 import { first } from 'rxjs/operators';
 import {
-  ClusterClient,
+  IClusterClient,
   CoreSetup,
   KibanaRequest,
   Logger,
@@ -68,7 +68,7 @@ export interface PluginSetupContract {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private clusterClient?: ClusterClient;
+  private clusterClient?: IClusterClient;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
