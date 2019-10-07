@@ -123,6 +123,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   searchFields?: string[];
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
+  filter?: string;
 }
 
 /**
