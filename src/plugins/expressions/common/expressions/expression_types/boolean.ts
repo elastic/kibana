@@ -23,7 +23,7 @@ import { Render } from './render';
 
 const name = 'boolean';
 
-export const boolean = (): ExpressionType<typeof name, boolean> => ({
+export const boolean = (): ExpressionType<'boolean', boolean> => ({
   name,
   from: {
     null: () => false,

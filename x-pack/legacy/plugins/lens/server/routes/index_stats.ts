@@ -13,6 +13,7 @@ import {
   IndexPatternsService,
   FieldDescriptor,
 } from '../../../../../../src/legacy/server/index_patterns/service';
+import { BASE_API_URL } from '../../common';
 
 type Document = Record<string, unknown>;
 
@@ -22,7 +23,7 @@ export async function initStatsRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
   router.post(
     {
-      path: '/index_stats/{indexPatternTitle}',
+      path: `${BASE_API_URL}/index_stats/{indexPatternTitle}`,
       validate: {
         params: schema.object({
           indexPatternTitle: schema.string(),

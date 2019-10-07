@@ -41,7 +41,9 @@ export function createUrlFormat(FieldFormat) {
       return {
         type: DEFAULT_URL_TYPE,
         urlTemplate: null,
-        labelTemplate: null
+        labelTemplate: null,
+        width: null,
+        height: null,
       };
     }
 
@@ -91,6 +93,15 @@ export function createUrlFormat(FieldFormat) {
       };
     }
 
+    _generateImgHtml(url, imageLabel) {
+      const isValidWidth = !isNaN(parseInt(this.param('width')));
+      const isValidHeight = !isNaN(parseInt(this.param('height')));
+      const maxWidth = isValidWidth ? `${this.param('width')}px` : 'none';
+      const maxHeight = isValidHeight ? `${this.param('height')}px` : 'none';
+
+      return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
+    }
+
     static id = 'url';
     static title = 'Url';
     static fieldType = [
@@ -127,7 +138,7 @@ export function createUrlFormat(FieldFormat) {
               ? `A dynamically-specified image located at ${url}`
               : label;
 
-          return `<img src="${url}" alt="${imageLabel}">`;
+          return this._generateImgHtml(url, imageLabel);
         default:
           const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
           if (!inWhitelist && !parsedUrl) {
