@@ -38,7 +38,6 @@ export class UpdateSourceEditor extends Component {
       const emsFields = emsFile.getFieldsInLanguage();
       fields = emsFields.map(field => {
         return {
-          type: 'string',
           name: field.name,
           label: field.description
         };

@@ -16,24 +16,18 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 
 const sortByLabel  = (a, b) => {
-  if (a.label < b.label) return -1;
-  if (a.label > b.label) return 1;
-  return 0;
+  return a.label.localeCompare(b.label);
 };
-
-const ENTRY_KEY_INDEX = 0;
-const ENTRY_VALUE_INDEX = 1;
 
 function getOptions(fields, selectedFields) {
   if (!fields) {
     return [];
   }
 
-  const fieldsByTypeMap = new Map();
-
-  fields
+  return fields
     .filter(field => {
       // remove selected fields
       const isFieldSelected = !!selectedFields.find(selectedField => {
@@ -41,46 +35,14 @@ function getOptions(fields, selectedFields) {
       });
       return !isFieldSelected;
     })
-    .forEach(field => {
-      const fieldLabel = 'label' in field ? field.label : field.name;
-      const option = {
+    .map(field => {
+      return {
         value: field.name,
-        label: fieldLabel,
+        prepend: 'type' in field ? <FieldIcon type={field.type} size="m" useColor /> : null,
+        label: 'label' in field ? field.label : field.name,
       };
-      if (fieldsByTypeMap.has(field.type)) {
-        const fieldsList = fieldsByTypeMap.get(field.type);
-        fieldsList.push(option);
-        fieldsByTypeMap.set(field.type, fieldsList);
-      } else {
-        fieldsByTypeMap.set(field.type, [option]);
-      }
-    });
-
-  const fieldTypeEntries = [...fieldsByTypeMap.entries()];
-  const options = [];
-  if (fieldTypeEntries.length === 1) {
-    // Field list only contains a single type, no need to display group label for type header
-    options.push(...fieldTypeEntries[0][ENTRY_VALUE_INDEX].sort(sortByLabel));
-  } else {
-    // Display group label per type header
-    fieldTypeEntries
-      .sort((a, b) => {
-        if (a[ENTRY_KEY_INDEX] < b[ENTRY_KEY_INDEX]) return -1;
-        if (a[ENTRY_KEY_INDEX] > b[ENTRY_KEY_INDEX]) return 1;
-        return 0;
-      })
-      .forEach(entry => {
-        const fieldType = entry[ENTRY_KEY_INDEX];
-        const fieldTypeOptions = entry[ENTRY_VALUE_INDEX].sort(sortByLabel);
-        options.push({
-          label: fieldType,
-          isGroupLabel: true
-        });
-        options.push(...fieldTypeOptions);
-      });
-  }
-
-  return options;
+    })
+    .sort(sortByLabel);
 }
 
 export class AddTooltipFieldPopover extends Component {
@@ -124,8 +86,6 @@ export class AddTooltipFieldPopover extends Component {
       .map(option => {
         return option.value;
       });
-
-    console.log(checkedFields);
 
     this.setState({
       checkedFields,
