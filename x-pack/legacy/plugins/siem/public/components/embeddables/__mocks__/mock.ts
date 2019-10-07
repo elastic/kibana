@@ -99,9 +99,8 @@ export const mockLineLayer = {
     sourceGeoField: 'source.geo.location',
     destGeoField: 'destination.geo.location',
     metrics: [
-      { type: 'sum', field: 'source.bytes', label: 'Total Src Bytes' },
-      { type: 'sum', field: 'destination.bytes', label: 'Total Dest Bytes' },
-      { type: 'count', label: 'Total Documents' },
+      { type: 'sum', field: 'source.bytes', label: 'source.bytes' },
+      { type: 'sum', field: 'destination.bytes', label: 'destination.bytes' },
     ],
   },
   style: {

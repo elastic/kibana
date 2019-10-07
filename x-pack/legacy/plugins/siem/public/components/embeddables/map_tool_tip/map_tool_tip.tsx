@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { FeatureGeometry, FeatureProperty, MapFeature, MapToolTipProps } from '../types';
+import { FeatureGeometry, FeatureProperty, MapToolTipProps } from '../types';
 import { DraggablePortalContext } from '../../drag_and_drop/draggable_wrapper';
-import { MapToolTipFooter } from './tooltip_footer';
+import { ToolTipFooter } from './tooltip_footer';
 import { LineToolTipContent } from './line_tool_tip_content';
 import { PointToolTipContent } from './point_tool_tip_content';
+import { Loader } from '../../loader';
 
 export const MapToolTip = React.memo<MapToolTipProps>(
   ({
@@ -28,18 +29,14 @@ export const MapToolTip = React.memo<MapToolTipProps>(
     loadFeatureGeometry,
   }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoadingNextFeature, setIsLoadingNextFeature] = useState<boolean>(false);
     const [featureIndex, setFeatureIndex] = useState<number>(0);
     const [featureProps, setFeatureProps] = useState<FeatureProperty[]>([]);
     const [featurePropsFilters, setFeaturePropsFilters] = useState<Record<string, object>>({});
     const [featureGeometry, setFeatureGeometry] = useState<FeatureGeometry | null>(null);
     const [, setLayerName] = useState<string>('');
 
-    // Keep a ref of features to determine the render of one feature from the next to ensure the loader is displayed
-    const featuresRef = useRef<MapFeature[] | null>(null);
-
     useEffect(() => {
-      featuresRef.current = features;
-
       // Early return if component doesn't yet have props -- result of mounting in portal before actual rendering
       if (
         features.length === 0 ||
@@ -50,7 +47,10 @@ export const MapToolTip = React.memo<MapToolTipProps>(
         return;
       }
 
-      setIsLoading(true);
+      // Separate loaders for initial load vs loading next feature to keep tooltip from drastically resizing
+      if (!isLoadingNextFeature) {
+        setIsLoading(true);
+      }
 
       const fetchFeatureProps = async () => {
         if (features[featureIndex] != null) {
@@ -83,6 +83,7 @@ export const MapToolTip = React.memo<MapToolTipProps>(
           setFeatureGeometry(featureGeo);
           setLayerName(layerNameString);
           setIsLoading(false);
+          setIsLoadingNextFeature(false);
         }
       };
 
@@ -95,23 +96,7 @@ export const MapToolTip = React.memo<MapToolTipProps>(
         .join(),
     ]);
 
-    const areSameFeatures = (oldFeatures: MapFeature[], newFeatures: MapFeature[]) => {
-      return (
-        oldFeatures
-          .map(f => `${f.id}-${f.layerId}`)
-          .sort()
-          .join() ===
-        newFeatures
-          .map(f => `${f.id}-${f.layerId}`)
-          .sort()
-          .join()
-      );
-    };
-
-    return isLoading ||
-      (!isLocked &&
-        featuresRef.current != null &&
-        !areSameFeatures(featuresRef.current, features)) ? (
+    return isLoading && !isLoadingNextFeature ? (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />
@@ -123,6 +108,7 @@ export const MapToolTip = React.memo<MapToolTipProps>(
           onOutsideClick={() => {
             if (closeTooltip != null) {
               closeTooltip();
+              setFeatureIndex(0);
             }
           }}
         >
@@ -130,9 +116,7 @@ export const MapToolTip = React.memo<MapToolTipProps>(
             {featureGeometry != null && featureGeometry.type === 'LineString' ? (
               <LineToolTipContent
                 contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}`}
-                features={features}
                 featureProps={featureProps}
-                featureIndex={featureIndex}
               />
             ) : (
               <PointToolTipContent
@@ -144,13 +128,20 @@ export const MapToolTip = React.memo<MapToolTipProps>(
               />
             )}
             {features.length > 1 && (
-              <MapToolTipFooter
+              <ToolTipFooter
                 featureIndex={featureIndex}
                 totalFeatures={features.length}
-                previousFeature={() => setFeatureIndex(featureIndex - 1)}
-                nextFeature={() => setFeatureIndex(featureIndex + 1)}
+                previousFeature={() => {
+                  setFeatureIndex(featureIndex - 1);
+                  setIsLoadingNextFeature(true);
+                }}
+                nextFeature={() => {
+                  setFeatureIndex(featureIndex + 1);
+                  setIsLoadingNextFeature(true);
+                }}
               />
             )}
+            {isLoadingNextFeature && <Loader data-test-subj="loading-panel" overlay size="m" />}
           </div>
         </EuiOutsideClickDetector>
       </DraggablePortalContext.Provider>

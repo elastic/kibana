@@ -6,11 +6,11 @@
 
 import React from 'react';
 import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiFlexGroup,
-  EuiButtonIcon,
-  EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -30,32 +30,34 @@ interface MapToolTipFooterProps {
   nextFeature: () => void;
 }
 
-export const MapToolTipFooter = React.memo<MapToolTipFooterProps>(
+export const ToolTipFooter = React.memo<MapToolTipFooterProps>(
   ({ featureIndex, totalFeatures, previousFeature, nextFeature }) => {
     return (
       <>
         <EuiHorizontalRule margin="s" />
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
-              {i18n.MAP_TOOL_TIP_FEATURES_FOOTER(featureIndex, totalFeatures)}
+              {i18n.MAP_TOOL_TIP_FEATURES_FOOTER(featureIndex + 1, totalFeatures)}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <span>
               <EuiButtonIcon
+                data-test-subj={'previous-feature-button'}
                 color={'text'}
                 onClick={previousFeature}
                 iconType="arrowLeft"
                 aria-label="Next"
-                disabled={featureIndex === 0}
+                disabled={featureIndex <= 0}
               />
               <EuiButtonIcon
+                data-test-subj={'next-feature-button'}
                 color={'text'}
                 onClick={nextFeature}
                 iconType="arrowRight"
                 aria-label="Next"
-                disabled={featureIndex === totalFeatures - 1}
+                disabled={featureIndex >= totalFeatures - 1}
               />
             </span>
           </EuiFlexItem>
@@ -65,4 +67,4 @@ export const MapToolTipFooter = React.memo<MapToolTipFooterProps>(
   }
 );
 
-MapToolTipFooter.displayName = 'MapToolTipFooter';
+ToolTipFooter.displayName = 'ToolTipFooter';

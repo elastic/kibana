@@ -29,10 +29,12 @@ export const PointToolTipContent = React.memo<PointToolTipContentProps>(
       title: sourceDestinationFieldMappings[property._propertyKey],
       description: (
         <WithHoverActions
+          data-test-subj={`hover-actions-${property._propertyKey}`}
           hoverContent={
-            <HoverActionsContainer data-test-subj="hover-actions-container">
+            <HoverActionsContainer>
               <EuiToolTip content={i18n.FILTER_FOR_VALUE}>
                 <EuiIcon
+                  data-test-subj={`add-to-filter-${property._propertyKey}`}
                   type="filter"
                   onClick={() => {
                     if (closeTooltip != null && addFilters != null) {
@@ -47,7 +49,6 @@ export const PointToolTipContent = React.memo<PointToolTipContentProps>(
           render={() =>
             property._rawValue != null ? (
               <DefaultDraggable
-                data-test-subj="port"
                 field={property._propertyKey}
                 id={`map-point-tooltip-${contextId}-${property._propertyKey}-${property._rawValue}`}
                 tooltipContent={property._propertyKey}

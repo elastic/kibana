@@ -9,7 +9,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { SourceDestinationArrows } from '../../source_destination/source_destination_arrows';
 import { SUM_OF_DESTINATION_BYTES, SUM_OF_SOURCE_BYTES } from '../map_config';
-import { FeatureProperty, MapFeature } from '../types';
+import { FeatureProperty } from '../types';
 
 const FlowBadge = styled(EuiBadge)`
   height: 45px;
@@ -18,13 +18,11 @@ const FlowBadge = styled(EuiBadge)`
 
 interface LineToolTipContentProps {
   contextId: string;
-  features: MapFeature[];
   featureProps: FeatureProperty[];
-  featureIndex: number;
 }
 
 export const LineToolTipContent = React.memo<LineToolTipContentProps>(
-  ({ contextId, features, featureProps, featureIndex }) => {
+  ({ contextId, featureProps }) => {
     const lineProps = featureProps.reduce<Record<string, string>>(
       (acc, f) => ({ ...acc, ...{ [f._propertyKey]: f._rawValue } }),
       {}
