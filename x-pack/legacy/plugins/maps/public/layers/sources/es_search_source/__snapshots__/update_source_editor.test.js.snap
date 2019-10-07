@@ -64,8 +64,8 @@ exports[`should enable sort order select when sort field provided 1`] = `
     labelType="label"
   >
     <EuiSwitch
-      checked={true}
-      label="Dynamically filter for data in the visible map area"
+      checked={false}
+      label="Show top documents based on sort order"
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -77,8 +77,8 @@ exports[`should enable sort order select when sort field provided 1`] = `
     labelType="label"
   >
     <EuiSwitch
-      checked={false}
-      label="Show most recent documents by entity"
+      checked={true}
+      label="Dynamically filter for data in the visible map area"
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -149,20 +149,7 @@ exports[`should render top hits form when useTopHits is true 1`] = `
   >
     <EuiSwitch
       checked={true}
-      label="Dynamically filter for data in the visible map area"
-      onChange={[Function]}
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <EuiSwitch
-      checked={true}
-      label="Show most recent documents by entity"
+      label="Show top documents based on sort order"
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -202,6 +189,19 @@ exports[`should render top hits form when useTopHits is true 1`] = `
       showRange={true}
       step={1}
       value={1}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={true}
+      label="Dynamically filter for data in the visible map area"
+      onChange={[Function]}
     />
   </EuiFormRow>
 </Fragment>
@@ -270,8 +270,8 @@ exports[`should render update source editor 1`] = `
     labelType="label"
   >
     <EuiSwitch
-      checked={true}
-      label="Dynamically filter for data in the visible map area"
+      checked={false}
+      label="Show top documents based on sort order"
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -283,8 +283,8 @@ exports[`should render update source editor 1`] = `
     labelType="label"
   >
     <EuiSwitch
-      checked={false}
-      label="Show most recent documents by entity"
+      checked={true}
+      label="Dynamically filter for data in the visible map area"
       onChange={[Function]}
     />
   </EuiFormRow>

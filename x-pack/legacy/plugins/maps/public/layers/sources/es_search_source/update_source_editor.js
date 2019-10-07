@@ -75,9 +75,7 @@ export class UpdateSourceEditor extends Component {
     this.setState({
       tooltipFields: getSourceFields(indexPattern.fields),
       termFields: getTermsFields(indexPattern.fields),
-      sortFields: indexPattern.fields.filter(field => {
-        return field.sortable;
-      }),
+      sortFields: indexPattern.fields.filter(field => field.sortable),
     });
   }
   _onTooltipPropertiesChange = propertyNames => {
@@ -214,6 +212,18 @@ export class UpdateSourceEditor extends Component {
 
         <EuiFormRow>
           <EuiSwitch
+            label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
+              defaultMessage: `Show top documents based on sort order`,
+            })}
+            checked={this.props.useTopHits}
+            onChange={this.onUseTopHitsChange}
+          />
+        </EuiFormRow>
+
+        {this.renderTopHitsForm()}
+
+        <EuiFormRow>
+          <EuiSwitch
             label={i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
               defaultMessage: `Dynamically filter for data in the visible map area`,
             })}
@@ -222,17 +232,6 @@ export class UpdateSourceEditor extends Component {
           />
         </EuiFormRow>
 
-        <EuiFormRow>
-          <EuiSwitch
-            label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-              defaultMessage: `Show most recent documents by entity`,
-            })}
-            checked={this.props.useTopHits}
-            onChange={this.onUseTopHitsChange}
-          />
-        </EuiFormRow>
-
-        {this.renderTopHitsForm()}
       </Fragment>
     );
   }

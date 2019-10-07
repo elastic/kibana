@@ -245,16 +245,14 @@ export class ESSearchSource extends AbstractESSource {
     };
   }
 
-  // Returns true when top hits is enabled and properly configured
   _isTopHits() {
     const { useTopHits, topHitsSplitField } = this._descriptor;
     return !!(useTopHits && topHitsSplitField);
   }
 
-  // Returns true when sort is properly configured
   _hasSort() {
     const { sortField, sortOrder } = this._descriptor;
-    return !!(sortField && sortOrder);
+    return !!sortField && !!sortOrder;
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
