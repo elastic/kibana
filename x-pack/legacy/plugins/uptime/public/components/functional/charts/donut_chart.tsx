@@ -36,12 +36,14 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
         .range([gray, danger]);
       const pieGenerator = d3.layout
         .pie()
-        .value((d: any) => d.value)
+        .value(({ value }: any) => value)
+        // these start/end angles will reverse the direction of the pie,
+        // which matches our design
         .startAngle(2 * Math.PI)
         .endAngle(0);
 
       svgElement
-        .selectAll('key')
+        .selectAll('')
         .data(
           // @ts-ignore pie generator expects param of type number[], but only works with
           // output of d3.entries, which is like Array<{ key: string, value: number }>
