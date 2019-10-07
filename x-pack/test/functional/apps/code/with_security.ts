@@ -23,7 +23,8 @@ export default function testWithSecurity({ getService, getPageObjects }: FtrProv
   const security = getService('security');
   const config = getService('config');
 
-  describe('Security', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/46977
+  describe.skip('Security', () => {
     describe('with security enabled:', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
