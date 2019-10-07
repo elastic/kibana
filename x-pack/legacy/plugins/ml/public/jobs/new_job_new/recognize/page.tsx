@@ -42,7 +42,6 @@ import {
   ModuleJob,
 } from '../../../../common/types/modules';
 import { TimeRangePicker } from '../pages/components/time_range_step/time_range_picker';
-import { TimeRange } from '../pages/components/time_range_step/time_range';
 import { getTimeFilterRange } from '../../../components/full_time_range_selector';
 import { JobGroupsInput } from '../pages/components/job_details_step/components/groups/job_groups_input';
 import { mlJobService } from '../../../services/job_service';
@@ -84,25 +83,30 @@ export enum SAVE_STATE {
 export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const { from, to } = getTimeFilterRange();
 
-  // region State
-  const [jobPrefix, setJobPrefix] = useState<string>('');
-  const [startDatafeedAfterSave, setStartDatafeedAfterSave] = useState<boolean>(true);
-  const [useFullIndexData, setUseFullIndexData] = useState<boolean>(true);
-  const [timeRange, setTimeRange] = useState<TimeRange>({
-    start: from,
-    end: to,
+  // #region State
+  const [formState, setFormState] = useState({
+    jobPrefix: '',
+    startDatafeedAfterSave: true,
+    useFullIndexData: true,
+    timeRange: {
+      start: from,
+      end: to,
+    },
+    useDedicatedIndex: false,
+    jobGroups: [] as string[],
   });
-  const [useDedicatedIndex, setUseDedicatedIndex] = useState<boolean>(false);
-  const [jobGroups, setJobGroups] = useState<string[]>([]);
   const [jobs, setJobs] = useState<ModuleJobUI[]>([]);
   const [kibanaObjects, setKibanaObjects] = useState<KibanaObjects>({} as KibanaObjects);
   const [saveState, setSaveState] = useState<SAVE_STATE>(SAVE_STATE.NOT_SAVED);
   const [resultsUrl, setResultsUrl] = useState<string>('');
   const [validationResult, setValidationResult] = useState<any>({});
-  // endregion
+  // #endregion
 
   const onJobPrefixChange = (value: string) => {
-    setJobPrefix(value && value.toLowerCase());
+    setFormState({
+      ...formState,
+      jobPrefix: value && value.toLowerCase(),
+    });
   };
 
   const {
@@ -128,9 +132,13 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       const response: Module = await ml.getDataRecognizerModule({ moduleId });
       setJobs(response.jobs);
       setKibanaObjects(response.kibana as KibanaObjects);
-      setJobGroups([
-        ...new Set(flatten(response.jobs.map(({ config: { groups = [] } }) => groups))),
-      ]);
+
+      setFormState({
+        ...formState,
+        jobGroups: [
+          ...new Set(flatten(response.jobs.map(({ config: { groups = [] } }) => groups))),
+        ],
+      });
       setSaveState(SAVE_STATE.NOT_SAVED);
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -152,8 +160,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   );
 
   const handleValidation = () => {
-    const jobPrefixValidationResult = jobPrefixValidator(jobPrefix);
-    const jobGroupsValidationResult = jobGroups
+    const jobPrefixValidationResult = jobPrefixValidator(formState.jobPrefix);
+    const jobGroupsValidationResult = formState.jobGroups
       .map(group => groupValidator(group))
       .filter(result => result !== null);
 
@@ -166,11 +174,12 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
   useEffect(() => {
     handleValidation();
-  }, [jobPrefix, jobGroups]);
+  }, [formState.jobPrefix, formState.jobGroups]);
 
   const save = async (event: FormEvent) => {
     event.preventDefault();
     setSaveState(SAVE_STATE.SAVING);
+    const { jobPrefix, jobGroups, startDatafeedAfterSave, useDedicatedIndex } = formState;
     try {
       const response: DataRecognizerConfigResponse = await ml.setupDataRecognizerConfig({
         moduleId,
@@ -196,8 +205,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       setResultsUrl(
         mlJobService.createResultsUrl(
           jobsResponse.filter(({ success }) => success).map(({ id }) => id),
-          timeRange.start,
-          timeRange.end,
+          formState.timeRange.start,
+          formState.timeRange.end,
           'explorer'
         )
       );
@@ -274,7 +283,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
               <EuiSpacer size="m" />
 
               {isFormVisible && (
-                <form onSubmit={save}>
+                <>
                   <EuiForm>
                     <EuiDescribedFormGroup
                       idAria="ml_aria_label_new_job_recognizer_job_prefix"
@@ -328,7 +337,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                       >
                         <EuiFieldText
                           name="jobPrefix"
-                          value={jobPrefix}
+                          value={formState.jobPrefix}
                           onChange={({ target: { value } }) => onJobPrefixChange(value)}
                           isInvalid={!!validationResult.jobPrefix}
                         />
@@ -336,8 +345,13 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                     </EuiDescribedFormGroup>
                     <JobGroupsInput
                       existingGroups={existingGroupIds}
-                      selectedGroups={jobGroups}
-                      onChange={setJobGroups}
+                      selectedGroups={formState.jobGroups}
+                      onChange={value => {
+                        setFormState({
+                          ...formState,
+                          jobGroups: value,
+                        });
+                      }}
                       validation={{
                         valid:
                           !validationResult.jobGroups || validationResult.jobGroups.length === 0,
@@ -360,9 +374,12 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                             defaultMessage="Start datafeed after save"
                           />
                         }
-                        checked={startDatafeedAfterSave}
+                        checked={formState.startDatafeedAfterSave}
                         onChange={({ target: { checked } }) => {
-                          setStartDatafeedAfterSave(checked);
+                          setFormState({
+                            ...formState,
+                            startDatafeedAfterSave: checked,
+                          });
                         }}
                       />
                     </EuiFormRow>
@@ -377,14 +394,25 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                             values={{ indexPatternTitle: indexPattern.title }}
                           />
                         }
-                        checked={useFullIndexData}
+                        checked={formState.useFullIndexData}
                         onChange={({ target: { checked } }) => {
-                          setUseFullIndexData(checked);
+                          setFormState({
+                            ...formState,
+                            useFullIndexData: checked,
+                          });
                         }}
                       />
                     </EuiFormRow>
-                    {!useFullIndexData && (
-                      <TimeRangePicker setTimeRange={setTimeRange} timeRange={timeRange} />
+                    {!formState.useFullIndexData && (
+                      <TimeRangePicker
+                        setTimeRange={value => {
+                          setFormState({
+                            ...formState,
+                            timeRange: value,
+                          });
+                        }}
+                        timeRange={formState.timeRange}
+                      />
                     )}
                     <EuiSpacer size="l" />
                     <EuiAccordion
@@ -411,9 +439,12 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                               />
                             </EuiText>
                           }
-                          checked={useDedicatedIndex}
+                          checked={formState.useDedicatedIndex}
                           onChange={({ target: { checked } }) => {
-                            setUseDedicatedIndex(checked);
+                            setFormState({
+                              ...formState,
+                              useDedicatedIndex: checked,
+                            });
                           }}
                         />
                       </EuiFormRow>
@@ -426,6 +457,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                       type="submit"
                       isLoading={saveState === SAVE_STATE.SAVING}
                       disabled={validationResult.formValid}
+                      onClick={save}
                     >
                       <FormattedMessage
                         id="xpack.ml.newJob.simple.recognize.createJobButtonAriaLabel"
@@ -433,7 +465,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                       />
                     </EuiButton>
                   </EuiTextAlign>
-                </form>
+                </>
               )}
               <CreateResultCallout
                 saveState={saveState}
@@ -446,7 +478,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             <EuiPanel>
               <ModuleJobs
                 jobs={jobs}
-                jobPrefix={jobPrefix}
+                jobPrefix={formState.jobPrefix}
                 isSaving={saveState === SAVE_STATE.SAVING}
               />
             </EuiPanel>
