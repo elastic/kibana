@@ -12,7 +12,7 @@ import { SessionStorageMock } from './SessionStorageMock';
 jest.mock('ui/kfetch');
 
 describe('callApi', () => {
-  let kfetchSpy: jest.Mock;
+  let kfetchSpy: jest.SpyInstance;
 
   beforeEach(() => {
     kfetchSpy = jest.spyOn(kfetchModule, 'kfetch').mockResolvedValue({
@@ -63,7 +63,7 @@ describe('callApi', () => {
   });
 
   describe('cache', () => {
-    let nowSpy: jest.Mock;
+    let nowSpy: jest.SpyInstance;
     beforeEach(() => {
       nowSpy = mockNow('2019');
     });

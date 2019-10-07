@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'uiExports/autocompleteProviders';
-
 import { compose } from '../lib/compose/kibana_compose';
 import { startApp } from './start_app';
 startApp(compose());

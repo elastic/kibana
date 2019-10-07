@@ -19,7 +19,7 @@ With this UI, you can:
 [role="screenshot"]
 image:management/watcher-ui/images/watches.png["Watcher list"]
 
-{stack-ov}/xpack-alerting.html[Alerting on cluster and index events]
+{ref}/xpack-alerting.html[Alerting on cluster and index events]
 is a good source for detailed 
 information on how watches work. If you are using the UI to create a 
 threshold watch, take a look at the different watcher actions. If you are 
@@ -110,9 +110,9 @@ image:management/watcher-ui/images/threshold-alert/threshold-alert-condition.png
 
 Now that the condition is set, you must add an action. The action triggers 
 when the watch condition is met. For a complete list of actions and how to configure them, see 
-{stack-ov}/action-conditions.html[Adding conditions to actions].
+{ref}/action-conditions.html[Adding conditions to actions].
 
-In this example, you’ll configure an email action. You must have an {stack-ov}/actions-email.html#configuring-email[email account configured]
+In this example, you’ll configure an email action. You must have an {ref}/actions-email.html#configuring-email[email account configured]
 in {es} for this example to work. 
 
 . Click *Add action* and select *Email*.
@@ -178,7 +178,7 @@ image:management/watcher-ui/images/execution-history.png["Execution history tab"
 The *Action statuses* tab lists all actions associated with the watch and 
 the state of each action. If the action is firing, you can acknowledge the 
 watch to prevent too many executions of the same action for the same watch. 
-See {stack-ov}/actions.html#actions-ack-throttle[Acknowledgement and Throttling] for details. 
+See {ref}/actions.html#actions-ack-throttle[Acknowledgement and throttling] for details. 
 
 [role="screenshot"]
 image:management/watcher-ui/images/alerts-status.png["Action status tab"]
@@ -209,7 +209,7 @@ For more information, see {ref}/query-dsl.html[Query DSL].
 On the Watch overview page, click *Create* and choose *Create advanced watch*.  
 An advanced watch requires a name and ID.  Name is a user-friendly way to 
 identify the watch, and ID refers to the identifier used by {es}.  Refer to 
-{stack-ov}/how-watcher-works.html#watch-definition[Watch definition] for how 
+{ref}/how-watcher-works.html#watch-definition[Watch definition] for how 
 to input the watch JSON.  
 
 [role="screenshot"]
@@ -227,7 +227,7 @@ simulation. Be aware of these implementation details on overrides:
 * Action overrides support {ref}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode[multiple options].
 
 After starting the simulation, you’ll see a results screen. For more information 
-on the fields in the response, see the {ref}//watcher-api-execute-watch.html[Execute Watch API].
+on the fields in the response, see the {ref}/watcher-api-execute-watch.html[Execute watch API].
 
 [role="screenshot"]
 image:management/watcher-ui/images/advanced-watch/advanced-watch-simulate.png["Create advanced watch"]
@@ -237,8 +237,8 @@ image:management/watcher-ui/images/advanced-watch/advanced-watch-simulate.png["C
 
 Refer to these examples for creating an advanced watch: 
 
-* {stack-ov}/watch-cluster-status.html[Watch the status of an {es} cluster]
-* {stack-ov}/watching-meetup-data.html[Watch event data]
+* {ref}/watch-cluster-status.html[Watch the status of an {es} cluster]
+* {ref}/watching-meetup-data.html[Watch event data]
 
 
 

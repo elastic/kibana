@@ -36,7 +36,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import { UiSettingsClientContract } from 'src/core/public';
 import { Field, IndexPattern } from '../../../index_patterns';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
@@ -62,7 +61,6 @@ interface Props {
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   intl: InjectedIntl;
-  uiSettings: UiSettingsClientContract;
 }
 
 interface State {
@@ -233,8 +231,10 @@ class FilterEditorUI extends Component<Props, State> {
     return (
       <div>
         <EuiFlexGroup responsive={false} gutterSize="s">
-          <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderFieldInput()}</EuiFlexItem>
-          <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderOperatorInput()}</EuiFlexItem>
+          <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ flexBasis: 160 }}>
+            {this.renderOperatorInput()}
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div data-test-subj="filterParams">{this.renderParamsEditor()}</div>
@@ -257,7 +257,7 @@ class FilterEditorUI extends Component<Props, State> {
           isDisabled={!selectedIndexPattern}
           placeholder={this.props.intl.formatMessage({
             id: 'data.filter.filterEditor.fieldSelectPlaceholder',
-            defaultMessage: 'Select a field',
+            defaultMessage: 'Select a field first',
           })}
           options={fields}
           selectedOptions={selectedField ? [selectedField] : []}
@@ -283,10 +283,17 @@ class FilterEditorUI extends Component<Props, State> {
       >
         <OperatorComboBox
           isDisabled={!selectedField}
-          placeholder={this.props.intl.formatMessage({
-            id: 'data.filter.filterEditor.operatorSelectPlaceholder',
-            defaultMessage: 'Select an operator',
-          })}
+          placeholder={
+            selectedField
+              ? this.props.intl.formatMessage({
+                  id: 'data.filter.filterEditor.operatorSelectPlaceholderSelect',
+                  defaultMessage: 'Select',
+                })
+              : this.props.intl.formatMessage({
+                  id: 'data.filter.filterEditor.operatorSelectPlaceholderWaiting',
+                  defaultMessage: 'Waiting',
+                })
+          }
           options={operators}
           selectedOptions={selectedOperator ? [selectedOperator] : []}
           getLabel={({ message }) => message}
@@ -334,7 +341,6 @@ class FilterEditorUI extends Component<Props, State> {
             value={this.state.params}
             onChange={this.onParamsChange}
             data-test-subj="phraseValueInput"
-            uiSettings={this.props.uiSettings}
           />
         );
       case 'phrases':
@@ -344,7 +350,6 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             values={this.state.params}
             onChange={this.onParamsChange}
-            uiSettings={this.props.uiSettings}
           />
         );
       case 'range':

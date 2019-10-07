@@ -17,12 +17,11 @@
  * under the License.
  */
 
-// @ts-ignore
 import { get } from 'lodash';
-// @ts-ignore
-import { KBN_FIELD_TYPES } from '../../../../utils/kbn_field_types';
+
 import { Field, FieldType } from './fields';
 import { StaticIndexPattern } from './index_patterns';
+import { getFilterableKbnTypeNames } from '../../../../../plugins/data/public';
 
 export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
 export const CONTAINS_SPACES = 'CONTAINS_SPACES';
@@ -65,15 +64,13 @@ export function validateIndexPattern(indexPattern: string) {
   return errors;
 }
 
-const filterableTypes = KBN_FIELD_TYPES.filter((type: any) => type.filterable).map(
-  (type: any) => type.name
-);
+const filterableTypes = getFilterableKbnTypeNames();
 
 export function isFilterable(field: Field): boolean {
   return (
     field.name === '_id' ||
     field.scripted ||
-    (field.searchable && filterableTypes.includes(field.type))
+    Boolean(field.searchable && filterableTypes.includes(field.type))
   );
 }
 

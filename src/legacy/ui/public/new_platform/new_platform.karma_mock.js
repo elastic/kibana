@@ -24,6 +24,9 @@ export const npSetup = {
     chrome: {}
   },
   plugins: {
+    embeddable: {
+      registerEmbeddableFactory: sinon.fake(),
+    },
     expressions: {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
@@ -52,12 +55,19 @@ export const npStart = {
     chrome: {}
   },
   plugins: {
+    embeddable: {
+      getEmbeddableFactory: sinon.fake(),
+      getEmbeddableFactories: sinon.fake(),
+      registerEmbeddableFactory: sinon.fake(),
+    },
     expressions: {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    data: {},
+    data: {
+      getSuggestions: sinon.fake(),
+    },
     inspector: {
       isAvailable: () => false,
       open: () => ({

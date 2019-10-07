@@ -17,7 +17,7 @@ import angular from 'angular';
 import moment from 'moment';
 
 import { formatHumanReadableDateTime } from '../../../../../util/date_utils';
-import { TimeBuckets } from 'ui/time_buckets';
+import { TimeBuckets } from '../../../../../util/time_buckets';
 import { numTicksForDateFormat } from '../../../../../util/chart_utils';
 import { mlEscape } from '../../../../../util/string_utils';
 import { mlChartTooltipService } from '../../../../../components/chart_tooltip/chart_tooltip_service';

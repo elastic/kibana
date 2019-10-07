@@ -22,9 +22,9 @@ import {
   EuiAccordion,
   EuiToolTip,
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiSpacer,
   EuiIconTip,
-  Color,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -37,6 +37,7 @@ export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   aggIndex: number;
   aggIsTooLow: boolean;
   dragHandleProps: {} | null;
+  isDisabled: boolean;
   isDraggable: boolean;
   isLastBucket: boolean;
   isRemovable: boolean;
@@ -49,6 +50,7 @@ function DefaultEditorAgg({
   dragHandleProps,
   formIsTouched,
   groupName,
+  isDisabled,
   isDraggable,
   isLastBucket,
   isRemovable,
@@ -142,6 +144,7 @@ function DefaultEditorAgg({
       actionIcons.push({
         id: 'disableAggregation',
         color: 'text',
+        disabled: isDisabled,
         type: 'eye',
         onClick: () => onToggleEnableAgg(agg, false),
         tooltip: i18n.translate('common.ui.vis.editors.agg.disableAggButtonTooltip', {
@@ -205,8 +208,9 @@ function DefaultEditorAgg({
           return (
             <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
               <EuiButtonIcon
+                disabled={icon.disabled}
                 iconType={icon.type}
-                color={icon.color as Color}
+                color={icon.color as EuiButtonIconProps['color']}
                 onClick={icon.onClick}
                 aria-label={icon.tooltip}
                 data-test-subj={icon.dataTestSubj}

@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export * from '.';
+export * from './field_formats/types';
+export * from './timefilter/types';
+export * from './query/types';
+export * from './kbn_field_types/types';

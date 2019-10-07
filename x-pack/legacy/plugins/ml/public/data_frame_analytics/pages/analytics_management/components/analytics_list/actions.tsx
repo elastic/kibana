@@ -21,31 +21,33 @@ import { stopAnalytics } from '../../services/analytics_service';
 import { StartAction } from './action_start';
 import { DeleteAction } from './action_delete';
 
+export const AnalyticsViewAction = {
+  isPrimary: true,
+  render: (item: DataFrameAnalyticsListRow) => {
+    return (
+      <EuiButtonEmpty
+        disabled={!isOutlierAnalysis(item.config.analysis)}
+        onClick={() => (window.location.href = getResultsUrl(item.id))}
+        size="xs"
+        color="text"
+        iconType="visTable"
+        aria-label={i18n.translate('xpack.ml.dataframe.analyticsList.viewAriaLabel', {
+          defaultMessage: 'View',
+        })}
+      >
+        {i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
+          defaultMessage: 'View',
+        })}
+      </EuiButtonEmpty>
+    );
+  },
+};
+
 export const getActions = () => {
   const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
   return [
-    {
-      isPrimary: true,
-      render: (item: DataFrameAnalyticsListRow) => {
-        return (
-          <EuiButtonEmpty
-            disabled={!isOutlierAnalysis(item.config.analysis)}
-            onClick={() => (window.location.href = getResultsUrl(item.id))}
-            size="xs"
-            color="text"
-            iconType="visTable"
-            aria-label={i18n.translate('xpack.ml.dataframe.analyticsList.viewAriaLabel', {
-              defaultMessage: 'View',
-            })}
-          >
-            {i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
-              defaultMessage: 'View',
-            })}
-          </EuiButtonEmpty>
-        );
-      },
-    },
+    AnalyticsViewAction,
     {
       render: (item: DataFrameAnalyticsListRow) => {
         if (!isDataFrameAnalyticsRunning(item.stats)) {

@@ -58,7 +58,7 @@ import {
   getRelationships,
   getSavedObjectLabel,
   fetchExportObjects,
-  fetchExportByType,
+  fetchExportByTypeAndSearch,
   findObjects,
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -303,7 +303,8 @@ class ObjectsTableUI extends Component {
 
   onExportAll = async () => {
     const { intl } = this.props;
-    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked } = this.state;
+    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
+    const { queryText } = parseQuery(activeQuery);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
       (accum, [id, selected]) => {
         if (selected) {
@@ -316,7 +317,7 @@ class ObjectsTableUI extends Component {
 
     let blob;
     try {
-      blob = await fetchExportByType(exportTypes, isIncludeReferencesDeepChecked);
+      blob = await fetchExportByTypeAndSearch(exportTypes, queryText ? `${queryText}*` : undefined, isIncludeReferencesDeepChecked);
     } catch (e) {
       toastNotifications.addDanger({
         title: intl.formatMessage({

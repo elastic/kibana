@@ -17,7 +17,7 @@ export const UNIT = (totalCount: number) =>
   });
 
 export const NAME = i18n.translate('xpack.siem.hostsTable.nameTitle', {
-  defaultMessage: 'Name',
+  defaultMessage: 'Host name',
 });
 
 export const LAST_SEEN = i18n.translate('xpack.siem.hostsTable.lastSeenTitle', {
