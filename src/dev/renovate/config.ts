@@ -86,6 +86,7 @@ export const RENOVATE_CONFIG = {
         labels: group.extraLabels && [...DEFAULT_LABELS, ...group.extraLabels],
         enabled: group.enabled === false ? false : undefined,
         allowedVersions: group.allowedVersions || undefined,
+        reviewers: group.reviewers || undefined,
       })),
 
       // internal/local packages
