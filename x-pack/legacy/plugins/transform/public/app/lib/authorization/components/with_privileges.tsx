@@ -8,8 +8,9 @@ import React, { useContext, FC } from 'react';
 
 import { EuiPageContent } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { SectionLoading } from '../../../components';
-import { useAppDependencies } from '../../../app_dependencies';
 
 import { AuthorizationContext } from './authorization_provider';
 import { NotAuthorizedSection } from './not_authorized_section';
@@ -72,65 +73,57 @@ interface MissingClusterPrivilegesProps {
 const MissingClusterPrivileges: FC<MissingClusterPrivilegesProps> = ({
   missingPrivileges,
   privilegesCount,
-}) => {
-  const { FormattedMessage } = useAppDependencies().core.i18n;
-
-  return (
-    <EuiPageContent>
-      <NotAuthorizedSection
-        title={
-          <FormattedMessage
-            id="xpack.transform.app.deniedPrivilegeTitle"
-            defaultMessage="You're missing cluster privileges"
-          />
-        }
-        message={
-          <FormattedMessage
-            id="xpack.transform.app.deniedPrivilegeDescription"
-            defaultMessage="To use this section of Transforms, you must have {privilegesCount,
+}) => (
+  <EuiPageContent>
+    <NotAuthorizedSection
+      title={
+        <FormattedMessage
+          id="xpack.transform.app.deniedPrivilegeTitle"
+          defaultMessage="You're missing cluster privileges"
+        />
+      }
+      message={
+        <FormattedMessage
+          id="xpack.transform.app.deniedPrivilegeDescription"
+          defaultMessage="To use this section of Transforms, you must have {privilegesCount,
           plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
-            values={{
-              missingPrivileges,
-              privilegesCount,
-            }}
-          />
-        }
-      />
-    </EuiPageContent>
-  );
-};
+          values={{
+            missingPrivileges,
+            privilegesCount,
+          }}
+        />
+      }
+    />
+  </EuiPageContent>
+);
 
 export const PrivilegesWrapper: FC<{ privileges: string | string[] }> = ({
   children,
   privileges,
-}) => {
-  const { FormattedMessage } = useAppDependencies().core.i18n;
-
-  return (
-    <WithPrivileges privileges={privileges}>
-      {({ isLoading, hasPrivileges, privilegesMissing }) => {
-        if (isLoading) {
-          return (
-            <SectionLoading>
-              <FormattedMessage
-                id="xpack.transform.app.checkingPrivilegesDescription"
-                defaultMessage="Checking privileges…"
-              />
-            </SectionLoading>
-          );
-        }
-
-        if (!hasPrivileges) {
-          return (
-            <MissingClusterPrivileges
-              missingPrivileges={privilegesMissing.cluster!.join(', ')}
-              privilegesCount={privilegesMissing.cluster!.length}
+}) => (
+  <WithPrivileges privileges={privileges}>
+    {({ isLoading, hasPrivileges, privilegesMissing }) => {
+      if (isLoading) {
+        return (
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.transform.app.checkingPrivilegesDescription"
+              defaultMessage="Checking privileges…"
             />
-          );
-        }
+          </SectionLoading>
+        );
+      }
 
-        return <>{children}</>;
-      }}
-    </WithPrivileges>
-  );
-};
+      if (!hasPrivileges) {
+        return (
+          <MissingClusterPrivileges
+            missingPrivileges={privilegesMissing.cluster!.join(', ')}
+            privilegesCount={privilegesMissing.cluster!.length}
+          />
+        );
+      }
+
+      return <>{children}</>;
+    }}
+  </WithPrivileges>
+);

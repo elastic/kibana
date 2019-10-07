@@ -22,7 +22,6 @@ export function transform(kibana: any) {
     },
     init(server: Legacy.Server) {
       const { core, plugins } = createServerShim(server, PLUGIN.ID);
-      const { i18n } = core;
       const transformPlugin = new TransformPlugin();
 
       // Start plugin
@@ -32,7 +31,7 @@ export function transform(kibana: any) {
       plugins.license.registerLicenseChecker(
         server,
         PLUGIN.ID,
-        PLUGIN.getI18nName(i18n),
+        PLUGIN.getI18nName(),
         PLUGIN.MINIMUM_LICENSE_REQUIRED
       );
     },

@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { i18n } from '@kbn/i18n';
+
 class TextService {
   public breadcrumbs: { [key: string]: string } = {};
-  public i18n: any;
 
-  public init(i18n: any): void {
-    this.i18n = i18n;
+  public init(): void {
     this.breadcrumbs = {
       home: i18n.translate('xpack.transform.home.breadcrumbTitle', {
         defaultMessage: 'Transforms',
@@ -20,7 +21,7 @@ class TextService {
   }
 
   public getSizeNotationHelpText() {
-    return this.i18n.translate('xpack.transform.transformForm.sizeNotationPlaceholder', {
+    return i18n.translate('xpack.transform.transformForm.sizeNotationPlaceholder', {
       defaultMessage: 'Examples: {example1}, {example2}, {example3}, {example4}',
       values: {
         example1: '1g',

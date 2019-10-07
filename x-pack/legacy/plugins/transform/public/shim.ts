@@ -6,10 +6,6 @@
 
 import { npStart } from 'ui/new_platform';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n/react';
-import { I18nContext } from 'ui/i18n';
-
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import routes from 'ui/routes';
 import { docTitle } from 'ui/doc_title/doc_title';
@@ -23,13 +19,6 @@ import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana
 type npCore = typeof npStart.core;
 
 export interface AppCore extends npCore {
-  i18n: {
-    [i18nPackage: string]: any;
-    Context: typeof I18nContext;
-    FormattedMessage: typeof FormattedMessage;
-    FormattedDate: typeof FormattedDate;
-    FormattedTime: typeof FormattedTime;
-  };
   savedSearches: {
     getClient(): any;
     setClient(client: any): void;
@@ -89,13 +78,6 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
   return {
     core: {
       ...npStart.core,
-      i18n: {
-        ...i18n,
-        Context: I18nContext,
-        FormattedMessage,
-        FormattedDate,
-        FormattedTime,
-      },
       routing: {
         registerAngularRoute: (path: string, config: object): void => {
           routes.when(path, config);

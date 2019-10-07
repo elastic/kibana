@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { i18n } from '@kbn/i18n';
+
 import { LICENSE_TYPE_BASIC, LicenseType } from '../../../common/constants';
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
@@ -12,7 +15,7 @@ export const PROGRESS_REFRESH_INTERVAL_MS = 2000;
 export const PLUGIN = {
   ID: 'transform',
   MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,
-  getI18nName: (i18n: any): string => {
+  getI18nName: (): string => {
     return i18n.translate('xpack.transform.appName', {
       defaultMessage: 'Transforms',
     });

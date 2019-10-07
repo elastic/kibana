@@ -5,6 +5,8 @@
  */
 import { unmountComponentAtNode } from 'react-dom';
 
+import { i18n } from '@kbn/i18n';
+
 import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
 import { PLUGIN } from '../common/constants';
@@ -27,7 +29,6 @@ export class Plugin {
   public start(core: Core, plugins: Plugins): void {
     const {
       http,
-      i18n,
       routing,
       legacyHttp,
       chrome,
@@ -49,7 +50,7 @@ export class Plugin {
     });
 
     // Initialize services
-    textService.init(i18n);
+    textService.init();
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
     uiMetricService.init(uiMetric.createUiStatsReporter);
     documentationLinksService.init(
@@ -110,7 +111,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { chrome, http, i18n, savedSearches: coreSavedSearches } as AppCore,
+              { chrome, http, savedSearches: coreSavedSearches } as AppCore,
               { management: { sections: management.sections } } as AppPlugins
             );
           }

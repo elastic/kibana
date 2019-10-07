@@ -8,9 +8,11 @@ import React, { useContext, FC } from 'react';
 import { render } from 'react-dom';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { SectionError } from './components';
 import { CLIENT_BASE_PATH, SECTION_SLUG } from './constants';
-import { getAppProviders, useAppDependencies } from './app_dependencies';
+import { getAppProviders } from './app_dependencies';
 import { AuthorizationContext } from './lib/authorization';
 import { AppCore, AppPlugins } from './types';
 
@@ -18,8 +20,6 @@ import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
 
 export const App: FC = () => {
-  const { FormattedMessage } = useAppDependencies().core.i18n;
-
   const { apiError } = useContext(AuthorizationContext);
 
   if (apiError) {

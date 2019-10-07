@@ -11,7 +11,7 @@ import { TRANSFORM_STATE } from '../../../public/app/common';
 import {
   TransformEndpointRequest,
   TransformEndpointResult,
-} from '../../../public/app/hooks/use_api';
+} from '../../../public/app/hooks/use_api_types';
 import { TransformId } from '../../../public/app/common/transform';
 import { isRequestTimeout, fillResultsWithTimeouts } from './error_utils';
 import { transformAuditMessagesProvider } from './transform_audit_messages';
