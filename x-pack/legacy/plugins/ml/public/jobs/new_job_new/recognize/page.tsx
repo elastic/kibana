@@ -188,7 +188,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           return {
             ...job,
             datafeedResult: datafeedsResponse.find(({ id }) => id.endsWith(job.id)),
-            setupResult: jobsResponse.find(({ id }) => id === job.id),
+            setupResult: jobsResponse.find(({ id }) => id === jobPrefix + job.id),
           };
         })
       );
