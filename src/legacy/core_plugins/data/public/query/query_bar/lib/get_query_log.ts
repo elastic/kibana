@@ -17,16 +17,22 @@
  * under the License.
  */
 
-import { PersistedLog } from 'ui/persisted_log';
 import { UiSettingsClientContract } from 'src/core/public';
+import { PersistedLog } from '../../persisted_log';
+import { Storage } from '../../../types';
 
 export function getQueryLog(
   uiSettings: UiSettingsClientContract,
+  store: Storage,
   appName: string,
   language: string
 ) {
-  return new PersistedLog(`typeahead:${appName}-${language}`, {
-    maxLength: uiSettings.get('history:limit'),
-    filterDuplicates: true,
-  });
+  return new PersistedLog(
+    `typeahead:${appName}-${language}`,
+    {
+      maxLength: uiSettings.get('history:limit'),
+      filterDuplicates: true,
+    },
+    store
+  );
 }
