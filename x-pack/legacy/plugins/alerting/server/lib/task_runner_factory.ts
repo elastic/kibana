@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
-import { ConcreteTaskInstance } from '../../../task_manager';
+import { Logger } from '../../../../../../src/core/server';
+import { RunContext } from '../../../task_manager';
 import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from './validate_alert_type_params';
-import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
+import { EncryptedSavedObjectsStartContract } from '../shim';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
 import {
   AlertType,
   AlertServices,
@@ -21,32 +22,45 @@ import {
   SpaceIdToNamespaceFunction,
 } from '../types';
 
-export interface CreateTaskRunnerFunctionOptions {
+export interface TaskRunnerContext {
+  logger: Logger;
   isSecurityEnabled: boolean;
   getServices: GetServicesFunction;
-  alertType: AlertType;
   executeAction: ActionsPluginStartContract['execute'];
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
 }
 
-interface TaskRunnerOptions {
-  taskInstance: ConcreteTaskInstance;
-}
+export class TaskRunnerFactory {
+  private isInitialized = false;
+  private taskRunnerContext?: TaskRunnerContext;
 
-export function getCreateTaskRunnerFunction({
-  getServices,
-  alertType,
-  executeAction,
-  encryptedSavedObjectsPlugin,
-  spaceIdToNamespace,
-  getBasePath,
-  isSecurityEnabled,
-}: CreateTaskRunnerFunctionOptions) {
-  return ({ taskInstance }: TaskRunnerOptions) => {
+  public initialize(taskRunnerContext: TaskRunnerContext) {
+    if (this.isInitialized) {
+      throw new Error('TaskRunnerFactory already initialized');
+    }
+    this.isInitialized = true;
+    this.taskRunnerContext = taskRunnerContext;
+  }
+
+  public create(alertType: AlertType, { taskInstance }: RunContext) {
+    if (!this.isInitialized) {
+      throw new Error('TaskRunnerFactory not initialized');
+    }
+
+    const {
+      logger,
+      isSecurityEnabled,
+      getServices,
+      executeAction,
+      encryptedSavedObjectsPlugin,
+      spaceIdToNamespace,
+      getBasePath,
+    } = this.taskRunnerContext!;
+
     return {
-      run: async () => {
+      async run() {
         const { alertId, spaceId } = taskInstance.params;
         const requestHeaders: Record<string, string> = {};
         const namespace = spaceIdToNamespace(spaceId);
@@ -69,6 +83,16 @@ export function getCreateTaskRunnerFunction({
         const fakeRequest = {
           headers: requestHeaders,
           getBasePath: () => getBasePath(spaceId),
+          path: '/',
+          route: { settings: {} },
+          url: {
+            href: '/',
+          },
+          raw: {
+            req: {
+              url: '/',
+            },
+          },
         };
 
         const services = getServices(fakeRequest);
@@ -97,7 +121,7 @@ export function getCreateTaskRunnerFunction({
 
         const executionHandler = createExecutionHandler({
           alertId,
-          log: services.log,
+          logger,
           executeAction,
           apiKey,
           actions: actionsWithIds,
@@ -154,5 +178,5 @@ export function getCreateTaskRunnerFunction({
         };
       },
     };
-  };
+  }
 }

@@ -5,10 +5,10 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { getRoute } from './get';
+import { getAlertRoute } from './get';
 
 const { server, alertsClient } = createMockServer();
-getRoute(server);
+server.route(getAlertRoute);
 
 const mockedAlert = {
   id: '1',
