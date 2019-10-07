@@ -15,7 +15,7 @@ import { SpacesPlugin as SpacesPluginStartContract } from '../../spaces';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
 import {
-  ElasticsearchServiceSetup,
+  CoreSetup,
   LoggerFactory,
   SavedObjectsLegacyService,
 } from '../../../../../src/core/server';
@@ -58,7 +58,7 @@ export interface ActionsPluginInitializerContext {
   };
 }
 export interface ActionsCoreSetup {
-  elasticsearch: ElasticsearchServiceSetup;
+  elasticsearch: CoreSetup['elasticsearch'];
   http: {
     route: (route: Hapi.ServerRoute) => void;
     basePath: {

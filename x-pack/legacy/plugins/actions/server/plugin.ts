@@ -14,7 +14,7 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
 import { createExecuteFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
-import { ClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
+import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import { getActionsConfigurationUtilities } from './actions_config';
 import {
   ActionsPluginInitializerContext,
@@ -47,7 +47,7 @@ export class Plugin {
   private readonly config$: Observable<ActionsConfigType>;
   private readonly logger: Logger;
   private serverBasePath?: string;
-  private adminClient?: ClusterClient;
+  private adminClient?: IClusterClient;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
