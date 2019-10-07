@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerFacade } from '../..';
+import { IClusterClient } from 'src/core/server';
 import { AnyObject } from '../lib/esqueue';
 
 export class WithInternalRequest {
   public readonly callCluster: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
 
-  constructor(server: ServerFacade) {
-    const cluster = server.plugins.elasticsearch.getCluster('admin');
-    this.callCluster = cluster.callWithInternalUser;
+  constructor(cluster: IClusterClient) {
+    this.callCluster = cluster.callAsInternalUser;
   }
 }
