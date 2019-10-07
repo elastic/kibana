@@ -29,7 +29,7 @@ describe('filter manager utilities', () => {
       ];
       const result = await extractTimeFilter('time', filters);
 
-      expect(result.timeFilter).toEqual(filters[1]);
+      expect(result.timeRangeFilter).toEqual(filters[1]);
       expect(result.restOfFilters[0]).toEqual(filters[0]);
     });
 
@@ -40,7 +40,7 @@ describe('filter manager utilities', () => {
       ];
       const result = await extractTimeFilter('time', filters);
 
-      expect(result.timeFilter).toBeUndefined();
+      expect(result.timeRangeFilter).toBeUndefined();
       expect(result.restOfFilters).toEqual(filters);
     });
 
@@ -51,7 +51,7 @@ describe('filter manager utilities', () => {
       ];
       const result = await extractTimeFilter('time', filters);
 
-      expect(result.timeFilter).toBeUndefined();
+      expect(result.timeRangeFilter).toBeUndefined();
       expect(result.restOfFilters).toEqual(filters);
     });
   });

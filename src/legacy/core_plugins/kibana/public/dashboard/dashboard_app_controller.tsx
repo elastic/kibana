@@ -431,12 +431,12 @@ export class DashboardAppController {
         (p: IndexPattern) => p.id === indexPatternId
       );
       if (indexPattern && indexPattern.timeFieldName) {
-        const { timeFilter, restOfFilters } = extractTimeFilter(
+        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
           indexPattern.timeFieldName,
           filters
         );
         queryFilter.setFilters(restOfFilters);
-        timefilter.setTime(timeFilter as any);
+        timefilter.setTime(timeRangeFilter as any);
       }
 
       $scope.appState.$newFilters = [];

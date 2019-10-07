@@ -344,9 +344,9 @@ function VisEditor(
   };
 
   $scope.onApplyFilters = filters => {
-    const { timeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
+    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
     queryFilter.setFilters(restOfFilters);
-    timefilter.setTime(timeFilter);
+    timefilter.setTime(timeRangeFilter);
     $scope.state.$newFilters = [];
   };
 

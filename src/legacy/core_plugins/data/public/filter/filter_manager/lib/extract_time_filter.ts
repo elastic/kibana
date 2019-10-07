@@ -21,7 +21,7 @@ import { keys, partition } from 'lodash';
 import { Filter, isRangeFilter, RangeFilter } from '@kbn/es-query';
 
 export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {
-  const [rangeFilter, restOfFilters] = partition(filters, (obj: Filter) => {
+  const [timeRangeFilter, restOfFilters] = partition(filters, (obj: Filter) => {
     let key;
 
     if (isRangeFilter(obj)) {
@@ -33,6 +33,6 @@ export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {
 
   return {
     restOfFilters,
-    timeFilter: rangeFilter[0] as RangeFilter | undefined,
+    timeRangeFilter: timeRangeFilter[0] as RangeFilter | undefined,
   };
 }
