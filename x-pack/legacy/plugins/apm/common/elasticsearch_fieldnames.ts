@@ -61,7 +61,7 @@ export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
 export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
 export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
 
-export const LABELS = 'labels';
+export const LABEL_NAME = 'labels.name';
 
 export const HOST_NAME = 'host.hostname';
 export const CONTAINER_ID = 'container.id';

@@ -18,7 +18,7 @@ import { getMetricsProjection } from '../../../../../../common/projections/metri
 import { mergeProjection } from '../../../../../../common/projections/util/merge_projection';
 import {
   SERVICE_AGENT_NAME,
-  LABELS,
+  LABEL_NAME,
   METRIC_JAVA_GC_COUNT,
   METRIC_JAVA_GC_TIME
 } from '../../../../../../common/elasticsearch_fieldnames';
@@ -54,6 +54,10 @@ export async function fetchAndTransformGcMetrics({
     serviceNodeName
   });
 
+  // GC rate and time are reported by the agents as monotonically
+  // increasing counters, which means that we have to calculate
+  // the delta in an es query. In the future agent might start
+  // reporting deltas.
   const params = mergeProjection(projection, {
     body: {
       size: 0,
@@ -69,7 +73,7 @@ export async function fetchAndTransformGcMetrics({
       aggs: {
         per_pool: {
           terms: {
-            field: `${LABELS}.name`
+            field: `${LABEL_NAME}`
           },
           aggs: {
             average: {
@@ -80,16 +84,20 @@ export async function fetchAndTransformGcMetrics({
             over_time: {
               date_histogram: getMetricsDateHistogramParams(start, end),
               aggs: {
+                // get the max value
                 max: {
                   max: {
                     field: fieldName
                   }
                 },
+                // get the derivative, which is the delta y
                 derivative: {
                   derivative: {
                     buckets_path: 'max'
                   }
                 },
+                // if a gc counter is reset, the delta will be >0 and
+                // needs to be excluded
                 value: {
                   bucket_script: {
                     buckets_path: { value: 'derivative' },
@@ -129,19 +137,15 @@ export async function fetchAndTransformGcMetrics({
       color: colors[i],
       overallValue,
       data: (idx(timeseriesData, _ => _.buckets) || []).map((bucket, index) => {
-        if (!('value' in bucket)) {
-          // derivative/value will be undefined for the first hit
-          return {
-            x: bucket.key,
-            y: 0
-          };
-        }
+        // derivative/value will be undefined for the first hit and if the `max` value is null
+        const y =
+          'value' in bucket && bucket.value.value !== null
+            ? bucket.value.value
+            : 0;
 
-        const { value } = bucket.value;
-        const y = value === null || isNaN(value) ? null : value;
         return {
-          x: bucket.key,
-          y
+          y,
+          x: bucket.key
         };
       })
     };
