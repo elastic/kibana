@@ -700,12 +700,7 @@ export class SavedObjectsRepository {
 
     let requestIndexCounter = 0;
     const expectedResults: Array<Either<any, any>> = objects.map(object => {
-      const {
-        type,
-        id,
-        attributes,
-        options: { references = [], namespace, version } = {},
-      } = object;
+      const { type, id } = object;
 
       if (!this._allowedTypes.includes(type)) {
         return {
@@ -717,6 +712,11 @@ export class SavedObjectsRepository {
           },
         };
       }
+
+      const {
+        attributes,
+        options: { references = [], namespace, version },
+      } = object;
 
       const documentToSave = {
         [type]: attributes,
