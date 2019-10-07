@@ -39,7 +39,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
           defaultMessage: 'Lens Visualization',
         }),
         type: DOC_TYPE,
-        getIconForSavedObject: () => 'faceHappy',
+        getIconForSavedObject: () => 'lensApp',
       },
     });
     this.chrome = chrome;
