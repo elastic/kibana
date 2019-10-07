@@ -53,7 +53,6 @@ import './visualize';
 import './dashboard';
 import './management';
 import './dev_tools';
-import './context';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';

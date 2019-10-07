@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import './app';
 import contextAppRouteTemplate from './index.html';
-import { getRootBreadcrumbs } from '../discover/breadcrumbs';
+import { getRootBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 

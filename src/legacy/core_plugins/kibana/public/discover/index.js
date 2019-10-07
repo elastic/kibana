@@ -27,6 +27,7 @@ import './controllers/discover';
 import './doc_table/components/table_row';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import './doc';
+import './context';
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
