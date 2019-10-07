@@ -29,7 +29,7 @@ interface ActionsListProps {
 }
 
 export const ActionsList = ({ api }: ActionsListProps) => {
-  const alertsTableColumns = [
+  const actionTypesTableColumns = [
     {
       field: 'id',
       name: i18n.translate('xpack.actions.sections.actionTypesList.actionTypesTable.idHeader', {
@@ -41,7 +41,7 @@ export const ActionsList = ({ api }: ActionsListProps) => {
     {
       field: 'name',
       name: i18n.translate(
-        'xpack.alerting.sections.actionTypesList.actionTypesTable.actionTypeHeader',
+        'xpack.actions.sections.actionTypesList.actionTypesTable.actionTypeHeader',
         {
           defaultMessage: 'Action Type',
         }
@@ -51,12 +51,12 @@ export const ActionsList = ({ api }: ActionsListProps) => {
     },
   ];
 
-  const ActionsTable = ({ actions }: { actions: ActionTypesResponse[] }) => {
+  const ActionTypesTable = ({ actionTypes }: { actionTypes: ActionTypesResponse[] }) => {
     return (
       <EuiInMemoryTable
-        items={actions}
+        items={actionTypes}
         itemId="id"
-        columns={alertsTableColumns}
+        columns={actionTypesTableColumns}
         sorting={true}
         isSelectable={true}
         message={
@@ -92,13 +92,13 @@ export const ActionsList = ({ api }: ActionsListProps) => {
         Option<JSX.Element>
       >(
         loadActionTypes(actionTypesApi.api.http),
-        ({ isLoading: isAlertsLoading, data: alerts }) =>
-          isAlertsLoading
+        ({ isLoading: isActionTypesLoading, data: actionTypes }) =>
+          isActionTypesLoading
             ? some(<ActionTypesLoadingIndicator />)
-            : map(alerts, (data: any) => (
+            : map(actionTypes, (data: any) => (
                 <ContentWrapper>
                   <EuiSpacer size="m" />
-                  <ActionsTable actions={data} />
+                  <ActionTypesTable actionTypes={data} />
                 </ContentWrapper>
               )),
         error =>

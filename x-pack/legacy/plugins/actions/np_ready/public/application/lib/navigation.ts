@@ -3,8 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { BASE_PATH } from '../constants';
 
 let router: any;
 export const registerRouter = (aRouter: any) => {
   router = aRouter;
+};
+
+export const goToActionTypesList = () => {
+  router.history.push({ pathname: `${BASE_PATH}actionTypes` });
 };
