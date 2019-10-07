@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-readonly dataClient$: Observable<ClusterClient>;
+readonly dataClient$: Observable<IClusterClient>;
 ```
