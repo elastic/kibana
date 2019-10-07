@@ -13,11 +13,13 @@ import {
 } from '../actions/monitor';
 
 export interface MonitorState {
-  monitorDetailsList: Map<string, MonitorDetailsState>;
+  monitorDetailsList: MonitorDetailsState[];
+  loading: boolean;
 }
 
 const initialState: MonitorState = {
-  monitorDetailsList: new Map(),
+  monitorDetailsList: [],
+  loading: false,
 };
 
 export function monitorReducer(state = initialState, action: MonitorActionTypes): MonitorState {
@@ -25,14 +27,18 @@ export function monitorReducer(state = initialState, action: MonitorActionTypes)
     case FETCH_MONITOR_DETAILS:
       return {
         ...state,
+        loading: true,
       };
     case FETCH_MONITOR_DETAILS_SUCCESS:
       const monitorDetails = action.payload;
-      const currMonitorDetailsList = new Map(state.monitorDetailsList);
-      currMonitorDetailsList.set(monitorDetails.monitorId, monitorDetails);
+      const { monitorId } = monitorDetails;
       return {
         ...state,
-        monitorDetailsList: currMonitorDetailsList,
+        monitorDetailsList: {
+          ...state.monitorDetailsList,
+          [monitorId]: monitorDetails,
+        },
+        loading: false,
       };
     case FETCH_MONITOR_DETAILS_FAIL:
       return {

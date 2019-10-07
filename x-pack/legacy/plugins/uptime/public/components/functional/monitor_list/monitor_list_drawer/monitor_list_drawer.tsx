@@ -20,10 +20,9 @@ import { connect } from 'react-redux';
 import { MonitorSummary, CheckMonitor } from '../../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { AppState } from '../../../../state';
-import { MonitorDetailsRequest } from '../../../../state/actions/monitor';
+import { fetchMonitorDetails } from '../../../../state/actions/monitor';
 import { MostRecentError } from './most_recent_error';
 import { getMonitorDetails } from '../../../../state/selectors';
-import { fetchMonitorDetailsAction } from '../../../../state/effects/monitor';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -32,18 +31,57 @@ const ContainerDiv = styled.div`
 
 interface MonitorListDrawerProps {
   summary: MonitorSummary;
-  loadMonitorDetails: typeof fetchMonitorDetailsAction;
+  monitorDetails: any;
+  loadMonitorDetails: typeof fetchMonitorDetails;
 }
 
 /**
  * The elements shown when the user expands the monitor list rows.
  */
 
-const WrapperComponent = props => {
-  return <MonitorListDrawerComponent {...props} />;
-};
-export function MonitorListDrawerComponent({ summary, loadMonitorDetails }) {
+export function MonitorListDrawerComponent({
+  summary,
+  loadMonitorDetails,
+  monitorDetails,
+}: MonitorListDrawerProps) {
+  if (!summary || !summary.state.checks) {
+    return null;
+  }
+  useEffect(() => {
+    loadMonitorDetails(summary.monitor_id);
+  }, []);
+
   const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
+  const {
+    colors: { success, danger },
+  } = useContext(UptimeSettingsContext);
+  if (!summary || !summary.state.checks) {
+    return null;
+  }
+
+  const upLocations: CheckMonitor[] = [];
+  const downLocations: CheckMonitor[] = [];
+
+  summary.state.checks.forEach(check => {
+    if (check.monitor.status === 'up') {
+      upLocations.push(check.monitor);
+    }
+    if (check.monitor.status === 'down') {
+      downLocations.push(check.monitor);
+    }
+  });
+
+  const displayMonitorStatus = (locations: CheckMonitor[], color: string, titleTxt: string) => {
+    return (
+      <>
+        <EuiHealth color={color}>
+          {titleTxt} in{' '}
+          {locations.map((location, index) => (index ? ', ' : '') + (location.name || location.ip))}
+        </EuiHealth>
+        <EuiSpacer size="s" />
+      </>
+    );
+  };
 
   return (
     <ContainerDiv>
@@ -59,17 +97,22 @@ export function MonitorListDrawerComponent({ summary, loadMonitorDetails }) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
+      {downLocations.length > 0 && displayMonitorStatus(downLocations, danger, 'Down')}
+      {upLocations.length > 0 && displayMonitorStatus(upLocations, success, 'Up')}
+      {monitorDetails && <MostRecentError error={monitorDetails.error} />}
     </ContainerDiv>
   );
 }
 
-const mapStateToProps = (state: AppState, { summary }: any) => ({});
+const mapStateToProps = (state: AppState, { summary }: any) => ({
+  monitorDetails: getMonitorDetails(state, summary),
+});
 
 const mapDispatchToProps = (dispatch: any) => ({
-  loadMonitorDetails: (data: MonitorDetailsRequest) => dispatch(fetchMonitorDetailsAction(data)),
+  loadMonitorDetails: (monitorId: string) => dispatch(fetchMonitorDetails(monitorId)),
 });
 
 export const MonitorListDrawer = connect(
   mapStateToProps,
   mapDispatchToProps
-)(WrapperComponent);
+)(MonitorListDrawerComponent);

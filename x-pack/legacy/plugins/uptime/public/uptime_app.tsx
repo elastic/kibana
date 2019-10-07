@@ -22,6 +22,7 @@ import { UptimeDatePicker } from './components/functional/uptime_date_picker';
 import { useUrlParams } from './hooks';
 import { getTitle } from './lib/helper/get_title';
 import { store } from './state';
+import { setBasePath } from './state/actions';
 
 export interface UptimeAppColors {
   danger: string;
@@ -135,6 +136,8 @@ const Application = (props: UptimeAppProps) => {
       setHeadingText,
     };
   };
+
+  store.dispatch(setBasePath(basePath));
 
   return (
     <I18nContext>

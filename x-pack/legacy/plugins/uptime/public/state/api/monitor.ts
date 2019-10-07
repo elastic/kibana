@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext } from 'react';
 import { MonitorDetailsState } from '../actions/monitor';
 import { getApiPath } from '../../lib/helper';
-import { UptimeSettingsContext } from '../../contexts';
 
-export const fetchMonitorDetails = async (monitorId: string): Promise<MonitorDetailsState> => {
-  const { basePath } = useContext(UptimeSettingsContext);
+interface ApiRequest {
+  monitorId: string;
+  basePath: string;
+}
 
+export const fetchMonitorDetails = async ({
+  monitorId,
+  basePath,
+}: ApiRequest): Promise<MonitorDetailsState> => {
   const url = getApiPath(`/api/uptime/monitor/details?monitorId=${monitorId}`, basePath);
   const response = await fetch(url);
   if (!response.ok) {
