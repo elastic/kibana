@@ -9,6 +9,7 @@ import * as React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
+import { Route, RouteComponentProps } from 'react-router-dom';
 
 import { ActionCreator } from 'typescript-fsa';
 import { HeaderPage } from '../../components/header_page';
@@ -21,6 +22,7 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { LastEventIndexKey } from '../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../store';
 
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -31,13 +33,22 @@ import { FiltersGlobal } from '../../components/filters_global';
 
 import * as i18n from './translations';
 import { navTabsHosts } from './nav_tabs';
+import {
+  HostsQueryTabBody,
+  AuthenticationsQueryTabBody,
+  UncommonProcessQueryTabBody,
+  AnomaliesQueryTabBody,
+  EventsQueryTabBody,
+} from './navigation';
 import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
+import { Anomaly } from '../../components/ml/types';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 interface HostsComponentReduxProps {
   filterQuery: string;
+  kqlQueryExpression: string;
 }
 
 interface HostsComponentDispatchProps {
@@ -46,75 +57,136 @@ interface HostsComponentDispatchProps {
     from: number;
     to: number;
   }>;
+  hostsPagePath: string;
 }
 
 export type HostsQueryProps = GlobalTimeArgs;
 
 export type HostsComponentProps = HostsComponentReduxProps &
   HostsComponentDispatchProps &
-  HostsQueryProps;
+  HostsQueryProps &
+  RouteComponentProps;
+
+import { HostsTableType } from '../../store/hosts/model';
 
 const HostsComponent = React.memo<HostsComponentProps>(
-  ({ isInitializing, filterQuery, from, setAbsoluteRangeDatePicker, setQuery, to }) => {
+  ({
+    isInitializing,
+    kqlQueryExpression,
+    filterQuery,
+    from,
+    setAbsoluteRangeDatePicker,
+    setQuery,
+    to,
+    deleteQuery,
+    hostsPagePath,
+  }) => {
     const capabilities = React.useContext(MlCapabilitiesContext);
+
     return (
       <>
         <WithSource sourceId="default">
-          {({ indicesExist, indexPattern }) =>
-            indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-              <StickyContainer>
-                <FiltersGlobal>
-                  <HostsKql
-                    indexPattern={indexPattern}
-                    setQuery={setQuery}
-                    type={hostsModel.HostsType.page}
-                  />
-                </FiltersGlobal>
+          {({ indicesExist, indexPattern }) => {
+            if (indicesExistOrDataTemporarilyUnavailable(indicesExist)) {
+              const tabProps = {
+                deleteQuery,
+                endDate: to,
+                filterQuery,
+                kqlQueryExpression,
+                skip: isInitializing,
+                setQuery,
+                startDate: from,
+                type: hostsModel.HostsType.page,
+                indexPattern,
+                narrowDateRange: (score: Anomaly, interval: string) => {
+                  const fromTo = scoreIntervalToDateTime(score, interval);
+                  setAbsoluteRangeDatePicker({
+                    id: 'global',
+                    from: fromTo.from,
+                    to: fromTo.to,
+                  });
+                },
+              };
 
-                <HeaderPage
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
-                  title={i18n.PAGE_TITLE}
-                />
+              return (
                 <>
-                  <KpiHostsQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    skip={isInitializing}
-                    sourceId="default"
-                    startDate={from}
-                  >
-                    {({ kpiHosts, loading, id, inspect, refetch }) => (
-                      <KpiHostsComponentManage
-                        data={kpiHosts}
-                        from={from}
-                        id={id}
-                        inspect={inspect}
-                        loading={loading}
-                        refetch={refetch}
+                  <StickyContainer>
+                    <FiltersGlobal>
+                      <HostsKql
+                        indexPattern={indexPattern}
                         setQuery={setQuery}
-                        to={to}
-                        narrowDateRange={(min: number, max: number) => {
-                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                        }}
+                        type={hostsModel.HostsType.page}
                       />
-                    )}
-                  </KpiHostsQuery>
-                  <EuiSpacer />
-                  <SiemNavigation
-                    navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
-                    display="default"
-                    showBorder={true}
+                    </FiltersGlobal>
+
+                    <HeaderPage
+                      subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+                      title={i18n.PAGE_TITLE}
+                    />
+                    <>
+                      <KpiHostsQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                      >
+                        {({ kpiHosts, loading, id, inspect, refetch }) => (
+                          <KpiHostsComponentManage
+                            data={kpiHosts}
+                            from={from}
+                            id={id}
+                            inspect={inspect}
+                            loading={loading}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            to={to}
+                            narrowDateRange={(min: number, max: number) => {
+                              setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                            }}
+                          />
+                        )}
+                      </KpiHostsQuery>
+                      <EuiSpacer />
+                      <SiemNavigation
+                        navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
+                        display="default"
+                        showBorder={true}
+                      />
+                      <EuiSpacer />
+                    </>
+                  </StickyContainer>
+                  <Route
+                    path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}
+                    render={() => <HostsQueryTabBody {...tabProps} />}
                   />
-                  <EuiSpacer />
+                  <Route
+                    path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}
+                    render={() => <AuthenticationsQueryTabBody {...tabProps} />}
+                  />
+                  <Route
+                    path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}
+                    render={() => <UncommonProcessQueryTabBody {...tabProps} />}
+                  />
+                  <Route
+                    path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}
+                    render={() => <AnomaliesQueryTabBody {...tabProps} />}
+                  />
+                  <Route
+                    path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}
+                    render={() => <EventsQueryTabBody {...tabProps} />}
+                  />
                 </>
-              </StickyContainer>
-            ) : (
+              );
+            }
+
+            return (
               <>
                 <HeaderPage title={i18n.PAGE_TITLE} />
                 <HostsEmptyPage />
               </>
-            )
-          }
+            );
+          }}
         </WithSource>
         <SpyRoute />
       </>
@@ -126,14 +198,20 @@ HostsComponent.displayName = 'HostsComponent';
 
 const makeMapStateToProps = () => {
   const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();
+  const hostsFilterQueryExpression = hostsSelectors.hostsFilterQueryExpression();
   const mapStateToProps = (state: State): HostsComponentReduxProps => ({
     filterQuery: getHostsFilterQueryAsJson(state, hostsModel.HostsType.page) || '',
+    kqlQueryExpression: hostsFilterQueryExpression(state, hostsModel.HostsType.page) || '',
   });
   return mapStateToProps;
 };
 
+interface HostsProps extends GlobalTimeArgs {
+  hostsPagePath: string;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Hosts = compose<React.ComponentClass<GlobalTimeArgs>>(
+export const Hosts = compose<React.ComponentClass<HostsProps>>(
   connect(
     makeMapStateToProps,
     {

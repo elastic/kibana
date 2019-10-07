@@ -11,11 +11,7 @@ import { HostComponentProps } from '../../../components/link_to/redirect_to_host
 import { HostsTableType } from '../../../store/hosts/model';
 import { HostsQueryProps } from '../hosts';
 import { NavTab } from '../../../components/navigation/types';
-import {
-  AnomaliesChildren,
-  CommonChildren,
-  KeyHostsNavTabWithoutMlPermission,
-} from '../navigation/types';
+import { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;
@@ -28,20 +24,18 @@ interface HostDetailsComponentDispatchProps {
     to: number;
   }>;
   detailName: string;
+  hostDetailsPagePath: string;
 }
 
-export interface HostDetailsBodyProps extends HostsQueryProps {
-  children: CommonChildren | AnomaliesChildren;
+export interface HostDetailsProps extends HostsQueryProps {
+  detailName: string;
+  hostDetailsPagePath: string;
 }
 
 export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
   HostDetailsComponentDispatchProps &
   HostComponentProps &
   HostsQueryProps;
-
-export type HostDetailsBodyComponentProps = HostDetailsComponentReduxProps &
-  HostDetailsComponentDispatchProps &
-  HostDetailsBodyProps;
 
 type KeyHostDetailsNavTabWithoutMlPermission = HostsTableType.authentications &
   HostsTableType.uncommonProcesses &
