@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 
 import {
   MockedPluginInitializer,
@@ -76,12 +76,12 @@ beforeEach(() => {
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
-    injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+    injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
   };
   mockSetupContext = {
-    ...omit(mockSetupDeps, 'injectedMetadata'),
+    ...mockSetupDeps,
     application: expect.any(Object),
   };
   mockStartDeps = {
@@ -90,14 +90,14 @@ beforeEach(() => {
     http: httpServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),
-    injectedMetadata: injectedMetadataServiceMock.createStartContract(),
+    injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     savedObjects: savedObjectsMock.createStartContract(),
   };
   mockStartContext = {
-    ...omit(mockStartDeps, 'injectedMetadata'),
+    ...mockStartDeps,
     application: expect.any(Object),
     chrome: omit(mockStartDeps.chrome, 'getComponent'),
   };

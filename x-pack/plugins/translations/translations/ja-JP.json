@@ -4517,7 +4517,6 @@
     "xpack.graph.savedWorkspace.workspaceNameTitle": "新規グラフワークスペース",
     "xpack.graph.savedWorkspaces.graphWorkspaceLabel": "グラフワークスペース",
     "xpack.graph.savedWorkspaces.graphWorkspacesLabel": "グラフワークスペース",
-    "xpack.graph.saveWorkspace.disabledWarning": "保存が無効になっています",
     "xpack.graph.saveWorkspace.successNotification.noDataSavedText": "構成が保存されましたが、データは保存されませんでした",
     "xpack.graph.saveWorkspace.successNotificationTitle": "「{workspaceTitle}」が保存されました",
     "xpack.graph.serverSideErrors.expiredLicenseErrorMessage": "グラフを利用できません。ライセンスが期限切れです。",
@@ -11386,7 +11385,6 @@
     "xpack.advancedUiActions.customizeTimeRange.modal.headerTitle": "パネルの時間範囲のカスタマイズ",
     "xpack.advancedUiActions.customizeTimeRangeMenuItem.displayName": "時間範囲のカスタマイズ",
     "xpack.fileUpload.fileParser.errorReadingFile": "ファイルの読み込み中にエラーが発生しました",
-    "xpack.fileUpload.fileParser.noFileProvided": "エラー、ファイルが提供されていません",
-    "xpack.fileUpload.jsonIndexFilePicker.errorGettingIndexName": "インデックス名の取得中にエラーが発生: {errorMessage}"
+    "xpack.fileUpload.fileParser.noFileProvided": "エラー、ファイルが提供されていません"
   }
 }
