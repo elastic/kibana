@@ -14,7 +14,7 @@ import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
 import {
-  ElasticsearchServiceSetup,
+  CoreSetup,
   LoggerFactory,
   SavedObjectsLegacyService,
 } from '../../../../../src/core/server';
@@ -57,7 +57,7 @@ export interface AlertingPluginInitializerContext {
   logger: LoggerFactory;
 }
 export interface AlertingCoreSetup {
-  elasticsearch: ElasticsearchServiceSetup;
+  elasticsearch: CoreSetup['elasticsearch'];
   http: {
     route: (route: Hapi.ServerRoute) => void;
     basePath: {
