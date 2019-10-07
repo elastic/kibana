@@ -17,24 +17,17 @@
  * under the License.
  */
 import { isPlainObject } from 'lodash';
-const symbol = Symbol('log message with metadata');
 
-export function attachMetaData(message, metadata = {}) {
-  return {
-    [symbol]: {
-      message,
-      metadata,
-    },
-  };
-}
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { metadataSymbol, attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 
 export const logWithMetadata = {
   isLogEvent(eventData) {
-    return Boolean(isPlainObject(eventData) && eventData[symbol]);
+    return Boolean(isPlainObject(eventData) && eventData[metadataSymbol]);
   },
 
   getLogEventData(eventData) {
-    const { message, metadata } = eventData[symbol];
+    const { message, metadata } = eventData[metadataSymbol];
     return {
       ...metadata,
       message

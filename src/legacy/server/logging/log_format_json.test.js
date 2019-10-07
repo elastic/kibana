@@ -19,13 +19,14 @@
 
 import moment from 'moment';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 import {
   createListStream,
   createPromiseFromStreams,
 } from '../../utils';
 
 import KbnLoggerJsonFormat from './log_format_json';
-import { attachMetaData } from './log_with_metadata';
 
 const time = +moment('2010-01-01T05:15:59Z', moment.ISO_8601);
 

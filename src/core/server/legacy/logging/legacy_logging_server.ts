@@ -26,6 +26,17 @@ import { setupLogging } from '../../../../legacy/server/logging';
 import { LogLevel } from '../../logging/log_level';
 import { LogRecord } from '../../logging/log_record';
 
+export const metadataSymbol = Symbol('log message with metadata');
+export function attachMetaData(message: string, metadata: Record<string, any> = {}) {
+  return {
+    [metadataSymbol]: {
+      message,
+      metadata,
+    },
+  };
+}
+const isEmptyObject = (obj: object) => Object.keys(obj).length === 0;
+
 interface PluginRegisterParams {
   plugin: {
     register: (
@@ -90,9 +101,16 @@ export class LegacyLoggingServer {
   }
 
   public log({ level, context, message, error, timestamp, meta = {} }: LogRecord) {
+    const { tags = [], ...metadata } = meta;
+    const data = error
+      ? error
+      : isEmptyObject(metadata)
+      ? message
+      : attachMetaData(message, metadata);
+
     this.events.emit('log', {
-      data: error || message,
-      tags: [getLegacyLogLevel(level), ...context.split('.'), ...(meta.tags || [])],
+      data,
+      tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
       timestamp: timestamp.getTime(),
     });
   }
