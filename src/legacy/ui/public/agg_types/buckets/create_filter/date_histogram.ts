@@ -17,19 +17,21 @@
  * under the License.
  */
 
-import chrome from '../../../chrome';
-import { dateRange } from '../../../utils/date_range';
+import moment from 'moment';
 import { buildRangeFilter } from '@kbn/es-query';
+import { IBucketDateHistogramAggConfig } from '../date_histogram';
 
-const config = chrome.getUiSettingsClient();
+export const createFilterDateHistogram = (agg: IBucketDateHistogramAggConfig, key: string) => {
+  const start = moment(key);
+  const interval = agg.buckets.getInterval();
 
-export function createFilterDateRange(agg, key) {
-  const range = dateRange.parse(key, config.get('dateFormat'));
-
-  const filter = {};
-  if (range.from) filter.gte = range.from.toISOString();
-  if (range.to) filter.lt = range.to.toISOString();
-  if (range.to && range.from) filter.format = 'strict_date_optional_time';
-
-  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
-}
+  return buildRangeFilter(
+    agg.params.field,
+    {
+      gte: start.toISOString(),
+      lt: start.add(interval).toISOString(),
+      format: 'strict_date_optional_time',
+    },
+    agg.getIndexPattern()
+  );
+};

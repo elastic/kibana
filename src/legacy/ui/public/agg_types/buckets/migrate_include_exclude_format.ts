@@ -18,35 +18,32 @@
  */
 
 import { isString, isObject } from 'lodash';
+import { AggConfig } from 'ui/agg_types';
+import { IBucketAggConfig, BucketAggType, BucketAggParam } from './_bucket_agg_type';
 
-function isType(type) {
-  return function (agg) {
+export const isType = (type: string) => {
+  return (agg: IBucketAggConfig): boolean => {
     const field = agg.params.field;
+
     return field && field.type === type;
   };
-}
+};
 
-const isStringType = isType('string');
+export const isStringType = isType('string');
 
-const migrateIncludeExcludeFormat = {
-  serialize: function (value, agg) {
+export const migrateIncludeExcludeFormat = {
+  serialize(this: BucketAggParam, value: any, agg: AggConfig) {
     if (this.shouldShow && !this.shouldShow(agg)) return;
     if (!value || isString(value)) return value;
     else return value.pattern;
   },
-  write: function (aggConfig, output) {
-    const value = aggConfig.params[this.name];
+  write(this: BucketAggType<IBucketAggConfig>, aggConfig: AggConfig, output: Record<string, any>) {
+    const value = aggConfig.getParam(this.name);
 
     if (isObject(value)) {
       output.params[this.name] = value.pattern;
     } else if (value && isStringType(aggConfig)) {
       output.params[this.name] = value;
     }
-  }
-};
-
-export {
-  isType,
-  isStringType,
-  migrateIncludeExcludeFormat
+  },
 };

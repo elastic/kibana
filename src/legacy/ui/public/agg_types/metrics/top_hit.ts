@@ -46,7 +46,7 @@ aggTypeFieldFilters.addFilter((field, aggConfig: IMetricAggConfig) => {
     return true;
   }
 
-  return field.type === 'number';
+  return field.type === KBN_FIELD_TYPES.NUMBER;
 });
 
 export const topHitMetricAgg = new MetricAggType({
@@ -82,7 +82,7 @@ export const topHitMetricAgg = new MetricAggType({
       editorComponent: TopFieldParamEditor,
       onlyAggregatable: false,
       filterFieldTypes: '*',
-      write(agg, output) {
+      write(agg: IMetricAggConfig, output: Record<string, any>) {
         const field = agg.getParam('field');
         output.params = {};
 
@@ -196,7 +196,7 @@ export const topHitMetricAgg = new MetricAggType({
           value: 'asc',
         },
       ],
-      write(agg, output) {
+      write(agg: IMetricAggConfig, output: Record<string, any>) {
         const sortField = agg.params.sortField;
         const sortOrder = agg.params.sortOrder;
 

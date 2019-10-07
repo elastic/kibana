@@ -18,61 +18,83 @@
  */
 
 import _ from 'lodash';
-import chrome from '../../chrome';
 import moment from 'moment-timezone';
-import { BucketAggType } from './_bucket_agg_type';
-import { TimeBuckets } from '../../time_buckets';
+import { i18n } from '@kbn/i18n';
+import { BUCKET_TYPES } from 'ui/agg_types/buckets/bucket_agg_types';
+import chrome from '../../chrome';
+import { BucketAggParam, BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
 import { TimeIntervalParamEditor } from '../../vis/editors/default/controls/time_interval';
 import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../../vis/editors/default/controls/drop_partials';
 import { dateHistogramInterval } from '../../../../core_plugins/data/public';
-import { i18n } from '@kbn/i18n';
 import { writeParams } from '../agg_params';
+import { AggConfigs } from '../agg_configs';
+import { AggConfig } from '../agg_config';
+import { isMetricAggType } from '../metrics/metric_agg_type';
+
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+
+// @ts-ignore
+import { TimeBuckets } from '../../time_buckets';
 
 const config = chrome.getUiSettingsClient();
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
 
-function getInterval(agg) {
-  return _.get(agg, ['params', 'interval']);
-}
+const getInterval = (agg: IBucketAggConfig): string => _.get(agg, ['params', 'interval']);
 
-export function setBounds(agg, force) {
+export const setBounds = (agg: IBucketDateHistogramAggConfig, force?: boolean) => {
   if (agg.buckets._alreadySet && !force) return;
   agg.buckets._alreadySet = true;
   const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
   agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
+};
+
+// will be replaced by src/legacy/ui/public/time_buckets/time_buckets.js
+interface TimeBuckets {
+  _alreadySet?: boolean;
+  setBounds: Function;
+  getScaledDateFormatter: Function;
+  setInterval: Function;
+  getInterval: Function;
 }
 
+export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
+  buckets: TimeBuckets;
+}
 
-export const dateHistogramBucketAgg = new BucketAggType({
-  name: 'date_histogram',
+export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHistogramAggConfig {
+  return Boolean(agg.buckets);
+}
+
+export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggConfig>({
+  name: BUCKET_TYPES.DATE_HISTOGRAM,
   title: i18n.translate('common.ui.aggTypes.buckets.dateHistogramTitle', {
     defaultMessage: 'Date Histogram',
   }),
   ordered: {
-    date: true
+    date: true,
   },
-  makeLabel: function (agg) {
-    const output = writeParams(this.params, agg);
+  makeLabel(agg) {
+    const output: Record<string, any> = writeParams(this.params as BucketAggParam[], agg);
     const field = agg.getFieldDisplayName();
     return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
       defaultMessage: '{fieldName} per {intervalDescription}',
       values: {
         fieldName: field,
         intervalDescription: output.metricScaleText || output.bucketInterval.description,
-      }
+      },
     });
   },
   createFilter: createFilterDateHistogram,
-  decorateAggConfig: function () {
-    let buckets;
+  decorateAggConfig() {
+    let buckets: any;
     return {
       buckets: {
         configurable: true,
-        get: function () {
+        get(this: IBucketDateHistogramAggConfig) {
           if (buckets) return buckets;
 
           buckets = new TimeBuckets();
@@ -80,28 +102,28 @@ export const dateHistogramBucketAgg = new BucketAggType({
           setBounds(this);
 
           return buckets;
-        }
-      }
+        },
+      },
     };
   },
-  getFormat: function (agg) {
+  getFormat(agg) {
     return agg.buckets.getScaledDateFormatter();
   },
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'date',
-      default: function (agg) {
+      filterFieldTypes: KBN_FIELD_TYPES.DATE,
+      default(agg: IBucketDateHistogramAggConfig) {
         return agg.getIndexPattern().timeFieldName;
       },
-      onChange: function (agg) {
+      onChange(agg: IBucketDateHistogramAggConfig) {
         if (_.get(agg, 'params.interval') === 'auto' && !agg.fieldIsTimeField()) {
           delete agg.params.interval;
         }
 
         setBounds(agg, true);
-      }
+      },
     },
     {
       name: 'timeRange',
@@ -116,7 +138,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
     {
       name: 'interval',
       editorComponent: TimeIntervalParamEditor,
-      deserialize: function (state, agg) {
+      deserialize(state: any, agg: IBucketDateHistogramAggConfig) {
         // For upgrading from 7.0.x to 7.1.x - intervals are now stored as key of options or custom value
         if (state === 'custom') {
           return _.get(agg, 'params.customInterval');
@@ -133,10 +155,10 @@ export const dateHistogramBucketAgg = new BucketAggType({
       },
       default: 'auto',
       options: intervalOptions,
-      modifyAggConfigOnSearchRequestStart: function (agg) {
+      modifyAggConfigOnSearchRequestStart(agg: IBucketDateHistogramAggConfig) {
         setBounds(agg, true);
       },
-      write: function (agg, output, aggs) {
+      write(agg: IBucketDateHistogramAggConfig, output: Record<string, any>, aggs: AggConfigs) {
         setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
         const { useNormalizedEsInterval } = agg.params;
@@ -158,31 +180,41 @@ export const dateHistogramBucketAgg = new BucketAggType({
 
         const scaleMetrics = interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
-          const metrics = aggs.aggs.filter(agg => agg.type && agg.type.type === 'metrics');
-          const all = _.every(metrics, function (agg) {
-            return agg.type.isScalable();
+          const metrics = aggs.aggs.filter(a => isMetricAggType(a.type));
+          const all = _.every(metrics, (a: AggConfig) => {
+            const { type } = a;
+
+            if (isMetricAggType(type)) {
+              return type.isScalable();
+            }
           });
           if (all) {
             output.metricScale = interval.scale;
             output.metricScaleText = interval.preScaled.description;
           }
         }
-      }
-    },
+      },
+    } as BucketAggParam,
     {
       name: 'time_zone',
       default: undefined,
       // We don't ever want this parameter to be serialized out (when saving or to URLs)
       // since we do all the logic handling it "on the fly" in the `write` method, to prevent
       // time_zones being persisted into saved_objects
-      serialize: () => undefined,
-      write: (agg, output) => {
+      serialize: _.noop,
+      write(agg: IBucketDateHistogramAggConfig, output: Record<string, any>) {
         // If a time_zone has been set explicitly always prefer this.
         let tz = agg.params.time_zone;
         if (!tz && agg.params.field) {
           // If a field has been configured check the index pattern's typeMeta if a date_histogram on that
           // field requires a specific time_zone
-          tz = _.get(agg.getIndexPattern(), ['typeMeta', 'aggs', 'date_histogram', agg.params.field.name, 'time_zone']);
+          tz = _.get(agg.getIndexPattern(), [
+            'typeMeta',
+            'aggs',
+            'date_histogram',
+            agg.params.field.name,
+            'time_zone',
+          ]);
         }
         if (!tz) {
           // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
@@ -191,7 +223,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
         }
         output.params.time_zone = tz;
       },
-    },
+    } as BucketAggParam,
     {
       name: 'drop_partials',
       default: false,
@@ -203,29 +235,27 @@ export const dateHistogramBucketAgg = new BucketAggType({
       },
     },
     {
-      name: 'format'
+      name: 'format',
     },
-
     {
       name: 'min_doc_count',
-      default: 1
+      default: 1,
     },
-
     {
       name: 'extended_bounds',
       default: {},
-      write: function (agg, output) {
+      write(agg: IBucketDateHistogramAggConfig, output: Record<string, any>) {
         const val = agg.params.extended_bounds;
 
         if (val.min != null || val.max != null) {
           output.params.extended_bounds = {
             min: moment(val.min).valueOf(),
-            max: moment(val.max).valueOf()
+            max: moment(val.max).valueOf(),
           };
 
           return;
         }
-      }
-    }
-  ]
+      },
+    } as BucketAggParam,
+  ],
 });

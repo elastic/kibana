@@ -18,13 +18,20 @@
  */
 
 import chrome from 'ui/chrome';
+import { noop } from 'lodash';
+import { SearchSource } from 'ui/courier';
 import { i18n } from '@kbn/i18n';
-import { BucketAggType } from './_bucket_agg_type';
-import { Schemas } from '../../vis/editors/default/schemas';
-import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
+import { BucketAggType, BucketAggParam } from './_bucket_agg_type';
+import { BUCKET_TYPES } from './bucket_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { AggConfigOptions } from '../agg_config';
+import { IBucketAggConfig } from './_bucket_agg_type';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from '../../courier/utils/courier_inspector_utils';
 import { createFilterTerms } from './create_filter/terms';
 import { wrapWithInlineComp } from './_inline_comp_wrapper';
-import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { OrderAggParamEditor } from '../../vis/editors/default/controls/order_agg';
 import { OrderParamEditor } from '../../vis/editors/default/controls/order';
@@ -32,31 +39,47 @@ import { OrderByParamEditor, aggFilter } from '../../vis/editors/default/control
 import { SizeParamEditor } from '../../vis/editors/default/controls/size';
 import { MissingBucketParamEditor } from '../../vis/editors/default/controls/missing_bucket';
 import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other_bucket';
+import { ContentType } from '../../../../../plugins/data/common';
+import { AggConfigs } from '../agg_configs';
 
-const orderAggSchema = (new Schemas([
+import { Adapters } from '../../../../../plugins/inspector/public';
+
+// @ts-ignore
+import { Schemas } from '../../vis/editors/default/schemas';
+
+import {
+  buildOtherBucketAgg,
+  mergeOtherBucketAggResponse,
+  updateMissingBucket,
+  // @ts-ignore
+} from './_terms_other_bucket_helper';
+
+const [orderAggSchema] = new Schemas([
   {
     group: 'none',
     name: 'orderAgg',
     // This string is never visible to the user so it doesn't need to be translated
     title: 'Order Agg',
     hideCustomLabel: true,
-    aggFilter: aggFilter
-  }
-])).all[0];
+    aggFilter,
+  },
+]).all;
+
+const termsTitle = i18n.translate('common.ui.aggTypes.buckets.termsTitle', {
+  defaultMessage: 'Terms',
+});
 
 export const termsBucketAgg = new BucketAggType({
-  name: 'terms',
-  title: i18n.translate('common.ui.aggTypes.buckets.termsTitle', {
-    defaultMessage: 'Terms',
-  }),
-  makeLabel: function (agg) {
+  name: BUCKET_TYPES.TERMS,
+  title: termsTitle,
+  makeLabel(agg) {
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
-  getFormat: function (bucket) {
+  getFormat(bucket) {
     return {
-      getConverterFor: (type) => {
-        return (val) => {
+      getConverterFor: (type: ContentType) => {
+        return (val: any) => {
           if (val === '__other__') {
             return bucket.params.otherBucketLabel;
           }
@@ -71,11 +94,18 @@ export const termsBucketAgg = new BucketAggType({
           const converter = bucket.params.field.format.getConverterFor(type);
           return converter(val, undefined, undefined, parsedUrl);
         };
-      }
+      },
     };
   },
   createFilter: createFilterTerms,
-  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource, inspectorAdapters, abortSignal) => {
+  postFlightRequest: async (
+    resp: any,
+    aggConfigs: AggConfigs,
+    aggConfig: IBucketAggConfig,
+    searchSource: SearchSource,
+    inspectorAdapters: Adapters,
+    abortSignal?: AbortSignal
+  ) => {
     if (!resp.aggregations) return resp;
     const nestedSearchSource = searchSource.createChild();
     if (aggConfig.params.otherBucket) {
@@ -88,23 +118,24 @@ export const termsBucketAgg = new BucketAggType({
       nestedSearchSource.setField('aggs', filterAgg);
 
       const request = inspectorAdapters.requests.start(
-        i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketTitle', { defaultMessage: 'Other bucket' }),
+        i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketTitle', {
+          defaultMessage: 'Other bucket',
+        }),
         {
           description: i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketDescription', {
-            defaultMessage: 'This request counts the number of documents that fall ' +
-              'outside the criterion of the data buckets.'
+            defaultMessage:
+              'This request counts the number of documents that fall ' +
+              'outside the criterion of the data buckets.',
           }),
         }
       );
-      nestedSearchSource.getSearchRequestBody().then(body => {
+      nestedSearchSource.getSearchRequestBody().then((body: string) => {
         request.json(body);
       });
       request.stats(getRequestInspectorStats(nestedSearchSource));
 
       const response = await nestedSearchSource.fetch();
-      request
-        .stats(getResponseInspectorStats(nestedSearchSource, response))
-        .ok({ json: response });
+      request.stats(getResponseInspectorStats(nestedSearchSource, response)).ok({ json: response });
       resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
     }
     if (aggConfig.params.missingBucket) {
@@ -116,28 +147,34 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
+      filterFieldTypes: [
+        KBN_FIELD_TYPES.NUMBER,
+        KBN_FIELD_TYPES.BOOLEAN,
+        KBN_FIELD_TYPES.DATE,
+        KBN_FIELD_TYPES.IP,
+        KBN_FIELD_TYPES.STRING,
+      ],
     },
     {
       name: 'orderBy',
       editorComponent: OrderByParamEditor,
-      write: () => {} // prevent default write, it's handled by orderAgg
+      write: noop, // prevent default write, it's handled by orderAgg
     },
     {
       name: 'orderAgg',
       type: 'agg',
       default: null,
       editorComponent: OrderAggParamEditor,
-      makeAgg: function (termsAgg, state) {
+      makeAgg(termsAgg: IBucketAggConfig, state: AggConfigOptions) {
         state = state || {};
         state.schema = orderAggSchema;
         const orderAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
         orderAgg.id = termsAgg.id + '-orderAgg';
         return orderAgg;
       },
-      write: function (agg, output, aggs) {
+      write(agg: IBucketAggConfig, output: Record<string, any>, aggs: AggConfigs) {
         const dir = agg.params.order.value;
-        const order = output.params.order = {};
+        const order: Record<string, any> = (output.params.order = {});
 
         let orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
 
@@ -145,7 +182,8 @@ export const termsBucketAgg = new BucketAggType({
         // thus causing issues with filtering. This probably causes other issues since float might not
         // be able to contain the number on the elasticsearch side
         if (output.params.script) {
-          output.params.value_type = agg.getField().type === 'number' ? 'float' : agg.getField().type;
+          output.params.value_type =
+            agg.getField().type === 'number' ? 'float' : agg.getField().type;
         }
 
         if (agg.params.missingBucket && agg.params.field.type === 'string') {
@@ -169,7 +207,7 @@ export const termsBucketAgg = new BucketAggType({
 
         output.subAggs = (output.subAggs || []).concat(orderAgg);
         order[orderAggId] = dir;
-      }
+      },
     },
     {
       name: 'order',
@@ -181,27 +219,27 @@ export const termsBucketAgg = new BucketAggType({
           text: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
             defaultMessage: 'Descending',
           }),
-          value: 'desc'
+          value: 'desc',
         },
         {
           text: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
             defaultMessage: 'Ascending',
           }),
-          value: 'asc'
-        }
+          value: 'asc',
+        },
       ],
-      write: () => {} // prevent default write, it's handled by orderAgg
+      write: noop, // prevent default write, it's handled by orderAgg
     },
     {
       name: 'size',
       editorComponent: wrapWithInlineComp(SizeParamEditor),
-      default: 5
+      default: 5,
     },
     {
       name: 'otherBucket',
       default: false,
       editorComponent: OtherBucketParamEditor,
-      write: () => {},
+      write: noop,
     },
     {
       name: 'otherBucketLabel',
@@ -212,14 +250,14 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForOtherBucketLabel', {
         defaultMessage: 'Label for other bucket',
       }),
-      shouldShow: agg => agg.params.otherBucket,
-      write: () => {},
-    },
+      shouldShow: (agg: IBucketAggConfig) => agg.getParam('otherBucket'),
+      write: noop,
+    } as BucketAggParam,
     {
       name: 'missingBucket',
       default: false,
       editorComponent: MissingBucketParamEditor,
-      write: () => {},
+      write: noop,
     },
     {
       name: 'missingBucketLabel',
@@ -232,24 +270,28 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForMissingValuesLabel', {
         defaultMessage: 'Label for missing values',
       }),
-      shouldShow: agg => agg.params.missingBucket,
-      write: () => {},
+      shouldShow: (agg: IBucketAggConfig) => agg.getParam('missingBucket'),
+      write: noop,
     },
     {
       name: 'exclude',
-      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.excludeLabel', { defaultMessage: 'Exclude' }),
+      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.excludeLabel', {
+        defaultMessage: 'Exclude',
+      }),
       type: 'string',
       advanced: true,
       shouldShow: isStringType,
-      ...migrateIncludeExcludeFormat
+      ...migrateIncludeExcludeFormat,
     },
     {
       name: 'include',
-      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.includeLabel', { defaultMessage: 'Include' }),
+      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.includeLabel', {
+        defaultMessage: 'Include',
+      }),
       type: 'string',
       advanced: true,
       shouldShow: isStringType,
-      ...migrateIncludeExcludeFormat
+      ...migrateIncludeExcludeFormat,
     },
-  ]
+  ] as BucketAggParam[],
 });

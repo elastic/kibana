@@ -20,69 +20,79 @@
 import _ from 'lodash';
 import angular from 'angular';
 
-import { BucketAggType } from './_bucket_agg_type';
-import { createFilterFilters } from './create_filter/filters';
-import { FiltersParamEditor } from '../../vis/editors/default/controls/filters';
 import { i18n } from '@kbn/i18n';
 import { Storage } from 'ui/storage';
 
 import chrome from 'ui/chrome';
 import { buildEsQuery } from '@kbn/es-query';
+import { FiltersParamEditor, FilterValue } from '../../vis/editors/default/controls/filters';
+import { createFilterFilters } from './create_filter/filters';
+import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { setup as data } from '../../../../core_plugins/data/public/legacy';
 
 const { getQueryLog } = data.query.helpers;
 const config = chrome.getUiSettingsClient();
 const storage = new Storage(window.localStorage);
 
+const filtersTitle = i18n.translate('common.ui.aggTypes.buckets.filtersTitle', {
+  defaultMessage: 'Filters',
+  description:
+    'The name of an aggregation, that allows to specify multiple individual filters to group data by.',
+});
+
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
-  title: i18n.translate('common.ui.aggTypes.buckets.filtersTitle', {
-    defaultMessage: 'Filters',
-    description: 'The name of an aggregation, that allows to specify multiple individual filters to group data by.'
-  }),
+  title: filtersTitle,
   createFilter: createFilterFilters,
   customLabels: false,
   params: [
     {
       name: 'filters',
       editorComponent: FiltersParamEditor,
-      default: [ { input: { query: '', language: config.get('search:queryLanguage') }, label: '' } ],
-      write: function (aggConfig, output) {
-        const inFilters = aggConfig.params.filters;
+      default: [{ input: { query: '', language: config.get('search:queryLanguage') }, label: '' }],
+      write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
+        const inFilters: FilterValue[] = aggConfig.params.filters;
         if (!_.size(inFilters)) return;
 
-        inFilters.forEach((filter) => {
+        inFilters.forEach(filter => {
           const persistedLog = getQueryLog(config, storage, 'filtersAgg', filter.input.language);
           persistedLog.add(filter.input.query);
         });
 
-        const outFilters = _.transform(inFilters, function (filters, filter) {
-          const input = _.cloneDeep(filter.input);
+        const outFilters = _.transform(
+          inFilters,
+          function(filters, filter) {
+            const input = _.cloneDeep(filter.input);
 
-          if (!input) {
-            console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
-            return;
-          }
+            if (!input) {
+              console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
+              return;
+            }
 
-          const query = buildEsQuery(aggConfig.getIndexPattern(), [input], [], config);
+            const query = buildEsQuery(aggConfig.getIndexPattern(), [input], [], config);
 
-          if (!query) {
-            console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
-            return;
-          }
+            if (!query) {
+              console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
+              return;
+            }
 
-          const matchAllLabel = filter.input.query === '' ? '*' : '';
-          const label = filter.label
-            || matchAllLabel
-            || (typeof filter.input.query === 'string' ? filter.input.query : angular.toJson(filter.input.query));
-          filters[label] = { query };
-        }, {});
+            const matchAllLabel = filter.input.query === '' ? '*' : '';
+            const label =
+              filter.label ||
+              matchAllLabel ||
+              (typeof filter.input.query === 'string'
+                ? filter.input.query
+                : angular.toJson(filter.input.query));
+            filters[label] = { query };
+          },
+          {}
+        );
 
         if (!_.size(outFilters)) return;
 
         const params = output.params || (output.params = {});
         params.filters = outFilters;
-      }
-    }
-  ]
+      },
+    },
+  ],
 });

@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import React from 'react';
+import { buildRangeFilter } from '@kbn/es-query';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
-const wrapWithInlineComp = Component => props => (
-  <div className={`visEditorAggParam--half visEditorAggParam--half-${props.aggParam.name}`}>
-    <Component {...props}/>
-  </div>);
-
-export { wrapWithInlineComp };
+export const createFilterRange = (aggConfig: IBucketAggConfig, params: any) => {
+  return buildRangeFilter(
+    aggConfig.params.field,
+    params,
+    aggConfig.getIndexPattern(),
+    aggConfig.fieldFormatter()(params)
+  );
+};

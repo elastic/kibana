@@ -30,7 +30,7 @@ import { BaseParamType } from './param_types/base';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
-  TParam extends AggParam = TAggConfig['params'][number]
+  TParam extends AggParam = AggParam
 > {
   name: string;
   title: string;
@@ -50,7 +50,8 @@ export interface AggTypeConfig<
     aggConfigs: AggConfigs,
     aggConfig: TAggConfig,
     searchSource: SearchSource,
-    inspectorAdapters: Adapters
+    inspectorAdapters: Adapters,
+    abortSignal?: AbortSignal
   ) => Promise<any>;
   getFormat?: (agg: TAggConfig) => FieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
@@ -62,7 +63,7 @@ const getFormat = (agg: AggConfig) => {
   return field ? field.format : fieldFormats.getDefaultInstance('string');
 };
 
-export class AggType<TAggConfig extends AggConfig = AggConfig> {
+export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends AggParam = AggParam> {
   /**
    * the unique, unchanging, name that we have assigned this aggType
    *
@@ -131,7 +132,7 @@ export class AggType<TAggConfig extends AggConfig = AggConfig> {
    * @property params
    * @type {AggParams}
    */
-  params: TAggConfig['params'];
+  params: TParam[];
   /**
    * Designed for multi-value metric aggs, this method can return a
    * set of AggConfigs that should replace this aggConfig in requests
@@ -215,7 +216,7 @@ export class AggType<TAggConfig extends AggConfig = AggConfig> {
     }
 
     if (config.params && config.params.length && config.params[0] instanceof BaseParamType) {
-      this.params = config.params as TAggConfig['params'];
+      this.params = config.params as TParam[];
     } else {
       // always append the raw JSON param
       const params: any[] = config.params ? [...config.params] : [];

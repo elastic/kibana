@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import { CidrMask } from '../../../utils/cidr_mask';
-import { buildRangeFilter } from '@kbn/es-query';
+import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
+import { npStart } from 'ui/new_platform';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
-export function createFilterIpRange(aggConfig, key) {
-  let range;
-  if (aggConfig.params.ipRangeType === 'mask') {
-    range = new CidrMask(key).getRange();
-  } else {
-    const [from, to] = key.split(/\s+to\s+/);
-    range = {
-      from: from === '-Infinity' ? -Infinity : from,
-      to: to === 'Infinity' ? Infinity : to
-    };
-  }
+// @ts-ignore
+import { dateRange } from '../../../utils/date_range';
 
-  return buildRangeFilter(aggConfig.params.field, { gte: range.from, lte: range.to }, aggConfig.getIndexPattern());
+export const createFilterDateRange = (agg: IBucketAggConfig, rangeString: string) => {
+  const range = dateRange.parse(rangeString, npStart.core.uiSettings.get('dateFormat'));
+
+  const filter: RangeFilterParams = {};
+  if (range.from) filter.gte = range.from.toISOString();
+  if (range.to) filter.lt = range.to.toISOString();
+  if (range.to && range.from) filter.format = 'strict_date_optional_time';
+
+  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
 }

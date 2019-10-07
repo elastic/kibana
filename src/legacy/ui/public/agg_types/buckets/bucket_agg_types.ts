@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import moment from 'moment';
-import { buildRangeFilter } from '@kbn/es-query';
-
-export function createFilterDateHistogram(agg, key) {
-  const start = moment(key);
-  const interval = agg.buckets.getInterval();
-
-  return buildRangeFilter(agg.params.field, {
-    gte: start.toISOString(),
-    lt: start.add(interval).toISOString(),
-    format: 'strict_date_optional_time'
-  }, agg.getIndexPattern());
+export enum BUCKET_TYPES {
+  FILTER = 'filter',
+  HISTOGRAM = 'histogram',
+  IP_RANGE = 'ip_range',
+  DATE_RANGE = 'date_range',
+  RANGE = 'range',
+  TERMS = 'terms',
+  SIGNIFICANT_TERMS = 'significant_terms',
+  GEOHASH_GRID = 'geohash_grid',
+  GEOTILE_GRID = 'geotile_grid',
+  DATE_HISTOGRAM = 'date_histogram',
 }
