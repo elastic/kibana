@@ -9,16 +9,15 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
     <Styled(EuiBadge)
       color="hollow"
     >
-      <EuiFlexGroup
+      <Styled(EuiFlexGroup)
         direction="column"
-        justifyContent="spaceAround"
       >
         <EuiFlexItem
           grow={false}
         >
           Source
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </Styled(EuiFlexGroup)>
     </Styled(EuiBadge)>
   </EuiFlexItem>
   <SourceDestinationArrows
@@ -39,16 +38,13 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
     <Styled(EuiBadge)
       color="hollow"
     >
-      <EuiFlexGroup
-        direction="column"
-        justifyContent="spaceAround"
-      >
+      <Styled(EuiFlexGroup)>
         <EuiFlexItem
           grow={false}
         >
           Destination
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </Styled(EuiFlexGroup)>
     </Styled(EuiBadge)>
   </EuiFlexItem>
 </EuiFlexGroup>

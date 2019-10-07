@@ -115,12 +115,12 @@ export const MapToolTip = React.memo<MapToolTipProps>(
           <div>
             {featureGeometry != null && featureGeometry.type === 'LineString' ? (
               <LineToolTipContent
-                contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}`}
+                contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
                 featureProps={featureProps}
               />
             ) : (
               <PointToolTipContent
-                contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}`}
+                contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
                 featureProps={featureProps}
                 featurePropsFilters={featurePropsFilters}
                 addFilters={addFilters}
