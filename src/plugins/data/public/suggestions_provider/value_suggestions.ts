@@ -18,16 +18,17 @@
  */
 
 import { memoize } from 'lodash';
-import { Field } from 'ui/index_patterns';
+
+import { UiSettingsClientContract, HttpServiceBase } from 'src/core/public';
+import { IGetSuggestions, Field } from './types';
 
 export function getSuggestionsProvider(
-  config: { get: (key: string) => any },
-  fetch: (...options: any[]) => any
-) {
+  uiSettings: UiSettingsClientContract,
+  http: HttpServiceBase
+): IGetSuggestions {
   const requestSuggestions = memoize(
     (index: string, field: Field, query: string, boolFilter: any = []) => {
-      return fetch({
-        pathname: `/api/kibana/suggestions/values/${index}`,
+      return http.fetch(`/api/kibana/suggestions/values/${index}`, {
         method: 'POST',
         body: JSON.stringify({ query, field: field.name, boolFilter }),
       });
@@ -36,7 +37,7 @@ export function getSuggestionsProvider(
   );
 
   return async (index: string, field: Field, query: string, boolFilter?: any) => {
-    const shouldSuggestValues = config.get('filterEditor:suggestValues');
+    const shouldSuggestValues = uiSettings.get('filterEditor:suggestValues');
     if (field.type === 'boolean') {
       return [true, false];
     } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {

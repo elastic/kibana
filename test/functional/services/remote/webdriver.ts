@@ -27,15 +27,9 @@ import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriver';
-// @ts-ignore types not available
+import { Builder, Capabilities, By, logging, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
-// @ts-ignore types not available
 import firefox from 'selenium-webdriver/firefox';
-// @ts-ignore types not available
-import ie from 'selenium-webdriver/ie';
-// @ts-ignore internal modules are not typed
-import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 // @ts-ignore internal modules are not typed
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
@@ -99,7 +93,7 @@ async function attemptToCreateCommand(
         });
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
 
-        const session = new Builder()
+        const session = await new Builder()
           .forBrowser(browserType)
           .withCapabilities(chromeCapabilities)
           .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
@@ -119,16 +113,18 @@ async function attemptToCreateCommand(
 
       case 'firefox': {
         const firefoxOptions = new firefox.Options();
-        firefoxOptions.setPreference('devtools.console.stdout.content', true);
+        // Firefox 65+ supports logging console output to stdout
+        firefoxOptions.set('moz:firefoxOptions', {
+          prefs: { 'devtools.console.stdout.content': true },
+        });
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
-          firefoxOptions.addArguments('-headless');
+          firefoxOptions.headless();
         }
-
         const { input, chunk$, cleanup } = await createStdoutSocket();
         lifecycle.on('cleanup', cleanup);
 
-        const session = new Builder()
+        const session = await new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
           .setFirefoxService(
@@ -176,11 +172,13 @@ async function attemptToCreateCommand(
           logLevel: 'TRACE',
         });
 
+        const session = await new Builder()
+          .forBrowser(browserType)
+          .withCapabilities(ieCapabilities)
+          .build();
+
         return {
-          session: new Builder()
-            .forBrowser(browserType)
-            .withCapabilities(ieCapabilities)
-            .build(),
+          session,
           consoleLog$: Rx.EMPTY,
         };
       }
@@ -208,7 +206,7 @@ async function attemptToCreateCommand(
     return;
   } // abort
 
-  return { driver: session, By, Key, until, LegacyActionSequence, consoleLog$ };
+  return { driver: session, By, until, consoleLog$ };
 }
 
 export async function initWebDriver(
