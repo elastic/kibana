@@ -30,6 +30,8 @@ import {
   AUTO_INTERVAL,
 } from './lib/get_interval';
 import { PANEL_TYPES } from '../../common/panel_types';
+// eslint-disable-next-line
+import { setInitialRenderCompleteAttrs, updateRenderCompleteAttrs } from '../../../../../plugins/kibana_utils/public/render_complete/track_render_complete_attributes';
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -150,6 +152,11 @@ class VisEditorVisualizationUI extends Component {
   componentDidMount() {
     window.addEventListener('mousemove', this.handleMouseMove);
     this._loadVisualization();
+
+    if (this._visEl.current) {
+      setInitialRenderCompleteAttrs(this._visEl.current);
+      this._visEl.current.addEventListener('renderComplete', this.onRenderComplete);
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -158,7 +165,16 @@ class VisEditorVisualizationUI extends Component {
         timeRange: this.props.timeRange,
       });
     }
+    if (this._visEl.current) {
+      this._visEl.current.removeEventListener('renderComplete', this.onRenderComplete);
+    }
   }
+
+  onRenderComplete = () => {
+    if (this._visEl.current) {
+      updateRenderCompleteAttrs(this._visEl.current);
+    }
+  };
 
   render() {
     const { dirty, autoApply, title, description, onToggleAutoApply, onCommit } = this.props;
