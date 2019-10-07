@@ -17,15 +17,38 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
+export default async function ({ readConfigFile }) {
+  const defaultConfig = await readConfigFile(require.resolve('./config'));
 
-export async function fetchExportByType(types, includeReferencesDeep = false) {
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_export',
-    body: JSON.stringify({
-      type: types,
-      includeReferencesDeep,
-    }),
-  });
+  return {
+    ...defaultConfig.getAll(),
+
+    browser: {
+      type: 'ie',
+    },
+
+    junit: {
+      reportName: 'Internet Explorer UI Functional Tests'
+    },
+
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
+        'telemetry:optIn': false,
+        'state:storeInSessionStorage': true,
+        'notifications:lifetime:info': 10000,
+      },
+    },
+
+
+    kbnTestServer: {
+      ...defaultConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...defaultConfig.get('kbnTestServer.serverArgs'),
+      ],
+    },
+
+
+  };
 }

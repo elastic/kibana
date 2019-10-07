@@ -17,18 +17,16 @@
  * under the License.
  */
 
-export * from './fetch_export_by_type_and_search';
-export * from './fetch_export_objects';
-export * from './in_app_url';
-export * from './get_relationships';
-export * from './get_saved_object_counts';
-export * from './get_saved_object_label';
-export * from './import_file';
-export * from './import_legacy_file';
-export * from './parse_query';
-export * from './resolve_import_errors';
-export * from './resolve_saved_objects';
-export * from './log_legacy_import';
-export * from './process_import_response';
-export * from './get_default_title';
-export * from './find_objects';
+import { kfetch } from 'ui/kfetch';
+
+export async function fetchExportByTypeAndSearch(types, search, includeReferencesDeep = false) {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_export',
+    body: JSON.stringify({
+      type: types,
+      search,
+      includeReferencesDeep,
+    }),
+  });
+}
