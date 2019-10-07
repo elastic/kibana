@@ -58,12 +58,13 @@ grunt.registerTask(
     const done = this.async();
 
     try {
-      const stats = JSON.parse(await execa.stderr(process.execPath, [
+      const result = await execa(process.execPath, [
         'scripts/functional_test_runner',
         ...TEST_TAGS.map(tag => `--include-tag=${tag}`),
         '--config', 'test/functional/config.js',
         '--test-stats'
-      ]));
+      ]);
+      const stats = JSON.parse(result.stderr);
 
       if (stats.excludedTests.length > 0) {
         grunt.fail.fatal(`

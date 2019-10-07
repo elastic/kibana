@@ -27,9 +27,10 @@ it(
   'types return values to prevent mutations in typescript',
   async () => {
     await expect(
-      execa.stdout('tsc', ['--noEmit'], {
+      execa('tsc', ['--noEmit'], {
         cwd: resolve(__dirname, '__fixtures__/frozen_object_mutation'),
-      })
+        preferLocal: true,
+      }).then(r => r.stdout)
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
 "Command failed: tsc --noEmit
 
