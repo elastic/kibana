@@ -210,11 +210,11 @@ export function SpanFlyout({
                 )
               },
               {
-                id: 'labels',
+                id: 'metadata',
                 name: i18n.translate(
-                  'xpack.apm.propertiesTable.tabs.labelsLabel',
+                  'xpack.apm.propertiesTable.tabs.metadataLabel',
                   {
-                    defaultMessage: 'Labels'
+                    defaultMessage: 'Metadata'
                   }
                 ),
                 content: (
