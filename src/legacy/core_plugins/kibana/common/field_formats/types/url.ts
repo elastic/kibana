@@ -78,6 +78,8 @@ export function createUrlFormat() {
         type: DEFAULT_URL_TYPE,
         urlTemplate: null,
         labelTemplate: null,
+        width: null,
+        height: null,
       };
     }
 
@@ -125,6 +127,15 @@ export function createUrlFormat() {
       };
     }
 
+    _generateImgHtml(url, imageLabel) {
+      const isValidWidth = !isNaN(parseInt(this.param('width')));
+      const isValidHeight = !isNaN(parseInt(this.param('height')));
+      const maxWidth = isValidWidth ? `${this.param('width')}px` : 'none';
+      const maxHeight = isValidHeight ? `${this.param('height')}px` : 'none';
+
+      return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
+    }
+
     textConvert: TextContextTypeConvert = value => this.formatLabel(value);
 
     htmlConvert: HtmlContextTypeConvert = (rawValue, field, hit, parsedUrl) => {
@@ -141,7 +152,7 @@ export function createUrlFormat() {
           const imageLabel =
             label === url ? `A dynamically-specified image located at ${url}` : label;
 
-          return `<img src="${url}" alt="${imageLabel}">`;
+          return this._generateImgHtml(url, imageLabel);
         default:
           const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
           if (!inWhitelist && !parsedUrl) {
