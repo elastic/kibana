@@ -60,7 +60,6 @@ export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyS
         });
       }
     }, [pathName, search, hosts, hostDetails, network, navTabs, timerange, timelineId]);
-
     return (
       <TabNavigation
         display={display}

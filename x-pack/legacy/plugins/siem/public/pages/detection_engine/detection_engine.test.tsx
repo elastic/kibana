@@ -10,7 +10,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { MemoryRouter } from 'react-router-dom';
 
-import { Overview } from './index';
+import { DetectionEngine } from './index';
 
 import '../../mock/ui_settings';
 import { mocksSource } from '../../containers/source/mock';
@@ -35,7 +35,7 @@ let localSource: Array<{
   };
 }>;
 
-describe('Overview', () => {
+describe('DetectionEngine', () => {
   describe('rendering', () => {
     beforeEach(() => {
       localSource = cloneDeep(mocksSource);
@@ -47,7 +47,7 @@ describe('Overview', () => {
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
             <MemoryRouter>
-              <Overview />
+              <DetectionEngine />
             </MemoryRouter>
           </MockedProvider>
         </TestProviders>
@@ -64,7 +64,7 @@ describe('Overview', () => {
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
             <MemoryRouter>
-              <Overview />
+              <DetectionEngine />
             </MemoryRouter>
           </MockedProvider>
         </TestProviders>

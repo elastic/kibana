@@ -6,25 +6,25 @@
 
 import React from 'react';
 import { pure } from 'recompose';
-import chrome from 'ui/chrome';
-import { documentationLinks } from 'ui/documentation_links';
+// import chrome from 'ui/chrome';
+// import { documentationLinks } from 'ui/documentation_links';
 
 import { HeaderPage } from '../../components/header_page';
-import { GlobalTime } from '../../containers/global_time';
-
-import { EmptyPage } from '../../components/empty_page';
-import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
+// import { GlobalTime } from '../../containers/global_time';
+//
+// import { EmptyPage } from '../../components/empty_page';
+// import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
 import * as i18n from './translations';
 
-const basePath = chrome.getBasePath();
+// const basePath = chrome.getBasePath();
 
 export const DetectionEngineComponent = pure(() => {
   return (
     <>
       <HeaderPage subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE} />
-
+      <p>{'HELLO WORLD'}</p>
       {/* <WithSource sourceId="default">
         {({ indicesExist }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
