@@ -19,27 +19,31 @@
 
 import { intersection, isObject } from 'lodash';
 import { Headers } from '../http/router';
-import { CallAPIOptions } from './cluster_client';
+import { APICaller, CallAPIOptions } from './api_types';
 
 /** @public */
 export { Headers };
-
-/** @public */
-export type APICaller = (
-  endpoint: string,
-  clientParams: Record<string, any>,
-  options?: CallAPIOptions
-) => Promise<unknown>;
 
 /**
  * Serves the same purpose as "normal" `ClusterClient` but exposes additional
  * `callAsCurrentUser` method that doesn't use credentials of the Kibana internal
  * user (as `callAsInternalUser` does) to request Elasticsearch API, but rather
- * passes HTTP headers extracted from the current user request to the API
+ * passes HTTP headers extracted from the current user request to the API.
+ *
+ * See {@link ScopedClusterClient}.
  *
  * @public
  */
-export class ScopedClusterClient {
+export type IScopedClusterClient = Pick<
+  ScopedClusterClient,
+  'callAsCurrentUser' | 'callAsInternalUser'
+>;
+
+/**
+ * {@inheritDoc IScopedClusterClient}
+ * @public
+ */
+export class ScopedClusterClient implements IScopedClusterClient {
   constructor(
     private readonly internalAPICaller: APICaller,
     private readonly scopedAPICaller: APICaller,
