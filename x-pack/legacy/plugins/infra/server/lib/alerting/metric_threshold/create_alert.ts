@@ -5,32 +5,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './constants';
-import { MetricsExplorerAggregation } from '../../../routes/metrics_explorer/types';
+import { SavedObjectsClientContract } from 'src/core/server';
+import {
+  MetricThresholdAlertTypeParams,
+  Comparator,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from './types';
+import { infraMetricAlertSavedObjectType } from '../saved_object_mappings';
 import { ActionsClient } from '../../../../../actions';
 import { AlertsClient } from '../../../../../alerting';
 
-interface Properties {
-  searchField: {
-    name: string;
-    value: string;
-  };
-  metric: string;
-  comparator: Comparator;
-  aggregation: MetricsExplorerAggregation;
-  threshold: number;
-  interval: string;
+interface Properties extends MetricThresholdAlertTypeParams {
   actions: {
     email: string;
     slack: string;
-    log: string;
+    log: any;
   };
-  indexPattern: string;
 }
 
 interface Clients {
   alertsClient: AlertsClient;
   actionsClient: ActionsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface Action {
@@ -41,16 +37,16 @@ interface Action {
 }
 
 const comparatorNames = {
-  GT: i18n.translate('xpack.infra.alerting.threshold.greaterThan', {
+  [Comparator.GT]: i18n.translate('xpack.infra.alerting.threshold.greaterThan', {
     defaultMessage: 'greater than',
   }),
-  LT: i18n.translate('xpack.infra.alerting.threshold.lessThan', {
+  [Comparator.LT]: i18n.translate('xpack.infra.alerting.threshold.lessThan', {
     defaultMessage: 'less than',
   }),
-  GT_OR_EQ: i18n.translate('xpack.infra.alerting.threshold.greaterThanOrEqualTo', {
+  [Comparator.GT_OR_EQ]: i18n.translate('xpack.infra.alerting.threshold.greaterThanOrEqualTo', {
     defaultMessage: 'greater than or equal to',
   }),
-  LT_OR_EQ: i18n.translate('xpack.infra.alerting.threshold.lessThanOrEqualTo', {
+  [Comparator.LT_OR_EQ]: i18n.translate('xpack.infra.alerting.threshold.lessThanOrEqualTo', {
     defaultMessage: 'less than or equal to',
   }),
 };
@@ -77,7 +73,7 @@ const aggregationNames = {
 };
 
 const createAlert = async (
-  { alertsClient, actionsClient }: Clients,
+  { alertsClient, actionsClient, savedObjectsClient }: Clients,
   {
     actions: { slack, email, log },
     metric,
@@ -280,7 +276,7 @@ const createAlert = async (
     )
   );
 
-  return alertsClient.create({
+  const createdAlert = await alertsClient.create({
     data: {
       alertTypeId: METRIC_THRESHOLD_ALERT_TYPE_ID,
       alertTypeParams: {
@@ -304,6 +300,16 @@ const createAlert = async (
       throttle: null,
     },
   });
+
+  if (!createdAlert.id) throw new Error('Alert not successfully created');
+
+  await savedObjectsClient.create(
+    infraMetricAlertSavedObjectType,
+    { searchField, threshold, interval, comparator, aggregation, metric, indexPattern },
+    { id: createdAlert.id }
+  );
+
+  return createdAlert.id;
 };
 
 export { createAlert };

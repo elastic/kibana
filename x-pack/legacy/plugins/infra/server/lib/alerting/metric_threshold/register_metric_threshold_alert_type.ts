@@ -5,26 +5,18 @@
  */
 import { schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './constants';
+import {
+  MetricThresholdAlertTypeParams,
+  Comparator,
+  AlertStates,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from './types';
 import { AlertServices } from '../../../../../alerting/server/types';
-import { MetricsExplorerAggregation } from '../../../routes/metrics_explorer/types';
-
-interface ExecutorParams {
-  aggregation: MetricsExplorerAggregation;
-  metric: string;
-  searchField: {
-    name: string;
-    value: string;
-  };
-  interval: string;
-  indexPattern: string;
-  threshold: number;
-  comparator: Comparator;
-}
+import { infraMetricAlertSavedObjectType } from '../saved_object_mappings';
 
 async function getMetric(
   { callCluster }: AlertServices,
-  { metric, searchField, aggregation, interval, indexPattern }: ExecutorParams
+  { metric, searchField, aggregation, interval, indexPattern }: MetricThresholdAlertTypeParams
 ) {
   const searchBody = {
     query: {
@@ -85,10 +77,10 @@ async function getMetric(
 }
 
 const comparatorMap = {
-  GT: (a: number, b: number) => a > b,
-  LT: (a: number, b: number) => a < b,
-  GT_OR_EQ: (a: number, b: number) => a >= b,
-  LT_OR_EQ: (a: number, b: number) => a <= b,
+  [Comparator.GT]: (a: number, b: number) => a > b,
+  [Comparator.LT]: (a: number, b: number) => a < b,
+  [Comparator.GT_OR_EQ]: (a: number, b: number) => a >= b,
+  [Comparator.LT_OR_EQ]: (a: number, b: number) => a <= b,
 };
 
 export async function registerMetricThresholdAlertType(server: Server) {
@@ -117,24 +109,27 @@ export async function registerMetricThresholdAlertType(server: Server) {
       }),
     },
     actionGroups: ['fired', 'recovered'],
-    async executor({ services, params }) {
-      const { threshold, comparator, searchField } = params as ExecutorParams;
+    async executor({ alertId, services, params }) {
+      const { threshold, comparator, searchField } = params as MetricThresholdAlertTypeParams;
       const alertInstance = services.alertInstanceFactory(
         `${searchField.name}:${searchField.value}`
       );
-      const { isAlertInFiredState } = alertInstance.getState();
-      const currentValue = await getMetric(services, params as ExecutorParams);
+      const { alertState } = alertInstance.getState();
+      const currentValue = await getMetric(services, params as MetricThresholdAlertTypeParams);
       if (typeof currentValue === 'undefined')
         throw new Error('Could not get current value of metric');
 
       const comparisonFunction = comparatorMap[comparator];
 
       const isValueInAlertState = comparisonFunction(currentValue, threshold);
+      const isAlertInFiredState = alertState === AlertStates.ALERT;
       // If the value has crossed the threshold, check to see if this just happened, or if
       // it was beyond the threshold the previous time this alert executed
       const shouldFire = isValueInAlertState && !isAlertInFiredState;
       // Vice versa for if the value has NOT crossed the threshold
       const shouldRecover = !isValueInAlertState && isAlertInFiredState;
+
+      let nextAlertState = Boolean(isAlertInFiredState) ? AlertStates.ALERT : AlertStates.OK;
 
       // Only schedule actions when the value tranverses the threshold; don't renotify
       // over and over again if the value remains in an alert state
@@ -142,13 +137,14 @@ export async function registerMetricThresholdAlertType(server: Server) {
         alertInstance.scheduleActions(shouldFire ? 'fired' : 'recovered', {
           value: currentValue,
         });
-        alertInstance.replaceState({
-          isAlertInFiredState: shouldFire,
-        });
-        return;
+        nextAlertState = shouldFire ? AlertStates.ALERT : AlertStates.OK;
       }
+
       alertInstance.replaceState({
-        isAlertInFiredState: Boolean(isAlertInFiredState),
+        alertState: nextAlertState,
+      });
+      services.savedObjectsClient.update(infraMetricAlertSavedObjectType, alertId, {
+        currentAlertState: nextAlertState,
       });
     },
   });

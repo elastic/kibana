@@ -5,7 +5,9 @@
  */
 
 import { infraSourceConfigurationSavedObjectMappings } from './lib/sources';
+import { infraAlertSavedObjectMappings } from './lib/alerting';
 
 export const savedObjectMappings = {
   ...infraSourceConfigurationSavedObjectMappings,
+  ...infraAlertSavedObjectMappings,
 };

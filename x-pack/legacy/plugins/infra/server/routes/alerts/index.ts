@@ -5,3 +5,5 @@
  */
 
 export * from './create_metric_threshold_alert';
+export * from './list_metric_alerts';
+export * from './delete_metric_alert';

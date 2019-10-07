@@ -5,37 +5,24 @@
  */
 
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { createAlert } from '../../lib/alerting/metric_threshold/create_alert';
 import { internalInfraFrameworkRequest } from '../../lib/adapters/framework/adapter_types';
+import { infraMetricAlertSavedObjectType } from '../../lib/alerting/saved_object_mappings';
 
-export const initCreateMetricThresholdAlert = ({ framework }: InfraBackendLibs) =>
+export const initListMetricAlerts = ({ framework }: InfraBackendLibs) =>
   framework.registerRoute({
-    path: '/api/infra/alerts/metric_threshold',
-    method: 'POST',
+    path: '/api/infra/alerts/list',
+    method: 'GET',
     handler: async (req, res) => {
       const internalReq = req[internalInfraFrameworkRequest] as any;
-      const alertsClient =
-        typeof internalReq.getAlertsClient === 'function' ? internalReq.getAlertsClient() : null;
-
-      const actionsClient =
-        typeof internalReq.getActionsClient === 'function' ? internalReq.getActionsClient() : null;
-
-      if (!alertsClient || !actionsClient) {
-        return res.response().code(404);
-      }
 
       const savedObjectsClient = framework
         .getSavedObjectsService()
         .getScopedSavedObjectsClient(internalReq);
 
       try {
-        const result = await createAlert(
-          { alertsClient, actionsClient, savedObjectsClient },
-          req.payload
-        );
-        const alertId = result;
-
-        return res.response(alertId);
+        const results = await savedObjectsClient.find({ type: infraMetricAlertSavedObjectType });
+        if (!results.saved_objects) throw new Error('Could not list alerts');
+        return res.response(results.saved_objects);
       } catch (e) {
         if (e && e.output) {
           return res.response(e.output.payload.message).code(e.output.statusCode);

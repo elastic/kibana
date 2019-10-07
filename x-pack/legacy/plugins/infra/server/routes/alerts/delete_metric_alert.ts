@@ -5,22 +5,19 @@
  */
 
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { createAlert } from '../../lib/alerting/metric_threshold/create_alert';
 import { internalInfraFrameworkRequest } from '../../lib/adapters/framework/adapter_types';
+import { infraMetricAlertSavedObjectType } from '../../lib/alerting/saved_object_mappings';
 
-export const initCreateMetricThresholdAlert = ({ framework }: InfraBackendLibs) =>
+export const initDeleteMetricAlert = ({ framework }: InfraBackendLibs) =>
   framework.registerRoute({
-    path: '/api/infra/alerts/metric_threshold',
-    method: 'POST',
+    path: '/api/infra/alerts',
+    method: 'DELETE',
     handler: async (req, res) => {
       const internalReq = req[internalInfraFrameworkRequest] as any;
       const alertsClient =
         typeof internalReq.getAlertsClient === 'function' ? internalReq.getAlertsClient() : null;
 
-      const actionsClient =
-        typeof internalReq.getActionsClient === 'function' ? internalReq.getActionsClient() : null;
-
-      if (!alertsClient || !actionsClient) {
+      if (!alertsClient) {
         return res.response().code(404);
       }
 
@@ -28,14 +25,13 @@ export const initCreateMetricThresholdAlert = ({ framework }: InfraBackendLibs) 
         .getSavedObjectsService()
         .getScopedSavedObjectsClient(internalReq);
 
-      try {
-        const result = await createAlert(
-          { alertsClient, actionsClient, savedObjectsClient },
-          req.payload
-        );
-        const alertId = result;
+      const { id } = req.query;
 
-        return res.response(alertId);
+      try {
+        const result = await alertsClient.delete({ id });
+        await savedObjectsClient.delete(infraMetricAlertSavedObjectType, id);
+
+        return res.response().code(204);
       } catch (e) {
         if (e && e.output) {
           return res.response(e.output.payload.message).code(e.output.statusCode);

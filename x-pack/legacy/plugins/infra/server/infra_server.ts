@@ -16,7 +16,7 @@ import { InfraBackendLibs } from './lib/infra_types';
 import { initLogAnalysisGetLogEntryRateRoute } from './routes/log_analysis';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetadataRoute } from './routes/metadata';
-import { initLogAnalysisCreateMetricThresholdAlert } from './routes/alerts';
+import * as alertRouteInitializers from './routes/alerts';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -36,5 +36,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initLogAnalysisGetLogEntryRateRoute(libs);
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
-  initLogAnalysisCreateMetricThresholdAlert(libs);
+  for (const fn of Object.values(alertRouteInitializers)) {
+    fn(libs);
+  }
 };
