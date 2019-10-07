@@ -28,7 +28,7 @@ export const UPGRADE_DESCRIPTION = i18n.translate(
   'xpack.siem.components.mlPopup.upgradeDescription',
   {
     defaultMessage:
-      'In order to access SIEM’s anomaly detection features, you must be subscribed to an Elastic Platinum license. With it, you’ll have the ability to run Machine Learning jobs to view anomalous events throughout SIEM.',
+      'To access SIEM’s anomaly detection features, you must update your license to Platinum or start a free 30-day trial. You can then run Machine Learning jobs and view anomalies.',
   }
 );
 
