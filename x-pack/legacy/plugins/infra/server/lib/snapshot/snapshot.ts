@@ -226,7 +226,7 @@ const getAllCompositeAggregationData = async <BucketType>(
   return getAllCompositeAggregationData(
     framework,
     request,
-    query,
+    newQuery,
     previousBuckets.concat(currentBuckets)
   );
 };
