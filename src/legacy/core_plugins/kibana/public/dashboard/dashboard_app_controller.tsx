@@ -57,7 +57,7 @@ import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { extractTimeFilter } from '../../../data/public';
+import { extractTimeFilter, changeTimeFilter } from '../../../data/public';
 import { data } from '../../../data/public/setup';
 
 import {
@@ -436,7 +436,7 @@ export class DashboardAppController {
           filters
         );
         queryFilter.addFilters(restOfFilters);
-        timefilter.setTime(timeRangeFilter as any);
+        if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
       }
 
       $scope.appState.$newFilters = [];
