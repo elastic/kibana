@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/22322
+
   describe('vertical bar chart', function () {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
@@ -154,7 +155,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('switch between Y axis scale types', () => {
+    describe('switch between Y axis scale types', () => {
       before(initBarChart);
       const axisId = 'ValueAxis-1';
 
@@ -162,7 +163,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickMetricsAndAxes();
         await PageObjects.visualize.clickYAxisOptions(axisId);
         await PageObjects.visualize.selectYAxisScaleType(axisId, 'log');
-        await PageObjects.visualize.clickYAxisAdvancedOptions(axisId);
+        await PageObjects.visualize.clickYAxisOptions(axisId);
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();

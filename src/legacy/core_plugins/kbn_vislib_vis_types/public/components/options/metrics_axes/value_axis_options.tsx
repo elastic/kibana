@@ -141,6 +141,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
 
       <SelectOption
         id={`scaleSelectYAxis-${axis.id}`}
+        data-test-subj={`scaleSelectYAxis-${axis.id}`}
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleTypeLabel', {
           defaultMessage: 'Scale type',
         })}
