@@ -22,7 +22,8 @@ import { format } from 'url';
 import { get } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import { Cluster } from '@kbn/es';
-import { legacyEsTestConfig } from './legacy_es_test_config';
+import { esTestConfig } from './es_test_config';
+
 import { KIBANA_ROOT } from '../';
 import * as legacyElasticsearch from 'elasticsearch';
 const path = require('path');
@@ -30,12 +31,12 @@ const del = require('del');
 
 export function createLegacyEsTestCluster(options = {}) {
   const {
-    port = legacyEsTestConfig.getPort(),
+    port = esTestConfig.getPort(),
     password = 'changeme',
     license = 'oss',
     log,
     basePath = resolve(KIBANA_ROOT, '.es'),
-    esFrom = legacyEsTestConfig.getBuildFrom(),
+    esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
     esArgs,
     ssl,
@@ -46,7 +47,7 @@ export function createLegacyEsTestCluster(options = {}) {
     .substring(2);
   const clusterName = `test-${randomHash}`;
   const config = {
-    version: legacyEsTestConfig.getVersion(),
+    version: esTestConfig.getVersion(),
     installPath: resolve(basePath, clusterName),
     sourcePath: resolve(KIBANA_ROOT, '../elasticsearch'),
     password,
@@ -54,7 +55,7 @@ export function createLegacyEsTestCluster(options = {}) {
     basePath,
     esArgs,
   };
-  const transportPort = legacyEsTestConfig.getTransportPort();
+  const transportPort = esTestConfig.getTransportPort();
 
   const cluster = new Cluster({ log, ssl });
 
@@ -121,7 +122,7 @@ export function createLegacyEsTestCluster(options = {}) {
     }
 
     getUrl() {
-      const parts = legacyEsTestConfig.getUrlParts();
+      const parts = esTestConfig.getUrlParts();
       parts.port = port;
 
       return format(parts);
