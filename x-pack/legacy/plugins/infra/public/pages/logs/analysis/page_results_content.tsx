@@ -20,6 +20,7 @@ import {
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { FirstUseCallout } from './first_use';
 import { LogRateResults } from './sections/log_rate';
+import { AnomaliesResults } from './sections/anomalies';
 
 export const AnalysisResultsContent = ({
   sourceId,
@@ -150,7 +151,14 @@ export const AnalysisResultsContent = ({
                 </EuiPanel>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiPanel paddingSize="l">Anomalies</EuiPanel>
+                <EuiPanel paddingSize="l">
+                  <AnomaliesResults
+                    isLoading={isLoading}
+                    results={logEntryRate}
+                    setTimeRange={handleChartTimeRangeChange}
+                    timeRange={queryTimeRange}
+                  />
+                </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPage>

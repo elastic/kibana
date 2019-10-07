@@ -13,7 +13,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
@@ -31,12 +31,32 @@ export const LogRateResults = ({
   timeRange: TimeRange;
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.logRateSectionTitle', {
-    defaultMessage: 'Log rate',
+    defaultMessage: 'Logs entries',
   });
 
   const loadingAriaLabel = i18n.translate(
     'xpack.infra.logs.analysis.logRateSectionLoadingAriaLabel',
     { defaultMessage: 'Loading log rate results' }
+  );
+
+  const logEntryRateSeries = useMemo(
+    () =>
+      results && results.histogramBuckets
+        ? results.histogramBuckets.reduce<Array<{ group: string; time: number; value: number }>>(
+            (buckets, bucket) => {
+              return [
+                ...buckets,
+                ...bucket.dataSets.map(dataSet => ({
+                  group: dataSet.dataSetId === '' ? 'unknown' : dataSet.dataSetId,
+                  time: bucket.startTime,
+                  value: dataSet.averageActualLogEntryRate,
+                })),
+              ];
+            },
+            []
+          )
+        : [],
+    [results]
   );
 
   return (
@@ -71,10 +91,9 @@ export const LogRateResults = ({
         />
       ) : (
         <LogEntryRateBarChart
-          bucketDuration={results.bucketDuration}
-          histogramBuckets={results.histogramBuckets}
           setTimeRange={setTimeRange}
           timeRange={timeRange}
+          series={logEntryRateSeries}
         />
       )}
     </>

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RectAnnotationDatum } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
@@ -15,6 +16,8 @@ import {
   TooltipValue,
   LIGHT_THEME,
   DARK_THEME,
+  getAnnotationId,
+  RectAnnotation,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -23,11 +26,13 @@ import React, { useCallback, useMemo } from 'react';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
 
-export const LogEntryRateBarChart: React.FunctionComponent<{
+export const AnomaliesChart: React.FunctionComponent<{
+  chartId: string;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
-  series: Array<{ group: string; time: number; value: number }>;
-}> = ({ series, setTimeRange, timeRange }) => {
+  series: Array<{ time: number; value: number }>;
+  annotations: RectAnnotationDatum[];
+}> = ({ chartId, series, annotations, setTimeRange, timeRange }) => {
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
 
@@ -55,13 +60,14 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
     },
     [setTimeRange]
   );
+  const chartAnnotationsId = getAnnotationId(`anomalies-${chartId}`);
 
   return (
     <div style={{ height: 400, width: '100%' }}>
       <Chart className="log-entry-rate-chart">
         <Axis
           id={getAxisId('timestamp')}
-          title={i18n.translate('xpack.infra.logs.analysis.logRateSectionXaxisTitle', {
+          title={i18n.translate('xpack.infra.logs.analysis.anomaliesSectionXaxisTitle', {
             defaultMessage: 'Time',
           })}
           position="bottom"
@@ -70,7 +76,7 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
         />
         <Axis
           id={getAxisId('values')}
-          title={i18n.translate('xpack.infra.logs.analysis.logRateSectionYaxisTitle', {
+          title={i18n.translate('xpack.infra.logs.analysis.anomaliesSectionYaxisTitle', {
             defaultMessage: 'Log entries per 15 minutes',
           })}
           position="left"
@@ -78,17 +84,16 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
         />
         <BarSeries
           id={logEntryRateSpecId}
-          name={i18n.translate('xpack.infra.logs.analysis.logRateSectionLineSeriesName', {
+          name={i18n.translate('xpack.infra.logs.analysis.anomaliesSectionLineSeriesName', {
             defaultMessage: 'Log entries per 15 minutes (avg)',
           })}
           xScaleType="time"
           yScaleType="linear"
           xAccessor={'time'}
           yAccessors={['value']}
-          splitSeriesAccessors={['group']}
-          stackAccessors={['time']}
           data={series}
         />
+        <RectAnnotation dataValues={annotations} annotationId={chartAnnotationsId} />
         <Settings
           onBrushEnd={handleBrushEnd}
           tooltip={tooltipProps}
