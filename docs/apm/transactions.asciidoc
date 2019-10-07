@@ -52,6 +52,20 @@ For further details, including troubleshooting and custom implementation instruc
 refer to the documentation for each {apm-agents-ref}[APM Agent] you've implemented.
 ====
 
+[[rum-transaction-overview]]
+==== RUM Transaction overview
+
+The transaction overview page is customized for the JavaScript RUM Agent.
+This page highlights things like *page load times*, *transactions per minute*, and even the *average page load duration distribution by country*.
+
+[role="screenshot"]
+image::apm/images/apm-geo-ui.jpg[average page load duration distribution]
+
+This data is available due to the geo-ip and user agent pipelines being enabled by default,
+which allows for the capture of geo-location and user agent data.
+These visualizations make it easy for you to visualize performance information about your
+end users' experience based on their location.
+
 [[transaction-details]]
 ==== Transaction details
 

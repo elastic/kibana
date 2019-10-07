@@ -26,6 +26,8 @@ import { fieldsRoutes } from './routes/fields';
 import { visDataRoutes } from './routes/vis';
 // @ts-ignore
 import { SearchStrategiesRegister } from './lib/search_strategies/search_strategies_register';
+// @ts-ignore
+import { getVisData } from './lib/get_vis_data';
 
 // TODO: Remove as CoreSetup is completed.
 export interface CustomCoreSetup {
@@ -46,6 +48,9 @@ export class MetricsServerPlugin {
 
     fieldsRoutes(http.server);
     visDataRoutes(http.server);
+
+    // Expose getVisData to allow plugins to use TSVB's backend for metrics
+    http.server.expose('getVisData', getVisData);
 
     SearchStrategiesRegister.init(http.server);
   }

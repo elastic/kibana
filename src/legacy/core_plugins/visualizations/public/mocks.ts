@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-
 jest.mock('ui/vis/vis_filters');
 jest.mock('ui/vis/default_feedback_message');
 jest.mock('ui/vis/index.js');
@@ -30,7 +28,6 @@ import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
 import { VisProvider as Vis } from 'ui/vis/index.js';
 // @ts-ignore
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 jest.mock('./types/vis_type_alias_registry');
 import { PluginInitializerContext } from 'src/core/public';
 
@@ -44,19 +41,16 @@ const createSetupContract = (): VisualizationsSetup => ({
     createFilter: jest.fn(),
   },
   types: {
-    Vis,
-    VisFactoryProvider: jest.fn(),
     registerVisualization: jest.fn(),
-    visTypeAliasRegistry: {
-      add: jest.fn(),
-      get: jest.fn(),
-    },
+    registerAlias: jest.fn(),
   },
 });
 
 const createStartContract = (): VisualizationsStart => ({
   types: {
     get: jest.fn(),
+    all: jest.fn(),
+    getAliases: jest.fn(),
   },
 });
 
@@ -67,19 +61,9 @@ const createInstance = async () => {
     __LEGACY: {
       VisFiltersProvider,
       createFilter,
-
-      Vis,
-      VisFactoryProvider,
-      VisTypesRegistryProvider,
     },
   });
-  const doStart = () =>
-    plugin.start(coreMock.createStart(), {
-      __LEGACY: {
-        VisTypesRegistryProvider,
-        chrome,
-      },
-    });
+  const doStart = () => plugin.start(coreMock.createStart());
 
   return {
     plugin,

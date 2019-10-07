@@ -51,7 +51,10 @@ function getMockReq(metricsBuckets = []) {
     },
     params: {
       clusterUuid: '1234xyz'
-    }
+    },
+    getUiSettingsService: () => ({
+      get: () => 'Browser'
+    })
   };
 }
 

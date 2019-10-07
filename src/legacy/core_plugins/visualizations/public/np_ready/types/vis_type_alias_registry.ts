@@ -42,6 +42,7 @@ export interface VisTypeAlias {
   name: string;
   title: string;
   icon: string;
+  isPromoted?: boolean;
   description: string;
 
   appExtensions?: {

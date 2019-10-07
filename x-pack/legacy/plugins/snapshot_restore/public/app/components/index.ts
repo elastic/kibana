@@ -16,4 +16,8 @@ export { SnapshotDeleteProvider } from './snapshot_delete_provider';
 export { RestoreSnapshotForm } from './restore_snapshot_form';
 export { PolicyExecuteProvider } from './policy_execute_provider';
 export { PolicyDeleteProvider } from './policy_delete_provider';
+export {
+  UpdateRetentionModalProvider,
+  UpdateRetentionSetting,
+} from './update_retention_modal_provider';
 export { PolicyForm } from './policy_form';

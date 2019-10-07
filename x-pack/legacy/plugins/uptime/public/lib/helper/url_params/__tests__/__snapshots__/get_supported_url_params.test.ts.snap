@@ -2,6 +2,8 @@
 
 exports[`getSupportedUrlParams provides defaults for empty string array values 1`] = `
 Object {
+  "absoluteDateRangeEnd": 20,
+  "absoluteDateRangeStart": 20,
   "autorefreshInterval": 60000,
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
@@ -15,6 +17,8 @@ Object {
 
 exports[`getSupportedUrlParams provides defaults for undefined values 1`] = `
 Object {
+  "absoluteDateRangeEnd": 20,
+  "absoluteDateRangeStart": 20,
   "autorefreshInterval": 60000,
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
@@ -28,10 +32,12 @@ Object {
 
 exports[`getSupportedUrlParams returns custom values 1`] = `
 Object {
+  "absoluteDateRangeEnd": 20,
+  "absoluteDateRangeStart": 20,
   "autorefreshInterval": 23,
   "autorefreshIsPaused": false,
-  "dateRangeEnd": "bar",
-  "dateRangeStart": "foo",
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-15m",
   "filters": "",
   "search": "monitor.status: down",
   "selectedPingStatus": "up",
@@ -41,6 +47,8 @@ Object {
 
 exports[`getSupportedUrlParams returns default values 1`] = `
 Object {
+  "absoluteDateRangeEnd": 20,
+  "absoluteDateRangeStart": 20,
   "autorefreshInterval": 60000,
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
@@ -54,6 +62,8 @@ Object {
 
 exports[`getSupportedUrlParams returns the first item for string arrays 1`] = `
 Object {
+  "absoluteDateRangeEnd": 20,
+  "absoluteDateRangeStart": 20,
   "autorefreshInterval": 60000,
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",

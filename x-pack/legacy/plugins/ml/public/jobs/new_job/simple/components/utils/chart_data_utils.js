@@ -9,7 +9,7 @@
 // various util functions for populating the chartData object used by the job wizards
 
 import _ from 'lodash';
-import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
+import { TimeBuckets } from 'plugins/ml/util/time_buckets';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlSimpleJobSearchService } from 'plugins/ml/jobs/new_job/simple/components/utils/search_service';
@@ -24,7 +24,7 @@ export function ChartDataUtilsProvider() {
       const MAX_BARS = BAR_TARGET + (BAR_TARGET / 100) * 100; // 100% larger that bar target
       const query = formConfig.combinedQuery;
       const bounds = timefilter.getActiveBounds();
-      const buckets = new MlTimeBuckets();
+      const buckets = new TimeBuckets();
       buckets.setBarTarget(BAR_TARGET);
       buckets.setMaxBars(MAX_BARS);
       buckets.setInterval('auto');

@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { getJobId } from '../../../../../common/log_analysis';
+import { getAllModuleJobIds } from '../../../../../common/log_analysis';
 
 export const callJobsSummaryAPI = async (spaceId: string, sourceId: string) => {
   const response = await kfetch({
@@ -18,7 +18,7 @@ export const callJobsSummaryAPI = async (spaceId: string, sourceId: string) => {
     pathname: '/api/ml/jobs/jobs_summary',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
-        jobIds: [getJobId(spaceId, sourceId, 'log-entry-rate')],
+        jobIds: getAllModuleJobIds(spaceId, sourceId),
       })
     ),
   });

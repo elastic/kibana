@@ -3,8 +3,5 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "elasticsearch",
-    "xpack_main"
-  ]
+  "requiredPlugins": ["elasticsearch"]
 }

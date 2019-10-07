@@ -1,0 +1,84 @@
+[[release-highlights-7.4.0]]
+== 7.4.0 release highlights
+++++
+<titleabbrev>7.4.0</titleabbrev>
+++++
+
+Each release of {kib} brings new features and product improvements. 
+Here are the most notable feature and user experience changes in 7.4.
+
+//NOTE: The notable-highlights tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+// tag::notable-highlights[]
+
+For a complete list of highlights,
+see the https://www.elastic.co/blog/kibana-7-4-0-released[{kib} 7.4 release blog].
+
+[float]
+[[pki-7.4]]
+=== Public Key Infrastructure (PKI) authentication
+
+Building off the success of feature controls in 7.2 and 
+support for Kerberos in 7.3, {kib} 7.4 adds support for another 
+highly requested authentication mechanism, Public Key Infrastructure (PKI). 
+With native support for PKI authentication, users are now able to log into 
+{kib} using X.509 client certificates and a two-way encryption system. 
+This provides new ways to authenticate {kib}--from general client certificate 
+authorization to identity card access. To start using PKI in production, check out 
+{kibana-ref}/kibana-authentication.html#pki-authentication[our documentation].
+
+[float]
+[[siem-gets-maps-7.4]]
+=== SIEM gets maps
+
+A geospatial perspective is especially useful for security 
+events data sets. In 7.4, SIEM embeds maps directly in 
+the Network interface to show common request paths between origin and 
+destination sources. 
+For more information, see the https://www.elastic.co/blog/elastic-siem-7-4-0-released[SIEM 7.4 release blog].
+
+
+[role="screenshot"]
+image::release-notes/images/7.4-siem-maps.png[SIEM and Maps]
+
+[float]
+[[saved-queries-and-filters-7.4]]
+=== Reusable saved queries and filters
+
+Have you ever written a query in {kib} that you’ve wanted to reuse? 
+7.4 introduces saved queries, which
+save the contents of the search bar query, filter pills, and time filter. You can now reuse your 
+saved query in dashboards, visualizations, maps, and saved 
+searches, and share them with other users.
+
+[role="screenshot"]
+image::release-notes/images/7.4-saved-queries.gif[Saved queries]
+
+[float]
+[[snapshot-lifecycle-management-7.4]]
+=== Snapshot lifecycle management
+
+Adding to the *Snapshot and Restore* UI introduced in 7.2, 
+{kib} has a new view
+for managing snapshot lifecycle policies. The *Policies* view provides an overview  
+of your snapshot status, a history of the
+snapshots taken with the defined policies, and a wizard for creating a new policy.
+
+[role="screenshot"]
+image::release-notes/images/7.4-snapshot-and-restore.png[Policies view in Snapshot and Restore]
+
+[float]
+[[outlier-detection-7.4]]
+=== Outlier detection on transforms
+
+experimental[] In 7.3, {kib} added an API that provided outlier detection analysis. In this release, 
+{kib} has a new view in Machine Learning where you can create, 
+manage, and view your outlier detection jobs and their results. Because the 
+results are just another index, you can create some insightful visualizations and 
+maps based on the outliers found in your entity-centric data.
+
+[role="screenshot"]
+image::release-notes/images/7.4-outlier-detection.gif[Outlier detection analysis]
+
+// end::notable-highlights[]

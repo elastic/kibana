@@ -15,25 +15,70 @@ import {
   EuiPortal,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTitle
+  EuiTitle,
+  EuiBadge,
+  EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get, keys } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { idx } from '@kbn/elastic-idx';
+import { px, units } from '../../../../../../../style/variables';
+import { Summary } from '../../../../../../shared/Summary';
+import { TimestampSummaryItem } from '../../../../../../shared/Summary/TimestampSummaryItem';
+import { DurationSummaryItem } from '../../../../../../shared/Summary/DurationSummaryItem';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/Links/DiscoverLinks/DiscoverSpanLink';
 import { Stacktrace } from '../../../../../../shared/Stacktrace';
-import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
+function formatType(type: string) {
+  switch (type) {
+    case 'db':
+      return 'DB';
+    case 'hard-navigation':
+      return i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.spanType.navigationTimingLabel',
+        {
+          defaultMessage: 'Navigation timing'
+        }
+      );
+    default:
+      return type;
+  }
+}
+
+function formatSubtype(subtype: string | undefined) {
+  switch (subtype) {
+    case 'mysql':
+      return 'MySQL';
+    default:
+      return subtype;
+  }
+}
+
+function getSpanTypes(span: Span) {
+  const { type, subtype, action } = span.span;
+
+  return {
+    spanType: formatType(type),
+    spanSubtype: formatSubtype(subtype),
+    spanAction: action
+  };
+}
+
 const TagName = styled.div`
   font-weight: bold;
+`;
+
+const SpanBadge = styled(EuiBadge)`
+  display: inline-block;
+  margin-right: ${px(units.quarter)};
 `;
 
 interface Props {
@@ -62,6 +107,7 @@ export function SpanFlyout({
     key,
     value: get(spanLabels, key)
   }));
+  const spanTypes = getSpanTypes(span);
 
   return (
     <EuiPortal>
@@ -96,9 +142,50 @@ export function SpanFlyout({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <FlyoutTopLevelProperties transaction={parentTransaction} />
-          <EuiHorizontalRule />
-          <StickySpanProperties span={span} totalDuration={totalDuration} />
+          <StickySpanProperties span={span} transaction={parentTransaction} />
+          <EuiSpacer size="m" />
+          <Summary
+            items={[
+              <TimestampSummaryItem time={span.timestamp.us / 1000} />,
+              <DurationSummaryItem
+                duration={span.span.duration.us}
+                totalDuration={totalDuration}
+                parentType="transaction"
+              />,
+              <>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.spanType',
+                    { defaultMessage: 'Type' }
+                  )}
+                >
+                  <SpanBadge color="hollow">{spanTypes.spanType}</SpanBadge>
+                </EuiToolTip>
+                {spanTypes.spanSubtype && (
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.apm.transactionDetails.spanFlyout.spanSubtype',
+                      { defaultMessage: 'Subtype' }
+                    )}
+                  >
+                    <SpanBadge color="hollow">
+                      {spanTypes.spanSubtype}
+                    </SpanBadge>
+                  </EuiToolTip>
+                )}
+                {spanTypes.spanAction && (
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.apm.transactionDetails.spanFlyout.spanAction',
+                      { defaultMessage: 'Action' }
+                    )}
+                  >
+                    <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
+                  </EuiToolTip>
+                )}
+              </>
+            ]}
+          />
           <EuiHorizontalRule />
           <HttpContext httpContext={httpContext} />
           <DatabaseContext dbContext={dbContext} />

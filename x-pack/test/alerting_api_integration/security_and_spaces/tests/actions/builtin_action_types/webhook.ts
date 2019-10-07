@@ -28,6 +28,7 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   async function createWebhookAction(
     urlWithCreds: string,
@@ -65,10 +66,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     // need to wait for kibanaServer to settle ...
     before(() => {
-      const kibanaServer = getService('kibanaServer');
-      const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
-      const webhookServiceUrl = getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK);
-      webhookSimulatorURL = `${kibanaUrl}${webhookServiceUrl}`;
+      webhookSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
+      );
     });
 
     after(() => esArchiver.unload('empty_kibana'));

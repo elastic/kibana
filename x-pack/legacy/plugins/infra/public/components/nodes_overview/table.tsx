@@ -63,20 +63,22 @@ export const TableView = injectI18n(
           textOnly: true,
           render: (value: string, item: { node: InfraWaffleMapNode }) => {
             const tooltipText = item.node.id === value ? `${value}` : `${value} (${item.node.id})`;
+            // For the table we need to create a UniqueID that takes into to account the groupings
+            // as well as the node name. There is the possibility that a node can be present in two
+            // different groups and be on the screen at the same time.
+            const uniqueID = [...item.node.path.map(p => p.value), item.node.name].join(':');
             return (
               <NodeContextMenu
                 node={item.node}
                 nodeType={nodeType}
-                closePopover={this.closePopoverFor(item.node.pathId)}
+                closePopover={this.closePopoverFor(uniqueID)}
                 timeRange={timeRange}
-                isPopoverOpen={this.state.isPopoverOpen.includes(item.node.pathId)}
+                isPopoverOpen={this.state.isPopoverOpen.includes(uniqueID)}
                 options={options}
                 popoverPosition="rightCenter"
               >
                 <EuiToolTip content={tooltipText}>
-                  <EuiButtonEmpty onClick={this.openPopoverFor(item.node.pathId)}>
-                    {value}
-                  </EuiButtonEmpty>
+                  <EuiButtonEmpty onClick={this.openPopoverFor(uniqueID)}>{value}</EuiButtonEmpty>
                 </EuiToolTip>
               </NodeContextMenu>
             );

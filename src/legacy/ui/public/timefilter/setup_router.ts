@@ -23,7 +23,7 @@ import moment from 'moment';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import chrome from 'ui/chrome';
 import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
-import { Timefilter } from '../../../core_plugins/data/public/timefilter';
+import { TimefilterContract } from '../../../core_plugins/data/public/timefilter';
 
 // TODO
 // remove everything underneath once globalState is no longer an angular service
@@ -46,7 +46,7 @@ export function getTimefilterConfig() {
 // This function is exposed for applications that do not use uiRoutes like APM
 // Kibana issue https://github.com/elastic/kibana/issues/19110 tracks the removal of this dependency on uiRouter
 export const registerTimefilterWithGlobalState = _.once(
-  (timefilter: Timefilter, globalState: any, $rootScope: IScope) => {
+  (timefilter: TimefilterContract, globalState: any, $rootScope: IScope) => {
     // settings have to be re-fetched here, to make sure that settings changed by overrideLocalDefault are taken into account.
     const config = getTimefilterConfig();
     timefilter.setTime(_.defaults(globalState.time || {}, config.timeDefaults));

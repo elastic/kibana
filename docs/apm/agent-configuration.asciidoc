@@ -43,3 +43,8 @@ Adjusting the sampling rate controls what percent of requests are traced.
 `1.0` means _all_ requests are traced. If you set the `TRANSACTION_SAMPLE_RATE` to a value below `1.0`,
 the agent will randomly sample only a subset of transactions.
 Unsampled transactions only record the name of the transaction, the overall transaction time, and the result.
+
+IMPORTANT: In a distributed trace, the sampling decision is propagated by the initializing Agent.
+This means if you're using multiple agents, only the originating service's sampling rate will be used.
+Be sure to set sensible defaults in _all_ of your agents, especially the
+{apm-rum-ref}/configuration.html#transaction-sample-rate[JavaScript RUM Agent].

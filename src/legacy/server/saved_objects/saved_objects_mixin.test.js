@@ -18,6 +18,48 @@
  */
 
 import { savedObjectsMixin } from './saved_objects_mixin';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { mockKibanaMigrator } from '../../../core/server/saved_objects/migrations/kibana/kibana_migrator.mock';
+
+const savedObjectMappings = [
+  {
+    pluginId: 'testtype',
+    properties: {
+      testtype: {
+        properties: {
+          name: { type: 'keyword' },
+        },
+      },
+    },
+  },
+  {
+    pluginId: 'testtype2',
+    properties: {
+      doc1: {
+        properties: {
+          name: { type: 'keyword' },
+        },
+      },
+      doc2: {
+        properties: {
+          name: { type: 'keyword' },
+        },
+      },
+    },
+  },
+  {
+    pluginId: 'secretPlugin',
+    properties: {
+      hiddentype: {
+        properties: {
+          secret: { type: 'keyword' },
+        },
+      },
+    },
+  },
+];
+
+const migrator = mockKibanaMigrator.create({ savedObjectMappings });
 
 describe('Saved Objects Mixin', () => {
   let mockKbnServer;
@@ -42,6 +84,11 @@ describe('Saved Objects Mixin', () => {
           get: stubConfig,
         };
       },
+      indexPatternsServiceFactory: () => {
+        return {
+          getFieldsForWildcard: jest.fn(),
+        };
+      },
       plugins: {
         elasticsearch: {
           getCluster: () => {
@@ -55,6 +102,9 @@ describe('Saved Objects Mixin', () => {
       },
     };
     mockKbnServer = {
+      newPlatform: {
+        __internals: { kibanaMigrator: migrator },
+      },
       server: mockServer,
       ready: () => {},
       pluginSpecs: {
@@ -63,6 +113,7 @@ describe('Saved Objects Mixin', () => {
         },
       },
       uiExports: {
+        savedObjectMappings,
         savedObjectSchemas: {
           hiddentype: {
             hidden: true,
@@ -71,43 +122,6 @@ describe('Saved Objects Mixin', () => {
             indexPattern: 'other-index',
           },
         },
-        savedObjectMappings: [
-          {
-            pluginId: 'testtype',
-            properties: {
-              testtype: {
-                properties: {
-                  name: { type: 'keyword' },
-                },
-              },
-            },
-          },
-          {
-            pluginId: 'testtype2',
-            properties: {
-              doc1: {
-                properties: {
-                  name: { type: 'keyword' },
-                },
-              },
-              doc2: {
-                properties: {
-                  name: { type: 'keyword' },
-                },
-              },
-            },
-          },
-          {
-            pluginId: 'secretPlugin',
-            properties: {
-              hiddentype: {
-                properties: {
-                  secret: { type: 'keyword' },
-                },
-              },
-            },
-          },
-        ],
       },
     };
   });
@@ -290,7 +304,7 @@ describe('Saved Objects Mixin', () => {
       });
 
       it('should call underlining callCluster', async () => {
-        stubCallCluster.mockImplementation(method => {
+        mockCallCluster.mockImplementation(method => {
           if (method === 'indices.get') {
             return { status: 404 };
           } else if (method === 'indices.getAlias') {
@@ -301,7 +315,7 @@ describe('Saved Objects Mixin', () => {
         });
         const client = await service.getScopedSavedObjectsClient();
         await client.create('testtype');
-        expect(stubCallCluster).toHaveBeenCalled();
+        expect(mockCallCluster).toHaveBeenCalled();
       });
     });
 

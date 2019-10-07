@@ -8,12 +8,10 @@ import React, { Fragment, useContext, useEffect } from 'react';
 import {
   AnnotationDomainTypes,
   Axis,
-  DARK_THEME,
   getAnnotationId,
   getAxisId,
   getSpecId,
   Chart,
-  LIGHT_THEME,
   LineAnnotation,
   LineSeries,
   Position,
@@ -28,26 +26,20 @@ import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { ThresholdWatch } from 'plugins/watcher/models/watch/threshold_watch';
+import { npStart } from 'ui/new_platform';
 import { getWatchVisualizationData } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { comparators } from '../../../../models/watch/comparators';
 import { SectionError } from '../../../../components';
 
-const getChartTheme = () => {
-  const isDarkTheme = chrome.getUiSettingsClient().get('theme:darkMode');
-  const baseTheme = isDarkTheme ? DARK_THEME : LIGHT_THEME;
-
+const customTheme = () => {
   return {
-    ...baseTheme,
     lineSeriesStyle: {
-      ...baseTheme.lineSeriesStyle,
       line: {
-        ...baseTheme.lineSeriesStyle.line,
         strokeWidth: 3,
       },
       point: {
-        ...baseTheme.lineSeriesStyle.point,
         visible: false,
       },
     },
@@ -100,6 +92,7 @@ const getTimeBuckets = (watch: any) => {
 
 export const WatchVisualization = () => {
   const { watch } = useContext(WatchContext);
+  const chartsTheme = npStart.plugins.eui_utils.useChartsTheme();
   const {
     index,
     timeField,
@@ -218,9 +211,9 @@ export const WatchVisualization = () => {
       <div data-test-subj="watchVisualizationChart">
         <EuiSpacer size="l" />
         {watchVisualizationDataKeys.length ? (
-          <Chart size={[800, 300]} renderer="canvas">
+          <Chart size={['100%', 300]} renderer="canvas">
             <Settings
-              theme={getChartTheme()}
+              theme={[customTheme(), chartsTheme]}
               xDomain={domain}
               showLegend={!!watch.termField}
               legendPosition={Position.Bottom}

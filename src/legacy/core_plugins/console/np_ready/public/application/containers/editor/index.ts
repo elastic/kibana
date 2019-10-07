@@ -18,3 +18,4 @@
  */
 
 export { Editor, EditorOutput, ConsoleHistory, autoIndent, getDocumentation } from './legacy';
+export { useEditorActionContext, useEditorReadContext, EditorContextProvider } from './context';

@@ -23,7 +23,7 @@ const OutputMode = require('./sense_editor/mode/output');
 const smartResize = require('./smart_resize');
 
 let output;
-export function initializeOutput($el, settings) {
+export function initializeOutput($el) {
   output = ace.acequire('ace/ace').edit($el[0]);
 
   const outputMode = new OutputMode.Mode();
@@ -77,10 +77,6 @@ export function initializeOutput($el, settings) {
 
   output.setShowPrintMargin(false);
   output.setReadOnly(true);
-
-  if (settings) {
-    settings.applyCurrentSettings(output);
-  }
 
   return output;
 }

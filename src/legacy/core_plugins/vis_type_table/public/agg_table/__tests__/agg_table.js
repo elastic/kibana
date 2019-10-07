@@ -99,16 +99,18 @@ describe('Table Vis - AggTable Directive', function () {
     );
   };
 
+  ngMock.inject(function (Private) {
+    legacyDependencies = {
+      // eslint-disable-next-line new-cap
+      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
+    };
+
+    visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
+  });
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(function ($injector, Private, config) {
-      legacyDependencies = {
-        // eslint-disable-next-line new-cap
-        createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
-      };
-
-      visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
-
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       Vis = Private(VisProvider);

@@ -23,6 +23,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
 import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import { npStart } from 'ui/new_platform';
 
 import {
   AnnotationDomainTypes,
@@ -44,21 +45,44 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { getChartTheme } from 'ui/elastic_charts';
 import chrome from 'ui/chrome';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
+import { EuiChartThemeType } from '@elastic/eui/src/themes/charts/themes';
+import { Subscription } from 'rxjs';
 
 export interface DiscoverHistogramProps {
   chartData: any;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
 }
 
-export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
+interface DiscoverHistogramState {
+  chartsTheme: EuiChartThemeType['theme'];
+}
+
+export class DiscoverHistogram extends Component<DiscoverHistogramProps, DiscoverHistogramState> {
   public static propTypes = {
     chartData: PropTypes.object,
     timefilterUpdateHandler: PropTypes.func,
   };
+
+  private subscription?: Subscription;
+  public state = {
+    chartsTheme: npStart.plugins.eui_utils.getChartsThemeDefault(),
+  };
+
+  componentDidMount() {
+    this.subscription = npStart.plugins.eui_utils
+      .getChartsTheme$()
+      .subscribe(chartsTheme => this.setState({ chartsTheme }));
+  }
+
+  componentWillUnmount() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = undefined;
+    }
+  }
 
   public onBrushEnd = (min: number, max: number) => {
     const range = {
@@ -124,6 +148,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     const uiSettings = chrome.getUiSettingsClient();
     const timeZone = timezoneProvider(uiSettings)();
     const { chartData } = this.props;
+    const { chartsTheme } = this.state;
 
     if (!chartData || !chartData.series[0]) {
       return null;
@@ -213,7 +238,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
           onBrushEnd={this.onBrushEnd}
           onElementClick={this.onElementClick(xInterval)}
           tooltip={tooltipProps}
-          theme={getChartTheme()}
+          theme={chartsTheme}
         />
         <Axis
           id={getAxisId('discover-histogram-left-axis')}

@@ -9,16 +9,16 @@ import { CANVAS, JSON, KIBANA, PDF, POST, URL } from './constants';
 
 export const ComponentStrings = {
   App: {
-    getLoadErrorTitle: () =>
-      i18n.translate('xpack.canvas.app.loadErrorTitle', {
-        defaultMessage: 'Canvas failed to load :(',
-      }),
     getLoadErrorMessage: (error: string) =>
       i18n.translate('xpack.canvas.app.loadErrorMessage', {
         defaultMessage: 'Message: {error}',
         values: {
           error,
         },
+      }),
+    getLoadErrorTitle: () =>
+      i18n.translate('xpack.canvas.app.loadErrorTitle', {
+        defaultMessage: 'Canvas failed to load',
       }),
     getLoadingMessage: () =>
       i18n.translate('xpack.canvas.app.loadingMessage', {
@@ -33,6 +33,49 @@ export const ComponentStrings = {
     getTitleText: () =>
       i18n.translate('xpack.canvas.embedObject.titleText', {
         defaultMessage: 'Embed Object',
+      }),
+  },
+  ArgAddPopover: {
+    getAddAriaLabel: () =>
+      i18n.translate('xpack.canvas.argAddPopover.addAriaLabel', {
+        defaultMessage: 'Add argument',
+      }),
+  },
+  ArgFormAdvancedFailure: {
+    getApplyButtonLabel: () =>
+      i18n.translate('xpack.canvas.argFormAdvancedFailure.applyButtonLabel', {
+        defaultMessage: 'Apply',
+      }),
+    getRowErrorMessage: () =>
+      i18n.translate('xpack.canvas.argFormAdvancedFailure.rowErrorMessage', {
+        defaultMessage: 'Invalid Expression',
+      }),
+    getResetButtonLabel: () =>
+      i18n.translate('xpack.canvas.argFormAdvancedFailure.resetButtonLabel', {
+        defaultMessage: 'Reset',
+      }),
+  },
+  ArgFormArgSimpleForm: {
+    getRemoveAriaLabel: () =>
+      i18n.translate('xpack.canvas.argFormArgSimpleForm.removeAriaLabel', {
+        defaultMessage: 'Remove',
+      }),
+    getRequiredTooltip: () =>
+      i18n.translate('xpack.canvas.argFormArgSimpleForm.requiredTooltip', {
+        defaultMessage: 'This argument is required, you should specify a value.',
+      }),
+  },
+  ArgFormPendingArgValue: {
+    getLoadingMessage: () =>
+      i18n.translate('xpack.canvas.argFormPendingArgValue.loadingMessage', {
+        defaultMessage: 'Loading',
+      }),
+  },
+  ArgFormSimpleFailure: {
+    getFailureTooltip: () =>
+      i18n.translate('xpack.canvas.argFormSimpleFailure.failureTooltip', {
+        defaultMessage:
+          'The interface for this argument could not parse the value, so a fallback input is being used',
       }),
   },
   Asset: {
@@ -129,6 +172,49 @@ export const ComponentStrings = {
         defaultMessage: 'Remove Color',
       }),
   },
+  DatasourceDatasourceComponent: {
+    getChangeButtonLabel: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.changeButtonLabel', {
+        defaultMessage: 'Change your data source',
+      }),
+    getPreviewButtonLabel: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
+        defaultMessage: 'Preview',
+      }),
+    getSaveButtonLabel: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourceComponent.saveButtonLabel', {
+        defaultMessage: 'Save',
+      }),
+  },
+  DatasourceNoDatasource: {
+    getPanelDescription: () =>
+      i18n.translate('xpack.canvas.datasourceNoDatasource.panelDescription', {
+        defaultMessage:
+          "This element does not have an attached data source. This is usually because the element is an image or other static asset. If that's not the case you might want to check your expression to make sure it is not malformed.",
+      }),
+    getPanelTitle: () =>
+      i18n.translate('xpack.canvas.datasourceNoDatasource.panelTitle', {
+        defaultMessage: 'No data source present',
+      }),
+  },
+  DatasourceDatasourcePreview: {
+    getEmptyFirstLineDescription: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptyFirstLineDescription', {
+        defaultMessage: "We couldn't find any documents matching your search criteria.",
+      }),
+    getEmptySecondLineDescription: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptySecondLineDescription', {
+        defaultMessage: 'Check your datasource settings and try again.',
+      }),
+    getEmptyTitle: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptyTitle', {
+        defaultMessage: 'No documents found',
+      }),
+    getModalTitle: () =>
+      i18n.translate('xpack.canvas.datasourceDatasourcePreview.modalTitle', {
+        defaultMessage: 'Datasource preview',
+      }),
+  },
   HelpMenu: {
     getHelpMenuDescription: () =>
       i18n.translate('xpack.canvas.helpMenu.description', {
@@ -163,6 +249,65 @@ export const ComponentStrings = {
     getFlyoutCloseButtonAriaLabel: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyout.closeButtonAriaLabel', {
         defaultMessage: 'Closes keyboard shortcuts reference',
+      }),
+  },
+  PageManager: {
+    getPageNumberAriaLabel: (pageNumber: number) =>
+      i18n.translate('xpack.canvas.pageManager.pageNumberAriaLabel', {
+        defaultMessage: 'Load page number {pageNumber}',
+        values: {
+          pageNumber,
+        },
+      }),
+  },
+  PagePreviewPageControls: {
+    getClonePageAriaLabel: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageAriaLabel', {
+        defaultMessage: 'Clone page',
+      }),
+    getClonePageTooltip: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageTooltip', {
+        defaultMessage: 'Clone',
+      }),
+    getDeletePageAriaLabel: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageAriaLabel', {
+        defaultMessage: 'Delete page',
+      }),
+    getDeletePageTooltip: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageTooltip', {
+        defaultMessage: 'Delete',
+      }),
+  },
+  Toolbar: {
+    getEditorButtonLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {
+        defaultMessage: 'Expression editor',
+      }),
+    getNextPageAriaLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.nextPageAriaLabel', {
+        defaultMessage: 'Next Page',
+      }),
+    getPageButtonLabel: (pageNum: number, totalPages: number) =>
+      i18n.translate('xpack.canvas.toolbar.pageButtonLabel', {
+        defaultMessage: 'Page {pageNum}{rest}',
+        values: {
+          pageNum,
+          rest: totalPages > 1 ? ` of ${totalPages}` : '',
+        },
+      }),
+    getPreviousPageAriaLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.previousPageAriaLabel', {
+        defaultMessage: 'Previous Page',
+      }),
+    getWorkpadManagerCloseButtonLabel: () =>
+      i18n.translate('xpack.canvas.toolbar.workpadManagerCloseButtonLabel', {
+        defaultMessage: 'Close',
+      }),
+  },
+  ToolbarTray: {
+    getCloseTrayAriaLabel: () =>
+      i18n.translate('xpack.canvas.toolbarTray.closeTrayAriaLabel', {
+        defaultMessage: 'Close tray',
       }),
   },
   WorkpadCreate: {
