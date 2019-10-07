@@ -20,6 +20,7 @@
 import { ExpressionType } from '../types';
 import { Datatable } from './datatable';
 import { Render } from './render';
+import { ExpressionValueBoxed } from '../types/types';
 
 const name = 'pointseries';
 
@@ -47,13 +48,15 @@ export type PointSeriesRow = Record<string, any>;
 /**
  * A `PointSeries` is a unique structure that represents dots on a chart.
  */
-export interface PointSeries {
-  type: typeof name;
-  columns: PointSeriesColumns;
-  rows: PointSeriesRow[];
-}
+export type PointSeries = ExpressionValueBoxed<
+  'pointseries',
+  {
+    columns: PointSeriesColumns;
+    rows: PointSeriesRow[];
+  }
+>;
 
-export const pointseries = (): ExpressionType<typeof name, PointSeries> => ({
+export const pointseries = (): ExpressionType<'pointseries', PointSeries> => ({
   name,
   from: {
     null: () => {

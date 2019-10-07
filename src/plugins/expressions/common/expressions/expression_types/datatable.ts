@@ -106,10 +106,10 @@ export const datatable = (): ExpressionType<typeof name, Datatable, SerializedDa
       rows: [],
       columns: [],
     }),
-    pointseries: (context: PointSeries) => ({
+    pointseries: (value: PointSeries) => ({
       type: name,
-      rows: context.rows,
-      columns: map(context.columns, (val, colName) => {
+      rows: value.rows,
+      columns: map(value.columns, (val, colName) => {
         return { name: colName!, type: val.type };
       }),
     }),
