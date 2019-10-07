@@ -5,10 +5,16 @@
  */
 
 import { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+import { setupEndpointsApi } from './applications/endpoints';
+import { PLUGIN_ID } from '../common/constants';
 
 export class EndgameServer implements Plugin {
   constructor(initContext: PluginInitializerContext) {}
-  setup(core: CoreSetup) {}
+  setup(core: CoreSetup) {
+    const router = core.http.createRouter();
+    router.routerPath = `/app/${PLUGIN_ID}/_api`;
+    setupEndpointsApi(router, core);
+  }
   start(core: CoreStart) {}
   stop() {}
 }

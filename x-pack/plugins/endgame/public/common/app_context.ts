@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './endpoints_page';
+import React from 'react';
+
+export const EndgameAppContext = React.createContext({});
