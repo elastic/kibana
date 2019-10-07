@@ -16,6 +16,10 @@ const FlowBadge = styled(EuiBadge)`
   min-width: 85px;
 `;
 
+const EuiFlexGroupStyled = styled(EuiFlexGroup)`
+  margin: 0 auto;
+`;
+
 interface LineToolTipContentProps {
   contextId: string;
   featureProps: FeatureProperty[];
@@ -32,9 +36,9 @@ export const LineToolTipContent = React.memo<LineToolTipContentProps>(
       <EuiFlexGroup justifyContent="center" gutterSize="none">
         <EuiFlexItem>
           <FlowBadge color="hollow">
-            <EuiFlexGroup direction="column" justifyContent="spaceAround">
+            <EuiFlexGroupStyled direction="column">
               <EuiFlexItem grow={false}>{'Source'}</EuiFlexItem>
-            </EuiFlexGroup>
+            </EuiFlexGroupStyled>
           </FlowBadge>
         </EuiFlexItem>
         <SourceDestinationArrows
@@ -45,9 +49,9 @@ export const LineToolTipContent = React.memo<LineToolTipContentProps>(
         />
         <EuiFlexItem>
           <FlowBadge color="hollow">
-            <EuiFlexGroup direction="column" justifyContent="spaceAround">
+            <EuiFlexGroupStyled>
               <EuiFlexItem grow={false}>{'Destination'}</EuiFlexItem>
-            </EuiFlexGroup>
+            </EuiFlexGroupStyled>
           </FlowBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
