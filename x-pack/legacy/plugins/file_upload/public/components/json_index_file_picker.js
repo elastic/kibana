@@ -101,11 +101,7 @@ export class JsonIndexFilePicker extends Component {
 
   setFileProgress = ({ bytesProcessed, totalBytes }) => {
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
-    if (
-      this._isMounted &&
-      this.state.fileParseActive &&
-      percentageProcessed > (this.state.percentageProcessed + 3)
-    ) {
+    if (this._isMounted && this.state.fileParseActive) {
       this.setState({ percentageProcessed });
     }
   }

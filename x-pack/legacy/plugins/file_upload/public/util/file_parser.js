@@ -9,7 +9,8 @@ import { geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
 import { i18n } from '@kbn/i18n';
 const oboe = require('oboe');
 
-export const FILE_BUFFER = 1024 * 50;
+// In local testing, performance improvements leveled off around this size
+export const FILE_BUFFER = 1024000;
 
 const readSlice = (fileReader, file, start, stop) => {
   const blob = file.slice(start, stop);
@@ -92,7 +93,6 @@ export const fileHandler = (
 };
 
 export function jsonPreview(json, previewFunction) {
-  // Call preview (if any)
   if (json && previewFunction) {
     const defaultName = _.get(json, 'name', 'Import File');
     previewFunction(json, defaultName);
