@@ -109,8 +109,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionDescription', {
-              defaultMessage: `Metricbeat is now monitoring your {product} {identifier}.
-              Disable self monitoring to finish the migration.`,
+              defaultMessage: `Metricbeat is now monitoring your {product} {identifier}. Disable self monitoring to finish the migration.`,
               values: {
                 product: formatProductName(productName),
                 identifier: getIdentifier(productName, true)
