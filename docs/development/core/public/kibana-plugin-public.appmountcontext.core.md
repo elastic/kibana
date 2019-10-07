@@ -18,5 +18,8 @@ core: {
         notifications: NotificationsStart;
         overlays: OverlayStart;
         uiSettings: UiSettingsClientContract;
+        injectedMetadata: {
+            getInjectedVar: (name: string, defaultValue?: any) => unknown;
+        };
     };
 ```
