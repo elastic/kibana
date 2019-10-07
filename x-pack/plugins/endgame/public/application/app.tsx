@@ -7,7 +7,8 @@ import { AppMountContext, AppMountParameters } from 'kibana/public';
 import React, { PureComponent } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route, Link } from 'react-router-dom';
-import { toAsyncComponent } from '../common/toAsyncComponent';
+import { toAsyncComponent } from '../common/to_async_component';
+import { EndgameAppContext } from '../common/app_context';
 
 const ShowLanding = toAsyncComponent(
   async () => ((await import('./landing')).LandingPage as unknown) as PureComponent
@@ -25,10 +26,10 @@ class EndgameApp extends PureComponent<
   {}
 > {
   render() {
-    const { appBasePath /* , appContext*/ } = this.props;
+    const { appBasePath, appContext } = this.props;
     return (
       <BrowserRouter basename={appBasePath}>
-        <div>
+        <EndgameAppContext.Provider value={{ appContext }}>
           <h1>EndGame App</h1>
           <hr />
           <div>
@@ -36,7 +37,7 @@ class EndgameApp extends PureComponent<
           </div>
           <Route path="/" exact component={ShowLanding} />
           <Route path="/endpoints" exact component={ShowEndpoints} />
-        </div>
+        </EndgameAppContext.Provider>
       </BrowserRouter>
     );
   }

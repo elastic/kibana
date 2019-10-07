@@ -12,12 +12,13 @@ import {
   AppMountContext,
   AppMountParameters,
 } from 'kibana/public';
+import { PLUGIN_ID } from '../common/constants';
 
 export class EndgameClient implements Plugin {
   constructor(initContext: PluginInitializerContext) {}
   setup(core: CoreSetup) {
     core.application.register({
-      id: 'endgame',
+      id: PLUGIN_ID,
       title: 'Endgame Security',
       async mount(context: AppMountContext, params: AppMountParameters) {
         const { mountApp } = await import('./application');
