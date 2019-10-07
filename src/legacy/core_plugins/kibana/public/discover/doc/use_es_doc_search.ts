@@ -19,7 +19,7 @@
 import { useEffect, useState } from 'react';
 import { ElasticSearchHit } from 'ui/registry/doc_views_types';
 import { DocProps } from './doc';
-import { IndexPattern } from '../../../data/public/index_patterns';
+import { IndexPattern } from '../../../../data/public/index_patterns';
 
 export enum ElasticRequestState {
   Loading,
