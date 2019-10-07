@@ -14,9 +14,9 @@ export const RepoTitle = ({ uri }: { uri: string }) => {
   const name = RepositoryUtils.repoNameFromUri(uri);
 
   return (
-    <EuiText size="s" className="integrations__snippet-title">
+    <EuiText size="s" className="codeIntegrations__snippet-title">
       <span>{org}/</span>
-      <span className="integrations__text--bold">{name}</span>
+      <span className="codeIntegrations__text--bold">{name}</span>
     </EuiText>
   );
 };
