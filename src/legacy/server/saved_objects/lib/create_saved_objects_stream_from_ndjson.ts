@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Readable } from 'stream';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from 'src/core/server';
 import { createSplitStream, createMapStream, createFilterStream } from '../../../utils/streams';
 
 export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
