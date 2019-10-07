@@ -27,8 +27,5 @@ export const TRANSACTION_METADATA_SECTIONS = [
     required: true
   },
   SECTION_LABELS.USER_AGENT,
-  {
-    ...SECTION_LABELS.CUSTOM,
-    key: 'transaction.custom'
-  }
+  SECTION_LABELS.CUSTOM_TRANSACTION
 ];

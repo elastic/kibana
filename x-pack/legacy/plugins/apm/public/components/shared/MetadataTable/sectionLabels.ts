@@ -76,11 +76,20 @@ export const USER_AGENT = {
   })
 };
 
-export const CUSTOM = {
-  key: 'custom',
-  label: i18n.translate('xpack.apm.metadataTable.section.customLabel', {
+const customLabel = i18n.translate(
+  'xpack.apm.metadataTable.section.customLabel',
+  {
     defaultMessage: 'Custom'
-  })
+  }
+);
+
+export const CUSTOM_ERROR = {
+  key: 'error.custom',
+  label: customLabel
+};
+export const CUSTOM_TRANSACTION = {
+  key: 'transaction.custom',
+  label: customLabel
 };
 
 export const PAGE = {

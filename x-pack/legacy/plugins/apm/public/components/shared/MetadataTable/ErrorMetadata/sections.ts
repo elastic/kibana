@@ -22,8 +22,5 @@ export const ERROR_METADATA_SECTIONS = [
     ...SECTION_LABELS.USER,
     required: true
   },
-  {
-    ...SECTION_LABELS.CUSTOM,
-    key: 'error.custom'
-  }
+  SECTION_LABELS.CUSTOM_ERROR
 ];
