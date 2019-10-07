@@ -141,7 +141,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
           elements = [];
         }
         // Force isStale checks for all the retrieved elements.
-        await Promise.all(elements.map(async (element: any) => await element.isEnabled()));
+        await Promise.all(elements.map(async element => await element.isEnabled()));
         await this._withTimeout(defaultFindTimeout);
         return elements;
       });
@@ -322,7 +322,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       log.debug(`Find.clickByPartialLinkText('${linkText}') with timeout=${timeout}`);
       await retry.try(async () => {
         const element = await this.byPartialLinkText(linkText, timeout);
-        await (element as any).moveMouseTo();
+        await element.moveMouseTo();
         await element.click();
       });
     }
@@ -334,7 +334,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       log.debug(`Find.clickByLinkText('${linkText}') with timeout=${timeout}`);
       await retry.try(async () => {
         const element = await this.byLinkText(linkText, timeout);
-        await (element as any).moveMouseTo();
+        await element.moveMouseTo();
         await element.click();
       });
     }
@@ -470,7 +470,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     private async _withTimeout(timeout: number) {
       if (timeout !== this.currentWait) {
         this.currentWait = timeout;
-        await (driver.manage() as any).setTimeouts({ implicit: timeout });
+        await driver.manage().setTimeouts({ implicit: timeout });
       }
     }
   }

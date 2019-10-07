@@ -18,7 +18,9 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { IKey, logging } from 'selenium-webdriver';
+import { logging, Key, Origin } from 'selenium-webdriver';
+// @ts-ignore internal modules are not typed
+import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 import { takeUntil } from 'rxjs/operators';
 
 import { modifyUrl } from '../../../src/core/utils';
@@ -31,9 +33,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
-  const { driver, Key, LegacyActionSequence, browserType } = await getService(
-    '__webdriver__'
-  ).init();
+  const { driver, browserType } = await getService('__webdriver__').init();
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
 
@@ -56,7 +56,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Keyboard events
      */
-    public readonly keys: IKey = Key;
+    public readonly keys = Key;
 
     /**
      * Browser name
@@ -76,10 +76,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * Returns instance of Actions API based on driver w3c flag
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#actions
      */
-    public getActions(): any {
-      return this.isW3CEnabled
-        ? (driver as any).actions()
-        : (driver as any).actions({ bridge: true });
+    public getActions() {
+      return this.isW3CEnabled ? driver.actions() : driver.actions({ bridge: true });
     }
 
     /**
@@ -101,7 +99,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<{height: number, width: number, x: number, y: number}>}
      */
     public async getWindowSize(): Promise<{ height: number; width: number; x: number; y: number }> {
-      return await (driver.manage().window() as any).getRect();
+      return await driver
+        .manage()
+        .window()
+        .getRect();
     }
 
     /**
@@ -112,10 +113,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {number} height
      * @return {Promise<void>}
      */
-    public async setWindowSize(width: number, height: number): Promise<void>;
-    public async setWindowSize(...args: number[]): Promise<void>;
-    public async setWindowSize(...args: unknown[]): Promise<void> {
-      await (driver.manage().window() as any).setRect({ width: args[0], height: args[1] });
+    public async setWindowSize(width: number, height: number) {
+      await driver
+        .manage()
+        .window()
+        .setRect({ width, height });
     }
 
     /**
@@ -124,7 +126,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<string>}
      */
-    public async getCurrentUrl(): Promise<string> {
+    public async getCurrentUrl() {
       // strip _t=Date query param when url is read
       const current = await driver.getCurrentUrl();
       const currentWithoutTime = modifyUrl(current, parsed => {
@@ -142,7 +144,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {boolean} insertTimestamp Optional
      * @return {Promise<void>}
      */
-    public async get(url: string, insertTimestamp: boolean = true): Promise<void> {
+    public async get(url: string, insertTimestamp: boolean = true) {
       if (insertTimestamp) {
         const urlWithTime = modifyUrl(url, parsed => {
           (parsed.query as any)._t = Date.now();
@@ -168,12 +170,12 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           .move({ x: 0, y: 0 })
           .perform();
         await this.getActions()
-          .move({ x: point.x, y: point.y, origin: 'pointer' })
+          .move({ x: point.x, y: point.y, origin: Origin.POINTER })
           .perform();
       } else {
         await this.getActions()
           .pause(this.getActions().mouse)
-          .move({ x: point.x, y: point.y, origin: 'pointer' })
+          .move({ x: point.x, y: point.y, origin: Origin.POINTER })
           .perform();
       }
     }
@@ -198,7 +200,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           }
           return data.location instanceof WebElementWrapper
             ? { x: data.offset.x || 0, y: data.offset.y || 0, origin: data.location._webElement }
-            : { x: data.location.x, y: data.location.y, origin: 'pointer' };
+            : { x: data.location.x, y: data.location.y, origin: Origin.POINTER };
         };
 
         const startPoint = getW3CPoint(from);
@@ -223,7 +225,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           return await this.getActions()
             .move({ origin: from.location._webElement })
             .press()
-            .move({ x: to.location.x, y: to.location.y, origin: 'pointer' })
+            .move({ x: to.location.x, y: to.location.y, origin: Origin.POINTER })
             .release()
             .perform();
         } else {
@@ -243,7 +245,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<void>}
      */
-    public async refresh(): Promise<void> {
+    public async refresh() {
       await driver.navigate().refresh();
     }
 
@@ -253,8 +255,16 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<void>}
      */
-    public async goBack(): Promise<void> {
+    public async goBack() {
       await driver.navigate().back();
+    }
+
+    /**
+     * Moves forwards in the browser history.
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#forward
+     */
+    public async goForward() {
+      await driver.navigate().forward();
     }
 
     /**
@@ -282,19 +292,19 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {x: number, y: number} point on browser page
      * @return {Promise<void>}
      */
-    public async clickMouseButton(point: { x: number; y: number }): Promise<void> {
+    public async clickMouseButton(point: { x: number; y: number }) {
       if (this.isW3CEnabled) {
         await this.getActions()
           .move({ x: 0, y: 0 })
           .perform();
         await this.getActions()
-          .move({ x: point.x, y: point.y, origin: 'pointer' })
+          .move({ x: point.x, y: point.y, origin: Origin.POINTER })
           .click()
           .perform();
       } else {
         await this.getActions()
           .pause(this.getActions().mouse)
-          .move({ x: point.x, y: point.y, origin: 'pointer' })
+          .move({ x: point.x, y: point.y, origin: Origin.POINTER })
           .click()
           .perform();
       }
@@ -307,7 +317,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<string>}
      */
-    public async getPageSource(): Promise<string> {
+    public async getPageSource() {
       return await driver.getPageSource();
     }
 
@@ -317,7 +327,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<Buffer>}
      */
-    public async takeScreenshot(): Promise<string> {
+    public async takeScreenshot() {
       return await driver.takeScreenshot();
     }
 
@@ -327,7 +337,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
-    public async doubleClick(): Promise<void> {
+    public async doubleClick() {
       await this.getActions()
         .doubleClick()
         .perform();
@@ -341,10 +351,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {string} handle
      * @return {Promise<void>}
      */
-    public async switchToWindow(handle: string): Promise<void>;
-    public async switchToWindow(...args: string[]): Promise<void>;
-    public async switchToWindow(...args: string[]): Promise<void> {
-      await (driver.switchTo() as any).window(...args);
+    public async switchToWindow(nameOrHandle: string) {
+      await driver.switchTo().window(nameOrHandle);
     }
 
     /**
@@ -353,7 +361,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<string[]>}
      */
-    public async getAllWindowHandles(): Promise<string[]> {
+    public async getAllWindowHandles() {
       return await driver.getAllWindowHandles();
     }
 
@@ -379,7 +387,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<void>}
      */
-    public async closeCurrentWindow(): Promise<void> {
+    public async closeCurrentWindow() {
       await driver.close();
     }
 
@@ -418,18 +426,18 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async getScrollTop(): Promise<number> {
+    public async getScrollTop() {
       const scrollSize = await driver.executeScript<string>('return document.body.scrollTop');
       return parseInt(scrollSize, 10);
     }
 
-    public async getScrollLeft(): Promise<number> {
+    public async getScrollLeft() {
       const scrollSize = await driver.executeScript<string>('return document.body.scrollLeft');
       return parseInt(scrollSize, 10);
     }
 
     // return promise with REAL scroll position
-    public async setScrollTop(scrollSize: number | string): Promise<number> {
+    public async setScrollTop(scrollSize: number | string) {
       await driver.executeScript('document.body.scrollTop = ' + scrollSize);
       return this.getScrollTop();
     }
