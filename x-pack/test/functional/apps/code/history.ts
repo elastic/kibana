@@ -31,7 +31,6 @@ export default function manageRepositoriesFunctionalTests({
     const repositoryListSelector = 'codeRepositoryList > codeRepositoryItem';
 
     describe('browser history can go back while exploring code app', () => {
-      let driver: any;
       before(async () => {
         // Navigate to the code app.
         await PageObjects.common.navigateToApp('code');
@@ -44,9 +43,6 @@ export default function manageRepositoriesFunctionalTests({
         );
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
-
-        const webDriver = await getService('__webdriver__').init();
-        driver = webDriver.driver;
       });
       // after(async () => await esArchiver.unload('code'));
 
@@ -101,7 +97,7 @@ export default function manageRepositoriesFunctionalTests({
           });
 
           // can go forward to source view page
-          await driver.navigate().forward();
+          await browser.goForward();
 
           await retry.try(async () => {
             expect(await testSubjects.exists('codeStructureTreeTab')).to.be(true);
@@ -124,7 +120,7 @@ export default function manageRepositoriesFunctionalTests({
           expect(await testSubjects.exists('codeStructureTreeTab')).to.be(true);
         });
 
-        await driver.navigate().forward();
+        await browser.goForward();
 
         await retry.try(async () => {
           const searchResultListSelector = 'codeSearchResultList codeSearchResultFileItem';
@@ -169,7 +165,7 @@ export default function manageRepositoriesFunctionalTests({
           expect(lang.indexOf('typescript')).to.equal(0);
         });
 
-        await driver.navigate().forward();
+        await browser.goForward();
 
         await retry.try(async () => {
           const filter = await (await find.allByCssSelector(
@@ -219,7 +215,7 @@ export default function manageRepositoriesFunctionalTests({
           expect(existence).to.be(false);
         });
 
-        await driver.navigate().forward();
+        await browser.goForward();
 
         await retry.try(async () => {
           const existence = await find.existsByCssSelector('.code-line-number-21', FIND_TIME);
@@ -251,7 +247,7 @@ export default function manageRepositoriesFunctionalTests({
           expect(testSubjects.exists('codeFileTreeTabActive')).to.be.ok();
         });
 
-        await driver.navigate().forward();
+        await browser.goForward();
 
         await retry.try(async () => {
           // if structure tree tab is active, file tree tab's `data-test-subj` would be `codeFileTreeTab`
