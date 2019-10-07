@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { TabNavigation } from './';
@@ -74,8 +74,8 @@ describe('Tab Navigation', () => {
       expect(hostsTab.prop('isSelected')).toBeTruthy();
     });
     test('it changes active tab when nav changes by props', () => {
-      const wrapper = shallow(<TabNavigation {...mockProps} />);
-      const networkTab = () => wrapper.find('[data-test-subj="navigation-network"]');
+      const wrapper = mount(<TabNavigation {...mockProps} />);
+      const networkTab = () => wrapper.find('[data-test-subj="navigation-network"]').first();
       expect(networkTab().prop('isSelected')).toBeFalsy();
       wrapper.setProps({
         pageName: 'network',
@@ -151,9 +151,9 @@ describe('Tab Navigation', () => {
       expect(tableNavigationTab.prop('isSelected')).toBeTruthy();
     });
     test('it changes active tab when nav changes by props', () => {
-      const wrapper = shallow(<TabNavigation {...mockProps} />);
+      const wrapper = mount(<TabNavigation {...mockProps} />);
       const tableNavigationTab = () =>
-        wrapper.find(`[data-test-subj="navigation-${HostsTableType.events}"]`);
+        wrapper.find(`[data-test-subj="navigation-${HostsTableType.events}"]`).first();
       expect(tableNavigationTab().prop('isSelected')).toBeFalsy();
       wrapper.setProps({
         pageName: SiemPageName.hosts,
