@@ -46,7 +46,6 @@ export default async function ({ readConfigFile }) {
       ...defaultConfig.get('kbnTestServer'),
       serverArgs: [
         ...defaultConfig.get('kbnTestServer.serverArgs'),
-        '--csp.strict=false',
       ],
     },
 
