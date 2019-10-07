@@ -27,6 +27,7 @@ function mockFrame(): FramePublicAPI {
       fromDate: 'now-7d',
       toDate: 'now',
     },
+    filters: [],
   };
 }
 
