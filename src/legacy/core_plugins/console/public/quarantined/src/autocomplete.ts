@@ -370,9 +370,7 @@ export default function({
       } else {
         indentedTemplateLines = utils.jsonToString(term.template, true).split('\n');
       }
-      let currentIndentation = editor.getLineValue({
-        lineNumber: context.rangeToReplace.start.lineNumber,
-      });
+      let currentIndentation = editor.getLineValue(context.rangeToReplace.start.lineNumber);
       currentIndentation = currentIndentation.match(/^\s*/)![0];
       for (
         let i = 1;
@@ -560,7 +558,7 @@ export default function({
     }
 
     // in between request on an empty
-    if ((editor.getLineValue({ lineNumber: pos.lineNumber }) || '').trim() === '') {
+    if (editor.getLineValue(pos.lineNumber).trim() === '') {
       // check if the previous line is a single line begging of a new request
       rowMode = parser.getRowParseMode(
         pos.lineNumber - 1 - 1 /* see RowParser for why the added -1, for now */

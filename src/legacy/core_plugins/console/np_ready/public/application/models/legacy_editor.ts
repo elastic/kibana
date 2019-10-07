@@ -18,13 +18,13 @@
  */
 
 import { Editor as IAceEditor, Range as AceRange } from 'brace';
-import { Editor, Position, Range, Token, TokensProvider } from '../../interfaces';
+import { CoreEditor, Position, Range, Token, TokensProvider } from '../../interfaces';
 import { AceTokensProvider } from '../../lib/ace_token_provider';
 
-export class LegacyEditor implements Editor {
+export class LegacyEditor implements CoreEditor {
   constructor(private readonly editor: IAceEditor) {}
 
-  getLineState({ lineNumber }: { lineNumber: number }) {
+  getLineState(lineNumber: number) {
     const session = this.editor.getSession();
     return session.getState(lineNumber - 1);
   }
@@ -48,7 +48,7 @@ export class LegacyEditor implements Editor {
     return this.editor.getValue();
   }
 
-  getLineValue({ lineNumber }: { lineNumber: number }): string {
+  getLineValue(lineNumber: number): string {
     const session = this.editor.getSession();
     return session.getLine(lineNumber - 1);
   }
@@ -70,8 +70,19 @@ export class LegacyEditor implements Editor {
     return provider.getTokenAt(pos);
   }
 
-  insert(value: string): void {
-    this.editor.insert(value);
+  insert(valueOrPos: string | Position, value?: string): void {
+    if (typeof valueOrPos === 'string') {
+      this.editor.insert(valueOrPos);
+      return;
+    }
+    const document = this.editor.getSession().getDocument();
+    document.insert(
+      {
+        column: valueOrPos.column - 1,
+        row: valueOrPos.lineNumber - 1,
+      },
+      value || ''
+    );
   }
 
   moveCursorToPosition(pos: Position): void {

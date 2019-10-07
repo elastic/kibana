@@ -17,13 +17,24 @@
  * under the License.
  */
 
-import { Position } from './editor';
+import { Position } from './core_editor';
 
 export interface Token {
-  // TODO: document
+  /**
+   * The value of the token.
+   *
+   * Can be an empty string.
+   */
   value: string;
-  // TODO: document
+
+  /**
+   * The type of the token. E.g., "whitespace". All of the types are
+   * enumerated by the token lexer.
+   */
   type: string;
-  // TODO: document
+
+  /**
+   * The position of the first character of the token.
+   */
   position: Position;
 }

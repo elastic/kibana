@@ -18,7 +18,7 @@
  */
 
 import { Token } from './token';
-import { Position } from './editor';
+import { Position } from './core_editor';
 
 /**
  * Describes a kind of object that provides tokens.
@@ -30,6 +30,15 @@ export interface TokensProvider {
    * - An empty array means that we are on an empty line.
    */
   getTokens(lineNumber: number): Token[] | null;
-  // TODO: document
+
+  /**
+   * Get the token at the specified position.
+   *
+   * The token "at" the position is considered to the token directly preceding
+   * the indicated cursor position.
+   *
+   * Returns null if there is not a token that meets this criteria of if the position is outside
+   * of the document range.
+   */
   getTokenAt(pos: Position): Token | null;
 }

@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Editor, Position } from '../../interfaces';
+import { CoreEditor, Position } from '../../interfaces';
 import { TokenIteratorImpl } from '../../lib/token_iterator';
 
 interface Dependencies {
   position: Position;
-  editor: Editor;
+  editor: CoreEditor;
 }
 
 export function createTokenIterator({ editor, position }: Dependencies) {

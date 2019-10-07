@@ -18,26 +18,56 @@
  */
 
 import { Token } from './token';
-import { Position } from './editor';
+import { Position } from './core_editor';
 
 export interface TokenIterator {
   /**
-   * Report where we are currently
+   * Report the token under the iterator's cursor.
    */
   getCurrentToken(): Token | null;
 
-  // TODO: document
-  stepBackward(): Token | null;
-
-  // TODO: document
-  stepForward(): Token | null;
-
-  // TODO: document
+  /**
+   * Return the current position in the document.
+   *
+   * This will correspond to the position of a token.
+   *
+   * Note: this method may not be that useful given {@link getCurrentToken}.
+   */
   getCurrentPosition(): Position;
 
-  // TODO: document
+  /**
+   * Go to the previous token in the document.
+   *
+   * Stepping to the previous token can return null under the following conditions:
+   *
+   * 1. We are at the beginning of the document.
+   * 2. The preceding line is empty - no tokens.
+   * 3. We are in an empty document - not text, so no tokens.
+   */
+  stepBackward(): Token | null;
+
+  /**
+   * See documentation for {@link stepBackward}.
+   *
+   * Steps forward instead of backwards.
+   */
+  stepForward(): Token | null;
+
+  /**
+   * Get the line number of the current token.
+   *
+   * Can be considered a convenience method for:
+   *
+   * ```ts
+   * it.getCurrentToken().lineNumber;
+   * ```
+   */
   getCurrentTokenLineNumber(): number | null;
 
-  // TODO: document
+  /**
+   * See documentation for {@link getCurrentTokenLineNumber}.
+   *
+   * Substitutes `column` for `lineNumber`.
+   */
   getCurrentTokenColumn(): number | null;
 }

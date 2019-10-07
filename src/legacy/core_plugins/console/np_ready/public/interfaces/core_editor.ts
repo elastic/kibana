@@ -53,39 +53,62 @@ export enum LINE_MODE {
   UNKNOWN = 64,
 }
 
-export interface Editor {
+/**
+ * The CoreEditor is a component separate from the Editor implementation that provides Console
+ * app specific business logic. The CoreEditor is an interface to the lower-level editor implementation
+ * being used which is usually vendor code such as Ace or Monaco.
+ */
+export interface CoreEditor {
   /**
-   * Get the current position of the cursor
+   * Get the current position of the cursor.
    */
   getCurrentPosition(): Position;
 
   /**
-   * Get the contents of the editor
+   * Get the contents of the editor.
    */
   getValue(): string;
 
   /**
-   * Get the contents of the editor at a specific line
+   * Get the contents of the editor at a specific line.
    */
-  getLineValue(args: { lineNumber: number }): string;
+  getLineValue(lineNumber: number): string;
 
-  // TODO: document
+  /**
+   * Insert a string value at the current cursor position.
+   */
   insert(value: string): void;
 
-  // TODO: document
+  /**
+   * Insert a string value at the indicated position.
+   */
+  insert(pos: Position, value: string): void;
+
+  /**
+   * Replace a range of text.
+   */
   replace(rangeToReplace: Range, value: string): void;
 
-  // TODO: document
+  /**
+   * Clear the selected range.
+   */
   clearSelection(): void;
 
-  // TODO: document
+  /**
+   * Move the cursor to the indicated position.
+   */
   moveCursorToPosition(pos: Position): void;
 
-  // TODO: document
+  /**
+   * Get the token at the indicated position. The token considered "at" the position is the
+   * one directly preceding the position.
+   *
+   * Returns null if there is no such token.
+   */
   getTokenAt(pos: Position): Token | null;
 
   /**
-   * Get an iterable token provider
+   * Get an iterable token provider.
    */
   getTokenProvider(): TokensProvider;
 
@@ -97,11 +120,10 @@ export interface Editor {
   /**
    * Get the lexer state at the end of a specific line.
    */
-  getLineState(args: { lineNumber: number }): string;
+  getLineState(lineNumber: number): string;
 
-  // TODO: document
+  /**
+   * Get line content between and including the start and end lines provided.
+   */
   getLines(startLine: number, endLine: number): string[];
-
-  // TODO: document
-  // getLineMode(args: { lineNumber: number }): LINE_MODE;
 }
