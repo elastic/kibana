@@ -17,6 +17,7 @@ import {
   EuiToolTip,
   EuiEmptyPrompt,
   EuiFilePicker,
+  EuiLink,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import moment from 'moment';
@@ -180,11 +181,7 @@ export class WorkpadLoader extends React.PureComponent {
     const columns = [
       {
         field: 'name',
-<<<<<<< HEAD
-        name: 'Workpad Name',
-=======
         name: strings.getTableNameColumnTitle(),
->>>>>>> c6c4644443... [Canvas][i18n] Workpad Manager (#45968)
         sortable: true,
         dataType: 'string',
         render: (name, workpad) => {
@@ -240,9 +237,6 @@ export class WorkpadLoader extends React.PureComponent {
         titleSize="s"
         body={
           <Fragment>
-<<<<<<< HEAD
-            <p>Create a new workpad or drag and drop previously built workpad JSON files here.</p>
-=======
             <p>{strings.getEmptyPromptGettingStartedDescription()}</p>
             <p>
               {strings.getEmptyPromptNewUserDescription()}{' '}
@@ -251,7 +245,6 @@ export class WorkpadLoader extends React.PureComponent {
               </EuiLink>
               .
             </p>
->>>>>>> c6c4644443... [Canvas][i18n] Workpad Manager (#45968)
           </Fragment>
         }
       />
@@ -315,10 +308,6 @@ export class WorkpadLoader extends React.PureComponent {
     );
 
     const downloadButton = (
-<<<<<<< HEAD
-      <EuiButton color="secondary" onClick={this.downloadWorkpads} iconType="exportAction">
-        {`Download (${selectedWorkpads.length})`}
-=======
       <EuiButton
         color="secondary"
         onClick={this.downloadWorkpads}
@@ -326,7 +315,6 @@ export class WorkpadLoader extends React.PureComponent {
         aria-label={strings.getExportButtonAriaLabel(selectedWorkpads.length)}
       >
         {strings.getExportButtonLabel(selectedWorkpads.length)}
->>>>>>> c6c4644443... [Canvas][i18n] Workpad Manager (#45968)
       </EuiButton>
     );
 
