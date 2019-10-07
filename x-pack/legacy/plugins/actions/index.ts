@@ -5,6 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
+import { resolve } from 'path';
 import { Root } from 'joi';
 import mappings from './mappings.json';
 import { init } from './server';
@@ -15,6 +16,7 @@ export function actions(kibana: any) {
   return new kibana.Plugin({
     id: 'actions',
     configPrefix: 'xpack.actions',
+    publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'task_manager', 'encrypted_saved_objects'],
     isEnabled(config: Legacy.KibanaConfig) {
       return (
@@ -41,6 +43,9 @@ export function actions(kibana: any) {
     init,
     uiExports: {
       mappings,
+      // styleSheetPaths: resolve(__dirname, 'public/np_ready/public/index.scss'),
+      hacks: ['plugins/actions/hacks/register'],
+      managementSections: ['plugins/actions'],
     },
   });
 }
