@@ -26,7 +26,7 @@ export default function(kibana: any) {
     require: ['kibana'],
     init(server: KbnServer) {
       const { http } = server.newPlatform.setup.core;
-      const router = http.createRouter('');
+      const router = http.createRouter();
 
       router.get({ path: '/api/np-http-in-legacy', validate: false }, async (context, req, res) => {
         const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
