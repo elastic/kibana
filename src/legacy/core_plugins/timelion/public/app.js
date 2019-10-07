@@ -26,8 +26,8 @@ import { docTitle } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
-import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
+import { npStart } from 'ui/new_platform';
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
 
 // import the uiExports that we want to "use"
@@ -97,7 +97,7 @@ require('ui/routes')
         return savedSheets.get($route.current.params.id)
           .then((savedSheet) => {
             if ($route.current.params.id) {
-              recentlyAccessed.add(
+              npStart.core.chrome.recentlyAccessed.add(
                 savedSheet.getFullPath(),
                 savedSheet.title,
                 savedSheet.id);
