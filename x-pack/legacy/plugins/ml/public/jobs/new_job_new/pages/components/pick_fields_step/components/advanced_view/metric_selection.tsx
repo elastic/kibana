@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useContext, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator, isAdvancedJobCreator } from '../../../../../common/job_creator';
@@ -13,7 +13,7 @@ import { Aggregation, Field } from '../../../../../../../../common/types/fields'
 import { MetricSelector } from './metric_selector';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { DetectorList } from './detector_list';
-import { ModalPayload } from './create_detector_modal';
+import { ModalPayload } from '../advanced_detector_modal/advanced_detector_modal';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -29,7 +29,7 @@ const emptyRichDetector: RichDetector = {
 };
 
 export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
-  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
 
   if (isAdvancedJobCreator(jc) === false) {
     return null;
@@ -37,8 +37,6 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
   const jobCreator = jc as AdvancedJobCreator;
 
   const { fields, aggs } = newJobCapsService;
-  // const [detector, setDetector] = useState(emptyRichDetector);
-  // const [bucketSpanMs, setBucketSpanMs] = useState(jobCreator.bucketSpanMs);
   const [modalPayload, setModalPayload] = useState<ModalPayload | null>(null);
 
   function closeModal() {
@@ -85,19 +83,6 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
       setModalPayload({ detector: dtr, index: i });
     }
   }
-
-  // useEffect(() => {
-  //   if (detector.agg !== null) {
-  //     setModalPayload(null);
-  //   }
-  // }, [detector]);
-
-  // watch for change in jobCreator
-  // useEffect(() => {
-  //   if (jobCreator.bucketSpanMs !== bucketSpanMs) {
-  //     setBucketSpanMs(jobCreator.bucketSpanMs);
-  //   }
-  // }, [jobCreatorUpdated]);
 
   return (
     <Fragment>

@@ -52,8 +52,9 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     setDatafeedConfigString(jobCreator.formattedDatafeedJson);
   }, [jobCreatorUpdated]);
 
-  const flyOutSize =
-    jobEditorMode === EDITOR_MODE.HIDDEN || datafeedEditorMode === EDITOR_MODE.HIDDEN ? 'm' : 'l';
+  const editJsonMode =
+    jobEditorMode === EDITOR_MODE.HIDDEN || datafeedEditorMode === EDITOR_MODE.HIDDEN;
+  const flyOutSize = editJsonMode ? 'm' : 'l';
 
   function toggleJsonFlyout() {
     setSaveable(false);
@@ -86,7 +87,11 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
 
   return (
     <Fragment>
-      <FlyoutButton onClick={toggleJsonFlyout} isDisabled={isDisabled} />
+      <FlyoutButton
+        onClick={toggleJsonFlyout}
+        isDisabled={isDisabled}
+        editJsonMode={editJsonMode}
+      />
 
       {showJsonFlyout === true && isDisabled === false && (
         <EuiFlyout onClose={() => setShowJsonFlyout(false)} hideCloseButton size={flyOutSize}>
@@ -144,18 +149,27 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   );
 };
 
-const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled, onClick }) => (
-  <EuiButtonEmpty
-    onClick={onClick}
-    isDisabled={isDisabled}
-    data-test-subj="mlJobWizardButtonPreviewJobJson"
-  >
-    <FormattedMessage
-      id="xpack.ml.newJob.wizard.previewJsonButton"
-      defaultMessage="Preview job JSON"
-    />
-  </EuiButtonEmpty>
-);
+const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void; editJsonMode: boolean }> = ({
+  isDisabled,
+  onClick,
+  editJsonMode,
+}) => {
+  const previewJsonTitle = i18n.translate('xpack.ml.newJob.wizard.previewJsonButton', {
+    defaultMessage: 'Preview JSON',
+  });
+  const editJsonTitle = i18n.translate('xpack.ml.newJob.wizard.previewJsonButton', {
+    defaultMessage: 'Edit JSON',
+  });
+  return (
+    <EuiButtonEmpty
+      onClick={onClick}
+      isDisabled={isDisabled}
+      data-test-subj="mlJobWizardButtonPreviewJobJson"
+    >
+      {editJsonMode ? editJsonTitle : previewJsonTitle}
+    </EuiButtonEmpty>
+  );
+};
 
 const Contents: FC<{
   title: string;
