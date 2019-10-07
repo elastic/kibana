@@ -28,6 +28,11 @@ import { initializeInput } from '../../../../public/quarantined/src/input.ts';
 import { AceTokensProvider } from '.';
 import { Position, Token, TokensProvider } from '../../interfaces';
 
+interface RunTestArgs {
+  input: string;
+  done?: () => void;
+}
+
 describe('Ace (legacy) token provider', () => {
   let aceEditor: Editor & { $el: any; autocomplete: any; update: any };
   let tokenProvider: TokensProvider;
@@ -56,23 +61,18 @@ describe('Ace (legacy) token provider', () => {
     const runTest = ({
       input,
       expectedTokens,
-      cb,
+      done,
       lineNumber = 1,
-    }: {
-      input: string;
-      expectedTokens: Token[] | null;
-      cb: () => void;
-      lineNumber?: number;
-    }) => {
+    }: RunTestArgs & { expectedTokens: Token[] | null; lineNumber?: number }) => {
       aceEditor.update(input, function() {
         const tokens = tokenProvider.getTokens(lineNumber);
         expect(tokens).toEqual(expectedTokens);
-        cb();
+        if (done) done();
       });
     };
 
     describe('base cases', () => {
-      test('case 1 - only url', function(cb) {
+      test('case 1 - only url', done => {
         runTest({
           input: `GET http://somehost/_search`,
           expectedTokens: [
@@ -86,11 +86,11 @@ describe('Ace (legacy) token provider', () => {
             { type: 'url.slash', value: '/', position: { lineNumber: 1, column: 20 } },
             { type: 'url.part', value: '_search', position: { lineNumber: 1, column: 21 } },
           ],
-          cb,
+          done,
         });
       });
 
-      test('case 2 - basic auth in host name', function(cb) {
+      test('case 2 - basic auth in host name', done => {
         runTest({
           input: `GET http://test:user@somehost/`,
           expectedTokens: [
@@ -103,11 +103,11 @@ describe('Ace (legacy) token provider', () => {
             },
             { type: 'url.slash', value: '/', position: { lineNumber: 1, column: 30 } },
           ],
-          cb,
+          done,
         });
       });
 
-      test('case 3 - handles empty lines', function(cb) {
+      test('case 3 - handles empty lines', done => {
         runTest({
           input: `POST abc
 
@@ -119,14 +119,14 @@ describe('Ace (legacy) token provider', () => {
             { type: 'whitespace', value: ' ', position: { lineNumber: 1, column: 5 } },
             { type: 'url.part', value: 'abc', position: { lineNumber: 1, column: 6 } },
           ],
-          cb,
+          done,
           lineNumber: 1,
         });
       });
     });
 
     describe('with newlines', () => {
-      test('case 1 - newlines base case', function(cb) {
+      test('case 1 - newlines base case', done => {
         runTest({
           input: `GET http://test:user@somehost/
 {
@@ -139,26 +139,26 @@ describe('Ace (legacy) token provider', () => {
             { type: 'whitespace', value: ' ', position: { lineNumber: 3, column: 11 } },
             { type: 'string', value: '"!"', position: { lineNumber: 3, column: 12 } },
           ],
-          cb,
+          done,
           lineNumber: 3,
         });
       });
     });
 
     describe('edge cases', () => {
-      test('case 1 - getting token outside of document', function(cb) {
+      test('case 1 - getting token outside of document', done => {
         runTest({
           input: `GET http://test:user@somehost/
 {
   "wudup": "!"
 }`,
           expectedTokens: null,
-          cb,
+          done,
           lineNumber: 100,
         });
       });
 
-      test('case 2 - empty lines', function(cb) {
+      test('case 2 - empty lines', done => {
         runTest({
           input: `GET http://test:user@somehost/
           
@@ -169,7 +169,7 @@ describe('Ace (legacy) token provider', () => {
   "wudup": "!"
 }`,
           expectedTokens: [],
-          cb,
+          done,
           lineNumber: 5,
         });
       });
@@ -180,23 +180,18 @@ describe('Ace (legacy) token provider', () => {
     const runTest = ({
       input,
       expectedToken,
-      cb,
+      done,
       position,
-    }: {
-      input: string;
-      expectedToken: Token | null;
-      cb: () => void;
-      position: Position;
-    }) => {
+    }: RunTestArgs & { expectedToken: Token | null; position: Position }) => {
       aceEditor.update(input, function() {
         const tokens = tokenProvider.getTokenAt(position);
         expect(tokens).toEqual(expectedToken);
-        cb();
+        if (done) done();
       });
     };
 
     describe('base cases', () => {
-      it('case 1 - gets a token from the url', cb => {
+      it('case 1 - gets a token from the url', done => {
         const input = `GET http://test:user@somehost/`;
         runTest({
           input,
@@ -205,7 +200,6 @@ describe('Ace (legacy) token provider', () => {
             type: 'whitespace',
             value: ' ',
           },
-          cb,
           position: { lineNumber: 1, column: 5 },
         });
 
@@ -216,18 +210,18 @@ describe('Ace (legacy) token provider', () => {
             type: 'url.protocol_host',
             value: 'http://test:user@somehost',
           },
-          cb,
           position: { lineNumber: 1, column: input.length },
+          done,
         });
       });
     });
 
     describe('special cases', () => {
-      it('case 1 - handles input outside of range', cb => {
+      it('case 1 - handles input outside of range', done => {
         runTest({
           input: `GET abc`,
           expectedToken: null,
-          cb,
+          done,
           position: { lineNumber: 1, column: 99 },
         });
       });
