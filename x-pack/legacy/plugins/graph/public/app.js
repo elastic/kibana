@@ -53,7 +53,7 @@ import {
 
 import './angular/directives/graph_inspect';
 
-export function initAngularModule(moduleName, deps) {
+export function initAngularModule(angularModule, deps) {
   const {
     xpackInfo,
     fatalError,
@@ -72,11 +72,12 @@ export function initAngularModule(moduleName, deps) {
     coreStart, //npStart.core
     confirmModal,
     $http, //$http
+    KbnUrlProvider,
     canEditDrillDownUrls,
-    graphSavePolicy
+    graphSavePolicy,
   } = deps;
 
-  const app = angular.module(moduleName, ['ngRoute', 'react', 'graphI18n', 'ngSanitize']);
+  const app = angularModule;
 
   function checkLicense(Promise, kbnBaseUrl) {
     const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
@@ -127,26 +128,27 @@ export function initAngularModule(moduleName, deps) {
     ]);
   });
 
-  app.config(function ($routeProvider, $locationProvider) {
+  app.config(function ($routeProvider) {
     $routeProvider.when('/home', {
       template: listingTemplate,
       badge: getReadonlyBadge,
-      controller($location, $scope) {
+      controller($location, $scope, Private) {
+        const kbnUrl = Private(KbnUrlProvider);
         checkLicense(Promise, kbnBaseUrl);
         const services = savedObjectRegistry.byLoaderPropertiesName;
         const graphService = services['Graph workspace'];
 
         $scope.listingLimit = config.get('savedObjects:listingLimit');
         $scope.create = () => {
-          $location.url(getNewPath());
+          kbnUrl.change(getNewPath());
         };
         $scope.find = (search) => {
           return graphService.find(search, $scope.listingLimit);
         };
         $scope.editItem = (workspace) => {
-          $location.url(getEditPath(workspace));
+          kbnUrl.change(getEditPath(workspace));
         };
-        $scope.getViewUrl = (workspace) => getEditUrl(chrome, workspace);
+        $scope.getViewUrl = (workspace) => getEditUrl(addBasePath, workspace);
         $scope.delete = (workspaces) => {
           return graphService.delete(workspaces.map(({ id }) => id));
         };
@@ -191,14 +193,12 @@ export function initAngularModule(moduleName, deps) {
       .otherwise({
         redirectTo: '/home'
       });
-
-    $locationProvider.html5Mode(false);
-    $locationProvider.hashPrefix('');
   });
 
 
   //========  Controller for basic UI ==================
-  app.controller('graphuiPlugin', function ($scope, $route, $location) {
+  app.controller('graphuiPlugin', function ($scope, $route, $location, Private) {
+    const kbnUrl = Private(KbnUrlProvider);
     function handleSuccess(data) {
       return checkLicense(Promise, kbnBaseUrl)
         .then(() => data);
@@ -240,7 +240,7 @@ export function initAngularModule(moduleName, deps) {
           // but the check is too simple right now. Change this
           // once actual state-diffing is in place.
           $scope.$evalAsync(() => {
-            $location.url(getHomePath());
+            kbnUrl.change(getHomePath());
           });
         }
       });
@@ -677,7 +677,7 @@ export function initAngularModule(moduleName, deps) {
       run: function () {
         canWipeWorkspace(function () {
           $scope.$evalAsync(() => {
-            $location.url('/workspace/');
+            kbnUrl.change('/workspace/');
           });
         });  },
       testId: 'graphNewButton',
@@ -883,7 +883,7 @@ export function initAngularModule(moduleName, deps) {
             'data-test-subj': 'saveGraphSuccess',
           });
           if ($scope.savedWorkspace.id !== $route.current.params.id) {
-            $location.url(getEditPath($scope.savedWorkspace));
+            kbnUrl.change(getEditPath($scope.savedWorkspace));
           }
         }
         return { id };

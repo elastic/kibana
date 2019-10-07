@@ -17,6 +17,8 @@ import 'uiExports/autocompleteProviders';
 import chrome from 'ui/chrome';
 import { fatalError } from 'ui/notify';
 // @ts-ignore
+import { KbnUrlProvider } from 'ui/url';
+// @ts-ignore
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 // @ts-ignore
@@ -42,7 +44,6 @@ async function getAngularInjectedDependencies() {
     $http: injector.get('$http'),
     confirmModal: injector.get('confirmModal'),
     savedObjectRegisty: Private(SavedObjectRegistryProvider),
-    kbnUrl: injector.get('kbnUrl'),
     kbnBaseUrl: injector.get('kbnBaseUrl'),
     savedWorkspacesClient: Private(SavedWorkspacesProvider),
     savedGraphWorkspaces: injector.get('savedGraphWorkspaces'),
@@ -72,8 +73,9 @@ export class GraphPlugin {
             data,
             fatalError,
             xpackInfo,
+            KbnUrlProvider,
             addBasePath: core.http.basePath.prepend,
-            getBasePath: core.http.basePath.get
+            getBasePath: core.http.basePath.get,
           },
           angularDependencies
         );

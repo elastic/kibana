@@ -5,8 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GraphWorkspaceSavedObject } from '../types';
 import { ChromeStart } from 'kibana/public';
+import { GraphWorkspaceSavedObject } from '../types';
 
 export function getHomePath() {
   return '/home';
@@ -20,8 +20,11 @@ export function getEditPath({ id }: GraphWorkspaceSavedObject) {
   return `/workspace/${id}`;
 }
 
-export function getEditUrl(chrome: ChromeStart, workspace: GraphWorkspaceSavedObject) {
-  return chrome.addBasePath(`#${getEditPath(workspace)}`);
+export function getEditUrl(
+  addBasePath: (url: string) => string,
+  workspace: GraphWorkspaceSavedObject
+) {
+  return addBasePath(`#${getEditPath(workspace)}`);
 }
 
 export type SetBreadcrumbOptions =

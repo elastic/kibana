@@ -27,7 +27,7 @@ import { start as data } from '../../../core_plugins/data/public/legacy';
 
 const module = uiModules.get('kibana');
 
-module.directive('kbnTopNav', () => {
+export function createTopNavDirective() {
   return {
     restrict: 'E',
     template: '',
@@ -89,9 +89,11 @@ module.directive('kbnTopNav', () => {
       return linkFn;
     }
   };
-});
+}
 
-module.directive('kbnTopNavHelper', (reactDirective) => {
+module.directive('kbnTopNav', createTopNavDirective);
+
+export function createTopNavHelper(reactDirective) {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [
@@ -139,4 +141,6 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
       'showAutoRefreshOnly',
     ],
   );
-});
+}
+
+module.directive('kbnTopNavHelper', createTopNavHelper);
