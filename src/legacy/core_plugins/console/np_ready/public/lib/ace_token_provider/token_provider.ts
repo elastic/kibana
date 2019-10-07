@@ -65,16 +65,19 @@ export class AceTokensProvider implements TokensProvider {
 
   getTokens(lineNumber: number): Token[] | null {
     if (lineNumber < 1) return null;
-    const tokens: ActualTokenInfo[] = this.session.getTokens(lineNumber - 1) as any;
-    if (!tokens || !tokens.length) {
-      const lineCount = this.session.doc.getAllLines().length;
-      if (lineCount >= lineNumber) {
-        // We are inside of the document but have no tokens for this line. Return an empty
-        // array to represent this empty line.
-        return [];
-      }
+
+    const lineCount = this.session.doc.getAllLines().length;
+    if (lineNumber > lineCount) {
       return null;
     }
+
+    const tokens: ActualTokenInfo[] = this.session.getTokens(lineNumber - 1) as any;
+    if (!tokens || !tokens.length) {
+      // We are inside of the document but have no tokens for this line. Return an empty
+      // array to represent this empty line.
+      return [];
+    }
+
     return toTokens(lineNumber, tokens);
   }
 

@@ -83,10 +83,7 @@ export class TokenIteratorImpl implements TokenIterator {
         idx = 0;
       } else {
         nextToken = nextLineTokens[nextLineTokens.length - 1];
-        idx = nextLineTokens.length - 1;
-      }
-      if (nextToken == null) {
-        idx = 0;
+        idx = nextToken ? nextLineTokens.length - 1 : 0;
       }
 
       const nextPosition = nextToken
