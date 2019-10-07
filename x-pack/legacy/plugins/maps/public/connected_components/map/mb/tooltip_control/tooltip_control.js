@@ -318,7 +318,7 @@ export class TooltipControl extends React.Component {
     }
 
     return (
-      <EuiText size="xs">
+      <EuiText size="xs" style={{ maxWidth: '425px' }}>
         <FeaturesTooltip
           {...publicProps}
           anchorLocation={this.props.tooltipState.location}

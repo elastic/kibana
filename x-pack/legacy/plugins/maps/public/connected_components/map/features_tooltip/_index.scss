@@ -14,10 +14,6 @@
 }
 
 .mapFeatureTooltip__propertyLabel {
-  max-width: $euiSizeXL * 3;
+  max-width: $euiSizeXL * 4;
   font-weight: $euiFontWeightSemiBold;
-}
-
-.mapFeatureTooltip__propertyValue {
-  max-width: $euiSizeXL * 5;
 }
