@@ -79,7 +79,7 @@ export const initLegacyModule = once((): void => {
     .directive('applyFiltersPopoverComponent', (reactDirective: any) =>
       reactDirective(wrapInI18nContext(ApplyFiltersPopover))
     )
-    .directive('applyFiltersPopover', (indexPatterns: IndexPatterns) => {
+    .directive('applyFiltersPopover', () => {
       return {
         template,
         restrict: 'E',
@@ -87,6 +87,7 @@ export const initLegacyModule = once((): void => {
           filters: '=',
           onCancel: '=',
           onSubmit: '=',
+          indexPatterns: '=',
         },
         link($scope: any) {
           $scope.state = {};
@@ -95,7 +96,7 @@ export const initLegacyModule = once((): void => {
           // popover, because it has to reset its state whenever the new filters change. Setting a `key`
           // property on the component accomplishes this due to how React handles the `key` property.
           $scope.$watch('filters', async (filters: any) => {
-            const mappedFilters: Filter[] = await mapAndFlattenFilters(indexPatterns, filters);
+            const mappedFilters: Filter[] = await mapAndFlattenFilters(filters);
             $scope.state = {
               filters: mappedFilters,
               key: Date.now(),
@@ -107,7 +108,7 @@ export const initLegacyModule = once((): void => {
 
   const module = uiModules.get('kibana/index_patterns');
   let _service: any;
-  module.service('indexPatterns', function(chrome: any) {
+  module.service('indexPatterns', function() {
     if (!_service)
       _service = new IndexPatterns(
         npStart.core.uiSettings,

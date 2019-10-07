@@ -18,7 +18,6 @@
  */
 
 import { UiSettingsClientContract } from 'src/core/public';
-import { IndexPatterns } from '../index_patterns';
 import { FilterManager } from './filter_manager';
 
 /**
@@ -27,14 +26,13 @@ import { FilterManager } from './filter_manager';
  */
 
 export interface FilterServiceDependencies {
-  indexPatterns: IndexPatterns;
   uiSettings: UiSettingsClientContract;
 }
 
 export class FilterService {
-  public setup({ indexPatterns, uiSettings }: FilterServiceDependencies) {
+  public setup({ uiSettings }: FilterServiceDependencies) {
     return {
-      filterManager: new FilterManager(indexPatterns, uiSettings),
+      filterManager: new FilterManager(uiSettings),
     };
   }
 

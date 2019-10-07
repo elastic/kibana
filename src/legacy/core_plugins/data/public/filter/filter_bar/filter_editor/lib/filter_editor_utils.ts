@@ -31,7 +31,7 @@ import {
   PhrasesFilter,
   RangeFilter,
 } from '@kbn/es-query';
-import { omit } from 'lodash';
+import { omit, get } from 'lodash';
 import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
 import { Field, IndexPattern, isFilterable } from '../../../../index_patterns';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
@@ -41,6 +41,16 @@ export function getIndexPatternFromFilter(
   indexPatterns: IndexPattern[]
 ): IndexPattern | undefined {
   return indexPatterns.find(indexPattern => indexPattern.id === filter.meta.index);
+}
+
+export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IndexPattern[]): string {
+  const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
+  const valueFormatter: any = get(indexPattern, ['fields', 'byName', filter.meta.key, 'format']);
+  if (typeof filter.meta.value === 'function') {
+    return filter.meta.value(valueFormatter);
+  } else {
+    return filter.meta.value || '';
+  }
 }
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IndexPattern) {

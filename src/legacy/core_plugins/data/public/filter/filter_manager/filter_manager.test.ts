@@ -26,9 +26,7 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 import { FilterManager } from './filter_manager';
 
-import { IndexPatterns } from '../../index_patterns';
 import { getFilter } from './test_helpers/get_stub_filter';
-import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 import { StubState } from './test_helpers/stub_state';
 import { getFiltersArray } from './test_helpers/get_filters_array';
 
@@ -48,18 +46,13 @@ describe('filter_manager', () => {
   let updateListener: sinon.SinonSpy<any[], any>;
 
   let filterManager: FilterManager;
-  let indexPatterns: StubIndexPatterns;
   let readyFilters: Filter[];
 
   beforeEach(() => {
     updateListener = sinon.stub();
     appStateStub = new StubState();
     globalStateStub = new StubState();
-    indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(
-      (indexPatterns as unknown) as IndexPatterns,
-      setupMock.uiSettings
-    );
+    filterManager = new FilterManager(setupMock.uiSettings);
     readyFilters = getFiltersArray();
 
     // FilterStateManager is tested indirectly.

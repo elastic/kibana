@@ -20,10 +20,9 @@
 import { compact, flatten } from 'lodash';
 import { Filter } from '@kbn/es-query';
 import { mapFilter } from './map_filter';
-import { IndexPatterns } from '../../../index_patterns';
 
-export const mapAndFlattenFilters = (indexPatterns: IndexPatterns, filters: Filter[]) => {
-  const promises = compact(flatten(filters)).map((item: Filter) => mapFilter(indexPatterns, item));
+export const mapAndFlattenFilters = (filters: Filter[]) => {
+  const promises = compact(flatten(filters)).map((item: Filter) => mapFilter(item));
 
   return Promise.all(promises);
 };

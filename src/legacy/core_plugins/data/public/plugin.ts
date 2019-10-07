@@ -113,7 +113,6 @@ export class DataPlugin
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
-        indexPatterns: indexPatternsService.indexPatterns,
       }),
       query: this.query.setup(),
       search: this.search.setup(savedObjectsClient),

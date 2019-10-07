@@ -19,16 +19,12 @@
 
 import { Filter } from '@kbn/es-query';
 import { mapAndFlattenFilters } from './map_and_flatten_filters';
-import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
-import { IndexPatterns } from '../../../index_patterns';
 
 describe('filter manager utilities', () => {
   describe('mapAndFlattenFilters()', () => {
-    let mockIndexPatterns: unknown;
     let filters: unknown;
 
     beforeEach(() => {
-      mockIndexPatterns = new StubIndexPatterns();
       filters = [
         null,
         [
@@ -45,10 +41,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should map and flatten the filters', async () => {
-      const results = await mapAndFlattenFilters(
-        mockIndexPatterns as IndexPatterns,
-        filters as Filter[]
-      );
+      const results = await mapAndFlattenFilters(filters as Filter[]);
 
       expect(results).toHaveLength(5);
       expect(results[0]).toHaveProperty('meta');
