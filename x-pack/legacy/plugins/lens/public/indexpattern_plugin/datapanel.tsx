@@ -30,7 +30,7 @@ import { DatasourceDataPanelProps, DataType } from '../types';
 import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
-import { FieldIcon } from './field_icon';
+import { LensFieldIcon } from './lens_field_icon';
 import { updateLayerIndexPattern } from './state_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 
@@ -442,7 +442,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       }))
                     }
                   >
-                    <FieldIcon type={type} /> {fieldTypeNames[type]}
+                    <LensFieldIcon type={type} /> {fieldTypeNames[type]}
                   </EuiContextMenuItem>
                 ))}
               />

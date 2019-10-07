@@ -62,12 +62,42 @@ describe('POST /api/saved_objects/_export', () => {
     jest.resetAllMocks();
   });
 
+  test('does not allow both "search" and "objects" to be specified', async () => {
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_export',
+      payload: {
+        search: 'search',
+        objects: [{ type: 'search', id: 'bar' }],
+        includeReferencesDeep: true,
+      },
+    };
+
+    const { payload, statusCode } = await server.inject(request);
+
+    expect(statusCode).toEqual(400);
+    expect(JSON.parse(payload)).toMatchInlineSnapshot(`
+      Object {
+        "error": "Bad Request",
+        "message": "\\"search\\" must not exist simultaneously with [objects]",
+        "statusCode": 400,
+        "validation": Object {
+          "keys": Array [
+            "value",
+          ],
+          "source": "payload",
+        },
+      }
+    `);
+  });
+
   test('formats successful response', async () => {
     const request = {
       method: 'POST',
       url: '/api/saved_objects/_export',
       payload: {
         type: 'search',
+        search: 'my search string',
         includeReferencesDeep: true,
       },
     };
@@ -101,58 +131,59 @@ describe('POST /api/saved_objects/_export', () => {
     expect(headers).toHaveProperty('content-disposition', 'attachment; filename="export.ndjson"');
     expect(headers).toHaveProperty('content-type', 'application/ndjson');
     expect(objects).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "attributes": Object {},
-    "id": "1",
-    "references": Array [],
-    "type": "index-pattern",
-  },
-  Object {
-    "attributes": Object {},
-    "id": "2",
-    "references": Array [
-      Object {
-        "id": "1",
-        "name": "ref_0",
-        "type": "index-pattern",
-      },
-    ],
-    "type": "search",
-  },
-]
-`);
-    expect(getSortedObjectsForExport).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "exportSizeLimit": 10000,
-        "includeReferencesDeep": true,
-        "objects": undefined,
-        "savedObjectsClient": Object {
-          "bulkCreate": [MockFunction],
-          "bulkGet": [MockFunction],
-          "create": [MockFunction],
-          "delete": [MockFunction],
-          "errors": Object {},
-          "find": [MockFunction],
-          "get": [MockFunction],
-          "update": [MockFunction],
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
         },
-        "types": Array [
-          "search",
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "ref_0",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "search",
+        },
+      ]
+    `);
+    expect(getSortedObjectsForExport).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "exportSizeLimit": 10000,
+              "includeReferencesDeep": true,
+              "objects": undefined,
+              "savedObjectsClient": Object {
+                "bulkCreate": [MockFunction],
+                "bulkGet": [MockFunction],
+                "create": [MockFunction],
+                "delete": [MockFunction],
+                "errors": Object {},
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "update": [MockFunction],
+              },
+              "search": "my search string",
+              "types": Array [
+                "search",
+              ],
+            },
+          ],
         ],
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 });
