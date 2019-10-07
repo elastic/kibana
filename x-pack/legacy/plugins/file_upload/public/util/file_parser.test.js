@@ -90,7 +90,7 @@ describe('parse file', () => {
     expect(oboeStream.abort.mock.calls.length).toEqual(1);
   });
 
-  // Expect 2 calls, one reads file, next is expected to be undefined to
+  // Expect 2 calls, one reads file, next is 'undefined' to
   // both fileReader and oboeStream
   it('should normally read binary and emit to oboeStream for valid data', async () => {
     const fileRef = getFileRef();
