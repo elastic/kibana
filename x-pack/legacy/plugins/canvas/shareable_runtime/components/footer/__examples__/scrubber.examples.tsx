@@ -14,17 +14,17 @@ import { workpads } from '../../../../__tests__/fixtures/workpads';
 
 storiesOf('shareables/Footer/Scrubber', module)
   .add('contextual: hello', () => (
-    <ExampleContext source="hello" style={{ height: 140 }}>
+    <ExampleContext source="hello" style={{ height: 172 }} isScrubberVisible={true}>
       <Scrubber />
     </ExampleContext>
   ))
   .add('contextual: austin', () => (
-    <ExampleContext source="austin" style={{ height: 140 }}>
+    <ExampleContext source="austin" style={{ height: 172 }} isScrubberVisible={true}>
       <Scrubber />
     </ExampleContext>
   ))
   .add('component', () => (
-    <ExampleContext style={{ height: 140 }}>
+    <ExampleContext style={{ height: 172 }}>
       <ScrubberComponent
         isScrubberVisible={true}
         pages={(workpads[0].pages as unknown) as CanvasRenderedPage[]}

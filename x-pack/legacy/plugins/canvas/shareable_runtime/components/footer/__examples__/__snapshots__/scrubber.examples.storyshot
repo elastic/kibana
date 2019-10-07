@@ -5,7 +5,7 @@ exports[`Storyshots shareables/Footer/Scrubber component 1`] = `
   className="kbnCanvas"
   style={
     Object {
-      "height": 140,
+      "height": 172,
       "overflow": "hidden",
       "position": "relative",
       "width": undefined,
@@ -64,7 +64,7 @@ exports[`Storyshots shareables/Footer/Scrubber contextual: austin 1`] = `
   className="kbnCanvas"
   style={
     Object {
-      "height": 140,
+      "height": 172,
       "overflow": "hidden",
       "position": "relative",
       "width": undefined,
@@ -72,7 +72,7 @@ exports[`Storyshots shareables/Footer/Scrubber contextual: austin 1`] = `
   }
 >
   <div
-    className="root"
+    className="root visible"
   >
     <div
       className="slideContainer"
@@ -1305,7 +1305,7 @@ exports[`Storyshots shareables/Footer/Scrubber contextual: hello 1`] = `
   className="kbnCanvas"
   style={
     Object {
-      "height": 140,
+      "height": 172,
       "overflow": "hidden",
       "position": "relative",
       "width": undefined,
@@ -1313,7 +1313,7 @@ exports[`Storyshots shareables/Footer/Scrubber contextual: hello 1`] = `
   }
 >
   <div
-    className="root"
+    className="root visible"
   >
     <div
       className="slideContainer"

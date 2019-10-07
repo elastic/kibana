@@ -119,8 +119,10 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
   className="kbnCanvas"
   style={
     Object {
+      "background": "#333",
       "height": undefined,
       "overflow": "hidden",
+      "padding": 10,
       "position": "relative",
       "width": undefined,
     }
@@ -160,7 +162,7 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
           <div
             className="eui-textTruncate"
           >
-            Elastic{ON} - Austin from Clint Andrew Hall with a title that just goes and goes and goes
+            My Canvas Workpad
           </div>
         </div>
       </div>

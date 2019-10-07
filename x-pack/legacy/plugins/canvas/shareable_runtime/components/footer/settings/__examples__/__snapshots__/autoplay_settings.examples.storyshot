@@ -203,7 +203,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
       className="euiSwitch"
     >
       <input
-        checked={false}
+        checked={true}
         className="euiSwitch__input"
         id="cycle"
         name="cycle"

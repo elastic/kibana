@@ -14,7 +14,7 @@ const style = { background: '#333', padding: 10 };
 
 storiesOf('shareables/Footer/Title', module)
   .add('contextual: hello', () => (
-    <ExampleContext source="austin">
+    <ExampleContext source="hello" {...{ style }}>
       <Title />
     </ExampleContext>
   ))

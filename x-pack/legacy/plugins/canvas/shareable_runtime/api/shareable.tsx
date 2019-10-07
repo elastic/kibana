@@ -132,7 +132,13 @@ const updateArea = async (area: Element) => {
       area.classList.add('kbnCanvas');
       area.removeAttribute(SHAREABLE);
 
-      render(<App workpad={workpad} {...{ stage, settings }} />, area);
+      render(
+        [
+          <style key="style">{`html body .kbnCanvas { height: ${stage.height}px; width: ${stage.width}px; }`}</style>,
+          <App key="app" workpad={workpad} {...{ stage, settings }} />,
+        ],
+        area
+      );
     }
   }
 };

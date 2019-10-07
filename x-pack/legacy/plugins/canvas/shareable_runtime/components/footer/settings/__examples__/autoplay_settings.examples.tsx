@@ -37,7 +37,7 @@ storiesOf('shareables/Footer/Settings/AutoplaySettings', module)
   .add('component: on, 5s', () => (
     <ExampleContext {...{ style }}>
       <AutoplaySettingsComponent
-        isEnabled={false}
+        isEnabled={true}
         interval="5s"
         onSetAutoplay={action('onSetAutoplay')}
         onSetInterval={action('onSetInterval')}
