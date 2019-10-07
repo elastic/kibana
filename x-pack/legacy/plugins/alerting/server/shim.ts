@@ -32,7 +32,7 @@ export interface Server extends Legacy.Server {
 }
 
 /**
- * Shim what's we're thinkign setup and start contracts will look like
+ * Shim what we're thinking setup and start contracts will look like
  */
 export type ActionsPluginSetupContract = Pick<ActionsPlugin, 'registerType'>;
 export type ActionsPluginStartContract = Pick<ActionsPlugin, 'listTypes' | 'execute'>;
