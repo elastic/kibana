@@ -21,6 +21,15 @@ import { isPlainObject } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { metadataSymbol, attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 
+export function attachMetaData(message, metadata = {}) {
+  return {
+    [symbol]: {
+      message,
+      metadata,
+    },
+  };
+}
+
 export const logWithMetadata = {
   isLogEvent(eventData) {
     return Boolean(isPlainObject(eventData) && eventData[metadataSymbol]);

@@ -27,6 +27,7 @@ import {
 } from '../../utils';
 
 import KbnLoggerStringFormat from './log_format_string';
+import { attachMetaData } from './log_with_metadata';
 
 const time = +moment('2010-01-01T05:15:59Z', moment.ISO_8601);
 
