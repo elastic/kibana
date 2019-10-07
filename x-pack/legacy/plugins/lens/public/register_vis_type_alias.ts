@@ -18,7 +18,7 @@ visualizations.types.registerAlias({
   description: i18n.translate('xpack.lens.visTypeAlias.description', {
     defaultMessage: `Lens is a simpler way to create basic visualizations`,
   }),
-  icon: 'faceHappy',
+  icon: 'lensApp',
   appExtensions: {
     visualizations: {
       docTypes: ['lens'],
@@ -30,7 +30,7 @@ visualizations.types.registerAlias({
           id,
           title,
           editUrl: getEditPath(id),
-          icon: 'faceHappy',
+          icon: 'lensApp',
           isExperimental: true,
           savedObjectType: type,
           typeTitle: i18n.translate('xpack.lens.visTypeAlias.type', { defaultMessage: 'Lens' }),
