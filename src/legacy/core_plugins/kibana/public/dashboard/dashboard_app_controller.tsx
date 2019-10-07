@@ -435,7 +435,7 @@ export class DashboardAppController {
           indexPattern.timeFieldName,
           filters
         );
-        queryFilter.setFilters(restOfFilters);
+        queryFilter.addFilters(restOfFilters);
         timefilter.setTime(timeRangeFilter as any);
       }
 

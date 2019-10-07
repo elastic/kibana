@@ -425,7 +425,7 @@ function discoverController(
 
   $scope.applyFilters = filters => {
     const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
-    queryFilter.setFilters(restOfFilters);
+    queryFilter.addFilters(restOfFilters);
     timefilter.setTime(timeRangeFilter);
 
     $scope.state.$newFilters = [];
