@@ -17,17 +17,16 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import { dirname, resolve } from 'path';
-import { writeFile, readFileSync } from 'fs';
-import Bluebird, { fromNode as fcb, promisify } from 'bluebird';
-import mkdirp from 'mkdirp';
+import { writeFile, readFileSync, mkdir } from 'fs';
+import { promisify } from 'util';
+
+import expect from '@kbn/expect';
 import del from 'del';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-type WriteFileAsync = (path: string | number | Buffer | URL, data: any) => Bluebird<void>;
-
-const writeFileAsync = promisify(writeFile) as WriteFileAsync;
+const mkdirAsync = promisify(mkdir);
+const writeFileAsync = promisify(writeFile);
 
 export async function SnapshotsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -77,8 +76,8 @@ export async function SnapshotsProvider({ getService }: FtrProviderContext) {
 
     private async _take(path: string, snapshot?: object) {
       try {
-        await fcb(cb => mkdirp(dirname(path), cb));
-        await fcb(cb => writeFile(path, JSON.stringify(snapshot), 'utf8', cb));
+        await mkdirAsync(dirname(path), { recursive: true });
+        await writeFileAsync(path, JSON.stringify(snapshot), 'utf8');
       } catch (err) {
         log.error('SNAPSHOT FAILED');
         log.error(err);
