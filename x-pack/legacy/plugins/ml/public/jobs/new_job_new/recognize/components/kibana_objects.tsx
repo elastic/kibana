@@ -13,8 +13,6 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
-  EuiListGroup,
-  EuiListGroupItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaObjectUi } from '../page';
@@ -44,39 +42,36 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
         <EuiTitle size="s">
           <h4>{kibanaObjectLabels[objectType]}</h4>
         </EuiTitle>
-        <EuiListGroup bordered={false} flush={true} wrapText={true}>
+        <ul>
           {kibanaObjects.map(({ id, title, success, exists }) => (
-            <EuiListGroupItem
-              key={id}
-              label={
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem>
-                    {isSaving ? <EuiLoadingSpinner size="m" /> : null}
-                    {success !== undefined ? (
-                      <EuiIcon
-                        type={success ? 'check' : 'cross'}
-                        color={success ? 'success' : 'danger'}
+            <li key={id}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  {isSaving ? <EuiLoadingSpinner size="m" /> : null}
+                  {success !== undefined ? (
+                    <EuiIcon
+                      type={success ? 'check' : 'cross'}
+                      color={success ? 'success' : 'danger'}
+                    />
+                  ) : null}
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s" color="secondary">
+                    {title}
+                  </EuiText>
+                  {exists && (
+                    <EuiText size="xs" color="danger">
+                      <FormattedMessage
+                        id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
+                        defaultMessage="(already exists)"
                       />
-                    ) : null}
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s" color="secondary">
-                      {title}
                     </EuiText>
-                    {exists && (
-                      <EuiText size="xs" color="danger">
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
-                          defaultMessage="(already exists)"
-                        />
-                      </EuiText>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-            />
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </li>
           ))}
-        </EuiListGroup>
+        </ul>
       </>
     );
   }

@@ -30,8 +30,7 @@ import {
 } from '@elastic/eui';
 // @ts-ignore
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { merge } from 'lodash';
-import { flatten } from 'lodash';
+import { merge, flatten } from 'lodash';
 import { useKibanaContext } from '../../../contexts/kibana';
 import {
   DatafeedResponse,

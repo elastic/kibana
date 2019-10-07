@@ -14,7 +14,6 @@ import {
   EuiText,
   EuiTitle,
   EuiSpacer,
-  EuiFlexGrid,
 } from '@elastic/eui';
 
 interface ModuleJobsProps {
@@ -52,10 +51,10 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) =
                   </EuiText>
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} style={{ width: '200px' }}>
                 {isSaving && <EuiLoadingSpinner size="m" />}
                 {setupResult && datafeedResult && (
-                  <EuiFlexGrid gutterSize="s" style={{ width: '200px' }}>
+                  <EuiFlexGroup gutterSize="s">
                     <EuiFlexItem>
                       <EuiText
                         color={setupResult.success ? 'secondary' : 'danger'}
@@ -112,7 +111,7 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) =
                         />
                       </EuiText>
                     </EuiFlexItem>
-                  </EuiFlexGrid>
+                  </EuiFlexGroup>
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
