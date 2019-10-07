@@ -20,8 +20,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FeatureProperties } from './feature_properties';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
+import { TooltipHeader } from './tooltip_header';
 
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
@@ -31,7 +32,7 @@ const VIEWS = {
   GEOMETRY_FILTER_VIEW: 'GEOMETRY_FILTER_VIEW'
 };
 
-export class FeatureTooltip extends React.Component {
+export class FeaturesTooltip extends React.Component {
 
   state = {
     uniqueLayers: [],
@@ -371,10 +372,18 @@ export class FeatureTooltip extends React.Component {
 
     return (
       <Fragment>
-        {this._renderHeader()}
+        <TooltipHeader
+          closeTooltip={this._onCloseTooltip}
+          features={filteredFeatures}
+          isLocked={this.props.isLocked}
+          layers={this.state.uniqueLayers}
+          pageNumber={this.state.pageNumber}
+          onFilterByLayer={this._onLayerChange}
+          onPageChange={this._onPageChange}
+          selectedLayerFilter={this.state.layerIdFilter}
+        />
         {this._renderProperties(currentFeature)}
         {this._renderActions(filteredGeoFields)}
-        {this._renderFooter(filteredFeatures)}
       </Fragment>
     );
   }

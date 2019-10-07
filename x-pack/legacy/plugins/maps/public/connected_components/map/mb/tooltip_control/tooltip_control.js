@@ -11,7 +11,7 @@ import {
   LAT_INDEX,
   LON_INDEX,
 } from '../../../../../common/constants';
-import { FeatureTooltip } from '../../feature_tooltip';
+import { FeaturesTooltip } from '../../features_tooltip/features_tooltip';
 import { EuiPopover, EuiText } from '@elastic/eui';
 
 export const TOOLTIP_TYPE = {
@@ -319,7 +319,7 @@ export class TooltipControl extends React.Component {
 
     return (
       <EuiText size="xs">
-        <FeatureTooltip
+        <FeaturesTooltip
           {...publicProps}
           anchorLocation={this.props.tooltipState.location}
           findLayerById={this._findLayerById}

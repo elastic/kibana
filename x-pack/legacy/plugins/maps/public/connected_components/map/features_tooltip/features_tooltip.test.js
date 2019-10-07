@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FeatureTooltip } from './feature_tooltip';
+import { FeaturesTooltip } from './features_tooltip';
 
 class MockLayer {
   constructor(id) {
@@ -54,11 +54,11 @@ const defaultProps = {
   isLocked: false,
 };
 
-describe('FeatureTooltip (single)', () => {
+describe('FeaturesTooltip (single)', () => {
 
   test('should not show close button', async () => {
     const component = shallow(
-      <FeatureTooltip
+      <FeaturesTooltip
         {...defaultProps}
         features={SINGLE_FEATURE}
       />
@@ -75,7 +75,7 @@ describe('FeatureTooltip (single)', () => {
 
   test('should show close button', async () => {
     const component = shallow(
-      <FeatureTooltip
+      <FeaturesTooltip
         {...defaultProps}
         isLocked={true}
         features={SINGLE_FEATURE}
@@ -92,11 +92,11 @@ describe('FeatureTooltip (single)', () => {
   });
 });
 
-describe('FeatureTooltip (multi)', () => {
+describe('FeaturesTooltip (multi)', () => {
 
   test('should not show close button / should show count', async () => {
     const component = shallow(
-      <FeatureTooltip
+      <FeaturesTooltip
         {...defaultProps}
         features={MULTI_FEATURE_MULTI_LAYER}
       />
@@ -113,7 +113,7 @@ describe('FeatureTooltip (multi)', () => {
 
   test('should show close button / should show count', async () => {
     const component = shallow(
-      <FeatureTooltip
+      <FeaturesTooltip
         {...defaultProps}
         isLocked={true}
         features={MULTI_FEATURE_MULTI_LAYER}
@@ -131,7 +131,7 @@ describe('FeatureTooltip (multi)', () => {
 
   test('should show close button / should show count / should show arrows / should show layer filter', async () => {
     const component = shallow(
-      <FeatureTooltip
+      <FeaturesTooltip
         {...defaultProps}
         isLocked={true}
         features={MULTI_FEATURE_MULTI_LAYER}
