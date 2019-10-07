@@ -2,7 +2,7 @@
 [[fleet-api]]
 == Kibana Fleet APIs
 
-Manage your Fleet Agents.
+Manage your Fleet agents.
 
 * <<fleet-agent-enroll, Enroll an agent API>>
 * <<fleet-agent-checkin, Agent checkin API>>

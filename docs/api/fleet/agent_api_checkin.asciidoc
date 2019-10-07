@@ -4,7 +4,7 @@
 <titleabbrev>Agent checkin</titleabbrev>
 ++++
 
-This API is used by a fleet agent to report is current state.
+Report current state of a Fleet agent.
 
 [[fleet-agent-checkin-request]]
 ==== Request
@@ -23,7 +23,7 @@ This API is used by a fleet agent to report is current state.
   (Required, array) An array of events with the properties `type`, `subtype`, `message`, `timestamp`, `payload`, and `data`.
 
 `local_metadata`::
-  (Optional, object) an object that contains the local metadata for an agent. Metadata are a dictonary of strings (example: `{ "os": "macos" }`).
+  (Optional, object) An object that contains the local metadata for an agent. The metadata is a dictionary of strings (example: `{ "os": "macos" }`).
 
 [[fleet-agent-checkin-request-request-codes]]
 ==== Response code

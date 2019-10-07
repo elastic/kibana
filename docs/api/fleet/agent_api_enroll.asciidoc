@@ -1,7 +1,7 @@
 [[fleet-agent-enroll]]
-=== Fleet agent enroll API
+=== Enroll Fleet agent API
 ++++
-<titleabbrev>Enroll a new agent</titleabbrev>
+<titleabbrev>Enroll agent</titleabbrev>
 ++++
 
 [[fleet-agent-enroll-request]]
@@ -21,7 +21,7 @@
   (Optional, string) An ID for the agent.
 
 `metadata`::
-  (Optional, object) Objects with `local`, and `userProvided` properties that contains the metadata for an agent. Metadata are a dictonary of strings (example: `"local": { "os": "macos" }`).
+  (Optional, object) Objects with `local` and `userProvided` properties that contain the metadata for an agent. The metadata is a dictionary of strings (example: `"local": { "os": "macos" }`).
 
 [[fleet-agent-enroll-request-codes]]
 ==== Response code
