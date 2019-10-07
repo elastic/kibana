@@ -614,9 +614,19 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, namespace, references = [] } = options;
+    const { version, namespace, references } = options;
 
     const time = this._getCurrentTime();
+
+    const doc = {
+      [type]: attributes,
+      updated_at: time,
+      references,
+    };
+    if (!Array.isArray(doc.references)) {
+      delete doc.references;
+    }
+
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
@@ -624,11 +634,7 @@ export class SavedObjectsRepository {
       refresh: 'wait_for',
       ignore: [404],
       body: {
-        doc: {
-          [type]: attributes,
-          updated_at: time,
-          references,
-        },
+        doc,
       },
     });
 
