@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('./_helpers').runXPackScript('mocha', ['legacy/plugins/code/server/__tests__/*.{ts,tsx}']);
+require('./_helpers').runKibanaScript('mocha', ['x-pack/legacy/plugins/code/server/__tests__/*.{ts,tsx}']);

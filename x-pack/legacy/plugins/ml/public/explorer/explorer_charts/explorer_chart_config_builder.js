@@ -13,7 +13,7 @@
 
 import _ from 'lodash';
 
-import { parseInterval } from 'ui/utils/parse_interval';
+import { parseInterval } from '../../../common/util/parse_interval';
 import { getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
 import { mlJobService } from '../../services/job_service';
