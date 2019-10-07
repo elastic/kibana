@@ -55,7 +55,7 @@ export function EuiMonitoringSSPTable({
       <Fragment>
         <EuiSpacer size="m"/>
         <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
-          {i18n.translate('xpack.monitoring.euiTable.setupNewButtonLabel', {
+          {i18n.translate('xpack.monitoring.euiSSPTable.setupNewButtonLabel', {
             defaultMessage: 'Set up monitoring for new {identifier}',
             values: {
               identifier: getIdentifier(productName)
