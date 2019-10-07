@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
@@ -94,7 +94,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('loads the job type selection page', async () => {
-        await ml.jobSourceSelection.selectSourceIndexPattern('farequote');
+        await ml.jobSourceSelection.selectSource('farequote');
       });
 
       it('loads the multi metric job wizard page', async () => {

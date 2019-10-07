@@ -16,21 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { shallow } from 'enzyme';
-import { FieldNameIcon } from './field_name_icon';
 
-test('FieldNameIcon renders a blackwhite icon for a string', () => {
-  const component = shallow(<FieldNameIcon type="string" label="test" />);
-  expect(component).toMatchSnapshot();
-});
-
-test('FieldNameIcon renders a colored icon for a number', () => {
-  const component = shallow(<FieldNameIcon type="number" label="test" useColor />);
-  expect(component).toMatchSnapshot();
-});
-
-test('FieldNameIcon renders an icon for an unknown type', () => {
-  const component = shallow(<FieldNameIcon type="sdfsdf" label="test" useColor />);
-  expect(component).toMatchSnapshot();
-});
+export interface VisResponseValue {
+  visType: string;
+  visData: object;
+  visConfig: object;
+  params?: object;
+}

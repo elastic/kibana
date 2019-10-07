@@ -17,13 +17,16 @@
  * under the License.
  */
 
-import { Registry } from '@kbn/interpreter/common';
-import { RenderFunction } from './render_function';
+import { kfetch } from 'ui/kfetch';
 
-class RenderFunctionsRegistry extends Registry<any, any> {
-  wrapper(obj: any) {
-    return new (RenderFunction as any)(obj);
-  }
+export async function fetchExportByTypeAndSearch(types, search, includeReferencesDeep = false) {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_export',
+    body: JSON.stringify({
+      type: types,
+      search,
+      includeReferencesDeep,
+    }),
+  });
 }
-
-export { RenderFunctionsRegistry };

@@ -17,15 +17,4 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
-
-export async function fetchExportByType(types, includeReferencesDeep = false) {
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_export',
-    body: JSON.stringify({
-      type: types,
-      includeReferencesDeep,
-    }),
-  });
-}
+export * from './types';

@@ -18,12 +18,12 @@
  */
 
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './interpreter';
-import { ExpressionType } from '../../common/expressions/types';
+import { AnyExpressionType, AnyExpressionFunction } from '../../common/expressions/types';
 
 export interface ExpressionsSetupContract {
-  registerFunction: (fn: any) => void;
+  registerFunction: (fn: () => AnyExpressionFunction) => void;
   registerRenderer: (renderer: any) => void;
-  registerType: (type: () => ExpressionType<any, any>) => void;
+  registerType: (type: () => AnyExpressionType) => void;
   __LEGACY: {
     functions: FunctionsRegistry;
     renderers: RenderFunctionsRegistry;
@@ -44,13 +44,13 @@ export class ExpressionsService {
     const { functions, renderers, types } = this;
 
     this.setupApi = {
-      registerFunction: (fn: any) => {
+      registerFunction: fn => {
         this.functions.register(fn);
       },
       registerRenderer: (renderer: any) => {
         this.renderers.register(renderer);
       },
-      registerType: (type: () => ExpressionType<any, any>) => {
+      registerType: type => {
         this.types.register(type);
       },
       __LEGACY: {
