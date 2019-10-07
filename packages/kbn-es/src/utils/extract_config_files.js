@@ -19,7 +19,6 @@
 
 const path = require('path');
 const fs = require('fs');
-const mkdirp = require('mkdirp');
 
 /**
  * Copies config references to an absolute path to
@@ -62,7 +61,7 @@ function copyFileSync(src, dest) {
   const destPath = path.dirname(dest);
 
   if (!fs.existsSync(destPath)) {
-    mkdirp(destPath);
+    fs.mkdirSync(destPath, { recursive: true });
   }
 
   fs.writeFileSync(dest, fs.readFileSync(src));

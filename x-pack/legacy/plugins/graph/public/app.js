@@ -106,9 +106,10 @@ app.directive('graphApp', function (reactDirective) {
     ['onQuerySubmit', { watchDepth: 'reference' }],
     ['initialQuery', { watchDepth: 'reference' }],
     ['confirmWipeWorkspace', { watchDepth: 'reference' }],
-    ['autocompleteStart', { watchDepth: 'reference' }],
     ['coreStart', { watchDepth: 'reference' }],
-    ['reduxStore', { watchDepth: 'reference' }]
+    ['pluginDataStart', { watchDepth: 'reference' }],
+    ['store', { watchDepth: 'reference' }],
+    ['reduxStore', { watchDepth: 'reference' }],
   ]);
 });
 
@@ -321,9 +322,9 @@ app.controller('graphuiPlugin', function (
     chrome,
   });
 
+  $scope.pluginDataStart = npStart.plugins.data;
   $scope.store = new Storage(window.localStorage);
   $scope.coreStart = npStart.core;
-  $scope.autocompleteStart = npStart.plugins.data.autocomplete;
   $scope.loading = false;
 
   $scope.spymode = 'request';

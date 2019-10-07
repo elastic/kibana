@@ -1262,20 +1262,15 @@ export class SavedObjectsErrorHelpers {
 
 // @public
 export interface SavedObjectsExportOptions {
-    // (undocumented)
     exportSizeLimit: number;
-    // (undocumented)
     includeReferencesDeep?: boolean;
-    // (undocumented)
     namespace?: string;
-    // (undocumented)
     objects?: Array<{
         id: string;
         type: string;
     }>;
-    // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
-    // (undocumented)
+    search?: string;
     types?: string[];
 }
 
