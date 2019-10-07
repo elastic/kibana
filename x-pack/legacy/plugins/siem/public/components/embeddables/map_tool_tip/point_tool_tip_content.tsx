@@ -10,18 +10,18 @@ import * as i18n from '../translations';
 import { sourceDestinationFieldMappings } from '../map_config';
 import { WithHoverActions } from '../../with_hover_actions';
 import { HoverActionsContainer } from '../../page/add_to_kql';
-import { DefaultDraggable } from '../../draggables';
 import { getEmptyTagValue, getOrEmptyTagFromValue } from '../../empty_value';
 import { DescriptionListStyled } from '../../page';
 import { FeatureProperty } from '../types';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
+import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
 
 interface PointToolTipContentProps {
   contextId: string;
   featureProps: FeatureProperty[];
   featurePropsFilters: Record<string, object>;
-  addFilters?(filter: object): void;
-  closeTooltip?(): void;
+  addFilters(filter: object): void;
+  closeTooltip(): void;
 }
 
 export const PointToolTipContent = React.memo<PointToolTipContentProps>(
@@ -38,10 +38,8 @@ export const PointToolTipContent = React.memo<PointToolTipContentProps>(
                   data-test-subj={`add-to-filter-${property._propertyKey}`}
                   type="filter"
                   onClick={() => {
-                    if (closeTooltip != null && addFilters != null) {
-                      closeTooltip();
-                      addFilters(featurePropsFilters[property._propertyKey]);
-                    }
+                    closeTooltip();
+                    addFilters(featurePropsFilters[property._propertyKey]);
                   }}
                 />
               </EuiToolTip>
@@ -49,14 +47,14 @@ export const PointToolTipContent = React.memo<PointToolTipContentProps>(
           }
           render={() =>
             property._rawValue != null ? (
-              <DefaultDraggable
-                field={property._propertyKey}
-                id={`map-point-tooltip-${contextId}-${property._propertyKey}-${property._rawValue}`}
-                tooltipContent={property._propertyKey}
-                value={property._rawValue}
-              >
-                {getRenderedFieldValue(property._propertyKey, property._rawValue)}
-              </DefaultDraggable>
+              <DefaultFieldRenderer
+                rowItems={
+                  Array.isArray(property._rawValue) ? property._rawValue : [property._rawValue]
+                }
+                attrName={property._propertyKey}
+                idPrefix={`map-point-tooltip-${contextId}-${property._propertyKey}-${property._rawValue}`}
+                render={item => getRenderedFieldValue(property._propertyKey, item)}
+              />
             ) : (
               getEmptyTagValue()
             )
@@ -79,4 +77,5 @@ export const getRenderedFieldValue = (field: string, value: string) => {
   } else if (['source.ip', 'destination.ip'].includes(field)) {
     return <IPDetailsLink ip={value} />;
   }
+  return <>{value}</>;
 };

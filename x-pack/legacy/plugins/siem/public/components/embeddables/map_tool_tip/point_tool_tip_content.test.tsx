@@ -94,7 +94,7 @@ describe('PointToolTipContent', () => {
 
     test('it returns nothing if field is not host.name or source/destination.ip', () => {
       const value = 'Kramerica.co';
-      expect(getRenderedFieldValue('destination.domain', value)).toStrictEqual();
+      expect(getRenderedFieldValue('destination.domain', value)).toStrictEqual(<>{value}</>);
     });
   });
 });
