@@ -33,10 +33,6 @@ export class EuiMonitoringTable extends React.PureComponent {
     }
 
     const columns = _columns.map(column => {
-      if (!column['data-test-subj']) {
-        column['data-test-subj'] = 'monitoringTableHasData';
-      }
-
       if (!('sortable' in column)) {
         column.sortable = true;
       }
@@ -63,6 +59,7 @@ export class EuiMonitoringTable extends React.PureComponent {
     return (
       <div data-test-subj={`${this.props.className}Container`}>
         <EuiInMemoryTable
+          data-test-subj={items.length ? 'monitoringTableHasData' : 'monitoringTableNoData'}
           items={items}
           search={search}
           columns={columns}
