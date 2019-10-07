@@ -22,6 +22,7 @@ interface FindRequest extends WithoutQueryAndParams<Hapi.Request> {
       id: string;
     };
     fields?: string[];
+    filter?: string;
   };
 }
 
@@ -59,6 +60,9 @@ export function findRoute(server: Hapi.Server) {
             fields: Joi.array()
               .items(Joi.string())
               .single(),
+            filter: Joi.string()
+              .allow('')
+              .optional(),
           })
           .default(),
       },
@@ -76,6 +80,7 @@ export function findRoute(server: Hapi.Server) {
           sortField: query.sort_field,
           hasReference: query.has_reference,
           fields: query.fields,
+          filter: query.filter,
         },
       });
     },
