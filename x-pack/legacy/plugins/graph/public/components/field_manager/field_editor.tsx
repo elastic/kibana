@@ -158,10 +158,10 @@ export function FieldEditor({
               {
                 name: isDisabled
                   ? i18n.translate('xpack.graph.fieldManager.enableFieldLabel', {
-                      defaultMessage: 'Enable',
+                      defaultMessage: 'Enable field',
                     })
                   : i18n.translate('xpack.graph.fieldManager.disableFieldLabel', {
-                      defaultMessage: 'Temporarily disable',
+                      defaultMessage: 'Disable field',
                     }),
                 icon: <EuiIcon type={isDisabled ? 'eye' : 'eyeClosed'} size="m" />,
                 onClick: toggleDisabledState,
@@ -170,6 +170,13 @@ export function FieldEditor({
                 name: i18n.translate('xpack.graph.fieldManager.deleteFieldLabel', {
                   defaultMessage: 'Deselect field',
                 }),
+                toolTipContent: i18n.translate(
+                  'xpack.graph.fieldManager.deleteFieldTooltipContent',
+                  {
+                    defaultMessage:
+                      "No new vertices of this field will be discovered. Existing vertices won't be removed.",
+                  }
+                ),
                 icon: <EuiIcon type="trash" size="m" />,
                 onClick: () => {
                   deselectField(initialField.name);

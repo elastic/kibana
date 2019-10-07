@@ -15,6 +15,7 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
+import 'ui/angular-bootstrap';
 import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
 import 'ui/directives/input_focus';
@@ -408,10 +409,11 @@ app.controller('graphuiPlugin', function (
       $scope.workspaceInitialized = true;
       $scope.workspace.fillInGraph(fields.length * 10);
     } catch (e) {
+      const message = ('body' in e) ? e.body.message : e.message;
       toastNotifications.addDanger({
         title: i18n.translate(
           'xpack.graph.fillWorkspaceError',
-          { defaultMessage: 'Fetching top terms failed: {message}', values: { message: e.message } }
+          { defaultMessage: 'Fetching top terms failed: {message}', values: { message } }
         ),
       });
     }
