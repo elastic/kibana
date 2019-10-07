@@ -38,7 +38,7 @@ import { CreateTransformButton } from './components/create_transform_button';
 import { TransformList } from './components/transform_list';
 import { RefreshTransformListButton } from './components/refresh_transform_list_button';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
-import { getTransformsFactory } from './services/transform_service';
+import { useGetTransforms } from '../../hooks';
 import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
 
 export const TransformManagement: FC = () => {
@@ -50,7 +50,7 @@ export const TransformManagement: FC = () => {
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
 
-  const getTransforms = getTransformsFactory(
+  const getTransforms = useGetTransforms(
     setTransforms,
     setErrorMessage,
     setIsInitialized,

@@ -7,6 +7,9 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { createPublicShim } from '../../../../../shim';
+import { getAppProviders } from '../../../../app_dependencies';
+
 import { TransformListRow } from '../../../../common';
 import { StopAction } from './action_stop';
 
@@ -16,6 +19,8 @@ jest.mock('ui/new_platform');
 
 describe('Transform: Transform List Actions <StopAction />', () => {
   test('Minimal initialization', () => {
+    const Providers = getAppProviders(createPublicShim());
+
     const item: TransformListRow = transformListRow;
     const props = {
       disabled: false,
@@ -23,7 +28,13 @@ describe('Transform: Transform List Actions <StopAction />', () => {
       stopTransform(d: TransformListRow) {},
     };
 
-    const wrapper = shallow(<StopAction {...props} />);
+    const wrapper = shallow(
+      <Providers>
+        <StopAction {...props} />
+      </Providers>
+    )
+      .find(StopAction)
+      .shallow();
 
     expect(wrapper).toMatchSnapshot();
   });

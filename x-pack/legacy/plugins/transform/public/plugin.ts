@@ -26,11 +26,11 @@ const template = `<kbn-management-app section="elasticsearch/transform"><div id=
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
     const {
+      http,
       i18n,
       routing,
-      http,
+      legacyHttp,
       chrome,
-      notification,
       documentation,
       docTitle,
       savedSearches: coreSavedSearches,
@@ -79,8 +79,8 @@ export class Plugin {
       ) => {
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
         // e.g. to check license status per request.
-        http.setClient($http);
-        httpService.init(http.getClient(), chrome);
+        legacyHttp.setClient($http);
+        httpService.init(legacyHttp.getClient());
         coreSavedSearches.setClient(savedSearches);
 
         // Angular Lifecycle
@@ -110,7 +110,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { chrome, i18n, notification, savedSearches: coreSavedSearches } as AppCore,
+              { chrome, http, i18n, savedSearches: coreSavedSearches } as AppCore,
               { management: { sections: management.sections } } as AppPlugins
             );
           }

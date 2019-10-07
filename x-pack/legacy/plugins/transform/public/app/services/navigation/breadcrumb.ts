@@ -64,7 +64,7 @@ class BreadcrumbService {
       href: undefined,
     });
 
-    this.chrome.breadcrumbs.set(newBreadcrumbs);
+    this.chrome.setBreadcrumbs(newBreadcrumbs);
   }
 }
 

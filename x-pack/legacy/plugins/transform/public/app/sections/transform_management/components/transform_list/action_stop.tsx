@@ -13,7 +13,7 @@ import {
   createCapabilityFailureMessage,
   AuthorizationContext,
 } from '../../../../lib/authorization';
-import { stopTransforms } from '../../services/transform_service';
+import { useStopTransforms } from '../../../../hooks';
 
 interface StopActionProps {
   items: TransformListRow[];
@@ -23,6 +23,7 @@ interface StopActionProps {
 export const StopAction: FC<StopActionProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+  const stopTransforms = useStopTransforms();
   const buttonStopText = i18n.translate('xpack.transform.transformList.stopActionName', {
     defaultMessage: 'Stop',
   });

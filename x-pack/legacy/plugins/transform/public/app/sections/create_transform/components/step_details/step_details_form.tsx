@@ -15,7 +15,7 @@ import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from
 import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
-import { api } from '../../../../services/api_service';
+import { useApi } from '../../../../hooks/use_api';
 
 import { isTransformIdValid, TransformId, TransformPivotConfig } from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
@@ -71,6 +71,8 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
     defaults.isContinuousModeEnabled
   );
+
+  const api = useApi();
 
   // fetch existing transform IDs and indices once for form validation
   useEffect(() => {

@@ -29,7 +29,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { api } from '../../../../services/api_service';
+import { useApi } from '../../../../hooks/use_api';
 import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
@@ -76,6 +76,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
     useEffect(() => {
       onChange({ created, started, indexPatternId });
     }, [created, started, indexPatternId]);
+
+    const api = useApi();
 
     if (!isKibanaContextInitialized(kibanaContext)) {
       return null;

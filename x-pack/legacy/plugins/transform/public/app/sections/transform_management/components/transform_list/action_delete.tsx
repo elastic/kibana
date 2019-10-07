@@ -14,7 +14,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { deleteTransforms } from '../../services/transform_service';
+import { useDeleteTransforms } from '../../../../hooks';
 
 import {
   createCapabilityFailureMessage,
@@ -34,6 +34,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
   const disabled = items.some((i: TransformListRow) => i.stats.state !== TRANSFORM_STATE.STOPPED);
 
   const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
+  const deleteTransforms = useDeleteTransforms();
 
   const [isModalVisible, setModalVisible] = useState(false);
 

@@ -7,7 +7,6 @@
 import React, { SFC } from 'react';
 import ReactDOM from 'react-dom';
 
-import { api } from '../../../../services/api_service';
 import { SimpleQuery } from '../../../../common';
 import {
   PIVOT_PREVIEW_STATUS,
@@ -17,7 +16,7 @@ import {
 
 import { IndexPattern } from 'ui/index_patterns';
 
-jest.mock('../../../../services/api_service');
+jest.mock('../../../../hooks/use_api');
 
 type Callback = () => void;
 interface TestHookProps {
@@ -58,7 +57,6 @@ describe('usePivotPreviewData', () => {
     expect(pivotPreviewObj.errorMessage).toBe('');
     expect(pivotPreviewObj.status).toBe(PIVOT_PREVIEW_STATUS.UNUSED);
     expect(pivotPreviewObj.previewData).toEqual([]);
-    expect(api.getTransformsPreview).not.toHaveBeenCalled();
   });
 
   test('indexPattern set triggers loading', () => {
@@ -76,9 +74,6 @@ describe('usePivotPreviewData', () => {
     // trigger that state upate yet.
     expect(pivotPreviewObj.status).toBe(PIVOT_PREVIEW_STATUS.UNUSED);
     expect(pivotPreviewObj.previewData).toEqual([]);
-    // ideally this should be 1 instead of 0 but jest/enzyme/hooks doesn't
-    // trigger that state upate yet.
-    expect(api.getTransformsPreview).toHaveBeenCalledTimes(0);
   });
 
   // TODO add more tests to check data retrieved via `api.esSearch()`.

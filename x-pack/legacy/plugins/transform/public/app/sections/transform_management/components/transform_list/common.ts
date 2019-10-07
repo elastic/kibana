@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformId, TRANSFORM_STATE } from '../../../../common';
-
 export interface Clause {
   type: string;
   value: string;
@@ -18,20 +16,6 @@ export interface Query {
   };
   text: string;
   syntax: any;
-}
-
-export interface TransformEndpointRequest {
-  id: TransformId;
-  state?: TRANSFORM_STATE;
-}
-
-export interface ResultData {
-  success: boolean;
-  error?: any;
-}
-
-export interface TransformEndpointResult {
-  [key: string]: ResultData;
 }
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;

@@ -56,6 +56,8 @@ export function loadIndexPatterns(
     });
 }
 
+type CombinedQuery = Record<'bool', any> | unknown;
+
 export function loadCurrentIndexPattern(
   indexPatterns: IndexPatternsType,
   indexPatternId: IndexPatternId
@@ -85,7 +87,7 @@ export function createSearchItems(
     language: 'lucene',
   };
 
-  let combinedQuery = {
+  let combinedQuery: CombinedQuery = {
     bool: {
       must: [
         {

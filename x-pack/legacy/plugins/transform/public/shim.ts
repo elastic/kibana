@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { npStart } from 'ui/new_platform';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n/react';
 import { I18nContext } from 'ui/i18n';
 
-import chrome from 'ui/chrome';
-import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { fatalError, toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
 import { docTitle } from 'ui/doc_title/doc_title';
 
@@ -20,18 +20,15 @@ import { HashRouter } from 'react-router-dom';
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
-export interface AppCore {
-  chrome: typeof chrome;
+type npCore = typeof npStart.core;
+
+export interface AppCore extends npCore {
   i18n: {
     [i18nPackage: string]: any;
     Context: typeof I18nContext;
     FormattedMessage: typeof FormattedMessage;
     FormattedDate: typeof FormattedDate;
     FormattedTime: typeof FormattedTime;
-  };
-  notification: {
-    fatalError: typeof fatalError;
-    toastNotifications: typeof toastNotifications;
   };
   savedSearches: {
     getClient(): any;
@@ -46,8 +43,7 @@ export interface AppPlugins {
 }
 
 export interface Core extends AppCore {
-  chrome: typeof chrome;
-  http: {
+  legacyHttp: {
     getClient(): any;
     setClient(client: any): void;
   };
@@ -88,8 +84,11 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
 
   let reactRouter: HashRouter | undefined;
 
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = npStart.core.docLinks;
+
   return {
     core: {
+      ...npStart.core,
       i18n: {
         ...i18n,
         Context: I18nContext,
@@ -108,16 +107,11 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
           return reactRouter;
         },
       },
-      http: {
+      legacyHttp: {
         setClient: (client: any): void => {
           httpClient = client;
         },
         getClient: (): any => httpClient,
-      },
-      chrome,
-      notification: {
-        fatalError,
-        toastNotifications,
       },
       documentation: {
         esDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`,

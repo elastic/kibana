@@ -8,7 +8,6 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { HashRouter } from 'react-router-dom';
 
 import { API_BASE_PATH } from '../../common/constants';
-import { httpService } from './services/http';
 import { AuthorizationProvider } from './lib/authorization';
 import { AppDependencies } from './types';
 
@@ -35,7 +34,7 @@ export const getAppProviders = (deps: AppDependencies) => {
 
   return ({ children }: { children: ReactNode }) => (
     <AuthorizationProvider
-      privilegesEndpoint={httpService.addBasePath(`${API_BASE_PATH}privileges`)}
+      privilegesEndpoint={deps.core.http.basePath.prepend(`${API_BASE_PATH}privileges`)}
     >
       <I18nContext>
         <HashRouter>

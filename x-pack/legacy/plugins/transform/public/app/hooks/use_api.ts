@@ -4,24 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import { useAppDependencies } from '../app_dependencies';
 
 import { PreviewRequestBody, TransformId } from '../common';
 
-import {
-  TransformEndpointRequest,
-  TransformEndpointResult,
-} from '../sections/transform_management/components/transform_list/common';
+import { http } from '../services/http_service';
 
-import { http } from './http_service';
+import { EsIndex, TransformEndpointRequest, TransformEndpointResult } from './use_api_types';
 
-const basePath = chrome.addBasePath('/api/transform');
-
-interface EsIndex {
-  name: string;
-}
-
-export const api = {
+const apiFactory = (basePath: string, indicesBasePath: string) => ({
   getTransforms(transformId?: TransformId): Promise<any> {
     const transformIdString = transformId !== undefined ? `/${transformId}` : '';
     return http({
@@ -95,10 +86,18 @@ export const api = {
     }) as Promise<any>;
   },
   getIndices() {
-    const tempBasePath = chrome.addBasePath('/api');
     return http({
-      url: `${tempBasePath}/index_management/indices`,
+      url: `${indicesBasePath}/index_management/indices`,
       method: 'GET',
     }) as Promise<EsIndex[]>;
   },
+});
+
+export const useApi = () => {
+  const appDeps = useAppDependencies();
+
+  const basePath = appDeps.core.http.basePath.prepend('/api/transform');
+  const indicesBasePath = appDeps.core.http.basePath.prepend('/api');
+
+  return apiFactory(basePath, indicesBasePath);
 };

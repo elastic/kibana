@@ -5,11 +5,9 @@
  */
 class HttpService {
   private client: any;
-  public addBasePath: (path: string) => string = () => '';
 
-  public init(httpClient: any, chrome: any): void {
+  public init(httpClient: any): void {
     this.client = httpClient;
-    this.addBasePath = chrome.addBasePath.bind(chrome);
   }
 
   public get httpClient(): any {

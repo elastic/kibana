@@ -8,7 +8,6 @@ import React, { SFC } from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 
-import { api } from '../../../../services/api_service';
 import { SimpleQuery } from '../../../../common';
 import {
   SOURCE_INDEX_STATUS,
@@ -16,7 +15,7 @@ import {
   UseSourceIndexDataReturnType,
 } from './use_source_index_data';
 
-jest.mock('../../../../services/api_service');
+jest.mock('../../../../hooks/use_api');
 
 type Callback = () => void;
 interface TestHookProps {
@@ -61,7 +60,6 @@ describe('useSourceIndexData', () => {
     expect(sourceIndexObj.errorMessage).toBe('');
     expect(sourceIndexObj.status).toBe(SOURCE_INDEX_STATUS.LOADING);
     expect(sourceIndexObj.tableItems).toEqual([]);
-    expect(api.esSearch).toHaveBeenCalledTimes(1);
   });
 
   // TODO add more tests to check data retrieved via `api.esSearch()`.

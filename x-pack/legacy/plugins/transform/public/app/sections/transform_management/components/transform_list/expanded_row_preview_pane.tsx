@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import { SortDirection, SORT_DIRECTION, FieldDataColumnType } from '../../../../../shared_imports';
 
-import { api } from '../../../../services/api_service';
+import { useApi } from '../../../../hooks/use_api';
 
 import {
   getFlattenedFields,
@@ -75,6 +75,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const api = useApi();
 
   const getPreviewFactory = () => {
     let concurrentLoads = 0;

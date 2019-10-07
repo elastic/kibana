@@ -10,7 +10,7 @@ import { SearchResponse } from 'elasticsearch';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { api } from '../../../../services/api_service';
+import { useApi } from '../../../../hooks/use_api';
 import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import {
@@ -47,6 +47,7 @@ export const useSourceIndexData = (
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(SOURCE_INDEX_STATUS.UNUSED);
   const [tableItems, setTableItems] = useState<EsDoc[]>([]);
+  const api = useApi();
 
   const getSourceIndexData = async function() {
     setErrorMessage('');

@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
-import { api } from '../../../../services/api_service';
+import { useApi } from '../../../../hooks/use_api';
 
 import { Dictionary } from '../../../../../../common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
@@ -60,6 +60,7 @@ export const usePivotPreviewData = (
   const [status, setStatus] = useState(PIVOT_PREVIEW_STATUS.UNUSED);
   const [previewData, setPreviewData] = useState<PreviewData>([]);
   const [previewMappings, setPreviewMappings] = useState<PreviewMappings>({ properties: {} });
+  const api = useApi();
 
   const aggsArr = dictionaryToArray(aggs);
   const groupByArr = dictionaryToArray(groupBy);

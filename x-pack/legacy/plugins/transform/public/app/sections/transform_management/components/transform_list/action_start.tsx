@@ -14,7 +14,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { startTransforms } from '../../services/transform_service';
+import { useStartTransforms } from '../../../../hooks';
 
 import {
   createCapabilityFailureMessage,
@@ -31,6 +31,7 @@ interface StartActionProps {
 export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+  const startTransforms = useStartTransforms();
 
   const [isModalVisible, setModalVisible] = useState(false);
 

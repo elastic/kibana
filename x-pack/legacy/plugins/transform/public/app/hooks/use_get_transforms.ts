@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { api } from '../../../../services/api_service';
 import {
   TransformListRow,
   TransformStats,
@@ -13,7 +12,9 @@ import {
   TransformPivotConfig,
   refreshTransformList$,
   REFRESH_TRANSFORM_LIST_STATE,
-} from '../../../../common';
+} from '../common';
+
+import { useApi } from './use_api';
 
 interface GetTransformsResponse {
   count: number;
@@ -44,7 +45,7 @@ type GetTransformsStatsResponse = GetTransformsStatsResponseOk | GetTransformsSt
 
 export type GetTransforms = (forceRefresh?: boolean) => void;
 
-export const getTransformsFactory = (
+export const useGetTransforms = (
   setTransforms: React.Dispatch<React.SetStateAction<TransformListRow[]>>,
   setErrorMessage: React.Dispatch<
     React.SetStateAction<GetTransformsStatsResponseError | undefined>
@@ -52,6 +53,8 @@ export const getTransformsFactory = (
   setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
   blockRefresh: boolean
 ): GetTransforms => {
+  const api = useApi();
+
   let concurrentLoads = 0;
 
   const getTransforms = async (forceRefresh = false) => {

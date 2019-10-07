@@ -11,7 +11,7 @@ import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { i18n } from '@kbn/i18n';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { api } from '../../../../services/api_service';
+import { useApi } from '../../../../hooks/use_api';
 import { JobIcon } from '../../../../components/job_icon';
 import { TransformMessage } from '../../../../../../common/types/messages';
 import { useRefreshTransformList } from '../../../../common';
@@ -29,6 +29,8 @@ export const ExpandedRowMessagesPane: React.SFC<Props> = ({ transformId }) => {
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+
+  const api = useApi();
 
   const getMessagesFactory = () => {
     let concurrentLoads = 0;
