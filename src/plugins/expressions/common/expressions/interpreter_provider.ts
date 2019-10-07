@@ -21,10 +21,11 @@
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 
 // @ts-ignore
-import { fromExpression, getType, getByAlias, castProvider } from '@kbn/interpreter/common';
+import { fromExpression, getByAlias, castProvider } from '@kbn/interpreter/common';
 
 import { createError } from './create_error';
 import { ExpressionAST, ExpressionFunctionAST, AnyExpressionFunction, ArgumentType } from './types';
+import { getType } from '../../common';
 
 export { createError };
 
@@ -34,22 +35,15 @@ export interface InterpreterConfig {
   handlers: any;
 }
 
-export type ExpressionInterpret = (
-  ast: ExpressionAST,
-  context?: AnyExpressionFunction['context'] | null
-) => any;
+export type ExpressionInterpret = (ast: ExpressionAST, context?: any) => any;
 
 export function interpreterProvider(config: InterpreterConfig): ExpressionInterpret {
   const { functions, types } = config;
   const handlers = { ...config.handlers, types };
   const cast = castProvider(types);
 
-  async function invokeChain(
-    chainArr: ExpressionFunctionAST[],
-    context: AnyExpressionFunction['context'] | null
-  ): Promise<any> {
+  async function invokeChain(chainArr: ExpressionFunctionAST[], context: any): Promise<any> {
     if (!chainArr.length) return context;
-
     // if execution was aborted return error
     if (handlers.abortSignal && handlers.abortSignal.aborted) {
       return createError({
@@ -57,7 +51,6 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
         name: 'AbortError',
       });
     }
-
     const chain = clone(chainArr);
     const link = chain.shift(); // Every thing in the chain will always be a function right?
     if (!link) throw Error('Function chain is empty.');
@@ -90,7 +83,7 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
 
   async function invokeFunction(
     fnDef: AnyExpressionFunction,
-    context: AnyExpressionFunction['context'] | null,
+    context: any,
     args: Record<string, unknown>
   ): Promise<any> {
     // Check function input.
@@ -124,7 +117,7 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
   async function resolveArgs(
     fnDef: AnyExpressionFunction,
-    context: AnyExpressionFunction['context'] | null,
+    context: any,
     argAsts: any
   ): Promise<any> {
     const argDefs = fnDef.args;
@@ -215,7 +208,8 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
   }
 
   const interpret: ExpressionInterpret = async function interpret(ast, context = null) {
-    switch (getType(ast)) {
+    const type = getType(ast);
+    switch (type) {
       case 'expression':
         return invokeChain(ast.chain, context);
       case 'string':
