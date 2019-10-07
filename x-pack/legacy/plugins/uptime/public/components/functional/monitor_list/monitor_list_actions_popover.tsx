@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { connect } from 'react-redux';
@@ -15,17 +15,20 @@ import { UptimeSettingsContext } from '../../../contexts';
 import { isIntegrationsPopupOpen } from '../../../state/selectors';
 import { AppState } from '../../../state';
 import { toggleIntegrationsPopover, PopoverState } from '../../../state/actions';
+import { fetchMonitorDetails, FETCH_MONITOR_DETAILS } from '../../../state/actions/monitor';
 
 interface MonitorListActionsPopoverProps {
   summary: MonitorSummary;
   popoverState: PopoverState | null;
   togglePopoverIsVisible: typeof toggleIntegrationsPopover;
+  loadMonitorDetails: any;
 }
 
 const MonitorListActionsPopoverComponent = ({
   summary,
   popoverState,
   togglePopoverIsVisible,
+  loadMonitorDetails,
 }: MonitorListActionsPopoverProps) => {
   const popoverId = `${summary.monitor_id}_popover`;
   const {
@@ -36,6 +39,11 @@ const MonitorListActionsPopoverComponent = ({
     isInfraAvailable,
     isLogsAvailable,
   } = useContext(UptimeSettingsContext);
+
+  useEffect(() => {
+    togglePopoverIsVisible({ id: '', open: false });
+    loadMonitorDetails('bad-ssl');
+  }, []);
 
   const monitorUrl: string | undefined = get(summary, 'state.url.full', undefined);
   const isPopoverOpen: boolean =
@@ -82,6 +90,12 @@ const mapStateToProps = (state: AppState) => ({
 const mapDispatchToProps = (dispatch: any) => ({
   togglePopoverIsVisible: (popoverState: PopoverState) => {
     return dispatch(toggleIntegrationsPopover(popoverState));
+  },
+  loadMonitorDetails: (monitorId: string) => {
+    return dispatch({
+      type: FETCH_MONITOR_DETAILS,
+      payload: monitorId,
+    });
   },
 });
 

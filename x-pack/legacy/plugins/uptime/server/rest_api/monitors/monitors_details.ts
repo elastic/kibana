@@ -5,7 +5,6 @@
  */
 
 import Joi from 'joi';
-import { PingResults } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 
 export const createGetMonitorDetailsRoute = (libs: UMServerLibs) => ({

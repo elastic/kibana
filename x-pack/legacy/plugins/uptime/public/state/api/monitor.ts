@@ -5,20 +5,14 @@
  */
 
 import { useContext } from 'react';
-import { MonitorDetailsRequest, MonitorDetailsState } from '../actions/monitor';
+import { MonitorDetailsState } from '../actions/monitor';
 import { getApiPath } from '../../lib/helper';
 import { UptimeSettingsContext } from '../../contexts';
 
-export const fetchMonitorDetails = async (
-  data: MonitorDetailsRequest
-): Promise<MonitorDetailsState> => {
+export const fetchMonitorDetails = async (monitorId: string): Promise<MonitorDetailsState> => {
   const { basePath } = useContext(UptimeSettingsContext);
-  const { monitorId, checkGroup } = data;
 
-  const url = getApiPath(
-    `/api/uptime/monitor/details?monitorId=${monitorId}&checkGroup=${checkGroup}`,
-    basePath
-  );
+  const url = getApiPath(`/api/uptime/monitor/details?monitorId=${monitorId}`, basePath);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(response.statusText);

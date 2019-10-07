@@ -9,17 +9,13 @@ export const FETCH_MONITOR_DETAILS_SUCCESS = 'FETCH_MONITOR_DETAILS_SUCCESS';
 export const FETCH_MONITOR_DETAILS_FAIL = 'FETCH_MONITOR_DETAILS_FAIL';
 
 export interface MonitorDetailsState {
-  error: Error;
-}
-
-export interface MonitorDetailsRequest {
   monitorId: string;
-  checkGroup: string;
+  error: Error;
 }
 
 interface GetMonitorDetailsAction {
   type: typeof FETCH_MONITOR_DETAILS;
-  payload: MonitorDetailsRequest;
+  payload: string;
 }
 
 interface GetMonitorDetailsSuccessAction {
@@ -32,12 +28,26 @@ interface GetMonitorDetailsFailAction {
   payload: any;
 }
 
-export function fetchMonitorDetails(
-  monitorDetailsState: MonitorDetailsRequest
-): GetMonitorDetailsAction {
+export function fetchMonitorDetails(monitorId: string): GetMonitorDetailsAction {
   return {
     type: FETCH_MONITOR_DETAILS,
+    payload: monitorId,
+  };
+}
+
+export function fetchMonitorDetailsSuccess(
+  monitorDetailsState: MonitorDetailsState
+): GetMonitorDetailsSuccessAction {
+  return {
+    type: FETCH_MONITOR_DETAILS_SUCCESS,
     payload: monitorDetailsState,
+  };
+}
+
+export function fetchMonitorDetailsFail(error: any): GetMonitorDetailsFailAction {
+  return {
+    type: FETCH_MONITOR_DETAILS_FAIL,
+    payload: error,
   };
 }
 

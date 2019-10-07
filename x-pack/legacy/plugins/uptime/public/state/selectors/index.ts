@@ -7,4 +7,6 @@ import { AppState } from '../../state';
 
 export const isIntegrationsPopupOpen = (state: AppState) => state.ui.integrationsPopoverOpen;
 
-export const getMonitorDetails = (state: AppState) => state.ui.integrationsPopoverOpen;
+export const getMonitorDetails = (state: AppState, summary: any) => {
+  return state.monitor.monitorDetailsList.get(summary.monitor_id);
+};

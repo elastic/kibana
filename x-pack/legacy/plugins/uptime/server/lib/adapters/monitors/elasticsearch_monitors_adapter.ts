@@ -440,20 +440,29 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         size: 1,
         query: {
           bool: {
+            must: [
+              {
+                exists: {
+                  field: 'error',
+                },
+              },
+            ],
             filter: [
               {
                 term: {
                   'monitor.id': monitorId,
                 },
               },
-              {
-                term: {
-                  'monitor.check_group': checkGroup,
-                },
-              },
             ],
           },
         },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+        ],
       },
     };
 
@@ -462,7 +471,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const monitorError: Error | null = get(result, 'hits.hits[0]._source.error', null);
 
     return {
-      monitorError,
+      monitorId,
+      error: monitorError,
     };
   }
 }

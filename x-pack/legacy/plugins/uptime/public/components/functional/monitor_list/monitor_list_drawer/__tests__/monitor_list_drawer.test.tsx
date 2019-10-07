@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSummary, Check } from '../../../../../common/graphql/types';
+import { MonitorSummary, Check } from '../../../../../../common/graphql/types';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { MonitorListDrawer } from '../monitor_list_drawer';

@@ -95,11 +95,11 @@ export const MonitorListComponent = (props: Props) => {
       return {
         ...map,
         [id]: (
-          <MonitorListDrawer
-            summary={
-              items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
-            }
-          />
+          <>
+            <MonitorListDrawer
+              summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
+            />
+          </>
         ),
       };
     }, {});
@@ -250,9 +250,9 @@ export const MonitorListComponent = (props: Props) => {
                         },
                       }
                     )}
-                    iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
+                    iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
                     onClick={() => {
-                      if (drawerIds.find(i => id === i)) {
+                      if (drawerIds.includes(id)) {
                         updateDrawerIds(drawerIds.filter(p => p !== id));
                       } else {
                         updateDrawerIds([...drawerIds, id]);
