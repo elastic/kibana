@@ -38,6 +38,7 @@ import {
 import { memoizeLast } from 'ui/utils/memoize';
 import { VisType } from 'ui/vis';
 import { VisTypeAlias } from '../../../../../visualizations/public';
+import { createUiStatsReporter, METRIC_TYPE } from '../../../../../ui_metric/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
@@ -237,6 +238,8 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     const onClick =
       'aliasUrl' in visType
         ? () => {
+            createUiStatsReporter('visualize')(METRIC_TYPE.CLICK, visType.name);
+
             window.location = chrome.addBasePath(visType.aliasUrl);
           }
         : () => this.props.onVisTypeSelected(visType);
