@@ -258,6 +258,45 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to disable.|string|
 
+#### `POST /api/alert/{id}/_mute_all`: Mute all alert instances
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to mute all alert instances for.|string|
+
+#### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|alertId|The id of the alert you're trying to mute an instance for.|string|
+|alertInstanceId|The instance id of the alert instance you're trying to mute.|string|
+
+#### `POST /api/alert/{id}/_unmute_all`: Unmute all alert instances
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to unmute all alert instances for.|string|
+
+#### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|alertId|The id of the alert you're trying to unmute an instance for.|string|
+|alertInstanceId|The instance id of the alert instance you're trying to unmute.|string|
+
+#### `POST /api/alert/{id}/_update_api_key`: Update alert API key
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
 
 ## Alert instance factory
 
