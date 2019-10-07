@@ -6,11 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import { toastNotifications } from 'ui/notify';
 import { startMLJob } from '../../../../../services/rest/ml';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MachineLearningFlyoutView } from './view';
+import { KibanaCoreContext } from '../../../../../../../observability/public/context/kibana_core';
 
 interface Props {
   isOpen: boolean;
@@ -23,6 +23,8 @@ interface State {
 }
 
 export class MachineLearningFlyout extends Component<Props, State> {
+  static contextType = KibanaCoreContext;
+
   public state: State = {
     isCreatingJob: false
   };
@@ -53,6 +55,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   };
 
   public addErrorToast = () => {
+    const core = this.context;
     const { urlParams } = this.props;
     const { serviceName } = urlParams;
 
@@ -60,7 +63,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
       return;
     }
 
-    toastNotifications.addWarning({
+    core.notifications.toasts.addWarning({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
         {
@@ -86,6 +89,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   }: {
     transactionType: string;
   }) => {
+    const core = this.context;
     const { urlParams } = this.props;
     const { serviceName } = urlParams;
 
@@ -93,7 +97,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
       return;
     }
 
-    toastNotifications.addSuccess({
+    core.notifications.toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationTitle',
         {
@@ -113,17 +117,19 @@ export class MachineLearningFlyout extends Component<Props, State> {
               }
             }
           )}{' '}
-          <MLJobLink
-            serviceName={serviceName}
-            transactionType={transactionType}
-          >
-            {i18n.translate(
-              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
-              {
-                defaultMessage: 'View job'
-              }
-            )}
-          </MLJobLink>
+          <KibanaCoreContext.Provider value={core}>
+            <MLJobLink
+              serviceName={serviceName}
+              transactionType={transactionType}
+            >
+              {i18n.translate(
+                'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
+                {
+                  defaultMessage: 'View job'
+                }
+              )}
+            </MLJobLink>
+          </KibanaCoreContext.Provider>
         </p>
       )
     });
