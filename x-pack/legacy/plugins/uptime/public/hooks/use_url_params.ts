@@ -34,12 +34,26 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
       location: { pathname, search },
     } = refreshContext;
     const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
+    const mergedParams = {
+      ...currentParams,
+      ...updatedParams,
+    };
+
     history.push({
       pathname,
-      search: qs.stringify({
-        ...currentParams,
-        ...updatedParams,
-      }),
+      search: qs.stringify(
+        // drop any parameters that have no value
+        Object.keys(mergedParams).reduce((cur, acc) => {
+          const value = mergedParams[acc];
+          if (value === undefined || value === '') {
+            return cur;
+          }
+          return {
+            ...cur,
+            [acc]: value,
+          };
+        }, {})
+      ),
     });
   };
 

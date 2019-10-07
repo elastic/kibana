@@ -140,7 +140,7 @@ export const OverviewPage = ({
               currentFilter={urlFilters}
               onFilterUpdate={(filtersKuery: string) => {
                 if (urlFilters !== filtersKuery) {
-                  updateUrl({ filters: filtersKuery });
+                  updateUrl({ filters: filtersKuery, pagination: '' });
                 }
               }}
               variables={sharedProps}
