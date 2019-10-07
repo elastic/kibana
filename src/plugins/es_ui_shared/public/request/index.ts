@@ -25,3 +25,12 @@ export {
   sendRequest,
   useRequest,
 } from './request';
+
+export {
+  SendRequestConfigNp,
+  SendRequestResponseNp,
+  UseRequestConfigNp,
+  UseRequestResponseNp,
+  sendRequestNp,
+  useRequestNp,
+} from './request_np';
