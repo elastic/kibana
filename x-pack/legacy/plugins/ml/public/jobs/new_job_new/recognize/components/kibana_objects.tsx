@@ -50,8 +50,24 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                   {isSaving ? <EuiLoadingSpinner size="m" /> : null}
                   {success !== undefined ? (
                     <EuiIcon
-                      type={success ? 'check' : 'cross'}
-                      color={success ? 'success' : 'danger'}
+                      type={success || exists ? 'check' : 'cross'}
+                      color={success || exists ? 'success' : 'danger'}
+                      aria-label={
+                        success
+                          ? i18n.translate(
+                              'xpack.ml.newJob.simple.recognize.results.savedAriaLabel',
+                              { defaultMessage: 'Saved' }
+                            )
+                          : exists
+                          ? i18n.translate(
+                              'xpack.ml.newJob.simple.recognize.results.alreadySavedAriaLabel',
+                              { defaultMessage: 'Already saved' }
+                            )
+                          : i18n.translate(
+                              'xpack.ml.newJob.simple.recognize.results.saveFailedAriaLabel',
+                              { defaultMessage: 'Save failed' }
+                            )
+                      }
                     />
                   ) : null}
                 </EuiFlexItem>
@@ -60,7 +76,7 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                     {title}
                   </EuiText>
                   {exists && (
-                    <EuiText size="xs" color="danger">
+                    <EuiText size="xs" color="default">
                       <FormattedMessage
                         id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
                         defaultMessage="(already exists)"

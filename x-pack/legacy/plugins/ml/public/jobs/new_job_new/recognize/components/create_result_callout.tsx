@@ -68,6 +68,10 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
             }
             color="warning"
             iconType="alert"
+            aria-label={i18n.translate(
+              'xpack.ml.newJob.simple.recognize.someJobsCreationFailed.saveFailedAriaLabel',
+              { defaultMessage: 'Save failed' }
+            )}
           >
             <EuiButton
               color="warning"

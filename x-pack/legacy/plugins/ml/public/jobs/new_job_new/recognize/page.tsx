@@ -168,7 +168,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     setValidationResult({
       jobPrefix: jobPrefixValidationResult,
       jobGroups: jobGroupsValidationResult,
-      formValid: !!jobPrefixValidationResult || jobGroupsValidationResult.length > 0,
+      formValid: !jobPrefixValidationResult && jobGroupsValidationResult.length === 0,
     });
   };
 
@@ -417,6 +417,12 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                     <EuiSpacer size="l" />
                     <EuiAccordion
                       id="advancedOptions"
+                      area-label={i18n.translate(
+                        'xpack.ml.newJob.simple.recognize.advancedSettingsAriaLabel',
+                        {
+                          defaultMessage: 'Advanced settings',
+                        }
+                      )}
                       buttonContent={
                         <FormattedMessage
                           id="xpack.ml.newJob.simple.recognize.advancedLabel"
@@ -456,13 +462,26 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                       fill
                       type="submit"
                       isLoading={saveState === SAVE_STATE.SAVING}
-                      disabled={validationResult.formValid}
+                      disabled={!validationResult.formValid}
                       onClick={save}
+                      area-label={i18n.translate(
+                        'xpack.ml.newJob.simple.recognize.createJobButtonAriaLabel',
+                        { defaultMessage: 'Create Job' }
+                      )}
                     >
-                      <FormattedMessage
-                        id="xpack.ml.newJob.simple.recognize.createJobButtonAriaLabel"
-                        defaultMessage="Create Job"
-                      />
+                      {saveState === SAVE_STATE.NOT_SAVED && (
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.createJobButtonLabel"
+                          defaultMessage="Create {numberOfJobs, plural, zero {Job} one {Job} other {Jobs}}"
+                          values={{ numberOfJobs: jobs.length }}
+                        />
+                      )}
+                      {saveState === SAVE_STATE.SAVING && (
+                        <FormattedMessage
+                          id="xpack.ml.newJob.simple.recognize.analysisRunningLabel"
+                          defaultMessage="Analysis running"
+                        />
+                      )}
                     </EuiButton>
                   </EuiTextAlign>
                 </>

@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -66,6 +67,21 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) =
                           type={setupResult.success ? 'check' : 'cross'}
                           color={setupResult.success ? 'secondary' : 'danger'}
                           size="s"
+                          aria-label={
+                            setupResult.success
+                              ? i18n.translate(
+                                  'xpack.ml.newJob.simple.recognize.job.savedAriaLabel',
+                                  {
+                                    defaultMessage: 'Saved',
+                                  }
+                                )
+                              : i18n.translate(
+                                  'xpack.ml.newJob.simple.recognize.job.saveFailedAriaLabel',
+                                  {
+                                    defaultMessage: 'Save failed',
+                                  }
+                                )
+                          }
                         />
                         <FormattedMessage
                           id="xpack.ml.newJob.simple.recognize.jobLabel"
@@ -85,6 +101,21 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) =
                           type={datafeedResult.success ? 'check' : 'cross'}
                           color={datafeedResult.success ? 'secondary' : 'danger'}
                           size="s"
+                          aria-label={
+                            setupResult.success
+                              ? i18n.translate(
+                                  'xpack.ml.newJob.simple.recognize.datafeed.savedAriaLabel',
+                                  {
+                                    defaultMessage: 'Saved',
+                                  }
+                                )
+                              : i18n.translate(
+                                  'xpack.ml.newJob.simple.recognize.datafeed.saveFailedAriaLabel',
+                                  {
+                                    defaultMessage: 'Save failed',
+                                  }
+                                )
+                          }
                         />
                         <FormattedMessage
                           id="xpack.ml.newJob.simple.recognize.datafeedLabel"
@@ -104,6 +135,21 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) =
                           type={datafeedResult.started ? 'check' : 'cross'}
                           color={datafeedResult.started ? 'secondary' : 'danger'}
                           size="s"
+                          aria-label={
+                            setupResult.success
+                              ? i18n.translate(
+                                  'xpack.ml.newJob.simple.recognize.running.startedAriaLabel',
+                                  {
+                                    defaultMessage: 'Started',
+                                  }
+                                )
+                              : i18n.translate(
+                                  'xpack.ml.newJob.simple.recognize.running.startFailedAriaLabel',
+                                  {
+                                    defaultMessage: 'Save failed',
+                                  }
+                                )
+                          }
                         />
                         <FormattedMessage
                           id="xpack.ml.newJob.simple.recognize.runningLabel"
