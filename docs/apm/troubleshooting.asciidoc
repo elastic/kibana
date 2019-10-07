@@ -24,6 +24,16 @@ You can create the index template manually by running `apm-server setup`.
 Take note that index templates *cannot* be applied retroactively -- they are only applied at index creation time.
 More information is available in {apm-server-ref}/apm-server-configuration.html[Set up and configure].
 
+You can check for the existence of an APM index template using the
+{ref}/indices-get-template.html[Get index template API].
+If you're using the default index naming pattern, that request would be:
+
+[source,js]
+--------------------------------------------------
+GET /_template/apm-{version}
+--------------------------------------------------
+// CONSOLE
+
 If you're not outputting data directly from APM Server to Elasticsearch (perhaps you're using Logstash or Kafka),
 then the index template will not be set up automatically. Instead, you'll need to
 {apm-server-ref}/_manually_loading_template_configuration.html#load-template-manually-alternate[load the template manually].
