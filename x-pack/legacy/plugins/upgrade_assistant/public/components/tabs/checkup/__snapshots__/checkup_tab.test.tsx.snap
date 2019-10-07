@@ -457,7 +457,6 @@ exports[`CheckupTab render without deprecations 1`] = `
             </p>
           </React.Fragment>
         }
-        iconColor="subdued"
         iconType="faceHappy"
         title={
           <h2>

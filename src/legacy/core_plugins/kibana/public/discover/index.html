@@ -1,6 +1,7 @@
 <discover-app class="app-container">
-  <!-- Local nav. -->
+  <h1 class="euiScreenReaderOnly">{{screenTitle}}</h1>
 
+  <!-- Local nav. -->
   <kbn-top-nav
     app-name="'discover'"
     config="topNavMenu"
@@ -175,8 +176,13 @@
             <section
               class="dscTable"
               fixed-scroll
-              aria-label="{{::'kbn.discover.documentsAriaLabel' | i18n: {defaultMessage: 'Documents'} }}"
+              aria-labelledby="documentsAriaLabel"
             >
+              <h2 class="euiScreenReaderOnly"
+                id="documentsAriaLabel"
+                i18n-id="kbn.discover.documentsAriaLabel"
+                i18n-default-message="Documents"
+              ></h2>
               <doc-table
                 hits="rows"
                 index-pattern="indexPattern"

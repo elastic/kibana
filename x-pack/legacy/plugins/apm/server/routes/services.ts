@@ -11,6 +11,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
 import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
+import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 
@@ -62,5 +63,20 @@ export const serviceTransactionTypesRoute = createRoute(() => ({
     const setup = await setupRequest(req);
     const { serviceName } = path;
     return getServiceTransactionTypes(serviceName, setup);
+  }
+}));
+
+export const serviceNodeMetadataRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+  params: {
+    path: t.type({
+      serviceName: t.string,
+      serviceNodeName: t.string
+    })
+  },
+  handler: async (req, { path }) => {
+    const setup = await setupRequest(req);
+    const { serviceName, serviceNodeName } = path;
+    return getServiceNodeMetadata({ setup, serviceName, serviceNodeName });
   }
 }));

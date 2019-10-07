@@ -141,7 +141,6 @@ export function openContextMenu(
 
   ReactDOM.render(
     <EuiPopover
-      id="dashboardPanelContextMenu"
       className="embPanel__optionsMenuPopover"
       button={container}
       isOpen={true}
