@@ -15,7 +15,7 @@ export default function({ getService }: { getService: (service: string) => any }
       const { runningAverageTasks, runningAverageLeadTime } = await supertest
         .post('/api/perf_tasks')
         .set('kbn-xsrf', 'xxx')
-        .send({ tasksToSpawn: 10, durationInSeconds: 60 })
+        .send({ tasksToSpawn: 20, trackExecutionTimeline: true, durationInSeconds: 60 })
         .expect(200)
         .then((response: any) => response.body);
 

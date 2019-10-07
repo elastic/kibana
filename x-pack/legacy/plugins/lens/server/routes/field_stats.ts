@@ -9,7 +9,7 @@ import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { AggregationSearchResponse } from 'elasticsearch';
 import { CoreSetup } from 'src/core/server';
-import { FieldStatsResponse } from '../../common';
+import { FieldStatsResponse, BASE_API_URL } from '../../common';
 
 const SHARD_SIZE = 5000;
 
@@ -17,7 +17,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
   router.post(
     {
-      path: '/index_stats/{indexPatternTitle}/field',
+      path: `${BASE_API_URL}/index_stats/{indexPatternTitle}/field`,
       validate: {
         params: schema.object({
           indexPatternTitle: schema.string(),

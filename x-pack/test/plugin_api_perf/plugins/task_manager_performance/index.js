@@ -62,12 +62,32 @@ export default function TaskManagerPerformanceAPI(kibana) {
           createTaskRunner: ({ taskInstance }) => {
             return {
               async run() {
-                const { state } = taskInstance;
-                const leadTime = Date.now() - taskInstance.runAt;
+                const { params, state } = taskInstance;
+
+                const runAt = millisecondsFromNow(5000);
+                const now = Date.now();
+                const leadTime = now - taskInstance.runAt;
                 performanceState.leadTimeQueue.push(leadTime);
+
+                const counter = (state.counter ? 1 + state.counter : 1);
+
+                const stateUpdated = {
+                  ...state,
+                  counter
+                };
+
+                if(params.trackExecutionTimeline) {
+                  stateUpdated.timeline = stateUpdated.timeline || [];
+                  stateUpdated.timeline.push({
+                    owner: taskInstance.owner.split('-')[0],
+                    counter,
+                    leadTime,
+                    ranAt: now
+                  });
+                }
                 return {
-                  state,
-                  runAt: millisecondsFromNow(1000),
+                  state: stateUpdated,
+                  runAt,
                 };
               },
             };

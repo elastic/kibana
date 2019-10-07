@@ -46,13 +46,13 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.argFormAdvancedFailure.applyButtonLabel', {
         defaultMessage: 'Apply',
       }),
-    getRowErrorMessage: () =>
-      i18n.translate('xpack.canvas.argFormAdvancedFailure.rowErrorMessage', {
-        defaultMessage: 'Invalid Expression',
-      }),
     getResetButtonLabel: () =>
       i18n.translate('xpack.canvas.argFormAdvancedFailure.resetButtonLabel', {
         defaultMessage: 'Reset',
+      }),
+    getRowErrorMessage: () =>
+      i18n.translate('xpack.canvas.argFormAdvancedFailure.rowErrorMessage', {
+        defaultMessage: 'Invalid Expression',
       }),
   },
   ArgFormArgSimpleForm: {
@@ -172,6 +172,48 @@ export const ComponentStrings = {
         defaultMessage: 'Remove Color',
       }),
   },
+  CustomElementModal: {
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.customElementModal.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getCharactersRemainingDescription: (numberOfRemainingCharacter: number) =>
+      i18n.translate('xpack.canvas.customElementModal.remainingCharactersDescription', {
+        defaultMessage: '{numberOfRemainingCharacter} characters remaining',
+        values: {
+          numberOfRemainingCharacter,
+        },
+      }),
+    getDescriptionInputLabel: () =>
+      i18n.translate('xpack.canvas.customElementModal.descriptionInputLabel', {
+        defaultMessage: 'Description',
+      }),
+    getElementPreviewTitle: () =>
+      i18n.translate('xpack.canvas.customElementModal.elementPreviewTitle', {
+        defaultMessage: 'Element preview',
+      }),
+    getImageFilePickerPlaceholder: () =>
+      i18n.translate('xpack.canvas.customElementModal.imageFilePickerPlaceholder', {
+        defaultMessage: 'Select or drag and drop an image',
+      }),
+    getImageInputDescription: () =>
+      i18n.translate('xpack.canvas.customElementModal.imageInputDescription', {
+        defaultMessage:
+          'Take a screenshot of your element and upload it here. This can also be done after saving.',
+      }),
+    getImageInputLabel: () =>
+      i18n.translate('xpack.canvas.customElementModal.imageInputLabel', {
+        defaultMessage: 'Thumbnail image',
+      }),
+    getNameInputLabel: () =>
+      i18n.translate('xpack.canvas.customElementModal.nameInputLabel', {
+        defaultMessage: 'Name',
+      }),
+    getSaveButtonLabel: () =>
+      i18n.translate('xpack.canvas.customElementModal.saveButtonLabel', {
+        defaultMessage: 'Save',
+      }),
+  },
   DatasourceDatasourceComponent: {
     getChangeButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.changeButtonLabel', {
@@ -184,17 +226,6 @@ export const ComponentStrings = {
     getSaveButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.saveButtonLabel', {
         defaultMessage: 'Save',
-      }),
-  },
-  DatasourceNoDatasource: {
-    getPanelDescription: () =>
-      i18n.translate('xpack.canvas.datasourceNoDatasource.panelDescription', {
-        defaultMessage:
-          "This element does not have an attached data source. This is usually because the element is an image or other static asset. If that's not the case you might want to check your expression to make sure it is not malformed.",
-      }),
-    getPanelTitle: () =>
-      i18n.translate('xpack.canvas.datasourceNoDatasource.panelTitle', {
-        defaultMessage: 'No data source present',
       }),
   },
   DatasourceDatasourcePreview: {
@@ -213,6 +244,73 @@ export const ComponentStrings = {
     getModalTitle: () =>
       i18n.translate('xpack.canvas.datasourceDatasourcePreview.modalTitle', {
         defaultMessage: 'Datasource preview',
+      }),
+  },
+  DatasourceNoDatasource: {
+    getPanelDescription: () =>
+      i18n.translate('xpack.canvas.datasourceNoDatasource.panelDescription', {
+        defaultMessage:
+          "This element does not have an attached data source. This is usually because the element is an image or other static asset. If that's not the case you might want to check your expression to make sure it is not malformed.",
+      }),
+    getPanelTitle: () =>
+      i18n.translate('xpack.canvas.datasourceNoDatasource.panelTitle', {
+        defaultMessage: 'No data source present',
+      }),
+  },
+  ElementConfig: {
+    getFailedLabel: () =>
+      i18n.translate('xpack.canvas.elementConfig.failedLabel', {
+        defaultMessage: 'Failed',
+        description:
+          'The label for the total number of elements in a workpad that have thrown an error or failed to load',
+      }),
+    getLoadedLabel: () =>
+      i18n.translate('xpack.canvas.elementConfig.loadedLabel', {
+        defaultMessage: 'Loaded',
+        description: 'The label for the number of elements in a workpad that have loaded',
+      }),
+    getProgressLabel: () =>
+      i18n.translate('xpack.canvas.elementConfig.progressLabel', {
+        defaultMessage: 'Progress',
+        description: 'The label for the percentage of elements that have finished loading',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.elementConfig.title', {
+        defaultMessage: 'Elements',
+        description:
+          '"Elements" refers to the individual text, images, or visualizations that you can add to a Canvas workpad',
+      }),
+    getTotalLabel: () =>
+      i18n.translate('xpack.canvas.elementConfig.totalLabel', {
+        defaultMessage: 'Total',
+        description: 'The label for the total number of elements in a workpad',
+      }),
+  },
+  ElementSettings: {
+    getDataTabLabel: () =>
+      i18n.translate('xpack.canvas.elementSettings.dataTabLabel', {
+        defaultMessage: 'Data',
+        description:
+          'This tab contains the settings for the data (i.e. Elasticsearch query) used as ' +
+          'the source for a Canvas element',
+      }),
+    getDisplayTabLabel: () =>
+      i18n.translate('xpack.canvas.elementSettings.displayTabLabel', {
+        defaultMessage: 'Display',
+        description: 'This tab contains the settings for how data is displayed in a Canvas element',
+      }),
+  },
+  GroupSettings: {
+    getSaveGroupDescription: () =>
+      i18n.translate('xpack.canvas.groupSettings.saveGroupDescription', {
+        defaultMessage: 'Save this group as a new element to re-use it throughout your workpad.',
+      }),
+    getUngroupDescription: () =>
+      i18n.translate('xpack.canvas.groupSettings.ungroupDescription', {
+        defaultMessage: 'Ungroup ({uKey}) to edit individual element settings.',
+        values: {
+          uKey: 'U',
+        },
       }),
   },
   HelpMenu: {
@@ -249,6 +347,80 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
         defaultMessage: 'Keyboard Shortcuts',
+      }),
+  },
+  MultiElementSettings: {
+    getMultipleElementsActionsDescription: () =>
+      i18n.translate('xpack.canvas.groupSettings.multipleElementsActionsDescription', {
+        defaultMessage:
+          'Deselect these elements to edit their individual settings, press ({gKey}) to group them, or save this selection as a new ' +
+          'element to re-use it throughout your workpad.',
+        values: {
+          gKey: 'G',
+        },
+      }),
+    getMultipleElementsDescription: () =>
+      i18n.translate('xpack.canvas.groupSettings.multipleElementsDescription', {
+        defaultMessage: 'Multiple elements are currently selected.',
+      }),
+  },
+  PageConfig: {
+    getBackgroundColorDescription: () =>
+      i18n.translate('xpack.canvas.pageConfig.backgroundColorDescription', {
+        defaultMessage: 'Accepts HEX, RGB or HTML color names',
+      }),
+    getBackgroundColorLabel: () =>
+      i18n.translate('xpack.canvas.pageConfig.backgroundColorLabel', {
+        defaultMessage: 'Background Color',
+      }),
+    getNoTransitionDropDownOptionLabel: () =>
+      i18n.translate('xpack.canvas.pageConfig.transitions.noneDropDownOptionLabel', {
+        defaultMessage: 'None',
+        description:
+          'This is the option the user should choose if they do not want any page transition (i.e. fade in, fade out, etc) to ' +
+          'be applied to the current page.',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.pageConfig.title', {
+        defaultMessage: 'Page',
+      }),
+    getTransitionLabel: () =>
+      i18n.translate('xpack.canvas.pageConfig.transitionLabel', {
+        defaultMessage: 'Transition',
+        description:
+          'This refers to the transition effect, such as fade in or rotate,  applied to a page in presentation mode.',
+      }),
+    getTransitionPreviewLabel: () =>
+      i18n.translate('xpack.canvas.pageConfig.transitionPreviewLabel', {
+        defaultMessage: 'Preview',
+        description: 'This is the label for a preview of the transition effect selected.',
+      }),
+  },
+  PageManager: {
+    getPageNumberAriaLabel: (pageNumber: number) =>
+      i18n.translate('xpack.canvas.pageManager.pageNumberAriaLabel', {
+        defaultMessage: 'Load page number {pageNumber}',
+        values: {
+          pageNumber,
+        },
+      }),
+  },
+  PagePreviewPageControls: {
+    getClonePageAriaLabel: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageAriaLabel', {
+        defaultMessage: 'Clone page',
+      }),
+    getClonePageTooltip: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageTooltip', {
+        defaultMessage: 'Clone',
+      }),
+    getDeletePageAriaLabel: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageAriaLabel', {
+        defaultMessage: 'Delete page',
+      }),
+    getDeletePageTooltip: () =>
+      i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageTooltip', {
+        defaultMessage: 'Delete',
       }),
   },
   ShareWebsiteFlyout: {
@@ -389,31 +561,120 @@ export const ComponentStrings = {
         },
       }),
   },
-  PageManager: {
-    getPageNumberAriaLabel: (pageNumber: number) =>
-      i18n.translate('xpack.canvas.pageManager.pageNumberAriaLabel', {
-        defaultMessage: 'Load page number {pageNumber}',
-        values: {
-          pageNumber,
-        },
+  SidebarContent: {
+    getGroupedElementSidebarTitle: () =>
+      i18n.translate('xpack.canvas.sidebarContent.groupedElementSidebarTitle', {
+        defaultMessage: 'Grouped element',
+        description:
+          'The title displayed when a grouped element is selected. "elements" refer to the different visualizations, images, ' +
+          'text, etc that can be added in a Canvas workpad. These elements can be grouped into a larger "grouped element" ' +
+          'that contains multiple individual elements.',
+      }),
+    getMultiElementSidebarTitle: () =>
+      i18n.translate('xpack.canvas.sidebarContent.multiElementSidebarTitle', {
+        defaultMessage: 'Multiple elements',
+        description:
+          'The title displayed when multiple elements are selected. "elements" refer to the different visualizations, images, ' +
+          'text, etc that can be added in a Canvas workpad.',
+      }),
+    getSingleElementSidebarTitle: () =>
+      i18n.translate('xpack.canvas.sidebarContent.singleElementSidebarTitle', {
+        defaultMessage: 'Selected element',
+        description:
+          'The title displayed when a single element are selected. "element" refer to the different visualizations, images, ' +
+          'text, etc that can be added in a Canvas workpad.',
       }),
   },
-  PagePreviewPageControls: {
-    getClonePageAriaLabel: () =>
-      i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageAriaLabel', {
-        defaultMessage: 'Clone page',
+  SidebarHeader: {
+    getAlignmentMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.alignmentMenuItemLabel', {
+        defaultMessage: 'Alignment',
+        description:
+          'This refers to the vertical (i.e. left, center, right) and horizontal (i.e. top, middle, bottom) ' +
+          'alignment options of the selected elements',
       }),
-    getClonePageTooltip: () =>
-      i18n.translate('xpack.canvas.pagePreviewPageControls.clonePageTooltip', {
-        defaultMessage: 'Clone',
+    getBottomAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.bottomAlignMenuItemLabel', {
+        defaultMessage: 'Bottom',
       }),
-    getDeletePageAriaLabel: () =>
-      i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageAriaLabel', {
-        defaultMessage: 'Delete page',
+    getBringForwardAriaLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.bringForwardArialLabel', {
+        defaultMessage: 'Move element up one layer',
       }),
-    getDeletePageTooltip: () =>
-      i18n.translate('xpack.canvas.pagePreviewPageControls.deletePageTooltip', {
-        defaultMessage: 'Delete',
+    getBringToFrontAriaLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.bringToFrontArialLabel', {
+        defaultMessage: 'Move element to top layer',
+      }),
+    getCenterAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.centerAlignMenuItemLabel', {
+        defaultMessage: 'Center',
+        description: 'This refers to alignment centered horizontally.',
+      }),
+    getContextMenuTitle: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.contextMenuAriaLabel', {
+        defaultMessage: 'Element options',
+      }),
+    getCreateElementModalTitle: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.createElementModalTitle', {
+        defaultMessage: 'Create new element',
+      }),
+    getDistributionMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.distributionMenutItemLabel', {
+        defaultMessage: 'Distribution',
+        description:
+          'This refers to the options to evenly spacing the selected elements horizontall or vertically.',
+      }),
+    getGroupMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.groupMenuItemLabel', {
+        defaultMessage: 'Group',
+        description: 'This refers to grouping multiple selected elements.',
+      }),
+    getHorizontalDistributionMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.horizontalDistributionMenutItemLabel', {
+        defaultMessage: 'Horizontal',
+      }),
+    getLeftAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.leftAlignMenuItemLabel', {
+        defaultMessage: 'Left',
+      }),
+    getMiddleAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.middleAlignMenuItemLabel', {
+        defaultMessage: 'Middle',
+        description: 'This refers to alignment centered vertically.',
+      }),
+    getOrderMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.orderMenuItemLabel', {
+        defaultMessage: 'Order',
+        description: 'Refers to the order of the elements displayed on the page from front to back',
+      }),
+    getRightAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.rightAlignMenuItemLabel', {
+        defaultMessage: 'Right',
+      }),
+    getSaveElementMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.savedElementMenuItemLabel', {
+        defaultMessage: 'Save as new element',
+      }),
+    getSendBackwardAriaLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.sendBackwardArialLabel', {
+        defaultMessage: 'Move element down one layer',
+      }),
+    getSendToBackAriaLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.sendToBackArialLabel', {
+        defaultMessage: 'Move element to bottom layer',
+      }),
+    getTopAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.topAlignMenuItemLabel', {
+        defaultMessage: 'Top',
+      }),
+    getUngroupMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.ungroupMenuItemLabel', {
+        defaultMessage: 'Ungroup',
+        description: 'This refers to ungrouping a grouped element',
+      }),
+    getVerticalDistributionMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.sidebarHeader.verticalDistributionMenutItemLabel', {
+        defaultMessage: 'Vertical',
       }),
   },
   Toolbar: {
@@ -446,6 +707,61 @@ export const ComponentStrings = {
     getCloseTrayAriaLabel: () =>
       i18n.translate('xpack.canvas.toolbarTray.closeTrayAriaLabel', {
         defaultMessage: 'Close tray',
+      }),
+  },
+  WorkpadConfig: {
+    getApplyStylesheetButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.applyStylesheetButtonLabel', {
+        defaultMessage: `Apply stylesheet`,
+        description:
+          '"stylesheet" refers to the collection of CSS style rules entered by the user.',
+      }),
+    getFlipDimensionAriaLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.swapDimensionsAriaLabel', {
+        defaultMessage: `Swap the page's width and height`,
+      }),
+    getFlipDimensionTooltip: () =>
+      i18n.translate('xpack.canvas.workpadConfig.swapDimensionsTooltip', {
+        defaultMessage: 'Swap the width and height',
+      }),
+    getGlobalCSSLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.globalCSSLabel', {
+        defaultMessage: `Global CSS overrides`,
+      }),
+    getGlobalCSSTooltip: () =>
+      i18n.translate('xpack.canvas.workpadConfig.globalCSSTooltip', {
+        defaultMessage: `Apply styles to all pages in this workpad`,
+      }),
+    getPageHeightLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.heightLabel', {
+        defaultMessage: 'Height',
+      }),
+    getPageSizeBadgeAriaLabel: (sizeName: string) =>
+      i18n.translate('xpack.canvas.workpadConfig.pageSizeBadgeAriaLabel', {
+        defaultMessage: `Preset page size: {sizeName}`,
+        values: {
+          sizeName,
+        },
+      }),
+    getPageSizeBadgeOnClickAriaLabel: (sizeName: string) =>
+      i18n.translate('xpack.canvas.workpadConfig.pageSizeBadgeOnClickAriaLabel', {
+        defaultMessage: `Set page size to {sizeName}`,
+        values: {
+          sizeName,
+        },
+      }),
+    getPageWidthLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.widthLabel', {
+        defaultMessage: 'Width',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.workpadConfig.title', {
+        defaultMessage: 'Workpad',
+      }),
+    getUSLetterButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.USLetterButtonLabel', {
+        defaultMessage: 'US Letter',
+        description: 'This is referring to the dimentions of U.S. standard letter paper.',
       }),
   },
   WorkpadCreate: {
@@ -752,6 +1068,14 @@ export const ComponentStrings = {
           numberOfWorkpads,
         },
       }),
+    getDeleteModalConfirmButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadLoader.deleteModalConfirmButtonLabel', {
+        defaultMessage: 'Delete',
+      }),
+    getDeleteModalDescription: () =>
+      i18n.translate('xpack.canvas.workpadLoader.deleteModalDescription', {
+        defaultMessage: `You can't recover deleted workpads.`,
+      }),
     getDeleteMultipleWorkpadModalTitle: (numberOfWorkpads: string) =>
       i18n.translate('xpack.canvas.workpadLoader.deleteMultipleWorkpadsModalTitle', {
         defaultMessage: 'Delete {numberOfWorkpads} workpads?',
@@ -765,18 +1089,6 @@ export const ComponentStrings = {
         values: {
           workpadName,
         },
-      }),
-    getDeleteModalConfirmButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadLoader.deleteModalConfirmButtonLabel', {
-        defaultMessage: 'Delete',
-      }),
-    getDeleteModalDescription: () =>
-      i18n.translate('xpack.canvas.workpadLoader.deleteModalDescription', {
-        defaultMessage: `You can't recover deleted workpads.`,
-      }),
-    getEmptyPromptTitle: () =>
-      i18n.translate('xpack.canvas.workpadLoader.emptyPromptTitle', {
-        defaultMessage: 'Add your first workpad',
       }),
     getEmptyPromptGettingStartedDescription: () =>
       i18n.translate('xpack.canvas.workpadLoader.emptyPromptGettingStartedDescription', {
@@ -792,6 +1104,10 @@ export const ComponentStrings = {
         values: {
           CANVAS,
         },
+      }),
+    getEmptyPromptTitle: () =>
+      i18n.translate('xpack.canvas.workpadLoader.emptyPromptTitle', {
+        defaultMessage: 'Add your first workpad',
       }),
     getExportButtonAriaLabel: (numberOfWorkpads: number) =>
       i18n.translate('xpack.canvas.workpadLoader.exportButtonAriaLabel', {
@@ -892,6 +1208,13 @@ export const ComponentStrings = {
       }),
   },
   WorkpadTemplates: {
+    getCloneTemplateLinkAriaLabel: (templateName: string) =>
+      i18n.translate('xpack.canvas.workpadTemplate.cloneTemplateLinkAriaLabel', {
+        defaultMessage: `Clone workpad template '{templateName}'`,
+        values: {
+          templateName,
+        },
+      }),
     getTableDescriptionColumnTitle: () =>
       i18n.translate('xpack.canvas.workpadTemplates.table.descriptionColumnTitle', {
         defaultMessage: 'Description',
@@ -910,13 +1233,6 @@ export const ComponentStrings = {
     getTemplateSearchPlaceholder: () =>
       i18n.translate('xpack.canvas.workpadTemplate.searchPlaceholder', {
         defaultMessage: 'Find template',
-      }),
-    getCloneTemplateLinkAriaLabel: (templateName: string) =>
-      i18n.translate('xpack.canvas.workpadTemplate.cloneTemplateLinkAriaLabel', {
-        defaultMessage: `Clone workpad template '{templateName}'`,
-        values: {
-          templateName,
-        },
       }),
   },
 };

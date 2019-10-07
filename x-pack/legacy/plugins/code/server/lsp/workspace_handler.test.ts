@@ -6,7 +6,6 @@
 import fs from 'fs';
 import path from 'path';
 
-import mkdirp from 'mkdirp';
 import * as os from 'os';
 import rimraf from 'rimraf';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
@@ -48,7 +47,7 @@ function makeAFile(
   file = 'src/controllers/user.ts'
 ) {
   const fullPath = path.join(workspacePath, repo, '__randomString', revision, file);
-  mkdirp.sync(path.dirname(fullPath));
+  fs.mkdirSync(path.dirname(fullPath), { recursive: true });
   fs.writeFileSync(fullPath, '');
   const strInUrl = fullPath
     .split(path.sep)
@@ -139,8 +138,8 @@ test('should throw a error if url is invalid', async () => {
 });
 
 beforeAll(() => {
-  mkdirp.sync(workspaceDir);
-  mkdirp.sync(repoDir);
+  fs.mkdirSync(workspaceDir, { recursive: true });
+  fs.mkdirSync(repoDir, { recursive: true });
 });
 
 afterAll(() => {
