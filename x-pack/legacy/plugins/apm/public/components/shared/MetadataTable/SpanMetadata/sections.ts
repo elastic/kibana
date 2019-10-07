@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as SECTION_LABELS from '../sectionLabels';
+import {
+  AGENT,
+  SERVICE,
+  SPAN,
+  LABELS,
+  TRANSACTION,
+  TRACE
+} from '../sectionLabels';
 
 export const SPAN_METADATA_SECTIONS = [
-  SECTION_LABELS.AGENT,
-  SECTION_LABELS.SERVICE,
-  SECTION_LABELS.SPAN,
-  SECTION_LABELS.LABELS,
-  SECTION_LABELS.TRANSACTION,
-  SECTION_LABELS.TRACE
+  SPAN,
+  AGENT,
+  SERVICE,
+  TRANSACTION,
+  LABELS,
+  TRACE
 ];

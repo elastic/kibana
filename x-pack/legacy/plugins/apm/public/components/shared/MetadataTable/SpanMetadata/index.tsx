@@ -16,9 +16,7 @@ interface Props {
 export function SpanMetadata({ span }: Props) {
   const spanCopy = {
     ...span,
-    span: {
-      id: span.span.id
-    }
+    span: { id: span.span.id }
   };
 
   return <MetadataTable item={spanCopy} sections={SPAN_METADATA_SECTIONS} />;

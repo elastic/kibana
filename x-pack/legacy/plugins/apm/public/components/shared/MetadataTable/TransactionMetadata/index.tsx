@@ -14,9 +14,13 @@ interface Props {
 }
 
 export function TransactionMetadata({ transaction }: Props) {
+  const transactionCopy = {
+    ...transaction,
+    transaction: { id: transaction.transaction.id }
+  };
   return (
     <MetadataTable
-      item={transaction}
+      item={transactionCopy}
       sections={TRANSACTION_METADATA_SECTIONS}
     />
   );

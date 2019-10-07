@@ -4,28 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as SECTION_LABELS from '../sectionLabels';
+import {
+  TRANSACTION,
+  LABELS,
+  HTTP,
+  HOST,
+  CONTAINER,
+  SERVICE,
+  PROCESS,
+  AGENT,
+  URL,
+  PAGE,
+  USER,
+  USER_AGENT,
+  CUSTOM_TRANSACTION
+} from '../sectionLabels';
 
 export const TRANSACTION_METADATA_SECTIONS = [
-  {
-    ...SECTION_LABELS.LABELS,
-    required: true
-  },
-  SECTION_LABELS.HTTP,
-  SECTION_LABELS.HOST,
-  SECTION_LABELS.CONTAINER,
-  SECTION_LABELS.SERVICE,
-  SECTION_LABELS.PROCESS,
-  SECTION_LABELS.AGENT,
-  SECTION_LABELS.URL,
-  {
-    ...SECTION_LABELS.PAGE,
-    key: 'transaction.page'
-  },
-  {
-    ...SECTION_LABELS.USER,
-    required: true
-  },
-  SECTION_LABELS.USER_AGENT,
-  SECTION_LABELS.CUSTOM_TRANSACTION
+  TRANSACTION,
+  { ...LABELS, required: true },
+  HTTP,
+  HOST,
+  CONTAINER,
+  SERVICE,
+  PROCESS,
+  AGENT,
+  URL,
+  { ...PAGE, key: 'transaction.page' },
+  { ...USER, required: true },
+  USER_AGENT,
+  CUSTOM_TRANSACTION
 ];

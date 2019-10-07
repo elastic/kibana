@@ -15,24 +15,16 @@ import React from 'react';
 import { get, has } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { Span } from '../../../../typings/es_schemas/ui/Span';
-import { APMError } from '../../../../typings/es_schemas/ui/APMError';
-import { StringMap } from '../../../../typings/common';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
-type MetadataItem = Transaction | APMError | Span;
-
 interface Props {
-  item: MetadataItem;
-  sections: MetadataSection[];
-}
-
-export interface MetadataSection {
-  key: string;
-  label: string;
-  required?: boolean;
+  item: Record<string, unknown>;
+  sections: Array<{
+    key: string;
+    label: string;
+    required?: boolean;
+  }>;
 }
 
 export function MetadataTable({ item, sections }: Props) {
@@ -68,7 +60,7 @@ function Section({
   propData,
   propKey
 }: {
-  propData?: StringMap;
+  propData?: Record<string, unknown>;
   propKey?: string;
 }) {
   return (

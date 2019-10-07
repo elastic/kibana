@@ -116,3 +116,10 @@ export const TRACE = {
     defaultMessage: 'Trace'
   })
 };
+
+export const ERROR = {
+  key: 'error',
+  label: i18n.translate('xpack.apm.metadataTable.section.errorLabel', {
+    defaultMessage: 'Error'
+  })
+};

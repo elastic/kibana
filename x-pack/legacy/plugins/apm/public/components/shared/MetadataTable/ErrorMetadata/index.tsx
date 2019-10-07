@@ -14,5 +14,9 @@ interface Props {
 }
 
 export function ErrorMetadata({ error }: Props) {
-  return <MetadataTable item={error} sections={ERROR_METADATA_SECTIONS} />;
+  const errorCopy = {
+    ...error,
+    error: { id: error.error.id }
+  };
+  return <MetadataTable item={errorCopy} sections={ERROR_METADATA_SECTIONS} />;
 }

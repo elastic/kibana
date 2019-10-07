@@ -4,23 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as SECTION_LABELS from '../sectionLabels';
+import {
+  ERROR,
+  LABELS,
+  HTTP,
+  HOST,
+  CONTAINER,
+  SERVICE,
+  PROCESS,
+  AGENT,
+  URL,
+  USER,
+  CUSTOM_ERROR
+} from '../sectionLabels';
 
 export const ERROR_METADATA_SECTIONS = [
-  {
-    ...SECTION_LABELS.LABELS,
-    required: true
-  },
-  SECTION_LABELS.HTTP,
-  SECTION_LABELS.HOST,
-  SECTION_LABELS.CONTAINER,
-  SECTION_LABELS.SERVICE,
-  SECTION_LABELS.PROCESS,
-  SECTION_LABELS.AGENT,
-  SECTION_LABELS.URL,
-  {
-    ...SECTION_LABELS.USER,
-    required: true
-  },
-  SECTION_LABELS.CUSTOM_ERROR
+  ERROR,
+  { ...LABELS, required: true },
+  HTTP,
+  HOST,
+  CONTAINER,
+  SERVICE,
+  PROCESS,
+  AGENT,
+  URL,
+  { ...USER, required: true },
+  CUSTOM_ERROR
 ];
