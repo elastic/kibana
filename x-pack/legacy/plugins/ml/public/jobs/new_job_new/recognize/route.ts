@@ -9,8 +9,6 @@ import uiRoutes from 'ui/routes';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 // @ts-ignore
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
-// @ts-ignore
-import { ml } from 'plugins/ml/services/ml_api_service';
 import { getCreateRecognizerJobBreadcrumbs } from '../../breadcrumbs';
 import { checkCreateJobsPrivilege } from '../../../privilege/check_privilege';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../util/index_utils';
@@ -26,8 +24,5 @@ uiRoutes.when('/jobs/new_job/recognize', {
     savedSearch: loadCurrentSavedSearch,
     checkMlNodesAvailable,
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
-    module: ($route: Record<string, any>) => {
-      return ml.getDataRecognizerModule({ moduleId: $route.current.params.id });
-    },
   },
 });

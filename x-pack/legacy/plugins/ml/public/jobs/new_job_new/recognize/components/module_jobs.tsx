@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, memo } from 'react';
+import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiBadge,
@@ -23,7 +23,7 @@ interface ModuleJobsProps {
   isSaving: boolean;
 }
 
-export const ModuleJobs: FC<ModuleJobsProps> = memo(({ jobs, jobPrefix, isSaving }) => {
+export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) => {
   return (
     <>
       <EuiTitle size="s">
@@ -32,7 +32,7 @@ export const ModuleJobs: FC<ModuleJobsProps> = memo(({ jobs, jobPrefix, isSaving
         </h4>
       </EuiTitle>
 
-      <EuiListGroup bordered={false} flush={true} wrapText={true} maxWidth={false}>
+      <EuiListGroup bordered={false} flush={true} wrapText={true} maxWidth={true}>
         {jobs.map(({ id, config: { description }, setupResult, datafeedResult }) => (
           <EuiListGroupItem
             key={id}
@@ -99,4 +99,4 @@ export const ModuleJobs: FC<ModuleJobsProps> = memo(({ jobs, jobPrefix, isSaving
       </EuiListGroup>
     </>
   );
-});
+};
