@@ -62,7 +62,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/46677
-    describe.skip('gauge', () => {
+    describe('gauge', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickGauge();
