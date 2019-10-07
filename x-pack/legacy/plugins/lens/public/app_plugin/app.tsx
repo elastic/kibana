@@ -9,6 +9,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Storage } from 'ui/storage';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+
 import { CoreStart, NotificationsStart } from 'src/core/public';
 import {
   DataStart,
@@ -43,6 +45,7 @@ interface State {
 export function App({
   editorFrame,
   data,
+  dataShim,
   core,
   store,
   docId,
@@ -50,8 +53,9 @@ export function App({
   redirectTo,
 }: {
   editorFrame: EditorFrameInstance;
+  data: DataPublicPluginStart;
   core: CoreStart;
-  data: DataStart;
+  dataShim: DataStart;
   store: Storage;
   docId?: string;
   docStorage: SavedObjectStore;
@@ -77,9 +81,9 @@ export function App({
   const lastKnownDocRef = useRef<Document | undefined>(undefined);
 
   useEffect(() => {
-    const subscription = data.filter.filterManager.getUpdates$().subscribe({
+    const subscription = dataShim.filter.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState(s => ({ ...s, filters: data.filter.filterManager.getFilters() }));
+        setState(s => ({ ...s, filters: dataShim.filter.filterManager.getFilters() }));
       },
     });
     return () => {
@@ -112,7 +116,7 @@ export function App({
         .then(doc => {
           getAllIndexPatterns(
             doc.state.datasourceMetaData.filterableIndexPatterns,
-            data.indexPatterns.indexPatterns,
+            dataShim.indexPatterns.indexPatterns,
             core.notifications
           )
             .then(indexPatterns => {
@@ -164,6 +168,7 @@ export function App({
       <KibanaContextProvider
         services={{
           appName: 'lens',
+          data,
           store,
           ...core,
         }}
@@ -230,7 +235,7 @@ export function App({
                 setState(s => ({ ...s, savedQuery }));
               }}
               onSavedQueryUpdated={savedQuery => {
-                data.filter.filterManager.setFilters(
+                dataShim.filter.filterManager.setFilters(
                   savedQuery.attributes.filters || state.filters
                 );
                 setState(s => ({
@@ -245,7 +250,7 @@ export function App({
                 }));
               }}
               onClearSavedQuery={() => {
-                data.filter.filterManager.removeAll();
+                dataShim.filter.filterManager.removeAll();
                 setState(s => ({
                   ...s,
                   savedQuery: undefined,
@@ -290,7 +295,7 @@ export function App({
                   ) {
                     getAllIndexPatterns(
                       filterableIndexPatterns,
-                      data.indexPatterns.indexPatterns,
+                      dataShim.indexPatterns.indexPatterns,
                       core.notifications
                     ).then(indexPatterns => {
                       if (indexPatterns) {
