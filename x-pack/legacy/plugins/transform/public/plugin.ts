@@ -27,16 +27,8 @@ const template = `<kbn-management-app section="elasticsearch/transform"><div id=
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
-    const {
-      http,
-      routing,
-      legacyHttp,
-      chrome,
-      documentation,
-      docTitle,
-      savedSearches: coreSavedSearches,
-    } = core;
-    const { management, uiMetric } = plugins;
+    const { http, routing, legacyHttp, chrome, documentation, docTitle } = core;
+    const { management, savedSearches: coreSavedSearches, uiMetric } = plugins;
 
     // Register management section
     const esSection = management.sections.getSection('elasticsearch');

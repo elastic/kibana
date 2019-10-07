@@ -10,20 +10,11 @@ import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import routes from 'ui/routes';
 import { docTitle } from 'ui/doc_title/doc_title';
 
-import { HashRouter } from 'react-router-dom';
-
 // @ts-ignore: allow traversal to fail on x-pack build
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
 type npCore = typeof npStart.core;
-
-export interface AppCore extends npCore {
-  savedSearches: {
-    getClient(): any;
-    setClient(client: any): void;
-  };
-}
 
 export interface AppPlugins {
   management: {
@@ -31,15 +22,13 @@ export interface AppPlugins {
   };
 }
 
-export interface Core extends AppCore {
+export interface Core extends npCore {
   legacyHttp: {
     getClient(): any;
     setClient(client: any): void;
   };
   routing: {
     registerAngularRoute(path: string, config: object): void;
-    registerRouter(router: HashRouter): void;
-    getRouter(): HashRouter | undefined;
   };
   documentation: {
     esDocBasePath: string;
@@ -58,6 +47,10 @@ export interface Plugins extends AppPlugins {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
     };
   };
+  savedSearches: {
+    getClient(): any;
+    setClient(client: any): void;
+  };
   uiMetric: {
     createUiStatsReporter: typeof createUiStatsReporter;
   };
@@ -71,8 +64,6 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
   // to access it within our React app.
   let savedSearches: SavedSearchLoader;
 
-  let reactRouter: HashRouter | undefined;
-
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = npStart.core.docLinks;
 
   return {
@@ -81,12 +72,6 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
       routing: {
         registerAngularRoute: (path: string, config: object): void => {
           routes.when(path, config);
-        },
-        registerRouter: (router: HashRouter): void => {
-          reactRouter = router;
-        },
-        getRouter: (): HashRouter | undefined => {
-          return reactRouter;
         },
       },
       legacyHttp: {
@@ -103,12 +88,6 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
       docTitle: {
         change: docTitle.change,
       },
-      savedSearches: {
-        setClient: (client: any): void => {
-          savedSearches = client;
-        },
-        getClient: (): any => savedSearches,
-      },
     },
     plugins: {
       management: {
@@ -116,6 +95,12 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
         constants: {
           BREADCRUMB: MANAGEMENT_BREADCRUMB,
         },
+      },
+      savedSearches: {
+        setClient: (client: any): void => {
+          savedSearches = client;
+        },
+        getClient: (): any => savedSearches,
       },
       uiMetric: {
         createUiStatsReporter,
