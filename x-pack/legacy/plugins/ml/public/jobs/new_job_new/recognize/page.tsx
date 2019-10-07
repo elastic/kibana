@@ -50,6 +50,12 @@ import { mlJobService } from '../../../services/job_service';
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjects } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
+import {
+  composeValidators,
+  maxLengthValidator,
+  patternValidator,
+} from '../../../../common/util/validators';
+import { JOB_ID_MAX_LENGTH, JOB_ID_PATTERN } from '../../../../common/constants/validation';
 
 interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -92,6 +98,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [kibanaObjects, setKibanaObjects] = useState<KibanaObjects>({} as KibanaObjects);
   const [saveState, setSaveState] = useState<SAVE_STATE>(SAVE_STATE.NOT_SAVED);
   const [resultsUrl, setResultsUrl] = useState<string>('');
+  const [validationResult, setValidationResult] = useState<any>({});
   // endregion
 
   const onJobPrefixChange = (value: string) => {
@@ -135,12 +142,38 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     loadModule();
   }, []);
 
+  const jobPrefixValidator = composeValidators(
+    patternValidator(/^(?![\-_])[a-z0-9\-_]*/),
+    maxLengthValidator(JOB_ID_MAX_LENGTH - Math.max(...jobs.map(({ id }) => id.length)))
+  );
+  const groupValidator = composeValidators(
+    patternValidator(JOB_ID_PATTERN),
+    maxLengthValidator(JOB_ID_MAX_LENGTH)
+  );
+
+  const handleValidation = () => {
+    const jobPrefixValidationResult = jobPrefixValidator(jobPrefix);
+    const jobGroupsValidationResult = jobGroups
+      .map(group => groupValidator(group))
+      .filter(result => result !== null);
+
+    setValidationResult({
+      jobPrefix: jobPrefixValidationResult,
+      jobGroups: jobGroupsValidationResult,
+      formValid: !!jobPrefixValidationResult || jobGroupsValidationResult.length > 0,
+    });
+  };
+
+  useEffect(() => {
+    handleValidation();
+  }, [jobPrefix, jobGroups]);
+
   const save = async (event: FormEvent) => {
     event.preventDefault();
     setSaveState(SAVE_STATE.SAVING);
     try {
       const response: DataRecognizerConfigResponse = await ml.setupDataRecognizerConfig({
-        moduleId: module.id,
+        moduleId,
         prefix: jobPrefix,
         groups: jobGroups,
         query: tempQuery,
@@ -218,7 +251,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                 <FormattedMessage
                   id="xpack.ml.newJob.simple.recognize.usingSavedSearchDescription"
                   defaultMessage="Using a saved search will mean the query used in the datafeeds will be different from the default ones we supply in the {moduleId} module."
-                  values={{ moduleId: module.id }}
+                  values={{ moduleId }}
                 />
               </EuiText>
             </EuiCallOut>
@@ -268,11 +301,36 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                           />
                         }
                         describedByIds={['ml_aria_label_new_job_recognizer_job_prefix']}
+                        isInvalid={!!validationResult.jobPrefix}
+                        error={
+                          <>
+                            {validationResult.jobPrefix && validationResult.jobPrefix.maxLength ? (
+                              <div>
+                                <FormattedMessage
+                                  id="xpack.ml.newJob.simple.recognize.jobPrefixInvalidMaxLengthErrorMessage"
+                                  defaultMessage="Job ID prefix must be no more than {maxLength, plural, one {# character} other {# characters}} long."
+                                  values={{
+                                    maxLength: validationResult.jobPrefix.maxLength.requiredLength,
+                                  }}
+                                />
+                              </div>
+                            ) : null}
+                            {validationResult.jobPrefix && validationResult.jobPrefix.pattern && (
+                              <div>
+                                <FormattedMessage
+                                  id="xpack.ml.newJob.simple.recognize.jobLabelAllowedCharactersDescription"
+                                  defaultMessage="Job label can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
+                                />
+                              </div>
+                            )}
+                          </>
+                        }
                       >
                         <EuiFieldText
                           name="jobPrefix"
                           value={jobPrefix}
                           onChange={({ target: { value } }) => onJobPrefixChange(value)}
+                          isInvalid={!!validationResult.jobPrefix}
                         />
                       </EuiFormRow>
                     </EuiDescribedFormGroup>
@@ -280,11 +338,22 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                       existingGroups={existingGroupIds}
                       selectedGroups={jobGroups}
                       onChange={setJobGroups}
+                      validation={{
+                        valid:
+                          !validationResult.jobGroups || validationResult.jobGroups.length === 0,
+                        message: (
+                          <FormattedMessage
+                            id="xpack.ml.newJob.simple.recognize.jobGroupAllowedCharactersDescription"
+                            defaultMessage="Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
+                          />
+                        ),
+                      }}
                     />
                     <EuiSpacer size="l" />
                     <EuiFormRow>
                       <EuiCheckbox
                         id="startDataFeed"
+                        name="startDataFeed"
                         label={
                           <FormattedMessage
                             id="xpack.ml.newJob.simple.recognize.startDatafeedAfterSaveLabel"
@@ -300,6 +369,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                     <EuiFormRow>
                       <EuiCheckbox
                         id="useFullData"
+                        name="useFullData"
                         label={
                           <FormattedMessage
                             id="xpack.ml.newJob.simple.recognize.useFullDataLabel"
@@ -329,12 +399,17 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                     >
                       <EuiFormRow>
                         <EuiCheckbox
-                          id="ml_aria_label_new_job_dedicated_index"
+                          id="useDedicatedIndex"
+                          name="useDedicatedIndex"
+                          aria-labelledby="ml_aria_label_new_job_dedicated_index"
+                          aria-describedby="ml_aria_description_new_job_dedicated_index"
                           label={
-                            <FormattedMessage
-                              id="xpack.ml.newJob.simple.recognize.useDedicatedIndexLabel"
-                              defaultMessage="Use dedicated index"
-                            />
+                            <EuiText id="ml_aria_label_new_job_dedicated_index">
+                              <FormattedMessage
+                                id="xpack.ml.newJob.simple.recognize.useDedicatedIndexLabel"
+                                defaultMessage="Use dedicated index"
+                              />
+                            </EuiText>
                           }
                           checked={useDedicatedIndex}
                           onChange={({ target: { checked } }) => {
@@ -346,7 +421,12 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                     <EuiSpacer size="l" />
                   </EuiForm>
                   <EuiTextAlign textAlign="right">
-                    <EuiButton fill type="submit" isLoading={saveState === SAVE_STATE.SAVING}>
+                    <EuiButton
+                      fill
+                      type="submit"
+                      isLoading={saveState === SAVE_STATE.SAVING}
+                      disabled={validationResult.formValid}
+                    >
                       <FormattedMessage
                         id="xpack.ml.newJob.simple.recognize.createJobButtonAriaLabel"
                         defaultMessage="Create Job"
@@ -362,7 +442,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
               />
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiPanel>
               <ModuleJobs
                 jobs={jobs}

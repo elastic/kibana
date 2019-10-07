@@ -26,7 +26,7 @@ export function maxLengthValidator(
  * Provides a validator function for checking against pattern.
  * @param pattern
  */
-export function patterValidator(
+export function patternValidator(
   pattern: RegExp
 ): (value: string) => { pattern: { matchPattern: string } } | null {
   return value =>
@@ -44,8 +44,8 @@ export function patterValidator(
  * @param validators
  */
 export function composeValidators(
-  ...validators: Array<(value: string) => { [key: string]: {} } | null>
-): (value: string) => { [key: string]: {} } | null {
+  ...validators: Array<(value: string) => { [key: string]: any } | null>
+): (value: string) => { [key: string]: any } | null {
   return value => {
     const valudationResult = validators.reduce((acc, validator) => {
       return {
