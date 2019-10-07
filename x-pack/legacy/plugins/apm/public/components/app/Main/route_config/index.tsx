@@ -139,16 +139,6 @@ export const routes: BreadcrumbRoute[] = [
     },
     name: RouteName.SERVICE_NODE_METRICS
   },
-  // service map
-  {
-    exact: true,
-    path: '/services/:serviceName/service-map',
-    component: () => <ServiceDetails tab="service-map" />,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
-      defaultMessage: 'Service Map'
-    }),
-    name: RouteName.SINGLE_SERVICE_MAP
-  },
   {
     exact: true,
     path: '/services/:serviceName/transactions/view',

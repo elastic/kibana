@@ -39,6 +39,15 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
     }
   }, [options, cy]);
 
+  // Destroy the cytoscape instance on unmount
+  useEffect(() => {
+    return () => {
+      if (cy) {
+        cy.destroy();
+      }
+    };
+  }, [cy]);
+
   return [ref, cy] as [React.MutableRefObject<any>, cytoscape.Core | undefined];
 }
 
