@@ -206,7 +206,7 @@ export class ESSearchSource extends AbstractESSource {
     entityBuckets.forEach(entityBucket => {
       const total = _.get(entityBucket, 'entityHits.hits.total', 0);
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
-      // Reverse hits list so they are drawn from oldest to newest (per entity) so newest events are on top
+      // Reverse hits list so top documents by sort are drawn on top
       allHits.push(...hits.reverse());
       if (total > hits.length) {
         hasTrimmedResults = true;
@@ -238,7 +238,7 @@ export class ESSearchSource extends AbstractESSource {
     const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document request');
 
     return {
-      hits: resp.hits.hits,
+      hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
         areResultsTrimmed: resp.hits.total > resp.hits.hits.length
       }
