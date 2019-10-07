@@ -39,12 +39,60 @@ describe('UrlFormat', () => {
     );
   });
 
-  test('outputs an <image> if type === "img"', () => {
-    const url = new UrlFormat({ type: 'img' });
+  describe('outputs an <image> if type === "img"', () => {
+    test('default', () => {
+      const url = new UrlFormat({ type: 'img' });
 
-    expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-      '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co"></span>'
-    );
+      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+        '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+          'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
+      );
+    });
+
+    test('with correct width and height set', () => {
+      const url = new UrlFormat({ type: 'img', width: '12', height: '55' });
+
+      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+        '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+          'style="width:auto; height:auto; max-width:12px; max-height:55px;"></span>'
+      );
+    });
+
+    test('with correct width and height set if no width specified', () => {
+      const url = new UrlFormat({ type: 'img', height: '55' });
+
+      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+        '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+          'style="width:auto; height:auto; max-width:none; max-height:55px;"></span>'
+      );
+    });
+
+    test('with correct width and height set if no height specified', () => {
+      const url = new UrlFormat({ type: 'img', width: '22' });
+
+      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+        '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+          'style="width:auto; height:auto; max-width:22px; max-height:none;"></span>'
+      );
+    });
+
+    test('only accepts valid numbers for width', () => {
+      const url = new UrlFormat({ type: 'img', width: 'not a number' });
+
+      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+        '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+          'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
+      );
+    });
+
+    test('only accepts valid numbers for height', () => {
+      const url = new UrlFormat({ type: 'img', height: 'not a number' });
+
+      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+        '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+          'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
+      );
+    });
   });
 
   describe('url template', () => {
