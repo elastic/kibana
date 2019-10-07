@@ -17,8 +17,30 @@
  * under the License.
  */
 
-export { IndexHeader } from './index_header';
-export { Badges } from './badges';
-export { GuideText } from './guide_text';
-export { Alerts } from './alerts';
-export { Tabs } from './tabs';
+import React from 'react';
+import { EuiFieldSearch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+interface Props {
+  $scope: any;
+}
+
+export const SearchField = ({ $scope }: Props) => {
+  return (
+    <EuiFieldSearch
+      fullWidth={true}
+      placeholder={i18n.translate('kbn.management.editIndexPattern.fields.filterPlaceholder', {
+        defaultMessage: 'Filter',
+      })}
+      aria-label={i18n.translate('kbn.management.editIndexPattern.fields.filterAria', {
+        defaultMessage: 'Filter',
+      })}
+      data-test-subj="indexPatternFieldFilter"
+      value={$scope.fieldFilter}
+      onChange={event => {
+        $scope.fieldFilter = event.target.value;
+        $scope.$apply();
+      }}
+    />
+  );
+};

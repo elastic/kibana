@@ -30,201 +30,14 @@ import { FieldWildcardProvider } from 'ui/field_wildcard';
 import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { SourceFiltersTable } from './source_filters_table';
-import { IndexedFieldsTable } from './indexed_fields_table';
-import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
-import { EuiSpacer, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import { IndexHeader, Badges, GuideText, Alerts } from './components';
+import { EuiSpacer } from '@elastic/eui';
+import { IndexHeader, Badges, GuideText, Alerts, Tabs } from './components';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
-const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
-const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
-const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 const REACT_EDIT_INDEX_REACT_COMPONENT = 'editIndexReactComponent';
-
-const SearchField = ({ $scope }) => {
-  return (
-    <EuiFieldSearch
-      fullWidth={true}
-      placeholder={i18n.translate('kbn.management.editIndexPattern.fields.filterPlaceholder', { defaultMessage: 'Filter' })}
-      aria-label={i18n.translate('kbn.management.editIndexPattern.fields.filterAria', { defaultMessage: 'Filter' })}
-      data-test-subj="indexPatternFieldFilter"
-      value={$scope.fieldFilter}
-      onChange={(event) => {
-        $scope.fieldFilter = event.target.value;
-        $scope.$apply();
-      }}
-    />
-  );
-};
-
-function updateSourceFiltersTable($scope, $state) {
-  if ($state.tab === 'sourceFilters') {
-    $scope.$$postDigest(() => {
-      const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
-      if (!node) {
-        return;
-      }
-
-      render(
-        <I18nContext>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={1}>
-              <SearchField $scope={$scope} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <SourceFiltersTable
-            indexPattern={$scope.indexPattern}
-            filterFilter={$scope.fieldFilter}
-            fieldWildcardMatcher={$scope.fieldWildcardMatcher}
-            onAddOrRemoveFilter={() => {
-              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, $scope.indexPatternListProvider);
-              $scope.refreshFilters();
-              $scope.$apply();
-            }}
-          />
-        </I18nContext>,
-        node,
-      );
-    });
-  } else {
-    destroySourceFiltersTable();
-  }
-}
-
-function destroySourceFiltersTable() {
-  const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
-  node && unmountComponentAtNode(node);
-}
-
-
-function updateScriptedFieldsTable($scope, $state) {
-  if ($state.tab === 'scriptedFields') {
-    $scope.$$postDigest(() => {
-      const node = document.getElementById(REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID);
-      if (!node) {
-        return;
-      }
-
-      render(
-        <I18nContext>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={1}>
-              <SearchField $scope={$scope} />
-            </EuiFlexItem>
-            {$scope.scriptedFieldLanguages.length > 0 ?
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  options={[
-                    { value: '', text: i18n.translate('kbn.management.editIndexPattern.fields.allLangsDropDown', {
-                      defaultMessage: 'All languages'
-                    }) },
-                  ].concat($scope.scriptedFieldLanguages.map(t => ({ value: t, text: t })))}
-                  value={$scope.scriptedFieldLanguageFilter}
-                  onChange={event => {
-                    $scope.scriptedFieldLanguageFilter = event.target.value;
-                    $scope.$apply();
-                  }}
-                  data-test-subj="scriptedFieldLanguageFilterDropdown"
-                />
-              </EuiFlexItem>
-              : null
-            }
-          </EuiFlexGroup>
-          <ScriptedFieldsTable
-            indexPattern={$scope.indexPattern}
-            fieldFilter={$scope.fieldFilter}
-            scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
-            helpers={{
-              redirectToRoute: (obj, route) => {
-                $scope.kbnUrl.redirectToRoute(obj, route);
-                $scope.$apply();
-              },
-              getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
-            }}
-            onRemoveField={() => {
-              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, $scope.indexPatternListProvider);
-              $scope.refreshFilters();
-              $scope.$apply();
-            }}
-          />
-        </I18nContext>,
-        node,
-      );
-    });
-  } else {
-    destroyScriptedFieldsTable();
-  }
-}
-
-function destroyScriptedFieldsTable() {
-  const node = document.getElementById(REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID);
-  node && unmountComponentAtNode(node);
-}
-
-function updateIndexedFieldsTable($scope, $state) {
-  if ($state.tab === 'indexedFields') {
-    $scope.$$postDigest(() => {
-      const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
-      if (!node) {
-        return;
-      }
-
-      render(
-        <I18nContext>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={1}>
-              <SearchField $scope={$scope} />
-            </EuiFlexItem>
-            {$scope.indexedFieldTypes.length > 0 ?
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  options={[
-                    { value: '', text: i18n.translate('kbn.management.editIndexPattern.fields.allTypesDropDown', {
-                      defaultMessage: 'All field types'
-                    }) },
-                  ].concat($scope.indexedFieldTypes.map(t => ({ value: t, text: t })))}
-                  value={$scope.indexedFieldTypeFilter}
-                  onChange={event => {
-                    $scope.indexedFieldTypeFilter = event.target.value;
-                    $scope.$apply();
-                  }}
-                  data-test-subj="indexedFieldTypeFilterDropdown"
-                />
-              </EuiFlexItem>
-              : null
-            }
-          </EuiFlexGroup>
-          <IndexedFieldsTable
-            fields={$scope.fields}
-            indexPattern={$scope.indexPattern}
-            fieldFilter={$scope.fieldFilter}
-            fieldWildcardMatcher={$scope.fieldWildcardMatcher}
-            indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
-            helpers={{
-              redirectToRoute: (obj, route) => {
-                $scope.kbnUrl.redirectToRoute(obj, route);
-                $scope.$apply();
-              },
-              getFieldInfo: $scope.getFieldInfo,
-            }}
-          />
-        </I18nContext>,
-        node,
-      );
-    });
-  } else {
-    destroyIndexedFieldsTable();
-  }
-}
-
-function destroyIndexedFieldsTable() {
-  const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
-  node && unmountComponentAtNode(node);
-}
 
 function updateReactComponent($scope, config) {
   $scope.$$postDigest(() => {
@@ -253,6 +66,8 @@ function updateReactComponent($scope, config) {
         <EuiSpacer size="m" />
 
         {$scope.conflictFields.length > 0 ? <Alerts conflictFields={$scope.conflictFields} /> : null}
+
+        <Tabs $scope={$scope} />
       </I18nContext>,
       node
     );
@@ -304,8 +119,6 @@ uiModules.get('apps/management')
       $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, indexPatternListProvider);
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
-      updateIndexedFieldsTable($scope, $state);
-      updateScriptedFieldsTable($scope, $state);
     });
 
     $scope.refreshFilters = function () {
@@ -329,9 +142,6 @@ uiModules.get('apps/management')
 
     $scope.changeTab = function (obj) {
       $state.tab = obj.index;
-      updateIndexedFieldsTable($scope, $state);
-      updateScriptedFieldsTable($scope, $state);
-      updateSourceFiltersTable($scope, $state);
       $state.save();
     };
 
@@ -413,35 +223,24 @@ uiModules.get('apps/management')
         return;
       }
 
-      switch($state.tab) {
-        case 'indexedFields':
-          updateIndexedFieldsTable($scope, $state);
-        case 'scriptedFields':
-          updateScriptedFieldsTable($scope, $state);
-        case 'sourceFilters':
-          updateSourceFiltersTable($scope, $state);
-      }
+      updateReactComponent($scope, config);
     });
 
     $scope.$watch('indexedFieldTypeFilter', () => {
       if ($scope.indexedFieldTypeFilter !== undefined && $state.tab === 'indexedFields') {
-        updateIndexedFieldsTable($scope, $state);
+        updateReactComponent($scope, config);
       }
     });
 
     $scope.$watch('scriptedFieldLanguageFilter', () => {
       if ($scope.scriptedFieldLanguageFilter !== undefined && $state.tab === 'scriptedFields') {
-        updateScriptedFieldsTable($scope, $state);
+        updateReactComponent($scope, config);
       }
     });
 
     $scope.$on('$destroy', () => {
-      destroyIndexedFieldsTable();
-      destroyScriptedFieldsTable();
       destoryReactComponent();
     });
 
     updateReactComponent($scope, config);
-    updateScriptedFieldsTable($scope, $state);
-    updateSourceFiltersTable($scope, $state);
   });

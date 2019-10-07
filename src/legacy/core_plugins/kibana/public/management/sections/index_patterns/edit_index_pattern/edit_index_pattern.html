@@ -7,39 +7,6 @@
       aria-label="{{::'kbn.management.editIndexPattern.detailsAria' | i18n: { defaultMessage: 'Index pattern details' } }}"
     >
       <div id="editIndexReactComponent"></div>
-
-      <!-- Tabs -->
-      <div class="kuiTabs kuiVerticalRhythm">
-        <button
-          class="kuiTab"
-          ng-repeat="editSection in editSections"
-          ng-class="{ 'kuiTab-isSelected': state.tab === editSection.index }"
-          ng-click="changeTab(editSection)"
-          data-test-subj="tab-{{ editSection.index }}"
-        >
-          {{ editSection.title }}
-          <span
-            data-test-subj="tab-count-{{ editSection.index }}"
-            aria-label="{{:: editSection.count + ' ' + editSection.title}}"
-          >
-            <span ng-if="editSection.count != editSection.totalCount">
-              ({{ editSection.count }} / {{ editSection.totalCount }})
-            </span>
-            <span ng-if="editSection.count == editSection.totalCount">
-              ({{ editSection.count }})
-            </span>
-          </span>
-        </button>
-      </div>
-
-      <!-- Tab content -->
-      <div class="kuiVerticalRhythm">
-        <div id="reactIndexedFieldsTable"></div>
-
-        <div id="reactScriptedFieldsTable"></div>
-
-        <div id="reactSourceFiltersTable"></div>
-      </div>
     </div>
   </div>
 </kbn-management-app>
