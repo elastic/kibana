@@ -23,14 +23,26 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
 
-  describe('ui plugin loading', function describeIndexTests() {
-    before(async () => {
-      await PageObjects.common.navigateToApp('settings');
-    });
+  describe('ui plugins', function () {
+    describe('loading', function describeIndexTests() {
+      before(async () => {
+        await PageObjects.common.navigateToApp('settings');
+      });
 
-    it('should attach string to window.corePluginB', async () => {
-      const corePluginB = await browser.execute('return window.corePluginB');
-      expect(corePluginB).to.equal(`Plugin A said: Hello from Plugin A!`);
+      it('should attach string to window.corePluginB', async () => {
+        const corePluginB = await browser.execute('return window.corePluginB');
+        expect(corePluginB).to.equal(`Plugin A said: Hello from Plugin A!`);
+      });
+    });
+    describe('have injectedMetadata service provided', function describeIndexTests() {
+      before(async () => {
+        await PageObjects.common.navigateToApp('bar');
+      });
+
+      it('should attach string to window.corePluginB', async () => {
+        const hasAccessToInjectedMetadata = await browser.execute('return window.hasAccessToInjectedMetadata');
+        expect(hasAccessToInjectedMetadata).to.equal(true);
+      });
     });
   });
 }
