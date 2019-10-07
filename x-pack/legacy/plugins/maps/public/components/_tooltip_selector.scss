@@ -3,6 +3,7 @@
 
   padding-bottom: $euiSizeS;
   border-bottom: 1px solid $euiColorLightShade;
+  background-color: $euiColorEmptyShade;
 
   &:hover,
   &:focus,
@@ -27,7 +28,6 @@
 }
 
 .mapTooltipSelector__propertyRow-isDraggingOver {
-  background-color: $euiColorEmptyShade;
   // Don't allow interaction events while layer is being re-ordered
   pointer-events: none !important;
 }
