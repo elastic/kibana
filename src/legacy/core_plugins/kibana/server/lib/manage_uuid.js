@@ -18,7 +18,7 @@
  */
 
 import uuid from 'uuid';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { join as pathJoin } from 'path';
 import { readFile as readFileCallback, writeFile as writeFileCallback } from 'fs';
 
@@ -30,7 +30,7 @@ export default async function manageUuid(server) {
   const uuidFile = pathJoin(config.get('path.data'), fileName);
 
   async function detectUuid() {
-    const readFile = Promise.promisify(readFileCallback);
+    const readFile = Bluebird.promisify(readFileCallback);
     try {
       const result = await readFile(uuidFile);
       return result.toString(FILE_ENCODING);
@@ -46,7 +46,7 @@ export default async function manageUuid(server) {
   }
 
   async function writeUuid(uuid) {
-    const writeFile = Promise.promisify(writeFileCallback);
+    const writeFile = Bluebird.promisify(writeFileCallback);
     try {
       return await writeFile(uuidFile, uuid, { encoding: FILE_ENCODING });
     } catch (err) {
