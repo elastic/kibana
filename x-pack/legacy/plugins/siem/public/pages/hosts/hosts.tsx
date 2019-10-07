@@ -106,6 +106,9 @@ const HostsComponent = React.memo<HostsComponentProps>(
                     to: fromTo.to,
                   });
                 },
+                updateDateRange: (min: number, max: number) => {
+                  setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                },
               };
 
               return (
