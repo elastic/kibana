@@ -1,5 +1,5 @@
 import { appendFileSync, readFileSync, writeFileSync } from 'fs';
-import * as dotEnv from 'dotenv';
+import dotEnv from 'dotenv';
 import testsList from './tests_list';
 
 // envObj :: path -> {}
@@ -7,6 +7,6 @@ const envObj = path => dotEnv.config({ path });
 
 // default fn :: path -> {}
 export default path => {
-  const obj = envObj(path);
+  const obj = envObj(path).parsed;
   return { tests: testsList(obj), ...obj, };
 }
