@@ -4744,8 +4744,6 @@
     "xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription": "正在加载模板……",
     "xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage": "加载模板时出错",
     "xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel": "包括系统模板",
-    "xpack.idxMgmt.mappingsEditor.formatError": "JSON 格式错误",
-    "xpack.idxMgmt.mappingsEditor.mappingsEditorAriaLabel": "索引映射编辑器",
     "xpack.idxMgmt.templateCreate.loadingTemplateToCloneDescription": "正在加载要克隆的模板……",
     "xpack.idxMgmt.templateCreate.loadingTemplateToCloneErrorMessage": "加载要克隆的模板时出错",
     "xpack.idxMgmt.templateDetails.aliasesTab.noAliasesTitle": "未定义任何别名。",
