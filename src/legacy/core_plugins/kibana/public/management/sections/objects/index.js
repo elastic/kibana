@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { management } from 'ui/management';
-import './_view';
+import './view/_view';
 import './_objects';
 import 'ace';
 import { uiModules } from 'ui/modules';

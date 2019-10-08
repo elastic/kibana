@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import 'angular-elastic/elastic';
 import rison from 'rison-node';
-import { savedObjectManagementRegistry } from '../../saved_object_registry';
+import { savedObjectManagementRegistry } from '../../../saved_object_registry';
 import objectViewHTML from './_view.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
@@ -30,11 +30,11 @@ import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
-import { canViewInApp } from './lib/in_app_url';
+import { canViewInApp } from '../lib/in_app_url';
 
-import { castEsToKbnFieldTypeName } from '../../../../../../../plugins/data/public';
+import { castEsToKbnFieldTypeName } from '../../../../../../../../plugins/data/public';
 
-import { getViewBreadcrumbs } from './breadcrumbs';
+import { getViewBreadcrumbs } from '../breadcrumbs';
 
 const location = 'SavedObject view';
 
