@@ -6,6 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const KQL_ARIA_LABEL = i18n.translate('xpack.siem.detectionEngine.kqlAriaLabel', {
+  defaultMessage: 'KQL filter',
+});
+
+export const KQL_PLACEHOLDER = i18n.translate('xpack.siem.detectionEngine.kqlPlaceholder', {
+  defaultMessage: 'e.g. event.action: "foo"',
+});
+
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle', {
   defaultMessage: 'Detection engine',
 });

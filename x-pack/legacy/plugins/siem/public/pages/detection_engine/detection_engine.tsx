@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonGroup, EuiFieldSearch, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { StickyContainer } from 'react-sticky';
 
@@ -12,6 +12,7 @@ import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { HeaderPanel } from '../../components/header_panel';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { DetectionEngineKql } from './kql';
 import * as i18n from './translations';
 
 export const DetectionEngineComponent = React.memo(() => {
@@ -31,11 +32,7 @@ export const DetectionEngineComponent = React.memo(() => {
     <>
       <StickyContainer>
         <FiltersGlobal>
-          <EuiFieldSearch
-            aria-label="KQL filter"
-            fullWidth
-            placeholder='e.g. event.action: "foo"'
-          />
+          <DetectionEngineKql />
         </FiltersGlobal>
 
         <HeaderPage subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE}>
@@ -63,7 +60,7 @@ export const DetectionEngineComponent = React.memo(() => {
               options={toggleButtons}
             />
           </HeaderPanel>
-          {'Table here...'}
+          {'Datagrid here...'}
         </EuiPanel>
       </StickyContainer>
 

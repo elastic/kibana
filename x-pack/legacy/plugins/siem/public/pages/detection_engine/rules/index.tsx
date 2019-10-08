@@ -23,7 +23,7 @@ export const RulesComponent = React.memo(() => {
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
           <EuiFlexItem grow={false}>
             <EuiButton href="#" iconType="importAction">
-              {'Import rule&hellip;'}
+              {'Import rule…'}
             </EuiButton>
           </EuiFlexItem>
 
