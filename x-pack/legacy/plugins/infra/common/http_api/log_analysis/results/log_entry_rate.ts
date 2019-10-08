@@ -41,6 +41,7 @@ export const logEntryRatePartitionRT = rt.type({
   analysisBucketCount: rt.number,
   anomalies: rt.array(logEntryRateAnomaly),
   averageActualLogEntryRate: rt.number,
+  maximumAnomalyScore: rt.number,
   partitionId: rt.string,
 });
 

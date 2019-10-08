@@ -91,6 +91,11 @@ export const createLogEntryRateQuery = (
               },
             },
             aggs: {
+              maximum_record_score: {
+                max: {
+                  field: 'record_score',
+                },
+              },
               top_hits_record: {
                 top_hits: {
                   _source: Object.keys(logRateMlRecordRT.props),
@@ -138,6 +143,7 @@ export const logRateModelPlotBucketRT = rt.type({
   key: compositeTimestampPartitionKeyRT,
   filter_records: rt.type({
     doc_count: rt.number,
+    maximum_record_score: metricAggregationRT,
     top_hits_record: rt.type({
       hits: rt.type({
         hits: rt.array(
