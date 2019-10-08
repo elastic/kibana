@@ -16,6 +16,7 @@ import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { Config } from '../index';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
+import { getOptionLabel } from '../constants';
 
 interface Props {
   onDeleted: () => void;
@@ -96,8 +97,8 @@ async function deleteConfig(selectedConfig: Config) {
         'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigSucceededText',
         {
           defaultMessage:
-            'You have successfully deleted a configuration for {serviceName}. It will take some time to propagate to the agents.',
-          values: { serviceName: `"${selectedConfig.service.name}"` }
+            'You have successfully deleted a configuration for "{serviceName}". It will take some time to propagate to the agents.',
+          values: { serviceName: getOptionLabel(selectedConfig.service.name) }
         }
       )
     });
@@ -111,10 +112,10 @@ async function deleteConfig(selectedConfig: Config) {
         'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigFailedText',
         {
           defaultMessage:
-            'Something went wrong when deleting a configuration for {serviceName}. Error: {errorMessage}',
+            'Something went wrong when deleting a configuration for "{serviceName}". Error: "{errorMessage}"',
           values: {
-            serviceName: `"${selectedConfig.service.name}"`,
-            errorMessage: `"${error.message}"`
+            serviceName: getOptionLabel(selectedConfig.service.name),
+            errorMessage: error.message
           }
         }
       )

@@ -10,7 +10,7 @@ export interface AgentConfiguration {
   etag?: string;
   agent_name?: string;
   service: {
-    name: string;
+    name?: string;
     environment?: string;
   };
   settings: {

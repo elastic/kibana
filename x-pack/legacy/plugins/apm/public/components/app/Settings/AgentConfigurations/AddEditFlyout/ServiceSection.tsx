@@ -9,8 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
 import { useFetcher } from '../../../../../hooks/useFetcher';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../../common/environment_filter_values';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
+import { getOptionLabel, getOptionValue } from '../constants';
 
 const SELECT_PLACEHOLDER_LABEL = `- ${i18n.translate(
   'xpack.apm.settings.agentConf.flyOut.serviceSection.selectPlaceholder',
@@ -23,15 +23,6 @@ interface Props {
   setServiceName: (env: string) => void;
   environment?: string;
   setEnvironment: (env: string) => void;
-}
-
-function getEnvironmentNameLabel(name: string | undefined) {
-  return name === ENVIRONMENT_NOT_DEFINED
-    ? i18n.translate(
-        'xpack.apm.settings.agentConf.flyOut.serviceSection.serviceEnvironmentNotSetOptionLabel',
-        { defaultMessage: 'Not set' }
-      )
-    : name;
 }
 
 export function ServiceSection({
@@ -57,9 +48,8 @@ export function ServiceSection({
     () => {
       if (!isReadOnly && serviceName) {
         return callApmApi({
-          pathname:
-            '/api/apm/settings/agent-configuration/services/{serviceName}/environments',
-          params: { path: { serviceName } }
+          pathname: '/api/apm/settings/agent-configuration/environments',
+          params: { query: { serviceName: getOptionValue(serviceName) } }
         });
       }
     },
@@ -67,11 +57,19 @@ export function ServiceSection({
     { preservePreviousData: false }
   );
 
-  const environmentOptions = environments.map(({ name, alreadyExists }) => ({
-    disabled: alreadyExists,
-    text: getEnvironmentNameLabel(name),
+  const serviceNameOptions = serviceNames.map(name => ({
+    text: getOptionLabel(name),
     value: name
   }));
+  const environmentOptions = environments.map(
+    ({ name, alreadyConfigured }) => ({
+      disabled: alreadyConfigured,
+      text: `${getOptionLabel(name)} ${
+        alreadyConfigured ? '(already configured)' : ''
+      }`,
+      value: name
+    })
+  );
 
   return (
     <>
@@ -100,12 +98,12 @@ export function ServiceSection({
         }
       >
         {isReadOnly ? (
-          <EuiText>{serviceName}</EuiText>
+          <EuiText>{getOptionLabel(serviceName)}</EuiText>
         ) : (
           <SelectWithPlaceholder
             placeholder={SELECT_PLACEHOLDER_LABEL}
             isLoading={serviceNamesStatus === 'loading'}
-            options={serviceNames.map(text => ({ text }))}
+            options={serviceNameOptions}
             value={serviceName}
             disabled={serviceNamesStatus === 'loading'}
             onChange={e => {
@@ -134,7 +132,7 @@ export function ServiceSection({
         }
       >
         {isReadOnly ? (
-          <EuiText>{getEnvironmentNameLabel(environment)}</EuiText>
+          <EuiText>{getOptionLabel(environment)}</EuiText>
         ) : (
           <SelectWithPlaceholder
             placeholder={SELECT_PLACEHOLDER_LABEL}

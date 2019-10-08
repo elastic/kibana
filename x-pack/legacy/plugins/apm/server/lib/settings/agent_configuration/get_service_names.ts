@@ -37,7 +37,7 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: 100
+            size: 50
           }
         }
       }
@@ -46,5 +46,6 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
 
   const resp = await client.search(params);
   const buckets = idx(resp.aggregations, _ => _.services.buckets) || [];
-  return buckets.map(bucket => bucket.key).sort();
+  const serviceNames = buckets.map(bucket => bucket.key).sort();
+  return ['ALL_OPTION_VALUE', ...serviceNames];
 }

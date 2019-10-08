@@ -10,32 +10,31 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
 } from '../../../../../common/elasticsearch_fieldnames';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 
 export async function getExistingEnvironmentsForService({
   serviceName,
   setup
 }: {
-  serviceName: string;
+  serviceName: string | undefined;
   setup: Setup;
 }) {
   const { client, config } = setup;
+
+  const bool = serviceName
+    ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
+    : { must_not: [{ exists: { field: SERVICE_NAME } }] };
 
   const params = {
     index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter: [{ term: { [SERVICE_NAME]: serviceName } }]
-        }
-      },
+      query: { bool },
       aggs: {
         environments: {
           terms: {
             field: SERVICE_ENVIRONMENT,
-            missing: ENVIRONMENT_NOT_DEFINED,
-            size: 100
+            missing: 'ALL_OPTION_VALUE',
+            size: 50
           }
         }
       }

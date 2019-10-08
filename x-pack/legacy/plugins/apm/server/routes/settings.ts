@@ -58,45 +58,45 @@ export const listAgentConfigurationServicesRoute = createRoute(() => ({
   }
 }));
 
-const agentPayloadRt = t.type({
-  agent_name: t.string,
-  service: t.intersection([
-    t.type({ name: t.string }),
-    t.partial({ environment: t.string })
-  ]),
-  settings: t.intersection([
-    t.partial({ transaction_sample_rate: transactionSampleRateRt }),
-    t.partial({ capture_body: t.string }),
-    t.partial({ transaction_max_spans: transactionMaxSpansRt })
-  ])
-});
+const agentPayloadRt = t.intersection([
+  t.partial({ agent_name: t.string }),
+  t.type({
+    service: t.intersection([
+      t.partial({ name: t.string }),
+      t.partial({ environment: t.string })
+    ])
+  }),
+  t.type({
+    settings: t.intersection([
+      t.partial({ transaction_sample_rate: transactionSampleRateRt }),
+      t.partial({ capture_body: t.string }),
+      t.partial({ transaction_max_spans: transactionMaxSpansRt })
+    ])
+  })
+]);
 
 // get environments for service
 export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
-  path:
-    '/api/apm/settings/agent-configuration/services/{serviceName}/environments',
+  path: '/api/apm/settings/agent-configuration/environments',
   params: {
-    path: t.type({
-      serviceName: t.string
-    })
+    query: t.partial({ serviceName: t.string })
   },
-  handler: async (req, { path }) => {
+  handler: async (req, { query }) => {
     const setup = await setupRequest(req);
-    const { serviceName } = path;
+    const { serviceName } = query;
     return await getEnvironments({ serviceName, setup });
   }
 }));
 
 // get agentName for service
 export const agentConfigurationAgentNameRoute = createRoute(() => ({
-  path:
-    '/api/apm/settings/agent-configuration/services/{serviceName}/agent_name',
+  path: '/api/apm/settings/agent-configuration/agent_name',
   params: {
-    path: t.type({ serviceName: t.string })
+    query: t.type({ serviceName: t.string })
   },
-  handler: async (req, { path }) => {
+  handler: async (req, { query }) => {
     const setup = await setupRequest(req);
-    const { serviceName } = path;
+    const { serviceName } = query;
     return await getAgentNameByService({ serviceName, setup });
   }
 }));
@@ -115,7 +115,7 @@ export const createAgentConfigurationRoute = createRoute(() => ({
 
 export const updateAgentConfigurationRoute = createRoute(() => ({
   method: 'PUT',
-  path: `/api/apm/settings/agent-configuration/{configurationId}`,
+  path: '/api/apm/settings/agent-configuration/{configurationId}',
   params: {
     path: t.type({
       configurationId: t.string

@@ -17,7 +17,7 @@ export async function getEnvironments({
   serviceName,
   setup
 }: {
-  serviceName: string;
+  serviceName: string | undefined;
   setup: Setup;
 }) {
   const [allEnvironments, existingEnvironments] = await Promise.all([
@@ -28,7 +28,7 @@ export async function getEnvironments({
   return allEnvironments.map(environment => {
     return {
       name: environment,
-      alreadyExists: existingEnvironments.includes(environment)
+      alreadyConfigured: existingEnvironments.includes(environment)
     };
   });
 }

@@ -146,14 +146,13 @@ export function useFetcher(
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    return {
       ...result,
       refetch: () => {
         // this will invalidate the deps to `useEffect` and will result in a new request
         setCounter(count => count + 1);
       }
-    }),
-    [result]
-  );
+    };
+  }, [result]);
 }

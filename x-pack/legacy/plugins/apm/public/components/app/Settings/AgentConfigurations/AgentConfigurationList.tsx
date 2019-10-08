@@ -76,7 +76,11 @@ export function AgentConfigurationList({
             setIsFlyoutOpen(true);
           }}
         >
-          {config.service.name}
+          {config.service.name ||
+            i18n.translate(
+              'xpack.apm.settings.agentConf.configTable.serviceNameAllLabel',
+              { defaultMessage: 'All' }
+            )}
         </EuiButtonEmpty>
       )
     },
@@ -90,8 +94,8 @@ export function AgentConfigurationList({
       render: (value: string) =>
         value ||
         i18n.translate(
-          'xpack.apm.settings.agentConf.configTable.environmentNotSetLabel',
-          { defaultMessage: 'Not set' }
+          'xpack.apm.settings.agentConf.configTable.environmentAllLabel',
+          { defaultMessage: 'All' }
         )
     },
     {

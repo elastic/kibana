@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter, SearchResponse } from 'elasticsearch';
+import { ESSearchHit } from 'elasticsearch';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
@@ -23,28 +23,28 @@ export async function searchConfigurations({
 }) {
   const { client, config } = setup;
 
-  const filters: ESFilter[] = [{ term: { [SERVICE_NAME]: serviceName } }];
-
-  if (environment) {
-    filters.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
-  } else {
-    filters.push({
-      bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } }
-    });
-  }
+  const environmentFilter = environment
+    ? [{ term: { [SERVICE_ENVIRONMENT]: { boost: 2, value: environment } } }]
+    : [];
 
   const params = {
     index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
     body: {
       size: 1,
       query: {
-        bool: { filter: filters }
+        bool: {
+          minimum_should_match: 2,
+          should: [
+            { term: { [SERVICE_NAME]: { boost: 3, value: serviceName } } },
+            ...environmentFilter,
+            { bool: { must_not: [{ exists: { field: SERVICE_NAME } }] } },
+            { bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] } }
+          ]
+        }
       }
     }
   };
 
   const resp = await client.search<AgentConfiguration>(params);
-
-  type FirstHit = SearchResponse<AgentConfiguration>['hits']['hits'][0];
-  return resp.hits.hits[0] as FirstHit | undefined;
+  return resp.hits.hits[0] as ESSearchHit<AgentConfiguration> | undefined;
 }

@@ -25,7 +25,6 @@ import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 import { transactionSampleRateRt } from '../../../../../../common/runtime_types/transaction_sample_rate_rt';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../../common/environment_filter_values';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
 import { trackEvent } from '../../../../../../../infra/public/hooks/use_track_metric';
 import { Config } from '../index';
@@ -35,6 +34,7 @@ import { DeleteSection } from './DeleteSection';
 import { transactionMaxSpansRt } from '../../../../../../common/runtime_types/transaction_max_spans_rt';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { isRumAgentName } from '../../../../../../common/agent_name';
+import { ALL_OPTION_VALUE, getOptionValue, getOptionLabel } from '../constants';
 
 interface Settings {
   transaction_sample_rate: number;
@@ -63,23 +63,24 @@ export function AddEditFlyout({
 }: Props) {
   const [isSaving, setIsSaving] = useState(false);
 
-  // config conditions (servie)
+  // config conditions (service)
   const [serviceName, setServiceName] = useState<string>(
-    selectedConfig ? selectedConfig.service.name : ''
+    selectedConfig ? selectedConfig.service.name || ALL_OPTION_VALUE : ''
   );
   const [environment, setEnvironment] = useState<string>(
-    selectedConfig
-      ? selectedConfig.service.environment || ENVIRONMENT_NOT_DEFINED
-      : ''
+    selectedConfig ? selectedConfig.service.environment || ALL_OPTION_VALUE : ''
   );
 
-  const { data: agentName } = useFetcher(
+  const { data: { agentName } = { agentName: undefined } } = useFetcher(
     () => {
+      if (serviceName === ALL_OPTION_VALUE) {
+        return { agentName: undefined };
+      }
+
       if (serviceName) {
         return callApmApi({
-          pathname:
-            '/api/apm/settings/agent-configuration/services/{serviceName}/agent_name',
-          params: { path: { serviceName } }
+          pathname: '/api/apm/settings/agent-configuration/agent_name',
+          params: { query: { serviceName } }
         });
       }
     },
@@ -110,12 +111,15 @@ export function AddEditFlyout({
   const isTransactionMaxSpansValid = isRight(
     transactionMaxSpansRt.decode(transactionMaxSpans)
   );
+
   const isFormValid =
-    !!agentName &&
     !!serviceName &&
     !!environment &&
     isSampleRateValid &&
-    (isRumService || (!!captureBody && isTransactionMaxSpansValid));
+    // captureBody and isTransactionMaxSpansValid are required except if service is RUM
+    (isRumService || (!!captureBody && isTransactionMaxSpansValid)) &&
+    // agent name is required, except if serviceName is "all"
+    (serviceName === ALL_OPTION_VALUE || agentName !== undefined);
 
   const handleSubmitEvent = async (
     event:
@@ -124,10 +128,6 @@ export function AddEditFlyout({
   ) => {
     event.preventDefault();
     setIsSaving(true);
-
-    if (!agentName) {
-      throw new Error('Missing agent_name');
-    }
 
     await saveConfig({
       serviceName,
@@ -267,7 +267,7 @@ async function saveConfig({
   captureBody: string;
   transactionMaxSpans: string;
   configurationId?: string;
-  agentName: string;
+  agentName?: string;
 }) {
   trackEvent({ app: 'apm', name: 'save_agent_configuration' });
 
@@ -284,9 +284,8 @@ async function saveConfig({
     const configuration = {
       agent_name: agentName,
       service: {
-        name: serviceName,
-        environment:
-          environment === ENVIRONMENT_NOT_DEFINED ? undefined : environment
+        name: getOptionValue(serviceName),
+        environment: getOptionValue(environment)
       },
       settings
     };
@@ -319,8 +318,8 @@ async function saveConfig({
         'xpack.apm.settings.agentConf.saveConfig.succeeded.text',
         {
           defaultMessage:
-            'The configuration for {serviceName} was saved. It will take some time to propagate to the agents.',
-          values: { serviceName: `"${serviceName}"` }
+            'The configuration for "{serviceName}" was saved. It will take some time to propagate to the agents.',
+          values: { serviceName: getOptionLabel(serviceName) }
         }
       )
     });
@@ -334,10 +333,10 @@ async function saveConfig({
         'xpack.apm.settings.agentConf.saveConfig.failed.text',
         {
           defaultMessage:
-            'Something went wrong when saving the configuration for {serviceName}. Error: {errorMessage}',
+            'Something went wrong when saving the configuration for "{serviceName}". Error: "{errorMessage}"',
           values: {
-            serviceName: `"${serviceName}"`,
-            errorMessage: `"${error.message}"`
+            serviceName: getOptionLabel(serviceName),
+            errorMessage: error.message
           }
         }
       )
