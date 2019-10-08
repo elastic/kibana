@@ -25,7 +25,10 @@ export class Variables extends React.Component<Props> {
         <EuiSpacer />
         <EuiAccordion
           id="local-variables"
-          buttonContent={i18n.translate('xpack.apm.stacktraceTab.localVariablesToogleButtonLabel', { defaultMessage: 'Local variables' })}
+          buttonContent={i18n.translate(
+            'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
+            { defaultMessage: 'Local variables' }
+          )}
         >
           <React.Fragment>
             <DottedKeyValueTable data={this.props.vars} maxDepth={5} />
