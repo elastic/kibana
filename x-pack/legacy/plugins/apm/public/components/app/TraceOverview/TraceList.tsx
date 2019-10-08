@@ -91,7 +91,7 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
           'xpack.apm.tracesTable.impactColumnDescription',
           {
             defaultMessage:
-              "Impact shows the most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
+              "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
           }
         )}
       >
