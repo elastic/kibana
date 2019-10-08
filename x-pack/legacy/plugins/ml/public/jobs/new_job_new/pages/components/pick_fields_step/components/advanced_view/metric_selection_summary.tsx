@@ -56,41 +56,41 @@ export const AdvancedDetectorsSummary: FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (allDataReady()) {
-      loadCharts();
-    }
-  }, [fieldValues]);
+  // useEffect(() => {
+  //   if (allDataReady()) {
+  //     loadCharts();
+  //   }
+  // }, [fieldValues]);
 
-  async function loadCharts() {
-    if (allDataReady()) {
-      setLoadingData(true);
-      try {
-        const cs = getChartSettings(jobCreator, chartInterval);
-        setChartSettings(cs);
-        const resp: LineChartData = await chartLoader.loadLineCharts(
-          jobCreator.start,
-          jobCreator.end,
-          jobCreator.aggFieldPairs,
-          jobCreator.splitField,
-          fieldValues.length > 0 ? fieldValues[0] : null,
-          cs.intervalMs
-        );
-        setLineChartsData(resp);
-      } catch (error) {
-        mlMessageBarService.notify.error(error);
-        setLineChartsData({});
-      }
-      setLoadingData(false);
-    }
-  }
+  // async function loadCharts() {
+  //   if (allDataReady()) {
+  //     setLoadingData(true);
+  //     try {
+  //       const cs = getChartSettings(jobCreator, chartInterval);
+  //       setChartSettings(cs);
+  //       const resp: LineChartData = await chartLoader.loadLineCharts(
+  //         jobCreator.start,
+  //         jobCreator.end,
+  //         jobCreator.aggFieldPairs,
+  //         jobCreator.splitField,
+  //         fieldValues.length > 0 ? fieldValues[0] : null,
+  //         cs.intervalMs
+  //       );
+  //       setLineChartsData(resp);
+  //     } catch (error) {
+  //       mlMessageBarService.notify.error(error);
+  //       setLineChartsData({});
+  //     }
+  //     setLoadingData(false);
+  //   }
+  // }
 
-  function allDataReady() {
-    return (
-      jobCreator.aggFieldPairs.length > 0 &&
-      (jobCreator.splitField === null || (jobCreator.splitField !== null && fieldValues.length > 0))
-    );
-  }
+  // function allDataReady() {
+  //   return (
+  //     jobCreator.aggFieldPairs.length > 0 &&
+  //     (jobCreator.splitField === null || (jobCreator.splitField !== null && fieldValues.length > 0))
+  //   );
+  // }
 
   return (
     <Fragment>

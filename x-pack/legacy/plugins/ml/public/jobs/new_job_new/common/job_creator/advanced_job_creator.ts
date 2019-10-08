@@ -8,11 +8,10 @@ import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/type
 import { IndexPattern } from 'ui/index_patterns';
 
 import { JobCreator } from './job_creator';
-import { Field, Aggregation, SplitField, AggFieldPair } from '../../../../../common/types/fields';
+import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE, CREATED_BY_LABEL, DEFAULT_MODEL_MEMORY_LIMIT } from './util/constants';
-import { ml } from '../../../../services/ml_api_service';
+import { JOB_TYPE, DEFAULT_MODEL_MEMORY_LIMIT } from './util/constants';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../common/util/validation_utils';
 
@@ -140,19 +139,13 @@ export class AdvancedJobCreator extends JobCreator {
     return isValidJson(this._queryString);
   }
 
-  public get aggFieldPairs(): AggFieldPair[] {
-    return [];
-    // return this.detectors.map((d, i) => ({
-    //   field: this._fields[i],
-    //   agg: this._aggs[i],
-    // }));
-  }
-
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     const detectors = getRichDetectors(job, datafeed);
 
     this.removeAllDetectors();
+    this._richDetectors.length = 0;
+
     detectors.forEach((d, i) => {
       const dtr = detectors[i];
       if (dtr.agg !== null && dtr.field !== null) {

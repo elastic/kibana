@@ -27,10 +27,7 @@ import {
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../../../src/plugins/data/public';
 import { ModalWrapper } from './modal_wrapper';
-import {
-  ML_JOB_AGGREGATION,
-  ES_AGGREGATION,
-} from '../../../../../../../../common/constants/aggregation_types';
+import { ES_AGGREGATION } from '../../../../../../../../common/constants/aggregation_types';
 import {
   AggDescription,
   FieldDescription,
@@ -53,23 +50,18 @@ export interface ModalPayload {
   index?: number;
 }
 
-interface ExtendedOptionProps extends EuiComboBoxOptionProps {
-  agg: Aggregation | null;
-  field: Field | null;
-  exclude_frequent: string | null;
-}
-
-const emptyOption: ExtendedOptionProps = {
+const emptyOption: EuiComboBoxOptionProps = {
   label: '',
-  agg: null,
-  field: null,
-  exclude_frequent: null,
 };
 
-const excludeFrequentOptions: ExtendedOptionProps[] = [
-  { label: 'all', agg: null, field: null, exclude_frequent: 'all' },
-  { label: 'none', agg: null, field: null, exclude_frequent: 'none' },
-];
+const mlCategory: Field = {
+  id: 'mlcategory',
+  name: 'mlcategory',
+  type: ES_FIELD_TYPES.KEYWORD,
+  aggregatable: false,
+};
+
+const excludeFrequentOptions: EuiComboBoxOptionProps[] = [{ label: 'all' }, { label: 'none' }];
 
 export const AdvancedDetectorModal: FC<Props> = ({
   payload,
@@ -87,58 +79,100 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const jobCreator = jc as AdvancedJobCreator;
 
   const [detector, setDetector] = useState(payload.detector);
-  const [agg, setAgg] = useState(createAggOption(detector.agg));
-  const [field, setField] = useState(createFieldOption(detector.field));
-  const [byField, setByField] = useState(createFieldOption(detector.byField));
-  const [overField, setOverField] = useState(createFieldOption(detector.overField));
-  const [partitionField, setPartitionField] = useState(createFieldOption(detector.partitionField));
-  const [excludeFrequent, setExcludeFrequent] = useState(
+  const [aggOption, setAggOption] = useState(createAggOption(detector.agg));
+  const [fieldOption, setFieldOption] = useState(createFieldOption(detector.field));
+  const [byFieldOption, setByFieldOption] = useState(createFieldOption(detector.byField));
+  const [overFieldOption, setOverFieldOption] = useState(createFieldOption(detector.overField));
+  const [partitionFieldOption, setPartitionFieldOption] = useState(
+    createFieldOption(detector.partitionField)
+  );
+  const [excludeFrequentOption, setExcludeFrequentOption] = useState(
     createExcludeFrequentOption(detector.excludeFrequent)
   );
   const [fieldsEnabled, setFieldsEnabled] = useState(true);
+  const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
 
   const aggOptions: EuiComboBoxOptionProps[] = aggs.map(createAggOption);
-  const fieldOptions: EuiComboBoxOptionProps[] = fields.map(createFieldOption);
+  // .sort((a, b) => a.label.localeCompare(b.label));
+  const fieldOptions: EuiComboBoxOptionProps[] = fields
+    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
+    .map(createFieldOption);
   const splitFieldOptions = [...fieldOptions, ...createMlcategoryField(jobCreator)];
 
-  const onOptionChange = (func: (p: ExtendedOptionProps) => any) => (
+  const eventRateField = fields.find(f => f.id === EVENT_RATE_FIELD_ID);
+
+  const onOptionChange = (func: (p: EuiComboBoxOptionProps) => any) => (
     selectedOptions: EuiComboBoxOptionProps[]
   ) => {
-    func((selectedOptions[0] || emptyOption) as ExtendedOptionProps);
+    func(selectedOptions[0] || emptyOption);
   };
 
+  function getAgg(title: string) {
+    return aggs.find(a => a.id === title) || null;
+  }
+  function getField(title: string) {
+    if (title === mlCategory.id) {
+      return mlCategory;
+    }
+    return fields.find(a => a.id === title) || null;
+  }
+
   useEffect(() => {
+    const agg = getAgg(aggOption.label);
+    let field = getField(fieldOption.label);
+
+    if (agg !== null) {
+      setFieldsEnabled(true);
+      if (isCountAgg(agg) && eventRateField !== undefined) {
+        setFieldOption(emptyOption);
+        setFieldOptionEnabled(false);
+        field = eventRateField;
+      } else {
+        setFieldOptionEnabled(true);
+      }
+    } else {
+      setFieldsEnabled(false);
+    }
+
     const dtr: RichDetector = {
-      agg: agg.agg,
-      field: field.field,
-      byField: byField.field,
-      overField: overField.field,
-      partitionField: partitionField.field,
-      excludeFrequent: excludeFrequent.exclude_frequent,
+      agg,
+      field,
+      byField: getField(byFieldOption.label),
+      overField: getField(overFieldOption.label),
+      partitionField: getField(partitionFieldOption.label),
+      excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
     };
     setDetector(dtr);
+  }, [
+    aggOption,
+    fieldOption,
+    byFieldOption,
+    overFieldOption,
+    partitionFieldOption,
+    excludeFrequentOption,
+  ]);
 
-    if (agg.agg !== null) {
-      setFieldsEnabled(true);
-      if (agg.agg.id === ML_JOB_AGGREGATION.COUNT) {
-        const eventRateField = (fieldOptions as ExtendedOptionProps[]).find(f => {
-          if (f.field !== null) {
-            return f.field.id === EVENT_RATE_FIELD_ID;
-          }
-        });
-        if (eventRateField !== undefined) {
-          setField(eventRateField);
-        }
-      }
+  useEffect(() => {
+    const agg = getAgg(aggOption.label);
+    setFieldsEnabled(aggOption.label !== '');
+    if (agg !== null) {
+      setFieldOptionEnabled(isCountAgg(agg) === false);
     }
-  }, [agg, field, byField, overField, partitionField, excludeFrequent]);
+  }, []);
 
   function onCreateClick() {
     detectorChangeHandler(detector, payload.index);
   }
 
+  function saveEnabled() {
+    return (
+      fieldsEnabled &&
+      (fieldOptionEnabled === false || (fieldOptionEnabled === true && fieldOption.label !== ''))
+    );
+  }
+
   return (
-    <ModalWrapper onCreateClick={onCreateClick} closeModal={closeModal} saveEnabled={fieldsEnabled}>
+    <ModalWrapper onCreateClick={onCreateClick} closeModal={closeModal} saveEnabled={saveEnabled()}>
       <Fragment>
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -146,8 +180,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={aggOptions}
-                selectedOptions={[agg]}
-                onChange={onOptionChange(setAgg)}
+                selectedOptions={[aggOption]}
+                onChange={onOptionChange(setAggOption)}
                 isClearable={true}
                 // data-test-subj={testSubject}
               />
@@ -158,10 +192,10 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={fieldOptions}
-                selectedOptions={[field]}
-                onChange={onOptionChange(setField)}
+                selectedOptions={[fieldOption]}
+                onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false}
+                isDisabled={fieldsEnabled === false || fieldOptionEnabled === false}
                 // data-test-subj={testSubject}
               />
             </FieldDescription>
@@ -174,8 +208,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={[byField]}
-                onChange={onOptionChange(setByField)}
+                selectedOptions={[byFieldOption]}
+                onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
                 // data-test-subj={testSubject}
@@ -187,8 +221,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={[overField]}
-                onChange={onOptionChange(setOverField)}
+                selectedOptions={[overFieldOption]}
+                onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
                 // data-test-subj={testSubject}
@@ -200,8 +234,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
-                selectedOptions={[partitionField]}
-                onChange={onOptionChange(setPartitionField)}
+                selectedOptions={[partitionFieldOption]}
+                onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
                 // data-test-subj={testSubject}
@@ -216,8 +250,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={excludeFrequentOptions}
-                selectedOptions={[excludeFrequent]}
-                onChange={onOptionChange(setExcludeFrequent)}
+                selectedOptions={[excludeFrequentOption]}
+                onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
                 // data-test-subj={testSubject}
@@ -231,50 +265,44 @@ export const AdvancedDetectorModal: FC<Props> = ({
   );
 };
 
-function createAggOption(agg: Aggregation | null) {
+function createAggOption(agg: Aggregation | null): EuiComboBoxOptionProps {
   if (agg === null) {
     return emptyOption;
   }
   return {
     label: agg.id,
-    agg,
-  } as ExtendedOptionProps;
+  };
 }
 
-function createFieldOption(field: Field | null) {
+function createFieldOption(field: Field | null): EuiComboBoxOptionProps {
   if (field === null) {
     return emptyOption;
   }
   return {
     label: field.name,
-    field,
-  } as ExtendedOptionProps;
+  };
 }
 
-function createExcludeFrequentOption(excludeFrequent: string | null) {
+function createExcludeFrequentOption(excludeFrequent: string | null): EuiComboBoxOptionProps {
   if (excludeFrequent === null) {
     return emptyOption;
   }
   return {
     label: excludeFrequent,
-    exclude_frequent: excludeFrequent,
-  } as ExtendedOptionProps;
+  };
 }
 
-function createMlcategoryField(jobCreator: JobCreatorType) {
+function isCountAgg(agg: Aggregation) {
+  return agg.dslName === ES_AGGREGATION.COUNT;
+}
+
+function createMlcategoryField(jobCreator: JobCreatorType): EuiComboBoxOptionProps[] {
   if (jobCreator.categorizationFieldName === null) {
     return [];
   }
-  const mlCategory: Field = {
-    id: 'mlcategory',
-    name: 'mlcategory',
-    type: ES_FIELD_TYPES.KEYWORD,
-    aggregatable: false,
-  };
   return [
     {
       label: 'mlcategory',
-      field: mlCategory,
-    } as ExtendedOptionProps,
+    },
   ];
 }
