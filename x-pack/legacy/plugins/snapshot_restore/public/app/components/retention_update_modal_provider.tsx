@@ -28,17 +28,19 @@ import { DEFAULT_RETENTION_SCHEDULE, DEFAULT_RETENTION_FREQUENCY } from '../cons
 import { updateRetentionSchedule } from '../services/http';
 
 interface Props {
-  children: (updateRetention: UpdateRetentionSetting) => React.ReactElement;
+  children: (updateRetention: UpdateRetentionSettings) => React.ReactElement;
 }
 
-export type UpdateRetentionSetting = (
+export type UpdateRetentionSettings = (
   retentionSchedule?: string,
   onSuccess?: OnSuccessCallback
 ) => void;
 
 type OnSuccessCallback = () => void;
 
-export const UpdateRetentionModalProvider: React.FunctionComponent<Props> = ({ children }) => {
+export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props> = ({
+  children,
+}) => {
   const {
     core: {
       i18n,
@@ -68,7 +70,7 @@ export const UpdateRetentionModalProvider: React.FunctionComponent<Props> = ({ c
 
   const [isInvalid, setIsInvalid] = useState<boolean>(false);
 
-  const updateRetentionPrompt: UpdateRetentionSetting = (
+  const updateRetentionPrompt: UpdateRetentionSettings = (
     originalRetentionSchedule,
     onSuccess = () => undefined
   ) => {
