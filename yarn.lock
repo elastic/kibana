@@ -1064,10 +1064,10 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/charts@^12.1.0":
-  version "12.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-12.1.0.tgz#a1ad871cf1d90efc2450d29aa41bc9872434616a"
-  integrity sha512-sXZ0KHN29icVbeCU0x6LsiYI++w55kUJA0bpH7vpGExny70UBHNqjnLcBui0DBhlS3Bsz64xW5c4i9TKWeqXLA==
+"@elastic/charts@^13.4.0":
+  version "13.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-13.4.0.tgz#117cce6081cb6cd62dfab1de207a0d56dde99d36"
+  integrity sha512-m52fEc6d94whUrOZdXTA2cTEyZQGxodOIUA5/bNFj7pmxbCkIXhcJ1Wj7eJxrBIjvzL/hYSy4ALueTO/gS++bg==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"
@@ -14342,10 +14342,10 @@ handle-thing@^2.0.0:
   resolved "https://registry.yarnpkg.com/handle-thing/-/handle-thing-2.0.0.tgz#0e039695ff50c93fc288557d696f3c1dc6776754"
   integrity sha512-d4sze1JNC454Wdo2fkuyzCr6aHcbL6PGGuFAz0Li/NcOm1tCHGnWDRmJP85dh9IhQErTc2svWFEX5xHIOo//kQ==
 
-handlebars@4.3.3, handlebars@^4.3.3:
-  version "4.3.3"
-  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.3.3.tgz#56dd05fe33d6bd8a7d797351c39a0cdcfd576be5"
-  integrity sha512-VupOxR91xcGojfINrzMqrvlyYbBs39sXIrWa7YdaQWeBudOlvKEGvCczMfJPgnuwHE/zyH1M6J+IUP6cgDVyxg==
+handlebars@4.3.5:
+  version "4.3.5"
+  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.3.5.tgz#d6c2d0a0f08b4479e3949f8321c0f3893bb691be"
+  integrity sha512-I16T/l8X9DV3sEkY9sK9lsPRgDsj82ayBY/4pAZyP2BcX5WeRM3O06bw9kIs2GLrHvFB/DNzWWJyFvof8wQGqw==
   dependencies:
     neo-async "^2.6.0"
     optimist "^0.6.1"

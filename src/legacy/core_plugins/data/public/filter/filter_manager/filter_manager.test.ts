@@ -35,9 +35,6 @@ import { getFiltersArray } from './test_helpers/get_filters_array';
 import { coreMock } from '../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
-import { timefilterServiceMock } from '../../timefilter/timefilter_service.mock';
-const timefilterSetupMock = timefilterServiceMock.createSetupContract();
-
 setupMock.uiSettings.get.mockImplementation((key: string) => {
   return true;
 });
@@ -61,8 +58,7 @@ describe('filter_manager', () => {
     indexPatterns = new StubIndexPatterns();
     filterManager = new FilterManager(
       (indexPatterns as unknown) as IndexPatterns,
-      setupMock.uiSettings,
-      timefilterSetupMock.timefilter
+      setupMock.uiSettings
     );
     readyFilters = getFiltersArray();
 
@@ -692,14 +688,6 @@ describe('filter_manager', () => {
       expect(filterManager.getFilters()).toHaveLength(3);
       expect(fetchStub).toBeCalledTimes(1);
       expect(updateStub).toBeCalledTimes(1);
-    });
-  });
-
-  describe('addFiltersAndChangeTimeFilter', () => {
-    test('should just add filters if there is no time filter in array', async () => {
-      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      await filterManager.addFiltersAndChangeTimeFilter([f1]);
-      expect(filterManager.getFilters()).toHaveLength(1);
     });
   });
 });
