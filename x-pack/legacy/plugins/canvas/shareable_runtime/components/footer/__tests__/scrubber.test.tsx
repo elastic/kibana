@@ -13,6 +13,8 @@ import {
   getRenderedElement as element,
 } from '../../../test/selectors';
 
+jest.mock('../../../supported_renderers');
+
 describe('<Scrubber />', () => {
   test('null workpad renders nothing', () => {
     expect(mount(<Scrubber />).isEmptyRender());

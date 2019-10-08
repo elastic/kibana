@@ -79,7 +79,7 @@ export const buildTask = gulp.series(
   cleanBuildTask,
   reportTask,
   prepareTask,
-  pluginHelpersBuild,
   buildCanvasShareableRuntime,
+  pluginHelpersBuild,
   generateNoticeText
 );

@@ -14,6 +14,8 @@ import {
 } from '../../../../test/selectors';
 import { AutoplaySettings } from '../autoplay_settings';
 
+jest.mock('../../../../supported_renderers');
+
 describe('<AutoplaySettings />', () => {
   const wrapper = mount(
     <JestContext>

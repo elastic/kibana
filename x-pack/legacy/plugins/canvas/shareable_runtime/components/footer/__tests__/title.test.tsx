@@ -9,6 +9,8 @@ import React from 'react';
 import { JestContext } from '../../../test/context_jest';
 import { Title } from '../title';
 
+jest.mock('../../../supported_renderers');
+
 describe('<Title />', () => {
   test('null workpad renders nothing', () => {
     expect(mount(<Title />).isEmptyRender());

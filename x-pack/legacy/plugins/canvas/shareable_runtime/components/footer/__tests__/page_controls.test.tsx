@@ -14,6 +14,8 @@ import {
 } from '../../../test/selectors';
 import { PageControls } from '../page_controls';
 
+jest.mock('../../../supported_renderers');
+
 describe('<PageControls />', () => {
   test('null workpad renders nothing', () => {
     expect(mount(<PageControls />).isEmptyRender());

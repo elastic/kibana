@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../supported_renderers');
 export { Context as JestContext } from './context';

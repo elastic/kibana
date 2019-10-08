@@ -10,6 +10,8 @@ import { JestContext } from '../../../test/context_jest';
 import { getScrubber as scrubber, getPageControlsCenter as center } from '../../../test/selectors';
 import { Footer } from '../footer';
 
+jest.mock('../../../supported_renderers');
+
 describe('<Footer />', () => {
   test('null workpad renders nothing', () => {
     expect(mount(<Footer />).isEmptyRender());
