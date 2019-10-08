@@ -17,16 +17,20 @@
  * under the License.
  */
 
-export { withProcRunner } from './proc_runner';
-export {
-  ToolingLog,
-  ToolingLogTextWriter,
-  pickLevelFromFlags,
-  ToolingLogCollectingWriter,
-} from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
-export { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } from './certs';
-export { run, createFailError, createFlagError, combineErrors, isFailError, Flags } from './run';
-export { REPO_ROOT } from './constants';
-export { KbnClient } from './kbn_client';
-export * from './axios';
+import { AxiosError, AxiosResponse } from 'axios';
+
+export interface AxiosRequestError extends AxiosError {
+  response: undefined;
+}
+
+export interface AxiosResponseError<T> extends AxiosError {
+  response: AxiosResponse<T>;
+}
+
+export const isAxiosRequestError = (error: any): error is AxiosRequestError => {
+  return error && error.response === undefined;
+};
+
+export const isAxiosResponseError = <T = any>(error: any): error is AxiosResponseError<T> => {
+  return error && error.response !== undefined && error.response.status !== undefined;
+};
