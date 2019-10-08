@@ -57,7 +57,7 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
   );
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <div style={{ height: 200, width: '100%' }}>
       <Chart className="log-entry-rate-chart">
         <Axis
           id={getAxisId('timestamp')}
@@ -94,6 +94,8 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
           tooltip={tooltipProps}
           theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
           xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
+          showLegend
+          legendPosition="right"
         />
       </Chart>
     </div>
