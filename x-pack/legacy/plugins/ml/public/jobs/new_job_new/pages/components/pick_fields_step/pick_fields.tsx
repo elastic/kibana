@@ -17,9 +17,7 @@ import { AdvancedView } from './components/advanced_view';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
   const jobType = jobCreator.type;
 
@@ -47,9 +45,7 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           {jobType === JOB_TYPE.POPULATION && (
             <PopulationView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
-          {jobType === JOB_TYPE.ADVANCED && (
-            <AdvancedView isActive={isCurrentStep} setCanProceed={setNextActive} />
-          )}
+          {jobType === JOB_TYPE.ADVANCED && <AdvancedView setCanProceed={setNextActive} />}
           <WizardNav
             previous={() =>
               setCurrentStep(

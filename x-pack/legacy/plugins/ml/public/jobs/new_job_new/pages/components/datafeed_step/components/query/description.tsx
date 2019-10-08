@@ -6,8 +6,7 @@
 
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 
 interface Props {
   children: JSX.Element;
@@ -18,19 +17,8 @@ export const Description: FC<Props> = memo(({ children }) => {
     defaultMessage: 'Elasticsearch query',
   });
   return (
-    // <EuiDescribedFormGroup
-    //   idAria="description"
-    //   title={<h3>{title}</h3>}
-    //   description={
-    //     <FormattedMessage
-    //       id="xpack.ml.newJob.wizard.datafeedStep.query.description"
-    //       defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah"
-    //     />
-    //   }
-    // >
     <EuiFormRow label={title} describedByIds={['description']} fullWidth={true}>
       {children}
     </EuiFormRow>
-    // </EuiDescribedFormGroup>
   );
 });

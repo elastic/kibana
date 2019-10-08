@@ -11,7 +11,7 @@ import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE, DEFAULT_MODEL_MEMORY_LIMIT } from './util/constants';
+import { JOB_TYPE } from './util/constants';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../common/util/validation_utils';
 

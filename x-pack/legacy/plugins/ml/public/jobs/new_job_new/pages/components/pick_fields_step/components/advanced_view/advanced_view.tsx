@@ -8,16 +8,14 @@ import React, { Fragment, FC, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { AdvancedDetectors } from './metric_selection';
-import { AdvancedDetectorsSummary } from './metric_selection_summary';
 import { AdvancedSettings } from './settings';
 import { ExtraSettings } from './extra';
 
 interface Props {
-  isActive: boolean;
   setCanProceed?: (proceed: boolean) => void;
 }
 
-export const AdvancedView: FC<Props> = ({ isActive, setCanProceed }) => {
+export const AdvancedView: FC<Props> = ({ setCanProceed }) => {
   const [metricsValid, setMetricValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
 
@@ -29,17 +27,13 @@ export const AdvancedView: FC<Props> = ({ isActive, setCanProceed }) => {
 
   return (
     <Fragment>
-      {isActive === false && <AdvancedDetectorsSummary />}
-
-      {isActive === true && (
-        <Fragment>
-          <ExtraSettings setIsValid={setSettingsValid} />
-          <EuiHorizontalRule margin="l" />
-          <AdvancedDetectors setIsValid={setMetricValid} />
-          <EuiHorizontalRule margin="l" />
-          <AdvancedSettings setIsValid={setSettingsValid} />
-        </Fragment>
-      )}
+      <Fragment>
+        <ExtraSettings />
+        <EuiHorizontalRule margin="l" />
+        <AdvancedDetectors setIsValid={setMetricValid} />
+        <EuiHorizontalRule margin="l" />
+        <AdvancedSettings setIsValid={setSettingsValid} />
+      </Fragment>
     </Fragment>
   );
 };

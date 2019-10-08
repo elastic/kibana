@@ -18,7 +18,6 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
 } from '@elastic/eui';
-import { JobCreatorType } from '../../../../common/job_creator';
 import { Job, Datafeed } from '../../../../common/job_creator/configs';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../common/util/validation_utils';
@@ -38,8 +37,6 @@ interface Props {
 export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafeedEditorMode }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
-  // const [jobConfig, setJobConfig] = useState(jobCreator.jobConfig);
-  // const [datafeedConfig, setDatafeedConfig] = useState(jobCreator.datafeedConfig);
 
   const [jobConfigString, setJobConfigString] = useState(jobCreator.formattedJobJson);
   const [datafeedConfigString, setDatafeedConfigString] = useState(

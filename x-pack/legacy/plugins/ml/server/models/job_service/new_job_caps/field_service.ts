@@ -229,10 +229,6 @@ function getIpFields(fields: Field[]): Field[] {
   return fields.filter(f => f.type === ES_FIELD_TYPES.IP);
 }
 
-function getDateFields(fields: Field[]): Field[] {
-  return fields.filter(f => f.type === ES_FIELD_TYPES.DATE);
-}
-
 function getNumericalFields(fields: Field[]): Field[] {
   return fields.filter(
     f =>
