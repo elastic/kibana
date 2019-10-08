@@ -61,6 +61,10 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
     return this.signature;
   }
 
+  public refresh() {
+    this.refresher$.next(true);
+  }
+
   public setup(core: CoreSetup) {
     this.removeInterceptor = core.http.intercept({
       response: httpResponse => {
@@ -71,7 +75,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
           this.signature = signature;
 
           if (httpResponse.request && !httpResponse.request.url.includes(API_ROUTE)) {
-            this.refresher$.next(true);
+            this.refresh();
           }
         }
       },
@@ -109,7 +113,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
     return {
       license$,
       refresh: () => {
-        this.refresher$.next(true);
+        this.refresh();
       },
     };
   }

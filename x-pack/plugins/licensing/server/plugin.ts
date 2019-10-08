@@ -16,7 +16,7 @@ import {
   Plugin as CorePlugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { LicensingPluginSetup, ILicensingPlugin } from '../common/types';
+import { LicensingPluginSetup, ILicensingPlugin, ILicense } from '../common/types';
 import { License } from '../common/license';
 import { hasLicenseInfoChanged } from '../common/has_license_info_changed';
 import { LicensingConfig } from './licensing_config';
@@ -35,6 +35,7 @@ type LicensingConfigType = TypeOf<typeof schema>;
 
 export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugin {
   private stop$ = new Subject();
+  private refresher$ = new BehaviorSubject<boolean>(true);
   private readonly logger: Logger;
   private readonly config$: Observable<LicensingConfig>;
   private configSubscription: Subscription;
@@ -109,16 +110,20 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
       .digest('hex');
   }
 
+  public refresh() {
+    this.refresher$.next(true);
+  }
+
   public async setup(core: CoreSetup) {
     const { clusterSource, pollingFrequency } = this.currentConfig;
 
     this.elasticsearch = core.elasticsearch;
 
-    const refresher$ = new BehaviorSubject<boolean>(true);
     const initial$ = of(new License({ plugin: this, features: {}, clusterSource }));
-    const licenseFetches$ = merge(timer(0, pollingFrequency), refresher$).pipe(
-      switchMap(this.next)
-    );
+    const licenseFetches$ = merge(
+      timer(0, pollingFrequency),
+      this.refresher$.pipe(takeUntil(this.stop$))
+    ).pipe(switchMap(this.next));
     const updates$ = merge(initial$, licenseFetches$).pipe(
       pairwise(),
       filter(([previous, next]) => hasLicenseInfoChanged(previous, next)),
@@ -133,8 +138,8 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
 
     return {
       license$,
-      refresh() {
-        refresher$.next(true);
+      refresh: () => {
+        this.refresh();
       },
     };
   }
