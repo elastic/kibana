@@ -65,28 +65,28 @@ export interface IUiSettingsClient {
  *  @class UiSettingsService
  */
 export class UiSettingsClient implements IUiSettingsClient {
-  private readonly _type: UiSettingsServiceOptions['type'];
-  private readonly _id: UiSettingsServiceOptions['id'];
-  private readonly _buildNum: UiSettingsServiceOptions['buildNum'];
-  private readonly _savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
-  private readonly _overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
-  private readonly _defaults: NonNullable<UiSettingsServiceOptions['defaults']>;
-  private readonly _log: Logger;
+  private readonly type: UiSettingsServiceOptions['type'];
+  private readonly id: UiSettingsServiceOptions['id'];
+  private readonly buildNum: UiSettingsServiceOptions['buildNum'];
+  private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
+  private readonly overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
+  private readonly defaults: NonNullable<UiSettingsServiceOptions['defaults']>;
+  private readonly log: Logger;
 
   constructor(options: UiSettingsServiceOptions) {
     const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
 
-    this._type = type;
-    this._id = id;
-    this._buildNum = buildNum;
-    this._savedObjectsClient = savedObjectsClient;
-    this._defaults = defaults;
-    this._overrides = overrides;
-    this._log = log;
+    this.type = type;
+    this.id = id;
+    this.buildNum = buildNum;
+    this.savedObjectsClient = savedObjectsClient;
+    this.defaults = defaults;
+    this.overrides = overrides;
+    this.log = log;
   }
 
   getDefaults() {
-    return this._defaults;
+    return this.defaults;
   }
 
   // returns a Promise for the value of the requested setting
@@ -111,7 +111,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   // NOTE: should be a private method
   async getRaw(): Promise<UiSettingsRaw> {
     const userProvided = await this.getUserProvided();
-    return defaultsDeep(userProvided, this._defaults);
+    return defaultsDeep(userProvided, this.defaults);
   }
 
   async getUserProvided(options: ReadOptions = {}): Promise<UserProvided> {
@@ -128,7 +128,7 @@ export class UiSettingsClient implements IUiSettingsClient {
 
     // write all overridden keys, dropping the userValue is override is null and
     // adding keys for overrides that are not in saved object
-    for (const [key, userValue] of Object.entries(this._overrides)) {
+    for (const [key, userValue] of Object.entries(this.overrides)) {
       userProvided[key] =
         userValue === null ? { isOverridden: true } : { isOverridden: true, userValue };
     }
@@ -157,7 +157,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   isOverridden(key: string) {
-    return this._overrides.hasOwnProperty(key);
+    return this.overrides.hasOwnProperty(key);
   }
 
   // NOTE: should be private method
@@ -179,18 +179,18 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
 
     try {
-      await this._savedObjectsClient.update(this._type, this._id, changes);
+      await this.savedObjectsClient.update(this.type, this.id, changes);
     } catch (error) {
-      const { isNotFoundError } = this._savedObjectsClient.errors;
+      const { isNotFoundError } = this.savedObjectsClient.errors;
       if (!isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
         throw error;
       }
 
       await createOrUpgradeSavedConfig({
-        savedObjectsClient: this._savedObjectsClient,
-        version: this._id,
-        buildNum: this._buildNum,
-        log: this._log,
+        savedObjectsClient: this.savedObjectsClient,
+        version: this.id,
+        buildNum: this.buildNum,
+        log: this.log,
       });
 
       await this._write({
@@ -209,18 +209,18 @@ export class UiSettingsClient implements IUiSettingsClient {
       isNotFoundError,
       isForbiddenError,
       isNotAuthorizedError,
-    } = this._savedObjectsClient.errors;
+    } = this.savedObjectsClient.errors;
 
     try {
-      const resp = await this._savedObjectsClient.get(this._type, this._id);
+      const resp = await this.savedObjectsClient.get(this.type, this.id);
       return resp.attributes;
     } catch (error) {
       if (isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
         const failedUpgradeAttributes = await createOrUpgradeSavedConfig<T>({
-          savedObjectsClient: this._savedObjectsClient,
-          version: this._id,
-          buildNum: this._buildNum,
-          log: this._log,
+          savedObjectsClient: this.savedObjectsClient,
+          version: this.id,
+          buildNum: this.buildNum,
+          log: this.log,
           onWriteError(writeError, attributes) {
             if (isConflictError(writeError)) {
               // trigger `!failedUpgradeAttributes` check below, since another
@@ -260,7 +260,7 @@ export class UiSettingsClient implements IUiSettingsClient {
       isForbiddenError,
       isEsUnavailableError,
       isNotAuthorizedError,
-    } = this._savedObjectsClient.errors;
+    } = this.savedObjectsClient.errors;
 
     return (
       isForbiddenError(error) ||
