@@ -53,6 +53,7 @@ export const MapToolTip = React.memo<MapToolTipProps>(
       if (!isLoadingNextFeature) {
         setIsLoading(true);
       }
+      setIsError(false);
 
       const fetchFeatureProps = async () => {
         if (features[featureIndex] != null) {
