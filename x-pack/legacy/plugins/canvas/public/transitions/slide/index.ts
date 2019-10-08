@@ -6,10 +6,14 @@
 
 import './slide.css';
 
+import { TransitionStrings } from '../../../i18n';
+
+const { slide: strings } = TransitionStrings;
+
 export const slide = () => ({
   name: 'slide',
-  displayName: 'Slide',
-  help: 'Slide from one page to the next',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   enter: 'slideIn',
   exit: 'slideOut',
 });
