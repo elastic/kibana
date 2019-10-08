@@ -18,39 +18,26 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { logging, Key, Origin } from 'selenium-webdriver';
+import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
-import { takeUntil } from 'rxjs/operators';
 
 import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { Browsers } from './remote/browsers';
-import { pollForLogEntry$ } from './remote/poll_for_log_entry';
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const config = getService('config');
-  const lifecycle = getService('lifecycle');
-  const { driver, browserType } = await getService('__webdriver__').init();
+  const { driver, browserType, consoleLog$ } = await getService('__webdriver__').init();
+
+  consoleLog$.subscribe(({ message, level }) => {
+    log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
+      `browser[${level}] ${message}`
+    );
+  });
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
-
-  if (browserType === Browsers.Chrome) {
-    // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
-    // See: https://github.com/w3c/webdriver/issues/406
-    // See: https://w3c.github.io/webdriver/#endpoints
-
-    pollForLogEntry$(driver, logging.Type.BROWSER, config.get('browser.logPollingMs'))
-      .pipe(takeUntil(lifecycle.cleanup$))
-      .subscribe({
-        next({ message, level: { name: level } }) {
-          const msg = message.replace(/\\n/g, '\n');
-          log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
-        },
-      });
-  }
 
   return new (class BrowserService {
     /**
