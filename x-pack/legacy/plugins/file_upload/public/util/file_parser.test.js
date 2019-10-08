@@ -56,7 +56,6 @@ describe('parse file', () => {
   });
 
   it('should abort on file reader error', () => {
-    fileReader.abort.mockReset();
     const fileRef = getFileRef();
 
     const fileReaderWithErrorCall = {
