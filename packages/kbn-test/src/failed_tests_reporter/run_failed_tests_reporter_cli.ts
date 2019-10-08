@@ -29,7 +29,7 @@ export function runFailedTestsReporterCli() {
   run(
     async ({ log, flags }) => {
       const buildUrl = flags['build-url'];
-      if (typeof buildUrl !== 'string') {
+      if (typeof buildUrl !== 'string' || !buildUrl) {
         throw createFlagError('Missing --build-url or process.env.BUILD_URL');
       }
 
@@ -60,8 +60,8 @@ export function runFailedTestsReporterCli() {
         }
       }
 
-      const githubApi = new GithubApi(log, dryRun ? undefined : process.env.GITHUB_TOKEN);
-      const issues = await githubApi.getKibanaIssues();
+      const githubApi = new GithubApi(log, process.env.GITHUB_TOKEN, dryRun);
+      const issues = await githubApi.getAllFailedTestIssues();
       const reportPaths = await globby(['target/junit/**/*.xml'], {
         cwd: REPO_ROOT,
         absolute: true,

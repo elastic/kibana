@@ -21,9 +21,9 @@ import Url from 'url';
 
 import Axios, { AxiosRequestConfig } from 'axios';
 import parseLinkHeader from 'parse-link-header';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, isAxiosResponseError } from '@kbn/dev-utils';
 
-const ISSUES_URL = '/repos/elastic/kibana/issues/';
+const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
 
 export interface GithubIssue {
   html_url: string;
@@ -33,11 +33,12 @@ export interface GithubIssue {
   body: string;
 }
 
+type RequestOptions = AxiosRequestConfig & { safeForDryRun?: boolean };
+
 export class GithubApi {
   private readonly x = Axios.create({
-    baseURL: 'https://api.github.com',
     headers: {
-      Authentication: `token ${this.token}`,
+      Authorization: `token ${this.token}`,
       'User-Agent': 'elastic/kibana#failed_test_reporter',
     },
   });
@@ -46,21 +47,44 @@ export class GithubApi {
    * Create a GithubApi helper object, if token is undefined requests won't be
    * sent, but will instead be logged.
    */
-  constructor(private readonly log: ToolingLog, private readonly token: string | undefined) {}
+  constructor(
+    private readonly log: ToolingLog,
+    private readonly token: string | undefined,
+    private readonly dryRun: boolean
+  ) {
+    if (!token && !dryRun) {
+      throw new TypeError('token parameter is required');
+    }
+  }
 
-  async getKibanaIssues() {
+  async getAllFailedTestIssues() {
+    this.log.info('Fetching failed-test issues');
     const issues: GithubIssue[] = [];
-    let nextUrl = ISSUES_URL;
+    let nextRequest: RequestOptions = {
+      safeForDryRun: true,
+      method: 'GET',
+      url: Url.resolve(BASE_URL, 'issues'),
+      params: {
+        state: 'all',
+        per_page: '100',
+        labels: 'failed-test',
+      },
+    };
 
     while (true) {
-      const resp = await this.request<GithubIssue[]>({ method: 'GET', url: nextUrl }, []);
+      const resp = await this.request<GithubIssue[]>(nextRequest, []);
+
       for (const issue of resp.data) {
         issues.push(issue);
       }
 
       const parsed = parseLinkHeader(resp.headers.link);
       if (parsed && parsed.next && parsed.next.url) {
-        nextUrl = parsed.next.url;
+        nextRequest = {
+          safeForDryRun: true,
+          method: 'GET',
+          url: parsed.next.url,
+        };
       } else {
         break;
       }
@@ -73,7 +97,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'PATCH',
-        url: Url.resolve(ISSUES_URL, encodeURIComponent(issueNumber)),
+        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}`),
         data: {
           state: 'open', // Reopen issue if it was closed.
           body: newBody,
@@ -87,7 +111,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'POST',
-        url: Url.resolve(ISSUES_URL, `${encodeURIComponent(issueNumber)}/comments`),
+        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}/comments`),
         data: {
           body: commentBody,
         },
@@ -100,7 +124,7 @@ export class GithubApi {
     const resp = await this.request(
       {
         method: 'POST',
-        url: ISSUES_URL,
+        url: Url.resolve(BASE_URL, 'issues'),
         data: {
           title,
           body,
@@ -115,19 +139,31 @@ export class GithubApi {
     return resp.data.html_url;
   }
 
-  private async request<T>(options: AxiosRequestConfig, dryRunResponse: T) {
-    if (this.token === undefined) {
-      this.log.debug(
-        `Github API: ${options.method} ${options.url} ${JSON.stringify(options.data)}`
-      );
-      return {
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        data: dryRunResponse,
-      };
+  private async request<T>(options: RequestOptions, dryRunResponse: T) {
+    const executeRequest = !this.dryRun || options.safeForDryRun;
+    this.log.verbose('Github API', executeRequest ? 'Request' : 'Dry Run', options);
+
+    if (executeRequest) {
+      try {
+        return await this.x.request<T>(options);
+      } catch (error) {
+        if (isAxiosResponseError(error)) {
+          throw new Error(
+            `[${error.config.method} ${error.config.url}] ${error.response.status} ${
+              error.response.statusText
+            } Error: ${JSON.stringify(error.response.data)}`
+          );
+        }
+
+        throw error;
+      }
     }
 
-    return await this.x.request<T>(options);
+    return {
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      data: dryRunResponse,
+    };
   }
 }
