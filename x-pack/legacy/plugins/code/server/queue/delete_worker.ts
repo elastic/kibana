@@ -42,6 +42,17 @@ export class DeleteWorker extends AbstractWorker {
     const { uri } = job.payload;
 
     try {
+      await this.objectClient.getRepository(uri);
+    } catch (error) {
+      this.log.debug(`Repository ${uri} might not exist. Skip delete job.`);
+      return {
+        uri,
+        // Because the repository does not exist, we can regard the delete job to be successful.
+        res: true,
+      };
+    }
+
+    try {
       // 1. Cancel running clone and update workers
       await this.cancellationService.cancelCloneJob(uri, CancellationReason.REPOSITORY_DELETE);
       await this.cancellationService.cancelUpdateJob(uri, CancellationReason.REPOSITORY_DELETE);
