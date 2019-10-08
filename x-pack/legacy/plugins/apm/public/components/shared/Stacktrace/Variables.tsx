@@ -6,12 +6,11 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import styled from 'styled-components';
-import { EuiHorizontalRule, EuiAccordion } from '@elastic/eui';
+import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   borderRadius,
-  fontFamily,
   px,
   unit,
   units
