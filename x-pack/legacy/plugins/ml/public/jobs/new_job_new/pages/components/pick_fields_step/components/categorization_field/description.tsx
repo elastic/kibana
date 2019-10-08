@@ -24,7 +24,7 @@ export const Description: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationField.description"
-          defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah."
+          defaultMessage="Optional, for use if analyzing unstructured log data. Using text data types is recommended."
         />
       }
     >

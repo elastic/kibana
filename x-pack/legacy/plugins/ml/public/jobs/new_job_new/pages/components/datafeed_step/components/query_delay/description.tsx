@@ -26,7 +26,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.queryDelay.description"
-          defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah."
+          defaultMessage="Time delay in seconds, between current time and latest input data time."
         />
       }
     >

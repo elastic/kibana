@@ -24,7 +24,7 @@ export const Description: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.description"
-          defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah."
+          defaultMessage="Optional, for use if input data has been pre-summarized e.g. {docCountParam}."
         />
       }
     >

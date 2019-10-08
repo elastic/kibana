@@ -27,7 +27,7 @@ export const AggDescription: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.aggSelect.description"
-          defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah "
+          defaultMessage="Analysis functions to be performed e.g. sum, count."
         />
       }
     >
@@ -52,7 +52,7 @@ export const FieldDescription: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.fieldSelect.description"
-          defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah "
+          defaultMessage="Required for functions: sum, mean, median, max, min, info_content, distinct_count."
         />
       }
     >
@@ -77,7 +77,7 @@ export const ByFieldDescription: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.byFieldSelect.description"
-          defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah "
+          defaultMessage="Required for individual analysis where anomalies are detected compared to an entity's own past behavior."
         />
       }
     >
@@ -102,7 +102,7 @@ export const OverFieldDescription: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.overFieldSelect.description"
-          defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah "
+          defaultMessage="Required for population analysis where anomalies are detected compared to the behavior of the population."
         />
       }
     >
@@ -127,7 +127,7 @@ export const PartitionFieldDescription: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.description"
-          defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah "
+          defaultMessage="Allows segmentation of modeling into logical groups."
         />
       }
     >
@@ -152,7 +152,7 @@ export const ExcludeFrequentDescription: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.description"
-          defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah "
+          defaultMessage="If true will automatically identify and exclude frequently occurring entities which may otherwise have dominated results."
         />
       }
     >

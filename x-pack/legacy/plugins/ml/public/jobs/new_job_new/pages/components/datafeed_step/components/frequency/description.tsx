@@ -26,7 +26,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.frequency.description"
-          defaultMessage="Blah blah blah blah blah blah blah blah blah blah blah blah."
+          defaultMessage=" The interval between searches."
         />
       }
     >
