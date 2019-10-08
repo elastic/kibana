@@ -11,17 +11,14 @@ import { ActionCreator } from 'typescript-fsa';
 import { FlowTarget } from '../../graphql/types';
 import { NavTab } from '../../components/navigation/types';
 import { GlobalTimeArgs } from '../../containers/global_time';
-import { NetworkTableType } from '../../store/network/model';
 import { networkModel } from '../../store';
 import { ESTermQuery } from '../../../common/typed_json';
 import { InputsModelId } from '../../store/inputs/constants';
 
-export type KeyNetworkNavTabWithoutMlPermission = NetworkTableType.dns &
-  NetworkTableType.topNFlowSource &
-  NetworkTableType.topNFlowDestination;
+export type KeyNetworkNavTabWithoutMlPermission = NetworkTabType.dns & NetworkTabType.ips;
 
 type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
-  NetworkTableType.anomalies;
+  NetworkTabType.anomalies;
 
 type KeyNetworkNavTab = KeyNetworkNavTabWithoutMlPermission | KeyNetworkNavTabWithMlPermission;
 
