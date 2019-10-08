@@ -459,25 +459,6 @@ describe('interception', () => {
   });
 
   describe('request availability during interception', () => {
-    it('should be available to responseError when request throws', async () => {
-      expect.assertions(3);
-
-      let spiedRequest: Request | undefined;
-
-      http.intercept({
-        request() {
-          throw new Error('Internal Server Error');
-        },
-        responseError({ request }) {
-          spiedRequest = request;
-        },
-      });
-
-      await expect(http.fetch('/my/path')).rejects.toThrow();
-      expect(fetchMock.called()).toBe(false);
-      expect(spiedRequest).toBeDefined();
-    });
-
     it('should be available to responseError when response throws', async () => {
       let spiedRequest: Request | undefined;
 
@@ -513,22 +494,6 @@ describe('interception', () => {
 
       await expect(http.fetch('/my/path')).rejects.toThrow();
       expect(spiedResponse).toBeDefined();
-    });
-
-    it('should not be available to responseError when request throws', async () => {
-      let spiedResponse: Response | undefined;
-
-      http.intercept({
-        request() {
-          throw new Error('Internal Server Error');
-        },
-        responseError({ response }) {
-          spiedResponse = response;
-        },
-      });
-
-      await expect(http.fetch('/my/path')).rejects.toThrow();
-      expect(spiedResponse).toBeUndefined();
     });
   });
 

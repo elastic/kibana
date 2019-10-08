@@ -154,6 +154,12 @@ export const setup = (
   ) {
     let current: HttpResponse | undefined;
 
+    try {
+      current = await responsePromise;
+    } catch (err) {
+      throw err;
+    }
+
     const finalHttpResponse = await [...interceptors].reduce(
       (promise, interceptor) =>
         promise.then(
@@ -165,16 +171,15 @@ export const setup = (
               return httpResponse;
             }
 
-            return Object.assign(
-              (await interceptor.response(httpResponse, controller)) || {},
-              httpResponse
-            );
+            return {
+              ...httpResponse,
+              ...((await interceptor.response(httpResponse, controller)) || {}),
+              request: httpResponse.request,
+            };
           },
           async error => {
             const request =
-              error.request ||
-              (error.innerError && error.innerError.request) ||
-              (current && current.request);
+              error.request || (error.innerError && error.innerError.request) || current!.request;
 
             if (error.innerError) {
               error = error.innerError;
@@ -191,8 +196,8 @@ export const setup = (
                 {
                   error,
                   request,
-                  response: error.response || (current && current.response),
-                  body: error.body || (current && current.body),
+                  response: error.response || current!.response,
+                  body: error.body || current!.body,
                 },
                 controller
               );
@@ -210,7 +215,7 @@ export const setup = (
             }
           }
         ),
-      responsePromise
+      Promise.resolve(current)
     );
 
     return finalHttpResponse.body;
