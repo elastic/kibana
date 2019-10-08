@@ -11,6 +11,7 @@ const oboe = require('oboe');
 
 // In local testing, performance improvements leveled off around this size
 export const FILE_BUFFER = 1024000;
+let featuresProcessed = 0;
 
 const readSlice = (fileReader, file, start, stop) => {
   const blob = file.slice(start, stop);
@@ -21,6 +22,7 @@ const createOboeStreamAndPatterns = cleanAndValidate => {
   const oboeStream = oboe();
   oboeStream.node({
     'features.*': function (feature) {
+      featuresProcessed++;
       const cleanFeature = cleanAndValidate(feature);
       return cleanFeature;
     }
@@ -63,6 +65,7 @@ export const fileHandler = (
           return;
         }
         chunkHandler({
+          featuresProcessed,
           bytesProcessed: stop || file.size,
           totalBytes: file.size
         });
@@ -86,7 +89,9 @@ export const fileHandler = (
           defaultMessage: 'Error reading file',
         })));
     };
-    oboeStream.done(parsedGeojson => resolve(parsedGeojson));
+    oboeStream.done(parsedGeojson => {
+      resolve(parsedGeojson);
+    });
   });
   readSlice(fileReader, file, start, stop);
   return filePromise;

@@ -21,6 +21,7 @@ export class JsonIndexFilePicker extends Component {
   state = {
     fileUploadError: '',
     percentageProcessed: 0,
+    featuresProcessed: 0,
     fileParseActive: false,
   };
 
@@ -40,6 +41,7 @@ export class JsonIndexFilePicker extends Component {
     this.setState({
       fileUploadError: '',
       percentageProcessed: 0,
+      featuresProcessed: 0,
     });
     if (fileArr.length === 0) { // Remove
       this.setState({
@@ -115,10 +117,11 @@ export class JsonIndexFilePicker extends Component {
     return fileNameOnly.toLowerCase();
   }
 
-  setFileProgress = ({ bytesProcessed, totalBytes }) => {
+  setFileProgress = ({ featuresProcessed, bytesProcessed, totalBytes }) => {
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
-    if (this._isMounted && this.state.fileParseActive) {
-      this.setState({ percentageProcessed });
+    const boolTriggerUpdate = (percentageProcessed - this.state.percentageProcessed) > 4;
+    if (this._isMounted && this.state.fileParseActive && boolTriggerUpdate) {
+      this.setState({ featuresProcessed, percentageProcessed });
     }
   }
 
@@ -143,6 +146,7 @@ export class JsonIndexFilePicker extends Component {
         this.setState({
           fileParseActive: false,
           percentageProcessed: 0,
+          featuresProcessed: 0,
           fileUploadError: (
             <FormattedMessage
               id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
@@ -158,7 +162,7 @@ export class JsonIndexFilePicker extends Component {
     if (!this._isMounted) {
       return;
     }
-    this.setState({ percentageProcessed: 0 });
+    this.setState({ percentageProcessed: 0, featuresProcessed: 0 });
     if (!parsedFileResult) {
       resetFileAndIndexSettings();
       return;
@@ -174,7 +178,8 @@ export class JsonIndexFilePicker extends Component {
   render() {
     const {
       fileUploadError,
-      percentageProcessed
+      percentageProcessed,
+      featuresProcessed,
     } = this.state;
 
     return (
@@ -202,9 +207,9 @@ export class JsonIndexFilePicker extends Component {
             percentageProcessed ? (
               i18n.translate(
                 'xpack.fileUpload.jsonIndexFilePicker.parsingFile', {
-                  defaultMessage: '{percentageProcessed}% of file parsed...',
+                  defaultMessage: '{featuresProcessed} features parsed...',
                   values: {
-                    percentageProcessed
+                    featuresProcessed
                   }
                 })
             ) : (
