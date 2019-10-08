@@ -6,8 +6,7 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
-import { execute } from '../lib';
-import { ActionTypeRegistryContract, GetServicesFunction } from '../types';
+import { ActionExecutorContract } from '../lib';
 
 interface ExecuteRequest extends Hapi.Request {
   params: {
@@ -18,17 +17,11 @@ interface ExecuteRequest extends Hapi.Request {
   };
 }
 
-interface ExecuteRouteOptions {
-  server: Hapi.Server;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  getServices: GetServicesFunction;
-}
-
-export function executeRoute({ server, actionTypeRegistry, getServices }: ExecuteRouteOptions) {
-  server.route({
+export function getExecuteActionRoute(actionExecutor: ActionExecutorContract) {
+  return {
     method: 'POST',
     path: '/api/action/{id}/_execute',
-    options: {
+    config: {
       tags: ['access:actions-read'],
       response: {
         emptyStatusCode: 204,
@@ -52,16 +45,11 @@ export function executeRoute({ server, actionTypeRegistry, getServices }: Execut
     async handler(request: ExecuteRequest, h: Hapi.ResponseToolkit) {
       const { id } = request.params;
       const { params } = request.payload;
-      const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
-      const result = await execute({
+      return await actionExecutor.execute({
         params,
-        actionTypeRegistry,
+        request,
         actionId: id,
-        namespace: namespace === 'default' ? undefined : namespace,
-        services: getServices(request),
-        encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
       });
-      return result;
     },
-  });
+  };
 }

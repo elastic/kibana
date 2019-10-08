@@ -5,12 +5,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Provider } from 'react-redux';
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { CoreStart } from 'kibana/public';
-import { AutocompletePublicPluginStart } from 'src/plugins/data/public';
 import { FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 import { GraphStore } from '../state_management';
@@ -20,25 +21,25 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 
 export interface GraphAppProps extends SearchBarProps {
   coreStart: CoreStart;
-  autocompleteStart: AutocompletePublicPluginStart;
+  // This is not named dataStart because of Angular treating data- prefix differently
+  pluginDataStart: DataPublicPluginStart;
   store: Storage;
   reduxStore: GraphStore;
   isInitialized: boolean;
-  onFillWorkspace: () => void;
 }
 
 export function GraphApp(props: GraphAppProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const { coreStart, autocompleteStart, store, reduxStore, ...searchBarProps } = props;
+  const { coreStart, pluginDataStart, store, reduxStore, ...searchBarProps } = props;
 
   return (
     <I18nProvider>
       <KibanaContextProvider
         services={{
           appName: 'graph',
-          store: props.store,
-          autocomplete: props.autocompleteStart,
-          ...props.coreStart,
+          store,
+          data: pluginDataStart,
+          ...coreStart,
         }}
       >
         <Provider store={reduxStore}>
@@ -55,7 +56,6 @@ export function GraphApp(props: GraphAppProps) {
             </div>
             {!props.isInitialized && (
               <GuidancePanel
-                onFillWorkspace={props.onFillWorkspace}
                 onOpenFieldPicker={() => {
                   setPickerOpen(true);
                 }}

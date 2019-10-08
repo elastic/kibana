@@ -12,6 +12,7 @@ import { CoreSetup } from 'src/core/server';
 
 import { APP_TITLE } from './common/constants';
 import { codePlugin } from './server';
+import { PluginSetupContract } from '../../../plugins/code/server';
 
 export type RequestFacade = Legacy.Request;
 export type RequestQueryFacade = RequestQuery;
@@ -38,6 +39,7 @@ export const code = (kibana: any) =>
         const config = server.config();
         return {
           codeUiEnabled: config.get('xpack.code.ui.enabled'),
+          codeIntegrationsEnabled: config.get('xpack.code.integrations.enabled'),
         };
       },
       hacks: ['plugins/code/hacks/toggle_app_link_in_nav'],
@@ -49,12 +51,14 @@ export const code = (kibana: any) =>
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
         }).default(),
+        integrations: Joi.object({
+          enabled: Joi.boolean().default(false),
+        }).default(),
         enabled: Joi.boolean().default(true),
       }).default();
     },
     async init(server: ServerFacade) {
-      // @ts-ignore
-      const initializerContext = server.newPlatform.setup.plugins.code;
+      const initializerContext = server.newPlatform.setup.plugins.code as PluginSetupContract;
       if (!initializerContext.legacy.config.ui.enabled) {
         return;
       }

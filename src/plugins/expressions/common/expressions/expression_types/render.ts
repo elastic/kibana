@@ -18,17 +18,20 @@
  */
 
 import { ExpressionType } from '../types';
+import { ExpressionValueBoxed } from '../types/types';
 
 const name = 'render';
 
 /**
  * Represents an object that is intended to be rendered.
  */
-export interface Render<T> {
-  type: typeof name;
-  as: string;
-  value: T;
-}
+export type Render<T> = ExpressionValueBoxed<
+  typeof name,
+  {
+    as: string;
+    value: T;
+  }
+>;
 
 export const render = (): ExpressionType<typeof name, Render<unknown>> => ({
   name,

@@ -13,6 +13,10 @@ import { EditorFrameInstance } from '../types';
 import { Storage } from 'ui/storage';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
+
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+const dataStartMock = dataPluginMock.createStartContract();
+
 import {
   TopNavMenu,
   TopNavMenuData,
@@ -68,8 +72,9 @@ describe('Lens App', () => {
 
   function makeDefaultArgs(): jest.Mocked<{
     editorFrame: EditorFrameInstance;
+    data: typeof dataStartMock;
     core: typeof core;
-    data: DataStart;
+    dataShim: DataStart;
     store: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
@@ -87,7 +92,7 @@ describe('Lens App', () => {
           },
         },
       },
-      data: {
+      dataShim: {
         indexPatterns: {
           indexPatterns: {
             get: jest.fn(id => {
@@ -110,8 +115,9 @@ describe('Lens App', () => {
       redirectTo: jest.fn(id => {}),
     } as unknown) as jest.Mocked<{
       editorFrame: EditorFrameInstance;
+      data: typeof dataStartMock;
       core: typeof core;
-      data: DataStart;
+      dataShim: DataStart;
       store: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
@@ -224,7 +230,7 @@ describe('Lens App', () => {
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(args.data.indexPatterns.indexPatterns.get).toHaveBeenCalledWith('1');
+      expect(args.dataShim.indexPatterns.indexPatterns.get).toHaveBeenCalledWith('1');
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
@@ -492,7 +498,7 @@ describe('Lens App', () => {
 
       const instance = mount(<App {...args} />);
 
-      args.data.filter.filterManager.setFilters([
+      args.dataShim.filter.filterManager.setFilters([
         buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
 
@@ -623,7 +629,7 @@ describe('Lens App', () => {
         query: { query: 'new', language: 'lucene' },
       });
 
-      args.data.filter.filterManager.setFilters([
+      args.dataShim.filter.filterManager.setFilters([
         buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
       instance.update();
