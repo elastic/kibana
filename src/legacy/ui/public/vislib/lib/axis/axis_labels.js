@@ -112,7 +112,7 @@ export class AxisLabels {
           const currentTickStartEdge = currentTickCenter - currentTickHalfSize;
           const currentTickEndEdge = currentTickCenter + currentTickHalfSize;
 
-          const outsideUpperBound = maxSize < currentTickEndEdge > maxSize;
+          const outsideUpperBound = currentTickEndEdge > maxSize;
           const outsideLowerBound = currentTickStartEdge < 0;
           const overlapsLastTick = (currentTickEndEdge >= lastTickStartEdge && currentTickStartEdge <= lastTickEndEdge);
 
