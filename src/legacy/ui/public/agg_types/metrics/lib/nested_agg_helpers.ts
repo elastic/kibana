@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
+
 /**
  * Forwards modifyAggConfigOnSearchRequestStart calls to a nested AggConfig.
  * This must be used for each parameter, that accepts a nested aggregation, otherwise
@@ -33,22 +35,22 @@
  *      calls to. That should match the name of the parameter the function is called on.
  * @returns {function} A function, that forwards the calls.
  */
-function forwardModifyAggConfigOnSearchRequestStart(paramName) {
-  return (aggConfig, ...args) => {
+export const forwardModifyAggConfigOnSearchRequestStart = (paramName: string) => {
+  return (aggConfig: IMetricAggConfig, searchSource?: any, request?: any) => {
     if (!aggConfig || !aggConfig.params) {
       return;
     }
-    const nestedAggConfig = aggConfig.params[paramName];
+
+    const nestedAggConfig = aggConfig.getParam(paramName);
+
     if (nestedAggConfig && nestedAggConfig.type && nestedAggConfig.type.params) {
-      nestedAggConfig.type.params.forEach(param => {
+      nestedAggConfig.type.params.forEach((param: MetricAggParam) => {
         // Check if this parameter of the nested aggConfig has a modifyAggConfigOnSearchRequestStart
         // function, that needs to be called.
         if (param.modifyAggConfigOnSearchRequestStart) {
-          param.modifyAggConfigOnSearchRequestStart(nestedAggConfig, ...args);
+          param.modifyAggConfigOnSearchRequestStart(nestedAggConfig, searchSource, request);
         }
       });
     }
   };
-}
-
-export { forwardModifyAggConfigOnSearchRequestStart };
+};

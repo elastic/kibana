@@ -17,69 +17,94 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { noop } from 'lodash';
 import { MetricAggParamEditor } from '../../../vis/editors/default/controls/metric_agg';
 import { SubAggParamEditor } from '../../../vis/editors/default/controls/sub_agg';
-import _ from 'lodash';
-import { Schemas } from '../../../vis/editors/default/schemas';
-import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
-import { i18n } from '@kbn/i18n';
+import { IMetricAggConfig } from '../metric_agg_type';
+import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
+// @ts-ignore
+import { Schemas } from '../../../vis/editors/default/schemas';
 
-const metricAggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev', '!geo_bounds', '!geo_centroid'];
-const metricAggSchema = (new Schemas([
+const metricAggFilter = [
+  '!top_hits',
+  '!percentiles',
+  '!percentile_ranks',
+  '!median',
+  '!std_dev',
+  '!geo_bounds',
+  '!geo_centroid',
+];
+
+const metricAggTitle = i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
+  defaultMessage: 'Metric agg',
+});
+
+const subtypeLabel = i18n.translate(
+  'common.ui.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle',
+  {
+    defaultMessage: 'Parent Pipeline Aggregations',
+  }
+);
+
+const [metricAggSchema] = new Schemas([
   {
     group: 'none',
     name: 'metricAgg',
-    title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
-      defaultMessage: 'Metric agg'
-    }),
+    title: metricAggTitle,
     hideCustomLabel: true,
-    aggFilter: metricAggFilter
-  }
-])).all[0];
+    aggFilter: metricAggFilter,
+  },
+]).all;
 
-const parentPipelineAggHelper = {
-  subtype: i18n.translate('common.ui.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle', {
-    defaultMessage: 'Parent Pipeline Aggregations'
-  }),
-  params: function () {
+export const parentPipelineAggHelper = {
+  subtype: subtypeLabel,
+
+  params() {
     return [
       {
         name: 'metricAgg',
         editorComponent: MetricAggParamEditor,
         default: 'custom',
-        write: parentPipelineAggWriter
+        write: parentPipelineAggWriter,
       },
       {
         name: 'customMetric',
         editorComponent: SubAggParamEditor,
         type: 'agg',
-        default: null,
-        makeAgg: function (termsAgg, state) {
+        makeAgg(termsAgg: IMetricAggConfig, state: any) {
           state = state || { type: 'count' };
           state.schema = metricAggSchema;
+
           const metricAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
+
           metricAgg.id = termsAgg.id + '-metric';
+
           return metricAgg;
         },
-        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customMetric'),
-        write: _.noop
+        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
+          'customMetric'
+        ),
+        write: noop,
       },
       {
         name: 'buckets_path',
-        write: _.noop
-      }
+        write: noop,
+      },
     ];
   },
-  getFormat: function (agg) {
+
+  getFormat(agg: IMetricAggConfig) {
     let subAgg;
-    if (agg.params.customMetric) {
-      subAgg = agg.params.customMetric;
+    const customMetric = agg.getParam('customMetric');
+
+    if (customMetric) {
+      subAgg = customMetric;
     } else {
-      subAgg = agg.aggConfigs.byId(agg.params.metricAgg);
+      subAgg = agg.aggConfigs.byId(agg.getParam('metricAgg'));
     }
     return subAgg.type.getFormat(subAgg);
-  }
+  },
 };
-export { parentPipelineAggHelper };

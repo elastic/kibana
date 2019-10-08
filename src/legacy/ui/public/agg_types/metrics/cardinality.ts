@@ -17,28 +17,32 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
-import { fieldFormats } from '../../registry/field_formats';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+// @ts-ignore
+import { fieldFormats } from '../../registry/field_formats';
+import { METRIC_TYPES } from './metric_agg_types';
+
+const uniqueCountTitle = i18n.translate('common.ui.aggTypes.metrics.uniqueCountTitle', {
+  defaultMessage: 'Unique Count',
+});
 
 export const cardinalityMetricAgg = new MetricAggType({
-  name: 'cardinality',
-  title: i18n.translate('common.ui.aggTypes.metrics.uniqueCountTitle', {
-    defaultMessage: 'Unique Count'
-  }),
-  makeLabel: function (aggConfig) {
+  name: METRIC_TYPES.CARDINALITY,
+  title: uniqueCountTitle,
+  makeLabel(aggConfig) {
     return i18n.translate('common.ui.aggTypes.metrics.uniqueCountLabel', {
       defaultMessage: 'Unique count of {field}',
-      values: { field: aggConfig.getFieldDisplayName() }
+      values: { field: aggConfig.getFieldDisplayName() },
     });
   },
-  getFormat: function () {
+  getFormat() {
     return fieldFormats.getDefaultInstance('number');
   },
   params: [
     {
       name: 'field',
-      type: 'field'
-    }
-  ]
+      type: 'field',
+    },
+  ],
 });
