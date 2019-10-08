@@ -18,6 +18,8 @@ export class FeatureProperties extends React.Component {
   state = {
     properties: null,
     loadPropertiesErrorMsg: null,
+    prevWidth: null,
+    prevHeight: null
   };
 
   componentDidMount() {
@@ -177,9 +179,7 @@ export class FeatureProperties extends React.Component {
     return (
       <table
         className="mapFeatureTooltip_table"
-        ref={node => {
-          this.node = node;
-        }}
+        ref={node => this._node = node}
       >
         <tbody>
           {rows}
