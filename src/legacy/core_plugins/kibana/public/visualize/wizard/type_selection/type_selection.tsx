@@ -235,14 +235,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     }
 
     const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const onClick =
-      'aliasUrl' in visType
-        ? () => {
-            createUiStatsReporter('visualize')(METRIC_TYPE.CLICK, visType.name);
-
-            window.location = chrome.addBasePath(visType.aliasUrl);
-          }
-        : () => this.props.onVisTypeSelected(visType);
+    const onClick = () => this.props.onVisTypeSelected(visType);
 
     const highlightedType: HighlightedType = {
       title: visType.title,

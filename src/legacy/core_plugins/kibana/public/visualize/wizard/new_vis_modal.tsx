@@ -28,7 +28,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
-import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
+import { TypesStart, VisTypeAlias } from '../../../../visualizations/public/np_ready/public/types';
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -104,8 +104,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.props.onClose();
   };
 
-  private onVisTypeSelected = (visType: VisType) => {
-    if (visType.requiresSearch && visType.options.showIndexSelection) {
+  private onVisTypeSelected = (visType: VisType | VisTypeAlias) => {
+    if (!('aliasUrl' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
       this.setState({
         showSearchVisModal: true,
         visType,
@@ -119,8 +119,14 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.redirectToVis(this.state.visType!, searchType, searchId);
   };
 
-  private redirectToVis(visType: VisType, searchType?: string, searchId?: string) {
+  private redirectToVis(visType: VisType | VisTypeAlias, searchType?: string, searchId?: string) {
     this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+
+    if ('aliasUrl' in visType) {
+      window.location = chrome.addBasePath(visType.aliasUrl);
+
+      return;
+    }
 
     let params = [`type=${encodeURIComponent(visType.name)}`];
 
