@@ -30,7 +30,7 @@ export interface UiSettingsServiceOptions {
   buildNum: number;
   savedObjectsClient: SavedObjectsClientContract;
   overrides?: Record<string, SavedObjectAttribute>;
-  getDefaults?: () => Record<string, UiSettingsParams>;
+  defaults?: Record<string, UiSettingsParams>;
   log: Logger;
 }
 
@@ -50,7 +50,7 @@ type UserProvided = Record<string, UserProvidedValue>;
 type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
 export interface IUiSettingsClient {
-  getDefaults: () => Promise<Record<string, UiSettingsParams>>;
+  getDefaults: () => Record<string, UiSettingsParams>;
   get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
   getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
   getUserProvided: () => Promise<UserProvided>;
@@ -70,33 +70,23 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly _buildNum: UiSettingsServiceOptions['buildNum'];
   private readonly _savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
   private readonly _overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
-  private readonly _getDefaults: NonNullable<UiSettingsServiceOptions['getDefaults']>;
+  private readonly _defaults: NonNullable<UiSettingsServiceOptions['defaults']>;
   private readonly _log: Logger;
 
   constructor(options: UiSettingsServiceOptions) {
-    const {
-      type,
-      id,
-      buildNum,
-      savedObjectsClient,
-      log,
-      // we use a function for getDefaults() so that defaults can be different in
-      // different scenarios, and so they can change over time
-      getDefaults = () => ({}),
-      overrides = {},
-    } = options;
+    const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
 
     this._type = type;
     this._id = id;
     this._buildNum = buildNum;
     this._savedObjectsClient = savedObjectsClient;
-    this._getDefaults = getDefaults;
+    this._defaults = defaults;
     this._overrides = overrides;
     this._log = log;
   }
 
-  async getDefaults() {
-    return await this._getDefaults();
+  getDefaults() {
+    return this._defaults;
   }
 
   // returns a Promise for the value of the requested setting
@@ -121,7 +111,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   // NOTE: should be a private method
   async getRaw(): Promise<UiSettingsRaw> {
     const userProvided = await this.getUserProvided();
-    return defaultsDeep(userProvided, await this.getDefaults());
+    return defaultsDeep(userProvided, this._defaults);
   }
 
   async getUserProvided(options: ReadOptions = {}): Promise<UserProvided> {

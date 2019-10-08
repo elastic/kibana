@@ -35,7 +35,6 @@ const BUILD_NUM = 1234;
 const chance = new Chance();
 
 interface SetupOptions {
-  getDefaults?: () => Record<string, any>;
   defaults?: Record<string, any>;
   esDocSource?: Record<string, any>;
   overrides?: Record<string, any>;
@@ -45,7 +44,7 @@ describe('ui settings', () => {
   const sandbox = sinon.createSandbox();
 
   function setup(options: SetupOptions = {}) {
-    const { getDefaults, defaults = {}, overrides = {}, esDocSource = {} } = options;
+    const { defaults = {}, overrides = {}, esDocSource = {} } = options;
 
     const savedObjectsClient = createObjectsClientStub(esDocSource);
 
@@ -53,7 +52,7 @@ describe('ui settings', () => {
       type: TYPE,
       id: ID,
       buildNum: BUILD_NUM,
-      getDefaults: getDefaults || (() => defaults),
+      defaults,
       savedObjectsClient,
       overrides,
       log: logger,
@@ -244,25 +243,10 @@ describe('ui settings', () => {
   });
 
   describe('#getDefaults()', () => {
-    it('returns a promise for the defaults', async () => {
-      const { uiSettings } = setup();
-      const promise = uiSettings.getDefaults();
-      expect(promise).to.be.a(Promise);
-      expect(await promise).to.eql({});
-    });
-  });
-
-  describe('getDefaults() argument', () => {
-    it('casts sync `getDefaults()` to promise', () => {
-      const getDefaults = () => ({ key: { value: chance.word() } });
-      const { uiSettings } = setup({ getDefaults });
-      expect(uiSettings.getDefaults()).to.be.a(Promise);
-    });
-
-    it('returns the defaults returned by getDefaults() argument', async () => {
+    it('returns the defaults passed to the constructor', () => {
       const value = chance.word();
       const { uiSettings } = setup({ defaults: { key: { value } } });
-      expect(await uiSettings.getDefaults()).to.eql({
+      expect(uiSettings.getDefaults()).to.eql({
         key: { value },
       });
     });
