@@ -22,7 +22,7 @@ import { loader, ExpressionLoader } from './loader';
 import { fromExpression } from '@kbn/interpreter/common';
 import { IInterpreterRenderHandlers } from './_types';
 import { Observable } from 'rxjs';
-import { ExpressionAST } from '../../../../../../plugins/expressions/common';
+import { ExpressionAST } from '../../../../../../../../plugins/expressions/common';
 
 const element: HTMLElement = null as any;
 
@@ -36,7 +36,7 @@ jest.mock('../services', () => ({
   },
 }));
 
-jest.mock('../../../../interpreter/public/registries', () => {
+jest.mock('../../../../../../interpreter/public/registries', () => {
   const _registry: Record<string, any> = {};
   _registry.test = {
     render: (el: HTMLElement, value: any, handlers: IInterpreterRenderHandlers) => {

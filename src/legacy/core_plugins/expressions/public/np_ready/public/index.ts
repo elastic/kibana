@@ -17,23 +17,12 @@
  * under the License.
  */
 
-import { IInterpreter } from './lib/_types';
-import { Start as IInspector } from '../../../../../plugins/inspector/public';
+import { PluginInitializerContext } from '../../../../../../core/public';
+import { ExpressionsPublicPlugin } from './plugin';
 
-const createGetterSetter = <T extends object>(name: string) => {
-  let value: T;
+export * from './plugin';
+export { ExpressionRenderer, ExpressionRendererProps, ExpressionsService } from './expressions';
 
-  const get = (): T => {
-    if (!value) throw new Error(`${name} was not set`);
-    return value;
-  };
-
-  const set = (newValue: T) => {
-    value = newValue;
-  };
-
-  return [get, set];
-};
-
-export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
-export const [getInterpreter, setInterpreter] = createGetterSetter<IInterpreter>('Interpreter');
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ExpressionsPublicPlugin(initializerContext);
+}

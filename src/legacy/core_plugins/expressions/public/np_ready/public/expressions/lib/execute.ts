@@ -18,7 +18,11 @@
  */
 
 import { fromExpression } from '@kbn/interpreter/target/common';
-import { DataAdapter, RequestAdapter, Adapters } from '../../../../../../plugins/inspector/public';
+import {
+  DataAdapter,
+  RequestAdapter,
+  Adapters,
+} from '../../../../../../../../plugins/inspector/public';
 import { getInterpreter } from '../services';
 import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './_types';
 
