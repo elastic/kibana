@@ -54,16 +54,12 @@ export const MapToolTip = React.memo<MapToolTipProps>(
 
       const fetchFeatureProps = async () => {
         if (features[featureIndex] != null) {
+          const layerId = features[featureIndex].layerId;
+          const featureId = features[featureIndex].id;
           const [featureProperties, featureGeo, layerNameString] = await Promise.all([
-            loadFeatureProperties({
-              layerId: features[featureIndex].layerId,
-              featureId: features[featureIndex].id,
-            }),
-            loadFeatureGeometry({
-              layerId: features[featureIndex].layerId,
-              featureId: features[featureIndex].id,
-            }),
-            getLayerName(features[featureIndex].layerId),
+            loadFeatureProperties({ layerId, featureId }),
+            loadFeatureGeometry({ layerId, featureId }),
+            getLayerName(layerId),
           ]);
 
           // Fetch ES filters in advance while loader is present to prevent lag when user clicks to add filter
