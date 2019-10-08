@@ -105,6 +105,7 @@ export const FilterGroupComponent = ({
         content={i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
           defaultMessage: 'Up',
         })}
+        dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
         value="up"
         withNext={true}
       />
@@ -112,6 +113,7 @@ export const FilterGroupComponent = ({
         content={i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
           defaultMessage: 'Down',
         })}
+        dataTestSubj="xpack.uptime.filterBar.filterStatusDown"
         value="down"
         withNext={false}
       />

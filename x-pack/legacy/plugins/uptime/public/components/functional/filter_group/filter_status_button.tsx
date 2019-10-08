@@ -10,15 +10,22 @@ import { useUrlParams } from '../../../hooks';
 
 export interface FilterStatusButtonProps {
   content: string;
+  dataTestSubj: string;
   value: string;
   withNext: boolean;
 }
 
-export const FilterStatusButton = ({ content, value, withNext }: FilterStatusButtonProps) => {
+export const FilterStatusButton = ({
+  content,
+  dataTestSubj,
+  value,
+  withNext,
+}: FilterStatusButtonProps) => {
   const [getUrlParams, setUrlParams] = useUrlParams();
   const { statusFilter: urlValue } = getUrlParams();
   return (
     <EuiFilterButton
+      data-test-subj={dataTestSubj}
       hasActiveFilters={urlValue === value}
       onClick={() => {
         const nextFilter = { statusFilter: urlValue === value ? '' : value, pagination: '' };
