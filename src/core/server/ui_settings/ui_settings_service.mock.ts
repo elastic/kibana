@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from './ui_settings_service';
+import { IUiSettingsClient } from './ui_settings_client';
+import { UiSettingsServiceSetup } from './ui_settings_service';
 
-const createServiceMock = () => {
+const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = {
     getDefaults: jest.fn(),
     get: jest.fn(),
@@ -35,6 +36,18 @@ const createServiceMock = () => {
   return mocked;
 };
 
+const createSetupMock = () => {
+  const mocked: jest.Mocked<UiSettingsServiceSetup> = {
+    setDefaults: jest.fn(),
+    asScopedToClient: jest.fn(),
+  };
+
+  mocked.asScopedToClient.mockReturnValue(createClientMock());
+
+  return mocked;
+};
+
 export const uiSettingsServiceMock = {
-  create: createServiceMock,
+  createSetup: createSetupMock,
+  createClient: createClientMock,
 };

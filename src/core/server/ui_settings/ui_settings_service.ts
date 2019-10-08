@@ -22,7 +22,7 @@ import { first } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { KibanaRequest } from '../http';
+
 import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
 import { UiSettingsConfigType } from './ui_settings_config';
 import { IUiSettingsClient, UiSettingsClient } from './ui_settings_client';
