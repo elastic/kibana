@@ -17,7 +17,20 @@
  * under the License.
  */
 
-export { ToolingLog } from './tooling_log';
-export { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
-export { pickLevelFromFlags, LogLevel } from './log_levels';
-export { ToolingLogCollectingWriter } from './tooling_log_collecting_writer';
+import { AxiosError, AxiosResponse } from 'axios';
+
+export interface AxiosRequestError extends AxiosError {
+  response: undefined;
+}
+
+export interface AxiosResponseError<T> extends AxiosError {
+  response: AxiosResponse<T>;
+}
+
+export const isAxiosRequestError = (error: any): error is AxiosRequestError => {
+  return error && error.config && error.response === undefined;
+};
+
+export const isAxiosResponseError = <T = any>(error: any): error is AxiosResponseError<T> => {
+  return error && error.response && error.response.status !== undefined;
+};
