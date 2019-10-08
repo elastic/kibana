@@ -20,9 +20,8 @@
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { share, first } from 'rxjs/operators';
-// TODO: This needs to be addressed.
-import { renderersRegistry } from '../../../../interpreter/public/registries';
 import { event, RenderId, Data, IInterpreterRenderHandlers } from './types';
+import { getRenderersRegistry } from './services';
 
 export class ExpressionRenderHandler {
   render$: Observable<RenderId>;
@@ -71,13 +70,15 @@ export class ExpressionRenderHandler {
       throw new Error('invalid data provided to expression renderer');
     }
 
-    if (!renderersRegistry.get(data.as)) {
+    if (!getRenderersRegistry().get(data.as)) {
       throw new Error(`invalid renderer id '${data.as}'`);
     }
 
     const promise = this.render$.pipe(first()).toPromise();
 
-    renderersRegistry.get(data.as).render(this.element, data.value, this.handlers);
+    getRenderersRegistry()
+      .get(data.as)
+      .render(this.element, data.value, this.handlers);
 
     return promise;
   };

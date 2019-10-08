@@ -26,29 +26,25 @@ import { ExpressionAST } from '../../../../../../plugins/expressions/common';
 
 const element: HTMLElement = null as any;
 
-jest.mock('./services', () => ({
-  getInterpreter: () => {
-    return {
-      interpretAst: async (expression: ExpressionAST) => {
-        return { type: 'render', as: 'test' };
+jest.mock('./services', () => {
+  const renderers: Record<string, unknown> = {
+    test: {
+      render: (el: HTMLElement, value: unknown, handlers: IInterpreterRenderHandlers) => {
+        handlers.done();
       },
-    };
-  },
-}));
-
-jest.mock('../../../../../../interpreter/public/registries', () => {
-  const _registry: Record<string, any> = {};
-  _registry.test = {
-    render: (el: HTMLElement, value: any, handlers: IInterpreterRenderHandlers) => {
-      handlers.done();
     },
   };
   return {
-    renderersRegistry: {
-      get: (id: string) => {
-        return _registry[id];
-      },
+    getInterpreter: () => {
+      return {
+        interpretAst: async (expression: ExpressionAST) => {
+          return { type: 'render', as: 'test' };
+        },
+      };
     },
+    getRenderersRegistry: () => ({
+      get: (id: string) => renderers[id],
+    }),
   };
 });
 

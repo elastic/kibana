@@ -21,21 +21,20 @@ import { render, ExpressionRenderHandler } from './render';
 import { Observable } from 'rxjs';
 import { IInterpreterRenderHandlers } from './types';
 
-const element: HTMLElement = null as any;
+const element: HTMLElement = {} as HTMLElement;
 
-jest.mock('../../../../interpreter/public/registries', () => {
-  const _registry: Record<string, any> = {};
-  _registry.test = {
-    render: (el: HTMLElement, value: any, handlers: IInterpreterRenderHandlers) => {
-      handlers.done();
+jest.mock('./services', () => {
+  const renderers: Record<string, unknown> = {
+    test: {
+      render: (el: HTMLElement, value: unknown, handlers: IInterpreterRenderHandlers) => {
+        handlers.done();
+      },
     },
   };
   return {
-    renderersRegistry: {
-      get: (id: string) => {
-        return _registry[id];
-      },
-    },
+    getRenderersRegistry: () => ({
+      get: (id: string) => renderers[id],
+    }),
   };
 });
 

@@ -19,6 +19,7 @@
 
 import { IInterpreter } from './types';
 import { Start as IInspector } from '../../../../../../plugins/inspector/public';
+import { ExpressionsSetup } from './plugin';
 
 const createGetterSetter = <T extends object>(name: string): [() => T, (value: T) => void] => {
   let value: T;
@@ -37,3 +38,6 @@ const createGetterSetter = <T extends object>(name: string): [() => T, (value: T
 
 export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
 export const [getInterpreter, setInterpreter] = createGetterSetter<IInterpreter>('Interpreter');
+export const [getRenderersRegistry, setRenderersRegistry] = createGetterSetter<
+  ExpressionsSetup['__LEGACY']['renderers']
+>('Renderers registry');

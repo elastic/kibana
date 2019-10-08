@@ -33,7 +33,7 @@ import {
   Setup as InspectorSetup,
 } from '../../../../../../plugins/inspector/public';
 import { IInterpreter } from './types';
-import { setInterpreter, setInspector } from './services';
+import { setInterpreter, setInspector, setRenderersRegistry } from './services';
 import { createRenderer } from './expression_renderer';
 import { loader } from './loader';
 import { execute } from './execute';
@@ -56,6 +56,8 @@ export class ExpressionsPublicPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ExpressionsSetupDeps): ExpressionsSetup {
+    setRenderersRegistry(npSetup.plugins.expressions.__LEGACY.renderers);
+
     // eslint-disable-next-line
     const { getInterpreter } = require('../../../../interpreter/public/interpreter');
     getInterpreter()
