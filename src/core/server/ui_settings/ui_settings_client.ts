@@ -118,7 +118,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     const userProvided: UserProvided = {};
 
     // write the userValue for each key stored in the saved object that is not overridden
-    for (const [key, userValue] of Object.entries(await this._read(options))) {
+    for (const [key, userValue] of Object.entries(await this.read(options))) {
       if (userValue !== null && !this.isOverridden(key)) {
         userProvided[key] = {
           userValue,
@@ -137,7 +137,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   async setMany<T extends SavedObjectAttribute = any>(changes: Record<string, T>) {
-    await this._write({ changes });
+    await this.write({ changes });
   }
 
   async set<T extends SavedObjectAttribute = any>(key: string, value: T) {
@@ -167,7 +167,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
   }
 
-  private async _write<T extends SavedObjectAttribute = any>({
+  private async write<T extends SavedObjectAttribute = any>({
     changes,
     autoCreateOrUpgradeIfMissing = true,
   }: {
@@ -193,14 +193,14 @@ export class UiSettingsClient implements IUiSettingsClient {
         log: this.log,
       });
 
-      await this._write({
+      await this.write({
         changes,
         autoCreateOrUpgradeIfMissing: false,
       });
     }
   }
 
-  private async _read<T extends SavedObjectAttribute>({
+  private async read<T extends SavedObjectAttribute>({
     ignore401Errors = false,
     autoCreateOrUpgradeIfMissing = true,
   }: ReadOptions = {}): Promise<Record<string, T>> {
@@ -238,7 +238,7 @@ export class UiSettingsClient implements IUiSettingsClient {
         });
 
         if (!failedUpgradeAttributes) {
-          return await this._read({
+          return await this.read({
             ignore401Errors,
             autoCreateOrUpgradeIfMissing: false,
           });
