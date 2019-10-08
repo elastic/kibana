@@ -46,12 +46,29 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getFlowTargetAggs(networkTopNFlowSort, flowTarget, querySize),
+        ...getFlowTargetAggs(networkTopNFlowSort, flowTarget, querySize, ip),
       },
       query: {
-        bool: {
-          filter: ip ? [...filter, { term: { [`${flowTarget}.ip`]: ip } }] : filter,
-        },
+        bool: ip
+          ? {
+              filter,
+              should: [
+                {
+                  term: {
+                    'source.ip': ip,
+                  },
+                },
+                {
+                  term: {
+                    'destination.ip': ip,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            }
+          : {
+              filter,
+            },
       },
     },
     size: 0,
@@ -63,11 +80,13 @@ export const buildTopNFlowQuery = ({
 const getFlowTargetAggs = (
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTargetNew,
-  querySize: number
+  querySize: number,
+  ip?: string
 ) => ({
   [flowTarget]: {
     terms: {
       field: `${flowTarget}.ip`,
+      exclude: ip ? [ip] : [],
       size: querySize,
       order: {
         ...getQueryOrder(networkTopNFlowSortField),
