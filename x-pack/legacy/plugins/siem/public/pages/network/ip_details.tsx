@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -29,13 +29,15 @@ import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { TlsQuery } from '../../containers/tls';
 import { UsersQuery } from '../../containers/users';
-import { FlowTarget, LastEventIndexKey } from '../../graphql/types';
+import { FlowTarget, FlowTargetNew, LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
+import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
+import { NetworkTopNFlowTable } from '../../components/page/network/network_top_n_flow_table';
 import * as i18n from './translations';
 import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -43,11 +45,13 @@ import { scoreIntervalToDateTime } from '../../components/ml/score/score_interva
 import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_network_table';
 import { networkToCriteria } from '../../components/ml/criteria/network_to_criteria';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { ConditionalFlexGroup } from './network';
 
 const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);
 const UsersTableManage = manageQuery(UsersTable);
 const IpOverviewManage = manageQuery(IpOverview);
+const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
@@ -133,7 +137,101 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     </IpOverviewQuery>
 
                     <EuiHorizontalRule />
+                    <EuiSpacer />
 
+                    <ConditionalFlexGroup direction="column">
+                      <EuiFlexItem>
+                        <NetworkTopNFlowQuery
+                          endDate={to}
+                          flowTarget={FlowTargetNew.source}
+                          filterQuery={filterQuery}
+                          skip={isInitializing}
+                          sourceId="default"
+                          startDate={from}
+                          type={networkModel.NetworkType.page}
+                        >
+                          {({
+                            id,
+                            inspect,
+                            isInspected,
+                            loading,
+                            loadPage,
+                            networkTopNFlow,
+                            pageInfo,
+                            refetch,
+                            totalCount,
+                          }) => (
+                            <NetworkTopNFlowTableManage
+                              data={networkTopNFlow}
+                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                              flowTargeted={FlowTargetNew.source}
+                              id={id}
+                              indexPattern={indexPattern}
+                              inspect={inspect}
+                              isInspect={isInspected}
+                              loading={loading}
+                              loadPage={loadPage}
+                              refetch={refetch}
+                              setQuery={setQuery}
+                              showMorePagesIndicator={getOr(
+                                false,
+                                'showMorePagesIndicator',
+                                pageInfo
+                              )}
+                              totalCount={totalCount}
+                              type={networkModel.NetworkType.page}
+                            />
+                          )}
+                        </NetworkTopNFlowQuery>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem>
+                        <NetworkTopNFlowQuery
+                          endDate={to}
+                          flowTarget={FlowTargetNew.destination}
+                          filterQuery={filterQuery}
+                          skip={isInitializing}
+                          sourceId="default"
+                          startDate={from}
+                          type={networkModel.NetworkType.page}
+                        >
+                          {({
+                            id,
+                            inspect,
+                            isInspected,
+                            loading,
+                            loadPage,
+                            networkTopNFlow,
+                            pageInfo,
+                            refetch,
+                            totalCount,
+                          }) => (
+                            <NetworkTopNFlowTableManage
+                              data={networkTopNFlow}
+                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                              flowTargeted={FlowTargetNew.destination}
+                              id={id}
+                              indexPattern={indexPattern}
+                              inspect={inspect}
+                              isInspect={isInspected}
+                              loading={loading}
+                              loadPage={loadPage}
+                              refetch={refetch}
+                              setQuery={setQuery}
+                              showMorePagesIndicator={getOr(
+                                false,
+                                'showMorePagesIndicator',
+                                pageInfo
+                              )}
+                              totalCount={totalCount}
+                              type={networkModel.NetworkType.page}
+                            />
+                          )}
+                        </NetworkTopNFlowQuery>
+                      </EuiFlexItem>
+                    </ConditionalFlexGroup>
+
+                    <EuiSpacer />
                     <DomainsQuery
                       endDate={to}
                       filterQuery={filterQuery}

@@ -32,7 +32,9 @@ export const buildTopNFlowQuery = ({
     fields: { timestamp },
   },
   timerange: { from, to },
+  ip,
 }: NetworkTopNFlowRequestOptions) => {
+  console.log('IP', ip);
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },

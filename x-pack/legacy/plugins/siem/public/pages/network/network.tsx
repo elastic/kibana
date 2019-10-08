@@ -41,7 +41,7 @@ const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 
-const ConditionalFlexGroup = styled(EuiFlexGroup)`
+export const ConditionalFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`
     @media only screen and (min-width: 1441px) {
       flex-direction: row;

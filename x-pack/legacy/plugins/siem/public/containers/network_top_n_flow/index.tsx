@@ -29,6 +29,7 @@ const ID = 'networkTopNFlowQuery';
 export interface NetworkTopNFlowArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
+  ip?: string;
   isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -78,6 +79,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
+      ip,
       pagination: generateTablePaginationOptions(activePage, limit),
       sort: topNFlowSort,
       sourceId,

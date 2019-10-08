@@ -9,6 +9,7 @@ import gql from 'graphql-tag';
 export const networkTopNFlowQuery = gql`
   query GetNetworkTopNFlowQuery(
     $sourceId: ID!
+    $ip: String
     $filterQuery: String
     $pagination: PaginationInputPaginated!
     $sort: NetworkTopNFlowSortField!
