@@ -10,5 +10,5 @@ import test from './workpads/test.json';
 
 export * from './utils';
 
-export type WorkpadNames = 'hello' | 'austin' | 'test';
+export type WorkpadNames = keyof typeof sharedWorkpads;
 export const sharedWorkpads = { hello, austin, test };
