@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
+import KbnServer from '../../../../src/legacy/server/kbn_server';
 import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -122,8 +123,11 @@ export function siem(kibana: any) {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
+      const newPlatform = ((server as unknown) as KbnServer).newPlatform;
       if (server.plugins.alerting != null) {
-        server.plugins.alerting.registerType(signalsAlertType);
+        server.plugins.alerting.setup.registerType(
+          signalsAlertType({ logger: newPlatform.coreContext.logger.get('plugins', APP_ID) })
+        );
       }
       server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
       initServerWithKibana(server);

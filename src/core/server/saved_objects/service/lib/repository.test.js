@@ -23,7 +23,7 @@ import _ from 'lodash';
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
 import { getRootPropertiesObjects } from '../../mappings/lib/get_root_properties_objects';
@@ -2511,7 +2511,7 @@ describe('SavedObjectsRepository', () => {
     it('can throw es errors and have them decorated as SavedObjectsClient errors', async () => {
       expect.assertions(4);
 
-      const es401 = new elasticsearch.errors[401]();
+      const es401 = new legacyElasticsearch.errors[401]();
       expect(SavedObjectsErrorHelpers.isNotAuthorizedError(es401)).toBe(false);
       onBeforeWrite.mockImplementation(() => {
         throw es401;
