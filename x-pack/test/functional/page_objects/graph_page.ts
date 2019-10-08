@@ -30,10 +30,19 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     async selectIndexPattern(pattern: string) {
       await testSubjects.click('graphDatasourceButton');
       await testSubjects.click(`savedObjectTitle${pattern.split(' ').join('-')}`);
+      // wait till add fields button becomes available, then the index pattern is loaded completely
+      await testSubjects.waitForAttributeToChange(
+        'graph-add-field-button',
+        'aria-disabled',
+        'false'
+      );
     }
 
     async clickAddField() {
-      await testSubjects.click('graph-add-field-button');
+      await retry.try(async () => {
+        await testSubjects.click('graph-add-field-button');
+        await testSubjects.existOrFail('graph-field-search', { timeout: 3000 });
+      });
     }
 
     async selectField(field: string) {
