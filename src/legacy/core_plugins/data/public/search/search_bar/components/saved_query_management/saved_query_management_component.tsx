@@ -39,7 +39,8 @@ import { SavedQueryService } from '../../lib/saved_query_service';
 import { SavedQueryListItem } from './saved_query_list_item';
 
 const pageCount = 50;
-
+const savedQueriesToFetch = 50;
+const perPage = 10;
 interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
@@ -60,14 +61,19 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   savedQueryService,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+  const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]); // unless we tell the saved objects client how many to fetch at a time, we'll always only get 20
+  const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
 
   useEffect(() => {
     const fetchQueries = async () => {
-      const allSavedQueries = await savedQueryService.getAllSavedQueries();
+      const { allSavedQueries, totalCount } = await savedQueryService.getAllSavedQueries(
+        savedQueriesToFetch,
+        activePage + 1
+      ); // this doesn't actually return all the saved queries, it returns the number we ask for or less than that, if we don't have as many we're asking for.
       const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
       setSavedQueries(sortedAllSavedQueries);
+      setTotalCount(totalCount);
     };
     if (isOpen) {
       fetchQueries();
@@ -141,8 +147,8 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
         ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
         : [...savedQueriesWithoutCurrent];
     const savedQueriesDisplayRows = savedQueriesReordered.slice(
-      activePage * pageCount,
-      activePage * pageCount + pageCount
+      activePage * perPage,
+      activePage * perPage + perPage
     );
     return savedQueriesDisplayRows.map(savedQuery => (
       <SavedQueryListItem
@@ -195,7 +201,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
               </div>
               <EuiPagination
                 className="kbnSavedQueryManagement__pagination"
-                pageCount={Math.ceil(savedQueries.length / pageCount)}
+                pageCount={Math.ceil(count / perPage)}
                 activePage={activePage}
                 onPageClick={goToPage}
               />
