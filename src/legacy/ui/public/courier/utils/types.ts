@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import { EsQuerySortValue, SortDirection } from '../../../../../../ui/public/courier';
+export interface InspectorStat {
+  label: string;
+  value: string;
+  description: string;
+}
 
-/**
- * Returns `EsQuerySort` which is used to sort records in the ES query
- * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html
- * @param timeField
- * @param tieBreakerField
- * @param sortDir
- */
-export function getEsQuerySort(
-  timeField: string,
-  tieBreakerField: string,
-  sortDir: SortDirection
-): EsQuerySortValue[] {
-  return [{ [timeField]: sortDir }, { [tieBreakerField]: sortDir }];
+export interface RequestInspectorStats {
+  indexPattern?: InspectorStat;
+  indexPatternId?: InspectorStat;
+  queryTime?: InspectorStat;
+  hitsTotal?: InspectorStat;
+  hits?: InspectorStat;
+  requestTime?: InspectorStat;
 }

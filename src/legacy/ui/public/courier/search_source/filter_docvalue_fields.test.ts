@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import { EsQuerySortValue, SortDirection } from '../../../../../../ui/public/courier';
+import { filterDocvalueFields } from './filter_docvalue_fields';
 
-/**
- * Returns `EsQuerySort` which is used to sort records in the ES query
- * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html
- * @param timeField
- * @param tieBreakerField
- * @param sortDir
- */
-export function getEsQuerySort(
-  timeField: string,
-  tieBreakerField: string,
-  sortDir: SortDirection
-): EsQuerySortValue[] {
-  return [{ [timeField]: sortDir }, { [tieBreakerField]: sortDir }];
-}
+test('Should exclude docvalue_fields that are not contained in fields', () => {
+  const docvalueFields = [
+    'my_ip_field',
+    { field: 'my_keyword_field' },
+    { field: 'my_date_field', format: 'epoch_millis' },
+  ];
+  const out = filterDocvalueFields(docvalueFields, ['my_ip_field', 'my_keyword_field']);
+  expect(out).toEqual(['my_ip_field', { field: 'my_keyword_field' }]);
+});

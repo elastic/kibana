@@ -18,11 +18,7 @@
  */
 
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
-
-export enum SortDirection {
-  asc = 'asc',
-  desc = 'desc',
-}
+import { SortDirection } from 'ui/courier';
 
 /**
  * The list of field names that are allowed for sorting, but not included in

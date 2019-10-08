@@ -17,19 +17,20 @@
  * under the License.
  */
 
-import { EsQuerySortValue, SortDirection } from '../../../../../../ui/public/courier';
+import { IndexPattern } from '../../../../core_plugins/data/public';
+import { FetchHandlers } from '../fetch/types';
 
-/**
- * Returns `EsQuerySort` which is used to sort records in the ES query
- * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html
- * @param timeField
- * @param tieBreakerField
- * @param sortDir
- */
-export function getEsQuerySort(
-  timeField: string,
-  tieBreakerField: string,
-  sortDir: SortDirection
-): EsQuerySortValue[] {
-  return [{ [timeField]: sortDir }, { [tieBreakerField]: sortDir }];
+export interface SearchStrategyProvider {
+  id: string;
+  search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
+  isViable: (indexPattern: IndexPattern) => boolean;
+}
+
+export interface SearchStrategyResponse {
+  searching: Promise<any[]>;
+  abort: () => void;
+}
+
+export interface SearchStrategySearchParams extends FetchHandlers {
+  searchRequests: any[];
 }

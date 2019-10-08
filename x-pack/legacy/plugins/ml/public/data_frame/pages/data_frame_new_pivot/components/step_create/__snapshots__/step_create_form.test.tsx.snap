@@ -29,7 +29,6 @@ exports[`Data Frame: <StepCreateForm /> Minimal initialization 1`] = `
             "getId": [MockFunction],
             "getOwnField": [MockFunction],
             "getParent": [MockFunction],
-            "getPreferredSearchStrategyId": [MockFunction],
             "getSearchRequestBody": [MockFunction],
             "history": Array [],
             "onRequestStart": [MockFunction],
