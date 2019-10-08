@@ -43,7 +43,7 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
   const stateItems: Item[] = [];
   stateItems.push(
     {
-      title: 'id',
+      title: 'ID',
       description: item.id,
     },
     {

@@ -88,7 +88,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
         } catch (e) {
           toastNotifications.addDanger(
             i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
-              defaultMessage: 'An error occurred getting the existing transform Ids: {error}',
+              defaultMessage: 'An error occurred getting the existing transform IDs: {error}',
               values: { error: JSON.stringify(e) },
             })
           );
@@ -181,7 +181,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     <EuiForm>
       <EuiFormRow
         label={i18n.translate('xpack.transform.stepDetailsForm.transformIdLabel', {
-          defaultMessage: 'Transform id',
+          defaultMessage: 'Transform ID',
         })}
         isInvalid={(!transformIdEmpty && !transformIdValid) || transformIdExists}
         error={[
@@ -196,18 +196,18 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
           ...(transformIdExists
             ? [
                 i18n.translate('xpack.transform.stepDetailsForm.transformIdExistsError', {
-                  defaultMessage: 'A transform with this id already exists.',
+                  defaultMessage: 'A transform with this ID already exists.',
                 }),
               ]
             : []),
         ]}
       >
         <EuiFieldText
-          placeholder="transform id"
+          placeholder="transform ID"
           value={transformId}
           onChange={e => setTransformId(e.target.value)}
           aria-label={i18n.translate('xpack.transform.stepDetailsForm.transformIdInputAriaLabel', {
-            defaultMessage: 'Choose a unique transform id.',
+            defaultMessage: 'Choose a unique transform ID.',
           })}
           isInvalid={(!transformIdEmpty && !transformIdValid) || transformIdExists}
         />

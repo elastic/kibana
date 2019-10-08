@@ -36,7 +36,7 @@ export const StepDetailsSummary: SFC<StepDetailsExposedState> = React.memo(
       <Fragment>
         <EuiFormRow
           label={i18n.translate('xpack.transform.stepDetailsSummary.transformIdLabel', {
-            defaultMessage: 'Transform id',
+            defaultMessage: 'Transform ID',
           })}
         >
           <EuiFieldText defaultValue={transformId} disabled={true} />

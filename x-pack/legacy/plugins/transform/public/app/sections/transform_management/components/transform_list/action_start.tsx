@@ -60,14 +60,14 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
     startedTransformMessage = i18n.translate(
       'xpack.transform.transformList.startedTransformBulkToolTip',
       {
-        defaultMessage: 'One or more selected transforms is already started.',
+        defaultMessage: 'One or more transforms are already started.',
       }
     );
     completedBatchTransformMessage = i18n.translate(
       'xpack.transform.transformList.completeBatchTransformBulkActionToolTip',
       {
         defaultMessage:
-          'One or more selected transforms is a completed batch transform and cannot be restarted.',
+          'One or more transforms are completed batch transforms and cannot be restarted.',
       }
     );
   } else {

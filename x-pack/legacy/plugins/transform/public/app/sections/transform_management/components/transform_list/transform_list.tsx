@@ -138,7 +138,7 @@ export const TransformList: FC<Props> = ({
 
       if (c.type === 'term') {
         // filter term based clauses, e.g. bananas
-        // match on id and description
+        // match on ID and description
         // if the term has been negated, AND the matches
         if (bool === true) {
           ts = transforms.filter(

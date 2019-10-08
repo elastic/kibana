@@ -38,7 +38,7 @@ export const StopAction: FC<StopActionProps> = ({ items, forceDisable }) => {
     stoppedTransformMessage = i18n.translate(
       'xpack.transform.transformList.stoppedTransformBulkToolTip',
       {
-        defaultMessage: 'One or more selected transforms is already stopped.',
+        defaultMessage: 'One or more transforms are already stopped.',
       }
     );
   } else {

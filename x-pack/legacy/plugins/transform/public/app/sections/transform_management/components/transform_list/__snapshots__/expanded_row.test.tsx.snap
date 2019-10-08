@@ -13,7 +13,7 @@ exports[`Transform: Transform List <ExpandedRow /> Minimal initialization 1`] = 
               "items": Array [
                 Object {
                   "description": "fq_date_histogram_1m_1441",
-                  "title": "id",
+                  "title": "ID",
                 },
                 Object {
                   "description": "stopped",
@@ -106,7 +106,7 @@ exports[`Transform: Transform List <ExpandedRow /> Minimal initialization 1`] = 
                 "items": Array [
                   Object {
                     "description": "fq_date_histogram_1m_1441",
-                    "title": "id",
+                    "title": "ID",
                   },
                   Object {
                     "description": "stopped",

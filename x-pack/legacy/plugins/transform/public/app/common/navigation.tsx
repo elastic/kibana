@@ -12,7 +12,7 @@ import { CLIENT_BASE_PATH, SECTION_SLUG } from '../constants';
 
 /**
  * Gets a url for navigating to Discover page.
- * @param indexPatternId Index pattern id.
+ * @param indexPatternId Index pattern ID.
  * @param baseUrl Base url.
  */
 export function getDiscoverUrl(indexPatternId: string, baseUrl: string): string {
