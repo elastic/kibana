@@ -21,9 +21,9 @@ const Url = styled('span')`
   ${truncate(px(unit * 24))};
 `;
 interface HttpInfoProps {
-  method: string;
+  method?: string;
   status?: number;
-  url: string;
+  url?: string;
 }
 
 const Span = styled('span')`
@@ -31,6 +31,10 @@ const Span = styled('span')`
 `;
 
 export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
+  if (!method && !status && !url) {
+    return null;
+  }
+
   const methodLabel = i18n.translate(
     'xpack.apm.transactionDetails.requestMethodLabel',
     {
@@ -41,12 +45,16 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
   return (
     <Span>
       <HttpInfoBadge title={undefined}>
-        <EuiToolTip content={methodLabel}>
-          <>{method.toUpperCase()}</>
-        </EuiToolTip>{' '}
-        <EuiToolTip content={url}>
-          <Url>{url}</Url>
-        </EuiToolTip>
+        {method && (
+          <EuiToolTip content={methodLabel}>
+            <>{method.toUpperCase()}</>
+          </EuiToolTip>
+        )}{' '}
+        {url && (
+          <EuiToolTip content={url}>
+            <Url>{url}</Url>
+          </EuiToolTip>
+        )}
       </HttpInfoBadge>
       {status && <HttpStatusBadge status={status} />}
     </Span>

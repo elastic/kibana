@@ -32,9 +32,8 @@ import { DiscoverSpanLink } from '../../../../../../shared/Links/DiscoverLinks/D
 import { Stacktrace } from '../../../../../../shared/Stacktrace';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
-import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
-import { HttpStatusBadge } from '../../../../../../shared/Summary/HttpStatusBadge';
+import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/HttpInfoSummaryItem';
 import { SpanMetadata } from '../../../../../../shared/MetadataTable/SpanMetadata';
 
 function formatType(type: string) {
@@ -77,6 +76,10 @@ const SpanBadge = styled(EuiBadge)`
   margin-right: ${px(units.quarter)};
 `;
 
+const HttpInfoContainer = styled('div')`
+  margin-right: ${px(units.quarter)};
+`;
+
 interface Props {
   span?: Span;
   parentTransaction?: Transaction;
@@ -99,7 +102,9 @@ export function SpanFlyout({
   const dbContext = idx(span, _ => _.span.db);
   const httpContext = idx(span, _ => _.span.http);
   const spanTypes = getSpanTypes(span);
-  const spanHttpStatusCode = idx(span, _ => _.span.http.response.status_code);
+  const spanHttpStatusCode = idx(httpContext, _ => _.response.status_code);
+  const spanHttpUrl = idx(httpContext, _ => _.url.original);
+  const spanHttpMethod = idx(httpContext, _ => _.method);
 
   return (
     <EuiPortal>
@@ -145,6 +150,15 @@ export function SpanFlyout({
                 parentType="transaction"
               />,
               <>
+                {spanHttpStatusCode && (
+                  <HttpInfoContainer>
+                    <HttpInfoSummaryItem
+                      method={spanHttpMethod}
+                      url={spanHttpUrl}
+                      status={spanHttpStatusCode}
+                    />
+                  </HttpInfoContainer>
+                )}
                 <EuiToolTip
                   content={i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.spanType',
@@ -175,14 +189,10 @@ export function SpanFlyout({
                     <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
                   </EuiToolTip>
                 )}
-                {spanHttpStatusCode && (
-                  <HttpStatusBadge status={spanHttpStatusCode} />
-                )}
               </>
             ]}
           />
           <EuiHorizontalRule />
-          <HttpContext httpContext={httpContext} />
           <DatabaseContext dbContext={dbContext} />
           <EuiTabbedContent
             tabs={[

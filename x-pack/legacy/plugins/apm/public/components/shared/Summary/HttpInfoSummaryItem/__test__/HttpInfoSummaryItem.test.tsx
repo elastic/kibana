@@ -22,6 +22,11 @@ describe('HttpInfoSummaryItem', () => {
       ).not.toThrowError();
     });
 
+    it('renders empty component if no property', () => {
+      const component = shallow(<HttpInfoSummaryItem />);
+      expect(component.isEmptyRender()).toBeTruthy();
+    });
+
     describe('with status code 100', () => {
       it('shows a success color', () => {
         const wrapper = mount(<HttpInfoSummaryItem {...props} />);
