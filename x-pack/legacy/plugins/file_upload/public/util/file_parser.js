@@ -11,20 +11,19 @@ const oboe = require('oboe');
 
 // In local testing, performance improvements leveled off around this size
 export const FILE_BUFFER = 1024000;
-let featuresProcessed = 0;
 
 const readSlice = (fileReader, file, start, stop) => {
   const blob = file.slice(start, stop);
   fileReader.readAsBinaryString(blob);
 };
 
-const createOboeStreamAndPatterns = cleanAndValidate => {
+const createOboeStreamAndPatterns = (cleanAndValidate, featureTracking) => {
   const oboeStream = oboe();
   oboeStream.node({
-    'features.*': function (feature) {
-      featuresProcessed++;
-      const cleanFeature = cleanAndValidate(feature);
-      return cleanFeature;
+    'features.*': feature => {
+      // TODO: Add handling and tracking for cleanAndValidate fails
+      featureTracking();
+      return cleanAndValidate(feature);
     }
   });
   return oboeStream;
@@ -33,8 +32,7 @@ const createOboeStreamAndPatterns = cleanAndValidate => {
 let previousFileReader;
 export const fileHandler = (
   file, chunkHandler, cleanAndValidate, getFileParseActive,
-  fileReader = new FileReader(), fileBuffer = FILE_BUFFER,
-  oboeStream = createOboeStreamAndPatterns(cleanAndValidate)
+  fileReader = new FileReader(), fileBuffer = FILE_BUFFER, oboeStream
 ) => {
 
   if (!file) {
@@ -47,6 +45,7 @@ export const fileHandler = (
     );
   }
 
+
   // Halt any previous file reading activity
   if (previousFileReader) {
     previousFileReader.abort();
@@ -56,6 +55,25 @@ export const fileHandler = (
   let stop = fileBuffer;
   previousFileReader = fileReader;
 
+  let updateProgress;
+  if (!oboeStream) {
+    // Set up feature tracking
+    let featuresProcessed = 0;
+    const featureTracking = () => featuresProcessed++;
+    // Create local oboeStream instance and track features
+    oboeStream = createOboeStreamAndPatterns(cleanAndValidate, featureTracking);
+    updateProgress = () => chunkHandler({
+      featuresProcessed,
+      bytesProcessed: stop || file.size,
+      totalBytes: file.size
+    });
+  } else {
+    updateProgress = chunkHandler({
+      bytesProcessed: stop || file.size,
+      totalBytes: file.size
+    });
+  }
+
   const filePromise = new Promise((resolve, reject) => {
     fileReader.onloadend = ({ target: { readyState, result } }) => {
       if (readyState === FileReader.DONE) {
@@ -64,11 +82,7 @@ export const fileHandler = (
           resolve(null);
           return;
         }
-        chunkHandler({
-          featuresProcessed,
-          bytesProcessed: stop || file.size,
-          totalBytes: file.size
-        });
+        updateProgress();
         oboeStream.emit('data', result);
         if (!stop) {
           return;
