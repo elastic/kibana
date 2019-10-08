@@ -43,7 +43,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
         .endAngle(0);
 
       svgElement
-        .selectAll('')
+        .selectAll('g')
         .data(
           // @ts-ignore pie generator expects param of type number[], but only works with
           // output of d3.entries, which is like Array<{ key: string, value: number }>
