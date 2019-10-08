@@ -20,7 +20,10 @@ export const monitoring = (kibana) => new kibana.Plugin({
   id: 'monitoring',
   configPrefix: 'xpack.monitoring',
   publicDir: resolve(__dirname, 'public'),
-  init(server, _options) { init(this, server); },
+  init(server, _options) { 
+    console.log('...server:', server);
+    //console.log('...INIT');
+    init(this, server); },
   config,
   deprecations,
   uiExports: getUiExports(),
