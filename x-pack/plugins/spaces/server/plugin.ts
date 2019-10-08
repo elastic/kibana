@@ -24,7 +24,6 @@ import { getSpacesUsageCollector } from './lib/get_spaces_usage_collector';
 import { SpacesService } from './spaces_service';
 import { SpacesServiceSetup } from './spaces_service/spaces_service';
 import { ConfigType } from './config';
-import { getActiveSpace } from './lib/get_active_space';
 import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
@@ -51,7 +50,6 @@ export interface LegacyAPI {
   };
   legacyConfig: {
     kibanaIndex: string;
-    serverDefaultRoute: string;
   };
   xpackMain: XPackMainPlugin;
   // TODO: Spaces has a circular dependency with Security right now.
@@ -67,12 +65,12 @@ export interface PluginsSetup {
 export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
   __legacyCompat: {
+    registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
     // TODO: We currently need the legacy plugin to inform this plugin when it is safe to create the default space.
     // The NP does not have the equivilent ES connection/health/comapt checks that the legacy world does.
     // See: https://github.com/elastic/kibana/issues/43456
     createDefaultSpace: () => Promise<void>;
   };
-  registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
 }
 
 export class Plugin {
@@ -108,8 +106,6 @@ export class Plugin {
   public async start() {}
 
   public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<SpacesPluginSetup> {
-    // TODO: checkLicense replacement
-
     const service = new SpacesService(this.log, this.getLegacyAPI);
 
     const spacesService = await service.setup({
@@ -139,6 +135,10 @@ export class Plugin {
     return {
       spacesService,
       __legacyCompat: {
+        registerLegacyAPI: (legacyAPI: LegacyAPI) => {
+          this.legacyAPI = legacyAPI;
+          this.setupLegacyComponents(core, spacesService, plugins.features, plugins.licensing);
+        },
         createDefaultSpace: async () => {
           const esClient = await core.elasticsearch.adminClient$.pipe(take(1)).toPromise();
           return createDefaultSpace({
@@ -146,10 +146,6 @@ export class Plugin {
             savedObjects: this.getLegacyAPI().savedObjects,
           });
         },
-      },
-      registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-        this.legacyAPI = legacyAPI;
-        this.setupLegacyComponents(core, spacesService, plugins.features, plugins.licensing);
       },
     };
   }
@@ -173,13 +169,8 @@ export class Plugin {
       createSpacesTutorialContextFactory(spacesService)
     );
     legacyAPI.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
-      const spacesClient = await spacesService.scopedClient(request);
       try {
-        const activeSpace = await getActiveSpace(
-          spacesClient,
-          core.http.basePath.get(request),
-          core.http.basePath.serverBasePath
-        );
+        const activeSpace = await spacesService.getActiveSpace(request);
         const features = featuresSetup.getFeatures();
         return toggleUICapabilities(features, uiCapabilities, activeSpace);
       } catch (e) {

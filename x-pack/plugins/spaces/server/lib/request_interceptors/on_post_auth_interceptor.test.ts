@@ -32,7 +32,6 @@ import { SecurityPlugin } from '../../../../../legacy/plugins/security';
 describe('onPostAuthInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
 
-  const defaultRoute = '/app/kibana';
   const headers = {
     authorization: `Basic ${Buffer.from(
       `${kibanaTestUser.username}:${kibanaTestUser.password}`
@@ -163,9 +162,6 @@ describe('onPostAuthInterceptor', () => {
     };
 
     const legacyAPI = {
-      legacyConfig: {
-        serverDefaultRoute: defaultRoute,
-      },
       savedObjects: (savedObjectsService as unknown) as SavedObjectsLegacyService,
     } as LegacyAPI;
 

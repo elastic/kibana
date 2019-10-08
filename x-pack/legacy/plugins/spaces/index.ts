@@ -127,9 +127,10 @@ export const spaces = (kibana: Record<string, any>) =>
 
       const config = server.config();
 
-      spacesPlugin.registerLegacyAPI({
+      const { registerLegacyAPI, createDefaultSpace } = spacesPlugin.__legacyCompat;
+
+      registerLegacyAPI({
         legacyConfig: {
-          serverDefaultRoute: config.get('server.defaultRoute'),
           kibanaIndex: config.get('kibana.index'),
         },
         savedObjects: server.savedObjects,
@@ -157,7 +158,7 @@ export const spaces = (kibana: Record<string, any>) =>
       initSpaceSelectorView(server);
 
       watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {
-        await spacesPlugin.__legacyCompat.createDefaultSpace();
+        await createDefaultSpace();
       });
 
       server.expose('getSpaceId', (request: any) => spacesPlugin.spacesService.getSpaceId(request));
