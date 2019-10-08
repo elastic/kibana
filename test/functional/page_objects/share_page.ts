@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function SharePageProvider({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function SharePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const PageObjects = getPageObjects(['visualize', 'common']);
@@ -32,7 +34,7 @@ export function SharePageProvider({ getService, getPageObjects }) {
       return testSubjects.click('shareTopNavButton');
     }
 
-    async openShareMenuItem(itemTitle) {
+    async openShareMenuItem(itemTitle: string) {
       log.debug(`openShareMenuItem title:${itemTitle}`);
       const isShareMenuOpen = await this.isShareMenuOpen();
       if (!isShareMenuOpen) {
@@ -45,7 +47,7 @@ export function SharePageProvider({ getService, getPageObjects }) {
         await this.clickShareTopNavButton();
       }
       const menuPanel = await find.byCssSelector('div.euiContextMenuPanel');
-      testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
+      await testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
       await testSubjects.waitForDeleted(menuPanel);
     }
 
@@ -56,7 +58,7 @@ export function SharePageProvider({ getService, getPageObjects }) {
      * in a pure OSS environment, the permalinks sharing panel is displayed initially
      */
     async openPermaLinks() {
-      if(await testSubjects.exists('sharePanel-Permalinks')) {
+      if (await testSubjects.exists('sharePanel-Permalinks')) {
         await testSubjects.click(`sharePanel-Permalinks`);
       }
     }
@@ -84,7 +86,6 @@ export function SharePageProvider({ getService, getPageObjects }) {
       await this.openPermaLinks();
       return await testSubjects.click('exportAsSavedObject');
     }
-
   }
 
   return new SharePage();
