@@ -28,9 +28,9 @@ export interface AxiosResponseError<T> extends AxiosError {
 }
 
 export const isAxiosRequestError = (error: any): error is AxiosRequestError => {
-  return error && error.response === undefined;
+  return error && error.config && error.response === undefined;
 };
 
 export const isAxiosResponseError = <T = any>(error: any): error is AxiosResponseError<T> => {
-  return error && error.response !== undefined && error.response.status !== undefined;
+  return error && error.response && error.response.status !== undefined;
 };
