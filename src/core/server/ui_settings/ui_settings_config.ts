@@ -25,5 +25,8 @@ export const config = {
   path: 'uiSettings',
   schema: schema.object({
     overrides: schema.object({}, { allowUnknowns: true }),
+    // Deprecation is implemented in LP.
+    // We define schema here not to fail on the validation step.
+    enabled: schema.maybe(schema.boolean()),
   }),
 };

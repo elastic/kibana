@@ -24,11 +24,14 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 
 import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
+import { HttpServiceSetup } from '../http';
 import { UiSettingsConfigType } from './ui_settings_config';
 import { IUiSettingsClient, UiSettingsClient } from './ui_settings_client';
 import { mapToObject } from '../../utils/';
 
-interface SetupDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
+interface SetupDeps {
+  http: HttpServiceSetup;
+}
 
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
@@ -65,30 +68,20 @@ export class UiSettingsService implements CoreService<UiSettingsServiceSetup> {
 
   public async setup(deps: SetupDeps): Promise<UiSettingsServiceSetup> {
     this.log.debug('Setting up ui settings service');
-    const config = await this.config$.pipe(first()).toPromise();
-    const { overrides } = config;
+    const overrides = await this.getOverrides(deps);
     const { version, buildNum } = this.coreContext.env.packageInfo;
-    const getDefaults = () => mapToObject(this.uiSettingsDefaults);
-    const log = this.log;
+
     return {
-      setDefaults: (values: Record<string, UiSettingsParams>) => {
-        Object.entries(values).forEach(([key, value]) => {
-          // can they change over time?
-          // if (this.uiSettingsDefaults.has(key)) {
-          //   throw new Error(`uiSettingsDefaults for key ${key} has been already set`);
-          // }
-          this.uiSettingsDefaults.set(key, value);
-        });
-      },
-      asScopedToClient(savedObjectsClient: SavedObjectsClientContract) {
+      setDefaults: this.setDefaults.bind(this),
+      asScopedToClient: (savedObjectsClient: SavedObjectsClientContract) => {
         return new UiSettingsClient({
           type: 'config',
           id: version,
           buildNum,
           savedObjectsClient,
-          getDefaults,
+          defaults: mapToObject(this.uiSettingsDefaults),
           overrides,
-          log,
+          log: this.log,
         });
       },
     };
@@ -97,4 +90,28 @@ export class UiSettingsService implements CoreService<UiSettingsServiceSetup> {
   public async start() {}
 
   public async stop() {}
+
+  private setDefaults(values: Record<string, UiSettingsParams> = {}) {
+    Object.entries(values).forEach(([key, value]) => {
+      if (this.uiSettingsDefaults.has(key)) {
+        throw new Error(`uiSettings defaults for key ${key} has been already set`);
+      }
+      this.uiSettingsDefaults.set(key, value);
+    });
+  }
+
+  private async getOverrides(deps: SetupDeps) {
+    const config = await this.config$.pipe(first()).toPromise();
+    const overrides: Record<string, SavedObjectAttribute> = config;
+    // manually implemented deprecation until New platform Config service
+    // supports them https://github.com/elastic/kibana/issues/40255
+    if (typeof deps.http.config.defaultRoute !== 'undefined') {
+      overrides.defaultRoute = deps.http.config.defaultRoute;
+      this.log.warn(
+        'Config key "server.defaultRoute" is deprecated. It has been replaced with "uiSettings.overrides.defaultRoute"'
+      );
+    }
+
+    return overrides;
+  }
 }

@@ -92,7 +92,9 @@ export class Server {
       http: httpSetup,
     });
 
-    const uiSettingsSetup = await this.uiSettings.setup({});
+    const uiSettingsSetup = await this.uiSettings.setup({
+      http: httpSetup,
+    });
 
     const coreSetup = {
       context: contextServiceSetup,

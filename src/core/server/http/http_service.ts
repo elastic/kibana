@@ -85,6 +85,17 @@ export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
     contextName: T,
     provider: RequestHandlerContextProvider<T>
   ) => RequestHandlerContextContainer;
+
+  config: {
+    /**
+     * @internalRemarks
+     * Deprecated part of the server config, provided until
+     * https://github.com/elastic/kibana/issues/40255
+     *
+     * @deprecated
+     * */
+    defaultRoute?: string;
+  };
 };
 
 /** @public */
@@ -152,6 +163,10 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
         contextName: T,
         provider: RequestHandlerContextProvider<T>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
+
+      config: {
+        defaultRoute: config.defaultRoute,
+      },
     };
 
     return contract;
