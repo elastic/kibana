@@ -33,13 +33,15 @@ export function EuiMonitoringTable({
     search.box.schema = true;
   }
 
-  const oldOnChange = search.onChange;
-  search.onChange = (arg) => {
-    const filteredItems = EuiSearchBar.Query.execute(arg.query, items, props.executeQueryOptions);
-    setHasItem(filteredItems.length > 0);
-    oldOnChange && oldOnChange(arg);
-    return true;
-  };
+  if (search) {
+    const oldOnChange = search.onChange;
+    search.onChange = (arg) => {
+      const filteredItems = EuiSearchBar.Query.execute(arg.query, items, props.executeQueryOptions);
+      setHasItem(filteredItems.length > 0);
+      oldOnChange && oldOnChange(arg);
+      return true;
+    };
+  }
 
   const columns = _columns.map(column => {
     if (!('sortable' in column)) {
