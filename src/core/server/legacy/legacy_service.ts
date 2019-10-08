@@ -271,6 +271,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
+          uiSettings: setupDeps.core.uiSettings,
         },
         logger: this.coreContext.logger,
       },

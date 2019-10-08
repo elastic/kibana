@@ -27,6 +27,7 @@ import {
   LoggerFactory,
   SavedObjectsClientContract,
   SavedObjectsLegacyService,
+  IUiSettingsClient,
 } from '../../core/server';
 
 import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
@@ -39,7 +40,6 @@ import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/ela
 import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/public';
-import { IUiSettingsClient } from '../../legacy/ui/ui_settings/ui_settings_service';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
 export interface KibanaConfig {
@@ -102,6 +102,13 @@ type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promi
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
+    __internals: {
+      hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
+      uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
+      elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
+      uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
+      kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
+    };
     coreContext: {
       logger: LoggerFactory;
     };
