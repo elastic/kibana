@@ -186,7 +186,6 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
               })}
             >
               <button
-                style={{ lineHeight: 'inherit' }}
                 onClick={sendCurrentRequestToES}
                 data-test-subj="sendRequestButton"
                 className="conApp__editorActionButton conApp__editorActionButton--success"

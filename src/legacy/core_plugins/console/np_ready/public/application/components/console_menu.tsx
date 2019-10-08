@@ -105,18 +105,13 @@ export class ConsoleMenu extends Component<Props, State> {
     const button = (
       <button
         className="euiButtonIcon--primary"
-        style={{ lineHeight: 'inherit' }}
         onClick={this.onButtonClick}
         data-test-subj="toggleConsoleMenu"
-        // @ts-ignore
-        aria-label={
-          <FormattedMessage
-            id="console.requestOptionsButtonAriaLabel"
-            defaultMessage="Request options"
-          />
-        }
+        aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+          defaultMessage: 'Request options',
+        })}
       >
-        <EuiIcon color="" type="wrench" />
+        <EuiIcon type="wrench" />
       </button>
     );
 

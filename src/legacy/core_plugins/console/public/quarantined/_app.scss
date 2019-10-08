@@ -37,6 +37,9 @@
 }
 
 .conApp__editorActions {
+  button {
+    line-height: inherit;
+  }
   position: absolute;
   z-index: $euiZLevel1;
   top: 0;
