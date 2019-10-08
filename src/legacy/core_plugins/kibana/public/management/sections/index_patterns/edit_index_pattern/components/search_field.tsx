@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -26,6 +26,8 @@ interface Props {
 }
 
 export const SearchField = ({ $scope }: Props) => {
+  const [text, setText] = useState<string>($scope.fieldFilter || '');
+
   return (
     <EuiFieldSearch
       fullWidth={true}
@@ -36,9 +38,11 @@ export const SearchField = ({ $scope }: Props) => {
         defaultMessage: 'Filter',
       })}
       data-test-subj="indexPatternFieldFilter"
-      value={$scope.fieldFilter}
+      value={text}
       onChange={event => {
-        $scope.fieldFilter = event.target.value;
+        const newText = event.target.value;
+        setText(newText);
+        $scope.fieldFilter = newText;
         $scope.$apply();
       }}
     />
