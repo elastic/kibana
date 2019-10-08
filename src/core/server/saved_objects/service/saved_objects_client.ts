@@ -242,4 +242,15 @@ export class SavedObjectsClient {
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
   }
+
+  /**
+   * Bulk Updates multiple SavedObject at once
+   *
+   * @param objects
+   */
+  async bulkUpdate<T extends SavedObjectAttributes = any>(
+    objects: Array<SavedObjectsBulkUpdateObject<T>>
+  ): Promise<SavedObjectsBulkResponse<T>> {
+    return await this._repository.bulkUpdate(objects);
+  }
 }
