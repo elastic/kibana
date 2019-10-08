@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiBasicTable,
   EuiSpacer,
-  EuiSearchBar
+  EuiSearchBar,
+  EuiButton
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { getIdentifier } from '../setup_mode/formatting';
 
 export function EuiMonitoringSSPTable({
   rows: items,
@@ -17,6 +20,8 @@ export function EuiMonitoringSSPTable({
   pagination,
   columns: _columns,
   onTableChange,
+  setupMode,
+  productName,
   fetchMoreData,
   ...props
 }) {
@@ -39,6 +44,23 @@ export function EuiMonitoringSSPTable({
 
     return column;
   });
+
+  let footerContent = null;
+  if (setupMode && setupMode.enabled) {
+    footerContent = (
+      <Fragment>
+        <EuiSpacer size="m"/>
+        <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
+          {i18n.translate('xpack.monitoring.euiSSPTable.setupNewButtonLabel', {
+            defaultMessage: 'Set up monitoring for new {identifier}',
+            values: {
+              identifier: getIdentifier(productName)
+            }
+          })}
+        </EuiButton>
+      </Fragment>
+    );
+  }
 
   const onChange = async ({ page, sort }) => {
     setPage(page);
@@ -71,6 +93,7 @@ export function EuiMonitoringSSPTable({
         loading={isLoading}
         columns={columns}
       />
+      {footerContent}
     </div>
   );
 }
