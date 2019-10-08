@@ -7,7 +7,7 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import React, { SFC } from 'react';
-import { Agent } from '../../../common/types/domain_data';
+import { Agent } from '../../../../common/types/domain_data';
 
 export const AgentMetadataSection: SFC<{ agent: Agent }> = ({ agent }) => {
   const mapMetadata = (obj: { [key: string]: string } | undefined) => {

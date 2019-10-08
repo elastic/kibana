@@ -16,11 +16,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentsLib } from '../../lib/agent';
-import { AgentEvent, Agent } from '../../../common/types/domain_data';
-import { formatDate } from '../../utils/date';
-import { usePagination } from '../../hooks/use_pagination';
+import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
+import { AgentsLib } from '../../../lib/agent';
+import { AgentEvent, Agent } from '../../../../common/types/domain_data';
+import { usePagination } from '../../../hooks/use_pagination';
 
 function useSearch() {
   const [search, setSearch] = useState('');
@@ -96,7 +95,9 @@ export const AgentEventsTable: SFC<{ agents: AgentsLib; agent: Agent }> = ({ age
       name: i18n.translate('xpack.fleet.agentEventsList.timestampColumnTitle', {
         defaultMessage: 'Timestamp',
       }),
-      render: (timestamp: string) => formatDate(timestamp),
+      render: (timestamp: string) => (
+        <FormattedTime value={new Date(timestamp)} month="numeric" day="numeric" year="numeric" />
+      ),
       sortable: true,
     },
     {

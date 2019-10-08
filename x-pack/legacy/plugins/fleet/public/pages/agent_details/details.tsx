@@ -18,11 +18,11 @@ import {
 import { RouteComponentProps } from 'react-router-dom';
 import { AgentsLib } from '../../lib/agent';
 import { Agent } from '../../../common/types/domain_data';
-import { AgentEventsTable } from '../../components/agent_details/agent_events_table';
+import { AgentEventsTable } from './components/agent_events_table';
 import { Loading } from '../../components/loading';
-import { PolicySection } from '../../components/agent_details/policy_section';
-import { AgentDetailSection } from '../../components/agent_details/details_section';
-import { AgentMetadataSection } from '../../components/agent_details/metadata_section';
+import { PolicySection } from './components/policy_section';
+import { AgentDetailSection } from './components/details_section';
+import { AgentMetadataSection } from './components/metadata_section';
 
 function useGetAgent(agents: AgentsLib, id: string) {
   const [state, setState] = useState<{

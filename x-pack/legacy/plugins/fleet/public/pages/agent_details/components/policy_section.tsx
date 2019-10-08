@@ -7,7 +7,7 @@
 import React, { SFC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { Agent } from '../../../common/types/domain_data';
+import { Agent } from '../../../../common/types/domain_data';
 
 export const PolicySection: SFC<{ agent: Agent }> = ({ agent }) => (
   <div>
