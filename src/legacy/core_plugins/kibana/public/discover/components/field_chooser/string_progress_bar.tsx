@@ -16,24 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
-
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText, EuiToolTip } from '@elastic/eui';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+interface Props {
+  count: number;
+  percent: number;
+}
 
-const module = uiModules.get('discover/field_chooser');
-
-function StringFieldProgressBar(props) {
+export function StringFieldProgressBar(props: Props) {
   return (
     <EuiToolTip
       anchorClassName="dscProgressBarTooltip__anchor"
@@ -41,30 +32,20 @@ function StringFieldProgressBar(props) {
       delay="regular"
       position="right"
     >
-      <EuiFlexGroup
-        alignItems="center"
-      >
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiProgress
             value={props.percent}
             max={100}
             color="secondary"
             aria-labelledby="CanvasAssetManagerLabel"
-            size="l"
+            size="s"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-          >
-            {props.percent}%
-          </EuiText>
+          <EuiText size="xs">{props.percent}%</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiToolTip>
   );
 }
-
-module.directive('stringFieldProgressBar', function (reactDirective) {
-  return reactDirective(wrapInI18nContext(StringFieldProgressBar));
-});

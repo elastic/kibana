@@ -19,7 +19,7 @@
 
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
-import './discover_field';
+import './discover_field_directive';
 import 'ui/angular_ui_select';
 import './discover_field_search_directive';
 import './discover_index_pattern_directive';
@@ -56,8 +56,8 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         (pattern) => pattern.id === $scope.indexPattern.id
       );
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
-      $scope.setIndexPattern = function (id) {
-        $scope.state.index = id;
+      $scope.setIndexPattern = function (patternId) {
+        $scope.state.index = patternId;
         $scope.state.save();
       };
 
@@ -281,6 +281,10 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         if (prevFields) {
           fields.forEach(function (field) {
             field.details = _.get(prevFields, ['byName', field.name, 'details']);
+          });
+        } else {
+          fields.forEach(function (field) {
+            $scope.computeDetails(field);
           });
         }
 

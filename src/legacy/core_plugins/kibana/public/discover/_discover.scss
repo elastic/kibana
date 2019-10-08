@@ -115,13 +115,8 @@ discover-app {
  * 1. Override sidebar-item-title styles.
  */
 .dscSidebarItem {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding-top: 0 !important; /* 1 */
   padding-bottom: 0 !important; /* 1 */
-  height: $euiSizeXL;
 
   &:hover,
   &:focus {
