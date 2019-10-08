@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { createEsTestCluster } from './es_test_cluster.js';
+export { createLegacyEsTestCluster } from './legacy_es_test_cluster.js';
 export { esTestConfig } from './es_test_config';
