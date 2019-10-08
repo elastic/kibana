@@ -6,44 +6,24 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { TaskManager, TaskRunCreatorFunction } from '../../task_manager';
-import { getCreateTaskRunnerFunction, ExecutorError } from './lib';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
-import {
-  ActionType,
-  GetBasePathFunction,
-  GetServicesFunction,
-  SpaceIdToNamespaceFunction,
-} from './types';
+import { TaskManagerSetupContract } from './shim';
+import { RunContext } from '../../task_manager';
+import { ExecutorError, TaskRunnerFactory } from './lib';
+import { ActionType } from './types';
 
 interface ConstructorOptions {
-  taskManager: TaskManager;
-  getServices: GetServicesFunction;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  getBasePath: GetBasePathFunction;
+  taskManager: TaskManagerSetupContract;
+  taskRunnerFactory: TaskRunnerFactory;
 }
 
 export class ActionTypeRegistry {
-  private readonly taskRunCreatorFunction: TaskRunCreatorFunction;
-  private readonly taskManager: TaskManager;
+  private readonly taskManager: TaskManagerSetupContract;
   private readonly actionTypes: Map<string, ActionType> = new Map();
+  private readonly taskRunnerFactory: TaskRunnerFactory;
 
-  constructor({
-    getServices,
-    taskManager,
-    encryptedSavedObjectsPlugin,
-    spaceIdToNamespace,
-    getBasePath,
-  }: ConstructorOptions) {
+  constructor({ taskManager, taskRunnerFactory }: ConstructorOptions) {
     this.taskManager = taskManager;
-    this.taskRunCreatorFunction = getCreateTaskRunnerFunction({
-      getServices,
-      actionTypeRegistry: this,
-      encryptedSavedObjectsPlugin,
-      spaceIdToNamespace,
-      getBasePath,
-    });
+    this.taskRunnerFactory = taskRunnerFactory;
   }
 
   /**
@@ -83,7 +63,7 @@ export class ActionTypeRegistry {
           // Don't retry other kinds of errors
           return false;
         },
-        createTaskRunner: this.taskRunCreatorFunction,
+        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
   }
