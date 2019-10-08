@@ -103,7 +103,7 @@ describe('updatedFailureIssue()', () => {
       api
     );
 
-    expect(api.editIssueBody).toMatchInlineSnapshot(`
+    expect(api.editIssueBodyAndEnsureOpen).toMatchInlineSnapshot(`
       [MockFunction] {
         "calls": Array [
           Array [

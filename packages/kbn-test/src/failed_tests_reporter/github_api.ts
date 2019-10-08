@@ -69,12 +69,13 @@ export class GithubApi {
     return issues;
   }
 
-  async editIssueBody(issueNumber: number, newBody: string) {
+  async editIssueBodyAndEnsureOpen(issueNumber: number, newBody: string) {
     await this.request(
       {
         method: 'PATCH',
         url: Url.resolve(ISSUES_URL, encodeURIComponent(issueNumber)),
         data: {
+          state: 'open', // Reopen issue if it was closed.
           body: newBody,
         },
       },

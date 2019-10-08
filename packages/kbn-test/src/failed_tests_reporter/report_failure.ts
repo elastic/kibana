@@ -63,7 +63,7 @@ export async function updatedFailureIssue(
     'test.failCount': newCount,
   });
 
-  await api.editIssueBody(issue.number, newBody);
+  await api.editIssueBodyAndEnsureOpen(issue.number, newBody);
   await api.addIssueComment(issue.number, `New failure: [Jenkins Build](${buildUrl})`);
 
   log.info(`Updated issue ${issue.html_url}, failCount: ${newCount}`);
