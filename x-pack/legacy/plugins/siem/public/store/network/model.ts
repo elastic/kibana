@@ -24,7 +24,6 @@ export enum NetworkTableType {
   dns = 'dns',
   topNFlowSource = 'topNFlowSource',
   topNFlowDestination = 'topNFlowDestination',
-  anomalies = 'anomalies',
 }
 
 export type TopNTableType =
