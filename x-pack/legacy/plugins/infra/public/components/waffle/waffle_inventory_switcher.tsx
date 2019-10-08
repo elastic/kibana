@@ -8,6 +8,7 @@ import { EuiPopover, EuiContextMenu, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   InfraSnapshotMetricInput,
   InfraSnapshotMetricType,
@@ -83,7 +84,11 @@ export const WaffleInventorySwitcher = (props: Props) => {
       id="contextMenu"
       button={
         <EuiButton iconType="arrowDown" iconSide="right" onClick={openPopover}>
-          View: {selectedText}
+          <FormattedMessage
+            id="xpack.infra.waffle.inventoryButtonLabel"
+            defaultMessage="View: {selectedText}"
+            values={{ selectedText }}
+          />
         </EuiButton>
       }
       isOpen={isOpen}
