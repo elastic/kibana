@@ -1,7 +1,7 @@
 [[code-install-lang-server]]
 == Install language server
 
-*Code* comes with built-in language support for TypeScript. You can install additional languages as a {kib} plugin. Plugin's reduce the amount of CPU usage required to run Code. Install only the languages needed for your indexed repositories. 
+*Code* comes with built-in language support for TypeScript. You can install additional languages as a {kib} plugin. Plugin's reduce the distribution size to run Code inside {kib}. Install only the languages needed for your indexed repositories. 
 
 [role="screenshot"]
 image::images/code-lang-server-tab.png[]
