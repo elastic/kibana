@@ -26,7 +26,9 @@ export const getSuccessToast = (
   color: 'success',
   text: (
     <Fragment>
-      <ReportLink getUrl={getReportLink} />
+      <p>
+        <ReportLink getUrl={getReportLink} />
+      </p>
       <DownloadButton getUrl={getDownloadLink} job={job} />
     </Fragment>
   ),

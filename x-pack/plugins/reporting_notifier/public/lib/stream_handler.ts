@@ -29,6 +29,7 @@ import {
   getFailureToast,
   getWarningFormulasToast,
   getWarningMaxSizeToast,
+  getGeneralErrorToast,
 } from '../components';
 import { jobQueueClient } from './job_queue';
 
@@ -124,12 +125,14 @@ export class ReportingNotifierStreamHandler {
       }),
       catchError(err => {
         // show connection refused toast
-        this.notificationsFn().toasts.addDanger({
-          text: i18n.translate('xpack.reportingNotifier.httpErrorMessage', {
-            defaultMessage: 'Could not check the Kibana server for updated Reporting jobs! Try refreshing the page. {err}',
-            values: { err: err.toString() }
-          }),
-        }); // prettier-ignore
+        this.notificationsFn().toasts.addDanger(
+          getGeneralErrorToast(
+            i18n.translate('xpack.reportingNotifier.httpErrorMessage', {
+              defaultMessage: 'Could not check Reporting job status!',
+            }),
+            err
+          )
+        ); // prettier-ignore
         window.console.error(err);
         return Rx.of({ completed: [], failed: [] }); // log the error and resume
       })

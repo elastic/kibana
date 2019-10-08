@@ -5,7 +5,9 @@
  */
 
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { ToastInput } from '../../../../../src/core/public';
 import { JobSummary, ManagementLinkFn } from '../../index.d';
 
@@ -24,13 +26,19 @@ export const getFailureToast = (
     ),
     text: (
       <Fragment>
-        <p>
-          <FormattedMessage
-            id="xpack.reportingNotifier.error.failedWithMessage"
-            defaultMessage="The reporting job failed with the message: '{errorText}'"
-            values={{ errorText }}
-          />
-        </p>
+        <EuiCallOut
+          size="m"
+          title={i18n.translate('xpack.reportingNotifier.error.calloutTitle', {
+            defaultMessage: 'The reporting job failed',
+          })}
+          color="danger"
+          iconType="alert"
+        >
+          {errorText}
+        </EuiCallOut>
+
+        <EuiSpacer />
+
         <p>
           <FormattedMessage
             id="xpack.reportingNotifier.error.checkManagement"
@@ -49,6 +57,7 @@ export const getFailureToast = (
         </p>
       </Fragment>
     ),
+    iconType: undefined,
     'data-test-subj': 'completeReportFailure',
   };
 };

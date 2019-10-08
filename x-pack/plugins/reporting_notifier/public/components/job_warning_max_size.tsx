@@ -31,7 +31,9 @@ export const getWarningMaxSizeToast = (
           defaultMessage="The report reached the max size and contains partial data."
         />
       </p>
-      <ReportLink getUrl={getReportLink} />
+      <p>
+        <ReportLink getUrl={getReportLink} />
+      </p>
       <DownloadButton getUrl={getDownloadLink} job={job} />
     </Fragment>
   ),

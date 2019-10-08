@@ -31,7 +31,9 @@ export const getWarningFormulasToast = (
           defaultMessage="The report contains characters which spreadsheet applications can interpret as formulas."
         />
       </p>
-      <ReportLink getUrl={getReportLink} />
+      <p>
+        <ReportLink getUrl={getReportLink} />
+      </p>
       <DownloadButton getUrl={getDownloadLink} job={job} />
     </Fragment>
   ),

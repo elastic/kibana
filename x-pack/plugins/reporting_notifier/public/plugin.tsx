@@ -18,6 +18,7 @@ import {
   JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
 } from '../constants';
 import { JobId, JobStatusBuckets } from '../index.d';
+import { getGeneralErrorToast } from './components';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 
 const {
@@ -55,12 +56,14 @@ export class ReportingNotifierPublicPlugin implements Plugin<any, any> {
       }),
       catchError(err => {
         // show general toast, log the error and resume
-        notificationsFn().toasts.addDanger({
-          text: i18n.translate('xpack.reportingNotifier.pollingErrorMessage', {
-            defaultMessage: 'Reporting notifier error! Try refreshing the page. {err}',
-            values: { err: err.toString() }
-          }),
-        }); // prettier-ignore
+        notificationsFn().toasts.addDanger(
+          getGeneralErrorToast(
+            i18n.translate('xpack.reportingNotifier.pollingErrorMessage', {
+              defaultMessage: 'Reporting notifier error!',
+            }),
+            err
+          )
+        );
         window.console.error(err);
         return Rx.of({ completed: [], failed: [] });
       })
