@@ -71,19 +71,18 @@ export const AnomaliesResults = ({
         : [],
     [results]
   );
-  // TODO: Convert to correct data (anomaly scores), also base on severity score
-  const logEntryRateAnomalyAnnotations = useMemo(
+  // TODO: Add grouping / colouring based on severity scoring
+  const anomalyAnnotations = useMemo(
     () =>
       results && results.histogramBuckets
         ? results.histogramBuckets.reduce<RectAnnotationDatum[]>((annotatedBuckets, bucket) => {
-            const anomalies = bucket.partitions.reduce<typeof bucket['partitions'][0]['anomalies']>(
-              (accumulatedAnomalies, partition) => [
-                ...accumulatedAnomalies,
-                ...partition.anomalies,
-              ],
-              []
+            const sumPartitionMaxAnomalyScores = bucket.partitions.reduce<number>(
+              (scoreSum, partition) => {
+                return scoreSum + partition.maximumAnomalyScore;
+              },
+              0
             );
-            if (anomalies.length <= 0) {
+            if (sumPartitionMaxAnomalyScores === 0) {
               return annotatedBuckets;
             }
             return [
@@ -94,11 +93,11 @@ export const AnomaliesResults = ({
                   x1: bucket.startTime + results.bucketDuration,
                 },
                 details: i18n.translate(
-                  'xpack.infra.logs.analysis.anomalySectionAnomalyCountTooltipLabel',
+                  'xpack.infra.logs.analysis.logRateBucketMaxAnomalyScoreAnnotationLabel',
                   {
-                    defaultMessage: `{anomalyCount, plural, one {# anomaly} other {# anomalies}}`,
+                    defaultMessage: 'Anomaly score: {sumPartitionMaxAnomalyScores}',
                     values: {
-                      anomalyCount: anomalies.length,
+                      sumPartitionMaxAnomalyScores: Number(sumPartitionMaxAnomalyScores).toFixed(0),
                     },
                   }
                 ),
@@ -157,7 +156,7 @@ export const AnomaliesResults = ({
             setTimeRange={setTimeRange}
             timeRange={timeRange}
             series={logEntryRateSeries}
-            annotations={logEntryRateAnomalyAnnotations}
+            annotations={anomalyAnnotations}
           />
           <EuiSpacer size="l" />
           <AnomaliesTable results={results} setTimeRange={setTimeRange} timeRange={timeRange} />
