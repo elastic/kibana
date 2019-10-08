@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
 
-import { CodeBlock } from '../codeblock';
+import { BareCodeBlock } from '../codeblock';
 import { history } from '../../utils/url';
 import { FrameHeader } from './frame_header';
 import { RepoTitle } from './repo_title';
@@ -35,18 +35,18 @@ export const Integrations = () => (
         return (
           <div key={key} className="codeIntegrations__frame">
             <RepoTitle uri={snippet.uri} />
-            <CodeBlock
-              content={content}
-              header={
-                <FrameHeader
-                  fileName={fileName}
-                  lineNumber={lineNumber}
-                  onClick={() => history.push(fileUrl)}
-                />
-              }
-              language={language}
-              lineNumber={i => lineMapping[i]}
-            />
+            <EuiPanel paddingSize="s">
+              <FrameHeader
+                fileName={fileName}
+                lineNumber={lineNumber}
+                onClick={() => history.push(fileUrl)}
+              />
+              <BareCodeBlock
+                content={content}
+                language={language}
+                lineNumber={i => lineMapping[i]}
+              />
+            </EuiPanel>
           </div>
         );
       }
