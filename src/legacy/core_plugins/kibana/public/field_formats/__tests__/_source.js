@@ -50,7 +50,6 @@ describe('_source formatting', function () {
 
     it('uses the _source, field, and hit to create a <dl>', function () {
       const hit = _.first(hits);
-      // todo not confident about this change
       const $nonBindable = $(convertHtml(hit._source, indexPattern.fields, hit));
       expect($nonBindable.is('span[ng-non-bindable]')).to.be.ok();
       const $dl = $nonBindable.children();
