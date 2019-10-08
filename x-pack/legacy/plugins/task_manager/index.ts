@@ -12,7 +12,13 @@ import mappings from './mappings.json';
 import { migrations } from './migrations';
 
 export { PluginSetupContract as TaskManager };
-export { TaskInstance, ConcreteTaskInstance, TaskRunCreatorFunction, RunContext } from './task';
+export {
+  TaskInstance,
+  ConcreteTaskInstance,
+  TaskRunCreatorFunction,
+  TaskStatus,
+  RunContext,
+} from './task';
 
 export function taskManager(kibana: any) {
   return new kibana.Plugin({
