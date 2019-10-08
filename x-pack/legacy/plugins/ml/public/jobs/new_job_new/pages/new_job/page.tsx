@@ -8,6 +8,7 @@ import React, { FC, useEffect, Fragment } from 'react';
 
 import { EuiPage, EuiPageBody, EuiPageContentBody } from '@elastic/eui';
 import { Wizard } from './wizard';
+import { WIZARD_STEPS } from '../components/step_types';
 import {
   jobCreatorFactory,
   isSingleMetricJobCreator,
@@ -50,17 +51,22 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
 
-  let skipTimeRangeStep = false;
+  let firstWizardStep =
+    jobType === JOB_TYPE.ADVANCED
+      ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
+      : WIZARD_STEPS.TIME_RANGE;
 
   if (mlJobService.tempJobCloningObjects.job !== undefined) {
+    // cloning a job
     const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
     const { job, datafeed } = expandCombinedJobConfig(clonedJob);
     jobCreator.cloneFromExistingJob(job, datafeed);
 
-    skipTimeRangeStep = mlJobService.tempJobCloningObjects.skipTimeRangeStep;
     // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
-    if (skipTimeRangeStep === false) {
+    if (mlJobService.tempJobCloningObjects.skipTimeRangeStep === false) {
       jobCreator.jobId = '';
+    } else if (jobType !== JOB_TYPE.ADVANCED) {
+      firstWizardStep = WIZARD_STEPS.PICK_FIELDS;
     }
 
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
@@ -79,6 +85,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       mlJobService.tempJobCloningObjects.end = undefined;
     }
   } else {
+    // creating a new job
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
     if (isPopulationJobCreator(jobCreator) === true) {
@@ -132,7 +139,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
               chartInterval={chartInterval}
               jobValidator={jobValidator}
               existingJobsAndGroups={existingJobsAndGroups}
-              skipTimeRangeStep={skipTimeRangeStep}
+              firstWizardStep={firstWizardStep}
             />
           </EuiPageContentBody>
         </EuiPageBody>

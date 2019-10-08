@@ -116,7 +116,7 @@ export const WizardSteps: FC<Props> = ({
   ];
 
   if (jobType === JOB_TYPE.ADVANCED) {
-    stepsConfig.splice(1, 0, {
+    stepsConfig.splice(0, 1, {
       title: i18n.translate('xpack.ml.newJob.wizard.step.configureDatafeedTitle', {
         defaultMessage: 'Configure datafeed',
       }),

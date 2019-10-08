@@ -27,7 +27,7 @@ interface Props {
   chartInterval: TimeBuckets;
   jobValidator: JobValidator;
   existingJobsAndGroups: ExistingJobsAndGroups;
-  skipTimeRangeStep: boolean;
+  firstWizardStep: WIZARD_STEPS;
 }
 
 export const Wizard: FC<Props> = ({
@@ -37,7 +37,7 @@ export const Wizard: FC<Props> = ({
   chartInterval,
   jobValidator,
   existingJobsAndGroups,
-  skipTimeRangeStep = false,
+  firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
@@ -86,9 +86,7 @@ export const Wizard: FC<Props> = ({
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
 
-    if (skipTimeRangeStep) {
-      setCurrentStep(WIZARD_STEPS.PICK_FIELDS);
-    }
+    setCurrentStep(firstWizardStep);
   }, []);
 
   // disable the step links if the job is running

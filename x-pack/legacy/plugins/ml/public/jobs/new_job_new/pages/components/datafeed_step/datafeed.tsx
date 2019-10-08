@@ -17,9 +17,7 @@ import { JobCreatorContext } from '../job_creator_context';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 
 export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
   const [validQuery, setValidQuery] = useState(false);
 
@@ -49,7 +47,7 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
             </EuiFlexItem>
           </EuiFlexGroup>
           <WizardNav
-            previous={() => setCurrentStep(WIZARD_STEPS.TIME_RANGE)}
+            // previous={() => setCurrentStep(WIZARD_STEPS.TIME_RANGE)}
             next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)}
             nextActive={nextActive}
           >

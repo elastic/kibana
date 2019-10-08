@@ -67,11 +67,11 @@ export class JobValidator {
     this._existingJobsAndGroups = existingJobsAndGroups;
   }
 
-  public validate(callback: () => void) {
+  public validate(callback: () => void, forceValidate: boolean = false) {
     this._validating = true;
     const formattedJobConfig = this._jobCreator.formattedJobJson;
     // only validate if the config has changed
-    if (formattedJobConfig !== this._lastJobConfig) {
+    if (forceValidate || formattedJobConfig !== this._lastJobConfig) {
       if (this._validateTimeout !== null) {
         // clear any previous on going validation timeouts
         clearTimeout(this._validateTimeout);

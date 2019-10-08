@@ -22,21 +22,22 @@ import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import { JOB_TYPE } from '../../../common/job_creator/util/constants';
 import { isSingleMetricJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './job_details';
 import { DetectorChart } from './detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
-import { convertToAdvancedJob, resetJob } from '../../../common/job_creator/util/general';
+import {
+  convertToAdvancedJob,
+  resetJob,
+  advancedStartDatafeed,
+} from '../../../common/job_creator/util/general';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const {
-    jobCreator,
-    jobCreatorUpdate,
-    jobValidator,
-    jobValidatorUpdated,
-    resultsLoader,
-  } = useContext(JobCreatorContext);
+  const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
+    JobCreatorContext
+  );
   const [progress, setProgress] = useState(resultsLoader.progress);
   const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
@@ -47,10 +48,36 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }, []);
 
   async function start() {
+    if (jobCreator.type === JOB_TYPE.ADVANCED) {
+      await startAdvanced();
+    } else {
+      await startInline();
+    }
+  }
+
+  async function startInline() {
     setCreatingJob(true);
     try {
       const jr = await jobCreator.createAndStartJob();
       setJobRunner(jr);
+    } catch (error) {
+      // catch and display all job creation errors
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
+          defaultMessage: `Job creation error`,
+        }),
+        text: error.message,
+      });
+      setCreatingJob(false);
+    }
+  }
+
+  async function startAdvanced() {
+    setCreatingJob(true);
+    try {
+      await jobCreator.createJob();
+      await jobCreator.createDatafeed();
+      advancedStartDatafeed(jobCreator);
     } catch (error) {
       // catch and display all job creation errors
       toastNotifications.addDanger({
@@ -129,14 +156,16 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                     datafeedEditorMode={EDITOR_MODE.READONLY}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={convertToAdvanced}>
-                    <FormattedMessage
-                      id="xpack.ml.newJob.wizard.summaryStep.convertToAdvancedButton"
-                      defaultMessage="Convert to advanced job"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                {jobCreator.type !== JOB_TYPE.ADVANCED && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty onClick={convertToAdvanced}>
+                      <FormattedMessage
+                        id="xpack.ml.newJob.wizard.summaryStep.convertToAdvancedButton"
+                        defaultMessage="Convert to advanced job"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
               </Fragment>
             )}
             {progress > 0 && (

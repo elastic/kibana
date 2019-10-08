@@ -165,7 +165,7 @@ export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = null;
-  stashCombinedJob(jobCreator, false, true, false);
+  stashCombinedJob(jobCreator, true, false, false);
 
   let jobType = JOB_TYPE.SINGLE_METRIC;
   if (isMultiMetricJobCreator(jobCreator)) {
@@ -182,4 +182,9 @@ export function resetJob(jobCreator: JobCreatorType) {
   stashCombinedJob(jobCreator, true, false, true);
 
   window.location.href = '#/jobs/new_job';
+}
+
+export function advancedStartDatafeed(jobCreator: JobCreatorType) {
+  stashCombinedJob(jobCreator, false, true, false);
+  window.location.href = '#/jobs';
 }
