@@ -103,7 +103,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
               'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
               {
                 defaultMessage:
-                  'View {occurrencesCount} occurrences in Discover',
+                  'View {occurrencesCount} {occurrencesCount, plural, one {occurence} other {occurences}} in Discover.',
                 values: { occurrencesCount }
               }
             )}
