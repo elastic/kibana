@@ -10,7 +10,6 @@ import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { Legacy } from 'kibana';
 import { JsonObject } from '../../../../common/typed_json';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
-import { InfraMetricModel } from '../metrics/adapter_types';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
@@ -23,7 +22,7 @@ export interface InfraServerPluginDeps {
 }
 
 /* eslint-disable  @typescript-eslint/unified-signatures */
-export interface InfraBackendFrameworkAdapter<R> {
+export interface InfraBackendFrameworkAdapter<R = unknown> {
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   registerRoute<RouteRequest extends InfraWrappableRequest, RouteResponse extends InfraResponse>(
     route: R
@@ -67,13 +66,13 @@ export interface InfraBackendFrameworkAdapter<R> {
   // NP_TODO: using Promise<unknown> here until new platform callAsCurrentUser can return types
   // callWithRequest(req: KibanaRequest, method: string, options?: object): Promise<unknown>;
 
-  getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
-  getSpaceId(request: InfraFrameworkRequest<any>): string;
+  getIndexPatternsService(req: KibanaRequest): Legacy.IndexPatternsService;
+  getSpaceId(request: KibanaRequest): string;
   makeTSVBRequest(
-    req: InfraFrameworkRequest,
+    req: KibanaRequest,
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
-    filters: Array<JsonObject>
+    filters: JsonObject[]
   ): Promise<InfraTSVBResponse>;
 }
 /* eslint-enable  @typescript-eslint/unified-signatures */
@@ -105,7 +104,7 @@ export interface InfraFrameworkRouteOptions<
   RouteResponse extends InfraResponse
 > {
   path: string;
-  method: string | Array<string>;
+  method: string | string[];
   vhost?: string;
   handler: InfraFrameworkRouteHandler<RouteRequest, RouteResponse>;
   options?: Pick<RouteOptions, Exclude<keyof RouteOptions, 'handler'>>;
@@ -135,12 +134,12 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
       value: number;
       relation: string;
     };
-    hits: Array<Hit>;
+    hits: Hit[];
   };
 }
 
 export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends InfraDatabaseResponse {
-  responses: InfraDatabaseSearchResponse<Hit, Aggregation>[];
+  responses: Array<InfraDatabaseSearchResponse<Hit, Aggregation>>;
 }
 
 export interface InfraDatabaseFieldCapsResponse extends InfraDatabaseResponse {
@@ -158,7 +157,7 @@ export interface InfraDatabaseGetIndicesResponse {
 export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 
 export interface SortedSearchHit extends SearchHit {
-  sort: Array<any>;
+  sort: any[];
   _source: {
     [field: string]: any;
   };
@@ -172,7 +171,7 @@ export type InfraDateRangeAggregationBucket<NestedAggregation extends object = {
 } & NestedAggregation;
 
 export interface InfraDateRangeAggregationResponse<NestedAggregation extends object = {}> {
-  buckets: InfraDateRangeAggregationBucket<NestedAggregation>[];
+  buckets: Array<InfraDateRangeAggregationBucket<NestedAggregation>>;
 }
 
 export interface InfraTopHitsAggregationResponse {
@@ -186,7 +185,7 @@ export interface InfraMetadataAggregationBucket {
 }
 
 export interface InfraMetadataAggregationResponse {
-  buckets: Array<InfraMetadataAggregationBucket>;
+  buckets: InfraMetadataAggregationBucket[];
 }
 
 export interface InfraFieldsResponse {
@@ -209,13 +208,13 @@ export interface InfraTSVBResponse {
 
 export interface InfraTSVBPanel {
   id: string;
-  series: Array<InfraTSVBSeries>;
+  series: InfraTSVBSeries[];
 }
 
 export interface InfraTSVBSeries {
   id: string;
   label: string;
-  data: Array<InfraTSVBDataPoint>;
+  data: InfraTSVBDataPoint[];
 }
 
 export type InfraTSVBDataPoint = [number, number];

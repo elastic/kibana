@@ -15,6 +15,7 @@ import zip from 'lodash/fp/zip';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
+import { KibanaRequest } from 'src/core/server';
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
@@ -212,7 +213,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 
   private async getLogEntryDocumentsBetween(
-    request: InfraFrameworkRequest,
+    request: KibanaRequest,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     start: number,

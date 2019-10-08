@@ -73,9 +73,24 @@ export class InfraKibanaBackendFrameworkAdapter
     const body = schema.object({
       operationName: schema.string(),
       query: schema.string(),
-      variables: schema.object({
-        sourceId: schema.string(),
-      }),
+      // NP_TODO: we short circuit validation here, need to understand the best way forward
+      // whether it's using io-ts and skipping ALL config-schema validation or figuring out
+      // why the nested maybe stuff inside variables didn't work well here
+      variables: schema.object(
+        {
+          // sourceId: schema.string(),
+          // countBefore: schema.maybe(schema.number()),
+          // countAfter: schema.maybe(schema.number()),
+          // filterQuery: schema.maybe(schema.string()),
+          // timeKey: schema.maybe(
+          //   schema.object({
+          //     time: schema.maybe(schema.number()),
+          //     tiebreaker: schema.maybe(schema.number()),
+          //   })
+          // ),
+        },
+        { allowUnknowns: true }
+      ),
     });
     type Body = TypeOf<typeof body>;
 
@@ -99,7 +114,7 @@ export class InfraKibanaBackendFrameworkAdapter
         const gqlResponse = await runHttpQuery([request], {
           method: request.route.method.toUpperCase(),
           options: (req: Legacy.Request) => ({
-            context: { req: wrapRequest(req) },
+            context: { req },
             schema: gqlSchema,
           }),
           query,
@@ -112,7 +127,9 @@ export class InfraKibanaBackendFrameworkAdapter
           },
         });
       } catch (error) {
-        return response.badRequest({ body: error });
+        return response.internalError({
+          body: { ...error, temporary: 'this is just a temporary error catch' },
+        });
         // NP_TODO handle errors! (see below for previously handled error cases)
       }
 
@@ -195,7 +212,7 @@ export class InfraKibanaBackendFrameworkAdapter
     request: KibanaRequest | Legacy.Request,
     endpoint: string,
     params: CallWithRequestParams,
-    ...rest: Array<any>
+    ...rest: any[]
   ) {
     const client = (await this.core.elasticsearch.dataClient$.pipe(first()).toPromise()).asScoped(
       request
@@ -236,19 +253,24 @@ export class InfraKibanaBackendFrameworkAdapter
       {
         ...params,
         ...frozenIndicesParams,
+        // NP_TODO not sure how to use config auth automatically??
+        headers: {
+          Authorization: 'Basic ZWxhc3RpYzpjaGFuZ2VtZQ==', // 8.0 shared 'Basic YWRtaW46dkw0MVpiREpoNWtuUUE=',
+        },
       },
-      ...rest
+      // NP_TODO: not sure we need this?
+      {
+        wrap401Errors: true,
+      }
     );
     return fields as Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
   }
 
-  public getIndexPatternsService(
-    request: InfraFrameworkRequest<Legacy.Request>
-  ): Legacy.IndexPatternsService {
+  public getIndexPatternsService(request: KibanaRequest): Legacy.IndexPatternsService {
     return this.plugins.indexPatterns.indexPatternsServiceFactory({
-      callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
+      callCluster: async (method: string, args: [GenericParams], ...rest: Array<any>) => {
         const fieldCaps = await this.callWithRequest(
-          request[internalInfraFrameworkRequest],
+          request,
           method,
           { ...args, allowNoIndices: true } as GenericParams,
           ...rest
@@ -258,63 +280,60 @@ export class InfraKibanaBackendFrameworkAdapter
     });
   }
 
-  public getSpaceId(request: InfraFrameworkRequest): string {
+  public getSpaceId(request: KibanaRequest): string {
     const spacesPlugin = this.plugins.spaces;
 
     if (spacesPlugin && typeof spacesPlugin.getSpaceId === 'function') {
-      return spacesPlugin.getSpaceId(request[internalInfraFrameworkRequest]);
+      return spacesPlugin.getSpaceId(request);
     } else {
       return 'default';
     }
   }
 
+  // NP_TODO: this function still needs NP migration for the metrics plugin
+  // and for the getBasePath
   public async makeTSVBRequest(
-    req: InfraFrameworkRequest<Legacy.Request>,
+    request: KibanaRequest,
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
-    filters: any[]
+    filters: Array<any>
   ) {
-    const internalRequest = req[internalInfraFrameworkRequest];
-    const server = internalRequest.server;
+    const server = request.server;
     const getVisData = get(server, 'plugins.metrics.getVisData');
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');
     }
 
     // getBasePath returns randomized base path AND spaces path
-    const basePath = internalRequest.getBasePath();
+    const basePath = request.getBasePath();
     const url = `${basePath}/api/metrics/vis/data`;
 
     // For the following request we need a copy of the instnace of the internal request
     // but modified for our TSVB request. This will ensure all the instance methods
     // are available along with our overriden values
-    const request = Object.assign(
-      Object.create(Object.getPrototypeOf(internalRequest)),
-      internalRequest,
-      {
-        url,
-        method: 'POST',
-        payload: {
-          timerange,
-          panels: [model],
-          filters,
-        },
-      }
-    );
-    const result = await getVisData(request);
+    const requestCopy = Object.assign(Object.create(Object.getPrototypeOf(request)), request, {
+      url,
+      method: 'POST',
+      payload: {
+        timerange,
+        panels: [model],
+        filters,
+      },
+    });
+    const result = await getVisData(requestCopy);
     return result as InfraTSVBResponse;
   }
 }
 
-export function wrapRequest<InternalRequest extends InfraWrappableRequest>(
-  req: InternalRequest
-): InfraFrameworkRequest<InternalRequest> {
-  const { params, payload, query } = req;
+// export function wrapRequest<InternalRequest extends InfraWrappableRequest>(
+//   req: InternalRequest
+// ): InfraFrameworkRequest<InternalRequest> {
+//   const { params, payload, query } = req;
 
-  return {
-    [internalInfraFrameworkRequest]: req,
-    params,
-    payload,
-    query,
-  };
-}
+//   return {
+//     [internalInfraFrameworkRequest]: req,
+//     params,
+//     payload,
+//     query,
+//   };
+// }
