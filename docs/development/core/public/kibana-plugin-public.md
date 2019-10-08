@@ -70,7 +70,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [SavedObject](./kibana-plugin-public.savedobject.md) |  |
-|  [SavedObjectAttributes](./kibana-plugin-public.savedobjectattributes.md) | The data for a Saved Object is stored in the <code>attributes</code> key as either an object or an array of objects. |
+|  [SavedObjectAttributes](./kibana-plugin-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [SavedObjectReference](./kibana-plugin-public.savedobjectreference.md) | A reference to another saved object. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-public.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBatchResponse](./kibana-plugin-public.savedobjectsbatchresponse.md) |  |
@@ -91,18 +91,21 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |
+|  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
+|  [HandlerFunction](./kibana-plugin-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-public.icontextcontainer.md) |
+|  [HandlerParameters](./kibana-plugin-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-public.handlercontexttype.md)<!-- -->. |
 |  [HttpBody](./kibana-plugin-public.httpbody.md) |  |
 |  [HttpHandler](./kibana-plugin-public.httphandler.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
-|  [IContextHandler](./kibana-plugin-public.icontexthandler.md) | A function registered by a plugin to perform some action. |
 |  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [OverlayBannerMount](./kibana-plugin-public.overlaybannermount.md) | A function that will mount the banner inside the provided element. |
 |  [OverlayBannerUnmount](./kibana-plugin-public.overlaybannerunmount.md) | A function that will unmount the banner from the element. |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-public.pluginopaqueid.md) |  |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
-|  [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) |  |
+|  [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
+|  [SavedObjectAttributeSingle](./kibana-plugin-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) |
 |  [SavedObjectsClientContract](./kibana-plugin-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |
 |  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |

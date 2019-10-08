@@ -5,8 +5,8 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
+import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Filter } from '@kbn/es-query';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'src/core/public';
 import { Query } from 'src/plugins/data/common';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
@@ -281,7 +281,7 @@ export interface VisualizationSuggestion<T = unknown> {
   /**
    * An EUI icon type shown instead of the preview expression.
    */
-  previewIcon: string;
+  previewIcon: IconType;
 }
 
 export interface FramePublicAPI {
@@ -301,7 +301,8 @@ export interface FramePublicAPI {
 
 export interface VisualizationType {
   id: string;
-  icon?: EuiIconType | string;
+  icon?: IconType;
+  largeIcon?: IconType;
   label: string;
 }
 
@@ -313,7 +314,7 @@ export interface Visualization<T = unknown, P = unknown> {
   getDescription: (
     state: T
   ) => {
-    icon?: EuiIconType | string;
+    icon?: IconType;
     label: string;
   };
 

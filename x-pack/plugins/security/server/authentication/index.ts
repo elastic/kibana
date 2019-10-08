@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  ClusterClient,
+  IClusterClient,
   CoreSetup,
   KibanaRequest,
   LoggerFactory,
@@ -25,7 +25,7 @@ export { CreateAPIKeyResult } from './api_keys';
 
 interface SetupAuthenticationParams {
   core: CoreSetup;
-  clusterClient: PublicMethodsOf<ClusterClient>;
+  clusterClient: IClusterClient;
   config: ConfigType;
   loggers: LoggerFactory;
   getLegacyAPI(): LegacyAPI;
