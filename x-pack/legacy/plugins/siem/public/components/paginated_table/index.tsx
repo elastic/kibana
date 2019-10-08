@@ -100,15 +100,17 @@ export interface BasicTableProps<T> {
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
 }
+type Func<T> = (arg: T) => string | number;
 
-export interface Columns<T> {
+export interface Columns<T, U = T> {
+  align?: string;
   field?: string;
-  name: string | React.ReactNode;
-  isMobileHeader?: boolean;
-  sortable?: boolean;
-  truncateText?: boolean;
   hideForMobile?: boolean;
-  render?: (item: T) => void;
+  isMobileHeader?: boolean;
+  name: string | React.ReactNode;
+  render?: (item: T, node: U) => React.ReactNode;
+  sortable?: boolean | Func<T>;
+  truncateText?: boolean;
   width?: string;
 }
 
@@ -218,7 +220,7 @@ export const PaginatedTable = memo<SiemTables>(
 
     return (
       <Panel
-        data-test-subj={`${dataTestSubj}-${loading}`}
+        data-test-subj={`${dataTestSubj}-loading-${loading}`}
         loading={loading}
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}

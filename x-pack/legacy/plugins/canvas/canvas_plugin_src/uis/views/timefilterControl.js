@@ -3,25 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ViewStrings } from '../../strings';
+
+const { Timefilter: strings } = ViewStrings;
 
 export const timefilterControl = () => ({
   name: 'timefilterControl',
-  displayName: 'Time filter',
+  displayName: strings.getDisplayName(),
   modelArgs: [],
   args: [
     {
       name: 'column',
-      displayName: 'Column',
-      help: 'Column to which selected time is applied',
+      displayName: strings.getColumnDisplayName(),
+      help: strings.getColumnHelp(),
       argType: 'string',
       options: {
-        confirm: 'Set',
+        confirm: strings.getColumnConfirm(),
       },
     },
     {
       name: 'filterGroup',
-      displayName: 'Filter group name',
-      help: "Apply the selected group name to an element's filters function to target this filter",
+      displayName: strings.getFilterGroupDisplayName(),
+      help: strings.getFilterGroupHelp(),
       argType: 'filterGroup',
     },
   ],

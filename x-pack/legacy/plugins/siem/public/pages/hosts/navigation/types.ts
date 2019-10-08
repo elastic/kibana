@@ -12,6 +12,7 @@ import { InspectQuery, Refetch } from '../../../store/inputs/model';
 
 import { HostsTableType } from '../../../store/hosts/model';
 import { NavTab } from '../../../components/navigation/types';
+import { UpdateDateRange } from '../../../components/charts/common';
 
 export type KeyHostsNavTabWithoutMlPermission = HostsTableType.hosts &
   HostsTableType.authentications &
@@ -53,6 +54,7 @@ export type HostsComponentsQueryProps = QueryTabBodyProps & {
     loading: boolean;
     refetch: Refetch;
   }) => void;
+  updateDateRange?: UpdateDateRange;
   narrowDateRange?: NarrowDateRange;
 };
 

@@ -25,7 +25,7 @@ import {
 import { ErrorCountBadge } from './ErrorCountBadge';
 import { isRumAgentName } from '../../../../../common/agent_name';
 import { fontSize } from '../../../../style/variables';
-import { PercentOfTrace } from './PercentOfTrace';
+import { PercentOfParent } from './PercentOfParent';
 
 interface Props {
   transaction: Transaction;
@@ -96,7 +96,13 @@ export function StickyTransactionProperties({
           defaultMessage: '% of trace'
         }
       ),
-      val: <PercentOfTrace duration={duration} totalDuration={totalDuration} />,
+      val: (
+        <PercentOfParent
+          duration={duration}
+          totalDuration={totalDuration}
+          parentType="trace"
+        />
+      ),
       width: '25%'
     },
     {

@@ -15,6 +15,8 @@ import { isEqual } from 'lodash';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { EuiSideNavItem, MainRouteParams } from '../../common/types';
 import { SymbolWithMembers } from '../../actions/structure';
+import { trackCodeUiMetric, METRIC_TYPE } from '../../services/ui_metric';
+import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   structureTree: SymbolWithMembers[];
@@ -32,8 +34,17 @@ interface ActiveSymbol {
 export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: ActiveSymbol }> {
   public state: { activeSymbol?: ActiveSymbol } = {};
 
+  public componentDidUpdate(prevProps: Props) {
+    if (this.props.uri && prevProps.uri !== this.props.uri && this.props.structureTree.length > 0) {
+      // track lsp data available  page view count
+      trackCodeUiMetric(METRIC_TYPE.COUNT, CodeUIUsageMetrics.LSP_DATA_AVAILABLE_PAGE_VIEW_COUNT);
+    }
+  }
+
   public getClickHandler = (symbol: ActiveSymbol) => () => {
     this.setState({ activeSymbol: symbol });
+    // track structure tree click count
+    trackCodeUiMetric(METRIC_TYPE.COUNT, CodeUIUsageMetrics.STRUCTURE_TREE_CLICK_COUNT);
   };
 
   public getStructureTreeItemRenderer = (

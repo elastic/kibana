@@ -12,6 +12,7 @@ import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_pl
 import { MetricConfig } from './types';
 import { LensMultiTable } from '../types';
 import { AutoScale } from './auto_scale';
+import { VisualizationContainer } from '../visualization_container';
 
 export interface MetricChartProps {
   data: LensMultiTable;
@@ -105,17 +106,7 @@ export function MetricChart({
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        maxWidth: '100%',
-        maxHeight: '100%',
-        textAlign: 'center',
-      }}
-    >
+    <VisualizationContainer reportTitle={title} className="lnsMetricExpression__container">
       <AutoScale>
         <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
           {value}
@@ -126,6 +117,6 @@ export function MetricChart({
           </div>
         )}
       </AutoScale>
-    </div>
+    </VisualizationContainer>
   );
 }

@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup } from './plugin';
+import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -28,6 +28,7 @@ export function plugin() {
 
 /** @public types */
 export type DataSetup = DataSetup;
+export type DataStart = DataStart;
 
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
@@ -46,6 +47,8 @@ export {
   FilterManager,
   FilterStateManager,
   uniqFilters,
+  extractTimeFilter,
+  changeTimeFilter,
   onlyDisabledFiltersChanged,
 } from './filter/filter_manager';
 export {
@@ -65,3 +68,5 @@ export {
   mockFields,
   mockIndexPattern,
 } from './index_patterns';
+
+export { TimeHistoryContract, TimefilterContract, getTime, InputTimeRange } from './timefilter';

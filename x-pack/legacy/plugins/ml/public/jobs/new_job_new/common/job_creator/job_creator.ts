@@ -13,7 +13,7 @@ import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
-import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
+import { JOB_TYPE, CREATED_BY_LABEL, SHARED_RESULTS_INDEX_NAME } from './util/constants';
 import { isSparseDataJob } from './util/general';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 
@@ -440,6 +440,13 @@ export class JobCreator {
 
     if (this._job_config.analysis_config.influencers !== undefined) {
       this._job_config.analysis_config.influencers.forEach(i => this.addInfluencer(i));
+    }
+
+    if (
+      this._job_config.results_index_name !== undefined &&
+      this._job_config.results_index_name !== SHARED_RESULTS_INDEX_NAME
+    ) {
+      this.useDedicatedIndex = true;
     }
     this._sparseData = isSparseDataJob(job, datafeed);
   }

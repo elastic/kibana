@@ -16,13 +16,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Class | Description |
 |  --- | --- |
-|  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>). |
+|  [BasePath](./kibana-plugin-server.basepath.md) | Access or manipulate the Kibana base path |
+|  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
 |  [ElasticsearchErrorHelpers](./kibana-plugin-server.elasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md) |  |
-|  [SavedObjectsSchema](./kibana-plugin-server.savedobjectsschema.md) |  |
-|  [SavedObjectsSerializer](./kibana-plugin-server.savedobjectsserializer.md) |  |
-|  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API |
+|  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->. |
 
 ## Enumerations
 
@@ -34,6 +33,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Interface | Description |
 |  --- | --- |
+|  [APICaller](./kibana-plugin-server.apicaller.md) |  |
+|  [AssistanceAPIResponse](./kibana-plugin-server.assistanceapiresponse.md) |  |
+|  [AssistantAPIClientParams](./kibana-plugin-server.assistantapiclientparams.md) |  |
 |  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of an incoming request authentication. |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
@@ -41,6 +43,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [CustomHttpResponseOptions](./kibana-plugin-server.customhttpresponseoptions.md) | HTTP response parameters for a response with adjustable status code. |
+|  [DeprecationAPIClientParams](./kibana-plugin-server.deprecationapiclientparams.md) |  |
+|  [DeprecationAPIResponse](./kibana-plugin-server.deprecationapiresponse.md) |  |
+|  [DeprecationInfo](./kibana-plugin-server.deprecationinfo.md) |  |
 |  [DiscoveredPlugin](./kibana-plugin-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchError](./kibana-plugin-server.elasticsearcherror.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
@@ -51,7 +56,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [IContextContainer](./kibana-plugin-server.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [IKibanaSocket](./kibana-plugin-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
-|  [InternalCoreStart](./kibana-plugin-server.internalcorestart.md) |  |
+|  [IndexSettingsDeprecationInfo](./kibana-plugin-server.indexsettingsdeprecationinfo.md) |  |
 |  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
 |  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) |  |
@@ -95,7 +100,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsMigrationVersion](./kibana-plugin-server.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsRawDoc](./kibana-plugin-server.savedobjectsrawdoc.md) | A raw document as represented directly in the saved object index. |
 |  [SavedObjectsResolveImportErrorsOptions](./kibana-plugin-server.savedobjectsresolveimporterrorsoptions.md) | Options to control the "resolve import" operation. |
-|  [SavedObjectsService](./kibana-plugin-server.savedobjectsservice.md) |  |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-server.savedobjectsupdateresponse.md) |  |
 |  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
@@ -112,22 +116,28 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [APICaller](./kibana-plugin-server.apicaller.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) |  |
 |  [AuthHeaders](./kibana-plugin-server.authheaders.md) | Auth Headers map |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-server.getauthstate.md) | Get authentication state for a request. Returned by <code>auth</code> interceptor. |
+|  [HandlerContextType](./kibana-plugin-server.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-server.handlerfunction.md) to represent the type of the context. |
+|  [HandlerFunction](./kibana-plugin-server.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-server.icontextcontainer.md) |
+|  [HandlerParameters](./kibana-plugin-server.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-server.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-server.handlercontexttype.md)<!-- -->. |
 |  [Headers](./kibana-plugin-server.headers.md) | Http request headers to read. |
 |  [HttpResponsePayload](./kibana-plugin-server.httpresponsepayload.md) | Data send to the client as a response payload. |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
-|  [IContextHandler](./kibana-plugin-server.icontexthandler.md) | A function registered by a plugin to perform some action. |
+|  [IBasePath](./kibana-plugin-server.ibasepath.md) | Access or manipulate the Kibana base path[BasePath](./kibana-plugin-server.basepath.md) |
+|  [IClusterClient](./kibana-plugin-server.iclusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
 |  [IContextProvider](./kibana-plugin-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Return authentication status for a request. |
+|  [IScopedClusterClient](./kibana-plugin-server.iscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->. |
 |  [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client. |
 |  [KnownHeaders](./kibana-plugin-server.knownheaders.md) | Set of well-known HTTP headers. |
 |  [LifecycleResponseFactory](./kibana-plugin-server.lifecycleresponsefactory.md) | Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client. |
+|  [MIGRATION\_ASSISTANCE\_INDEX\_ACTION](./kibana-plugin-server.migration_assistance_index_action.md) |  |
+|  [MIGRATION\_DEPRECATION\_LEVEL](./kibana-plugin-server.migration_deprecation_level.md) |  |
 |  [OnPostAuthHandler](./kibana-plugin-server.onpostauthhandler.md) |  |
 |  [OnPreAuthHandler](./kibana-plugin-server.onpreauthhandler.md) |  |
 |  [PluginInitializer](./kibana-plugin-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
@@ -138,8 +148,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RequestHandler](./kibana-plugin-server.requesthandler.md) | A function executed when route path matched requested resource path. Request handler is expected to return a result of one of [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) functions. |
 |  [RequestHandlerContextContainer](./kibana-plugin-server.requesthandlercontextcontainer.md) | An object that handles registration of http request context providers. |
 |  [RequestHandlerContextProvider](./kibana-plugin-server.requesthandlercontextprovider.md) | Context provider for request handler. Extends request context object with provided functionality or data. |
-|  [RequestHandlerParams](./kibana-plugin-server.requesthandlerparams.md) | Parameters passed to the request handler function. |
-|  [RequestHandlerReturn](./kibana-plugin-server.requesthandlerreturn.md) | Expected outcome the request handler function. |
 |  [ResponseError](./kibana-plugin-server.responseerror.md) | Error message and optional data send to the client in case of error. |
 |  [ResponseErrorAttributes](./kibana-plugin-server.responseerrorattributes.md) | Additional data to provide error details. |
 |  [ResponseHeaders](./kibana-plugin-server.responseheaders.md) | Http response headers to set. |

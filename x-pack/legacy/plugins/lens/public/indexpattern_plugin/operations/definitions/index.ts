@@ -11,6 +11,7 @@ import {
   HttpServiceBase,
 } from 'src/core/public';
 import { termsOperation } from './terms';
+import { cardinalityOperation } from './cardinality';
 import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 import { dateHistogramOperation } from './date_histogram';
 import { countOperation } from './count';
@@ -28,6 +29,7 @@ const internalOperationDefinitions = [
   minOperation,
   maxOperation,
   averageOperation,
+  cardinalityOperation,
   sumOperation,
   countOperation,
   filterRatioOperation,

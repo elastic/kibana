@@ -8,7 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldSearch } from '@elastic/eui';
 import { debounce } from 'lodash';
+import { ComponentStrings } from '../../../i18n';
 
+const { WorkpadSearch: strings } = ComponentStrings;
 export class WorkpadSearch extends React.PureComponent {
   static propTypes = {
     onChange: PropTypes.func.isRequired,
@@ -30,7 +32,7 @@ export class WorkpadSearch extends React.PureComponent {
   render() {
     return (
       <EuiFieldSearch
-        placeholder="Find workpad"
+        placeholder={strings.getWorkpadSearchPlaceholder()}
         value={this.state.searchText}
         onChange={this.setSearchText}
         fullWidth

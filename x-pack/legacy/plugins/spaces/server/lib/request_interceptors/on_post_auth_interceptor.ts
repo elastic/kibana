@@ -6,12 +6,12 @@
 import { Logger, CoreSetup } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
-import { addSpaceIdToPath } from '../spaces_url_parser';
 import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 import { LegacyAPI } from '../../new_platform/plugin';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import { addSpaceIdToPath } from '../../../common';
 
 export interface OnPostAuthInterceptorDeps {
   getLegacyAPI(): LegacyAPI;
@@ -28,7 +28,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
   log,
   http,
 }: OnPostAuthInterceptorDeps) {
-  const { serverBasePath, serverDefaultRoute } = getLegacyAPI().legacyConfig;
+  const { serverBasePath } = getLegacyAPI().legacyConfig;
 
   http.registerOnPostAuth(async (request, response, toolkit) => {
     const path = request.url.pathname!;
@@ -38,6 +38,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
     // The root of kibana is also the root of the defaut space,
     // since the default space does not have a URL Identifier (i.e., `/s/foo`).
     const isRequestingKibanaRoot = path === '/' && spaceId === DEFAULT_SPACE_ID;
+    const isRequestingSpaceRoot = path === '/' && spaceId !== DEFAULT_SPACE_ID;
     const isRequestingApplication = path.startsWith('/app');
 
     const spacesClient = await spacesService.scopedClient(request);
@@ -54,7 +55,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
           // No need for an interstitial screen where there is only one possible outcome.
           const space = spaces[0];
 
-          const destination = addSpaceIdToPath(serverBasePath, space.id, serverDefaultRoute);
+          const destination = addSpaceIdToPath(serverBasePath, space.id, ENTER_SPACE_PATH);
           return response.redirected({ headers: { location: destination } });
         }
 
@@ -68,9 +69,13 @@ export function initSpacesOnPostAuthRequestInterceptor({
         const wrappedError = wrapError(error);
         return response.customError({
           body: wrappedError,
+          headers: wrappedError.output.headers,
           statusCode: wrappedError.output.statusCode,
         });
       }
+    } else if (isRequestingSpaceRoot) {
+      const destination = addSpaceIdToPath(serverBasePath, spaceId, ENTER_SPACE_PATH);
+      return response.redirected({ headers: { location: destination } });
     }
 
     // This condition should only happen after selecting a space, or when transitioning from one application to another
@@ -82,14 +87,31 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
         space = await spacesClient.get(spaceId);
       } catch (error) {
-        log.error(
-          `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
-        );
-        // Space doesn't exist, or user not authorized for space, or some other issue retrieving the active space.
-        const result = response.redirected({
-          headers: { location: getSpaceSelectorUrl(serverBasePath) },
-        });
-        return result;
+        const wrappedError = wrapError(error);
+
+        const statusCode = wrappedError.output.statusCode;
+
+        // If user is not authorized, or the space cannot be found, allow them to select another space
+        // by redirecting to the space selector.
+        const shouldRedirectToSpaceSelector = statusCode === 403 || statusCode === 404;
+
+        if (shouldRedirectToSpaceSelector) {
+          log.debug(
+            `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
+          );
+          return response.redirected({
+            headers: {
+              location: getSpaceSelectorUrl(serverBasePath),
+            },
+          });
+        } else {
+          log.error(`Unable to navigate to space "${spaceId}". ${error}`);
+          return response.customError({
+            body: wrappedError,
+            headers: wrappedError.output.headers,
+            statusCode: wrappedError.output.statusCode,
+          });
+        }
       }
 
       // Verify application is available in this space
@@ -109,7 +131,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
           const isAvailableInSpace = enabledFeatures.some(feature => feature.app.includes(appId));
 
           if (!isAvailableInSpace) {
-            log.error(`App ${appId} is not enabled within space "${spaceId}".`);
+            log.debug(`App ${appId} is not enabled within space "${spaceId}".`);
             return response.notFound();
           }
         }

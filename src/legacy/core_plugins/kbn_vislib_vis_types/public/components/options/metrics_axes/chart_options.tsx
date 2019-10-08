@@ -19,7 +19,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
@@ -30,7 +30,7 @@ import { SetParamByIndex, ChangeValueAxis } from './';
 
 export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 
-interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
+export interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
   chart: SeriesParam;
   index: number;
   changeValueAxis: ChangeValueAxis;
@@ -88,6 +88,8 @@ function ChartOptions({
         setValue={setValueAxis}
       />
 
+      <EuiSpacer size="m" />
+
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <SelectOption
@@ -116,15 +118,19 @@ function ChartOptions({
       </EuiFlexGroup>
 
       {chart.type === ChartTypes.AREA && (
-        <SelectOption
-          label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.lineModeLabel', {
-            defaultMessage: 'Line mode',
-          })}
-          options={vis.type.editorConfig.collections.interpolationModes}
-          paramName="interpolate"
-          value={chart.interpolate}
-          setValue={setChart}
-        />
+        <>
+          <EuiSpacer size="m" />
+
+          <SelectOption
+            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.lineModeLabel', {
+              defaultMessage: 'Line mode',
+            })}
+            options={vis.type.editorConfig.collections.interpolationModes}
+            paramName="interpolate"
+            value={chart.interpolate}
+            setValue={setChart}
+          />
+        </>
       )}
 
       {chart.type === ChartTypes.LINE && (

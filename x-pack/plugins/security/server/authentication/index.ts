@@ -5,7 +5,7 @@
  */
 import { UnwrapPromise } from '@kbn/utility-types';
 import {
-  ClusterClient,
+  IClusterClient,
   CoreSetup,
   KibanaRequest,
   LoggerFactory,
@@ -31,7 +31,7 @@ export {
 
 interface SetupAuthenticationParams {
   core: CoreSetup;
-  clusterClient: PublicMethodsOf<ClusterClient>;
+  clusterClient: IClusterClient;
   config: ConfigType;
   loggers: LoggerFactory;
   getLegacyAPI(): LegacyAPI;

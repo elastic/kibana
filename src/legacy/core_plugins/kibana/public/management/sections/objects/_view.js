@@ -28,10 +28,11 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 import { canViewInApp } from './lib/in_app_url';
+
+import { castEsToKbnFieldTypeName } from '../../../../../../../plugins/data/public';
 
 import { getViewBreadcrumbs } from './breadcrumbs';
 

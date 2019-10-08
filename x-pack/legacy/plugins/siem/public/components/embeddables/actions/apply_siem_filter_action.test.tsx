@@ -18,7 +18,7 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
-} from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/embeddables';
+} from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { Filter } from '@kbn/es-query';
 
 // Using type narrowing to remove all the any's -- https://github.com/elastic/kibana/pull/43965/files#r318796100

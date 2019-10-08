@@ -94,6 +94,7 @@ export interface DataFrameAnalyticsListRow {
 export enum DataFrameAnalyticsListColumn {
   configDestIndex = 'config.dest.index',
   configSourceIndex = 'config.source.index',
+  configCreateTime = 'config.create_time',
   // Description attribute is not supported yet by API
   // description = 'config.description',
   id = 'id',

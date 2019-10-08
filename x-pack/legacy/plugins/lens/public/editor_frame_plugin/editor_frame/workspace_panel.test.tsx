@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { buildExistsFilter } from '@kbn/es-query';
 import { ExpressionRendererProps } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Visualization, FramePublicAPI, TableSuggestion } from '../../types';
 import {
@@ -20,6 +21,7 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';
+import { coreMock } from 'src/core/public/mocks';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -59,10 +61,11 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -80,10 +83,11 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -101,10 +105,11 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
-    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(1);
+    expect(instance.find('[data-test-subj="empty-workspace"]')).toHaveLength(2);
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 
@@ -136,6 +141,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
@@ -149,7 +155,9 @@ describe('workspace_panel', () => {
           },
           Object {
             "arguments": Object {
-              "filters": Array [],
+              "filters": Array [
+                "[]",
+              ],
               "query": Array [
                 "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
               ],
@@ -230,6 +238,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
@@ -239,39 +248,39 @@ describe('workspace_panel', () => {
     expect(
       (instance.find(expressionRendererMock).prop('expression') as Ast).chain[2].arguments.tables
     ).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "chain": Array [
-                        Object {
-                          "arguments": Object {},
-                          "function": "datasource",
-                          "type": "function",
-                        },
-                      ],
-                      "type": "expression",
-                    },
-                    Object {
-                      "chain": Array [
-                        Object {
-                          "arguments": Object {},
-                          "function": "datasource2",
-                          "type": "function",
-                        },
-                      ],
-                      "type": "expression",
-                    },
-                    Object {
-                      "chain": Array [
-                        Object {
-                          "arguments": Object {},
-                          "function": "datasource2",
-                          "type": "function",
-                        },
-                      ],
-                      "type": "expression",
-                    },
-                  ]
-            `);
+                                    Array [
+                                      Object {
+                                        "chain": Array [
+                                          Object {
+                                            "arguments": Object {},
+                                            "function": "datasource",
+                                            "type": "function",
+                                          },
+                                        ],
+                                        "type": "expression",
+                                      },
+                                      Object {
+                                        "chain": Array [
+                                          Object {
+                                            "arguments": Object {},
+                                            "function": "datasource2",
+                                            "type": "function",
+                                          },
+                                        ],
+                                        "type": "expression",
+                                      },
+                                      Object {
+                                        "chain": Array [
+                                          Object {
+                                            "arguments": Object {},
+                                            "function": "datasource2",
+                                            "type": "function",
+                                          },
+                                        ],
+                                        "type": "expression",
+                                      },
+                                    ]
+                        `);
   });
 
   it('should run the expression again if the date range changes', async () => {
@@ -307,6 +316,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
       />
     );
 
@@ -318,6 +328,62 @@ describe('workspace_panel', () => {
 
     instance.setProps({
       framePublicAPI: { ...framePublicAPI, dateRange: { fromDate: 'now-90d', toDate: 'now-30d' } },
+    });
+
+    await waitForPromises();
+    instance.update();
+
+    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('should run the expression again if the filters change', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.getLayers.mockReturnValue(['first']);
+
+    mockDatasource.toExpression
+      .mockReturnValueOnce('datasource')
+      .mockReturnValueOnce('datasource second');
+
+    expressionRendererMock = jest.fn(_arg => <span />);
+
+    instance = mount(
+      <InnerWorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
+      />
+    );
+
+    // "wait" for the expression to execute
+    await waitForPromises();
+    instance.update();
+
+    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
+
+    instance.setProps({
+      framePublicAPI: {
+        ...framePublicAPI,
+        filters: [buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
+      },
     });
 
     await waitForPromises();
@@ -355,6 +421,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
         />
       );
 
@@ -394,6 +461,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
         />
       );
 
@@ -438,6 +506,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
         />
       );
 
@@ -485,6 +554,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
         />
       );
 
@@ -542,6 +612,7 @@ describe('workspace_panel', () => {
             visualizationState={{}}
             dispatch={mockDispatch}
             ExpressionRenderer={expressionRendererMock}
+            core={coreMock.createSetup()}
           />
         </ChildDragDropProvider>
       );

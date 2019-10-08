@@ -18,7 +18,7 @@ export type TabId = string;
 type TabSupport = Record<TabId, string | null>;
 
 const tabSupport: TabSupport = {
-  // overview: null,
+  overview: null,
   jobs: 'anomaly_detection',
   settings: 'anomaly_detection',
   data_frames: null,

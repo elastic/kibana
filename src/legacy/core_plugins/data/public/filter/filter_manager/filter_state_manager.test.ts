@@ -35,14 +35,6 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
   return true;
 });
 
-jest.mock('ui/timefilter', () => {
-  return {
-    timefilter: {
-      setTime: jest.fn(),
-    },
-  };
-});
-
 describe('filter_state_manager', () => {
   let appStateStub: StubState;
   let globalStateStub: StubState;
