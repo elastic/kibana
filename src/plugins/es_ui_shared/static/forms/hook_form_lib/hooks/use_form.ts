@@ -132,14 +132,16 @@ export function useForm<T extends object = FormData>(
 
     if (fieldsToValidate.length === 0) {
       // Nothing to validate
-      return true;
+      return { areFieldsValid: true, isFormValid: true };
     }
 
     const formData = getFormData({ unflatten: false });
     await Promise.all(fieldsToValidate.map(field => field.validate({ formData })));
-    updateFormValidity();
 
-    return fieldsToValidate.every(isFieldValid);
+    const isFormValid = updateFormValidity();
+    const areFieldsValid = fieldsToValidate.every(isFieldValid);
+
+    return { areFieldsValid, isFormValid };
   };
 
   const validateAllFields = async (): Promise<boolean> => {
@@ -150,9 +152,9 @@ export function useForm<T extends object = FormData>(
       return isValid!;
     }
 
-    await validateFields(fieldsToValidate.map(field => field.path));
+    const { isFormValid } = await validateFields(fieldsToValidate.map(field => field.path));
 
-    return isValid!;
+    return isFormValid!;
   };
 
   const addField: FormHook<T>['__addField'] = field => {

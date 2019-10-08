@@ -40,7 +40,9 @@ export interface FormHook<T extends object = FormData> {
   readonly __formData$: MutableRefObject<Subject<T>>;
   __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
-  __validateFields: (fieldNames: string[]) => Promise<boolean>;
+  __validateFields: (
+    fieldNames: string[]
+  ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
   __updateFormDataAt: (field: string, value: unknown) => T;
   __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
 }
