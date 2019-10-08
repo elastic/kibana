@@ -12,7 +12,6 @@ import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH } from './app/constants';
 import { renderReact } from './app/app';
-import { AppCore, AppPlugins } from './app/types';
 import { Core, Plugins } from './shim';
 
 import { breadcrumbService, docTitleService } from './app/services/navigation';
@@ -29,6 +28,15 @@ export class Plugin {
   public start(core: Core, plugins: Plugins): void {
     const { http, routing, legacyHttp, chrome, documentation, docTitle } = core;
     const { management, savedSearches: coreSavedSearches, uiMetric } = plugins;
+
+    // AppCore/AppPlugins to be passed on as React context
+    const AppDependencies = {
+      core: { chrome, http, i18n: core.i18n },
+      plugins: {
+        management: { sections: management.sections },
+        savedSearches: coreSavedSearches,
+      },
+    };
 
     // Register management section
     const esSection = management.sections.getSection('elasticsearch');
@@ -101,11 +109,7 @@ export class Plugin {
           unmountReactApp();
           const elem = document.getElementById(REACT_ROOT_ID);
           if (elem) {
-            renderReact(
-              elem,
-              { chrome, http, savedSearches: coreSavedSearches } as AppCore,
-              { management: { sections: management.sections } } as AppPlugins
-            );
+            renderReact(elem, AppDependencies);
           }
         });
       },

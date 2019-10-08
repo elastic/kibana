@@ -30,7 +30,7 @@ interface Props {
 
 export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
   const appDeps = useAppDependencies();
-  const savedSearches = appDeps.core.savedSearches.getClient();
+  const savedSearches = appDeps.plugins.savedSearches.getClient();
 
   const [contextValue, setContextValue] = useState<KibanaContextValue>({ initialized: false });
 

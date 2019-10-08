@@ -9,7 +9,7 @@ import { HashRouter } from 'react-router-dom';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { AuthorizationProvider } from './lib/authorization';
-import { AppDependencies } from './types';
+import { AppDependencies } from '../shim';
 
 let DependenciesContext: React.Context<AppDependencies>;
 

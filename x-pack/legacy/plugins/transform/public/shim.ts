@@ -14,12 +14,25 @@ import { docTitle } from 'ui/doc_title/doc_title';
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
-type npCore = typeof npStart.core;
+export type npCore = typeof npStart.core;
+
+// AppCore/AppPlugins is the set of core features/plugins
+// we pass on via context/hooks to the app and its components.
+export type AppCore = Pick<npCore, 'chrome' | 'http' | 'i18n'>;
 
 export interface AppPlugins {
   management: {
     sections: typeof management;
   };
+  savedSearches: {
+    getClient(): any;
+    setClient(client: any): void;
+  };
+}
+
+export interface AppDependencies {
+  core: AppCore;
+  plugins: AppPlugins;
 }
 
 export interface Core extends npCore {
@@ -46,10 +59,6 @@ export interface Plugins extends AppPlugins {
     constants: {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
     };
-  };
-  savedSearches: {
-    getClient(): any;
-    setClient(client: any): void;
   };
   uiMetric: {
     createUiStatsReporter: typeof createUiStatsReporter;

@@ -14,7 +14,7 @@ import { SectionError } from './components';
 import { CLIENT_BASE_PATH, SECTION_SLUG } from './constants';
 import { getAppProviders } from './app_dependencies';
 import { AuthorizationContext } from './lib/authorization';
-import { AppCore, AppPlugins } from './types';
+import { AppDependencies } from '../shim';
 
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
@@ -54,8 +54,8 @@ export const App: FC = () => {
   );
 };
 
-export const renderReact = (elem: Element, core: AppCore, plugins: AppPlugins) => {
-  const Providers = getAppProviders({ core, plugins });
+export const renderReact = (elem: Element, appDependencies: AppDependencies) => {
+  const Providers = getAppProviders(appDependencies);
 
   render(
     <Providers>
