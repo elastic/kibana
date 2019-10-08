@@ -7,7 +7,7 @@
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { NOT_AVAILABLE_LABEL } from '../../common/i18n';
 
 const HOURS_CUT_OFF = 3600000000; // 1 hour (in microseconds)
@@ -247,50 +247,46 @@ export const getFixedByteFormatter = memoize((max: number) => {
   return bailIfNumberInvalid(formatter);
 });
 
-function twoWithSameFormat(ticks: Date[], format: string) {
+function twoWithSameValue(ticks: Moment[], format: string) {
   return ticks
-    .map(t => moment(t).format(format))
+    .map(t => t.format(format))
     .reduce((acc, val) => ({ same: acc.same || acc.prev === val, prev: val }), {
       same: false
     }).same;
 }
 
-function extracted(max: Date, min: Date, ticks: Date[]) {
-  const momentMax = moment(max);
-  const momentMin = moment(min);
-  const monthChanges = momentMax.diff(momentMin, 'months', true);
-  const yearChanges = momentMax.diff(momentMin, 'years', true);
-  const dayChanges = momentMax.diff(momentMin, 'days', true);
-  const hourChanges = momentMax.diff(momentMin, 'hours', true);
-  const minuteChanges = momentMax.diff(momentMin, 'minutes', true);
-  const secondChanges = momentMax.diff(momentMin, 'seconds', true);
-
-  const twoWithSameYear = twoWithSameFormat(ticks, 'YYYY');
-  const twoWithSameMonth = twoWithSameFormat(ticks, 'YYYY MMM');
-  const twoWithSameDay = twoWithSameFormat(ticks, 'MMM D');
-  const twoWithSameHour = twoWithSameFormat(ticks, 'D H');
-  const twoWithSameMinute = twoWithSameFormat(ticks, 'H m');
-  const twoWithSameSecond = twoWithSameFormat(ticks, 'm s');
-
-  if (secondChanges < 2) return '.SSS';
-  if (twoWithSameSecond) return 's.SSS';
-  if (minuteChanges < 2) return "s''";
-  if (twoWithSameMinute) return "m' s''";
-  if (hourChanges < 2) return "m'";
-  if (twoWithSameHour) return 'HH:mm';
-  if (dayChanges < 2) return 'HH';
-  if (twoWithSameDay) return 'Do HH';
-  if (monthChanges < 2) return 'Do';
-  if (twoWithSameMonth) return 'MMM Do';
-  if (yearChanges < 2) return 'MMM';
-  if (twoWithSameYear) return 'YYYY MMM';
+function chooseDateFormat(ticks: Moment[]) {
+  if (granularityIsOk(ticks, 'seconds')) return '.SSS';
+  if (twoWithSameValue(ticks, 'm s')) return 's.SSS';
+  if (granularityIsOk(ticks, 'minutes')) return "s''";
+  if (twoWithSameValue(ticks, 'HH:mm')) return "m' s''";
+  if (granularityIsOk(ticks, 'hours')) return "m'";
+  if (twoWithSameValue(ticks, 'Do HH')) return 'HH:mm';
+  if (granularityIsOk(ticks, 'days')) return 'HH';
+  if (twoWithSameValue(ticks, 'MMM Do')) return 'Do HH';
+  if (granularityIsOk(ticks, 'months')) return 'Do';
+  if (twoWithSameValue(ticks, 'YYYY MMM')) return 'MMM Do';
+  if (granularityIsOk(ticks, 'years')) return 'MMM';
+  if (twoWithSameValue(ticks, 'YYYY')) return 'YYYY MMM';
   return 'YYYY';
 }
 
-export const timeSerieTickFormatter = (ticks: Date[]) => {
+function granularityIsOk(
+  ticks: Moment[],
+  changes: 'seconds' | 'minutes' | 'hours' | 'days' | 'months' | 'years'
+) {
   const min = ticks[0];
   const max = ticks[ticks.length - 1];
 
-  const format = extracted(max, min, ticks);
+  // if the range is too broad, labels tend to be less readable and we should increase granularity
+  // e.g. Jan Aug Jan can be understood
+  // Jan Aug Jan Aug Jan Aug Jan Aug is too broad and we should specify year too
+  const a = max.diff(min, changes, true);
+
+  return a < 2;
+}
+
+export const timeSerieTickFormatter = (ticks: Date[]) => {
+  const format = chooseDateFormat(ticks.map(x => moment(x)));
   return (d: Date) => moment(d).format(format);
 };
