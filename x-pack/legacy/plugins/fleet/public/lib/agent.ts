@@ -38,11 +38,13 @@ export class AgentsLib {
     perPage: number,
     kuery?: string
   ): Promise<ReturnTypeList<Agent>> => {
+    // ts-ignore
     let ESQuery;
     if (kuery) {
       ESQuery = await this.elasticsearch.convertKueryToEsQuery(kuery);
     }
-    return await this.adapter.getAll(page, perPage, ESQuery);
+    // TODO: add back param to getAll() when endpoint supports query
+    return await this.adapter.getAll(page, perPage);
   };
 
   /** Update a given agent via it's ID */

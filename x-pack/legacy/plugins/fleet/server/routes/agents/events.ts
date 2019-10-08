@@ -43,6 +43,6 @@ export const createGETAgentEventsRoute = (libs: FleetServerLib) => ({
       perPage
     );
 
-    return { list: items, total, success: true, page };
+    return { list: items, total, success: true, page, perPage };
   },
 });

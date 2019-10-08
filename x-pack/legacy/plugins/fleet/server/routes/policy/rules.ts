@@ -52,6 +52,7 @@ export const createGetEnrollmentRulesRoute = (libs: FleetServerLib) => ({
       page: 1,
       total: token.enrollment_rules.length,
       success: true,
+      perPage: 0,
     };
   },
 });
