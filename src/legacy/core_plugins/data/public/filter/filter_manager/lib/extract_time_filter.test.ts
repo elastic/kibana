@@ -17,41 +17,42 @@
  * under the License.
  */
 
-import { Filter, buildRangeFilter, buildQueryFilter } from '@kbn/es-query';
+import { Filter, buildRangeFilter, buildQueryFilter, buildPhraseFilter } from '@kbn/es-query';
 import { extractTimeFilter } from './extract_time_filter';
-import { IndexPatterns } from '../../../index_patterns';
-
-const mockIndexPatterns = jest.fn(
-  () =>
-    ({
-      get: () => ({
-        timeFieldName: 'time',
-      }),
-    } as any)
-);
 
 describe('filter manager utilities', () => {
   describe('extractTimeFilter()', () => {
-    const indexPatterns = mockIndexPatterns() as IndexPatterns;
-
-    test('should return the matching filter for the default time field', async () => {
+    test('should detect timeFilter', async () => {
       const filters: Filter[] = [
         buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'logstash-*'),
         buildRangeFilter({ name: 'time' }, { gt: 1388559600000, lt: 1388646000000 }, 'logstash-*'),
       ];
-      const result = await extractTimeFilter(indexPatterns, filters);
+      const result = await extractTimeFilter('time', filters);
 
-      expect(result).toEqual(filters[1]);
+      expect(result.timeRangeFilter).toEqual(filters[1]);
+      expect(result.restOfFilters[0]).toEqual(filters[0]);
     });
 
-    test('should not return the non-matching filter for the default time field', async () => {
+    test("should not return timeFilter when name doesn't match", async () => {
       const filters: Filter[] = [
         buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'logstash-*'),
         buildRangeFilter({ name: '@timestamp' }, { from: 1, to: 2 }, 'logstash-*'),
       ];
-      const result = await extractTimeFilter(indexPatterns, filters);
+      const result = await extractTimeFilter('time', filters);
 
-      expect(result).toBeUndefined();
+      expect(result.timeRangeFilter).toBeUndefined();
+      expect(result.restOfFilters).toEqual(filters);
+    });
+
+    test('should not return a non range filter, even when names match', async () => {
+      const filters: Filter[] = [
+        buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'logstash-*'),
+        buildPhraseFilter({ name: 'time' }, 'banana', 'logstash-*'),
+      ];
+      const result = await extractTimeFilter('time', filters);
+
+      expect(result.timeRangeFilter).toBeUndefined();
+      expect(result.restOfFilters).toEqual(filters);
     });
   });
 });
