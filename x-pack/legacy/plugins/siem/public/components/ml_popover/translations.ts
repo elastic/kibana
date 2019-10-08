@@ -24,14 +24,6 @@ export const UPGRADE_TITLE = i18n.translate('xpack.siem.components.mlPopup.upgra
   defaultMessage: 'Upgrade to Elastic Platinum',
 });
 
-export const UPGRADE_DESCRIPTION = i18n.translate(
-  'xpack.siem.components.mlPopup.upgradeDescription',
-  {
-    defaultMessage:
-      'To access SIEM’s anomaly detection features, you must update your license to Platinum or start a free 30-day trial. You can then run Machine Learning jobs and view anomalies.',
-  }
-);
-
 export const UPGRADE_BUTTON = i18n.translate('xpack.siem.components.mlPopup.upgradeButtonLabel', {
   defaultMessage: 'Subscription options',
 });
