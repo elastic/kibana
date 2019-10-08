@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { isPlainObject } from 'lodash';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { checkParam } from '../error_missing_required';
 import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
@@ -29,7 +29,7 @@ export async function getMetrics(req, indexPattern, metricSet = [], filters = []
     min = max - (numOfBuckets * bucketSize * 1000);
   }
 
-  return Promise.map(metricSet, metric => {
+  return Bluebird.map(metricSet, metric => {
     // metric names match the literal metric name, but they can be supplied in groups or individually
     let metricNames;
 
@@ -40,7 +40,7 @@ export async function getMetrics(req, indexPattern, metricSet = [], filters = []
     }
 
     return Bluebird.map(metricNames, metricName => {
-      return getSeries(req, indexPattern, metricName, metricOptions, filters, { min, max, bucketSize, timezone });
+      return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, { min, max, bucketSize, timezone });
     });
   })
     .then(rows => {
