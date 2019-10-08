@@ -300,10 +300,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
 
     async createJobAndWaitForCompletion() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
-      await retry.tryForTime(
-        5 * 60 * 1000,
-        async () => await testSubjects.existOrFail('mlJobWizardButtonRunInRealTime')
-      );
+      await testSubjects.existOrFail('mlJobWizardButtonRunInRealTime', { timeout: 5 * 60 * 1000 });
     },
   };
 }

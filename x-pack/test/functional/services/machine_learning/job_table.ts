@@ -140,17 +140,16 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async ensureDetailsOpen(jobId: string) {
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10000, async () => {
         if (!(await testSubjects.exists(this.detailsSelector(jobId)))) {
           await testSubjects.click(this.rowSelector(jobId, 'mlJobListRowDetailsToggle'));
+          await testSubjects.existOrFail(this.detailsSelector(jobId), { timeout: 1000 });
         }
-
-        await testSubjects.existOrFail(this.detailsSelector(jobId), { timeout: 1000 });
       });
     }
 
     public async ensureDetailsClosed(jobId: string) {
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10000, async () => {
         if (await testSubjects.exists(this.detailsSelector(jobId))) {
           await testSubjects.click(this.rowSelector(jobId, 'mlJobListRowDetailsToggle'));
           await testSubjects.missingOrFail(this.detailsSelector(jobId), { timeout: 1000 });
@@ -159,15 +158,8 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async waitForJobsToLoad() {
-      await retry.tryForTime(
-        60 * 1000,
-        async () => await testSubjects.existOrFail('~mlJobListTable', { timeout: 10000 })
-      );
-
-      await retry.tryForTime(
-        30 * 1000,
-        async () => await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 10000 })
-      );
+      await testSubjects.existOrFail('~mlJobListTable', { timeout: 60 * 1000 });
+      await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
     }
 
     public async filterWithSearchString(filter: string) {
@@ -214,11 +206,12 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async clickActionsMenu(jobId: string) {
-      await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
-      await retry.tryForTime(
-        5000,
-        async () => await testSubjects.existOrFail('mlActionButtonDeleteJob', { timeout: 1000 })
-      );
+      retry.tryForTime(30 * 1000, async () => {
+        if (!(await testSubjects.exists('mlActionButtonDeleteJob'))) {
+          await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
+          await testSubjects.existOrFail('mlActionButtonDeleteJob', { timeout: 5000 });
+        }
+      });
     }
 
     public async clickCloneJobAction(jobId: string) {
