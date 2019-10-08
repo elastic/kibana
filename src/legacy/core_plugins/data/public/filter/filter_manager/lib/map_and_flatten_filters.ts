@@ -22,7 +22,5 @@ import { Filter } from '@kbn/es-query';
 import { mapFilter } from './map_filter';
 
 export const mapAndFlattenFilters = (filters: Filter[]) => {
-  const promises = compact(flatten(filters)).map((item: Filter) => mapFilter(item));
-
-  return Promise.all(promises);
+  return compact(flatten(filters)).map((item: Filter) => mapFilter(item));
 };

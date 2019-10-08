@@ -124,7 +124,7 @@ export class FilterManager {
 
   /* Setters */
 
-  public async addFilters(filters: Filter[] | Filter, pinFilterStatus?: boolean) {
+  public addFilters(filters: Filter[] | Filter, pinFilterStatus?: boolean) {
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
@@ -142,7 +142,7 @@ export class FilterManager {
     const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
     FilterManager.setFiltersStore(filters, store);
 
-    const mappedFilters = await mapAndFlattenFilters(filters);
+    const mappedFilters = mapAndFlattenFilters(filters);
 
     // This is where we add new filters to the correct place (app \ global)
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
@@ -154,8 +154,8 @@ export class FilterManager {
     this.handleStateUpdate(newFilters);
   }
 
-  public async setFilters(newFilters: Filter[]) {
-    const mappedFilters = await mapAndFlattenFilters(newFilters);
+  public setFilters(newFilters: Filter[]) {
+    const mappedFilters = mapAndFlattenFilters(newFilters);
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
     const mergedFilters = this.mergeIncomingFilters(newPartitionedFilters);
     this.handleStateUpdate(mergedFilters);
@@ -174,7 +174,7 @@ export class FilterManager {
   }
 
   public async removeAll() {
-    await this.setFilters([]);
+    this.setFilters([]);
   }
 
   public static setFiltersStore(filters: Filter[], store: FilterStateStore) {

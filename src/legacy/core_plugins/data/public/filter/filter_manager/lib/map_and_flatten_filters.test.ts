@@ -44,8 +44,8 @@ describe('filter manager utilities', () => {
       ];
     });
 
-    test('should map and flatten the filters', async () => {
-      const results = await mapAndFlattenFilters(filters as Filter[]);
+    test('should map and flatten the filters', () => {
+      const results = mapAndFlattenFilters(filters as Filter[]);
 
       expect(results).toHaveLength(5);
       expect(results[0]).toHaveProperty('meta');

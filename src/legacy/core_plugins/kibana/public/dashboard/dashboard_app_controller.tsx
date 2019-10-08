@@ -258,7 +258,7 @@ export class DashboardAppController {
             updateIndexPatterns(dashboardContainer);
           });
 
-          inputSubscription = dashboardContainer.getInput$().subscribe(async () => {
+          inputSubscription = dashboardContainer.getInput$().subscribe(() => {
             let dirty = false;
 
             // This has to be first because handleDashboardContainerChanges causes
@@ -266,7 +266,7 @@ export class DashboardAppController {
 
             // Add filters modifies the object passed to it, hence the clone deep.
             if (!_.isEqual(container.getInput().filters, queryFilter.getFilters())) {
-              await queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
+              queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
 
               dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
               dirty = true;

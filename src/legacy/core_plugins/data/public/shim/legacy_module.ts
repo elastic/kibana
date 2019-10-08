@@ -95,8 +95,8 @@ export const initLegacyModule = once((): void => {
           // Each time the new filters change we want to rebuild (not just re-render) the "apply filters"
           // popover, because it has to reset its state whenever the new filters change. Setting a `key`
           // property on the component accomplishes this due to how React handles the `key` property.
-          $scope.$watch('filters', async (filters: any) => {
-            const mappedFilters: Filter[] = await mapAndFlattenFilters(filters);
+          $scope.$watch('filters', (filters: any) => {
+            const mappedFilters: Filter[] = mapAndFlattenFilters(filters);
             $scope.state = {
               filters: mappedFilters,
               key: Date.now(),

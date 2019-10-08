@@ -75,7 +75,7 @@ describe('filter_state_manager', () => {
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
 
-      await filterManager.setFilters([f1, f2]);
+      filterManager.setFilters([f1, f2]);
 
       sinon.assert.notCalled(appStateStub.save);
       sinon.assert.calledOnce(globalStateStub.save);
@@ -122,27 +122,27 @@ describe('filter_state_manager', () => {
       }, 100);
     });
 
-    test('should update URL when filter manager filters are set', async () => {
+    test('should update URL when filter manager filters are set', () => {
       appStateStub.save = sinon.stub();
       globalStateStub.save = sinon.stub();
 
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
 
-      await filterManager.setFilters([f1, f2]);
+      filterManager.setFilters([f1, f2]);
 
       sinon.assert.calledOnce(appStateStub.save);
       sinon.assert.calledOnce(globalStateStub.save);
     });
 
-    test('should update URL when filter manager filters are added', async () => {
+    test('should update URL when filter manager filters are added', () => {
       appStateStub.save = sinon.stub();
       globalStateStub.save = sinon.stub();
 
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
 
-      await filterManager.addFilters([f1, f2]);
+      filterManager.addFilters([f1, f2]);
 
       sinon.assert.calledOnce(appStateStub.save);
       sinon.assert.calledOnce(globalStateStub.save);
@@ -155,13 +155,13 @@ describe('filter_state_manager', () => {
      ** would cause filter state manager detects those changes
      ** And triggers *another* filter manager update.
      */
-    test('should NOT re-trigger filter manager', async done => {
+    test('should NOT re-trigger filter manager', done => {
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       filterManager.setFilters([f1]);
       const setFiltersSpy = sinon.spy(filterManager, 'setFilters');
 
       f1.meta.negate = true;
-      await filterManager.setFilters([f1]);
+      filterManager.setFilters([f1]);
 
       setTimeout(() => {
         expect(setFiltersSpy.callCount).toEqual(1);
