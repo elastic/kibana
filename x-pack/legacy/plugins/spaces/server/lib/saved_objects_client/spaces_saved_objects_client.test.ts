@@ -18,6 +18,7 @@ const createMockClient = () => {
   return {
     get: jest.fn(),
     bulkGet: jest.fn(),
+    bulkUpdate: jest.fn(),
     find: jest.fn(),
     create: jest.fn(),
     bulkCreate: jest.fn(),
@@ -329,6 +330,60 @@ const createSpacesService = async (spaceId: string) => {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });
+      });
+    });
+
+    describe('#bulkUpdate', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const request = createMockRequest();
+        const baseClient = createMockClient();
+        const spacesService = await createSpacesService(currentSpace.id);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await expect(
+          client.bulkUpdate([
+            { id: '', type: 'foo', attributes: {}, options: { namespace: 'bar' } },
+          ])
+        ).rejects.toThrowError('Spaces currently determines the namespaces');
+      });
+
+      test(`supplements options with undefined namespace`, async () => {
+        const request = createMockRequest();
+        const baseClient = createMockClient();
+        const expectedReturnValue = Symbol();
+        baseClient.bulkUpdate.mockReturnValue(expectedReturnValue);
+        const spacesService = await createSpacesService(currentSpace.id);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        const options = Object.freeze({ references: [] });
+        const actualReturnValue = await client.bulkUpdate([
+          { id: 'id', type: 'foo', attributes: {}, options },
+        ]);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.bulkUpdate).toHaveBeenCalledWith([
+          {
+            id: 'id',
+            type: 'foo',
+            attributes: {},
+            options: {
+              references: [],
+              namespace: currentSpace.expectedNamespace,
+            },
+          },
+        ]);
       });
     });
 

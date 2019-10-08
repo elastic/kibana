@@ -36,6 +36,7 @@ describe('POST /api/saved_objects/_export', () => {
   const savedObjectsClient = {
     errors: {} as any,
     bulkCreate: jest.fn(),
+    bulkUpdate: jest.fn(),
     bulkGet: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),

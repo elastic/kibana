@@ -26,6 +26,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   const savedObjectsClient = {
     errors: {} as any,
     bulkCreate: jest.fn(),
+    bulkUpdate: jest.fn(),
     bulkGet: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),

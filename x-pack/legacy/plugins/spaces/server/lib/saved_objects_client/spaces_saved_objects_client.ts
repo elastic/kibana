@@ -9,6 +9,7 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -210,5 +211,30 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
+  }
+
+  /**
+   * Updates an array of objects by id
+   *
+   * @param {array} objects - an array ids, or an array of objects containing id, type, attributes and optionally version, references and namespace
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
+   * @example
+   *
+   * bulkUpdate([
+   *   { id: 'one', type: 'config', attributes: { title: 'My new title'}, options: { version: 'd7rhfk47d=' } },
+   *   { id: 'foo', type: 'index-pattern', attributes: {} }
+   * ])
+   */
+  public async bulkUpdate(objects: SavedObjectsBulkUpdateObject[] = []) {
+    objects.map(object => {
+      throwErrorIfNamespaceSpecified(object.options);
+      object.options = {
+        ...(object.options || {}),
+        namespace: spaceIdToNamespace(this.spaceId),
+      };
+      return object;
+    });
+
+    return await this.client.bulkUpdate(objects);
   }
 }

@@ -21,6 +21,7 @@ export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,

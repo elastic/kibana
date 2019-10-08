@@ -104,6 +104,7 @@ test('collects dashboard and all dependencies', async () => {
     errors: {} as any,
     create: jest.fn(),
     bulkCreate: jest.fn(),
+    bulkUpdate: jest.fn(),
     delete: jest.fn(),
     find: jest.fn(),
     get: jest.fn(),

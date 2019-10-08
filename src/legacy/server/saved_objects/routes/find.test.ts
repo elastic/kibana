@@ -26,6 +26,7 @@ describe('GET /api/saved_objects/_find', () => {
   const savedObjectsClient = {
     errors: {} as any,
     bulkCreate: jest.fn(),
+    bulkUpdate: jest.fn(),
     bulkGet: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),

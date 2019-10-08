@@ -318,6 +318,181 @@ describe('#bulkCreate', () => {
   });
 });
 
+describe('#bulkUpdate', () => {
+  it('redirects request to underlying base client if type is not registered', async () => {
+    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+    const options = { version: 'some-version' };
+    const mockedResponse = {
+      saved_objects: [{ id: 'some-id', type: 'unknown-type', attributes, references: [] }],
+    };
+
+    mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
+
+    await expect(
+      wrapper.bulkUpdate([{ type: 'unknown-type', id: 'some-id', attributes, options }])
+    ).resolves.toEqual(mockedResponse);
+
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([
+      { type: 'unknown-type', id: 'some-id', attributes, options },
+    ]);
+  });
+
+  it('encrypts attributes and strips them from response', async () => {
+    const docs = [
+      {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: {
+          attrOne: 'one',
+          attrSecret: 'secret',
+          attrThree: 'three',
+        },
+      },
+      {
+        id: 'some-id-2',
+        type: 'known-type',
+        attributes: {
+          attrOne: 'one 2',
+          attrSecret: 'secret 2',
+          attrThree: 'three 2',
+        },
+      },
+    ];
+
+    const mockedResponse = {
+      saved_objects: docs.map(doc => ({ ...doc, references: [] })),
+    };
+
+    mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
+
+    await expect(wrapper.bulkUpdate(docs.map(doc => ({ ...doc, options: {} })))).resolves.toEqual({
+      saved_objects: [
+        {
+          id: 'some-id',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one',
+            attrThree: 'three',
+          },
+        },
+        {
+          id: 'some-id-2',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one 2',
+            attrThree: 'three 2',
+          },
+        },
+      ],
+    });
+
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(2);
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id' },
+      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+    );
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id-2' },
+      { attrOne: 'one 2', attrSecret: 'secret 2', attrThree: 'three 2' }
+    );
+
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([
+      {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: {
+          attrOne: 'one',
+          attrSecret: '*secret*',
+          attrThree: 'three',
+        },
+      },
+      {
+        id: 'some-id-2',
+        type: 'known-type',
+        attributes: {
+          attrOne: 'one 2',
+          attrSecret: '*secret 2*',
+          attrThree: 'three 2',
+        },
+      },
+    ]);
+  });
+
+  it('uses `namespace` to encrypt attributes if it is specified', async () => {
+    const options = {
+      version: 'some-version',
+      namespace: 'some-namespace',
+    };
+    const docs = [
+      {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: {
+          attrOne: 'one',
+          attrSecret: 'secret',
+          attrThree: 'three',
+        },
+      },
+    ];
+
+    mockBaseClient.bulkUpdate.mockResolvedValue({
+      saved_objects: docs.map(doc => ({ ...doc, references: [] })),
+    });
+
+    await expect(wrapper.bulkUpdate(docs.map(doc => ({ ...doc, options })))).resolves.toEqual({
+      saved_objects: [
+        {
+          id: 'some-id',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one',
+            attrThree: 'three',
+          },
+        },
+      ],
+    });
+
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id', namespace: 'some-namespace' },
+      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+    );
+
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([
+      {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: {
+          attrOne: 'one',
+          attrSecret: '*secret*',
+          attrThree: 'three',
+        },
+        options,
+      },
+    ]);
+  });
+
+  it('fails if base client fails', async () => {
+    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+    const options = { version: 'some-version' };
+
+    const failureReason = new Error('Something bad happened...');
+    mockBaseClient.bulkUpdate.mockRejectedValue(failureReason);
+
+    await expect(
+      wrapper.bulkUpdate([{ type: 'unknown-type', id: 'some-id', attributes, options }])
+    ).rejects.toThrowError(failureReason);
+
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([
+      { type: 'unknown-type', id: 'some-id', attributes, options },
+    ]);
+  });
+});
+
 describe('#delete', () => {
   it('redirects request to underlying base client if type is not registered', async () => {
     const options = { namespace: 'some-ns' };
