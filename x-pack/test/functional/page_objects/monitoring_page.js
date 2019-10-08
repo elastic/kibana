@@ -41,6 +41,7 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
     async tableSetFilter(subj, text) {
       await testSubjects.setValue(subj, text);
       await PageObjects.common.pressEnterKey();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async tableClearFilter(subj) {
