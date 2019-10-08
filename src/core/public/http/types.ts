@@ -30,8 +30,8 @@ export interface HttpServiceBase {
   basePath: IBasePath;
 
   /**
-   * Adds a new {@link HTTPInterceptor} to the global HTTP client.
-   * @param interceptor a {@link HTTPInterceptor}
+   * Adds a new {@link HttpInterceptor} to the global HTTP client.
+   * @param interceptor a {@link HttpInterceptor}
    * @returns a function for removing the attached interceptor.
    */
   intercept(interceptor: HttpInterceptor): () => void;
@@ -71,6 +71,10 @@ export interface HttpServiceBase {
   getLoadingCount$(): Observable<number>;
 }
 
+/**
+ * APIs for manipulating the basePath on URL segments.
+ * @public
+ */
 export interface IBasePath {
   /**
    * Gets the `basePath` string.
@@ -112,7 +116,9 @@ export interface HttpHeadersInit {
  * @public
  */
 export interface HttpRequestInit {
-  /** {@inheritdoc RequestInit.body} */
+  /**
+   * A BodyInit object or null to set request's body.
+   */
   body?: BodyInit | null;
 
   /**

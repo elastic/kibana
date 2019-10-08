@@ -379,9 +379,9 @@ export interface DocLinksStart {
     };
 }
 
-// Warning: (ae-missing-release-tag) "ErrorToastOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "IToast"
 // 
-// @public (undocumented)
+// @public
 export interface ErrorToastOptions {
     title: string;
     toastMessage?: string;
@@ -465,9 +465,6 @@ export interface HttpInterceptor {
 
 // @public
 export interface HttpRequestInit {
-    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "RequestInit"
-    // 
-    // (undocumented)
     body?: BodyInit | null;
     cache?: RequestCache;
     credentials?: RequestCredentials;
@@ -497,15 +494,12 @@ export interface HttpResponse {
 // @public (undocumented)
 export interface HttpServiceBase {
     addLoadingCount(countSource$: Observable<number>): void;
-    // Warning: (ae-forgotten-export) The symbol "IBasePath" needs to be exported by the entry point index.d.ts
     basePath: IBasePath;
     delete: HttpHandler;
     fetch: HttpHandler;
     get: HttpHandler;
     getLoadingCount$(): Observable<number>;
     head: HttpHandler;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "HTTPInterceptor"
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "HTTPInterceptor"
     intercept(interceptor: HttpInterceptor): () => void;
     options: HttpHandler;
     patch: HttpHandler;
@@ -527,6 +521,13 @@ export interface I18nStart {
     Context: ({ children }: {
         children: React.ReactNode;
     }) => JSX.Element;
+}
+
+// @public
+export interface IBasePath {
+    get: () => string;
+    prepend: (url: string) => string;
+    remove: (url: string) => string;
 }
 
 // @public
@@ -554,23 +555,8 @@ export interface IHttpInterceptController {
     halted: boolean;
 }
 
-// @public (undocumented)
-export interface IToasts {
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    add(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    addDanger(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    addError(error: Error, options: ErrorToastOptions): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    addSuccess(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    addWarning(toastOrTitle: ToastInput): Toast;
-    get$(): Rx.Observable<Toast[]>;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "IToast"
-    remove(toasts: Toast): void;
-}
+// @public
+export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'>;
 
 // @public @deprecated
 export interface LegacyCoreSetup extends CoreSetup {
@@ -635,9 +621,7 @@ export interface OverlayBannersStart {
 // @public
 export type OverlayBannerUnmount = () => void;
 
-// Warning: (ae-missing-release-tag) "OverlayRef" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface OverlayRef {
     close(): Promise<void>;
     onClose: Promise<void>;
@@ -866,10 +850,34 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
 
 export { Toast }
 
-// Warning: (ae-forgotten-export) The symbol "ToastInputFields" needs to be exported by the entry point index.d.ts
-// 
-// @public (undocumented)
+// @public
 export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
+
+// @public
+export type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+
+// @public
+export class ToastsApi implements IToasts {
+    constructor(deps: {
+        uiSettings: UiSettingsClientContract;
+    });
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    add(toastOrTitle: ToastInput): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    addDanger(toastOrTitle: ToastInput): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    addError(error: Error, options: ErrorToastOptions): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    addSuccess(toastOrTitle: ToastInput): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    addWarning(toastOrTitle: ToastInput): Toast;
+    get$(): Rx.Observable<Toast[]>;
+    // @internal (undocumented)
+    registerOverlays(overlays: OverlayStart): void;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ToastApi"
+    remove(toast: Toast): void;
+    }
 
 // @public (undocumented)
 export type ToastsSetup = IToasts;

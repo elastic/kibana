@@ -25,11 +25,26 @@ import { ErrorToast } from './error_toast';
 import { UiSettingsClientContract } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
 
-type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+/**
+ * Allowed fields for {@link ToastInput}.
+ *
+ * @remarks
+ * `id` cannot be specified.
+ *
+ * @public
+ */
+export type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
 
-/** @public */
+/**
+ * Inputs for {@link IToasts} APIs.
+ * @public
+ */
 export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 
+/**
+ * Options available for {@link IToast} APIs.
+ * @public
+ */
 export interface ErrorToastOptions {
   /**
    * The title of the toast and the dialog when expanding the message.
@@ -54,60 +69,19 @@ const normalizeToast = (toastOrTitle: ToastInput) => {
   return toastOrTitle;
 };
 
-/** @public */
-export interface IToasts {
-  /** Current array of toast messages to show to user. */
-  get$(): Rx.Observable<Toast[]>;
+/**
+ * Methods for adding and removing global toast messages. See {@link ToastsApi}.
+ * @public
+ */
+export type IToasts = Pick<
+  ToastsApi,
+  'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+>;
 
-  /**
-   * Adds a new toast to current array of toast.
-   *
-   * @param toastOrTitle - a {@link ToastInput}
-   * @returns a {@link Toast}
-   */
-  add(toastOrTitle: ToastInput): Toast;
-
-  /**
-   * Removes a toast from the current array of toasts if present.
-   * @param toast - a {@link Toast} returned by {@link IToast.add}
-   */
-  remove(toasts: Toast): void;
-
-  /**
-   * Adds a new toast pre-configured with the success color and check icon.
-   *
-   * @param toastOrTitle - a {@link ToastInput}
-   * @returns a {@link Toast}
-   */
-  addSuccess(toastOrTitle: ToastInput): Toast;
-
-  /**
-   * Adds a new toast pre-configured with the warning color and help icon.
-   *
-   * @param toastOrTitle - a {@link ToastInput}
-   * @returns a {@link Toast}
-   */
-  addWarning(toastOrTitle: ToastInput): Toast;
-
-  /**
-   * Adds a new toast pre-configured with the danger color and alert icon.
-   *
-   * @param toastOrTitle - a {@link ToastInput}
-   * @returns a {@link Toast}
-   */
-  addDanger(toastOrTitle: ToastInput): Toast;
-
-  /**
-   * Adds a new toast that displays an exception message with a button to open the full stacktrace in a modal.
-   *
-   * @param error - an `Error` instance.
-   * @param options - {@link ErrorToastOptions}
-   * @returns a {@link Toast}
-   */
-  addError(error: Error, options: ErrorToastOptions): Toast;
-}
-
-/** @internal */
+/**
+ * Methods for adding and removing global toast messages.
+ * @public
+ */
 export class ToastsApi implements IToasts {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
@@ -119,14 +93,22 @@ export class ToastsApi implements IToasts {
     this.uiSettings = deps.uiSettings;
   }
 
+  /** @internal */
   public registerOverlays(overlays: OverlayStart) {
     this.overlays = overlays;
   }
 
+  /** Current array of toast messages to show to user. */
   public get$() {
     return this.toasts$.asObservable();
   }
 
+  /**
+   * Adds a new toast to current array of toast.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
   public add(toastOrTitle: ToastInput) {
     const toast: Toast = {
       id: String(this.idCounter++),
@@ -139,6 +121,10 @@ export class ToastsApi implements IToasts {
     return toast;
   }
 
+  /**
+   * Removes a toast from the current array of toasts if present.
+   * @param toast - a {@link Toast} returned by {@link ToastApi.add}
+   */
   public remove(toast: Toast) {
     const list = this.toasts$.getValue();
     const listWithoutToast = list.filter(t => t !== toast);
@@ -147,6 +133,12 @@ export class ToastsApi implements IToasts {
     }
   }
 
+  /**
+   * Adds a new toast pre-configured with the success color and check icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
   public addSuccess(toastOrTitle: ToastInput) {
     return this.add({
       color: 'success',
@@ -155,6 +147,12 @@ export class ToastsApi implements IToasts {
     });
   }
 
+  /**
+   * Adds a new toast pre-configured with the warning color and help icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
   public addWarning(toastOrTitle: ToastInput) {
     return this.add({
       color: 'warning',
@@ -164,6 +162,12 @@ export class ToastsApi implements IToasts {
     });
   }
 
+  /**
+   * Adds a new toast pre-configured with the danger color and alert icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @returns a {@link Toast}
+   */
   public addDanger(toastOrTitle: ToastInput) {
     return this.add({
       color: 'danger',
@@ -173,6 +177,13 @@ export class ToastsApi implements IToasts {
     });
   }
 
+  /**
+   * Adds a new toast that displays an exception message with a button to open the full stacktrace in a modal.
+   *
+   * @param error - an `Error` instance.
+   * @param options - {@link ErrorToastOptions}
+   * @returns a {@link Toast}
+   */
   public addError(error: Error, options: ErrorToastOptions) {
     const message = options.toastMessage || error.message;
     return this.add({

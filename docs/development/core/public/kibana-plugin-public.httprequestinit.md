@@ -16,7 +16,7 @@ export interface HttpRequestInit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body](./kibana-plugin-public.httprequestinit.body.md) | <code>BodyInit &#124; null</code> |  |
+|  [body](./kibana-plugin-public.httprequestinit.body.md) | <code>BodyInit &#124; null</code> | A BodyInit object or null to set request's body. |
 |  [cache](./kibana-plugin-public.httprequestinit.cache.md) | <code>RequestCache</code> | The cache mode associated with request, which is a string indicating how the request will interact with the browser's cache when fetching. |
 |  [credentials](./kibana-plugin-public.httprequestinit.credentials.md) | <code>RequestCredentials</code> | The credentials mode associated with request, which is a string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. |
 |  [headers](./kibana-plugin-public.httprequestinit.headers.md) | <code>HttpHeadersInit</code> | [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md) |

@@ -106,6 +106,7 @@ export {
   HttpResponse,
   HttpHandler,
   HttpBody,
+  IBasePath,
   IHttpInterceptController,
   IHttpFetchError,
 } from './http';
@@ -122,6 +123,8 @@ export {
   Toast,
   ToastInput,
   IToasts,
+  ToastsApi,
+  ToastInputFields,
   ToastsSetup,
   ToastsStart,
   ErrorToastOptions,

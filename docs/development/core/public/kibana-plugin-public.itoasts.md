@@ -2,24 +2,12 @@
 
 [Home](./index.md) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [IToasts](./kibana-plugin-public.itoasts.md)
 
-## IToasts interface
+## IToasts type
 
+Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-public.toastsapi.md)<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-export interface IToasts 
+export declare type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'>;
 ```
-
-## Methods
-
-|  Method | Description |
-|  --- | --- |
-|  [add(toastOrTitle)](./kibana-plugin-public.itoasts.add.md) | Adds a new toast to current array of toast. |
-|  [addDanger(toastOrTitle)](./kibana-plugin-public.itoasts.adddanger.md) | Adds a new toast pre-configured with the danger color and alert icon. |
-|  [addError(error, options)](./kibana-plugin-public.itoasts.adderror.md) | Adds a new toast that displays an exception message with a button to open the full stacktrace in a modal. |
-|  [addSuccess(toastOrTitle)](./kibana-plugin-public.itoasts.addsuccess.md) | Adds a new toast pre-configured with the success color and check icon. |
-|  [addWarning(toastOrTitle)](./kibana-plugin-public.itoasts.addwarning.md) | Adds a new toast pre-configured with the warning color and help icon. |
-|  [get$()](./kibana-plugin-public.itoasts.get_.md) | Current array of toast messages to show to user. |
-|  [remove(toasts)](./kibana-plugin-public.itoasts.remove.md) | Removes a toast from the current array of toasts if present. |
-

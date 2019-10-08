@@ -14,7 +14,7 @@ createRouter: () => IRouter;
 
 ## Remarks
 
-Each route can have only one handler functions, which is executed when the route is matched. All routes are prefixed with plugin name as a first segment of URL path. See the [IRouter](./kibana-plugin-server.irouter.md) documentation for more information.
+Each route can have only one handler function, which is executed when the route is matched. See the [IRouter](./kibana-plugin-server.irouter.md) documentation for more information.
 
 ## Example
 

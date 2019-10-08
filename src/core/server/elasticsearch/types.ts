@@ -35,7 +35,7 @@ export interface ElasticsearchServiceSetup {
    * We fill all the missing properties in the `clientConfig` using the default
    * Elasticsearch config so that we don't depend on default values set and
    * controlled by underlying Elasticsearch JS client.
-   * We don't run validation against passed config expect it to be valid.
+   * We don't run validation against the passed config and expect it to be valid.
    *
    * @example
    * ```js
@@ -50,7 +50,7 @@ export interface ElasticsearchServiceSetup {
 
   /**
    * Observable of clients for the `admin` cluster. Observable emits when Elasticsearch config changes on the Kibana
-   * server. See {@link IClusterClient}
+   * server. See {@link IClusterClient}.
    *
    * @exmaple
    * ```js
@@ -61,7 +61,7 @@ export interface ElasticsearchServiceSetup {
 
   /**
    * Observable of clients for the `data` cluster. Observable emits when Elasticsearch config changes on the Kibana
-   * server. See {@link IClusterClient}
+   * server. See {@link IClusterClient}.
    *
    * @exmaple
    * ```js

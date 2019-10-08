@@ -23,7 +23,7 @@ import Boom from 'boom';
 
 import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
-import { KibanaResponse, KibanaResponseFactory, kibanaResponseFactory } from './response';
+import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
@@ -264,4 +264,4 @@ export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends
   context: RequestHandlerContext,
   request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   response: KibanaResponseFactory
-) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

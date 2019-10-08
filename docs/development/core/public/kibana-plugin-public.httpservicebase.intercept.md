@@ -4,7 +4,7 @@
 
 ## HttpServiceBase.intercept() method
 
-Adds a new  to the global HTTP client.
+Adds a new [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) to the global HTTP client.
 
 <b>Signature:</b>
 

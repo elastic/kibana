@@ -31,6 +31,6 @@ export interface HttpServiceBase
 |  --- | --- |
 |  [addLoadingCount(countSource$)](./kibana-plugin-public.httpservicebase.addloadingcount.md) | Adds a new source of loading counts. Used to show the global loading indicator when sum of all observed counts are more than 0. |
 |  [getLoadingCount$()](./kibana-plugin-public.httpservicebase.getloadingcount_.md) | Get the sum of all loading count sources as a single Observable. |
-|  [intercept(interceptor)](./kibana-plugin-public.httpservicebase.intercept.md) | Adds a new  to the global HTTP client. |
+|  [intercept(interceptor)](./kibana-plugin-public.httpservicebase.intercept.md) | Adds a new [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) to the global HTTP client. |
 |  [removeAllInterceptors()](./kibana-plugin-public.httpservicebase.removeallinterceptors.md) | Removes all configured interceptors. |
 

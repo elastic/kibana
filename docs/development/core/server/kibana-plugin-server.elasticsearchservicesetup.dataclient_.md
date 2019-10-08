@@ -4,7 +4,7 @@
 
 ## ElasticsearchServiceSetup.dataClient$ property
 
-Observable of clients for the `data` cluster. Observable emits when Elasticsearch config changes on the Kibana server. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)
+Observable of clients for the `data` cluster. Observable emits when Elasticsearch config changes on the Kibana server. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->.
 
 
 ```js

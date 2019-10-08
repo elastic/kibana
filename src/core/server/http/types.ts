@@ -178,8 +178,7 @@ export interface HttpServiceSetup {
    * Provides ability to declare a handler function for a particular path and HTTP request method.
    *
    * @remarks
-   * Each route can have only one handler functions, which is executed when the route is matched.
-   * All routes are prefixed with plugin name as a first segment of URL path.
+   * Each route can have only one handler function, which is executed when the route is matched.
    * See the {@link IRouter} documentation for more information.
    *
    * @example

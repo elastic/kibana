@@ -30,6 +30,7 @@ export {
   ErrorHttpResponseOptions,
   KibanaRequest,
   KibanaRequestRoute,
+  IKibanaResponse,
   KnownHeaders,
   LegacyRequest,
   LifecycleResponseFactory,
@@ -52,6 +53,9 @@ export {
   AuthHeaders,
   AuthResultParams,
   AuthToolkit,
+  AuthResult,
+  Authenticated,
+  AuthResultType,
 } from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
 export { SessionStorageFactory, SessionStorage } from './session_storage';

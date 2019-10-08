@@ -4,6 +4,8 @@
 
 ## ErrorToastOptions interface
 
+Options available for  APIs.
+
 <b>Signature:</b>
 
 ```typescript

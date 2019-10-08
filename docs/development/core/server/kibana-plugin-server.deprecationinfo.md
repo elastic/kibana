@@ -4,6 +4,7 @@
 
 ## DeprecationInfo interface
 
+
 <b>Signature:</b>
 
 ```typescript

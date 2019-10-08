@@ -388,8 +388,6 @@ export interface APICaller {
     <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<T>;
 }
 
-// Warning: (ae-missing-release-tag) "AssistanceAPIResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface AssistanceAPIResponse {
     // (undocumented)
@@ -400,8 +398,6 @@ export interface AssistanceAPIResponse {
     };
 }
 
-// Warning: (ae-missing-release-tag) "AssistantAPIClientParams" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface AssistantAPIClientParams extends GenericParams {
     // (undocumented)
@@ -410,20 +406,32 @@ export interface AssistantAPIClientParams extends GenericParams {
     path: '/_migration/assistance';
 }
 
-// Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// 
+// @public (undocumented)
+export interface Authenticated extends AuthResultParams {
+    // (undocumented)
+    type: AuthResultType.authenticated;
+}
+
 // @public
-export type AuthenticationHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: AuthToolkit) => AuthResult | KibanaResponse | Promise<AuthResult | KibanaResponse>;
+export type AuthenticationHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: AuthToolkit) => AuthResult | IKibanaResponse | Promise<AuthResult | IKibanaResponse>;
 
 // @public
 export type AuthHeaders = Record<string, string | string[]>;
+
+// @public (undocumented)
+export type AuthResult = Authenticated;
 
 // @public
 export interface AuthResultParams {
     requestHeaders?: AuthHeaders;
     responseHeaders?: AuthHeaders;
     state?: Record<string, any>;
+}
+
+// @public (undocumented)
+export enum AuthResultType {
+    // (undocumented)
+    authenticated = "authenticated"
 }
 
 // @public
@@ -518,8 +526,6 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     statusCode: number;
 }
 
-// Warning: (ae-missing-release-tag) "DeprecationAPIClientParams" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface DeprecationAPIClientParams extends GenericParams {
     // (undocumented)
@@ -528,8 +534,6 @@ export interface DeprecationAPIClientParams extends GenericParams {
     path: '/_migration/deprecations';
 }
 
-// Warning: (ae-missing-release-tag) "DeprecationAPIResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface DeprecationAPIResponse {
     // (undocumented)
@@ -542,8 +546,6 @@ export interface DeprecationAPIResponse {
     node_settings: DeprecationInfo[];
 }
 
-// Warning: (ae-missing-release-tag) "DeprecationInfo" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface DeprecationInfo {
     // (undocumented)
@@ -574,8 +576,6 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
     ssl?: Partial<ElasticsearchConfig['ssl']>;
 };
 
-// Warning: (ae-missing-release-tag) "ElasticsearchError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface ElasticsearchError extends Boom {
     // (undocumented)
@@ -675,6 +675,16 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public
+export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
+    // (undocumented)
+    readonly options: HttpResponseOptions;
+    // (undocumented)
+    readonly payload?: T;
+    // (undocumented)
+    readonly status: number;
+}
+
+// @public
 export interface IKibanaSocket {
     readonly authorizationError?: Error;
     readonly authorized?: boolean;
@@ -685,8 +695,6 @@ export interface IKibanaSocket {
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
-// Warning: (ae-missing-release-tag) "IndexSettingsDeprecationInfo" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -895,13 +903,9 @@ export interface LogRecord {
     timestamp: Date;
 }
 
-// Warning: (ae-missing-release-tag) "MIGRATION_ASSISTANCE_INDEX_ACTION" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 
-// Warning: (ae-missing-release-tag) "MIGRATION_DEPRECATION_LEVEL" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 
@@ -1006,7 +1010,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1480,8 +1484,6 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
     version?: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "Omit" needs to be exported by the entry point index.d.ts
-// 
 // @public (undocumented)
 export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes' | 'references'> {
     // (undocumented)
@@ -1521,6 +1523,7 @@ export interface SessionStorageFactory<T> {
 
 // Warnings were encountered during analysis:
 // 
+// src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:162:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 
