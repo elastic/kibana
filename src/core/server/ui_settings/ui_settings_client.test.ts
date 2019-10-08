@@ -21,9 +21,13 @@ import expect from '@kbn/expect';
 import Chance from 'chance';
 import sinon from 'sinon';
 
-import { UiSettingsService } from './ui_settings_client';
+import { loggingServiceMock } from '../logging/logging_service.mock';
+
+import { UiSettingsClient } from './ui_settings_client';
 import * as createOrUpgradeSavedConfigNS from './create_or_upgrade_saved_config/create_or_upgrade_saved_config';
 import { createObjectsClientStub, savedObjectsClientErrors } from './create_objects_client_stub';
+
+const logger = loggingServiceMock.create().get();
 
 const TYPE = 'config';
 const ID = 'kibana-version';
@@ -45,13 +49,14 @@ describe('ui settings', () => {
 
     const savedObjectsClient = createObjectsClientStub(esDocSource);
 
-    const uiSettings = new UiSettingsService({
+    const uiSettings = new UiSettingsClient({
       type: TYPE,
       id: ID,
       buildNum: BUILD_NUM,
       getDefaults: getDefaults || (() => defaults),
       savedObjectsClient,
       overrides,
+      log: logger,
     });
 
     const createOrUpgradeSavedConfig = sandbox.stub(

@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Legacy } from 'kibana';
 import { defaultsDeep } from 'lodash';
 import Boom from 'boom';
 
 import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
+import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+import { UiSettingsParams } from './ui_settings_service';
 
 export interface UiSettingsServiceOptions {
   type: string;
@@ -30,7 +31,7 @@ export interface UiSettingsServiceOptions {
   savedObjectsClient: SavedObjectsClientContract;
   overrides?: Record<string, SavedObjectAttribute>;
   getDefaults?: () => Record<string, UiSettingsParams>;
-  logWithMetadata?: Legacy.Server['logWithMetadata'];
+  log: Logger;
 }
 
 interface ReadOptions {
@@ -48,20 +49,6 @@ type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
 type UserProvided = Record<string, UserProvidedValue>;
 type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
-type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
-
-interface UiSettingsParams {
-  name: string;
-  value: SavedObjectAttribute;
-  description: string;
-  category: string[];
-  options?: string[];
-  optionLabels?: Record<string, string>;
-  requiresPageReload?: boolean;
-  readonly?: boolean;
-  type?: UiSettingsType;
-}
-
 export interface IUiSettingsClient {
   getDefaults: () => Promise<Record<string, UiSettingsParams>>;
   get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
@@ -77,14 +64,14 @@ export interface IUiSettingsClient {
  *  Service that provides access to the UiSettings stored in elasticsearch.
  *  @class UiSettingsService
  */
-export class UiSettingsService implements IUiSettingsClient {
+export class UiSettingsClient implements IUiSettingsClient {
   private readonly _type: UiSettingsServiceOptions['type'];
   private readonly _id: UiSettingsServiceOptions['id'];
   private readonly _buildNum: UiSettingsServiceOptions['buildNum'];
   private readonly _savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
   private readonly _overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
   private readonly _getDefaults: NonNullable<UiSettingsServiceOptions['getDefaults']>;
-  private readonly _logWithMetadata: NonNullable<UiSettingsServiceOptions['logWithMetadata']>;
+  private readonly _log: Logger;
 
   constructor(options: UiSettingsServiceOptions) {
     const {
@@ -92,11 +79,10 @@ export class UiSettingsService implements IUiSettingsClient {
       id,
       buildNum,
       savedObjectsClient,
+      log,
       // we use a function for getDefaults() so that defaults can be different in
       // different scenarios, and so they can change over time
       getDefaults = () => ({}),
-      // function that accepts log messages in the same format as server.logWithMetadata
-      logWithMetadata = () => {},
       overrides = {},
     } = options;
 
@@ -106,7 +92,7 @@ export class UiSettingsService implements IUiSettingsClient {
     this._savedObjectsClient = savedObjectsClient;
     this._getDefaults = getDefaults;
     this._overrides = overrides;
-    this._logWithMetadata = logWithMetadata;
+    this._log = log;
   }
 
   async getDefaults() {
@@ -214,7 +200,7 @@ export class UiSettingsService implements IUiSettingsClient {
         savedObjectsClient: this._savedObjectsClient,
         version: this._id,
         buildNum: this._buildNum,
-        logWithMetadata: this._logWithMetadata,
+        log: this._log,
       });
 
       await this._write({
@@ -244,7 +230,7 @@ export class UiSettingsService implements IUiSettingsClient {
           savedObjectsClient: this._savedObjectsClient,
           version: this._id,
           buildNum: this._buildNum,
-          logWithMetadata: this._logWithMetadata,
+          log: this._log,
           onWriteError(writeError, attributes) {
             if (isConflictError(writeError)) {
               // trigger `!failedUpgradeAttributes` check below, since another

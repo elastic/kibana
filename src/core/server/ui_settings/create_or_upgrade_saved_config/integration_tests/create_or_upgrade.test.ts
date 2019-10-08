@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import expect from '@kbn/expect';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectsClientContract } from 'src/core/server';
@@ -25,7 +24,9 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import KbnServer from '../../../../../legacy/server/kbn_server';
 import { createTestServers } from '../../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
+import { loggingServiceMock } from '../../../logging/logging_service.mock';
 
+const logger = loggingServiceMock.create().get();
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient: SavedObjectsClientContract;
   let kbnServer: KbnServer;
@@ -88,7 +89,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '5.4.0',
       buildNum: 54099,
-      logWithMetadata: sinon.stub(),
+      log: logger,
     });
 
     const config540 = await savedObjectsClient.get('config', '5.4.0');
@@ -114,7 +115,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '5.4.1',
       buildNum: 54199,
-      logWithMetadata: sinon.stub(),
+      log: logger,
     });
 
     const config541 = await savedObjectsClient.get('config', '5.4.1');
@@ -140,7 +141,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '7.0.0-rc1',
       buildNum: 70010,
-      logWithMetadata: sinon.stub(),
+      log: logger,
     });
 
     const config700rc1 = await savedObjectsClient.get('config', '7.0.0-rc1');
@@ -167,7 +168,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '7.0.0',
       buildNum: 70099,
-      logWithMetadata: sinon.stub(),
+      log: logger,
     });
 
     const config700 = await savedObjectsClient.get('config', '7.0.0');
@@ -195,7 +196,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '6.2.3-rc1',
       buildNum: 62310,
-      logWithMetadata: sinon.stub(),
+      log: logger,
     });
 
     const config623rc1 = await savedObjectsClient.get('config', '6.2.3-rc1');

@@ -18,8 +18,9 @@
  */
 
 import { defaults } from 'lodash';
-import { Legacy } from 'kibana';
+
 import { SavedObjectsClientContract, SavedObjectAttribute } from '../../saved_objects/types';
+import { Logger } from '../../logging';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
 
@@ -27,7 +28,7 @@ interface Options {
   savedObjectsClient: SavedObjectsClientContract;
   version: string;
   buildNum: number;
-  logWithMetadata: Legacy.Server['logWithMetadata'];
+  log: Logger;
   onWriteError?: <T extends SavedObjectAttribute = any>(
     error: Error,
     attributes: Record<string, any>
@@ -36,7 +37,7 @@ interface Options {
 export async function createOrUpgradeSavedConfig<T extends SavedObjectAttribute = any>(
   options: Options
 ): Promise<Record<string, T> | undefined> {
-  const { savedObjectsClient, version, buildNum, logWithMetadata, onWriteError } = options;
+  const { savedObjectsClient, version, buildNum, log, onWriteError } = options;
 
   // try to find an older config we can upgrade
   const upgradeableConfig = await getUpgradeableConfig({
@@ -59,13 +60,9 @@ export async function createOrUpgradeSavedConfig<T extends SavedObjectAttribute 
   }
 
   if (upgradeableConfig) {
-    logWithMetadata(
-      ['plugin', 'elasticsearch'],
-      `Upgrade config from ${upgradeableConfig.id} to ${version}`,
-      {
-        prevVersion: upgradeableConfig.id,
-        newVersion: version,
-      }
-    );
+    log.debug(`Upgrade config from ${upgradeableConfig.id} to ${version}`, {
+      prevVersion: upgradeableConfig.id,
+      newVersion: version,
+    });
   }
 }
