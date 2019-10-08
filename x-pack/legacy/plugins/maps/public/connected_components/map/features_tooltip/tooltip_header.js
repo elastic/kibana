@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import {
   EuiButtonIcon,
@@ -28,6 +27,7 @@ export class TooltipHeader extends Component {
     filteredFeatures: this.props.features,
     pageNumber: DEFAULT_PAGE_NUMBER,
     selectedLayerId: ALL_LAYERS,
+    layerOptions: [],
   };
 
   constructor(props) {
@@ -78,15 +78,16 @@ export class TooltipHeader extends Component {
       this.setState({
         filteredFeatures: this.props.features,
         selectedLayerId: ALL_LAYERS,
-        layers: layers.map((layer, index) => {
+        layerOptions: layers.map((layer, index) => {
+          const displayName = layerNames[index];
+          const count = countByLayerId.get(layer.getId());
           return {
-            displayName: layerNames[index],
-            id: layer.getId(),
-            count: countByLayerId.get(layer.getId())
+            value: layer.getId(),
+            text: `(${count}) ${displayName}`
           };
         })
       },
-      () => {this._onPageChange(DEFAULT_PAGE_NUMBER)});
+      () => this._onPageChange(DEFAULT_PAGE_NUMBER));
     }
   };
 
@@ -111,13 +112,14 @@ export class TooltipHeader extends Component {
       filteredFeatures,
       selectedLayerId: newLayerId
     },
-    () => {this._onPageChange(DEFAULT_PAGE_NUMBER)});
+    () => this._onPageChange(DEFAULT_PAGE_NUMBER));
   };
 
   render() {
     const { isLocked } = this.props;
-    const { filteredFeatures, pageNumber, selectedLayerId, layers } = this.state;
+    const { filteredFeatures, pageNumber, selectedLayerId, layerOptions } = this.state;
 
+    const isLayerSelectVisible = isLocked && layerOptions.length > 1;
     const headerItems = [];
 
     // Pagination controls
@@ -137,7 +139,7 @@ export class TooltipHeader extends Component {
     // Page number readout
     if (filteredFeatures.length > 1) {
       headerItems.push(
-        <EuiFlexItem grow={false} key="pageNumber">
+        <EuiFlexItem grow={!isLayerSelectVisible} key="pageNumber">
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.maps.tooltip.pageNumerText"
@@ -153,26 +155,20 @@ export class TooltipHeader extends Component {
     }
 
     // Layer select
-    if (isLocked && layers && layers.length > 1) {
-      const options = [
-        {
-          value: ALL_LAYERS,
-          text: i18n.translate('xpack.maps.tooltip.allLayersLabel', {
-            defaultMessage: 'All layers'
-          })
-        },
-        ...layers.map(({ id, displayName, count }) => {
-          return {
-            value: id,
-            text: `(${count}) ${displayName}`
-          };
-        })
-      ];
+    if (isLayerSelectVisible) {
       headerItems.push(
         <EuiFlexItem key="layerSelect">
           <EuiFormRow display="rowCompressed">
             <EuiSelect
-              options={options}
+              options={[
+                {
+                  value: ALL_LAYERS,
+                  text: i18n.translate('xpack.maps.tooltip.allLayersLabel', {
+                    defaultMessage: 'All layers'
+                  })
+                },
+                ...layerOptions
+              ]}
               onChange={this._onLayerChange}
               value={selectedLayerId}
               compressed
@@ -190,7 +186,7 @@ export class TooltipHeader extends Component {
     if (isLocked) {
       // When close button is the only item, add empty FlexItem to push close button to right
       if (headerItems.length === 0) {
-        headerItems.push(<EuiFlexItem key="spacer"></EuiFlexItem>);
+        headerItems.push(<EuiFlexItem key="spacer"/>);
       }
 
       headerItems.push(
