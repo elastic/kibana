@@ -23,19 +23,19 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
+  'detection-engine': [],
   host: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
   network: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
-  timeline: [CONSTANTS.timelineId, CONSTANTS.timerange],
   overview: [CONSTANTS.timelineId, CONSTANTS.timerange],
-  'detection-engine': [],
+  timeline: [CONSTANTS.timelineId, CONSTANTS.timerange],
 };
 
 export type LocationTypes =
   | CONSTANTS.detectionEnginePage
-  | CONSTANTS.networkDetails
-  | CONSTANTS.networkPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
+  | CONSTANTS.networkDetails
+  | CONSTANTS.networkPage
   | CONSTANTS.overviewPage
   | CONSTANTS.timelinePage
   | CONSTANTS.unknown;

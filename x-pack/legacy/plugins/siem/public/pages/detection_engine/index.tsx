@@ -4,9 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React from 'react';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
+import { CreateRuleComponent } from './create_rule';
+import { EditRuleComponent } from './edit_rule';
 import { DetectionEngineComponent } from './detection_engine';
+import { RuleDetailsComponent } from './rule_details';
+import { RulesComponent } from './rules';
 
-export const DetectionEngine = memo(() => <DetectionEngineComponent />);
-DetectionEngine.displayName = 'DetectionEngine';
+const detectionEnginePath = `/:pageName(detection-engine)`;
+
+type Props = Partial<RouteComponentProps<{}>> & { url: string };
+
+export const DetectionEngineContainer = React.memo<Props>(() => (
+  <Switch>
+    <Route exact path={detectionEnginePath} render={() => <DetectionEngineComponent />} strict />
+    <Route exact path={`${detectionEnginePath}/rules`} render={() => <RulesComponent />} />
+    <Route
+      path={`${detectionEnginePath}/rules/create-rule`}
+      render={() => <CreateRuleComponent />}
+    />
+    <Route
+      exact
+      path={`${detectionEnginePath}/rules/rule-details`}
+      render={() => <RuleDetailsComponent />}
+    />
+    <Route
+      path={`${detectionEnginePath}/rules/rule-details/edit-rule`}
+      render={() => <EditRuleComponent />}
+    />
+    <Route
+      path="/detection-engine/"
+      render={({ location: { search = '' } }) => (
+        <Redirect from="/detection-engine/" to={`/detection-engine${search}`} />
+      )}
+    />
+  </Switch>
+));
+DetectionEngineContainer.displayName = 'DetectionEngineContainer';

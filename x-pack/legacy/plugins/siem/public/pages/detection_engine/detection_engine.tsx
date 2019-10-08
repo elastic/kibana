@@ -4,46 +4,69 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiButton, EuiButtonGroup, EuiFieldSearch, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { pure } from 'recompose';
-// import chrome from 'ui/chrome';
-// import { documentationLinks } from 'ui/documentation_links';
+import { StickyContainer } from 'react-sticky';
 
+import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
-// import { GlobalTime } from '../../containers/global_time';
-//
-// import { EmptyPage } from '../../components/empty_page';
-// import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
+import { HeaderPanel } from '../../components/header_panel';
 import { SpyRoute } from '../../utils/route/spy_routes';
-
 import * as i18n from './translations';
 
-// const basePath = chrome.getBasePath();
+export const DetectionEngineComponent = React.memo(() => {
+  const idPrefix = 'signalType';
+  const toggleButtons = [
+    {
+      id: `${idPrefix}0`,
+      label: 'Open signals',
+    },
+    {
+      id: `${idPrefix}1`,
+      label: 'Closed signals',
+    },
+  ];
 
-export const DetectionEngineComponent = pure(() => {
   return (
     <>
-      <HeaderPage subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE} />
-      <p>{'HELLO WORLD'}</p>
-      {/* <WithSource sourceId="default">
-        {({ indicesExist }) =>
-          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <GlobalTime>{({ setQuery }) => <p>Testing...</p>}</GlobalTime>
-          ) : (
-            <EmptyPage
-              actionPrimaryIcon="gear"
-              actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
-              actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/siem`}
-              actionSecondaryIcon="popout"
-              actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
-              actionSecondaryTarget="_blank"
-              actionSecondaryUrl={documentationLinks.siem}
-              data-test-subj="empty-page"
-              title={i18n.EMPTY_TITLE}
+      <StickyContainer>
+        <FiltersGlobal>
+          <EuiFieldSearch
+            aria-label="KQL filter"
+            fullWidth
+            placeholder='e.g. event.action: "foo"'
+          />
+        </FiltersGlobal>
+
+        <HeaderPage subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE}>
+          <EuiButton fill href="#/detection-engine/rules" iconType="gear">
+            {i18n.BUTTON_MANAGE_RULES}
+          </EuiButton>
+        </HeaderPage>
+
+        <EuiPanel>
+          <HeaderPanel title="Signal detection frequency">{'Stack by...'}</HeaderPanel>
+          {'Chart here...'}
+        </EuiPanel>
+
+        <EuiSpacer />
+
+        <EuiPanel>
+          <HeaderPanel
+            subtitle={`${i18n.PANEL_SUBTITLE_SHOWING}: 7,712 signals`}
+            title="All signals"
+          >
+            <EuiButtonGroup
+              color="primary"
+              legend="Signal types"
+              onChange={() => null}
+              options={toggleButtons}
             />
-          )
-        }
-      </WithSource> */}
+          </HeaderPanel>
+          {'Table here...'}
+        </EuiPanel>
+      </StickyContainer>
+
       <SpyRoute />
     </>
   );

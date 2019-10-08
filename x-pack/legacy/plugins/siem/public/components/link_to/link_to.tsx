@@ -12,7 +12,13 @@ import { RedirectToHostsPage, RedirectToHostDetailsPage } from './redirect_to_ho
 import { RedirectToNetworkPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
 import { RedirectToTimelinesPage } from './redirect_to_timelines';
-import { RedirectToDetectionEnginePage } from './redirect_to_detection_engine';
+import {
+  RedirectToCreateRulePage,
+  RedirectToDetectionEnginePage,
+  RedirectToEditRulePage,
+  RedirectToRuleDetailsPage,
+  RedirectToRulesPage,
+} from './redirect_to_detection_engine';
 import { HostsTableType } from '../../store/hosts/model';
 
 interface LinkToPageProps {
@@ -41,11 +47,27 @@ export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
       path={`${match.url}/:pageName(network)/ip/:detailName`}
       component={RedirectToNetworkPage}
     />
-    <Route path={`${match.url}/:pageName(timelines)`} component={RedirectToTimelinesPage} />
     <Route
       path={`${match.url}/:pageName(detection-engine)`}
       component={RedirectToDetectionEnginePage}
     />
+    <Route
+      path={`${match.url}/:pageName(detection-engine)/rules`}
+      component={RedirectToRulesPage}
+    />
+    <Route
+      path={`${match.url}/:pageName(detection-engine)/rules/create-rule`}
+      component={RedirectToCreateRulePage}
+    />
+    <Route
+      path={`${match.url}/:pageName(detection-engine)/rules/rule-details`}
+      component={RedirectToRuleDetailsPage}
+    />
+    <Route
+      path={`${match.url}/:pageName(detection-engine)/rules/rule-details/edit-rule`}
+      component={RedirectToEditRulePage}
+    />
+    <Route path={`${match.url}/:pageName(timelines)`} component={RedirectToTimelinesPage} />
     <Redirect to="/" />
   </Switch>
 ));

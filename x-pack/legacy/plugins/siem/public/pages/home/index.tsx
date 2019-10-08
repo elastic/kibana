@@ -20,7 +20,7 @@ import { SiemNavigation } from '../../components/navigation';
 import { StatefulTimeline } from '../../components/timeline';
 import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning';
 import { NotFoundPage } from '../404';
-import { DetectionEngine } from '../detection_engine';
+import { DetectionEngineContainer } from '../detection_engine';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
@@ -153,7 +153,12 @@ export const HomePage = pure(() => (
                         <NetworkContainer url={match.url} location={location} />
                       )}
                     />
-                    <Route path="/:pageName(detection-engine)" render={() => <DetectionEngine />} />
+                    <Route
+                      path="/:pageName(detection-engine)"
+                      render={({ match, location }) => (
+                        <DetectionEngineContainer url={match.url} location={location} />
+                      )}
+                    />
                     <Route path="/:pageName(timelines)" render={() => <Timelines />} />
                     <Route path="/link-to" component={LinkToPage} />
                     <Route

@@ -75,16 +75,16 @@ export const replaceQueryStringInLocation = (location: Location, queryString: st
 };
 
 export const getUrlType = (pageName: string): UrlStateType => {
-  if (pageName === SiemPageName.hosts) {
+  if (pageName === SiemPageName.overview) {
+    return 'overview';
+  } else if (pageName === SiemPageName.hosts) {
     return 'host';
   } else if (pageName === SiemPageName.network) {
     return 'network';
-  } else if (pageName === SiemPageName.overview) {
-    return 'overview';
-  } else if (pageName === SiemPageName.timelines) {
-    return 'timeline';
   } else if (pageName === SiemPageName.detectionEngine) {
     return 'detection-engine';
+  } else if (pageName === SiemPageName.timelines) {
+    return 'timeline';
   }
   return 'overview';
 };
@@ -102,7 +102,9 @@ export const getCurrentLocation = (
   pageName: string,
   detailName: string | undefined
 ): LocationTypes => {
-  if (pageName === SiemPageName.hosts) {
+  if (pageName === SiemPageName.overview) {
+    return CONSTANTS.overviewPage;
+  } else if (pageName === SiemPageName.hosts) {
     if (detailName != null) {
       return CONSTANTS.hostsDetails;
     }
@@ -112,12 +114,10 @@ export const getCurrentLocation = (
       return CONSTANTS.networkDetails;
     }
     return CONSTANTS.networkPage;
-  } else if (pageName === SiemPageName.overview) {
-    return CONSTANTS.overviewPage;
-  } else if (pageName === SiemPageName.timelines) {
-    return CONSTANTS.timelinePage;
   } else if (pageName === SiemPageName.detectionEngine) {
     return CONSTANTS.detectionEnginePage;
+  } else if (pageName === SiemPageName.timelines) {
+    return CONSTANTS.timelinePage;
   }
   return CONSTANTS.unknown;
 };

@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -26,6 +34,8 @@ interface DraggableArguments {
 }
 
 export interface HeaderPageProps {
+  backLink?: string;
+  backText?: string;
   badgeLabel?: string;
   badgeTooltip?: string;
   children?: React.ReactNode;
@@ -35,10 +45,30 @@ export interface HeaderPageProps {
 }
 
 export const HeaderPage = pure<HeaderPageProps>(
-  ({ badgeLabel, badgeTooltip, children, draggableArguments, subtitle, title, ...rest }) => (
+  ({
+    backLink,
+    backText,
+    badgeLabel,
+    badgeTooltip,
+    children,
+    draggableArguments,
+    subtitle,
+    title,
+    ...rest
+  }) => (
     <Header {...rest}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
+          {backLink && backText && (
+            <EuiText size="xs">
+              <p>
+                <EuiLink href={backLink}>
+                  <EuiIcon size="s" type="arrowLeft" /> {backText}
+                </EuiLink>
+              </p>
+            </EuiText>
+          )}
+
           <EuiTitle size="l">
             <h1 data-test-subj="page_headline_title">
               {!draggableArguments ? (
@@ -64,9 +94,11 @@ export const HeaderPage = pure<HeaderPageProps>(
             </h1>
           </EuiTitle>
 
-          <EuiText color="subdued" size="xs">
-            {subtitle}
-          </EuiText>
+          {subtitle && (
+            <EuiText color="subdued" size="xs">
+              <p>{subtitle}</p>
+            </EuiText>
+          )}
         </EuiFlexItem>
 
         {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}

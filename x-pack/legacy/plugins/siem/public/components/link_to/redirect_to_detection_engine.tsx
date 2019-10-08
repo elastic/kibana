@@ -20,4 +20,31 @@ export const RedirectToDetectionEnginePage = ({
   <RedirectWrapper to={`/${DETECTION_ENGINE_PAGE_NAME}${search}`} />
 );
 
+export const RedirectToRulesPage = ({ location: { search } }: DetectionEngineComponentProps) => {
+  return <RedirectWrapper to={`/${DETECTION_ENGINE_PAGE_NAME}/rules${search}`} />;
+};
+
+export const RedirectToCreateRulePage = ({
+  location: { search },
+}: DetectionEngineComponentProps) => {
+  return <RedirectWrapper to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/create-rule${search}`} />;
+};
+
+export const RedirectToRuleDetailsPage = ({
+  location: { search },
+}: DetectionEngineComponentProps) => {
+  return <RedirectWrapper to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/rule-details${search}`} />;
+};
+
+export const RedirectToEditRulePage = ({ location: { search } }: DetectionEngineComponentProps) => {
+  return (
+    <RedirectWrapper to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/rule-details/edit-rule${search}`} />
+  );
+};
+
 export const getDetectionEngineUrl = () => `#/link-to/${DETECTION_ENGINE_PAGE_NAME}`;
+export const getRulesUrl = () => `#/link-to/${DETECTION_ENGINE_PAGE_NAME}/rules`;
+export const getCreateRuleUrl = () => `#/link-to/${DETECTION_ENGINE_PAGE_NAME}/rules/create-rule`;
+export const getRuleDetailsUrl = () => `#/link-to/${DETECTION_ENGINE_PAGE_NAME}/rules/rule-details`;
+export const getEditRuleUrl = () =>
+  `#/link-to/${DETECTION_ENGINE_PAGE_NAME}/rules/rule-details/edit-rule`;
