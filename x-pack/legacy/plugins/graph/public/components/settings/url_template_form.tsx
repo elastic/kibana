@@ -176,7 +176,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                       <strong>
                         {i18n.translate(
                           'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
-                          { defaultMessage: 'convert it' }
+                          { defaultMessage: 'convert it.' }
                         )}
                       </strong>
                     </EuiLink>
@@ -196,7 +196,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             urlPlaceholderMissing
               ? [
                   i18n.translate('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
-                    defaultMessage: 'The URL must contain a {placeholder} string',
+                    defaultMessage: 'The URL must contain a {placeholder} string.',
                     values: { placeholder: '{{gquery}}' },
                   }),
                 ]

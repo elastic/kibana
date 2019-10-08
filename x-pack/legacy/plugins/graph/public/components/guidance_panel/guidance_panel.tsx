@@ -106,7 +106,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
             <ListItem state={hasDatasource ? 'done' : 'active'}>
               <FormattedMessage
                 id="xpack.graph.guidancePanel.datasourceItem.description"
-                defaultMessage="Select a {indexpattern}"
+                defaultMessage="Select a {indexpattern}."
                 values={{
                   indexpattern: (
                     <EuiLink onClick={onOpenDatasourcePicker}>
@@ -124,19 +124,19 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
             <ListItem state={hasFields ? 'done' : hasDatasource ? 'active' : 'disabled'}>
               <EuiLink onClick={onOpenFieldPicker}>
                 {i18n.translate('xpack.graph.guidancePanel.fieldsItem.fieldsButtonLabel', {
-                  defaultMessage: 'Add fields',
+                  defaultMessage: 'Add fields.',
                 })}
               </EuiLink>
             </ListItem>
             <ListItem state={hasFields ? 'active' : 'disabled'}>
               <FormattedMessage
                 id="xpack.graph.guidancePanel.nodesItem.description"
-                defaultMessage="Search and graph your data. Don't know where to start? Graph the {topTerms}"
+                defaultMessage="Search and graph your data. Don't know where to start? {topTerms}."
                 values={{
                   topTerms: (
                     <EuiLink onClick={onFillWorkspace}>
                       {i18n.translate('xpack.graph.guidancePanel.nodesItem.topTermsButtonLabel', {
-                        defaultMessage: 'top terms',
+                        defaultMessage: 'Graph the top terms',
                       })}
                     </EuiLink>
                   ),

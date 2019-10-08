@@ -174,7 +174,7 @@ export function FieldEditor({
                   'xpack.graph.fieldManager.deleteFieldTooltipContent',
                   {
                     defaultMessage:
-                      "No new vertices of this field will be discovered. Existing vertices won't be removed.",
+                      'No new vertices for this field will be discovered.  Existing vertices remain in the graph.',
                   }
                 ),
                 icon: <EuiIcon type="trash" size="m" />,

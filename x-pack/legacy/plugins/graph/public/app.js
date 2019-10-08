@@ -372,7 +372,7 @@ app.controller('graphuiPlugin', function (
     const confirmModalOptions = {
       onConfirm: callback,
       onCancel: (() => {}),
-      cancelButtonText: i18n.translate('xpack.graph.clearWorkspace.cancelButtonLabel', {
+      confirmButtonText: i18n.translate('xpack.graph.clearWorkspace.confirmButtonLabel', {
         defaultMessage: 'Leave anyway',
       }),
       title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
