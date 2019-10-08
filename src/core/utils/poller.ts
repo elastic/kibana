@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { BehaviorSubject, timer } from 'rxjs';
+import * as Rx from 'rxjs';
+import { tap, repeatWhen, switchMap } from 'rxjs/operators';
 
 /**
  * Create an Observable BehaviorSubject to invoke a function on an interval
@@ -25,31 +26,47 @@ import { BehaviorSubject, timer } from 'rxjs';
  * @public
  */
 export class Poller<T> {
-  /**
-   * The observable to observe for changes to the poller value.
-   */
-  public readonly subject$ = new BehaviorSubject<T>(this.initialValue);
-  private poller$ = timer(0, this.frequency);
-  private subscription = this.poller$.subscribe(async iteration => {
-    const next = await this.handler(iteration);
-
-    if (next !== undefined) {
-      this.subject$.next(next);
-    }
-
-    return iteration;
-  });
-
+  private readonly value$: Rx.BehaviorSubject<T>;
+  private readonly subscription: Rx.Subscription;
   constructor(
-    private frequency: number,
-    private initialValue: T,
-    private handler: (iteration: number) => Promise<T | undefined> | T | undefined
-  ) {}
+    frequency: number,
+    initialValue: T,
+    handler: (iteration: number) => Promise<T | undefined> | T | undefined
+  ) {
+    let iteration = -1;
+
+    this.value$ = new Rx.BehaviorSubject(initialValue);
+    this.subscription = Rx.defer(() => {
+      const value = handler(++iteration);
+      // return sync values synchronously to make tests simpler
+      return Rx.from(value instanceof Promise ? value : [value]);
+    })
+      .pipe(
+        tap(value => {
+          if (value !== undefined) {
+            this.value$.next(value);
+          }
+        }),
+        repeatWhen(complete$ => complete$.pipe(switchMap(() => Rx.timer(frequency))))
+      )
+      .subscribe(undefined, error => {
+        this.value$.error(error);
+      });
+  }
+
+  getValue() {
+    return this.value$.getValue();
+  }
+
+  get$() {
+    return this.value$.asObservable();
+  }
 
   /**
    * Permanently end the polling operation.
    */
   unsubscribe() {
-    return this.subscription.unsubscribe();
+    this.value$.complete();
+    this.subscription.unsubscribe();
   }
 }

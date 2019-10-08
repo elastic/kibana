@@ -19,53 +19,108 @@
 
 import { Poller } from './poller';
 
-const delay = (duration: number) => new Promise(r => setTimeout(r, duration));
+jest.useFakeTimers();
 
-// FLAKY: https://github.com/elastic/kibana/issues/44560
-describe.skip('Poller', () => {
-  let handler: jest.Mock<any, any>;
-  let poller: Poller<string>;
-
-  beforeEach(() => {
-    handler = jest.fn().mockImplementation((iteration: number) => `polling-${iteration}`);
-    poller = new Poller<string>(100, 'polling', handler);
-  });
-
-  afterEach(() => {
+const cleanup: Array<Poller<any>> = [];
+afterEach(() => {
+  for (const poller of cleanup) {
     poller.unsubscribe();
+  }
+  cleanup.length = 0;
+});
+
+const setup = (fn?: (n: number) => any) => {
+  const handler = jest.fn(fn || (i => `i${i}`));
+  const poller = new Poller<string>(100, 'initial value', handler);
+  cleanup.push(poller);
+
+  return { handler, poller };
+};
+
+describe('Poller', () => {
+  it('executes a function initially on contstruction, again every interval', () => {
+    const { handler } = setup();
+    expect(handler).toBeCalledTimes(1);
+    jest.advanceTimersByTime(300);
+    expect(handler).toBeCalledTimes(4);
   });
 
-  it('returns an observable of subject', async () => {
-    await delay(300);
-    expect(poller.subject$.getValue()).toBe('polling-2');
+  it('does not add next value if returns undefined', () => {
+    const { poller } = setup(i => (i % 2 === 0 ? `i${i}` : undefined));
+
+    const next = jest.fn();
+    poller.get$().subscribe(next);
+    jest.advanceTimersByTime(400);
+
+    expect(next.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "i0",
+        ],
+        Array [
+          "i2",
+        ],
+        Array [
+          "i4",
+        ],
+      ]
+    `);
   });
 
-  it('executes a function on an interval', async () => {
-    await delay(300);
-    expect(handler).toBeCalledTimes(3);
+  it('only schedules after previous completes', async () => {
+    const ping = () => new Promise(resolve => setTimeout(resolve, 400));
+    const { handler } = setup(ping);
+
+    jest.advanceTimersByTime(100);
+    await Promise.resolve();
+    // after 100ms, if the poller wasn't waiting for first ping then it would have scheduled a second ping
+    expect(handler).toHaveBeenCalledTimes(1);
+
+    jest.advanceTimersByTime(300);
+    await Promise.resolve();
+    // after 400ms, if the poller wasn't waiting then it would have scheduled a fourth ping
+    expect(handler).toHaveBeenCalledTimes(1);
+
+    // after 500ms, the first ping is complete and the second should be scheduled now
+    jest.advanceTimersByTime(100);
+    expect(handler).toHaveBeenCalledTimes(2);
   });
 
-  it('no longer polls after unsubscribing', async () => {
-    await delay(300);
-    poller.unsubscribe();
-    await delay(300);
-    expect(handler).toBeCalledTimes(3);
+  describe('getValue()', () => {
+    it('returns current value', () => {
+      const { poller } = setup();
+
+      expect(poller.getValue()).toBe('i0');
+      jest.advanceTimersByTime(100);
+      expect(poller.getValue()).toBe('i1');
+      jest.advanceTimersByTime(100);
+      expect(poller.getValue()).toBe('i2');
+      jest.advanceTimersByTime(50);
+      expect(poller.getValue()).toBe('i2');
+      jest.advanceTimersByTime(100);
+      expect(poller.getValue()).toBe('i3');
+    });
   });
 
-  it('does not add next value if returns undefined', async () => {
-    const values: any[] = [];
-    const polling = new Poller<string>(100, 'polling', iteration => {
-      if (iteration % 2 === 0) {
-        return `polling-${iteration}`;
-      }
+  describe('unsubscribe()', () => {
+    it('completes observables', () => {
+      const { poller } = setup();
+
+      const onComplete = jest.fn();
+      poller.get$().subscribe({ complete: onComplete });
+      expect(onComplete).not.toHaveBeenCalled();
+      poller.unsubscribe();
+      expect(onComplete).toHaveBeenCalled();
     });
 
-    polling.subject$.subscribe(value => {
-      values.push(value);
-    });
-    await delay(300);
-    polling.unsubscribe();
+    it('stops polling', () => {
+      const { poller, handler } = setup();
 
-    expect(values).toEqual(['polling', 'polling-0', 'polling-2']);
+      jest.advanceTimersByTime(0);
+      expect(handler).toHaveBeenCalledTimes(1);
+      poller.unsubscribe();
+      jest.advanceTimersByTime(300);
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
   });
 });

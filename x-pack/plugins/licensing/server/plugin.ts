@@ -47,7 +47,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
   }
 
   private hasLicenseInfoChanged(newLicense: any) {
-    const currentLicense = this.poller.subject$.getValue();
+    const currentLicense = this.poller.getValue();
 
     if ((currentLicense && !newLicense) || (newLicense && !currentLicense)) {
       return true;
@@ -129,7 +129,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
   public async setup(core: CoreSetup) {
     const config = await this.config$.pipe(first()).toPromise();
     const poller = this.create(config, core);
-    const license$ = poller.subject$.asObservable();
+    const license$ = poller.get$();
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
