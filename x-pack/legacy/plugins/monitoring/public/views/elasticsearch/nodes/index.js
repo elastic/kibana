@@ -37,7 +37,7 @@ uiRoutes.when('/elasticsearch/nodes', {
         cluster_uuid: globalState.cluster_uuid
       }) || {};
 
-      const getPageData = ($injector) => {
+      const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
         const $http = $injector.get('$http');
         const globalState = $injector.get('globalState');
         const timeBounds = timefilter.getBounds();
@@ -48,7 +48,8 @@ uiRoutes.when('/elasticsearch/nodes', {
             timeRange: {
               min: timeBounds.min.toISOString(),
               max: timeBounds.max.toISOString()
-            }
+            },
+            ...routeOptions
           });
 
         const promise = globalState.cluster_uuid ? getNodes() : new Promise(resolve => resolve({}));
@@ -70,14 +71,20 @@ uiRoutes.when('/elasticsearch/nodes', {
         defaultData: {},
         getPageData,
         $scope,
-        $injector
+        $injector,
+        fetchDataImmediately: false // We want to apply pagination before sending the first request
       });
 
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
 
       $scope.$watch(() => this.data, () => this.renderReact(this.data || {}));
 
-      this.renderReact = ({ clusterStatus, nodes }) => {
+      this.renderReact = ({ clusterStatus, nodes, totalNodeCount }) => {
+        const pagination = {
+          ...this.pagination,
+          totalItemCount: totalNodeCount,
+        };
+
         super.renderReact(
           <I18nContext>
             <SetupModeRenderer
@@ -93,9 +100,7 @@ uiRoutes.when('/elasticsearch/nodes', {
                     setupMode={setupMode}
                     nodes={nodes}
                     showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
-                    sorting={this.sorting}
-                    pagination={this.pagination}
-                    onTableChange={this.onTableChange}
+                    {...this.getPaginationTableProps(pagination)}
                   />
                 </Fragment>
               )}
