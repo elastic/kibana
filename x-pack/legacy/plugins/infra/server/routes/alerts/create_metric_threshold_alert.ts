@@ -5,7 +5,7 @@
  */
 
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { createAlert } from '../../lib/alerting/metric_threshold/create_alert';
+import { createAlert, createMultiAlert } from '../../lib/alerting/metric_threshold/create_alert';
 import { internalInfraFrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 
 export const initCreateMetricThresholdAlert = ({ framework }: InfraBackendLibs) =>
@@ -29,13 +29,22 @@ export const initCreateMetricThresholdAlert = ({ framework }: InfraBackendLibs) 
         .getScopedSavedObjectsClient(internalReq);
 
       try {
-        const result = await createAlert(
-          { alertsClient, actionsClient, savedObjectsClient },
-          req.payload
-        );
-        const alertId = result;
-
-        return res.response(alertId);
+        if (req.payload.searchField.value === '*') {
+          const search = <Aggregation>(searchOptions: object) =>
+            framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
+          const alertIds = await createMultiAlert(
+            search,
+            { alertsClient, actionsClient, savedObjectsClient },
+            req.payload
+          );
+          return res.response(alertIds);
+        } else {
+          const alertId = await createAlert(
+            { alertsClient, actionsClient, savedObjectsClient },
+            req.payload
+          );
+          return res.response(alertId);
+        }
       } catch (e) {
         if (e && e.output) {
           return res.response(e.output.payload.message).code(e.output.statusCode);

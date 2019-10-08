@@ -5,6 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
+import uuid from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
 import {
   MetricThresholdAlertTypeParams,
@@ -12,8 +14,10 @@ import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from './types';
 import { infraMetricAlertSavedObjectType } from '../saved_object_mappings';
+import { getGroupings } from '../../metrics/get_groupings';
 import { ActionsClient } from '../../../../../actions';
 import { AlertsClient } from '../../../../../alerting';
+import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
 
 interface Properties extends MetricThresholdAlertTypeParams {
   actions: {
@@ -21,6 +25,7 @@ interface Properties extends MetricThresholdAlertTypeParams {
     slack: string;
     log: any;
   };
+  childOf?: string;
 }
 
 interface Clients {
@@ -72,7 +77,7 @@ const aggregationNames = {
   }),
 };
 
-const createAlert = async (
+export const createAlert = async (
   { alertsClient, actionsClient, savedObjectsClient }: Clients,
   {
     actions: { slack, email, log },
@@ -83,6 +88,7 @@ const createAlert = async (
     threshold,
     interval,
     indexPattern,
+    childOf,
   }: Properties
 ) => {
   const actions: Array<{ params: Record<string, any>; action: Action; group: string }> = [];
@@ -213,7 +219,7 @@ const createAlert = async (
       'xpack.infra.alerting.metricThreshold.slackTemplateAlertText',
       {
         defaultMessage:
-          '{searchFieldName} *{searchFieldValue}* has reported {aggregation} `{metric}` value {comparator} {threshold} within {interval}.\n\nThe current value is *{value}*',
+          '{searchFieldName} *{searchFieldValue}* has reported {aggregation} `{metric}` value {comparator} `{threshold}` within {interval}.\n\nThe current value is *{value}*',
         values,
       }
     );
@@ -221,7 +227,7 @@ const createAlert = async (
       'xpack.infra.alerting.metricThreshold.slackTemplateRecoveryText',
       {
         defaultMessage:
-          '{searchFieldName} *{searchFieldValue}* has recovered from an alert state in which {aggregation} `{metric}` value was {comparator} {threshold} within {interval}\n\nThe current value is *{value}*',
+          '{searchFieldName} *{searchFieldValue}* has recovered from an alert state in which {aggregation} `{metric}` value was {comparator} `{threshold}` within {interval}\n\nThe current value is *{value}*',
         values,
       }
     );
@@ -305,11 +311,68 @@ const createAlert = async (
 
   await savedObjectsClient.create(
     infraMetricAlertSavedObjectType,
-    { searchField, threshold, interval, comparator, aggregation, metric, indexPattern },
+    {
+      searchField,
+      threshold,
+      interval,
+      comparator,
+      aggregation,
+      metric,
+      indexPattern,
+      ...(childOf ? { childOf } : {}),
+    },
     { id: createdAlert.id }
   );
 
   return createdAlert.id;
 };
 
-export { createAlert };
+export const createMultiAlert = async (
+  search: <Aggregation>(options: object) => Promise<InfraDatabaseSearchResponse<{}, Aggregation>>,
+  clients: Clients,
+  props: Properties
+) => {
+  const { savedObjectsClient } = clients;
+  const { metric, aggregation, searchField, interval, indexPattern } = props;
+  const options = {
+    metrics: [
+      {
+        aggregation,
+        field: metric,
+        rate: false,
+      },
+    ],
+    groupBy: searchField.name,
+    indexPattern,
+    timerange: {
+      from: `now-${interval}`,
+      to: 'now',
+      field: '@timestamp',
+      interval,
+    },
+  };
+
+  const multiAlertId = uuid.v4();
+
+  const groupings = await getGroupings(search, options);
+  if (!groupings.series) throw new Error('Unable to get groupings');
+  const results = await Promise.all(
+    groupings.series.map(({ id }: { id: string }) =>
+      createAlert(clients, {
+        ...props,
+        searchField: {
+          ...searchField,
+          value: id,
+        },
+        childOf: multiAlertId,
+      })
+    )
+  );
+
+  await savedObjectsClient.create(
+    infraMetricAlertSavedObjectType,
+    { ...omit(props, 'actions'), childAlerts: results },
+    { id: multiAlertId }
+  );
+  return { id: multiAlertId, children: results };
+};

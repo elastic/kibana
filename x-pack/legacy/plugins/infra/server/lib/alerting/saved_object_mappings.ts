@@ -10,7 +10,13 @@ import { MetricThresholdAlertTypeParams } from './metric_threshold/types';
 export const infraMetricAlertSavedObjectType = 'infrastructure-metric-alert';
 
 export const infraAlertSavedObjectMappings: {
-  [infraMetricAlertSavedObjectType]: ElasticsearchMappingOf<MetricThresholdAlertTypeParams>;
+  [infraMetricAlertSavedObjectType]: ElasticsearchMappingOf<
+    MetricThresholdAlertTypeParams & {
+      currentAlertState: string;
+      childAlerts: string;
+      childOf: string;
+    }
+  >;
 } = {
   [infraMetricAlertSavedObjectType]: {
     properties: {
@@ -43,6 +49,12 @@ export const infraAlertSavedObjectMappings: {
         type: 'keyword',
       },
       currentAlertState: {
+        type: 'keyword',
+      },
+      childAlerts: {
+        type: 'keyword',
+      },
+      childOf: {
         type: 'keyword',
       },
     },

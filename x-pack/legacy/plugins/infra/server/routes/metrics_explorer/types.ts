@@ -8,8 +8,8 @@ import { InfraWrappableRequest } from '../../lib/adapters/framework';
 
 export interface InfraTimerange {
   field: string;
-  from: number;
-  to: number;
+  from: number | string;
+  to: number | string;
   interval: string;
 }
 

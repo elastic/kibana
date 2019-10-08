@@ -5,8 +5,11 @@
  */
 
 import { isObject, set } from 'lodash';
-import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
-import { MetricsExplorerRequest, MetricsExplorerResponse } from '../types';
+import { InfraDatabaseSearchResponse } from '../../lib/adapters/framework';
+import {
+  MetricsExplorerRequest,
+  MetricsExplorerResponse,
+} from '../../routes/metrics_explorer/types';
 
 interface GroupingAggregation {
   groupingsCount: {

@@ -6,7 +6,7 @@
 
 import { boomify } from 'boom';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getGroupings } from './lib/get_groupings';
+import { getGroupings } from '../../../server/lib/metrics/get_groupings';
 import { populateSeriesWithTSVBData } from './lib/populate_series_with_tsvb_data';
 import { metricsExplorerSchema } from './schema';
 import { MetricsExplorerResponse, MetricsExplorerWrappedRequest } from './types';
@@ -30,7 +30,6 @@ export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
         const options = req.payload;
         // First we get the groupings from a composite aggregation
         const response = await getGroupings(search, options);
-
         // Then we take the results and fill in the data from TSVB with the
         // user's custom metrics
         const seriesWithMetrics = await Promise.all(
