@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   EuiBasicTable,
   EuiSpacer,
   EuiSearchBar,
-  EuiButton
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 export function EuiMonitoringSSPTable({
   rows: items,
@@ -19,8 +17,6 @@ export function EuiMonitoringSSPTable({
   pagination,
   columns: _columns,
   onTableChange,
-  setupMode,
-  productName,
   fetchMoreData,
   ...props
 }) {
