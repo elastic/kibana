@@ -17,10 +17,8 @@ import { createActionTypeRegistry } from './index.test';
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
 const ACTION_TYPE_ID = '.pagerduty';
-const NO_OP_FN = () => {};
 
 const services: Services = {
-  log: NO_OP_FN,
   callCluster: async (path: string, opts: any) => {},
   savedObjectsClient: SavedObjectsClientMock.create(),
 };
@@ -28,12 +26,8 @@ const services: Services = {
 let actionType: ActionType;
 
 beforeAll(() => {
-  const actionTypeRegistry = createActionTypeRegistry();
+  const { actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
-});
-
-beforeEach(() => {
-  services.log = NO_OP_FN;
 });
 
 describe('get()', () => {
