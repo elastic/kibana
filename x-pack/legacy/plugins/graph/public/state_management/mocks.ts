@@ -76,6 +76,8 @@ export function createMockGraphStore({
     savePolicy: 'configAndData',
     showSaveModal: jest.fn(),
     setLiveResponseFields: jest.fn(),
+    setUrlTemplates: jest.fn(),
+    setWorkspaceInitialized: jest.fn(),
     ...mockedDepsOverwrites,
   };
   const sagaMiddleware = createSagaMiddleware();
