@@ -9,8 +9,8 @@
 ```typescript
 core: {
         elasticsearch: {
-            dataClient: ScopedClusterClient;
-            adminClient: ScopedClusterClient;
+            dataClient: IScopedClusterClient;
+            adminClient: IScopedClusterClient;
         };
     };
 ```
