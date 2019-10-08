@@ -10,6 +10,7 @@ files:
   ignore:
     - 'x-pack/legacy/plugins/canvas/shareable_runtime/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/lens/**/*.s+(a|c)ss'
+    - 'x-pack/legacy/plugins/maps/**/*.s+(a|c)ss'
 rules:
   quotes:
     - 2

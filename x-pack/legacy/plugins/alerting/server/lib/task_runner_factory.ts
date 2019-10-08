@@ -141,6 +141,7 @@ export class TaskRunnerFactory {
         };
 
         const alertTypeState = await alertType.executor({
+          alertId,
           services: alertTypeServices,
           params: validatedAlertTypeParams,
           state: taskInstance.state.alertTypeState || {},

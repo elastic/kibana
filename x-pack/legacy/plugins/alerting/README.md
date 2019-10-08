@@ -81,6 +81,7 @@ server.plugins.alerting.setup.registerType({
 		}),
 	},
 	async executor({
+    alertId,
 		startedAt,
 		previousStartedAt,
 		services,
@@ -138,6 +139,7 @@ server.plugins.alerting.setup.registerType({
 		}),
 	},
 	async executor({
+    alertId,
 		startedAt,
 		previousStartedAt,
 		services,

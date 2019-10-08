@@ -656,6 +656,14 @@
         ],
       },
       {
+        groupSlug: 'cytoscape',
+        groupName: 'cytoscape related packages',
+        packageNames: [
+          'cytoscape',
+          '@types/cytoscape',
+        ],
+      },
+      {
         groupSlug: 'fancy-log',
         groupName: 'fancy-log related packages',
         packageNames: [
@@ -909,6 +917,22 @@
         packageNames: [
           'write-pkg',
           '@types/write-pkg',
+        ],
+      },
+      {
+        groupSlug: 'parse-link-header',
+        groupName: 'parse-link-header related packages',
+        packageNames: [
+          'parse-link-header',
+          '@types/parse-link-header',
+        ],
+      },
+      {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
         ],
       },
       {
