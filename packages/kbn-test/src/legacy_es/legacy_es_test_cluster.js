@@ -23,12 +23,13 @@ import { get } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
+
 import { KIBANA_ROOT } from '../';
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 const path = require('path');
 const del = require('del');
 
-export function createEsTestCluster(options = {}) {
+export function createLegacyEsTestCluster(options = {}) {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
@@ -111,7 +112,7 @@ export function createEsTestCluster(options = {}) {
      * Returns an ES Client to the configured cluster
      */
     getClient() {
-      return new elasticsearch.Client({
+      return new legacyElasticsearch.Client({
         host: this.getUrl(),
       });
     }

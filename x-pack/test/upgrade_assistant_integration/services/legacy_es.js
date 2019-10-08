@@ -6,12 +6,12 @@
 
 import { format as formatUrl } from 'url';
 
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 
-export function EsProvider({ getService }) {
+export function LegacyEsProvider({ getService }) {
   const config = getService('config');
 
-  return new elasticsearch.Client({
+  return new legacyElasticsearch.Client({
     host: formatUrl(config.get('servers.elasticsearch')),
     requestTimeout: config.get('timeouts.esRequestTimeout'),
   });
