@@ -51,10 +51,15 @@ const chartBase: ChartBase = {
   series
 };
 
-export async function getCPUChartData(setup: Setup, serviceName: string) {
+export async function getCPUChartData(
+  setup: Setup,
+  serviceName: string,
+  serviceNodeName?: string
+) {
   const metricsChart = await fetchAndTransformMetrics({
     setup,
     serviceName,
+    serviceNodeName,
     chartBase,
     aggs: {
       systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },

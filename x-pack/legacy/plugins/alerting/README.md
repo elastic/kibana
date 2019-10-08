@@ -23,8 +23,9 @@ A Kibana alert detects a condition and executes one or more actions when that co
 
 ## Usage
 
-1. Develop and register an alert type (see alert types -> example).
-2. Create an alert using the RESTful API (see alerts -> create).
+1. Enable the alerting plugin in the `kibana.yml` by setting `xpack.alerting.enabled: true`.
+2. Develop and register an alert type (see alert types -> example).
+3. Create an alert using the RESTful API (see alerts -> create).
 
 ## Limitations
 
@@ -36,7 +37,7 @@ When security is enabled, users who create alerts will need the `manage_api_key`
 
 ### Methods
 
-**server.plugins.alerting.registerType(options)**
+**server.plugins.alerting.setup.registerType(options)**
 
 The following table describes the properties of the `options` object.
 
@@ -70,7 +71,7 @@ This example receives server and threshold as parameters. It will read the CPU u
 ```
 import { schema } from '@kbn/config-schema';
 ...
-server.plugins.alerting.registerType({
+server.plugins.alerting.setup.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
@@ -80,6 +81,7 @@ server.plugins.alerting.registerType({
 		}),
 	},
 	async executor({
+    alertId,
 		startedAt,
 		previousStartedAt,
 		services,
@@ -128,7 +130,7 @@ server.plugins.alerting.registerType({
 This example only receives threshold as a parameter. It will read the CPU usage of all the servers and schedule individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
 
 ```
-server.plugins.alerting.registerType({
+server.plugins.alerting.setup.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
@@ -137,6 +139,7 @@ server.plugins.alerting.registerType({
 		}),
 	},
 	async executor({
+    alertId,
 		startedAt,
 		previousStartedAt,
 		services,

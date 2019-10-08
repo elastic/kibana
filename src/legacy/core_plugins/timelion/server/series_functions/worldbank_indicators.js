@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import worldbank from './worldbank.js';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import Datasource from '../lib/classes/datasource';
 
 export default new Datasource ('worldbank_indicators', {
@@ -73,7 +73,7 @@ export default new Datasource ('worldbank_indicators', {
       return worldbank.timelionFn(wbArgs, tlConfig);
     });
 
-    return Promise.map(seriesLists, function (seriesList) {
+    return Bluebird.map(seriesLists, function (seriesList) {
       return seriesList.list[0];
     }).then(function (list) {
       return {

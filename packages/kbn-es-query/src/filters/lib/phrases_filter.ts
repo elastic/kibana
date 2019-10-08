@@ -21,8 +21,12 @@ import { Filter, FilterMeta } from './meta_filter';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: string[]; // The unformatted values
+  field?: string;
 };
 
 export type PhrasesFilter = Filter & {
   meta: PhrasesFilterMeta;
 };
+
+export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
+  filter && filter.meta.type === 'phrases';

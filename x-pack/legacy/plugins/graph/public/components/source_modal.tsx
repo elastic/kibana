@@ -12,7 +12,7 @@ import { SourcePicker, SourcePickerProps } from './source_picker';
 
 export function SourceModal(props: SourcePickerProps) {
   return (
-    <>
+    <div className="gphSourceModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
@@ -24,6 +24,6 @@ export function SourceModal(props: SourcePickerProps) {
       <EuiModalBody>
         <SourcePicker {...props} />
       </EuiModalBody>
-    </>
+    </div>
   );
 }

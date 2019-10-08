@@ -75,7 +75,7 @@ export class TaskPool {
   private async attemptToRun(tasks: TaskRunner[]) {
     for (const task of tasks) {
       if (this.availableWorkers > 0) {
-        if (await task.claimOwnership()) {
+        if (await task.markTaskAsRunning()) {
           this.running.add(task);
           task
             .run()
@@ -83,6 +83,8 @@ export class TaskPool {
               this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
             })
             .then(() => this.running.delete(task));
+        } else {
+          this.logger.warn(`Failed to mark Task ${task} as running`);
         }
       } else {
         return false;

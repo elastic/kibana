@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios, Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { AlertUtils, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -16,16 +16,13 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
   describe('update_api_key', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const OtherSpace = Spaces.find(space => space.id === 'other');
-
-    if (!OtherSpace) {
-      throw new Error('Space "other" not defined in scenarios');
-    }
 
     after(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
+      const alertUtils = new AlertUtils({ user, space, supertestWithoutAuth });
+
       describe(scenario.id, () => {
         it('should handle update alert api key request appropriately', async () => {
           const { body: createdAlert } = await supertest
@@ -35,10 +32,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/_update_api_key`)
-            .set('kbn-xsrf', 'foo')
-            .auth(user.username, user.password);
+          const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -69,23 +63,19 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
         it(`shouldn't update alert api key from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix('other')}/api/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add('other', createdAlert.id, 'alert');
 
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(OtherSpace.id)}/api/alert/${createdAlert.id}/_update_api_key`)
-            .set('kbn-xsrf', 'foo')
-            .auth(user.username, user.password);
+          const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
 
           expect(response.statusCode).to.eql(404);
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-            case 'space_1_all at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
@@ -93,6 +83,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               });
               break;
             case 'superuser at space1':
+            case 'space_1_all at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',

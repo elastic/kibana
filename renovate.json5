@@ -68,6 +68,17 @@
         ],
       },
       {
+        groupSlug: '@elastic/charts',
+        groupName: '@elastic/charts related packages',
+        packageNames: [
+          '@elastic/charts',
+          '@types/elastic__charts',
+        ],
+        reviewers: [
+          'markov00',
+        ],
+      },
+      {
         groupSlug: 'mocha',
         groupName: 'mocha related packages',
         packagePatterns: [
@@ -128,6 +139,13 @@
           '@types/typescript-fsa-reducers',
           'reselect',
           '@types/reselect',
+        ],
+      },
+      {
+        groupSlug: 'moment',
+        groupName: 'moment related packages',
+        packagePatterns: [
+          '(\\b|_)moment(\\b|_)',
         ],
       },
       {
@@ -239,6 +257,18 @@
         groupName: 'storybook related packages',
         packagePatterns: [
           '(\\b|_)storybook(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'typescript',
+        groupName: 'typescript related packages',
+        packagePatterns: [
+          '(\\b|_)ts(\\b|_)',
+          '(\\b|_)typescript(\\b|_)',
+        ],
+        packageNames: [
+          'tslib',
+          '@types/tslib',
         ],
       },
       {
@@ -458,22 +488,6 @@
         ],
       },
       {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
-        ],
-      },
-      {
-        groupSlug: 'moment-timezone',
-        groupName: 'moment-timezone related packages',
-        packageNames: [
-          'moment-timezone',
-          '@types/moment-timezone',
-        ],
-      },
-      {
         groupSlug: 'mustache',
         groupName: 'mustache related packages',
         packageNames: [
@@ -495,6 +509,14 @@
         packageNames: [
           'opn',
           '@types/opn',
+        ],
+      },
+      {
+        groupSlug: 'pngjs',
+        groupName: 'pngjs related packages',
+        packageNames: [
+          'pngjs',
+          '@types/pngjs',
         ],
       },
       {
@@ -586,6 +608,14 @@
         ],
       },
       {
+        groupSlug: 'vinyl-fs',
+        groupName: 'vinyl-fs related packages',
+        packageNames: [
+          'vinyl-fs',
+          '@types/vinyl-fs',
+        ],
+      },
+      {
         groupSlug: 'zen-observable',
         groupName: 'zen-observable related packages',
         packageNames: [
@@ -618,11 +648,35 @@
         ],
       },
       {
+        groupSlug: 'cytoscape',
+        groupName: 'cytoscape related packages',
+        packageNames: [
+          'cytoscape',
+          '@types/cytoscape',
+        ],
+      },
+      {
+        groupSlug: 'fancy-log',
+        groupName: 'fancy-log related packages',
+        packageNames: [
+          'fancy-log',
+          '@types/fancy-log',
+        ],
+      },
+      {
         groupSlug: 'file-saver',
         groupName: 'file-saver related packages',
         packageNames: [
           'file-saver',
           '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'getos',
+        groupName: 'getos related packages',
+        packageNames: [
+          'getos',
+          '@types/getos',
         ],
       },
       {
@@ -711,14 +765,6 @@
         packageNames: [
           'papaparse',
           '@types/papaparse',
-        ],
-      },
-      {
-        groupSlug: 'pngjs',
-        groupName: 'pngjs related packages',
-        packageNames: [
-          'pngjs',
-          '@types/pngjs',
         ],
       },
       {
