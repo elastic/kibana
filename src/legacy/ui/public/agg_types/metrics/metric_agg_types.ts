@@ -17,24 +17,26 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
-import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
-import { makeNestedLabel } from './lib/make_nested_label';
-import { i18n } from '@kbn/i18n';
-
-const derivativeLabel = i18n.translate('common.ui.aggTypes.metrics.derivativeLabel', {
-  defaultMessage: 'derivative'
-});
-
-export const derivativeMetricAgg = new MetricAggType({
-  name: 'derivative',
-  title: i18n.translate('common.ui.aggTypes.metrics.derivativeTitle', {
-    defaultMessage: 'Derivative'
-  }),
-  subtype: parentPipelineAggHelper.subtype,
-  makeLabel: agg => makeNestedLabel(agg, derivativeLabel),
-  params: [
-    ...parentPipelineAggHelper.params()
-  ],
-  getFormat: parentPipelineAggHelper.getFormat
-});
+export enum METRIC_TYPES {
+  AVG = 'avg',
+  CARDINALITY = 'cardinality',
+  AVG_BUCKET = 'avg_bucket',
+  MAX_BUCKET = 'max_bucket',
+  MIN_BUCKET = 'min_bucket',
+  SUM_BUCKET = 'sum_bucket',
+  COUNT = 'count',
+  CUMULATIVE_SUM = 'cumulative_sum',
+  DERIVATIVE = 'derivative',
+  GEO_BOUNDS = 'geo_bounds',
+  GEO_CENTROID = 'geo_centroid',
+  MEDIAN = 'median',
+  MIN = 'min',
+  MAX = 'max',
+  MOVING_FN = 'moving_avg',
+  SERIAL_DIFF = 'serial_diff',
+  SUM = 'sum',
+  TOP_HITS = 'top_hits',
+  PERCENTILES = 'percentiles',
+  PERCENTILE_RANKS = 'percentile_ranks',
+  STD_DEV = 'std_dev',
+}

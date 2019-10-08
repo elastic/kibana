@@ -17,24 +17,24 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
-import { makeNestedLabel } from './lib/make_nested_label';
-import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
-import { i18n } from '@kbn/i18n';
+import { AggConfigs } from '../../agg_configs';
+import { IMetricAggConfig } from '../metric_agg_type';
 
-const overallSumLabel = i18n.translate('common.ui.aggTypes.metrics.overallSumLabel', {
-  defaultMessage: 'overall sum'
-});
+export const parentPipelineAggWriter = (
+  agg: IMetricAggConfig,
+  output: Record<string, any>,
+  aggConfigs?: AggConfigs
+): void => {
+  const customMetric = agg.getParam('customMetric');
+  const metricAgg = agg.getParam('metricAgg');
 
-export const bucketSumMetricAgg = new MetricAggType({
-  name: 'sum_bucket',
-  title: i18n.translate('common.ui.aggTypes.metrics.sumBucketTitle', {
-    defaultMessage: 'Sum Bucket'
-  }),
-  makeLabel: agg => makeNestedLabel(agg, overallSumLabel),
-  subtype: siblingPipelineAggHelper.subtype,
-  params: [
-    ...siblingPipelineAggHelper.params()
-  ],
-  getFormat: siblingPipelineAggHelper.getFormat
-});
+  const selectedMetric = customMetric || (aggConfigs && aggConfigs.getResponseAggById(metricAgg));
+
+  if (customMetric && customMetric.type.name !== 'count') {
+    output.parentAggs = (output.parentAggs || []).concat(selectedMetric);
+  }
+
+  output.params = {
+    buckets_path: selectedMetric.type.name === 'count' ? '_count' : selectedMetric.id,
+  };
+};

@@ -17,24 +17,32 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
-export const geoBoundsMetricAgg = new MetricAggType({
-  name: 'geo_bounds',
-  title: i18n.translate('common.ui.aggTypes.metrics.geoBoundsTitle', {
-    defaultMessage: 'Geo Bounds'
-  }),
-  makeLabel: function () {
-    return i18n.translate('common.ui.aggTypes.metrics.geoBoundsLabel', {
-      defaultMessage: 'Geo Bounds'
+const sumTitle = i18n.translate('common.ui.aggTypes.metrics.sumTitle', {
+  defaultMessage: 'Sum',
+});
+
+export const sumMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.SUM,
+  title: sumTitle,
+  makeLabel(aggConfig) {
+    return i18n.translate('common.ui.aggTypes.metrics.sumLabel', {
+      defaultMessage: 'Sum of {field}',
+      values: { field: aggConfig.getFieldDisplayName() },
     });
+  },
+  isScalable() {
+    return true;
   },
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'geo_point'
-    }
-  ]
+      filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
+    },
+  ],
 });

@@ -17,36 +17,41 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+
 import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
-import { i18n } from '@kbn/i18n';
+import { METRIC_TYPES } from './metric_agg_types';
 
 const overallAverageLabel = i18n.translate('common.ui.aggTypes.metrics.overallAverageLabel', {
-  defaultMessage: 'overall average'
+  defaultMessage: 'overall average',
+});
+
+const averageBucketTitle = i18n.translate('common.ui.aggTypes.metrics.averageBucketTitle', {
+  defaultMessage: 'Average Bucket',
 });
 
 export const bucketAvgMetricAgg = new MetricAggType({
-  name: 'avg_bucket',
-  title: i18n.translate('common.ui.aggTypes.metrics.averageBucketTitle', {
-    defaultMessage: 'Average Bucket'
-  }),
+  name: METRIC_TYPES.AVG_BUCKET,
+  title: averageBucketTitle,
   makeLabel: agg => makeNestedLabel(agg, overallAverageLabel),
   subtype: siblingPipelineAggHelper.subtype,
-  params: [
-    ...siblingPipelineAggHelper.params()
-  ],
+  params: [...siblingPipelineAggHelper.params()],
   getFormat: siblingPipelineAggHelper.getFormat,
-  getValue: function (agg, bucket) {
-    const customMetric = agg.params.customMetric;
+  getValue(agg, bucket) {
+    const customMetric = agg.getParam('customMetric');
+    const customBucket = agg.getParam('customBucket');
     const scaleMetrics = customMetric.type && customMetric.type.isScalable();
 
     let value = bucket[agg.id] && bucket[agg.id].value;
-    if (scaleMetrics && agg.params.customBucket.type.name === 'date_histogram') {
-      const aggInfo = agg.params.customBucket.write();
+
+    if (scaleMetrics && customBucket.type.name === 'date_histogram') {
+      const aggInfo = customBucket.write();
+
       value *= get(aggInfo, 'bucketInterval.scale', 1);
     }
     return value;
-  }
+  },
 });
