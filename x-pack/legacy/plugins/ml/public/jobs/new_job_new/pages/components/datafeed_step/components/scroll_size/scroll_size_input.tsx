@@ -6,6 +6,7 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
+import { newJobDefaults } from '../../../../../../new_job/utils/new_job_defaults';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
@@ -17,6 +18,9 @@ export const ScrollSizeInput: FC = () => {
   const [scrollSizeString, setScrollSize] = useState(
     jobCreator.scrollSize === null ? '' : `${jobCreator.scrollSize}`
   );
+
+  const { datafeeds } = newJobDefaults();
+  const { scroll_size: scrollSizeDefault } = datafeeds;
 
   useEffect(() => {
     jobCreator.scrollSize = scrollSizeString === '' ? null : +scrollSizeString;
@@ -35,6 +39,7 @@ export const ScrollSizeInput: FC = () => {
     <Description validation={validation}>
       <EuiFieldNumber
         min={0}
+        placeholder={scrollSizeDefault}
         value={scrollSizeString === '' ? scrollSizeString : +scrollSizeString}
         onChange={e => setScrollSize(e.target.value)}
         isInvalid={validation.valid === false}
