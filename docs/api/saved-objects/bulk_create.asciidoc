@@ -11,6 +11,15 @@ experimental[] Create multiple {kib} saved objects.
 
 `POST /api/saved_objects/_bulk_create`
 
+`POST /s/<space_id>/api/saved_objects/_bulk_create`
+
+
+[[saved-objects-api-bulk-create-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
+
 [[saved-objects-api-bulk-create-query-params]]
 ==== Query parameters
 
@@ -38,7 +47,7 @@ experimental[] Create multiple {kib} saved objects.
 [[saved-objects-api-bulk-create-response-body]]
 ==== Response body
 
-`saved_objects`:: 
+`saved_objects`::
   (array) Top-level property the contains objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
 
 Saved objects that are unable to persist are replaced with an error object.
@@ -46,13 +55,13 @@ Saved objects that are unable to persist are replaced with an error object.
 [[saved-objects-api-bulk-create-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
   Indicates a successful call.
 
 [[saved-objects-api-bulk-create-example]]
 ==== Example
 
-Create an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID: 
+Create an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
 
 [source,js]
 --------------------------------------------------
@@ -67,7 +76,7 @@ POST api/saved_objects/_bulk_create
   },
   {
     "type": "dashboard",
-    "id": "my-dashboard",
+    "id": "be3733a0-9efe-11e7-acb3-3dab96693fab",
     "attributes": {
       "title": "Look at my dashboard"
     }
@@ -91,7 +100,7 @@ The API returns the following:
       }
     },
     {
-      "id": "my-dashboard",
+      "id": "be3733a0-9efe-11e7-acb3-3dab96693fab",
       "type": "dashboard",
       "error": {
         "statusCode": 409,
