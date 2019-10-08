@@ -669,7 +669,7 @@ export interface TimelineItem {
 
   data: TimelineNonEcsData[];
 
-  ecs: ECS;
+  ecs: Ecs;
 }
 
 export interface TimelineNonEcsData {
@@ -678,7 +678,7 @@ export interface TimelineNonEcsData {
   value?: Maybe<string[]>;
 }
 
-export interface ECS {
+export interface Ecs {
   _id: string;
 
   _index?: Maybe<string>;
@@ -1819,7 +1819,7 @@ export interface ResponseFavoriteTimeline {
 }
 
 export interface EcsEdges {
-  node: ECS;
+  node: Ecs;
 
   cursor: CursorType;
 }
@@ -1868,33 +1868,33 @@ export interface HostFields {
 // Arguments
 // ====================================================
 
-export interface getNoteQueryArgs {
+export interface GetNoteQueryArgs {
   id: string;
 }
-export interface getNotesByTimelineIdQueryArgs {
+export interface GetNotesByTimelineIdQueryArgs {
   timelineId: string;
 }
-export interface getNotesByEventIdQueryArgs {
+export interface GetNotesByEventIdQueryArgs {
   eventId: string;
 }
-export interface getAllNotesQueryArgs {
+export interface GetAllNotesQueryArgs {
   pageInfo?: Maybe<PageInfoNote>;
 
   search?: Maybe<string>;
 
   sort?: Maybe<SortNote>;
 }
-export interface getAllPinnedEventsByTimelineIdQueryArgs {
+export interface GetAllPinnedEventsByTimelineIdQueryArgs {
   timelineId: string;
 }
-export interface sourceQueryArgs {
+export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface getOneTimelineQueryArgs {
+export interface GetOneTimelineQueryArgs {
   id: string;
 }
-export interface getAllTimelineQueryArgs {
+export interface GetAllTimelineQueryArgs {
   pageInfo?: Maybe<PageInfoTimeline>;
 
   search?: Maybe<string>;
@@ -2123,51 +2123,51 @@ export interface UncommonProcessesSourceArgs {
 
   defaultIndex: string[];
 }
-export interface indicesExistSourceStatusArgs {
+export interface IndicesExistSourceStatusArgs {
   defaultIndex: string[];
 }
-export interface indexFieldsSourceStatusArgs {
+export interface IndexFieldsSourceStatusArgs {
   defaultIndex: string[];
 }
-export interface persistNoteMutationArgs {
+export interface PersistNoteMutationArgs {
   noteId?: Maybe<string>;
 
   version?: Maybe<string>;
 
   note: NoteInput;
 }
-export interface deleteNoteMutationArgs {
+export interface DeleteNoteMutationArgs {
   id: string[];
 }
-export interface deleteNoteByTimelineIdMutationArgs {
+export interface DeleteNoteByTimelineIdMutationArgs {
   timelineId: string;
 
   version?: Maybe<string>;
 }
-export interface persistPinnedEventOnTimelineMutationArgs {
+export interface PersistPinnedEventOnTimelineMutationArgs {
   pinnedEventId?: Maybe<string>;
 
   eventId: string;
 
   timelineId?: Maybe<string>;
 }
-export interface deletePinnedEventOnTimelineMutationArgs {
+export interface DeletePinnedEventOnTimelineMutationArgs {
   id: string[];
 }
-export interface deleteAllPinnedEventsOnTimelineMutationArgs {
+export interface DeleteAllPinnedEventsOnTimelineMutationArgs {
   timelineId: string;
 }
-export interface persistTimelineMutationArgs {
+export interface PersistTimelineMutationArgs {
   id?: Maybe<string>;
 
   version?: Maybe<string>;
 
   timeline: TimelineInput;
 }
-export interface persistFavoriteMutationArgs {
+export interface PersistFavoriteMutationArgs {
   timelineId?: Maybe<string>;
 }
-export interface deleteTimelineMutationArgs {
+export interface DeleteTimelineMutationArgs {
   id: string[];
 }
 
@@ -2185,8 +2185,8 @@ export namespace GetAuthenticationsQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -2328,8 +2328,8 @@ export namespace GetDomainsQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -2440,8 +2440,8 @@ export namespace GetEventsOverTimeQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -2491,8 +2491,8 @@ export namespace GetLastEventTimeQuery {
     defaultIndex: string[];
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -2519,8 +2519,8 @@ export namespace GetHostFirstLastSeenQuery {
     defaultIndex: string[];
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -2553,8 +2553,8 @@ export namespace GetHostsTableQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -2649,8 +2649,8 @@ export namespace GetHostOverviewQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -2747,8 +2747,8 @@ export namespace GetIpOverviewQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -2925,8 +2925,8 @@ export namespace GetKpiHostDetailsQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -2987,8 +2987,8 @@ export namespace GetKpiHostsQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -3055,8 +3055,8 @@ export namespace GetKpiNetworkQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -3116,8 +3116,8 @@ export namespace GetNetworkDnsQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -3203,8 +3203,8 @@ export namespace GetNetworkTopNFlowQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -3385,8 +3385,8 @@ export namespace GetOverviewHostQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -3439,8 +3439,8 @@ export namespace GetOverviewNetworkQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -3492,8 +3492,8 @@ export namespace SourceQuery {
     defaultIndex: string[];
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -3545,8 +3545,8 @@ export namespace GetAllTimeline {
     onlyUserFavorite?: Maybe<boolean>;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     getAllTimeline: GetAllTimeline;
   };
@@ -3653,8 +3653,8 @@ export namespace DeleteTimelineMutation {
     id: string[];
   };
 
-  export type mutation = {
-    __typename?: 'mutation';
+  export type Mutation = {
+    __typename?: 'Mutation';
 
     deleteTimeline: boolean;
   };
@@ -3668,8 +3668,8 @@ export namespace GetTimelineDetailsQuery {
     defaultIndex: string[];
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -3704,8 +3704,8 @@ export namespace PersistTimelineFavoriteMutation {
     timelineId?: Maybe<string>;
   };
 
-  export type mutation = {
-    __typename?: 'mutation';
+  export type Mutation = {
+    __typename?: 'Mutation';
 
     persistFavorite: PersistFavorite;
   };
@@ -3742,8 +3742,8 @@ export namespace GetTimelineQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -4426,8 +4426,8 @@ export namespace PersistTimelineNoteMutation {
     note: NoteInput;
   };
 
-  export type mutation = {
-    __typename?: 'mutation';
+  export type Mutation = {
+    __typename?: 'Mutation';
 
     persistNote: PersistNote;
   };
@@ -4472,8 +4472,8 @@ export namespace GetOneTimeline {
     id: string;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     getOneTimeline: GetOneTimeline;
   };
@@ -4732,8 +4732,8 @@ export namespace PersistTimelineMutation {
     timeline: TimelineInput;
   };
 
-  export type mutation = {
-    __typename?: 'mutation';
+  export type Mutation = {
+    __typename?: 'Mutation';
 
     persistTimeline: PersistTimeline;
   };
@@ -4924,8 +4924,8 @@ export namespace PersistTimelinePinnedEventMutation {
     timelineId?: Maybe<string>;
   };
 
-  export type mutation = {
-    __typename?: 'mutation';
+  export type Mutation = {
+    __typename?: 'Mutation';
 
     persistPinnedEventOnTimeline: Maybe<PersistPinnedEventOnTimeline>;
   };
@@ -4966,8 +4966,8 @@ export namespace GetTlsQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -5051,8 +5051,8 @@ export namespace GetUncommonProcessesQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };
@@ -5159,8 +5159,8 @@ export namespace GetUsersQuery {
     inspect: boolean;
   };
 
-  export type query = {
-    __typename?: 'query';
+  export type Query = {
+    __typename?: 'Query';
 
     source: Source;
   };

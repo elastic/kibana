@@ -28,13 +28,16 @@ async function main() {
         [OUTPUT_INTROSPECTION_PATH]: {
           documents: GRAPHQL_GLOBS,
           config: {
-            namingConvention: 'keep',
+            namingConvention: {
+              typeNames: 'change-case#pascalCase',
+              enumValues: 'keep',
+            },
             contextType: 'SiemContext',
             scalars: {
-              ToStringArray: 'string[]',
-              ToNumberArray: 'number[]',
-              ToDateArray: 'string[]',
-              ToBooleanArray: 'boolean[]',
+              ToStringArray: 'string[] | string',
+              ToNumberArray: 'number[] | number',
+              ToDateArray: 'string[] | string',
+              ToBooleanArray: 'boolean[] | boolean',
               Date: 'string',
             },
           },
@@ -43,7 +46,10 @@ async function main() {
         [OUTPUT_CLIENT_TYPES_PATH]: {
           documents: GRAPHQL_GLOBS,
           config: {
-            namingConvention: 'keep',
+            namingConvention: {
+              typeNames: 'change-case#pascalCase',
+              enumValues: 'keep',
+            },
             scalars: {
               ToStringArray: 'string[]',
               ToNumberArray: 'number[]',
@@ -51,7 +57,6 @@ async function main() {
               ToBooleanArray: 'boolean[]',
               Date: 'string',
             },
-            preResolveTypes: true,
           },
           plugins: [
             {
@@ -71,13 +76,16 @@ async function main() {
         },
         [OUTPUT_SERVER_TYPES_PATH]: {
           config: {
-            namingConvention: 'keep',
+            namingConvention: {
+              typeNames: 'change-case#pascalCase',
+              enumValues: 'keep',
+            },
             contextType: 'SiemContext',
             scalars: {
-              ToStringArray: 'string[]',
-              ToNumberArray: 'number[]',
-              ToDateArray: 'string[]',
-              ToBooleanArray: 'boolean[]',
+              ToStringArray: 'string[] | string',
+              ToNumberArray: 'number[] | number',
+              ToDateArray: 'string[] | string',
+              ToBooleanArray: 'boolean[] | boolean',
               Date: 'string',
             },
           },

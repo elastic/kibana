@@ -315,15 +315,15 @@ export enum SortFieldTimeline {
   created = 'created',
 }
 
-export type ToStringArray = string[];
+export type ToStringArray = string[] | string;
 
 export type Date = string;
 
-export type ToNumberArray = number[];
+export type ToNumberArray = number[] | number;
 
-export type ToDateArray = string[];
+export type ToDateArray = string[] | string;
 
-export type ToBooleanArray = boolean[];
+export type ToBooleanArray = boolean[] | boolean;
 
 export type EsValue = any;
 
@@ -541,17 +541,17 @@ export interface AuthenticationItem {
 }
 
 export interface UserEcsFields {
-  id?: Maybe<string[]>;
+  id?: Maybe<string[] | string>;
 
-  name?: Maybe<string[]>;
+  name?: Maybe<string[] | string>;
 
-  full_name?: Maybe<string[]>;
+  full_name?: Maybe<string[] | string>;
 
-  email?: Maybe<string[]>;
+  email?: Maybe<string[] | string>;
 
-  hash?: Maybe<string[]>;
+  hash?: Maybe<string[] | string>;
 
-  group?: Maybe<string[]>;
+  group?: Maybe<string[] | string>;
 }
 
 export interface LastSourceHost {
@@ -563,69 +563,69 @@ export interface LastSourceHost {
 }
 
 export interface SourceEcsFields {
-  bytes?: Maybe<number[]>;
+  bytes?: Maybe<number[] | number>;
 
-  ip?: Maybe<string[]>;
+  ip?: Maybe<string[] | string>;
 
-  port?: Maybe<number[]>;
+  port?: Maybe<number[] | number>;
 
-  domain?: Maybe<string[]>;
+  domain?: Maybe<string[] | string>;
 
   geo?: Maybe<GeoEcsFields>;
 
-  packets?: Maybe<number[]>;
+  packets?: Maybe<number[] | number>;
 }
 
 export interface GeoEcsFields {
-  city_name?: Maybe<string[]>;
+  city_name?: Maybe<string[] | string>;
 
-  continent_name?: Maybe<string[]>;
+  continent_name?: Maybe<string[] | string>;
 
-  country_iso_code?: Maybe<string[]>;
+  country_iso_code?: Maybe<string[] | string>;
 
-  country_name?: Maybe<string[]>;
+  country_name?: Maybe<string[] | string>;
 
   location?: Maybe<Location>;
 
-  region_iso_code?: Maybe<string[]>;
+  region_iso_code?: Maybe<string[] | string>;
 
-  region_name?: Maybe<string[]>;
+  region_name?: Maybe<string[] | string>;
 }
 
 export interface Location {
-  lon?: Maybe<number[]>;
+  lon?: Maybe<number[] | number>;
 
-  lat?: Maybe<number[]>;
+  lat?: Maybe<number[] | number>;
 }
 
 export interface HostEcsFields {
-  architecture?: Maybe<string[]>;
+  architecture?: Maybe<string[] | string>;
 
-  id?: Maybe<string[]>;
+  id?: Maybe<string[] | string>;
 
-  ip?: Maybe<string[]>;
+  ip?: Maybe<string[] | string>;
 
-  mac?: Maybe<string[]>;
+  mac?: Maybe<string[] | string>;
 
-  name?: Maybe<string[]>;
+  name?: Maybe<string[] | string>;
 
   os?: Maybe<OsEcsFields>;
 
-  type?: Maybe<string[]>;
+  type?: Maybe<string[] | string>;
 }
 
 export interface OsEcsFields {
-  platform?: Maybe<string[]>;
+  platform?: Maybe<string[] | string>;
 
-  name?: Maybe<string[]>;
+  name?: Maybe<string[] | string>;
 
-  full?: Maybe<string[]>;
+  full?: Maybe<string[] | string>;
 
-  family?: Maybe<string[]>;
+  family?: Maybe<string[] | string>;
 
-  version?: Maybe<string[]>;
+  version?: Maybe<string[] | string>;
 
-  kernel?: Maybe<string[]>;
+  kernel?: Maybe<string[] | string>;
 }
 
 export interface CursorType {
@@ -671,16 +671,16 @@ export interface TimelineItem {
 
   data: TimelineNonEcsData[];
 
-  ecs: ECS;
+  ecs: Ecs;
 }
 
 export interface TimelineNonEcsData {
   field: string;
 
-  value?: Maybe<string[]>;
+  value?: Maybe<string[] | string>;
 }
 
-export interface ECS {
+export interface Ecs {
   _id: string;
 
   _index?: Maybe<string>;
@@ -711,7 +711,7 @@ export interface ECS {
 
   timestamp?: Maybe<string>;
 
-  message?: Maybe<string[]>;
+  message?: Maybe<string[] | string>;
 
   user?: Maybe<UserEcsFields>;
 
@@ -723,23 +723,23 @@ export interface ECS {
 }
 
 export interface AuditdEcsFields {
-  result?: Maybe<string[]>;
+  result?: Maybe<string[] | string>;
 
-  session?: Maybe<string[]>;
+  session?: Maybe<string[] | string>;
 
   data?: Maybe<AuditdData>;
 
   summary?: Maybe<Summary>;
 
-  sequence?: Maybe<string[]>;
+  sequence?: Maybe<string[] | string>;
 }
 
 export interface AuditdData {
-  acct?: Maybe<string[]>;
+  acct?: Maybe<string[] | string>;
 
-  terminal?: Maybe<string[]>;
+  terminal?: Maybe<string[] | string>;
 
-  op?: Maybe<string[]>;
+  op?: Maybe<string[] | string>;
 }
 
 export interface Summary {
@@ -747,85 +747,85 @@ export interface Summary {
 
   object?: Maybe<PrimarySecondary>;
 
-  how?: Maybe<string[]>;
+  how?: Maybe<string[] | string>;
 
-  message_type?: Maybe<string[]>;
+  message_type?: Maybe<string[] | string>;
 
-  sequence?: Maybe<string[]>;
+  sequence?: Maybe<string[] | string>;
 }
 
 export interface PrimarySecondary {
-  primary?: Maybe<string[]>;
+  primary?: Maybe<string[] | string>;
 
-  secondary?: Maybe<string[]>;
+  secondary?: Maybe<string[] | string>;
 
-  type?: Maybe<string[]>;
+  type?: Maybe<string[] | string>;
 }
 
 export interface DestinationEcsFields {
-  bytes?: Maybe<number[]>;
+  bytes?: Maybe<number[] | number>;
 
-  ip?: Maybe<string[]>;
+  ip?: Maybe<string[] | string>;
 
-  port?: Maybe<number[]>;
+  port?: Maybe<number[] | number>;
 
-  domain?: Maybe<string[]>;
+  domain?: Maybe<string[] | string>;
 
   geo?: Maybe<GeoEcsFields>;
 
-  packets?: Maybe<number[]>;
+  packets?: Maybe<number[] | number>;
 }
 
 export interface EventEcsFields {
-  action?: Maybe<string[]>;
+  action?: Maybe<string[] | string>;
 
-  category?: Maybe<string[]>;
+  category?: Maybe<string[] | string>;
 
-  created?: Maybe<string[]>;
+  created?: Maybe<string[] | string>;
 
-  dataset?: Maybe<string[]>;
+  dataset?: Maybe<string[] | string>;
 
-  duration?: Maybe<number[]>;
+  duration?: Maybe<number[] | number>;
 
-  end?: Maybe<string[]>;
+  end?: Maybe<string[] | string>;
 
-  hash?: Maybe<string[]>;
+  hash?: Maybe<string[] | string>;
 
-  id?: Maybe<string[]>;
+  id?: Maybe<string[] | string>;
 
-  kind?: Maybe<string[]>;
+  kind?: Maybe<string[] | string>;
 
-  module?: Maybe<string[]>;
+  module?: Maybe<string[] | string>;
 
-  original?: Maybe<string[]>;
+  original?: Maybe<string[] | string>;
 
-  outcome?: Maybe<string[]>;
+  outcome?: Maybe<string[] | string>;
 
-  risk_score?: Maybe<number[]>;
+  risk_score?: Maybe<number[] | number>;
 
-  risk_score_norm?: Maybe<number[]>;
+  risk_score_norm?: Maybe<number[] | number>;
 
-  severity?: Maybe<number[]>;
+  severity?: Maybe<number[] | number>;
 
-  start?: Maybe<string[]>;
+  start?: Maybe<string[] | string>;
 
-  timezone?: Maybe<string[]>;
+  timezone?: Maybe<string[] | string>;
 
-  type?: Maybe<string[]>;
+  type?: Maybe<string[] | string>;
 }
 
 export interface NetworkEcsField {
-  bytes?: Maybe<number[]>;
+  bytes?: Maybe<number[] | number>;
 
-  community_id?: Maybe<string[]>;
+  community_id?: Maybe<string[] | string>;
 
-  direction?: Maybe<string[]>;
+  direction?: Maybe<string[] | string>;
 
-  packets?: Maybe<number[]>;
+  packets?: Maybe<number[] | number>;
 
-  protocol?: Maybe<string[]>;
+  protocol?: Maybe<string[] | string>;
 
-  transport?: Maybe<string[]>;
+  transport?: Maybe<string[] | string>;
 }
 
 export interface SuricataEcsFields {
@@ -835,15 +835,15 @@ export interface SuricataEcsFields {
 export interface SuricataEveData {
   alert?: Maybe<SuricataAlertData>;
 
-  flow_id?: Maybe<number[]>;
+  flow_id?: Maybe<number[] | number>;
 
-  proto?: Maybe<string[]>;
+  proto?: Maybe<string[] | string>;
 }
 
 export interface SuricataAlertData {
-  signature?: Maybe<string[]>;
+  signature?: Maybe<string[] | string>;
 
-  signature_id?: Maybe<number[]>;
+  signature_id?: Maybe<number[] | number>;
 }
 
 export interface TlsEcsFields {
@@ -859,7 +859,7 @@ export interface TlsClientCertificateData {
 }
 
 export interface FingerprintData {
-  sha1?: Maybe<string[]>;
+  sha1?: Maybe<string[] | string>;
 }
 
 export interface TlsFingerprintsData {
@@ -867,7 +867,7 @@ export interface TlsFingerprintsData {
 }
 
 export interface TlsJa3Data {
-  hash?: Maybe<string[]>;
+  hash?: Maybe<string[] | string>;
 }
 
 export interface TlsServerCertificateData {
@@ -875,7 +875,7 @@ export interface TlsServerCertificateData {
 }
 
 export interface ZeekEcsFields {
-  session_id?: Maybe<string[]>;
+  session_id?: Maybe<string[] | string>;
 
   connection?: Maybe<ZeekConnectionData>;
 
@@ -891,119 +891,119 @@ export interface ZeekEcsFields {
 }
 
 export interface ZeekConnectionData {
-  local_resp?: Maybe<boolean[]>;
+  local_resp?: Maybe<boolean[] | boolean>;
 
-  local_orig?: Maybe<boolean[]>;
+  local_orig?: Maybe<boolean[] | boolean>;
 
-  missed_bytes?: Maybe<number[]>;
+  missed_bytes?: Maybe<number[] | number>;
 
-  state?: Maybe<string[]>;
+  state?: Maybe<string[] | string>;
 
-  history?: Maybe<string[]>;
+  history?: Maybe<string[] | string>;
 }
 
 export interface ZeekNoticeData {
-  suppress_for?: Maybe<number[]>;
+  suppress_for?: Maybe<number[] | number>;
 
-  msg?: Maybe<string[]>;
+  msg?: Maybe<string[] | string>;
 
-  note?: Maybe<string[]>;
+  note?: Maybe<string[] | string>;
 
-  sub?: Maybe<string[]>;
+  sub?: Maybe<string[] | string>;
 
-  dst?: Maybe<string[]>;
+  dst?: Maybe<string[] | string>;
 
-  dropped?: Maybe<boolean[]>;
+  dropped?: Maybe<boolean[] | boolean>;
 
-  peer_descr?: Maybe<string[]>;
+  peer_descr?: Maybe<string[] | string>;
 }
 
 export interface ZeekDnsData {
-  AA?: Maybe<boolean[]>;
+  AA?: Maybe<boolean[] | boolean>;
 
-  qclass_name?: Maybe<string[]>;
+  qclass_name?: Maybe<string[] | string>;
 
-  RD?: Maybe<boolean[]>;
+  RD?: Maybe<boolean[] | boolean>;
 
-  qtype_name?: Maybe<string[]>;
+  qtype_name?: Maybe<string[] | string>;
 
-  rejected?: Maybe<boolean[]>;
+  rejected?: Maybe<boolean[] | boolean>;
 
-  qtype?: Maybe<string[]>;
+  qtype?: Maybe<string[] | string>;
 
-  query?: Maybe<string[]>;
+  query?: Maybe<string[] | string>;
 
-  trans_id?: Maybe<number[]>;
+  trans_id?: Maybe<number[] | number>;
 
-  qclass?: Maybe<string[]>;
+  qclass?: Maybe<string[] | string>;
 
-  RA?: Maybe<boolean[]>;
+  RA?: Maybe<boolean[] | boolean>;
 
-  TC?: Maybe<boolean[]>;
+  TC?: Maybe<boolean[] | boolean>;
 }
 
 export interface ZeekHttpData {
-  resp_mime_types?: Maybe<string[]>;
+  resp_mime_types?: Maybe<string[] | string>;
 
-  trans_depth?: Maybe<string[]>;
+  trans_depth?: Maybe<string[] | string>;
 
-  status_msg?: Maybe<string[]>;
+  status_msg?: Maybe<string[] | string>;
 
-  resp_fuids?: Maybe<string[]>;
+  resp_fuids?: Maybe<string[] | string>;
 
-  tags?: Maybe<string[]>;
+  tags?: Maybe<string[] | string>;
 }
 
 export interface ZeekFileData {
-  session_ids?: Maybe<string[]>;
+  session_ids?: Maybe<string[] | string>;
 
-  timedout?: Maybe<boolean[]>;
+  timedout?: Maybe<boolean[] | boolean>;
 
-  local_orig?: Maybe<boolean[]>;
+  local_orig?: Maybe<boolean[] | boolean>;
 
-  tx_host?: Maybe<string[]>;
+  tx_host?: Maybe<string[] | string>;
 
-  source?: Maybe<string[]>;
+  source?: Maybe<string[] | string>;
 
-  is_orig?: Maybe<boolean[]>;
+  is_orig?: Maybe<boolean[] | boolean>;
 
-  overflow_bytes?: Maybe<number[]>;
+  overflow_bytes?: Maybe<number[] | number>;
 
-  sha1?: Maybe<string[]>;
+  sha1?: Maybe<string[] | string>;
 
-  duration?: Maybe<number[]>;
+  duration?: Maybe<number[] | number>;
 
-  depth?: Maybe<number[]>;
+  depth?: Maybe<number[] | number>;
 
-  analyzers?: Maybe<string[]>;
+  analyzers?: Maybe<string[] | string>;
 
-  mime_type?: Maybe<string[]>;
+  mime_type?: Maybe<string[] | string>;
 
-  rx_host?: Maybe<string[]>;
+  rx_host?: Maybe<string[] | string>;
 
-  total_bytes?: Maybe<number[]>;
+  total_bytes?: Maybe<number[] | number>;
 
-  fuid?: Maybe<string[]>;
+  fuid?: Maybe<string[] | string>;
 
-  seen_bytes?: Maybe<number[]>;
+  seen_bytes?: Maybe<number[] | number>;
 
-  missing_bytes?: Maybe<number[]>;
+  missing_bytes?: Maybe<number[] | number>;
 
-  md5?: Maybe<string[]>;
+  md5?: Maybe<string[] | string>;
 }
 
 export interface ZeekSslData {
-  cipher?: Maybe<string[]>;
+  cipher?: Maybe<string[] | string>;
 
-  established?: Maybe<boolean[]>;
+  established?: Maybe<boolean[] | boolean>;
 
-  resumed?: Maybe<boolean[]>;
+  resumed?: Maybe<boolean[] | boolean>;
 
-  version?: Maybe<string[]>;
+  version?: Maybe<string[] | string>;
 }
 
 export interface HttpEcsFields {
-  version?: Maybe<string[]>;
+  version?: Maybe<string[] | string>;
 
   request?: Maybe<HttpRequestData>;
 
@@ -1011,91 +1011,91 @@ export interface HttpEcsFields {
 }
 
 export interface HttpRequestData {
-  method?: Maybe<string[]>;
+  method?: Maybe<string[] | string>;
 
   body?: Maybe<HttpBodyData>;
 
-  referrer?: Maybe<string[]>;
+  referrer?: Maybe<string[] | string>;
 
-  bytes?: Maybe<number[]>;
+  bytes?: Maybe<number[] | number>;
 }
 
 export interface HttpBodyData {
-  content?: Maybe<string[]>;
+  content?: Maybe<string[] | string>;
 
-  bytes?: Maybe<number[]>;
+  bytes?: Maybe<number[] | number>;
 }
 
 export interface HttpResponseData {
-  status_code?: Maybe<number[]>;
+  status_code?: Maybe<number[] | number>;
 
   body?: Maybe<HttpBodyData>;
 
-  bytes?: Maybe<number[]>;
+  bytes?: Maybe<number[] | number>;
 }
 
 export interface UrlEcsFields {
-  domain?: Maybe<string[]>;
+  domain?: Maybe<string[] | string>;
 
-  original?: Maybe<string[]>;
+  original?: Maybe<string[] | string>;
 
-  username?: Maybe<string[]>;
+  username?: Maybe<string[] | string>;
 
-  password?: Maybe<string[]>;
+  password?: Maybe<string[] | string>;
 }
 
 export interface ProcessEcsFields {
-  pid?: Maybe<number[]>;
+  pid?: Maybe<number[] | number>;
 
-  name?: Maybe<string[]>;
+  name?: Maybe<string[] | string>;
 
-  ppid?: Maybe<number[]>;
+  ppid?: Maybe<number[] | number>;
 
-  args?: Maybe<string[]>;
+  args?: Maybe<string[] | string>;
 
-  executable?: Maybe<string[]>;
+  executable?: Maybe<string[] | string>;
 
-  title?: Maybe<string[]>;
+  title?: Maybe<string[] | string>;
 
   thread?: Maybe<Thread>;
 
-  working_directory?: Maybe<string[]>;
+  working_directory?: Maybe<string[] | string>;
 }
 
 export interface Thread {
-  id?: Maybe<number[]>;
+  id?: Maybe<number[] | number>;
 
-  start?: Maybe<string[]>;
+  start?: Maybe<string[] | string>;
 }
 
 export interface FileFields {
-  path?: Maybe<string[]>;
+  path?: Maybe<string[] | string>;
 
-  target_path?: Maybe<string[]>;
+  target_path?: Maybe<string[] | string>;
 
-  extension?: Maybe<string[]>;
+  extension?: Maybe<string[] | string>;
 
-  type?: Maybe<string[]>;
+  type?: Maybe<string[] | string>;
 
-  device?: Maybe<string[]>;
+  device?: Maybe<string[] | string>;
 
-  inode?: Maybe<string[]>;
+  inode?: Maybe<string[] | string>;
 
-  uid?: Maybe<string[]>;
+  uid?: Maybe<string[] | string>;
 
-  owner?: Maybe<string[]>;
+  owner?: Maybe<string[] | string>;
 
-  gid?: Maybe<string[]>;
+  gid?: Maybe<string[] | string>;
 
-  group?: Maybe<string[]>;
+  group?: Maybe<string[] | string>;
 
-  mode?: Maybe<string[]>;
+  mode?: Maybe<string[] | string>;
 
-  size?: Maybe<number[]>;
+  size?: Maybe<number[] | number>;
 
-  mtime?: Maybe<string[]>;
+  mtime?: Maybe<string[] | string>;
 
-  ctime?: Maybe<string[]>;
+  ctime?: Maybe<string[] | string>;
 }
 
 export interface SystemEcsField {
@@ -1109,17 +1109,17 @@ export interface AuditEcsFields {
 }
 
 export interface PackageEcsFields {
-  arch?: Maybe<string[]>;
+  arch?: Maybe<string[] | string>;
 
-  entity_id?: Maybe<string[]>;
+  entity_id?: Maybe<string[] | string>;
 
-  name?: Maybe<string[]>;
+  name?: Maybe<string[] | string>;
 
-  size?: Maybe<number[]>;
+  size?: Maybe<number[] | number>;
 
-  summary?: Maybe<string[]>;
+  summary?: Maybe<string[] | string>;
 
-  version?: Maybe<string[]>;
+  version?: Maybe<string[] | string>;
 }
 
 export interface AuthEcsFields {
@@ -1127,9 +1127,9 @@ export interface AuthEcsFields {
 }
 
 export interface SshEcsFields {
-  method?: Maybe<string[]>;
+  method?: Maybe<string[] | string>;
 
-  signature?: Maybe<string[]>;
+  signature?: Maybe<string[] | string>;
 }
 
 export interface PageInfo {
@@ -1147,7 +1147,7 @@ export interface TimelineDetailsData {
 export interface DetailItem {
   field: string;
 
-  values?: Maybe<string[]>;
+  values?: Maybe<string[] | string>;
 
   originalValue?: Maybe<EsValue>;
 }
@@ -1373,11 +1373,11 @@ export interface UsersNode {
 export interface UsersItem {
   name?: Maybe<string>;
 
-  id?: Maybe<string[]>;
+  id?: Maybe<string[] | string>;
 
-  groupId?: Maybe<string[]>;
+  groupId?: Maybe<string[] | string>;
 
-  groupName?: Maybe<string[]>;
+  groupName?: Maybe<string[] | string>;
 
   count?: Maybe<number>;
 }
@@ -1821,7 +1821,7 @@ export interface ResponseFavoriteTimeline {
 }
 
 export interface EcsEdges {
-  node: ECS;
+  node: Ecs;
 
   cursor: CursorType;
 }
@@ -1870,33 +1870,33 @@ export interface HostFields {
 // Arguments
 // ====================================================
 
-export interface getNoteQueryArgs {
+export interface GetNoteQueryArgs {
   id: string;
 }
-export interface getNotesByTimelineIdQueryArgs {
+export interface GetNotesByTimelineIdQueryArgs {
   timelineId: string;
 }
-export interface getNotesByEventIdQueryArgs {
+export interface GetNotesByEventIdQueryArgs {
   eventId: string;
 }
-export interface getAllNotesQueryArgs {
+export interface GetAllNotesQueryArgs {
   pageInfo?: Maybe<PageInfoNote>;
 
   search?: Maybe<string>;
 
   sort?: Maybe<SortNote>;
 }
-export interface getAllPinnedEventsByTimelineIdQueryArgs {
+export interface GetAllPinnedEventsByTimelineIdQueryArgs {
   timelineId: string;
 }
-export interface sourceQueryArgs {
+export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface getOneTimelineQueryArgs {
+export interface GetOneTimelineQueryArgs {
   id: string;
 }
-export interface getAllTimelineQueryArgs {
+export interface GetAllTimelineQueryArgs {
   pageInfo?: Maybe<PageInfoTimeline>;
 
   search?: Maybe<string>;
@@ -2125,51 +2125,51 @@ export interface UncommonProcessesSourceArgs {
 
   defaultIndex: string[];
 }
-export interface indicesExistSourceStatusArgs {
+export interface IndicesExistSourceStatusArgs {
   defaultIndex: string[];
 }
-export interface indexFieldsSourceStatusArgs {
+export interface IndexFieldsSourceStatusArgs {
   defaultIndex: string[];
 }
-export interface persistNoteMutationArgs {
+export interface PersistNoteMutationArgs {
   noteId?: Maybe<string>;
 
   version?: Maybe<string>;
 
   note: NoteInput;
 }
-export interface deleteNoteMutationArgs {
+export interface DeleteNoteMutationArgs {
   id: string[];
 }
-export interface deleteNoteByTimelineIdMutationArgs {
+export interface DeleteNoteByTimelineIdMutationArgs {
   timelineId: string;
 
   version?: Maybe<string>;
 }
-export interface persistPinnedEventOnTimelineMutationArgs {
+export interface PersistPinnedEventOnTimelineMutationArgs {
   pinnedEventId?: Maybe<string>;
 
   eventId: string;
 
   timelineId?: Maybe<string>;
 }
-export interface deletePinnedEventOnTimelineMutationArgs {
+export interface DeletePinnedEventOnTimelineMutationArgs {
   id: string[];
 }
-export interface deleteAllPinnedEventsOnTimelineMutationArgs {
+export interface DeleteAllPinnedEventsOnTimelineMutationArgs {
   timelineId: string;
 }
-export interface persistTimelineMutationArgs {
+export interface PersistTimelineMutationArgs {
   id?: Maybe<string>;
 
   version?: Maybe<string>;
 
   timeline: TimelineInput;
 }
-export interface persistFavoriteMutationArgs {
+export interface PersistFavoriteMutationArgs {
   timelineId?: Maybe<string>;
 }
-export interface deleteTimelineMutationArgs {
+export interface DeleteTimelineMutationArgs {
   id: string[];
 }
 
@@ -2219,63 +2219,63 @@ export type DirectiveResolverFn<TResult, TArgs = {}, TContext = {}> = (
 
 export namespace QueryResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = {}> {
-    getNote?: getNoteResolver<NoteResult, TypeParent, TContext>;
+    getNote?: GetNoteResolver<NoteResult, TypeParent, TContext>;
 
-    getNotesByTimelineId?: getNotesByTimelineIdResolver<NoteResult[], TypeParent, TContext>;
+    getNotesByTimelineId?: GetNotesByTimelineIdResolver<NoteResult[], TypeParent, TContext>;
 
-    getNotesByEventId?: getNotesByEventIdResolver<NoteResult[], TypeParent, TContext>;
+    getNotesByEventId?: GetNotesByEventIdResolver<NoteResult[], TypeParent, TContext>;
 
-    getAllNotes?: getAllNotesResolver<ResponseNotes, TypeParent, TContext>;
+    getAllNotes?: GetAllNotesResolver<ResponseNotes, TypeParent, TContext>;
 
-    getAllPinnedEventsByTimelineId?: getAllPinnedEventsByTimelineIdResolver<
+    getAllPinnedEventsByTimelineId?: GetAllPinnedEventsByTimelineIdResolver<
       PinnedEvent[],
       TypeParent,
       TContext
     >;
     /** Get a security data source by id */
-    source?: sourceResolver<Source, TypeParent, TContext>;
+    source?: SourceResolver<Source, TypeParent, TContext>;
     /** Get a list of all security data sources */
-    allSources?: allSourcesResolver<Source[], TypeParent, TContext>;
+    allSources?: AllSourcesResolver<Source[], TypeParent, TContext>;
 
-    getOneTimeline?: getOneTimelineResolver<TimelineResult, TypeParent, TContext>;
+    getOneTimeline?: GetOneTimelineResolver<TimelineResult, TypeParent, TContext>;
 
-    getAllTimeline?: getAllTimelineResolver<ResponseTimelines, TypeParent, TContext>;
+    getAllTimeline?: GetAllTimelineResolver<ResponseTimelines, TypeParent, TContext>;
   }
 
-  export type getNoteResolver<R = NoteResult, Parent = {}, TContext = SiemContext> = Resolver<
+  export type GetNoteResolver<R = NoteResult, Parent = {}, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext,
-    getNoteArgs
+    GetNoteArgs
   >;
-  export interface getNoteArgs {
+  export interface GetNoteArgs {
     id: string;
   }
 
-  export type getNotesByTimelineIdResolver<
+  export type GetNotesByTimelineIdResolver<
     R = NoteResult[],
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, getNotesByTimelineIdArgs>;
-  export interface getNotesByTimelineIdArgs {
+  > = Resolver<R, Parent, TContext, GetNotesByTimelineIdArgs>;
+  export interface GetNotesByTimelineIdArgs {
     timelineId: string;
   }
 
-  export type getNotesByEventIdResolver<
+  export type GetNotesByEventIdResolver<
     R = NoteResult[],
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, getNotesByEventIdArgs>;
-  export interface getNotesByEventIdArgs {
+  > = Resolver<R, Parent, TContext, GetNotesByEventIdArgs>;
+  export interface GetNotesByEventIdArgs {
     eventId: string;
   }
 
-  export type getAllNotesResolver<
+  export type GetAllNotesResolver<
     R = ResponseNotes,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, getAllNotesArgs>;
-  export interface getAllNotesArgs {
+  > = Resolver<R, Parent, TContext, GetAllNotesArgs>;
+  export interface GetAllNotesArgs {
     pageInfo?: Maybe<PageInfoNote>;
 
     search?: Maybe<string>;
@@ -2283,46 +2283,46 @@ export namespace QueryResolvers {
     sort?: Maybe<SortNote>;
   }
 
-  export type getAllPinnedEventsByTimelineIdResolver<
+  export type GetAllPinnedEventsByTimelineIdResolver<
     R = PinnedEvent[],
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, getAllPinnedEventsByTimelineIdArgs>;
-  export interface getAllPinnedEventsByTimelineIdArgs {
+  > = Resolver<R, Parent, TContext, GetAllPinnedEventsByTimelineIdArgs>;
+  export interface GetAllPinnedEventsByTimelineIdArgs {
     timelineId: string;
   }
 
-  export type sourceResolver<R = Source, Parent = {}, TContext = SiemContext> = Resolver<
+  export type SourceResolver<R = Source, Parent = {}, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext,
-    sourceArgs
+    SourceArgs
   >;
-  export interface sourceArgs {
+  export interface SourceArgs {
     /** The id of the source */
     id: string;
   }
 
-  export type allSourcesResolver<R = Source[], Parent = {}, TContext = SiemContext> = Resolver<
+  export type AllSourcesResolver<R = Source[], Parent = {}, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type getOneTimelineResolver<
+  export type GetOneTimelineResolver<
     R = TimelineResult,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, getOneTimelineArgs>;
-  export interface getOneTimelineArgs {
+  > = Resolver<R, Parent, TContext, GetOneTimelineArgs>;
+  export interface GetOneTimelineArgs {
     id: string;
   }
 
-  export type getAllTimelineResolver<
+  export type GetAllTimelineResolver<
     R = ResponseTimelines,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, getAllTimelineArgs>;
-  export interface getAllTimelineArgs {
+  > = Resolver<R, Parent, TContext, GetAllTimelineArgs>;
+  export interface GetAllTimelineArgs {
     pageInfo?: Maybe<PageInfoTimeline>;
 
     search?: Maybe<string>;
@@ -2335,73 +2335,73 @@ export namespace QueryResolvers {
 
 export namespace NoteResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NoteResult> {
-    eventId?: eventIdResolver<Maybe<string>, TypeParent, TContext>;
+    eventId?: EventIdResolver<Maybe<string>, TypeParent, TContext>;
 
-    note?: noteResolver<Maybe<string>, TypeParent, TContext>;
+    note?: NoteResolver<Maybe<string>, TypeParent, TContext>;
 
-    timelineId?: timelineIdResolver<Maybe<string>, TypeParent, TContext>;
+    timelineId?: TimelineIdResolver<Maybe<string>, TypeParent, TContext>;
 
-    noteId?: noteIdResolver<string, TypeParent, TContext>;
+    noteId?: NoteIdResolver<string, TypeParent, TContext>;
 
-    created?: createdResolver<Maybe<number>, TypeParent, TContext>;
+    created?: CreatedResolver<Maybe<number>, TypeParent, TContext>;
 
-    createdBy?: createdByResolver<Maybe<string>, TypeParent, TContext>;
+    createdBy?: CreatedByResolver<Maybe<string>, TypeParent, TContext>;
 
-    timelineVersion?: timelineVersionResolver<Maybe<string>, TypeParent, TContext>;
+    timelineVersion?: TimelineVersionResolver<Maybe<string>, TypeParent, TContext>;
 
-    updated?: updatedResolver<Maybe<number>, TypeParent, TContext>;
+    updated?: UpdatedResolver<Maybe<number>, TypeParent, TContext>;
 
-    updatedBy?: updatedByResolver<Maybe<string>, TypeParent, TContext>;
+    updatedBy?: UpdatedByResolver<Maybe<string>, TypeParent, TContext>;
 
-    version?: versionResolver<Maybe<string>, TypeParent, TContext>;
+    version?: VersionResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type eventIdResolver<
+  export type EventIdResolver<
     R = Maybe<string>,
     Parent = NoteResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type noteResolver<
+  export type NoteResolver<
     R = Maybe<string>,
     Parent = NoteResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type timelineIdResolver<
+  export type TimelineIdResolver<
     R = Maybe<string>,
     Parent = NoteResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type noteIdResolver<R = string, Parent = NoteResult, TContext = SiemContext> = Resolver<
+  export type NoteIdResolver<R = string, Parent = NoteResult, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type createdResolver<
+  export type CreatedResolver<
     R = Maybe<number>,
     Parent = NoteResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type createdByResolver<
+  export type CreatedByResolver<
     R = Maybe<string>,
     Parent = NoteResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type timelineVersionResolver<
+  export type TimelineVersionResolver<
     R = Maybe<string>,
     Parent = NoteResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type updatedResolver<
+  export type UpdatedResolver<
     R = Maybe<number>,
     Parent = NoteResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type updatedByResolver<
+  export type UpdatedByResolver<
     R = Maybe<string>,
     Parent = NoteResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type versionResolver<
+  export type VersionResolver<
     R = Maybe<string>,
     Parent = NoteResult,
     TContext = SiemContext
@@ -2410,17 +2410,17 @@ export namespace NoteResultResolvers {
 
 export namespace ResponseNotesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ResponseNotes> {
-    notes?: notesResolver<NoteResult[], TypeParent, TContext>;
+    notes?: NotesResolver<NoteResult[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<Maybe<number>, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type notesResolver<
+  export type NotesResolver<
     R = NoteResult[],
     Parent = ResponseNotes,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<
+  export type TotalCountResolver<
     R = Maybe<number>,
     Parent = ResponseNotes,
     TContext = SiemContext
@@ -2429,80 +2429,80 @@ export namespace ResponseNotesResolvers {
 
 export namespace PinnedEventResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = PinnedEvent> {
-    code?: codeResolver<Maybe<number>, TypeParent, TContext>;
+    code?: CodeResolver<Maybe<number>, TypeParent, TContext>;
 
-    message?: messageResolver<Maybe<string>, TypeParent, TContext>;
+    message?: MessageResolver<Maybe<string>, TypeParent, TContext>;
 
-    pinnedEventId?: pinnedEventIdResolver<string, TypeParent, TContext>;
+    pinnedEventId?: PinnedEventIdResolver<string, TypeParent, TContext>;
 
-    eventId?: eventIdResolver<Maybe<string>, TypeParent, TContext>;
+    eventId?: EventIdResolver<Maybe<string>, TypeParent, TContext>;
 
-    timelineId?: timelineIdResolver<Maybe<string>, TypeParent, TContext>;
+    timelineId?: TimelineIdResolver<Maybe<string>, TypeParent, TContext>;
 
-    timelineVersion?: timelineVersionResolver<Maybe<string>, TypeParent, TContext>;
+    timelineVersion?: TimelineVersionResolver<Maybe<string>, TypeParent, TContext>;
 
-    created?: createdResolver<Maybe<number>, TypeParent, TContext>;
+    created?: CreatedResolver<Maybe<number>, TypeParent, TContext>;
 
-    createdBy?: createdByResolver<Maybe<string>, TypeParent, TContext>;
+    createdBy?: CreatedByResolver<Maybe<string>, TypeParent, TContext>;
 
-    updated?: updatedResolver<Maybe<number>, TypeParent, TContext>;
+    updated?: UpdatedResolver<Maybe<number>, TypeParent, TContext>;
 
-    updatedBy?: updatedByResolver<Maybe<string>, TypeParent, TContext>;
+    updatedBy?: UpdatedByResolver<Maybe<string>, TypeParent, TContext>;
 
-    version?: versionResolver<Maybe<string>, TypeParent, TContext>;
+    version?: VersionResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type codeResolver<
+  export type CodeResolver<
     R = Maybe<number>,
     Parent = PinnedEvent,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type messageResolver<
+  export type MessageResolver<
     R = Maybe<string>,
     Parent = PinnedEvent,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type pinnedEventIdResolver<
+  export type PinnedEventIdResolver<
     R = string,
     Parent = PinnedEvent,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type eventIdResolver<
+  export type EventIdResolver<
     R = Maybe<string>,
     Parent = PinnedEvent,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type timelineIdResolver<
+  export type TimelineIdResolver<
     R = Maybe<string>,
     Parent = PinnedEvent,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type timelineVersionResolver<
+  export type TimelineVersionResolver<
     R = Maybe<string>,
     Parent = PinnedEvent,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type createdResolver<
+  export type CreatedResolver<
     R = Maybe<number>,
     Parent = PinnedEvent,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type createdByResolver<
+  export type CreatedByResolver<
     R = Maybe<string>,
     Parent = PinnedEvent,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type updatedResolver<
+  export type UpdatedResolver<
     R = Maybe<number>,
     Parent = PinnedEvent,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type updatedByResolver<
+  export type UpdatedByResolver<
     R = Maybe<string>,
     Parent = PinnedEvent,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type versionResolver<
+  export type VersionResolver<
     R = Maybe<string>,
     Parent = PinnedEvent,
     TContext = SiemContext
@@ -2512,11 +2512,11 @@ export namespace PinnedEventResolvers {
 export namespace SourceResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = Source> {
     /** The id of the source */
-    id?: idResolver<string, TypeParent, TContext>;
+    id?: IdResolver<string, TypeParent, TContext>;
     /** The raw configuration of the source */
-    configuration?: configurationResolver<SourceConfiguration, TypeParent, TContext>;
+    configuration?: ConfigurationResolver<SourceConfiguration, TypeParent, TContext>;
     /** The status of the source */
-    status?: statusResolver<SourceStatus, TypeParent, TContext>;
+    status?: StatusResolver<SourceStatus, TypeParent, TContext>;
     /** Gets Authentication success and failures based on a timerange */
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, TContext>;
 
@@ -2558,20 +2558,20 @@ export namespace SourceResolvers {
     /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
     UncommonProcesses?: UncommonProcessesResolver<UncommonProcessesData, TypeParent, TContext>;
     /** Just a simple example to get the app name */
-    whoAmI?: whoAmIResolver<Maybe<SayMyName>, TypeParent, TContext>;
+    whoAmI?: WhoAmIResolver<Maybe<SayMyName>, TypeParent, TContext>;
   }
 
-  export type idResolver<R = string, Parent = Source, TContext = SiemContext> = Resolver<
+  export type IdResolver<R = string, Parent = Source, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type configurationResolver<
+  export type ConfigurationResolver<
     R = SourceConfiguration,
     Parent = Source,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type statusResolver<R = SourceStatus, Parent = Source, TContext = SiemContext> = Resolver<
+  export type StatusResolver<R = SourceStatus, Parent = Source, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
@@ -2920,7 +2920,7 @@ export namespace SourceResolvers {
     defaultIndex: string[];
   }
 
-  export type whoAmIResolver<
+  export type WhoAmIResolver<
     R = Maybe<SayMyName>,
     Parent = Source,
     TContext = SiemContext
@@ -2930,10 +2930,10 @@ export namespace SourceResolvers {
 export namespace SourceConfigurationResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SourceConfiguration> {
     /** The field mapping to use for this source */
-    fields?: fieldsResolver<SourceFields, TypeParent, TContext>;
+    fields?: FieldsResolver<SourceFields, TypeParent, TContext>;
   }
 
-  export type fieldsResolver<
+  export type FieldsResolver<
     R = SourceFields,
     Parent = SourceConfiguration,
     TContext = SiemContext
@@ -2943,45 +2943,45 @@ export namespace SourceConfigurationResolvers {
 export namespace SourceFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SourceFields> {
     /** The field to identify a container by */
-    container?: containerResolver<string, TypeParent, TContext>;
+    container?: ContainerResolver<string, TypeParent, TContext>;
     /** The fields to identify a host by */
-    host?: hostResolver<string, TypeParent, TContext>;
+    host?: HostResolver<string, TypeParent, TContext>;
     /** The fields that may contain the log event message. The first field found win. */
-    message?: messageResolver<string[], TypeParent, TContext>;
+    message?: MessageResolver<string[], TypeParent, TContext>;
     /** The field to identify a pod by */
-    pod?: podResolver<string, TypeParent, TContext>;
+    pod?: PodResolver<string, TypeParent, TContext>;
     /** The field to use as a tiebreaker for log events that have identical timestamps */
-    tiebreaker?: tiebreakerResolver<string, TypeParent, TContext>;
+    tiebreaker?: TiebreakerResolver<string, TypeParent, TContext>;
     /** The field to use as a timestamp for metrics and logs */
-    timestamp?: timestampResolver<string, TypeParent, TContext>;
+    timestamp?: TimestampResolver<string, TypeParent, TContext>;
   }
 
-  export type containerResolver<
+  export type ContainerResolver<
     R = string,
     Parent = SourceFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type hostResolver<R = string, Parent = SourceFields, TContext = SiemContext> = Resolver<
+  export type HostResolver<R = string, Parent = SourceFields, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type messageResolver<
+  export type MessageResolver<
     R = string[],
     Parent = SourceFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type podResolver<R = string, Parent = SourceFields, TContext = SiemContext> = Resolver<
+  export type PodResolver<R = string, Parent = SourceFields, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type tiebreakerResolver<
+  export type TiebreakerResolver<
     R = string,
     Parent = SourceFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type timestampResolver<
+  export type TimestampResolver<
     R = string,
     Parent = SourceFields,
     TContext = SiemContext
@@ -2991,26 +2991,26 @@ export namespace SourceFieldsResolvers {
 export namespace SourceStatusResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SourceStatus> {
     /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
-    indicesExist?: indicesExistResolver<boolean, TypeParent, TContext>;
+    indicesExist?: IndicesExistResolver<boolean, TypeParent, TContext>;
     /** The list of fields defined in the index mappings */
-    indexFields?: indexFieldsResolver<IndexField[], TypeParent, TContext>;
+    indexFields?: IndexFieldsResolver<IndexField[], TypeParent, TContext>;
   }
 
-  export type indicesExistResolver<
+  export type IndicesExistResolver<
     R = boolean,
     Parent = SourceStatus,
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, indicesExistArgs>;
-  export interface indicesExistArgs {
+  > = Resolver<R, Parent, TContext, IndicesExistArgs>;
+  export interface IndicesExistArgs {
     defaultIndex: string[];
   }
 
-  export type indexFieldsResolver<
+  export type IndexFieldsResolver<
     R = IndexField[],
     Parent = SourceStatus,
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, indexFieldsArgs>;
-  export interface indexFieldsArgs {
+  > = Resolver<R, Parent, TContext, IndexFieldsArgs>;
+  export interface IndexFieldsArgs {
     defaultIndex: string[];
   }
 }
@@ -3018,66 +3018,66 @@ export namespace SourceStatusResolvers {
 export namespace IndexFieldResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = IndexField> {
     /** Where the field belong */
-    category?: categoryResolver<string, TypeParent, TContext>;
+    category?: CategoryResolver<string, TypeParent, TContext>;
     /** Example of field's value */
-    example?: exampleResolver<Maybe<string>, TypeParent, TContext>;
+    example?: ExampleResolver<Maybe<string>, TypeParent, TContext>;
     /** whether the field's belong to an alias index */
-    indexes?: indexesResolver<(Maybe<string>)[], TypeParent, TContext>;
+    indexes?: IndexesResolver<(Maybe<string>)[], TypeParent, TContext>;
     /** The name of the field */
-    name?: nameResolver<string, TypeParent, TContext>;
+    name?: NameResolver<string, TypeParent, TContext>;
     /** The type of the field's values as recognized by Kibana */
-    type?: typeResolver<string, TypeParent, TContext>;
+    type?: TypeResolver<string, TypeParent, TContext>;
     /** Whether the field's values can be efficiently searched for */
-    searchable?: searchableResolver<boolean, TypeParent, TContext>;
+    searchable?: SearchableResolver<boolean, TypeParent, TContext>;
     /** Whether the field's values can be aggregated */
-    aggregatable?: aggregatableResolver<boolean, TypeParent, TContext>;
+    aggregatable?: AggregatableResolver<boolean, TypeParent, TContext>;
     /** Description of the field */
-    description?: descriptionResolver<Maybe<string>, TypeParent, TContext>;
+    description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
 
-    format?: formatResolver<Maybe<string>, TypeParent, TContext>;
+    format?: FormatResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type categoryResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
+  export type CategoryResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type exampleResolver<
+  export type ExampleResolver<
     R = Maybe<string>,
     Parent = IndexField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type indexesResolver<
+  export type IndexesResolver<
     R = (Maybe<string>)[],
     Parent = IndexField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type nameResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
+  export type NameResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type typeResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
+  export type TypeResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type searchableResolver<
+  export type SearchableResolver<
     R = boolean,
     Parent = IndexField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type aggregatableResolver<
+  export type AggregatableResolver<
     R = boolean,
     Parent = IndexField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type descriptionResolver<
+  export type DescriptionResolver<
     R = Maybe<string>,
     Parent = IndexField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type formatResolver<
+  export type FormatResolver<
     R = Maybe<string>,
     Parent = IndexField,
     TContext = SiemContext
@@ -3086,31 +3086,31 @@ export namespace IndexFieldResolvers {
 
 export namespace AuthenticationsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationsData> {
-    edges?: edgesResolver<AuthenticationsEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<AuthenticationsEdges[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
-    pageInfo?: pageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type edgesResolver<
+  export type EdgesResolver<
     R = AuthenticationsEdges[],
     Parent = AuthenticationsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<
+  export type TotalCountResolver<
     R = number,
     Parent = AuthenticationsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type pageInfoResolver<
+  export type PageInfoResolver<
     R = PageInfoPaginated,
     Parent = AuthenticationsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = AuthenticationsData,
     TContext = SiemContext
@@ -3119,17 +3119,17 @@ export namespace AuthenticationsDataResolvers {
 
 export namespace AuthenticationsEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationsEdges> {
-    node?: nodeResolver<AuthenticationItem, TypeParent, TContext>;
+    node?: NodeResolver<AuthenticationItem, TypeParent, TContext>;
 
-    cursor?: cursorResolver<CursorType, TypeParent, TContext>;
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
   }
 
-  export type nodeResolver<
+  export type NodeResolver<
     R = AuthenticationItem,
     Parent = AuthenticationsEdges,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type cursorResolver<
+  export type CursorResolver<
     R = CursorType,
     Parent = AuthenticationsEdges,
     TContext = SiemContext
@@ -3138,45 +3138,45 @@ export namespace AuthenticationsEdgesResolvers {
 
 export namespace AuthenticationItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationItem> {
-    _id?: _idResolver<string, TypeParent, TContext>;
+    _id?: _IdResolver<string, TypeParent, TContext>;
 
-    failures?: failuresResolver<number, TypeParent, TContext>;
+    failures?: FailuresResolver<number, TypeParent, TContext>;
 
-    successes?: successesResolver<number, TypeParent, TContext>;
+    successes?: SuccessesResolver<number, TypeParent, TContext>;
 
-    user?: userResolver<UserEcsFields, TypeParent, TContext>;
+    user?: UserResolver<UserEcsFields, TypeParent, TContext>;
 
-    lastSuccess?: lastSuccessResolver<Maybe<LastSourceHost>, TypeParent, TContext>;
+    lastSuccess?: LastSuccessResolver<Maybe<LastSourceHost>, TypeParent, TContext>;
 
-    lastFailure?: lastFailureResolver<Maybe<LastSourceHost>, TypeParent, TContext>;
+    lastFailure?: LastFailureResolver<Maybe<LastSourceHost>, TypeParent, TContext>;
   }
 
-  export type _idResolver<
+  export type _IdResolver<
     R = string,
     Parent = AuthenticationItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type failuresResolver<
+  export type FailuresResolver<
     R = number,
     Parent = AuthenticationItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type successesResolver<
+  export type SuccessesResolver<
     R = number,
     Parent = AuthenticationItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type userResolver<
+  export type UserResolver<
     R = UserEcsFields,
     Parent = AuthenticationItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type lastSuccessResolver<
+  export type LastSuccessResolver<
     R = Maybe<LastSourceHost>,
     Parent = AuthenticationItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type lastFailureResolver<
+  export type LastFailureResolver<
     R = Maybe<LastSourceHost>,
     Parent = AuthenticationItem,
     TContext = SiemContext
@@ -3185,46 +3185,46 @@ export namespace AuthenticationItemResolvers {
 
 export namespace UserEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UserEcsFields> {
-    id?: idResolver<Maybe<string[]>, TypeParent, TContext>;
+    id?: IdResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    name?: nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    full_name?: full_nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    full_name?: FullNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    email?: emailResolver<Maybe<string[]>, TypeParent, TContext>;
+    email?: EmailResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    hash?: hashResolver<Maybe<string[]>, TypeParent, TContext>;
+    hash?: HashResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    group?: groupResolver<Maybe<string[]>, TypeParent, TContext>;
+    group?: GroupResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type idResolver<
-    R = Maybe<string[]>,
+  export type IdResolver<
+    R = Maybe<string[] | string>,
     Parent = UserEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type nameResolver<
-    R = Maybe<string[]>,
+  export type NameResolver<
+    R = Maybe<string[] | string>,
     Parent = UserEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type full_nameResolver<
-    R = Maybe<string[]>,
+  export type FullNameResolver<
+    R = Maybe<string[] | string>,
     Parent = UserEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type emailResolver<
-    R = Maybe<string[]>,
+  export type EmailResolver<
+    R = Maybe<string[] | string>,
     Parent = UserEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type hashResolver<
-    R = Maybe<string[]>,
+  export type HashResolver<
+    R = Maybe<string[] | string>,
     Parent = UserEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type groupResolver<
-    R = Maybe<string[]>,
+  export type GroupResolver<
+    R = Maybe<string[] | string>,
     Parent = UserEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3232,24 +3232,24 @@ export namespace UserEcsFieldsResolvers {
 
 export namespace LastSourceHostResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = LastSourceHost> {
-    timestamp?: timestampResolver<Maybe<string>, TypeParent, TContext>;
+    timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
 
-    source?: sourceResolver<Maybe<SourceEcsFields>, TypeParent, TContext>;
+    source?: SourceResolver<Maybe<SourceEcsFields>, TypeParent, TContext>;
 
-    host?: hostResolver<Maybe<HostEcsFields>, TypeParent, TContext>;
+    host?: HostResolver<Maybe<HostEcsFields>, TypeParent, TContext>;
   }
 
-  export type timestampResolver<
+  export type TimestampResolver<
     R = Maybe<string>,
     Parent = LastSourceHost,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sourceResolver<
+  export type SourceResolver<
     R = Maybe<SourceEcsFields>,
     Parent = LastSourceHost,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type hostResolver<
+  export type HostResolver<
     R = Maybe<HostEcsFields>,
     Parent = LastSourceHost,
     TContext = SiemContext
@@ -3258,46 +3258,46 @@ export namespace LastSourceHostResolvers {
 
 export namespace SourceEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SourceEcsFields> {
-    bytes?: bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    bytes?: BytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    ip?: ipResolver<Maybe<string[]>, TypeParent, TContext>;
+    ip?: IpResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    port?: portResolver<Maybe<number[]>, TypeParent, TContext>;
+    port?: PortResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    domain?: domainResolver<Maybe<string[]>, TypeParent, TContext>;
+    domain?: DomainResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    geo?: geoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
+    geo?: GeoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
 
-    packets?: packetsResolver<Maybe<number[]>, TypeParent, TContext>;
+    packets?: PacketsResolver<Maybe<number[] | number>, TypeParent, TContext>;
   }
 
-  export type bytesResolver<
-    R = Maybe<number[]>,
+  export type BytesResolver<
+    R = Maybe<number[] | number>,
     Parent = SourceEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ipResolver<
-    R = Maybe<string[]>,
+  export type IpResolver<
+    R = Maybe<string[] | string>,
     Parent = SourceEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type portResolver<
-    R = Maybe<number[]>,
+  export type PortResolver<
+    R = Maybe<number[] | number>,
     Parent = SourceEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type domainResolver<
-    R = Maybe<string[]>,
+  export type DomainResolver<
+    R = Maybe<string[] | string>,
     Parent = SourceEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type geoResolver<
+  export type GeoResolver<
     R = Maybe<GeoEcsFields>,
     Parent = SourceEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type packetsResolver<
-    R = Maybe<number[]>,
+  export type PacketsResolver<
+    R = Maybe<number[] | number>,
     Parent = SourceEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3305,53 +3305,53 @@ export namespace SourceEcsFieldsResolvers {
 
 export namespace GeoEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = GeoEcsFields> {
-    city_name?: city_nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    city_name?: CityNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    continent_name?: continent_nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    continent_name?: ContinentNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    country_iso_code?: country_iso_codeResolver<Maybe<string[]>, TypeParent, TContext>;
+    country_iso_code?: CountryIsoCodeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    country_name?: country_nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    country_name?: CountryNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    location?: locationResolver<Maybe<Location>, TypeParent, TContext>;
+    location?: LocationResolver<Maybe<Location>, TypeParent, TContext>;
 
-    region_iso_code?: region_iso_codeResolver<Maybe<string[]>, TypeParent, TContext>;
+    region_iso_code?: RegionIsoCodeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    region_name?: region_nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    region_name?: RegionNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type city_nameResolver<
-    R = Maybe<string[]>,
+  export type CityNameResolver<
+    R = Maybe<string[] | string>,
     Parent = GeoEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type continent_nameResolver<
-    R = Maybe<string[]>,
+  export type ContinentNameResolver<
+    R = Maybe<string[] | string>,
     Parent = GeoEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type country_iso_codeResolver<
-    R = Maybe<string[]>,
+  export type CountryIsoCodeResolver<
+    R = Maybe<string[] | string>,
     Parent = GeoEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type country_nameResolver<
-    R = Maybe<string[]>,
+  export type CountryNameResolver<
+    R = Maybe<string[] | string>,
     Parent = GeoEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type locationResolver<
+  export type LocationResolver<
     R = Maybe<Location>,
     Parent = GeoEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type region_iso_codeResolver<
-    R = Maybe<string[]>,
+  export type RegionIsoCodeResolver<
+    R = Maybe<string[] | string>,
     Parent = GeoEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type region_nameResolver<
-    R = Maybe<string[]>,
+  export type RegionNameResolver<
+    R = Maybe<string[] | string>,
     Parent = GeoEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3359,18 +3359,18 @@ export namespace GeoEcsFieldsResolvers {
 
 export namespace LocationResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = Location> {
-    lon?: lonResolver<Maybe<number[]>, TypeParent, TContext>;
+    lon?: LonResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    lat?: latResolver<Maybe<number[]>, TypeParent, TContext>;
+    lat?: LatResolver<Maybe<number[] | number>, TypeParent, TContext>;
   }
 
-  export type lonResolver<
-    R = Maybe<number[]>,
+  export type LonResolver<
+    R = Maybe<number[] | number>,
     Parent = Location,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type latResolver<
-    R = Maybe<number[]>,
+  export type LatResolver<
+    R = Maybe<number[] | number>,
     Parent = Location,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3378,53 +3378,53 @@ export namespace LocationResolvers {
 
 export namespace HostEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostEcsFields> {
-    architecture?: architectureResolver<Maybe<string[]>, TypeParent, TContext>;
+    architecture?: ArchitectureResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    id?: idResolver<Maybe<string[]>, TypeParent, TContext>;
+    id?: IdResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    ip?: ipResolver<Maybe<string[]>, TypeParent, TContext>;
+    ip?: IpResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    mac?: macResolver<Maybe<string[]>, TypeParent, TContext>;
+    mac?: MacResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    name?: nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    os?: osResolver<Maybe<OsEcsFields>, TypeParent, TContext>;
+    os?: OsResolver<Maybe<OsEcsFields>, TypeParent, TContext>;
 
-    type?: typeResolver<Maybe<string[]>, TypeParent, TContext>;
+    type?: TypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type architectureResolver<
-    R = Maybe<string[]>,
+  export type ArchitectureResolver<
+    R = Maybe<string[] | string>,
     Parent = HostEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type idResolver<
-    R = Maybe<string[]>,
+  export type IdResolver<
+    R = Maybe<string[] | string>,
     Parent = HostEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ipResolver<
-    R = Maybe<string[]>,
+  export type IpResolver<
+    R = Maybe<string[] | string>,
     Parent = HostEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type macResolver<
-    R = Maybe<string[]>,
+  export type MacResolver<
+    R = Maybe<string[] | string>,
     Parent = HostEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type nameResolver<
-    R = Maybe<string[]>,
+  export type NameResolver<
+    R = Maybe<string[] | string>,
     Parent = HostEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type osResolver<
+  export type OsResolver<
     R = Maybe<OsEcsFields>,
     Parent = HostEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type typeResolver<
-    R = Maybe<string[]>,
+  export type TypeResolver<
+    R = Maybe<string[] | string>,
     Parent = HostEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3432,46 +3432,46 @@ export namespace HostEcsFieldsResolvers {
 
 export namespace OsEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = OsEcsFields> {
-    platform?: platformResolver<Maybe<string[]>, TypeParent, TContext>;
+    platform?: PlatformResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    name?: nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    full?: fullResolver<Maybe<string[]>, TypeParent, TContext>;
+    full?: FullResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    family?: familyResolver<Maybe<string[]>, TypeParent, TContext>;
+    family?: FamilyResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    version?: versionResolver<Maybe<string[]>, TypeParent, TContext>;
+    version?: VersionResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    kernel?: kernelResolver<Maybe<string[]>, TypeParent, TContext>;
+    kernel?: KernelResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type platformResolver<
-    R = Maybe<string[]>,
+  export type PlatformResolver<
+    R = Maybe<string[] | string>,
     Parent = OsEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type nameResolver<
-    R = Maybe<string[]>,
+  export type NameResolver<
+    R = Maybe<string[] | string>,
     Parent = OsEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type fullResolver<
-    R = Maybe<string[]>,
+  export type FullResolver<
+    R = Maybe<string[] | string>,
     Parent = OsEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type familyResolver<
-    R = Maybe<string[]>,
+  export type FamilyResolver<
+    R = Maybe<string[] | string>,
     Parent = OsEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type versionResolver<
-    R = Maybe<string[]>,
+  export type VersionResolver<
+    R = Maybe<string[] | string>,
     Parent = OsEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type kernelResolver<
-    R = Maybe<string[]>,
+  export type KernelResolver<
+    R = Maybe<string[] | string>,
     Parent = OsEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3479,17 +3479,17 @@ export namespace OsEcsFieldsResolvers {
 
 export namespace CursorTypeResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = CursorType> {
-    value?: valueResolver<Maybe<string>, TypeParent, TContext>;
+    value?: ValueResolver<Maybe<string>, TypeParent, TContext>;
 
-    tiebreaker?: tiebreakerResolver<Maybe<string>, TypeParent, TContext>;
+    tiebreaker?: TiebreakerResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type valueResolver<
+  export type ValueResolver<
     R = Maybe<string>,
     Parent = CursorType,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type tiebreakerResolver<
+  export type TiebreakerResolver<
     R = Maybe<string>,
     Parent = CursorType,
     TContext = SiemContext
@@ -3498,24 +3498,24 @@ export namespace CursorTypeResolvers {
 
 export namespace PageInfoPaginatedResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = PageInfoPaginated> {
-    activePage?: activePageResolver<number, TypeParent, TContext>;
+    activePage?: ActivePageResolver<number, TypeParent, TContext>;
 
-    fakeTotalCount?: fakeTotalCountResolver<number, TypeParent, TContext>;
+    fakeTotalCount?: FakeTotalCountResolver<number, TypeParent, TContext>;
 
-    showMorePagesIndicator?: showMorePagesIndicatorResolver<boolean, TypeParent, TContext>;
+    showMorePagesIndicator?: ShowMorePagesIndicatorResolver<boolean, TypeParent, TContext>;
   }
 
-  export type activePageResolver<
+  export type ActivePageResolver<
     R = number,
     Parent = PageInfoPaginated,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type fakeTotalCountResolver<
+  export type FakeTotalCountResolver<
     R = number,
     Parent = PageInfoPaginated,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type showMorePagesIndicatorResolver<
+  export type ShowMorePagesIndicatorResolver<
     R = boolean,
     Parent = PageInfoPaginated,
     TContext = SiemContext
@@ -3524,17 +3524,17 @@ export namespace PageInfoPaginatedResolvers {
 
 export namespace InspectResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = Inspect> {
-    dsl?: dslResolver<string[], TypeParent, TContext>;
+    dsl?: DslResolver<string[], TypeParent, TContext>;
 
-    response?: responseResolver<string[], TypeParent, TContext>;
+    response?: ResponseResolver<string[], TypeParent, TContext>;
   }
 
-  export type dslResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
+  export type DslResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type responseResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
+  export type ResponseResolver<R = string[], Parent = Inspect, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
@@ -3543,31 +3543,31 @@ export namespace InspectResolvers {
 
 export namespace TimelineDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TimelineData> {
-    edges?: edgesResolver<TimelineEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<TimelineEdges[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
-    pageInfo?: pageInfoResolver<PageInfo, TypeParent, TContext>;
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type edgesResolver<
+  export type EdgesResolver<
     R = TimelineEdges[],
     Parent = TimelineData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<
+  export type TotalCountResolver<
     R = number,
     Parent = TimelineData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type pageInfoResolver<
+  export type PageInfoResolver<
     R = PageInfo,
     Parent = TimelineData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = TimelineData,
     TContext = SiemContext
@@ -3576,17 +3576,17 @@ export namespace TimelineDataResolvers {
 
 export namespace TimelineEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TimelineEdges> {
-    node?: nodeResolver<TimelineItem, TypeParent, TContext>;
+    node?: NodeResolver<TimelineItem, TypeParent, TContext>;
 
-    cursor?: cursorResolver<CursorType, TypeParent, TContext>;
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
   }
 
-  export type nodeResolver<
+  export type NodeResolver<
     R = TimelineItem,
     Parent = TimelineEdges,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type cursorResolver<
+  export type CursorResolver<
     R = CursorType,
     Parent = TimelineEdges,
     TContext = SiemContext
@@ -3595,31 +3595,31 @@ export namespace TimelineEdgesResolvers {
 
 export namespace TimelineItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TimelineItem> {
-    _id?: _idResolver<string, TypeParent, TContext>;
+    _id?: _IdResolver<string, TypeParent, TContext>;
 
-    _index?: _indexResolver<Maybe<string>, TypeParent, TContext>;
+    _index?: _IndexResolver<Maybe<string>, TypeParent, TContext>;
 
-    data?: dataResolver<TimelineNonEcsData[], TypeParent, TContext>;
+    data?: DataResolver<TimelineNonEcsData[], TypeParent, TContext>;
 
-    ecs?: ecsResolver<ECS, TypeParent, TContext>;
+    ecs?: EcsResolver<Ecs, TypeParent, TContext>;
   }
 
-  export type _idResolver<R = string, Parent = TimelineItem, TContext = SiemContext> = Resolver<
+  export type _IdResolver<R = string, Parent = TimelineItem, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type _indexResolver<
+  export type _IndexResolver<
     R = Maybe<string>,
     Parent = TimelineItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type dataResolver<
+  export type DataResolver<
     R = TimelineNonEcsData[],
     Parent = TimelineItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ecsResolver<R = ECS, Parent = TimelineItem, TContext = SiemContext> = Resolver<
+  export type EcsResolver<R = Ecs, Parent = TimelineItem, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
@@ -3628,203 +3628,203 @@ export namespace TimelineItemResolvers {
 
 export namespace TimelineNonEcsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TimelineNonEcsData> {
-    field?: fieldResolver<string, TypeParent, TContext>;
+    field?: FieldResolver<string, TypeParent, TContext>;
 
-    value?: valueResolver<Maybe<string[]>, TypeParent, TContext>;
+    value?: ValueResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type fieldResolver<
+  export type FieldResolver<
     R = string,
     Parent = TimelineNonEcsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type valueResolver<
-    R = Maybe<string[]>,
+  export type ValueResolver<
+    R = Maybe<string[] | string>,
     Parent = TimelineNonEcsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace ECSResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = ECS> {
-    _id?: _idResolver<string, TypeParent, TContext>;
+export namespace EcsResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = Ecs> {
+    _id?: _IdResolver<string, TypeParent, TContext>;
 
-    _index?: _indexResolver<Maybe<string>, TypeParent, TContext>;
+    _index?: _IndexResolver<Maybe<string>, TypeParent, TContext>;
 
-    auditd?: auditdResolver<Maybe<AuditdEcsFields>, TypeParent, TContext>;
+    auditd?: AuditdResolver<Maybe<AuditdEcsFields>, TypeParent, TContext>;
 
-    destination?: destinationResolver<Maybe<DestinationEcsFields>, TypeParent, TContext>;
+    destination?: DestinationResolver<Maybe<DestinationEcsFields>, TypeParent, TContext>;
 
-    event?: eventResolver<Maybe<EventEcsFields>, TypeParent, TContext>;
+    event?: EventResolver<Maybe<EventEcsFields>, TypeParent, TContext>;
 
-    geo?: geoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
+    geo?: GeoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
 
-    host?: hostResolver<Maybe<HostEcsFields>, TypeParent, TContext>;
+    host?: HostResolver<Maybe<HostEcsFields>, TypeParent, TContext>;
 
-    network?: networkResolver<Maybe<NetworkEcsField>, TypeParent, TContext>;
+    network?: NetworkResolver<Maybe<NetworkEcsField>, TypeParent, TContext>;
 
-    source?: sourceResolver<Maybe<SourceEcsFields>, TypeParent, TContext>;
+    source?: SourceResolver<Maybe<SourceEcsFields>, TypeParent, TContext>;
 
-    suricata?: suricataResolver<Maybe<SuricataEcsFields>, TypeParent, TContext>;
+    suricata?: SuricataResolver<Maybe<SuricataEcsFields>, TypeParent, TContext>;
 
-    tls?: tlsResolver<Maybe<TlsEcsFields>, TypeParent, TContext>;
+    tls?: TlsResolver<Maybe<TlsEcsFields>, TypeParent, TContext>;
 
-    zeek?: zeekResolver<Maybe<ZeekEcsFields>, TypeParent, TContext>;
+    zeek?: ZeekResolver<Maybe<ZeekEcsFields>, TypeParent, TContext>;
 
-    http?: httpResolver<Maybe<HttpEcsFields>, TypeParent, TContext>;
+    http?: HttpResolver<Maybe<HttpEcsFields>, TypeParent, TContext>;
 
-    url?: urlResolver<Maybe<UrlEcsFields>, TypeParent, TContext>;
+    url?: UrlResolver<Maybe<UrlEcsFields>, TypeParent, TContext>;
 
-    timestamp?: timestampResolver<Maybe<string>, TypeParent, TContext>;
+    timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
 
-    message?: messageResolver<Maybe<string[]>, TypeParent, TContext>;
+    message?: MessageResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    user?: userResolver<Maybe<UserEcsFields>, TypeParent, TContext>;
+    user?: UserResolver<Maybe<UserEcsFields>, TypeParent, TContext>;
 
-    process?: processResolver<Maybe<ProcessEcsFields>, TypeParent, TContext>;
+    process?: ProcessResolver<Maybe<ProcessEcsFields>, TypeParent, TContext>;
 
-    file?: fileResolver<Maybe<FileFields>, TypeParent, TContext>;
+    file?: FileResolver<Maybe<FileFields>, TypeParent, TContext>;
 
-    system?: systemResolver<Maybe<SystemEcsField>, TypeParent, TContext>;
+    system?: SystemResolver<Maybe<SystemEcsField>, TypeParent, TContext>;
   }
 
-  export type _idResolver<R = string, Parent = ECS, TContext = SiemContext> = Resolver<
+  export type _IdResolver<R = string, Parent = Ecs, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type _indexResolver<R = Maybe<string>, Parent = ECS, TContext = SiemContext> = Resolver<
+  export type _IndexResolver<R = Maybe<string>, Parent = Ecs, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type auditdResolver<
+  export type AuditdResolver<
     R = Maybe<AuditdEcsFields>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type destinationResolver<
+  export type DestinationResolver<
     R = Maybe<DestinationEcsFields>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type eventResolver<
+  export type EventResolver<
     R = Maybe<EventEcsFields>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type geoResolver<R = Maybe<GeoEcsFields>, Parent = ECS, TContext = SiemContext> = Resolver<
+  export type GeoResolver<R = Maybe<GeoEcsFields>, Parent = Ecs, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type hostResolver<
+  export type HostResolver<
     R = Maybe<HostEcsFields>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type networkResolver<
+  export type NetworkResolver<
     R = Maybe<NetworkEcsField>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sourceResolver<
+  export type SourceResolver<
     R = Maybe<SourceEcsFields>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type suricataResolver<
+  export type SuricataResolver<
     R = Maybe<SuricataEcsFields>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type tlsResolver<R = Maybe<TlsEcsFields>, Parent = ECS, TContext = SiemContext> = Resolver<
+  export type TlsResolver<R = Maybe<TlsEcsFields>, Parent = Ecs, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type zeekResolver<
+  export type ZeekResolver<
     R = Maybe<ZeekEcsFields>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type httpResolver<
+  export type HttpResolver<
     R = Maybe<HttpEcsFields>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type urlResolver<R = Maybe<UrlEcsFields>, Parent = ECS, TContext = SiemContext> = Resolver<
+  export type UrlResolver<R = Maybe<UrlEcsFields>, Parent = Ecs, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type timestampResolver<R = Maybe<string>, Parent = ECS, TContext = SiemContext> = Resolver<
+  export type TimestampResolver<R = Maybe<string>, Parent = Ecs, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type messageResolver<R = Maybe<string[]>, Parent = ECS, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type userResolver<
+  export type MessageResolver<
+    R = Maybe<string[] | string>,
+    Parent = Ecs,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type UserResolver<
     R = Maybe<UserEcsFields>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type processResolver<
+  export type ProcessResolver<
     R = Maybe<ProcessEcsFields>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type fileResolver<R = Maybe<FileFields>, Parent = ECS, TContext = SiemContext> = Resolver<
+  export type FileResolver<R = Maybe<FileFields>, Parent = Ecs, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type systemResolver<
+  export type SystemResolver<
     R = Maybe<SystemEcsField>,
-    Parent = ECS,
+    Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
 
 export namespace AuditdEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuditdEcsFields> {
-    result?: resultResolver<Maybe<string[]>, TypeParent, TContext>;
+    result?: ResultResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    session?: sessionResolver<Maybe<string[]>, TypeParent, TContext>;
+    session?: SessionResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    data?: dataResolver<Maybe<AuditdData>, TypeParent, TContext>;
+    data?: DataResolver<Maybe<AuditdData>, TypeParent, TContext>;
 
-    summary?: summaryResolver<Maybe<Summary>, TypeParent, TContext>;
+    summary?: SummaryResolver<Maybe<Summary>, TypeParent, TContext>;
 
-    sequence?: sequenceResolver<Maybe<string[]>, TypeParent, TContext>;
+    sequence?: SequenceResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type resultResolver<
-    R = Maybe<string[]>,
+  export type ResultResolver<
+    R = Maybe<string[] | string>,
     Parent = AuditdEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sessionResolver<
-    R = Maybe<string[]>,
+  export type SessionResolver<
+    R = Maybe<string[] | string>,
     Parent = AuditdEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type dataResolver<
+  export type DataResolver<
     R = Maybe<AuditdData>,
     Parent = AuditdEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type summaryResolver<
+  export type SummaryResolver<
     R = Maybe<Summary>,
     Parent = AuditdEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sequenceResolver<
-    R = Maybe<string[]>,
+  export type SequenceResolver<
+    R = Maybe<string[] | string>,
     Parent = AuditdEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3832,25 +3832,25 @@ export namespace AuditdEcsFieldsResolvers {
 
 export namespace AuditdDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuditdData> {
-    acct?: acctResolver<Maybe<string[]>, TypeParent, TContext>;
+    acct?: AcctResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    terminal?: terminalResolver<Maybe<string[]>, TypeParent, TContext>;
+    terminal?: TerminalResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    op?: opResolver<Maybe<string[]>, TypeParent, TContext>;
+    op?: OpResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type acctResolver<
-    R = Maybe<string[]>,
+  export type AcctResolver<
+    R = Maybe<string[] | string>,
     Parent = AuditdData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type terminalResolver<
-    R = Maybe<string[]>,
+  export type TerminalResolver<
+    R = Maybe<string[] | string>,
     Parent = AuditdData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type opResolver<
-    R = Maybe<string[]>,
+  export type OpResolver<
+    R = Maybe<string[] | string>,
     Parent = AuditdData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3858,39 +3858,39 @@ export namespace AuditdDataResolvers {
 
 export namespace SummaryResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = Summary> {
-    actor?: actorResolver<Maybe<PrimarySecondary>, TypeParent, TContext>;
+    actor?: ActorResolver<Maybe<PrimarySecondary>, TypeParent, TContext>;
 
-    object?: objectResolver<Maybe<PrimarySecondary>, TypeParent, TContext>;
+    object?: ObjectResolver<Maybe<PrimarySecondary>, TypeParent, TContext>;
 
-    how?: howResolver<Maybe<string[]>, TypeParent, TContext>;
+    how?: HowResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    message_type?: message_typeResolver<Maybe<string[]>, TypeParent, TContext>;
+    message_type?: MessageTypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    sequence?: sequenceResolver<Maybe<string[]>, TypeParent, TContext>;
+    sequence?: SequenceResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type actorResolver<
+  export type ActorResolver<
     R = Maybe<PrimarySecondary>,
     Parent = Summary,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type objectResolver<
+  export type ObjectResolver<
     R = Maybe<PrimarySecondary>,
     Parent = Summary,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type howResolver<R = Maybe<string[]>, Parent = Summary, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type message_typeResolver<
-    R = Maybe<string[]>,
+  export type HowResolver<
+    R = Maybe<string[] | string>,
     Parent = Summary,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sequenceResolver<
-    R = Maybe<string[]>,
+  export type MessageTypeResolver<
+    R = Maybe<string[] | string>,
+    Parent = Summary,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SequenceResolver<
+    R = Maybe<string[] | string>,
     Parent = Summary,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3898,25 +3898,25 @@ export namespace SummaryResolvers {
 
 export namespace PrimarySecondaryResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = PrimarySecondary> {
-    primary?: primaryResolver<Maybe<string[]>, TypeParent, TContext>;
+    primary?: PrimaryResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    secondary?: secondaryResolver<Maybe<string[]>, TypeParent, TContext>;
+    secondary?: SecondaryResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    type?: typeResolver<Maybe<string[]>, TypeParent, TContext>;
+    type?: TypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type primaryResolver<
-    R = Maybe<string[]>,
+  export type PrimaryResolver<
+    R = Maybe<string[] | string>,
     Parent = PrimarySecondary,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type secondaryResolver<
-    R = Maybe<string[]>,
+  export type SecondaryResolver<
+    R = Maybe<string[] | string>,
     Parent = PrimarySecondary,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type typeResolver<
-    R = Maybe<string[]>,
+  export type TypeResolver<
+    R = Maybe<string[] | string>,
     Parent = PrimarySecondary,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3924,46 +3924,46 @@ export namespace PrimarySecondaryResolvers {
 
 export namespace DestinationEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = DestinationEcsFields> {
-    bytes?: bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    bytes?: BytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    ip?: ipResolver<Maybe<string[]>, TypeParent, TContext>;
+    ip?: IpResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    port?: portResolver<Maybe<number[]>, TypeParent, TContext>;
+    port?: PortResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    domain?: domainResolver<Maybe<string[]>, TypeParent, TContext>;
+    domain?: DomainResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    geo?: geoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
+    geo?: GeoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
 
-    packets?: packetsResolver<Maybe<number[]>, TypeParent, TContext>;
+    packets?: PacketsResolver<Maybe<number[] | number>, TypeParent, TContext>;
   }
 
-  export type bytesResolver<
-    R = Maybe<number[]>,
+  export type BytesResolver<
+    R = Maybe<number[] | number>,
     Parent = DestinationEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ipResolver<
-    R = Maybe<string[]>,
+  export type IpResolver<
+    R = Maybe<string[] | string>,
     Parent = DestinationEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type portResolver<
-    R = Maybe<number[]>,
+  export type PortResolver<
+    R = Maybe<number[] | number>,
     Parent = DestinationEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type domainResolver<
-    R = Maybe<string[]>,
+  export type DomainResolver<
+    R = Maybe<string[] | string>,
     Parent = DestinationEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type geoResolver<
+  export type GeoResolver<
     R = Maybe<GeoEcsFields>,
     Parent = DestinationEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type packetsResolver<
-    R = Maybe<number[]>,
+  export type PacketsResolver<
+    R = Maybe<number[] | number>,
     Parent = DestinationEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3971,130 +3971,130 @@ export namespace DestinationEcsFieldsResolvers {
 
 export namespace EventEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = EventEcsFields> {
-    action?: actionResolver<Maybe<string[]>, TypeParent, TContext>;
+    action?: ActionResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    category?: categoryResolver<Maybe<string[]>, TypeParent, TContext>;
+    category?: CategoryResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    created?: createdResolver<Maybe<string[]>, TypeParent, TContext>;
+    created?: CreatedResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    dataset?: datasetResolver<Maybe<string[]>, TypeParent, TContext>;
+    dataset?: DatasetResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    duration?: durationResolver<Maybe<number[]>, TypeParent, TContext>;
+    duration?: DurationResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    end?: endResolver<Maybe<string[]>, TypeParent, TContext>;
+    end?: EndResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    hash?: hashResolver<Maybe<string[]>, TypeParent, TContext>;
+    hash?: HashResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    id?: idResolver<Maybe<string[]>, TypeParent, TContext>;
+    id?: IdResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    kind?: kindResolver<Maybe<string[]>, TypeParent, TContext>;
+    kind?: KindResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    module?: moduleResolver<Maybe<string[]>, TypeParent, TContext>;
+    module?: ModuleResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    original?: originalResolver<Maybe<string[]>, TypeParent, TContext>;
+    original?: OriginalResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    outcome?: outcomeResolver<Maybe<string[]>, TypeParent, TContext>;
+    outcome?: OutcomeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    risk_score?: risk_scoreResolver<Maybe<number[]>, TypeParent, TContext>;
+    risk_score?: RiskScoreResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    risk_score_norm?: risk_score_normResolver<Maybe<number[]>, TypeParent, TContext>;
+    risk_score_norm?: RiskScoreNormResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    severity?: severityResolver<Maybe<number[]>, TypeParent, TContext>;
+    severity?: SeverityResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    start?: startResolver<Maybe<string[]>, TypeParent, TContext>;
+    start?: StartResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    timezone?: timezoneResolver<Maybe<string[]>, TypeParent, TContext>;
+    timezone?: TimezoneResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    type?: typeResolver<Maybe<string[]>, TypeParent, TContext>;
+    type?: TypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type actionResolver<
-    R = Maybe<string[]>,
+  export type ActionResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type categoryResolver<
-    R = Maybe<string[]>,
+  export type CategoryResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type createdResolver<
-    R = Maybe<string[]>,
+  export type CreatedResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type datasetResolver<
-    R = Maybe<string[]>,
+  export type DatasetResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type durationResolver<
-    R = Maybe<number[]>,
+  export type DurationResolver<
+    R = Maybe<number[] | number>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type endResolver<
-    R = Maybe<string[]>,
+  export type EndResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type hashResolver<
-    R = Maybe<string[]>,
+  export type HashResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type idResolver<
-    R = Maybe<string[]>,
+  export type IdResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type kindResolver<
-    R = Maybe<string[]>,
+  export type KindResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type moduleResolver<
-    R = Maybe<string[]>,
+  export type ModuleResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type originalResolver<
-    R = Maybe<string[]>,
+  export type OriginalResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type outcomeResolver<
-    R = Maybe<string[]>,
+  export type OutcomeResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type risk_scoreResolver<
-    R = Maybe<number[]>,
+  export type RiskScoreResolver<
+    R = Maybe<number[] | number>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type risk_score_normResolver<
-    R = Maybe<number[]>,
+  export type RiskScoreNormResolver<
+    R = Maybe<number[] | number>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type severityResolver<
-    R = Maybe<number[]>,
+  export type SeverityResolver<
+    R = Maybe<number[] | number>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type startResolver<
-    R = Maybe<string[]>,
+  export type StartResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type timezoneResolver<
-    R = Maybe<string[]>,
+  export type TimezoneResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type typeResolver<
-    R = Maybe<string[]>,
+  export type TypeResolver<
+    R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4102,46 +4102,46 @@ export namespace EventEcsFieldsResolvers {
 
 export namespace NetworkEcsFieldResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NetworkEcsField> {
-    bytes?: bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    bytes?: BytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    community_id?: community_idResolver<Maybe<string[]>, TypeParent, TContext>;
+    community_id?: CommunityIdResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    direction?: directionResolver<Maybe<string[]>, TypeParent, TContext>;
+    direction?: DirectionResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    packets?: packetsResolver<Maybe<number[]>, TypeParent, TContext>;
+    packets?: PacketsResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    protocol?: protocolResolver<Maybe<string[]>, TypeParent, TContext>;
+    protocol?: ProtocolResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    transport?: transportResolver<Maybe<string[]>, TypeParent, TContext>;
+    transport?: TransportResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type bytesResolver<
-    R = Maybe<number[]>,
+  export type BytesResolver<
+    R = Maybe<number[] | number>,
     Parent = NetworkEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type community_idResolver<
-    R = Maybe<string[]>,
+  export type CommunityIdResolver<
+    R = Maybe<string[] | string>,
     Parent = NetworkEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type directionResolver<
-    R = Maybe<string[]>,
+  export type DirectionResolver<
+    R = Maybe<string[] | string>,
     Parent = NetworkEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type packetsResolver<
-    R = Maybe<number[]>,
+  export type PacketsResolver<
+    R = Maybe<number[] | number>,
     Parent = NetworkEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type protocolResolver<
-    R = Maybe<string[]>,
+  export type ProtocolResolver<
+    R = Maybe<string[] | string>,
     Parent = NetworkEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type transportResolver<
-    R = Maybe<string[]>,
+  export type TransportResolver<
+    R = Maybe<string[] | string>,
     Parent = NetworkEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4149,10 +4149,10 @@ export namespace NetworkEcsFieldResolvers {
 
 export namespace SuricataEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SuricataEcsFields> {
-    eve?: eveResolver<Maybe<SuricataEveData>, TypeParent, TContext>;
+    eve?: EveResolver<Maybe<SuricataEveData>, TypeParent, TContext>;
   }
 
-  export type eveResolver<
+  export type EveResolver<
     R = Maybe<SuricataEveData>,
     Parent = SuricataEcsFields,
     TContext = SiemContext
@@ -4161,25 +4161,25 @@ export namespace SuricataEcsFieldsResolvers {
 
 export namespace SuricataEveDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SuricataEveData> {
-    alert?: alertResolver<Maybe<SuricataAlertData>, TypeParent, TContext>;
+    alert?: AlertResolver<Maybe<SuricataAlertData>, TypeParent, TContext>;
 
-    flow_id?: flow_idResolver<Maybe<number[]>, TypeParent, TContext>;
+    flow_id?: FlowIdResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    proto?: protoResolver<Maybe<string[]>, TypeParent, TContext>;
+    proto?: ProtoResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type alertResolver<
+  export type AlertResolver<
     R = Maybe<SuricataAlertData>,
     Parent = SuricataEveData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type flow_idResolver<
-    R = Maybe<number[]>,
+  export type FlowIdResolver<
+    R = Maybe<number[] | number>,
     Parent = SuricataEveData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type protoResolver<
-    R = Maybe<string[]>,
+  export type ProtoResolver<
+    R = Maybe<string[] | string>,
     Parent = SuricataEveData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4187,18 +4187,18 @@ export namespace SuricataEveDataResolvers {
 
 export namespace SuricataAlertDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SuricataAlertData> {
-    signature?: signatureResolver<Maybe<string[]>, TypeParent, TContext>;
+    signature?: SignatureResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    signature_id?: signature_idResolver<Maybe<number[]>, TypeParent, TContext>;
+    signature_id?: SignatureIdResolver<Maybe<number[] | number>, TypeParent, TContext>;
   }
 
-  export type signatureResolver<
-    R = Maybe<string[]>,
+  export type SignatureResolver<
+    R = Maybe<string[] | string>,
     Parent = SuricataAlertData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type signature_idResolver<
-    R = Maybe<number[]>,
+  export type SignatureIdResolver<
+    R = Maybe<number[] | number>,
     Parent = SuricataAlertData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4206,32 +4206,32 @@ export namespace SuricataAlertDataResolvers {
 
 export namespace TlsEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TlsEcsFields> {
-    client_certificate?: client_certificateResolver<
+    client_certificate?: ClientCertificateResolver<
       Maybe<TlsClientCertificateData>,
       TypeParent,
       TContext
     >;
 
-    fingerprints?: fingerprintsResolver<Maybe<TlsFingerprintsData>, TypeParent, TContext>;
+    fingerprints?: FingerprintsResolver<Maybe<TlsFingerprintsData>, TypeParent, TContext>;
 
-    server_certificate?: server_certificateResolver<
+    server_certificate?: ServerCertificateResolver<
       Maybe<TlsServerCertificateData>,
       TypeParent,
       TContext
     >;
   }
 
-  export type client_certificateResolver<
+  export type ClientCertificateResolver<
     R = Maybe<TlsClientCertificateData>,
     Parent = TlsEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type fingerprintsResolver<
+  export type FingerprintsResolver<
     R = Maybe<TlsFingerprintsData>,
     Parent = TlsEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type server_certificateResolver<
+  export type ServerCertificateResolver<
     R = Maybe<TlsServerCertificateData>,
     Parent = TlsEcsFields,
     TContext = SiemContext
@@ -4240,10 +4240,10 @@ export namespace TlsEcsFieldsResolvers {
 
 export namespace TlsClientCertificateDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TlsClientCertificateData> {
-    fingerprint?: fingerprintResolver<Maybe<FingerprintData>, TypeParent, TContext>;
+    fingerprint?: FingerprintResolver<Maybe<FingerprintData>, TypeParent, TContext>;
   }
 
-  export type fingerprintResolver<
+  export type FingerprintResolver<
     R = Maybe<FingerprintData>,
     Parent = TlsClientCertificateData,
     TContext = SiemContext
@@ -4252,11 +4252,11 @@ export namespace TlsClientCertificateDataResolvers {
 
 export namespace FingerprintDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = FingerprintData> {
-    sha1?: sha1Resolver<Maybe<string[]>, TypeParent, TContext>;
+    sha1?: Sha1Resolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type sha1Resolver<
-    R = Maybe<string[]>,
+  export type Sha1Resolver<
+    R = Maybe<string[] | string>,
     Parent = FingerprintData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4264,10 +4264,10 @@ export namespace FingerprintDataResolvers {
 
 export namespace TlsFingerprintsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TlsFingerprintsData> {
-    ja3?: ja3Resolver<Maybe<TlsJa3Data>, TypeParent, TContext>;
+    ja3?: Ja3Resolver<Maybe<TlsJa3Data>, TypeParent, TContext>;
   }
 
-  export type ja3Resolver<
+  export type Ja3Resolver<
     R = Maybe<TlsJa3Data>,
     Parent = TlsFingerprintsData,
     TContext = SiemContext
@@ -4276,11 +4276,11 @@ export namespace TlsFingerprintsDataResolvers {
 
 export namespace TlsJa3DataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TlsJa3Data> {
-    hash?: hashResolver<Maybe<string[]>, TypeParent, TContext>;
+    hash?: HashResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type hashResolver<
-    R = Maybe<string[]>,
+  export type HashResolver<
+    R = Maybe<string[] | string>,
     Parent = TlsJa3Data,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4288,10 +4288,10 @@ export namespace TlsJa3DataResolvers {
 
 export namespace TlsServerCertificateDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TlsServerCertificateData> {
-    fingerprint?: fingerprintResolver<Maybe<FingerprintData>, TypeParent, TContext>;
+    fingerprint?: FingerprintResolver<Maybe<FingerprintData>, TypeParent, TContext>;
   }
 
-  export type fingerprintResolver<
+  export type FingerprintResolver<
     R = Maybe<FingerprintData>,
     Parent = TlsServerCertificateData,
     TContext = SiemContext
@@ -4300,52 +4300,52 @@ export namespace TlsServerCertificateDataResolvers {
 
 export namespace ZeekEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ZeekEcsFields> {
-    session_id?: session_idResolver<Maybe<string[]>, TypeParent, TContext>;
+    session_id?: SessionIdResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    connection?: connectionResolver<Maybe<ZeekConnectionData>, TypeParent, TContext>;
+    connection?: ConnectionResolver<Maybe<ZeekConnectionData>, TypeParent, TContext>;
 
-    notice?: noticeResolver<Maybe<ZeekNoticeData>, TypeParent, TContext>;
+    notice?: NoticeResolver<Maybe<ZeekNoticeData>, TypeParent, TContext>;
 
-    dns?: dnsResolver<Maybe<ZeekDnsData>, TypeParent, TContext>;
+    dns?: DnsResolver<Maybe<ZeekDnsData>, TypeParent, TContext>;
 
-    http?: httpResolver<Maybe<ZeekHttpData>, TypeParent, TContext>;
+    http?: HttpResolver<Maybe<ZeekHttpData>, TypeParent, TContext>;
 
-    files?: filesResolver<Maybe<ZeekFileData>, TypeParent, TContext>;
+    files?: FilesResolver<Maybe<ZeekFileData>, TypeParent, TContext>;
 
-    ssl?: sslResolver<Maybe<ZeekSslData>, TypeParent, TContext>;
+    ssl?: SslResolver<Maybe<ZeekSslData>, TypeParent, TContext>;
   }
 
-  export type session_idResolver<
-    R = Maybe<string[]>,
+  export type SessionIdResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type connectionResolver<
+  export type ConnectionResolver<
     R = Maybe<ZeekConnectionData>,
     Parent = ZeekEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type noticeResolver<
+  export type NoticeResolver<
     R = Maybe<ZeekNoticeData>,
     Parent = ZeekEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type dnsResolver<
+  export type DnsResolver<
     R = Maybe<ZeekDnsData>,
     Parent = ZeekEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type httpResolver<
+  export type HttpResolver<
     R = Maybe<ZeekHttpData>,
     Parent = ZeekEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type filesResolver<
+  export type FilesResolver<
     R = Maybe<ZeekFileData>,
     Parent = ZeekEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sslResolver<
+  export type SslResolver<
     R = Maybe<ZeekSslData>,
     Parent = ZeekEcsFields,
     TContext = SiemContext
@@ -4354,39 +4354,39 @@ export namespace ZeekEcsFieldsResolvers {
 
 export namespace ZeekConnectionDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ZeekConnectionData> {
-    local_resp?: local_respResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    local_resp?: LocalRespResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    local_orig?: local_origResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    local_orig?: LocalOrigResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    missed_bytes?: missed_bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    missed_bytes?: MissedBytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    state?: stateResolver<Maybe<string[]>, TypeParent, TContext>;
+    state?: StateResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    history?: historyResolver<Maybe<string[]>, TypeParent, TContext>;
+    history?: HistoryResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type local_respResolver<
-    R = Maybe<boolean[]>,
+  export type LocalRespResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekConnectionData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type local_origResolver<
-    R = Maybe<boolean[]>,
+  export type LocalOrigResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekConnectionData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type missed_bytesResolver<
-    R = Maybe<number[]>,
+  export type MissedBytesResolver<
+    R = Maybe<number[] | number>,
     Parent = ZeekConnectionData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type stateResolver<
-    R = Maybe<string[]>,
+  export type StateResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekConnectionData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type historyResolver<
-    R = Maybe<string[]>,
+  export type HistoryResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekConnectionData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4394,53 +4394,53 @@ export namespace ZeekConnectionDataResolvers {
 
 export namespace ZeekNoticeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ZeekNoticeData> {
-    suppress_for?: suppress_forResolver<Maybe<number[]>, TypeParent, TContext>;
+    suppress_for?: SuppressForResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    msg?: msgResolver<Maybe<string[]>, TypeParent, TContext>;
+    msg?: MsgResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    note?: noteResolver<Maybe<string[]>, TypeParent, TContext>;
+    note?: NoteResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    sub?: subResolver<Maybe<string[]>, TypeParent, TContext>;
+    sub?: SubResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    dst?: dstResolver<Maybe<string[]>, TypeParent, TContext>;
+    dst?: DstResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    dropped?: droppedResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    dropped?: DroppedResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    peer_descr?: peer_descrResolver<Maybe<string[]>, TypeParent, TContext>;
+    peer_descr?: PeerDescrResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type suppress_forResolver<
-    R = Maybe<number[]>,
+  export type SuppressForResolver<
+    R = Maybe<number[] | number>,
     Parent = ZeekNoticeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type msgResolver<
-    R = Maybe<string[]>,
+  export type MsgResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekNoticeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type noteResolver<
-    R = Maybe<string[]>,
+  export type NoteResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekNoticeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type subResolver<
-    R = Maybe<string[]>,
+  export type SubResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekNoticeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type dstResolver<
-    R = Maybe<string[]>,
+  export type DstResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekNoticeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type droppedResolver<
-    R = Maybe<boolean[]>,
+  export type DroppedResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekNoticeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type peer_descrResolver<
-    R = Maybe<string[]>,
+  export type PeerDescrResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekNoticeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4448,81 +4448,81 @@ export namespace ZeekNoticeDataResolvers {
 
 export namespace ZeekDnsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ZeekDnsData> {
-    AA?: AAResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    AA?: AaResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    qclass_name?: qclass_nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    qclass_name?: QclassNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    RD?: RDResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    RD?: RdResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    qtype_name?: qtype_nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    qtype_name?: QtypeNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    rejected?: rejectedResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    rejected?: RejectedResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    qtype?: qtypeResolver<Maybe<string[]>, TypeParent, TContext>;
+    qtype?: QtypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    query?: queryResolver<Maybe<string[]>, TypeParent, TContext>;
+    query?: QueryResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    trans_id?: trans_idResolver<Maybe<number[]>, TypeParent, TContext>;
+    trans_id?: TransIdResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    qclass?: qclassResolver<Maybe<string[]>, TypeParent, TContext>;
+    qclass?: QclassResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    RA?: RAResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    RA?: RaResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    TC?: TCResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    TC?: TcResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
   }
 
-  export type AAResolver<
-    R = Maybe<boolean[]>,
+  export type AaResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type qclass_nameResolver<
-    R = Maybe<string[]>,
+  export type QclassNameResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type RDResolver<
-    R = Maybe<boolean[]>,
+  export type RdResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type qtype_nameResolver<
-    R = Maybe<string[]>,
+  export type QtypeNameResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type rejectedResolver<
-    R = Maybe<boolean[]>,
+  export type RejectedResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type qtypeResolver<
-    R = Maybe<string[]>,
+  export type QtypeResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type queryResolver<
-    R = Maybe<string[]>,
+  export type QueryResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type trans_idResolver<
-    R = Maybe<number[]>,
+  export type TransIdResolver<
+    R = Maybe<number[] | number>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type qclassResolver<
-    R = Maybe<string[]>,
+  export type QclassResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type RAResolver<
-    R = Maybe<boolean[]>,
+  export type RaResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type TCResolver<
-    R = Maybe<boolean[]>,
+  export type TcResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4530,39 +4530,39 @@ export namespace ZeekDnsDataResolvers {
 
 export namespace ZeekHttpDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ZeekHttpData> {
-    resp_mime_types?: resp_mime_typesResolver<Maybe<string[]>, TypeParent, TContext>;
+    resp_mime_types?: RespMimeTypesResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    trans_depth?: trans_depthResolver<Maybe<string[]>, TypeParent, TContext>;
+    trans_depth?: TransDepthResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    status_msg?: status_msgResolver<Maybe<string[]>, TypeParent, TContext>;
+    status_msg?: StatusMsgResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    resp_fuids?: resp_fuidsResolver<Maybe<string[]>, TypeParent, TContext>;
+    resp_fuids?: RespFuidsResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    tags?: tagsResolver<Maybe<string[]>, TypeParent, TContext>;
+    tags?: TagsResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type resp_mime_typesResolver<
-    R = Maybe<string[]>,
+  export type RespMimeTypesResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekHttpData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type trans_depthResolver<
-    R = Maybe<string[]>,
+  export type TransDepthResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekHttpData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type status_msgResolver<
-    R = Maybe<string[]>,
+  export type StatusMsgResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekHttpData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type resp_fuidsResolver<
-    R = Maybe<string[]>,
+  export type RespFuidsResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekHttpData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type tagsResolver<
-    R = Maybe<string[]>,
+  export type TagsResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekHttpData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4570,130 +4570,130 @@ export namespace ZeekHttpDataResolvers {
 
 export namespace ZeekFileDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ZeekFileData> {
-    session_ids?: session_idsResolver<Maybe<string[]>, TypeParent, TContext>;
+    session_ids?: SessionIdsResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    timedout?: timedoutResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    timedout?: TimedoutResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    local_orig?: local_origResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    local_orig?: LocalOrigResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    tx_host?: tx_hostResolver<Maybe<string[]>, TypeParent, TContext>;
+    tx_host?: TxHostResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    source?: sourceResolver<Maybe<string[]>, TypeParent, TContext>;
+    source?: SourceResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    is_orig?: is_origResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    is_orig?: IsOrigResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    overflow_bytes?: overflow_bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    overflow_bytes?: OverflowBytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    sha1?: sha1Resolver<Maybe<string[]>, TypeParent, TContext>;
+    sha1?: Sha1Resolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    duration?: durationResolver<Maybe<number[]>, TypeParent, TContext>;
+    duration?: DurationResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    depth?: depthResolver<Maybe<number[]>, TypeParent, TContext>;
+    depth?: DepthResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    analyzers?: analyzersResolver<Maybe<string[]>, TypeParent, TContext>;
+    analyzers?: AnalyzersResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    mime_type?: mime_typeResolver<Maybe<string[]>, TypeParent, TContext>;
+    mime_type?: MimeTypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    rx_host?: rx_hostResolver<Maybe<string[]>, TypeParent, TContext>;
+    rx_host?: RxHostResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    total_bytes?: total_bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    total_bytes?: TotalBytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    fuid?: fuidResolver<Maybe<string[]>, TypeParent, TContext>;
+    fuid?: FuidResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    seen_bytes?: seen_bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    seen_bytes?: SeenBytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    missing_bytes?: missing_bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    missing_bytes?: MissingBytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    md5?: md5Resolver<Maybe<string[]>, TypeParent, TContext>;
+    md5?: Md5Resolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type session_idsResolver<
-    R = Maybe<string[]>,
+  export type SessionIdsResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type timedoutResolver<
-    R = Maybe<boolean[]>,
+  export type TimedoutResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type local_origResolver<
-    R = Maybe<boolean[]>,
+  export type LocalOrigResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type tx_hostResolver<
-    R = Maybe<string[]>,
+  export type TxHostResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sourceResolver<
-    R = Maybe<string[]>,
+  export type SourceResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type is_origResolver<
-    R = Maybe<boolean[]>,
+  export type IsOrigResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type overflow_bytesResolver<
-    R = Maybe<number[]>,
+  export type OverflowBytesResolver<
+    R = Maybe<number[] | number>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sha1Resolver<
-    R = Maybe<string[]>,
+  export type Sha1Resolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type durationResolver<
-    R = Maybe<number[]>,
+  export type DurationResolver<
+    R = Maybe<number[] | number>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type depthResolver<
-    R = Maybe<number[]>,
+  export type DepthResolver<
+    R = Maybe<number[] | number>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type analyzersResolver<
-    R = Maybe<string[]>,
+  export type AnalyzersResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type mime_typeResolver<
-    R = Maybe<string[]>,
+  export type MimeTypeResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type rx_hostResolver<
-    R = Maybe<string[]>,
+  export type RxHostResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type total_bytesResolver<
-    R = Maybe<number[]>,
+  export type TotalBytesResolver<
+    R = Maybe<number[] | number>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type fuidResolver<
-    R = Maybe<string[]>,
+  export type FuidResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type seen_bytesResolver<
-    R = Maybe<number[]>,
+  export type SeenBytesResolver<
+    R = Maybe<number[] | number>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type missing_bytesResolver<
-    R = Maybe<number[]>,
+  export type MissingBytesResolver<
+    R = Maybe<number[] | number>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type md5Resolver<
-    R = Maybe<string[]>,
+  export type Md5Resolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekFileData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4701,32 +4701,32 @@ export namespace ZeekFileDataResolvers {
 
 export namespace ZeekSslDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ZeekSslData> {
-    cipher?: cipherResolver<Maybe<string[]>, TypeParent, TContext>;
+    cipher?: CipherResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    established?: establishedResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    established?: EstablishedResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    resumed?: resumedResolver<Maybe<boolean[]>, TypeParent, TContext>;
+    resumed?: ResumedResolver<Maybe<boolean[] | boolean>, TypeParent, TContext>;
 
-    version?: versionResolver<Maybe<string[]>, TypeParent, TContext>;
+    version?: VersionResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type cipherResolver<
-    R = Maybe<string[]>,
+  export type CipherResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekSslData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type establishedResolver<
-    R = Maybe<boolean[]>,
+  export type EstablishedResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekSslData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type resumedResolver<
-    R = Maybe<boolean[]>,
+  export type ResumedResolver<
+    R = Maybe<boolean[] | boolean>,
     Parent = ZeekSslData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type versionResolver<
-    R = Maybe<string[]>,
+  export type VersionResolver<
+    R = Maybe<string[] | string>,
     Parent = ZeekSslData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4734,24 +4734,24 @@ export namespace ZeekSslDataResolvers {
 
 export namespace HttpEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HttpEcsFields> {
-    version?: versionResolver<Maybe<string[]>, TypeParent, TContext>;
+    version?: VersionResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    request?: requestResolver<Maybe<HttpRequestData>, TypeParent, TContext>;
+    request?: RequestResolver<Maybe<HttpRequestData>, TypeParent, TContext>;
 
-    response?: responseResolver<Maybe<HttpResponseData>, TypeParent, TContext>;
+    response?: ResponseResolver<Maybe<HttpResponseData>, TypeParent, TContext>;
   }
 
-  export type versionResolver<
-    R = Maybe<string[]>,
+  export type VersionResolver<
+    R = Maybe<string[] | string>,
     Parent = HttpEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type requestResolver<
+  export type RequestResolver<
     R = Maybe<HttpRequestData>,
     Parent = HttpEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type responseResolver<
+  export type ResponseResolver<
     R = Maybe<HttpResponseData>,
     Parent = HttpEcsFields,
     TContext = SiemContext
@@ -4760,32 +4760,32 @@ export namespace HttpEcsFieldsResolvers {
 
 export namespace HttpRequestDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HttpRequestData> {
-    method?: methodResolver<Maybe<string[]>, TypeParent, TContext>;
+    method?: MethodResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    body?: bodyResolver<Maybe<HttpBodyData>, TypeParent, TContext>;
+    body?: BodyResolver<Maybe<HttpBodyData>, TypeParent, TContext>;
 
-    referrer?: referrerResolver<Maybe<string[]>, TypeParent, TContext>;
+    referrer?: ReferrerResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    bytes?: bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    bytes?: BytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
   }
 
-  export type methodResolver<
-    R = Maybe<string[]>,
+  export type MethodResolver<
+    R = Maybe<string[] | string>,
     Parent = HttpRequestData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type bodyResolver<
+  export type BodyResolver<
     R = Maybe<HttpBodyData>,
     Parent = HttpRequestData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type referrerResolver<
-    R = Maybe<string[]>,
+  export type ReferrerResolver<
+    R = Maybe<string[] | string>,
     Parent = HttpRequestData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type bytesResolver<
-    R = Maybe<number[]>,
+  export type BytesResolver<
+    R = Maybe<number[] | number>,
     Parent = HttpRequestData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4793,18 +4793,18 @@ export namespace HttpRequestDataResolvers {
 
 export namespace HttpBodyDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HttpBodyData> {
-    content?: contentResolver<Maybe<string[]>, TypeParent, TContext>;
+    content?: ContentResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    bytes?: bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    bytes?: BytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
   }
 
-  export type contentResolver<
-    R = Maybe<string[]>,
+  export type ContentResolver<
+    R = Maybe<string[] | string>,
     Parent = HttpBodyData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type bytesResolver<
-    R = Maybe<number[]>,
+  export type BytesResolver<
+    R = Maybe<number[] | number>,
     Parent = HttpBodyData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4812,25 +4812,25 @@ export namespace HttpBodyDataResolvers {
 
 export namespace HttpResponseDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HttpResponseData> {
-    status_code?: status_codeResolver<Maybe<number[]>, TypeParent, TContext>;
+    status_code?: StatusCodeResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    body?: bodyResolver<Maybe<HttpBodyData>, TypeParent, TContext>;
+    body?: BodyResolver<Maybe<HttpBodyData>, TypeParent, TContext>;
 
-    bytes?: bytesResolver<Maybe<number[]>, TypeParent, TContext>;
+    bytes?: BytesResolver<Maybe<number[] | number>, TypeParent, TContext>;
   }
 
-  export type status_codeResolver<
-    R = Maybe<number[]>,
+  export type StatusCodeResolver<
+    R = Maybe<number[] | number>,
     Parent = HttpResponseData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type bodyResolver<
+  export type BodyResolver<
     R = Maybe<HttpBodyData>,
     Parent = HttpResponseData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type bytesResolver<
-    R = Maybe<number[]>,
+  export type BytesResolver<
+    R = Maybe<number[] | number>,
     Parent = HttpResponseData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4838,32 +4838,32 @@ export namespace HttpResponseDataResolvers {
 
 export namespace UrlEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UrlEcsFields> {
-    domain?: domainResolver<Maybe<string[]>, TypeParent, TContext>;
+    domain?: DomainResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    original?: originalResolver<Maybe<string[]>, TypeParent, TContext>;
+    original?: OriginalResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    username?: usernameResolver<Maybe<string[]>, TypeParent, TContext>;
+    username?: UsernameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    password?: passwordResolver<Maybe<string[]>, TypeParent, TContext>;
+    password?: PasswordResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type domainResolver<
-    R = Maybe<string[]>,
+  export type DomainResolver<
+    R = Maybe<string[] | string>,
     Parent = UrlEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type originalResolver<
-    R = Maybe<string[]>,
+  export type OriginalResolver<
+    R = Maybe<string[] | string>,
     Parent = UrlEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type usernameResolver<
-    R = Maybe<string[]>,
+  export type UsernameResolver<
+    R = Maybe<string[] | string>,
     Parent = UrlEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type passwordResolver<
-    R = Maybe<string[]>,
+  export type PasswordResolver<
+    R = Maybe<string[] | string>,
     Parent = UrlEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4871,60 +4871,60 @@ export namespace UrlEcsFieldsResolvers {
 
 export namespace ProcessEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ProcessEcsFields> {
-    pid?: pidResolver<Maybe<number[]>, TypeParent, TContext>;
+    pid?: PidResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    name?: nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    ppid?: ppidResolver<Maybe<number[]>, TypeParent, TContext>;
+    ppid?: PpidResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    args?: argsResolver<Maybe<string[]>, TypeParent, TContext>;
+    args?: ArgsResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    executable?: executableResolver<Maybe<string[]>, TypeParent, TContext>;
+    executable?: ExecutableResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    title?: titleResolver<Maybe<string[]>, TypeParent, TContext>;
+    title?: TitleResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    thread?: threadResolver<Maybe<Thread>, TypeParent, TContext>;
+    thread?: ThreadResolver<Maybe<Thread>, TypeParent, TContext>;
 
-    working_directory?: working_directoryResolver<Maybe<string[]>, TypeParent, TContext>;
+    working_directory?: WorkingDirectoryResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type pidResolver<
-    R = Maybe<number[]>,
+  export type PidResolver<
+    R = Maybe<number[] | number>,
     Parent = ProcessEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type nameResolver<
-    R = Maybe<string[]>,
+  export type NameResolver<
+    R = Maybe<string[] | string>,
     Parent = ProcessEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ppidResolver<
-    R = Maybe<number[]>,
+  export type PpidResolver<
+    R = Maybe<number[] | number>,
     Parent = ProcessEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type argsResolver<
-    R = Maybe<string[]>,
+  export type ArgsResolver<
+    R = Maybe<string[] | string>,
     Parent = ProcessEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type executableResolver<
-    R = Maybe<string[]>,
+  export type ExecutableResolver<
+    R = Maybe<string[] | string>,
     Parent = ProcessEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type titleResolver<
-    R = Maybe<string[]>,
+  export type TitleResolver<
+    R = Maybe<string[] | string>,
     Parent = ProcessEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type threadResolver<
+  export type ThreadResolver<
     R = Maybe<Thread>,
     Parent = ProcessEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type working_directoryResolver<
-    R = Maybe<string[]>,
+  export type WorkingDirectoryResolver<
+    R = Maybe<string[] | string>,
     Parent = ProcessEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4932,18 +4932,18 @@ export namespace ProcessEcsFieldsResolvers {
 
 export namespace ThreadResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = Thread> {
-    id?: idResolver<Maybe<number[]>, TypeParent, TContext>;
+    id?: IdResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    start?: startResolver<Maybe<string[]>, TypeParent, TContext>;
+    start?: StartResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type idResolver<R = Maybe<number[]>, Parent = Thread, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type startResolver<
-    R = Maybe<string[]>,
+  export type IdResolver<
+    R = Maybe<number[] | number>,
+    Parent = Thread,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type StartResolver<
+    R = Maybe<string[] | string>,
     Parent = Thread,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4951,102 +4951,102 @@ export namespace ThreadResolvers {
 
 export namespace FileFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = FileFields> {
-    path?: pathResolver<Maybe<string[]>, TypeParent, TContext>;
+    path?: PathResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    target_path?: target_pathResolver<Maybe<string[]>, TypeParent, TContext>;
+    target_path?: TargetPathResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    extension?: extensionResolver<Maybe<string[]>, TypeParent, TContext>;
+    extension?: ExtensionResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    type?: typeResolver<Maybe<string[]>, TypeParent, TContext>;
+    type?: TypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    device?: deviceResolver<Maybe<string[]>, TypeParent, TContext>;
+    device?: DeviceResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    inode?: inodeResolver<Maybe<string[]>, TypeParent, TContext>;
+    inode?: InodeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    uid?: uidResolver<Maybe<string[]>, TypeParent, TContext>;
+    uid?: UidResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    owner?: ownerResolver<Maybe<string[]>, TypeParent, TContext>;
+    owner?: OwnerResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    gid?: gidResolver<Maybe<string[]>, TypeParent, TContext>;
+    gid?: GidResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    group?: groupResolver<Maybe<string[]>, TypeParent, TContext>;
+    group?: GroupResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    mode?: modeResolver<Maybe<string[]>, TypeParent, TContext>;
+    mode?: ModeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    size?: sizeResolver<Maybe<number[]>, TypeParent, TContext>;
+    size?: SizeResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    mtime?: mtimeResolver<Maybe<string[]>, TypeParent, TContext>;
+    mtime?: MtimeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    ctime?: ctimeResolver<Maybe<string[]>, TypeParent, TContext>;
+    ctime?: CtimeResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type pathResolver<
-    R = Maybe<string[]>,
+  export type PathResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type target_pathResolver<
-    R = Maybe<string[]>,
+  export type TargetPathResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type extensionResolver<
-    R = Maybe<string[]>,
+  export type ExtensionResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type typeResolver<
-    R = Maybe<string[]>,
+  export type TypeResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type deviceResolver<
-    R = Maybe<string[]>,
+  export type DeviceResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inodeResolver<
-    R = Maybe<string[]>,
+  export type InodeResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uidResolver<
-    R = Maybe<string[]>,
+  export type UidResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ownerResolver<
-    R = Maybe<string[]>,
+  export type OwnerResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type gidResolver<
-    R = Maybe<string[]>,
+  export type GidResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type groupResolver<
-    R = Maybe<string[]>,
+  export type GroupResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type modeResolver<
-    R = Maybe<string[]>,
+  export type ModeResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sizeResolver<
-    R = Maybe<number[]>,
+  export type SizeResolver<
+    R = Maybe<number[] | number>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type mtimeResolver<
-    R = Maybe<string[]>,
+  export type MtimeResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ctimeResolver<
-    R = Maybe<string[]>,
+  export type CtimeResolver<
+    R = Maybe<string[] | string>,
     Parent = FileFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -5054,17 +5054,17 @@ export namespace FileFieldsResolvers {
 
 export namespace SystemEcsFieldResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SystemEcsField> {
-    audit?: auditResolver<Maybe<AuditEcsFields>, TypeParent, TContext>;
+    audit?: AuditResolver<Maybe<AuditEcsFields>, TypeParent, TContext>;
 
-    auth?: authResolver<Maybe<AuthEcsFields>, TypeParent, TContext>;
+    auth?: AuthResolver<Maybe<AuthEcsFields>, TypeParent, TContext>;
   }
 
-  export type auditResolver<
+  export type AuditResolver<
     R = Maybe<AuditEcsFields>,
     Parent = SystemEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type authResolver<
+  export type AuthResolver<
     R = Maybe<AuthEcsFields>,
     Parent = SystemEcsField,
     TContext = SiemContext
@@ -5073,10 +5073,10 @@ export namespace SystemEcsFieldResolvers {
 
 export namespace AuditEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuditEcsFields> {
-    package?: packageResolver<Maybe<PackageEcsFields>, TypeParent, TContext>;
+    package?: PackageResolver<Maybe<PackageEcsFields>, TypeParent, TContext>;
   }
 
-  export type packageResolver<
+  export type PackageResolver<
     R = Maybe<PackageEcsFields>,
     Parent = AuditEcsFields,
     TContext = SiemContext
@@ -5085,46 +5085,46 @@ export namespace AuditEcsFieldsResolvers {
 
 export namespace PackageEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = PackageEcsFields> {
-    arch?: archResolver<Maybe<string[]>, TypeParent, TContext>;
+    arch?: ArchResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    entity_id?: entity_idResolver<Maybe<string[]>, TypeParent, TContext>;
+    entity_id?: EntityIdResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    name?: nameResolver<Maybe<string[]>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    size?: sizeResolver<Maybe<number[]>, TypeParent, TContext>;
+    size?: SizeResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
-    summary?: summaryResolver<Maybe<string[]>, TypeParent, TContext>;
+    summary?: SummaryResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    version?: versionResolver<Maybe<string[]>, TypeParent, TContext>;
+    version?: VersionResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type archResolver<
-    R = Maybe<string[]>,
+  export type ArchResolver<
+    R = Maybe<string[] | string>,
     Parent = PackageEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type entity_idResolver<
-    R = Maybe<string[]>,
+  export type EntityIdResolver<
+    R = Maybe<string[] | string>,
     Parent = PackageEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type nameResolver<
-    R = Maybe<string[]>,
+  export type NameResolver<
+    R = Maybe<string[] | string>,
     Parent = PackageEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sizeResolver<
-    R = Maybe<number[]>,
+  export type SizeResolver<
+    R = Maybe<number[] | number>,
     Parent = PackageEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type summaryResolver<
-    R = Maybe<string[]>,
+  export type SummaryResolver<
+    R = Maybe<string[] | string>,
     Parent = PackageEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type versionResolver<
-    R = Maybe<string[]>,
+  export type VersionResolver<
+    R = Maybe<string[] | string>,
     Parent = PackageEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -5132,10 +5132,10 @@ export namespace PackageEcsFieldsResolvers {
 
 export namespace AuthEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AuthEcsFields> {
-    ssh?: sshResolver<Maybe<SshEcsFields>, TypeParent, TContext>;
+    ssh?: SshResolver<Maybe<SshEcsFields>, TypeParent, TContext>;
   }
 
-  export type sshResolver<
+  export type SshResolver<
     R = Maybe<SshEcsFields>,
     Parent = AuthEcsFields,
     TContext = SiemContext
@@ -5144,18 +5144,18 @@ export namespace AuthEcsFieldsResolvers {
 
 export namespace SshEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SshEcsFields> {
-    method?: methodResolver<Maybe<string[]>, TypeParent, TContext>;
+    method?: MethodResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    signature?: signatureResolver<Maybe<string[]>, TypeParent, TContext>;
+    signature?: SignatureResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
-  export type methodResolver<
-    R = Maybe<string[]>,
+  export type MethodResolver<
+    R = Maybe<string[] | string>,
     Parent = SshEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type signatureResolver<
-    R = Maybe<string[]>,
+  export type SignatureResolver<
+    R = Maybe<string[] | string>,
     Parent = SshEcsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -5163,17 +5163,17 @@ export namespace SshEcsFieldsResolvers {
 
 export namespace PageInfoResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = PageInfo> {
-    endCursor?: endCursorResolver<Maybe<CursorType>, TypeParent, TContext>;
+    endCursor?: EndCursorResolver<Maybe<CursorType>, TypeParent, TContext>;
 
-    hasNextPage?: hasNextPageResolver<Maybe<boolean>, TypeParent, TContext>;
+    hasNextPage?: HasNextPageResolver<Maybe<boolean>, TypeParent, TContext>;
   }
 
-  export type endCursorResolver<
+  export type EndCursorResolver<
     R = Maybe<CursorType>,
     Parent = PageInfo,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type hasNextPageResolver<
+  export type HasNextPageResolver<
     R = Maybe<boolean>,
     Parent = PageInfo,
     TContext = SiemContext
@@ -5182,17 +5182,17 @@ export namespace PageInfoResolvers {
 
 export namespace TimelineDetailsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TimelineDetailsData> {
-    data?: dataResolver<Maybe<DetailItem[]>, TypeParent, TContext>;
+    data?: DataResolver<Maybe<DetailItem[]>, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type dataResolver<
+  export type DataResolver<
     R = Maybe<DetailItem[]>,
     Parent = TimelineDetailsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = TimelineDetailsData,
     TContext = SiemContext
@@ -5201,24 +5201,24 @@ export namespace TimelineDetailsDataResolvers {
 
 export namespace DetailItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = DetailItem> {
-    field?: fieldResolver<string, TypeParent, TContext>;
+    field?: FieldResolver<string, TypeParent, TContext>;
 
-    values?: valuesResolver<Maybe<string[]>, TypeParent, TContext>;
+    values?: ValuesResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    originalValue?: originalValueResolver<Maybe<EsValue>, TypeParent, TContext>;
+    originalValue?: OriginalValueResolver<Maybe<EsValue>, TypeParent, TContext>;
   }
 
-  export type fieldResolver<R = string, Parent = DetailItem, TContext = SiemContext> = Resolver<
+  export type FieldResolver<R = string, Parent = DetailItem, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type valuesResolver<
-    R = Maybe<string[]>,
+  export type ValuesResolver<
+    R = Maybe<string[] | string>,
     Parent = DetailItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type originalValueResolver<
+  export type OriginalValueResolver<
     R = Maybe<EsValue>,
     Parent = DetailItem,
     TContext = SiemContext
@@ -5227,17 +5227,17 @@ export namespace DetailItemResolvers {
 
 export namespace LastEventTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = LastEventTimeData> {
-    lastSeen?: lastSeenResolver<Maybe<string>, TypeParent, TContext>;
+    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type lastSeenResolver<
+  export type LastSeenResolver<
     R = Maybe<string>,
     Parent = LastEventTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = LastEventTimeData,
     TContext = SiemContext
@@ -5246,24 +5246,24 @@ export namespace LastEventTimeDataResolvers {
 
 export namespace EventsOverTimeDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = EventsOverTimeData> {
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    eventsOverTime?: eventsOverTimeResolver<MatrixOverTimeHistogramData[], TypeParent, TContext>;
+    eventsOverTime?: EventsOverTimeResolver<MatrixOverTimeHistogramData[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
   }
 
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = EventsOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type eventsOverTimeResolver<
+  export type EventsOverTimeResolver<
     R = MatrixOverTimeHistogramData[],
     Parent = EventsOverTimeData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<
+  export type TotalCountResolver<
     R = number,
     Parent = EventsOverTimeData,
     TContext = SiemContext
@@ -5272,24 +5272,24 @@ export namespace EventsOverTimeDataResolvers {
 
 export namespace MatrixOverTimeHistogramDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
-    x?: xResolver<number, TypeParent, TContext>;
+    x?: XResolver<number, TypeParent, TContext>;
 
-    y?: yResolver<number, TypeParent, TContext>;
+    y?: YResolver<number, TypeParent, TContext>;
 
-    g?: gResolver<string, TypeParent, TContext>;
+    g?: GResolver<string, TypeParent, TContext>;
   }
 
-  export type xResolver<
+  export type XResolver<
     R = number,
     Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type yResolver<
+  export type YResolver<
     R = number,
     Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type gResolver<
+  export type GResolver<
     R = string,
     Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
@@ -5298,31 +5298,31 @@ export namespace MatrixOverTimeHistogramDataResolvers {
 
 export namespace HostsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostsData> {
-    edges?: edgesResolver<HostsEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<HostsEdges[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
-    pageInfo?: pageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type edgesResolver<
+  export type EdgesResolver<
     R = HostsEdges[],
     Parent = HostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<R = number, Parent = HostsData, TContext = SiemContext> = Resolver<
+  export type TotalCountResolver<R = number, Parent = HostsData, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type pageInfoResolver<
+  export type PageInfoResolver<
     R = PageInfoPaginated,
     Parent = HostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = HostsData,
     TContext = SiemContext
@@ -5331,17 +5331,17 @@ export namespace HostsDataResolvers {
 
 export namespace HostsEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostsEdges> {
-    node?: nodeResolver<HostItem, TypeParent, TContext>;
+    node?: NodeResolver<HostItem, TypeParent, TContext>;
 
-    cursor?: cursorResolver<CursorType, TypeParent, TContext>;
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
   }
 
-  export type nodeResolver<R = HostItem, Parent = HostsEdges, TContext = SiemContext> = Resolver<
+  export type NodeResolver<R = HostItem, Parent = HostsEdges, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type cursorResolver<
+  export type CursorResolver<
     R = CursorType,
     Parent = HostsEdges,
     TContext = SiemContext
@@ -5350,38 +5350,38 @@ export namespace HostsEdgesResolvers {
 
 export namespace HostItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostItem> {
-    _id?: _idResolver<Maybe<string>, TypeParent, TContext>;
+    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    lastSeen?: lastSeenResolver<Maybe<string>, TypeParent, TContext>;
+    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
 
-    host?: hostResolver<Maybe<HostEcsFields>, TypeParent, TContext>;
+    host?: HostResolver<Maybe<HostEcsFields>, TypeParent, TContext>;
 
-    cloud?: cloudResolver<Maybe<CloudFields>, TypeParent, TContext>;
+    cloud?: CloudResolver<Maybe<CloudFields>, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type _idResolver<R = Maybe<string>, Parent = HostItem, TContext = SiemContext> = Resolver<
+  export type _IdResolver<R = Maybe<string>, Parent = HostItem, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type lastSeenResolver<
+  export type LastSeenResolver<
     R = Maybe<string>,
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type hostResolver<
+  export type HostResolver<
     R = Maybe<HostEcsFields>,
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type cloudResolver<
+  export type CloudResolver<
     R = Maybe<CloudFields>,
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = HostItem,
     TContext = SiemContext
@@ -5390,31 +5390,31 @@ export namespace HostItemResolvers {
 
 export namespace CloudFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = CloudFields> {
-    instance?: instanceResolver<Maybe<CloudInstance>, TypeParent, TContext>;
+    instance?: InstanceResolver<Maybe<CloudInstance>, TypeParent, TContext>;
 
-    machine?: machineResolver<Maybe<CloudMachine>, TypeParent, TContext>;
+    machine?: MachineResolver<Maybe<CloudMachine>, TypeParent, TContext>;
 
-    provider?: providerResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
+    provider?: ProviderResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
 
-    region?: regionResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
+    region?: RegionResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
   }
 
-  export type instanceResolver<
+  export type InstanceResolver<
     R = Maybe<CloudInstance>,
     Parent = CloudFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type machineResolver<
+  export type MachineResolver<
     R = Maybe<CloudMachine>,
     Parent = CloudFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type providerResolver<
+  export type ProviderResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = CloudFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type regionResolver<
+  export type RegionResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = CloudFields,
     TContext = SiemContext
@@ -5423,10 +5423,10 @@ export namespace CloudFieldsResolvers {
 
 export namespace CloudInstanceResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = CloudInstance> {
-    id?: idResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
+    id?: IdResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
   }
 
-  export type idResolver<
+  export type IdResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = CloudInstance,
     TContext = SiemContext
@@ -5435,10 +5435,10 @@ export namespace CloudInstanceResolvers {
 
 export namespace CloudMachineResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = CloudMachine> {
-    type?: typeResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
+    type?: TypeResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
   }
 
-  export type typeResolver<
+  export type TypeResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = CloudMachine,
     TContext = SiemContext
@@ -5447,24 +5447,24 @@ export namespace CloudMachineResolvers {
 
 export namespace FirstLastSeenHostResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = FirstLastSeenHost> {
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    firstSeen?: firstSeenResolver<Maybe<string>, TypeParent, TContext>;
+    firstSeen?: FirstSeenResolver<Maybe<string>, TypeParent, TContext>;
 
-    lastSeen?: lastSeenResolver<Maybe<string>, TypeParent, TContext>;
+    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = FirstLastSeenHost,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type firstSeenResolver<
+  export type FirstSeenResolver<
     R = Maybe<string>,
     Parent = FirstLastSeenHost,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type lastSeenResolver<
+  export type LastSeenResolver<
     R = Maybe<string>,
     Parent = FirstLastSeenHost,
     TContext = SiemContext
@@ -5473,45 +5473,45 @@ export namespace FirstLastSeenHostResolvers {
 
 export namespace IpOverviewDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = IpOverviewData> {
-    client?: clientResolver<Maybe<Overview>, TypeParent, TContext>;
+    client?: ClientResolver<Maybe<Overview>, TypeParent, TContext>;
 
-    destination?: destinationResolver<Maybe<Overview>, TypeParent, TContext>;
+    destination?: DestinationResolver<Maybe<Overview>, TypeParent, TContext>;
 
-    host?: hostResolver<HostEcsFields, TypeParent, TContext>;
+    host?: HostResolver<HostEcsFields, TypeParent, TContext>;
 
-    server?: serverResolver<Maybe<Overview>, TypeParent, TContext>;
+    server?: ServerResolver<Maybe<Overview>, TypeParent, TContext>;
 
-    source?: sourceResolver<Maybe<Overview>, TypeParent, TContext>;
+    source?: SourceResolver<Maybe<Overview>, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type clientResolver<
+  export type ClientResolver<
     R = Maybe<Overview>,
     Parent = IpOverviewData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type destinationResolver<
+  export type DestinationResolver<
     R = Maybe<Overview>,
     Parent = IpOverviewData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type hostResolver<
+  export type HostResolver<
     R = HostEcsFields,
     Parent = IpOverviewData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type serverResolver<
+  export type ServerResolver<
     R = Maybe<Overview>,
     Parent = IpOverviewData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sourceResolver<
+  export type SourceResolver<
     R = Maybe<Overview>,
     Parent = IpOverviewData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = IpOverviewData,
     TContext = SiemContext
@@ -5520,31 +5520,31 @@ export namespace IpOverviewDataResolvers {
 
 export namespace OverviewResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = Overview> {
-    firstSeen?: firstSeenResolver<Maybe<string>, TypeParent, TContext>;
+    firstSeen?: FirstSeenResolver<Maybe<string>, TypeParent, TContext>;
 
-    lastSeen?: lastSeenResolver<Maybe<string>, TypeParent, TContext>;
+    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
 
-    autonomousSystem?: autonomousSystemResolver<AutonomousSystem, TypeParent, TContext>;
+    autonomousSystem?: AutonomousSystemResolver<AutonomousSystem, TypeParent, TContext>;
 
-    geo?: geoResolver<GeoEcsFields, TypeParent, TContext>;
+    geo?: GeoResolver<GeoEcsFields, TypeParent, TContext>;
   }
 
-  export type firstSeenResolver<
+  export type FirstSeenResolver<
     R = Maybe<string>,
     Parent = Overview,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type lastSeenResolver<
+  export type LastSeenResolver<
     R = Maybe<string>,
     Parent = Overview,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type autonomousSystemResolver<
+  export type AutonomousSystemResolver<
     R = AutonomousSystem,
     Parent = Overview,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type geoResolver<R = GeoEcsFields, Parent = Overview, TContext = SiemContext> = Resolver<
+  export type GeoResolver<R = GeoEcsFields, Parent = Overview, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
@@ -5553,17 +5553,17 @@ export namespace OverviewResolvers {
 
 export namespace AutonomousSystemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AutonomousSystem> {
-    number?: numberResolver<Maybe<number>, TypeParent, TContext>;
+    number?: NumberResolver<Maybe<number>, TypeParent, TContext>;
 
-    organization?: organizationResolver<Maybe<AutonomousSystemOrganization>, TypeParent, TContext>;
+    organization?: OrganizationResolver<Maybe<AutonomousSystemOrganization>, TypeParent, TContext>;
   }
 
-  export type numberResolver<
+  export type NumberResolver<
     R = Maybe<number>,
     Parent = AutonomousSystem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type organizationResolver<
+  export type OrganizationResolver<
     R = Maybe<AutonomousSystemOrganization>,
     Parent = AutonomousSystem,
     TContext = SiemContext
@@ -5572,10 +5572,10 @@ export namespace AutonomousSystemResolvers {
 
 export namespace AutonomousSystemOrganizationResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AutonomousSystemOrganization> {
-    name?: nameResolver<Maybe<string>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type nameResolver<
+  export type NameResolver<
     R = Maybe<string>,
     Parent = AutonomousSystemOrganization,
     TContext = SiemContext
@@ -5584,31 +5584,31 @@ export namespace AutonomousSystemOrganizationResolvers {
 
 export namespace DomainsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = DomainsData> {
-    edges?: edgesResolver<DomainsEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<DomainsEdges[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
-    pageInfo?: pageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type edgesResolver<
+  export type EdgesResolver<
     R = DomainsEdges[],
     Parent = DomainsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<
+  export type TotalCountResolver<
     R = number,
     Parent = DomainsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type pageInfoResolver<
+  export type PageInfoResolver<
     R = PageInfoPaginated,
     Parent = DomainsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = DomainsData,
     TContext = SiemContext
@@ -5617,17 +5617,17 @@ export namespace DomainsDataResolvers {
 
 export namespace DomainsEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = DomainsEdges> {
-    node?: nodeResolver<DomainsNode, TypeParent, TContext>;
+    node?: NodeResolver<DomainsNode, TypeParent, TContext>;
 
-    cursor?: cursorResolver<CursorType, TypeParent, TContext>;
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
   }
 
-  export type nodeResolver<
+  export type NodeResolver<
     R = DomainsNode,
     Parent = DomainsEdges,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type cursorResolver<
+  export type CursorResolver<
     R = CursorType,
     Parent = DomainsEdges,
     TContext = SiemContext
@@ -5636,52 +5636,52 @@ export namespace DomainsEdgesResolvers {
 
 export namespace DomainsNodeResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = DomainsNode> {
-    _id?: _idResolver<Maybe<string>, TypeParent, TContext>;
+    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    timestamp?: timestampResolver<Maybe<string>, TypeParent, TContext>;
+    timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
 
-    source?: sourceResolver<Maybe<DomainsItem>, TypeParent, TContext>;
+    source?: SourceResolver<Maybe<DomainsItem>, TypeParent, TContext>;
 
-    destination?: destinationResolver<Maybe<DomainsItem>, TypeParent, TContext>;
+    destination?: DestinationResolver<Maybe<DomainsItem>, TypeParent, TContext>;
 
-    client?: clientResolver<Maybe<DomainsItem>, TypeParent, TContext>;
+    client?: ClientResolver<Maybe<DomainsItem>, TypeParent, TContext>;
 
-    server?: serverResolver<Maybe<DomainsItem>, TypeParent, TContext>;
+    server?: ServerResolver<Maybe<DomainsItem>, TypeParent, TContext>;
 
-    network?: networkResolver<Maybe<DomainsNetworkField>, TypeParent, TContext>;
+    network?: NetworkResolver<Maybe<DomainsNetworkField>, TypeParent, TContext>;
   }
 
-  export type _idResolver<
+  export type _IdResolver<
     R = Maybe<string>,
     Parent = DomainsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type timestampResolver<
+  export type TimestampResolver<
     R = Maybe<string>,
     Parent = DomainsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sourceResolver<
+  export type SourceResolver<
     R = Maybe<DomainsItem>,
     Parent = DomainsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type destinationResolver<
+  export type DestinationResolver<
     R = Maybe<DomainsItem>,
     Parent = DomainsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type clientResolver<
+  export type ClientResolver<
     R = Maybe<DomainsItem>,
     Parent = DomainsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type serverResolver<
+  export type ServerResolver<
     R = Maybe<DomainsItem>,
     Parent = DomainsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type networkResolver<
+  export type NetworkResolver<
     R = Maybe<DomainsNetworkField>,
     Parent = DomainsNode,
     TContext = SiemContext
@@ -5690,31 +5690,31 @@ export namespace DomainsNodeResolvers {
 
 export namespace DomainsItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = DomainsItem> {
-    uniqueIpCount?: uniqueIpCountResolver<Maybe<number>, TypeParent, TContext>;
+    uniqueIpCount?: UniqueIpCountResolver<Maybe<number>, TypeParent, TContext>;
 
-    domainName?: domainNameResolver<Maybe<string>, TypeParent, TContext>;
+    domainName?: DomainNameResolver<Maybe<string>, TypeParent, TContext>;
 
-    firstSeen?: firstSeenResolver<Maybe<string>, TypeParent, TContext>;
+    firstSeen?: FirstSeenResolver<Maybe<string>, TypeParent, TContext>;
 
-    lastSeen?: lastSeenResolver<Maybe<string>, TypeParent, TContext>;
+    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type uniqueIpCountResolver<
+  export type UniqueIpCountResolver<
     R = Maybe<number>,
     Parent = DomainsItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type domainNameResolver<
+  export type DomainNameResolver<
     R = Maybe<string>,
     Parent = DomainsItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type firstSeenResolver<
+  export type FirstSeenResolver<
     R = Maybe<string>,
     Parent = DomainsItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type lastSeenResolver<
+  export type LastSeenResolver<
     R = Maybe<string>,
     Parent = DomainsItem,
     TContext = SiemContext
@@ -5723,31 +5723,31 @@ export namespace DomainsItemResolvers {
 
 export namespace DomainsNetworkFieldResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = DomainsNetworkField> {
-    bytes?: bytesResolver<Maybe<number>, TypeParent, TContext>;
+    bytes?: BytesResolver<Maybe<number>, TypeParent, TContext>;
 
-    packets?: packetsResolver<Maybe<number>, TypeParent, TContext>;
+    packets?: PacketsResolver<Maybe<number>, TypeParent, TContext>;
 
-    transport?: transportResolver<Maybe<string>, TypeParent, TContext>;
+    transport?: TransportResolver<Maybe<string>, TypeParent, TContext>;
 
-    direction?: directionResolver<Maybe<NetworkDirectionEcs[]>, TypeParent, TContext>;
+    direction?: DirectionResolver<Maybe<NetworkDirectionEcs[]>, TypeParent, TContext>;
   }
 
-  export type bytesResolver<
+  export type BytesResolver<
     R = Maybe<number>,
     Parent = DomainsNetworkField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type packetsResolver<
+  export type PacketsResolver<
     R = Maybe<number>,
     Parent = DomainsNetworkField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type transportResolver<
+  export type TransportResolver<
     R = Maybe<string>,
     Parent = DomainsNetworkField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type directionResolver<
+  export type DirectionResolver<
     R = Maybe<NetworkDirectionEcs[]>,
     Parent = DomainsNetworkField,
     TContext = SiemContext
@@ -5756,31 +5756,31 @@ export namespace DomainsNetworkFieldResolvers {
 
 export namespace TlsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TlsData> {
-    edges?: edgesResolver<TlsEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<TlsEdges[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
-    pageInfo?: pageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type edgesResolver<R = TlsEdges[], Parent = TlsData, TContext = SiemContext> = Resolver<
+  export type EdgesResolver<R = TlsEdges[], Parent = TlsData, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type totalCountResolver<R = number, Parent = TlsData, TContext = SiemContext> = Resolver<
+  export type TotalCountResolver<R = number, Parent = TlsData, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type pageInfoResolver<
+  export type PageInfoResolver<
     R = PageInfoPaginated,
     Parent = TlsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = TlsData,
     TContext = SiemContext
@@ -5789,17 +5789,17 @@ export namespace TlsDataResolvers {
 
 export namespace TlsEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TlsEdges> {
-    node?: nodeResolver<TlsNode, TypeParent, TContext>;
+    node?: NodeResolver<TlsNode, TypeParent, TContext>;
 
-    cursor?: cursorResolver<CursorType, TypeParent, TContext>;
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
   }
 
-  export type nodeResolver<R = TlsNode, Parent = TlsEdges, TContext = SiemContext> = Resolver<
+  export type NodeResolver<R = TlsNode, Parent = TlsEdges, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type cursorResolver<R = CursorType, Parent = TlsEdges, TContext = SiemContext> = Resolver<
+  export type CursorResolver<R = CursorType, Parent = TlsEdges, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
@@ -5808,52 +5808,52 @@ export namespace TlsEdgesResolvers {
 
 export namespace TlsNodeResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TlsNode> {
-    _id?: _idResolver<Maybe<string>, TypeParent, TContext>;
+    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    timestamp?: timestampResolver<Maybe<string>, TypeParent, TContext>;
+    timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
 
-    alternativeNames?: alternativeNamesResolver<Maybe<string[]>, TypeParent, TContext>;
+    alternativeNames?: AlternativeNamesResolver<Maybe<string[]>, TypeParent, TContext>;
 
-    notAfter?: notAfterResolver<Maybe<string[]>, TypeParent, TContext>;
+    notAfter?: NotAfterResolver<Maybe<string[]>, TypeParent, TContext>;
 
-    commonNames?: commonNamesResolver<Maybe<string[]>, TypeParent, TContext>;
+    commonNames?: CommonNamesResolver<Maybe<string[]>, TypeParent, TContext>;
 
-    ja3?: ja3Resolver<Maybe<string[]>, TypeParent, TContext>;
+    ja3?: Ja3Resolver<Maybe<string[]>, TypeParent, TContext>;
 
-    issuerNames?: issuerNamesResolver<Maybe<string[]>, TypeParent, TContext>;
+    issuerNames?: IssuerNamesResolver<Maybe<string[]>, TypeParent, TContext>;
   }
 
-  export type _idResolver<R = Maybe<string>, Parent = TlsNode, TContext = SiemContext> = Resolver<
+  export type _IdResolver<R = Maybe<string>, Parent = TlsNode, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type timestampResolver<
+  export type TimestampResolver<
     R = Maybe<string>,
     Parent = TlsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type alternativeNamesResolver<
+  export type AlternativeNamesResolver<
     R = Maybe<string[]>,
     Parent = TlsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type notAfterResolver<
+  export type NotAfterResolver<
     R = Maybe<string[]>,
     Parent = TlsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type commonNamesResolver<
+  export type CommonNamesResolver<
     R = Maybe<string[]>,
     Parent = TlsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ja3Resolver<R = Maybe<string[]>, Parent = TlsNode, TContext = SiemContext> = Resolver<
+  export type Ja3Resolver<R = Maybe<string[]>, Parent = TlsNode, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type issuerNamesResolver<
+  export type IssuerNamesResolver<
     R = Maybe<string[]>,
     Parent = TlsNode,
     TContext = SiemContext
@@ -5862,31 +5862,31 @@ export namespace TlsNodeResolvers {
 
 export namespace UsersDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UsersData> {
-    edges?: edgesResolver<UsersEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<UsersEdges[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
-    pageInfo?: pageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type edgesResolver<
+  export type EdgesResolver<
     R = UsersEdges[],
     Parent = UsersData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<R = number, Parent = UsersData, TContext = SiemContext> = Resolver<
+  export type TotalCountResolver<R = number, Parent = UsersData, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type pageInfoResolver<
+  export type PageInfoResolver<
     R = PageInfoPaginated,
     Parent = UsersData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = UsersData,
     TContext = SiemContext
@@ -5895,17 +5895,17 @@ export namespace UsersDataResolvers {
 
 export namespace UsersEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UsersEdges> {
-    node?: nodeResolver<UsersNode, TypeParent, TContext>;
+    node?: NodeResolver<UsersNode, TypeParent, TContext>;
 
-    cursor?: cursorResolver<CursorType, TypeParent, TContext>;
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
   }
 
-  export type nodeResolver<R = UsersNode, Parent = UsersEdges, TContext = SiemContext> = Resolver<
+  export type NodeResolver<R = UsersNode, Parent = UsersEdges, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type cursorResolver<
+  export type CursorResolver<
     R = CursorType,
     Parent = UsersEdges,
     TContext = SiemContext
@@ -5914,24 +5914,24 @@ export namespace UsersEdgesResolvers {
 
 export namespace UsersNodeResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UsersNode> {
-    _id?: _idResolver<Maybe<string>, TypeParent, TContext>;
+    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    timestamp?: timestampResolver<Maybe<string>, TypeParent, TContext>;
+    timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
 
-    user?: userResolver<Maybe<UsersItem>, TypeParent, TContext>;
+    user?: UserResolver<Maybe<UsersItem>, TypeParent, TContext>;
   }
 
-  export type _idResolver<R = Maybe<string>, Parent = UsersNode, TContext = SiemContext> = Resolver<
+  export type _IdResolver<R = Maybe<string>, Parent = UsersNode, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type timestampResolver<
+  export type TimestampResolver<
     R = Maybe<string>,
     Parent = UsersNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type userResolver<
+  export type UserResolver<
     R = Maybe<UsersItem>,
     Parent = UsersNode,
     TContext = SiemContext
@@ -5940,38 +5940,38 @@ export namespace UsersNodeResolvers {
 
 export namespace UsersItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UsersItem> {
-    name?: nameResolver<Maybe<string>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string>, TypeParent, TContext>;
 
-    id?: idResolver<Maybe<string[]>, TypeParent, TContext>;
+    id?: IdResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    groupId?: groupIdResolver<Maybe<string[]>, TypeParent, TContext>;
+    groupId?: GroupIdResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    groupName?: groupNameResolver<Maybe<string[]>, TypeParent, TContext>;
+    groupName?: GroupNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
-    count?: countResolver<Maybe<number>, TypeParent, TContext>;
+    count?: CountResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type nameResolver<
+  export type NameResolver<
     R = Maybe<string>,
     Parent = UsersItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type idResolver<
-    R = Maybe<string[]>,
+  export type IdResolver<
+    R = Maybe<string[] | string>,
     Parent = UsersItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type groupIdResolver<
-    R = Maybe<string[]>,
+  export type GroupIdResolver<
+    R = Maybe<string[] | string>,
     Parent = UsersItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type groupNameResolver<
-    R = Maybe<string[]>,
+  export type GroupNameResolver<
+    R = Maybe<string[] | string>,
     Parent = UsersItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type countResolver<
+  export type CountResolver<
     R = Maybe<number>,
     Parent = UsersItem,
     TContext = SiemContext
@@ -5980,78 +5980,78 @@ export namespace UsersItemResolvers {
 
 export namespace KpiNetworkDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = KpiNetworkData> {
-    networkEvents?: networkEventsResolver<Maybe<number>, TypeParent, TContext>;
+    networkEvents?: NetworkEventsResolver<Maybe<number>, TypeParent, TContext>;
 
-    uniqueFlowId?: uniqueFlowIdResolver<Maybe<number>, TypeParent, TContext>;
+    uniqueFlowId?: UniqueFlowIdResolver<Maybe<number>, TypeParent, TContext>;
 
-    uniqueSourcePrivateIps?: uniqueSourcePrivateIpsResolver<Maybe<number>, TypeParent, TContext>;
+    uniqueSourcePrivateIps?: UniqueSourcePrivateIpsResolver<Maybe<number>, TypeParent, TContext>;
 
-    uniqueSourcePrivateIpsHistogram?: uniqueSourcePrivateIpsHistogramResolver<
+    uniqueSourcePrivateIpsHistogram?: UniqueSourcePrivateIpsHistogramResolver<
       Maybe<KpiNetworkHistogramData[]>,
       TypeParent,
       TContext
     >;
 
-    uniqueDestinationPrivateIps?: uniqueDestinationPrivateIpsResolver<
+    uniqueDestinationPrivateIps?: UniqueDestinationPrivateIpsResolver<
       Maybe<number>,
       TypeParent,
       TContext
     >;
 
-    uniqueDestinationPrivateIpsHistogram?: uniqueDestinationPrivateIpsHistogramResolver<
+    uniqueDestinationPrivateIpsHistogram?: UniqueDestinationPrivateIpsHistogramResolver<
       Maybe<KpiNetworkHistogramData[]>,
       TypeParent,
       TContext
     >;
 
-    dnsQueries?: dnsQueriesResolver<Maybe<number>, TypeParent, TContext>;
+    dnsQueries?: DnsQueriesResolver<Maybe<number>, TypeParent, TContext>;
 
-    tlsHandshakes?: tlsHandshakesResolver<Maybe<number>, TypeParent, TContext>;
+    tlsHandshakes?: TlsHandshakesResolver<Maybe<number>, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type networkEventsResolver<
+  export type NetworkEventsResolver<
     R = Maybe<number>,
     Parent = KpiNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueFlowIdResolver<
+  export type UniqueFlowIdResolver<
     R = Maybe<number>,
     Parent = KpiNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueSourcePrivateIpsResolver<
+  export type UniqueSourcePrivateIpsResolver<
     R = Maybe<number>,
     Parent = KpiNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueSourcePrivateIpsHistogramResolver<
+  export type UniqueSourcePrivateIpsHistogramResolver<
     R = Maybe<KpiNetworkHistogramData[]>,
     Parent = KpiNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueDestinationPrivateIpsResolver<
+  export type UniqueDestinationPrivateIpsResolver<
     R = Maybe<number>,
     Parent = KpiNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueDestinationPrivateIpsHistogramResolver<
+  export type UniqueDestinationPrivateIpsHistogramResolver<
     R = Maybe<KpiNetworkHistogramData[]>,
     Parent = KpiNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type dnsQueriesResolver<
+  export type DnsQueriesResolver<
     R = Maybe<number>,
     Parent = KpiNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type tlsHandshakesResolver<
+  export type TlsHandshakesResolver<
     R = Maybe<number>,
     Parent = KpiNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = KpiNetworkData,
     TContext = SiemContext
@@ -6060,17 +6060,17 @@ export namespace KpiNetworkDataResolvers {
 
 export namespace KpiNetworkHistogramDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = KpiNetworkHistogramData> {
-    x?: xResolver<Maybe<number>, TypeParent, TContext>;
+    x?: XResolver<Maybe<number>, TypeParent, TContext>;
 
-    y?: yResolver<Maybe<number>, TypeParent, TContext>;
+    y?: YResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type xResolver<
+  export type XResolver<
     R = Maybe<number>,
     Parent = KpiNetworkHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type yResolver<
+  export type YResolver<
     R = Maybe<number>,
     Parent = KpiNetworkHistogramData,
     TContext = SiemContext
@@ -6079,96 +6079,96 @@ export namespace KpiNetworkHistogramDataResolvers {
 
 export namespace KpiHostsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = KpiHostsData> {
-    hosts?: hostsResolver<Maybe<number>, TypeParent, TContext>;
+    hosts?: HostsResolver<Maybe<number>, TypeParent, TContext>;
 
-    hostsHistogram?: hostsHistogramResolver<Maybe<KpiHostHistogramData[]>, TypeParent, TContext>;
+    hostsHistogram?: HostsHistogramResolver<Maybe<KpiHostHistogramData[]>, TypeParent, TContext>;
 
-    authSuccess?: authSuccessResolver<Maybe<number>, TypeParent, TContext>;
+    authSuccess?: AuthSuccessResolver<Maybe<number>, TypeParent, TContext>;
 
-    authSuccessHistogram?: authSuccessHistogramResolver<
+    authSuccessHistogram?: AuthSuccessHistogramResolver<
       Maybe<KpiHostHistogramData[]>,
       TypeParent,
       TContext
     >;
 
-    authFailure?: authFailureResolver<Maybe<number>, TypeParent, TContext>;
+    authFailure?: AuthFailureResolver<Maybe<number>, TypeParent, TContext>;
 
-    authFailureHistogram?: authFailureHistogramResolver<
+    authFailureHistogram?: AuthFailureHistogramResolver<
       Maybe<KpiHostHistogramData[]>,
       TypeParent,
       TContext
     >;
 
-    uniqueSourceIps?: uniqueSourceIpsResolver<Maybe<number>, TypeParent, TContext>;
+    uniqueSourceIps?: UniqueSourceIpsResolver<Maybe<number>, TypeParent, TContext>;
 
-    uniqueSourceIpsHistogram?: uniqueSourceIpsHistogramResolver<
+    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogramResolver<
       Maybe<KpiHostHistogramData[]>,
       TypeParent,
       TContext
     >;
 
-    uniqueDestinationIps?: uniqueDestinationIpsResolver<Maybe<number>, TypeParent, TContext>;
+    uniqueDestinationIps?: UniqueDestinationIpsResolver<Maybe<number>, TypeParent, TContext>;
 
-    uniqueDestinationIpsHistogram?: uniqueDestinationIpsHistogramResolver<
+    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogramResolver<
       Maybe<KpiHostHistogramData[]>,
       TypeParent,
       TContext
     >;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type hostsResolver<
+  export type HostsResolver<
     R = Maybe<number>,
     Parent = KpiHostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type hostsHistogramResolver<
+  export type HostsHistogramResolver<
     R = Maybe<KpiHostHistogramData[]>,
     Parent = KpiHostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type authSuccessResolver<
+  export type AuthSuccessResolver<
     R = Maybe<number>,
     Parent = KpiHostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type authSuccessHistogramResolver<
+  export type AuthSuccessHistogramResolver<
     R = Maybe<KpiHostHistogramData[]>,
     Parent = KpiHostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type authFailureResolver<
+  export type AuthFailureResolver<
     R = Maybe<number>,
     Parent = KpiHostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type authFailureHistogramResolver<
+  export type AuthFailureHistogramResolver<
     R = Maybe<KpiHostHistogramData[]>,
     Parent = KpiHostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueSourceIpsResolver<
+  export type UniqueSourceIpsResolver<
     R = Maybe<number>,
     Parent = KpiHostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueSourceIpsHistogramResolver<
+  export type UniqueSourceIpsHistogramResolver<
     R = Maybe<KpiHostHistogramData[]>,
     Parent = KpiHostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueDestinationIpsResolver<
+  export type UniqueDestinationIpsResolver<
     R = Maybe<number>,
     Parent = KpiHostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueDestinationIpsHistogramResolver<
+  export type UniqueDestinationIpsHistogramResolver<
     R = Maybe<KpiHostHistogramData[]>,
     Parent = KpiHostsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = KpiHostsData,
     TContext = SiemContext
@@ -6177,17 +6177,17 @@ export namespace KpiHostsDataResolvers {
 
 export namespace KpiHostHistogramDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = KpiHostHistogramData> {
-    x?: xResolver<Maybe<number>, TypeParent, TContext>;
+    x?: XResolver<Maybe<number>, TypeParent, TContext>;
 
-    y?: yResolver<Maybe<number>, TypeParent, TContext>;
+    y?: YResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type xResolver<
+  export type XResolver<
     R = Maybe<number>,
     Parent = KpiHostHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type yResolver<
+  export type YResolver<
     R = Maybe<number>,
     Parent = KpiHostHistogramData,
     TContext = SiemContext
@@ -6196,82 +6196,82 @@ export namespace KpiHostHistogramDataResolvers {
 
 export namespace KpiHostDetailsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = KpiHostDetailsData> {
-    authSuccess?: authSuccessResolver<Maybe<number>, TypeParent, TContext>;
+    authSuccess?: AuthSuccessResolver<Maybe<number>, TypeParent, TContext>;
 
-    authSuccessHistogram?: authSuccessHistogramResolver<
+    authSuccessHistogram?: AuthSuccessHistogramResolver<
       Maybe<KpiHostHistogramData[]>,
       TypeParent,
       TContext
     >;
 
-    authFailure?: authFailureResolver<Maybe<number>, TypeParent, TContext>;
+    authFailure?: AuthFailureResolver<Maybe<number>, TypeParent, TContext>;
 
-    authFailureHistogram?: authFailureHistogramResolver<
+    authFailureHistogram?: AuthFailureHistogramResolver<
       Maybe<KpiHostHistogramData[]>,
       TypeParent,
       TContext
     >;
 
-    uniqueSourceIps?: uniqueSourceIpsResolver<Maybe<number>, TypeParent, TContext>;
+    uniqueSourceIps?: UniqueSourceIpsResolver<Maybe<number>, TypeParent, TContext>;
 
-    uniqueSourceIpsHistogram?: uniqueSourceIpsHistogramResolver<
+    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogramResolver<
       Maybe<KpiHostHistogramData[]>,
       TypeParent,
       TContext
     >;
 
-    uniqueDestinationIps?: uniqueDestinationIpsResolver<Maybe<number>, TypeParent, TContext>;
+    uniqueDestinationIps?: UniqueDestinationIpsResolver<Maybe<number>, TypeParent, TContext>;
 
-    uniqueDestinationIpsHistogram?: uniqueDestinationIpsHistogramResolver<
+    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogramResolver<
       Maybe<KpiHostHistogramData[]>,
       TypeParent,
       TContext
     >;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type authSuccessResolver<
+  export type AuthSuccessResolver<
     R = Maybe<number>,
     Parent = KpiHostDetailsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type authSuccessHistogramResolver<
+  export type AuthSuccessHistogramResolver<
     R = Maybe<KpiHostHistogramData[]>,
     Parent = KpiHostDetailsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type authFailureResolver<
+  export type AuthFailureResolver<
     R = Maybe<number>,
     Parent = KpiHostDetailsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type authFailureHistogramResolver<
+  export type AuthFailureHistogramResolver<
     R = Maybe<KpiHostHistogramData[]>,
     Parent = KpiHostDetailsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueSourceIpsResolver<
+  export type UniqueSourceIpsResolver<
     R = Maybe<number>,
     Parent = KpiHostDetailsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueSourceIpsHistogramResolver<
+  export type UniqueSourceIpsHistogramResolver<
     R = Maybe<KpiHostHistogramData[]>,
     Parent = KpiHostDetailsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueDestinationIpsResolver<
+  export type UniqueDestinationIpsResolver<
     R = Maybe<number>,
     Parent = KpiHostDetailsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueDestinationIpsHistogramResolver<
+  export type UniqueDestinationIpsHistogramResolver<
     R = Maybe<KpiHostHistogramData[]>,
     Parent = KpiHostDetailsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = KpiHostDetailsData,
     TContext = SiemContext
@@ -6280,31 +6280,31 @@ export namespace KpiHostDetailsDataResolvers {
 
 export namespace NetworkTopNFlowDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NetworkTopNFlowData> {
-    edges?: edgesResolver<NetworkTopNFlowEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<NetworkTopNFlowEdges[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
-    pageInfo?: pageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type edgesResolver<
+  export type EdgesResolver<
     R = NetworkTopNFlowEdges[],
     Parent = NetworkTopNFlowData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<
+  export type TotalCountResolver<
     R = number,
     Parent = NetworkTopNFlowData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type pageInfoResolver<
+  export type PageInfoResolver<
     R = PageInfoPaginated,
     Parent = NetworkTopNFlowData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = NetworkTopNFlowData,
     TContext = SiemContext
@@ -6313,17 +6313,17 @@ export namespace NetworkTopNFlowDataResolvers {
 
 export namespace NetworkTopNFlowEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NetworkTopNFlowEdges> {
-    node?: nodeResolver<NetworkTopNFlowItem, TypeParent, TContext>;
+    node?: NodeResolver<NetworkTopNFlowItem, TypeParent, TContext>;
 
-    cursor?: cursorResolver<CursorType, TypeParent, TContext>;
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
   }
 
-  export type nodeResolver<
+  export type NodeResolver<
     R = NetworkTopNFlowItem,
     Parent = NetworkTopNFlowEdges,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type cursorResolver<
+  export type CursorResolver<
     R = CursorType,
     Parent = NetworkTopNFlowEdges,
     TContext = SiemContext
@@ -6332,31 +6332,31 @@ export namespace NetworkTopNFlowEdgesResolvers {
 
 export namespace NetworkTopNFlowItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NetworkTopNFlowItem> {
-    _id?: _idResolver<Maybe<string>, TypeParent, TContext>;
+    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    source?: sourceResolver<Maybe<TopNFlowItemSource>, TypeParent, TContext>;
+    source?: SourceResolver<Maybe<TopNFlowItemSource>, TypeParent, TContext>;
 
-    destination?: destinationResolver<Maybe<TopNFlowItemDestination>, TypeParent, TContext>;
+    destination?: DestinationResolver<Maybe<TopNFlowItemDestination>, TypeParent, TContext>;
 
-    network?: networkResolver<Maybe<TopNFlowNetworkEcsField>, TypeParent, TContext>;
+    network?: NetworkResolver<Maybe<TopNFlowNetworkEcsField>, TypeParent, TContext>;
   }
 
-  export type _idResolver<
+  export type _IdResolver<
     R = Maybe<string>,
     Parent = NetworkTopNFlowItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sourceResolver<
+  export type SourceResolver<
     R = Maybe<TopNFlowItemSource>,
     Parent = NetworkTopNFlowItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type destinationResolver<
+  export type DestinationResolver<
     R = Maybe<TopNFlowItemDestination>,
     Parent = NetworkTopNFlowItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type networkResolver<
+  export type NetworkResolver<
     R = Maybe<TopNFlowNetworkEcsField>,
     Parent = NetworkTopNFlowItem,
     TContext = SiemContext
@@ -6365,49 +6365,45 @@ export namespace NetworkTopNFlowItemResolvers {
 
 export namespace TopNFlowItemSourceResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TopNFlowItemSource> {
-    autonomous_system?: autonomous_systemResolver<
-      Maybe<AutonomousSystemItem>,
-      TypeParent,
-      TContext
-    >;
+    autonomous_system?: AutonomousSystemResolver<Maybe<AutonomousSystemItem>, TypeParent, TContext>;
 
-    domain?: domainResolver<Maybe<string[]>, TypeParent, TContext>;
+    domain?: DomainResolver<Maybe<string[]>, TypeParent, TContext>;
 
-    ip?: ipResolver<Maybe<string>, TypeParent, TContext>;
+    ip?: IpResolver<Maybe<string>, TypeParent, TContext>;
 
-    location?: locationResolver<Maybe<GeoItem>, TypeParent, TContext>;
+    location?: LocationResolver<Maybe<GeoItem>, TypeParent, TContext>;
 
-    flows?: flowsResolver<Maybe<number>, TypeParent, TContext>;
+    flows?: FlowsResolver<Maybe<number>, TypeParent, TContext>;
 
-    destination_ips?: destination_ipsResolver<Maybe<number>, TypeParent, TContext>;
+    destination_ips?: DestinationIpsResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type autonomous_systemResolver<
+  export type AutonomousSystemResolver<
     R = Maybe<AutonomousSystemItem>,
     Parent = TopNFlowItemSource,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type domainResolver<
+  export type DomainResolver<
     R = Maybe<string[]>,
     Parent = TopNFlowItemSource,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ipResolver<
+  export type IpResolver<
     R = Maybe<string>,
     Parent = TopNFlowItemSource,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type locationResolver<
+  export type LocationResolver<
     R = Maybe<GeoItem>,
     Parent = TopNFlowItemSource,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type flowsResolver<
+  export type FlowsResolver<
     R = Maybe<number>,
     Parent = TopNFlowItemSource,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type destination_ipsResolver<
+  export type DestinationIpsResolver<
     R = Maybe<number>,
     Parent = TopNFlowItemSource,
     TContext = SiemContext
@@ -6416,17 +6412,17 @@ export namespace TopNFlowItemSourceResolvers {
 
 export namespace AutonomousSystemItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = AutonomousSystemItem> {
-    name?: nameResolver<Maybe<string>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string>, TypeParent, TContext>;
 
-    number?: numberResolver<Maybe<number>, TypeParent, TContext>;
+    number?: NumberResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type nameResolver<
+  export type NameResolver<
     R = Maybe<string>,
     Parent = AutonomousSystemItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type numberResolver<
+  export type NumberResolver<
     R = Maybe<number>,
     Parent = AutonomousSystemItem,
     TContext = SiemContext
@@ -6435,17 +6431,17 @@ export namespace AutonomousSystemItemResolvers {
 
 export namespace GeoItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = GeoItem> {
-    geo?: geoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
+    geo?: GeoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
 
-    flowTarget?: flowTargetResolver<Maybe<FlowTarget>, TypeParent, TContext>;
+    flowTarget?: FlowTargetResolver<Maybe<FlowTarget>, TypeParent, TContext>;
   }
 
-  export type geoResolver<
+  export type GeoResolver<
     R = Maybe<GeoEcsFields>,
     Parent = GeoItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type flowTargetResolver<
+  export type FlowTargetResolver<
     R = Maybe<FlowTarget>,
     Parent = GeoItem,
     TContext = SiemContext
@@ -6454,49 +6450,45 @@ export namespace GeoItemResolvers {
 
 export namespace TopNFlowItemDestinationResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TopNFlowItemDestination> {
-    autonomous_system?: autonomous_systemResolver<
-      Maybe<AutonomousSystemItem>,
-      TypeParent,
-      TContext
-    >;
+    autonomous_system?: AutonomousSystemResolver<Maybe<AutonomousSystemItem>, TypeParent, TContext>;
 
-    domain?: domainResolver<Maybe<string[]>, TypeParent, TContext>;
+    domain?: DomainResolver<Maybe<string[]>, TypeParent, TContext>;
 
-    ip?: ipResolver<Maybe<string>, TypeParent, TContext>;
+    ip?: IpResolver<Maybe<string>, TypeParent, TContext>;
 
-    location?: locationResolver<Maybe<GeoItem>, TypeParent, TContext>;
+    location?: LocationResolver<Maybe<GeoItem>, TypeParent, TContext>;
 
-    flows?: flowsResolver<Maybe<number>, TypeParent, TContext>;
+    flows?: FlowsResolver<Maybe<number>, TypeParent, TContext>;
 
-    source_ips?: source_ipsResolver<Maybe<number>, TypeParent, TContext>;
+    source_ips?: SourceIpsResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type autonomous_systemResolver<
+  export type AutonomousSystemResolver<
     R = Maybe<AutonomousSystemItem>,
     Parent = TopNFlowItemDestination,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type domainResolver<
+  export type DomainResolver<
     R = Maybe<string[]>,
     Parent = TopNFlowItemDestination,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ipResolver<
+  export type IpResolver<
     R = Maybe<string>,
     Parent = TopNFlowItemDestination,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type locationResolver<
+  export type LocationResolver<
     R = Maybe<GeoItem>,
     Parent = TopNFlowItemDestination,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type flowsResolver<
+  export type FlowsResolver<
     R = Maybe<number>,
     Parent = TopNFlowItemDestination,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type source_ipsResolver<
+  export type SourceIpsResolver<
     R = Maybe<number>,
     Parent = TopNFlowItemDestination,
     TContext = SiemContext
@@ -6505,17 +6497,17 @@ export namespace TopNFlowItemDestinationResolvers {
 
 export namespace TopNFlowNetworkEcsFieldResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TopNFlowNetworkEcsField> {
-    bytes_in?: bytes_inResolver<Maybe<number>, TypeParent, TContext>;
+    bytes_in?: BytesInResolver<Maybe<number>, TypeParent, TContext>;
 
-    bytes_out?: bytes_outResolver<Maybe<number>, TypeParent, TContext>;
+    bytes_out?: BytesOutResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type bytes_inResolver<
+  export type BytesInResolver<
     R = Maybe<number>,
     Parent = TopNFlowNetworkEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type bytes_outResolver<
+  export type BytesOutResolver<
     R = Maybe<number>,
     Parent = TopNFlowNetworkEcsField,
     TContext = SiemContext
@@ -6524,31 +6516,31 @@ export namespace TopNFlowNetworkEcsFieldResolvers {
 
 export namespace NetworkDnsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NetworkDnsData> {
-    edges?: edgesResolver<NetworkDnsEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<NetworkDnsEdges[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
-    pageInfo?: pageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type edgesResolver<
+  export type EdgesResolver<
     R = NetworkDnsEdges[],
     Parent = NetworkDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<
+  export type TotalCountResolver<
     R = number,
     Parent = NetworkDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type pageInfoResolver<
+  export type PageInfoResolver<
     R = PageInfoPaginated,
     Parent = NetworkDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = NetworkDnsData,
     TContext = SiemContext
@@ -6557,17 +6549,17 @@ export namespace NetworkDnsDataResolvers {
 
 export namespace NetworkDnsEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NetworkDnsEdges> {
-    node?: nodeResolver<NetworkDnsItem, TypeParent, TContext>;
+    node?: NodeResolver<NetworkDnsItem, TypeParent, TContext>;
 
-    cursor?: cursorResolver<CursorType, TypeParent, TContext>;
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
   }
 
-  export type nodeResolver<
+  export type NodeResolver<
     R = NetworkDnsItem,
     Parent = NetworkDnsEdges,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type cursorResolver<
+  export type CursorResolver<
     R = CursorType,
     Parent = NetworkDnsEdges,
     TContext = SiemContext
@@ -6576,45 +6568,45 @@ export namespace NetworkDnsEdgesResolvers {
 
 export namespace NetworkDnsItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NetworkDnsItem> {
-    _id?: _idResolver<Maybe<string>, TypeParent, TContext>;
+    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    dnsBytesIn?: dnsBytesInResolver<Maybe<number>, TypeParent, TContext>;
+    dnsBytesIn?: DnsBytesInResolver<Maybe<number>, TypeParent, TContext>;
 
-    dnsBytesOut?: dnsBytesOutResolver<Maybe<number>, TypeParent, TContext>;
+    dnsBytesOut?: DnsBytesOutResolver<Maybe<number>, TypeParent, TContext>;
 
-    dnsName?: dnsNameResolver<Maybe<string>, TypeParent, TContext>;
+    dnsName?: DnsNameResolver<Maybe<string>, TypeParent, TContext>;
 
-    queryCount?: queryCountResolver<Maybe<number>, TypeParent, TContext>;
+    queryCount?: QueryCountResolver<Maybe<number>, TypeParent, TContext>;
 
-    uniqueDomains?: uniqueDomainsResolver<Maybe<number>, TypeParent, TContext>;
+    uniqueDomains?: UniqueDomainsResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type _idResolver<
+  export type _IdResolver<
     R = Maybe<string>,
     Parent = NetworkDnsItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type dnsBytesInResolver<
+  export type DnsBytesInResolver<
     R = Maybe<number>,
     Parent = NetworkDnsItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type dnsBytesOutResolver<
+  export type DnsBytesOutResolver<
     R = Maybe<number>,
     Parent = NetworkDnsItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type dnsNameResolver<
+  export type DnsNameResolver<
     R = Maybe<string>,
     Parent = NetworkDnsItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type queryCountResolver<
+  export type QueryCountResolver<
     R = Maybe<number>,
     Parent = NetworkDnsItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type uniqueDomainsResolver<
+  export type UniqueDomainsResolver<
     R = Maybe<number>,
     Parent = NetworkDnsItem,
     TContext = SiemContext
@@ -6623,73 +6615,73 @@ export namespace NetworkDnsItemResolvers {
 
 export namespace OverviewNetworkDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = OverviewNetworkData> {
-    auditbeatSocket?: auditbeatSocketResolver<Maybe<number>, TypeParent, TContext>;
+    auditbeatSocket?: AuditbeatSocketResolver<Maybe<number>, TypeParent, TContext>;
 
-    filebeatCisco?: filebeatCiscoResolver<Maybe<number>, TypeParent, TContext>;
+    filebeatCisco?: FilebeatCiscoResolver<Maybe<number>, TypeParent, TContext>;
 
-    filebeatNetflow?: filebeatNetflowResolver<Maybe<number>, TypeParent, TContext>;
+    filebeatNetflow?: FilebeatNetflowResolver<Maybe<number>, TypeParent, TContext>;
 
-    filebeatPanw?: filebeatPanwResolver<Maybe<number>, TypeParent, TContext>;
+    filebeatPanw?: FilebeatPanwResolver<Maybe<number>, TypeParent, TContext>;
 
-    filebeatSuricata?: filebeatSuricataResolver<Maybe<number>, TypeParent, TContext>;
+    filebeatSuricata?: FilebeatSuricataResolver<Maybe<number>, TypeParent, TContext>;
 
-    filebeatZeek?: filebeatZeekResolver<Maybe<number>, TypeParent, TContext>;
+    filebeatZeek?: FilebeatZeekResolver<Maybe<number>, TypeParent, TContext>;
 
-    packetbeatDNS?: packetbeatDNSResolver<Maybe<number>, TypeParent, TContext>;
+    packetbeatDNS?: PacketbeatDnsResolver<Maybe<number>, TypeParent, TContext>;
 
-    packetbeatFlow?: packetbeatFlowResolver<Maybe<number>, TypeParent, TContext>;
+    packetbeatFlow?: PacketbeatFlowResolver<Maybe<number>, TypeParent, TContext>;
 
-    packetbeatTLS?: packetbeatTLSResolver<Maybe<number>, TypeParent, TContext>;
+    packetbeatTLS?: PacketbeatTlsResolver<Maybe<number>, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type auditbeatSocketResolver<
+  export type AuditbeatSocketResolver<
     R = Maybe<number>,
     Parent = OverviewNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type filebeatCiscoResolver<
+  export type FilebeatCiscoResolver<
     R = Maybe<number>,
     Parent = OverviewNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type filebeatNetflowResolver<
+  export type FilebeatNetflowResolver<
     R = Maybe<number>,
     Parent = OverviewNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type filebeatPanwResolver<
+  export type FilebeatPanwResolver<
     R = Maybe<number>,
     Parent = OverviewNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type filebeatSuricataResolver<
+  export type FilebeatSuricataResolver<
     R = Maybe<number>,
     Parent = OverviewNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type filebeatZeekResolver<
+  export type FilebeatZeekResolver<
     R = Maybe<number>,
     Parent = OverviewNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type packetbeatDNSResolver<
+  export type PacketbeatDnsResolver<
     R = Maybe<number>,
     Parent = OverviewNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type packetbeatFlowResolver<
+  export type PacketbeatFlowResolver<
     R = Maybe<number>,
     Parent = OverviewNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type packetbeatTLSResolver<
+  export type PacketbeatTlsResolver<
     R = Maybe<number>,
     Parent = OverviewNetworkData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = OverviewNetworkData,
     TContext = SiemContext
@@ -6698,66 +6690,66 @@ export namespace OverviewNetworkDataResolvers {
 
 export namespace OverviewHostDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = OverviewHostData> {
-    auditbeatAuditd?: auditbeatAuditdResolver<Maybe<number>, TypeParent, TContext>;
+    auditbeatAuditd?: AuditbeatAuditdResolver<Maybe<number>, TypeParent, TContext>;
 
-    auditbeatFIM?: auditbeatFIMResolver<Maybe<number>, TypeParent, TContext>;
+    auditbeatFIM?: AuditbeatFimResolver<Maybe<number>, TypeParent, TContext>;
 
-    auditbeatLogin?: auditbeatLoginResolver<Maybe<number>, TypeParent, TContext>;
+    auditbeatLogin?: AuditbeatLoginResolver<Maybe<number>, TypeParent, TContext>;
 
-    auditbeatPackage?: auditbeatPackageResolver<Maybe<number>, TypeParent, TContext>;
+    auditbeatPackage?: AuditbeatPackageResolver<Maybe<number>, TypeParent, TContext>;
 
-    auditbeatProcess?: auditbeatProcessResolver<Maybe<number>, TypeParent, TContext>;
+    auditbeatProcess?: AuditbeatProcessResolver<Maybe<number>, TypeParent, TContext>;
 
-    auditbeatUser?: auditbeatUserResolver<Maybe<number>, TypeParent, TContext>;
+    auditbeatUser?: AuditbeatUserResolver<Maybe<number>, TypeParent, TContext>;
 
-    filebeatSystemModule?: filebeatSystemModuleResolver<Maybe<number>, TypeParent, TContext>;
+    filebeatSystemModule?: FilebeatSystemModuleResolver<Maybe<number>, TypeParent, TContext>;
 
-    winlogbeat?: winlogbeatResolver<Maybe<number>, TypeParent, TContext>;
+    winlogbeat?: WinlogbeatResolver<Maybe<number>, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type auditbeatAuditdResolver<
+  export type AuditbeatAuditdResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type auditbeatFIMResolver<
+  export type AuditbeatFimResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type auditbeatLoginResolver<
+  export type AuditbeatLoginResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type auditbeatPackageResolver<
+  export type AuditbeatPackageResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type auditbeatProcessResolver<
+  export type AuditbeatProcessResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type auditbeatUserResolver<
+  export type AuditbeatUserResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type filebeatSystemModuleResolver<
+  export type FilebeatSystemModuleResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type winlogbeatResolver<
+  export type WinlogbeatResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = OverviewHostData,
     TContext = SiemContext
@@ -6766,31 +6758,31 @@ export namespace OverviewHostDataResolvers {
 
 export namespace UncommonProcessesDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UncommonProcessesData> {
-    edges?: edgesResolver<UncommonProcessesEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<UncommonProcessesEdges[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
-    pageInfo?: pageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type edgesResolver<
+  export type EdgesResolver<
     R = UncommonProcessesEdges[],
     Parent = UncommonProcessesData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<
+  export type TotalCountResolver<
     R = number,
     Parent = UncommonProcessesData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type pageInfoResolver<
+  export type PageInfoResolver<
     R = PageInfoPaginated,
     Parent = UncommonProcessesData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = UncommonProcessesData,
     TContext = SiemContext
@@ -6799,17 +6791,17 @@ export namespace UncommonProcessesDataResolvers {
 
 export namespace UncommonProcessesEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UncommonProcessesEdges> {
-    node?: nodeResolver<UncommonProcessItem, TypeParent, TContext>;
+    node?: NodeResolver<UncommonProcessItem, TypeParent, TContext>;
 
-    cursor?: cursorResolver<CursorType, TypeParent, TContext>;
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
   }
 
-  export type nodeResolver<
+  export type NodeResolver<
     R = UncommonProcessItem,
     Parent = UncommonProcessesEdges,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type cursorResolver<
+  export type CursorResolver<
     R = CursorType,
     Parent = UncommonProcessesEdges,
     TContext = SiemContext
@@ -6818,38 +6810,38 @@ export namespace UncommonProcessesEdgesResolvers {
 
 export namespace UncommonProcessItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UncommonProcessItem> {
-    _id?: _idResolver<string, TypeParent, TContext>;
+    _id?: _IdResolver<string, TypeParent, TContext>;
 
-    instances?: instancesResolver<number, TypeParent, TContext>;
+    instances?: InstancesResolver<number, TypeParent, TContext>;
 
-    process?: processResolver<ProcessEcsFields, TypeParent, TContext>;
+    process?: ProcessResolver<ProcessEcsFields, TypeParent, TContext>;
 
-    hosts?: hostsResolver<HostEcsFields[], TypeParent, TContext>;
+    hosts?: HostsResolver<HostEcsFields[], TypeParent, TContext>;
 
-    user?: userResolver<Maybe<UserEcsFields>, TypeParent, TContext>;
+    user?: UserResolver<Maybe<UserEcsFields>, TypeParent, TContext>;
   }
 
-  export type _idResolver<
+  export type _IdResolver<
     R = string,
     Parent = UncommonProcessItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type instancesResolver<
+  export type InstancesResolver<
     R = number,
     Parent = UncommonProcessItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type processResolver<
+  export type ProcessResolver<
     R = ProcessEcsFields,
     Parent = UncommonProcessItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type hostsResolver<
+  export type HostsResolver<
     R = HostEcsFields[],
     Parent = UncommonProcessItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type userResolver<
+  export type UserResolver<
     R = Maybe<UserEcsFields>,
     Parent = UncommonProcessItem,
     TContext = SiemContext
@@ -6859,10 +6851,10 @@ export namespace UncommonProcessItemResolvers {
 export namespace SayMyNameResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SayMyName> {
     /** The id of the source */
-    appName?: appNameResolver<string, TypeParent, TContext>;
+    appName?: AppNameResolver<string, TypeParent, TContext>;
   }
 
-  export type appNameResolver<R = string, Parent = SayMyName, TContext = SiemContext> = Resolver<
+  export type AppNameResolver<R = string, Parent = SayMyName, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
@@ -6871,147 +6863,147 @@ export namespace SayMyNameResolvers {
 
 export namespace TimelineResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TimelineResult> {
-    savedObjectId?: savedObjectIdResolver<string, TypeParent, TContext>;
+    savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
 
-    columns?: columnsResolver<Maybe<ColumnHeaderResult[]>, TypeParent, TContext>;
+    columns?: ColumnsResolver<Maybe<ColumnHeaderResult[]>, TypeParent, TContext>;
 
-    dataProviders?: dataProvidersResolver<Maybe<DataProviderResult[]>, TypeParent, TContext>;
+    dataProviders?: DataProvidersResolver<Maybe<DataProviderResult[]>, TypeParent, TContext>;
 
-    dateRange?: dateRangeResolver<Maybe<DateRangePickerResult>, TypeParent, TContext>;
+    dateRange?: DateRangeResolver<Maybe<DateRangePickerResult>, TypeParent, TContext>;
 
-    description?: descriptionResolver<Maybe<string>, TypeParent, TContext>;
+    description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
 
-    eventIdToNoteIds?: eventIdToNoteIdsResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
+    eventIdToNoteIds?: EventIdToNoteIdsResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
 
-    favorite?: favoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
+    favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
 
-    kqlMode?: kqlModeResolver<Maybe<string>, TypeParent, TContext>;
+    kqlMode?: KqlModeResolver<Maybe<string>, TypeParent, TContext>;
 
-    kqlQuery?: kqlQueryResolver<Maybe<SerializedFilterQueryResult>, TypeParent, TContext>;
+    kqlQuery?: KqlQueryResolver<Maybe<SerializedFilterQueryResult>, TypeParent, TContext>;
 
-    notes?: notesResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
+    notes?: NotesResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
 
-    noteIds?: noteIdsResolver<Maybe<string[]>, TypeParent, TContext>;
+    noteIds?: NoteIdsResolver<Maybe<string[]>, TypeParent, TContext>;
 
-    pinnedEventIds?: pinnedEventIdsResolver<Maybe<string[]>, TypeParent, TContext>;
+    pinnedEventIds?: PinnedEventIdsResolver<Maybe<string[]>, TypeParent, TContext>;
 
-    pinnedEventsSaveObject?: pinnedEventsSaveObjectResolver<
+    pinnedEventsSaveObject?: PinnedEventsSaveObjectResolver<
       Maybe<PinnedEvent[]>,
       TypeParent,
       TContext
     >;
 
-    title?: titleResolver<Maybe<string>, TypeParent, TContext>;
+    title?: TitleResolver<Maybe<string>, TypeParent, TContext>;
 
-    sort?: sortResolver<Maybe<SortTimelineResult>, TypeParent, TContext>;
+    sort?: SortResolver<Maybe<SortTimelineResult>, TypeParent, TContext>;
 
-    created?: createdResolver<Maybe<number>, TypeParent, TContext>;
+    created?: CreatedResolver<Maybe<number>, TypeParent, TContext>;
 
-    createdBy?: createdByResolver<Maybe<string>, TypeParent, TContext>;
+    createdBy?: CreatedByResolver<Maybe<string>, TypeParent, TContext>;
 
-    updated?: updatedResolver<Maybe<number>, TypeParent, TContext>;
+    updated?: UpdatedResolver<Maybe<number>, TypeParent, TContext>;
 
-    updatedBy?: updatedByResolver<Maybe<string>, TypeParent, TContext>;
+    updatedBy?: UpdatedByResolver<Maybe<string>, TypeParent, TContext>;
 
-    version?: versionResolver<string, TypeParent, TContext>;
+    version?: VersionResolver<string, TypeParent, TContext>;
   }
 
-  export type savedObjectIdResolver<
+  export type SavedObjectIdResolver<
     R = string,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type columnsResolver<
+  export type ColumnsResolver<
     R = Maybe<ColumnHeaderResult[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type dataProvidersResolver<
+  export type DataProvidersResolver<
     R = Maybe<DataProviderResult[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type dateRangeResolver<
+  export type DateRangeResolver<
     R = Maybe<DateRangePickerResult>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type descriptionResolver<
+  export type DescriptionResolver<
     R = Maybe<string>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type eventIdToNoteIdsResolver<
+  export type EventIdToNoteIdsResolver<
     R = Maybe<NoteResult[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type favoriteResolver<
+  export type FavoriteResolver<
     R = Maybe<FavoriteTimelineResult[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type kqlModeResolver<
+  export type KqlModeResolver<
     R = Maybe<string>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type kqlQueryResolver<
+  export type KqlQueryResolver<
     R = Maybe<SerializedFilterQueryResult>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type notesResolver<
+  export type NotesResolver<
     R = Maybe<NoteResult[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type noteIdsResolver<
+  export type NoteIdsResolver<
     R = Maybe<string[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type pinnedEventIdsResolver<
+  export type PinnedEventIdsResolver<
     R = Maybe<string[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type pinnedEventsSaveObjectResolver<
+  export type PinnedEventsSaveObjectResolver<
     R = Maybe<PinnedEvent[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type titleResolver<
+  export type TitleResolver<
     R = Maybe<string>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sortResolver<
+  export type SortResolver<
     R = Maybe<SortTimelineResult>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type createdResolver<
+  export type CreatedResolver<
     R = Maybe<number>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type createdByResolver<
+  export type CreatedByResolver<
     R = Maybe<string>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type updatedResolver<
+  export type UpdatedResolver<
     R = Maybe<number>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type updatedByResolver<
+  export type UpdatedByResolver<
     R = Maybe<string>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type versionResolver<
+  export type VersionResolver<
     R = string,
     Parent = TimelineResult,
     TContext = SiemContext
@@ -7020,80 +7012,80 @@ export namespace TimelineResultResolvers {
 
 export namespace ColumnHeaderResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ColumnHeaderResult> {
-    aggregatable?: aggregatableResolver<Maybe<boolean>, TypeParent, TContext>;
+    aggregatable?: AggregatableResolver<Maybe<boolean>, TypeParent, TContext>;
 
-    category?: categoryResolver<Maybe<string>, TypeParent, TContext>;
+    category?: CategoryResolver<Maybe<string>, TypeParent, TContext>;
 
-    columnHeaderType?: columnHeaderTypeResolver<Maybe<string>, TypeParent, TContext>;
+    columnHeaderType?: ColumnHeaderTypeResolver<Maybe<string>, TypeParent, TContext>;
 
-    description?: descriptionResolver<Maybe<string>, TypeParent, TContext>;
+    description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
 
-    example?: exampleResolver<Maybe<string>, TypeParent, TContext>;
+    example?: ExampleResolver<Maybe<string>, TypeParent, TContext>;
 
-    indexes?: indexesResolver<Maybe<string[]>, TypeParent, TContext>;
+    indexes?: IndexesResolver<Maybe<string[]>, TypeParent, TContext>;
 
-    id?: idResolver<Maybe<string>, TypeParent, TContext>;
+    id?: IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    name?: nameResolver<Maybe<string>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string>, TypeParent, TContext>;
 
-    placeholder?: placeholderResolver<Maybe<string>, TypeParent, TContext>;
+    placeholder?: PlaceholderResolver<Maybe<string>, TypeParent, TContext>;
 
-    searchable?: searchableResolver<Maybe<boolean>, TypeParent, TContext>;
+    searchable?: SearchableResolver<Maybe<boolean>, TypeParent, TContext>;
 
-    type?: typeResolver<Maybe<string>, TypeParent, TContext>;
+    type?: TypeResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type aggregatableResolver<
+  export type AggregatableResolver<
     R = Maybe<boolean>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type categoryResolver<
+  export type CategoryResolver<
     R = Maybe<string>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type columnHeaderTypeResolver<
+  export type ColumnHeaderTypeResolver<
     R = Maybe<string>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type descriptionResolver<
+  export type DescriptionResolver<
     R = Maybe<string>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type exampleResolver<
+  export type ExampleResolver<
     R = Maybe<string>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type indexesResolver<
+  export type IndexesResolver<
     R = Maybe<string[]>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type idResolver<
+  export type IdResolver<
     R = Maybe<string>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type nameResolver<
+  export type NameResolver<
     R = Maybe<string>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type placeholderResolver<
+  export type PlaceholderResolver<
     R = Maybe<string>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type searchableResolver<
+  export type SearchableResolver<
     R = Maybe<boolean>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type typeResolver<
+  export type TypeResolver<
     R = Maybe<string>,
     Parent = ColumnHeaderResult,
     TContext = SiemContext
@@ -7102,52 +7094,52 @@ export namespace ColumnHeaderResultResolvers {
 
 export namespace DataProviderResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = DataProviderResult> {
-    id?: idResolver<Maybe<string>, TypeParent, TContext>;
+    id?: IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    name?: nameResolver<Maybe<string>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string>, TypeParent, TContext>;
 
-    enabled?: enabledResolver<Maybe<boolean>, TypeParent, TContext>;
+    enabled?: EnabledResolver<Maybe<boolean>, TypeParent, TContext>;
 
-    excluded?: excludedResolver<Maybe<boolean>, TypeParent, TContext>;
+    excluded?: ExcludedResolver<Maybe<boolean>, TypeParent, TContext>;
 
-    kqlQuery?: kqlQueryResolver<Maybe<string>, TypeParent, TContext>;
+    kqlQuery?: KqlQueryResolver<Maybe<string>, TypeParent, TContext>;
 
-    queryMatch?: queryMatchResolver<Maybe<QueryMatchResult>, TypeParent, TContext>;
+    queryMatch?: QueryMatchResolver<Maybe<QueryMatchResult>, TypeParent, TContext>;
 
-    and?: andResolver<Maybe<DataProviderResult[]>, TypeParent, TContext>;
+    and?: AndResolver<Maybe<DataProviderResult[]>, TypeParent, TContext>;
   }
 
-  export type idResolver<
+  export type IdResolver<
     R = Maybe<string>,
     Parent = DataProviderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type nameResolver<
+  export type NameResolver<
     R = Maybe<string>,
     Parent = DataProviderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type enabledResolver<
+  export type EnabledResolver<
     R = Maybe<boolean>,
     Parent = DataProviderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type excludedResolver<
+  export type ExcludedResolver<
     R = Maybe<boolean>,
     Parent = DataProviderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type kqlQueryResolver<
+  export type KqlQueryResolver<
     R = Maybe<string>,
     Parent = DataProviderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type queryMatchResolver<
+  export type QueryMatchResolver<
     R = Maybe<QueryMatchResult>,
     Parent = DataProviderResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type andResolver<
+  export type AndResolver<
     R = Maybe<DataProviderResult[]>,
     Parent = DataProviderResult,
     TContext = SiemContext
@@ -7156,38 +7148,38 @@ export namespace DataProviderResultResolvers {
 
 export namespace QueryMatchResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = QueryMatchResult> {
-    field?: fieldResolver<Maybe<string>, TypeParent, TContext>;
+    field?: FieldResolver<Maybe<string>, TypeParent, TContext>;
 
-    displayField?: displayFieldResolver<Maybe<string>, TypeParent, TContext>;
+    displayField?: DisplayFieldResolver<Maybe<string>, TypeParent, TContext>;
 
-    value?: valueResolver<Maybe<string>, TypeParent, TContext>;
+    value?: ValueResolver<Maybe<string>, TypeParent, TContext>;
 
-    displayValue?: displayValueResolver<Maybe<string>, TypeParent, TContext>;
+    displayValue?: DisplayValueResolver<Maybe<string>, TypeParent, TContext>;
 
-    operator?: operatorResolver<Maybe<string>, TypeParent, TContext>;
+    operator?: OperatorResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type fieldResolver<
+  export type FieldResolver<
     R = Maybe<string>,
     Parent = QueryMatchResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type displayFieldResolver<
+  export type DisplayFieldResolver<
     R = Maybe<string>,
     Parent = QueryMatchResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type valueResolver<
+  export type ValueResolver<
     R = Maybe<string>,
     Parent = QueryMatchResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type displayValueResolver<
+  export type DisplayValueResolver<
     R = Maybe<string>,
     Parent = QueryMatchResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type operatorResolver<
+  export type OperatorResolver<
     R = Maybe<string>,
     Parent = QueryMatchResult,
     TContext = SiemContext
@@ -7196,17 +7188,17 @@ export namespace QueryMatchResultResolvers {
 
 export namespace DateRangePickerResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = DateRangePickerResult> {
-    start?: startResolver<Maybe<number>, TypeParent, TContext>;
+    start?: StartResolver<Maybe<number>, TypeParent, TContext>;
 
-    end?: endResolver<Maybe<number>, TypeParent, TContext>;
+    end?: EndResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type startResolver<
+  export type StartResolver<
     R = Maybe<number>,
     Parent = DateRangePickerResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type endResolver<
+  export type EndResolver<
     R = Maybe<number>,
     Parent = DateRangePickerResult,
     TContext = SiemContext
@@ -7215,24 +7207,24 @@ export namespace DateRangePickerResultResolvers {
 
 export namespace FavoriteTimelineResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = FavoriteTimelineResult> {
-    fullName?: fullNameResolver<Maybe<string>, TypeParent, TContext>;
+    fullName?: FullNameResolver<Maybe<string>, TypeParent, TContext>;
 
-    userName?: userNameResolver<Maybe<string>, TypeParent, TContext>;
+    userName?: UserNameResolver<Maybe<string>, TypeParent, TContext>;
 
-    favoriteDate?: favoriteDateResolver<Maybe<number>, TypeParent, TContext>;
+    favoriteDate?: FavoriteDateResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type fullNameResolver<
+  export type FullNameResolver<
     R = Maybe<string>,
     Parent = FavoriteTimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type userNameResolver<
+  export type UserNameResolver<
     R = Maybe<string>,
     Parent = FavoriteTimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type favoriteDateResolver<
+  export type FavoriteDateResolver<
     R = Maybe<number>,
     Parent = FavoriteTimelineResult,
     TContext = SiemContext
@@ -7241,10 +7233,10 @@ export namespace FavoriteTimelineResultResolvers {
 
 export namespace SerializedFilterQueryResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SerializedFilterQueryResult> {
-    filterQuery?: filterQueryResolver<Maybe<SerializedKueryQueryResult>, TypeParent, TContext>;
+    filterQuery?: FilterQueryResolver<Maybe<SerializedKueryQueryResult>, TypeParent, TContext>;
   }
 
-  export type filterQueryResolver<
+  export type FilterQueryResolver<
     R = Maybe<SerializedKueryQueryResult>,
     Parent = SerializedFilterQueryResult,
     TContext = SiemContext
@@ -7253,17 +7245,17 @@ export namespace SerializedFilterQueryResultResolvers {
 
 export namespace SerializedKueryQueryResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SerializedKueryQueryResult> {
-    kuery?: kueryResolver<Maybe<KueryFilterQueryResult>, TypeParent, TContext>;
+    kuery?: KueryResolver<Maybe<KueryFilterQueryResult>, TypeParent, TContext>;
 
-    serializedQuery?: serializedQueryResolver<Maybe<string>, TypeParent, TContext>;
+    serializedQuery?: SerializedQueryResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type kueryResolver<
+  export type KueryResolver<
     R = Maybe<KueryFilterQueryResult>,
     Parent = SerializedKueryQueryResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type serializedQueryResolver<
+  export type SerializedQueryResolver<
     R = Maybe<string>,
     Parent = SerializedKueryQueryResult,
     TContext = SiemContext
@@ -7272,17 +7264,17 @@ export namespace SerializedKueryQueryResultResolvers {
 
 export namespace KueryFilterQueryResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = KueryFilterQueryResult> {
-    kind?: kindResolver<Maybe<string>, TypeParent, TContext>;
+    kind?: KindResolver<Maybe<string>, TypeParent, TContext>;
 
-    expression?: expressionResolver<Maybe<string>, TypeParent, TContext>;
+    expression?: ExpressionResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type kindResolver<
+  export type KindResolver<
     R = Maybe<string>,
     Parent = KueryFilterQueryResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type expressionResolver<
+  export type ExpressionResolver<
     R = Maybe<string>,
     Parent = KueryFilterQueryResult,
     TContext = SiemContext
@@ -7291,17 +7283,17 @@ export namespace KueryFilterQueryResultResolvers {
 
 export namespace SortTimelineResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = SortTimelineResult> {
-    columnId?: columnIdResolver<Maybe<string>, TypeParent, TContext>;
+    columnId?: ColumnIdResolver<Maybe<string>, TypeParent, TContext>;
 
-    sortDirection?: sortDirectionResolver<Maybe<string>, TypeParent, TContext>;
+    sortDirection?: SortDirectionResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type columnIdResolver<
+  export type ColumnIdResolver<
     R = Maybe<string>,
     Parent = SortTimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type sortDirectionResolver<
+  export type SortDirectionResolver<
     R = Maybe<string>,
     Parent = SortTimelineResult,
     TContext = SiemContext
@@ -7310,17 +7302,17 @@ export namespace SortTimelineResultResolvers {
 
 export namespace ResponseTimelinesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ResponseTimelines> {
-    timeline?: timelineResolver<(Maybe<TimelineResult>)[], TypeParent, TContext>;
+    timeline?: TimelineResolver<(Maybe<TimelineResult>)[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<Maybe<number>, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<Maybe<number>, TypeParent, TContext>;
   }
 
-  export type timelineResolver<
+  export type TimelineResolver<
     R = (Maybe<TimelineResult>)[],
     Parent = ResponseTimelines,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<
+  export type TotalCountResolver<
     R = Maybe<number>,
     Parent = ResponseTimelines,
     TContext = SiemContext
@@ -7330,44 +7322,44 @@ export namespace ResponseTimelinesResolvers {
 export namespace MutationResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = {}> {
     /** Persists a note */
-    persistNote?: persistNoteResolver<ResponseNote, TypeParent, TContext>;
+    persistNote?: PersistNoteResolver<ResponseNote, TypeParent, TContext>;
 
-    deleteNote?: deleteNoteResolver<Maybe<boolean>, TypeParent, TContext>;
+    deleteNote?: DeleteNoteResolver<Maybe<boolean>, TypeParent, TContext>;
 
-    deleteNoteByTimelineId?: deleteNoteByTimelineIdResolver<Maybe<boolean>, TypeParent, TContext>;
+    deleteNoteByTimelineId?: DeleteNoteByTimelineIdResolver<Maybe<boolean>, TypeParent, TContext>;
     /** Persists a pinned event in a timeline */
-    persistPinnedEventOnTimeline?: persistPinnedEventOnTimelineResolver<
+    persistPinnedEventOnTimeline?: PersistPinnedEventOnTimelineResolver<
       Maybe<PinnedEvent>,
       TypeParent,
       TContext
     >;
     /** Remove a pinned events in a timeline */
-    deletePinnedEventOnTimeline?: deletePinnedEventOnTimelineResolver<
+    deletePinnedEventOnTimeline?: DeletePinnedEventOnTimelineResolver<
       boolean,
       TypeParent,
       TContext
     >;
     /** Remove all pinned events in a timeline */
-    deleteAllPinnedEventsOnTimeline?: deleteAllPinnedEventsOnTimelineResolver<
+    deleteAllPinnedEventsOnTimeline?: DeleteAllPinnedEventsOnTimelineResolver<
       boolean,
       TypeParent,
       TContext
     >;
     /** Persists a timeline */
-    persistTimeline?: persistTimelineResolver<ResponseTimeline, TypeParent, TContext>;
+    persistTimeline?: PersistTimelineResolver<ResponseTimeline, TypeParent, TContext>;
 
-    persistFavorite?: persistFavoriteResolver<ResponseFavoriteTimeline, TypeParent, TContext>;
+    persistFavorite?: PersistFavoriteResolver<ResponseFavoriteTimeline, TypeParent, TContext>;
 
-    deleteTimeline?: deleteTimelineResolver<boolean, TypeParent, TContext>;
+    deleteTimeline?: DeleteTimelineResolver<boolean, TypeParent, TContext>;
   }
 
-  export type persistNoteResolver<R = ResponseNote, Parent = {}, TContext = SiemContext> = Resolver<
+  export type PersistNoteResolver<R = ResponseNote, Parent = {}, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext,
-    persistNoteArgs
+    PersistNoteArgs
   >;
-  export interface persistNoteArgs {
+  export interface PersistNoteArgs {
     noteId?: Maybe<string>;
 
     version?: Maybe<string>;
@@ -7375,32 +7367,32 @@ export namespace MutationResolvers {
     note: NoteInput;
   }
 
-  export type deleteNoteResolver<
+  export type DeleteNoteResolver<
     R = Maybe<boolean>,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, deleteNoteArgs>;
-  export interface deleteNoteArgs {
+  > = Resolver<R, Parent, TContext, DeleteNoteArgs>;
+  export interface DeleteNoteArgs {
     id: string[];
   }
 
-  export type deleteNoteByTimelineIdResolver<
+  export type DeleteNoteByTimelineIdResolver<
     R = Maybe<boolean>,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, deleteNoteByTimelineIdArgs>;
-  export interface deleteNoteByTimelineIdArgs {
+  > = Resolver<R, Parent, TContext, DeleteNoteByTimelineIdArgs>;
+  export interface DeleteNoteByTimelineIdArgs {
     timelineId: string;
 
     version?: Maybe<string>;
   }
 
-  export type persistPinnedEventOnTimelineResolver<
+  export type PersistPinnedEventOnTimelineResolver<
     R = Maybe<PinnedEvent>,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, persistPinnedEventOnTimelineArgs>;
-  export interface persistPinnedEventOnTimelineArgs {
+  > = Resolver<R, Parent, TContext, PersistPinnedEventOnTimelineArgs>;
+  export interface PersistPinnedEventOnTimelineArgs {
     pinnedEventId?: Maybe<string>;
 
     eventId: string;
@@ -7408,30 +7400,30 @@ export namespace MutationResolvers {
     timelineId?: Maybe<string>;
   }
 
-  export type deletePinnedEventOnTimelineResolver<
+  export type DeletePinnedEventOnTimelineResolver<
     R = boolean,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, deletePinnedEventOnTimelineArgs>;
-  export interface deletePinnedEventOnTimelineArgs {
+  > = Resolver<R, Parent, TContext, DeletePinnedEventOnTimelineArgs>;
+  export interface DeletePinnedEventOnTimelineArgs {
     id: string[];
   }
 
-  export type deleteAllPinnedEventsOnTimelineResolver<
+  export type DeleteAllPinnedEventsOnTimelineResolver<
     R = boolean,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, deleteAllPinnedEventsOnTimelineArgs>;
-  export interface deleteAllPinnedEventsOnTimelineArgs {
+  > = Resolver<R, Parent, TContext, DeleteAllPinnedEventsOnTimelineArgs>;
+  export interface DeleteAllPinnedEventsOnTimelineArgs {
     timelineId: string;
   }
 
-  export type persistTimelineResolver<
+  export type PersistTimelineResolver<
     R = ResponseTimeline,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, persistTimelineArgs>;
-  export interface persistTimelineArgs {
+  > = Resolver<R, Parent, TContext, PersistTimelineArgs>;
+  export interface PersistTimelineArgs {
     id?: Maybe<string>;
 
     version?: Maybe<string>;
@@ -7439,46 +7431,46 @@ export namespace MutationResolvers {
     timeline: TimelineInput;
   }
 
-  export type persistFavoriteResolver<
+  export type PersistFavoriteResolver<
     R = ResponseFavoriteTimeline,
     Parent = {},
     TContext = SiemContext
-  > = Resolver<R, Parent, TContext, persistFavoriteArgs>;
-  export interface persistFavoriteArgs {
+  > = Resolver<R, Parent, TContext, PersistFavoriteArgs>;
+  export interface PersistFavoriteArgs {
     timelineId?: Maybe<string>;
   }
 
-  export type deleteTimelineResolver<R = boolean, Parent = {}, TContext = SiemContext> = Resolver<
+  export type DeleteTimelineResolver<R = boolean, Parent = {}, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext,
-    deleteTimelineArgs
+    DeleteTimelineArgs
   >;
-  export interface deleteTimelineArgs {
+  export interface DeleteTimelineArgs {
     id: string[];
   }
 }
 
 export namespace ResponseNoteResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ResponseNote> {
-    code?: codeResolver<Maybe<number>, TypeParent, TContext>;
+    code?: CodeResolver<Maybe<number>, TypeParent, TContext>;
 
-    message?: messageResolver<Maybe<string>, TypeParent, TContext>;
+    message?: MessageResolver<Maybe<string>, TypeParent, TContext>;
 
-    note?: noteResolver<NoteResult, TypeParent, TContext>;
+    note?: NoteResolver<NoteResult, TypeParent, TContext>;
   }
 
-  export type codeResolver<
+  export type CodeResolver<
     R = Maybe<number>,
     Parent = ResponseNote,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type messageResolver<
+  export type MessageResolver<
     R = Maybe<string>,
     Parent = ResponseNote,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type noteResolver<
+  export type NoteResolver<
     R = NoteResult,
     Parent = ResponseNote,
     TContext = SiemContext
@@ -7487,24 +7479,24 @@ export namespace ResponseNoteResolvers {
 
 export namespace ResponseTimelineResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ResponseTimeline> {
-    code?: codeResolver<Maybe<number>, TypeParent, TContext>;
+    code?: CodeResolver<Maybe<number>, TypeParent, TContext>;
 
-    message?: messageResolver<Maybe<string>, TypeParent, TContext>;
+    message?: MessageResolver<Maybe<string>, TypeParent, TContext>;
 
-    timeline?: timelineResolver<TimelineResult, TypeParent, TContext>;
+    timeline?: TimelineResolver<TimelineResult, TypeParent, TContext>;
   }
 
-  export type codeResolver<
+  export type CodeResolver<
     R = Maybe<number>,
     Parent = ResponseTimeline,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type messageResolver<
+  export type MessageResolver<
     R = Maybe<string>,
     Parent = ResponseTimeline,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type timelineResolver<
+  export type TimelineResolver<
     R = TimelineResult,
     Parent = ResponseTimeline,
     TContext = SiemContext
@@ -7513,38 +7505,38 @@ export namespace ResponseTimelineResolvers {
 
 export namespace ResponseFavoriteTimelineResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ResponseFavoriteTimeline> {
-    code?: codeResolver<Maybe<number>, TypeParent, TContext>;
+    code?: CodeResolver<Maybe<number>, TypeParent, TContext>;
 
-    message?: messageResolver<Maybe<string>, TypeParent, TContext>;
+    message?: MessageResolver<Maybe<string>, TypeParent, TContext>;
 
-    savedObjectId?: savedObjectIdResolver<string, TypeParent, TContext>;
+    savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
 
-    version?: versionResolver<string, TypeParent, TContext>;
+    version?: VersionResolver<string, TypeParent, TContext>;
 
-    favorite?: favoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
+    favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
   }
 
-  export type codeResolver<
+  export type CodeResolver<
     R = Maybe<number>,
     Parent = ResponseFavoriteTimeline,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type messageResolver<
+  export type MessageResolver<
     R = Maybe<string>,
     Parent = ResponseFavoriteTimeline,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type savedObjectIdResolver<
+  export type SavedObjectIdResolver<
     R = string,
     Parent = ResponseFavoriteTimeline,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type versionResolver<
+  export type VersionResolver<
     R = string,
     Parent = ResponseFavoriteTimeline,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type favoriteResolver<
+  export type FavoriteResolver<
     R = Maybe<FavoriteTimelineResult[]>,
     Parent = ResponseFavoriteTimeline,
     TContext = SiemContext
@@ -7553,17 +7545,17 @@ export namespace ResponseFavoriteTimelineResolvers {
 
 export namespace EcsEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = EcsEdges> {
-    node?: nodeResolver<ECS, TypeParent, TContext>;
+    node?: NodeResolver<Ecs, TypeParent, TContext>;
 
-    cursor?: cursorResolver<CursorType, TypeParent, TContext>;
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
   }
 
-  export type nodeResolver<R = ECS, Parent = EcsEdges, TContext = SiemContext> = Resolver<
+  export type NodeResolver<R = Ecs, Parent = EcsEdges, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type cursorResolver<R = CursorType, Parent = EcsEdges, TContext = SiemContext> = Resolver<
+  export type CursorResolver<R = CursorType, Parent = EcsEdges, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
@@ -7572,31 +7564,31 @@ export namespace EcsEdgesResolvers {
 
 export namespace EventsTimelineDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = EventsTimelineData> {
-    edges?: edgesResolver<EcsEdges[], TypeParent, TContext>;
+    edges?: EdgesResolver<EcsEdges[], TypeParent, TContext>;
 
-    totalCount?: totalCountResolver<number, TypeParent, TContext>;
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
 
-    pageInfo?: pageInfoResolver<PageInfo, TypeParent, TContext>;
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, TContext>;
 
-    inspect?: inspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
 
-  export type edgesResolver<
+  export type EdgesResolver<
     R = EcsEdges[],
     Parent = EventsTimelineData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type totalCountResolver<
+  export type TotalCountResolver<
     R = number,
     Parent = EventsTimelineData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type pageInfoResolver<
+  export type PageInfoResolver<
     R = PageInfo,
     Parent = EventsTimelineData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type inspectResolver<
+  export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = EventsTimelineData,
     TContext = SiemContext
@@ -7605,45 +7597,45 @@ export namespace EventsTimelineDataResolvers {
 
 export namespace OsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = OsFields> {
-    platform?: platformResolver<Maybe<string>, TypeParent, TContext>;
+    platform?: PlatformResolver<Maybe<string>, TypeParent, TContext>;
 
-    name?: nameResolver<Maybe<string>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string>, TypeParent, TContext>;
 
-    full?: fullResolver<Maybe<string>, TypeParent, TContext>;
+    full?: FullResolver<Maybe<string>, TypeParent, TContext>;
 
-    family?: familyResolver<Maybe<string>, TypeParent, TContext>;
+    family?: FamilyResolver<Maybe<string>, TypeParent, TContext>;
 
-    version?: versionResolver<Maybe<string>, TypeParent, TContext>;
+    version?: VersionResolver<Maybe<string>, TypeParent, TContext>;
 
-    kernel?: kernelResolver<Maybe<string>, TypeParent, TContext>;
+    kernel?: KernelResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type platformResolver<
+  export type PlatformResolver<
     R = Maybe<string>,
     Parent = OsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type nameResolver<R = Maybe<string>, Parent = OsFields, TContext = SiemContext> = Resolver<
+  export type NameResolver<R = Maybe<string>, Parent = OsFields, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type fullResolver<R = Maybe<string>, Parent = OsFields, TContext = SiemContext> = Resolver<
+  export type FullResolver<R = Maybe<string>, Parent = OsFields, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type familyResolver<
+  export type FamilyResolver<
     R = Maybe<string>,
     Parent = OsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type versionResolver<
+  export type VersionResolver<
     R = Maybe<string>,
     Parent = OsFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type kernelResolver<
+  export type KernelResolver<
     R = Maybe<string>,
     Parent = OsFields,
     TContext = SiemContext
@@ -7652,52 +7644,52 @@ export namespace OsFieldsResolvers {
 
 export namespace HostFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostFields> {
-    architecture?: architectureResolver<Maybe<string>, TypeParent, TContext>;
+    architecture?: ArchitectureResolver<Maybe<string>, TypeParent, TContext>;
 
-    id?: idResolver<Maybe<string>, TypeParent, TContext>;
+    id?: IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    ip?: ipResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
+    ip?: IpResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
 
-    mac?: macResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
+    mac?: MacResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
 
-    name?: nameResolver<Maybe<string>, TypeParent, TContext>;
+    name?: NameResolver<Maybe<string>, TypeParent, TContext>;
 
-    os?: osResolver<Maybe<OsFields>, TypeParent, TContext>;
+    os?: OsResolver<Maybe<OsFields>, TypeParent, TContext>;
 
-    type?: typeResolver<Maybe<string>, TypeParent, TContext>;
+    type?: TypeResolver<Maybe<string>, TypeParent, TContext>;
   }
 
-  export type architectureResolver<
+  export type ArchitectureResolver<
     R = Maybe<string>,
     Parent = HostFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type idResolver<R = Maybe<string>, Parent = HostFields, TContext = SiemContext> = Resolver<
+  export type IdResolver<R = Maybe<string>, Parent = HostFields, TContext = SiemContext> = Resolver<
     R,
     Parent,
     TContext
   >;
-  export type ipResolver<
+  export type IpResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = HostFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type macResolver<
+  export type MacResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = HostFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type nameResolver<
+  export type NameResolver<
     R = Maybe<string>,
     Parent = HostFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type osResolver<
+  export type OsResolver<
     R = Maybe<OsFields>,
     Parent = HostFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type typeResolver<
+  export type TypeResolver<
     R = Maybe<string>,
     Parent = HostFields,
     TContext = SiemContext
@@ -7705,34 +7697,34 @@ export namespace HostFieldsResolvers {
 }
 
 /** Directs the executor to skip this field or fragment when the `if` argument is true. */
-export type skipDirectiveResolver<Result> = DirectiveResolverFn<
+export type SkipDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
-  skipDirectiveArgs,
+  SkipDirectiveArgs,
   SiemContext
 >;
-export interface skipDirectiveArgs {
+export interface SkipDirectiveArgs {
   /** Skipped when true. */
   if: boolean;
 }
 
 /** Directs the executor to include this field or fragment only when the `if` argument is true. */
-export type includeDirectiveResolver<Result> = DirectiveResolverFn<
+export type IncludeDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
-  includeDirectiveArgs,
+  IncludeDirectiveArgs,
   SiemContext
 >;
-export interface includeDirectiveArgs {
+export interface IncludeDirectiveArgs {
   /** Included when true. */
   if: boolean;
 }
 
 /** Marks an element of a GraphQL schema as no longer supported. */
-export type deprecatedDirectiveResolver<Result> = DirectiveResolverFn<
+export type DeprecatedDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
-  deprecatedDirectiveArgs,
+  DeprecatedDirectiveArgs,
   SiemContext
 >;
-export interface deprecatedDirectiveArgs {
+export interface DeprecatedDirectiveArgs {
   /** Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted in [Markdown](https://daringfireball.net/projects/markdown/). */
   reason?: string;
 }
@@ -7783,7 +7775,7 @@ export type IResolvers<TContext = SiemContext> = {
   TimelineEdges?: TimelineEdgesResolvers.Resolvers<TContext>;
   TimelineItem?: TimelineItemResolvers.Resolvers<TContext>;
   TimelineNonEcsData?: TimelineNonEcsDataResolvers.Resolvers<TContext>;
-  ECS?: ECSResolvers.Resolvers<TContext>;
+  Ecs?: EcsResolvers.Resolvers<TContext>;
   AuditdEcsFields?: AuditdEcsFieldsResolvers.Resolvers<TContext>;
   AuditdData?: AuditdDataResolvers.Resolvers<TContext>;
   Summary?: SummaryResolvers.Resolvers<TContext>;
@@ -7899,7 +7891,7 @@ export type IResolvers<TContext = SiemContext> = {
 } & { [typeName: string]: never };
 
 export type IDirectiveResolvers<Result> = {
-  skip?: skipDirectiveResolver<Result>;
-  include?: includeDirectiveResolver<Result>;
-  deprecated?: deprecatedDirectiveResolver<Result>;
+  skip?: SkipDirectiveResolver<Result>;
+  include?: IncludeDirectiveResolver<Result>;
+  deprecated?: DeprecatedDirectiveResolver<Result>;
 } & { [directiveName: string]: never };
