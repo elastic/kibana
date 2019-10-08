@@ -43,6 +43,7 @@ export class Variables extends React.Component<Props> {
         <VariablesContainer>
           <EuiAccordion
             id="local-variables"
+            className="euiAccordion"
             buttonContent={i18n.translate(
               'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
               { defaultMessage: 'Local variables' }
