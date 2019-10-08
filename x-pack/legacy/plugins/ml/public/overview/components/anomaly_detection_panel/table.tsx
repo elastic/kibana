@@ -90,7 +90,22 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       sortable: true,
       render: (score: Group['max_anomaly_score']) => {
         if (score === null) {
+          // score is not loaded yet
           return <EuiLoadingSpinner />;
+        } else if (score === undefined) {
+          // an error occurred for this group's score
+          return (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.ml.overview.anomalyDetection.tableMaxScoreErrorTooltip',
+                {
+                  defaultMessage: 'There was a problem loading the maximum anomaly score',
+                }
+              )}
+            >
+              <EuiIcon type="alert" />
+            </EuiToolTip>
+          );
         } else {
           const color: string = getSeverityColor(score);
           return (
