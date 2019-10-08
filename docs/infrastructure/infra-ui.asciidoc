@@ -49,7 +49,7 @@ For example, enter `host.hostname : "host1"` to see only the information for `ho
 [[infra-date]]
 === Specify the time and date
 
-Click the time selector image:infrastructure/images/infra-time-selector.png[time selector icon] to choose the timeframe for the metrics.
+Click the time filter image:infrastructure/images/infra-time-selector.png[time filter icon] to choose the timeframe for the metrics.
 The values shown are the values for the last minute at the specified time and date.
 
 [float]

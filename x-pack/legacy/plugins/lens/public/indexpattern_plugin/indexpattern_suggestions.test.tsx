@@ -5,9 +5,6 @@
  */
 
 import chromeMock from 'ui/chrome';
-import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data/public/setup';
-import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import { SavedObjectsClientContract } from 'src/core/public';
 import {
   getIndexPatternDatasource,
   IndexPatternPersistedState,
@@ -135,12 +132,9 @@ describe('IndexPattern Data Source suggestions', () => {
 
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
-      core: coreMock.createSetup(),
+      core: coreMock.createStart(),
       chrome: chromeMock,
       storage: {} as Storage,
-      interpreter: { functionsRegistry },
-      data: dataMock,
-      savedObjectsClient: {} as SavedObjectsClientContract,
     });
 
     persistedState = {

@@ -16,8 +16,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
-import { ChartView } from './chart';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { LogEntryRateBarChart } from './bar_chart';
 
 export const LogRateResults = ({
   isLoading,
@@ -70,7 +70,12 @@ export const LogRateResults = ({
           }
         />
       ) : (
-        <ChartView data={results} setTimeRange={setTimeRange} timeRange={timeRange} />
+        <LogEntryRateBarChart
+          bucketDuration={results.bucketDuration}
+          histogramBuckets={results.histogramBuckets}
+          setTimeRange={setTimeRange}
+          timeRange={timeRange}
+        />
       )}
     </>
   );
