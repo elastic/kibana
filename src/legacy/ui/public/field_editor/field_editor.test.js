@@ -156,7 +156,6 @@ describe('FieldEditor', () => {
       script: 'doc.test.value',
     };
     indexPattern.fields.push(testField);
-    //todo might need another pass
     indexPattern.fields.getByName = (name) => {
       const fields = {
         [testField.name]: testField
@@ -185,7 +184,6 @@ describe('FieldEditor', () => {
       lang: 'testlang'
     };
     indexPattern.fields.push(testField);
-    //todo might need another pass
     indexPattern.fields.getByName = (name) => {
       const fields = {
         [testField.name]: testField

@@ -212,7 +212,6 @@ export class IndexPattern implements StaticIndexPattern {
     // Date value returned in "_source" could be in any number of formats
     // Use a docvalue for each date field to ensure standardized formats when working with date fields
     // indexPattern.flattenHit will override "_source" values when the same field is also defined in "fields"
-    // todo - use array instead of map?
     const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map(
       (dateField: any) => {
         return {
