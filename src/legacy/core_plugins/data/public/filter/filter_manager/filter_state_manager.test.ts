@@ -83,16 +83,21 @@ describe('filter_state_manager', () => {
   });
 
   describe('app_state_defined', () => {
+    let filterStateManager: FilterStateManager;
     beforeEach(() => {
       // FilterStateManager is tested indirectly.
       // Therefore, we don't need it's instance.
-      new FilterStateManager(
+      filterStateManager = new FilterStateManager(
         globalStateStub,
         () => {
           return appStateStub;
         },
         filterManager
       );
+    });
+
+    afterEach(() => {
+      filterStateManager.destroy();
     });
 
     test('should update filter manager global filters', done => {
