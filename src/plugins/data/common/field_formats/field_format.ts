@@ -58,9 +58,9 @@ export abstract class FieldFormat {
    */
   convertObject: FieldFormatConvert | undefined;
 
-  protected htmlConvert: HtmlContextTypeConvert | undefined;
+  htmlConvert: HtmlContextTypeConvert | undefined;
 
-  protected textConvert: TextContextTypeConvert | undefined;
+  textConvert: TextContextTypeConvert | undefined;
 
   /**
    * @property {Function} - ref to child class
@@ -174,11 +174,7 @@ export abstract class FieldFormat {
     return createCustomFieldFormat(convertFn);
   }
 
-  /*
-   * have to remove the private because of
-   * https://github.com/Microsoft/TypeScript/issues/17293
-   */
-  private setupContentType(): FieldFormatConvert {
+  setupContentType(): FieldFormatConvert {
     return {
       [TEXT_CONTEXT_TYPE]: textContentTypeSetup(this, this.textConvert),
       [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(this, this.htmlConvert),
