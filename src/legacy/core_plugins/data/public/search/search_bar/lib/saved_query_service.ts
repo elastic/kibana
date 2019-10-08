@@ -34,13 +34,11 @@ export interface SavedQueryService {
     attributes: SavedQueryAttributes,
     config?: { overwrite: boolean }
   ) => Promise<SavedQuery>;
-  getAllSavedQueries: (
-    perPage?: number,
-    activePage?: number
-  ) => Promise<{ allSavedQueries: SavedQuery[]; totalCount: number }>;
+  getAllSavedQueries: (perPage?: number, activePage?: number) => Promise<SavedQuery[]>;
   findSavedQueries: (searchText?: string) => Promise<SavedQuery[]>;
   getSavedQuery: (id: string) => Promise<SavedQuery>;
   deleteSavedQuery: (id: string) => Promise<{}>;
+  getSavedQueryCount: () => Promise<number>;
 }
 
 export const createSavedQueryService = (
@@ -92,22 +90,20 @@ export const createSavedQueryService = (
 
     return parseSavedQueryObject(rawQueryResponse);
   };
-
+  // we have to tell the saved objects client how many to fetch, otherwise it defaults to fetching 20 per page
   const getAllSavedQueries = async (
     perPage: number = 50, // the number of items to fetch for the active page
     activePage: number = 1
-  ): Promise<{ allSavedQueries: SavedQuery[]; totalCount: number }> => {
+  ): Promise<SavedQuery[]> => {
     const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
       type: 'query',
       perPage,
       page: activePage,
     });
-    const allSavedQueries = response.savedObjects.map(
+    return response.savedObjects.map(
       (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
         parseSavedQueryObject(savedObject)
     );
-    const totalCount = response.total;
-    return { allSavedQueries, totalCount };
   };
 
   const findSavedQueries = async (searchText: string = ''): Promise<SavedQuery[]> => {
@@ -163,11 +159,21 @@ export const createSavedQueryService = (
     };
   };
 
+  const getSavedQueryCount = async (): Promise<number> => {
+    const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
+      type: 'query',
+      perPage: 0,
+      page: 1,
+    });
+    return response.total;
+  };
+
   return {
     saveQuery,
     getAllSavedQueries,
     findSavedQueries,
     getSavedQuery,
     deleteSavedQuery,
+    getSavedQueryCount,
   };
 };

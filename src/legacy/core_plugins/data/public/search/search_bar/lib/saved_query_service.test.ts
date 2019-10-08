@@ -61,7 +61,13 @@ const mockSavedObjectsClient = {
   delete: jest.fn(),
 };
 
-const { deleteSavedQuery, getSavedQuery, findSavedQueries, saveQuery } = createSavedQueryService(
+const {
+  deleteSavedQuery,
+  getSavedQuery,
+  findSavedQueries,
+  saveQuery,
+  getAllSavedQueries,
+} = createSavedQueryService(
   // @ts-ignore
   mockSavedObjectsClient
 );

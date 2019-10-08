@@ -78,7 +78,8 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
 
   useEffect(() => {
     const fetchQueries = async () => {
-      const allSavedQueries = await savedQueryService.getAllSavedQueries();
+      const savedQueryCount = await savedQueryService.getSavedQueryCount();
+      const allSavedQueries = await savedQueryService.getAllSavedQueries(savedQueryCount);
       const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title') as SavedQuery[];
       setSavedQueries(sortedAllSavedQueries);
     };
