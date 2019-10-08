@@ -35,6 +35,7 @@ import supertest from 'supertest';
 import { CliArgs, Env } from '../core/server/config';
 import { LegacyObjectToConfigAdapter } from '../core/server/legacy';
 import { Root } from '../core/server/root';
+import KbnServer from '../legacy/server/kbn_server';
 
 type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
@@ -131,7 +132,7 @@ export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArg
  * Returns `kbnServer` instance used in the "legacy" Kibana.
  * @param root
  */
-export function getKbnServer(root: Root) {
+export function getKbnServer(root: Root): KbnServer {
   return (root as any).server.legacy.kbnServer;
 }
 

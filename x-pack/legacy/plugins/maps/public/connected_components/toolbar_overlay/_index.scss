@@ -9,6 +9,7 @@
 
 .mapToolbarOverlay__button {
   @include size($euiSizeXL);
+  // sass-lint:disable-block no-important
   background-color: $euiColorEmptyShade !important;
   pointer-events: all;
 
