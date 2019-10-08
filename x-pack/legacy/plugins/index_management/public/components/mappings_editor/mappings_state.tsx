@@ -33,7 +33,10 @@ const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 export interface Props {
-  children: (editor: FieldsEditor) => React.ReactNode;
+  children: (params: {
+    editor: FieldsEditor;
+    getProperties(): Mappings['properties'];
+  }) => React.ReactNode;
   defaultValue: { fields: { [key: string]: Field } };
   onUpdate: OnUpdateHandler;
 }
@@ -86,7 +89,10 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
   return (
     <StateContext.Provider value={state}>
       <DispatchContext.Provider value={dispatch}>
-        {children(state.documentFields.editor)}
+        {children({
+          editor: state.documentFields.editor,
+          getProperties: () => deNormalize(state.fields),
+        })}
       </DispatchContext.Provider>
     </StateContext.Provider>
   );

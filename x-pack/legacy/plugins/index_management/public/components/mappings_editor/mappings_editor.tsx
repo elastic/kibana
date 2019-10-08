@@ -6,7 +6,13 @@
 
 import React from 'react';
 
-import { ConfigurationForm, CONFIGURATION_FIELDS, DocumentFields } from './components';
+import { JsonEditor } from '../json_editor';
+import {
+  ConfigurationForm,
+  CONFIGURATION_FIELDS,
+  DocumentFieldsHeaders,
+  DocumentFields,
+} from './components';
 import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
 
 interface Props {
@@ -26,16 +32,23 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue = {} }: Props
     );
   const fieldsDefaultValue = defaultValue.properties || {};
 
-  const renderJsonEditor = () => {
-    return <h2>JSON editor</h2>;
+  // Temporary logic
+  const onJsonEditorUpdate = (args: any) => {
+    // eslint-disable-next-line
+    console.log(args);
   };
 
   return (
     <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
-      {fieldsEditor => (
+      {({ editor, getProperties }) => (
         <>
           <ConfigurationForm defaultValue={configurationDefaultValue} />
-          {fieldsEditor === 'json' ? renderJsonEditor() : <DocumentFields />}
+          <DocumentFieldsHeaders />
+          {editor === 'json' ? (
+            <JsonEditor onUpdate={onJsonEditorUpdate} defaultValue={getProperties()} />
+          ) : (
+            <DocumentFields />
+          )}
         </>
       )}
     </MappingsState>
