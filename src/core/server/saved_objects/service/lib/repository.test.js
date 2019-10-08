@@ -1730,6 +1730,68 @@ describe('SavedObjectsRepository', () => {
       );
     });
 
+    it('does not pass references if omitted', async () => {
+      await savedObjectsRepository.update(
+        type,
+        id,
+        { title: 'Testing' }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).not.toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: [],
+            })
+          }
+        })
+      );
+    });
+
+    it('passes references if they are provided', async () => {
+      await savedObjectsRepository.update(
+        type,
+        id,
+        { title: 'Testing' },
+        { references: ['foo'] }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: ['foo'],
+            })
+          }
+        })
+      );
+    });
+
+    it('passes empty references array if empty references array is provided', async () => {
+      await savedObjectsRepository.update(
+        type,
+        id,
+        { title: 'Testing' },
+        { references: [] }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: [],
+            })
+          }
+        })
+      );
+    });
+
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
       await savedObjectsRepository.update(
         'index-pattern',
