@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import { Logger, SavedObjectsLegacyService, IRouter } from 'src/core/server';
 import { initDeleteSpacesApi } from './delete';
 import { initGetSpaceApi } from './get';
@@ -20,8 +19,6 @@ export interface ExternalRouteDeps {
   spacesService: SpacesServiceSetup;
   log: Logger;
 }
-
-export type ExternalRouteRequestFacade = Legacy.Request;
 
 export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   initDeleteSpacesApi(deps);
