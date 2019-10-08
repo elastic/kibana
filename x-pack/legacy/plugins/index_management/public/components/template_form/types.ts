@@ -10,7 +10,7 @@ export interface StepProps {
   template: Partial<Template>;
   setDataGetter: (dataGetter: DataGetterFunc) => void;
   updateCurrentStep: (step: number) => void;
-  onStepValidityChange: (isValid: boolean) => void;
+  onStepValidityChange: (isValid: boolean | undefined) => void;
   isEditing?: boolean;
 }
 

@@ -28,8 +28,8 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
     const isMappingsValid = isValid === undefined ? true : isValid;
     onStepValidityChange(isMappingsValid);
     setDataGetter(() => {
-      const data = getData();
-      return Promise.resolve({ isValid: isMappingsValid, data });
+      const mappings = getData();
+      return Promise.resolve({ isValid: isMappingsValid, data: { mappings } });
     });
   }, []);
 
@@ -78,6 +78,8 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
 
       {/* Mappings code editor */}
       <MappingsEditor defaultValue={template.mappings} onUpdate={onMappingsEditorUpdate} />
+
+      <EuiSpacer size="m" />
     </div>
   );
 };
