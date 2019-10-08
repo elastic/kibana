@@ -9,7 +9,7 @@ import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { getJobId } from '../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
+import { InfraBackendFrameworkAdapter } from '../adapters/framework';
 import { NoLogRateResultsIndexError } from './errors';
 import {
   logRateModelPlotResponseRT,

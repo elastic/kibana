@@ -108,7 +108,7 @@ export class InfraSources {
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
       await this.libs.savedObjects
-        .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
+        .getScopedSavedObjectsClient(request)
         .create(
           infraSourceConfigurationSavedObjectType,
           pickSavedSourceConfiguration(newSourceConfiguration) as any,
@@ -127,7 +127,7 @@ export class InfraSources {
 
   public async deleteSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
     await this.libs.savedObjects
-      .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
+      .getScopedSavedObjectsClient(request)
       .delete(infraSourceConfigurationSavedObjectType, sourceId);
   }
 
@@ -147,7 +147,7 @@ export class InfraSources {
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
       await this.libs.savedObjects
-        .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
+        .getScopedSavedObjectsClient(request)
         .update(
           infraSourceConfigurationSavedObjectType,
           sourceId,
@@ -203,9 +203,7 @@ export class InfraSources {
   }
 
   private async getSavedSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalInfraFrameworkRequest]
-    );
+    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(request);
 
     const savedObject = await savedObjectsClient.get(
       infraSourceConfigurationSavedObjectType,
@@ -216,9 +214,7 @@ export class InfraSources {
   }
 
   private async getAllSavedSourceConfigurations(request: InfraFrameworkRequest) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalInfraFrameworkRequest]
-    );
+    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(request);
 
     const savedObjects = await savedObjectsClient.find({
       type: infraSourceConfigurationSavedObjectType,
