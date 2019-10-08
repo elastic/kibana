@@ -20,8 +20,9 @@
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { share, first } from 'rxjs/operators';
-import { renderersRegistry } from '../../../../../../interpreter/public/registries';
-import { event, RenderId, Data, IInterpreterRenderHandlers } from './_types';
+// TODO: This needs to be addressed.
+import { renderersRegistry } from '../../../../interpreter/public/registries';
+import { event, RenderId, Data, IInterpreterRenderHandlers } from './types';
 
 export class ExpressionRenderHandler {
   render$: Observable<RenderId>;

@@ -19,11 +19,11 @@
 
 import { Observable, Subject } from 'rxjs';
 import { first, share } from 'rxjs/operators';
-import { Adapters, InspectorSession } from '../../../../../../../../plugins/inspector/public';
+import { Adapters, InspectorSession } from '../../../../../../plugins/inspector/public';
 import { execute, ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
-import { RenderId, Data, IExpressionLoaderParams, ExpressionAST } from './_types';
-import { getInspector } from '../services';
+import { RenderId, Data, IExpressionLoaderParams, ExpressionAST } from './types';
+import { getInspector } from './services';
 
 export class ExpressionLoader {
   data$: Observable<Data>;

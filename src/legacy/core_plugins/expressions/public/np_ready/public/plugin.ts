@@ -17,17 +17,27 @@
  * under the License.
  */
 
+/* eslint-disable */
+import { npSetup } from 'ui/new_platform';
+import { ExpressionsSetupContract } from '../../../../../../plugins/expressions/public/expressions/expressions_service';
+/* eslint-enable */
+
 import {
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
 } from '../../../../../../core/public';
-import { ExpressionsService, ExpressionsSetup, ExpressionsStart } from './expressions';
 import {
   Start as InspectorStart,
   Setup as InspectorSetup,
 } from '../../../../../../plugins/inspector/public';
+import { IInterpreter } from './types';
+import { setInterpreter, setInspector } from './services';
+import { createRenderer } from './expression_renderer';
+import { loader } from './loader';
+import { execute } from './execute';
+import { render } from './render';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -37,28 +47,44 @@ export interface ExpressionsStartDeps {
   inspector: InspectorStart;
 }
 
-export { ExpressionsSetup, ExpressionsStart };
+export type ExpressionsSetup = ExpressionsSetupContract;
+export type ExpressionsStart = ReturnType<ExpressionsPublicPlugin['start']>;
 
 export class ExpressionsPublicPlugin
   implements
     Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
-  private readonly expressions: ExpressionsService = new ExpressionsService();
-
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ExpressionsSetupDeps): ExpressionsSetup {
+    // eslint-disable-next-line
+    const { getInterpreter } = require('../../../../interpreter/public/interpreter');
+    getInterpreter()
+      .then(({ interpreter }: { interpreter: IInterpreter }) => {
+        setInterpreter(interpreter);
+      })
+      .catch((e: Error) => {
+        throw new Error('interpreter is not initialized');
+      });
+
     return {
-      ...this.expressions.setup(),
+      registerType: npSetup.plugins.expressions.registerType,
+      registerFunction: npSetup.plugins.expressions.registerFunction,
+      registerRenderer: npSetup.plugins.expressions.registerRenderer,
+      __LEGACY: npSetup.plugins.expressions.__LEGACY,
     };
   }
 
-  public start(core: CoreStart, plugins: ExpressionsStartDeps): ExpressionsStart {
+  public start(core: CoreStart, { inspector }: ExpressionsStartDeps) {
+    const ExpressionRenderer = createRenderer(loader);
+    setInspector(inspector);
+
     return {
-      ...this.expressions.start({ inspector: plugins.inspector }),
+      execute,
+      render,
+      loader,
+      ExpressionRenderer,
     };
   }
 
-  public stop() {
-    this.expressions.stop();
-  }
+  public stop() {}
 }

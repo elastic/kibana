@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { IInterpreter } from './lib/_types';
-import { Start as IInspector } from '../../../../../../../plugins/inspector/public';
+import { IInterpreter } from './types';
+import { Start as IInspector } from '../../../../../../plugins/inspector/public';
 
 const createGetterSetter = <T extends object>(name: string): [() => T, (value: T) => void] => {
   let value: T;

@@ -28,6 +28,17 @@ const createExpressionsSetupMock = (): ExpressionsSetup => {
     registerFunction: jest.fn(),
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
+    __LEGACY: {
+      functions: {
+        register: () => {},
+      } as any,
+      renderers: {
+        register: () => {},
+      } as any,
+      types: {
+        register: () => {},
+      } as any,
+    },
   };
 };
 

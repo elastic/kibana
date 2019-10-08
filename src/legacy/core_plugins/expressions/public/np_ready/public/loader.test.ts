@@ -20,13 +20,13 @@
 import { first } from 'rxjs/operators';
 import { loader, ExpressionLoader } from './loader';
 import { fromExpression } from '@kbn/interpreter/common';
-import { IInterpreterRenderHandlers } from './_types';
+import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';
-import { ExpressionAST } from '../../../../../../../../plugins/expressions/common';
+import { ExpressionAST } from '../../../../../../plugins/expressions/common';
 
 const element: HTMLElement = null as any;
 
-jest.mock('../services', () => ({
+jest.mock('./services', () => ({
   getInterpreter: () => {
     return {
       interpretAst: async (expression: ExpressionAST) => {
