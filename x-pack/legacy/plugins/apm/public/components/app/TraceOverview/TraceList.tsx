@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
@@ -98,7 +98,13 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
         <>
           {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
             defaultMessage: 'Impact'
-          })}
+          })}{' '}
+          <EuiIcon
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+          />
         </>
       </EuiToolTip>
     ),

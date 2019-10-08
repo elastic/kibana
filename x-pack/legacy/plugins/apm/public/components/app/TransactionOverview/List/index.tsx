@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -114,7 +114,13 @@ export function TransactionList({ items, isLoading }: Props) {
             <>
               {i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
                 defaultMessage: 'Impact'
-              })}
+              })}{' '}
+              <EuiIcon
+                size="s"
+                color="subdued"
+                type="questionInCircle"
+                className="eui-alignTop"
+              />
             </>
           </EuiToolTip>
         ),
