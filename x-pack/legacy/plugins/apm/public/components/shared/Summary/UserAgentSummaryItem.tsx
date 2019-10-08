@@ -14,7 +14,6 @@ import { UserAgent } from '../../../../typings/es_schemas/raw/fields/UserAgent';
 type UserAgentSummaryItemProps = UserAgent;
 
 const Version = styled('span')`
-  color: ${theme.textColors.subdued};
   font-size: ${theme.euiFontSizeS};
 `;
 
@@ -24,9 +23,12 @@ export function UserAgentSummaryItem({
 }: UserAgentSummaryItemProps) {
   return (
     <EuiToolTip
-      content={i18n.translate('xpack.apm.transactionDetails.userAgentLabel', {
-        defaultMessage: 'User agent'
-      })}
+      content={i18n.translate(
+        'xpack.apm.transactionDetails.userAgentAndVersionLabel',
+        {
+          defaultMessage: 'User agent & version'
+        }
+      )}
     >
       <>
         {name}&nbsp;
