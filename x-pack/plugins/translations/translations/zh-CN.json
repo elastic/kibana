@@ -3336,7 +3336,6 @@
     "xpack.apm.notAvailableLabel": "不适用",
     "xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel": "没有可用数据",
     "xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel": "异常堆栈追溯",
-    "xpack.apm.propertiesTable.tabs.labelsLabel": "标签",
     "xpack.apm.propertiesTable.tabs.logStacktraceLabel": "日志堆栈追溯",
     "xpack.apm.propertiesTable.tabs.metadataLabel": "元数据",
     "xpack.apm.propertiesTable.tabs.timelineLabel": "时间线",
