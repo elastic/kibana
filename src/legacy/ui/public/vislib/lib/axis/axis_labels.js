@@ -112,10 +112,11 @@ export class AxisLabels {
           const currentTickStartEdge = currentTickCenter - currentTickHalfSize;
           const currentTickEndEdge = currentTickCenter + currentTickHalfSize;
 
-          const outsideUpperBound = maxSize <= (currentTickCenter + currentTickHalfSize);
+          const outsideUpperBound = maxSize < currentTickEndEdge > maxSize;
+          const outsideLowerBound = currentTickStartEdge < 0;
           const overlapsLastTick = (currentTickEndEdge >= lastTickStartEdge && currentTickStartEdge <= lastTickEndEdge);
 
-          if (outsideUpperBound || overlapsLastTick) {
+          if (outsideUpperBound || outsideLowerBound || overlapsLastTick) {
             d3.select(this.parentNode).remove();
           } else {
             lastTickStartEdge = currentTickCenter - currentTickHalfSize;
