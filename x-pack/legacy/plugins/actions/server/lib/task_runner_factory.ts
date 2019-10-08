@@ -4,42 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { execute } from './execute';
+import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
-import { TaskInstance } from '../../../task_manager';
-import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
-import {
-  ActionTaskParams,
-  ActionTypeRegistryContract,
-  GetBasePathFunction,
-  GetServicesFunction,
-  SpaceIdToNamespaceFunction,
-} from '../types';
+import { RunContext } from '../../../task_manager';
+import { EncryptedSavedObjectsStartContract } from '../shim';
+import { ActionTaskParams, GetBasePathFunction, SpaceIdToNamespaceFunction } from '../types';
 
-interface CreateTaskRunnerFunctionOptions {
-  getServices: GetServicesFunction;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+export interface TaskRunnerContext {
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
   isSecurityEnabled: boolean;
 }
 
-interface TaskRunnerOptions {
-  taskInstance: TaskInstance;
-}
+export class TaskRunnerFactory {
+  private isInitialized = false;
+  private taskRunnerContext?: TaskRunnerContext;
+  private readonly actionExecutor: ActionExecutorContract;
 
-export function getCreateTaskRunnerFunction({
-  getServices,
-  actionTypeRegistry,
-  encryptedSavedObjectsPlugin,
-  spaceIdToNamespace,
-  getBasePath,
-  isSecurityEnabled,
-}: CreateTaskRunnerFunctionOptions) {
-  return ({ taskInstance }: TaskRunnerOptions) => {
+  constructor(actionExecutor: ActionExecutorContract) {
+    this.actionExecutor = actionExecutor;
+  }
+
+  public initialize(taskRunnerContext: TaskRunnerContext) {
+    if (this.isInitialized) {
+      throw new Error('TaskRunnerFactory already initialized');
+    }
+    this.isInitialized = true;
+    this.taskRunnerContext = taskRunnerContext;
+  }
+
+  public create({ taskInstance }: RunContext) {
+    if (!this.isInitialized) {
+      throw new Error('TaskRunnerFactory not initialized');
+    }
+
+    const { actionExecutor } = this;
+    const {
+      encryptedSavedObjectsPlugin,
+      spaceIdToNamespace,
+      getBasePath,
+      isSecurityEnabled,
+    } = this.taskRunnerContext!;
+
     return {
-      run: async () => {
+      async run() {
         const { spaceId, actionTaskParamsId } = taskInstance.params;
         const namespace = spaceIdToNamespace(spaceId);
 
@@ -63,15 +72,22 @@ export function getCreateTaskRunnerFunction({
         const fakeRequest: any = {
           headers: requestHeaders,
           getBasePath: () => getBasePath(spaceId),
+          path: '/',
+          route: { settings: {} },
+          url: {
+            href: '/',
+          },
+          raw: {
+            req: {
+              url: '/',
+            },
+          },
         };
 
-        const executorResult = await execute({
-          namespace,
-          actionTypeRegistry,
-          encryptedSavedObjectsPlugin,
-          actionId,
-          services: getServices(fakeRequest),
+        const executorResult = await actionExecutor.execute({
           params,
+          actionId,
+          request: fakeRequest,
         });
         if (executorResult.status === 'error') {
           // Task manager error handler only kicks in when an error thrown (at this time)
@@ -84,5 +100,5 @@ export function getCreateTaskRunnerFunction({
         }
       },
     };
-  };
+  }
 }
