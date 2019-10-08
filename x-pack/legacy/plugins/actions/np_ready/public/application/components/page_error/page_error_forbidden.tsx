@@ -17,8 +17,8 @@ export function PageErrorForbidden() {
       title={
         <h1>
           <FormattedMessage
-            id="xpack.alerting.pageErrorForbidden.title"
-            defaultMessage="You don't have privileges to use Alerting"
+            id="xpack.actions.pageErrorForbidden.title"
+            defaultMessage="You don't have privileges to use Actions"
           />
         </h1>
       }

@@ -17,16 +17,16 @@ export function PageErrorNotExist({ id }: { id: any }) {
       title={
         <h1>
           <FormattedMessage
-            id="xpack.alerting.pageErrorNotExist.title"
-            defaultMessage="Couldn't find alert"
+            id="xpack.actions.pageErrorNotExist.title"
+            defaultMessage="Couldn't find action"
           />
         </h1>
       }
       body={
         <p>
           <FormattedMessage
-            id="xpack.alerting.pageErrorNotExist.description"
-            defaultMessage="A alert with ID '{id}' could not be found."
+            id="xpack.actions.pageErrorNotExist.description"
+            defaultMessage="A action with ID '{id}' could not be found."
             values={{ id }}
           />
         </p>
