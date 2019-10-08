@@ -5,4 +5,12 @@
  */
 
 export * from './fields';
+export * from './url_templates';
+export * from './advanced_settings';
+export * from './datasource';
+export * from './meta_data';
+export * from './persistence';
+export * from './workspace';
+
+export * from './global';
 export * from './store';

@@ -13,13 +13,14 @@ import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
-import { useLoadPolicies } from '../../../services/http';
+import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
 import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
+import { PolicyRetentionSchedule } from './policy_retention_schedule';
 
 interface MatchParams {
   policyName?: SlmPolicy['name'];
@@ -45,6 +46,14 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     },
     sendRequest: reload,
   } = useLoadPolicies();
+
+  // Load retention cluster settings
+  const {
+    isLoading: isLoadingRetentionSettings,
+    error: retentionSettingsError,
+    data: retentionSettings,
+    sendRequest: reloadRetentionSettings,
+  } = useLoadRetentionSettings();
 
   const openPolicyDetailsUrl = (newPolicyName: SlmPolicy['name']): string => {
     return linkToPolicy(newPolicyName);
@@ -137,6 +146,8 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   } else {
     const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
     const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
+    const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
+
     content = (
       <Fragment>
         {hasDuplicateSchedules ? (
@@ -159,6 +170,16 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             <EuiSpacer />
           </Fragment>
         ) : null}
+
+        {hasRetention ? (
+          <PolicyRetentionSchedule
+            retentionSettings={retentionSettings}
+            onRetentionScheduleUpdated={reloadRetentionSettings}
+            isLoading={isLoadingRetentionSettings}
+            error={retentionSettingsError}
+          />
+        ) : null}
+
         <PolicyTable
           policies={policies || []}
           reload={reload}

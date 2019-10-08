@@ -84,6 +84,11 @@ describe('Saved Objects Mixin', () => {
           get: stubConfig,
         };
       },
+      indexPatternsServiceFactory: () => {
+        return {
+          getFieldsForWildcard: jest.fn(),
+        };
+      },
       plugins: {
         elasticsearch: {
           getCluster: () => {
@@ -98,7 +103,7 @@ describe('Saved Objects Mixin', () => {
     };
     mockKbnServer = {
       newPlatform: {
-        start: { core: { savedObjects: { migrator } } },
+        __internals: { kibanaMigrator: migrator },
       },
       server: mockServer,
       ready: () => {},
