@@ -49,7 +49,7 @@ export const AnomaliesResults = ({
                 ...buckets,
                 {
                   time: bucket.startTime,
-                  value: bucket.dataSets.reduce((accumulatedValue, dataSet) => {
+                  value: bucket.partitions.reduce((accumulatedValue, dataSet) => {
                     return accumulatedValue + dataSet.averageActualLogEntryRate;
                   }, 0),
                 },
@@ -65,7 +65,7 @@ export const AnomaliesResults = ({
     () =>
       results && results.histogramBuckets
         ? results.histogramBuckets.reduce<RectAnnotationDatum[]>((annotatedBuckets, bucket) => {
-            const anomalies = bucket.dataSets.reduce<typeof bucket['dataSets'][0]['anomalies']>(
+            const anomalies = bucket.partitions.reduce<typeof bucket['partitions'][0]['anomalies']>(
               (accumulatedAnomalies, dataSet) => [...accumulatedAnomalies, ...dataSet.anomalies],
               []
             );

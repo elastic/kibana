@@ -46,8 +46,8 @@ export const LogRateResults = ({
             (buckets, bucket) => {
               return [
                 ...buckets,
-                ...bucket.dataSets.map(dataSet => ({
-                  group: dataSet.dataSetId === '' ? 'unknown' : dataSet.dataSetId,
+                ...bucket.partitions.map(dataSet => ({
+                  group: dataSet.partitionId === '' ? 'unknown' : dataSet.partitionId,
                   time: bucket.startTime,
                   value: dataSet.averageActualLogEntryRate,
                 })),
