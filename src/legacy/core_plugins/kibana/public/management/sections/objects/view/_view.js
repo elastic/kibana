@@ -35,7 +35,7 @@ import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 import { canViewInApp } from '../lib/in_app_url';
-import { Header, Errors } from './components';
+import { Header, Errors, Intro } from './components';
 
 import { castEsToKbnFieldTypeName } from '../../../../../../../../plugins/data/public';
 
@@ -70,6 +70,8 @@ function updateReactComponent($scope) {
           </>
           : null
         }
+        <EuiSpacer size="s" />
+        <Intro />
       </I18nContext>,
       node
     );

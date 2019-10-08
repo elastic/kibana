@@ -19,3 +19,4 @@
 
 export { Header } from './header';
 export { Errors } from './errors';
+export { Intro } from './intro';
