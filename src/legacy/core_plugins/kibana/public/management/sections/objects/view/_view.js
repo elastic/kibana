@@ -20,6 +20,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
@@ -34,7 +35,7 @@ import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 import { canViewInApp } from '../lib/in_app_url';
-import { Header } from './components';
+import { Header, Errors } from './components';
 
 import { castEsToKbnFieldTypeName } from '../../../../../../../../plugins/data/public';
 
@@ -61,6 +62,14 @@ function updateReactComponent($scope) {
           canDelete={$scope.canDelete}
           removeObject={$scope.delete}
         />
+
+        {$scope.notFound ?
+          <>
+            <EuiSpacer size="s" />
+            <Errors notFound={$scope.notFound} />
+          </>
+          : null
+        }
       </I18nContext>,
       node
     );

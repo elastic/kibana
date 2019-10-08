@@ -2,52 +2,6 @@
   <kbn-management-objects-view class="kuiViewContent kuiViewContent--constrainedWidth">
     <div id="reactViewSavedObjectsId"></div>
 
-    <!-- Errors -->
-    <div
-      class="kuiViewContentItem kuiVerticalRhythm"
-      ng-if="notFound"
-    >
-      <div class="kuiInfoPanel kuiInfoPanel--error">
-        <div class="kuiInfoPanelHeader">
-          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
-          <span
-            class="kuiInfoPanelHeader__title"
-            i18n-id="kbn.management.objects.view.savedObjectProblemErrorMessage"
-            i18n-default-message="There is a problem with this saved object"
-            ></span>
-        </div>
-
-        <div class="kuiInfoPanelBody">
-          <div
-            class="kuiInfoPanelBody__message"
-            ng-if="notFound === 'search'"
-            i18n-id="kbn.management.objects.view.savedSearchDoesNotExistErrorMessage"
-            i18n-default-message="The saved search associated with this object no longer exists."
-          ></div>
-
-          <div
-            class="kuiInfoPanelBody__message"
-            ng-if="notFound === 'index-pattern'"
-            i18n-id="kbn.management.objects.view.indexPatternDoesNotExistErrorMessage"
-            i18n-default-message="The index pattern associated with this object no longer exists."
-          ></div>
-
-          <div
-            class="kuiInfoPanelBody__message"
-            ng-if="notFound === 'index-pattern-field'"
-            i18n-id="kbn.management.objects.view.fieldDoesNotExistErrorMessage"
-            i18n-default-message="A field associated with this object no longer exists in the index pattern."
-          ></div>
-
-          <div
-            class="kuiInfoPanelBody__message"
-            i18n-id="kbn.management.objects.view.howToFixErrorDescription"
-            i18n-default-message="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
-          ></div>
-        </div>
-      </div>
-    </div>
-
     <!-- Intro -->
     <div class="kuiViewContentItem kuiVerticalRhythm">
       <div class="kuiInfoPanel kuiInfoPanel--warning" ng-if="canEdit">

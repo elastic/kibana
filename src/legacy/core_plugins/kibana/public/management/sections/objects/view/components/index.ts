@@ -18,3 +18,4 @@
  */
 
 export { Header } from './header';
+export { Errors } from './errors';
