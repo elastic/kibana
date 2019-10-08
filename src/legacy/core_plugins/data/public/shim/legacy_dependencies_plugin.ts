@@ -25,6 +25,7 @@ import { initLegacyModule } from './legacy_module';
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
   savedObjectsClient: any;
+  storage: Storage;
 }
 
 export interface LegacyDependenciesPluginStart {
@@ -37,6 +38,7 @@ export class LegacyDependenciesPlugin implements Plugin<any, any> {
 
     return {
       savedObjectsClient: chrome.getSavedObjectsClient(),
+      storage: new Storage(window.localStorage),
     } as LegacyDependenciesPluginSetup;
   }
 

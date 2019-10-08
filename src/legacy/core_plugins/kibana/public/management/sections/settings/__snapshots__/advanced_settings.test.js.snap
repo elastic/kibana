@@ -317,7 +317,7 @@ exports[`AdvancedSettings should render normally 1`] = `
       }
     }
   />
-  <InjectIntl(FormUI)
+  <Form
     categories={
       Array [
         "general",
@@ -722,7 +722,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
       }
     }
   />
-  <InjectIntl(FormUI)
+  <Form
     categories={
       Array [
         "general",
@@ -903,7 +903,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
       }
     }
   />
-  <InjectIntl(FormUI)
+  <Form
     categories={
       Array [
         "general",

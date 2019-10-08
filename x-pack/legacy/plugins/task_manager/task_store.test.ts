@@ -61,7 +61,7 @@ describe('TaskStore', () => {
       );
       const store = new TaskStore({
         index: 'tasky',
-        kibanaId: '',
+        taskManagerId: '',
         serializer,
         callCluster,
         maxAttempts: 2,
@@ -161,7 +161,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
       const store = new TaskStore({
         index: 'tasky',
-        kibanaId: '',
+        taskManagerId: '',
         serializer,
         callCluster,
         maxAttempts: 2,
@@ -353,7 +353,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits: [] } }));
       const store = new TaskStore({
         index: 'tasky',
-        kibanaId: '',
+        taskManagerId: '',
         serializer,
         callCluster,
         definitions: taskDefinitions,
@@ -579,7 +579,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         serializer,
         savedObjectsRepository: savedObjectsClient,
-        kibanaId: '',
+        taskManagerId: '',
         index: '',
         ...opts,
       });
@@ -603,7 +603,7 @@ describe('TaskStore', () => {
       }));
       const store = new TaskStore({
         index: 'tasky',
-        kibanaId: '',
+        taskManagerId: '',
         serializer,
         callCluster,
         definitions: taskDefinitions,
@@ -730,7 +730,7 @@ describe('TaskStore', () => {
     });
 
     test('it claims tasks by setting their ownerId, status and retryAt', async () => {
-      const kibanaId = uuid.v1();
+      const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
       const {
         args: {
@@ -740,7 +740,7 @@ describe('TaskStore', () => {
         },
       } = await testClaimAvailableTasks({
         opts: {
-          kibanaId,
+          taskManagerId,
         },
         claimingOpts: {
           claimOwnershipUntil,
@@ -751,7 +751,7 @@ describe('TaskStore', () => {
         source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
         lang: 'painless',
         params: {
-          ownerId: kibanaId,
+          ownerId: taskManagerId,
           retryAt: claimOwnershipUntil,
           status: 'claiming',
         },
@@ -759,7 +759,7 @@ describe('TaskStore', () => {
     });
 
     test('it returns task objects', async () => {
-      const kibanaId = uuid.v1();
+      const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
       const tasks = [
@@ -777,7 +777,7 @@ describe('TaskStore', () => {
               state: '{ "baby": "Henhen" }',
               user: 'jimbo',
               scope: ['reporting'],
-              ownerId: kibanaId,
+              ownerId: taskManagerId,
             },
           },
           _seq_no: 1,
@@ -798,7 +798,7 @@ describe('TaskStore', () => {
               state: '{ "henry": "The 8th" }',
               user: 'dabo',
               scope: ['reporting', 'ceo'],
-              ownerId: kibanaId,
+              ownerId: taskManagerId,
             },
           },
           _seq_no: 3,
@@ -815,7 +815,7 @@ describe('TaskStore', () => {
         },
       } = await testClaimAvailableTasks({
         opts: {
-          kibanaId,
+          taskManagerId,
         },
         claimingOpts: {
           claimOwnershipUntil,
@@ -829,7 +829,7 @@ describe('TaskStore', () => {
           must: [
             {
               term: {
-                'task.ownerId': kibanaId,
+                'task.ownerId': taskManagerId,
               },
             },
             { term: { 'task.status': 'claiming' } },
@@ -849,7 +849,7 @@ describe('TaskStore', () => {
           status: 'idle',
           taskType: 'foo',
           user: 'jimbo',
-          ownerId: kibanaId,
+          ownerId: taskManagerId,
         },
         {
           attempts: 2,
@@ -862,7 +862,7 @@ describe('TaskStore', () => {
           status: 'running',
           taskType: 'bar',
           user: 'dabo',
-          ownerId: kibanaId,
+          ownerId: taskManagerId,
         },
       ]);
     });
@@ -899,7 +899,7 @@ describe('TaskStore', () => {
 
       const store = new TaskStore({
         index: 'tasky',
-        kibanaId: '',
+        taskManagerId: '',
         serializer,
         callCluster: jest.fn(),
         maxAttempts: 2,
@@ -948,7 +948,7 @@ describe('TaskStore', () => {
       const callCluster = jest.fn();
       const store = new TaskStore({
         index: 'tasky',
-        kibanaId: '',
+        taskManagerId: '',
         serializer,
         callCluster,
         maxAttempts: 2,

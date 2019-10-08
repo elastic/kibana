@@ -107,13 +107,13 @@ export class DataPlugin
 
     const timefilterService = this.timefilter.setup({
       uiSettings,
+      store: __LEGACY.storage,
     });
     this.setupApi = {
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
         indexPatterns: indexPatternsService.indexPatterns,
-        timefilter: timefilterService.timefilter,
       }),
       query: this.query.setup(),
       search: this.search.setup(savedObjectsClient),
@@ -126,10 +126,10 @@ export class DataPlugin
   public start(core: CoreStart, { __LEGACY, data }: DataPluginStartDependencies) {
     const SearchBar = createSearchBar({
       core,
+      data,
       store: __LEGACY.storage,
       timefilter: this.setupApi.timefilter,
       filterManager: this.setupApi.filter.filterManager,
-      autocomplete: data.autocomplete,
     });
 
     return {
