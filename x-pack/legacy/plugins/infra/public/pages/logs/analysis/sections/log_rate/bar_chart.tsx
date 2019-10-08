@@ -61,9 +61,6 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
       <Chart className="log-entry-rate-chart">
         <Axis
           id={getAxisId('timestamp')}
-          title={i18n.translate('xpack.infra.logs.analysis.logRateSectionXaxisTitle', {
-            defaultMessage: 'Time',
-          })}
           position="bottom"
           showOverlappingTicks
           tickFormat={chartDateFormatter}

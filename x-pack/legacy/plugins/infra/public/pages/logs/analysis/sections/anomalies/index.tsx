@@ -19,6 +19,7 @@ import React, { useMemo } from 'react';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { AnomaliesChart } from './chart';
+import { AnomaliesTable } from './table';
 
 export const AnomaliesResults = ({
   isLoading,
@@ -40,6 +41,16 @@ export const AnomaliesResults = ({
     { defaultMessage: 'Loading anomalies' }
   );
 
+  const hasAnomalies = useMemo(() => {
+    return results && results.histogramBuckets
+      ? results.histogramBuckets.some(bucket => {
+          return bucket.partitions.some(partition => {
+            return partition.anomalies.length > 0;
+          });
+        })
+      : false;
+  }, [results]);
+
   const logEntryRateSeries = useMemo(
     () =>
       results && results.histogramBuckets
@@ -49,8 +60,8 @@ export const AnomaliesResults = ({
                 ...buckets,
                 {
                   time: bucket.startTime,
-                  value: bucket.partitions.reduce((accumulatedValue, dataSet) => {
-                    return accumulatedValue + dataSet.averageActualLogEntryRate;
+                  value: bucket.partitions.reduce((accumulatedValue, partition) => {
+                    return accumulatedValue + partition.averageActualLogEntryRate;
                   }, 0),
                 },
               ];
@@ -60,13 +71,16 @@ export const AnomaliesResults = ({
         : [],
     [results]
   );
-
+  // TODO: Convert to correct data (anomaly scores), also base on severity score
   const logEntryRateAnomalyAnnotations = useMemo(
     () =>
       results && results.histogramBuckets
         ? results.histogramBuckets.reduce<RectAnnotationDatum[]>((annotatedBuckets, bucket) => {
             const anomalies = bucket.partitions.reduce<typeof bucket['partitions'][0]['anomalies']>(
-              (accumulatedAnomalies, dataSet) => [...accumulatedAnomalies, ...dataSet.anomalies],
+              (accumulatedAnomalies, partition) => [
+                ...accumulatedAnomalies,
+                ...partition.anomalies,
+              ],
               []
             );
             if (anomalies.length <= 0) {
@@ -125,14 +139,29 @@ export const AnomaliesResults = ({
             </p>
           }
         />
-      ) : (
-        <AnomaliesChart
-          chartId="overall"
-          setTimeRange={setTimeRange}
-          timeRange={timeRange}
-          series={logEntryRateSeries}
-          annotations={logEntryRateAnomalyAnnotations}
+      ) : !hasAnomalies ? (
+        <EuiEmptyPrompt
+          title={
+            <h2>
+              {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoAnomaliesTitle', {
+                defaultMessage: 'No anomalies were detected.',
+              })}
+            </h2>
+          }
+          titleSize="m"
         />
+      ) : (
+        <>
+          <AnomaliesChart
+            chartId="overall"
+            setTimeRange={setTimeRange}
+            timeRange={timeRange}
+            series={logEntryRateSeries}
+            annotations={logEntryRateAnomalyAnnotations}
+          />
+          <EuiSpacer size="l" />
+          <AnomaliesTable results={results} setTimeRange={setTimeRange} timeRange={timeRange} />
+        </>
       )}
     </>
   );

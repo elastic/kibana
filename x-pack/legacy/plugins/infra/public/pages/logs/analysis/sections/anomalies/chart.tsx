@@ -63,22 +63,16 @@ export const AnomaliesChart: React.FunctionComponent<{
   const chartAnnotationsId = getAnnotationId(`anomalies-${chartId}`);
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <div style={{ height: 160, width: '100%' }}>
       <Chart className="log-entry-rate-chart">
         <Axis
           id={getAxisId('timestamp')}
-          title={i18n.translate('xpack.infra.logs.analysis.anomaliesSectionXaxisTitle', {
-            defaultMessage: 'Time',
-          })}
           position="bottom"
           showOverlappingTicks
           tickFormat={chartDateFormatter}
         />
         <Axis
           id={getAxisId('values')}
-          title={i18n.translate('xpack.infra.logs.analysis.anomaliesSectionYaxisTitle', {
-            defaultMessage: 'Log entries per 15 minutes',
-          })}
           position="left"
           tickFormat={value => Number(value).toFixed(0)}
         />
