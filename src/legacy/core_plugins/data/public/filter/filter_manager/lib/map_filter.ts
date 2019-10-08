@@ -81,6 +81,7 @@ export function mapFilter(filter: Filter) {
   filter.meta = filter.meta || {};
   filter.meta.type = mapped.type;
   filter.meta.key = mapped.key;
+  // Display value or formatter function.
   filter.meta.value = mapped.value;
   filter.meta.params = mapped.params;
   filter.meta.disabled = Boolean(filter.meta.disabled);
