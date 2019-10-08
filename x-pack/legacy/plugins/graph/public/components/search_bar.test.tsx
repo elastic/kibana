@@ -70,7 +70,7 @@ describe('search_bar', () => {
   let store: GraphStore;
 
   beforeEach(() => {
-    store = createMockGraphStore({ includeSagas: false }).store;
+    store = createMockGraphStore({}).store;
     store.dispatch(
       setDatasource({
         type: 'indexpattern',

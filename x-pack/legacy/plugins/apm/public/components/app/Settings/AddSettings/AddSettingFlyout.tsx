@@ -19,16 +19,17 @@ import {
   EuiCallOut
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isRight } from 'fp-ts/lib/Either';
+import { NotificationsStart } from 'kibana/public';
 import { transactionSampleRateRt } from '../../../../../common/runtime_types/transaction_sample_rate_rt';
 import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 import { callApmApi } from '../../../../services/rest/callApmApi';
 import { trackEvent } from '../../../../../../infra/public/hooks/use_track_metric';
+import { useKibanaCore } from '../../../../../../observability/public';
 import { Config } from '..';
 
 interface Props {
@@ -44,6 +45,9 @@ export function AddSettingsFlyout({
   onSubmit,
   selectedConfig
 }: Props) {
+  const {
+    notifications: { toasts }
+  } = useKibanaCore();
   const [environment, setEnvironment] = useState<string | undefined>(
     selectedConfig
       ? selectedConfig.service.environment || ENVIRONMENT_NOT_DEFINED
@@ -142,7 +146,7 @@ export function AddSettingsFlyout({
             selectedConfig={selectedConfig}
             onDelete={async () => {
               if (selectedConfig) {
-                await deleteConfig(selectedConfig);
+                await deleteConfig(selectedConfig, toasts);
               }
               onSubmit();
             }}
@@ -193,7 +197,8 @@ export function AddSettingsFlyout({
                     sampleRate: parseFloat(sampleRate),
                     configurationId: selectedConfig
                       ? selectedConfig.id
-                      : undefined
+                      : undefined,
+                    toasts
                   });
                   onSubmit();
                 }}
@@ -212,7 +217,11 @@ export function AddSettingsFlyout({
     </EuiPortal>
   );
 }
-async function deleteConfig(selectedConfig: Config) {
+
+async function deleteConfig(
+  selectedConfig: Config,
+  toasts: NotificationsStart['toasts']
+) {
   try {
     await callApmApi({
       pathname: '/api/apm/settings/agent-configuration/{configurationId}',
@@ -221,7 +230,7 @@ async function deleteConfig(selectedConfig: Config) {
         path: { configurationId: selectedConfig.id }
       }
     });
-    toastNotifications.addSuccess({
+    toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.settings.agentConf.deleteConfigSucceededTitle',
         {
@@ -239,7 +248,7 @@ async function deleteConfig(selectedConfig: Config) {
       )
     });
   } catch (error) {
-    toastNotifications.addDanger({
+    toasts.addDanger({
       title: i18n.translate(
         'xpack.apm.settings.agentConf.deleteConfigFailedTitle',
         {
@@ -264,12 +273,14 @@ async function saveConfig({
   sampleRate,
   serviceName,
   environment,
-  configurationId
+  configurationId,
+  toasts
 }: {
   sampleRate: number;
   serviceName: string | undefined;
   environment: string | undefined;
   configurationId?: string;
+  toasts: NotificationsStart['toasts'];
 }) {
   trackEvent({ app: 'apm', name: 'save_agent_configuration' });
 
@@ -299,7 +310,7 @@ async function saveConfig({
         }
       });
 
-      toastNotifications.addSuccess({
+      toasts.addSuccess({
         title: i18n.translate(
           'xpack.apm.settings.agentConf.editConfigSucceededTitle',
           {
@@ -324,7 +335,7 @@ async function saveConfig({
           body: configuration
         }
       });
-      toastNotifications.addSuccess({
+      toasts.addSuccess({
         title: i18n.translate(
           'xpack.apm.settings.agentConf.createConfigSucceededTitle',
           {
@@ -344,7 +355,7 @@ async function saveConfig({
     }
   } catch (error) {
     if (configurationId) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.settings.agentConf.editConfigFailedTitle',
           {
@@ -363,7 +374,7 @@ async function saveConfig({
         )
       });
     } else {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.settings.agentConf.createConfigFailedTitle',
           {

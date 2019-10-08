@@ -19,11 +19,11 @@
 
 import _ from 'lodash';
 import Boom from 'boom';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { unlinkSync as unlink } from 'fs';
-const writeFile = Promise.promisify(require('fs').writeFile);
+const writeFile = Bluebird.promisify(require('fs').writeFile);
 
-export default Promise.method(function (kbnServer, server, config) {
+export default Bluebird.method(function (kbnServer, server, config) {
   const path = config.get('pid.file');
   if (!path) return;
 
