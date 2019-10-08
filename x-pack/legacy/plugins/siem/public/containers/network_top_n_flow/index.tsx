@@ -28,8 +28,8 @@ const ID = 'networkTopNFlowQuery';
 
 export interface NetworkTopNFlowArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
   ip?: string;
+  inspect: inputsModel.InspectQuery;
   isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -42,6 +42,7 @@ export interface NetworkTopNFlowArgs {
 export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: NetworkTopNFlowArgs) => React.ReactNode;
   flowTarget: FlowTargetNew;
+  ip?: string;
   type: networkModel.NetworkType;
 }
 
@@ -67,6 +68,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       flowTarget,
       filterQuery,
       id = `${ID}-${flowTarget}`,
+      ip,
       isInspected,
       limit,
       skip,

@@ -23,6 +23,7 @@ export const networkTopNFlowQuery = gql`
       NetworkTopNFlow(
         filterQuery: $filterQuery
         flowTarget: $flowTarget
+        ip: $ip
         pagination: $pagination
         sort: $sort
         timerange: $timerange

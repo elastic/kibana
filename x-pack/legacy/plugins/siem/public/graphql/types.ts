@@ -1981,6 +1981,8 @@ export interface KpiHostDetailsSourceArgs {
 export interface NetworkTopNFlowSourceArgs {
   id?: string | null;
 
+  ip?: string;
+
   filterQuery?: string | null;
 
   flowTarget: FlowTargetNew;
@@ -3205,6 +3207,7 @@ export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
     filterQuery?: string | null;
+    ip?: string;
     pagination: PaginationInputPaginated;
     sort: NetworkTopNFlowSortField;
     flowTarget: FlowTargetNew;

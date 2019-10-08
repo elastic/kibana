@@ -143,8 +143,9 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       <EuiFlexItem>
                         <NetworkTopNFlowQuery
                           endDate={to}
-                          flowTarget={FlowTargetNew.source}
                           filterQuery={filterQuery}
+                          flowTarget={FlowTargetNew.source}
+                          ip={ip}
                           skip={isInitializing}
                           sourceId="default"
                           startDate={from}
@@ -190,6 +191,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           endDate={to}
                           flowTarget={FlowTargetNew.destination}
                           filterQuery={filterQuery}
+                          ip={ip}
                           skip={isInitializing}
                           sourceId="default"
                           startDate={from}

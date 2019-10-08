@@ -2841,6 +2841,8 @@ export namespace SourceResolvers {
   export interface NetworkTopNFlowArgs {
     id?: string | null;
 
+    ip?: string;
+
     filterQuery?: string | null;
 
     flowTarget: FlowTargetNew;
