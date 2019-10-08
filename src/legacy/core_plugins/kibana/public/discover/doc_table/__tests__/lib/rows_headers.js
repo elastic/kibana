@@ -252,8 +252,8 @@ describe('Doc Table', function () {
         $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
         // Stub field format converters for every field in the indexPattern
-        Object.keys($root.indexPattern.fields).forEach(f =>
-          stubFieldFormatConverter($root, f)
+        $root.indexPattern.fields.forEach(f =>
+          stubFieldFormatConverter($root, f.name)
         );
 
         $row = $('<tr>').attr({
