@@ -257,46 +257,6 @@ export const ComponentStrings = {
         defaultMessage: 'No data source present',
       }),
   },
-  Expression: {
-    getCancelButtonLabel: () =>
-      i18n.translate('xpack.canvas.expression.cancelButtonLabel', {
-        defaultMessage: 'Cancel',
-      }),
-    getCloseButtonLabel: () =>
-      i18n.translate('xpack.canvas.expression.closeButtonLabel', {
-        defaultMessage: 'Close',
-      }),
-    getLearnLinkText: () =>
-      i18n.translate('xpack.canvas.expression.learnLinkText', {
-        defaultMessage: 'Learn expression syntax',
-      }),
-    getMaximizeButtonLabel: () =>
-      i18n.translate('xpack.canvas.expression.maximizeButtonLabel', {
-        defaultMessage: 'Maximize editor',
-      }),
-    getMinimizeButtonLabel: () =>
-      i18n.translate('xpack.canvas.expression.minimizeButtonLabel', {
-        defaultMessage: 'Minimize Editor',
-      }),
-    getRunButtonLabel: () =>
-      i18n.translate('xpack.canvas.expression.runButtonLabel', {
-        defaultMessage: 'Run',
-      }),
-    getRunTooltip: () =>
-      i18n.translate('xpack.canvas.expression.runTooltip', {
-        defaultMessage: 'Run the expression',
-      }),
-  },
-  ExpressionElementNotSelected: {
-    getSelectDescription: () =>
-      i18n.translate('xpack.canvas.expressionElementNotSelected.selectDescription', {
-        defaultMessage: 'Select an element to show expression input',
-      }),
-    getCloseButtonLabel: () =>
-      i18n.translate('xpack.canvas.expressionElementNotSelected.closeButtonLabel', {
-        defaultMessage: 'Close',
-      }),
-  },
   ElementConfig: {
     getFailedLabel: () =>
       i18n.translate('xpack.canvas.elementConfig.failedLabel', {
@@ -338,6 +298,46 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.elementSettings.displayTabLabel', {
         defaultMessage: 'Display',
         description: 'This tab contains the settings for how data is displayed in a Canvas element',
+      }),
+  },
+  Expression: {
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.expression.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getCloseButtonLabel: () =>
+      i18n.translate('xpack.canvas.expression.closeButtonLabel', {
+        defaultMessage: 'Close',
+      }),
+    getLearnLinkText: () =>
+      i18n.translate('xpack.canvas.expression.learnLinkText', {
+        defaultMessage: 'Learn expression syntax',
+      }),
+    getMaximizeButtonLabel: () =>
+      i18n.translate('xpack.canvas.expression.maximizeButtonLabel', {
+        defaultMessage: 'Maximize editor',
+      }),
+    getMinimizeButtonLabel: () =>
+      i18n.translate('xpack.canvas.expression.minimizeButtonLabel', {
+        defaultMessage: 'Minimize Editor',
+      }),
+    getRunButtonLabel: () =>
+      i18n.translate('xpack.canvas.expression.runButtonLabel', {
+        defaultMessage: 'Run',
+      }),
+    getRunTooltip: () =>
+      i18n.translate('xpack.canvas.expression.runTooltip', {
+        defaultMessage: 'Run the expression',
+      }),
+  },
+  ExpressionElementNotSelected: {
+    getCloseButtonLabel: () =>
+      i18n.translate('xpack.canvas.expressionElementNotSelected.closeButtonLabel', {
+        defaultMessage: 'Close',
+      }),
+    getSelectDescription: () =>
+      i18n.translate('xpack.canvas.expressionElementNotSelected.selectDescription', {
+        defaultMessage: 'Select an element to show expression input',
       }),
   },
   GroupSettings: {
