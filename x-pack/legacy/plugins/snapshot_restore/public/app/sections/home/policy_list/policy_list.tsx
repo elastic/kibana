@@ -113,19 +113,9 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.policyList.emptyPromptTitle"
-              defaultMessage="You don't have any snapshot policies yet"
+              defaultMessage="Create a policy to automatically back up your cluster"
             />
           </h1>
-        }
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyList.emptyPromptDescription"
-                defaultMessage="Create a policy to automatically back up your cluster."
-              />
-            </p>
-          </Fragment>
         }
         actions={
           <EuiButton
@@ -136,7 +126,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           >
             <FormattedMessage
               id="xpack.snapshotRestore.createPolicyButton"
-              defaultMessage="Create a policy"
+              defaultMessage="Create a snapshot policy"
             />
           </EuiButton>
         }

@@ -168,32 +168,24 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           <h1 data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesTitle"
-              defaultMessage="You don't have any snapshots or repositories yet"
+              defaultMessage="Start by registering a repository for your snapshots"
             />
           </h1>
         }
         body={
-          <Fragment>
-            <p>
+          <p>
+            <EuiButton
+              href={linkToAddRepository()}
+              fill
+              iconType="plusInCircle"
+              data-test-subj="registerRepositoryButton"
+            >
               <FormattedMessage
-                id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesDescription"
-                defaultMessage="Start by registering a repository for your snapshots."
+                id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesAddButtonLabel"
+                defaultMessage="Register a repository"
               />
-            </p>
-            <p>
-              <EuiButton
-                href={linkToAddRepository()}
-                fill
-                iconType="plusInCircle"
-                data-test-subj="registerRepositoryButton"
-              >
-                <FormattedMessage
-                  id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesAddButtonLabel"
-                  defaultMessage="Register a repository"
-                />
-              </EuiButton>
-            </p>
-          </Fragment>
+            </EuiButton>
+          </p>
         }
         data-test-subj="emptyPrompt"
       />
