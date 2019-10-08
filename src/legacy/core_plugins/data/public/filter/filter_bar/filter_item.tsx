@@ -163,7 +163,7 @@ class FilterItemUI extends Component<Props, State> {
       },
       {
         id: 1,
-        width: 400,
+        width: 420,
         content: (
           <div>
             <FilterEditor

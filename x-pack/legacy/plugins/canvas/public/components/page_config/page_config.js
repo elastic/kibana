@@ -23,7 +23,11 @@ export const PageConfig = ({
         <h4>Page</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Background color" helpText="Accepts HEX, RGB or HTML Color names">
+      <EuiFormRow
+        display="rowCompressed"
+        label="Background color"
+        helpText="Accepts HEX, RGB or HTML Color names"
+      >
         <WorkpadColorPicker onChange={setBackground} value={background} />
       </EuiFormRow>
       {/* No need to show the transition for the first page because transitions occur when
@@ -31,15 +35,16 @@ export const PageConfig = ({
         page, we use the second page's transition) */}
       {pageIndex > 0 ? (
         <Fragment>
-          <EuiFormRow label="Transition" compressed>
+          <EuiFormRow label="Transition" display="rowCompressed">
             <EuiSelect
               value={transition ? transition.name : ''}
               options={transitions}
+              compressed
               onChange={e => setTransition(e.target.value)}
             />
           </EuiFormRow>
           {transition ? (
-            <EuiFormRow label="Preview">
+            <EuiFormRow label="Preview" display="rowCompressed">
               <EuiCard
                 title=""
                 description=""

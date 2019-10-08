@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
@@ -50,7 +51,6 @@ interface ScrollableLogTextStreamViewProps {
   loadNewerItems: () => void;
   setFlyoutItem: (id: string) => void;
   setFlyoutVisibility: (visible: boolean) => void;
-  intl: InjectedIntl;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
   scrollLock: {
@@ -66,7 +66,7 @@ interface ScrollableLogTextStreamViewState {
   items: StreamItem[];
 }
 
-class ScrollableLogTextStreamViewClass extends React.PureComponent<
+export class ScrollableLogTextStreamView extends React.PureComponent<
   ScrollableLogTextStreamViewProps,
   ScrollableLogTextStreamViewState
 > {
@@ -121,7 +121,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
       hasMoreAfterEnd,
       hasMoreBeforeStart,
       highlightedItem,
-      intl,
       isLoadingMore,
       isReloading,
       isStreaming,
@@ -147,16 +146,13 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
           />
         ) : !hasItems ? (
           <NoData
-            titleText={intl.formatMessage({
-              id: 'xpack.infra.logs.emptyView.noLogMessageTitle',
+            titleText={i18n.translate('xpack.infra.logs.emptyView.noLogMessageTitle', {
               defaultMessage: 'There are no log messages to display.',
             })}
-            bodyText={intl.formatMessage({
-              id: 'xpack.infra.logs.emptyView.noLogMessageDescription',
+            bodyText={i18n.translate('xpack.infra.logs.emptyView.noLogMessageDescription', {
               defaultMessage: 'Try adjusting your filter.',
             })}
-            refetchText={intl.formatMessage({
-              id: 'xpack.infra.logs.emptyView.checkForNewDataButtonLabel',
+            refetchText={i18n.translate('xpack.infra.logs.emptyView.checkForNewDataButtonLabel', {
               defaultMessage: 'Check for new data',
             })}
             onRefetch={this.handleReload}
@@ -311,8 +307,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
     });
   };
 }
-
-export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamViewClass);
 
 /**
  * This function-as-child component calculates the column widths based on the

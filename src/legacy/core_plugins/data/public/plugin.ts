@@ -18,11 +18,16 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { SearchService, SearchSetup } from './search';
+import { SearchService, SearchSetup, createSearchBar, StatetfulSearchBarProps } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
+import { TimefilterService, TimefilterSetup } from './timefilter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
-import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin';
+import {
+  LegacyDependenciesPluginSetup,
+  LegacyDependenciesPluginStart,
+} from './shim/legacy_dependencies_plugin';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
 /**
  * Interface for any dependencies on other plugins' `setup` contracts.
@@ -31,6 +36,11 @@ import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin
  */
 export interface DataPluginSetupDependencies {
   __LEGACY: LegacyDependenciesPluginSetup;
+}
+
+export interface DataPluginStartDependencies {
+  data: DataPublicPluginStart;
+  __LEGACY: LegacyDependenciesPluginStart;
 }
 
 /**
@@ -43,6 +53,23 @@ export interface DataSetup {
   filter: FilterSetup;
   query: QuerySetup;
   search: SearchSetup;
+  timefilter: TimefilterSetup;
+}
+
+/**
+ * Interface for this plugin's returned `start` contract.
+ *
+ * @public
+ */
+export interface DataStart {
+  indexPatterns: IndexPatternsSetup;
+  filter: FilterSetup;
+  query: QuerySetup;
+  search: SearchSetup;
+  timefilter: TimefilterSetup;
+  ui: {
+    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
+  };
 }
 
 /**
@@ -56,12 +83,15 @@ export interface DataSetup {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependencies> {
+export class DataPlugin
+  implements
+    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
   // Exposed services, sorted alphabetically
   private readonly filter: FilterService = new FilterService();
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
   private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
+  private readonly timefilter: TimefilterService = new TimefilterService();
 
   private setupApi!: DataSetup;
 
@@ -75,22 +105,38 @@ export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependen
       http,
     });
 
+    const timefilterService = this.timefilter.setup({
+      uiSettings,
+    });
     this.setupApi = {
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
         indexPatterns: indexPatternsService.indexPatterns,
+        timefilter: timefilterService.timefilter,
       }),
       query: this.query.setup(),
       search: this.search.setup(savedObjectsClient),
+      timefilter: timefilterService,
     };
 
     return this.setupApi;
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { __LEGACY, data }: DataPluginStartDependencies) {
+    const SearchBar = createSearchBar({
+      core,
+      store: __LEGACY.storage,
+      timefilter: this.setupApi.timefilter,
+      filterManager: this.setupApi.filter.filterManager,
+      autocomplete: data.autocomplete,
+    });
+
     return {
       ...this.setupApi!,
+      ui: {
+        SearchBar,
+      },
     };
   }
 
@@ -99,5 +145,6 @@ export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependen
     this.filter.stop();
     this.query.stop();
     this.search.stop();
+    this.timefilter.stop();
   }
 }

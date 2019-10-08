@@ -60,6 +60,8 @@ function getLogger(opts, id, logLevel) {
           `The entire error message length is: ${errLength} characters.`,
           tags
         );
+      } else {
+        logger(errString, tags);
       }
       return;
     }
@@ -324,7 +326,7 @@ export class Worker extends events.EventEmitter {
         }
       }
 
-      this.warn(`Failure occurred on job ${job._id}`, jobErr);
+      this.error(`Failure occurred on job ${job._id}`, jobErr);
       this.emit(constants.EVENT_WORKER_JOB_EXECUTION_ERROR, this._formatErrorParams(jobErr, job));
       return this._failJob(job, (jobErr.toString) ? jobErr.toString() : false);
     });

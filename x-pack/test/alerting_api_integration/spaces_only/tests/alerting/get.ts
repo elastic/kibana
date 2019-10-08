@@ -42,6 +42,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',
+        muteAll: false,
+        mutedInstanceIds: [],
       });
     });
 

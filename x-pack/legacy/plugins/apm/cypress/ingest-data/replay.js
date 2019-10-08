@@ -12,7 +12,7 @@
  *
  * You can either:
  *  1. Download a static test data file from: https://storage.googleapis.com/apm-ui-e2e-static-data/events.json
- *  2. Or, generate the test data file yourself by following the steps in: https://github.com/sqren/kibana/blob/master/x-pack/legacy/plugins/apm/cypress/README.md#how-to-generate-static-data
+ *  2. Or, generate the test data file yourself by following the steps in: https://github.com/elastic/kibana/blob/5207a0b68a66d4f513fe1b0cedb021b296641712/x-pack/legacy/plugins/apm/cypress/README.md#generate-static-data
  *
  * Run the script:
  *

@@ -73,13 +73,17 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
   return (
     <div>
       {name !== 'defaultStyle' && (
-        <EuiFormRow label="Series Identifier" compressed>
-          <EuiSelect
-            value={selectedSeries}
-            options={labelOptions}
-            onChange={ev => handleChange('label', ev)}
-          />
-        </EuiFormRow>
+        <Fragment>
+          <EuiFormRow label="Series Identifier" display="rowCompressed">
+            <EuiSelect
+              compressed
+              value={selectedSeries}
+              options={labelOptions}
+              onChange={ev => handleChange('label', ev)}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="s" />
+        </Fragment>
       )}
       {hasPropFields && (
         <Fragment>
@@ -87,10 +91,11 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
           <EuiFlexGroup gutterSize="s">
             {fields.includes('lines') && (
               <EuiFlexItem>
-                <EuiFormRow label="Line" compressed>
+                <EuiFormRow label="Line" display="rowCompressed">
                   <EuiSelect
                     value={get(chainArgs, 'lines.0', 0)}
                     options={values}
+                    compressed
                     onChange={ev => handleChange('lines', ev)}
                   />
                 </EuiFormRow>
@@ -98,10 +103,11 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
             )}
             {fields.includes('bars') && (
               <EuiFlexItem>
-                <EuiFormRow label="Bar" compressed>
+                <EuiFormRow label="Bar" display="rowCompressed">
                   <EuiSelect
                     value={get(chainArgs, 'bars.0', 0)}
                     options={values}
+                    compressed
                     onChange={ev => handleChange('bars', ev)}
                   />
                 </EuiFormRow>
@@ -109,10 +115,11 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
             )}
             {fields.includes('points') && (
               <EuiFlexItem>
-                <EuiFormRow label="Point" compressed>
+                <EuiFormRow label="Point" display="rowCompressed">
                   <EuiSelect
                     value={get(chainArgs, 'points.0', 0)}
                     options={values}
+                    compressed
                     onChange={ev => handleChange('points', ev)}
                   />
                 </EuiFormRow>

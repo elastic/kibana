@@ -8,8 +8,9 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreSetup, SavedObjectsClientContract } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import { Storage } from 'ui/storage';
+import { i18n } from '@kbn/i18n';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
@@ -19,7 +20,7 @@ import {
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { IndexPatternDatasourcePluginPlugins } from './plugin';
+import { IndexPatternDatasourceSetupPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
@@ -97,14 +98,45 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
   showEmptyFields: boolean;
 };
 
-export function columnToOperation(column: IndexPatternColumn): Operation {
+export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
   return {
-    label,
     dataType,
     isBucketed,
     scale,
+    label: uniqueLabel || label,
   };
+}
+
+/**
+ * Return a map of columnId => unique column label. Exported for testing reasons.
+ */
+export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
+  const columnLabelMap = {} as Record<string, string>;
+  const counts = {} as Record<string, number>;
+
+  const makeUnique = (label: string) => {
+    let uniqueLabel = label;
+
+    while (counts[uniqueLabel] >= 0) {
+      const num = ++counts[uniqueLabel];
+      uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
+        defaultMessage: '{label} [{num}]',
+        values: { label, num },
+      });
+    }
+
+    counts[uniqueLabel] = 0;
+    return uniqueLabel;
+  };
+
+  Object.values(layers).forEach(layer => {
+    Object.entries(layer.columns).forEach(([columnId, column]) => {
+      columnLabelMap[columnId] = makeUnique(column.label);
+    });
+  });
+
+  return columnLabelMap;
 }
 
 type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
@@ -150,14 +182,14 @@ function removeProperty<T>(prop: string, object: Record<string, T>): Record<stri
 }
 
 export function getIndexPatternDatasource({
-  core,
   chrome,
+  core,
   storage,
-  savedObjectsClient,
-}: IndexPatternDatasourcePluginPlugins & {
-  core: CoreSetup;
+}: Pick<IndexPatternDatasourceSetupPlugins, 'chrome'> & {
+  // Core start is being required here because it contains the savedObject client
+  // In the new platform, this plugin wouldn't be initialized until after setup
+  core: CoreStart;
   storage: Storage;
-  savedObjectsClient: SavedObjectsClientContract;
 }) {
   const uiSettings = chrome.getUiSettingsClient();
   // Not stateful. State is persisted to the frame
@@ -253,6 +285,8 @@ export function getIndexPatternDatasource({
       setState: StateSetter<IndexPatternPrivateState>,
       layerId: string
     ) {
+      const columnLabelMap = uniqueLabels(state.layers);
+
       return {
         getTableSpec: () => {
           return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
@@ -261,7 +295,7 @@ export function getIndexPatternDatasource({
           const layer = state.layers[layerId];
 
           if (layer && layer.columns[columnId]) {
-            return columnToOperation(layer.columns[columnId]);
+            return columnToOperation(layer.columns[columnId], columnLabelMap[columnId]);
           }
           return null;
         },
@@ -273,9 +307,10 @@ export function getIndexPatternDatasource({
                 setState={setState}
                 uiSettings={uiSettings}
                 storage={storage}
-                savedObjectsClient={savedObjectsClient}
+                savedObjectsClient={core.savedObjects.client}
                 layerId={props.layerId}
                 http={core.http}
+                uniqueLabel={columnLabelMap[props.columnId]}
                 {...props}
               />
             </I18nProvider>,

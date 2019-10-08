@@ -104,4 +104,31 @@ describe('DottedKeyValueTable', () => {
       'top.name.last'
     ]);
   });
+
+  it('should not add 0 sufix if value is an array with one element', () => {
+    const data = {
+      a: {
+        b: {
+          c1: ['foo', 'bar'],
+          c2: ['foo']
+        }
+      },
+      b: {
+        c: ['foo']
+      },
+      c: {
+        d: ['foo', 'bar']
+      }
+    };
+    const output = render(<DottedKeyValueTable data={data} maxDepth={5} />);
+
+    expect(getKeys(output)).toEqual([
+      'a.b.c1.0',
+      'a.b.c1.1',
+      'a.b.c2',
+      'b.c',
+      'c.d.0',
+      'c.d.1'
+    ]);
+  });
 });

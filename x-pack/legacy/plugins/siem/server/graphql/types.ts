@@ -146,6 +146,8 @@ export interface Source {
   TimelineDetails: TimelineDetailsData;
 
   LastEventTime: LastEventTimeData;
+
+  EventsOverTime: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -874,6 +876,22 @@ export interface LastEventTimeData {
   lastSeen?: Date | null;
 
   inspect?: Inspect | null;
+}
+
+export interface EventsOverTimeData {
+  inspect?: Inspect | null;
+
+  eventsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
 }
 
 export interface HostsData {
@@ -1864,6 +1882,13 @@ export interface LastEventTimeSourceArgs {
 
   defaultIndex: string[];
 }
+export interface EventsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  defaultIndex: string[];
+}
 export interface HostsSourceArgs {
   id?: string | null;
 
@@ -2497,6 +2522,8 @@ export namespace SourceResolvers {
     TimelineDetails?: TimelineDetailsResolver<TimelineDetailsData, TypeParent, Context>;
 
     LastEventTime?: LastEventTimeResolver<LastEventTimeData, TypeParent, Context>;
+
+    EventsOverTime?: EventsOverTimeResolver<EventsOverTimeData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
 
@@ -2605,6 +2632,19 @@ export namespace SourceResolvers {
     indexKey: LastEventIndexKey;
 
     details: LastTimeDetails;
+
+    defaultIndex: string[];
+  }
+
+  export type EventsOverTimeResolver<
+    R = EventsOverTimeData,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, EventsOverTimeArgs>;
+  export interface EventsOverTimeArgs {
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
 
     defaultIndex: string[];
   }
@@ -5200,6 +5240,58 @@ export namespace LastEventTimeDataResolvers {
   export type InspectResolver<
     R = Inspect | null,
     Parent = LastEventTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace EventsOverTimeDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = EventsOverTimeData> {
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
+
+    eventsOverTime?: EventsOverTimeResolver<MatrixOverTimeHistogramData[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+  }
+
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = EventsOverTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EventsOverTimeResolver<
+    R = MatrixOverTimeHistogramData[],
+    Parent = EventsOverTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = EventsOverTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace MatrixOverTimeHistogramDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
+    x?: XResolver<number, TypeParent, Context>;
+
+    y?: YResolver<number, TypeParent, Context>;
+
+    g?: GResolver<string, TypeParent, Context>;
+  }
+
+  export type XResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type YResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type GResolver<
+    R = string,
+    Parent = MatrixOverTimeHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

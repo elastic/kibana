@@ -39,6 +39,7 @@ import {
   SectionError,
   SectionLoading,
   RepositoryVerificationBadge,
+  Error,
 } from '../../../../components';
 import { TypeDetails } from './type_details';
 
@@ -98,7 +99,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   };
 
   const renderError = () => {
-    const notFound = error.status === 404;
+    const notFound = (error as any).status === 404;
     const errorObject = notFound
       ? {
           data: {
@@ -122,7 +123,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             defaultMessage="Error loading repository"
           />
         }
-        error={errorObject}
+        error={errorObject as Error}
       />
     );
   };

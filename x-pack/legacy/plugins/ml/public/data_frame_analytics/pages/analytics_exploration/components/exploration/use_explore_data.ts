@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { SortDirection, SORT_DIRECTION } from '../../../../../../common/types/eui/in_memory_table';
+import { SortDirection, SORT_DIRECTION } from '../../../../../components/ml_in_memory_table';
 
 import { ml } from '../../../../../services/ml_api_service';
 import { getNestedProperty } from '../../../../../util/object_utils';

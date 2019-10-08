@@ -17,11 +17,11 @@ interface Props {
 
 export function WorkspacePanelWrapper({ children, title, dispatch }: Props) {
   return (
-    <EuiPageContent className="lnsPageContent">
-      <EuiPageContentHeader className="lnsPageContentHeader">
+    <EuiPageContent className="lnsWorkspacePanelWrapper">
+      <EuiPageContentHeader className="lnsWorkspacePanelWrapper__pageContentHeader">
         <input
           type="text"
-          className="euiFieldText lnsTitleInput"
+          className="euiFieldText lnsWorkspacePanelWrapper__titleInput"
           placeholder={i18n.translate('xpack.lens.chartTitlePlaceholder', {
             defaultMessage: 'Title',
           })}
@@ -33,7 +33,9 @@ export function WorkspacePanelWrapper({ children, title, dispatch }: Props) {
           })}
         />
       </EuiPageContentHeader>
-      <EuiPageContentBody className="lnsPageContentBody">{children}</EuiPageContentBody>
+      <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
+        {children}
+      </EuiPageContentBody>
     </EuiPageContent>
   );
 }
