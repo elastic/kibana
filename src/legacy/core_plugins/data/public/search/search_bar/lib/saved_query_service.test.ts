@@ -67,6 +67,7 @@ const {
   findSavedQueries,
   saveQuery,
   getAllSavedQueries,
+  getSavedQueryCount,
 } = createSavedQueryService(
   // @ts-ignore
   mockSavedObjectsClient
@@ -230,6 +231,50 @@ describe('saved query service', () => {
     it('should delete the saved query for the given ID', async () => {
       await deleteSavedQuery('foo');
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo');
+    });
+  });
+
+  describe('getAllSavedQueries', function() {
+    it('should return saved queries when the number of saved queries is provided', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
+      });
+      const perPage = 1;
+      const activePage = 1;
+      const response = await getAllSavedQueries(perPage, activePage);
+      expect(response).toEqual(
+        expect.objectContaining([
+          {
+            attributes: {
+              description: 'bar',
+              query: { language: 'kuery', query: 'response:200' },
+              title: 'foo',
+            },
+            id: 'foo',
+          },
+        ])
+      );
+    });
+    it('should use default arguments when none are provided', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
+      });
+      await getAllSavedQueries();
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 50,
+        type: 'query',
+      });
+    });
+  });
+
+  describe('getSavedQueryCount', function() {
+    it('should return the total number of saved queries', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        total: 1,
+      });
+      const response = await getSavedQueryCount();
+      expect(response).toEqual(1);
     });
   });
 });
