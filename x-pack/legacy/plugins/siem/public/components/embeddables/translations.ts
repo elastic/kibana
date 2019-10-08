@@ -13,6 +13,27 @@ export const MAP_TITLE = i18n.translate(
   }
 );
 
+export const SOURCE_LAYER = i18n.translate(
+  'xpack.siem.components.embeddables.embeddedMap.sourceLayerLabel',
+  {
+    defaultMessage: 'Source Point',
+  }
+);
+
+export const DESTINATION_LAYER = i18n.translate(
+  'xpack.siem.components.embeddables.embeddedMap.destinationLayerLabel',
+  {
+    defaultMessage: 'Destination Point',
+  }
+);
+
+export const LINE_LAYER = i18n.translate(
+  'xpack.siem.components.embeddables.embeddedMap.lineLayerLabel',
+  {
+    defaultMessage: 'Line',
+  }
+);
+
 export const ERROR_CONFIGURING_EMBEDDABLES_API = i18n.translate(
   'xpack.siem.components.embeddables.embeddedMap.errorConfiguringEmbeddableApiTitle',
   {
@@ -62,3 +83,52 @@ export const MAP_TOOL_TIP_FEATURES_FOOTER = (currentFeature: number, totalFeatur
     defaultMessage:
       '{currentFeature} of {totalFeatures} {totalFeatures, plural, =1 {feature} other {features}}',
   });
+
+export const HOST = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.hostTitle',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const SOURCE_IP = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.sourceIPTitle',
+  {
+    defaultMessage: 'Source IP',
+  }
+);
+
+export const DESTINATION_IP = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.destinationIPTitle',
+  {
+    defaultMessage: 'Destination IP',
+  }
+);
+
+export const SOURCE_DOMAIN = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.sourceDomainTitle',
+  {
+    defaultMessage: 'Source domain',
+  }
+);
+
+export const DESTINATION_DOMAIN = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.destinationDomainTitle',
+  {
+    defaultMessage: 'Destination domain',
+  }
+);
+
+export const LOCATION = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.locationTitle',
+  {
+    defaultMessage: 'Location',
+  }
+);
+
+export const ASN = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.asnTitle',
+  {
+    defaultMessage: 'ASN',
+  }
+);

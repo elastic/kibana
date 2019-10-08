@@ -55,6 +55,10 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
     const [siemDefaultIndices] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
 
+    // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
+    // own component tree instead of the embeddables (default). This is necessary to have access to
+    // the Redux store, theme provider, etc, which is required to register and un-register the draggable
+    // Search InPortal/OutPortal for implementation touch points
     const portalNode = React.useMemo(() => createPortalNode(), []);
 
     // Initial Load useEffect

@@ -6,21 +6,22 @@
 
 import uuid from 'uuid';
 import { IndexPatternMapping } from './types';
+import * as i18n from './translations';
 
 // Update source/destination field mappings to modify what fields will be returned to map tooltip
 const sourceFieldMappings: Record<string, string> = {
-  'host.name': 'Host',
-  'source.ip': 'Source IP',
-  'source.domain': 'Source Domain',
-  'source.geo.country_iso_code': 'Location',
-  'source.as.organization.name': 'ASN',
+  'host.name': i18n.HOST,
+  'source.ip': i18n.SOURCE_IP,
+  'source.domain': i18n.SOURCE_DOMAIN,
+  'source.geo.country_iso_code': i18n.LOCATION,
+  'source.as.organization.name': i18n.ASN,
 };
 const destinationFieldMappings: Record<string, string> = {
-  'host.name': 'Host',
-  'destination.ip': 'Destination IP',
-  'destination.domain': 'Destination Domain',
-  'destination.geo.country_iso_code': 'Location',
-  'destination.as.organization.name': 'ASN',
+  'host.name': i18n.HOST,
+  'destination.ip': i18n.DESTINATION_IP,
+  'destination.domain': i18n.DESTINATION_DOMAIN,
+  'destination.geo.country_iso_code': i18n.LOCATION,
+  'destination.as.organization.name': i18n.ASN,
 };
 
 // Mapping of field -> display name for use within map tooltip
@@ -95,7 +96,7 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
     },
   },
   id: uuid.v4(),
-  label: `${indexPatternTitle} | Source Point`,
+  label: `${indexPatternTitle} | ${i18n.SOURCE_LAYER}`,
   minZoom: 0,
   maxZoom: 24,
   alpha: 0.75,
@@ -137,7 +138,7 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
     },
   },
   id: uuid.v4(),
-  label: `${indexPatternTitle} | Destination Point`,
+  label: `${indexPatternTitle} | ${i18n.DESTINATION_LAYER}`,
   minZoom: 0,
   maxZoom: 24,
   alpha: 0.75,
@@ -192,7 +193,7 @@ export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) 
     },
   },
   id: uuid.v4(),
-  label: `${indexPatternTitle} | Line`,
+  label: `${indexPatternTitle} | ${i18n.LINE_LAYER}`,
   minZoom: 0,
   maxZoom: 24,
   alpha: 1,
