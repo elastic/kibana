@@ -5,7 +5,9 @@
  */
 
 import { infraSourceConfigurationSavedObjectMappings } from './lib/sources';
+import { metricsExplorerViewSavedObjectMappings } from '../common/saved_objects/metrics_explorer_view';
 
 export const savedObjectMappings = {
   ...infraSourceConfigurationSavedObjectMappings,
+  ...metricsExplorerViewSavedObjectMappings,
 };
