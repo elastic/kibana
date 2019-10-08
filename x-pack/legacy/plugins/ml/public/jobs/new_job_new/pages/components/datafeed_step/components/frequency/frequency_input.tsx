@@ -8,6 +8,7 @@ import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
+import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../common/util/job_utils';
 
 export const FrequencyInput: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
@@ -18,6 +19,8 @@ export const FrequencyInput: FC = () => {
     jobCreator.frequency === null ? '' : jobCreator.frequency
   );
 
+  const [defaultFrequency, setDefaultFrequency] = useState(createDefaultFrequency());
+
   useEffect(() => {
     jobCreator.frequency = frequency === '' ? null : frequency;
     jobCreatorUpdate();
@@ -25,16 +28,25 @@ export const FrequencyInput: FC = () => {
 
   useEffect(() => {
     setFrequency(jobCreator.frequency === null ? '' : jobCreator.frequency);
+
+    const df = createDefaultFrequency();
+    setDefaultFrequency(df);
   }, [jobCreatorUpdate]);
 
   useEffect(() => {
     setValidation(jobValidator.frequency);
   }, [jobValidatorUpdated]);
 
+  function createDefaultFrequency() {
+    const df = calculateDatafeedFrequencyDefaultSeconds(jobCreator.bucketSpanMs / 1000);
+    return `${df}s`;
+  }
+
   return (
     <Description validation={validation}>
       <EuiFieldText
         value={frequency}
+        placeholder={defaultFrequency}
         onChange={e => setFrequency(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputFrequency"
