@@ -17,24 +17,25 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
-import { i18n } from '@kbn/i18n';
+import { METRIC_TYPES } from './metric_agg_types';
 
-const overallMinLabel = i18n.translate('common.ui.aggTypes.metrics.overallMinLabel', {
-  defaultMessage: 'overall min'
+const overallSumLabel = i18n.translate('common.ui.aggTypes.metrics.overallSumLabel', {
+  defaultMessage: 'overall sum',
 });
 
-export const bucketMinMetricAgg = new MetricAggType({
-  name: 'min_bucket',
-  title: i18n.translate('common.ui.aggTypes.metrics.minBucketTitle', {
-    defaultMessage: 'Min Bucket'
-  }),
-  makeLabel: agg => makeNestedLabel(agg, overallMinLabel),
+const sumBucketTitle = i18n.translate('common.ui.aggTypes.metrics.sumBucketTitle', {
+  defaultMessage: 'Sum Bucket',
+});
+
+export const bucketSumMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.SUM_BUCKET,
+  title: sumBucketTitle,
+  makeLabel: agg => makeNestedLabel(agg, overallSumLabel),
   subtype: siblingPipelineAggHelper.subtype,
-  params: [
-    ...siblingPipelineAggHelper.params()
-  ],
-  getFormat: siblingPipelineAggHelper.getFormat
+  params: [...siblingPipelineAggHelper.params()],
+  getFormat: siblingPipelineAggHelper.getFormat,
 });

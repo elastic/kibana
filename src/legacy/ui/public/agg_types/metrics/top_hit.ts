@@ -18,46 +18,61 @@
  */
 
 import _ from 'lodash';
-import { MetricAggType } from './metric_agg_type';
+import { i18n } from '@kbn/i18n';
+import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { TopSortFieldParamEditor } from '../../vis/editors/default/controls/top_sort_field';
 import { OrderParamEditor } from '../../vis/editors/default/controls/order';
-import { aggTypeFieldFilters } from '../param_types/filter';
-import { i18n } from '@kbn/i18n';
-import { wrapWithInlineComp } from '../buckets/_inline_comp_wrapper';
 import { TopFieldParamEditor } from '../../vis/editors/default/controls/top_field';
 import { TopSizeParamEditor } from '../../vis/editors/default/controls/top_size';
 import { TopAggregateParamEditor } from '../../vis/editors/default/controls/top_aggregate';
+import { aggTypeFieldFilters } from '../param_types/filter';
+import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
-const isNumericFieldSelected = function (agg) {
-  const fieldType = agg.params.field && agg.params.field.type;
-  return fieldType && fieldType === 'number';
+// @ts-ignore
+import { wrapWithInlineComp } from '../buckets/_inline_comp_wrapper';
+
+const isNumericFieldSelected = (agg: IMetricAggConfig) => {
+  const field = agg.getParam('field');
+
+  return field && field.type && field.type === KBN_FIELD_TYPES.NUMBER;
 };
 
-aggTypeFieldFilters.addFilter(
-  (field, aggConfig) => {
-    if (aggConfig.type.name !== 'top_hits' || _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)) {
-      return true;
-    }
-    return field.type === 'number';
-  });
+aggTypeFieldFilters.addFilter((field, aggConfig: IMetricAggConfig) => {
+  if (
+    aggConfig.type.name !== METRIC_TYPES.TOP_HITS ||
+    _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)
+  ) {
+    return true;
+  }
+
+  return field.type === 'number';
+});
 
 export const topHitMetricAgg = new MetricAggType({
-  name: 'top_hits',
+  name: METRIC_TYPES.TOP_HITS,
   title: i18n.translate('common.ui.aggTypes.metrics.topHitTitle', {
-    defaultMessage: 'Top Hit'
+    defaultMessage: 'Top Hit',
   }),
-  makeLabel: function (aggConfig) {
+  makeLabel(aggConfig) {
     const lastPrefixLabel = i18n.translate('common.ui.aggTypes.metrics.topHit.lastPrefixLabel', {
-      defaultMessage: 'Last'
+      defaultMessage: 'Last',
     });
     const firstPrefixLabel = i18n.translate('common.ui.aggTypes.metrics.topHit.firstPrefixLabel', {
-      defaultMessage: 'First'
+      defaultMessage: 'First',
     });
-    let prefix = aggConfig.params.sortOrder.value === 'desc' ? lastPrefixLabel : firstPrefixLabel;
-    if (aggConfig.params.size !== 1) {
-      prefix += ` ${aggConfig.params.size}`;
+
+    let prefix =
+      aggConfig.getParam('sortOrder').value === 'desc' ? lastPrefixLabel : firstPrefixLabel;
+
+    const size = aggConfig.getParam('size');
+
+    if (size !== 1) {
+      prefix += ` ${size}`;
     }
-    const field = aggConfig.params.field;
+
+    const field = aggConfig.getParam('field');
+
     return `${prefix} ${field ? field.displayName : ''}`;
   },
   params: [
@@ -68,29 +83,29 @@ export const topHitMetricAgg = new MetricAggType({
       onlyAggregatable: false,
       filterFieldTypes: '*',
       write(agg, output) {
-        const field = agg.params.field;
+        const field = agg.getParam('field');
         output.params = {};
 
         if (field.scripted) {
           output.params.script_fields = {
-            [ field.name ]: {
+            [field.name]: {
               script: {
                 source: field.script,
-                lang: field.lang
-              }
-            }
+                lang: field.lang,
+              },
+            },
           };
         } else {
           if (field.readFromDocValues) {
             // always format date fields as date_time to avoid
             // displaying unformatted dates like epoch_millis
             // or other not-accepted momentjs formats
-            const format = field.type === 'date' ? 'date_time' : 'use_field_mapping';
-            output.params.docvalue_fields = [ { field: field.name, format } ];
+            const format = field.type === KBN_FIELD_TYPES.DATE ? 'date_time' : 'use_field_mapping';
+            output.params.docvalue_fields = [{ field: field.name, format }];
           }
           output.params._source = field.name === '_source' ? true : field.name;
         }
-      }
+      },
     },
     {
       name: 'aggregate',
@@ -99,63 +114,68 @@ export const topHitMetricAgg = new MetricAggType({
       options: [
         {
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.minLabel', {
-            defaultMessage: 'Min'
+            defaultMessage: 'Min',
           }),
           isCompatible: isNumericFieldSelected,
           disabled: true,
-          value: 'min'
+          value: 'min',
         },
         {
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.maxLabel', {
-            defaultMessage: 'Max'
+            defaultMessage: 'Max',
           }),
           isCompatible: isNumericFieldSelected,
           disabled: true,
-          value: 'max'
+          value: 'max',
         },
         {
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.sumLabel', {
-            defaultMessage: 'Sum'
+            defaultMessage: 'Sum',
           }),
           isCompatible: isNumericFieldSelected,
           disabled: true,
-          value: 'sum'
+          value: 'sum',
         },
         {
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.averageLabel', {
-            defaultMessage: 'Average'
+            defaultMessage: 'Average',
           }),
           isCompatible: isNumericFieldSelected,
           disabled: true,
-          value: 'average'
+          value: 'average',
         },
         {
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.concatenateLabel', {
-            defaultMessage: 'Concatenate'
+            defaultMessage: 'Concatenate',
           }),
-          isCompatible: (aggConfig) => {
+          isCompatible(aggConfig: IMetricAggConfig) {
             return _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false);
           },
           disabled: true,
-          value: 'concat'
-        }
+          value: 'concat',
+        },
       ],
-      write: _.noop
+      write: _.noop,
     },
     {
       name: 'size',
       editorComponent: wrapWithInlineComp(TopSizeParamEditor),
-      default: 1
+      default: 1,
     },
     {
       name: 'sortField',
       type: 'field',
       editorComponent: TopSortFieldParamEditor,
-      filterFieldTypes: [ 'number', 'date', 'ip',  'string' ],
-      default: function (agg) {
+      filterFieldTypes: [
+        KBN_FIELD_TYPES.NUMBER,
+        KBN_FIELD_TYPES.DATE,
+        KBN_FIELD_TYPES.IP,
+        KBN_FIELD_TYPES.STRING,
+      ],
+      default(agg: IMetricAggConfig) {
         return agg.getIndexPattern().timeFieldName;
       },
-      write: _.noop // prevent default write, it is handled below
+      write: _.noop, // prevent default write, it is handled below
     },
     {
       name: 'sortOrder',
@@ -165,16 +185,16 @@ export const topHitMetricAgg = new MetricAggType({
       options: [
         {
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.descendingLabel', {
-            defaultMessage: 'Descending'
+            defaultMessage: 'Descending',
           }),
-          value: 'desc'
+          value: 'desc',
         },
         {
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.ascendingLabel', {
-            defaultMessage: 'Ascending'
+            defaultMessage: 'Ascending',
           }),
-          value: 'asc'
-        }
+          value: 'asc',
+        },
       ],
       write(agg, output) {
         const sortField = agg.params.sortField;
@@ -186,37 +206,37 @@ export const topHitMetricAgg = new MetricAggType({
               _script: {
                 script: {
                   source: sortField.script,
-                  lang: sortField.lang
+                  lang: sortField.lang,
                 },
                 type: sortField.type,
-                order: sortOrder.value
-              }
-            }
+                order: sortOrder.value,
+              },
+            },
           ];
         } else {
           output.params.sort = [
             {
-              [ sortField.name ]: {
-                order: sortOrder.value
-              }
-            }
+              [sortField.name]: {
+                order: sortOrder.value,
+              },
+            },
           ];
         }
-      }
-    }
+      },
+    },
   ],
   getValue(agg, bucket) {
-    const hits = _.get(bucket, `${agg.id}.hits.hits`);
+    const hits: any[] = _.get(bucket, `${agg.id}.hits.hits`);
     if (!hits || !hits.length) {
       return null;
     }
-    const path = agg.params.field.name;
+    const path = agg.getParam('field').name;
 
-    let values = _(hits).map(hit => {
-      return path === '_source' ? hit._source : agg.getIndexPattern().flattenHit(hit, true)[path];
-    })
-      .flatten()
-      .value();
+    let values = _.flatten(
+      hits.map(hit =>
+        path === '_source' ? hit._source : agg.getIndexPattern().flattenHit(hit, true)[path]
+      )
+    );
 
     if (values.length === 1) {
       values = values[0];
@@ -226,7 +246,10 @@ export const topHitMetricAgg = new MetricAggType({
       if (!_.compact(values).length) {
         return null;
       }
-      switch (agg.params.aggregate.value) {
+
+      const aggregate = agg.getParam('aggregate');
+
+      switch (aggregate.value) {
         case 'max':
           return _.max(values);
         case 'min':
@@ -238,5 +261,5 @@ export const topHitMetricAgg = new MetricAggType({
       }
     }
     return values;
-  }
+  },
 });

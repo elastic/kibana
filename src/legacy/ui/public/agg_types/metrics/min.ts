@@ -16,11 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
-import { find } from 'lodash';
+const minTitle = i18n.translate('common.ui.aggTypes.metrics.minTitle', {
+  defaultMessage: 'Min',
+});
 
-export function getPercentileValue(agg, bucket) {
-  const values = bucket[agg.parentId] && bucket[agg.parentId].values;
-  const percentile = find(values, value => agg.key === value.key);
-  return percentile ? percentile.value : NaN;
-}
+export const minMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.MIN,
+  title: minTitle,
+  makeLabel(aggConfig) {
+    return i18n.translate('common.ui.aggTypes.metrics.minLabel', {
+      defaultMessage: 'Min {field}',
+      values: { field: aggConfig.getFieldDisplayName() },
+    });
+  },
+  params: [
+    {
+      name: 'field',
+      type: 'field',
+      filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE],
+    },
+  ],
+});

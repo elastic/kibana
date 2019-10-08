@@ -17,28 +17,25 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
+import { makeNestedLabel } from './lib/make_nested_label';
+import { METRIC_TYPES } from './metric_agg_types';
 
-export const sumMetricAgg = new MetricAggType({
-  name: 'sum',
-  title: i18n.translate('common.ui.aggTypes.metrics.sumTitle', {
-    defaultMessage: 'Sum'
-  }),
-  makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.sumLabel', {
-      defaultMessage: 'Sum of {field}',
-      values: { field: aggConfig.getFieldDisplayName() }
-    });
-  },
-  params: [
-    {
-      name: 'field',
-      type: 'field',
-      filterFieldTypes: 'number'
-    }
-  ],
-  isScalable: function () {
-    return true;
-  }
+const serialDiffTitle = i18n.translate('common.ui.aggTypes.metrics.serialDiffTitle', {
+  defaultMessage: 'Serial Diff',
+});
+
+const serialDiffLabel = i18n.translate('common.ui.aggTypes.metrics.serialDiffLabel', {
+  defaultMessage: 'serial diff',
+});
+
+export const serialDiffMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.SERIAL_DIFF,
+  title: serialDiffTitle,
+  subtype: parentPipelineAggHelper.subtype,
+  makeLabel: agg => makeNestedLabel(agg, serialDiffLabel),
+  params: [...parentPipelineAggHelper.params()],
+  getFormat: parentPipelineAggHelper.getFormat,
 });

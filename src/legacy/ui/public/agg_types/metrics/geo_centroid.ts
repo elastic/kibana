@@ -17,25 +17,31 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
-export const maxMetricAgg = new MetricAggType({
-  name: 'max',
-  title: i18n.translate('common.ui.aggTypes.metrics.maxTitle', {
-    defaultMessage: 'Max'
-  }),
-  makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.maxLabel', {
-      defaultMessage: 'Max {field}',
-      values: { field: aggConfig.getFieldDisplayName() }
-    });
-  },
+const geoCentroidTitle = i18n.translate('common.ui.aggTypes.metrics.geoCentroidTitle', {
+  defaultMessage: 'Geo Centroid',
+});
+
+const geoCentroidLabel = i18n.translate('common.ui.aggTypes.metrics.geoCentroidLabel', {
+  defaultMessage: 'Geo Centroid',
+});
+
+export const geoCentroidMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.GEO_CENTROID,
+  title: geoCentroidTitle,
+  makeLabel: () => geoCentroidLabel,
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'number,date'
-    }
-  ]
+      filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
+    },
+  ],
+  getValue(agg, bucket) {
+    return bucket[agg.id] && bucket[agg.id].location;
+  },
 });
