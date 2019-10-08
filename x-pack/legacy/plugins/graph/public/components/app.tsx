@@ -26,7 +26,6 @@ export interface GraphAppProps extends SearchBarProps {
   store: Storage;
   reduxStore: GraphStore;
   isInitialized: boolean;
-  onFillWorkspace: () => void;
 }
 
 export function GraphApp(props: GraphAppProps) {
@@ -57,7 +56,6 @@ export function GraphApp(props: GraphAppProps) {
             </div>
             {!props.isInitialized && (
               <GuidancePanel
-                onFillWorkspace={props.onFillWorkspace}
                 onOpenFieldPicker={() => {
                   setPickerOpen(true);
                 }}
