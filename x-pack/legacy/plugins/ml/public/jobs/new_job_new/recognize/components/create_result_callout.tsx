@@ -64,7 +64,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
           />
         )}
         <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           {(saveState === SAVE_STATE.SAVED || saveState === SAVE_STATE.PARTIAL_FAILURE) && (
             <EuiFlexItem grow={false}>
               <EuiLink

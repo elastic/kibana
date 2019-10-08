@@ -59,30 +59,32 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                     </EuiText>
                   )}
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {isSaving ? <EuiLoadingSpinner size="m" /> : null}
-                  {success !== undefined ? (
-                    <EuiIcon
-                      type={success || exists ? 'check' : 'cross'}
-                      color={success || exists ? 'success' : 'danger'}
-                      aria-label={
-                        success
-                          ? i18n.translate(
-                              'xpack.ml.newJob.simple.recognize.results.savedAriaLabel',
-                              { defaultMessage: 'Saved' }
-                            )
-                          : exists
-                          ? i18n.translate(
-                              'xpack.ml.newJob.simple.recognize.results.alreadySavedAriaLabel',
-                              { defaultMessage: 'Already saved' }
-                            )
-                          : i18n.translate(
-                              'xpack.ml.newJob.simple.recognize.results.saveFailedAriaLabel',
-                              { defaultMessage: 'Save failed' }
-                            )
-                      }
-                    />
-                  ) : null}
+                <EuiFlexItem grow={false} style={{ width: '60px' }}>
+                  <EuiText textAlign="center">
+                    {isSaving ? <EuiLoadingSpinner size="m" /> : null}
+                    {success !== undefined ? (
+                      <EuiIcon
+                        type={success || exists ? 'check' : 'cross'}
+                        color={success || exists ? 'success' : 'danger'}
+                        aria-label={
+                          success
+                            ? i18n.translate(
+                                'xpack.ml.newJob.simple.recognize.results.savedAriaLabel',
+                                { defaultMessage: 'Saved' }
+                              )
+                            : exists
+                            ? i18n.translate(
+                                'xpack.ml.newJob.simple.recognize.results.alreadySavedAriaLabel',
+                                { defaultMessage: 'Already saved' }
+                              )
+                            : i18n.translate(
+                                'xpack.ml.newJob.simple.recognize.results.saveFailedAriaLabel',
+                                { defaultMessage: 'Save failed' }
+                              )
+                        }
+                      />
+                    ) : null}
+                  </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </li>
