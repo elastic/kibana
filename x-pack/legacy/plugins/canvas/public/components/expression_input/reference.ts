@@ -17,9 +17,10 @@ const { ExpressionInput: strings } = ComponentStrings;
 export function getFunctionReferenceStr(fnDef: CanvasFunction) {
   const { help, context, type } = fnDef;
 
-  const doc = `${strings.getFunctionReferenceAcceptsDetail(
-    context && context.types ? context.types.join(' | ') : 'null'
-  )}, ${strings.getFunctionReferenceReturnsDetail(type ? type : 'null')}
+  const acceptTypes = context && context.types ? context.types.join(' | ') : 'null';
+  const returnType = type ? type : 'null';
+
+  const doc = `${strings.getFunctionReferenceDetail(acceptTypes, returnType)}
 \n\n${help}`;
 
   return doc;
@@ -44,9 +45,10 @@ export function getArgReferenceStr(argDef: CanvasArgValue) {
     secondLineArr.push(strings.getArgReferenceAliasesDetail(aliases.join(' | ')));
   }
 
-  const ref = `${strings.getArgReferenceTypesDetail(
-    types && types.length ? types.join(' | ') : 'null'
-  )}, ${strings.getArgReferenceRequiredDetail(String(Boolean(required)))}
+  const typesStr = types && types.length ? types.join(' | ') : 'null';
+  const requiredStr = String(Boolean(required));
+
+  const ref = `${strings.getArgReferenceTopDetail(typesStr, requiredStr)}
   \n\n${secondLineArr.join(', ')}
   \n\n${help}`;
 
