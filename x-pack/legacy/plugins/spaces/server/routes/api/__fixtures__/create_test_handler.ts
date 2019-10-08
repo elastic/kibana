@@ -256,7 +256,6 @@ export function createTestHandler(initApiFn: (deps: ExternalRouteDeps) => void) 
       spacesService,
       log,
       legacyRouter: server.route.bind(server),
-      http: coreSetupMock.http,
     });
 
     teardowns.push(() => server.stop());

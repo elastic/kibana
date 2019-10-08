@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
-import { NotificationsSetup, HttpSetup } from 'src/core/public';
+import { HttpSetup } from 'src/core/public';
 import { SavedObjectsManagementRecord } from 'ui/management/saved_objects_management';
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
@@ -16,11 +15,7 @@ import { addSpaceIdToPath } from '../../common';
 export class SpacesManager extends EventEmitter {
   private activeSpace: Space | undefined;
 
-  constructor(
-    private readonly spaceSelectorURL: string,
-    private readonly http: HttpSetup,
-    private readonly notifications: NotificationsSetup
-  ) {
+  constructor(private readonly serverBasePath: string, private readonly http: HttpSetup) {
     super();
   }
 
@@ -34,7 +29,7 @@ export class SpacesManager extends EventEmitter {
 
   public async getActiveSpace(forceRefresh: boolean = false): Promise<Space> {
     if (!this.activeSpace || forceRefresh) {
-      this.activeSpace = (await this.http.get('/api/spaces/v1/activeSpace')) as Space;
+      this.activeSpace = (await this.http.get('/api/spaces/_active_space')) as Space;
     }
     return this.activeSpace;
   }

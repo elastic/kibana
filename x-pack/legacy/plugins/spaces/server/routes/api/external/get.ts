@@ -18,6 +18,21 @@ export function initGetSpacesApi(deps: ExternalRouteDeps) {
 
   legacyRouter({
     method: 'GET',
+    path: '/api/spaces/_active_space',
+    async handler(request: ExternalRouteRequestFacade) {
+      try {
+        return spacesService.getActiveSpace(request);
+      } catch (error) {
+        return wrapError(error);
+      }
+    },
+    options: {
+      pre: [routePreCheckLicenseFn],
+    },
+  });
+
+  legacyRouter({
+    method: 'GET',
     path: '/api/spaces/space',
     async handler(request: ExternalRouteRequestFacade) {
       log.debug(`Inside GET /api/spaces/space`);

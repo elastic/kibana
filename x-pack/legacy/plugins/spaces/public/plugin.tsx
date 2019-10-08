@@ -27,8 +27,8 @@ export class SpacesPlugin implements Plugin<{}, SpacesPluginStart, PluginsSetup>
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public async start(core: CoreStart, plugins: PluginsSetup) {
-    const { spaceSelectorUrl } = await core.http.get('/api/spaces/v1/npStart');
-    this.spacesManager = new SpacesManager(spaceSelectorUrl, core.http, core.notifications);
+    const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
+    this.spacesManager = new SpacesManager(serverBasePath, core.http);
 
     initSpacesNavControl(this.spacesManager, core);
     plugins.kibana.registerCatalogueFeature(createSpacesFeatureCatalogueEntry);

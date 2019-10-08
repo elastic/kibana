@@ -80,6 +80,11 @@ export const spaces = (kibana: Record<string, any>) =>
         },
       },
       home: ['plugins/spaces/legacy'],
+      injectDefaultVars(server: Server) {
+        return {
+          serverBasePath: server.config().get('server.basePath'),
+        };
+      },
     },
 
     async init(server: Server) {
