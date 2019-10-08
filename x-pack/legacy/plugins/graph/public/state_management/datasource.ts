@@ -5,17 +5,10 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { Action } from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { takeLatest, put, call, select } from 'redux-saga/effects';
-import { i18n } from '@kbn/i18n';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { createSelector } from 'reselect';
-import { GraphState, GraphStoreDependencies } from './store';
+import { GraphState } from './store';
 import { reset } from './global';
-import { loadFields } from './fields';
-import { mapFields } from '../services/persistence';
-import { settingsSelector } from './advanced_settings';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/datasource');
 
