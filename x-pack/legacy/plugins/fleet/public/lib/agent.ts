@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { ReturnTypeList } from '../../common/return_types';
 import { Agent } from '../../common/types/domain_data';
 import { AgentAdapter } from './adapters/agent/memory_agent_adapter';
 import { ElasticsearchLib } from './elasticsearch';
@@ -32,15 +32,19 @@ export class AgentsLib {
     return agents;
   };
 
-  // FIXME: This needs to be paginated https://github.com/elastic/kibana/issues/26022
   /** Get an array of all enrolled agents. */
-  public getAll = async (kuery?: string): Promise<Agent[]> => {
+  public getAll = async (
+    page: number,
+    perPage: number,
+    kuery?: string
+  ): Promise<ReturnTypeList<Agent>> => {
+    // @ts-ignore
     let ESQuery;
     if (kuery) {
       ESQuery = await this.elasticsearch.convertKueryToEsQuery(kuery);
     }
-    const agents = await this.adapter.getAll(ESQuery);
-    return agents;
+    // TODO: add back param to getAll() when endpoint supports query
+    return await this.adapter.getAll(page, perPage);
   };
 
   /** Update a given agent via it's ID */

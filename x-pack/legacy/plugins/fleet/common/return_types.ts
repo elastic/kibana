@@ -82,6 +82,7 @@ export interface ReturnTypeList<T> extends BaseReturnType {
   list: T[];
   page: number;
   total: number;
+  perPage: number;
 }
 
 // get

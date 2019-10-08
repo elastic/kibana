@@ -5,7 +5,7 @@
  */
 
 import {
-  SavedObjectsService,
+  SavedObjectsLegacyService,
   SavedObjectsClient as SavedObjectsClientType,
   SavedObjectAttributes,
   SavedObjectsBulkCreateObject,
@@ -23,7 +23,7 @@ import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 
 export class SODatabaseAdapter {
   private client: SavedObjectsClientType;
-  constructor(savedObjects: SavedObjectsService, elasticsearch: ElasticsearchPlugin) {
+  constructor(savedObjects: SavedObjectsLegacyService, elasticsearch: ElasticsearchPlugin) {
     const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
     const { callWithInternalUser } = elasticsearch.getCluster('admin');
     const internalRepository = getSavedObjectsRepository(callWithInternalUser);

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useEffect } from 'react';
+import useInterval from '@use-it/interval';
 import {
-  EuiInMemoryTable,
+  EuiBasicTable,
   EuiPageBody,
   EuiPageContent,
   EuiTitle,
@@ -16,9 +17,16 @@ import {
   EuiButton,
   EuiEmptyPrompt,
   EuiLink,
+  // @ts-ignore
+  EuiSearchBar,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  DEFAULT_AGENTS_PAGE_SIZE,
+  AGENTS_PAGE_SIZE_OPTIONS,
+  AGENT_POLLING_THRESHOLD_MS,
+} from '../../../common/constants';
 import { Agent } from '../../../common/types/domain_data';
 import { FrontendLibs } from '../../lib/types';
 import { AgentHealth } from '../../components/agent_health';
@@ -28,19 +36,55 @@ interface RouterProps {
 }
 
 export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
+  // Agent data states
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [agents, setAgents] = useState<Agent[]>([]);
+  const [lastPolledAgentsMs, setLastPolledAgentsMs] = useState<number>(0);
+  const [totalAgents, setTotalAgents] = useState<number>(0);
 
+  // Table and search states
+  const [currentQuery, setCurrentQuery] = useState<typeof EuiSearchBar.Query>(
+    EuiSearchBar.Query.MATCH_ALL
+  );
+  const [currentPagination, setCurrentPagination] = useState<{
+    pageSize: number;
+    currentPage: number;
+  }>({
+    pageSize: DEFAULT_AGENTS_PAGE_SIZE,
+    currentPage: 1,
+  });
+
+  // Fetch agents method
   const fetchAgents = async () => {
     setIsLoading(true);
-    setAgents(await libs.agents.getAll());
+    setLastPolledAgentsMs(new Date().getTime());
+    const { list, total } = await libs.agents.getAll(
+      currentPagination.currentPage,
+      currentPagination.pageSize
+      // TODO: Adjust list endpoint to support query string
+      // currentQuery
+    );
+    setAgents(list);
+    setTotalAgents(total);
     setIsLoading(false);
   };
 
-  // Load agents
+  // Load initial list of agents
   useEffect(() => {
     fetchAgents();
   }, []);
+
+  // Update agents if pagination or query state changes
+  useEffect(() => {
+    fetchAgents();
+  }, [currentPagination, currentQuery]);
+
+  // Poll for agents on interval
+  useInterval(() => {
+    if (new Date().getTime() - lastPolledAgentsMs >= AGENT_POLLING_THRESHOLD_MS) {
+      fetchAgents();
+    }
+  }, AGENT_POLLING_THRESHOLD_MS);
 
   // Some agents retrieved, set up table props
   const columns = [
@@ -50,7 +94,6 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
         defaultMessage: 'Host',
       }),
       truncateText: true,
-      sortable: true,
     },
     // {
     //   field: 'id',
@@ -67,7 +110,6 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
         defaultMessage: 'Policy',
       }),
       truncateText: true,
-      sortable: true,
     },
     // {
     //   field: 'event_rate',
@@ -84,7 +126,6 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
         defaultMessage: 'Status',
       }),
       truncateText: true,
-      sortable: true,
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
     },
     {
@@ -108,55 +149,6 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
       width: '100px',
     },
   ];
-
-  const sorting = {
-    sort: {
-      field: 'last_checkin',
-      direction: 'asc',
-    },
-  };
-
-  const pagination = {
-    initialPageSize: 20,
-    pageSizeOptions: [10, 20, 50],
-  };
-
-  const search = {
-    box: {
-      incremental: true,
-      schema: true,
-    },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'policy_id',
-        name: i18n.translate('xpack.fleet.agentList.policyFilterLabel', {
-          defaultMessage: 'Policy',
-        }),
-        multiSelect: 'or',
-        options: [...new Set(agents.map(agent => agent.policy_id))].map(policy => ({
-          value: policy,
-        })),
-      },
-    ],
-    toolsRight: (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-        <EuiFlexItem>
-          <EuiButton color="secondary" iconType="refresh" onClick={fetchAgents}>
-            <FormattedMessage id="xpack.fleet.agentList.reloadButton" defaultMessage="Reload" />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton fill iconType="plusInCircle">
-            <FormattedMessage
-              id="xpack.fleet.agentList.addButton"
-              defaultMessage="Install new agent"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-  };
 
   const emptyPrompt = (
     <EuiEmptyPrompt
@@ -197,7 +189,58 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
           </EuiText>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiInMemoryTable
+
+        <EuiFlexGroup>
+          <EuiFlexItem grow={4}>
+            <EuiSearchBar
+              query={currentQuery}
+              box={{
+                incremental: true,
+                schema: {
+                  strict: true,
+                  fields: {
+                    policy_id: {
+                      type: 'string',
+                    },
+                  },
+                },
+              }}
+              filters={[
+                {
+                  type: 'field_value_selection',
+                  field: 'policy_id',
+                  name: i18n.translate('xpack.fleet.agentList.policyFilterLabel', {
+                    defaultMessage: 'Policy',
+                  }),
+                  multiSelect: 'or',
+                  cache: AGENT_POLLING_THRESHOLD_MS,
+                  // Temporary until we can load list of policies
+                  options: [...new Set(agents.map(agent => agent.policy_id))].map(policy => ({
+                    value: policy,
+                  })),
+                },
+              ]}
+              onChange={({ query, error }: { query: any; error: any }) => {
+                if (error) {
+                  // TODO: Handle malformed query error
+                } else {
+                  setCurrentQuery(query);
+                }
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton fill iconType="plusInCircle">
+              <FormattedMessage
+                id="xpack.fleet.agentList.addButton"
+                defaultMessage="Install new agent"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+        <EuiBasicTable
           loading={isLoading}
           message={
             isLoading
@@ -213,9 +256,20 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
           items={agents}
           itemId="id"
           columns={columns}
-          search={search}
-          sorting={sorting}
-          pagination={pagination}
+          pagination={{
+            pageIndex: currentPagination.currentPage - 1,
+            pageSize: currentPagination.pageSize,
+            totalItemCount: totalAgents,
+            pageSizeOptions: AGENTS_PAGE_SIZE_OPTIONS,
+          }}
+          onChange={({ page }: { page: { index: number; size: number } }) => {
+            const newPagination = {
+              ...currentPagination,
+              currentPage: page.index + 1,
+              pageSize: page.size,
+            };
+            setCurrentPagination(newPagination);
+          }}
         />
       </EuiPageContent>
     </EuiPageBody>

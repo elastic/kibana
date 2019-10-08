@@ -13,6 +13,7 @@ import {
   SortOptions,
   SavedObjectAgentAttributes,
 } from './types';
+import { DEFAULT_AGENTS_PAGE_SIZE } from '../../../common/constants';
 import { SODatabaseAdapter } from '../../adapters/saved_objects_database/adapter_types';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
@@ -148,9 +149,9 @@ export class AgentsRepository implements AgentsRepositoryType {
   public async list(
     user: FrameworkUser,
     sortOptions?: SortOptions,
-    page?: number,
-    perPage: number = 20
-  ): Promise<{ agents: Agent[]; total: number }> {
+    page: number = 1,
+    perPage: number = DEFAULT_AGENTS_PAGE_SIZE
+  ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
     const { saved_objects, total } = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
       type: 'agents',
       page,
@@ -165,6 +166,8 @@ export class AgentsRepository implements AgentsRepositoryType {
     return {
       agents,
       total,
+      page,
+      perPage,
     };
   }
 

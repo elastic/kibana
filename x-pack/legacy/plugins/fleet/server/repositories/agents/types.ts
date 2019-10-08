@@ -143,7 +143,7 @@ export interface AgentsRepository {
     sortOptions?: SortOptions,
     page?: number,
     perPage?: number
-  ): Promise<{ agents: Agent[]; total: number }>;
+  ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }>;
 
   findEphemeralByPolicySharedId(user: FrameworkUser, policySharedId: string): Promise<Agent | null>;
 

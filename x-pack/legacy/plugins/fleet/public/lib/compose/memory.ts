@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
 import { management } from 'ui/management';
@@ -12,6 +11,7 @@ import { management } from 'ui/management';
 import { uiModules } from 'ui/modules';
 // @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 // @ts-ignore: path dynamic for kibana
 import { MemoryAgentAdapter } from '../adapters/agent/memory_agents_adapter';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';

@@ -17,7 +17,7 @@ import {
   SavedObjectsBulkGetObject,
   SavedObjectsUpdateResponse,
   SavedObjectsClient as SavedObjectsClientType,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
 } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SODatabaseAdapter as SODatabaseAdapterType } from './adapter_types';
@@ -26,7 +26,7 @@ import { FrameworkUser, internalAuthData } from '../framework/adapter_types';
 export class SODatabaseAdapter implements SODatabaseAdapterType {
   private readonly internalClient: SavedObjectsClientType;
   constructor(
-    private readonly savedObject: SavedObjectsService,
+    private readonly savedObject: SavedObjectsLegacyService,
     elasticsearch: ElasticsearchPlugin
   ) {
     const { SavedObjectsClient, getSavedObjectsRepository } = savedObject;
