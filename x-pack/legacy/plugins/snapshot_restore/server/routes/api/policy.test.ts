@@ -13,7 +13,6 @@ import {
   updateHandler,
   getIndicesHandler,
   updateRetentionSettingsHandler,
-  executeRetentionHandler,
 } from './policy';
 
 describe('[Snapshot and Restore API Routes] Policy', () => {
