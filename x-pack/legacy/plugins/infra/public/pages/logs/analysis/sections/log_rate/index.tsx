@@ -11,6 +11,7 @@ import {
   EuiLoadingChart,
   EuiSpacer,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -64,37 +65,56 @@ export const LogRateResults = ({
       <EuiTitle size="m" aria-label={title}>
         <h2>{title}</h2>
       </EuiTitle>
-      <EuiSpacer size="l" />
       {isLoading ? (
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingChart size="xl" aria-label={loadingAriaLabel} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingChart size="xl" aria-label={loadingAriaLabel} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       ) : !results || (results && results.histogramBuckets && !results.histogramBuckets.length) ? (
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataTitle', {
-                defaultMessage: 'There is no data to display.',
-              })}
-            </h2>
-          }
-          titleSize="m"
-          body={
+        <>
+          <EuiSpacer size="l" />
+          <EuiEmptyPrompt
+            title={
+              <h2>
+                {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataTitle', {
+                  defaultMessage: 'There is no data to display.',
+                })}
+              </h2>
+            }
+            titleSize="m"
+            body={
+              <p>
+                {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataBody', {
+                  defaultMessage: 'You may want to adjust your time range.',
+                })}
+              </p>
+            }
+          />
+        </>
+      ) : (
+        <>
+          <EuiText size="s">
             <p>
-              {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataBody', {
-                defaultMessage: 'You may want to adjust your time range.',
+              <b>
+                {i18n.translate('xpack.infra.logs.analysis.logRateSectionBucketSpanLabel', {
+                  defaultMessage: 'Bucket span: ',
+                })}
+              </b>
+              {i18n.translate('xpack.infra.logs.analysis.logRateSectionBucketSpanValue', {
+                defaultMessage: '15 minutes',
               })}
             </p>
-          }
-        />
-      ) : (
-        <LogEntryRateBarChart
-          setTimeRange={setTimeRange}
-          timeRange={timeRange}
-          series={logEntryRateSeries}
-        />
+          </EuiText>
+          <LogEntryRateBarChart
+            setTimeRange={setTimeRange}
+            timeRange={timeRange}
+            series={logEntryRateSeries}
+          />
+        </>
       )}
     </>
   );

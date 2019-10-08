@@ -67,9 +67,6 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
         />
         <Axis
           id={getAxisId('values')}
-          title={i18n.translate('xpack.infra.logs.analysis.logRateSectionYaxisTitle', {
-            defaultMessage: 'Log entries per 15 minutes',
-          })}
           position="left"
           tickFormat={value => Number(value).toFixed(0)}
         />
