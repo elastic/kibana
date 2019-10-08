@@ -361,7 +361,7 @@ describe('#bulkUpdate', () => {
     ];
 
     const mockedResponse = {
-      saved_objects: docs.map(doc => ({ ...doc, references: [] })),
+      saved_objects: docs.map(doc => ({ ...doc, references: undefined })),
     };
 
     mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
@@ -407,6 +407,7 @@ describe('#bulkUpdate', () => {
           attrSecret: '*secret*',
           attrThree: 'three',
         },
+        options: {},
       },
       {
         id: 'some-id-2',
@@ -416,6 +417,7 @@ describe('#bulkUpdate', () => {
           attrSecret: '*secret 2*',
           attrThree: 'three 2',
         },
+        options: {},
       },
     ]);
   });
@@ -438,7 +440,7 @@ describe('#bulkUpdate', () => {
     ];
 
     mockBaseClient.bulkUpdate.mockResolvedValue({
-      saved_objects: docs.map(doc => ({ ...doc, references: [] })),
+      saved_objects: docs.map(doc => ({ ...doc, references: undefined })),
     });
 
     await expect(wrapper.bulkUpdate(docs.map(doc => ({ ...doc, options })))).resolves.toEqual({

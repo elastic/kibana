@@ -433,21 +433,20 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
    * @returns The result of the update operation containing btoh failed and updated saved objects.
    */
-  public bulkUpdate = (objects: SavedObjectsBulkUpdateObject[] = []) => {
+  public bulkUpdate<T extends SavedObjectAttributes>(objects: SavedObjectsBulkUpdateObject[] = []) {
     const path = this.getPath(['_bulk_update']);
 
-    const request: ReturnType<SavedObjectsApi['bulkUpdate']> = this.savedObjectsFetch(path, {
+    return this.savedObjectsFetch(path, {
       method: 'PUT',
       body: JSON.stringify(objects),
-    });
-    return request.then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    }).then(resp => {
+      resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,
         SavedObjectsBatchResponse
       >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
-  };
+  }
 
   private createSavedObject<T extends SavedObjectAttributes>(
     options: SavedObject<T>

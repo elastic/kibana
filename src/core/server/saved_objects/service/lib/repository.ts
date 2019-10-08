@@ -35,6 +35,7 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
@@ -694,7 +695,7 @@ export class SavedObjectsRepository {
    */
   async bulkUpdate<T extends SavedObjectAttributes = any>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>
-  ): Promise<SavedObjectsBulkResponse<T>> {
+  ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     const time = this._getCurrentTime();
     const bulkUpdateParams: object[] = [];
 

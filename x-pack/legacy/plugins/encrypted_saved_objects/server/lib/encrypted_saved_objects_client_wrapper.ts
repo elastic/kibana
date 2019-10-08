@@ -13,6 +13,7 @@ import {
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -208,7 +209,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
    * @param response Raw response returned by the underlying base client.
    */
   private stripEncryptedAttributesFromBulkResponse<
-    T extends SavedObjectsBulkResponse | SavedObjectsFindResponse
+    T extends SavedObjectsBulkResponse | SavedObjectsFindResponse | SavedObjectsBulkUpdateResponse
   >(response: T): T {
     for (const savedObject of response.saved_objects) {
       if (this.options.service.isRegistered(savedObject.type)) {

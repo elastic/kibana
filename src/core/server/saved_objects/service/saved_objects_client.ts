@@ -124,6 +124,14 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
  *
  * @public
  */
+export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes = any> {
+  saved_objects: Array<SavedObjectsUpdateResponse<T>>;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any>
   extends Omit<SavedObject<T>, 'attributes' | 'references'> {
   attributes: Partial<T>;
@@ -250,7 +258,7 @@ export class SavedObjectsClient {
    */
   async bulkUpdate<T extends SavedObjectAttributes = any>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>
-  ): Promise<SavedObjectsBulkResponse<T>> {
+  ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     return await this._repository.bulkUpdate(objects);
   }
 }
