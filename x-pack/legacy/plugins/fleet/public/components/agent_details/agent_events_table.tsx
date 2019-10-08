@@ -20,21 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentsLib } from '../../lib/agent';
 import { AgentEvent, Agent } from '../../../common/types/domain_data';
 import { formatDate } from '../../utils/date';
-
-const DEFAULT_PAGE_SIZE = 20;
-const PAGE_SIZES = [10, 20, 50];
-
-function usePagination() {
-  const [pageIndex, setCurrentPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-
-  return {
-    pageIndex,
-    setCurrentPageIndex,
-    pageSize,
-    setPageSize,
-  };
-}
+import { usePagination } from '../../hooks/use_pagination';
 
 function useSearch() {
   const [search, setSearch] = useState('');
@@ -63,13 +49,21 @@ function useGetAgentEvents(
       total: state.total,
       list: state.list,
     });
-    const { list, total } = await agents.getAgentEvents(agent.id, search, page, pageSize);
+    try {
+      const { list, total } = await agents.getAgentEvents(agent.id, search, page, pageSize);
 
-    setState({
-      isLoading: false,
-      total,
-      list,
-    });
+      setState({
+        isLoading: false,
+        total,
+        list,
+      });
+    } catch (err) {
+      setState({
+        isLoading: false,
+        total: 0,
+        list: [],
+      });
+    }
   };
   useEffect(() => {
     fetchAgentEvents();
@@ -79,7 +73,7 @@ function useGetAgentEvents(
 }
 
 export const AgentEventsTable: SFC<{ agents: AgentsLib; agent: Agent }> = ({ agents, agent }) => {
-  const { pageIndex, setCurrentPageIndex, setPageSize, pageSize } = usePagination();
+  const { pageIndex, setCurrentPageIndex, setPageSize, pageSize, pageSizes } = usePagination();
   const { search, setSearch } = useSearch();
 
   const { list, total, isLoading, refresh } = useGetAgentEvents(
@@ -93,7 +87,7 @@ export const AgentEventsTable: SFC<{ agents: AgentsLib; agent: Agent }> = ({ age
     pageIndex,
     pageSize,
     totalItemCount: total,
-    pageSizeOptions: PAGE_SIZES,
+    pageSizeOptions: pageSizes,
   };
 
   const columns = [
