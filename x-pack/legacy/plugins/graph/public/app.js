@@ -66,26 +66,16 @@ import './angular/directives/graph_inspect';
 
 const app = uiModules.get('app/graph');
 
-function checkLicense(Promise, kbnBaseUrl) {
+function checkLicense(kbnBaseUrl) {
   const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
     xpackInfo.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
     const message = xpackInfo.get('features.graph.message');
     const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
     window.location.href = newUrl;
-    return Promise.halt();
+    throw new Error('Graph license error');
   }
-
-  return Promise.resolve();
 }
-
-app.directive('focusOn', function () {
-  return function (scope, elem, attr) {
-    scope.$on(attr.focusOn, function () {
-      elem[0].focus();
-    });
-  };
-});
 
 app.directive('vennDiagram', function (reactDirective) {
   return reactDirective(VennDiagram);
@@ -137,8 +127,8 @@ uiRoutes
   .when('/home', {
     template: listingTemplate,
     badge: getReadonlyBadge,
-    controller($injector, $location, $scope, Private, config, Promise, kbnBaseUrl) {
-      checkLicense(Promise, kbnBaseUrl);
+    controller($injector, $location, $scope, Private, config, kbnBaseUrl) {
+      checkLicense(kbnBaseUrl);
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const graphService = services['Graph workspace'];
       const kbnUrl = $injector.get('kbnUrl');
@@ -179,7 +169,6 @@ uiRoutes
             }
           ) : savedGraphWorkspaces.get();
       },
-      //Copied from example found in wizard.js ( Kibana TODO - can't
       indexPatterns: function (Private) {
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -208,17 +197,13 @@ app.controller('graphuiPlugin', function (
   $route,
   $http,
   kbnUrl,
-  Promise,
   confirmModal,
   kbnBaseUrl
 ) {
-  function handleSuccess(data) {
-    return checkLicense(Promise, kbnBaseUrl)
-      .then(() => data);
-  }
+  checkLicense(kbnBaseUrl);
 
   function handleError(err) {
-    return checkLicense(Promise, kbnBaseUrl)
+    return checkLicense(kbnBaseUrl)
       .then(() => {
         const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
           defaultMessage: 'Graph Error',
@@ -238,7 +223,7 @@ app.controller('graphuiPlugin', function (
   }
 
   function handleHttpError(error) {
-    return checkLicense(Promise, kbnBaseUrl)
+    return checkLicense(kbnBaseUrl)
       .then(() => {
         toastNotifications.addDanger(formatAngularHttpError(error));
       });
@@ -440,13 +425,6 @@ app.controller('graphuiPlugin', function (
     }
     $scope.workspace.simpleSearch(searchTerm, $scope.liveResponseFields, numHops);
   };
-
-  $scope.clearWorkspace = function () {
-    $scope.workspace = null;
-    $scope.detail = null;
-    if ($scope.closeMenus) $scope.closeMenus();
-  };
-
 
   $scope.selectSelected = function (node) {
     $scope.detail = {
