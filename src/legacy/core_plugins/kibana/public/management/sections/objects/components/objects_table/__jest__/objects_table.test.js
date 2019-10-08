@@ -318,8 +318,8 @@ describe('ObjectsTable', () => {
     it('should export all, accounting for the current search criteria', async () => {
       const { fetchExportByTypeAndSearch } = require('../../../lib/fetch_export_by_type_and_search');
       const { saveAs } = require('@elastic/filesaver');
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
+      const component = shallowWithI18nProvider(
+        <ObjectsTable
           {...defaultProps}
         />
       );
