@@ -27,8 +27,8 @@ export const SavedViewsToolbarControls = (props: Props) => {
     deletedId,
     deleteView,
     find,
-    findError,
-    createError,
+    errorOnFind,
+    errorOnCreate,
   } = useSavedView(props.defaultViewState, 'INVENTORY_VIEW');
   const [modalOpen, setModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -58,12 +58,12 @@ export const SavedViewsToolbarControls = (props: Props) => {
   }, [deletedId]);
 
   useEffect(() => {
-    if (createError) {
+    if (errorOnCreate) {
       toastNotifications.addWarning(getErrorToast('create')!);
-    } else if (findError) {
+    } else if (errorOnFind) {
       toastNotifications.addWarning(getErrorToast('find')!);
     }
-  }, [createError, findError]);
+  }, [errorOnCreate, errorOnFind]);
 
   return (
     <>
@@ -99,7 +99,7 @@ export const SavedViewsToolbarControls = (props: Props) => {
 const getErrorToast = (type: 'create' | 'find') => {
   if (type === 'create') {
     return {
-      title: i18n.translate('xpack.infra.savedView.createError.title', {
+      title: i18n.translate('xpack.infra.savedView.errorOnCreate.title', {
         defaultMessage: `An error occured saving view.`,
       }),
     };
