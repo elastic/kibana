@@ -101,9 +101,23 @@ export function TransactionList({ items, isLoading }: Props) {
       },
       {
         field: 'impact',
-        name: i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
-          defaultMessage: 'Impact'
-        }),
+        name: (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.apm.transactionsTable.impactColumnDescription',
+              {
+                defaultMessage:
+                  "Impact shows the most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
+              }
+            )}
+          >
+            <>
+              {i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
+                defaultMessage: 'Impact'
+              })}
+            </>
+          </EuiToolTip>
+        ),
         sortable: true,
         dataType: 'number',
         render: (value: number) => <ImpactBar value={value} />

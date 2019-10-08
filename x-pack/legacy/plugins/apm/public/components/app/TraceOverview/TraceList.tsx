@@ -85,11 +85,25 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
   },
   {
     field: 'impact',
-    name: i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
-      defaultMessage: 'Impact'
-    }),
+    name: (
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.apm.tracesTable.impactColumnDescription',
+          {
+            defaultMessage:
+              "Impact shows the most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
+          }
+        )}
+      >
+        <>
+          {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
+            defaultMessage: 'Impact'
+          })}
+        </>
+      </EuiToolTip>
+    ),
     width: '20%',
-    align: 'right',
+    align: 'left',
     sortable: true,
     render: (value: number) => <ImpactBar value={value} />
   }
