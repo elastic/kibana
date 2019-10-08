@@ -16,9 +16,10 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { ModuleJobUI } from '../page';
 
 interface ModuleJobsProps {
-  jobs: any[];
+  jobs: ModuleJobUI[];
   jobPrefix: string;
   isSaving: boolean;
 }
@@ -49,6 +50,12 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) =
                 {setupResult && setupResult.error && (
                   <EuiText size="xs" color="danger">
                     {setupResult.error.msg}
+                  </EuiText>
+                )}
+
+                {datafeedResult && datafeedResult.error && (
+                  <EuiText size="xs" color="danger">
+                    {datafeedResult.error.msg}
                   </EuiText>
                 )}
               </EuiFlexItem>

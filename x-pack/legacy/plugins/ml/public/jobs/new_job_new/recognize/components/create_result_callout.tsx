@@ -5,7 +5,7 @@
  */
 
 import React, { FC, memo } from 'react';
-import { EuiCallOut, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SAVE_STATE } from '../page';
@@ -18,6 +18,9 @@ interface CreateResultCalloutProps {
 
 export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
   ({ saveState, resultsUrl, onReset }) => {
+    if (saveState === SAVE_STATE.NOT_SAVED) {
+      return null;
+    }
     return (
       <>
         {saveState === SAVE_STATE.SAVED && (
@@ -42,21 +45,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
             }
             color="danger"
             iconType="alert"
-          >
-            <EuiButton
-              color="danger"
-              aria-label={i18n.translate(
-                'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
-                { defaultMessage: 'Reset' }
-              )}
-              onClick={onReset}
-            >
-              <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.jobsCreationFailed.resetButtonLabel"
-                defaultMessage="Jobs creation failed"
-              />
-            </EuiButton>
-          </EuiCallOut>
+          />
         )}
         {saveState === SAVE_STATE.PARTIAL_FAILURE && (
           <EuiCallOut
@@ -72,9 +61,32 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
               'xpack.ml.newJob.simple.recognize.someJobsCreationFailed.saveFailedAriaLabel',
               { defaultMessage: 'Save failed' }
             )}
-          >
+          />
+        )}
+        <EuiSpacer size="l" />
+        <EuiFlexGroup justifyContent="flexEnd">
+          {(saveState === SAVE_STATE.SAVED || saveState === SAVE_STATE.PARTIAL_FAILURE) && (
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                href={resultsUrl}
+                aria-label={i18n.translate(
+                  'xpack.ml.newJob.simple.recognize.viewResultsAriaLabel',
+                  {
+                    defaultMessage: 'View Results',
+                  }
+                )}
+              >
+                <FormattedMessage
+                  id="xpack.ml.newJob.simple.recognize.viewResultsLinkText"
+                  defaultMessage="View Results"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
             <EuiButton
-              color="warning"
+              color="primary"
+              fill={true}
               aria-label={i18n.translate(
                 'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
                 { defaultMessage: 'Reset' }
@@ -86,19 +98,8 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
                 defaultMessage="Reset"
               />
             </EuiButton>
-            <EuiLink
-              href={resultsUrl}
-              aria-label={i18n.translate('xpack.ml.newJob.simple.recognize.viewResultsAriaLabel', {
-                defaultMessage: 'View Results',
-              })}
-            >
-              <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.viewResultsLinkText"
-                defaultMessage="View Results"
-              />
-            </EuiLink>
-          </EuiCallOut>
-        )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     );
   }

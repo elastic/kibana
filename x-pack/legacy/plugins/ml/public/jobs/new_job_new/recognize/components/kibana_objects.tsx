@@ -46,6 +46,19 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
           {kibanaObjects.map(({ id, title, success, exists }) => (
             <li key={id}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiText size="s" color={exists ? 'subdued' : 'secondary'}>
+                    {title}
+                  </EuiText>
+                  {exists && (
+                    <EuiText size="xs" color="default">
+                      <FormattedMessage
+                        id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
+                        defaultMessage="(already exists)"
+                      />
+                    </EuiText>
+                  )}
+                </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   {isSaving ? <EuiLoadingSpinner size="m" /> : null}
                   {success !== undefined ? (
@@ -70,19 +83,6 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                       }
                     />
                   ) : null}
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s" color="secondary">
-                    {title}
-                  </EuiText>
-                  {exists && (
-                    <EuiText size="xs" color="default">
-                      <FormattedMessage
-                        id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
-                        defaultMessage="(already exists)"
-                      />
-                    </EuiText>
-                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </li>

@@ -56,7 +56,7 @@ import {
 import { JOB_ID_MAX_LENGTH } from '../../../../common/constants/validation';
 import { isJobIdValid } from '../../../../common/util/job_utils';
 
-interface ModuleJobUI extends ModuleJob {
+export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
   setupResult?: JobResponse;
 }
@@ -270,7 +270,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
         <EuiFlexGroup wrap={true} gutterSize="m">
           <EuiFlexItem grow={1}>
-            <EuiPanel>
+            <EuiPanel grow={false}>
               <EuiTitle size="s">
                 <h4>
                   <FormattedMessage
