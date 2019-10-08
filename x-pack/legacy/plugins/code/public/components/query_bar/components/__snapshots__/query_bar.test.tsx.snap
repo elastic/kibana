@@ -99,6 +99,18 @@ exports[`render correctly with empty query string 1`] = `
                     </EuiText>,
                     "value": "file",
                   },
+                  Object {
+                    "inputDisplay": <EuiText
+                      size="s"
+                    >
+                      <EuiIcon
+                        type="branch"
+                      />
+                       
+                      Search Commits
+                    </EuiText>,
+                    "value": "commit",
+                  },
                 ]
               }
               valueOfSelected="default"
@@ -165,6 +177,18 @@ exports[`render correctly with empty query string 1`] = `
                             Search Files
                           </EuiText>,
                           "value": "file",
+                        },
+                        Object {
+                          "inputDisplay": <EuiText
+                            size="s"
+                          >
+                            <EuiIcon
+                              type="branch"
+                            />
+                             
+                            Search Commits
+                          </EuiText>,
+                          "value": "commit",
                         },
                       ]
                     }
@@ -255,6 +279,18 @@ exports[`render correctly with empty query string 1`] = `
                                 Search Files
                               </EuiText>,
                               "value": "file",
+                            },
+                            Object {
+                              "inputDisplay": <EuiText
+                                size="s"
+                              >
+                                <EuiIcon
+                                  type="branch"
+                                />
+                                 
+                                Search Commits
+                              </EuiText>,
+                              "value": "commit",
                             },
                           ]
                         }
@@ -798,6 +834,18 @@ exports[`render correctly with input query string changed 1`] = `
                         </EuiText>,
                         "value": "file",
                       },
+                      Object {
+                        "inputDisplay": <EuiText
+                          size="s"
+                        >
+                          <EuiIcon
+                            type="branch"
+                          />
+                           
+                          Search Commits
+                        </EuiText>,
+                        "value": "commit",
+                      },
                     ]
                   }
                   valueOfSelected="default"
@@ -864,6 +912,18 @@ exports[`render correctly with input query string changed 1`] = `
                                 Search Files
                               </EuiText>,
                               "value": "file",
+                            },
+                            Object {
+                              "inputDisplay": <EuiText
+                                size="s"
+                              >
+                                <EuiIcon
+                                  type="branch"
+                                />
+                                 
+                                Search Commits
+                              </EuiText>,
+                              "value": "commit",
                             },
                           ]
                         }
@@ -954,6 +1014,18 @@ exports[`render correctly with input query string changed 1`] = `
                                     Search Files
                                   </EuiText>,
                                   "value": "file",
+                                },
+                                Object {
+                                  "inputDisplay": <EuiText
+                                    size="s"
+                                  >
+                                    <EuiIcon
+                                      type="branch"
+                                    />
+                                     
+                                    Search Commits
+                                  </EuiText>,
+                                  "value": "commit",
                                 },
                               ]
                             }

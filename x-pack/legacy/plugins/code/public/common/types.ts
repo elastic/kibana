@@ -28,6 +28,9 @@ export const SearchScopeText = {
   [SearchScope.FILE]: i18n.translate('xpack.code.searchScope.fileDropDownOptionLabel', {
     defaultMessage: 'Search Files',
   }),
+  [SearchScope.COMMIT]: i18n.translate('xpack.code.searchScope.commitDropDownOptionLabel', {
+    defaultMessage: 'Search Commits',
+  }),
 };
 
 export const SearchScopePlaceholderText = {
@@ -42,6 +45,9 @@ export const SearchScopePlaceholderText = {
   }),
   [SearchScope.FILE]: i18n.translate('xpack.code.searchScope.filePlaceholder', {
     defaultMessage: 'Type to find files',
+  }),
+  [SearchScope.COMMIT]: i18n.translate('xpack.code.searchScope.commitPlaceholder', {
+    defaultMessage: 'Type to find commits',
   }),
 };
 

@@ -224,6 +224,7 @@ export enum SearchScope {
   SYMBOL = 'symbol', // Only search symbols
   REPOSITORY = 'repository', // Only search repositories
   FILE = 'file', // Only search files
+  COMMIT = 'commit', // Only search commits
 }
 
 export interface SearchOptions {
