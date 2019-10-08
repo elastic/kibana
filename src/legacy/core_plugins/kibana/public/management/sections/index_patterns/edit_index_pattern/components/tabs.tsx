@@ -105,6 +105,7 @@ const tabContents = [
     index: 'scriptedFields',
     content: ($scope: any) => (
       <>
+        <EuiSpacer size="s" />
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
             <SearchField $scope={$scope} />
@@ -161,6 +162,7 @@ const tabContents = [
     index: 'sourceFilters',
     content: ($scope: any) => (
       <>
+        <EuiSpacer size="s" />
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
             <SearchField $scope={$scope} />
