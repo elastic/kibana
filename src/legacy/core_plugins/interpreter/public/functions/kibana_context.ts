@@ -19,8 +19,23 @@
 
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
+import { ExpressionFunction, KibanaContext } from '../../types';
 
-export const kibanaContext = () => ({
+interface Arguments {
+  q?: string | null;
+  filters?: string | null;
+  timeRange?: string | null;
+  savedSearchId?: string | null;
+}
+
+export type ExpressionFunctionKibanaContext = ExpressionFunction<
+  'kibana_context',
+  KibanaContext | null,
+  Arguments,
+  Promise<KibanaContext>
+>;
+
+export const kibanaContext = (): ExpressionFunctionKibanaContext => ({
   name: 'kibana_context',
   type: 'kibana_context',
   context: {
@@ -34,21 +49,33 @@ export const kibanaContext = () => ({
       types: ['string', 'null'],
       aliases: ['query', '_'],
       default: null,
+      help: i18n.translate('interpreter.functions.kibana_context.q.help', {
+        defaultMessage: 'Specify Kibana free form text query',
+      }),
     },
     filters: {
       types: ['string', 'null'],
       default: '"[]"',
+      help: i18n.translate('interpreter.functions.kibana_context.filters.help', {
+        defaultMessage: 'Specify Kibana generic filters',
+      }),
     },
     timeRange: {
       types: ['string', 'null'],
       default: null,
+      help: i18n.translate('interpreter.functions.kibana_context.timeRange.help', {
+        defaultMessage: 'Specify Kibana time range filter',
+      }),
     },
     savedSearchId: {
       types: ['string', 'null'],
       default: null,
+      help: i18n.translate('interpreter.functions.kibana_context.savedSearchId.help', {
+        defaultMessage: 'Specify saved search ID to be used for queries and filters',
+      }),
     },
   },
-  async fn(context: any, args: any) {
+  async fn(context, args, handlers) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const savedSearches = $injector.get('savedSearches') as any;
     const queryArg = args.q ? JSON.parse(args.q) : [];
@@ -63,15 +90,19 @@ export const kibanaContext = () => ({
       filters = filters.concat(searchFilters);
     }
 
-    if (context.query) {
+    if (context && context.query) {
       queries = queries.concat(context.query);
     }
 
-    if (context.filters) {
+    if (context && context.filters) {
       filters = filters.concat(context.filters).filter((f: any) => !f.meta.disabled);
     }
 
-    const timeRange = args.timeRange ? JSON.parse(args.timeRange) : context.timeRange;
+    const timeRange = args.timeRange
+      ? JSON.parse(args.timeRange)
+      : context
+      ? context.timeRange
+      : undefined;
 
     return {
       type: 'kibana_context',

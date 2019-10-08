@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }) {
   const shards = getService('monitoringElasticsearchShards');
   const retry = getService('retry');
 
-  describe('Elasticsearch shard legends', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/47184
+  describe.skip('Elasticsearch shard legends', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
