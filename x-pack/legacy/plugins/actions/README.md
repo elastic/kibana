@@ -51,7 +51,7 @@ This module provides a Utilities for interacting with the configuration.
 
 ### Methods
 
-**server.plugins.actions.registerType(options)**
+**server.plugins.actions.setup.registerType(options)**
 
 The following table describes the properties of the `options` object.
 
