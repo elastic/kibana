@@ -23,7 +23,7 @@ const Url = styled('span')`
 interface HttpInfoProps {
   method?: string;
   status?: number;
-  url?: string;
+  url: string;
 }
 
 const Span = styled('span')`
@@ -31,7 +31,7 @@ const Span = styled('span')`
 `;
 
 export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
-  if (!method && !status && !url) {
+  if (!url) {
     return null;
   }
 
@@ -50,11 +50,9 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
             <>{method.toUpperCase()}</>
           </EuiToolTip>
         )}{' '}
-        {url && (
-          <EuiToolTip content={url}>
-            <Url>{url}</Url>
-          </EuiToolTip>
-        )}
+        <EuiToolTip content={url}>
+          <Url>{url}</Url>
+        </EuiToolTip>
       </HttpInfoBadge>
       {status && <HttpStatusBadge status={status} />}
     </Span>

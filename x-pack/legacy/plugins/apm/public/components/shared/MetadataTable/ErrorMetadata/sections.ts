@@ -5,6 +5,7 @@
  */
 
 import {
+  Section,
   ERROR,
   LABELS,
   HTTP,
@@ -16,9 +17,9 @@ import {
   URL,
   USER,
   CUSTOM_ERROR
-} from '../sectionLabels';
+} from '../sections';
 
-export const ERROR_METADATA_SECTIONS = [
+export const ERROR_METADATA_SECTIONS: Section[] = [
   ERROR,
   { ...LABELS, required: true },
   HTTP,

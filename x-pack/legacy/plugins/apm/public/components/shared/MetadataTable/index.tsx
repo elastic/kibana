@@ -17,15 +17,27 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
+import { Section as SectionType } from './sections';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { APMError } from '../../../../typings/es_schemas/ui/APMError';
+import { Span } from '../../../../typings/es_schemas/ui/Span';
 
 interface Props {
-  item: Record<string, unknown>;
-  sections: Array<{
-    key: string;
-    label: string;
-    required?: boolean;
-  }>;
+  item: Transaction | APMError | Span;
+  sections: SectionType[];
 }
+
+export const reduceItemWithProperties = (
+  item: Record<string, unknown>,
+  properties: string[]
+) =>
+  properties.reduce((acc, property) => {
+    const value = item[property];
+    if (value) {
+      return { ...acc, [property]: value };
+    }
+    return acc;
+  }, {});
 
 export function MetadataTable({ item, sections }: Props) {
   const filteredSections = sections.filter(
@@ -42,16 +54,25 @@ export function MetadataTable({ item, sections }: Props) {
           </ElasticDocsLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {filteredSections.map(section => (
-        <div key={section.key}>
-          <EuiTitle size="xs">
-            <h6>{section.label}</h6>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <Section propData={get(item, section.key)} propKey={section.key} />
-          <EuiSpacer size="xl" />
-        </div>
-      ))}
+      {filteredSections.map(section => {
+        let sectionData: Record<string, unknown> = get(item, section.key);
+        if (section.properties) {
+          sectionData = reduceItemWithProperties(
+            sectionData,
+            section.properties
+          );
+        }
+        return (
+          <div key={section.key}>
+            <EuiTitle size="xs">
+              <h6>{section.label}</h6>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <Section propData={sectionData} propKey={section.key} />
+            <EuiSpacer size="xl" />
+          </div>
+        );
+      })}
     </React.Fragment>
   );
 }

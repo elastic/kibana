@@ -5,15 +5,16 @@
  */
 
 import {
+  Section,
   AGENT,
   SERVICE,
   SPAN,
   LABELS,
   TRANSACTION,
   TRACE
-} from '../sectionLabels';
+} from '../sections';
 
-export const SPAN_METADATA_SECTIONS = [
+export const SPAN_METADATA_SECTIONS: Section[] = [
   SPAN,
   AGENT,
   SERVICE,

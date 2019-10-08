@@ -5,6 +5,7 @@
  */
 
 import {
+  Section,
   TRANSACTION,
   LABELS,
   HTTP,
@@ -18,9 +19,9 @@ import {
   USER,
   USER_AGENT,
   CUSTOM_TRANSACTION
-} from '../sectionLabels';
+} from '../sections';
 
-export const TRANSACTION_METADATA_SECTIONS = [
+export const TRANSACTION_METADATA_SECTIONS: Section[] = [
   TRANSACTION,
   { ...LABELS, required: true },
   HTTP,

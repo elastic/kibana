@@ -150,7 +150,7 @@ export function SpanFlyout({
                 parentType="transaction"
               />,
               <>
-                {spanHttpStatusCode && (
+                {spanHttpUrl && (
                   <HttpInfoContainer>
                     <HttpInfoSummaryItem
                       method={spanHttpMethod}
