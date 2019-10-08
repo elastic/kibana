@@ -12,6 +12,7 @@ import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_option
 import { Toolbar } from '../../eui/toolbar';
 import { ToolbarProps } from './toolbar';
 import { fieldToName } from '../../waffle/lib/field_to_display_name';
+import { InfraSnapshotMetricType } from '../../../graphql/types';
 
 interface Props {
   children: (props: ToolbarProps) => React.ReactElement;
@@ -52,12 +53,7 @@ export const ToolbarWrapper = (props: Props) => {
   );
 };
 
-export const mapFieldToOption = (field: string) => ({
-  text: fieldToName(field),
-  field,
-});
-
-export const ToolbarTranslations = {
+const ToolbarTranslations = {
   CPUUsage: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
     defaultMessage: 'CPU usage',
   }),
@@ -81,4 +77,54 @@ export const ToolbarTranslations = {
   Load: i18n.translate('xpack.infra.waffle.metricOptions.loadText', {
     defaultMessage: 'Load',
   }),
+
+  Count: i18n.translate('xpack.infra.waffle.metricOptions.countText', {
+    defaultMessage: 'Count',
+  }),
+};
+
+export const toGroupByOpt = (field: string) => ({
+  text: fieldToName(field),
+  field,
+});
+
+export const toMetricOpt = (metric: InfraSnapshotMetricType) => {
+  switch (metric) {
+    case InfraSnapshotMetricType.cpu:
+      return {
+        text: ToolbarTranslations.CPUUsage,
+        value: InfraSnapshotMetricType.cpu,
+      };
+    case InfraSnapshotMetricType.memory:
+      return {
+        text: ToolbarTranslations.MemoryUsage,
+        value: InfraSnapshotMetricType.memory,
+      };
+    case InfraSnapshotMetricType.rx:
+      return {
+        text: ToolbarTranslations.InboundTraffic,
+        value: InfraSnapshotMetricType.rx,
+      };
+    case InfraSnapshotMetricType.tx:
+      return {
+        text: ToolbarTranslations.OutboundTraffic,
+        value: InfraSnapshotMetricType.rx,
+      };
+    case InfraSnapshotMetricType.logRate:
+      return {
+        text: ToolbarTranslations.LogRate,
+        value: InfraSnapshotMetricType.logRate,
+      };
+    case InfraSnapshotMetricType.load:
+      return {
+        text: ToolbarTranslations.Load,
+        value: InfraSnapshotMetricType.load,
+      };
+
+    case InfraSnapshotMetricType.count:
+      return {
+        text: ToolbarTranslations.Count,
+        value: InfraSnapshotMetricType.count,
+      };
+  }
 };

@@ -10,37 +10,21 @@ import { ToolbarProps } from './toolbar';
 import { WaffleMetricControls } from '../../waffle/waffle_metric_controls';
 import { WaffleGroupByControls } from '../../waffle/waffle_group_by_controls';
 import { InfraSnapshotMetricType } from '../../../graphql/types';
-import { ToolbarTranslations, mapFieldToOption } from './toolbar_wrapper';
+import { toGroupByOpt, toMetricOpt } from './toolbar_wrapper';
 
 export const HostToolbarItems = (props: ToolbarProps) => {
-  const metricOptions = useMemo(() => {
-    return [
-      {
-        text: ToolbarTranslations.CPUUsage,
-        value: InfraSnapshotMetricType.cpu,
-      },
-      {
-        text: ToolbarTranslations.MemoryUsage,
-        value: InfraSnapshotMetricType.memory,
-      },
-      {
-        text: ToolbarTranslations.Load,
-        value: InfraSnapshotMetricType.load,
-      },
-      {
-        text: ToolbarTranslations.InboundTraffic,
-        value: InfraSnapshotMetricType.rx,
-      },
-      {
-        text: ToolbarTranslations.OutboundTraffic,
-        value: InfraSnapshotMetricType.tx,
-      },
-      {
-        text: ToolbarTranslations.LogRate,
-        value: InfraSnapshotMetricType.logRate,
-      },
-    ];
-  }, []);
+  const metricOptions = useMemo(
+    () =>
+      [
+        InfraSnapshotMetricType.cpu,
+        InfraSnapshotMetricType.memory,
+        InfraSnapshotMetricType.load,
+        InfraSnapshotMetricType.rx,
+        InfraSnapshotMetricType.tx,
+        InfraSnapshotMetricType.logRate,
+      ].map(toMetricOpt),
+    []
+  );
 
   const groupByOptions = useMemo(
     () =>
@@ -50,7 +34,7 @@ export const HostToolbarItems = (props: ToolbarProps) => {
         'cloud.project.id',
         'cloud.provider',
         'service.type',
-      ].map(mapFieldToOption),
+      ].map(toGroupByOpt),
     []
   );
 

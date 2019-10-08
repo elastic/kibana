@@ -10,32 +10,22 @@ import { ToolbarProps } from './toolbar';
 import { WaffleMetricControls } from '../../waffle/waffle_metric_controls';
 import { WaffleGroupByControls } from '../../waffle/waffle_group_by_controls';
 import { InfraSnapshotMetricType } from '../../../graphql/types';
-import { ToolbarTranslations, mapFieldToOption } from './toolbar_wrapper';
+import { toGroupByOpt, toMetricOpt } from './toolbar_wrapper';
 
 export const PodToolbarItems = (props: ToolbarProps) => {
-  const options = useMemo(() => {
-    return [
-      {
-        text: ToolbarTranslations.CPUUsage,
-        value: InfraSnapshotMetricType.cpu,
-      },
-      {
-        text: ToolbarTranslations.MemoryUsage,
-        value: InfraSnapshotMetricType.memory,
-      },
-      {
-        text: ToolbarTranslations.InboundTraffic,
-        value: InfraSnapshotMetricType.rx,
-      },
-      {
-        text: ToolbarTranslations.OutboundTraffic,
-        value: InfraSnapshotMetricType.tx,
-      },
-    ];
-  }, []);
+  const options = useMemo(
+    () =>
+      [
+        InfraSnapshotMetricType.cpu,
+        InfraSnapshotMetricType.memory,
+        InfraSnapshotMetricType.rx,
+        InfraSnapshotMetricType.tx,
+      ].map(toMetricOpt),
+    []
+  );
 
   const groupByOptions = useMemo(
-    () => ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'].map(mapFieldToOption),
+    () => ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'].map(toGroupByOpt),
     []
   );
 
