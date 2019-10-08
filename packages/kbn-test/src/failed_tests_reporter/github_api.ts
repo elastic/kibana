@@ -50,19 +50,19 @@ export class GithubApi {
 
   async getKibanaIssues() {
     const issues: GithubIssue[] = [];
-    const queue = [ISSUES_URL];
+    let nextUrl = ISSUES_URL;
 
-    while (queue.length) {
-      const url = queue.shift()!;
-
-      const resp = await this.request<GithubIssue[]>({ method: 'GET', url }, []);
+    while (true) {
+      const resp = await this.request<GithubIssue[]>({ method: 'GET', url: nextUrl }, []);
       for (const issue of resp.data) {
         issues.push(issue);
       }
 
       const parsed = parseLinkHeader(resp.headers.link);
       if (parsed && parsed.next && parsed.next.url) {
-        queue.push(parsed.next.url);
+        nextUrl = parsed.next.url;
+      } else {
+        break;
       }
     }
 
