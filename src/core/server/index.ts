@@ -56,6 +56,7 @@ import {
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
+import { UiSettingsServiceSetup } from './ui_settings';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService } from './config';
@@ -163,6 +164,8 @@ export {
   SavedObjectsUpdateResponse,
 } from './saved_objects';
 
+export { IUiSettingsClient } from './ui_settings';
+
 export { RecursiveReadonly } from '../utils';
 
 export {
@@ -236,6 +239,7 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
+  uiSettings: UiSettingsServiceSetup;
 }
 
 /**

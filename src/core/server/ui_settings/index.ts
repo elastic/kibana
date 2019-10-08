@@ -19,6 +19,9 @@
 
 export {
   IUiSettingsClient,
-  UiSettingsService,
+  UiSettingsClient,
   UiSettingsServiceOptions,
 } from './ui_settings_client';
+
+export { config } from './ui_settings_config';
+export { UiSettingsService, UiSettingsServiceSetup } from './ui_settings_service';
