@@ -17,27 +17,20 @@
  * under the License.
  */
 
-import Octokit from '@octokit/rest';
-import { markdownMetadata } from './metadata';
+import { ToolingLogTextWriter } from './tooling_log_text_writer';
 
-export { markdownMetadata };
+export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
+  messages: string[] = [];
 
-export function getGithubClient() {
-  const client = new Octokit();
-  client.authenticate({
-    type: 'token',
-    token: process.env.GITHUB_TOKEN
-  });
-
-  return client;
-}
-
-export async function paginate(client, promise) {
-  let response = await promise;
-  let { data } = response;
-  while (client.hasNextPage(response)) {
-    response = await client.getNextPage(response);
-    data = data.concat(response.data);
+  constructor() {
+    super({
+      level: 'verbose',
+      writeTo: {
+        write: msg => {
+          // trim trailing new line
+          this.messages.push(msg.slice(0, -1));
+        },
+      },
+    });
   }
-  return data;
 }
