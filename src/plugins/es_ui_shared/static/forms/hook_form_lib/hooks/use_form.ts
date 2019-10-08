@@ -152,7 +152,7 @@ export function useForm<T extends object = FormData>(
 
     await validateFields(fieldsToValidate.map(field => field.path));
 
-    return updateFormValidity()!;
+    return isValid!;
   };
 
   const addField: FormHook<T>['__addField'] = field => {
