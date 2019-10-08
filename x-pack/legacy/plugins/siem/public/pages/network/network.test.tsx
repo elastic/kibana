@@ -70,6 +70,8 @@ const getMockProps = () => ({
   from,
   isInitializing: false,
   setQuery: jest.fn(),
+  capabilitiesFetched: true,
+  hasMlUserPermissions: true,
 });
 
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769

@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
+
+import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
+import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
-import { NetworkTabType } from './types';
+import { GetNetworkTabPath, NetworkTabType } from './types';
 import { GlobalTime } from '../../containers/global_time';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
@@ -17,56 +20,77 @@ type Props = Partial<RouteComponentProps<{}>> & { url: string };
 const networkPagePath = `/:pageName(network)`;
 const ipDetailsPagePath = `${networkPagePath}/ip/:detailName`;
 
-const getNetworkTabPath = (pagePath: string) =>
-  `${pagePath}/:tabName(` +
-  `${NetworkTabType.dns}|` +
-  `${NetworkTabType.ips}|` +
-  `${NetworkTabType.anomalies})`;
+const getNetworkTabPath: GetNetworkTabPath = (
+  pagePath,
+  capabilitiesFetched,
+  hasMlUserPermission
+) => {
+  if (capabilitiesFetched && !hasMlUserPermission) {
+    return `${pagePath}/:tabName(${NetworkTabType.dns}|${NetworkTabType.ips})`;
+  }
 
-export const NetworkContainer = React.memo<Props>(() => (
-  <GlobalTime>
-    {({ to, from, setQuery, deleteQuery, isInitializing }) => (
-      <Switch>
-        <Route
-          strict
-          path={getNetworkTabPath(networkPagePath)}
-          render={() => (
-            <Network
-              networkPagePath={networkPagePath}
-              to={to}
-              from={from}
-              setQuery={setQuery}
-              deleteQuery={deleteQuery}
-              isInitializing={isInitializing}
-            />
-          )}
-        />
-        <Route
-          path={ipDetailsPagePath}
-          render={({
-            match: {
-              params: { detailName },
-            },
-          }) => (
-            <IPDetails
-              detailName={detailName}
-              to={to}
-              from={from}
-              setQuery={setQuery}
-              deleteQuery={deleteQuery}
-              isInitializing={isInitializing}
-            />
-          )}
-        />
-        <Route
-          path="/network/"
-          render={({ location: { search = '' } }) => (
-            <Redirect from="/network/" to={`/network/${NetworkTabType.dns}${search}`} />
-          )}
-        />
-      </Switch>
-    )}
-  </GlobalTime>
-));
+  return (
+    `${pagePath}/:tabName(` +
+    `${NetworkTabType.dns}|` +
+    `${NetworkTabType.ips}|` +
+    `${NetworkTabType.anomalies})`
+  );
+};
+
+export const NetworkContainer = React.memo<Props>(() => {
+  const capabilities = useContext(MlCapabilitiesContext);
+
+  return (
+    <GlobalTime>
+      {({ to, from, setQuery, deleteQuery, isInitializing }) => (
+        <Switch>
+          <Route
+            strict
+            path={getNetworkTabPath(
+              networkPagePath,
+              capabilities.capabilitiesFetched,
+              hasMlUserPermissions(capabilities)
+            )}
+            render={() => (
+              <Network
+                networkPagePath={networkPagePath}
+                to={to}
+                from={from}
+                setQuery={setQuery}
+                deleteQuery={deleteQuery}
+                isInitializing={isInitializing}
+                capabilitiesFetched={capabilities.capabilitiesFetched}
+                hasMlUserPermissions={hasMlUserPermissions(capabilities)}
+              />
+            )}
+          />
+          <Route
+            path={ipDetailsPagePath}
+            render={({
+              match: {
+                params: { detailName },
+              },
+            }) => (
+              <IPDetails
+                detailName={detailName}
+                to={to}
+                from={from}
+                setQuery={setQuery}
+                deleteQuery={deleteQuery}
+                isInitializing={isInitializing}
+              />
+            )}
+          />
+          <Route
+            path="/network/"
+            render={({ location: { search = '' } }) => (
+              <Redirect from="/network/" to={`/network/${NetworkTabType.dns}${search}`} />
+            )}
+          />
+        </Switch>
+      )}
+    </GlobalTime>
+  );
+});
 
 NetworkContainer.displayName = 'NetworkContainer';

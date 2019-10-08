@@ -46,7 +46,11 @@ interface NetworkComponentReduxProps {
 
 export type NetworkComponentProps = NetworkComponentReduxProps &
   GlobalTimeArgs &
-  Partial<RouteComponentProps<{}>> & { networkPagePath: string };
+  Partial<RouteComponentProps<{}>> & {
+    networkPagePath: string;
+    hasMlUserPermissions: boolean;
+    capabilitiesFetched: boolean;
+  };
 
 export enum NetworkTabType {
   dns = 'dns',
@@ -62,3 +66,9 @@ interface IPDetailsComponentReduxProps {
 
 export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
   GlobalTimeArgs & { detailName: string };
+
+export type GetNetworkTabPath = (
+  pagePath: string,
+  capabilitiesFetched: boolean,
+  hasMlUserPermission: boolean
+) => string;
