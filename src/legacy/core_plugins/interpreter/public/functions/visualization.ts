@@ -24,7 +24,7 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
 import { VisResponseValue } from 'src/plugins/visualizations/public';
 import { setup as data } from '../../../data/public/legacy';
-import { start as visualizations } from '../../../visualizations/public/legacy';
+import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { ExpressionFunction, Render } from '../../types';
 
 interface Arguments {

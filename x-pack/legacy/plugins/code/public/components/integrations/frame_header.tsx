@@ -18,7 +18,7 @@ export const FrameHeader = ({
   onClick: () => void;
 }) => (
   <EuiFlexGroup
-    className="integrations__snippet-info"
+    className="codeIntegrations__snippet-info"
     alignItems="center"
     justifyContent="spaceBetween"
     gutterSize="none"
@@ -31,7 +31,7 @@ export const FrameHeader = ({
     <EuiText size="xs">
       <EuiTextColor color="subdued">Last updated: 14 mins ago</EuiTextColor>
       <EuiButtonIcon
-        className="integrations__link--external integrations__button-icon"
+        className="codeIntegrations__link--external codeIntegrations__button-icon"
         iconType="codeApp"
         onClick={onClick}
       />

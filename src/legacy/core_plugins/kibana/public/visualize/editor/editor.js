@@ -56,7 +56,7 @@ import { npStart } from 'ui/new_platform';
 
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
-import { start as visualizations } from '../../../../visualizations/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 const { savedQueryService } = data.search.services;
 
