@@ -9,7 +9,8 @@ import JoiNamespace from 'joi';
 import { resolve } from 'path';
 
 import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
-import { savedObjectMappings } from './server/saved_objects';
+import { savedObjectMappings as sourceSavedObjectMappings } from './server/saved_objects';
+import { inventoryViewSavedObjectMappings } from './common/saved_objects/inventory_view';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
@@ -65,7 +66,7 @@ export function infra(kibana: any) {
           url: `/app/${APP_ID}#/logs`,
         },
       ],
-      mappings: savedObjectMappings,
+      mappings: { ...sourceSavedObjectMappings, ...inventoryViewSavedObjectMappings },
     },
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);

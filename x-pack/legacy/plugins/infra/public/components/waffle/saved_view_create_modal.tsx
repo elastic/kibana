@@ -17,7 +17,6 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiFieldText,
-  EuiCheckbox,
   EuiSpacer,
   EuiSwitch,
   EuiText,
