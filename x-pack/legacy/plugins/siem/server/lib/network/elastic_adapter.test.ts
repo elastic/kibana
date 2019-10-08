@@ -10,7 +10,17 @@ import { FlowTargetNew, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchNetworkAdapter } from './elasticsearch_adapter';
-import { mockOptions, mockRequest, mockResponse, mockResult, mockTopNFlowQueryDsl } from './mock';
+import {
+  mockOptions,
+  mockRequest,
+  mockResponse,
+  mockResult,
+  mockOptionsIp,
+  mockRequestIp,
+  mockResponseIp,
+  mockResultIp,
+  mockTopNFlowQueryDsl,
+} from './mock';
 
 jest.mock('./query_top_n_flow.dsl', () => {
   const r = jest.requireActual('./query_top_n_flow.dsl');
@@ -113,6 +123,31 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
         mockOptions
       );
       expect(data.pageInfo.showMorePagesIndicator).toBeFalsy();
+    });
+  });
+
+  describe('Filter by IP', () => {
+    const mockCallWithRequest = jest.fn();
+    mockCallWithRequest.mockResolvedValue(mockResponseIp);
+    const mockFramework: FrameworkAdapter = {
+      version: 'mock',
+      callWithRequest: mockCallWithRequest,
+      exposeStaticDir: jest.fn(),
+      getIndexPatternsService: jest.fn(),
+      getSavedObjectsService: jest.fn(),
+      registerGraphQLEndpoint: jest.fn(),
+    };
+    jest.doMock('../framework', () => ({
+      callWithRequest: mockCallWithRequest,
+    }));
+
+    test('getNetworkTopNFlow', async () => {
+      const EsNetworkTopNFlow = new ElasticsearchNetworkAdapter(mockFramework);
+      const data: NetworkTopNFlowData = await EsNetworkTopNFlow.getNetworkTopNFlow(
+        mockRequestIp as FrameworkRequest,
+        mockOptionsIp
+      );
+      expect(data).toEqual(mockResultIp);
     });
   });
 });

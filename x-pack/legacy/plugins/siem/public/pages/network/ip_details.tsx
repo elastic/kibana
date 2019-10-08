@@ -18,12 +18,10 @@ import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { getNetworkUrl } from '../../components/link_to/redirect_to_network';
 import { manageQuery } from '../../components/page/manage_query';
-import { DomainsTable } from '../../components/page/network/domains_table';
 import { FlowTargetSelectConnected } from '../../components/page/network/flow_target_select_connected';
 import { IpOverview } from '../../components/page/network/ip_overview';
 import { UsersTable } from '../../components/page/network/users_table';
 import { TlsTable } from '../../components/page/network/tls_table';
-import { DomainsQuery } from '../../containers/domains';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -47,7 +45,6 @@ import { networkToCriteria } from '../../components/ml/criteria/network_to_crite
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { ConditionalFlexGroup } from './network';
 
-const DomainsTableManage = manageQuery(DomainsTable);
 const TlsTableManage = manageQuery(TlsTable);
 const UsersTableManage = manageQuery(UsersTable);
 const IpOverviewManage = manageQuery(IpOverview);
@@ -137,7 +134,6 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     </IpOverviewQuery>
 
                     <EuiHorizontalRule />
-                    <EuiSpacer />
 
                     <ConditionalFlexGroup direction="column">
                       <EuiFlexItem>
@@ -232,48 +228,6 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         </NetworkTopNFlowQuery>
                       </EuiFlexItem>
                     </ConditionalFlexGroup>
-
-                    <EuiSpacer />
-                    <DomainsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      flowTarget={flowTarget}
-                      ip={ip}
-                      skip={isInitializing}
-                      sourceId="default"
-                      startDate={from}
-                      type={networkModel.NetworkType.details}
-                    >
-                      {({
-                        id,
-                        inspect,
-                        isInspected,
-                        domains,
-                        totalCount,
-                        pageInfo,
-                        loading,
-                        loadPage,
-                        refetch,
-                      }) => (
-                        <DomainsTableManage
-                          data={domains}
-                          indexPattern={indexPattern}
-                          id={id}
-                          inspect={inspect}
-                          flowTarget={flowTarget}
-                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                          ip={ip}
-                          isInspect={isInspected}
-                          loading={loading}
-                          loadPage={loadPage}
-                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          totalCount={totalCount}
-                          type={networkModel.NetworkType.details}
-                        />
-                      )}
-                    </DomainsQuery>
 
                     <EuiSpacer />
 

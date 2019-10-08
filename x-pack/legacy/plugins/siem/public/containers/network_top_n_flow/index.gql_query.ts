@@ -6,7 +6,7 @@
 
 import gql from 'graphql-tag';
 
-export const networkTopNFlowQuery = gql`
+export const networkTopNFlowQueryString = `
   query GetNetworkTopNFlowQuery(
     $sourceId: ID!
     $ip: String
@@ -95,4 +95,8 @@ export const networkTopNFlowQuery = gql`
       }
     }
   }
+`;
+
+export const networkTopNFlowQuery = gql`
+  ${networkTopNFlowQueryString}
 `;
