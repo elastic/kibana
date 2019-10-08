@@ -14,7 +14,7 @@ import {
 } from '../../../src/core/public';
 
 export type JobId = string;
-export type JobStatus = 'completed' | 'processing' | 'failed';
+export type JobStatus = 'completed' | 'pending' | 'processing' | 'failed';
 
 export type HttpFn = () => HttpServiceBase;
 export type NotificationsFn = () => NotificationsStart;

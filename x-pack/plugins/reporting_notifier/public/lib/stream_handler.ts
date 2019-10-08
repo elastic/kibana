@@ -31,7 +31,7 @@ import {
   getWarningMaxSizeToast,
   getGeneralErrorToast,
 } from '../components';
-import { jobQueueClient } from './job_queue';
+import { jobQueueClient as defaultJobQueueClient } from './job_queue';
 
 function updateStored(jobIds: JobId[]): void {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
@@ -52,7 +52,11 @@ export class ReportingNotifierStreamHandler {
   private getManagementLink: ManagementLinkFn;
   private getDownloadLink: DownloadReportFn;
 
-  constructor(private httpFn: HttpFn, private notificationsFn: NotificationsFn) {
+  constructor(
+    private httpFn: HttpFn,
+    private notificationsFn: NotificationsFn,
+    private jobQueueClient = defaultJobQueueClient
+  ) {
     this.getManagementLink = () => {
       return httpFn().basePath.prepend(REPORTING_MANAGEMENT_HOME);
     };
@@ -64,9 +68,12 @@ export class ReportingNotifierStreamHandler {
   /*
    * Use Kibana Toast API to show our messages
    */
-  public showNotifications({ completed: completedJobs, failed: failedJobs }: JobStatusBuckets) {
+  public async showNotifications({
+    completed: completedJobs,
+    failed: failedJobs,
+  }: JobStatusBuckets): Promise<JobStatusBuckets> {
     // notifications with download link
-    completedJobs.forEach((job: JobSummary) => {
+    for (const job of completedJobs) {
       if (job.csvContainsFormulas) {
         this.notificationsFn().toasts.addWarning(
           getWarningFormulasToast(job, this.getManagementLink, this.getDownloadLink)
@@ -80,15 +87,15 @@ export class ReportingNotifierStreamHandler {
           getSuccessToast(job, this.getManagementLink, this.getDownloadLink)
         );
       }
-    });
+    }
 
     // no download link available
-    failedJobs.forEach(async (job: JobSummary) => {
-      const content = await jobQueueClient.getContent(this.httpFn, job.id);
+    for (const job of failedJobs) {
+      const content = await this.jobQueueClient.getContent(this.httpFn, job.id);
       this.notificationsFn().toasts.addDanger(
         getFailureToast(content, job, this.getManagementLink)
       );
-    });
+    }
     return { completed: completedJobs, failed: failedJobs };
   }
 
@@ -97,14 +104,14 @@ export class ReportingNotifierStreamHandler {
    * session storage) but have non-processing job status on the server
    */
   public findChangedStatusJobs(storedJobs: JobId[]): Rx.Observable<JobStatusBuckets> {
-    return Rx.from(jobQueueClient.findForJobIds(this.httpFn, storedJobs)).pipe(
+    return Rx.from(this.jobQueueClient.findForJobIds(this.httpFn, storedJobs)).pipe(
       map((jobs: SourceJob[]) => {
         const completedJobs: JobSummary[] = [];
         const failedJobs: JobSummary[] = [];
         const pending: JobId[] = [];
 
         // add side effects to storage
-        jobs.forEach((job: SourceJob) => {
+        for (const job of jobs) {
           const {
             _id: jobId,
             _source: { status: jobStatus },
@@ -118,7 +125,7 @@ export class ReportingNotifierStreamHandler {
               pending.push(jobId);
             }
           }
-        });
+        }
         updateStored(pending); // refresh the storage of pending job IDs, minus completed and failed job IDs
 
         return { completed: completedJobs, failed: failedJobs };
