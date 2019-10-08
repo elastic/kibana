@@ -51,8 +51,8 @@ export const WaffleInventorySwitcher = (props: Props) => {
             onClick: goToHost,
           },
           {
-            name: 'Kubernets',
-            icon: 'kubernets',
+            name: 'Kubernetes',
+            icon: 'kubernetes',
             onClick: goToK8,
           },
           {
@@ -83,7 +83,7 @@ export const WaffleInventorySwitcher = (props: Props) => {
       id="contextMenu"
       button={
         <EuiButton iconType="arrowDown" iconSide="right" onClick={openPopover}>
-          {selectedText}
+          View: {selectedText}
         </EuiButton>
       }
       isOpen={isOpen}

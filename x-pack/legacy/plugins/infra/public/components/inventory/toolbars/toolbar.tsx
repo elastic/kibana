@@ -5,23 +5,44 @@
  */
 
 import React from 'react';
-import { InfraNodeType } from '../../../graphql/types';
-import { HostToolbar } from './host_toolbar';
-import { PodToolbar } from './pod_toolbar';
-import { ContainerToolbar } from './container_toolbar';
+import { StaticIndexPattern } from 'ui/index_patterns';
+import { Action } from 'typescript-fsa';
+import {
+  InfraNodeType,
+  InfraSnapshotMetricInput,
+  InfraSnapshotGroupbyInput,
+} from '../../../graphql/types';
+import { HostToolbarItems } from './host_toolbar_items';
+import { PodToolbarItems } from './pod_toolbar_items';
+import { ContainerToolbarItems } from './container_toolbar_items';
+import { ToolbarWrapper } from './toolbar_wrapper';
+
+import { waffleOptionsSelectors } from '../../../store';
+import { InfraGroupByOptions } from '../../../lib/lib';
 
 export interface ToolbarProps {
-  nodeType: InfraNodeType;
+  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => StaticIndexPattern;
+  changeMetric: (payload: InfraSnapshotMetricInput) => Action<InfraSnapshotMetricInput>;
+  changeGroupBy: (payload: InfraSnapshotGroupbyInput[]) => Action<InfraSnapshotGroupbyInput[]>;
+  changeCustomOptions: (payload: InfraGroupByOptions[]) => Action<InfraGroupByOptions[]>;
+  customOptions: ReturnType<typeof waffleOptionsSelectors.selectCustomOptions>;
+  groupBy: ReturnType<typeof waffleOptionsSelectors.selectGroupBy>;
+  metric: ReturnType<typeof waffleOptionsSelectors.selectMetric>;
+  nodeType: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
 }
+
+const withProps = (Element: (props: ToolbarProps) => JSX.Element) => {
+  return <ToolbarWrapper>{props => <Element {...props} />}</ToolbarWrapper>;
+};
 
 export const Toolbar = (props: ToolbarProps) => {
   switch (props.nodeType) {
     case InfraNodeType.host:
-      return <HostToolbar {...props} />;
+      return withProps(HostToolbarItems);
     case InfraNodeType.pod:
-      return <PodToolbar {...props} />;
+      return withProps(PodToolbarItems);
     case InfraNodeType.container:
-      return <ContainerToolbar {...props} />;
+      return withProps(ContainerToolbarItems);
     default:
       return null;
   }
