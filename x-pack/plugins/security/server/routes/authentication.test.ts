@@ -31,8 +31,7 @@ describe('SAML authentication routes', () => {
       logger: loggingServiceMock.create().get(),
       config: { authc: { providers: ['saml'] } } as ConfigType,
       authc,
-      getLegacyAPI: () =>
-        ({ cspRules: 'test-csp-rule', serverBasePath: '/test-base-path' } as LegacyAPI),
+      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
     });
   });
 
@@ -44,8 +43,7 @@ describe('SAML authentication routes', () => {
       logger: loggingServiceMock.create().get(),
       config: { authc: { providers: ['basic'] } } as ConfigType,
       authc: authenticationMock.create(),
-      getLegacyAPI: () =>
-        ({ cspRules: 'test-csp-rule', serverBasePath: '/test-base-path' } as LegacyAPI),
+      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
     });
 
     const samlRoutePathPredicate = ([{ path }]: [{ path: string }, any]) =>

@@ -527,7 +527,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
-        '/base-path/api/security/saml/capture-url-fragment'
+        '/mock-server-basepath/api/security/saml/capture-url-fragment'
       );
       expect(authenticationResult.state).toEqual({ redirectURL: '/base-path/s/foo/some-path' });
     });
@@ -746,7 +746,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
-        '/base-path/api/security/saml/capture-url-fragment'
+        '/mock-server-basepath/api/security/saml/capture-url-fragment'
       );
       expect(authenticationResult.state).toEqual({ redirectURL: '/base-path/s/foo/some-path' });
     });
@@ -819,7 +819,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
-        '/base-path/api/security/saml/capture-url-fragment'
+        '/mock-server-basepath/api/security/saml/capture-url-fragment'
       );
       expect(authenticationResult.state).toEqual({ redirectURL: '/base-path/s/foo/some-path' });
     });

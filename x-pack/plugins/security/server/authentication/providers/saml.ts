@@ -571,10 +571,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return this.authenticateViaHandshake(request, '');
     }
 
-    // We should use `serverBasePath` here as soon as it's provided by the core. Using request scoped
-    // base path doesn't hurt, but isn't consistent with the rest of API routes.
-    return AuthenticationResult.redirectTo(`${basePath}/api/security/saml/capture-url-fragment`, {
-      state: { redirectURL },
-    });
+    return AuthenticationResult.redirectTo(
+      `${this.options.basePath.serverBasePath}/api/security/saml/capture-url-fragment`,
+      { state: { redirectURL } }
+    );
   }
 }

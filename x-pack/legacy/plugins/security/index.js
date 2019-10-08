@@ -138,7 +138,6 @@ export const security = (kibana) => new kibana.Plugin({
         server.plugins.kibana.systemApi
       ),
       cspRules: createCSPRuleString(config.get('csp.rules')),
-      serverBasePath: config.get('server.basePath'),
     });
 
     const plugin = this;
