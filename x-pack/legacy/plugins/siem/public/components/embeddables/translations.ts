@@ -132,3 +132,17 @@ export const ASN = i18n.translate(
     defaultMessage: 'ASN',
   }
 );
+
+export const SOURCE = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.lineContent.sourceLabel',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const DESTINATION = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.lineContent.destinationLabel',
+  {
+    defaultMessage: 'Destination',
+  }
+);

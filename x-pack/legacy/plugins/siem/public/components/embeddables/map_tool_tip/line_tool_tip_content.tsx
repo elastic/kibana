@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { SourceDestinationArrows } from '../../source_destination/source_destination_arrows';
 import { SUM_OF_DESTINATION_BYTES, SUM_OF_SOURCE_BYTES } from '../map_config';
 import { FeatureProperty } from '../types';
+import * as i18n from '../translations';
 
 const FlowBadge = styled(EuiBadge)`
   height: 45px;
@@ -37,7 +38,7 @@ export const LineToolTipContent = React.memo<LineToolTipContentProps>(
         <EuiFlexItem>
           <FlowBadge color="hollow">
             <EuiFlexGroupStyled direction="column">
-              <EuiFlexItem grow={false}>{'Source'}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{i18n.SOURCE}</EuiFlexItem>
             </EuiFlexGroupStyled>
           </FlowBadge>
         </EuiFlexItem>
@@ -50,7 +51,7 @@ export const LineToolTipContent = React.memo<LineToolTipContentProps>(
         <EuiFlexItem>
           <FlowBadge color="hollow">
             <EuiFlexGroupStyled>
-              <EuiFlexItem grow={false}>{'Destination'}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{i18n.DESTINATION}</EuiFlexItem>
             </EuiFlexGroupStyled>
           </FlowBadge>
         </EuiFlexItem>
