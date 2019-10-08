@@ -49,7 +49,20 @@ export function SharePageProvider({ getService, getPageObjects }) {
       await testSubjects.waitForDeleted(menuPanel);
     }
 
+    /**
+     * if there are more entries in the share menu, the permalinks entry has to be clicked first
+     * else the selection isn't displayed. this happens if you're testing against an instance
+     * with xpack features enabled, where there's also a csv sharing option
+     * in a pure OSS environment, the permalinks sharing panel is displayed initially
+     */
+    async openPermaLinks() {
+      if(await testSubjects.exists('sharePanel-Permalinks')) {
+        await testSubjects.click(`sharePanel-Permalinks`);
+      }
+    }
+
     async getSharedUrl() {
+      await this.openPermaLinks();
       return await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
     }
 
@@ -68,6 +81,7 @@ export function SharePageProvider({ getService, getPageObjects }) {
     }
 
     async exportAsSavedObject() {
+      await this.openPermaLinks();
       return await testSubjects.click('exportAsSavedObject');
     }
 
