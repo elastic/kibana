@@ -17,26 +17,4 @@
  * under the License.
  */
 
-import { AxiosError, AxiosResponse } from 'axios';
-
-export interface AxiosRequestError extends AxiosError {
-  response: undefined;
-}
-
-export interface AxiosResponseError<T> extends AxiosError {
-  response: AxiosResponse<T>;
-}
-
-export const isAxiosRequestError = (error: any): error is AxiosRequestError => {
-  return error && error.code === undefined && error.response === undefined;
-};
-
-export const isAxiosResponseError = (error: any): error is AxiosResponseError<any> => {
-  return error && error.code !== undefined && error.response !== undefined;
-};
-
-export const isConcliftOnGetError = (error: any) => {
-  return (
-    isAxiosResponseError(error) && error.config.method === 'GET' && error.response.status === 409
-  );
-};
+export { runFailedTestsReporterCli } from './run_failed_tests_reporter_cli';
