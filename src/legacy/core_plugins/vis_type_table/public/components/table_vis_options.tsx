@@ -19,7 +19,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { get } from 'lodash';
-import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -73,19 +73,19 @@ function TableOptions({
 
   return (
     <EuiPanel paddingSize="s">
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="visTypeTable.params.showMetricsLabel.optionsTitle"
-            defaultMessage="Options"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <NumberInputOption
-        label={i18n.translate('visTypeTable.params.perPageLabel', {
-          defaultMessage: 'Rows per page',
-        })}
+        label={
+          <>
+            <FormattedMessage
+              id="visTypeTable.params.perPageLabel"
+              defaultMessage="Rows per page"
+            />{' '}
+            <EuiIconTip
+              content="Leaving this field empty means it will use number of buckets from the response."
+              position="right"
+            />
+          </>
+        }
         isInvalid={!isPerPageValid}
         min={1}
         paramName="perPage"
