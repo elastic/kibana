@@ -33,14 +33,14 @@ import {
 } from '../types';
 
 interface Arguments {
-  align: TextAlignment;
-  color: string;
-  family: FontFamily;
-  italic: boolean;
-  lHeight: number | null;
-  size: number;
-  underline: boolean;
-  weight: FontWeight;
+  align?: TextAlignment;
+  color?: string;
+  family?: FontFamily;
+  italic?: boolean;
+  lHeight?: number | null;
+  size?: number;
+  underline?: boolean;
+  weight?: FontWeight;
 }
 
 export function font(): ExpressionFunction<'font', null, Arguments, Style> {
@@ -88,6 +88,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
         types: ['boolean'],
       },
       lHeight: {
+        default: null,
         aliases: ['lineHeight'],
         help: i18n.translate('interpreter.functions.font.args.lHeightHelpText', {
           defaultMessage: 'The line height in pixels',
@@ -126,7 +127,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       },
     },
     fn: (_context, args) => {
-      if (!Object.values(FontWeight).includes(args.weight)) {
+      if (!Object.values(FontWeight).includes(args.weight!)) {
         throw new Error(
           i18n.translate('interpreter.functions.font.invalidFontWeightErrorMessage', {
             defaultMessage: "Invalid font weight: '{weight}'",
@@ -136,7 +137,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
           })
         );
       }
-      if (!Object.values(TextAlignment).includes(args.align)) {
+      if (!Object.values(TextAlignment).includes(args.align!)) {
         throw new Error(
           i18n.translate('interpreter.functions.font.invalidTextAlignmentErrorMessage', {
             defaultMessage: "Invalid text alignment: '{align}'",

@@ -59,6 +59,9 @@ export interface AppMountContext {
         notifications: NotificationsStart;
         overlays: OverlayStart;
         uiSettings: UiSettingsClientContract;
+        injectedMetadata: {
+            getInjectedVar: (name: string, defaultValue?: any) => unknown;
+        };
     };
 }
 
@@ -235,6 +238,10 @@ export interface CoreSetup {
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     http: HttpSetup;
+    // @deprecated
+    injectedMetadata: {
+        getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    };
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
@@ -253,6 +260,10 @@ export interface CoreStart {
     http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
+    // @deprecated
+    injectedMetadata: {
+        getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    };
     // (undocumented)
     notifications: NotificationsStart;
     // (undocumented)

@@ -5,12 +5,12 @@
  */
 
 import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { toastNotifications } from 'ui/notify';
 import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
 import { KFetchError } from '../../../../../../src/legacy/ui/public/kfetch/kfetch_error';
+import { useKibanaCore } from '../../../observability/public';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -51,6 +51,11 @@ export function useFetcher(
     initialState?: unknown;
   } = {}
 ) {
+  const {
+    notifications: {
+      toasts: { addWarning }
+    }
+  } = useKibanaCore();
   const { preservePreviousData = true } = options;
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
@@ -93,7 +98,7 @@ export function useFetcher(
       } catch (e) {
         const err = e as KFetchError;
         if (!didCancel) {
-          toastNotifications.addWarning({
+          addWarning({
             title: i18n.translate('xpack.apm.fetcher.error.title', {
               defaultMessage: `Error while fetching resource`
             }),

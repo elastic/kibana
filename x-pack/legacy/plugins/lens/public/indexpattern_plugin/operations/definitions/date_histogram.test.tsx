@@ -354,7 +354,7 @@ describe('date_histogram', () => {
       expect(instance.find(EuiRange).prop('value')).toEqual(2);
     });
 
-    it('should render disabled switch and no level of detail control for auto interval', () => {
+    it('should render disabled switch and no time intervals control for auto interval', () => {
       const instance = shallow(
         <InlineOptions
           state={state}
