@@ -98,7 +98,7 @@ export const AnomalyDetectionPanel: FC = () => {
           return ml.results.getMaxAnomalyScore(group.jobIds, twentyFourHoursAgo, latestTimestamp);
         });
 
-      const results = await Promise.all(promises.map(p => p.catch(() => undefined))); // promises.map(p => p.catch(() => undefined))
+      const results = await Promise.all(promises.map(p => p.catch(() => undefined)));
       const tempGroups = { ...groupsObject };
       // Check results for each group's promise index and update state
       Object.keys(scores).forEach(groupId => {
