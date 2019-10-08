@@ -29,7 +29,7 @@ export async function getMetrics(req, indexPattern, metricSet = [], filters = []
     min = max - (numOfBuckets * bucketSize * 1000);
   }
 
-  return Promise.map(metricSet, metric => {
+  return Bluebird.map(metricSet, metric => {
     // metric names match the literal metric name, but they can be supplied in groups or individually
     let metricNames;
 
