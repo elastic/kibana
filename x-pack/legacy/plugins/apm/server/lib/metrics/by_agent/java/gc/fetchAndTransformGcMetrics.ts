@@ -10,6 +10,7 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
+import { sum } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { Setup } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
@@ -76,11 +77,6 @@ export async function fetchAndTransformGcMetrics({
             field: `${LABEL_NAME}`
           },
           aggs: {
-            average: {
-              avg: {
-                field: fieldName
-              }
-            },
             over_time: {
               date_histogram: getMetricsDateHistogramParams(start, end),
               aggs: {
@@ -128,7 +124,22 @@ export async function fetchAndTransformGcMetrics({
     const label = poolBucket.key;
     const timeseriesData = poolBucket.over_time;
 
-    const overallValue = poolBucket.average.value;
+    const data = (idx(timeseriesData, _ => _.buckets) || []).map(bucket => {
+      // derivative/value will be undefined for the first hit and if the `max` value is null
+      const y =
+        'value' in bucket && bucket.value.value !== null
+          ? bucket.value.value
+          : null;
+
+      return {
+        y,
+        x: bucket.key
+      };
+    });
+
+    const values = data.map(coordinate => coordinate.y).filter(y => y !== null);
+
+    const overallValue = sum(values) / values.length;
 
     return {
       title: label,
@@ -136,18 +147,7 @@ export async function fetchAndTransformGcMetrics({
       type: chartBase.type,
       color: colors[i],
       overallValue,
-      data: (idx(timeseriesData, _ => _.buckets) || []).map((bucket, index) => {
-        // derivative/value will be undefined for the first hit and if the `max` value is null
-        const y =
-          'value' in bucket && bucket.value.value !== null
-            ? bucket.value.value
-            : 0;
-
-        return {
-          y,
-          x: bucket.key
-        };
-      })
+      data
     };
   });
 

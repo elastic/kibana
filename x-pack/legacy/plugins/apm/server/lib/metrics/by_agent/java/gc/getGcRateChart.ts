@@ -26,7 +26,7 @@ const chartBase: ChartBase = {
   }),
   key: 'gc_count_line_chart',
   type: 'linemark',
-  yUnit: 'number',
+  yUnit: 'integer',
   series
 };
 
