@@ -193,17 +193,19 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getFieldsTabCount() {
       return retry.try(async () => {
-        const text = await testSubjects.getVisibleText('tab-count-indexedFields');
-        return text.replace(/\((.*)\)/, '$1');
+        const text = await testSubjects.getVisibleText('tab-indexedFields');
+        const index = text.indexOf('(');
+        return text.substring(index).replace(/\((.*)\)/, '$1');
       });
     }
 
     async getScriptedFieldsTabCount() {
-      const selector = '[data-test-subj="tab-count-scriptedFields"]';
+      const selector = '[data-test-subj="tab-scriptedFields"]';
       return await retry.try(async () => {
         const theText = await (await find.byCssSelector(selector))
           .getVisibleText();
-        return theText.replace(/\((.*)\)/, '$1');
+        const index = theText.indexOf('(');
+        return theText.substring(index).replace(/\((.*)\)/, '$1');
       });
     }
 
@@ -230,13 +232,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setFieldTypeFilter(type) {
       await find.clickByCssSelector(
-        'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]'
+        'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[value="' + type + '"]'
       );
     }
 
     async setScriptedFieldLanguageFilter(language) {
       await find.clickByCssSelector(
-        'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' +
+        'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[value="' +
             language +
             '"]'
       );
