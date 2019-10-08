@@ -18,6 +18,7 @@ import {
   IndexPattern,
 } from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
+
 import {
   GraphState,
   datasourceSelector,
@@ -31,6 +32,7 @@ export interface OuterSearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
   onQuerySubmit: (query: string) => void;
+
   confirmWipeWorkspace: (onConfirm: () => void) => void;
   indexPatternProvider: IndexPatternProvider;
 }

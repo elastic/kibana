@@ -75,7 +75,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
         return;
       }
 
-      comboBoxElement.scrollIntoViewIfNecessary();
+      await comboBoxElement.scrollIntoViewIfNecessary();
       await this.setFilterValue(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
 
