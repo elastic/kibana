@@ -9,11 +9,11 @@ import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { RedirectToHostsPage, RedirectToHostDetailsPage } from './redirect_to_hosts';
-import { RedirectToNetworkPage } from './redirect_to_network';
+import { RedirectToNetworkPage, RedirectToIpDetailsPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
 import { RedirectToTimelinesPage } from './redirect_to_timelines';
 import { HostsTableType } from '../../store/hosts/model';
-
+import { NetworkRouteType } from '../../pages/network/navigation/types';
 interface LinkToPageProps {
   match: RouteMatch<{}>;
 }
@@ -37,8 +37,12 @@ export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
 
     <Route exact path={`${match.url}/:pageName(network)`} component={RedirectToNetworkPage} />
     <Route
-      path={`${match.url}/:pageName(network)/ip/:detailName`}
+      path={`${match.url}/:pageName(network)/:detailName/:tabName(${NetworkRouteType.ips}|${NetworkRouteType.tls}|${NetworkRouteType.anomalies}|${NetworkRouteType.dns})`}
       component={RedirectToNetworkPage}
+    />
+    <Route
+      path={`${match.url}/:pageName(network)/ip/:detailName`}
+      component={RedirectToIpDetailsPage}
     />
     <Route path={`${match.url}/:pageName(timelines)`} component={RedirectToTimelinesPage} />
     <Redirect to="/" />

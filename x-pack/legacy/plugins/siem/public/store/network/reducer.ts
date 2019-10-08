@@ -75,6 +75,14 @@ export const initialNetworkState: NetworkState = {
         },
         isPtrIncluded: false,
       },
+      [NetworkTableType.tls]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        tlsSortField: {
+          field: TlsFields._id,
+          direction: Direction.desc,
+        },
+      },
     },
     filterQuery: null,
     filterQueryDraft: null,
