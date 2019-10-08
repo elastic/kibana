@@ -495,11 +495,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
             <EuiPanel>
-              <ModuleJobs
-                jobs={jobs}
-                jobPrefix={formState.jobPrefix}
-                isSaving={saveState === SAVE_STATE.SAVING}
-              />
+              <ModuleJobs jobs={jobs} jobPrefix={formState.jobPrefix} saveState={saveState} />
             </EuiPanel>
             <EuiSpacer size="m" />
             <EuiPanel>

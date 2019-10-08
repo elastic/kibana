@@ -12,19 +12,22 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
 } from '@elastic/eui';
-import { ModuleJobUI } from '../page';
+import { ModuleJobUI, SAVE_STATE } from '../page';
 
 interface ModuleJobsProps {
   jobs: ModuleJobUI[];
   jobPrefix: string;
-  isSaving: boolean;
+  saveState: SAVE_STATE;
 }
 
-export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) => {
+const SETUP_RESULTS_WIDTH = '200px';
+
+export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) => {
+  const isSaving = saveState === SAVE_STATE.SAVING;
   return (
     <>
       <EuiTitle size="s">
@@ -33,10 +36,48 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) =
         </h4>
       </EuiTitle>
 
+      {saveState !== SAVE_STATE.SAVING && saveState !== SAVE_STATE.NOT_SAVED && (
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="s">
+          <EuiFlexItem style={{ width: SETUP_RESULTS_WIDTH }} grow={false}>
+            <EuiFlexGroup justifyContent="spaceAround" responsive={false} gutterSize="s">
+              <EuiFlexItem grow={1}>
+                <EuiText size="s" textAlign="center">
+                  <FormattedMessage
+                    id="xpack.ml.newJob.simple.recognize.jobLabel"
+                    defaultMessage="Job"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <EuiText size="s" textAlign="center">
+                  <FormattedMessage
+                    id="xpack.ml.newJob.simple.recognize.datafeedLabel"
+                    defaultMessage="Datafeed"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <EuiText size="s" textAlign="center">
+                  <FormattedMessage
+                    id="xpack.ml.newJob.simple.recognize.runningLabel"
+                    defaultMessage="Running"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+
       <ul>
         {jobs.map(({ id, config: { description }, setupResult, datafeedResult }) => (
           <li key={id}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              justifyContent="spaceBetween"
+              responsive={false}
+            >
               <EuiFlexItem>
                 <EuiText size="s" color="secondary">
                   {jobPrefix}
@@ -59,110 +100,82 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, isSaving }) =
                   </EuiText>
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ width: '200px' }}>
+              <EuiFlexItem grow={false} style={{ width: SETUP_RESULTS_WIDTH }}>
                 {isSaving && <EuiLoadingSpinner size="m" />}
                 {setupResult && datafeedResult && (
-                  <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem>
-                      <EuiText
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    wrap={false}
+                    responsive={false}
+                    justifyContent="spaceAround"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        type={setupResult.success ? 'check' : 'cross'}
                         color={setupResult.success ? 'secondary' : 'danger'}
-                        size="xs"
-                        className="eui-textNoWrap"
-                        textAlign="center"
-                      >
-                        <EuiIcon
-                          type={setupResult.success ? 'check' : 'cross'}
-                          color={setupResult.success ? 'secondary' : 'danger'}
-                          size="s"
-                          aria-label={
-                            setupResult.success
-                              ? i18n.translate(
-                                  'xpack.ml.newJob.simple.recognize.job.savedAriaLabel',
-                                  {
-                                    defaultMessage: 'Saved',
-                                  }
-                                )
-                              : i18n.translate(
-                                  'xpack.ml.newJob.simple.recognize.job.saveFailedAriaLabel',
-                                  {
-                                    defaultMessage: 'Save failed',
-                                  }
-                                )
-                          }
-                        />
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.jobLabel"
-                          defaultMessage="Job"
-                        />
-                      </EuiText>
+                        size="m"
+                        aria-label={
+                          setupResult.success
+                            ? i18n.translate(
+                                'xpack.ml.newJob.simple.recognize.job.savedAriaLabel',
+                                {
+                                  defaultMessage: 'Saved',
+                                }
+                              )
+                            : i18n.translate(
+                                'xpack.ml.newJob.simple.recognize.job.saveFailedAriaLabel',
+                                {
+                                  defaultMessage: 'Save failed',
+                                }
+                              )
+                        }
+                      />
                     </EuiFlexItem>
 
-                    <EuiFlexItem>
-                      <EuiText
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        type={datafeedResult.success ? 'check' : 'cross'}
                         color={datafeedResult.success ? 'secondary' : 'danger'}
-                        size="xs"
-                        className="eui-textNoWrap"
-                        textAlign="center"
-                      >
-                        <EuiIcon
-                          type={datafeedResult.success ? 'check' : 'cross'}
-                          color={datafeedResult.success ? 'secondary' : 'danger'}
-                          size="s"
-                          aria-label={
-                            setupResult.success
-                              ? i18n.translate(
-                                  'xpack.ml.newJob.simple.recognize.datafeed.savedAriaLabel',
-                                  {
-                                    defaultMessage: 'Saved',
-                                  }
-                                )
-                              : i18n.translate(
-                                  'xpack.ml.newJob.simple.recognize.datafeed.saveFailedAriaLabel',
-                                  {
-                                    defaultMessage: 'Save failed',
-                                  }
-                                )
-                          }
-                        />
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.datafeedLabel"
-                          defaultMessage="Datafeed"
-                        />
-                      </EuiText>
+                        size="m"
+                        aria-label={
+                          setupResult.success
+                            ? i18n.translate(
+                                'xpack.ml.newJob.simple.recognize.datafeed.savedAriaLabel',
+                                {
+                                  defaultMessage: 'Saved',
+                                }
+                              )
+                            : i18n.translate(
+                                'xpack.ml.newJob.simple.recognize.datafeed.saveFailedAriaLabel',
+                                {
+                                  defaultMessage: 'Save failed',
+                                }
+                              )
+                        }
+                      />
                     </EuiFlexItem>
 
-                    <EuiFlexItem>
-                      <EuiText
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        type={datafeedResult.started ? 'check' : 'cross'}
                         color={datafeedResult.started ? 'secondary' : 'danger'}
-                        size="xs"
-                        className="eui-textNoWrap"
-                        textAlign="center"
-                      >
-                        <EuiIcon
-                          type={datafeedResult.started ? 'check' : 'cross'}
-                          color={datafeedResult.started ? 'secondary' : 'danger'}
-                          size="s"
-                          aria-label={
-                            setupResult.success
-                              ? i18n.translate(
-                                  'xpack.ml.newJob.simple.recognize.running.startedAriaLabel',
-                                  {
-                                    defaultMessage: 'Started',
-                                  }
-                                )
-                              : i18n.translate(
-                                  'xpack.ml.newJob.simple.recognize.running.startFailedAriaLabel',
-                                  {
-                                    defaultMessage: 'Save failed',
-                                  }
-                                )
-                          }
-                        />
-                        <FormattedMessage
-                          id="xpack.ml.newJob.simple.recognize.runningLabel"
-                          defaultMessage="Running"
-                        />
-                      </EuiText>
+                        size="m"
+                        aria-label={
+                          setupResult.success
+                            ? i18n.translate(
+                                'xpack.ml.newJob.simple.recognize.running.startedAriaLabel',
+                                {
+                                  defaultMessage: 'Started',
+                                }
+                              )
+                            : i18n.translate(
+                                'xpack.ml.newJob.simple.recognize.running.startFailedAriaLabel',
+                                {
+                                  defaultMessage: 'Start failed',
+                                }
+                              )
+                        }
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 )}
