@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { parseFile } from '../util/file_parser';
 import { MAX_FILE_SIZE } from '../../common/constants/file_import';
+import _ from 'lodash';
 
 const ACCEPTABLE_FILETYPES = [
   'json',
@@ -117,13 +118,15 @@ export class JsonIndexFilePicker extends Component {
     return fileNameOnly.toLowerCase();
   }
 
-  setFileProgress = ({ featuresProcessed, bytesProcessed, totalBytes }) => {
+  // It's necessary to throttle progress. Updates that are too frequent cause
+  // issues (update failure) in the nested progress component
+  setFileProgress = _.debounce(({ featuresProcessed, bytesProcessed, totalBytes }) => {
+    console.log(featuresProcessed);
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
-    const boolTriggerUpdate = (percentageProcessed - this.state.percentageProcessed) > 4;
-    if (this._isMounted && this.state.fileParseActive && boolTriggerUpdate) {
+    if (this._isMounted && this.state.fileParseActive) {
       this.setState({ featuresProcessed, percentageProcessed });
     }
-  }
+  }, 150);
 
   async _parseFile(file) {
     const {
@@ -162,7 +165,11 @@ export class JsonIndexFilePicker extends Component {
     if (!this._isMounted) {
       return;
     }
-    this.setState({ percentageProcessed: 0, featuresProcessed: 0 });
+    this.setState({
+      percentageProcessed: 0,
+      featuresProcessed: 0,
+      fileParseActive: false
+    });
     if (!parsedFileResult) {
       resetFileAndIndexSettings();
       return;
