@@ -38,7 +38,7 @@ export class AgentsLib {
     perPage: number,
     kuery?: string
   ): Promise<ReturnTypeList<Agent>> => {
-    // ts-ignore
+    // @ts-ignore
     let ESQuery;
     if (kuery) {
       ESQuery = await this.elasticsearch.convertKueryToEsQuery(kuery);
