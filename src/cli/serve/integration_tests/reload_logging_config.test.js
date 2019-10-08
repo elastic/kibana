@@ -21,7 +21,6 @@ import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 
 import { safeDump } from 'js-yaml';
@@ -59,7 +58,7 @@ describe('Server logging configuration', function () {
     isJson = true;
     setLoggingJson(true);
 
-    mkdirp.sync(tempDir);
+    fs.mkdirSync(tempDir, { recursive: true });
   });
 
   afterEach(() => {
