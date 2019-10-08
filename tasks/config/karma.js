@@ -109,8 +109,7 @@ module.exports = function (grunt) {
       singleRun: true,
       reporters: ['coverage'],
       coverageReporter: {
-        // reporters: [{ type: 'html', dir: 'coverage' }, { type: 'text-summary' }],
-        reporters: [{ type: 'json-summary', dir: 'kibana-coverage' }],
+        reporters: [{ type: 'html', dir: 'coverage' }, { type: 'text-summary' }],
       },
     },
   };
