@@ -2135,6 +2135,86 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
+    it('does not pass references if omitted', async () => {
+      const objects = [
+        {
+          type: 'index-pattern',
+          id: `logstash-no-ref`,
+          attributes: { title: `Testing no-ref` },
+          options: { }
+        }
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      const [, { body: [, { doc: firstDoc }] }] = callAdminCluster.mock.calls[0];
+
+      expect(firstDoc).not.toMatchObject({
+        references: [],
+      });
+    });
+
+    it('passes references if they are provided', async () => {
+      const objects = [
+        generateSavedObject({
+          options: {
+            references: [
+              {
+                name: 'ref_0',
+                type: 'test',
+                id: '1',
+              },
+            ],
+          }
+        })
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      const [, { body: [, { doc }] } ] = callAdminCluster.mock.calls[0];
+
+      expect(doc).toMatchObject({
+        references: [{
+          name: 'ref_0',
+          type: 'test',
+          id: '1',
+        }],
+      });
+    });
+
+    it('passes empty references array if empty references array is provided', async () => {
+      const objects = [
+        {
+          type: 'index-pattern',
+          id: `logstash-no-ref`,
+          attributes: { title: `Testing no-ref` },
+          options: {
+            references: []
+          }
+        }
+      ];
+
+      mockValidResponse(objects);
+
+      await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+
+      const [, { body: [, { doc }] } ] = callAdminCluster.mock.calls[0];
+
+      expect(doc).toMatchObject({
+        references: [],
+      });
+    });
+
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
 
       const objects = [

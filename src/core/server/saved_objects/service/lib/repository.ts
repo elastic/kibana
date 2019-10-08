@@ -715,7 +715,7 @@ export class SavedObjectsRepository {
 
       const {
         attributes,
-        options: { references = [], namespace, version },
+        options: { references, namespace, version },
       } = object;
 
       const documentToSave = {
@@ -723,6 +723,10 @@ export class SavedObjectsRepository {
         updated_at: time,
         references,
       };
+
+      if (!Array.isArray(documentToSave.references)) {
+        delete documentToSave.references;
+      }
 
       const expectedResult = {
         type,
