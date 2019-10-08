@@ -121,7 +121,6 @@ export class JsonIndexFilePicker extends Component {
   // It's necessary to throttle progress. Updates that are too frequent cause
   // issues (update failure) in the nested progress component
   setFileProgress = _.debounce(({ featuresProcessed, bytesProcessed, totalBytes }) => {
-    console.log(featuresProcessed);
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
     if (this._isMounted && this.state.fileParseActive) {
       this.setState({ featuresProcessed, percentageProcessed });
