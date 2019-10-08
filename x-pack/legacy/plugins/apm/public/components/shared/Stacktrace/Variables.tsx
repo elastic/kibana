@@ -15,13 +15,6 @@ interface Props {
 }
 
 export class Variables extends React.Component<Props> {
-  public localVariablesToogleButtonLabel() {
-    return i18n.translate(
-      'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
-      { defaultMessage: 'Local variables' }
-    );
-  }
-
   public render() {
     if (!this.props.vars) {
       return null;
@@ -32,7 +25,7 @@ export class Variables extends React.Component<Props> {
         <EuiSpacer />
         <EuiAccordion
           id="local-variables"
-          buttonContent={this.localVariablesToogleButtonLabel()}
+          buttonContent={i18n.translate('xpack.apm.stacktraceTab.localVariablesToogleButtonLabel', { defaultMessage: 'Local variables' })}
         >
           <React.Fragment>
             <DottedKeyValueTable data={this.props.vars} maxDepth={5} />
