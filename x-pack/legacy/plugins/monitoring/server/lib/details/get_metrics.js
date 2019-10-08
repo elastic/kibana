@@ -12,7 +12,7 @@ import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 import { getTimezone } from '../get_timezone';
 
-export async function getMetrics(req, indexPattern, metricSet = [], filters = [], metricOptions = {}, numOfBuckets = 0) {
+export async function getMetrics(req, indexPattern, metricSet = [], filters = [], metricOptions = {}, numOfBuckets = 0, groupBy = null) {
   checkParam(indexPattern, 'indexPattern in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
@@ -40,7 +40,7 @@ export async function getMetrics(req, indexPattern, metricSet = [], filters = []
     }
 
     return Bluebird.map(metricNames, metricName => {
-      return getSeries(req, indexPattern, metricName, metricOptions, filters, { min, max, bucketSize, timezone });
+      return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, { min, max, bucketSize, timezone });
     });
   })
     .then(rows => {

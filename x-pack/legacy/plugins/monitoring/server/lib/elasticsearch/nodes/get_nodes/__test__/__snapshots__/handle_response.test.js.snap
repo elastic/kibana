@@ -25,6 +25,8 @@ Array [
 ]
 `;
 
+exports[`map response of nodes data should handle empty pageOfNodes 1`] = `Array []`;
+
 exports[`map response of nodes data should handle empty shardStats 1`] = `
 Array [
   Object {

@@ -71,7 +71,8 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
 
-import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
+import { setup as data } from '../../../../data/public/legacy';
 import { npStart } from 'ui/new_platform';
 
 const { savedQueryService } = data.search.services;
@@ -422,7 +423,10 @@ function discoverController(
   };
 
   $scope.applyFilters = filters => {
-    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
+    queryFilter.addFilters(restOfFilters);
+    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
+
     $scope.state.$newFilters = [];
   };
 
