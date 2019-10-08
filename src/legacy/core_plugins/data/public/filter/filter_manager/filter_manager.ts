@@ -173,7 +173,7 @@ export class FilterManager {
     }
   }
 
-  public async removeAll() {
+  public removeAll() {
     this.setFilters([]);
   }
 

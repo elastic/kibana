@@ -74,7 +74,7 @@ describe('filter_manager', () => {
       fetchSubscription.unsubscribe();
     }
 
-    await filterManager.removeAll();
+    filterManager.removeAll();
   });
 
   describe('observing', () => {
@@ -536,7 +536,7 @@ describe('filter_manager', () => {
   describe('remove filters', () => {
     test('remove on empty should do nothing and not fire events', async () => {
       updateSubscription = filterManager.getUpdates$().subscribe(updateListener);
-      await filterManager.removeAll();
+      filterManager.removeAll();
       expect(updateListener.called).toBeFalsy();
       expect(filterManager.getFilters()).toHaveLength(0);
     });
@@ -547,7 +547,7 @@ describe('filter_manager', () => {
       filterManager.setFilters([f1, f2]);
 
       updateSubscription = filterManager.getUpdates$().subscribe(updateListener);
-      await filterManager.removeAll();
+      filterManager.removeAll();
       expect(updateListener.called).toBeTruthy();
       expect(filterManager.getFilters()).toHaveLength(0);
     });
@@ -655,7 +655,7 @@ describe('filter_manager', () => {
       expect(globalStateStub.filters).toHaveLength(2);
       expect(appStateStub.filters).toHaveLength(1);
 
-      await filterManager.removeAll();
+      filterManager.removeAll();
       expect(globalStateStub.filters).toHaveLength(0);
       expect(appStateStub.filters).toHaveLength(0);
     });
