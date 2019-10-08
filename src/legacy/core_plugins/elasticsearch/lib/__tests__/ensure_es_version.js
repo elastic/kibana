@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
@@ -74,13 +74,13 @@ describe('plugins/elasticsearch', () => {
       }
 
       const cluster = server.plugins.elasticsearch.getCluster('admin');
-      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Bluebird.resolve({ nodes: nodes }));
     }
 
     function setNodeWithoutHTTP(version) {
       const nodes = { 'node-without-http': { version, ip: 'ip' } };
       const cluster = server.plugins.elasticsearch.getCluster('admin');
-      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Bluebird.resolve({ nodes: nodes }));
     }
 
     it('returns true with single a node that matches', async () => {
