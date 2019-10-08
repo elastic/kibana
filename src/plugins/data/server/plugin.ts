@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
-import { searchService, ISearchSetup } from './search';
+import { ISearchSetup } from './search';
 import { SearchService } from './search/search_service';
 
 export interface DataPluginSetup {
@@ -28,7 +28,7 @@ export interface DataPluginSetup {
 export class DataServerPlugin implements Plugin<DataPluginSetup> {
   private readonly searchService: SearchService;
   constructor(initializerContext: PluginInitializerContext) {
-    this.searchService = searchService(initializerContext);
+    this.searchService = new SearchService(initializerContext);
   }
   public setup(core: CoreSetup) {
     return {

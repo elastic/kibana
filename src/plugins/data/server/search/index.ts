@@ -17,13 +17,6 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/server';
-import { SearchService } from './search_service';
-
-export function searchService(initializerContext: PluginInitializerContext) {
-  return new SearchService(initializerContext);
-}
-
 export { ISearchSetup } from './i_search_setup';
 export * from '../../common';
 

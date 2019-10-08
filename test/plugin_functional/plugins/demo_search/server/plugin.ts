@@ -26,6 +26,15 @@ interface IDemoSearchExplorerDeps {
   data: DataPluginSetup;
 }
 
+/**
+ * Add the typescript mappings for our search strategy to the request and
+ * response types. This allows typescript to require the right shapes if
+ * making the call:
+ * const response = context.search.search(request, DEMO_SEARCH_STRATEGY);
+ *
+ * If the caller does not pass in the right `request` shape, typescript will
+ * complain. The caller will also get a typed response.
+ */
 declare module '../../../../../src/plugins/data/server' {
   export interface IRequestTypesMap {
     [DEMO_SEARCH_STRATEGY]: IDemoRequest;
