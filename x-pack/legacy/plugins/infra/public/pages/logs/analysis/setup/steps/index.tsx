@@ -13,24 +13,33 @@ import { useAnalysisSetupState } from '../../../../../containers/logs/log_analys
 import { InitialConfiguration } from './initial_configuration';
 import { SetupProcess } from './setup_process';
 
+type SetupHandler = (startTime?: number | undefined, endTime?: number | undefined) => void;
+
 interface AnalysisSetupStepsProps {
-  setup: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  retry: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  viewResults: () => void;
+  cleanupAndSetup: SetupHandler;
   indexPattern: string;
+  setup: SetupHandler;
   setupStatus: SetupStatus;
+  viewResults: () => void;
 }
 
 export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps> = ({
-  setup: setupModule,
-  retry: retrySetup,
-  viewResults,
+  cleanupAndSetup: cleanupAndSetupModule,
   indexPattern,
+  setup: setupModule,
   setupStatus,
+  viewResults,
 }: AnalysisSetupStepsProps) => {
-  const { setup, retry, setStartTime, setEndTime, startTime, endTime } = useAnalysisSetupState({
+  const {
+    setup,
+    cleanupAndSetup,
+    setStartTime,
+    setEndTime,
+    startTime,
+    endTime,
+  } = useAnalysisSetupState({
     setupModule,
-    retrySetup,
+    cleanupAndSetupModule,
   });
 
   const steps = [
@@ -56,7 +65,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
           setupStatus={setupStatus}
           viewResults={viewResults}
           setup={setup}
-          retry={retry}
+          cleanupAndSetup={cleanupAndSetup}
           indexPattern={indexPattern}
         />
       ),

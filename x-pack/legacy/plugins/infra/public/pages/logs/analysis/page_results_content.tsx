@@ -33,8 +33,9 @@ import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { FirstUseCallout } from './first_use';
 import { LogRateResults } from './sections/log_rate';
+import { LogAnalysisJobProblemIndicator } from '../../../components/logging/log_analysis_job_status';
 
-const JOB_STATUS_POLLING_INTERVAL = 10000;
+const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 export const AnalysisResultsContent = ({
   sourceId,
@@ -124,7 +125,13 @@ export const AnalysisResultsContent = ({
     [setAutoRefresh]
   );
 
-  const { fetchJobStatus, jobStatus } = useContext(LogAnalysisJobs.Context);
+  const {
+    fetchJobStatus,
+    jobStatus,
+    setupStatus,
+    viewSetupForReconfiguration,
+    viewSetupForUpdate,
+  } = useContext(LogAnalysisJobs.Context);
 
   useInterval(() => {
     fetchJobStatus();
@@ -168,6 +175,12 @@ export const AnalysisResultsContent = ({
                     results={logEntryRate}
                     setTimeRange={handleChartTimeRangeChange}
                     timeRange={queryTimeRange}
+                  />
+                  <LogAnalysisJobProblemIndicator
+                    jobStatus={jobStatus['log-entry-rate']}
+                    setupStatus={setupStatus}
+                    onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
+                    onRecreateMlJobForUpdate={viewSetupForUpdate}
                   />
                 </EuiPageContentBody>
               </EuiPageContent>

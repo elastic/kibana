@@ -5,26 +5,31 @@
  */
 import { useState, useCallback } from 'react';
 
+type SetupHandler = (startTime?: number | undefined, endTime?: number | undefined) => void;
+
 interface Props {
-  setupModule: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  retrySetup: (startTime?: number | undefined, endTime?: number | undefined) => void;
+  cleanupAndSetupModule: SetupHandler;
+  setupModule: SetupHandler;
 }
 
-export const useAnalysisSetupState = ({ setupModule, retrySetup }: Props) => {
+export const useAnalysisSetupState = ({ setupModule, cleanupAndSetupModule }: Props) => {
   const [startTime, setStartTime] = useState<number | undefined>(undefined);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
+
   const setup = useCallback(() => {
     return setupModule(startTime, endTime);
   }, [setupModule, startTime, endTime]);
-  const retry = useCallback(() => {
-    return retrySetup(startTime, endTime);
-  }, [retrySetup, startTime, endTime]);
+
+  const cleanupAndSetup = useCallback(() => {
+    return cleanupAndSetupModule(startTime, endTime);
+  }, [cleanupAndSetupModule, startTime, endTime]);
+
   return {
-    setup,
-    retry,
-    setStartTime,
-    setEndTime,
-    startTime,
+    cleanupAndSetup,
     endTime,
+    setEndTime,
+    setStartTime,
+    setup,
+    startTime,
   };
 };
