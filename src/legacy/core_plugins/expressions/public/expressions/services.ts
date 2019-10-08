@@ -20,22 +20,20 @@
 import { IInterpreter } from './lib/_types';
 import { Start as IInspector } from '../../../../../plugins/inspector/public';
 
-let interpreter: IInterpreter | undefined;
-let inspector: IInspector;
+const createGetterSetter = <T extends object>(name: string) => {
+  let value: T;
 
-export const getInterpreter = (): IInterpreter => {
-  if (!interpreter) throw new Error('interpreter was not set');
-  return interpreter;
+  const get = (): T => {
+    if (!value) throw new Error(`${name} was not set`);
+    return value;
+  };
+
+  const set = (newValue: T) => {
+    value = newValue;
+  };
+
+  return [get, set];
 };
 
-export const setInterpreter = (inspectorInstance: IInterpreter) => {
-  interpreter = inspectorInstance;
-};
-
-export const getInspector = (): IInspector => {
-  return inspector;
-};
-
-export const setInspector = (inspectorInstance: IInspector) => {
-  inspector = inspectorInstance;
-};
+export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
+export const [getInterpreter, setInterpreter] = createGetterSetter<IInterpreter>('Interpreter');
