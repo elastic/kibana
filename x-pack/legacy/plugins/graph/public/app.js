@@ -203,30 +203,26 @@ app.controller('graphuiPlugin', function (
   checkLicense(kbnBaseUrl);
 
   function handleError(err) {
-    return checkLicense(kbnBaseUrl)
-      .then(() => {
-        const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
-          defaultMessage: 'Graph Error',
-          description: '"Graph" is a product name and should not be translated.',
-        });
-        if (err instanceof Error) {
-          toastNotifications.addError(err, {
-            title: toastTitle,
-          });
-        } else {
-          toastNotifications.addDanger({
-            title: toastTitle,
-            text: String(err),
-          });
-        }
+    checkLicense(kbnBaseUrl);
+    const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
+      defaultMessage: 'Graph Error',
+      description: '"Graph" is a product name and should not be translated.',
+    });
+    if (err instanceof Error) {
+      toastNotifications.addError(err, {
+        title: toastTitle,
       });
+    } else {
+      toastNotifications.addDanger({
+        title: toastTitle,
+        text: String(err),
+      });
+    }
   }
 
-  function handleHttpError(error) {
-    return checkLicense(kbnBaseUrl)
-      .then(() => {
-        toastNotifications.addDanger(formatAngularHttpError(error));
-      });
+  async function handleHttpError(error) {
+    checkLicense(kbnBaseUrl);
+    toastNotifications.addDanger(formatAngularHttpError(error));
   }
 
   // Replacement function for graphClientWorkspace's comms so
