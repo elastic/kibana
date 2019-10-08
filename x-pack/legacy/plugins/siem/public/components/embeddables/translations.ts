@@ -77,6 +77,13 @@ export const FILTER_FOR_VALUE = i18n.translate(
   }
 );
 
+export const MAP_TOOL_TIP_ERROR = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.errorTitle',
+  {
+    defaultMessage: 'Error loading map features',
+  }
+);
+
 export const MAP_TOOL_TIP_FEATURES_FOOTER = (currentFeature: number, totalFeatures: number) =>
   i18n.translate('xpack.siem.components.embeddables.mapToolTip.footerLabel', {
     values: { currentFeature, totalFeatures },

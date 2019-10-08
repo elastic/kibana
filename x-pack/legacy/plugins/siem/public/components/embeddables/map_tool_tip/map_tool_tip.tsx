@@ -17,6 +17,7 @@ import { ToolTipFooter } from './tooltip_footer';
 import { LineToolTipContent } from './line_tool_tip_content';
 import { PointToolTipContent } from './point_tool_tip_content';
 import { Loader } from '../../loader';
+import * as i18n from '../translations';
 
 export const MapToolTip = React.memo<MapToolTipProps>(
   ({
@@ -30,6 +31,7 @@ export const MapToolTip = React.memo<MapToolTipProps>(
   }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isLoadingNextFeature, setIsLoadingNextFeature] = useState<boolean>(false);
+    const [isError, setIsError] = useState<boolean>(false);
     const [featureIndex, setFeatureIndex] = useState<number>(0);
     const [featureProps, setFeatureProps] = useState<FeatureProperty[]>([]);
     const [featurePropsFilters, setFeaturePropsFilters] = useState<Record<string, object>>({});
@@ -56,30 +58,36 @@ export const MapToolTip = React.memo<MapToolTipProps>(
         if (features[featureIndex] != null) {
           const layerId = features[featureIndex].layerId;
           const featureId = features[featureIndex].id;
-          const [featureProperties, featureGeo, layerNameString] = await Promise.all([
-            loadFeatureProperties({ layerId, featureId }),
-            loadFeatureGeometry({ layerId, featureId }),
-            getLayerName(layerId),
-          ]);
 
-          // Fetch ES filters in advance while loader is present to prevent lag when user clicks to add filter
-          const featurePropsPromises = await Promise.all(
-            featureProperties.map(property => property.getESFilters())
-          );
-          const featurePropsESFilters = featureProperties.reduce(
-            (acc, property, index) => ({
-              ...acc,
-              [property._propertyKey]: featurePropsPromises[index],
-            }),
-            {}
-          );
+          try {
+            const featureGeo = loadFeatureGeometry({ layerId, featureId });
+            const [featureProperties, layerNameString] = await Promise.all([
+              loadFeatureProperties({ layerId, featureId }),
+              getLayerName(layerId),
+            ]);
 
-          setFeatureProps(featureProperties);
-          setFeaturePropsFilters(featurePropsESFilters);
-          setFeatureGeometry(featureGeo);
-          setLayerName(layerNameString);
-          setIsLoading(false);
-          setIsLoadingNextFeature(false);
+            // Fetch ES filters in advance while loader is present to prevent lag when user clicks to add filter
+            const featurePropsPromises = await Promise.all(
+              featureProperties.map(property => property.getESFilters())
+            );
+            const featurePropsESFilters = featureProperties.reduce(
+              (acc, property, index) => ({
+                ...acc,
+                [property._propertyKey]: featurePropsPromises[index],
+              }),
+              {}
+            );
+
+            setFeatureProps(featureProperties);
+            setFeaturePropsFilters(featurePropsESFilters);
+            setFeatureGeometry(featureGeo);
+            setLayerName(layerNameString);
+          } catch (e) {
+            setIsError(true);
+          } finally {
+            setIsLoading(false);
+            setIsLoadingNextFeature(false);
+          }
         }
       };
 
@@ -91,6 +99,14 @@ export const MapToolTip = React.memo<MapToolTipProps>(
         .sort()
         .join(),
     ]);
+
+    if (isError) {
+      return (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>{i18n.MAP_TOOL_TIP_ERROR}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
 
     return isLoading && !isLoadingNextFeature ? (
       <EuiFlexGroup justifyContent="spaceAround">

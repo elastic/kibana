@@ -68,7 +68,7 @@ export interface RenderTooltipContentParams {
   isLocked: boolean;
   getLayerName(layerId: string): Promise<string>;
   loadFeatureProperties({ layerId, featureId }: LoadFeatureProps): Promise<FeatureProperty[]>;
-  loadFeatureGeometry({ layerId, featureId }: LoadFeatureProps): Promise<FeatureGeometry>;
+  loadFeatureGeometry({ layerId, featureId }: LoadFeatureProps): FeatureGeometry;
 }
 
 export type MapToolTipProps = Partial<RenderTooltipContentParams>;
