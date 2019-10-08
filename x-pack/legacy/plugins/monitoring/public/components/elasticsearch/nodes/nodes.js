@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { ClusterStatus } from '../cluster_status';
-import { EuiMonitoringTable } from '../../table';
+import { EuiMonitoringSSPTable } from '../../table';
 import { MetricCell, OfflineCell } from './cells';
 import {
   EuiLink,
@@ -222,8 +222,8 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
 };
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
-  const { sorting, pagination, onTableChange, clusterUuid, setupMode } = props;
-  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode);
+  const { sorting, pagination, onTableChange, clusterUuid, setupMode, fetchMoreData } = props;
+  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid);
 
   // Merge the nodes data with the setup data if enabled
   const nodes = props.nodes || [];
@@ -325,7 +325,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
         {disableInternalCollectionForMigrationMessage}
         {netNewUserMessage}
         <EuiPageContent>
-          <EuiMonitoringTable
+          <EuiMonitoringSSPTable
             className="elasticsearchNodesTable"
             rows={nodes}
             columns={columns}
@@ -346,9 +346,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
               },
             }}
             onTableChange={onTableChange}
-            executeQueryOptions={{
-              defaultFields: ['name']
-            }}
+            fetchMoreData={fetchMoreData}
           />
         </EuiPageContent>
       </EuiPageBody>

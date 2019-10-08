@@ -8,7 +8,7 @@ import React from 'react';
 import {
   EuiBasicTable,
   EuiSpacer,
-  EuiSearchBar
+  EuiSearchBar,
 } from '@elastic/eui';
 
 export function EuiMonitoringSSPTable({
