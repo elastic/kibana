@@ -15,16 +15,16 @@ export {
   OnFormUpdateArg,
   ValidationFunc,
   FieldConfig,
-} from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
   FormRow,
   Field,
   TextField,
   SelectField,
-} from '../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
+} from '../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {
   fieldValidators,
   fieldFormatters,
-} from '../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
+} from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';

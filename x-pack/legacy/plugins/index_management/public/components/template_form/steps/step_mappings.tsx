@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -13,26 +12,26 @@ import {
   EuiTitle,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiFormRow,
   EuiText,
-  EuiCodeEditor,
-  EuiCode,
 } from '@elastic/eui';
+
 import { mappingDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
-import { useJsonStep } from './use_json_step';
+import { MappingsEditor, OnUpdateHandler } from '../../mappings_editor';
 
 export const StepMappings: React.FunctionComponent<StepProps> = ({
   template,
   setDataGetter,
   onStepValidityChange,
 }) => {
-  const { content, setContent, error } = useJsonStep({
-    prop: 'mappings',
-    defaultValue: template.mappings,
-    setDataGetter,
-    onStepValidityChange,
-  });
+  const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(({ isValid, getData }) => {
+    const isMappingsValid = isValid === undefined ? true : isValid;
+    onStepValidityChange(isMappingsValid);
+    setDataGetter(() => {
+      const mappings = getData();
+      return Promise.resolve({ isValid: isMappingsValid, data: { mappings } });
+    });
+  }, []);
 
   return (
     <div data-test-subj="stepMappings">
@@ -78,61 +77,9 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
       <EuiSpacer size="l" />
 
       {/* Mappings code editor */}
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.stepMappings.fieldMappingsLabel"
-            defaultMessage="Mappings"
-          />
-        }
-        helpText={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.stepMappings.mappingsEditorHelpText"
-            defaultMessage="Use JSON format: {code}"
-            values={{
-              code: (
-                <EuiCode>
-                  {JSON.stringify({
-                    properties: {
-                      name: { type: 'text' },
-                    },
-                  })}
-                </EuiCode>
-              ),
-            }}
-          />
-        }
-        isInvalid={Boolean(error)}
-        error={error}
-        fullWidth
-      >
-        <EuiCodeEditor
-          mode="json"
-          theme="textmate"
-          width="100%"
-          height="500px"
-          setOptions={{
-            showLineNumbers: false,
-            tabSize: 2,
-          }}
-          editorProps={{
-            $blockScrolling: Infinity,
-          }}
-          showGutter={false}
-          minLines={6}
-          aria-label={i18n.translate(
-            'xpack.idxMgmt.templateForm.stepMappings.fieldMappingsAriaLabel',
-            {
-              defaultMessage: 'Mappings editor',
-            }
-          )}
-          value={content}
-          onChange={(udpated: string) => {
-            setContent(udpated);
-          }}
-          data-test-subj="mappingsEditor"
-        />
-      </EuiFormRow>
+      <MappingsEditor defaultValue={template.mappings} onUpdate={onMappingsEditorUpdate} />
+
+      <EuiSpacer size="m" />
     </div>
   );
 };

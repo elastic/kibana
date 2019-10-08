@@ -9,7 +9,6 @@ import { EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../mappings_state';
 import { validateUniqueName } from '../../lib';
-import { DocumentFieldsHeaders } from './document_fields_header';
 import { FieldsList, CreateField, EditField } from './fields';
 
 export const DocumentFields = () => {
@@ -67,7 +66,6 @@ export const DocumentFields = () => {
 
   return (
     <>
-      <DocumentFieldsHeaders />
       <FieldsList fields={fields} />
       {renderCreateField()}
       {renderAddFieldButton()}
