@@ -158,7 +158,8 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
       return h.response().code(404);
     }
 
-    if (body.etag === config._source.etag) {
+    // update `applied_by_agent` field if etags match
+    if (body.etag === config._source.etag && !config._source.applied_by_agent) {
       markAppliedByAgent({ id: config._id, body: config._source, setup });
     }
 
