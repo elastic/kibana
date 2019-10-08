@@ -4,73 +4,60 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
-import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import React, { useContext } from 'react';
 import { connect } from 'react-redux';
-import { RouteComponentProps } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
-import styled, { css } from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
 import { EmbeddedMap } from '../../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
-import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_network_table';
-import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { manageQuery } from '../../components/page/manage_query';
-import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
-import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
-import { GlobalTime } from '../../containers/global_time';
+import { KpiNetworkComponent } from '../../components/page/network';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { NetworkFilter } from '../../containers/network';
-import { NetworkDnsQuery } from '../../containers/network_dns';
-import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
+import { SiemNavigation } from '../../components/navigation';
+import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
+import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
+
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { FlowTargetNew, LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { InputsModelId } from '../../store/inputs/constants';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 
-const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
-const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
+import { navTabsNetwork } from './nav_tabs';
+import { NetworkComponentProps } from './types';
+
+import { NetworkTabs } from './network_tabs';
+
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
-
-const ConditionalFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    @media only screen and (min-width: 1441px) {
-      flex-direction: row;
-    }
-  `}
-`;
-ConditionalFlexGroup.displayName = 'ConditionalFlexGroup';
-
-interface NetworkComponentReduxProps {
-  filterQuery: string;
-  queryExpression: string;
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
-}
-
-type NetworkComponentProps = NetworkComponentReduxProps & Partial<RouteComponentProps<{}>>;
+const sourceId = 'default';
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
-  ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => (
-    <>
-      <WithSource sourceId="default">
-        {({ indicesExist, indexPattern }) =>
-          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <StickyContainer>
-              <GlobalTime>
-                {({ to, from, setQuery, isInitializing }) => (
+  ({
+    filterQuery,
+    queryExpression,
+    setAbsoluteRangeDatePicker,
+    networkPagePath,
+    to,
+    from,
+    setQuery,
+    isInitializing,
+  }) => {
+    const capabilities = useContext(MlCapabilitiesContext);
+
+    return (
+      <>
+        <WithSource sourceId={sourceId}>
+          {({ indicesExist, indexPattern }) =>
+            indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+              <>
+                <StickyContainer>
                   <>
                     <FiltersGlobal>
                       <NetworkKql
@@ -101,7 +88,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                       endDate={to}
                       filterQuery={filterQuery}
                       skip={isInitializing}
-                      sourceId="default"
+                      sourceId={sourceId}
                       startDate={from}
                     >
                       {({ kpiNetwork, loading, id, inspect, refetch }) => (
@@ -123,167 +110,42 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
                     <EuiSpacer />
 
-                    <ConditionalFlexGroup direction="column">
-                      <EuiFlexItem>
-                        <NetworkTopNFlowQuery
-                          endDate={to}
-                          flowTarget={FlowTargetNew.source}
-                          filterQuery={filterQuery}
-                          skip={isInitializing}
-                          sourceId="default"
-                          startDate={from}
-                          type={networkModel.NetworkType.page}
-                        >
-                          {({
-                            id,
-                            inspect,
-                            isInspected,
-                            loading,
-                            loadPage,
-                            networkTopNFlow,
-                            pageInfo,
-                            refetch,
-                            totalCount,
-                          }) => (
-                            <NetworkTopNFlowTableManage
-                              data={networkTopNFlow}
-                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                              flowTargeted={FlowTargetNew.source}
-                              id={id}
-                              indexPattern={indexPattern}
-                              inspect={inspect}
-                              isInspect={isInspected}
-                              loading={loading}
-                              loadPage={loadPage}
-                              refetch={refetch}
-                              setQuery={setQuery}
-                              showMorePagesIndicator={getOr(
-                                false,
-                                'showMorePagesIndicator',
-                                pageInfo
-                              )}
-                              totalCount={totalCount}
-                              type={networkModel.NetworkType.page}
-                            />
-                          )}
-                        </NetworkTopNFlowQuery>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem>
-                        <NetworkTopNFlowQuery
-                          endDate={to}
-                          flowTarget={FlowTargetNew.destination}
-                          filterQuery={filterQuery}
-                          skip={isInitializing}
-                          sourceId="default"
-                          startDate={from}
-                          type={networkModel.NetworkType.page}
-                        >
-                          {({
-                            id,
-                            inspect,
-                            isInspected,
-                            loading,
-                            loadPage,
-                            networkTopNFlow,
-                            pageInfo,
-                            refetch,
-                            totalCount,
-                          }) => (
-                            <NetworkTopNFlowTableManage
-                              data={networkTopNFlow}
-                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                              flowTargeted={FlowTargetNew.destination}
-                              id={id}
-                              indexPattern={indexPattern}
-                              inspect={inspect}
-                              isInspect={isInspected}
-                              loading={loading}
-                              loadPage={loadPage}
-                              refetch={refetch}
-                              setQuery={setQuery}
-                              showMorePagesIndicator={getOr(
-                                false,
-                                'showMorePagesIndicator',
-                                pageInfo
-                              )}
-                              totalCount={totalCount}
-                              type={networkModel.NetworkType.page}
-                            />
-                          )}
-                        </NetworkTopNFlowQuery>
-                      </EuiFlexItem>
-                    </ConditionalFlexGroup>
-
-                    <EuiSpacer />
-
-                    <NetworkDnsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      skip={isInitializing}
-                      sourceId="default"
-                      startDate={from}
-                      type={networkModel.NetworkType.page}
-                    >
-                      {({
-                        totalCount,
-                        loading,
-                        networkDns,
-                        pageInfo,
-                        loadPage,
-                        id,
-                        inspect,
-                        isInspected,
-                        refetch,
-                      }) => (
-                        <NetworkDnsTableManage
-                          data={networkDns}
-                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                          id={id}
-                          inspect={inspect}
-                          isInspect={isInspected}
-                          loading={loading}
-                          loadPage={loadPage}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-                          totalCount={totalCount}
-                          type={networkModel.NetworkType.page}
-                        />
-                      )}
-                    </NetworkDnsQuery>
-
-                    <EuiSpacer />
-
-                    <AnomaliesNetworkTable
-                      startDate={from}
-                      endDate={to}
-                      skip={isInitializing}
-                      type={networkModel.NetworkType.page}
-                      narrowDateRange={(score, interval) => {
-                        const fromTo = scoreIntervalToDateTime(score, interval);
-                        setAbsoluteRangeDatePicker({
-                          id: 'global',
-                          from: fromTo.from,
-                          to: fromTo.to,
-                        });
-                      }}
+                    <SiemNavigation
+                      navTabs={navTabsNetwork(hasMlUserPermissions(capabilities))}
+                      display={sourceId}
+                      showBorder={true}
                     />
+
+                    <EuiSpacer />
+
+                    <NetworkTabs
+                      to={to}
+                      filterQuery={filterQuery}
+                      isInitializing={isInitializing}
+                      from={from}
+                      type={networkModel.NetworkType.page}
+                      indexPattern={indexPattern}
+                      setQuery={setQuery}
+                      setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                      networkPagePath={networkPagePath}
+                    />
+
+                    <EuiSpacer />
                   </>
-                )}
-              </GlobalTime>
-            </StickyContainer>
-          ) : (
-            <>
-              <HeaderPage title={i18n.PAGE_TITLE} />
-              <NetworkEmptyPage />
-            </>
-          )
-        }
-      </WithSource>
-      <SpyRoute />
-    </>
-  )
+                </StickyContainer>
+              </>
+            ) : (
+              <>
+                <HeaderPage title={i18n.PAGE_TITLE} />
+                <NetworkEmptyPage />
+              </>
+            )
+          }
+        </WithSource>
+        <SpyRoute />
+      </>
+    );
+  }
 );
 
 NetworkComponent.displayName = 'NetworkComponent';
