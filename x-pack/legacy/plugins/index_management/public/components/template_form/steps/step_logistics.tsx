@@ -83,7 +83,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
   });
 
   useEffect(() => {
-    onStepValidityChange(form.isValid);
+    onStepValidityChange(form.isValid === undefined ? true : form.isValid);
   }, [form.isValid]);
 
   useEffect(() => {

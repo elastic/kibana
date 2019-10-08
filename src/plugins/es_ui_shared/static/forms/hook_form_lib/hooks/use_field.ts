@@ -36,13 +36,15 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     deserializer = (value: unknown) => value,
   } = config;
 
-  const [value, setStateValue] = useState(
-    typeof defaultValue === 'function' ? deserializer(defaultValue()) : deserializer(defaultValue)
-  );
+  const initialValue =
+    typeof defaultValue === 'function' ? deserializer(defaultValue()) : deserializer(defaultValue);
+
+  const [value, setStateValue] = useState(initialValue);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
   const [isChangingValue, setIsChangingValue] = useState(false);
+  const [isValidated, setIsValidated] = useState(false);
   const validateCounter = useRef(0);
   const changeCounter = useRef(0);
   const inflightValidation = useRef<Promise<any> | null>(null);
@@ -262,6 +264,7 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
       validationType,
     } = validationData;
 
+    setIsValidated(true);
     setValidating(true);
 
     // By the time our validate function has reached completion, it’s possible
@@ -275,12 +278,10 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
         // This is the most recent invocation
         setValidating(false);
         // Update the errors array
-        setErrors(previousErrors => {
-          // First filter out the validation type we are currently validating
-          const filteredErrors = filterErrors(previousErrors, validationType);
-          return [...filteredErrors, ..._validationErrors];
-        });
+        const filteredErrors = filterErrors(errors, validationType);
+        setErrors([...filteredErrors, ..._validationErrors]);
       }
+
       return {
         isValid: _validationErrors.length === 0,
         errors: _validationErrors,
@@ -358,6 +359,15 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     return errorMessages ? errorMessages : null;
   };
 
+  const reset = () => {
+    setPristine(true);
+    setValidating(false);
+    setIsChangingValue(false);
+    setIsValidated(false);
+    setErrors([]);
+    setValue(initialValue);
+  };
+
   const serializeOutput: FieldHook['__serializeOutput'] = (rawValue = value) =>
     serializer(rawValue);
 
@@ -388,6 +398,7 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     form,
     isPristine,
     isValidating,
+    isValidated,
     isChangingValue,
     onChange,
     getErrorsMessages,
@@ -395,6 +406,7 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     setErrors: _setErrors,
     clearErrors,
     validate,
+    reset,
     __serializeOutput: serializeOutput,
   };
 
