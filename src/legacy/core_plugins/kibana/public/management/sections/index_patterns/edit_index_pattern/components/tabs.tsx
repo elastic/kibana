@@ -47,7 +47,18 @@ export const Tabs = ({ $scope }: Props) => {
     };
   });
 
-  return <EuiTabbedContent tabs={tabs} />;
+  const currentTabIndex = tabContents.findIndex(t => t.index === $scope.state.tab);
+  const currentTab = currentTabIndex !== -1 ? tabs[currentTabIndex] : tabs[0];
+
+  return (
+    <EuiTabbedContent
+      tabs={tabs}
+      initialSelectedTab={currentTab}
+      onTabClick={tab => {
+        $scope.changeTab(tab.id);
+      }}
+    />
+  );
 };
 
 const tabContents = [
@@ -92,7 +103,8 @@ const tabContents = [
           indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
           helpers={{
             redirectToRoute: (obj: any, route: any) => {
-              $scope.kbnUrl.redirectToRoute(obj, route);
+              const url = $scope.kbnUrl.getRouteUrl(obj, route);
+              $scope.kbnUrl.change(url);
               $scope.$apply();
             },
             getFieldInfo: $scope.getFieldInfo,
@@ -140,7 +152,8 @@ const tabContents = [
           scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
           helpers={{
             redirectToRoute: (obj: any, route: any) => {
-              $scope.kbnUrl.redirectToRoute(obj, route);
+              const url = $scope.kbnUrl.getRouteUrl(obj, route);
+              $scope.kbnUrl.change(url);
               $scope.$apply();
             },
             getRouteHref: (obj: any, route: any) => $scope.kbnUrl.getRouteHref(obj, route),

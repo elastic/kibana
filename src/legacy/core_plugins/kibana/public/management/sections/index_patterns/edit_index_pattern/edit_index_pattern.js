@@ -140,13 +140,13 @@ uiModules.get('apps/management')
       $scope[filter] = val || ''; // null causes filter to check for null explicitly
     };
 
-    $scope.changeTab = function (obj) {
-      $state.tab = obj.index;
+    $scope.changeTab = function (index) {
+      $state.tab = index;
       $state.save();
     };
 
     $scope.$watch('state.tab', function (tab) {
-      if (!tab) $scope.changeTab($scope.editSections[0]);
+      if (!tab) $scope.changeTab($scope.editSections[0].index);
     });
 
     $scope.$watchCollection('indexPattern.fields', function () {
