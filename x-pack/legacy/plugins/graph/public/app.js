@@ -48,16 +48,15 @@ import { GraphVisualization } from './components/graph_visualization';
 
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
-import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
+import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
 import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
 } from './helpers/as_observable';
-import { fetchTopNodes } from './services/fetch_top_nodes';
+import { colorChoices } from './helpers/style_choices';
 import {
   createGraphStore,
-  selectedFieldsSelector,
   datasourceSelector,
   hasFieldsSelector
 } from './state_management';
@@ -99,7 +98,6 @@ app.directive('graphListing', function (reactDirective) {
 app.directive('graphApp', function (reactDirective) {
   return reactDirective(GraphApp, [
     ['store', { watchDepth: 'reference' }],
-    ['onFillWorkspace', { watchDepth: 'reference' }],
     ['isInitialized', { watchDepth: 'reference' }],
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['indexPatternProvider', { watchDepth: 'reference' }],
@@ -295,6 +293,9 @@ app.controller('graphuiPlugin', function (
     setLiveResponseFields: (fields) => {
       $scope.liveResponseFields = fields;
     },
+    setUrlTemplates: (urlTemplates) => {
+      $scope.urlTemplates = urlTemplates;
+    },
     getWorkspace: () => {
       return $scope.workspace;
     },
@@ -302,7 +303,11 @@ app.controller('graphuiPlugin', function (
       return $route.current.locals.savedWorkspace;
     },
     notifications: npStart.core.notifications,
+    http: npStart.core.http,
     showSaveModal,
+    setWorkspaceInitialized: () => {
+      $scope.workspaceInitialized = true;
+    },
     savePolicy: chrome.getInjected('graphSavePolicy'),
     changeUrl: (newUrl) => {
       $scope.$evalAsync(() => {
@@ -315,17 +320,18 @@ app.controller('graphuiPlugin', function (
     chrome,
   });
 
+  // register things on scope passed down to react components
   $scope.pluginDataStart = npStart.plugins.data;
   $scope.store = new Storage(window.localStorage);
   $scope.coreStart = npStart.core;
   $scope.loading = false;
-
-  $scope.spymode = 'request';
-
-  const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
-
   $scope.reduxStore = store;
+  $scope.savedWorkspace = $route.current.locals.savedWorkspace;
 
+  // register things for legacy angular UI
+  const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
+  $scope.spymode = 'request';
+  $scope.colors = colorChoices;
   $scope.nodeClick = function (n, $event) {
 
     //Selection logic - shift key+click helps selects multiple nodes
@@ -371,32 +377,6 @@ app.controller('graphuiPlugin', function (
       $scope.setDetail ({ 'inferredEdge': edge });
     }else {
       $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
-    }
-  };
-
-
-  $scope.fillWorkspace = async () => {
-    try {
-      const fields = selectedFieldsSelector(store.getState());
-      const topTermNodes = await fetchTopNodes(
-        npStart.core.http.post,
-        datasourceSelector(store.getState()).current.title,
-        fields
-      );
-      $scope.workspace.mergeGraph({
-        nodes: topTermNodes,
-        edges: []
-      });
-      $scope.workspaceInitialized = true;
-      $scope.workspace.fillInGraph(fields.length * 10);
-    } catch (e) {
-      const message = ('body' in e) ? e.body.message : e.message;
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.graph.fillWorkspaceError',
-          { defaultMessage: 'Fetching top terms failed: {message}', values: { message } }
-        ),
-      });
     }
   };
 
@@ -607,7 +587,5 @@ app.controller('graphuiPlugin', function (
   } else {
     $scope.noIndexPatterns = $route.current.locals.indexPatterns.length === 0;
   }
-
-  $scope.savedWorkspace = $route.current.locals.savedWorkspace;
 });
 

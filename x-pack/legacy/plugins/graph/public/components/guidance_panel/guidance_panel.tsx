@@ -24,6 +24,7 @@ import {
   hasDatasourceSelector,
   hasFieldsSelector,
   requestDatasource,
+  fillWorkspace,
 } from '../../state_management';
 import { IndexPatternSavedObject } from '../../types';
 import { openSourceModal } from '../../services/source_modal';
@@ -226,6 +227,9 @@ export const GuidancePanel = connect(
           title: indexPattern.attributes.title,
         })
       );
+    },
+    onFillWorkspace: () => {
+      dispatch(fillWorkspace());
     },
   })
 )(GuidancePanelComponent);
