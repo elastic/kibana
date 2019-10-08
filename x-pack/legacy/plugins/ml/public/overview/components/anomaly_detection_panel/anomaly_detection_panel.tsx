@@ -143,10 +143,12 @@ export const AnomalyDetectionPanel: FC = () => {
     </Fragment>
   );
 
+  const panelClass = isLoading ? 'mlOverviewPanel__isLoading' : 'mlOverviewPanel';
+
   return (
-    <EuiPanel className="mlOverviewPanel">
+    <EuiPanel className={panelClass}>
       {typeof errorMessage !== 'undefined' && errorDisplay}
-      {isLoading && <EuiLoadingSpinner />}   
+      {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}   
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount === 0 && (
         <EuiEmptyPrompt
           iconType="createSingleMetricJob"
@@ -180,7 +182,7 @@ export const AnomalyDetectionPanel: FC = () => {
           <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData} />
           <EuiSpacer size="m" />
           <div className="mlOverviewPanel__buttons">
-            <EuiButtonEmpty size="s" onClick={onRefresh}>
+            <EuiButtonEmpty size="s" onClick={onRefresh} className="mlOverviewPanel__refreshButton">
               {i18n.translate('xpack.ml.overview.anomalyDetection.refreshJobsButtonText', {
                 defaultMessage: 'Refresh',
               })}
