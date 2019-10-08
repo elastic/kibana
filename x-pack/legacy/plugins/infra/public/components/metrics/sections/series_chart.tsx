@@ -60,7 +60,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
   customColors.set(colors, color || '#999');
   return (
     <AreaSeries
-      id={getSpecId(id)}
+      id={getSpecId(name)}
       name={name}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
@@ -74,7 +74,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
   );
 };
 
-export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
+export const BarChart = ({ color, series, name, stack }: Props) => {
   const style: RecursivePartial<BarSeriesStyle> = {
     rectBorder: {
       stroke: color || void 0,
@@ -87,13 +87,13 @@ export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
   };
   const colors: DataSeriesColorsValues = {
     colorValues: [],
-    specId: getSpecId(id),
+    specId: getSpecId(name),
   };
   const customColors: CustomSeriesColorsMap = new Map();
   customColors.set(colors, color || '#999');
   return (
     <BarSeries
-      id={getSpecId(id)}
+      id={getSpecId(name)}
       name={name}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}

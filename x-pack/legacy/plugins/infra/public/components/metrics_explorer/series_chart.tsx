@@ -8,6 +8,7 @@ import React from 'react';
 import {
   ScaleType,
   getSpecId,
+  SpecId,
   DataSeriesColorsValues,
   CustomSeriesColorsMap,
   AreaSeries,
@@ -32,28 +33,53 @@ interface Props {
   stack: boolean;
 }
 
+interface PropsForCharts extends Props {
+  specId: SpecId;
+  chartId: string;
+  customColors: CustomSeriesColorsMap;
+  yAccessor: string;
+  color: string;
+}
+
 export const MetricExplorerSeriesChart = (props: Props) => {
-  if (MetricsExplorerChartType.bar === props.type) {
-    return <MetricsExplorerBarChart {...props} />;
-  }
-  return <MetricsExplorerAreaChart {...props} />;
-};
-
-export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Props) => {
-  const color =
-    (metric.color && colorTransformer(metric.color)) ||
-    colorTransformer(MetricsExplorerColor.color0);
-
-  const yAccessor = `metric_${id}`;
-  const specId = getSpecId(yAccessor);
+  const yAccessor = `metric_${props.id}`;
+  const label = createMetricLabel(props.metric);
+  const specId = getSpecId(label);
+  const chartId = `series-${props.series.id}-${yAccessor}`;
   const colors: DataSeriesColorsValues = {
     colorValues: [],
     specId,
   };
   const customColors: CustomSeriesColorsMap = new Map();
+  const color =
+    (props.metric.color && colorTransformer(props.metric.color)) ||
+    colorTransformer(MetricsExplorerColor.color0);
   customColors.set(colors, color);
-  const chartId = `series-${series.id}-${yAccessor}`;
 
+  const propsForCharts = {
+    ...props,
+    specId,
+    yAccessor,
+    chartId,
+    color,
+    customColors,
+  };
+
+  if (MetricsExplorerChartType.bar === props.type) {
+    return <MetricsExplorerBarChart {...propsForCharts} />;
+  }
+  return <MetricsExplorerAreaChart {...propsForCharts} />;
+};
+
+export const MetricsExplorerAreaChart = ({
+  specId,
+  yAccessor,
+  chartId,
+  customColors,
+  series,
+  type,
+  stack,
+}: PropsForCharts) => {
   const seriesAreaStyle: RecursivePartial<AreaSeriesStyle> = {
     line: {
       strokeWidth: 2,
@@ -74,7 +100,6 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
     <AreaSeries
       key={chartId}
       id={specId}
-      name={createMetricLabel(metric)}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor="timestamp"
@@ -87,21 +112,15 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
   );
 };
 
-export const MetricsExplorerBarChart = ({ metric, id, series, type, stack }: Props) => {
-  const color =
-    (metric.color && colorTransformer(metric.color)) ||
-    colorTransformer(MetricsExplorerColor.color0);
-
-  const yAccessor = `metric_${id}`;
-  const specId = getSpecId(yAccessor);
-  const colors: DataSeriesColorsValues = {
-    colorValues: [],
-    specId,
-  };
-  const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
-  const chartId = `series-${series.id}-${yAccessor}`;
-
+export const MetricsExplorerBarChart = ({
+  specId,
+  chartId,
+  yAccessor,
+  customColors,
+  series,
+  stack,
+  color,
+}: PropsForCharts) => {
   const seriesBarStyle: RecursivePartial<BarSeriesStyle> = {
     rectBorder: {
       stroke: color,
@@ -116,7 +135,6 @@ export const MetricsExplorerBarChart = ({ metric, id, series, type, stack }: Pro
     <BarSeries
       key={chartId}
       id={specId}
-      name={createMetricLabel(metric)}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor="timestamp"
