@@ -124,8 +124,8 @@ export default function({ getService }: FtrProviderContext) {
           const res = await getMonitorStates(makeApiParams(testMonitorId));
 
           const uniqueIps = new Set<string>();
-          const checkedIps = res.monitorStates.summaries[0].state.checks.forEach<string[]>(
-            (c: any) => uniqueIps.add(c.monitor.ip)
+          res.monitorStates.summaries[0].state.checks.forEach((c: any) =>
+            uniqueIps.add(c.monitor.ip)
           );
 
           expect(uniqueIps.size).to.eql(4);
