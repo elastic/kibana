@@ -154,7 +154,7 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void; editJsonMode: boo
   const previewJsonTitle = i18n.translate('xpack.ml.newJob.wizard.previewJsonButton', {
     defaultMessage: 'Preview JSON',
   });
-  const editJsonTitle = i18n.translate('xpack.ml.newJob.wizard.previewJsonButton', {
+  const editJsonTitle = i18n.translate('xpack.ml.newJob.wizard.editJsonButton', {
     defaultMessage: 'Edit JSON',
   });
   return (

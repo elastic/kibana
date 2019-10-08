@@ -26,7 +26,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
   if (jobCreator.type === JOB_TYPE.ADVANCED) {
     // for advanced jobs, ignore time range warning as the
     // user hasn't selected a time range.
-    idFilterList.push('time_range_short');
+    idFilterList.push(...['time_range_short', 'success_time_range']);
   }
 
   function getJobConfig() {
