@@ -26,7 +26,7 @@ const services = {
 let actionType: ActionType;
 
 beforeAll(() => {
-  const actionTypeRegistry = createActionTypeRegistry();
+  const { actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
 });
 
