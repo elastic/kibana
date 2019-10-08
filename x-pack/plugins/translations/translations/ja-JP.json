@@ -1842,7 +1842,7 @@
     "kbn.management.editIndexPattern.tabs.sourceHeader": "ソースフィルター",
     "kbn.management.editIndexPattern.timeFilterHeader": "時間フィルターフィールド名: {timeFieldName}",
     "kbn.management.editIndexPattern.timeFilterLabel.mappingAPILink": "マッピング API",
-    "kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail": "このページは {indexPatternTitle} インデックス内のすべてのフィールドと、Elasticsearch に記録された各フィールドのコアタイプを一覧表示します。フィールドタイプを変更するには Elasticsearch を使用します",
+    "kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail": "このページは {indexPatternTitle} インデックス内のすべてのフィールドと、Elasticsearch に記録された各フィールドのコアタイプを一覧表示します。フィールドタイプを変更するには Elasticsearch {apiLink}を使用します",
     "kbn.management.editIndexPatternLiveRegionAriaLabel": "インデックスパターン",
     "kbn.management.indexPattern.confirmOverwriteButton": "上書き",
     "kbn.management.indexPattern.confirmOverwriteLabel": "「{title}」に上書きしてよろしいですか？",
