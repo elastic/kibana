@@ -18,6 +18,12 @@
  */
 
 export { withProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
+export {
+  ToolingLog,
+  ToolingLogTextWriter,
+  pickLevelFromFlags,
+  ToolingLogCollectingWriter,
+} from './tooling_log';
 export { createAbsolutePathSerializer } from './serializers';
 export { run, createFailError, createFlagError, combineErrors, isFailError } from './run';
+export * from './axios';

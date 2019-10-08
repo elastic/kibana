@@ -17,27 +17,4 @@
  * under the License.
  */
 
-import Octokit from '@octokit/rest';
-import { markdownMetadata } from './metadata';
-
-export { markdownMetadata };
-
-export function getGithubClient() {
-  const client = new Octokit();
-  client.authenticate({
-    type: 'token',
-    token: process.env.GITHUB_TOKEN
-  });
-
-  return client;
-}
-
-export async function paginate(client, promise) {
-  let response = await promise;
-  let { data } = response;
-  while (client.hasNextPage(response)) {
-    response = await client.getNextPage(response);
-    data = data.concat(response.data);
-  }
-  return data;
-}
+export { runFailedTestsReporterCli } from './run_failed_tests_reporter_cli';

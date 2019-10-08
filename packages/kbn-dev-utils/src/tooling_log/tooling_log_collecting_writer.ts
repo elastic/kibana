@@ -17,7 +17,20 @@
  * under the License.
  */
 
-export { ToolingLog } from './tooling_log';
-export { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
-export { pickLevelFromFlags, LogLevel } from './log_levels';
-export { ToolingLogCollectingWriter } from './tooling_log_collecting_writer';
+import { ToolingLogTextWriter } from './tooling_log_text_writer';
+
+export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
+  messages: string[] = [];
+
+  constructor() {
+    super({
+      level: 'verbose',
+      writeTo: {
+        write: msg => {
+          // trim trailing new line
+          this.messages.push(msg.slice(0, -1));
+        },
+      },
+    });
+  }
+}
