@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { history } from '../../utils/url';
-import { CodeBlock, Position } from '../codeblock/codeblock';
+import { CodeBlock, Position } from '../codeblock';
 
 interface Props {
   query: string;

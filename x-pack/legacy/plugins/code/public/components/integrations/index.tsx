@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 
-import { CodeBlock } from '../codeblock/codeblock';
+import { CodeBlock } from '../codeblock';
 import { history } from '../../utils/url';
 import { FrameHeader } from './frame_header';
 import { RepoTitle } from './repo_title';

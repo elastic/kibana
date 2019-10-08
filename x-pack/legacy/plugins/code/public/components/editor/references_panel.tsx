@@ -19,7 +19,7 @@ import React from 'react';
 import { parseSchema } from '../../../common/uri_util';
 import { GroupedFileResults, GroupedRepoResults } from '../../actions';
 import { history } from '../../utils/url';
-import { CodeBlock, Position } from '../codeblock/codeblock';
+import { CodeBlock, Position } from '../codeblock';
 
 interface Props {
   isLoading: boolean;
