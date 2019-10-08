@@ -10,7 +10,6 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
-import { ActionCreator } from 'typescript-fsa';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { KpiHostsComponent } from '../../components/page/hosts';
@@ -24,7 +23,6 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { InputsModelId } from '../../store/inputs/constants';
 import { SiemNavigation } from '../../components/navigation';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { FiltersGlobal } from '../../components/filters_global';
@@ -32,31 +30,12 @@ import { FiltersGlobal } from '../../components/filters_global';
 import * as i18n from './translations';
 import { navTabsHosts } from './nav_tabs';
 import { HostsTabs } from './hosts_tabs';
+import { HostsComponentProps } from './types';
 
 import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
-
-interface HostsComponentReduxProps {
-  filterQuery: string;
-  kqlQueryExpression: string;
-}
-
-interface HostsComponentDispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
-  hostsPagePath: string;
-}
-
-export type HostsQueryProps = GlobalTimeArgs;
-
-export type HostsComponentProps = HostsComponentReduxProps &
-  HostsComponentDispatchProps &
-  HostsQueryProps;
 
 const HostsComponent = React.memo<HostsComponentProps>(
   ({

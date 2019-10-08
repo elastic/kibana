@@ -1,0 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { ActionCreator } from 'typescript-fsa';
+
+import { InputsModelId } from '../../store/inputs/constants';
+import { GlobalTimeArgs } from '../../containers/global_time';
+
+interface HostsComponentReduxProps {
+  filterQuery: string;
+  kqlQueryExpression: string;
+}
+
+interface HostsComponentDispatchProps {
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
+  hostsPagePath: string;
+}
+
+export type HostsQueryProps = GlobalTimeArgs;
+
+export type HostsComponentProps = HostsComponentReduxProps &
+  HostsComponentDispatchProps &
+  HostsQueryProps;

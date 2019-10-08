@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { hostsModel } from '../../store';
-import { HostsComponentProps } from './hosts';
+import { HostsComponentProps } from './types';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../components/ml/types';
 import { HostsTableType } from '../../store/hosts/model';
