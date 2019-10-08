@@ -4,51 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
 
-import { IpDetailsTableType, NetworkType } from '../../../store/network/model';
+import { NetworkType } from '../../../store/network/model';
 import { ESTermQuery } from '../../../../common/typed_json';
-import { NarrowDateRange } from '../../../components/ml/types';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 import { FlowTarget } from '../../../graphql/types';
 import { InputsModelId } from '../../../store/inputs/constants';
-import { GlobalTimeArgs } from '../../../containers/global_time';
 
 export const type = NetworkType.details;
+
+type SetAbsoluteRangeDatePicker = ActionCreator<{
+  id: InputsModelId;
+  from: number;
+  to: number;
+}>;
+
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
   flowTarget: FlowTarget;
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
 }
 
 interface IPDetailsComponentDispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
-  detailName: string;
+  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 }
 
 export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
-  NetworkQueryProps & { detailName: string };
-
-export type IPDetailsBodyComponentProps = IPDetailsComponentReduxProps &
-  IPDetailsComponentDispatchProps &
-  IPDetailsBodyProps;
-
-type KeIPDetailsNavTabWithoutMlPermission = IpDetailsTableType.tls & IpDetailsTableType.users;
-
-type KeIPDetailsNavTabWithMlPermission = KeIPDetailsNavTabWithoutMlPermission &
-  IpDetailsTableType.anomalies;
-
-export type KeyIPDetailsNavTab =
-  | KeIPDetailsNavTabWithoutMlPermission
-  | KeIPDetailsNavTabWithMlPermission;
+  IPDetailsComponentDispatchProps & { detailName: string };
 
 interface OwnProps {
   type: NetworkType;
@@ -73,15 +56,6 @@ interface OwnProps {
 
 export type NetworkComponentsQueryProps = OwnProps;
 
-export type AnomaliesQueryTabBodyProps = OwnProps & {
-  narrowDateRange: NarrowDateRange;
+export type DomainsQueryTableProps = OwnProps & {
+  indexPattern: StaticIndexPattern;
 };
-
-export type NetworkQueryProps = GlobalTimeArgs;
-
-export interface IPDetailsBodyProps extends NetworkQueryProps {
-  children: CommonChildren | AnonamaliesChildren;
-}
-
-export type CommonChildren = (args: NetworkComponentsQueryProps) => JSX.Element;
-export type AnonamaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;

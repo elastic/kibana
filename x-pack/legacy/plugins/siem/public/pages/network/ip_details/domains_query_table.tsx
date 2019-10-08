@@ -6,14 +6,16 @@
 
 import React from 'react';
 import { getOr } from 'lodash/fp';
+
 import { manageQuery } from '../../../components/page/manage_query';
-import { UsersQuery } from '../../../containers/users';
-import { NetworkComponentsQueryProps } from '../ip_details/types';
-import { UsersTable } from '../../../components/page/network/users_table';
+import { DomainsQuery } from '../../../containers/domains';
+import { DomainsTable } from '../../../components/page/network/domains_table';
 
-const UsersTableManage = manageQuery(UsersTable);
+import { DomainsQueryTableProps } from './types';
 
-export const UsersQueryTabBody = ({
+const DomainsTableManage = manageQuery(DomainsTable);
+
+export const DomainsQueryTable = ({
   endDate,
   filterQuery,
   flowTarget,
@@ -22,8 +24,9 @@ export const UsersQueryTabBody = ({
   skip,
   startDate,
   type,
-}: NetworkComponentsQueryProps) => (
-  <UsersQuery
+  indexPattern,
+}: DomainsQueryTableProps) => (
+  <DomainsQuery
     endDate={endDate}
     filterQuery={filterQuery}
     flowTarget={flowTarget}
@@ -33,14 +36,16 @@ export const UsersQueryTabBody = ({
     startDate={startDate}
     type={type}
   >
-    {({ id, inspect, isInspected, users, totalCount, pageInfo, loading, loadPage, refetch }) => (
-      <UsersTableManage
-        data={users}
+    {({ id, inspect, isInspected, domains, totalCount, pageInfo, loading, loadPage, refetch }) => (
+      <DomainsTableManage
+        data={domains}
+        indexPattern={indexPattern}
         id={id}
         inspect={inspect}
-        isInspect={isInspected}
         flowTarget={flowTarget}
         fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+        ip={ip}
+        isInspect={isInspected}
         loading={loading}
         loadPage={loadPage}
         showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
@@ -50,7 +55,5 @@ export const UsersQueryTabBody = ({
         type={type}
       />
     )}
-  </UsersQuery>
+  </DomainsQuery>
 );
-
-UsersQueryTabBody.displayName = 'UsersQueryTabBody';

@@ -8,20 +8,10 @@ import { Breadcrumb } from 'ui/chrome';
 
 import { decodeIpv6 } from '../../../lib/helpers';
 import { getNetworkUrl } from '../../../components/link_to/redirect_to_network';
-import { networkModel, networkSelectors } from '../../../store/network';
-import { State } from '../../../store';
+import { networkModel } from '../../../store/network';
 import * as i18n from '../translations';
 
 export const type = networkModel.NetworkType.details;
-
-export const makeMapStateToProps = () => {
-  const getNetworkFilterQuery = networkSelectors.networkFilterQueryAsJson();
-  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
-  return (state: State) => ({
-    filterQuery: getNetworkFilterQuery(state, networkModel.NetworkType.details) || '',
-    flowTarget: getIpDetailsFlowTargetSelector(state),
-  });
-};
 
 export const getBreadcrumbs = (ip: string | undefined, search: string[]): Breadcrumb[] => {
   const breadcrumbs = [

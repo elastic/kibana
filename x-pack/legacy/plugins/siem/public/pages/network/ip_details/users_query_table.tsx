@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
 import React from 'react';
+import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../components/page/manage_query';
-import { TlsTable } from '../../../components/page/network/tls_table';
-import { TlsQuery } from '../../../containers/tls';
-import { NetworkComponentsQueryProps } from '../ip_details/types';
+import { UsersQuery } from '../../../containers/users';
+import { NetworkComponentsQueryProps } from './types';
+import { UsersTable } from '../../../components/page/network/users_table';
 
-const TlsTableManage = manageQuery(TlsTable);
+const UsersTableManage = manageQuery(UsersTable);
 
-export const TlsQueryTabBody = ({
+export const UsersQueryTable = ({
   endDate,
   filterQuery,
   flowTarget,
@@ -23,7 +23,7 @@ export const TlsQueryTabBody = ({
   startDate,
   type,
 }: NetworkComponentsQueryProps) => (
-  <TlsQuery
+  <UsersQuery
     endDate={endDate}
     filterQuery={filterQuery}
     flowTarget={flowTarget}
@@ -33,12 +33,13 @@ export const TlsQueryTabBody = ({
     startDate={startDate}
     type={type}
   >
-    {({ id, inspect, isInspected, tls, totalCount, pageInfo, loading, loadPage, refetch }) => (
-      <TlsTableManage
-        data={tls}
+    {({ id, inspect, isInspected, users, totalCount, pageInfo, loading, loadPage, refetch }) => (
+      <UsersTableManage
+        data={users}
         id={id}
         inspect={inspect}
         isInspect={isInspected}
+        flowTarget={flowTarget}
         fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
         loading={loading}
         loadPage={loadPage}
@@ -49,7 +50,7 @@ export const TlsQueryTabBody = ({
         type={type}
       />
     )}
-  </TlsQuery>
+  </UsersQuery>
 );
 
-TlsQueryTabBody.displayName = 'TlsQueryTabBody';
+UsersQueryTable.displayName = 'UsersQueryTable';
