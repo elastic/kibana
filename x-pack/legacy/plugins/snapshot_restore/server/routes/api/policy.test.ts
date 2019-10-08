@@ -361,25 +361,4 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       ).rejects.toThrow();
     });
   });
-
-  describe('executeRetentionHandler()', () => {
-    const mockExecuteRequest = ({} as unknown) as Request;
-
-    it('should return successful ES response', async () => {
-      const mockEsResponse = { acknowledged: true };
-      const callWithRequest = jest.fn().mockResolvedValueOnce(mockEsResponse);
-      const expectedResponse = { ...mockEsResponse };
-
-      await expect(
-        executeRetentionHandler(mockExecuteRequest, callWithRequest, mockResponseToolkit)
-      ).resolves.toEqual(expectedResponse);
-    });
-
-    it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
-      await expect(
-        executeRetentionHandler(mockExecuteRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
-    });
-  });
 });
