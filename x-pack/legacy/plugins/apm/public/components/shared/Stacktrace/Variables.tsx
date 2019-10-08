@@ -24,7 +24,6 @@ const VariablesContainer = styled.div`
   border-top: 1px solid ${theme.euiColorLightShade};
   border-radius: 0 0 ${borderRadius} ${borderRadius};
   padding: ${px(units.half)} ${px(unit)};
-  font-family: ${fontFamily};
 `;
 
 interface Props {
@@ -39,7 +38,6 @@ export class Variables extends React.Component<Props> {
 
     return (
       <React.Fragment>
-        <EuiHorizontalRule margin="none" />
         <VariablesContainer>
           <EuiAccordion
             id="local-variables"
