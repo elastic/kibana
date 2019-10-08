@@ -37,7 +37,7 @@ export default function (kibana) {
       // value from all observables here to be able to synchronously return and create
       // cluster clients afterwards.
       const [esConfig, adminCluster, dataCluster] = await combineLatest(
-        server.newPlatform.setup.core.elasticsearch.legacy.config$,
+        server.newPlatform.__internals.elasticsearch.legacy.config$,
         server.newPlatform.setup.core.elasticsearch.adminClient$,
         server.newPlatform.setup.core.elasticsearch.dataClient$
       ).pipe(

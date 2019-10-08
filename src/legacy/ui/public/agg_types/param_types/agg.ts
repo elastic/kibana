@@ -21,7 +21,7 @@ import { AggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 export class AggParamType extends BaseParamType {
-  makeAgg: (agg: AggConfig, state?: unknown) => AggConfig;
+  makeAgg: (agg: AggConfig, state?: any) => AggConfig;
 
   constructor(config: Record<string, any>) {
     super(config);
