@@ -25,7 +25,6 @@ import Handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
 import imageDiff from 'image-diff';
-import mkdirp from 'mkdirp';
 import moment from 'moment';
 import SimpleGit from 'simple-git';
 
@@ -77,8 +76,8 @@ async function compareScreenshots() {
   const SESSION_SCREENSHOTS_DIR = path.resolve(SCREENSHOTS_DIR, 'session');
 
   // We don't need to create the baseline dir because it's committed.
-  mkdirp.sync(DIFF_SCREENSHOTS_DIR);
-  mkdirp.sync(SESSION_SCREENSHOTS_DIR);
+  fs.mkdirSync(DIFF_SCREENSHOTS_DIR, { recursive: true });
+  fs.mkdirSync(SESSION_SCREENSHOTS_DIR, { recursive: true });
   const files = await readDirAsync(SESSION_SCREENSHOTS_DIR);
   const screenshots = files.filter(file => file.indexOf('.png') !== -1);
 

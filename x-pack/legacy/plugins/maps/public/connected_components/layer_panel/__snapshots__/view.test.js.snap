@@ -5,7 +5,7 @@ exports[`LayerPanel is rendered 1`] = `
   services={
     Object {
       "appName": "maps",
-      "autocomplete": undefined,
+      "data": undefined,
       "store": Storage {
         "clear": [Function],
         "get": [Function],
