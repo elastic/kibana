@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectsClientContract } from 'src/core/server';
 
-import KbnServer from '../../../../server/kbn_server';
+import KbnServer from '../../../../../legacy/server/kbn_server';
 import { createTestServers } from '../../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 

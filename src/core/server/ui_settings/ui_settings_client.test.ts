@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import Chance from 'chance';
 import sinon from 'sinon';
 
-import { UiSettingsService } from './ui_settings_service';
+import { UiSettingsService } from './ui_settings_client';
 import * as createOrUpgradeSavedConfigNS from './create_or_upgrade_saved_config/create_or_upgrade_saved_config';
 import { createObjectsClientStub, savedObjectsClientErrors } from './create_objects_client_stub';
 

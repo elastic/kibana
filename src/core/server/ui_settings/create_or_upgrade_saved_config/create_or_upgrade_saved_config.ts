@@ -18,8 +18,8 @@
  */
 
 import { defaults } from 'lodash';
-import { SavedObjectsClientContract, SavedObjectAttribute } from 'src/core/server';
 import { Legacy } from 'kibana';
+import { SavedObjectsClientContract, SavedObjectAttribute } from '../../saved_objects/types';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
 

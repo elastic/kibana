@@ -21,7 +21,7 @@ import {
   IUiSettingsClient,
   UiSettingsService,
   UiSettingsServiceOptions,
-} from './ui_settings_service';
+} from '../../../../src/core/server/ui_settings'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 
 export type UiSettingsServiceFactoryOptions = Pick<
   UiSettingsServiceOptions,

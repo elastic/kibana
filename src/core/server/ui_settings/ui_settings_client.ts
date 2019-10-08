@@ -20,7 +20,7 @@ import { Legacy } from 'kibana';
 import { defaultsDeep } from 'lodash';
 import Boom from 'boom';
 
-import { SavedObjectsClientContract, SavedObjectAttribute } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 export interface UiSettingsServiceOptions {
