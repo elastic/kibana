@@ -37,15 +37,15 @@ export const logEntryRateAnomaly = rt.type({
   typicalLogEntryRate: rt.number,
 });
 
-export const logEntryRateDataSetRT = rt.type({
+export const logEntryRatePartitionRT = rt.type({
   analysisBucketCount: rt.number,
   anomalies: rt.array(logEntryRateAnomaly),
   averageActualLogEntryRate: rt.number,
-  dataSetId: rt.string,
+  partitionId: rt.string,
 });
 
 export const logEntryRateHistogramBucket = rt.type({
-  dataSets: rt.array(logEntryRateDataSetRT),
+  partitions: rt.array(logEntryRatePartitionRT),
   startTime: rt.number,
 });
 
