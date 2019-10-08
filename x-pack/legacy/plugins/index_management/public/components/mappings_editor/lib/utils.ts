@@ -15,7 +15,7 @@ import {
   SubType,
   ChildFieldName,
 } from '../types';
-import { DATA_TYPE_DEFINITION } from '../constants';
+import { DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
 
 export const getUniqueId = () => {
   return (
@@ -243,3 +243,6 @@ export const shouldDeleteChildFieldsAfterTypeChange = (
 
   return false;
 };
+
+export const canUseMappingsEditor = (maxNestedDepth: number) =>
+  maxNestedDepth < MAX_DEPTH_DEFAULT_EDITOR;

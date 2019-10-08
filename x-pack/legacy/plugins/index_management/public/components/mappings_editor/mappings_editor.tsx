@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { JsonEditor } from '../json_editor';
 import {
   ConfigurationForm,
   CONFIGURATION_FIELDS,
@@ -14,6 +14,9 @@ import {
   DocumentFields,
 } from './components';
 import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
+import { OnUpdateHandler } from '../json_editor/use_json';
+import { canUseMappingsEditor } from './lib';
+import { JsonEditor } from '../json_editor';
 
 interface Props {
   onUpdate: MappingsStateProps['onUpdate'];
@@ -32,25 +35,51 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue = {} }: Props
     );
   const fieldsDefaultValue = defaultValue.properties || {};
 
-  // Temporary logic
-  const onJsonEditorUpdate = (args: any) => {
-    // eslint-disable-next-line
-    console.log(args);
-  };
-
   return (
     <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
-      {({ editor, getProperties }) => (
-        <>
-          <ConfigurationForm defaultValue={configurationDefaultValue} />
-          <DocumentFieldsHeaders />
-          {editor === 'json' ? (
-            <JsonEditor onUpdate={onJsonEditorUpdate} defaultValue={getProperties()} />
-          ) : (
-            <DocumentFields />
-          )}
-        </>
-      )}
+      {({ editor, getProperties, dispatch, maxNestedDepth }) => {
+        const [jsonEditorDefault, setJsonEditorDefault] = useState({});
+        const onJsonEditorUpdate = useCallback<OnUpdateHandler>(
+          args => {
+            dispatch({ type: 'jsonEditor.update', value: { json: args.getData() } });
+          },
+          [dispatch]
+        );
+
+        const renderEditor = () => {
+          if (editor === 'json') {
+            return <JsonEditor onUpdate={onJsonEditorUpdate} defaultValue={jsonEditorDefault} />;
+          }
+          return <DocumentFields />;
+        };
+
+        return (
+          <>
+            <ConfigurationForm defaultValue={configurationDefaultValue} />
+            <DocumentFieldsHeaders />
+            {renderEditor()}
+            {/* TODO: Review toggle controls below */}
+            <EuiSpacer size={'l'} />
+            {editor === 'json' ? (
+              <EuiButton
+                disabled={!canUseMappingsEditor(maxNestedDepth)}
+                onClick={() => dispatch({ type: 'changeEditor', value: 'default' })}
+              >
+                {'Use Mappings Editor'}
+              </EuiButton>
+            ) : (
+              <EuiButton
+                onClick={() => {
+                  setJsonEditorDefault(getProperties());
+                  dispatch({ type: 'changeEditor', value: 'json' });
+                }}
+              >
+                {'Use JSON Editor'}
+              </EuiButton>
+            )}
+          </>
+        );
+      }}
     </MappingsState>
   );
 });

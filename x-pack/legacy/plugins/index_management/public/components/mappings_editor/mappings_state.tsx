@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useReducer, useEffect, createContext, useContext } from 'react';
+import React, { useReducer, useEffect, createContext, useContext, useCallback } from 'react';
 
-import { reducer, MappingsConfiguration, MappingsFields, State, Dispatch } from './reducer';
-import { MAX_DEPTH_DEFAULT_EDITOR } from './constants';
+import { reducer, MappingsConfiguration, MappingsFields, State, Dispatch, Action } from './reducer';
 import { Field, FieldsEditor } from './types';
-import { normalize, deNormalize } from './lib';
+import { normalize, deNormalize, canUseMappingsEditor } from './lib';
 
 type Mappings = MappingsConfiguration & {
   properties: MappingsFields;
@@ -36,6 +35,8 @@ export interface Props {
   children: (params: {
     editor: FieldsEditor;
     getProperties(): Mappings['properties'];
+    dispatch: React.Dispatch<Action>;
+    maxNestedDepth: number;
   }) => React.ReactNode;
   defaultValue: { fields: { [key: string]: Field } };
   onUpdate: OnUpdateHandler;
@@ -44,6 +45,7 @@ export interface Props {
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
   const { byId, rootLevelFields, maxNestedDepth } = normalize(defaultValue.fields);
 
+  const canUseDefaultEditor = canUseMappingsEditor(maxNestedDepth);
   const initialState: State = {
     isValid: undefined,
     configuration: {
@@ -60,7 +62,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     },
     documentFields: {
       status: 'idle',
-      editor: maxNestedDepth >= MAX_DEPTH_DEFAULT_EDITOR ? 'json' : 'default',
+      editor: canUseDefaultEditor ? 'default' : 'json',
     },
   };
 
@@ -86,12 +88,15 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     });
   }, [state]);
 
+  const renderPropsDispatch = useCallback(dispatch, []);
   return (
     <StateContext.Provider value={state}>
       <DispatchContext.Provider value={dispatch}>
         {children({
           editor: state.documentFields.editor,
+          maxNestedDepth: state.fields ? state.fields.maxNestedDepth : 0,
           getProperties: () => deNormalize(state.fields),
+          dispatch: renderPropsDispatch,
         })}
       </DispatchContext.Provider>
     </StateContext.Provider>

@@ -11,6 +11,7 @@ import {
   shouldDeleteChildFieldsAfterTypeChange,
   getAllChildFields,
   getMaxNestedDepth,
+  normalize,
 } from './lib';
 
 export interface MappingsConfiguration {
@@ -50,6 +51,8 @@ export type Action =
   | { type: 'documentField.createField'; value?: string }
   | { type: 'documentField.editField'; value: string }
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
+  | { type: 'jsonEditor.update'; value: { json: { [key: string]: any } } }
+  | { type: 'changeEditor'; value: FieldsEditor }
   | { type: 'documentField.changeEditor'; value: FieldsEditor };
 
 export type Dispatch = (action: Action) => void;
@@ -112,6 +115,7 @@ export const reducer = (state: State, action: Action): State => {
           fieldToEdit: undefined,
         },
       };
+    case 'changeEditor':
     case 'documentField.changeEditor':
       return { ...state, documentFields: { ...state.documentFields, editor: action.value } };
     case 'field.add': {
@@ -240,6 +244,21 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
     }
+    case 'jsonEditor.update':
+      try {
+        const nextFields = normalize(action.value.json);
+        return {
+          ...state,
+          fields: nextFields,
+        };
+      } catch (e) {
+        // This shouldn't happen because the source of the JSON should have
+        // sanity checking for valid JSON.
+
+        // eslint-disable-next-line no-console
+        console.error(e);
+        return state;
+      }
     default:
       throw new Error(`Action "${action!.type}" not recognized.`);
   }

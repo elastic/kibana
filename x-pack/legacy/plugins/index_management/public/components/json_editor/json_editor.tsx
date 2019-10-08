@@ -17,46 +17,42 @@ interface Props {
   euiCodeEditorProps?: { [key: string]: any };
 }
 
-export const JsonEditor = ({
-  label,
-  helpText,
-  onUpdate,
-  defaultValue,
-  euiCodeEditorProps,
-}: Props) => {
-  const { content, setContent, error } = useJson({
-    defaultValue,
-    onUpdate,
-  });
+export const JsonEditor = React.memo(
+  ({ label, helpText, onUpdate, defaultValue, euiCodeEditorProps }: Props) => {
+    const { content, setContent, error } = useJson({
+      defaultValue,
+      onUpdate,
+    });
 
-  return (
-    <EuiFormRow
-      label={label}
-      helpText={helpText}
-      isInvalid={Boolean(error)}
-      error={error}
-      fullWidth
-    >
-      <EuiCodeEditor
-        mode="json"
-        theme="textmate"
-        width="100%"
-        height="500px"
-        setOptions={{
-          showLineNumbers: false,
-          tabSize: 2,
-        }}
-        editorProps={{
-          $blockScrolling: Infinity,
-        }}
-        showGutter={false}
-        minLines={6}
-        value={content}
-        onChange={(udpated: string) => {
-          setContent(udpated);
-        }}
-        {...euiCodeEditorProps}
-      />
-    </EuiFormRow>
-  );
-};
+    return (
+      <EuiFormRow
+        label={label}
+        helpText={helpText}
+        isInvalid={Boolean(error)}
+        error={error}
+        fullWidth
+      >
+        <EuiCodeEditor
+          mode="json"
+          theme="textmate"
+          width="100%"
+          height="500px"
+          setOptions={{
+            showLineNumbers: false,
+            tabSize: 2,
+          }}
+          editorProps={{
+            $blockScrolling: Infinity,
+          }}
+          showGutter={false}
+          minLines={6}
+          value={content}
+          onChange={(updated: string) => {
+            setContent(updated);
+          }}
+          {...euiCodeEditorProps}
+        />
+      </EuiFormRow>
+    );
+  }
+);
