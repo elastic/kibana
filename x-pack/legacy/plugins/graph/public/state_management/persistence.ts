@@ -81,7 +81,6 @@ export const loadingSaga = ({
     yield put(updateSettings(advancedSettings));
     yield put(loadTemplates(urlTemplates));
 
-    // workspace won't be null because it's created in the same call stack
     getWorkspace()!.runLayout();
   }
 
