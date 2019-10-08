@@ -68,7 +68,7 @@ export function createUrlFormat() {
     ];
     static urlTypes = URL_TYPES;
 
-    constructor(params: any) {
+    constructor(params: Record<string, any>) {
       super(params);
       this.compileTemplate = memoize(this.compileTemplate);
     }

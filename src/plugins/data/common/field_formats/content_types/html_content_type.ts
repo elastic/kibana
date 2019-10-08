@@ -55,7 +55,7 @@ export const setup = (
     const subValues = value.map((v: any) => {
       return recurse(v, field, hit, meta);
     });
-    const useMultiLine = subValues.some((sub: any) => {
+    const useMultiLine = subValues.some((sub: string) => {
       return sub.indexOf('\n') > -1;
     });
 

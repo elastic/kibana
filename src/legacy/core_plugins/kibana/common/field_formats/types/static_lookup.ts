@@ -23,11 +23,14 @@ import {
   TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
-function convertLookupEntriesToMap(lookupEntries: any) {
-  return lookupEntries.reduce((lookupMap: any, lookupEntry: any) => {
-    lookupMap[lookupEntry.key] = lookupEntry.value;
-    return lookupMap;
-  }, {});
+function convertLookupEntriesToMap(lookupEntries: any[]) {
+  return lookupEntries.reduce(
+    (lookupMap: Record<string, any>, lookupEntry: Record<string, any>) => {
+      lookupMap[lookupEntry.key] = lookupEntry.value;
+      return lookupMap;
+    },
+    {}
+  );
 }
 
 export function createStaticLookupFormat() {

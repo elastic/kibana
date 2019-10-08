@@ -47,7 +47,7 @@ export function createSourceFormat() {
 
     private getConfig: Function;
 
-    constructor(params: any, getConfig: Function) {
+    constructor(params: Record<string, any>, getConfig: Function) {
       super(params);
 
       this.getConfig = getConfig;

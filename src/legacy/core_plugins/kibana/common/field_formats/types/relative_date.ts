@@ -30,7 +30,7 @@ export function createRelativeDateFormat() {
     static title = 'Relative Date';
     static fieldType = KBN_FIELD_TYPES.DATE;
 
-    constructor(params: any) {
+    constructor(params: Record<string, any>) {
       super(params);
     }
 

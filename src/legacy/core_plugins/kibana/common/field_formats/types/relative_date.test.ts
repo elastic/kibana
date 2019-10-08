@@ -23,11 +23,11 @@ import { createRelativeDateFormat } from './relative_date';
 const RelativeDateFormat = createRelativeDateFormat();
 
 describe('Relative Date Format', () => {
-  let convert: any;
+  let convert: Function;
 
   beforeEach(() => {
     const relativeDate = new RelativeDateFormat({});
-    convert = relativeDate.convert.bind(relativeDate) as Function;
+    convert = relativeDate.convert.bind(relativeDate);
   });
 
   test('decoding an undefined or null date should return a "-"', () => {

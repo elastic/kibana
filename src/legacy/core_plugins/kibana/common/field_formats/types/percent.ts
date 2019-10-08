@@ -31,7 +31,7 @@ export function createPercentFormat() {
       };
     },
 
-    afterConvert(val: any) {
+    afterConvert(val: number) {
       return this.param('fractional') ? val : val / 100;
     },
   });

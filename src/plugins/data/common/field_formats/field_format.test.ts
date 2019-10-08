@@ -22,7 +22,7 @@ import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
 
 const getTestFormat = (
-  _params?: any,
+  _params?: Record<string, any>,
   textConvert = (val: string) => asPrettyString(val),
   htmlConvert?: any
 ) =>
