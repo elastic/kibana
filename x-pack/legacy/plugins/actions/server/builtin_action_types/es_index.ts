@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { nullableType } from './lib/nullable';
+import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 // config definition
@@ -33,7 +35,7 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-export function getActionType(): ActionType {
+export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.index',
     name: 'index',
@@ -41,13 +43,16 @@ export function getActionType(): ActionType {
       config: ConfigSchema,
       params: ParamsSchema,
     },
-    executor,
+    executor: curry(executor)({ logger }),
   };
 }
 
 // action executor
 
-async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+async function executor(
+  { logger }: { logger: Logger },
+  execOptions: ActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult> {
   const actionId = execOptions.actionId;
   const config = execOptions.config as ActionTypeConfigType;
   const params = execOptions.params as ActionParamsType;
@@ -67,10 +72,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   }
 
   if (config.index != null && params.index != null) {
-    services.log(
-      ['debug', 'actions'],
-      `index passed in params overridden by index set in config for action ${actionId}`
-    );
+    logger.debug(`index passed in params overridden by index set in config for action ${actionId}`);
   }
 
   const index = config.index || params.index;

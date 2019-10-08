@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { postPagerduty } from './lib/post_pagerduty';
+import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 // uses the PagerDuty Events API v2
@@ -84,7 +86,7 @@ function validateParams(paramsObject: any): string | void {
 }
 
 // action type definition
-export function getActionType(): ActionType {
+export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.pagerduty',
     name: 'pagerduty',
@@ -93,13 +95,16 @@ export function getActionType(): ActionType {
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    executor,
+    executor: curry(executor)({ logger }),
   };
 }
 
 // action executor
 
-async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+async function executor(
+  { logger }: { logger: Logger },
+  execOptions: ActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult> {
   const actionId = execOptions.actionId;
   const config = execOptions.config as ActionTypeConfigType;
   const secrets = execOptions.secrets as ActionTypeSecretsType;
@@ -124,20 +129,14 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
         errorMessage: err.message,
       },
     });
-    services.log(
-      ['warn', 'actions', 'pagerduty'],
-      `error thrown posting pagerduty event: ${err.message}`
-    );
+    logger.warn(`error thrown posting pagerduty event: ${err.message}`);
     return {
       status: 'error',
       message,
     };
   }
 
-  services.log(
-    ['debug', 'actions', 'pagerduty'],
-    `response posting pagerduty event: ${response.status}`
-  );
+  logger.debug(`response posting pagerduty event: ${response.status}`);
 
   if (response.status === 202) {
     return {

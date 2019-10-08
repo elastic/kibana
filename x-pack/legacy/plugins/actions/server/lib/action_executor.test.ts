@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Hapi from 'hapi';
 import { schema } from '@kbn/config-schema';
-import { execute } from './execute';
+import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
+import {
+  SavedObjectsClientMock,
+  loggingServiceMock,
+} from '../../../../../../src/core/server/mocks';
 
+const actionExecutor = new ActionExecutor();
 const savedObjectsClient = SavedObjectsClientMock.create();
 
 function getServices() {
@@ -24,14 +29,36 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 
 const executeParams = {
   actionId: '1',
-  namespace: 'some-namespace',
-  services: getServices(),
   params: {
     foo: true,
   },
+  request: {
+    headers: {},
+    getBasePath: () => '',
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
+    },
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
+  } as Hapi.Request,
+};
+
+actionExecutor.initialize({
+  logger: loggingServiceMock.create().get(),
+  spaces() {
+    return {
+      getSpaceId: () => 'some-namespace',
+    } as any;
+  },
+  getServices,
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
-};
+});
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -58,7 +85,7 @@ test('successfully executes', async () => {
   savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
-  await execute(executeParams);
+  await actionExecutor.execute(executeParams);
 
   expect(encryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledWith(
     'action',
@@ -98,7 +125,7 @@ test('provides empty config when config and / or secrets is empty', async () => 
   savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
-  await execute(executeParams);
+  await actionExecutor.execute(executeParams);
 
   expect(actionType.executor).toHaveBeenCalledTimes(1);
   const executorCall = actionType.executor.mock.calls[0][0];
@@ -128,7 +155,7 @@ test('throws an error when config is invalid', async () => {
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
-  const result = await execute(executeParams);
+  const result = await actionExecutor.execute(executeParams);
   expect(result).toEqual({
     status: 'error',
     retry: false,
@@ -159,7 +186,7 @@ test('throws an error when params is invalid', async () => {
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
-  const result = await execute(executeParams);
+  const result = await actionExecutor.execute(executeParams);
   expect(result).toEqual({
     status: 'error',
     retry: false,
@@ -169,5 +196,7 @@ test('throws an error when params is invalid', async () => {
 
 test('throws an error when failing to load action through savedObjectsClient', async () => {
   savedObjectsClient.get.mockRejectedValueOnce(new Error('No access'));
-  await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(`"No access"`);
+  await expect(actionExecutor.execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"No access"`
+  );
 });

@@ -11,7 +11,8 @@ import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from './validate_alert_type_params';
-import { ActionsPluginStartContract, EncryptedSavedObjectsStartContract } from '../shim';
+import { EncryptedSavedObjectsStartContract } from '../shim';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
 import {
   AlertType,
   AlertServices,
