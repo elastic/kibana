@@ -10,6 +10,8 @@ import { SavedObjectsManagementRecord } from 'ui/management/saved_objects_manage
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from './copy_saved_objects_to_space/types';
+import { ENTER_SPACE_PATH } from '../../common/constants';
+import { addSpaceIdToPath } from '../../common';
 
 export class SpacesManager extends EventEmitter {
   private activeSpace: Space | undefined;
@@ -93,34 +95,14 @@ export class SpacesManager extends EventEmitter {
   }
 
   public async changeSelectedSpace(space: Space) {
-    await this.http
-      .post(`/api/spaces/v1/space/${encodeURIComponent(space.id)}/select`)
-      .then(response => {
-        if (response.location) {
-          window.location = response.location;
-        } else {
-          this._displayError();
-        }
-      })
-      .catch(() => this._displayError());
+    window.location.href = addSpaceIdToPath(this.serverBasePath, space.id, ENTER_SPACE_PATH);
   }
 
   public redirectToSpaceSelector() {
-    window.location.href = this.spaceSelectorURL;
+    window.location.href = `${this.serverBasePath}/spaces/space_selector`;
   }
 
   public async requestRefresh() {
     this.emit('request_refresh');
-  }
-
-  public _displayError() {
-    this.notifications.toasts.addDanger({
-      title: i18n.translate('xpack.spaces.spacesManager.unableToChangeSpaceWarningTitle', {
-        defaultMessage: 'Unable to change your Space',
-      }),
-      text: i18n.translate('xpack.spaces.spacesManager.unableToChangeSpaceWarningDescription', {
-        defaultMessage: 'please try again later',
-      }),
-    });
   }
 }

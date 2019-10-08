@@ -16,7 +16,7 @@ import { migrateToKibana660 } from './server/lib/migrations';
 import { plugin } from './server/new_platform';
 import { SecurityPlugin } from '../security';
 import { SpacesServiceSetup } from './server/new_platform/spaces_service/spaces_service';
-import { initSpaceSelectorView } from './server/routes/views';
+import { initSpaceSelectorView, initEnterSpaceView } from './server/routes/views';
 
 export interface SpacesPlugin {
   getSpaceId: SpacesServiceSetup['getSpaceId'];
@@ -146,6 +146,7 @@ export const spaces = (kibana: Record<string, any>) =>
         },
       });
 
+      initEnterSpaceView(server);
       initSpaceSelectorView(server);
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));

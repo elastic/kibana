@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { SavedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 
@@ -15,13 +15,13 @@ const alertTypeRegistry = alertTypeRegistryMock.create();
 const savedObjectsClient = SavedObjectsClientMock.create();
 
 const alertsClientParams = {
-  log: jest.fn(),
   taskManager,
   alertTypeRegistry,
   savedObjectsClient,
   spaceId: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  logger: loggingServiceMock.create().get(),
 };
 
 beforeEach(() => {
@@ -110,6 +110,7 @@ describe('create()', () => {
       retryAt: null,
       state: {},
       params: {},
+      ownerId: null,
     });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
@@ -417,16 +418,9 @@ describe('create()', () => {
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Task manager error"`
     );
-    expect(alertsClientParams.log).toHaveBeenCalledTimes(1);
-    expect(alertsClientParams.log.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    Array [
-                                                                                                                      "alerting",
-                                                                                                                      "error",
-                                                                                                                    ],
-                                                                                                                    "Failed to cleanup alert \\"1\\" after scheduling task failed. Error: Saved object delete error",
-                                                                                                                  ]
-                                                                            `);
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'Failed to cleanup alert "1" after scheduling task failed. Error: Saved object delete error'
+    );
   });
 
   test('throws an error if alert type not registerd', async () => {
@@ -491,6 +485,7 @@ describe('create()', () => {
       retryAt: null,
       state: {},
       params: {},
+      ownerId: null,
     });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
@@ -568,6 +563,7 @@ describe('enable()', () => {
       taskType: '',
       startedAt: null,
       retryAt: null,
+      ownerId: null,
     });
 
     await alertsClient.enable({ id: '1' });
@@ -643,6 +639,7 @@ describe('enable()', () => {
       taskType: '',
       startedAt: null,
       retryAt: null,
+      ownerId: null,
     });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       created: true,

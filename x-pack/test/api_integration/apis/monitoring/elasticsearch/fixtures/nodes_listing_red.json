@@ -113,5 +113,6 @@
       "transport_address": "127.0.0.1:9302",
       "type": "node"
     }
-  ]
+  ],
+  "totalNodeCount": 2
 }

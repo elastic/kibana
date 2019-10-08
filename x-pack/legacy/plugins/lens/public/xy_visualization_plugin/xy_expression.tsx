@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import chrome from 'ui/chrome';
 import {
   Chart,
   Settings,
@@ -19,14 +20,19 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { EuiIcon, EuiText, IconType } from '@elastic/eui';
+import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
+import { isHorizontalChart } from './state_helpers';
+
+const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
+const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -74,10 +80,6 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
       types: ['lens_xy_layer'],
       help: 'Layers of visual series',
       multi: true,
-    },
-    isHorizontal: {
-      types: ['boolean'],
-      help: 'Render horizontally',
     },
   },
   context: {
@@ -133,22 +135,21 @@ export function XYChartReportable(props: XYChartRenderProps) {
   }, []);
 
   return (
-    <VisualizationContainer isReady={isReady}>
+    <VisualizationContainer className="lnsXyExpression__container" isReady={isReady}>
       <MemoizedChart {...props} />
     </VisualizationContainer>
   );
 }
 
 export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderProps) {
-  const { legend, layers, isHorizontal } = args;
+  const { legend, layers } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return (
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
-        <p>
-          <EuiIcon type={icon} color="subdued" size="l" />
-        </p>
+        <EuiIcon type={icon} color="subdued" size="l" />
+        <EuiSpacer size="s" />
         <p>
           <FormattedMessage
             id="xpack.lens.xyVisualization.noDataLabel"
@@ -176,18 +177,23 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
     }
   }
 
+  const chartHasMoreThanOneSeries =
+    layers.length > 1 || data.tables[layers[0].layerId].columns.length > 2;
+  const shouldRotate = isHorizontalChart(layers);
+
   return (
-    <Chart className="lnsXyExpression__chart">
+    <Chart>
       <Settings
-        showLegend={legend.isVisible}
+        showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}
-        rotation={isHorizontal ? 90 : 0}
+        theme={chartTheme}
+        rotation={shouldRotate ? 90 : 0}
       />
 
       <Axis
         id={getAxisId('x')}
-        position={isHorizontal ? Position.Left : Position.Bottom}
+        position={shouldRotate ? Position.Left : Position.Bottom}
         title={args.xTitle}
         showGridLines={false}
         hide={layers[0].hide}
@@ -196,7 +202,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
 
       <Axis
         id={getAxisId('y')}
-        position={isHorizontal ? Position.Bottom : Position.Left}
+        position={shouldRotate ? Position.Bottom : Position.Left}
         title={args.yTitle}
         showGridLines={false}
         hide={layers[0].hide}
@@ -258,7 +264,10 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
 
           return seriesType === 'line' ? (
             <LineSeries {...seriesProps} />
-          ) : seriesType === 'bar' || seriesType === 'bar_stacked' ? (
+          ) : seriesType === 'bar' ||
+            seriesType === 'bar_stacked' ||
+            seriesType === 'bar_horizontal' ||
+            seriesType === 'bar_horizontal_stacked' ? (
             <BarSeries {...seriesProps} />
           ) : (
             <AreaSeries {...seriesProps} />

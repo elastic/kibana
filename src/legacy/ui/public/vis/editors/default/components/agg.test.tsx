@@ -61,6 +61,7 @@ describe('DefaultEditorAgg component', () => {
       dragHandleProps: null,
       formIsTouched: false,
       groupName: AggGroupNames.Metrics,
+      isDisabled: false,
       isDraggable: false,
       isLastBucket: false,
       isRemovable: false,
@@ -198,6 +199,18 @@ describe('DefaultEditorAgg component', () => {
       comp.find('[data-test-subj="toggleDisableAggregationBtn disable"] button').simulate('click');
 
       expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, false);
+    });
+
+    it('should disable the disableAggregation button', () => {
+      defaultProps.isDisabled = true;
+      defaultProps.isRemovable = true;
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+
+      expect(
+        comp
+          .find('EuiButtonIcon[data-test-subj="toggleDisableAggregationBtn disable"]')
+          .prop('disabled')
+      ).toBeTruthy();
     });
 
     it('should enable agg', () => {

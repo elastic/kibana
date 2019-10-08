@@ -5,7 +5,14 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeProps,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiPage,
+} from '@elastic/eui';
 import styled, { injectGlobal } from 'styled-components';
 
 // SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
@@ -19,6 +26,16 @@ injectGlobal`
     background-color: rgba(0,0,0,0);
   }
 `;
+
+export const DescriptionListStyled = styled(EuiDescriptionList)`
+  ${({ theme }) => `
+    dt {
+      font-size: ${theme.eui.euiFontSizeXS} !important;
+    }
+  `}
+`;
+
+DescriptionListStyled.displayName = 'DescriptionListStyled';
 
 export const PageContainer = styled.div`
   display: flex;

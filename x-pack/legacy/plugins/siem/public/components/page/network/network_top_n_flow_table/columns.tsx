@@ -21,7 +21,7 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
-import { Columns } from '../../../load_more_table';
+import { Columns } from '../../../paginated_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
@@ -111,7 +111,7 @@ export const getNetworkTopNFlowColumns = (
         return getEmptyTagValue();
       }
     },
-    width: '15%',
+    width: '20%',
   },
   {
     name: i18n.DOMAIN,
@@ -150,12 +150,17 @@ export const getNetworkTopNFlowColumns = (
                 attrName: `${flowTarget}.as.organization.name`,
                 idPrefix: `${id}-name`,
               })}
-            {as.number &&
-              getRowItemDraggable({
-                rowItem: `${as.number}`,
-                attrName: `${flowTarget}.as.number`,
-                idPrefix: `${id}-number`,
-              })}
+
+            {as.number && (
+              <>
+                {' '}
+                {getRowItemDraggable({
+                  rowItem: `${as.number}`,
+                  attrName: `${flowTarget}.as.number`,
+                  idPrefix: `${id}-number`,
+                })}
+              </>
+            )}
           </>
         );
       } else {

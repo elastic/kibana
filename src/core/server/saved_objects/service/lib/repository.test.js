@@ -18,10 +18,11 @@
  */
 
 import { delay } from 'bluebird';
+
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
 import { getRootPropertiesObjects } from '../../mappings/lib/get_root_properties_objects';
@@ -272,6 +273,10 @@ describe('SavedObjectsRepository', () => {
 
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
+      cacheIndexPatterns: {
+        setIndexPatterns: jest.fn(),
+        getIndexPatterns: () => undefined,
+      },
       mappings,
       callCluster: callAdminCluster,
       migrator,
@@ -285,7 +290,7 @@ describe('SavedObjectsRepository', () => {
     getSearchDslNS.getSearchDsl.mockReset();
   });
 
-  afterEach(() => {});
+  afterEach(() => { });
 
   describe('#create', () => {
     beforeEach(() => {
@@ -993,7 +998,7 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
-    it('should return objects in the same order regardless of type', () => {});
+    it('should return objects in the same order regardless of type', () => { });
   });
 
   describe('#delete', () => {
@@ -1154,6 +1159,13 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
+    it('requires index pattern to be defined if filter is defined', async () => {
+      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
+      expect(savedObjectsRepository.find({ type: 'foo', filter: 'foo.type: hello' }))
+        .rejects
+        .toThrowErrorMatchingInlineSnapshot('"options.filter is missing index pattern to work correctly: Bad Request"');
+    });
+
     it('passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl',
       async () => {
         callAdminCluster.mockReturnValue(namespacedSearchResults);
@@ -1169,6 +1181,8 @@ describe('SavedObjectsRepository', () => {
             type: 'foo',
             id: '1',
           },
+          indexPattern: undefined,
+          kueryNode: null,
         };
 
         await savedObjectsRepository.find(relevantOpts);
@@ -1730,6 +1744,68 @@ describe('SavedObjectsRepository', () => {
       );
     });
 
+    it('does not pass references if omitted', async () => {
+      await savedObjectsRepository.update(
+        type,
+        id,
+        { title: 'Testing' }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).not.toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: [],
+            })
+          }
+        })
+      );
+    });
+
+    it('passes references if they are provided', async () => {
+      await savedObjectsRepository.update(
+        type,
+        id,
+        { title: 'Testing' },
+        { references: ['foo'] }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: ['foo'],
+            })
+          }
+        })
+      );
+    });
+
+    it('passes empty references array if empty references array is provided', async () => {
+      await savedObjectsRepository.update(
+        type,
+        id,
+        { title: 'Testing' },
+        { references: [] }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: [],
+            })
+          }
+        })
+      );
+    });
+
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
       await savedObjectsRepository.update(
         'index-pattern',
@@ -2072,7 +2148,7 @@ describe('SavedObjectsRepository', () => {
     it('can throw es errors and have them decorated as SavedObjectsClient errors', async () => {
       expect.assertions(4);
 
-      const es401 = new elasticsearch.errors[401]();
+      const es401 = new legacyElasticsearch.errors[401]();
       expect(SavedObjectsErrorHelpers.isNotAuthorizedError(es401)).toBe(false);
       onBeforeWrite.mockImplementation(() => {
         throw es401;
