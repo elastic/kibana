@@ -9,7 +9,7 @@ Calls specified `endpoint` with provided `clientParams` on behalf of the Kibana 
 <b>Signature:</b>
 
 ```typescript
-callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<unknown>;
+callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
 ```
 
 ## Parameters
@@ -22,5 +22,5 @@ callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options
 
 <b>Returns:</b>
 
-`Promise<unknown>`
+`Promise<any>`
 

@@ -39,6 +39,10 @@ export const ErrorStrings = {
       }),
   },
   esService: {
+    getDefaultIndexFetchErrorMessage: () =>
+      i18n.translate('xpack.canvas.error.esService.defaultIndexFetchErrorMessage', {
+        defaultMessage: "Couldn't fetch default index",
+      }),
     getFieldsFetchErrorMessage: (index: string) =>
       i18n.translate('xpack.canvas.error.esService.fieldsFetchErrorMessage', {
         defaultMessage: "Couldn't fetch Elasticsearch fields for '{index}'",
@@ -50,10 +54,6 @@ export const ErrorStrings = {
       i18n.translate('xpack.canvas.error.esService.indicesFetchErrorMessage', {
         defaultMessage: "Couldn't fetch Elasticsearch indices",
       }),
-    getDefaultIndexFetchErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.esService.defaultIndexFetchErrorMessage', {
-        defaultMessage: "Couldn't fetch default index",
-      }),
   },
   runInterpreter: {
     getRenderErrorMessage: (type: string) =>
@@ -64,14 +64,36 @@ export const ErrorStrings = {
         },
       }),
   },
-  workpadRoutes: {
-    getCreateFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadRoutes.createFailureErrorMessage', {
-        defaultMessage: "Couldn't create workpad",
+  WorkpadFileUpload: {
+    getAcceptJSONOnlyErrorMessage: () =>
+      i18n.translate('xpack.canvas.error.workpadUpload.acceptJSONOnlyErrorMessage', {
+        defaultMessage: 'Only {JSON} files are accepted',
+        values: {
+          JSON,
+        },
       }),
-    getLoadFailureErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadRoutes.loadFailureErrorMessage', {
-        defaultMessage: "Couldn't load workpad with ID",
+    getFileUploadFailureWithFileNameErrorMessage: (fileName: string) =>
+      i18n.translate('xpack.canvas.errors.workpadUpload.fileUploadFileWithFileNameErrorMessage', {
+        defaultMessage: `Couldn't upload '{fileName}'`,
+        values: {
+          fileName,
+        },
+      }),
+    getFileUploadFailureWithoutFileNameErrorMessage: () =>
+      i18n.translate(
+        'xpack.canvas.error.workpadUpload.fileUploadFailureWithoutFileNameErrorMessage',
+        {
+          defaultMessage: `Couldn't upload file`,
+        }
+      ),
+    getMissingPropertiesErrorMessage: () =>
+      i18n.translate('xpack.canvas.error.workpadUpload.missingPropertiesErrorMessage', {
+        defaultMessage:
+          'Some properties required for a {CANVAS} workpad are missing.  Edit your {JSON} file to provide the correct property values, and try again.',
+        values: {
+          CANVAS,
+          JSON,
+        },
       }),
   },
   WorkpadLoader: {
@@ -92,36 +114,14 @@ export const ErrorStrings = {
         defaultMessage: `Couldn't upload workpad`,
       }),
   },
-  WorkpadFileUpload: {
-    getFileUploadFailureWithFileNameErrorMessage: (fileName: string) =>
-      i18n.translate('xpack.canvas.errors.workpadUpload.fileUploadFileWithFileNameErrorMessage', {
-        defaultMessage: `Couldn't upload '{fileName}'`,
-        values: {
-          fileName,
-        },
+  workpadRoutes: {
+    getCreateFailureErrorMessage: () =>
+      i18n.translate('xpack.canvas.error.workpadRoutes.createFailureErrorMessage', {
+        defaultMessage: "Couldn't create workpad",
       }),
-    getFileUploadFailureWithoutFileNameErrorMessage: () =>
-      i18n.translate(
-        'xpack.canvas.error.workpadUpload.fileUploadFailureWithoutFileNameErrorMessage',
-        {
-          defaultMessage: `Couldn't upload file`,
-        }
-      ),
-    getAcceptJSONOnlyErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadUpload.acceptJSONOnlyErrorMessage', {
-        defaultMessage: 'Only {JSON} files are accepted',
-        values: {
-          JSON,
-        },
-      }),
-    getMissingPropertiesErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadUpload.missingPropertiesErrorMessage', {
-        defaultMessage:
-          'Some properties required for a {CANVAS} workpad are missing.  Edit your {JSON} file to provide the correct property values, and try again.',
-        values: {
-          CANVAS,
-          JSON,
-        },
+    getLoadFailureErrorMessage: () =>
+      i18n.translate('xpack.canvas.error.workpadRoutes.loadFailureErrorMessage', {
+        defaultMessage: "Couldn't load workpad with ID",
       }),
   },
 };

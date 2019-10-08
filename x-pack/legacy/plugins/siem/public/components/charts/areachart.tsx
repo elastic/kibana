@@ -17,19 +17,19 @@ import {
   AreaSeriesStyle,
   RecursivePartial,
 } from '@elastic/charts';
-import { getOr, get } from 'lodash/fp';
+import { getOr, get, isNull, isNumber } from 'lodash/fp';
+import { AutoSizer } from '../auto_sizer';
+import { ChartPlaceHolder } from './chart_place_holder';
 import {
-  ChartSeriesData,
-  ChartHolder,
-  getSeriesStyle,
-  WrappedByAutoSizer,
-  ChartSeriesConfigs,
   browserTimezone,
   chartDefaultSettings,
+  ChartSeriesConfigs,
+  ChartSeriesData,
   getChartHeight,
   getChartWidth,
+  getSeriesStyle,
+  WrappedByAutoSizer,
 } from './common';
-import { AutoSizer } from '../auto_sizer';
 
 // custom series styles: https://ela.st/areachart-styling
 const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
@@ -50,6 +50,17 @@ const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
     },
   };
 };
+
+const checkIfAllTheDataInTheSeriesAreValid = (series: unknown): series is ChartSeriesData =>
+  !!get('value.length', series) &&
+  get('value', series).every(
+    ({ x, y }: { x: unknown; y: unknown }) => !isNull(x) && isNumber(y) && y > 0
+  );
+
+const checkIfAnyValidSeriesExist = (
+  data: ChartSeriesData[] | null | undefined
+): data is ChartSeriesData[] =>
+  Array.isArray(data) && data.some(checkIfAllTheDataInTheSeriesAreValid);
 
 // https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = React.memo<{
@@ -73,12 +84,12 @@ export const AreaChartBaseComponent = React.memo<{
         {data.map(series => {
           const seriesKey = series.key;
           const seriesSpecId = getSpecId(seriesKey);
-          return series.value != null ? (
+          return checkIfAllTheDataInTheSeriesAreValid(series) ? (
             <AreaSeries
               id={seriesSpecId}
               key={seriesKey}
               name={series.key.replace('Histogram', '')}
-              data={series.value}
+              data={series.value || undefined}
               xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
               yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
               timeZone={browserTimezone}
@@ -106,28 +117,6 @@ export const AreaChartBaseComponent = React.memo<{
 
 AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
 
-export const AreaChartWithCustomPrompt = React.memo<{
-  data: ChartSeriesData[] | null | undefined;
-  height: string | null | undefined;
-  width: string | null | undefined;
-  configs?: ChartSeriesConfigs | undefined;
-}>(({ data, height, width, configs }) => {
-  return data != null &&
-    data.length &&
-    data.every(
-      ({ value }) =>
-        value != null &&
-        value.length > 0 &&
-        value.every(chart => chart.x != null && chart.y != null)
-    ) ? (
-    <AreaChartBaseComponent height={height} width={width} data={data} configs={configs} />
-  ) : (
-    <ChartHolder height={height} width={width} />
-  );
-});
-
-AreaChartWithCustomPrompt.displayName = 'AreaChartWithCustomPrompt';
-
 export const AreaChart = React.memo<{
   areaChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
@@ -135,11 +124,11 @@ export const AreaChart = React.memo<{
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
 
-  return get(`0.value.length`, areaChart) ? (
+  return checkIfAnyValidSeriesExist(areaChart) ? (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer innerRef={measureRef} height={getChartHeight(customHeight, height)}>
-          <AreaChartWithCustomPrompt
+          <AreaChartBaseComponent
             data={areaChart}
             height={getChartHeight(customHeight, height)}
             width={getChartWidth(customWidth, width)}
@@ -149,7 +138,11 @@ export const AreaChart = React.memo<{
       )}
     </AutoSizer>
   ) : (
-    <ChartHolder height={getChartHeight(customHeight)} width={getChartWidth(customWidth)} />
+    <ChartPlaceHolder
+      height={getChartHeight(customHeight)}
+      width={getChartWidth(customWidth)}
+      data={areaChart}
+    />
   );
 });
 
