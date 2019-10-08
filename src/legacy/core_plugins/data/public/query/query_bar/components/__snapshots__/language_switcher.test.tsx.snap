@@ -215,11 +215,11 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
     language="lucene"
     onSelectLanguage={[Function]}
   >
-    <MockUiComponent
+    <EuiPopover
       anchorClassName="euiFormControlLayout__append"
       anchorPosition="downRight"
       button={
-        <MockUiComponent
+        <EuiButtonEmpty
           className="euiFormControlLayout__append"
           onClick={[Function]}
           size="xs"
@@ -229,104 +229,64 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
             id="data.query.queryBar.luceneLanguageName"
             values={Object {}}
           />
-        </MockUiComponent>
+        </EuiButtonEmpty>
       }
       closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
       id="popover"
       isOpen={false}
       ownFocus={true}
+      panelPaddingSize="m"
       withTitle={true}
     >
-      <MockUiComponent>
-        <FormattedMessage
-          defaultMessage="Syntax options"
-          id="data.query.queryBar.syntaxOptionsTitle"
-          values={Object {}}
-        >
-          Syntax options
-        </FormattedMessage>
-      </MockUiComponent>
-      <div
-        style={
-          Object {
-            "width": "350px",
-          }
-        }
+      <EuiOutsideClickDetector
+        isDisabled={true}
+        onOutsideClick={[Function]}
       >
-        <MockUiComponent>
-          <p>
-            <FormattedMessage
-              defaultMessage="The {docsLink} (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene."
-              id="data.query.queryBar.syntaxOptionsDescription"
-              values={
-                Object {
-                  "docsLink": <MockButtonComponent
-                    href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html"
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      defaultMessage="Kibana Query Language"
-                      id="data.query.queryBar.kqlFullLanguageName"
-                      values={Object {}}
-                    />
-                  </MockButtonComponent>,
-                }
-              }
-            >
-              The 
-              <MockButtonComponent
-                href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html"
-                target="_blank"
-              >
-                <button>
-                  <FormattedMessage
-                    defaultMessage="Kibana Query Language"
-                    id="data.query.queryBar.kqlFullLanguageName"
-                    values={Object {}}
-                  >
-                    Kibana Query Language
-                  </FormattedMessage>
-                </button>
-              </MockButtonComponent>
-               (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene.
-            </FormattedMessage>
-          </p>
-        </MockUiComponent>
-        <MockUiComponent
-          size="m"
-        />
-        <MockUiComponent>
-          <MockUiComponent
-            label={
-              <FormattedMessage
-                defaultMessage="Kibana Query Language"
-                id="data.query.queryBar.kqlFullLanguageName"
-                values={Object {}}
-              />
-            }
+        <div
+          className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
+          id="popover"
+          onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
+        >
+          <div
+            className="euiPopover__anchor euiFormControlLayout__append"
           >
-            <MockButtonComponent
-              checked={false}
-              data-test-subj="languageToggle"
-              id="queryEnhancementOptIn"
-              label={
-                <FormattedMessage
-                  defaultMessage="Off"
-                  id="data.query.queryBar.kqlOffLabel"
-                  values={Object {}}
-                />
-              }
-              name="popswitch"
-              onChange={[Function]}
+            <EuiButtonEmpty
+              className="euiFormControlLayout__append"
+              onClick={[Function]}
+              size="xs"
             >
               <button
+                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
                 onClick={[Function]}
-              />
-            </MockButtonComponent>
-          </MockUiComponent>
-        </MockUiComponent>
-      </div>
-    </MockUiComponent>
+                type="button"
+              >
+                <span
+                  className="euiButtonEmpty__content"
+                >
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Lucene"
+                      id="data.query.queryBar.luceneLanguageName"
+                      values={Object {}}
+                    >
+                      Lucene
+                    </FormattedMessage>
+                  </span>
+                </span>
+              </button>
+            </EuiButtonEmpty>
+          </div>
+        </div>
+      </EuiOutsideClickDetector>
+    </EuiPopover>
   </QueryLanguageSwitcher>
 </Provider>
 `;
@@ -546,11 +506,11 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
     language="kuery"
     onSelectLanguage={[Function]}
   >
-    <MockUiComponent
+    <EuiPopover
       anchorClassName="euiFormControlLayout__append"
       anchorPosition="downRight"
       button={
-        <MockUiComponent
+        <EuiButtonEmpty
           className="euiFormControlLayout__append"
           onClick={[Function]}
           size="xs"
@@ -560,104 +520,64 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
             id="data.query.queryBar.kqlLanguageName"
             values={Object {}}
           />
-        </MockUiComponent>
+        </EuiButtonEmpty>
       }
       closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
       id="popover"
       isOpen={false}
       ownFocus={true}
+      panelPaddingSize="m"
       withTitle={true}
     >
-      <MockUiComponent>
-        <FormattedMessage
-          defaultMessage="Syntax options"
-          id="data.query.queryBar.syntaxOptionsTitle"
-          values={Object {}}
-        >
-          Syntax options
-        </FormattedMessage>
-      </MockUiComponent>
-      <div
-        style={
-          Object {
-            "width": "350px",
-          }
-        }
+      <EuiOutsideClickDetector
+        isDisabled={true}
+        onOutsideClick={[Function]}
       >
-        <MockUiComponent>
-          <p>
-            <FormattedMessage
-              defaultMessage="The {docsLink} (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene."
-              id="data.query.queryBar.syntaxOptionsDescription"
-              values={
-                Object {
-                  "docsLink": <MockButtonComponent
-                    href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html"
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      defaultMessage="Kibana Query Language"
-                      id="data.query.queryBar.kqlFullLanguageName"
-                      values={Object {}}
-                    />
-                  </MockButtonComponent>,
-                }
-              }
-            >
-              The 
-              <MockButtonComponent
-                href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html"
-                target="_blank"
-              >
-                <button>
-                  <FormattedMessage
-                    defaultMessage="Kibana Query Language"
-                    id="data.query.queryBar.kqlFullLanguageName"
-                    values={Object {}}
-                  >
-                    Kibana Query Language
-                  </FormattedMessage>
-                </button>
-              </MockButtonComponent>
-               (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene.
-            </FormattedMessage>
-          </p>
-        </MockUiComponent>
-        <MockUiComponent
-          size="m"
-        />
-        <MockUiComponent>
-          <MockUiComponent
-            label={
-              <FormattedMessage
-                defaultMessage="Kibana Query Language"
-                id="data.query.queryBar.kqlFullLanguageName"
-                values={Object {}}
-              />
-            }
+        <div
+          className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
+          id="popover"
+          onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
+        >
+          <div
+            className="euiPopover__anchor euiFormControlLayout__append"
           >
-            <MockButtonComponent
-              checked={true}
-              data-test-subj="languageToggle"
-              id="queryEnhancementOptIn"
-              label={
-                <FormattedMessage
-                  defaultMessage="On"
-                  id="data.query.queryBar.kqlOnLabel"
-                  values={Object {}}
-                />
-              }
-              name="popswitch"
-              onChange={[Function]}
+            <EuiButtonEmpty
+              className="euiFormControlLayout__append"
+              onClick={[Function]}
+              size="xs"
             >
               <button
+                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
                 onClick={[Function]}
-              />
-            </MockButtonComponent>
-          </MockUiComponent>
-        </MockUiComponent>
-      </div>
-    </MockUiComponent>
+                type="button"
+              >
+                <span
+                  className="euiButtonEmpty__content"
+                >
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    <FormattedMessage
+                      defaultMessage="KQL"
+                      id="data.query.queryBar.kqlLanguageName"
+                      values={Object {}}
+                    >
+                      KQL
+                    </FormattedMessage>
+                  </span>
+                </span>
+              </button>
+            </EuiButtonEmpty>
+          </div>
+        </div>
+      </EuiOutsideClickDetector>
+    </EuiPopover>
   </QueryLanguageSwitcher>
 </Provider>
 `;

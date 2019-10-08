@@ -24,30 +24,6 @@ import { coreMock } from '../../../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 const startMock = coreMock.createStart();
 
-jest.mock('@elastic/eui', () => {
-  // This simplifies rendering and decouples interaction testing from EUI implementation
-  const MockUiComponent = (props: any) => {
-    return props.children || null;
-  };
-  const MockButtonComponent = (props: any) => {
-    const { children, onChange } = props;
-    return <button onClick={onChange}>{children}</button>;
-  };
-
-  return {
-    EuiButtonEmpty: MockUiComponent,
-    EuiForm: MockUiComponent,
-    EuiFormRow: MockUiComponent,
-    EuiLink: MockButtonComponent,
-    EuiPopover: MockUiComponent,
-    EuiPopoverTitle: MockUiComponent,
-    EuiSpacer: MockUiComponent,
-    EuiSwitch: MockButtonComponent,
-    EuiText: MockUiComponent,
-    PopoverAnchorPosition: MockUiComponent,
-  };
-});
-
 describe('LanguageSwitcher', () => {
   function wrapInContext(testProps: any) {
     const services = {
@@ -86,18 +62,5 @@ describe('LanguageSwitcher', () => {
     );
 
     expect(component).toMatchSnapshot();
-  });
-
-  it('call onSelectLanguage when the toggle is clicked', () => {
-    const callback = jest.fn();
-    const component = mountWithIntl(
-      wrapInContext({
-        language: 'kuery',
-        onSelectLanguage: callback,
-      })
-    );
-
-    component.find('[data-test-subj="languageToggle"]').simulate('click');
-    expect(callback).toHaveBeenCalledTimes(1);
   });
 });
