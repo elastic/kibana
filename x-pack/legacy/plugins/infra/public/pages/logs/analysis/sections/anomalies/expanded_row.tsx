@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { RectAnnotationDatum } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { AnomaliesChart } from './chart';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
@@ -76,12 +77,28 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     [results]
   );
   return (
-    <AnomaliesChart
-      chartId={`${partitionId}-anomalies`}
-      timeRange={timeRange}
-      setTimeRange={setTimeRange}
-      series={logEntryRateSeries}
-      annotations={anomalyAnnotations}
-    />
+    <EuiFlexGroup>
+      <EuiFlexItem grow={8}>
+        <AnomaliesChart
+          chartId={`${partitionId}-anomalies`}
+          timeRange={timeRange}
+          setTimeRange={setTimeRange}
+          series={logEntryRateSeries}
+          annotations={anomalyAnnotations}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={2}>
+        <EuiStat
+          title={Number(topAnomalyScore).toFixed(1)}
+          description={i18n.translate(
+            'xpack.infra.logs.analysis.anomaliesExpandedRowTopAnomalyScoreDescription',
+            {
+              defaultMessage: 'Top anomaly score',
+            }
+          )}
+          reverse
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
