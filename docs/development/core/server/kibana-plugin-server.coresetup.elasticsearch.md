@@ -8,8 +8,8 @@
 
 ```typescript
 elasticsearch: {
-        adminClient$: Observable<ClusterClient>;
-        dataClient$: Observable<ClusterClient>;
-        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
+        adminClient$: Observable<IClusterClient>;
+        dataClient$: Observable<IClusterClient>;
+        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => IClusterClient;
     };
 ```

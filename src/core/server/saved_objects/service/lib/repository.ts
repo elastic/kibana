@@ -19,11 +19,13 @@
 
 import { omit } from 'lodash';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import { SavedObjectsErrorHelpers } from './errors';
+import { SavedObjectsCacheIndexPatterns } from './cache_index_patterns';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
@@ -45,6 +47,7 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
 } from '../../types';
+import { validateConvertFilterToKueryNode } from './filter_utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -74,6 +77,7 @@ export interface SavedObjectsRepositoryOptions {
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
   allowedTypes: string[];
+  cacheIndexPatterns: SavedObjectsCacheIndexPatterns;
   onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
@@ -91,11 +95,13 @@ export class SavedObjectsRepository {
   private _onBeforeWrite: (...args: Parameters<CallCluster>) => Promise<void>;
   private _unwrappedCallCluster: CallCluster;
   private _serializer: SavedObjectsSerializer;
+  private _cacheIndexPatterns: SavedObjectsCacheIndexPatterns;
 
   constructor(options: SavedObjectsRepositoryOptions) {
     const {
       index,
       config,
+      cacheIndexPatterns,
       mappings,
       callCluster,
       schema,
@@ -106,7 +112,7 @@ export class SavedObjectsRepository {
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
-    // prior to writing them to the index. Otherwise, we'll cause unecessary
+    // prior to writing them to the index. Otherwise, we'll cause unnecessary
     // index migrations to run at Kibana startup, and those will probably fail
     // due to invalidly versioned documents in the index.
     //
@@ -117,6 +123,7 @@ export class SavedObjectsRepository {
     this._config = config;
     this._mappings = mappings;
     this._schema = schema;
+    this._cacheIndexPatterns = cacheIndexPatterns;
     if (allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
     }
@@ -126,6 +133,9 @@ export class SavedObjectsRepository {
 
     this._unwrappedCallCluster = async (...args: Parameters<CallCluster>) => {
       await migrator.runMigrations();
+      if (this._cacheIndexPatterns.getIndexPatterns() == null) {
+        await this._cacheIndexPatterns.setIndexPatterns(index);
+      }
       return callCluster(...args);
     };
     this._schema = schema;
@@ -404,9 +414,12 @@ export class SavedObjectsRepository {
     fields,
     namespace,
     type,
+    filter,
   }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
     if (!type) {
-      throw new TypeError(`options.type must be a string or an array of strings`);
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.type must be a string or an array of strings'
+      );
     }
 
     const types = Array.isArray(type) ? type : [type];
@@ -421,12 +434,27 @@ export class SavedObjectsRepository {
     }
 
     if (searchFields && !Array.isArray(searchFields)) {
-      throw new TypeError('options.searchFields must be an array');
+      throw SavedObjectsErrorHelpers.createBadRequestError('options.searchFields must be an array');
     }
 
     if (fields && !Array.isArray(fields)) {
-      throw new TypeError('options.fields must be an array');
+      throw SavedObjectsErrorHelpers.createBadRequestError('options.fields must be an array');
     }
+
+    if (filter && filter !== '' && this._cacheIndexPatterns.getIndexPatterns() == null) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.filter is missing index pattern to work correctly'
+      );
+    }
+
+    const kueryNode =
+      filter && filter !== ''
+        ? validateConvertFilterToKueryNode(
+            allowedTypes,
+            filter,
+            this._cacheIndexPatterns.getIndexPatterns()
+          )
+        : null;
 
     const esOptions = {
       index: this.getIndicesForTypes(allowedTypes),
@@ -446,6 +474,8 @@ export class SavedObjectsRepository {
           sortOrder,
           namespace,
           hasReference,
+          indexPattern: kueryNode != null ? this._cacheIndexPatterns.getIndexPatterns() : undefined,
+          kueryNode,
         }),
       },
     };
@@ -614,9 +644,19 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, namespace, references = [] } = options;
+    const { version, namespace, references } = options;
 
     const time = this._getCurrentTime();
+
+    const doc = {
+      [type]: attributes,
+      updated_at: time,
+      references,
+    };
+    if (!Array.isArray(doc.references)) {
+      delete doc.references;
+    }
+
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
@@ -624,11 +664,7 @@ export class SavedObjectsRepository {
       refresh: 'wait_for',
       ignore: [404],
       body: {
-        doc: {
-          [type]: attributes,
-          updated_at: time,
-          references,
-        },
+        doc,
       },
     });
 
@@ -769,7 +805,7 @@ export class SavedObjectsRepository {
 
   // The internal representation of the saved object that the serializer returns
   // includes the namespace, and we use this for migrating documents. However, we don't
-  // want the namespcae to be returned from the repository, as the repository scopes each
+  // want the namespace to be returned from the repository, as the repository scopes each
   // method transparently to the specified namespace.
   private _rawToSavedObject(raw: RawDoc): SavedObject {
     const savedObject = this._serializer.rawToSavedObject(raw);
