@@ -43,7 +43,7 @@ export function uiSettingsMixin(kbnServer, server) {
     return acc;
   }, {});
 
-  server.newPlatform.__internals.uiSettings.setDefaults(mergedUiSettingDefaults);
+  kbnServer.newPlatform.__internals.uiSettings.setDefaults(mergedUiSettingDefaults);
 
   server.decorate('server', 'uiSettingsServiceFactory', (options = {}) => {
     return uiSettingsServiceFactory(server, options);

@@ -33,6 +33,12 @@ interface Decorators {
   request: { [name: string]: any };
 }
 
+const uiSettingDefaults = {
+  application: {
+    defaultProperty1: 'value1',
+  },
+};
+
 describe('uiSettingsMixin()', () => {
   const sandbox = sinon.createSandbox();
 
@@ -74,8 +80,15 @@ describe('uiSettingsMixin()', () => {
     const kbnServer = {
       server,
       config,
-      uiExports: { addConsumer: sinon.stub() },
+      uiExports: { addConsumer: sinon.stub(), uiSettingDefaults },
       ready: sinon.stub().returns(readyPromise),
+      newPlatform: {
+        __internals: {
+          uiSettings: {
+            setDefaults: sinon.stub(),
+          },
+        },
+      },
     };
 
     uiSettingsMixin(kbnServer, server, config);
@@ -89,6 +102,15 @@ describe('uiSettingsMixin()', () => {
   }
 
   afterEach(() => sandbox.restore());
+
+  it('passes uiSettingsDefaults to the new platform', () => {
+    const { kbnServer } = setup();
+    sinon.assert.calledOnce(kbnServer.newPlatform.__internals.uiSettings.setDefaults);
+    sinon.assert.calledWithExactly(
+      kbnServer.newPlatform.__internals.uiSettings.setDefaults,
+      uiSettingDefaults
+    );
+  });
 
   describe('server.uiSettingsServiceFactory()', () => {
     it('decorates server with "uiSettingsServiceFactory"', () => {
@@ -124,10 +146,6 @@ describe('uiSettingsMixin()', () => {
       sinon.assert.calledWithExactly(uiSettingsServiceFactoryStub, server as any, {
         // @ts-ignore foo doesn't exist on Hapi.Server
         foo: 'bar',
-        overrides: {
-          foo: 'bar',
-        },
-        getDefaults: sinon.match.func,
       });
     });
   });
@@ -161,12 +179,7 @@ describe('uiSettingsMixin()', () => {
       sinon.assert.notCalled(getUiSettingsServiceForRequestStub);
       const request = {};
       decorations.request.getUiSettingsService.call(request);
-      sinon.assert.calledWith(getUiSettingsServiceForRequestStub, server as any, request as any, {
-        overrides: {
-          foo: 'bar',
-        },
-        getDefaults: sinon.match.func,
-      });
+      sinon.assert.calledWith(getUiSettingsServiceForRequestStub, server as any, request as any);
     });
   });
 
