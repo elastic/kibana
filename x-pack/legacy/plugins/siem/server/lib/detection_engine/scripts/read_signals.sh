@@ -9,10 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./put_signal_index.sh
+# Example: ./read_signals.sh {id}
 curl -s -k \
-  -H "Content-Type: application/json" \
-  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -d @../signals_mapping.json \
-  -X PUT ${ELASTICSEARCH_URL}/${SIGNALS_INDEX} \
-  | jq .
+ -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
+ -X GET ${KIBANA_URL}/api/siem/signals/$1 | jq .

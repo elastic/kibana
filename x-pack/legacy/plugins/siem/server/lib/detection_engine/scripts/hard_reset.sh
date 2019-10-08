@@ -9,10 +9,8 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./put_signal_index.sh
-curl -s -k \
-  -H "Content-Type: application/json" \
-  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -d @../signals_mapping.json \
-  -X PUT ${ELASTICSEARCH_URL}/${SIGNALS_INDEX} \
-  | jq .
+./delete_all_actions.sh
+./delete_all_alerts.sh
+./delete_all_alert_tasks.sh
+./delete_signal_index.sh
+./put_signal_index.sh

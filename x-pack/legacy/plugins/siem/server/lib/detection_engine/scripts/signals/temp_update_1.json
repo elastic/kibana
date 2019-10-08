@@ -1,0 +1,12 @@
+{
+  "id": "85e55248-7b90-4e9c-afa2-4ff97baf3de3",
+  "description": "Detecting root and admin users",
+  "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
+  "interval": "5m",
+  "name": "Detect Root/Admin Users",
+  "severity": 1,
+  "type": "kql",
+  "from": "now-6m",
+  "to": "now",
+  "kql": "user.name: root or user.name: admin"
+}
