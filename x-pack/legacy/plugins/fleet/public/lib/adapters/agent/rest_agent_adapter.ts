@@ -5,11 +5,7 @@
  */
 
 import { Agent } from '../../../../common/types/domain_data';
-import {
-  ReturnTypeGet,
-  ReturnTypeList,
-  ReturnTypeUpdate,
-} from '../../../../common/types/std_return_format';
+import { ReturnTypeGet, ReturnTypeList, ReturnTypeUpdate } from '../../../../common/return_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { AgentAdapter } from './memory_agent_adapter';
 
@@ -36,11 +32,20 @@ export class RestAgentAdapter extends AgentAdapter {
     }
   }
 
-  public async getAll(ESQuery?: string): Promise<Agent[]> {
+  public async getAll(page: number, perPage: number): Promise<ReturnTypeList<Agent>> {
     try {
-      return (await this.REST.get<ReturnTypeList<Agent>>('/api/fleet/agents', { ESQuery })).list;
+      return await this.REST.get<ReturnTypeList<Agent>>('/api/fleet/agents', {
+        page,
+        perPage,
+      });
     } catch (e) {
-      return [];
+      return {
+        list: [],
+        success: false,
+        page,
+        total: 0,
+        perPage,
+      };
     }
   }
 

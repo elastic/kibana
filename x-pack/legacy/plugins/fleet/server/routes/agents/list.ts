@@ -9,6 +9,7 @@ import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeList } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
 import { Agent } from '../../../common/types/domain_data';
+import { DEFAULT_AGENTS_PAGE_SIZE } from '../../../common/constants';
 
 export const createListAgentsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
@@ -17,16 +18,20 @@ export const createListAgentsRoute = (libs: FleetServerLib) => ({
     validate: {
       query: {
         page: Joi.number().default(1),
+        perPage: Joi.number().default(DEFAULT_AGENTS_PAGE_SIZE),
       },
     },
   },
   handler: async (
-    request: FrameworkRequest<{ query: { page: string } }>
+    request: FrameworkRequest<{ query: { page: string; perPage: string } }>
   ): Promise<ReturnTypeList<Agent>> => {
-    const page = parseInt(request.query.page, 10);
+    const { agents, total, page, perPage } = await libs.agents.list(
+      request.user,
+      undefined,
+      parseInt(request.query.page, 10),
+      parseInt(request.query.perPage, 10)
+    );
 
-    const { agents, total } = await libs.agents.list(request.user);
-
-    return { list: agents, success: true, page, total };
+    return { list: agents, success: true, total, page, perPage };
   },
 });

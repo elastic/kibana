@@ -16,9 +16,6 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
   config: {
     auth: false,
     validate: {
-      query: {
-        page: Joi.number().default(1),
-      },
       headers: Joi.object({
         'kbn-fleet-enrollment-token': Joi.string().required(),
       }).options({
@@ -37,7 +34,6 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
   },
   handler: async (
     request: FrameworkRequest<{
-      query: { page: string };
       payload: {
         sharedId?: string;
         type: 'PERMANENT' | 'EPHEMERAL_INSTANCE';

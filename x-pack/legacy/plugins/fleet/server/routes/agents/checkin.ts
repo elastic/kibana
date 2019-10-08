@@ -16,7 +16,6 @@ import { RuntimeAgentEvent, AgentEvent } from '../../repositories/agent_events/t
 import { FleetServerLib } from '../../libs/types';
 
 type CheckinRequest = FrameworkRequest<{
-  query: { page: string };
   payload: {
     events: any[];
     local_metadata: any;

@@ -29,8 +29,9 @@ export class AgentAdapter {
     return true;
   }
 
-  public async getAll(ESQuery?: string) {
-    return this.memoryDB.map<Agent>((beat: any) => omit(beat, ['access_token']));
+  public async getAll(page: number, perPage: number) {
+    const list = this.memoryDB.map<Agent>((beat: any) => omit(beat, ['access_token']));
+    return { list, success: true, page, perPage, total: list.length };
   }
   public async getOnPolicy(tagId: string): Promise<Agent[]> {
     return this.memoryDB.map<Agent>((beat: any) => omit(beat, ['access_token']));

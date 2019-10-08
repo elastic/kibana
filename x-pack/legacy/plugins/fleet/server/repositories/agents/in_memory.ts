@@ -5,6 +5,7 @@
  */
 
 import { AgentsRepository, Agent, NewAgent } from './types';
+import { DEFAULT_AGENTS_PAGE_SIZE } from '../../../common/constants';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
 /**
@@ -64,13 +65,13 @@ export class InMemoryAgentsRepository implements AgentsRepository {
     user: FrameworkUser,
     sortOptions: any,
     page: number = 1,
-    perPage: number = 20
-  ): Promise<{ agents: Agent[]; total: number }> {
+    perPage: number = DEFAULT_AGENTS_PAGE_SIZE
+  ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
     const start = (page - 1) * perPage;
     const agents = Object.values(this.agents).slice(start, start + perPage);
     const total = Object.keys(this.agents).length;
 
-    return { agents, total };
+    return { agents, total, page, perPage };
   }
 
   public async findEphemeralByPolicySharedId(

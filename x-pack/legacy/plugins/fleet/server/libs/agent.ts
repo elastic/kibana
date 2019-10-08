@@ -203,7 +203,7 @@ export class AgentLib {
     sortOptions: SortOptions = SortOptions.EnrolledAtDESC,
     page?: number,
     perPage?: number
-  ): Promise<{ agents: Agent[]; total: number }> {
+  ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
     return this.agentsRepository.list(user, sortOptions, page, perPage);
   }
 
