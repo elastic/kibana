@@ -5,13 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiTitle,
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiText
-} from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { Config } from '../index';
@@ -23,59 +17,26 @@ interface Props {
   selectedConfig: Config;
 }
 
-export function DeleteSection({ onDeleted, selectedConfig }: Props) {
+export function DeleteButton({ onDeleted, selectedConfig }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   return (
-    <>
-      <EuiHorizontalRule margin="m" />
-      <EuiTitle size="xs">
-        <h3>
-          <EuiText color="danger">
-            {i18n.translate(
-              'xpack.apm.settings.agentConf.flyout.deleteSection.title',
-              { defaultMessage: 'Delete configuration' }
-            )}
-          </EuiText>
-        </h3>
-      </EuiTitle>
-
-      <EuiSpacer size="s" />
-
-      <EuiText>
-        <p>
-          {i18n.translate(
-            'xpack.apm.settings.agentConf.flyout.deleteSection.helpText',
-            {
-              defaultMessage:
-                'If you wish to delete this configuration, please be aware that the agents will continue to use the existing configuration until they sync with the APM Server.'
-            }
-          )}
-        </p>
-      </EuiText>
-
-      <EuiSpacer size="s" />
-
-      <EuiButton
-        fill={false}
-        color="danger"
-        isLoading={isDeleting}
-        iconSide="right"
-        onClick={async () => {
-          setIsDeleting(true);
-          await deleteConfig(selectedConfig);
-          setIsDeleting(false);
-          onDeleted();
-        }}
-      >
-        {i18n.translate(
-          'xpack.apm.settings.agentConf.flyout.deleteSection.buttonLabel',
-          { defaultMessage: 'Delete' }
-        )}
-      </EuiButton>
-
-      <EuiSpacer size="m" />
-    </>
+    <EuiButtonEmpty
+      color="danger"
+      isLoading={isDeleting}
+      iconSide="right"
+      onClick={async () => {
+        setIsDeleting(true);
+        await deleteConfig(selectedConfig);
+        setIsDeleting(false);
+        onDeleted();
+      }}
+    >
+      {i18n.translate(
+        'xpack.apm.settings.agentConf.flyout.deleteSection.buttonLabel',
+        { defaultMessage: 'Delete' }
+      )}
+    </EuiButtonEmpty>
   );
 }
 

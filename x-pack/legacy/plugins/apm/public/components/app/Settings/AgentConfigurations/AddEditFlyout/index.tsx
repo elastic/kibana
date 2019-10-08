@@ -21,26 +21,19 @@ import {
 } from '@elastic/eui';
 import { idx } from '@kbn/elastic-idx';
 import React, { useState } from 'react';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 import { transactionSampleRateRt } from '../../../../../../common/runtime_types/transaction_sample_rate_rt';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
-import { trackEvent } from '../../../../../../../infra/public/hooks/use_track_metric';
 import { Config } from '../index';
 import { SettingsSection } from './SettingsSection';
 import { ServiceSection } from './ServiceSection';
-import { DeleteSection } from './DeleteSection';
+import { DeleteButton } from './DeleteButton';
 import { transactionMaxSpansRt } from '../../../../../../common/runtime_types/transaction_max_spans_rt';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { isRumAgentName } from '../../../../../../common/agent_name';
-import { ALL_OPTION_VALUE, getOptionValue, getOptionLabel } from '../constants';
-
-interface Settings {
-  transaction_sample_rate: number;
-  capture_body?: string;
-  transaction_max_spans?: number;
-}
+import { ALL_OPTION_VALUE } from '../constants';
+import { saveConfig } from './saveConfig';
 
 const defaultSettings = {
   TRANSACTION_SAMPLE_RATE: '1.0',
@@ -210,136 +203,49 @@ export function AddEditFlyout({
                 setTransactionMaxSpans={setTransactionMaxSpans}
                 isTransactionMaxSpansValid={isTransactionMaxSpansValid}
               />
-
-              {selectedConfig ? (
-                <DeleteSection
-                  selectedConfig={selectedConfig}
-                  onDeleted={onDeleted}
-                />
-              ) : null}
             </form>
           </EuiForm>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose}>
-                {i18n.translate(
-                  'xpack.apm.settings.agentConf.cancelButtonLabel',
-                  { defaultMessage: 'Cancel' }
-                )}
-              </EuiButtonEmpty>
+              {selectedConfig ? (
+                <DeleteButton
+                  selectedConfig={selectedConfig}
+                  onDeleted={onDeleted}
+                />
+              ) : null}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                type="submit"
-                fill
-                isLoading={isSaving}
-                iconSide="right"
-                isDisabled={!isFormValid}
-                onClick={handleSubmitEvent}
-              >
-                {i18n.translate(
-                  'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
-                  { defaultMessage: 'Save configuration' }
-                )}
-              </EuiButton>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={onClose}>
+                    {i18n.translate(
+                      'xpack.apm.settings.agentConf.cancelButtonLabel',
+                      { defaultMessage: 'Cancel' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    type="submit"
+                    fill
+                    isLoading={isSaving}
+                    iconSide="right"
+                    isDisabled={!isFormValid}
+                    onClick={handleSubmitEvent}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
+                      { defaultMessage: 'Save' }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>
     </EuiPortal>
   );
-}
-
-async function saveConfig({
-  serviceName,
-  environment,
-  sampleRate,
-  captureBody,
-  transactionMaxSpans,
-  configurationId,
-  agentName
-}: {
-  serviceName: string;
-  environment: string;
-  sampleRate: string;
-  captureBody: string;
-  transactionMaxSpans: string;
-  configurationId?: string;
-  agentName?: string;
-}) {
-  trackEvent({ app: 'apm', name: 'save_agent_configuration' });
-
-  try {
-    const settings: Settings = {
-      transaction_sample_rate: Number(sampleRate)
-    };
-
-    if (!isRumAgentName(agentName)) {
-      settings.capture_body = captureBody;
-      settings.transaction_max_spans = Number(transactionMaxSpans);
-    }
-
-    const configuration = {
-      agent_name: agentName,
-      service: {
-        name: getOptionValue(serviceName),
-        environment: getOptionValue(environment)
-      },
-      settings
-    };
-
-    if (configurationId) {
-      await callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/{configurationId}',
-        method: 'PUT',
-        params: {
-          path: { configurationId },
-          body: configuration
-        }
-      });
-    } else {
-      await callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/new',
-        method: 'POST',
-        params: {
-          body: configuration
-        }
-      });
-    }
-
-    toastNotifications.addSuccess({
-      title: i18n.translate(
-        'xpack.apm.settings.agentConf.saveConfig.succeeded.title',
-        { defaultMessage: 'Configuration saved' }
-      ),
-      text: i18n.translate(
-        'xpack.apm.settings.agentConf.saveConfig.succeeded.text',
-        {
-          defaultMessage:
-            'The configuration for "{serviceName}" was saved. It will take some time to propagate to the agents.',
-          values: { serviceName: getOptionLabel(serviceName) }
-        }
-      )
-    });
-  } catch (error) {
-    toastNotifications.addDanger({
-      title: i18n.translate(
-        'xpack.apm.settings.agentConf.saveConfig.failed.title',
-        { defaultMessage: 'Configuration could not be saved' }
-      ),
-      text: i18n.translate(
-        'xpack.apm.settings.agentConf.saveConfig.failed.text',
-        {
-          defaultMessage:
-            'Something went wrong when saving the configuration for "{serviceName}". Error: "{errorMessage}"',
-          values: {
-            serviceName: getOptionLabel(serviceName),
-            errorMessage: error.message
-          }
-        }
-      )
-    });
-  }
 }
