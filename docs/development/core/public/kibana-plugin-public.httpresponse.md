@@ -16,6 +16,6 @@ export interface HttpResponse
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [body](./kibana-plugin-public.httpresponse.body.md) | <code>HttpBody</code> |  |
-|  [request](./kibana-plugin-public.httpresponse.request.md) | <code>Request</code> |  |
+|  [request](./kibana-plugin-public.httpresponse.request.md) | <code>Readonly&lt;Request&gt;</code> |  |
 |  [response](./kibana-plugin-public.httpresponse.response.md) | <code>Response</code> |  |
 

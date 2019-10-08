@@ -17,6 +17,6 @@ export interface HttpErrorResponse
 |  --- | --- | --- |
 |  [body](./kibana-plugin-public.httperrorresponse.body.md) | <code>HttpBody</code> |  |
 |  [error](./kibana-plugin-public.httperrorresponse.error.md) | <code>Error &#124; IHttpFetchError</code> |  |
-|  [request](./kibana-plugin-public.httperrorresponse.request.md) | <code>Request</code> |  |
+|  [request](./kibana-plugin-public.httperrorresponse.request.md) | <code>Readonly&lt;Request&gt;</code> |  |
 |  [response](./kibana-plugin-public.httperrorresponse.response.md) | <code>Response</code> |  |
 

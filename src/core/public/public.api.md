@@ -432,7 +432,7 @@ export interface HttpErrorResponse {
     // (undocumented)
     error: Error | IHttpFetchError;
     // (undocumented)
-    request?: Request;
+    request: Readonly<Request>;
     // (undocumented)
     response?: Response;
 }
@@ -463,7 +463,7 @@ export interface HttpHeadersInit {
 export interface HttpInterceptor {
     request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
     requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<Partial<HttpResponse>> | Partial<HttpResponse> | void;
     responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
 }
 
@@ -490,7 +490,7 @@ export interface HttpResponse {
     // (undocumented)
     body?: HttpBody;
     // (undocumented)
-    request?: Request;
+    request: Readonly<Request>;
     // (undocumented)
     response?: Response;
 }

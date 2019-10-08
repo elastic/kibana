@@ -294,19 +294,14 @@ export interface HttpInterceptor {
    */
   response?(
     httpResponse: HttpResponse,
-<<<<<<< HEAD
     controller: IHttpInterceptController
-  ): Promise<HttpResponse> | HttpResponse | void;
+  ): Promise<Partial<HttpResponse>> | Partial<HttpResponse> | void;
 
   /**
    * Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise.
    * @param httpErrorResponse {@link HttpErrorResponse}
    * @param controller {@link IHttpInterceptController}
    */
-=======
-    controller: HttpInterceptController
-  ): Promise<Partial<HttpResponse>> | Partial<HttpResponse> | void;
->>>>>>> 892173856f... Pass along request object to all HTTP interceptors
   responseError?(
     httpErrorResponse: HttpErrorResponse,
     controller: IHttpInterceptController
