@@ -58,10 +58,10 @@ export class FeatureProperties extends React.Component {
     });
 
     // Preserve current properties width/height so they can be used while rendering loading indicator.
-    if (this.state.properties && this.node) {
+    if (this.state.properties && this._node) {
       this.setState({
-        prevWidth: this.node.clientWidth,
-        prevHeight: this.node.clientHeight
+        prevWidth: this._node.clientWidth,
+        prevHeight: this._node.clientHeight
       });
     }
 
