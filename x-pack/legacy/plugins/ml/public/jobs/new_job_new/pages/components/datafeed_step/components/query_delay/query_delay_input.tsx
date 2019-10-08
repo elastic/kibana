@@ -9,6 +9,8 @@ import { EuiFieldText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
+const DEFAULT_QUERY_DELAY = '60s';
+
 export const QueryDelayInput: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
     JobCreatorContext
@@ -35,6 +37,7 @@ export const QueryDelayInput: FC = () => {
     <Description validation={validation}>
       <EuiFieldText
         value={queryDelay}
+        placeholder={DEFAULT_QUERY_DELAY}
         onChange={e => setQueryDelay(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputQueryDelay"
