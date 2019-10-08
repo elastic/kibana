@@ -17,8 +17,8 @@
  * under the License.
  */
 
+// eslint-disable-next-line
 import { npSetup } from 'ui/new_platform';
-// @ts-ignore
 
 import { setInspector, setInterpreter } from './services';
 import { execute } from './lib/execute';
@@ -27,7 +27,7 @@ import { render } from './lib/render';
 import { IInterpreter } from './lib/_types';
 import { createRenderer } from './expression_renderer';
 
-import { Start as IInspector } from '../../../../../plugins/inspector/public';
+import { Start as IInspector } from '../../../../../../../plugins/inspector/public';
 
 export interface ExpressionsServiceStartDependencies {
   inspector: IInspector;
@@ -39,7 +39,7 @@ export interface ExpressionsServiceStartDependencies {
 export class ExpressionsService {
   public setup() {
     // eslint-disable-next-line
-    const { getInterpreter } = require('../../../interpreter/public/interpreter');
+    const { getInterpreter } = require('../../../../../interpreter/public/interpreter');
     getInterpreter()
       .then(({ interpreter }: { interpreter: IInterpreter }) => {
         setInterpreter(interpreter);

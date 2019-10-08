@@ -17,4 +17,23 @@
  * under the License.
  */
 
-export * from './np_ready/public/mocks';
+import { IInterpreter } from './lib/_types';
+import { Start as IInspector } from '../../../../../../../plugins/inspector/public';
+
+const createGetterSetter = <T extends object>(name: string): [() => T, (value: T) => void] => {
+  let value: T;
+
+  const get = (): T => {
+    if (!value) throw new Error(`${name} was not set`);
+    return value;
+  };
+
+  const set = (newValue: T) => {
+    value = newValue;
+  };
+
+  return [get, set];
+};
+
+export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
+export const [getInterpreter, setInterpreter] = createGetterSetter<IInterpreter>('Interpreter');

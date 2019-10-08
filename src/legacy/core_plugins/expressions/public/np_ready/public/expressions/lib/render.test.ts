@@ -23,7 +23,7 @@ import { IInterpreterRenderHandlers } from './_types';
 
 const element: HTMLElement = null as any;
 
-jest.mock('../../../../interpreter/public/registries', () => {
+jest.mock('../../../../../../interpreter/public/registries', () => {
   const _registry: Record<string, any> = {};
   _registry.test = {
     render: (el: HTMLElement, value: any, handlers: IInterpreterRenderHandlers) => {
