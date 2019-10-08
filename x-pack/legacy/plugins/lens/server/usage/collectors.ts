@@ -7,6 +7,7 @@
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
 import { getVisualizationCounts } from './visualization_counts';
+import { LensUsage } from './types';
 
 export function getSavedObjectsClient(
   savedObjects: SavedObjectsLegacyService,
@@ -31,16 +32,18 @@ export function registerLensUsageCollector(
 ) {
   const lensUsageCollector = plugins.usage.collectorSet.makeUsageCollector({
     type: 'lens',
-    fetch: async (callCluster: CallCluster) => {
+    fetch: async (callCluster: CallCluster): Promise<LensUsage> => {
       const savedObjectsClient = getSavedObjectsClient(plugins.savedObjects, callCluster);
       try {
         return getVisualizationCounts(savedObjectsClient);
       } catch (err) {
         return {
-          lens: {
-            total: 0,
-            visualization_types: {},
-          },
+          saved_total: 0,
+          saved_last_30_days: 0,
+          saved_last_90_days: 0,
+          visualization_types_overall: {},
+          visualization_types_last_30_days: {},
+          visualization_types_last_90_days: {},
         };
       }
     },

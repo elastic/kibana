@@ -25,12 +25,6 @@ import {
 } from '../datatable_visualization_plugin';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../../src/legacy/core_plugins/ui_metric/public';
-
-const trackLensUiMetric = createUiStatsReporter('lens');
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -70,12 +64,6 @@ export class AppPlugin {
     this.instance = editorFrameStartInterface.createInstance({});
 
     const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
-      if (routeProps.match.params.id) {
-        trackLensUiMetric(METRIC_TYPE.LOADED, 'lens_from_saved');
-      } else {
-        trackLensUiMetric(METRIC_TYPE.LOADED, 'lens_loaded');
-      }
-
       return (
         <App
           core={core}

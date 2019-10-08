@@ -4,32 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClient } from 'src/core/server';
+import { SavedObjectsClient, SavedObjectsFindResponse } from 'src/core/server';
+import { Document } from '../../public/persistence';
+import { LensUsage } from './types';
 
-export async function getVisualizationCounts(savedObjectsClient: SavedObjectsClient) {
-  const lensSavedObjects = await savedObjectsClient.find({
-    type: 'lens',
+function getTypeName(doc: Document): string {
+  if (doc.visualizationType === 'lnsXY') {
+    return (doc.state.visualization as { preferredSeriesType: string }).preferredSeriesType;
+  } else {
+    return doc.visualizationType as string;
+  }
+}
+
+function groupByType(response: SavedObjectsFindResponse) {
+  const byVisType: Record<string, number> = {};
+
+  response.saved_objects.forEach(({ attributes }) => {
+    const type = getTypeName(attributes as Document);
+
+    if (byVisType[type]) {
+      byVisType[type] += 1;
+    } else {
+      byVisType[type] = 1;
+    }
   });
 
-  const byType: Record<string, number> = {};
+  return byVisType;
+}
 
-  lensSavedObjects.saved_objects.forEach(({ attributes }) => {
-    let type;
-    if (attributes.visualizationType === 'lnsXY') {
-      type = attributes.state.visualization.preferredSeriesType;
-    } else {
-      type = attributes.visualizationType;
-    }
+export async function getVisualizationCounts(
+  savedObjectsClient: SavedObjectsClient
+): Promise<LensUsage> {
+  const [overall, last30, last90] = await Promise.all([
+    savedObjectsClient.find({
+      type: 'lens',
+    }),
 
-    if (byType[type]) {
-      byType[type] += 1;
-    } else {
-      byType[type] = 1;
-    }
-  });
+    savedObjectsClient.find({
+      type: 'lens',
+      filter: 'lens.updated_at >= "now-30d"',
+    }),
+
+    savedObjectsClient.find({
+      type: 'lens',
+      filter: 'lens.updated_at >= "now-90d"',
+    }),
+  ]);
 
   return {
-    total: lensSavedObjects.total,
-    visualization_types: byType,
+    visualization_types_overall: groupByType(overall),
+    visualization_types_last_30_days: groupByType(last30),
+    visualization_types_last_90_days: groupByType(last90),
+    saved_total: overall.total,
+    saved_last_30_days: last30.total,
+    saved_last_90_days: last90.total,
   };
 }
