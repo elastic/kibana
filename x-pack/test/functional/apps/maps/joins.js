@@ -182,7 +182,7 @@ export default function ({ getPageObjects, getService }) {
           return feature.properties.__kbn__isvisible__;
         });
 
-        expect(visibilitiesOfFeatures).to.eql([false, false, true, false]);
+        expect(visibilitiesOfFeatures).to.eql([false, true, false, false]);
       });
 
 
