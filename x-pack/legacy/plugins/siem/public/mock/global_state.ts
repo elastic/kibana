@@ -46,7 +46,6 @@ export const mockGlobalState: State = {
         },
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
-        anomalies: null,
       },
       filterQuery: null,
       filterQueryDraft: null,

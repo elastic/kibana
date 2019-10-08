@@ -77,7 +77,6 @@ export const mockNetworkState: NetworkModel = {
           direction: Direction.asc,
         },
       },
-      [IpDetailsTableType.anomalies]: null,
     },
     filterQuery: null,
     filterQueryDraft: null,
@@ -118,7 +117,6 @@ describe('Network redux store', () => {
         },
         tls: { activePage: 0, limit: 10, tlsSortField: { field: '_id', direction: 'desc' } },
         users: { activePage: 0, limit: 10, usersSortField: { field: 'name', direction: 'asc' } },
-        anomalies: null,
       });
     });
   });
