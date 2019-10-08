@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nContext } from 'ui/i18n';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
@@ -31,12 +34,43 @@ import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 import { canViewInApp } from '../lib/in_app_url';
+import { Header } from './components';
 
 import { castEsToKbnFieldTypeName } from '../../../../../../../../plugins/data/public';
 
 import { getViewBreadcrumbs } from '../breadcrumbs';
 
 const location = 'SavedObject view';
+
+const REACT_COMPONENT_ID = 'reactViewSavedObjectsId';
+
+function updateReactComponent($scope) {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_COMPONENT_ID);
+    if (!node) {
+      return;
+    }
+
+    render(
+      <I18nContext>
+        <Header
+          canEdit={$scope.canEdit}
+          title={$scope.title}
+          link={$scope.link}
+          canViewInApp={$scope.canViewInApp}
+          canDelete={$scope.canDelete}
+          removeObject={$scope.delete}
+        />
+      </I18nContext>,
+      node
+    );
+  });
+}
+
+function destroyReactComponent() {
+  const node = document.getElementById(REACT_COMPONENT_ID);
+  node && unmountComponentAtNode(node);
+}
 
 uiRoutes
   .when('/management/kibana/objects/:service/:id', {
@@ -148,6 +182,9 @@ uiModules.get('apps/management', ['monospaced.elastic'])
         $scope.notFound = $routeParams.notFound;
 
         $scope.title = service.type;
+        $scope.$watch('link', () => {
+          updateReactComponent($scope);
+        });
 
         savedObjectsClient.get(service.type, $routeParams.id)
           .then(function (obj) {
@@ -273,6 +310,12 @@ uiModules.get('apps/management', ['monospaced.elastic'])
 
           toastNotifications.addSuccess(`${_.capitalize(action)} '${$scope.obj.attributes.title}' ${$scope.title.toLowerCase()} object`);
         }
+
+        $scope.$on('$destroy', () => {
+          destroyReactComponent();
+        });
+
+        updateReactComponent($scope);
       }
     };
   });

@@ -1,58 +1,6 @@
 <kbn-management-app section="kibana/objects" class="kuiView" data-test-subj="savedObjectsEdit">
   <kbn-management-objects-view class="kuiViewContent kuiViewContent--constrainedWidth">
-    <!-- Header -->
-    <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
-      <div class="kuiBarSection">
-        <h1
-          class="kuiTitle"
-          i18n-id="kbn.management.objects.view.editItemTitle"
-          i18n-default-message="Edit {title}"
-          i18n-values="{ title }"
-          ng-if="canEdit"
-        ></h1>
-
-        <h1
-          class="kuiTitle"
-          i18n-id="kbn.management.objects.view.viewItemTitle"
-          i18n-default-message="View {title}"
-          i18n-values="{ title }"
-          ng-if="!canEdit"
-        ></h1>
-      </div>
-
-      <div class="kuiBarSection">
-        <a
-          class="kuiButton kuiButton--basic kuiButton--iconText"
-          href="{{ link }}"
-          ng-if="canViewInApp"
-        >
-          <span class="kuiButton__inner">
-            <span class="kuiButton__icon kuiIcon fa-eye"></span>
-            <span
-              i18n-id="kbn.management.objects.view.viewItemButtonLabel"
-              i18n-default-message="View {title}"
-              i18n-values="{ title }"
-            ></span>
-          </span>
-        </a>
-
-        <button
-          class="kuiButton kuiButton--danger kuiButton--iconText"
-          ng-click="delete()"
-          ng-if="canDelete"
-          data-test-subj="savedObjectEditDelete"
-        >
-          <span class="kuiButton__inner">
-            <span class="kuiButton__icon kuiIcon fa-trash-o"></span>
-            <span
-              i18n-id="kbn.management.objects.view.deleteItemButtonLabel"
-              i18n-default-message="Delete {title}"
-              i18n-values="{ title }"
-              ></span>
-          </span>
-        </button>
-      </div>
-    </div>
+    <div id="reactViewSavedObjectsId"></div>
 
     <!-- Errors -->
     <div
