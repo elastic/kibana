@@ -17,24 +17,25 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
-import { makeNestedLabel } from './lib/make_nested_label';
-import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
+import { makeNestedLabel } from './lib/make_nested_label';
+import { METRIC_TYPES } from './metric_agg_types';
 
-const overallMaxLabel = i18n.translate('common.ui.aggTypes.metrics.overallMaxLabel', {
-  defaultMessage: 'overall max'
+const cumulativeSumLabel = i18n.translate('common.ui.aggTypes.metrics.cumulativeSumLabel', {
+  defaultMessage: 'cumulative sum',
 });
 
-export const bucketMaxMetricAgg = new MetricAggType({
-  name: 'max_bucket',
-  title: i18n.translate('common.ui.aggTypes.metrics.maxBucketTitle', {
-    defaultMessage: 'Max Bucket'
-  }),
-  makeLabel: agg => makeNestedLabel(agg, overallMaxLabel),
-  subtype: siblingPipelineAggHelper.subtype,
-  params: [
-    ...siblingPipelineAggHelper.params()
-  ],
-  getFormat: siblingPipelineAggHelper.getFormat
+const cumulativeSumTitle = i18n.translate('common.ui.aggTypes.metrics.cumulativeSumTitle', {
+  defaultMessage: 'Cumulative Sum',
+});
+
+export const cumulativeSumMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.CUMULATIVE_SUM,
+  title: cumulativeSumTitle,
+  subtype: parentPipelineAggHelper.subtype,
+  makeLabel: agg => makeNestedLabel(agg, cumulativeSumLabel),
+  params: [...parentPipelineAggHelper.params()],
+  getFormat: parentPipelineAggHelper.getFormat,
 });

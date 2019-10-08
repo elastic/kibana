@@ -17,21 +17,24 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
-import { i18n } from '@kbn/i18n';
+import { METRIC_TYPES } from './metric_agg_types';
+
+const movingAvgTitle = i18n.translate('common.ui.aggTypes.metrics.movingAvgTitle', {
+  defaultMessage: 'Moving Avg',
+});
 
 const movingAvgLabel = i18n.translate('common.ui.aggTypes.metrics.movingAvgLabel', {
-  defaultMessage: 'moving avg'
+  defaultMessage: 'moving avg',
 });
 
 export const movingAvgMetricAgg = new MetricAggType({
-  name: 'moving_avg',
+  name: METRIC_TYPES.MOVING_FN,
   dslName: 'moving_fn',
-  title: i18n.translate('common.ui.aggTypes.metrics.movingAvgTitle', {
-    defaultMessage: 'Moving Avg'
-  }),
+  title: movingAvgTitle,
   subtype: parentPipelineAggHelper.subtype,
   makeLabel: agg => makeNestedLabel(agg, movingAvgLabel),
   params: [
@@ -42,8 +45,8 @@ export const movingAvgMetricAgg = new MetricAggType({
     },
     {
       name: 'script',
-      default: 'MovingFunctions.unweightedAvg(values)'
-    }
+      default: 'MovingFunctions.unweightedAvg(values)',
+    },
   ],
   getValue(agg, bucket) {
     /**
@@ -57,5 +60,5 @@ export const movingAvgMetricAgg = new MetricAggType({
      */
     return bucket[agg.id] ? bucket[agg.id].value : null;
   },
-  getFormat: parentPipelineAggHelper.getFormat
+  getFormat: parentPipelineAggHelper.getFormat,
 });

@@ -17,27 +17,27 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
+import { makeNestedLabel } from './lib/make_nested_label';
+import { METRIC_TYPES } from './metric_agg_types';
 
-export const geoCentroidMetricAgg = new MetricAggType({
-  name: 'geo_centroid',
-  title: i18n.translate('common.ui.aggTypes.metrics.geoCentroidTitle', {
-    defaultMessage: 'Geo Centroid'
-  }),
-  makeLabel: function () {
-    return i18n.translate('common.ui.aggTypes.metrics.geoCentroidLabel', {
-      defaultMessage: 'Geo Centroid'
-    });
+const derivativeLabel = i18n.translate('common.ui.aggTypes.metrics.derivativeLabel', {
+  defaultMessage: 'derivative',
+});
+
+const derivativeTitle = i18n.translate('common.ui.aggTypes.metrics.derivativeTitle', {
+  defaultMessage: 'Derivative',
+});
+
+export const derivativeMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.DERIVATIVE,
+  title: derivativeTitle,
+  subtype: parentPipelineAggHelper.subtype,
+  makeLabel(agg) {
+    return makeNestedLabel(agg, derivativeLabel);
   },
-  params: [
-    {
-      name: 'field',
-      type: 'field',
-      filterFieldTypes: 'geo_point'
-    }
-  ],
-  getValue: function (agg, bucket) {
-    return bucket[agg.id] && bucket[agg.id].location;
-  }
+  params: [...parentPipelineAggHelper.params()],
+  getFormat: parentPipelineAggHelper.getFormat,
 });

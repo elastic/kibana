@@ -17,19 +17,28 @@
  * under the License.
  */
 
-const parentPipelineAggWriter = function (agg, output, aggs) {
-  const selectedMetric = agg.params.customMetric || aggs.getResponseAggById(agg.params.metricAgg);
+import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
-  if (agg.params.customMetric && agg.params.customMetric.type.name !== 'count') {
-    output.parentAggs = (output.parentAggs || []).concat(selectedMetric);
-  }
+const geoBoundsTitle = i18n.translate('common.ui.aggTypes.metrics.geoBoundsTitle', {
+  defaultMessage: 'Geo Bounds',
+});
 
-  output.params = {};
-  if (selectedMetric.type.name === 'count') {
-    output.params.buckets_path = '_count';
-  } else {
-    output.params.buckets_path = selectedMetric.id;
-  }
-};
+const geoBoundsLabel = i18n.translate('common.ui.aggTypes.metrics.geoBoundsLabel', {
+  defaultMessage: 'Geo Bounds',
+});
 
-export { parentPipelineAggWriter };
+export const geoBoundsMetricAgg = new MetricAggType({
+  name: METRIC_TYPES.GEO_BOUNDS,
+  title: geoBoundsTitle,
+  makeLabel: () => geoBoundsLabel,
+  params: [
+    {
+      name: 'field',
+      type: 'field',
+      filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
+    },
+  ],
+});

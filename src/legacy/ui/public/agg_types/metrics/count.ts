@@ -17,28 +17,31 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
-import { fieldFormats } from '../../registry/field_formats';
 import { i18n } from '@kbn/i18n';
+import { MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
+
+// @ts-ignore
+import { fieldFormats } from '../../registry/field_formats';
 
 export const countMetricAgg = new MetricAggType({
-  name: 'count',
+  name: METRIC_TYPES.COUNT,
   title: i18n.translate('common.ui.aggTypes.metrics.countTitle', {
-    defaultMessage: 'Count'
+    defaultMessage: 'Count',
   }),
   hasNoDsl: true,
-  makeLabel: function () {
+  makeLabel() {
     return i18n.translate('common.ui.aggTypes.metrics.countLabel', {
-      defaultMessage: 'Count'
+      defaultMessage: 'Count',
     });
   },
-  getFormat: function () {
+  getFormat() {
     return fieldFormats.getDefaultInstance('number');
   },
-  getValue: function (agg, bucket) {
+  getValue(agg, bucket) {
     return bucket.doc_count;
   },
-  isScalable: function () {
+  isScalable() {
     return true;
-  }
+  },
 });

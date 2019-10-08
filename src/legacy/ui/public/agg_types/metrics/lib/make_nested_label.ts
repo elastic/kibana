@@ -17,27 +17,33 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { startCase } from 'lodash';
+import { IMetricAggConfig } from '../metric_agg_type';
 
-const makeNestedLabel = function (aggConfig, label) {
-  const uppercaseLabel = _.startCase(label);
-  if (aggConfig.params.customMetric) {
-    let metricLabel = aggConfig.params.customMetric.makeLabel();
+export const makeNestedLabel = (aggConfig: IMetricAggConfig, label: string) => {
+  const uppercaseLabel = startCase(label);
+  const customMetric = aggConfig.getParam('customMetric');
+  const metricAgg = aggConfig.getParam('metricAgg');
+
+  if (customMetric) {
+    let metricLabel = customMetric.makeLabel();
+
     if (metricLabel.includes(`${uppercaseLabel} of `)) {
       metricLabel = metricLabel.substring(`${uppercaseLabel} of `.length);
       metricLabel = `2. ${label} of ${metricLabel}`;
-    }
-    else if (metricLabel.includes(`${label} of `)) {
-      metricLabel = (parseInt(metricLabel.substring(0, 1)) + 1) + metricLabel.substring(1);
-    }
-    else {
+    } else if (metricLabel.includes(`${label} of `)) {
+      metricLabel = parseInt(metricLabel.substring(0, 1), 10) + 1 + metricLabel.substring(1);
+    } else {
       metricLabel = `${uppercaseLabel} of ${metricLabel}`;
     }
     return metricLabel;
   }
-  const metric = aggConfig.aggConfigs.byId(aggConfig.params.metricAgg);
-  if (!metric) return '';
+
+  const metric = aggConfig.aggConfigs.byId(metricAgg);
+
+  if (!metric) {
+    return '';
+  }
+
   return `${uppercaseLabel} of ${metric.makeLabel()}`;
 };
-
-export { makeNestedLabel };
