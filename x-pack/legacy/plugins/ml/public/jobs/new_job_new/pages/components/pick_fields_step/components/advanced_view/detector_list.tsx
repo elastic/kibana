@@ -5,6 +5,8 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiTitle,
@@ -14,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -43,6 +46,8 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
       <EuiTitle size="xs">
         <h3>Detectors</h3>
       </EuiTitle>
+
+      <NoDetectorsWarning show={detectors.length === 0} />
 
       <EuiSpacer size="m" />
 
@@ -77,6 +82,30 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
+    </Fragment>
+  );
+};
+
+const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
+  if (show === false) {
+    return null;
+  }
+
+  return (
+    <Fragment>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        title={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.title', {
+          defaultMessage: 'No detectors',
+        })}
+        iconType="alert"
+      >
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.message"
+          defaultMessage="At least one detector is needed to create a job."
+        />
+      </EuiCallOut>
+      <EuiSpacer size="s" />
     </Fragment>
   );
 };
