@@ -55,7 +55,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       }
       const endpoint = await codeServices.locate(req, uri);
       try {
-        return await gitService.fileTree(endpoint, {
+        const filetree = await gitService.fileTree(endpoint, {
           uri: repoUri,
           path,
           revision,
@@ -64,12 +64,9 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
           withParents,
           flatten,
         });
+        return res.ok({ body: filetree });
       } catch (e) {
-        if (e.isBoom) {
-          return e;
-        } else {
-          return res.internalError({ body: e.message || e.name });
-        }
+        return res.internalError({ body: e.message || e.name });
       }
     },
   });
@@ -123,11 +120,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
           }
         }
       } catch (e) {
-        if (e.isBoom) {
-          return e;
-        } else {
-          return res.internalError({ body: e.message || e.name });
-        }
+        return res.internalError({ body: e.message || e.name });
       }
     },
   });
@@ -162,11 +155,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
           });
         }
       } catch (e) {
-        if (e.isBoom) {
-          return e;
-        } else {
-          return res.internalError({ body: e.message || e.name });
-        }
+        return res.internalError({ body: e.message || e.name });
       }
     },
   });
@@ -199,13 +188,16 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         return res.notFound({ body: `repo ${uri} not found` });
       }
       const endpoint = await codeServices.locate(req, uri);
-      return await gitService.history(endpoint, { uri: repoUri, path, revision, count, after });
+      const history = await gitService.history(endpoint, {
+        uri: repoUri,
+        path,
+        revision,
+        count,
+        after,
+      });
+      return res.ok({ body: history });
     } catch (e) {
-      if (e.isBoom) {
-        return e;
-      } else {
-        return res.internalError({ body: e.message || e.name });
-      }
+      return res.internalError({ body: e.message || e.name });
     }
   }
 
@@ -228,11 +220,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         const branchesAndTags = await gitService.branchesAndTags(endpoint, { uri: repoUri });
         return res.ok({ body: branchesAndTags });
       } catch (e) {
-        if (e.isBoom) {
-          return e;
-        } else {
-          return res.internalError({ body: e.message || e.name });
-        }
+        return res.internalError({ body: e.message || e.name });
       }
     },
   });
@@ -258,11 +246,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         });
         return res.ok({ body: diff });
       } catch (e) {
-        if (e.isBoom) {
-          return e;
-        } else {
-          return res.internalError({ body: e.message || e.name });
-        }
+        return res.internalError({ body: e.message || e.name });
       }
     },
   });
@@ -283,17 +267,14 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       const endpoint = await codeServices.locate(req, uri);
 
       try {
-        return await gitService.blame(endpoint, {
+        const blame = await gitService.blame(endpoint, {
           uri: repoUri,
           revision: decodeRevisionString(decodeURIComponent(revision)),
           path,
         });
+        return res.ok({ body: blame });
       } catch (e) {
-        if (e.isBoom) {
-          return e;
-        } else {
-          return res.internalError({ body: e.message || e.name });
-        }
+        return res.internalError({ body: e.message || e.name });
       }
     },
   });

@@ -49,11 +49,9 @@ export function workspaceRoute(
         const endpoint = await codeServices.locate(req, repoUri);
         try {
           await workspaceService.initCmd(endpoint, { repoUri, revision, force, repoConfig });
-          return res.ok();
+          return res.ok({});
         } catch (e) {
-          if (e.isBoom) {
-            return res.internalError({ body: e });
-          }
+          return res.internalError({ body: e.message || e.name });
         }
       } else {
         return res.notFound({ body: `repo config for ${repoUri} not found.` });

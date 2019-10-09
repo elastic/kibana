@@ -6,7 +6,6 @@
 
 import { Request } from 'hapi';
 import util from 'util';
-import Boom from 'boom';
 import { ServiceHandlerAdapter, ServiceRegisterOptions } from '../service_handler_adapter';
 import { ResourceLocator } from '../resource_locator';
 import {
@@ -124,7 +123,7 @@ export class ClusterNodeAdapter implements ServiceHandlerAdapter {
               const data = await localHandler(params, context);
               return { data };
             } catch (e) {
-              throw Boom.boomify(e);
+              throw e;
             }
           },
         });

@@ -6,7 +6,6 @@
 
 import Wreck from '@hapi/wreck';
 import util from 'util';
-import Boom from 'boom';
 import { KibanaRequest } from 'src/core/server';
 import * as http from 'http';
 import {
@@ -105,7 +104,7 @@ export class NonCodeNodeAdapter implements ServiceHandlerAdapter {
         });
       } catch (e) {
         this.log.error('parse json failed: ' + buffer.toString());
-        throw Boom.boomify(e, { statusCode: 500 });
+        throw e;
       }
     } else {
       this.log.error(
@@ -113,8 +112,8 @@ export class NonCodeNodeAdapter implements ServiceHandlerAdapter {
           payload.params
         )}`
       );
-      const body: Boom.Payload = await Wreck.read(res, { json: true });
-      throw new Boom(body.message, { statusCode: res.statusCode || 500, data: body.error });
+      const body = await Wreck.read(res, { json: true });
+      throw new Error(body.message);
     }
   }
 }

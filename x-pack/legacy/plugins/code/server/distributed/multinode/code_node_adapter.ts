@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import util from 'util';
-import Boom from 'boom';
 import {
   DEFAULT_SERVICE_OPTION,
   ServiceHandlerAdapter,
@@ -31,7 +30,7 @@ export interface RequestPayload {
 
 export class CodeNodeAdapter implements ServiceHandlerAdapter {
   localAdapter: LocalHandlerAdapter = new LocalHandlerAdapter();
-  constructor(private readonly server: CodeServerRouter, private readonly log: Logger) {}
+  constructor(private readonly router: CodeServerRouter, private readonly log: Logger) {}
 
   locator: ResourceLocator = {
     async locate(httpRequest: KibanaRequest, resource: string): Promise<Endpoint> {
@@ -70,12 +69,16 @@ export class CodeNodeAdapter implements ServiceHandlerAdapter {
       const d = serviceDefinition[method];
       const path = `${options.routePrefix}/${d.routePath || method}`;
       // register routes, receive requests from non-code node.
-      this.server.route({
+      this.router.route({
         method: 'post',
         path,
-        // TODO: change this route
-        handler: async (req: Request) => {
-          const { context, params } = req.payload as RequestPayload;
+        npHandler: async (
+          ctx: RequestHandlerContext,
+          req: KibanaRequest,
+          res: KibanaResponseFactory
+        ) => {
+          // @ts-ignore
+          const { context, params } = req.body as RequestPayload;
           this.log.debug(`Receiving RPC call ${req.url.path} ${util.inspect(params)}`);
           const endpoint: Endpoint = {
             toContext(): RequestContext {
@@ -84,13 +87,9 @@ export class CodeNodeAdapter implements ServiceHandlerAdapter {
           };
           try {
             const data = await serviceMethodMap[method](endpoint, params);
-            return { data };
+            return res.ok({ body: data });
           } catch (e) {
-            if (!Boom.isBoom(e)) {
-              throw Boom.boomify(e, { statusCode: 500 });
-            } else {
-              throw e;
-            }
+            return res.internalError({ body: e.message || e.name });
           }
         },
       });

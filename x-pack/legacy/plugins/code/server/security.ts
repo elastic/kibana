@@ -28,6 +28,7 @@ export class CodeServerRouter {
             path: route.path,
             validate: {
               query: schema.object({}, { allowUnknowns: true }),
+              params: schema.object({}, { allowUnknowns: true }),
             },
             options: {
               tags,

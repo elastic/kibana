@@ -145,7 +145,7 @@ export const getGitServiceHandler = (
   async history({ uri, path, revision, count, after }) {
     const commit = await gitOps.getCommitInfo(uri, revision);
     if (commit === null) {
-      throw Boom.notFound(`commit ${revision} not found in repo ${uri}`);
+      throw new Error(`commit ${revision} not found in repo ${uri}`);
     }
     let commits = await gitOps.log(uri, commit.id, after ? count + 1 : count, path);
     if (after && commits.length > 0) {

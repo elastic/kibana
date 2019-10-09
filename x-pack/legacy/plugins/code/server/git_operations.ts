@@ -491,7 +491,7 @@ export class GitOperations {
   public async getCommitOr404(repoUri: string, ref: string): Promise<CommitInfo> {
     const commit = await this.getCommitInfo(repoUri, ref);
     if (!commit) {
-      throw Boom.notFound(`repo ${repoUri} or ${ref} not found`);
+      throw new Error(`repo ${repoUri} or ${ref} not found`);
     }
     return commit;
   }
