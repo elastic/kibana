@@ -27,6 +27,13 @@ async function main() {
       generates: {
         [OUTPUT_INTROSPECTION_PATH]: {
           documents: GRAPHQL_GLOBS,
+          primitives: {
+            String: 'string',
+            Int: 'number',
+            Float: 'number',
+            Boolean: 'boolean',
+            ID: 'string',
+          },
           config: {
             namingConvention: {
               typeNames: 'change-case#pascalCase',
@@ -45,11 +52,20 @@ async function main() {
         },
         [OUTPUT_CLIENT_TYPES_PATH]: {
           documents: GRAPHQL_GLOBS,
+          primitives: {
+            String: 'string',
+            Int: 'number',
+            Float: 'number',
+            Boolean: 'boolean',
+            ID: 'string',
+          },
           config: {
+            avoidOptionals: false,
             namingConvention: {
               typeNames: 'change-case#pascalCase',
               enumValues: 'keep',
             },
+            contextType: 'SiemContext',
             scalars: {
               ToStringArray: 'string[]',
               ToNumberArray: 'number[]',
@@ -75,7 +91,15 @@ async function main() {
           ],
         },
         [OUTPUT_SERVER_TYPES_PATH]: {
+          primitives: {
+            String: 'string',
+            Int: 'number',
+            Float: 'number',
+            Boolean: 'boolean',
+            ID: 'string',
+          },
           config: {
+            avoidOptionals: false,
             namingConvention: {
               typeNames: 'change-case#pascalCase',
               enumValues: 'keep',
