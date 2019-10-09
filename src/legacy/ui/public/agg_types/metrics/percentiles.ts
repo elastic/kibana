@@ -30,7 +30,6 @@ import { PercentilesEditor } from '../../vis/editors/default/controls/percentile
 // @ts-ignore
 import { ordinalSuffix } from '../../utils/ordinal_suffix';
 
-
 type IPercentileAggConfig = IResponseAggConfig;
 
 const valueProps = {

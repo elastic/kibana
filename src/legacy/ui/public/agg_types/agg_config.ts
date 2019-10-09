@@ -26,13 +26,13 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggType, FieldParamType } from '.';
+import { AggType } from './agg_type';
+import { FieldParamType } from './param_types/field';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
 import { Schema } from '../vis/editors/default/schemas';
 import { ContentType } from '../../../../plugins/data/common';
-import { isBucketAggType } from './buckets/_bucket_agg_type';
 
 // @ts-ignore
 import { fieldFormats } from '../registry/field_formats';
@@ -333,7 +333,7 @@ export class AggConfig {
   }
 
   getKey(bucket: any, key: string) {
-    if (isBucketAggType(this.type)) {
+    if (this.type.getKey) {
       return this.type.getKey(bucket, key, this);
     } else {
       return '';
@@ -342,6 +342,7 @@ export class AggConfig {
 
   getFieldDisplayName() {
     const field = this.getField();
+
     return field ? field.displayName || this.fieldName() : '';
   }
 

@@ -20,13 +20,15 @@
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AggParam, initParams } from './agg_params';
-// @ts-ignore
-import { FieldFormat, fieldFormats } from '../registry/field_formats';
+
 import { AggConfig } from '../vis';
 import { AggConfigs } from './agg_configs';
 import { SearchSource } from '../courier';
 import { Adapters } from '../inspector';
 import { BaseParamType } from './param_types/base';
+
+// @ts-ignore
+import { FieldFormat, fieldFormats } from '../registry/field_formats';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -188,6 +190,8 @@ export class AggType<TAggConfig extends AggConfig = AggConfig, TParam extends Ag
   getFormat: (agg: TAggConfig) => FieldFormat;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
+
+  getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 
   paramByName = (name: string) => {
     return this.params.find((p: AggParam) => p.name === name);

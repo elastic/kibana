@@ -33,4 +33,4 @@ export const createFilterDateRange = (agg: IBucketAggConfig, rangeString: string
   if (range.to && range.from) filter.format = 'strict_date_optional_time';
 
   return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
-}
+};
