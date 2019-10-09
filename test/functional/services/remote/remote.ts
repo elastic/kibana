@@ -34,7 +34,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
-  const collectCoverage: boolean = process.env.CODE_COVERAGE === '1';
+  const collectCoverage: boolean = !!process.env.CODE_COVERAGE;
   const coveragePrefix = 'coveragejson:';
   const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
   let logSubscription: undefined | Rx.Subscription;

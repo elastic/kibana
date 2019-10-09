@@ -45,7 +45,7 @@ const STATS_WARNINGS_FILTER = new RegExp([
   '(export .* was not found in)',
   '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
 ].join(''));
-const IS_CODE_COVERAGE = process.env.CODE_COVERAGE === '1';
+const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 
 function recursiveIssuer(m) {
   if (m.issuer) {
