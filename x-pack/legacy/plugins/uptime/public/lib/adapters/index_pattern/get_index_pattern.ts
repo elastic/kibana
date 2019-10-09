@@ -16,7 +16,6 @@ import { getApiPath } from '../../helper';
 export const getIndexPattern = async (basePath?: string, setter?: (data: unknown) => void) => {
   try {
     const { data } = await axios.get(getApiPath('/api/uptime/index_pattern', basePath));
-
     if (setter) {
       setter(data);
     }

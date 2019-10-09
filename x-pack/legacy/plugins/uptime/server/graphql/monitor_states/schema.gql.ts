@@ -136,7 +136,6 @@ export const monitorStatesSchema = gql`
     "Transport encryption information."
     tls: [StateTLS]
     url: StateUrl
-    error: Error
   }
 
   "Represents the current state and associated data for an Uptime monitor."
