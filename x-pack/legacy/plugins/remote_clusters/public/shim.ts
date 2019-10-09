@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
+import { npStart, npSetup } from 'ui/new_platform';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { fatalError } from 'ui/notify';
 import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
-
-import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export function createShim() {
   const {
@@ -17,6 +15,11 @@ export function createShim() {
   } = npStart;
 
   return {
+    coreSetup: {
+      plugins: {
+        metrics: npSetup.plugins.metrics,
+      },
+    },
     coreStart: {
       chrome,
       i18n,
@@ -33,9 +36,6 @@ export function createShim() {
       management: {
         getSection: management.getSection.bind(management),
         breadcrumb: MANAGEMENT_BREADCRUMB,
-      },
-      uiMetric: {
-        createUiStatsReporter,
       },
     },
   };

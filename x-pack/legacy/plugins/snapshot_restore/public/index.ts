@@ -8,4 +8,5 @@ import { createShim } from './shim';
 
 const { core, plugins } = createShim();
 const snapshotRestorePlugin = new SnapshotRestorePlugin();
+snapshotRestorePlugin.setup();
 snapshotRestorePlugin.start(core, plugins);

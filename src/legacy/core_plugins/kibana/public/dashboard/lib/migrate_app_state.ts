@@ -19,8 +19,9 @@
 
 import semver from 'semver';
 import chrome from 'ui/chrome';
+import { npSetup, npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
-import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
+
 import {
   DashboardAppState,
   SavedDashboardPanelTo60,
@@ -32,11 +33,15 @@ import {
 } from '../types';
 import { migratePanelsTo730 } from '../migrations/migrate_to_730_panels';
 
+npSetup.plugins.metrics.registerApp('DashboardPanelVersionInUrl');
+const METRIC_TYPE = npStart.plugins.metrics.METRIC_TYPE;
+
 /**
  * Attempts to migrate the state stored in the URL into the latest version of it.
  *
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
+
 export function migrateAppState(appState: { [key: string]: unknown } | DashboardAppState) {
   if (!appState.panels) {
     throw new Error(
@@ -59,7 +64,11 @@ export function migrateAppState(appState: { [key: string]: unknown } | Dashboard
     const version = (panel as SavedDashboardPanel730ToLatest).version;
 
     // This will help us figure out when to remove support for older style URLs.
-    createUiStatsReporter('DashboardPanelVersionInUrl')(METRIC_TYPE.LOADED, `${version}`);
+    npStart.plugins.metrics.reportUiStats(
+      'DashboardPanelVersionInUrl',
+      METRIC_TYPE.LOADED,
+      `${version}`
+    );
 
     return semver.satisfies(version, '<7.3');
   });

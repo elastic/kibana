@@ -3,23 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { npStart } from 'ui/new_platform';
 import { UIM_APP_NAME } from '../../constants';
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../../../../src/legacy/core_plugins/ui_metric/public';
-
-class UiMetricService {
-  track?: ReturnType<typeof createUiStatsReporter>;
-
-  public init = (getReporter: typeof createUiStatsReporter): void => {
-    this.track = getReporter(UIM_APP_NAME);
-  };
-
-  public trackUiMetric = (eventName: string): void => {
-    if (!this.track) throw Error('UiMetricService not initialized.');
-    return this.track(METRIC_TYPE.COUNT, eventName);
-  };
-}
-
-export const uiMetricService = new UiMetricService();
+export const METRIC_TYPE = npStart.plugins.metrics.METRIC_TYPE;
+export const trackUiMetric = npStart.plugins.metrics.reportUiStats.bind(
+  null,
+  UIM_APP_NAME,
+  METRIC_TYPE.COUNT
+);

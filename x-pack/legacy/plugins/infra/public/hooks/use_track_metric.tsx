@@ -5,10 +5,9 @@
  */
 
 import { useEffect } from 'react';
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { npSetup, npStart } from 'ui/new_platform';
+import { METRIC_TYPE } from '@kbn/analytics';
+export { METRIC_TYPE };
 
 /**
  * Note: The UI Metric plugin will take care of sending this data to the telemetry server.
@@ -20,19 +19,10 @@ import {
 
 type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
 
-const trackerCache = new Map<string, ReturnType<typeof createUiStatsReporter>>();
-
-function getTrackerForApp(app: string) {
-  const cached = trackerCache.get(app);
-  if (cached) {
-    return cached;
-  }
-
-  const tracker = createUiStatsReporter(app);
-  trackerCache.set(app, tracker);
-
-  return tracker;
-}
+npSetup.plugins.metrics.registerApp('infra_metrics');
+npSetup.plugins.metrics.registerApp('infra_logs');
+npSetup.plugins.metrics.registerApp('apm');
+npSetup.plugins.metrics.registerApp('uptime');
 
 interface TrackOptions {
   app: ObservabilityApp;
@@ -43,7 +33,6 @@ type EffectDeps = unknown[];
 
 type TrackMetricOptions = TrackOptions & { metric: string };
 
-export { METRIC_TYPE };
 export function useTrackMetric(
   { app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }: TrackMetricOptions,
   effectDependencies: EffectDeps = []
@@ -53,7 +42,7 @@ export function useTrackMetric(
     if (delay > 0) {
       decoratedMetric += `__delayed_${delay}ms`;
     }
-    const trackUiMetric = getTrackerForApp(app);
+    const trackUiMetric = npStart.plugins.metrics.reportUiStats.bind(null, app);
     const id = setTimeout(() => trackUiMetric(metricType, decoratedMetric), Math.max(delay, 0));
     return () => clearTimeout(id);
   }, effectDependencies);
@@ -80,6 +69,6 @@ interface TrackEventProps {
 }
 
 export function trackEvent({ app, name, metricType = METRIC_TYPE.CLICK }: TrackEventProps) {
-  const trackUiMetric = getTrackerForApp(app);
+  const trackUiMetric = npStart.plugins.metrics.reportUiStats.bind(null, app);
   trackUiMetric(metricType, `event__${name}`);
 }

@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createUiStatsReporter, METRIC_TYPE } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
-import { UIM_APP_NAME } from '../constants';
+import { npSetup, npStart } from 'ui/new_platform';
+import { UIM_APP_NAME } from '../constants/ui_metric';
 
-export const trackUiMetric = createUiStatsReporter(UIM_APP_NAME);
-export { METRIC_TYPE };
+npSetup.plugins.metrics.registerApp(UIM_APP_NAME);
+export const METRIC_TYPE = npStart.plugins.metrics.METRIC_TYPE;
+export const trackUiMetric = npStart.plugins.metrics.reportUiStats.bind(null, UIM_APP_NAME);
+
 /**
  * Transparently return provided request Promise, while allowing us to track
  * a successful completion of the request.

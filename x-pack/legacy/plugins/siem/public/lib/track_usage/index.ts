@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { npSetup, npStart } from 'ui/new_platform';
 import { APP_ID } from '../../../common/constants';
 
-export const trackUiAction = createUiStatsReporter(APP_ID);
-export { METRIC_TYPE };
+npSetup.plugins.metrics.registerApp(APP_ID);
+export const METRIC_TYPE = npStart.plugins.metrics.METRIC_TYPE;
+export const trackUiAction = npStart.plugins.metrics.reportUiStats.bind(null, APP_ID);
 
 export enum TELEMETRY_EVENT {
   // ML

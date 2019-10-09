@@ -22,12 +22,11 @@ export { METRIC_TYPE } from '@kbn/analytics';
 import { Storage } from 'ui/storage';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
-interface MetricsSetupContract {
+export interface MetricsSetupContract {
   registerApp: (appName: string) => void;
-  METRIC_TYPE: typeof METRIC_TYPE;
 }
 
-interface MetricsStartContract {
+export interface MetricsStartContract {
   reportUiStats: (
     appName: string,
     type: UiStatsMetricType,
@@ -47,7 +46,6 @@ export class MetricsPublicPlugin
   public setup(core: CoreSetup): MetricsSetupContract {
     this.debugMode = true;
     return {
-      METRIC_TYPE,
       registerApp: (appName: string) => {
         if (this.apps[appName]) {
           throw Error(`${appName} already registered in metrics plugin.`);

@@ -24,4 +24,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new MetricsPublicPlugin(initializerContext);
 }
 
+export { MetricsSetupContract, MetricsStartContract } from './plugin';
 export { MetricsPublicPlugin as Plugin };

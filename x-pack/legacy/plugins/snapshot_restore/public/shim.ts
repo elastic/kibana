@@ -16,9 +16,6 @@ import { docTitle } from 'ui/doc_title/doc_title';
 
 import { HashRouter } from 'react-router-dom';
 
-// @ts-ignore: allow traversal to fail on x-pack build
-import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
-
 export interface AppCore {
   i18n: {
     [i18nPackage: string]: any;
@@ -65,9 +62,6 @@ export interface Plugins extends AppPlugins {
     constants: {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
     };
-  };
-  uiMetric: {
-    createUiStatsReporter: typeof createUiStatsReporter;
   };
 }
 
@@ -123,9 +117,6 @@ export function createShim(): { core: Core; plugins: Plugins } {
         constants: {
           BREADCRUMB: MANAGEMENT_BREADCRUMB,
         },
-      },
-      uiMetric: {
-        createUiStatsReporter,
       },
     },
   };

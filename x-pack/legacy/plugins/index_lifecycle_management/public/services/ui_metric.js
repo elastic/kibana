@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash';
-import { createUiStatsReporter } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 import {
   UIM_APP_NAME,
@@ -28,7 +27,11 @@ import {
   defaultHotPhase,
 } from '../store/defaults';
 
-export const trackUiMetric = createUiStatsReporter(UIM_APP_NAME);
+import { npSetup, npStart } from 'ui/new_platform';
+
+npSetup.plugins.metrics.registerApp(UIM_APP_NAME);
+export const METRIC_TYPE = npStart.plugins.metrics.METRIC_TYPE;
+export const trackUiMetric = npStart.plugins.metrics.reportUiStats.bind(null, UIM_APP_NAME);
 
 export function getUiMetricsForPhases(phases) {
   const phaseUiMetrics = [{

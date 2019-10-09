@@ -38,7 +38,6 @@ import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
 import 'ui/capabilities/route_setup';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-
 import { npStart } from 'ui/new_platform';
 
 // load directives

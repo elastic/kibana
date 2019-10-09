@@ -29,6 +29,12 @@ import { VisualizeConstants } from './visualize_constants';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs';
 
+
+import { npSetup, npStart } from 'ui/new_platform';
+npSetup.plugins.metrics.registerApp('visualize');
+export const METRIC_TYPE = npStart.plugins.metrics.METRIC_TYPE;
+export const trackUiMetric = npStart.plugins.metrics.reportUiStats.bind(null, 'visualize');
+
 // load directives
 import '../../../data/public';
 

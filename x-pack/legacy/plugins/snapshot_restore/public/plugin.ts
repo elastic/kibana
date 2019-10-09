@@ -5,6 +5,7 @@
  */
 import { unmountComponentAtNode } from 'react-dom';
 
+import { npSetup } from 'ui/new_platform';
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH, renderReact } from './app';
 import { AppCore, AppPlugins } from './app/types';
@@ -15,14 +16,17 @@ import { breadcrumbService, docTitleService } from './app/services/navigation';
 import { documentationLinksService } from './app/services/documentation';
 import { httpService } from './app/services/http';
 import { textService } from './app/services/text';
-import { uiMetricService } from './app/services/ui_metric';
+import { UIM_APP_NAME } from './app/constants';
 
 const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
 export class Plugin {
+  public setup(): void {
+    npSetup.plugins.metrics.registerApp(UIM_APP_NAME);
+  }
   public start(core: Core, plugins: Plugins): void {
     const { i18n, routing, http, chrome, notification, documentation, docTitle } = core;
-    const { management, uiMetric } = plugins;
+    const { management } = plugins;
 
     // Register management section
     const esSection = management.sections.getSection('elasticsearch');
@@ -38,7 +42,7 @@ export class Plugin {
     // Initialize services
     textService.init(i18n);
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
-    uiMetricService.init(uiMetric.createUiStatsReporter);
+
     documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
     docTitleService.init(docTitle.change);
 

@@ -11,10 +11,10 @@ import { IndexManagementHome } from './sections/home';
 import { TemplateCreate } from './sections/template_create';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
-import { trackUiMetric } from './services';
+import { trackUiMetric, METRIC_TYPE } from './services';
 
 export const App = () => {
-  useEffect(() => trackUiMetric('loaded', UIM_APP_LOAD), []);
+  useEffect(() => trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), []);
 
   return (
     <HashRouter>

@@ -27,6 +27,9 @@ import {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
+
+import { MetricsSetupContract, MetricsStartContract } from '../../../../plugins/metrics/public';
+
 import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
 
 export interface PluginsSetup {
@@ -35,6 +38,7 @@ export interface PluginsSetup {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  metrics: MetricsSetupContract;
 }
 
 export interface PluginsStart {
@@ -44,6 +48,7 @@ export interface PluginsStart {
   expressions: ReturnType<ExpressionsPlugin['start']>;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  metrics: MetricsStartContract;
 }
 
 export const npSetup = {

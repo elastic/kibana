@@ -25,8 +25,8 @@ export let indexPatternService;
 export let shouldShowTelemetryOptIn;
 export let telemetryOptInProvider;
 export let trackUiMetric;
-export const METRIC_TYPE = npSetup.plugins.metrics.METRIC_TYPE;
 npSetup.plugins.metrics.registerApp('Kibana_home');
+export const METRIC_TYPE = npStart.plugins.metrics.METRIC_TYPE;
 
 uiModules.get('kibana').run(($injector) => {
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');

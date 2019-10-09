@@ -10,17 +10,20 @@ import routes from 'ui/routes';
 
 import template from './index.html';
 import { renderReact } from './app';
-import { CRUD_APP_BASE_PATH } from './app/constants';
+import { CRUD_APP_BASE_PATH, UIM_APP_NAME } from './app/constants';
 import { setUserHasLeftApp, setRedirect } from './app/services';
 import { init as initBreadcrumbs } from './app/services/breadcrumb';
 import { init as initDocumentation } from './app/services/documentation';
 import { init as initHttp } from './app/services/http';
-import { init as initUiMetric } from './app/services/ui_metric';
 import { init as initNotification } from './app/services/notification';
+
 
 const REACT_ROOT_ID = 'remoteClustersReactRoot';
 
 export class Plugin {
+  setup(coreSetup) {
+    coreSetup.plugins.metrics.registerApp(UIM_APP_NAME);
+  }
   start(coreStart, pluginsStart) {
     const {
       i18n: { Context },
@@ -35,7 +38,6 @@ export class Plugin {
     if (getInjectedVar('remoteClustersUiEnabled')) {
       const {
         management: { getSection, breadcrumb: managementBreadcrumb },
-        uiMetric: { createUiStatsReporter },
       } = pluginsStart;
 
       const esSection = getSection('elasticsearch');
@@ -49,7 +51,6 @@ export class Plugin {
       // Initialize services
       initBreadcrumbs(setBreadcrumbs, managementBreadcrumb);
       initDocumentation(`${elasticWebsiteUrl}guide/en/elasticsearch/reference/${docLinkVersion}/`);
-      initUiMetric(createUiStatsReporter);
       initNotification(toasts, fatalError);
 
       const unmountReactApp = () => {

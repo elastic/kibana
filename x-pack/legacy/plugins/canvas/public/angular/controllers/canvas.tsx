@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import chrome from 'ui/chrome';
 import { UICapabilities } from 'ui/capabilities';
+import { npSetup } from 'ui/new_platform';
 
 // @ts-ignore Untyped local
 import { App } from '../../components/app';
@@ -23,6 +24,7 @@ export function CanvasRootController(
   $element: any, // Untyped in Kibana
   uiCapabilities: UICapabilities
 ) {
+  npSetup.plugins.metrics.registerApp('canvas');
   const domNode = $element[0];
 
   // set the read-only badge when appropriate

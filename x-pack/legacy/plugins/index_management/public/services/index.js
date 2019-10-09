@@ -26,4 +26,4 @@ export {
 export { sortTable } from './sort_table';
 export { filterItems } from './filter_items';
 export { healthToColor } from './health_to_color';
-export { trackUiMetric } from './track_ui_metric';
+export { trackUiMetric, METRIC_TYPE } from './track_ui_metric';

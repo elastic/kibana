@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { npStart, npSetup } from 'ui/new_platform';
 import { UIM_APP_NAME } from '../../common/constants';
 
-export { METRIC_TYPE };
-export const trackUiMetric = createUiStatsReporter(UIM_APP_NAME);
+npSetup.plugins.metrics.registerApp(UIM_APP_NAME);
+export const METRIC_TYPE = npStart.plugins.metrics.METRIC_TYPE;
+export const trackUiMetric = npStart.plugins.metrics.reportUiStats.bind(null, UIM_APP_NAME);

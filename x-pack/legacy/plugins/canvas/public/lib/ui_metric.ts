@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { npStart } from 'ui/new_platform';
 
-export const trackCanvasUiMetric = createUiStatsReporter('canvas');
-export { METRIC_TYPE };
+export const METRIC_TYPE = npStart.plugins.metrics.METRIC_TYPE;
+export const trackCanvasUiMetric = npStart.plugins.metrics.reportUiStats.bind(null, 'canvas');
