@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import { EuiIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -103,18 +103,16 @@ export class ConsoleMenu extends Component<Props, State> {
 
   render() {
     const button = (
-      <EuiButtonIcon
-        iconType="wrench"
+      <button
+        className="euiButtonIcon--primary"
         onClick={this.onButtonClick}
         data-test-subj="toggleConsoleMenu"
-        // @ts-ignore
-        aria-label={
-          <FormattedMessage
-            id="console.requestOptionsButtonAriaLabel"
-            defaultMessage="Request options"
-          />
-        }
-      />
+        aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+          defaultMessage: 'Request options',
+        })}
+      >
+        <EuiIcon type="wrench" />
+      </button>
     );
 
     const items = [
