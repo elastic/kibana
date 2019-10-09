@@ -1,12 +1,13 @@
 {
-  "id": "85e55248-7b90-4e9c-afa2-4ff97baf3de3",
-  "description": "Detecting root and admin users",
-  "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
-  "interval": "5m",
-  "name": "Detect Root/Admin Users",
-  "severity": 1,
-  "type": "kql",
-  "from": "now-6m",
-  "to": "now",
-  "kql": "user.name: root or user.name: admin"
+  "id": "f47e5de7-0023-4898-b856-cf3874e883ea",
+  "description": "Only watch winlogbeat users",
+  "index": ["winlogbeat-*"],
+  "interval": "9m",
+  "name": "Just watch other winlogbeat users",
+  "severity": 500,
+  "enabled": false,
+  "type": "filter",
+  "from": "now-5d",
+  "to": "now-1d",
+  "kql": "user.name: something_else"
 }

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaults } from 'lodash/fp';
+import { AlertAction } from '../../../../../alerting/server/types';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { readSignals } from './read_signals';
@@ -11,25 +13,51 @@ import { readSignals } from './read_signals';
 export interface SignalParams {
   alertsClient: AlertsClient;
   actionsClient: ActionsClient;
-  description: string;
-  from: string;
+  description?: string;
+  from?: string;
   id: string;
-  index: string[];
-  interval: string;
-  enabled: boolean;
-  filter: Record<string, {}> | undefined;
-  kql: string | undefined;
-  maxSignals: string;
-  name: string;
-  severity: number;
-  type: string; // TODO: Replace this type with a static enum type
-  to: string;
-  references: string[];
+  index?: string[];
+  interval?: string;
+  enabled?: boolean;
+  filter?: Record<string, {}> | undefined;
+  kql?: string | undefined;
+  maxSignals?: string;
+  name?: string;
+  severity?: number;
+  type?: string; // TODO: Replace this type with a static enum type
+  to?: string;
+  references?: string[];
 }
+
+export const calculateInterval = (
+  interval: string | undefined,
+  signalInterval: string | undefined
+): string => {
+  if (interval != null) {
+    return interval;
+  } else if (signalInterval != null) {
+    return signalInterval;
+  } else {
+    return '5m';
+  }
+};
+
+export const calculateKqlAndFilter = (
+  kql: string | undefined,
+  filter: {} | undefined
+): { kql: string | null | undefined; filter: {} | null | undefined } => {
+  if (filter != null) {
+    return { kql: null, filter };
+  } else if (kql != null) {
+    return { kql, filter: null };
+  } else {
+    return { kql: undefined, filter: undefined };
+  }
+};
 
 export const updateSignal = async ({
   alertsClient,
-  actionsClient,
+  actionsClient, // TODO: Use this whenever we add feature support for different action types
   description,
   enabled,
   filter,
@@ -46,58 +74,46 @@ export const updateSignal = async ({
 }: SignalParams) => {
   // TODO: Error handling and abstraction. Right now if this is an error then what happens is we get the error of
   // "message": "Saved object [alert/{id}] not found"
-
   const signal = await readSignals({ alertsClient, id });
 
-  /*
-  alertsClient.update({
+  // TODO: Remove this as cast as soon as signal.actions TypeScript bug is fixed
+  // where it is trying to return AlertAction[] or RawAlertAction[]
+  const actions = (signal.actions as AlertAction[]) || [];
+
+  const alertTypeParams = signal.alertTypeParams || {};
+
+  const { kql: nextKql, filter: nextFilter } = calculateKqlAndFilter(kql, filter);
+
+  const nextAlertTypeParams = defaults(
+    {
+      ...alertTypeParams,
+    },
+    {
+      description,
+      filter: nextFilter,
+      from,
+      index,
+      kql: nextKql,
+      name,
+      severity,
+      to,
+      type,
+      references,
+    }
+  );
+
+  if (signal.enabled && !enabled) {
+    await alertsClient.disable({ id });
+  } else if (!signal.enabled && enabled) {
+    await alertsClient.enable({ id });
+  }
+
+  return alertsClient.update({
     id,
     data: {
-      interval,
-      actions: signal.actions,
+      interval: calculateInterval(interval, signal.interval),
+      actions,
+      alertTypeParams: nextAlertTypeParams,
     },
   });
-  */
-  return signal;
-  /*
-  const actionResults = await actionsClient.create({
-    action: {
-      actionTypeId: '.server-log',
-      description: 'SIEM Alerts Log',
-      config: {},
-      secrets: {},
-    },
-  });
-
-  return alertsClient.create({
-    data: {
-      alertTypeId: SIGNALS_ID,
-      alertTypeParams: {
-        description,
-        id,
-        index,
-        from,
-        filter,
-        kql,
-        name,
-        severity,
-        to,
-        type,
-        references,
-      },
-      interval,
-      enabled,
-      actions: [
-        {
-          group: 'default',
-          id: actionResults.id,
-          params: {
-            message: 'SIEM Alert Fired',
-          },
-        },
-      ],
-      throttle: null,
-    },
-  });
-  */
 };

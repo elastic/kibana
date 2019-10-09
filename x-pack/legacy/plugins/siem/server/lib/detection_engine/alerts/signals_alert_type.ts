@@ -25,10 +25,10 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
       params: schema.object({
         description: schema.string(),
         from: schema.string(),
-        filter: schema.maybe(schema.object({}, { allowUnknowns: true })),
+        filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
         id: schema.number(),
         index: schema.arrayOf(schema.string()),
-        kql: schema.maybe(schema.string({ defaultValue: undefined })),
+        kql: schema.nullable(schema.string()),
         maxSignals: schema.number({ defaultValue: 100 }),
         name: schema.string(),
         severity: schema.number(),
