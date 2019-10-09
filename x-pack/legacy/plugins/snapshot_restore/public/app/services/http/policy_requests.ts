@@ -14,7 +14,7 @@ import {
   UIM_RETENTION_SETTINGS_UPDATE,
   UIM_RETENTION_EXECUTE,
 } from '../../constants';
-import { uiMetricService } from '../ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../ui_metric';
 import { httpService } from './http';
 import { useRequest, sendRequest } from './use_request';
 
@@ -45,8 +45,7 @@ export const executePolicy = async (name: SlmPolicy['name']) => {
     method: 'post',
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(UIM_POLICY_EXECUTE);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_EXECUTE);
   return result;
 };
 
@@ -58,8 +57,7 @@ export const deletePolicies = async (names: Array<SlmPolicy['name']>) => {
     method: 'delete',
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(names.length > 1 ? UIM_POLICY_DELETE_MANY : UIM_POLICY_DELETE);
+  trackUiMetric(METRIC_TYPE.COUNT, names.length > 1 ? UIM_POLICY_DELETE_MANY : UIM_POLICY_DELETE);
   return result;
 };
 
@@ -70,8 +68,7 @@ export const addPolicy = async (newPolicy: SlmPolicyPayload) => {
     body: newPolicy,
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(UIM_POLICY_CREATE);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_CREATE);
   return result;
 };
 
@@ -84,8 +81,7 @@ export const editPolicy = async (editedPolicy: SlmPolicyPayload) => {
     body: editedPolicy,
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(UIM_POLICY_UPDATE);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_UPDATE);
   return result;
 };
 
@@ -105,8 +101,7 @@ export const updateRetentionSchedule = (retentionSchedule: string) => {
     },
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(UIM_RETENTION_SETTINGS_UPDATE);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_RETENTION_SETTINGS_UPDATE);
   return result;
 };
 
@@ -116,7 +111,6 @@ export const executeRetention = async () => {
     method: 'post',
   });
 
-  const { trackUiMetric } = uiMetricService;
-  trackUiMetric(UIM_RETENTION_EXECUTE);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_RETENTION_EXECUTE);
   return result;
 };

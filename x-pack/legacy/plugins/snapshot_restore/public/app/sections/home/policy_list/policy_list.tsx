@@ -14,7 +14,7 @@ import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
-import { uiMetricService } from '../../../services/ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../services/ui_metric';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
 import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
@@ -77,9 +77,9 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   };
 
   // Track component loaded
-  const { trackUiMetric } = uiMetricService;
+
   useEffect(() => {
-    trackUiMetric(UIM_POLICY_LIST_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_POLICY_LIST_LOAD);
   }, []);
 
   let content: JSX.Element;

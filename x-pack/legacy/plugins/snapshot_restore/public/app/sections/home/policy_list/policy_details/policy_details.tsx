@@ -29,7 +29,7 @@ import {
   UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
 } from '../../../../constants';
 import { useLoadPolicy } from '../../../../services/http';
-import { uiMetricService } from '../../../../services/ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../../services/ui_metric';
 import { linkToEditPolicy, linkToSnapshot } from '../../../../services/navigation';
 
 import {
@@ -67,7 +67,6 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
-  const { trackUiMetric } = uiMetricService;
   const { error, data: policyDetails, sendRequest: reload } = useLoadPolicy(policyName);
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -103,7 +102,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
       {tabOptions.map(tab => (
         <EuiTab
           onClick={() => {
-            trackUiMetric(tabToUiMetricMap[tab.id]);
+            trackUiMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
             setActiveTab(tab.id);
           }}
           isSelected={tab.id === activeTab}

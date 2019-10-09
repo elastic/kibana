@@ -22,7 +22,7 @@ import { SectionError, SectionLoading, Error } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
-import { uiMetricService } from '../../../services/ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../services/ui_metric';
 import { linkToSnapshots } from '../../../services/navigation';
 import { RestoreTable } from './restore_table';
 import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
@@ -56,9 +56,8 @@ export const RestoreList: React.FunctionComponent = () => {
   );
 
   // Track component loaded
-  const { trackUiMetric } = uiMetricService;
   useEffect(() => {
-    trackUiMetric(UIM_RESTORE_LIST_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_RESTORE_LIST_LOAD);
   }, []);
 
   let content: JSX.Element;

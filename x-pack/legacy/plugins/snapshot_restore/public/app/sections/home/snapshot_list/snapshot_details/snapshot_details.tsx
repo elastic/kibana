@@ -37,7 +37,7 @@ import {
 } from '../../../../constants';
 import { useLoadSnapshot } from '../../../../services/http';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
-import { uiMetricService } from '../../../../services/ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../../services/ui_metric';
 import { TabSummary, TabFailures } from './tabs';
 
 interface Props {
@@ -65,7 +65,6 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const { trackUiMetric } = uiMetricService;
   const { error, data: snapshotDetails } = useLoadSnapshot(repositoryName, snapshotId);
 
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
@@ -110,7 +109,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
           {tabOptions.map(tab => (
             <EuiTab
               onClick={() => {
-                trackUiMetric(panelTypeToUiMetricMap[tab.id]);
+                trackUiMetric(METRIC_TYPE.CLICK, panelTypeToUiMetricMap[tab.id]);
                 setActiveTab(tab.id);
               }}
               isSelected={tab.id === activeTab}

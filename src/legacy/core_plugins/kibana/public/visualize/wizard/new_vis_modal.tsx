@@ -26,6 +26,7 @@ import chrome from 'ui/chrome';
 import { VisType } from 'ui/vis';
 import { VisualizeConstants } from '../visualize_constants';
 
+// @ts-ignore
 import { trackUiMetric, METRIC_TYPE } from '../';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';

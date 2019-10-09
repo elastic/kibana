@@ -19,7 +19,7 @@ import { SnapshotDetails } from '../../../../../../common/types';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
-import { uiMetricService } from '../../../../services/ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../../services/ui_metric';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
@@ -46,7 +46,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const { trackUiMetric } = uiMetricService;
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
 
   const columns = [
@@ -60,7 +59,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
-          onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
+          onClick={() => trackUiMetric(METRIC_TYPE.CLICK, UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
           href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
           data-test-subj="snapshotLink"
         >

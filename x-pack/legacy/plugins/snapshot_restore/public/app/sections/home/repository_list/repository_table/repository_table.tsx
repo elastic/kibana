@@ -22,7 +22,7 @@ import { RepositoryDeleteProvider } from '../../../../components';
 import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { textService } from '../../../../services/text';
-import { uiMetricService } from '../../../../services/ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../../services/ui_metric';
 import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
@@ -45,7 +45,6 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const { trackUiMetric } = uiMetricService;
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 
   const columns = [
@@ -61,7 +60,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           <Fragment>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
-              onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
+              onClick={() => trackUiMetric(METRIC_TYPE.CLICK, UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
               href={openRepositoryDetailsUrl(name)}
               data-test-subj="repositoryLink"
             >
