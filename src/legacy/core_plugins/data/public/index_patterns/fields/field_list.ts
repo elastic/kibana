@@ -18,16 +18,22 @@
  */
 
 import { IndexedArray } from 'ui/indexed_array';
+import { NotificationsSetup } from 'kibana/public';
 import { IndexPattern } from '../index_patterns';
 import { Field, FieldSpec } from './field';
 
 export class FieldList extends IndexedArray<Field> {
-  constructor(indexPattern: IndexPattern, specs: FieldSpec[], shortDotsEnable = false) {
+  constructor(
+    indexPattern: IndexPattern,
+    specs: FieldSpec[],
+    shortDotsEnable = false,
+    notifications: NotificationsSetup
+  ) {
     super({
       index: ['name'],
       group: ['type'],
       initialSet: specs.map(function(field) {
-        return new Field(indexPattern, field, shortDotsEnable);
+        return new Field(indexPattern, field, shortDotsEnable, notifications);
       }),
     });
   }
