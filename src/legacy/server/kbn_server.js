@@ -57,9 +57,11 @@ export default class KbnServer {
     this.settings = settings || {};
     this.config = config;
 
-    const { setupDeps, startDeps, handledConfigPaths, logger } = core;
+    const { setupDeps, startDeps, handledConfigPaths, logger, __internals } = core;
 
+    this.server = __internals.hapiServer;
     this.newPlatform = {
+      __internals,
       coreContext: {
         logger,
       },
@@ -78,7 +80,7 @@ export default class KbnServer {
     this.ready = constant(this.mixin(
       Plugins.waitForInitSetupMixin,
 
-      // sets this.server
+      // Sets global HTTP behaviors
       httpMixin,
 
       coreMixin,

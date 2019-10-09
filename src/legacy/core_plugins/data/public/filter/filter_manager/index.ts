@@ -21,4 +21,6 @@ export { FilterManager } from './filter_manager';
 export { FilterStateManager } from './filter_state_manager';
 
 export { uniqFilters } from './lib/uniq_filters';
+export { extractTimeFilter } from './lib/extract_time_filter';
+export { changeTimeFilter } from './lib/change_time_filter';
 export { onlyDisabledFiltersChanged } from './lib/only_disabled';
