@@ -577,6 +577,47 @@ test('exposes route details of incoming request to a route handler', async () =>
     });
 });
 
+describe('conditional compression', () => {
+  test('disables compression when there is a referer', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({ body: 'hello', headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
+    );
+    registerRouter(router);
+
+    await server.start();
+    const response = await innerServer.inject({
+      url: '/',
+      headers: {
+        'accept-encoding': 'gzip',
+        referer: 'http://some-other-site/',
+      },
+    });
+    expect(response.request.info.acceptEncoding).toEqual('');
+  });
+
+  test(`enables compression when there isn't a referer`, async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({ body: 'hello', headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
+    );
+    registerRouter(router);
+
+    await server.start();
+    const response = await innerServer.inject({
+      url: '/',
+      headers: {
+        'accept-encoding': 'gzip',
+      },
+    });
+    expect(response.request.info.acceptEncoding).toEqual('gzip');
+  });
+});
+
 describe('setup contract', () => {
   describe('#createSessionStorage', () => {
     it('creates session storage factory', async () => {
