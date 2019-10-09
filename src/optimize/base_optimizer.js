@@ -64,6 +64,7 @@ export default class BaseOptimizer {
     this.discoveredPlugins = opts.discoveredPlugins;
     this.profile = opts.profile || false;
     this.workers = opts.workers;
+
     switch (opts.sourceMaps) {
       case true:
         this.sourceMaps = 'source-map';

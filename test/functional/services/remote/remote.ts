@@ -34,7 +34,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
-  const codeCoverage: string = process.env.CODE_COVERAGE as string;
+  const collectCoverage: boolean = process.env.CODE_COVERAGE === '1';
   const coveragePrefix = 'coveragejson:';
   const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
   let logSubscription: undefined | Rx.Subscription;
@@ -53,15 +53,13 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
 
   if (browserType === Browsers.Chrome) {
-    // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
-    // See: https://github.com/w3c/webdriver/issues/406
-    // See: https://w3c.github.io/webdriver/#endpoints
-
     log.info(
-      `Chromedriver version: ${caps.get('chrome').chromedriverVersion}, w3c=${isW3CEnabled}`
+      `Chromedriver version: ${
+        caps.get('chrome').chromedriverVersion
+      }, w3c=${isW3CEnabled}, codeCoverage=${collectCoverage}`
     );
 
-    if (codeCoverage === '1') {
+    if (collectCoverage) {
       let coverageCounter = 1;
       // We are running xpack tests with different configs and cleanup will delete collected coverage
       // del.sync(coverageDir);
