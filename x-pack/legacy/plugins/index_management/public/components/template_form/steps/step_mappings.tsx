@@ -24,14 +24,17 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
   setDataGetter,
   onStepValidityChange,
 }) => {
-  const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(({ isValid, getData }) => {
-    const isMappingsValid = isValid === undefined ? true : isValid;
-    onStepValidityChange(isMappingsValid);
-    setDataGetter(() => {
-      const mappings = getData();
-      return Promise.resolve({ isValid: isMappingsValid, data: { mappings } });
-    });
-  }, []);
+  const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
+    ({ isValid, getData, validate }) => {
+      onStepValidityChange(isValid);
+      setDataGetter(async () => {
+        const isMappingsValid = isValid === undefined ? await validate() : isValid;
+        const mappings = getData();
+        return Promise.resolve({ isValid: isMappingsValid, data: { mappings } });
+      });
+    },
+    [setDataGetter, onStepValidityChange]
+  );
 
   return (
     <div data-test-subj="stepMappings">

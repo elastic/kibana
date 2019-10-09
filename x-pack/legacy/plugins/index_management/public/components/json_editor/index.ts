@@ -5,3 +5,5 @@
  */
 
 export * from './json_editor';
+
+export { OnUpdateHandler } from './use_json';

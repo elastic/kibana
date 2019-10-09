@@ -19,7 +19,7 @@
 
 import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
 import { Alignments, GaugeTypes } from './utils/collections';
-import { ColorSchemaVislibParams } from './types';
+import { ColorSchemaVislibParams, Labels, Style } from './types';
 
 interface Gauge extends ColorSchemaVislibParams {
   backStyle: 'Full';
@@ -30,18 +30,14 @@ interface Gauge extends ColorSchemaVislibParams {
   colorsRange: RangeValues[];
   extendRange: boolean;
   gaugeType: GaugeTypes;
-  labels: {
-    show: boolean;
-  };
+  labels: Labels;
   percentageMode: boolean;
   scale: {
     show: boolean;
     labels: false;
     color: 'rgba(105,112,125,0.2)';
   };
-  style: {
-    subText: string;
-  };
+  style: Style;
 }
 
 export interface GaugeVisParams {

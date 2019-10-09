@@ -52,6 +52,7 @@ export function useForm<T extends object = FormData>(
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const fieldsRefs = useRef<FieldsMap>({});
   const formUpdateSubscribers = useRef<Subscription[]>([]);
+  const isUnmounted = useRef<boolean>(false);
 
   // formData$ is an observable we can subscribe to in order to receive live
   // update of the raw form data. As an observable it does not trigger any React
@@ -64,6 +65,7 @@ export function useForm<T extends object = FormData>(
     return () => {
       formUpdateSubscribers.current.forEach(subscription => subscription.unsubscribe());
       formUpdateSubscribers.current = [];
+      isUnmounted.current = true;
     };
   }, []);
 
@@ -225,7 +227,9 @@ export function useForm<T extends object = FormData>(
     const validate = async () => await validateAllFields();
 
     const subscription = formData$.current.subscribe(raw => {
-      handler({ isValid, data: { raw, format }, validate });
+      if (!isUnmounted.current) {
+        handler({ isValid, data: { raw, format }, validate });
+      }
     });
 
     formUpdateSubscribers.current.push(subscription);
