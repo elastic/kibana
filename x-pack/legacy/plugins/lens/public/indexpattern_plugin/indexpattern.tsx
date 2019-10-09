@@ -107,7 +107,7 @@ export function getIndexPatternDatasource({
   const uiSettings = chrome.getUiSettingsClient();
   const onIndexPatternLoadError = (err: Error) =>
     core.notifications.toasts.addError(err, {
-      title: i18n.translate('xpack.lens.editorFrame.indexPatternLoadError', {
+      title: i18n.translate('xpack.lens.indexPattern.indexPatternLoadError', {
         defaultMessage: 'Error loading index pattern',
       }),
     });
