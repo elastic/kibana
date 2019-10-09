@@ -87,7 +87,7 @@ export class Worker extends events.EventEmitter {
     this._client = this.queue.client;
     this.jobtype = type;
     this.workerFn = workerFn;
-    this.checkSize = opts.size || 10;
+    this.checkSize = opts.size || 1;
 
     this.debug = getLogger(opts, this.id, 'debug');
     this.warn = getLogger(opts, this.id, 'warning');
