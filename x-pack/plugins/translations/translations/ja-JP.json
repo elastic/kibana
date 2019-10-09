@@ -5737,8 +5737,6 @@
     "xpack.maps.source.esSearch.topHitsSizeLabel": "エンティティごとのドキュメント数",
     "xpack.maps.source.esSearch.topHitsSplitFieldLabel": "エンティティ",
     "xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder": "エンティティフィールドを選択",
-    "xpack.maps.source.esSearch.topHitsTimeFieldLabel": "時間",
-    "xpack.maps.source.esSearch.topHitsTimeFieldSelectPlaceholder": "タイムフィールドを選択",
     "xpack.maps.source.esSearch.useTopHitsLabel": "エンティティによる最も最近のドキュメントを表示",
     "xpack.maps.source.esSearchDescription": "Kibana インデックスパターンの地理空間データ",
     "xpack.maps.source.esSearchTitle": "ドキュメント",

@@ -49,13 +49,18 @@ exports[`Should remove selected fields from selectable 1`] = `
     size="xs"
   />
   <EuiPopoverFooter>
-    <EuiButton
-      fill={true}
-      isDisabled={true}
-      onClick={[Function]}
+    <EuiTextAlign
+      textAlign="right"
     >
-      Add
-    </EuiButton>
+      <EuiButton
+        fill={true}
+        isDisabled={true}
+        onClick={[Function]}
+        size="s"
+      >
+        Add
+      </EuiButton>
+    </EuiTextAlign>
   </EuiPopoverFooter>
 </EuiPopover>
 `;
@@ -127,13 +132,18 @@ exports[`Should render 1`] = `
     size="xs"
   />
   <EuiPopoverFooter>
-    <EuiButton
-      fill={true}
-      isDisabled={true}
-      onClick={[Function]}
+    <EuiTextAlign
+      textAlign="right"
     >
-      Add
-    </EuiButton>
+      <EuiButton
+        fill={true}
+        isDisabled={true}
+        onClick={[Function]}
+        size="s"
+      >
+        Add
+      </EuiButton>
+    </EuiTextAlign>
   </EuiPopoverFooter>
 </EuiPopover>
 `;

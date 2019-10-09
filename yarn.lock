@@ -1064,10 +1064,10 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/charts@^13.4.0":
-  version "13.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-13.4.0.tgz#117cce6081cb6cd62dfab1de207a0d56dde99d36"
-  integrity sha512-m52fEc6d94whUrOZdXTA2cTEyZQGxodOIUA5/bNFj7pmxbCkIXhcJ1Wj7eJxrBIjvzL/hYSy4ALueTO/gS++bg==
+"@elastic/charts@^13.5.1":
+  version "13.5.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-13.5.1.tgz#feba462fa1699430db60b55827fea52444b34df1"
+  integrity sha512-kIwZ5q+8pBdISJZJYwZWvK5ZGYj7+GHnCWE7YFi68pZ99MTsmE1UEEXbDM9iYa+ru2/ALkcVr2zg72sjEsbeyA==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"
@@ -1105,18 +1105,6 @@
     mz "^2.7.0"
     parse-gitignore "1.0.1"
     vscode-languageserver "^5.2.1"
-
-"@elastic/elasticsearch@^7.4.0":
-  version "7.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.4.0.tgz#57f4066acf25e9d4e9b4f6376088433aae6f25d4"
-  integrity sha512-HpEKHH6mHQRvea3lw4NNJw9ZUS1KmkpwWKHucaHi1svDn+/fEAwY0wD8egL1vZJo4ZmWfCQMjVqGL+Hoy1HYRw==
-  dependencies:
-    debug "^4.1.1"
-    decompress-response "^4.2.0"
-    into-stream "^5.1.0"
-    ms "^2.1.1"
-    once "^1.4.0"
-    pump "^3.0.0"
 
 "@elastic/elasticsearch@^7.4.0":
   version "7.4.0"
@@ -4242,6 +4230,14 @@
   dependencies:
     "@types/events" "*"
     "@types/node" "*"
+
+"@types/xml-crypto@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@types/xml-crypto/-/xml-crypto-1.4.0.tgz#b586e4819f6bdd0571a3faa9a8098049d5c3cc5a"
+  integrity sha512-F4bCSHdmXgrbLdbQn5kf77U94gb4Ifn8G6u+97BJ5wGzg3xK4uLlJUDFuOIKLf9pZrEGUSSAU/8/0d3GqVXnYQ==
+  dependencies:
+    "@types/node" "*"
+    xpath "0.0.27"
 
 "@types/xml2js@^0.4.5":
   version "0.4.5"
