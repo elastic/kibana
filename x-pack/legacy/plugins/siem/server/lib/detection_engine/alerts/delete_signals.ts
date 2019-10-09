@@ -16,7 +16,7 @@ export interface DeleteSignalParams {
 
 export const deleteAllSignalActions = async (
   actionsClient: ActionsClient,
-  actions: AlertAction[] | undefined = []
+  actions: AlertAction[]
 ): Promise<Error | null> => {
   try {
     await Promise.all(actions.map(async ({ id }) => actionsClient.delete({ id })));
@@ -31,7 +31,7 @@ export const deleteSignals = async ({ alertsClient, actionsClient, id }: DeleteS
 
   // TODO: Remove this as cast as soon as signal.actions TypeScript bug is fixed
   // where it is trying to return AlertAction[] or RawAlertAction[]
-  const actions = alert.actions as (AlertAction[] | undefined);
+  const actions = (alert.actions as (AlertAction[] | undefined)) || [];
 
   const actionsErrors = await deleteAllSignalActions(actionsClient, actions);
   const deletedAlert = alertsClient.delete({ id });

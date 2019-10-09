@@ -78,7 +78,7 @@ export const updateSignal = async ({
 
   // TODO: Remove this as cast as soon as signal.actions TypeScript bug is fixed
   // where it is trying to return AlertAction[] or RawAlertAction[]
-  const actions = (signal.actions as AlertAction[]) || [];
+  const actions = (signal.actions as AlertAction[] | undefined) || [];
 
   const alertTypeParams = signal.alertTypeParams || {};
 
