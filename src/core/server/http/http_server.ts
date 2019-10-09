@@ -201,6 +201,13 @@ export class HttpServer {
     const basePathService = new BasePath(config.basePath);
     this.setupBasePathRewrite(config, basePathService);
 
+    this.server.ext('onRequest', (request, h) => {
+      if (request.info.referrer !== '') {
+        request.info.acceptEncoding = '';
+      }
+      return h.continue;
+    });
+
     return {
       registerRouter: this.registerRouter.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
