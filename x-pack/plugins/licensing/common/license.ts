@@ -36,29 +36,6 @@ interface LicenseArgs {
   clusterSource?: string;
 }
 
-/*
-  uid?: string;
-  status?: string;
-  expiry_date_in_millis?: number;
-  type?: LicenseType;
-}
-
-export interface RawFeatures {
-  [key: string]: {
-    available: boolean;
-    enabled: boolean;
-  };
-}
-
-export interface ObjectifiedLicense {
-  license: {
-    type: LicenseType;
-    isActive: boolean;
-    expiryDateInMillis: number;
-  };
-  features: any[];
-*/
-
 export class License implements ILicense {
   private readonly plugin: ILicensingPlugin;
   private readonly hasLicense: boolean;
@@ -74,24 +51,22 @@ export class License implements ILicense {
     objectified: ObjectifiedLicense,
     { plugin, error, clusterSource }: LicenseArgs
   ) {
-    const license = objectified.license && {
+    const license = {
       uid: objectified.license.uid,
       status: objectified.license.status,
       type: objectified.license.type,
       expiry_date_in_millis: objectified.license.expiryDateInMillis,
     };
-    const features =
-      objectified.features &&
-      objectified.features.reduce(
-        (map, feature) => ({
-          ...map,
-          [feature.name]: {
-            available: feature.isAvailable,
-            enabled: feature.isEnabled,
-          },
-        }),
-        {}
-      );
+    const features = objectified.features.reduce(
+      (map, feature) => ({
+        ...map,
+        [feature.name]: {
+          available: feature.isAvailable,
+          enabled: feature.isEnabled,
+        },
+      }),
+      {}
+    );
 
     return new License({
       plugin,
@@ -223,7 +198,7 @@ export class License implements ILicense {
     return { state: LICENSE_CHECK_STATE.Valid };
   }
 
-  toObject() {
+  toObject(): ObjectifiedLicense {
     if (this.objectified) {
       return this.objectified;
     }

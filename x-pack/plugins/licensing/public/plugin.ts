@@ -28,14 +28,14 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
   private removeInterceptor!: () => void;
   private signature = '';
   public pollingFrequency = DEFAULT_POLLING_FREQUENCY;
-  private refresher$ = new BehaviorSubject<boolean>(true);
+  private refresher$ = new BehaviorSubject(true);
 
   constructor(context: PluginInitializerContext) {}
 
-  private getSession(): ObjectifiedLicense {
+  private getSession(): ObjectifiedLicense | null {
     const raw = sessionStorage.getItem(LICENSING_SESSION);
     const signature = sessionStorage.getItem(LICENSING_SESSION_SIGNATURE);
-    const json = raw ? JSON.parse(raw) : {};
+    const json = raw && JSON.parse(raw);
 
     if (signature) {
       this.signature = signature;
@@ -61,11 +61,18 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
     return this.signature;
   }
 
-  public refresh() {
-    this.refresher$.next(true);
-  }
-
   public setup(core: CoreSetup) {
+    const session = this.getSession();
+    const initial$ = of(
+      session
+        ? License.fromObjectified(session, { plugin: this })
+        : new License({ plugin: this, features: {} })
+    );
+    const setup = {
+      refresh: () => this.refresher$.next(true),
+      license$: initial$,
+    };
+
     this.removeInterceptor = core.http.intercept({
       response: httpResponse => {
         const signature =
@@ -75,17 +82,14 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
           this.signature = signature;
 
           if (httpResponse.request && !httpResponse.request.url.includes(API_ROUTE)) {
-            this.refresh();
+            setup.refresh();
           }
         }
       },
     });
 
-    const initial$ = of(License.fromObjectified(this.getSession(), { plugin: this }));
-    const licenseFetches$ = merge(
-      timer(0, this.pollingFrequency),
-      this.refresher$.pipe(takeUntil(this.stop$))
-    ).pipe(
+    const licenseFetches$ = merge(timer(0, this.pollingFrequency), this.refresher$).pipe(
+      takeUntil(this.stop$),
       switchMap(async () => {
         try {
           const response = await core.http.get(API_ROUTE);
@@ -105,23 +109,20 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
       filter(([previous, next]) => hasLicenseInfoChanged(previous, next)),
       map(([, next]) => next)
     );
-    const license$ = merge(initial$, updates$).pipe(
+
+    setup.license$ = merge(initial$, updates$).pipe(
       tap(this.setSession),
       takeUntil(this.stop$)
     );
 
-    return {
-      license$,
-      refresh: () => {
-        this.refresh();
-      },
-    };
+    return setup;
   }
 
   public async start(core: CoreStart) {}
 
   public stop() {
     this.stop$.next();
+    this.stop$.complete();
 
     if (this.removeInterceptor) {
       this.removeInterceptor();

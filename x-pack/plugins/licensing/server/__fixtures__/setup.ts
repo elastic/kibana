@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { take, skip } from 'rxjs/operators';
+import { first, take, skip } from 'rxjs/operators';
 import { merge } from 'lodash';
 import { ClusterClient } from 'src/core/server';
 import { coreMock } from '../../../../../src/core/server/mocks';
@@ -82,7 +82,7 @@ export async function licenseMerge(xpackInfo = {}) {
 export async function setupOnly(pluginInitializerContext: any = {}) {
   const coreSetup = coreMock.createSetup();
   const clusterClient = ((await coreSetup.elasticsearch.dataClient$
-    .pipe(take(1))
+    .pipe(first())
     .toPromise()) as unknown) as jest.Mocked<PublicMethodsOf<ClusterClient>>;
   const plugin = new Plugin(
     coreMock.createPluginInitializerContext({
@@ -98,20 +98,20 @@ export async function setup(xpackInfo = {}, pluginInitializerContext: any = {}, 
 
   clusterClient.callAsInternalUser.mockResolvedValueOnce(licenseMerge(xpackInfo));
 
-  const { license$ } = await plugin.setup(coreSetup);
+  const licensingSetup = await plugin.setup(coreSetup);
   const license = await (shouldSkip
-    ? license$
+    ? licensingSetup.license$
         .pipe(
           skip(1),
           take(1)
         )
         .toPromise()
-    : license$.pipe(take(1)).toPromise());
+    : licensingSetup.license$.pipe(take(1)).toPromise());
 
-  return {
+  return Object.assign(licensingSetup, {
+    coreSetup,
     plugin,
-    license$,
     license,
     clusterClient,
-  };
+  });
 }

@@ -8,6 +8,7 @@ import { bufferCount, take, skip } from 'rxjs/operators';
 import { ILicense } from '../common/types';
 import { License } from '../common/license';
 import { licenseMerge } from '../common/license_merge';
+import { delay } from '../common/delay';
 import { Plugin } from './plugin';
 import { setup, setupOnly } from './__fixtures__/setup';
 
@@ -70,6 +71,24 @@ describe('licensing plugin', () => {
       .toPromise();
 
     expect([first.type, second.type, third.type]).toEqual(['basic', 'gold', 'platinum']);
+  });
+
+  test('calling refresh triggers fetch', async () => {
+    const { plugin: _plugin, license: _license, license$, clusterClient, refresh } = await setup();
+
+    // We create a dummy subscription to ensure that calls to refresh actually
+    // get triggered in the observable.
+    license$.subscribe(() => {});
+    plugin = _plugin;
+    license = _license;
+    clusterClient.callAsInternalUser.mockClear();
+    refresh();
+    await delay(200);
+
+    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
+      method: 'GET',
+      path: '/_xpack',
+    });
   });
 
   test('provides a licensing context to http routes', async () => {

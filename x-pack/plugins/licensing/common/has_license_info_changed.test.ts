@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { bufferCount, take, skip } from 'rxjs/operators';
-// import { ILicense } from './types';
 import { License } from './license';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
-// import { licenseMerge } from './license_merge';
 
 function license({ error, ...rawLicense }: { error?: Error; [key: string]: any } = {}) {
   return new License({

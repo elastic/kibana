@@ -38,7 +38,7 @@ describe('licensing feature', () => {
 
       const security = license.getFeature('security');
 
-      expect(security!.name).toBe('security');
+      expect(security.name).toBe('security');
     });
   });
 

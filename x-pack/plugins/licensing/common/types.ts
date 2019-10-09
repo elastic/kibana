@@ -36,13 +36,19 @@ export interface RawLicense {
 
 /**
  * @public
+ * Result from remote request fetching raw featureset.
+ */
+export interface RawFeature {
+  available: boolean;
+  enabled: boolean;
+}
+
+/**
+ * @public
  * Results from remote request fetching raw featuresets.
  */
 export interface RawFeatures {
-  [key: string]: {
-    available: boolean;
-    enabled: boolean;
-  };
+  [key: string]: RawFeature;
 }
 
 /** @public */
@@ -124,7 +130,7 @@ export interface ILicense {
   reasonUnavailable?: string | Error;
 
   /**
-   * The MD5 hash of the serialized license.
+   * A concretely-defined hash of the serialized license.
    */
   signature: string;
 

@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RawFeature } from './types';
+
+const empty = { available: false, enabled: false };
+
 export class LicenseFeature {
-  constructor(public name: string, private feature: any = {}) {}
+  constructor(public name: string, private feature: RawFeature = empty) {}
 
   public get isAvailable() {
-    return !!this.feature.available;
+    return this.feature.available;
   }
 
   public get isEnabled() {
-    return !!this.feature.enabled;
+    return this.feature.enabled;
   }
 
   public toObject() {

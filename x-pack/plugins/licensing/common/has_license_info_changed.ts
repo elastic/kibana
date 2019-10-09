@@ -29,5 +29,5 @@ export function hasLicenseInfoChanged(
     );
   }
 
-  return (!!currentLicense && !newLicense) || (!!newLicense && !currentLicense);
+  return currentLicense !== newLicense;
 }

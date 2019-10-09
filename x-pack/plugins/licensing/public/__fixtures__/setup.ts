@@ -23,43 +23,50 @@ export async function setup(xpackInfo = {}, pluginInitializerContext: any = {}, 
 
   coreSetup.http.get.mockResolvedValue(licenseMerge(xpackInfo));
 
-  const { license$ } = await plugin.setup(coreSetup);
+  const licensingSetup = await plugin.setup(coreSetup);
   const license = await (shouldSkip
-    ? license$
+    ? licensingSetup.license$
         .pipe(
           skip(1),
           take(1)
         )
         .toPromise()
-    : license$.pipe(take(1)).toPromise());
+    : licensingSetup.license$.pipe(take(1)).toPromise());
 
-  return {
+  return Object.assign(licensingSetup, {
     coreSetup,
     plugin,
-    license$,
     license,
-  };
+  });
 }
 
 // NOTE: Since we don't have a real interceptor here due to mocks,
 // we fake the process and necessary objects.
-export function mockHttpInterception(coreSetup: MockedKeys<CoreSetup>) {
-  coreSetup.http.intercept.mockImplementation(interceptor => {
-    coreSetup.http.get.mockImplementation(path => {
-      const headers = new Map();
+export function mockHttpInterception(
+  coreSetup: MockedKeys<CoreSetup>
+): Promise<jest.Mock<any, any>> {
+  return new Promise(resolve => {
+    coreSetup.http.intercept.mockImplementation(interceptor => {
+      coreSetup.http.get.mockImplementation(path => {
+        const headers = new Map();
 
-      if (path.includes('fake')) {
-        headers.set(SIGNATURE_HEADER, 'fake-signature');
-      }
+        if (path.includes('fake')) {
+          headers.set(SIGNATURE_HEADER, 'fake-signature');
+        }
 
-      (interceptor.response as (_: any) => void)({
-        request: { url: path },
-        response: { headers },
+        (interceptor.response as (_: any) => void)({
+          request: { url: path },
+          response: { headers },
+        });
+
+        return licenseMerge({});
       });
 
-      return licenseMerge({});
-    });
+      const spy = jest.fn();
 
-    return () => {};
+      resolve(spy);
+
+      return spy;
+    });
   });
 }
