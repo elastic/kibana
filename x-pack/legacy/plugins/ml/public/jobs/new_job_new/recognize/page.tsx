@@ -27,6 +27,7 @@ import {
   EuiAccordion,
   EuiButton,
   EuiTextAlign,
+  EuiSwitch,
 } from '@elastic/eui';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
@@ -503,29 +504,37 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                       }
                       paddingSize="l"
                     >
-                      <EuiFormRow>
-                        <EuiCheckbox
-                          id="useDedicatedIndex"
-                          name="useDedicatedIndex"
-                          aria-labelledby="ml_aria_label_new_job_dedicated_index"
-                          aria-describedby="ml_aria_description_new_job_dedicated_index"
-                          label={
-                            <EuiText id="ml_aria_label_new_job_dedicated_index">
-                              <FormattedMessage
-                                id="xpack.ml.newJob.simple.recognize.useDedicatedIndexLabel"
-                                defaultMessage="Use dedicated index"
-                              />
-                            </EuiText>
-                          }
-                          checked={formState.useDedicatedIndex}
-                          onChange={({ target: { checked } }) => {
-                            setFormState({
-                              ...formState,
-                              useDedicatedIndex: checked,
-                            });
-                          }}
-                        />
-                      </EuiFormRow>
+                      <EuiDescribedFormGroup
+                        idAria="ml_aria_label_new_job_dedicated_index"
+                        title={
+                          <h4>
+                            <FormattedMessage
+                              id="xpack.ml.newJob.simple.recognize.useDedicatedIndexLabel"
+                              defaultMessage="Use dedicated index"
+                            />
+                          </h4>
+                        }
+                        description={
+                          <FormattedMessage
+                            id="xpack.ml.tooltips.newJobDedicatedIndexTooltip"
+                            defaultMessage="Select to store results in a separate index for this job."
+                          />
+                        }
+                      >
+                        <EuiFormRow describedByIds={['ml_aria_label_new_job_dedicated_index']}>
+                          <EuiSwitch
+                            id="useDedicatedIndex"
+                            name="useDedicatedIndex"
+                            checked={formState.useDedicatedIndex}
+                            onChange={({ target: { checked } }) => {
+                              setFormState({
+                                ...formState,
+                                useDedicatedIndex: checked,
+                              });
+                            }}
+                          />
+                        </EuiFormRow>
+                      </EuiDescribedFormGroup>
                     </EuiAccordion>
                     <EuiSpacer size="l" />
                   </EuiForm>
@@ -566,23 +575,25 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
-            <EuiPanel>
+            <EuiPanel grow={false}>
               <ModuleJobs jobs={jobs} jobPrefix={formState.jobPrefix} saveState={saveState} />
             </EuiPanel>
-            <EuiSpacer size="m" />
             {Object.keys(kibanaObjects).length > 0 && (
-              <EuiPanel>
-                {Object.keys(kibanaObjects).map((objectType, i) => (
-                  <Fragment key={objectType}>
-                    <KibanaObjects
-                      objectType={objectType}
-                      kibanaObjects={kibanaObjects[objectType]}
-                      isSaving={saveState === SAVE_STATE.SAVING}
-                    />
-                    {i < Object.keys(kibanaObjects).length - 1 && <EuiSpacer size="s" />}
-                  </Fragment>
-                ))}
-              </EuiPanel>
+              <>
+                <EuiSpacer size="m" />
+                <EuiPanel grow={false}>
+                  {Object.keys(kibanaObjects).map((objectType, i) => (
+                    <Fragment key={objectType}>
+                      <KibanaObjects
+                        objectType={objectType}
+                        kibanaObjects={kibanaObjects[objectType]}
+                        isSaving={saveState === SAVE_STATE.SAVING}
+                      />
+                      {i < Object.keys(kibanaObjects).length - 1 && <EuiSpacer size="s" />}
+                    </Fragment>
+                  ))}
+                </EuiPanel>
+              </>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
