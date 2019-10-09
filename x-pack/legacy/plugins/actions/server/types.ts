@@ -31,7 +31,7 @@ export interface ActionsConfigType {
 
 // the parameters passed to an action type executor function
 export interface ActionTypeExecutorOptions {
-  id: string;
+  actionId: string;
   services: Services;
   config: Record<string, any>;
   secrets: Record<string, any>;

@@ -74,4 +74,13 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     ],
     method: 'PUT',
   });
+
+  slm.executeRetention = ca({
+    urls: [
+      {
+        fmt: '/_slm/_execute_retention',
+      },
+    ],
+    method: 'POST',
+  });
 };
