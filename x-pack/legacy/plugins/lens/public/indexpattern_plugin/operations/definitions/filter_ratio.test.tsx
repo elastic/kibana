@@ -9,7 +9,6 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
 import { FilterRatioIndexPatternColumn } from './filter_ratio';
 import { filterRatioOperation } from '.';
-import { IndexPatternPrivateState } from '../../indexpattern';
 import { Storage } from 'ui/storage';
 import {
   UiSettingsClientContract,
@@ -19,6 +18,7 @@ import {
 import { QueryBarInput } from '../../../../../../../../src/legacy/core_plugins/data/public/query';
 import { createMockedIndexPattern } from '../../mocks';
 import { EuiFormRow } from '@elastic/eui';
+import { IndexPatternPrivateState } from '../../types';
 
 jest.mock('ui/new_platform');
 
@@ -29,6 +29,7 @@ describe('filter_ratio', () => {
 
   beforeEach(() => {
     state = {
+      indexPatternRefs: [],
       indexPatterns: {
         1: {
           id: '1',
