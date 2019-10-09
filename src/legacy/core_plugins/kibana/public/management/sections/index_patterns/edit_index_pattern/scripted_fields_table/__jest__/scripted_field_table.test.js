@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
 
@@ -70,7 +70,7 @@ const indexPattern = {
 
 describe('ScriptedFieldsTable', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
+    const component = shallowWithI18nProvider(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
@@ -86,7 +86,7 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should filter based on the query bar', async () => {
-    const component = shallowWithIntl(
+    const component = shallowWithI18nProvider(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
@@ -105,7 +105,7 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should filter based on the lang filter', async () => {
-    const component = shallowWithIntl(
+    const component = shallowWithI18nProvider(
       <ScriptedFieldsTable
         indexPattern={{
           getScriptedFields: () => ([
@@ -130,7 +130,7 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should hide the table if there are no scripted fields', async () => {
-    const component = shallowWithIntl(
+    const component = shallowWithI18nProvider(
       <ScriptedFieldsTable
         indexPattern={{
           getScriptedFields: () => ([])
@@ -148,7 +148,7 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should show a delete modal', async () => {
-    const component = shallowWithIntl(
+    const component = shallowWithI18nProvider(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
@@ -165,7 +165,7 @@ describe('ScriptedFieldsTable', () => {
 
   it('should delete a field', async () => {
     const removeScriptedField = jest.fn();
-    const component = shallowWithIntl(
+    const component = shallowWithI18nProvider(
       <ScriptedFieldsTable
         indexPattern={{
           ...indexPattern,

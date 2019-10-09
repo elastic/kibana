@@ -25,3 +25,8 @@ export const DEFAULT_TO = 'now';
 export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
+
+/**
+ * Id for the SIGNALS alerting type
+ */
+export const SIGNALS_ID = `${APP_ID}.signals`;

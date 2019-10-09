@@ -23,11 +23,11 @@ type NumberKeys<T> = Exclude<
 
 export function AdvancedSettingsForm({
   advancedSettings,
-  updateAdvancedSettings,
+  updateSettings,
   allFields,
-}: Pick<SettingsProps, 'advancedSettings' | 'updateAdvancedSettings' | 'allFields'>) {
+}: Pick<SettingsProps, 'advancedSettings' | 'updateSettings' | 'allFields'>) {
   function updateSetting<K extends keyof AdvancedSettings>(key: K, value: AdvancedSettings[K]) {
-    updateAdvancedSettings({ ...advancedSettings, [key]: value });
+    updateSettings({ ...advancedSettings, [key]: value });
   }
 
   function getNumberUpdater<K extends NumberKeys<AdvancedSettings>>(key: K) {
