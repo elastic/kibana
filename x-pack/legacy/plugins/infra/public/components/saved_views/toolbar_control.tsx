@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { useSavedView } from '../../hooks/use_saved_view';
-import { inventoryViewSavedObjectType } from '../../../common/saved_objects/inventory_view';
 import { SavedViewCreateModal } from './create_modal';
 import { SavedViewListFlyout } from './view_list_flyout';
 interface Props<ViewState> {
@@ -30,7 +29,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     find,
     errorOnFind,
     errorOnCreate,
-  } = useSavedView(props.defaultViewState, inventoryViewSavedObjectType);
+  } = useSavedView(props.defaultViewState, props.viewType);
   const [modalOpen, setModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const openSaveModal = useCallback(() => setCreateModalOpen(true), []);
