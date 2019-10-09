@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post('/api/lens/index_stats/logstash/field')
           .set(COMMON_HEADERS)
           .send({
-            query: { match_all: {} },
+            dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post('/api/lens/index_stats/logstash-2015.09.22/field')
           .set(COMMON_HEADERS)
           .send({
-            query: { match_all: {} },
+            dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
@@ -163,7 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post('/api/lens/index_stats/logstash-2015.09.22/field')
           .set(COMMON_HEADERS)
           .send({
-            query: { match_all: {} },
+            dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post('/api/lens/index_stats/logstash-2015.09.22/field')
           .set(COMMON_HEADERS)
           .send({
-            query: { match_all: {} },
+            dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
@@ -260,6 +260,29 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           },
         });
+      });
+
+      it('should apply filters and queries', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: {
+              bool: {
+                filter: [{ match: { 'geo.src': 'US' } }],
+              },
+            },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            timeFieldName: '@timestamp',
+            field: {
+              name: 'bytes',
+              type: 'number',
+            },
+          })
+          .expect(200);
+
+        expect(body.totalDocuments).to.eql(425);
       });
     });
   });

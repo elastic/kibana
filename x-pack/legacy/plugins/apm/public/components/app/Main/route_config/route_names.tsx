@@ -7,13 +7,17 @@
 export enum RouteName {
   HOME = 'home',
   SERVICES = 'services',
+  SERVICE_MAP = 'service-map',
+  SINGLE_SERVICE_MAP = 'single-service-map',
   TRACES = 'traces',
   SERVICE = 'service',
   TRANSACTIONS = 'transactions',
   ERRORS = 'errors',
   ERROR = 'error',
   METRICS = 'metrics',
+  SERVICE_NODE_METRICS = 'node_metrics',
   TRANSACTION_TYPE = 'transaction_type',
   TRANSACTION_NAME = 'transaction_name',
-  SETTINGS = 'settings'
+  SETTINGS = 'settings',
+  SERVICE_NODES = 'nodes'
 }

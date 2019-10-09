@@ -4,6 +4,8 @@
 
 ## SavedObjectsExportOptions.types property
 
+optional array of saved object types.
+
 <b>Signature:</b>
 
 ```typescript

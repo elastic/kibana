@@ -23,7 +23,7 @@ import { SavedObjectsService, SavedObjectsSetupDeps } from './saved_objects_serv
 import { mockCoreContext } from '../core_context.mock';
 import { KibanaMigrator } from './migrations/kibana/kibana_migrator';
 import { of } from 'rxjs';
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
 
@@ -41,7 +41,7 @@ describe('SavedObjectsService', () => {
           .fn()
           .mockImplementation(() =>
             i++ <= 2
-              ? Promise.reject(new elasticsearch.errors.NoConnections())
+              ? Promise.reject(new legacyElasticsearch.errors.NoConnections())
               : Promise.resolve('success')
           ),
       };

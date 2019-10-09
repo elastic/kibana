@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreSetup, SavedObjectsClientContract } from 'src/core/public';
+import { CoreStart, SavedObjectsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,7 +20,7 @@ import {
 import { loadInitialState, changeIndexPattern, changeLayerIndexPattern } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { IndexPatternDatasourcePluginPlugins } from './plugin';
+import { IndexPatternDatasourceSetupPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
@@ -93,12 +93,14 @@ function removeProperty<T>(prop: string, object: Record<string, T>): Record<stri
 }
 
 export function getIndexPatternDatasource({
-  core,
   chrome,
+  core,
   storage,
   savedObjectsClient,
-}: IndexPatternDatasourcePluginPlugins & {
-  core: CoreSetup;
+}: Pick<IndexPatternDatasourceSetupPlugins, 'chrome'> & {
+  // Core start is being required here because it contains the savedObject client
+  // In the new platform, this plugin wouldn't be initialized until after setup
+  core: CoreStart;
   storage: Storage;
   savedObjectsClient: SavedObjectsClientContract;
 }) {
@@ -217,7 +219,7 @@ export function getIndexPatternDatasource({
                 setState={setState}
                 uiSettings={uiSettings}
                 storage={storage}
-                savedObjectsClient={savedObjectsClient}
+                savedObjectsClient={core.savedObjects.client}
                 layerId={props.layerId}
                 http={core.http}
                 uniqueLabel={columnLabelMap[props.columnId]}

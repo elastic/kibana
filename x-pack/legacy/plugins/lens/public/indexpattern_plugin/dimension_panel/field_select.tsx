@@ -14,7 +14,7 @@ import {
   EuiHighlight,
 } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
-import { FieldIcon } from '../field_icon';
+import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
 import { OperationFieldSupportMatrix } from './dimension_panel';
 import { IndexPattern, IndexPatternField } from '../types';
@@ -141,6 +141,7 @@ export function FieldSelect({
     <EuiComboBox
       fullWidth
       compressed
+      isClearable={false}
       data-test-subj="indexPattern-dimension-field"
       placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
         defaultMessage: 'Field',
@@ -172,7 +173,9 @@ export function FieldSelect({
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={null}>
-              <FieldIcon type={((option.value as unknown) as { dataType: DataType }).dataType} />
+              <LensFieldIcon
+                type={((option.value as unknown) as { dataType: DataType }).dataType}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>

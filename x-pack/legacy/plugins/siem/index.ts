@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
+import KbnServer from '../../../../src/legacy/server/kbn_server';
 import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -65,14 +66,15 @@ export function siem(kibana: any) {
         [DEFAULT_SIEM_REFRESH_INTERVAL]: {
           type: 'json',
           name: i18n.translate('xpack.siem.uiSettings.defaultRefreshIntervalLabel', {
-            defaultMessage: 'Time picker refresh interval',
+            defaultMessage: 'Time filter refresh interval',
           }),
           value: `{
   "pause": ${DEFAULT_INTERVAL_PAUSE},
   "value": ${DEFAULT_INTERVAL_VALUE}
 }`,
           description: i18n.translate('xpack.siem.uiSettings.defaultRefreshIntervalDescription', {
-            defaultMessage: "The SIEM timefilter's default refresh interval",
+            defaultMessage:
+              '<p>Default refresh interval for the SIEM time filter, in milliseconds.</p>',
           }),
           category: ['siem'],
           requiresPageReload: true,
@@ -80,39 +82,39 @@ export function siem(kibana: any) {
         [DEFAULT_SIEM_TIME_RANGE]: {
           type: 'json',
           name: i18n.translate('xpack.siem.uiSettings.defaultTimeRangeLabel', {
-            defaultMessage: 'Time picker defaults',
+            defaultMessage: 'Time filter period',
           }),
           value: `{
   "from": "${DEFAULT_FROM}",
   "to": "${DEFAULT_TO}"
 }`,
           description: i18n.translate('xpack.siem.uiSettings.defaultTimeRangeDescription', {
-            defaultMessage:
-              'The SIEM timefilter selection to use when Kibana is started without one',
+            defaultMessage: '<p>Default period of time in the SIEM time filter.</p>',
           }),
           category: ['siem'],
           requiresPageReload: true,
         },
         [DEFAULT_INDEX_KEY]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
-            defaultMessage: 'Default index',
+            defaultMessage: 'Elasticsearch indices',
           }),
           value: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
-            defaultMessage: 'Default Elasticsearch index to search',
+            defaultMessage:
+              '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
           }),
           category: ['siem'],
           requiresPageReload: true,
         },
         [DEFAULT_ANOMALY_SCORE]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreLabel', {
-            defaultMessage: 'Default anomaly threshold',
+            defaultMessage: 'Anomaly threshold',
           }),
           value: 50,
           type: 'number',
           description: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreDescription', {
             defaultMessage:
-              'Default anomaly score threshold to exceed before showing anomalies. Valid values are between 0 and 100',
+              '<p>Value above which Machine Learning job anomalies are displayed in the SIEM app.</p><p>Valid values: 0 to 100.</p>',
           }),
           category: ['siem'],
           requiresPageReload: true,
@@ -121,8 +123,11 @@ export function siem(kibana: any) {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
+      const newPlatform = ((server as unknown) as KbnServer).newPlatform;
       if (server.plugins.alerting != null) {
-        server.plugins.alerting.registerType(signalsAlertType);
+        server.plugins.alerting.setup.registerType(
+          signalsAlertType({ logger: newPlatform.coreContext.logger.get('plugins', APP_ID) })
+        );
       }
       server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
       initServerWithKibana(server);
