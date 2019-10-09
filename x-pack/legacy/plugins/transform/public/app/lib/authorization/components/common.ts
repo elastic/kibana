@@ -25,7 +25,7 @@ export interface MissingPrivileges {
   [key: string]: string[] | undefined;
 }
 export const toArray = (value: string | string[]): string[] =>
-  Array.isArray(value) ? (value as string[]) : ([value] as string[]);
+  Array.isArray(value) ? value : [value];
 
 export const hasPrivilegeFactory = (privileges: Privileges) => (privilege: Privilege) => {
   const [section, requiredPrivilege] = privilege;
