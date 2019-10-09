@@ -148,7 +148,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
               return true;
             }
           } catch (exc) {
-            logger.info(`[-] nextScroll threw an error ${JSON.stringify(exc)}`);
+            logger.error(`[-] nextScroll threw an error ${JSON.stringify(exc)}`);
           }
           let bulkResponse;
           try {
@@ -182,7 +182,13 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         // TODO: Comment this in eventually and use this for manual insertion of the
         // signals instead of the ReIndex() api
 
-        if (process.env.USE_SCROLL_BULK_INDEX === 'USE_SCROLL_BULK_INDEX') {
+        if (process.env.USE_REINDEX_API === 'USE_REINDEX_API') {
+          // eslint-disable-next-line
+          const result = await services.callCluster('reindex', reIndex);
+
+          // TODO: Error handling here and writing of any errors that come back from ES by
+          logger.info(`Result of reindex: ${JSON.stringify(result, null, 2)}`);
+        } else {
           logger.info(`[+] Initial search call`);
           const noReIndexResult = await services.callCluster('search', noReIndex);
           logger.info(`Total docs to reindex: ${noReIndexResult.hits.total.value}`);
@@ -192,12 +198,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
           } else {
             logger.info('Error processing SIEM signal job');
           }
-        } else {
-          // eslint-disable-next-line
-          const result = await services.callCluster('reindex', reIndex);
-
-          // TODO: Error handling here and writing of any errors that come back from ES by
-          logger.info(`Result of reindex: ${JSON.stringify(result, null, 2)}`);
         }
       } catch (err) {
         // TODO: Error handling and writing of errors into a signal that has error
