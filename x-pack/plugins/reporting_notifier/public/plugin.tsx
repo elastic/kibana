@@ -34,11 +34,13 @@ export class ReportingNotifierPublicPlugin implements Plugin<any, any> {
   private poller$: Rx.Observable<JobStatusBuckets> | null = null;
 
   // FIXME: License checking: only active, non-expired licenses allowed
+  // Depends on https://github.com/elastic/kibana/pull/44922
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {}
 
   // FIXME: only perform these actions for authenticated routes
+  // Depends on https://github.com/elastic/kibana/pull/39477
   public start(core: CoreStart) {
     const { http, notifications } = core;
     const httpFn = () => http;
