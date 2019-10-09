@@ -18,8 +18,10 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+// eslint-disable-next-line import/no-default-export
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
   const appsMenu = getService('appsMenu');
@@ -29,13 +31,23 @@ export default function ({ getService, getPageObjects }) {
   const fromTime = '2015-09-19 06:31:44.000';
   const toTime = '2015-09-23 18:31:44.000';
 
+  const getHost = () => {
+    if (process.env.TEST_KIBANA_HOSTNAME) {
+      return process.env.TEST_KIBANA_HOSTNAME;
+    } else if (process.env.TEST_KIBANA_HOST) {
+      return process.env.TEST_KIBANA_HOST;
+    } else {
+      return 'localhost';
+    }
+  };
+
   const getBasePath = () => {
     if (process.env.TEST_KIBANA_URL) {
       const myURL = new URL(process.env.TEST_KIBANA_URL);
       return `${myURL.protocol}//${myURL.host}`;
     }
     const protocol = process.env.TEST_KIBANA_PROTOCOL || 'http';
-    const host = process.env.TEST_KIBANA_HOST || 'localhost';
+    const host = getHost();
     const port = process.env.TEST_KIBANA_PORT || '5620';
     return `${protocol}://${host}:${port}`;
   };
@@ -90,6 +102,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('encodes portions of the URL as necessary', async () => {
+      await PageObjects.common.navigateToApp('home');
       const basePath = getBasePath();
       await browser.get(`${basePath}/app/kibana#/home`, false);
       await retry.waitFor(
