@@ -134,6 +134,10 @@ export default function({ getService }: FtrProviderContext) {
           region: ['sfo2'],
           __typename: 'CloudFields',
         },
+        inspect: {
+          dsl: [],
+          response: [],
+        },
         __typename: 'HostItem',
       };
 
