@@ -150,7 +150,13 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       />
     </eui-form-row>
     <eui-form-row
-      error="Script is required"
+      error={
+        <FormattedMessage
+          defaultMessage="Script is required"
+          id="common.ui.fieldEditor.scriptRequiredErrorMessage"
+          values={Object {}}
+        />
+      }
       fullWidth={true}
       isInvalid={true}
       label="Script"
@@ -677,7 +683,13 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       />
     </eui-form-row>
     <eui-form-row
-      error="Script is required"
+      error={
+        <FormattedMessage
+          defaultMessage="Script is required"
+          id="common.ui.fieldEditor.scriptRequiredErrorMessage"
+          values={Object {}}
+        />
+      }
       fullWidth={true}
       isInvalid={true}
       label="Script"
@@ -1346,7 +1358,13 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
     </eui-form-row>
     <eui-form-row
-      error="Script is required"
+      error={
+        <FormattedMessage
+          defaultMessage="Script is required"
+          id="common.ui.fieldEditor.scriptRequiredErrorMessage"
+          values={Object {}}
+        />
+      }
       fullWidth={true}
       isInvalid={true}
       label="Script"
