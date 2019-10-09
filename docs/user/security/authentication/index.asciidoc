@@ -122,10 +122,12 @@ Basic authentication is supported _only_ if `basic` authentication provider is e
 [float]
 ===== SAML and long URLs
 
-At the beginning of the SAML handshake {kib} stores initial URL in the session cookie to be able to redirect user back to this URL after successful SAML authentication.
-In case the URL is very long session cookie may exceed the maximum size supported by the browser (usually it's around 4KB for all cookies per domain) and it will truncate
-or drop such cookie completely. If you experience sporadic failures during SAML authentication that may be the reason why. To remedy this issue you need to decrease the maximum
-size of the URL {kib} is allowed to store during SAML handshake, the default value is 2KB:
+At the beginning of the SAML handshake, {kib} stores the initial URL in the session cookie, so it can redirect the user back to that URL after successful SAML authentication.
+If the URL is long, the session cookie might exceed the maximum size supported by the browser--typically 4KB for all cookies per domain. When this happens, the session cookie is truncated,
+or dropped completely, and you might experience sporadic failures during SAML authentication. 
+
+To remedy this issue, you can decrease the maximum
+size of the URL that {kib} is allowed to store during the SAML handshake. The default value is 2KB.
 
 [source,yaml]
 --------------------------------------------------------------------------------
