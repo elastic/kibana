@@ -19,9 +19,9 @@
 
 import Url from 'url';
 
-import Axios, { AxiosRequestConfig } from 'axios';
+import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import parseLinkHeader from 'parse-link-header';
-import { ToolingLog, isAxiosResponseError } from '@kbn/dev-utils';
+import { ToolingLog, isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
 
 const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
 
@@ -33,7 +33,11 @@ export interface GithubIssue {
   body: string;
 }
 
-type RequestOptions = AxiosRequestConfig & { safeForDryRun?: boolean };
+type RequestOptions = AxiosRequestConfig & {
+  safeForDryRun?: boolean;
+  maxAttempts?: number;
+  attempt?: number;
+};
 
 export class GithubApi {
   private readonly x = Axios.create({
@@ -139,31 +143,64 @@ export class GithubApi {
     return resp.data.html_url;
   }
 
-  private async request<T>(options: RequestOptions, dryRunResponse: T) {
+  private async request<T>(
+    options: RequestOptions,
+    dryRunResponse: T
+  ): Promise<{
+    status: number;
+    statusText: string;
+    headers: Record<string, string | string[] | undefined>;
+    data: T;
+  }> {
     const executeRequest = !this.dryRun || options.safeForDryRun;
+    const maxAttempts = options.maxAttempts || 5;
+    const attempt = options.attempt || 1;
+
     this.log.verbose('Github API', executeRequest ? 'Request' : 'Dry Run', options);
 
-    if (executeRequest) {
-      try {
-        return await this.x.request<T>(options);
-      } catch (error) {
-        if (isAxiosResponseError(error)) {
-          throw new Error(
-            `[${error.config.method} ${error.config.url}] ${error.response.status} ${
-              error.response.statusText
-            } Error: ${JSON.stringify(error.response.data)}`
-          );
-        }
-
-        throw error;
-      }
+    if (!executeRequest) {
+      return {
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        data: dryRunResponse,
+      };
     }
 
-    return {
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      data: dryRunResponse,
-    };
+    try {
+      return await this.x.request<T>(options);
+    } catch (error) {
+      const unableToReachGithub = isAxiosRequestError(error);
+      const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
+      const errorResponseLog =
+        isAxiosResponseError(error) &&
+        `[${error.config.method} ${error.config.url}] ${error.response.status} ${error.response.statusText} Error`;
+
+      if ((unableToReachGithub || githubApiFailed) && attempt < maxAttempts) {
+        const waitMs = 1000 * attempt;
+
+        if (errorResponseLog) {
+          this.log.error(`${errorResponseLog}: waiting ${waitMs}ms to retry`);
+        } else {
+          this.log.error(`Unable to reach github, waiting ${waitMs}ms to retry`);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, waitMs));
+        return await this.request<T>(
+          {
+            ...options,
+            maxAttempts,
+            attempt: attempt + 1,
+          },
+          dryRunResponse
+        );
+      }
+
+      if (errorResponseLog) {
+        throw new Error(`${errorResponseLog}: ${JSON.stringify(error.response.data)}`);
+      }
+
+      throw error;
+    }
   }
 }
