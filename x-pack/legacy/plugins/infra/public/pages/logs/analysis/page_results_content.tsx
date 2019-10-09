@@ -47,13 +47,13 @@ export const AnalysisResultsContent = ({
   const bucketDuration = useMemo(() => {
     // This function takes the current time range in ms,
     // works out the bucket interval we'd need to always
-    // display 200 data points, and then takes that new
+    // display 100 data points, and then takes that new
     // value and works out the nearest multiple of
     // 900000 (15 minutes) to it, so that we don't end up with
     // jaggy bucket boundaries between the ML buckets and our
     // aggregation buckets.
     const msRange = moment(queryTimeRange.endTime).diff(moment(queryTimeRange.startTime));
-    const bucketIntervalInMs = msRange / 200;
+    const bucketIntervalInMs = msRange / 100;
     const result = bucketSpan * Math.round(bucketIntervalInMs / bucketSpan);
     const roundedResult = parseInt(Number(result).toFixed(0), 10);
     return roundedResult < bucketSpan ? bucketSpan : roundedResult;
