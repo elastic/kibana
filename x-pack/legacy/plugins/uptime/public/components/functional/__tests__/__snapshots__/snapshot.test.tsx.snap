@@ -5,35 +5,29 @@ exports[`Snapshot component renders without errors 1`] = `
   loading={false}
 >
   <EuiTitle
-    size="xs"
+    size="s"
   >
-    <h5>
+    <h2>
       <FormattedMessage
-        defaultMessage="Current status"
+        defaultMessage="{down}/{total} monitors are down"
         id="xpack.uptime.snapshot.endpointStatusTitle"
-        values={Object {}}
+        values={
+          Object {
+            "down": 2,
+            "total": 10,
+          }
+        }
       />
-    </h5>
+    </h2>
   </EuiTitle>
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="m"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiSpacer
-        size="xs"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <DonutChart
-        down={2}
-        height={128}
-        up={8}
-        width={128}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
+  <DonutChart
+    down={2}
+    height={144}
+    up={8}
+    width={144}
+  />
 </ChartWrapper>
 `;

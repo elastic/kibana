@@ -9,6 +9,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
     grow={false}
   >
     <svg
+      aria-label="Pie chart showing the current status. 32 of 127 monitors are down."
       height={125}
       width={125}
     />
@@ -30,6 +31,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <svg
+      aria-label="Pie chart showing the current status. 32 of 127 monitors are down."
       height="125"
       width="125"
     />
@@ -38,7 +40,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
     class="euiFlexItem"
   >
     <div
-      class="sc-htpNat fzCrLw"
+      class="sc-htpNat kGuflQ"
     >
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
@@ -83,7 +85,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         </span>
       </div>
       <div
-        class="euiSpacer euiSpacer--xl"
+        class="euiSpacer euiSpacer--m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"

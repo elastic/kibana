@@ -8,7 +8,7 @@ exports[`DonutChartLegend applies valid props as expected 1`] = `
     message="Down"
   />
   <EuiSpacer
-    size="xl"
+    size="m"
   />
   <DonutChartLegendRow
     color="#d3dae6"
