@@ -9,7 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./read_signals.sh {id}
+# Example: ./read_signal.sh {id}
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X GET ${KIBANA_URL}/api/siem/signals/$1 | jq .
