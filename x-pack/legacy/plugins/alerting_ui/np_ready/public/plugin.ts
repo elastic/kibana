@@ -55,19 +55,16 @@ export class ActionsPlugin implements Plugin<any, any> {
       management: { getSection },
     } = pluginsStart;
 
-    const esSection = getSection('elasticsearch');
-    esSection.register('actions', {
-      display: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.managementSection.actionsDisplayName',
-        {
-          defaultMessage: 'Alert Actions',
-        }
-      ),
+    const kbnSection = getSection('kibana');
+    kbnSection.register('alerting', {
+      display: i18n.translate('xpack.alertingUI.managementSection.displayName', {
+        defaultMessage: 'Alerting',
+      }),
       order: 7,
       url: `#${BASE_PATH}/`,
     });
 
-    routes.when('/management/elasticsearch/actions/:param1?/:param2?/:param3?/:param4?', {
+    routes.when('/management/kibana/alerting/:param1?/:param2?/:param3?/:param4?', {
       template,
       controller: (() => {
         let elReactRoot: HTMLElement | undefined | null;

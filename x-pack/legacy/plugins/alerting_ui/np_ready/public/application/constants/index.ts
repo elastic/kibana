@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const BASE_PATH = '/management/elasticsearch/actions/';
+export const BASE_PATH = '/management/kibana/alerting/';
 export const BASE_API_PATH = '../api/action';
