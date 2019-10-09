@@ -63,14 +63,14 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, ch
           ? i18n.translate(
               'xpack.security.management.apiKeys.invalidateApiKey.successMultipleNotificationTitle',
               {
-                defaultMessage: 'Revoked {count} API keys',
+                defaultMessage: 'Invalidated {count} API keys',
                 values: { count: itemsInvalidated.length },
               }
             )
           : i18n.translate(
               'xpack.security.management.apiKeys.invalidateApiKey.successSingleNotificationTitle',
               {
-                defaultMessage: "Revoked API key '{name}'",
+                defaultMessage: "Invalidated API key '{name}'",
                 values: { name: itemsInvalidated[0].name },
               }
             );
@@ -122,14 +122,14 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, ch
               ? i18n.translate(
                   'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateSingleTitle',
                   {
-                    defaultMessage: "Revoke API key '{name}'?",
+                    defaultMessage: "Invalidate API key '{name}'?",
                     values: { name: apiKeys[0].name },
                   }
                 )
               : i18n.translate(
                   'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleTitle',
                   {
-                    defaultMessage: 'Revoke {count} api keys?',
+                    defaultMessage: 'Invalidate {count} api keys?',
                     values: { count: apiKeys.length },
                   }
                 )
@@ -143,7 +143,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, ch
           confirmButtonText={i18n.translate(
             'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.confirmButtonLabel',
             {
-              defaultMessage: 'Revoke {count, plural, one {API key} other {API keys}}',
+              defaultMessage: 'Invalidate {count, plural, one {API key} other {API keys}}',
               values: { count: apiKeys.length },
             }
           )}
@@ -155,7 +155,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, ch
               <p>
                 {i18n.translate(
                   'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleListDescription',
-                  { defaultMessage: 'You are about to revoke these apiKeys:' }
+                  { defaultMessage: 'You are about to invalidate these apiKeys:' }
                 )}
               </p>
               <ul>

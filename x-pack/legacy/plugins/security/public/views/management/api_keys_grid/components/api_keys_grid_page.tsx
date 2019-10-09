@@ -88,12 +88,12 @@ class ApiKeysGridPageUI extends Component<Props, State> {
             {isAdmin ? (
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                defaultMessage="View and revoke API keys. An API key sends requests on a user's behalf."
+                defaultMessage="View and invalidate API keys. An API key sends requests on a user's behalf."
               />
             ) : (
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
-                defaultMessage="View and revoke your API keys. An API key sends requests on your behalf."
+                defaultMessage="View and invalidate your API keys. An API key sends requests on your behalf."
               />
             )}
           </p>
@@ -214,7 +214,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
               >
                 <FormattedMessage
                   id="xpack.security.management.apiKeys.table.invalidateApiKeyButton"
-                  defaultMessage="Revoke {count, plural, one {API key} other {API keys}}"
+                  defaultMessage="Invalidate {count, plural, one {API key} other {API keys}}"
                   values={{
                     count: selectedItems.length,
                   }}
@@ -418,14 +418,14 @@ class ApiKeysGridPageUI extends Component<Props, State> {
                           <EuiToolTip
                             content={i18n.translate(
                               'xpack.security.management.apiKeys.table.actionDeleteTooltip',
-                              { defaultMessage: 'Revoke' }
+                              { defaultMessage: 'Invalidate' }
                             )}
                           >
                             <EuiButtonIcon
                               aria-label={i18n.translate(
                                 'xpack.security.management.apiKeys.table.actionDeleteAriaLabel',
                                 {
-                                  defaultMessage: `Revoke '{name}'`,
+                                  defaultMessage: `Invalidate '{name}'`,
                                   values: { name },
                                 }
                               )}
