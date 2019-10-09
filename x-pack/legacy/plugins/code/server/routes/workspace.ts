@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 
 import { RequestQueryFacade } from '../../';
@@ -29,7 +28,7 @@ export function workspaceRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      return serverOptions.repoConfigs;
+      return res.ok({ body: serverOptions.repoConfigs });
     },
   });
 
@@ -42,22 +41,22 @@ export function workspaceRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      const repoUri = req.params.uri as string;
-      getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
-      const revision = req.params.revision as string;
+      const { uri: repoUri, revision } = req.params as any;
+      getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
       const repoConfig = serverOptions.repoConfigs[repoUri];
       const force = !!(req.query as RequestQueryFacade).force;
       if (repoConfig) {
         const endpoint = await codeServices.locate(req, repoUri);
         try {
           await workspaceService.initCmd(endpoint, { repoUri, revision, force, repoConfig });
+          return res.ok();
         } catch (e) {
           if (e.isBoom) {
-            return e;
+            return res.internalError({ body: e });
           }
         }
       } else {
-        return Boom.notFound(`repo config for ${repoUri} not found.`);
+        return res.notFound({ body: `repo config for ${repoUri} not found.` });
       }
     },
   });

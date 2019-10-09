@@ -144,6 +144,13 @@ const redirectionResponseFactory = {
    * Expects `location` header to be set.
    */
   redirected: (options: RedirectResponseOptions) => new KibanaResponse(302, options.body, options),
+
+  /**
+   * Not modified.
+   * Status code: `304`.
+   * @param options - {@link RedirectResponseOptions} configures HTTP response body & headers.
+   */
+  notModified: (options: HttpResponseOptions) => new KibanaResponse(304, options.body, options),
 };
 
 const errorResponseFactory = {

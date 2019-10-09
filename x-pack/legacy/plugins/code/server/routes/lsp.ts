@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { SymbolLocator } from '@elastic/lsp-extension';
@@ -47,18 +46,19 @@ export function lspRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      if (typeof req.payload === 'object' && req.payload != null) {
+      if (typeof req.body === 'object' && req.body != null) {
+        // @ts-ignore
         const method = req.params.method;
         if (method) {
           try {
-            const params = (req.payload as unknown) as any;
+            const params = (req.body as unknown) as any;
             const uri = params.textDocument.uri;
             const { repoUri } = parseLspUrl(uri)!;
-            await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
+            await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
             const endpoint = await codeServices.locate(req, repoUri);
             const requestPromise = lspService.sendRequest(endpoint, {
               method: `textDocument/${method}`,
-              params: req.payload,
+              params: req.body,
             });
             return await promiseTimeout(serverOptions.lsp.requestTimeoutMs, requestPromise);
           } catch (error) {
@@ -71,25 +71,25 @@ export function lspRoute(
               ) {
                 log.debug(error);
               }
-              return h
-                .response({ error: { code: error.code, msg: LANG_SERVER_ERROR } })
-                .type('json')
-                .code(500); // different code for LS errors and other internal errors.
+              return res.custom({
+                statusCode: 500,
+                body: { error: { code: 500, msg: LANG_SERVER_ERROR } },
+              });
             } else if (error.isBoom) {
               return error;
             } else {
               log.error(error);
-              return h
-                .response({ error: { code: error.code || 500, msg: LANG_SERVER_ERROR } })
-                .type('json')
-                .code(500);
+              return res.custom({
+                statusCode: 500,
+                body: { error: { code: 500, msg: LANG_SERVER_ERROR } },
+              });
             }
           }
         } else {
-          return h.response('missing `method` in request').code(400);
+          return res.badRequest({ body: 'missing `method` in request' });
         }
       } else {
-        return h.response('json body required').code(400); // bad request
+        return res.badRequest({ body: 'json body required' });
       }
     },
     method: 'POST',
@@ -104,10 +104,12 @@ export function lspRoute(
       res: KibanaResponseFactory
     ) {
       // @ts-ignore
-      const { textDocument, position } = req.payload;
+      const { textDocument, position } = req.body as any;
+      // @ts-ignore
+      const { qname } = res.params as any;
       const { uri } = textDocument;
       const { repoUri } = parseLspUrl(uri);
-      await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
+      await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
       const endpoint = await codeServices.locate(req, repoUri);
       const response: ResponseMessage = await promiseTimeout(
         serverOptions.lsp.requestTimeoutMs,
@@ -124,16 +126,16 @@ export function lspRoute(
         },
       });
       const title: string = await findTitleFromHover(hover, uri, position);
-      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
+      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(context), log);
 
       const locators = response.result as SymbolLocator[];
       const locations = [];
-      const repoScope = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
+      const repoScope = await getReferenceHelper(context.core.savedObjects.client).findReferences();
       for (const locator of locators) {
         if (locator.location) {
           locations.push(locator.location);
         } else if (locator.qname && repoScope.length > 0) {
-          const searchResults = await symbolSearchClient.findByQname(req.params.qname, repoScope);
+          const searchResults = await symbolSearchClient.findByQname(qname, repoScope);
           for (const symbol of searchResults.symbols) {
             locations.push(symbol.symbolInformation.location);
           }
@@ -143,7 +145,7 @@ export function lspRoute(
         const ep = await codeServices.locate(req, loc.uri);
         return await gitService.blob(ep, loc);
       });
-      return { title, files, uri, position };
+      return res.ok({ body: { title, files, uri, position } });
     },
   });
 
@@ -156,11 +158,10 @@ export function lspRoute(
       res: KibanaResponseFactory
     ) {
       try {
-        // @ts-ignore
-        const { textDocument, position } = req.payload;
+        const { textDocument, position } = req.body as any;
         const { uri } = textDocument;
         const { repoUri } = parseLspUrl(uri);
-        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
+        await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
         const endpoint = await codeServices.locate(req, repoUri);
         const response: ResponseMessage = await promiseTimeout(
           serverOptions.lsp.requestTimeoutMs,
@@ -181,21 +182,22 @@ export function lspRoute(
           const ep = await codeServices.locate(req, loc.uri);
           return await gitService.blob(ep, loc);
         });
-        return { title, files, uri, position };
+        return res.ok({ body: { title, files, uri, position } });
       } catch (error) {
         log.error(error);
         if (error instanceof ResponseError) {
-          return h
-            .response({ error: { code: error.code, msg: LANG_SERVER_ERROR } })
-            .type('json')
-            .code(500); // different code for LS errors and other internal errors.
+          return res.custom({
+            statusCode: 500,
+            body: { error: { code: error.code, msg: LANG_SERVER_ERROR } },
+          });
+          // TODO: remove all these isBoom code.
         } else if (error.isBoom) {
           return error;
         } else {
-          return h
-            .response({ error: { code: 500, msg: LANG_SERVER_ERROR } })
-            .type('json')
-            .code(500);
+          return res.custom({
+            statusCode: 500,
+            body: { error: { code: 500, msg: LANG_SERVER_ERROR } },
+          });
         }
       }
     },
@@ -212,8 +214,12 @@ export function symbolByQnameRoute(router: CodeServerRouter, log: Logger) {
       res: KibanaResponseFactory
     ) {
       try {
-        const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
-        const repoScope = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
+        // @ts-ignore
+        const { qname } = res.params as any;
+        const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(context), log);
+        const repoScope = await getReferenceHelper(
+          context.core.savedObjects.client
+        ).findReferences();
         if (repoScope.length === 0) {
           return {
             symbols: [],
@@ -221,9 +227,10 @@ export function symbolByQnameRoute(router: CodeServerRouter, log: Logger) {
             took: 0,
           } as SymbolSearchResult;
         }
-        return await symbolSearchClient.findByQname(req.params.qname, repoScope);
+        const symbol = await symbolSearchClient.findByQname(qname, repoScope);
+        return res.ok({ body: symbol });
       } catch (error) {
-        return Boom.internal(`Search Exception`);
+        return res.internalError({ body: `Search Exception` });
       }
     },
   });

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 
 import { CodeServerRouter } from '../security';
@@ -115,15 +114,15 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
     ) {
       const { uri, path, ref } = req.params as any;
       const report: StatusReport = {};
-      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
       const endpoint = await codeServices.locate(req, uri);
 
       try {
         // Check if the repository already exists
         const repo = await repoObjectClient.getRepository(uri);
-        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repo.uri);
+        await getReferenceHelper(context.core.savedObjects.client).ensureReference(repo.uri);
       } catch (e) {
-        return Boom.notFound(`repo ${uri} not found`);
+        return res.notFound({ body: `repo ${uri} not found` });
       }
       await handleRepoStatus(endpoint, report, uri, ref, repoObjectClient);
       if (path) {
@@ -145,10 +144,10 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
             // not a file? The path may be a dir.
           }
         } catch (e) {
-          return Boom.internal(e.message || e.name);
+          return res.internalError({ body: e.message || e.name });
         }
       }
-      return report;
+      return res.ok({ body: report });
     },
   });
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import { i18n } from '@kbn/i18n';
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 
 import { validateGitUrl } from '../../common/git_url_utils';
@@ -40,7 +40,7 @@ export function repositoryRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      const repoUrl: string = (req.payload as any).url;
+      const repoUrl: string = (req.body as any).url;
 
       // Reject the request if the url is an invalid git url.
       try {
@@ -52,11 +52,11 @@ export function repositoryRoute(
       } catch (error) {
         log.error(`Validate git url ${repoUrl} error.`);
         log.error(error);
-        return Boom.badRequest(error);
+        return res.badRequest({ body: error });
       }
 
       const repo = RepositoryUtils.buildRepository(repoUrl);
-      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
 
       try {
         // Check if the repository already exists
@@ -64,28 +64,32 @@ export function repositoryRoute(
         // distinguish between that the repository exists in the current space and that the repository exists in
         // another space, and return the default message if error happens during reference checking.
         try {
-          const hasRef = await getReferenceHelper(req.getSavedObjectsClient()).hasReference(
+          const hasRef = await getReferenceHelper(context.core.savedObjects.client).hasReference(
             repo.uri
           );
           if (!hasRef) {
-            return Boom.conflict(
-              i18n.translate('xpack.code.repositoryManagement.repoOtherSpaceImportedMessage', {
-                defaultMessage: 'The repository has already been imported in another space!',
-              })
-            );
+            return res.custom({
+              statusCode: 409, // conflict
+              body: i18n.translate(
+                'xpack.code.repositoryManagement.repoOtherSpaceImportedMessage',
+                {
+                  defaultMessage: 'The repository has already been imported in another space!',
+                }
+              ),
+            });
           }
         } catch (e) {
           log.error(`Failed to check reference for ${repo.uri} in current space`);
         }
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
         log.info(msg);
-        return h.response(msg).code(304); // Not Modified
+        return res.notModified({ body: msg });
       } catch (error) {
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
           // create the reference first, and make the creation idempotent, to avoid potential dangling repositories
           // which have no references from any space, in case the writes to ES may fail independently
-          await getReferenceHelper(req.getSavedObjectsClient()).createReference(repo.uri);
+          await getReferenceHelper(context.core.savedObjects.client).createReference(repo.uri);
 
           // Create the index for the repository
           const initializer = (await repoIndexInitializerFactory.create(
@@ -111,12 +115,12 @@ export function repositoryRoute(
           if (endpoint) {
             await repositoryService.clone(endpoint, payload);
           }
-          return repo;
+          return res.ok({ body: repo });
         } catch (error2) {
           const msg = `Issue repository clone request for ${repoUrl} error`;
           log.error(msg);
           log.error(error2);
-          return Boom.badRequest(msg);
+          return res.badRequest({ body: msg });
         }
       }
     },
@@ -132,11 +136,11 @@ export function repositoryRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      const repoUri: string = req.params.uri as string;
-      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
+      const { uri: repoUri } = req.params as any;
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
       try {
         // make sure the repo belongs to the current space
-        getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
+        getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
 
         // Check if the repository already exists. If not, an error will be thrown.
         await repoObjectClient.getRepository(repoUri);
@@ -149,7 +153,7 @@ export function repositoryRoute(
           if (status.progress !== WorkerReservedProgress.ERROR) {
             const msg = `Repository ${repoUri} is already in delete.`;
             log.info(msg);
-            return h.response(msg).code(304); // Not Modified
+            return res.notModified({ body: msg });
           }
         } catch (error) {
           // Do nothing here since this error is expected.
@@ -161,15 +165,14 @@ export function repositoryRoute(
         };
         const endpoint = await codeServices.locate(req, repoUri);
         await repositoryService.delete(endpoint, payload);
-
         // delete the reference last to avoid dangling repositories
-        await getReferenceHelper(req.getSavedObjectsClient()).deleteReference(repoUri);
-        return {};
+        await getReferenceHelper(context.core.savedObjects.client).deleteReference(repoUri);
+        return res.ok();
       } catch (error) {
         const msg = `Issue repository delete request for ${repoUri} error`;
         log.error(msg);
         log.error(error);
-        return Boom.notFound(msg);
+        return res.notFound({ body: msg });
       }
     },
   });
@@ -183,16 +186,17 @@ export function repositoryRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      const repoUri = req.params.uri as string;
+      const { uri: repoUri } = req.params as any;
       try {
-        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
-        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
-        return await repoObjectClient.getRepository(repoUri);
+        await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+        const repo = await repoObjectClient.getRepository(repoUri);
+        return res.ok({ body: repo });
       } catch (error) {
         const msg = `Get repository ${repoUri} error`;
         log.error(msg);
         log.error(error);
-        return Boom.notFound(msg);
+        return res.notFound({ body: msg });
       }
     },
   });
@@ -205,14 +209,15 @@ export function repositoryRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      const repoUri = req.params.uri as string;
+      const { uri: repoUri } = req.params as any;
       try {
-        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
-
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
         let gitStatus = null;
         let indexStatus = null;
         let deleteStatus = null;
-        const hasRef = await getReferenceHelper(req.getSavedObjectsClient()).hasReference(repoUri);
+        const hasRef = await getReferenceHelper(context.core.savedObjects.client).hasReference(
+          repoUri
+        );
 
         if (hasRef) {
           try {
@@ -233,16 +238,17 @@ export function repositoryRoute(
             log.debug(`Get repository delete status ${repoUri} error: ${error}`);
           }
         }
-        return {
+        const status = {
           gitStatus,
           indexStatus,
           deleteStatus,
         };
+        return res.ok({ body: status });
       } catch (error) {
         const msg = `Get repository status ${repoUri} error`;
         log.error(msg);
         log.error(error);
-        return Boom.notFound(msg);
+        return res.notFound({ body: msg });
       }
     },
   });
@@ -257,14 +263,15 @@ export function repositoryRoute(
       res: KibanaResponseFactory
     ) {
       try {
-        const uris = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
-        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
-        return await repoObjectClient.getRepositories(uris);
+        const uris = await getReferenceHelper(context.core.savedObjects.client).findReferences();
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+        const repo = await repoObjectClient.getRepositories(uris);
+        return res.ok({ body: repo });
       } catch (error) {
         const msg = `Get all repositories error`;
         log.error(msg);
         log.error(error);
-        return Boom.notFound(msg);
+        return res.notFound({ body: msg });
       }
     },
   });
@@ -281,11 +288,11 @@ export function repositoryRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      const repoUri = req.params.uri as string;
-      const reindex: boolean = (req.payload as any).reindex;
+      const { uri: repoUri } = req.params as any;
+      const reindex: boolean = (req.body as any).reindex;
       try {
-        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
-        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
+        await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
         const cloneStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
 
         const payload = {
@@ -295,12 +302,12 @@ export function repositoryRoute(
         };
         const endpoint = await codeServices.locate(req, repoUri);
         await repositoryService.index(endpoint, payload);
-        return {};
+        return res.ok();
       } catch (error) {
         const msg = `Index repository ${repoUri} error`;
         log.error(msg);
         log.error(error);
-        return Boom.notFound(msg);
+        return res.notFound({ body: msg });
       }
     },
   });
@@ -315,28 +322,28 @@ export function repositoryRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      const config: RepositoryConfig = req.payload as RepositoryConfig;
+      const config: RepositoryConfig = req.body as RepositoryConfig;
       const repoUri: RepositoryUri = config.uri;
-      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
 
       try {
         // Check if the repository exists
-        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
+        await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
         await repoObjectClient.getRepository(repoUri);
       } catch (error) {
-        return Boom.badRequest(`Repository not existed for ${repoUri}`);
+        return res.badRequest({ body: `Repository not existed for ${repoUri}` });
       }
 
       try {
         // Persist to elasticsearch
         await repoObjectClient.setRepositoryConfig(repoUri, config);
         repoConfigController.resetConfigCache(repoUri);
-        return {};
+        return res.ok();
       } catch (error) {
         const msg = `Update repository config for ${repoUri} error`;
         log.error(msg);
         log.error(error);
-        return Boom.badRequest(msg);
+        return res.notFound({ body: msg });
       }
     },
   });
@@ -350,13 +357,14 @@ export function repositoryRoute(
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      const repoUri = req.params.uri as string;
+      const { uri: repoUri } = req.params as any;
       try {
-        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
-        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
-        return await repoObjectClient.getRepositoryConfig(repoUri);
+        await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+        const config = await repoObjectClient.getRepositoryConfig(repoUri);
+        return res.ok({ body: config });
       } catch (error) {
-        return Boom.notFound(`Repository config ${repoUri} not exist`);
+        return res.notFound({ body: `Repository config ${repoUri} not exist` });
       }
     },
   });

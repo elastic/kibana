@@ -21,7 +21,8 @@ export function setupRoute(router: CodeServerRouter, codeServices: CodeServices)
       res: KibanaResponseFactory
     ) {
       const endpoint = await codeServices.locate(req, '');
-      return await setupService.setup(endpoint, {});
+      const setup = await setupService.setup(endpoint, {});
+      return res.ok({ body: setup });
     },
   });
 }

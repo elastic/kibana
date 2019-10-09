@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Boom from 'boom';
-
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { ServerFacade } from '../..';
 import { enabledLanguageServers, LanguageServerDefinition } from '../lsp/language_servers';
@@ -43,7 +41,10 @@ export function installRoute(
       res: KibanaResponseFactory
     ) {
       const endpoint = await codeServices.locate(req, '');
-      return await Promise.all(enabledLanguageServers(options).map(def => status(endpoint, def)));
+      const installRes = await Promise.all(
+        enabledLanguageServers(options).map(def => status(endpoint, def))
+      );
+      return res.ok({ body: installRes });
     },
     method: 'GET',
   });
@@ -59,9 +60,10 @@ export function installRoute(
       const def = enabledLanguageServers(options).find(d => d.name === name);
       const endpoint = await codeServices.locate(req, '');
       if (def) {
-        return await status(endpoint, def);
+        const installRes = await status(endpoint, def);
+        return res.ok({ body: installRes });
       } else {
-        return Boom.notFound(`language server ${name} not found.`);
+        return res.notFound({ body: `language server ${name} not found.` });
       }
     },
     method: 'GET',

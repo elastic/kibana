@@ -11,17 +11,18 @@ export class WithRequest {
   public readonly callCluster: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
 
   constructor(readonly context: RequestHandlerContext) {
-    const cluster = context.elasticsearch.dataClient.callAsInternalUser;
+    // @ts-ignore
+    // const cluster = context.elasticsearch.dataClient.callAsInternalUser;
 
     // @ts-ignore
-    const securityPlugin = req.server.plugins.security;
-    if (securityPlugin) {
-      const useRbac = securityPlugin.authorization.mode.useRbacForRequest(req);
-      if (useRbac) {
-        this.callCluster = cluster.callWithInternalUser;
-        return;
-      }
-    }
-    this.callCluster = cluster.callWithRequest.bind(null, req);
+    // const securityPlugin = req.server.plugins.security;
+    // if (securityPlugin) {
+    //   const useRbac = securityPlugin.authorization.mode.useRbacForRequest(req);
+    //   if (useRbac) {
+    //     this.callCluster = cluster.callWithInternalUser;
+    //     return;
+    //   }
+    // }
+    this.callCluster = context.core.elasticsearch.dataClient.callAsInternalUser;
   }
 }
