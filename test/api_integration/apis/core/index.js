@@ -16,15 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('core', () => {
-    it('provides access to request context', async () => (
-      await supertest
-        .get('/testbed/ping')
-        .expect(200, 'Pong: true')
-    ));
+    describe('compression', () => {
+      it(`uses compression when there isn't a referer`, async () => {
+        await supertest
+          .get('/app/kibana')
+          .set('accept-encoding', 'gzip')
+          .then(response => {
+            expect(response.headers).to.have.property('content-encoding', 'gzip');
+          });
+      });
+
+      it(`doesn't use compression when there is a referer`, async () => {
+        await supertest
+          .get('/app/kibana')
+          .set('accept-encoding', 'gzip')
+          .set('referer', 'https://www.google.com')
+          .then(response => {
+            expect(response.headers).not.to.have.property('content-encoding');
+          });
+      });
+    });
   });
 }
