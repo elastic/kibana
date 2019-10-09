@@ -14,6 +14,7 @@ import {
   updateFieldProperties,
 } from './fields';
 import { AdvancedSettings, WorkspaceField, WorkspaceNode } from '../types';
+import { loadTemplates, syncTemplatesSaga } from './url_templates';
 
 /**
  * This suite tests all the sagas that only exist to sync the legacy world
@@ -25,7 +26,13 @@ describe('legacy sync sagas', () => {
 
   beforeEach(() => {
     env = createMockGraphStore({
-      sagas: [syncSettingsSaga, updateSaveButtonSaga, syncFieldsSaga, syncNodeStyleSaga],
+      sagas: [
+        syncSettingsSaga,
+        updateSaveButtonSaga,
+        syncFieldsSaga,
+        syncNodeStyleSaga,
+        syncTemplatesSaga,
+      ],
       initialStateOverwrites: {
         fields: {
           field1: {
@@ -65,6 +72,12 @@ describe('legacy sync sagas', () => {
     const newSettings = {} as AdvancedSettings;
     env.store.dispatch(updateSettings(newSettings));
     expect(env.mockedDeps.getWorkspace()!.options.exploreControls).toBe(newSettings);
+  });
+
+  it('syncs templates with workspace', () => {
+    env.store.dispatch(loadTemplates([]));
+    expect(env.mockedDeps.setUrlTemplates).toHaveBeenCalledWith([]);
+    expect(env.mockedDeps.notifyAngular).toHaveBeenCalled();
   });
 
   it('notifies angular when fields are selected', () => {
