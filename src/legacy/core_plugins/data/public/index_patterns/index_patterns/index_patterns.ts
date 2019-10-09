@@ -23,6 +23,7 @@ import {
   SimpleSavedObject,
   UiSettingsClientContract,
   HttpServiceBase,
+  NotificationsSetup,
 } from 'src/core/public';
 // @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
@@ -40,13 +41,16 @@ export class IndexPatterns {
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
   private apiClient: IndexPatternsApiClient;
+  private notifications: NotificationsSetup;
 
   constructor(
     config: UiSettingsClientContract,
     savedObjectsClient: SavedObjectsClientContract,
-    http: HttpServiceBase
+    http: HttpServiceBase,
+    notifications: NotificationsSetup
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
+    this.notifications = notifications;
 
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
@@ -129,7 +133,8 @@ export class IndexPatterns {
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
-      indexPatternCache
+      indexPatternCache,
+      this.notifications
     ).init();
   };
 }

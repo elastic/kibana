@@ -53,16 +53,16 @@ async function executor(
   { logger }: { logger: Logger },
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
-  const id = execOptions.id;
+  const actionId = execOptions.actionId;
   const config = execOptions.config as ActionTypeConfigType;
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
 
   if (config.index == null && params.index == null) {
     const message = i18n.translate('xpack.actions.builtin.esIndex.indexParamRequiredErrorMessage', {
-      defaultMessage: 'index param needs to be set because not set in config for action {id}',
+      defaultMessage: 'index param needs to be set because not set in config for action {actionId}',
       values: {
-        id,
+        actionId,
       },
     });
     return {
@@ -72,7 +72,7 @@ async function executor(
   }
 
   if (config.index != null && params.index != null) {
-    logger.debug(`index passed in params overridden by index set in config for action ${id}`);
+    logger.debug(`index passed in params overridden by index set in config for action ${actionId}`);
   }
 
   const index = config.index || params.index;
@@ -101,9 +101,9 @@ async function executor(
     result = await services.callCluster('bulk', bulkParams);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
-      defaultMessage: 'error in action "{id}" indexing data: {errorMessage}',
+      defaultMessage: 'error in action "{actionId}" indexing data: {errorMessage}',
       values: {
-        id,
+        actionId,
         errorMessage: err.message,
       },
     });
