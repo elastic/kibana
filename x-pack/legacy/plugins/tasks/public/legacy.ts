@@ -3,15 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HashRouter } from 'react-router-dom';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n/react';
 
 import { I18nContext } from 'ui/i18n';
 import { npStart } from 'ui/new_platform';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
-import routes from 'ui/routes';
 
 import { CoreStart } from '../../../../../src/core/public';
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
@@ -27,21 +24,6 @@ export interface I18n {
 export interface Core extends CoreStart {
   __LEGACY: {
     i18n: I18n;
-    http: {
-      client: {
-        get(): ng.IHttpService;
-        set(client: ng.IHttpService): void;
-      };
-    };
-    router: {
-      angular: {
-        registerRoute(path: string, config: object): void;
-      };
-      react: {
-        get(): HashRouter;
-        set(router: HashRouter): void;
-      };
-    };
   };
 }
 
@@ -60,9 +42,6 @@ export interface Plugins {
 }
 
 export function createShim(): { coreStart: Core; pluginsStart: Plugins } {
-  let httpClient: ng.IHttpService;
-  let reactRouter: HashRouter;
-
   return {
     coreStart: {
       ...npStart.core,
@@ -73,31 +52,6 @@ export function createShim(): { coreStart: Core; pluginsStart: Plugins } {
           FormattedMessage,
           FormattedDate,
           FormattedTime,
-        },
-        http: {
-          client: {
-            get() {
-              return httpClient!;
-            },
-            set(client) {
-              httpClient = client;
-            },
-          },
-        },
-        router: {
-          angular: {
-            registerRoute(path: string, config: object) {
-              routes.when(path, config);
-            },
-          },
-          react: {
-            get() {
-              return reactRouter;
-            },
-            set(router: HashRouter) {
-              reactRouter = router;
-            },
-          },
         },
       },
     },
