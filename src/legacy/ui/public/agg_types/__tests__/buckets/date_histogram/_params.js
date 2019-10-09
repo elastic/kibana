@@ -87,6 +87,14 @@ describe('date_histogram params', function () {
       expect(output.params).to.have.property('fixed_interval', '30s');
     });
 
+    it('does not scale down the interval', () => {
+      const timeBounds = getTimeBounds(1, 'm');
+      const output = writeInterval('h', timeBounds);
+      expect(output.params).to.have.property('calendar_interval', '1h');
+      expect(output).not.to.have.property('metricScaleText');
+      expect(output).not.to.have.property('metricScale');
+    });
+
     describe('scaling behavior', () => {
 
       it('should not scale without scaleMetricValues: true', function () {
