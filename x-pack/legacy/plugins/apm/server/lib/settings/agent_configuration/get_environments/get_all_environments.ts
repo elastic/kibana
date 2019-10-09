@@ -11,6 +11,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
 } from '../../../../../common/elasticsearch_fieldnames';
+import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration_constants';
 
 export async function getAllEnvironments({
   serviceName,
@@ -21,6 +22,7 @@ export async function getAllEnvironments({
 }) {
   const { client, config } = setup;
 
+  // omit filter for service.name if "All" option is selected
   const serviceNameFilter = serviceName
     ? [{ term: { [SERVICE_NAME]: serviceName } }]
     : [];
@@ -57,5 +59,5 @@ export async function getAllEnvironments({
   const resp = await client.search(params);
   const buckets = idx(resp.aggregations, _ => _.environments.buckets) || [];
   const environments = buckets.map(bucket => bucket.key);
-  return ['ALL_OPTION_VALUE', ...environments];
+  return [ALL_OPTION_VALUE, ...environments];
 }

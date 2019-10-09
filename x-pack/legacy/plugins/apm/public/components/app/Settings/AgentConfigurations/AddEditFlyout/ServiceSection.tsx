@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
-import { getOptionLabel, getOptionValue } from '../constants';
+import {
+  getOptionLabel,
+  omitAllOption
+} from '../../../../../../common/agent_configuration_constants';
 
 const SELECT_PLACEHOLDER_LABEL = `- ${i18n.translate(
   'xpack.apm.settings.agentConf.flyOut.serviceSection.selectPlaceholder',
@@ -19,9 +22,9 @@ const SELECT_PLACEHOLDER_LABEL = `- ${i18n.translate(
 
 interface Props {
   isReadOnly: boolean;
-  serviceName?: string;
+  serviceName: string;
   setServiceName: (env: string) => void;
-  environment?: string;
+  environment: string;
   setEnvironment: (env: string) => void;
 }
 
@@ -49,12 +52,17 @@ export function ServiceSection({
       if (!isReadOnly && serviceName) {
         return callApmApi({
           pathname: '/api/apm/settings/agent-configuration/environments',
-          params: { query: { serviceName: getOptionValue(serviceName) } }
+          params: { query: { serviceName: omitAllOption(serviceName) } }
         });
       }
     },
     [isReadOnly, serviceName],
     { preservePreviousData: false }
+  );
+
+  const ALREADY_CONFIGURED_TRANSLATED = i18n.translate(
+    'xpack.apm.settings.agentConf.flyOut.serviceSection.alreadyConfiguredOption',
+    { defaultMessage: 'already configured' }
   );
 
   const serviceNameOptions = serviceNames.map(name => ({
@@ -65,7 +73,7 @@ export function ServiceSection({
     ({ name, alreadyConfigured }) => ({
       disabled: alreadyConfigured,
       text: `${getOptionLabel(name)} ${
-        alreadyConfigured ? '(already configured)' : ''
+        alreadyConfigured ? `(${ALREADY_CONFIGURED_TRANSLATED})` : ''
       }`,
       value: name
     })

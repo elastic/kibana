@@ -10,7 +10,7 @@ import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { Config } from '../index';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
-import { getOptionLabel } from '../constants';
+import { getOptionLabel } from '../../../../../../common/agent_configuration_constants';
 import { useKibanaCore } from '../../../../../../../observability/public';
 
 interface Props {

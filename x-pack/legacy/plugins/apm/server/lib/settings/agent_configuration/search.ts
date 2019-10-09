@@ -23,19 +23,24 @@ export async function searchConfigurations({
 }) {
   const { client, config } = setup;
 
+  // sorting order
+  // 1. exact match: service.name AND service.environment (eg. opbeans-node / production)
+  // 2. Partial match: service.name and no service.environment (eg. opbeans-node / All)
+  // 3. Partial match: service.environment and no service.name (eg. All / production)
+  // 4. Catch all: no service.name and no service.environment (eg. All / All)
+
   const environmentFilter = environment
-    ? [{ term: { [SERVICE_ENVIRONMENT]: { boost: 2, value: environment } } }]
+    ? [{ term: { [SERVICE_ENVIRONMENT]: { value: environment } } }]
     : [];
 
   const params = {
     index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
     body: {
-      size: 1,
       query: {
         bool: {
           minimum_should_match: 2,
           should: [
-            { term: { [SERVICE_NAME]: { boost: 3, value: serviceName } } },
+            { term: { [SERVICE_NAME]: { value: serviceName } } },
             ...environmentFilter,
             { bool: { must_not: [{ exists: { field: SERVICE_NAME } }] } },
             { bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] } }
@@ -46,5 +51,33 @@ export async function searchConfigurations({
   };
 
   const resp = await client.search<AgentConfiguration>(params);
+  const { hits } = resp.hits;
+
+  const exactMatch = hits.find(
+    hit =>
+      hit._source.service.name === serviceName &&
+      hit._source.service.environment === environment
+  );
+
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  const matchWithServiceName = hits.find(
+    hit => hit._source.service.name === serviceName
+  );
+
+  if (matchWithServiceName) {
+    return matchWithServiceName;
+  }
+
+  const matchWithEnvironment = hits.find(
+    hit => hit._source.service.environment === environment
+  );
+
+  if (matchWithEnvironment) {
+    return matchWithEnvironment;
+  }
+
   return resp.hits.hits[0] as ESSearchHit<AgentConfiguration> | undefined;
 }

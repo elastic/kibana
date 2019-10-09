@@ -117,10 +117,10 @@ export function SettingsSection({
               { defaultMessage: 'Select option' }
             )}
             options={[
-              { value: 'off', text: 'off' },
-              { value: 'errors', text: 'errors' },
-              { value: 'transactions', text: 'transactions' },
-              { value: 'all', text: 'all' }
+              { text: 'off' },
+              { text: 'errors' },
+              { text: 'transactions' },
+              { text: 'all' }
             ]}
             value={captureBody}
             onChange={e => {

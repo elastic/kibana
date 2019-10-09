@@ -22,6 +22,7 @@ import { AgentConfigurationListAPIResponse } from '../../../../../server/lib/set
 import { Config } from '.';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { px, units } from '../../../../style/variables';
+import { getOptionLabel } from '../../../../../common/agent_configuration_constants';
 
 export function AgentConfigurationList({
   status,
@@ -76,11 +77,7 @@ export function AgentConfigurationList({
             setIsFlyoutOpen(true);
           }}
         >
-          {config.service.name ||
-            i18n.translate(
-              'xpack.apm.settings.agentConf.configTable.serviceNameAllLabel',
-              { defaultMessage: 'All' }
-            )}
+          {getOptionLabel(config.service.name)}
         </EuiButtonEmpty>
       )
     },
@@ -91,12 +88,7 @@ export function AgentConfigurationList({
         { defaultMessage: 'Service environment' }
       ),
       sortable: true,
-      render: (value: string) =>
-        value ||
-        i18n.translate(
-          'xpack.apm.settings.agentConf.configTable.environmentAllLabel',
-          { defaultMessage: 'All' }
-        )
+      render: (value: string) => getOptionLabel(value)
     },
     {
       field: 'settings.transaction_sample_rate',

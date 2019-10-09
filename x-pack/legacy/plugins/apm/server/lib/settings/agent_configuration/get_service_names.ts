@@ -11,6 +11,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
+import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration_constants';
 
 export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames
@@ -47,5 +48,5 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
   const resp = await client.search(params);
   const buckets = idx(resp.aggregations, _ => _.services.buckets) || [];
   const serviceNames = buckets.map(bucket => bucket.key).sort();
-  return ['ALL_OPTION_VALUE', ...serviceNames];
+  return [ALL_OPTION_VALUE, ...serviceNames];
 }

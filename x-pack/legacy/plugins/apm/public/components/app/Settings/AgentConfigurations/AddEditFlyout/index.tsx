@@ -32,7 +32,7 @@ import { DeleteButton } from './DeleteButton';
 import { transactionMaxSpansRt } from '../../../../../../common/runtime_types/transaction_max_spans_rt';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { isRumAgentName } from '../../../../../../common/agent_name';
-import { ALL_OPTION_VALUE } from '../constants';
+import { ALL_OPTION_VALUE } from '../../../../../../common/agent_configuration_constants';
 import { saveConfig } from './saveConfig';
 import { useKibanaCore } from '../../../../../../../observability/public';
 

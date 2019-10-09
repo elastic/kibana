@@ -8,7 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { trackEvent } from '../../../../../../../infra/public/hooks/use_track_metric';
 import { isRumAgentName } from '../../../../../../common/agent_name';
-import { getOptionValue, getOptionLabel } from '../constants';
+import {
+  getOptionLabel,
+  omitAllOption
+} from '../../../../../../common/agent_configuration_constants';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
 
 interface Settings {
@@ -51,8 +54,8 @@ export async function saveConfig({
     const configuration = {
       agent_name: agentName,
       service: {
-        name: getOptionValue(serviceName),
-        environment: getOptionValue(environment)
+        name: omitAllOption(serviceName),
+        environment: omitAllOption(environment)
       },
       settings
     };

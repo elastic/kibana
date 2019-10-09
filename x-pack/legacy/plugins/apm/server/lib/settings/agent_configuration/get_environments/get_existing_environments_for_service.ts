@@ -10,6 +10,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
 } from '../../../../../common/elasticsearch_fieldnames';
+import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration_constants';
 
 export async function getExistingEnvironmentsForService({
   serviceName,
@@ -33,7 +34,7 @@ export async function getExistingEnvironmentsForService({
         environments: {
           terms: {
             field: SERVICE_ENVIRONMENT,
-            missing: 'ALL_OPTION_VALUE',
+            missing: ALL_OPTION_VALUE,
             size: 50
           }
         }

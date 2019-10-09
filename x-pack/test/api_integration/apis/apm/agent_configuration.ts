@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function featureControlsTests({ getService }: FtrProviderContext) {
+export default function agentConfigurationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
@@ -53,9 +53,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           settings: { transaction_sample_rate: 0.1 },
         });
 
-        // serviceaa / all
+        // my_service / all
         await createConfiguration({
-          service: { name: 'serviceaa' },
+          service: { name: 'my_service' },
           settings: { transaction_sample_rate: 0.2 },
         });
 
@@ -65,10 +65,16 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           settings: { transaction_sample_rate: 0.3 },
         });
 
-        // serviceaa / production
+        // all / production
         await createConfiguration({
-          service: { name: 'serviceaa', environment: 'development' },
+          service: { environment: 'development' },
           settings: { transaction_sample_rate: 0.4 },
+        });
+
+        // my_service / production
+        await createConfiguration({
+          service: { name: 'my_service', environment: 'development' },
+          settings: { transaction_sample_rate: 0.5 },
         });
       });
 
@@ -79,25 +85,30 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       const agentsRequests = [
         {
-          service: { name: 'servicebb', environment: 'staging' },
+          service: { name: 'non_existing_service', environment: 'non_existing_env' },
           expectedSettings: { transaction_sample_rate: 0.1 },
         },
         {
-          service: { name: 'serviceaa', environment: 'production' },
+          service: { name: 'my_service', environment: 'production' },
           expectedSettings: { transaction_sample_rate: 0.2 },
         },
         {
-          service: { name: 'servicec', environment: 'production' },
+          service: { name: 'non_existing_service', environment: 'production' },
           expectedSettings: { transaction_sample_rate: 0.3 },
         },
         {
-          service: { name: 'serviceaa', environment: 'development' },
+          service: { name: 'non_existing_service', environment: 'development' },
           expectedSettings: { transaction_sample_rate: 0.4 },
+        },
+        {
+          service: { name: 'my_service', environment: 'development' },
+          expectedSettings: { transaction_sample_rate: 0.5 },
         },
       ];
 
       for (const agentRequest of agentsRequests) {
         it(`${agentRequest.service.name} / ${agentRequest.service.environment}`, async () => {
+          await new Promise(resolve => setTimeout(resolve, 2000));
           const { statusCode, body } = await searchConfigurations({
             service: agentRequest.service,
             etag: 'abc',
@@ -143,17 +154,22 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           return body._source.applied_by_agent;
         }
 
-        // wait until `applied_by_agent` has been updated
-        await waitFor(getAppliedByAgent);
+        // wait until `applied_by_agent` has been updated in elasticsearch
+        expect(await waitFor(getAppliedByAgent)).to.be(true);
       });
     });
   });
 }
 
-async function waitFor(cb: () => Promise<boolean>): Promise<undefined> {
+async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<boolean> {
+  if (retries === 0) {
+    throw new Error(`Maximum number of retries reached: ${retries}`);
+  }
+
   const res = await cb();
   if (!res) {
     await new Promise(resolve => setTimeout(resolve, 100));
-    return waitFor(cb);
+    return waitFor(cb, retries - 1);
   }
+  return res;
 }

@@ -28,7 +28,12 @@ export async function createOrUpdateConfiguration({
     refresh: true,
     index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
     body: {
-      ...configuration,
+      agent_name: configuration.agent_name,
+      service: {
+        name: configuration.service.name,
+        environment: configuration.service.environment
+      },
+      settings: configuration.settings,
       '@timestamp': Date.now(),
       applied_by_agent: false,
       etag: hash(configuration)
