@@ -20,7 +20,7 @@ export const createGetMonitorDetailsRoute = (libs: UMServerLibs) => ({
     tags: ['access:uptime'],
   },
   handler: async (request: any): Promise<any> => {
-    const { monitorId, checkGroup } = request.query;
-    return await libs.monitors.getMonitorDetails(request, monitorId, checkGroup);
+    const { monitorId } = request.query;
+    return await libs.monitors.getMonitorDetails(request, monitorId);
   },
 });

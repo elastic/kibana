@@ -340,7 +340,7 @@
     "redux": "4.0.0",
     "redux-actions": "2.2.1",
     "redux-observable": "^1.0.0",
-    "redux-saga": "^1.1.1",
+    "redux-saga": "^0.16.0",
     "redux-thunk": "2.3.0",
     "redux-thunks": "^1.0.0",
     "request": "^2.88.0",

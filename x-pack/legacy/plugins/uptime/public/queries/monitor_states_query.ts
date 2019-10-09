@@ -100,10 +100,6 @@ query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $paginatio
           domain
         }
         timestamp
-        error {
-          type
-          message
-        }
       }
     }
   }

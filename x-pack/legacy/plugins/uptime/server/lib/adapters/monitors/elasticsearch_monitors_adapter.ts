@@ -430,11 +430,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
   }
 
-  public async getMonitorDetails(
-    request: any,
-    monitorId: string,
-    checkGroup: string
-  ): Promise<any> {
+  public async getMonitorDetails(request: any, monitorId: string): Promise<any> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
