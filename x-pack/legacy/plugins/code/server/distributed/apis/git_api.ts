@@ -49,7 +49,7 @@ export const GitServiceDefinition = {
     request: {} as FileLocation,
     response: {} as {
       isBinary: boolean;
-      content: string;
+      content: Buffer;
     },
   },
   history: {
@@ -140,7 +140,7 @@ export const getGitServiceHandler = (
     const isBinary = blob.isBinary();
     return {
       isBinary,
-      content: blob.content().toString(),
+      content: blob.content(),
     };
   },
   async history({ uri, path, revision, count, after }) {
