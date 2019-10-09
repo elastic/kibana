@@ -76,7 +76,8 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       name: (
         <EuiToolTip
           content={i18n.translate('xpack.ml.overview.anomalyDetection.tableMaxScoreTooltip', {
-            defaultMessage: 'The maximum score for each job in its most recent 24 hour period',
+            defaultMessage:
+              'Maximum score across all jobs in the group over its most recent 24 hour period',
           })}
         >
           <span>
