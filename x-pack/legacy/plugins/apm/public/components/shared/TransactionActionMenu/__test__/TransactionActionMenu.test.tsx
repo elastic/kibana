@@ -16,8 +16,6 @@ import { ISavedObject } from '../../../../services/rest/savedObjects';
 import { LegacyCoreStart } from 'src/core/public';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 
-jest.mock('ui/kfetch');
-
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
     <TransactionActionMenu transaction={transaction as Transaction} />

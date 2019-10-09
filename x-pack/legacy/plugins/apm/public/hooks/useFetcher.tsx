@@ -7,7 +7,8 @@
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
-// TODO: find a solution to this
+// HttpFetchError is not exposed in src/core/public but we need the
+// type for error handling.
 // eslint-disable-next-line
 import { HttpFetchError } from 'src/core/public/http';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
