@@ -20,9 +20,6 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
-// @ts-ignore
-import { Config } from '../../../server/config';
-
 import * as uiSettingsServiceFactoryNS from '../ui_settings_service_factory';
 import * as getUiSettingsServiceForRequestNS from '../ui_settings_service_for_request';
 // @ts-ignore
@@ -43,14 +40,6 @@ describe('uiSettingsMixin()', () => {
   const sandbox = sinon.createSandbox();
 
   function setup() {
-    const config = Config.withDefaultSchema({
-      uiSettings: {
-        overrides: {
-          foo: 'bar',
-        },
-      },
-    });
-
     // maps of decorations passed to `server.decorate()`
     const decorations: Decorators = {
       server: {},
@@ -61,7 +50,6 @@ describe('uiSettingsMixin()', () => {
     const server = {
       log: sinon.stub(),
       route: sinon.stub(),
-      config: () => config,
       addMemoizedFactoryToRequest(name: string, factory: (...args: any[]) => any) {
         this.decorate('request', name, function(this: typeof server) {
           return factory(this);
@@ -79,8 +67,7 @@ describe('uiSettingsMixin()', () => {
 
     const kbnServer = {
       server,
-      config,
-      uiExports: { addConsumer: sinon.stub(), uiSettingDefaults },
+      uiExports: { uiSettingDefaults },
       ready: sinon.stub().returns(readyPromise),
       newPlatform: {
         __internals: {
@@ -91,7 +78,7 @@ describe('uiSettingsMixin()', () => {
       },
     };
 
-    uiSettingsMixin(kbnServer, server, config);
+    uiSettingsMixin(kbnServer, server);
 
     return {
       kbnServer,
