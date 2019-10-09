@@ -27,12 +27,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const LabelTemplateFlyoutComponent = ({
+export const LabelTemplateFlyout = ({
   isVisible = false,
   onClose = () => {},
-  intl,
 }) => {
   return isVisible ? (
     <EuiFlyout
@@ -70,37 +70,37 @@ export const LabelTemplateFlyoutComponent = ({
               {
                 input: 1234,
                 urlTemplate: 'http://company.net/profiles?user_id={{value}}',
-                labelTemplate: intl.formatMessage(
-                  { id: 'common.ui.fieldEditor.labelTemplate.example.idLabel', defaultMessage: 'User #{value}' },
-                  { value: '{{value}}' }),
-                output: '<a href="http://company.net/profiles?user_id=1234">' + intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.example.output.idLabel', defaultMessage: 'User' }) + ' #1234</a>',
+                labelTemplate: i18n.translate(
+                  'common.ui.fieldEditor.labelTemplate.example.idLabel', {
+                    defaultMessage: 'User #{value}', values: { value: '{{value}}' }
+                  }
+                ),
+                output: '<a href="http://company.net/profiles?user_id=1234">' + i18n.translate('common.ui.fieldEditor.labelTemplate.example.output.idLabel', { defaultMessage: 'User' }) + ' #1234</a>',
               },
               {
                 input: '/assets/main.css',
                 urlTemplate: 'http://site.com{{rawValue}}',
-                labelTemplate: intl.formatMessage(
-                  { id: 'common.ui.fieldEditor.labelTemplate.example.pathLabel', defaultMessage: 'View Asset' }),
-                output: '<a href="http://site.com/assets/main.css">' + intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.example.output.pathLabel', defaultMessage: 'View Asset' }) + '</a>',
+                labelTemplate: i18n.translate('common.ui.fieldEditor.labelTemplate.example.pathLabel', { defaultMessage: 'View Asset' }),
+                output: '<a href="http://site.com/assets/main.css">' + i18n.translate('common.ui.fieldEditor.labelTemplate.example.output.pathLabel', { defaultMessage: 'View Asset' }) + '</a>',
               },
             ]}
             columns={[
               {
                 field: 'input',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.inputHeader', defaultMessage: 'Input' }),
+                name: i18n.translate('common.ui.fieldEditor.labelTemplate.inputHeader', { defaultMessage: 'Input' }),
                 width: '160px',
               },
               {
                 field: 'urlTemplate',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.urlHeader', defaultMessage: 'URL Template' }),
+                name: i18n.translate('common.ui.fieldEditor.labelTemplate.urlHeader', { defaultMessage: 'URL Template' }),
               },
               {
                 field: 'labelTemplate',
-                name: intl.formatMessage(
-                  { id: 'common.ui.fieldEditor.labelTemplate.labelHeader', defaultMessage: 'Label Template' }),
+                name: i18n.translate('common.ui.fieldEditor.labelTemplate.labelHeader', { defaultMessage: 'Label Template' }),
               },
               {
                 field: 'output',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.labelTemplate.outputHeader', defaultMessage: 'Output' }),
+                name: i18n.translate('common.ui.fieldEditor.labelTemplate.outputHeader', { defaultMessage: 'Output' }),
                 render: (value) => {
                   return (
                     <span
@@ -121,6 +121,4 @@ export const LabelTemplateFlyoutComponent = ({
   ) : null;
 };
 
-LabelTemplateFlyoutComponent.displayName = 'LabelTemplateFlyout';
-
-export const LabelTemplateFlyout = injectI18n(LabelTemplateFlyoutComponent);
+LabelTemplateFlyout.displayName = 'LabelTemplateFlyout';
