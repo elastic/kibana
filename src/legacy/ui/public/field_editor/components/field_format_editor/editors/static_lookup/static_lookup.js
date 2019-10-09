@@ -31,9 +31,10 @@ import {
   DefaultFormatEditor
 } from '../default';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
+export class StaticLookupFormatEditor extends DefaultFormatEditor {
 
   onLookupChange = (newLookupParams, index) => {
     const lookupEntries = [...this.props.formatParams.lookupEntries];
@@ -65,7 +66,7 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
   }
 
   render() {
-    const { formatParams, intl } = this.props;
+    const { formatParams } = this.props;
 
     const items = formatParams.lookupEntries && formatParams.lookupEntries.length && formatParams.lookupEntries.map((lookup, index) => {
       return {
@@ -78,7 +79,7 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
     const columns = [
       {
         field: 'key',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.keyLabel', defaultMessage: 'Key' }),
+        name: <FormattedMessage id="common.ui.fieldEditor.staticLookup.keyLabel" defaultMessage="Key" />,
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -94,7 +95,7 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
       },
       {
         field: 'value',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.valueLabel', defaultMessage: 'Value' }),
+        name: <FormattedMessage id="common.ui.fieldEditor.staticLookup.valueLabel" defaultMessage="Value" />,
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -111,9 +112,8 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
       {
         actions: [
           {
-            name: intl.formatMessage({ id: 'common.ui.fieldEditor.staticLookup.deleteAria', defaultMessage: 'Delete' }),
-            description: intl.formatMessage(
-              { id: 'common.ui.fieldEditor.staticLookup.deleteTitle', defaultMessage: 'Delete entry' }),
+            name: i18n.translate('common.ui.fieldEditor.staticLookup.deleteAria', { defaultMessage: 'Delete' }),
+            description: i18n.translate('common.ui.fieldEditor.staticLookup.deleteTitle', { defaultMessage: 'Delete entry' }),
             onClick: (item) => {
               this.removeLookup(item.index);
             },
@@ -148,8 +148,11 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
         >
           <EuiFieldText
             value={formatParams.unknownKeyValue || ''}
-            placeholder={intl.formatMessage(
-              { id: 'common.ui.fieldEditor.staticLookup.leaveBlankPlaceholder', defaultMessage: 'Leave blank to keep value as-is' })}
+            placeholder={i18n.translate(
+              'common.ui.fieldEditor.staticLookup.leaveBlankPlaceholder', {
+                defaultMessage: 'Leave blank to keep value as-is'
+              })
+            }
             onChange={(e) => {
               this.onChange({ unknownKeyValue: e.target.value });
             }}
@@ -161,5 +164,4 @@ export class StaticLookupFormatEditorComponent extends DefaultFormatEditor {
   }
 }
 
-export const StaticLookupFormatEditor = injectI18n(StaticLookupFormatEditorComponent);
 StaticLookupFormatEditor.formatId = 'static_lookup';
