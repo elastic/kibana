@@ -14,7 +14,7 @@ import { SearchSource } from '../../../kibana_services';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ES_SEARCH, ES_GEO_FIELD_TYPE, ES_SIZE_LIMIT } from '../../../../common/constants';
+import { ES_SEARCH, ES_GEO_FIELD_TYPE, ES_SIZE_LIMIT, SORT_ORDER } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
@@ -56,9 +56,10 @@ export class ESSearchSource extends AbstractESSource {
       geoField: descriptor.geoField,
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
+      sortField: _.get(descriptor, 'sortField', ''),
+      sortOrder: _.get(descriptor, 'sortOrder', SORT_ORDER.DESC),
       useTopHits: _.get(descriptor, 'useTopHits', false),
       topHitsSplitField: descriptor.topHitsSplitField,
-      topHitsTimeField: descriptor.topHitsTimeField,
       topHitsSize: _.get(descriptor, 'topHitsSize', 1),
     }, inspectorAdapters);
   }
@@ -70,9 +71,10 @@ export class ESSearchSource extends AbstractESSource {
         onChange={onChange}
         filterByMapBounds={this._descriptor.filterByMapBounds}
         tooltipProperties={this._descriptor.tooltipProperties}
+        sortField={this._descriptor.sortField}
+        sortOrder={this._descriptor.sortOrder}
         useTopHits={this._descriptor.useTopHits}
         topHitsSplitField={this._descriptor.topHitsSplitField}
-        topHitsTimeField={this._descriptor.topHitsTimeField}
         topHitsSize={this._descriptor.topHitsSize}
       />
     );
@@ -135,10 +137,24 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
+  // Returns sort content for an Elasticsearch search body
+  _buildEsSort() {
+    const {
+      sortField,
+      sortOrder,
+    } = this._descriptor;
+    return [
+      {
+        [sortField]: {
+          order: sortOrder
+        }
+      }
+    ];
+  }
+
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
     const {
       topHitsSplitField,
-      topHitsTimeField,
       topHitsSize,
     } = this._descriptor;
 
@@ -158,7 +174,7 @@ export class ESSearchSource extends AbstractESSource {
     });
 
     const searchSource = await this._makeSearchSource(searchFilters, 0);
-    searchSource.setField('aggs', {
+    const aggs = {
       entitySplit: {
         terms: {
           field: topHitsSplitField,
@@ -167,13 +183,6 @@ export class ESSearchSource extends AbstractESSource {
         aggs: {
           entityHits: {
             top_hits: {
-              sort: [
-                {
-                  [topHitsTimeField]: {
-                    order: 'desc'
-                  }
-                }
-              ],
               _source: {
                 includes: searchFilters.fieldNames
               },
@@ -183,7 +192,11 @@ export class ESSearchSource extends AbstractESSource {
           }
         }
       }
-    });
+    };
+    if (this._hasSort()) {
+      aggs.entitySplit.aggs.entityHits.top_hits.sort = this._buildEsSort();
+    }
+    searchSource.setField('aggs', aggs);
 
     const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document top hits request');
 
@@ -193,7 +206,7 @@ export class ESSearchSource extends AbstractESSource {
     entityBuckets.forEach(entityBucket => {
       const total = _.get(entityBucket, 'entityHits.hits.total', 0);
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
-      // Reverse hits list so they are drawn from oldest to newest (per entity) so newest events are on top
+      // Reverse hits list so top documents by sort are drawn on top
       allHits.push(...hits.reverse());
       if (total > hits.length) {
         hasTrimmedResults = true;
@@ -218,10 +231,14 @@ export class ESSearchSource extends AbstractESSource {
     // By setting "fields", SearchSource removes all of defaults
     searchSource.setField('fields', searchFilters.fieldNames);
 
+    if (this._hasSort()) {
+      searchSource.setField('sort', this._buildEsSort());
+    }
+
     const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document request');
 
     return {
-      hits: resp.hits.hits,
+      hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
         areResultsTrimmed: resp.hits.total > resp.hits.hits.length
       }
@@ -229,8 +246,13 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   _isTopHits() {
-    const { useTopHits, topHitsSplitField, topHitsTimeField } = this._descriptor;
-    return !!(useTopHits && topHitsSplitField && topHitsTimeField);
+    const { useTopHits, topHitsSplitField } = this._descriptor;
+    return !!(useTopHits && topHitsSplitField);
+  }
+
+  _hasSort() {
+    const { sortField, sortOrder } = this._descriptor;
+    return !!sortField && !!sortOrder;
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
@@ -406,9 +428,10 @@ export class ESSearchSource extends AbstractESSource {
 
   getSyncMeta() {
     return {
+      sortField: this._descriptor.sortField,
+      sortOrder: this._descriptor.sortOrder,
       useTopHits: this._descriptor.useTopHits,
       topHitsSplitField: this._descriptor.topHitsSplitField,
-      topHitsTimeField: this._descriptor.topHitsTimeField,
       topHitsSize: this._descriptor.topHitsSize,
     };
   }
