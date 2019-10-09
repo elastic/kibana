@@ -56,8 +56,6 @@ const getFieldFormat = (id: string | undefined, params: object = {}) => {
   }
 };
 
-export type FieldFormat = any;
-
 export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
   const format: SerializedFieldFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
   const formats: Record<string, () => SerializedFieldFormat> = {
@@ -160,3 +158,5 @@ export const getTableAggs = (vis: Vis): AggConfig[] => {
   const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
   return columns.map((c: any) => c.aggConfig);
 };
+
+export { FieldFormat };
