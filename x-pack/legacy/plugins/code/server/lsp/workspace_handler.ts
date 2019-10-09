@@ -158,6 +158,9 @@ export class WorkspaceHandler {
   }
 
   public handleResponse(request: LspRequest, response: ResponseMessage): ResponseMessage {
+    if (!response.result) {
+      return response;
+    }
     const { method } = request;
     switch (method) {
       case 'textDocument/hover': {
