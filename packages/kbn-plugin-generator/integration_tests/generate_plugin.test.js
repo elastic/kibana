@@ -25,7 +25,7 @@ import { stat, readFileSync } from 'fs';
 import { snakeCase } from 'lodash';
 import del from 'del';
 import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
-import { createEsTestCluster } from '@kbn/test';
+import { createLegacyEsTestCluster } from '@kbn/test';
 import execa from 'execa';
 
 const statP = util.promisify(stat);
@@ -83,7 +83,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
 
     it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
       const log = new ToolingLog();
-      const es = createEsTestCluster({ license: 'basic', log });
+      const es = createLegacyEsTestCluster({ license: 'basic', log });
       await es.start();
       await withProcRunner(log, async proc => {
         await proc.run('kibana', {
