@@ -531,18 +531,20 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
               <ModuleJobs jobs={jobs} jobPrefix={formState.jobPrefix} saveState={saveState} />
             </EuiPanel>
             <EuiSpacer size="m" />
-            <EuiPanel>
-              {Object.keys(kibanaObjects).map((objectType, i) => (
-                <Fragment key={objectType}>
-                  <KibanaObjects
-                    objectType={objectType}
-                    kibanaObjects={kibanaObjects[objectType]}
-                    isSaving={saveState === SAVE_STATE.SAVING}
-                  />
-                  {i < Object.keys(kibanaObjects).length - 1 && <EuiSpacer size="s" />}
-                </Fragment>
-              ))}
-            </EuiPanel>
+            {Object.keys(kibanaObjects).length > 0 && (
+              <EuiPanel>
+                {Object.keys(kibanaObjects).map((objectType, i) => (
+                  <Fragment key={objectType}>
+                    <KibanaObjects
+                      objectType={objectType}
+                      kibanaObjects={kibanaObjects[objectType]}
+                      isSaving={saveState === SAVE_STATE.SAVING}
+                    />
+                    {i < Object.keys(kibanaObjects).length - 1 && <EuiSpacer size="s" />}
+                  </Fragment>
+                ))}
+              </EuiPanel>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
