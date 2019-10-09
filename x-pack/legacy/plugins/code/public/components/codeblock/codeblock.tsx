@@ -5,49 +5,72 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { editor, IPosition, IRange } from 'monaco-editor';
+import { editor, IRange } from 'monaco-editor';
 import React from 'react';
-import { ResizeChecker } from 'ui/resize_checker';
+
+import { ResizeChecker } from '../shared/resize_checker';
 import { monaco } from '../../monaco/monaco';
 import { registerEditor } from '../../monaco/single_selection_helper';
 
-interface Props {
-  code: string;
-  fileComponent?: React.ReactNode;
-  startLine?: number;
-  language?: string;
-  highlightRanges?: IRange[];
-  onClick?: (event: IPosition) => void;
+export interface Position {
+  lineNumber: string;
+  column: number;
+}
+
+export interface Props {
+  content: string;
+  header: React.ReactNode;
+  language: string;
+  highlightRanges: IRange[];
+  onClick: (event: Position) => void;
   folding: boolean;
-  lineNumbersFunc: (line: number) => string;
+  /**
+   * Returns the line number to display for a given line.
+   * @param lineIndex The index of the given line (0-indexed)
+   */
+  lineNumber: (lineIndex: number) => string;
+  className?: string;
 }
 
 export class CodeBlock extends React.PureComponent<Props> {
+  static defaultProps = {
+    header: undefined,
+    folding: false,
+    highlightRanges: [],
+    language: 'text',
+    lineNumber: String,
+    onClick: () => {},
+  };
+
   private el: HTMLDivElement | null = null;
   private ed?: editor.IStandaloneCodeEditor;
   private resizeChecker?: ResizeChecker;
   private currentHighlightDecorations: string[] = [];
 
   public async componentDidMount() {
+    const { content, highlightRanges, language, onClick } = this.props;
+
     if (this.el) {
-      await this.tryLoadFile(this.props.code, this.props.language || 'text');
+      await this.tryLoadFile(content, language);
       this.ed!.onMouseDown((e: editor.IEditorMouseEvent) => {
         if (
-          this.props.onClick &&
+          onClick &&
           (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS ||
             e.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT)
         ) {
           const position = e.target.position || { lineNumber: 0, column: 0 };
-          const lineNumber = (this.props.startLine || 0) + position.lineNumber;
-          this.props.onClick({
+          const lineNumber = this.lineNumber(position.lineNumber);
+
+          onClick({
             lineNumber,
             column: position.column,
           });
         }
       });
       registerEditor(this.ed!);
-      if (this.props.highlightRanges) {
-        const decorations = this.props.highlightRanges.map((range: IRange) => {
+
+      if (highlightRanges.length) {
+        const decorations = highlightRanges.map((range: IRange) => {
           return {
             range,
             options: {
@@ -65,6 +88,7 @@ export class CodeBlock extends React.PureComponent<Props> {
       });
     }
   }
+
   private async tryLoadFile(code: string, language: string) {
     try {
       await monaco.editor.colorize(code, language, {});
@@ -78,7 +102,7 @@ export class CodeBlock extends React.PureComponent<Props> {
     this.ed = monaco.editor.create(this.el!, {
       value: code,
       language,
-      lineNumbers: this.lineNumbersFunc.bind(this),
+      lineNumbers: this.lineNumber,
       readOnly: true,
       folding: this.props.folding,
       minimap: {
@@ -102,17 +126,16 @@ export class CodeBlock extends React.PureComponent<Props> {
   }
 
   public componentDidUpdate(prevProps: Readonly<Props>) {
-    if (
-      prevProps.code !== this.props.code ||
-      prevProps.highlightRanges !== this.props.highlightRanges
-    ) {
+    const { content, highlightRanges } = this.props;
+
+    if (prevProps.content !== content || prevProps.highlightRanges !== highlightRanges) {
       if (this.ed) {
         const model = this.ed.getModel();
         if (model) {
-          model.setValue(this.props.code);
+          model.setValue(content);
 
-          if (this.props.highlightRanges) {
-            const decorations = this.props.highlightRanges!.map((range: IRange) => {
+          if (highlightRanges.length) {
+            const decorations = highlightRanges!.map((range: IRange) => {
               return {
                 range,
                 options: {
@@ -137,19 +160,20 @@ export class CodeBlock extends React.PureComponent<Props> {
   }
 
   public render() {
-    const linesCount = this.props.code.split('\n').length;
+    const { className, header } = this.props;
+    const height = this.lines.length * 18;
+
     return (
-      <EuiPanel style={{ marginBottom: '2rem' }} paddingSize="s">
-        {this.props.fileComponent}
-        <div ref={r => (this.el = r)} style={{ height: linesCount * 18 }} />
+      <EuiPanel paddingSize="s" className={className}>
+        {header}
+        <div ref={r => (this.el = r)} style={{ height }} />
       </EuiPanel>
     );
   }
 
-  private lineNumbersFunc = (line: number) => {
-    if (this.props.lineNumbersFunc) {
-      return this.props.lineNumbersFunc(line);
-    }
-    return `${(this.props.startLine || 0) + line}`;
-  };
+  private lineNumber = (lineIndex: number) => this.props.lineNumber(lineIndex - 1);
+
+  private get lines(): string[] {
+    return this.props.content.split('\n');
+  }
 }
