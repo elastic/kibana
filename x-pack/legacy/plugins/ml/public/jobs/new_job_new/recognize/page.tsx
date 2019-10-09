@@ -260,8 +260,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       setResultsUrl(
         mlJobService.createResultsUrl(
           jobsResponse.filter(({ success }) => success).map(({ id }) => id),
-          formState.timeRange.start,
-          formState.timeRange.end,
+          timeRange.start,
+          timeRange.end,
           'explorer'
         )
       );
