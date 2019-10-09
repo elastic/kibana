@@ -10,8 +10,10 @@ interface Props {
   retrySetup: (startTime?: number | undefined, endTime?: number | undefined) => void;
 }
 
+const fourWeeksInMs = 86400000 * 7 * 4;
+
 export const useAnalysisSetupState = ({ setupModule, retrySetup }: Props) => {
-  const [startTime, setStartTime] = useState<number | undefined>(undefined);
+  const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
   const setup = useCallback(() => {
     return setupModule(startTime, endTime);

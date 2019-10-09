@@ -99,7 +99,7 @@ export class ActionExecutor {
 
     try {
       result = await actionType.executor({
-        id: actionId,
+        actionId,
         services,
         params: validatedParams,
         config: validatedConfig,

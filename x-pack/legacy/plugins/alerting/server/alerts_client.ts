@@ -448,7 +448,7 @@ export class AlertsClient {
   private getAlertFromRaw(
     id: string,
     rawAlert: Partial<RawAlert>,
-    references: SavedObjectReference[]
+    references: SavedObjectReference[] | undefined
   ) {
     if (!rawAlert.actions) {
       return {
@@ -456,7 +456,7 @@ export class AlertsClient {
         ...rawAlert,
       };
     }
-    const actions = this.injectReferencesIntoActions(rawAlert.actions, references);
+    const actions = this.injectReferencesIntoActions(rawAlert.actions, references || []);
     return {
       id,
       ...rawAlert,

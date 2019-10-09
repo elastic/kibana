@@ -87,9 +87,9 @@ describe('validateParams()', () => {
 
 describe('execute()', () => {
   test('calls the executor with proper params', async () => {
-    const id = 'some-id';
+    const actionId = 'some-id';
     await actionType.executor({
-      id,
+      actionId,
       services: {
         callCluster: async (path: string, opts: any) => {},
         savedObjectsClient: SavedObjectsClientMock.create(),
