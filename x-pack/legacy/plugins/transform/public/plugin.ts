@@ -21,8 +21,9 @@ import { textService } from './app/services/text';
 import { uiMetricService } from './app/services/ui_metric';
 
 const REACT_ROOT_ID = 'transformReactRoot';
+const KBN_MANAGEMENT_SECTION = 'elasticsearch/transform';
 
-const template = `<kbn-management-app section="elasticsearch/transform"><div id="transformReactRoot"/></kbn-management-app>`;
+const template = `<kbn-management-app section="${KBN_MANAGEMENT_SECTION}"><div id="${REACT_ROOT_ID}"/></kbn-management-app>`;
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
@@ -75,7 +76,6 @@ export class Plugin {
         $scope: any,
         $route: any,
         $http: ng.IHttpService,
-        $q: any,
         savedSearches: SavedSearchLoader
       ) => {
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
