@@ -12,11 +12,18 @@ import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../comm
 const ANALYTICS_DETAULT_MODEL_MEMORY_LIMIT = '50mb';
 
 export type EsIndexName = string;
+export type DependentVariable = string;
 export type IndexPatternTitle = string;
+export type AnalyticsJobType = JOB_TYPES | undefined;
 
 export interface FormMessage {
   error?: string;
   message: string;
+}
+
+export enum JOB_TYPES {
+  OUTLIER_DETECTION = 'outlier_detection',
+  REGRESSION = 'regression',
 }
 
 export interface State {
@@ -24,6 +31,7 @@ export interface State {
   advancedEditorRawString: string;
   form: {
     createIndexPattern: boolean;
+    dependentVariable: DependentVariable;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
@@ -34,9 +42,11 @@ export interface State {
     jobIdEmpty: boolean;
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
+    jobType: AnalyticsJobType;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
+    trainingPercent: number;
   };
   disabled: boolean;
   indexNames: EsIndexName[];
@@ -58,6 +68,7 @@ export const getInitialState = (): State => ({
   advancedEditorRawString: '',
   form: {
     createIndexPattern: false,
+    dependentVariable: '',
     destinationIndex: '',
     destinationIndexNameExists: false,
     destinationIndexNameEmpty: true,
@@ -68,9 +79,11 @@ export const getInitialState = (): State => ({
     jobIdEmpty: true,
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
+    jobType: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
+    trainingPercent: 70,
   },
   jobConfig: {},
   disabled:
@@ -92,7 +105,7 @@ export const getInitialState = (): State => ({
 export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
-  return {
+  const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
     source: {
       // If a Kibana index patterns includes commas, we need to split
       // the into an array of indices to be in the correct format for
@@ -112,4 +125,15 @@ export const getJobConfigFromFormState = (
     },
     model_memory_limit: ANALYTICS_DETAULT_MODEL_MEMORY_LIMIT,
   };
+
+  if (formState.jobType === JOB_TYPES.REGRESSION) {
+    jobConfig.analysis = {
+      regression: {
+        dependent_variable: formState.dependentVariable,
+        training_percent: formState.trainingPercent,
+      },
+    };
+  }
+
+  return jobConfig;
 };

@@ -12,21 +12,24 @@ import {
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
+  EuiFormRow,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
+  EuiSelect,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { JOB_TYPES, AnalyticsJobType } from '../../hooks/use_create_analytics_form/state';
 
 export const CreateAnalyticsModal: FC<CreateAnalyticsFormProps> = ({
   actions,
   children,
   state,
 }) => {
-  const { closeModal, createAnalyticsJob, startAnalyticsJob } = actions;
+  const { closeModal, createAnalyticsJob, setFormState, startAnalyticsJob } = actions;
   const {
     isAdvancedEditorEnabled,
     isJobCreated,
@@ -34,6 +37,7 @@ export const CreateAnalyticsModal: FC<CreateAnalyticsFormProps> = ({
     isModalButtonDisabled,
     isValid,
   } = state;
+  const { jobType } = state.form;
 
   const width = isAdvancedEditorEnabled ? '640px' : '450px';
 
@@ -47,9 +51,29 @@ export const CreateAnalyticsModal: FC<CreateAnalyticsFormProps> = ({
             })}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
-
-        <EuiModalBody>{children}</EuiModalBody>
-
+        {jobType === undefined && (
+          <EuiModalBody>
+            <EuiFormRow
+              label={i18n.translate('xpack.ml.dataframe.analytics.create.selectJobTypeLabel', {
+                defaultMessage: 'Select job type',
+              })}
+            >
+              <EuiSelect
+                options={Object.values(JOB_TYPES).map(type => ({
+                  value: type,
+                  text: type.replace(/_/g, ' '),
+                }))}
+                value={jobType}
+                hasNoInitialSelection={true}
+                onChange={e => {
+                  const value = e.target.value as AnalyticsJobType; // TODO: Is this the best way?
+                  setFormState({ jobType: value });
+                }}
+              />
+            </EuiFormRow>
+          </EuiModalBody>
+        )}
+        {jobType !== undefined && <EuiModalBody>{children}</EuiModalBody>}
         <EuiModalFooter>
           {(!isJobCreated || !isJobStarted) && (
             <EuiButtonEmpty onClick={closeModal}>

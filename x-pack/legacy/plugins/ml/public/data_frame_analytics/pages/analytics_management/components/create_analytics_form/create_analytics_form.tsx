@@ -7,25 +7,25 @@
 import React, { Fragment, FC } from 'react';
 
 import {
-  EuiCallOut,
   EuiComboBox,
   EuiForm,
   EuiFieldText,
   EuiFormRow,
   EuiLink,
-  EuiSpacer,
+  EuiRange,
   EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { JOB_TYPES } from '../../hooks/use_create_analytics_form/state';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
+import { Messages } from './messages';
+import { JobType } from './job_type';
 
 // based on code used by `ui/index_patterns` internally
 // remove the space character from the list of illegal characters
@@ -39,12 +39,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     form,
     indexPatternsWithNumericFields,
     indexPatternTitles,
+    isAdvancedEditorEnabled,
     isJobCreated,
     requestMessages,
   } = state;
 
   const {
     createIndexPattern,
+    dependentVariable,
     destinationIndex,
     destinationIndexNameEmpty,
     destinationIndexNameExists,
@@ -55,54 +57,32 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     jobIdExists,
     jobIdValid,
     jobIdInvalidMaxLength,
+    jobType,
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
+    trainingPercent,
   } = form;
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
-      {requestMessages.map((requestMessage, i) => (
-        <Fragment key={i}>
-          <EuiCallOut
-            title={requestMessage.message}
-            color={requestMessage.error !== undefined ? 'danger' : 'primary'}
-            iconType={requestMessage.error !== undefined ? 'alert' : 'checkInCircleFilled'}
-            size="s"
-          >
-            {requestMessage.error !== undefined ? <p>{requestMessage.error}</p> : null}
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </Fragment>
-      ))}
+      <Messages messages={requestMessages} />
       {!isJobCreated && (
         <Fragment>
-          <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.analytics.create.jobTypeLabel', {
-              defaultMessage: 'Job type',
-            })}
-            helpText={
-              <FormattedMessage
-                id="xpack.ml.dataframe.analytics.create.jobTypeHelpText"
-                defaultMessage="Outlier detection jobs require a source index that is mapped as a table-like data structure and will only analyze numeric and boolean fields. Please use the {advancedEditorButton} to apply custom options such as the model memory limit and analysis type. You cannot switch back to this form from the advanced editor."
-                values={{
-                  advancedEditorButton: (
-                    <EuiLink onClick={actions.switchToAdvancedEditor}>
-                      <FormattedMessage
-                        id="xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton"
-                        defaultMessage="advanced editor"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            }
-          >
-            <EuiText>
-              {i18n.translate('xpack.ml.dataframe.analytics.create.outlierDetectionText', {
-                defaultMessage: 'Outlier detection',
-              })}
-            </EuiText>
+          <JobType type={jobType} />
+          <EuiFormRow>
+            <EuiSwitch
+              compressed={true}
+              name="mlDataFrameAnalyticsEnableAdvancedEditor"
+              label={i18n.translate(
+                'xpack.ml.dataframe.analytics.create.enableAdvancedEditorSwitch',
+                {
+                  defaultMessage: 'Enable advanced editor',
+                }
+              )}
+              checked={isAdvancedEditorEnabled}
+              onChange={actions.switchToAdvancedEditor}
+            />
           </EuiFormRow>
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
@@ -157,6 +137,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
             />
           </EuiFormRow>
+          {/* TODO: Does the source index message below apply for regression jobs as well? Same for all validation messages below */}
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexLabel', {
               defaultMessage: 'Source index',
@@ -267,27 +248,76 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
             />
           </EuiFormRow>
-          <EuiFormRow
-            isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
-            error={
-              createIndexPattern &&
-              destinationIndexPatternTitleExists && [
-                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternTitleError', {
-                  defaultMessage: 'An index pattern with this title already exists.',
-                }),
-              ]
-            }
-          >
-            <EuiSwitch
-              disabled={isJobCreated}
-              name="mlDataFrameAnalyticsCreateIndexPattern"
-              label={i18n.translate('xpack.ml.dataframe.analytics.create.createIndexPatternLabel', {
-                defaultMessage: 'Create index pattern',
-              })}
-              checked={createIndexPattern === true}
-              onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
-            />
-          </EuiFormRow>
+          {/* TODO: fetch options for dependent variable? Can fetch numerical fields with field_caps api */}
+          {jobType === JOB_TYPES.REGRESSION && (
+            <Fragment>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.dependentVariableLabel',
+                  {
+                    defaultMessage: 'Dependent variable',
+                  }
+                )}
+              >
+                <EuiFieldText
+                  disabled={isJobCreated}
+                  placeholder="dependent variable"
+                  value={dependentVariable}
+                  onChange={e => setFormState({ dependentVariable: e.target.value })}
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
+                    {
+                      defaultMessage: 'Enter field to be used as dependent variable.',
+                    }
+                  )}
+                  isInvalid={dependentVariable === ''}
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.analytics.create.trainingPercentLabel', {
+                  defaultMessage: 'Training percent',
+                })}
+              >
+                <EuiRange
+                  min={0}
+                  max={100}
+                  step={1}
+                  showLabels
+                  showRange
+                  showValue
+                  value={trainingPercent}
+                  // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
+                  onChange={e => setFormState({ trainingPercent: e.target.value })}
+                />
+              </EuiFormRow>
+            </Fragment>
+          )}
+          {jobType === JOB_TYPES.OUTLIER_DETECTION && (
+            <EuiFormRow
+              isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
+              error={
+                createIndexPattern &&
+                destinationIndexPatternTitleExists && [
+                  i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternTitleError', {
+                    defaultMessage: 'An index pattern with this title already exists.',
+                  }),
+                ]
+              }
+            >
+              <EuiSwitch
+                disabled={isJobCreated}
+                name="mlDataFrameAnalyticsCreateIndexPattern"
+                label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.createIndexPatternLabel',
+                  {
+                    defaultMessage: 'Create index pattern',
+                  }
+                )}
+                checked={createIndexPattern === true}
+                onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
+              />
+            </EuiFormRow>
+          )}
         </Fragment>
       )}
     </EuiForm>

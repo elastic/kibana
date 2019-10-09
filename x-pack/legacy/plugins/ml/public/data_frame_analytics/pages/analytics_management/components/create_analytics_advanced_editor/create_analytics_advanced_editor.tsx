@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { JOB_TYPES } from '../../hooks/use_create_analytics_form/state';
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const {
@@ -37,6 +38,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
     jobIdEmpty,
     jobIdExists,
     jobIdValid,
+    jobType,
   } = state.form;
 
   const onChange = (str: string) => {
@@ -158,27 +160,32 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
               <EuiSpacer />
             </Fragment>
           ))}
-          <EuiFormRow
-            isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
-            error={
-              createIndexPattern &&
-              destinationIndexPatternTitleExists && [
-                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternTitleError', {
-                  defaultMessage: 'An index pattern with this title already exists.',
-                }),
-              ]
-            }
-          >
-            <EuiSwitch
-              disabled={isJobCreated}
-              name="mlDataFrameAnalyticsCreateIndexPattern"
-              label={i18n.translate('xpack.ml.dataframe.analytics.create.createIndexPatternLabel', {
-                defaultMessage: 'Create index pattern',
-              })}
-              checked={createIndexPattern === true}
-              onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
-            />
-          </EuiFormRow>
+          {jobType === JOB_TYPES.OUTLIER_DETECTION && (
+            <EuiFormRow
+              isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
+              error={
+                createIndexPattern &&
+                destinationIndexPatternTitleExists && [
+                  i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternTitleError', {
+                    defaultMessage: 'An index pattern with this title already exists.',
+                  }),
+                ]
+              }
+            >
+              <EuiSwitch
+                disabled={isJobCreated}
+                name="mlDataFrameAnalyticsCreateIndexPattern"
+                label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.createIndexPatternLabel',
+                  {
+                    defaultMessage: 'Create index pattern',
+                  }
+                )}
+                checked={createIndexPattern === true}
+                onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
+              />
+            </EuiFormRow>
+          )}
         </Fragment>
       )}
     </EuiForm>
