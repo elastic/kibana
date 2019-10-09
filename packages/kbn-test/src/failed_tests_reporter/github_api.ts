@@ -19,7 +19,7 @@
 
 import Url from 'url';
 
-import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import Axios, { AxiosRequestConfig } from 'axios';
 import parseLinkHeader from 'parse-link-header';
 import { ToolingLog, isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
 
