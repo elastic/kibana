@@ -173,7 +173,7 @@
     "hjson": "3.1.2",
     "hoek": "^5.0.4",
     "http-proxy-agent": "^2.1.0",
-    "https-proxy-agent": "^2.2.2",
+    "https-proxy-agent": "^3.0.0",
     "inert": "^5.1.0",
     "inline-style": "^2.0.0",
     "joi": "^13.5.2",
