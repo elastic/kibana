@@ -34,7 +34,7 @@ export const deleteSignals = async ({ alertsClient, actionsClient, id }: DeleteS
   const actions = (alert.actions as (AlertAction[] | undefined)) || [];
 
   const actionsErrors = await deleteAllSignalActions(actionsClient, actions);
-  const deletedAlert = alertsClient.delete({ id });
+  const deletedAlert = await alertsClient.delete({ id });
   if (actionsErrors != null) {
     throw actionsErrors;
   } else {
