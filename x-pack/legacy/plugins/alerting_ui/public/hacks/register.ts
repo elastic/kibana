@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
-    id: 'actions',
-    title: 'Actions', // This is a product name so we don't translate it.
-    description: i18n.translate('xpack.alertingUI.ActionsDescription', {
-      defaultMessage: 'Data by creating, managing, and monitoring actions.',
+    id: 'alerting',
+    title: 'Alerting', // This is a product name so we don't translate it.
+    description: i18n.translate('xpack.alertingUI.AlertingDescription', {
+      defaultMessage: 'Data by creating, managing, and monitoring alerts.',
     }),
-    icon: 'actionsApp',
-    path: '/app/kibana#/management/elasticsearch/actions',
+    icon: 'alertingApp',
+    path: '/app/kibana#/management/kibana/alerting',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN,
   };
