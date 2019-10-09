@@ -18,16 +18,15 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { npStart } from 'ui/new_platform';
-import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
+import { npStart, npSetup } from 'ui/new_platform';
 import { TelemetryOptInProvider } from './telemetry_opt_in';
 
 export let indexPatternService;
 export let shouldShowTelemetryOptIn;
 export let telemetryOptInProvider;
-
-export const trackUiMetric = createUiStatsReporter('Kibana_home');
-export { METRIC_TYPE };
+export let trackUiMetric;
+export const METRIC_TYPE = npSetup.plugins.metrics.METRIC_TYPE;
+npSetup.plugins.metrics.registerApp('Kibana_home');
 
 uiModules.get('kibana').run(($injector) => {
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
@@ -37,4 +36,7 @@ uiModules.get('kibana').run(($injector) => {
   telemetryOptInProvider = Private(TelemetryOptInProvider);
   shouldShowTelemetryOptIn = telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn();
   indexPatternService = $injector.get('indexPatterns');
+
+
+  trackUiMetric = npStart.plugins.metrics.reportUiStats.bind(null, 'Kibana_home');
 });

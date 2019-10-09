@@ -1,0 +1,6 @@
+{
+  "id": "metrics",
+  "version": "kibana",
+  "server": true,
+  "ui": true
+}
