@@ -27,23 +27,40 @@ import { Nav } from './components/nav';
 import { Home } from './components/home';
 import { Management } from './components/management';
 
-const EndpointRouter = ({ basename, context }: { basename: string; context: AppMountContext }) => (
-  <Router basename={basename}>
-    <EuiPage>
-      <EuiPageSideBar>
-        <Nav navigateToApp={context.core.application.navigateToApp} />
-      </EuiPageSideBar>
-      <Route path="/" exact component={Home} />
-      <Route path="/management" component={Management} />
-    </EuiPage>
-  </Router>
-);
+const EndpointRouter = ({
+  basename,
+  context,
+  endpointMetadata,
+}: {
+  basename: string;
+  context: AppMountContext;
+  endpointMetadata: any;
+}) => {
+  return (
+    <Router basename={basename}>
+      <EuiPage>
+        <EuiPageSideBar>
+          <Nav navigateToApp={context.core.application.navigateToApp} />
+        </EuiPageSideBar>
+        <Route path="/" exact component={Home} />
+        <Route
+          path="/management"
+          render={() => <Management endpointMetadata={endpointMetadata} />}
+        />
+      </EuiPage>
+    </Router>
+  );
+};
 
 export const renderApp = (
   context: AppMountContext,
-  { appBasePath, element }: AppMountParameters
+  { appBasePath, element }: AppMountParameters,
+  response: any
 ) => {
-  ReactDOM.render(<EndpointRouter basename={appBasePath} context={context} />, element);
+  ReactDOM.render(
+    <EndpointRouter basename={appBasePath} context={context} endpointMetadata={response} />,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
