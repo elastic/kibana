@@ -7,10 +7,7 @@
 import { fromExpression, getType } from '@kbn/interpreter/common';
 import { interpretAst } from 'plugins/interpreter/interpreter';
 import { loadLegacyServerFunctionWrappers } from 'plugins/interpreter/canvas/load_legacy_server_function_wrappers';
-import { ErrorStrings } from '../../i18n';
 import { notify } from './notify';
-
-const { runInterpreter: strings } = ErrorStrings;
 
 /**
  * Runs interpreter, usually in the browser
@@ -36,7 +33,7 @@ export function runInterpreter(ast, context = null, options = {}) {
         });
       }
 
-      return new Error(strings.getRenderErrorMessage(getType(renderable)));
+      return new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
     })
     .catch(err => {
       notify.error(err);
