@@ -17,24 +17,60 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getHighlightHtml } from '../../../../../../plugins/data/common/field_formats';
+import { i18n } from '@kbn/i18n';
+import { escape, memoize } from 'lodash';
+import {
+  getHighlightHtml,
+  FieldFormat,
+  KBN_FIELD_TYPES,
+  TextContextTypeConvert,
+  HtmlContextTypeConvert,
+} from '../../../../../../plugins/data/common/';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
 
 const URL_TYPES = [
-  { kind: 'a', text: 'Link' },
-  { kind: 'img', text: 'Image' },
-  { kind: 'audio', text: 'Audio' }
+  {
+    kind: 'a',
+    text: i18n.translate('kbn.common.fieldFormats.url.types.link', {
+      defaultMessage: 'Link',
+    }),
+  },
+  {
+    kind: 'img',
+    text: i18n.translate('kbn.common.fieldFormats.url.types.img', {
+      defaultMessage: 'Image',
+    }),
+  },
+  {
+    kind: 'audio',
+    text: i18n.translate('kbn.common.fieldFormats.url.types.audio', {
+      defaultMessage: 'Audio',
+    }),
+  },
 ];
 const DEFAULT_URL_TYPE = 'a';
 
-export function createUrlFormat(FieldFormat) {
+export function createUrlFormat() {
   class UrlFormat extends FieldFormat {
-    constructor(params) {
+    static id = 'url';
+    static title = 'Url';
+    static fieldType = [
+      KBN_FIELD_TYPES.NUMBER,
+      KBN_FIELD_TYPES.BOOLEAN,
+      KBN_FIELD_TYPES.DATE,
+      KBN_FIELD_TYPES.IP,
+      KBN_FIELD_TYPES.STRING,
+      KBN_FIELD_TYPES.MURMUR3,
+      KBN_FIELD_TYPES.UNKNOWN,
+      KBN_FIELD_TYPES.CONFLICT,
+    ];
+    static urlTypes = URL_TYPES;
+
+    constructor(params: Record<string, any>) {
       super(params);
-      this._compileTemplate = _.memoize(this._compileTemplate);
+      this.compileTemplate = memoize(this.compileTemplate);
     }
 
     getParamDefaults() {
@@ -47,34 +83,32 @@ export function createUrlFormat(FieldFormat) {
       };
     }
 
-    _formatLabel(value, url) {
+    private formatLabel(value: string, url?: string): string {
       const template = this.param('labelTemplate');
-      if (url == null) url = this._formatUrl(value);
+      if (url == null) url = this.formatUrl(value);
       if (!template) return url;
 
-      return this._compileTemplate(template)({
-        value: value,
-        url: url
+      return this.compileTemplate(template)({
+        value,
+        url,
       });
     }
 
-    _formatUrl(value) {
+    private formatUrl(value: string): string {
       const template = this.param('urlTemplate');
       if (!template) return value;
 
-      return this._compileTemplate(template)({
+      return this.compileTemplate(template)({
         value: encodeURIComponent(value),
-        rawValue: value
+        rawValue: value,
       });
     }
 
-    _compileTemplate(template) {
-      const parts = template.split(templateMatchRE).map(function (part, i) {
-        // trim all the odd bits, the variable names
-        return (i % 2) ? part.trim() : part;
-      });
+    private compileTemplate(template: string): Function {
+      // trim all the odd bits, the variable names
+      const parts = template.split(templateMatchRE).map((part, i) => (i % 2 ? part.trim() : part));
 
-      return function (locals) {
+      return function(locals: Record<string, any>): string {
         // replace all the odd bits with their local var
         let output = '';
         let i = -1;
@@ -93,38 +127,20 @@ export function createUrlFormat(FieldFormat) {
       };
     }
 
-    _generateImgHtml(url, imageLabel) {
-      const isValidWidth = !isNaN(parseInt(this.param('width')));
-      const isValidHeight = !isNaN(parseInt(this.param('height')));
+    private generateImgHtml(url: string, imageLabel: string): string {
+      const isValidWidth = !isNaN(parseInt(this.param('width'), 10));
+      const isValidHeight = !isNaN(parseInt(this.param('height'), 10));
       const maxWidth = isValidWidth ? `${this.param('width')}px` : 'none';
       const maxHeight = isValidHeight ? `${this.param('height')}px` : 'none';
 
       return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
     }
 
-    static id = 'url';
-    static title = 'Url';
-    static fieldType = [
-      'number',
-      'boolean',
-      'date',
-      'ip',
-      'string',
-      'murmur3',
-      'unknown',
-      'conflict'
-    ];
-    static urlTypes = URL_TYPES;
-  }
+    textConvert: TextContextTypeConvert = value => this.formatLabel(value);
 
-  UrlFormat.prototype._convert = {
-    text: function (value) {
-      return this._formatLabel(value);
-    },
-
-    html: function (rawValue, field, hit, parsedUrl) {
-      const url = _.escape(this._formatUrl(rawValue));
-      const label = _.escape(this._formatLabel(rawValue, url));
+    htmlConvert: HtmlContextTypeConvert = (rawValue, field, hit, parsedUrl) => {
+      const url = escape(this.formatUrl(rawValue));
+      const label = escape(this.formatLabel(rawValue, url));
 
       switch (this.param('type')) {
         case 'audio':
@@ -134,11 +150,9 @@ export function createUrlFormat(FieldFormat) {
           // If the URL hasn't been formatted to become a meaningful label then the best we can do
           // is tell screen readers where the image comes from.
           const imageLabel =
-            label === url
-              ? `A dynamically-specified image located at ${url}`
-              : label;
+            label === url ? `A dynamically-specified image located at ${url}` : label;
 
-          return this._generateImgHtml(url, imageLabel);
+          return this.generateImgHtml(url, imageLabel);
         default:
           const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
           if (!inWhitelist && !parsedUrl) {
@@ -186,8 +200,8 @@ export function createUrlFormat(FieldFormat) {
 
           return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
       }
-    }
-  };
+    };
+  }
 
   return UrlFormat;
 }

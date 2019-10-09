@@ -17,32 +17,22 @@
  * under the License.
  */
 
-function convertLookupEntriesToMap(lookupEntries) {
-  return lookupEntries.reduce((lookupMap, lookupEntry) => {
-    lookupMap[lookupEntry.key] = lookupEntry.value;
-    return lookupMap;
-  }, {});
-}
+import { createNumeralFormat } from './_numeral';
 
-export function createStaticLookupFormat(FieldFormat) {
-  return class StaticLookupFormat extends FieldFormat {
-    getParamDefaults() {
+export function createPercentFormat() {
+  return createNumeralFormat({
+    id: 'percent',
+    title: 'Percentage',
+
+    getParamDefaults: (getConfig: Function) => {
       return {
-        lookupEntries: [{}],
-        unknownKeyValue: null,
+        pattern: getConfig('format:percent:defaultPattern'),
+        fractional: true,
       };
-    }
+    },
 
-    _convert(val) {
-      const lookupEntries = this.param('lookupEntries');
-      const unknownKeyValue = this.param('unknownKeyValue');
-
-      const lookupMap = convertLookupEntriesToMap(lookupEntries);
-      return lookupMap[val] || unknownKeyValue || val;
-    }
-
-    static id = 'static_lookup';
-    static title = 'Static Lookup';
-    static fieldType = ['string', 'number', 'ip', 'boolean'];
-  };
+    afterConvert(val: number) {
+      return this.param('fractional') ? val : val / 100;
+    },
+  });
 }

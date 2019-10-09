@@ -17,25 +17,33 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { createIpFormat } from '../ip';
-import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
+import { trunc } from 'lodash';
+import {
+  FieldFormat,
+  KBN_FIELD_TYPES,
+  TextContextTypeConvert,
+} from '../../../../../../plugins/data/common/';
 
-const IpFormat = createIpFormat(FieldFormat);
+const omission = '...';
 
-describe('IP Address Format', function () {
-  let ip;
-  beforeEach(function () {
-    ip = new IpFormat();
-  });
+export function createTruncateFormat() {
+  class TruncateFormat extends FieldFormat {
+    static id = 'truncate';
+    static title = 'Truncated String';
+    static fieldType = KBN_FIELD_TYPES.STRING;
 
-  it('converts a value from a decimal to a string', function () {
-    expect(ip.convert(1186489492)).to.be('70.184.100.148');
-  });
+    textConvert: TextContextTypeConvert = val => {
+      const length = this.param('fieldLength');
+      if (length > 0) {
+        return trunc(val, {
+          length: length + omission.length,
+          omission,
+        });
+      }
 
-  it('converts null and undefined to -',  function () {
-    expect(ip.convert(null)).to.be('-');
-    expect(ip.convert(undefined)).to.be('-');
-  });
+      return val;
+    };
+  }
 
-});
+  return TruncateFormat;
+}
