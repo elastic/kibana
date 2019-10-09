@@ -7,6 +7,7 @@
 import {
   FlowTargetNew,
   NetworkDnsSortField,
+  NetworkTopCountriesData,
   NetworkTopNFlowData,
   NetworkTopNFlowSortField,
 } from '../../graphql/types';
@@ -22,6 +23,7 @@ export interface NetworkTopNFlowRequestOptions extends RequestOptionsPaginated {
 }
 
 export interface NetworkTopCountriesRequestOptions extends RequestOptionsPaginated {
+  networkTopCountriesSort: NetworkTopNFlowSortField;
   flowTarget: FlowTargetNew;
 }
 
@@ -32,6 +34,13 @@ export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
 
 export class Network {
   constructor(private readonly adapter: NetworkAdapter) {}
+
+  public async getNetworkTopCountries(
+    req: FrameworkRequest,
+    options: NetworkTopCountriesRequestOptions
+  ): Promise<NetworkTopCountriesData> {
+    return this.adapter.getNetworkTopCountries(req, options);
+  }
 
   public async getNetworkTopNFlow(
     req: FrameworkRequest,

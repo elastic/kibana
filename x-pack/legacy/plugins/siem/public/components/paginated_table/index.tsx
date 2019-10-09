@@ -24,6 +24,7 @@ import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { DomainsColumns } from '../page/network/domains_table/columns';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
+import { NetworkTopCountriesColumns } from '../page/network/network_top_countries_table/columns';
 import { NetworkTopNFlowColumns } from '../page/network/network_top_n_flow_table/columns';
 import { TlsColumns } from '../page/network/tls_table/columns';
 import { UncommonProcessTableColumns } from '../page/hosts/uncommon_process_table';
@@ -68,6 +69,7 @@ declare type BasicTableColumns =
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
+  | NetworkTopCountriesColumns
   | NetworkTopNFlowColumns
   | TlsColumns
   | UncommonProcessTableColumns

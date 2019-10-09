@@ -21,6 +21,22 @@ import { setNetworkQueriesActivePageToZero } from './helpers';
 export const mockNetworkState: NetworkModel = {
   page: {
     queries: {
+      [NetworkTableType.topCountriesSource]: {
+        activePage: 7,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopNFlowFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [NetworkTableType.topCountriesDestination]: {
+        activePage: 3,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopNFlowFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
       [NetworkTableType.topNFlowSource]: {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,

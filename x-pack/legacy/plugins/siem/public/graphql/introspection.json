@@ -7732,10 +7732,10 @@
             "deprecationReason": null
           },
           {
-            "name": "location",
+            "name": "destination_ips",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "GeoItem", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7748,7 +7748,15 @@
             "deprecationReason": null
           },
           {
-            "name": "destination_ips",
+            "name": "location",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "GeoItem", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "source_ips",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
@@ -7802,10 +7810,10 @@
             "deprecationReason": null
           },
           {
-            "name": "location",
+            "name": "destination_ips",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "GeoItem", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7814,6 +7822,14 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "location",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "GeoItem", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },

@@ -31,6 +31,8 @@ import {
   updateIsPtrIncluded,
   updateIpDetailsTableActivePage,
   updateNetworkPageTableActivePage,
+  updateTopCountriesLimit,
+  updateTopCountriesSort,
   updateTopNFlowLimit,
   updateTopNFlowSort,
   updateTlsSort,
@@ -74,6 +76,22 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.desc,
         },
         isPtrIncluded: false,
+      },
+      [NetworkTableType.topCountriesSource]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopNFlowFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [NetworkTableType.topCountriesDestination]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopNFlowFields.bytes_out,
+          direction: Direction.desc,
+        },
       },
     },
     filterQuery: null,
@@ -212,6 +230,32 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         [tableType]: {
           ...state[NetworkType.page].queries[tableType],
           topNFlowSort,
+        },
+      },
+    },
+  }))
+  .case(updateTopCountriesLimit, (state, { limit, networkType, tableType }) => ({
+    ...state,
+    [networkType]: {
+      ...state[networkType],
+      queries: {
+        ...state[networkType].queries,
+        [tableType]: {
+          ...state[NetworkType.page].queries[tableType],
+          limit,
+        },
+      },
+    },
+  }))
+  .case(updateTopCountriesSort, (state, { topCountriesSort, networkType, tableType }) => ({
+    ...state,
+    [networkType]: {
+      ...state[networkType],
+      queries: {
+        ...state[networkType].queries,
+        [tableType]: {
+          ...state[NetworkType.page].queries[tableType],
+          topCountriesSort,
         },
       },
     },

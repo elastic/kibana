@@ -66,13 +66,13 @@ export const updateTopCountriesLimit = actionCreator<{
   limit: number;
   networkType: NetworkType;
   tableType: networkModel.TopNTableType;
-}>('UPDATE_TOP_N_FLOW_LIMIT');
+}>('UPDATE_TOP_COUNTRIES_LIMIT');
 
 export const updateTopCountriesSort = actionCreator<{
-  topNFlowSort: NetworkTopNFlowSortField;
+  topCountriesSort: NetworkTopNFlowSortField;
   networkType: NetworkType;
   tableType: networkModel.NetworkTableType;
-}>('UPDATE_TOP_N_FLOW_SORT');
+}>('UPDATE_TOP_COUNTRIES_SORT');
 
 export const setNetworkFilterQueryDraft = actionCreator<{
   filterQueryDraft: KueryFilterQuery;

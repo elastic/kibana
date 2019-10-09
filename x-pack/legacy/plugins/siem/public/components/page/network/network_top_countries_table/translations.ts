@@ -7,51 +7,49 @@
 import { i18n } from '@kbn/i18n';
 
 export const UNIT = (totalCount: number) =>
-  i18n.translate('xpack.siem.networkTopNFlowTable.unit', {
+  i18n.translate('xpack.siem.networkTopCountriesTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {IP} other {IPs}}`,
+    defaultMessage: `{totalCount, plural, =1 {Country} other {Countries}}`,
   });
 
-export const SOURCE_IP = i18n.translate('xpack.siem.networkTopNFlowTable.column.sourceIpTitle', {
-  defaultMessage: 'Source IPs',
+export const COUNTRY = i18n.translate('xpack.siem.networkTopCountriesTable.column.sourceIpTitle', {
+  defaultMessage: 'COUNTRY',
 });
 
-export const DESTINATION_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.column.destinationIpTitle',
+export const BYTES_IN = i18n.translate('xpack.siem.networkTopCountriesTable.column.bytesInTitle', {
+  defaultMessage: 'Bytes in',
+});
+
+export const BYTES_OUT = i18n.translate(
+  'xpack.siem.networkTopCountriesTable.column.bytesOutTitle',
+  {
+    defaultMessage: 'Bytes out',
+  }
+);
+
+export const FLOWS = i18n.translate('xpack.siem.networkTopCountriesTable.flows', {
+  defaultMessage: 'Flows',
+});
+
+export const DESTINATION_COUNTRIES = i18n.translate(
+  'xpack.siem.networkTopCountriesTable.destinationIps',
+  {
+    defaultMessage: 'Top Destination Countries',
+  }
+);
+
+export const SOURCE_COUNTRIES = i18n.translate('xpack.siem.networkTopCountriesTable.sourceIps', {
+  defaultMessage: 'Top Source Countries',
+});
+
+export const DESTINATION_IPS = i18n.translate(
+  'xpack.siem.networkTopCountriesTable.destinationIps',
   {
     defaultMessage: 'Destination IPs',
   }
 );
 
-export const IP_TITLE = i18n.translate('xpack.siem.networkTopNFlowTable.column.IpTitle', {
-  defaultMessage: 'IP',
-});
-
-export const DOMAIN = i18n.translate('xpack.siem.networkTopNFlowTable.column.domainTitle', {
-  defaultMessage: 'Domain',
-});
-
-export const BYTES_IN = i18n.translate('xpack.siem.networkTopNFlowTable.column.bytesInTitle', {
-  defaultMessage: 'Bytes in',
-});
-
-export const BYTES_OUT = i18n.translate('xpack.siem.networkTopNFlowTable.column.bytesOutTitle', {
-  defaultMessage: 'Bytes out',
-});
-
-export const AUTONOMOUS_SYSTEM = i18n.translate('xpack.siem.networkTopNFlowTable.column.asTitle', {
-  defaultMessage: 'Autonomous system',
-});
-
-export const FLOWS = i18n.translate('xpack.siem.networkTopNFlowTable.flows', {
-  defaultMessage: 'Flows',
-});
-
-export const DESTINATION_IPS = i18n.translate('xpack.siem.networkTopNFlowTable.destinationIps', {
-  defaultMessage: 'Destination IPs',
-});
-
-export const SOURCE_IPS = i18n.translate('xpack.siem.networkTopNFlowTable.sourceIps', {
+export const SOURCE_IPS = i18n.translate('xpack.siem.networkTopCountriesTable.sourceIps', {
   defaultMessage: 'Source IPs',
 });
 

@@ -71,6 +71,16 @@ export const mockGlobalState: State = {
   network: {
     page: {
       queries: {
+        topCountriesSource: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+        },
+        topCountriesDestination: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+        },
         topNFlowSource: {
           activePage: 0,
           limit: 10,

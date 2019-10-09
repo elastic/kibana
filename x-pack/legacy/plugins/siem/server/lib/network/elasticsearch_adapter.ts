@@ -13,6 +13,8 @@ import {
   GeoItem,
   NetworkDnsData,
   NetworkDnsEdges,
+  NetworkTopCountriesData,
+  NetworkTopCountriesEdges,
   NetworkTopNFlowData,
   NetworkTopNFlowEdges,
 } from '../../graphql/types';
@@ -21,13 +23,62 @@ import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../f
 import { TermAggregation } from '../types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
-import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index';
+import {
+  NetworkDnsRequestOptions,
+  NetworkTopCountriesRequestOptions,
+  NetworkTopNFlowRequestOptions,
+} from './index';
 import { buildDnsQuery } from './query_dns.dsl';
 import { buildTopNFlowQuery, getOppositeField } from './query_top_n_flow.dsl';
-import { NetworkAdapter, NetworkDnsBuckets, NetworkTopCountriesBuckets, NetworkTopNFlowBuckets } from './types';
+import { buildTopCountriesQuery } from './query_top_countries.dsl';
+import {
+  NetworkAdapter,
+  NetworkDnsBuckets,
+  NetworkTopCountriesBuckets,
+  NetworkTopNFlowBuckets,
+} from './types';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
+
+  public async getNetworkTopCountries(
+    request: FrameworkRequest,
+    options: NetworkTopCountriesRequestOptions
+  ): Promise<NetworkTopCountriesData> {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
+    const dsl = buildTopCountriesQuery(options);
+    const response = await this.framework.callWithRequest<NetworkTopCountriesData, TermAggregation>(
+      request,
+      'search',
+      dsl
+    );
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
+    const totalCount = getOr(0, 'aggregations.top_countries_count.value', response);
+    const networkTopCountriesEdges: NetworkTopCountriesEdges[] = getTopCountriesEdges(
+      response,
+      options
+    );
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const edges = networkTopCountriesEdges.splice(cursorStart, querySize - cursorStart);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
+
+    return {
+      edges,
+      inspect,
+      pageInfo: {
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
+      },
+      totalCount,
+    };
+  }
 
   public async getNetworkTopNFlow(
     request: FrameworkRequest,

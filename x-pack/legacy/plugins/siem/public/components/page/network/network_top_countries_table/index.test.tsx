@@ -20,10 +20,10 @@ import {
 } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
-import { NetworkTopNFlowTable } from '.';
+import { NetworkTopCountriesTable } from '.';
 import { mockData } from './mock';
 jest.mock('../../../../lib/settings/use_kibana_ui_setting');
-describe('NetworkTopNFlow Table Component', () => {
+describe('NetworkTopCountries Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
@@ -34,14 +34,14 @@ describe('NetworkTopNFlow Table Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the default NetworkTopNFlow table', () => {
+    test('it renders the default NetworkTopCountries table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <NetworkTopNFlowTable
-            data={mockData.NetworkTopNFlow.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+          <NetworkTopCountriesTable
+            data={mockData.NetworkTopCountries.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
             flowTargeted={FlowTargetNew.source}
-            id="topNFlowSource"
+            id="topCountriesSource"
             indexPattern={mockIndexPattern}
             isInspect={false}
             loading={false}
@@ -49,9 +49,9 @@ describe('NetworkTopNFlow Table Component', () => {
             showMorePagesIndicator={getOr(
               false,
               'showMorePagesIndicator',
-              mockData.NetworkTopNFlow.pageInfo
+              mockData.NetworkTopCountries.pageInfo
             )}
-            totalCount={mockData.NetworkTopNFlow.totalCount}
+            totalCount={mockData.NetworkTopCountries.totalCount}
             type={networkModel.NetworkType.page}
           />
         </ReduxStoreProvider>
@@ -66,11 +66,11 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = mount(
         <MockedProvider>
           <TestProviders store={store}>
-            <NetworkTopNFlowTable
-              data={mockData.NetworkTopNFlow.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+            <NetworkTopCountriesTable
+              data={mockData.NetworkTopCountries.edges}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
               flowTargeted={FlowTargetNew.source}
-              id="topNFlowSource"
+              id="topCountriesSource"
               isInspect={false}
               indexPattern={mockIndexPattern}
               loading={false}
@@ -78,15 +78,15 @@ describe('NetworkTopNFlow Table Component', () => {
               showMorePagesIndicator={getOr(
                 false,
                 'showMorePagesIndicator',
-                mockData.NetworkTopNFlow.pageInfo
+                mockData.NetworkTopCountries.pageInfo
               )}
-              totalCount={mockData.NetworkTopNFlow.totalCount}
+              totalCount={mockData.NetworkTopCountries.totalCount}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.page.queries.topNFlowSource.topNFlowSort).toEqual({
+      expect(store.getState().network.page.queries.topCountriesSource.topCountriesSort).toEqual({
         direction: 'desc',
         field: 'bytes_out',
       });
@@ -98,7 +98,7 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries.topNFlowSource.topNFlowSort).toEqual({
+      expect(store.getState().network.page.queries.topCountriesSource.topCountriesSort).toEqual({
         direction: 'asc',
         field: 'bytes_out',
       });

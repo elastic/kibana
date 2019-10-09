@@ -1487,11 +1487,13 @@ export interface NetworkTopCountriesItem {
 export interface TopCountriesItemSource {
   country?: Maybe<string>;
 
-  location?: Maybe<GeoItem>;
+  destination_ips?: Maybe<number>;
 
   flows?: Maybe<number>;
 
-  destination_ips?: Maybe<number>;
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
 }
 
 export interface GeoItem {
@@ -1503,9 +1505,11 @@ export interface GeoItem {
 export interface TopCountriesItemDestination {
   country?: Maybe<string>;
 
-  location?: Maybe<GeoItem>;
+  destination_ips?: Maybe<number>;
 
   flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
 
   source_ips?: Maybe<number>;
 }

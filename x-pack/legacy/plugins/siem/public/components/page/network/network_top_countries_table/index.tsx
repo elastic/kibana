@@ -16,8 +16,8 @@ import {
   Direction,
   FlowTargetNew,
   NetworkTopCountriesEdges,
-  NetworkTopCountriesFields,
-  NetworkTopCountriesSortField,
+  NetworkTopNFlowFields,
+  NetworkTopNFlowSortField,
 } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
@@ -42,7 +42,7 @@ interface OwnProps {
 interface NetworkTopCountriesTableReduxProps {
   activePage: number;
   limit: number;
-  topCountriesSort: NetworkTopCountriesSortField;
+  topCountriesSort: NetworkTopNFlowSortField;
 }
 
 interface NetworkTopCountriesTableDispatchProps {
@@ -56,7 +56,7 @@ interface NetworkTopCountriesTableDispatchProps {
     tableType: networkModel.TopCountriesTableType;
   }>;
   updateTopCountriesSort: ActionCreator<{
-    topCountriesSort: NetworkTopCountriesSortField;
+    topCountriesSort: NetworkTopNFlowSortField;
     networkType: networkModel.NetworkType;
     tableType: networkModel.TopCountriesTableType;
   }>;
@@ -77,7 +77,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-export const NetworkTopCountriesTableId = 'networkTopSourceFlow-top-talkers';
+export const NetworkTopCountriesTableId = 'networkTopCountries-top-talkers';
 
 const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTableProps>(
   ({
@@ -105,8 +105,8 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
         const field = last(splitField);
         const newSortDirection =
           field !== topCountriesSort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-        const newTopCountriesSort: NetworkTopCountriesSortField = {
-          field: field as NetworkTopCountriesFields,
+        const newTopCountriesSort: NetworkTopNFlowSortField = {
+          field: field as NetworkTopNFlowFields,
           direction: newSortDirection,
         };
         if (!isEqual(newTopCountriesSort, topCountriesSort)) {
@@ -123,16 +123,16 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     let headerTitle: string;
 
     if (flowTargeted === FlowTargetNew.source) {
-      headerTitle = i18n.SOURCE_IP;
+      headerTitle = i18n.SOURCE_COUNTRIES;
       tableType = networkModel.NetworkTableType.topCountriesSource;
     } else {
-      headerTitle = i18n.DESTINATION_IP;
+      headerTitle = i18n.DESTINATION_COUNTRIES;
       tableType = networkModel.NetworkTableType.topCountriesDestination;
     }
 
     const field =
-      topCountriesSort.field === NetworkTopCountriesFields.bytes_out ||
-      topCountriesSort.field === NetworkTopCountriesFields.bytes_in
+      topCountriesSort.field === NetworkTopNFlowFields.bytes_out ||
+      topCountriesSort.field === NetworkTopNFlowFields.bytes_in
         ? `node.network.${topCountriesSort.field}`
         : `node.${flowTargeted}.${topCountriesSort.field}`;
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { isEmpty } from 'lodash/fp';
 import { EuiToolTip } from '@elastic/eui';
 import countries from 'i18n-iso-countries';
@@ -47,3 +47,32 @@ export const CountryFlag = memo<{
 });
 
 CountryFlag.displayName = 'CountryFlag';
+
+/** Renders an emjoi flag with country name for the specified country code */
+export const CountryFlagAndName = memo<{
+  countryCode: string;
+  displayCountryNameOnHover?: boolean;
+}>(({ countryCode, displayCountryNameOnHover = false }) => {
+  const [localesLoaded, setLocalesLoaded] = useState(false);
+  useEffect(() => {
+    if (isEmpty(countries.getNames('en'))) {
+      countries.registerLocale(countryJson);
+    }
+    setLocalesLoaded(true);
+  }, []);
+
+  const flag = getFlag(countryCode);
+
+  if (flag !== null && localesLoaded) {
+    return displayCountryNameOnHover ? (
+      <EuiToolTip position="top" content={countries.getName(countryCode, 'en')}>
+        <span data-test-subj="country-flag">{flag}</span>
+      </EuiToolTip>
+    ) : (
+      <span data-test-subj="country-flag">{`${flag} ${countries.getName(countryCode, 'en')}`}</span>
+    );
+  }
+  return null;
+});
+
+CountryFlagAndName.displayName = 'CountryFlagAndName';

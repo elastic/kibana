@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GeoItem, NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
+import { NetworkTopCountriesData, NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { SearchHit, TotalValue } from '../types';
 
 export interface NetworkAdapter {
+  getNetworkTopCountries(
+    req: FrameworkRequest,
+    options: RequestOptionsPaginated
+  ): Promise<NetworkTopCountriesData>;
   getNetworkTopNFlow(
     req: FrameworkRequest,
     options: RequestOptionsPaginated
@@ -85,8 +89,8 @@ export interface NetworkTopCountriesBuckets {
     value: number;
   };
   flows: number;
-  destination_ips?: number;
-  source_ips?: number;
+  destination_ips: number;
+  source_ips: number;
 }
 
 export interface NetworkTopNFlowData extends SearchHit {

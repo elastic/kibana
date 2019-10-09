@@ -1489,11 +1489,13 @@ export interface NetworkTopCountriesItem {
 export interface TopCountriesItemSource {
   country?: Maybe<string>;
 
-  location?: Maybe<GeoItem>;
+  destination_ips?: Maybe<number>;
 
   flows?: Maybe<number>;
 
-  destination_ips?: Maybe<number>;
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
 }
 
 export interface GeoItem {
@@ -1505,9 +1507,11 @@ export interface GeoItem {
 export interface TopCountriesItemDestination {
   country?: Maybe<string>;
 
-  location?: Maybe<GeoItem>;
+  destination_ips?: Maybe<number>;
 
   flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
 
   source_ips?: Maybe<number>;
 }
@@ -6457,11 +6461,13 @@ export namespace TopCountriesItemSourceResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TopCountriesItemSource> {
     country?: CountryResolver<Maybe<string>, TypeParent, TContext>;
 
-    location?: LocationResolver<Maybe<GeoItem>, TypeParent, TContext>;
+    destination_ips?: DestinationIpsResolver<Maybe<number>, TypeParent, TContext>;
 
     flows?: FlowsResolver<Maybe<number>, TypeParent, TContext>;
 
-    destination_ips?: DestinationIpsResolver<Maybe<number>, TypeParent, TContext>;
+    location?: LocationResolver<Maybe<GeoItem>, TypeParent, TContext>;
+
+    source_ips?: SourceIpsResolver<Maybe<number>, TypeParent, TContext>;
   }
 
   export type CountryResolver<
@@ -6469,8 +6475,8 @@ export namespace TopCountriesItemSourceResolvers {
     Parent = TopCountriesItemSource,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type LocationResolver<
-    R = Maybe<GeoItem>,
+  export type DestinationIpsResolver<
+    R = Maybe<number>,
     Parent = TopCountriesItemSource,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6479,7 +6485,12 @@ export namespace TopCountriesItemSourceResolvers {
     Parent = TopCountriesItemSource,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type DestinationIpsResolver<
+  export type LocationResolver<
+    R = Maybe<GeoItem>,
+    Parent = TopCountriesItemSource,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SourceIpsResolver<
     R = Maybe<number>,
     Parent = TopCountriesItemSource,
     TContext = SiemContext
@@ -6509,9 +6520,11 @@ export namespace TopCountriesItemDestinationResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TopCountriesItemDestination> {
     country?: CountryResolver<Maybe<string>, TypeParent, TContext>;
 
-    location?: LocationResolver<Maybe<GeoItem>, TypeParent, TContext>;
+    destination_ips?: DestinationIpsResolver<Maybe<number>, TypeParent, TContext>;
 
     flows?: FlowsResolver<Maybe<number>, TypeParent, TContext>;
+
+    location?: LocationResolver<Maybe<GeoItem>, TypeParent, TContext>;
 
     source_ips?: SourceIpsResolver<Maybe<number>, TypeParent, TContext>;
   }
@@ -6521,13 +6534,18 @@ export namespace TopCountriesItemDestinationResolvers {
     Parent = TopCountriesItemDestination,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type LocationResolver<
-    R = Maybe<GeoItem>,
+  export type DestinationIpsResolver<
+    R = Maybe<number>,
     Parent = TopCountriesItemDestination,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type FlowsResolver<
     R = Maybe<number>,
+    Parent = TopCountriesItemDestination,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type LocationResolver<
+    R = Maybe<GeoItem>,
     Parent = TopCountriesItemDestination,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

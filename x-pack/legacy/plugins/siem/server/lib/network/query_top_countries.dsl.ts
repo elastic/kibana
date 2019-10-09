@@ -7,17 +7,17 @@
 import {
   Direction,
   FlowTargetNew,
-  NetworkTopCountriesSortField,
-  NetworkTopCountriesFields,
+  NetworkTopNFlowSortField,
+  NetworkTopNFlowFields,
 } from '../../graphql/types';
 import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopCountriesRequestOptions } from './index';
 
 const getCountAgg = (flowTarget: FlowTargetNew) => ({
-  top_n_flow_count: {
+  top_countries_count: {
     cardinality: {
-      field: `${flowTarget}.ip`,
+      field: `${flowTarget}.geo.country_iso_code`,
     },
   },
 });
@@ -60,13 +60,13 @@ export const buildTopCountriesQuery = ({
 };
 
 const getFlowTargetAggs = (
-  networkTopCountriesSortField: NetworkTopCountriesSortField,
+  networkTopCountriesSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTargetNew,
   querySize: number
 ) => ({
   [flowTarget]: {
     terms: {
-      field: `${flowTarget}.ip`,
+      field: `${flowTarget}.geo.country_iso_code`,
       size: querySize,
       order: {
         ...getQueryOrder(networkTopCountriesSortField),
@@ -83,59 +83,19 @@ const getFlowTargetAggs = (
           field: `${flowTarget}.bytes`,
         },
       },
-      domain: {
-        terms: {
-          field: `${flowTarget}.domain`,
-          order: {
-            timestamp: 'desc',
-          },
-        },
-        aggs: {
-          timestamp: {
-            max: {
-              field: '@timestamp',
-            },
-          },
-        },
-      },
-      location: {
-        filter: {
-          exists: {
-            field: `${flowTarget}.geo`,
-          },
-        },
-        aggs: {
-          top_geo: {
-            top_hits: {
-              _source: `${flowTarget}.geo.*`,
-              size: 1,
-            },
-          },
-        },
-      },
-      autonomous_system: {
-        filter: {
-          exists: {
-            field: `${flowTarget}.as`,
-          },
-        },
-        aggs: {
-          top_as: {
-            top_hits: {
-              _source: `${flowTarget}.as.*`,
-              size: 1,
-            },
-          },
-        },
-      },
       flows: {
         cardinality: {
           field: 'network.community_id',
         },
       },
-      [`${getOppositeField(flowTarget)}_ips`]: {
+      source_ips: {
         cardinality: {
-          field: `${getOppositeField(flowTarget)}.ip`,
+          field: 'source.ip',
+        },
+      },
+      destination_ips: {
+        cardinality: {
+          field: 'destination.ip',
         },
       },
     },
@@ -159,17 +119,17 @@ type QueryOrder =
   | { destination_ips: Direction }
   | { source_ips: Direction };
 
-const getQueryOrder = (networkTopCountriesSortField: NetworkTopCountriesSortField): QueryOrder => {
+const getQueryOrder = (networkTopCountriesSortField: NetworkTopNFlowSortField): QueryOrder => {
   switch (networkTopCountriesSortField.field) {
-    case NetworkTopCountriesFields.bytes_in:
+    case NetworkTopNFlowFields.bytes_in:
       return { bytes_in: networkTopCountriesSortField.direction };
-    case NetworkTopCountriesFields.bytes_out:
+    case NetworkTopNFlowFields.bytes_out:
       return { bytes_out: networkTopCountriesSortField.direction };
-    case NetworkTopCountriesFields.flows:
+    case NetworkTopNFlowFields.flows:
       return { flows: networkTopCountriesSortField.direction };
-    case NetworkTopCountriesFields.destination_ips:
+    case NetworkTopNFlowFields.destination_ips:
       return { destination_ips: networkTopCountriesSortField.direction };
-    case NetworkTopCountriesFields.source_ips:
+    case NetworkTopNFlowFields.source_ips:
       return { source_ips: networkTopCountriesSortField.direction };
   }
   assertUnreachable(networkTopCountriesSortField.field);

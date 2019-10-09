@@ -20,12 +20,17 @@ import { LastEventTime } from '../../components/last_event_time';
 import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_network_table';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { manageQuery } from '../../components/page/manage_query';
-import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
-import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
+import {
+  KpiNetworkComponent,
+  NetworkDnsTable,
+  NetworkTopCountriesTable,
+  NetworkTopNFlowTable,
+} from '../../components/page/network';
 import { GlobalTime } from '../../containers/global_time';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { NetworkFilter } from '../../containers/network';
 import { NetworkDnsQuery } from '../../containers/network_dns';
+import { NetworkTopCountriesQuery } from '../../containers/network_top_countries';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { FlowTargetNew, LastEventIndexKey } from '../../graphql/types';
@@ -37,6 +42,7 @@ import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 
+const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
@@ -212,6 +218,100 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                             />
                           )}
                         </NetworkTopNFlowQuery>
+                      </EuiFlexItem>
+                    </ConditionalFlexGroup>
+
+                    <EuiSpacer />
+
+                    <ConditionalFlexGroup direction="column">
+                      <EuiFlexItem>
+                        <NetworkTopCountriesQuery
+                          endDate={to}
+                          flowTarget={FlowTargetNew.source}
+                          filterQuery={filterQuery}
+                          skip={isInitializing}
+                          sourceId="default"
+                          startDate={from}
+                          type={networkModel.NetworkType.page}
+                        >
+                          {({
+                            id,
+                            inspect,
+                            isInspected,
+                            loading,
+                            loadPage,
+                            networkTopCountries,
+                            pageInfo,
+                            refetch,
+                            totalCount,
+                          }) => (
+                            <NetworkTopCountriesTableManage
+                              data={networkTopCountries}
+                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                              flowTargeted={FlowTargetNew.source}
+                              id={id}
+                              indexPattern={indexPattern}
+                              inspect={inspect}
+                              isInspect={isInspected}
+                              loading={loading}
+                              loadPage={loadPage}
+                              refetch={refetch}
+                              setQuery={setQuery}
+                              showMorePagesIndicator={getOr(
+                                false,
+                                'showMorePagesIndicator',
+                                pageInfo
+                              )}
+                              totalCount={totalCount}
+                              type={networkModel.NetworkType.page}
+                            />
+                          )}
+                        </NetworkTopCountriesQuery>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem>
+                        <NetworkTopCountriesQuery
+                          endDate={to}
+                          flowTarget={FlowTargetNew.destination}
+                          filterQuery={filterQuery}
+                          skip={isInitializing}
+                          sourceId="default"
+                          startDate={from}
+                          type={networkModel.NetworkType.page}
+                        >
+                          {({
+                            id,
+                            inspect,
+                            isInspected,
+                            loading,
+                            loadPage,
+                            networkTopCountries,
+                            pageInfo,
+                            refetch,
+                            totalCount,
+                          }) => (
+                            <NetworkTopCountriesTableManage
+                              data={networkTopCountries}
+                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                              flowTargeted={FlowTargetNew.destination}
+                              id={id}
+                              indexPattern={indexPattern}
+                              inspect={inspect}
+                              isInspect={isInspected}
+                              loading={loading}
+                              loadPage={loadPage}
+                              refetch={refetch}
+                              setQuery={setQuery}
+                              showMorePagesIndicator={getOr(
+                                false,
+                                'showMorePagesIndicator',
+                                pageInfo
+                              )}
+                              totalCount={totalCount}
+                              type={networkModel.NetworkType.page}
+                            />
+                          )}
+                        </NetworkTopCountriesQuery>
                       </EuiFlexItem>
                     </ConditionalFlexGroup>
 

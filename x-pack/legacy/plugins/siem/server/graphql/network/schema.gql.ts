@@ -35,15 +35,17 @@ export const networkSchema = gql`
 
   type TopCountriesItemSource {
     country: String
-    location: GeoItem
-    flows: Float
     destination_ips: Float
+    flows: Float
+    location: GeoItem
+    source_ips: Float
   }
 
   type TopCountriesItemDestination {
     country: String
-    location: GeoItem
+    destination_ips: Float
     flows: Float
+    location: GeoItem
     source_ips: Float
   }
 
