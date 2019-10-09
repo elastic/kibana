@@ -135,7 +135,7 @@ export default function({ getService }: FtrProviderContext) {
           const params = makeApiParams(testMonitorId, [{ match: { 'monitor.ip': nonSummaryIp } }]);
 
           const nonSummaryRes = await getMonitorStates(params);
-          expect(nonSummaryRes.monitorStates.summaries.length).to.eql(numIps);
+          expect(nonSummaryRes.monitorStates.summaries.length).to.eql(1);
         });
 
         it('should not match non summary documents if the check status does not match the document status', async () => {
