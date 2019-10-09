@@ -10,9 +10,9 @@ import {
   MetricsExplorerChartOptions,
   MetricsExplorerTimeOptions,
 } from '../../public/containers/metrics_explorer/use_metrics_explorer_options';
+import { SavedViewSavedObject } from '../../public/hooks/use_saved_view';
 
 interface MetricsExplorerSavedView {
-  name: string;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
   currentTimerange: MetricsExplorerTimeOptions;
@@ -21,7 +21,9 @@ interface MetricsExplorerSavedView {
 export const metricsExplorerViewSavedObjectType = 'metrics-explorer-view';
 
 export const metricsExplorerViewSavedObjectMappings: {
-  [metricsExplorerViewSavedObjectType]: ElasticsearchMappingOf<MetricsExplorerSavedView>;
+  [metricsExplorerViewSavedObjectType]: ElasticsearchMappingOf<
+    SavedViewSavedObject<MetricsExplorerSavedView>
+  >;
 } = {
   [metricsExplorerViewSavedObjectType]: {
     properties: {

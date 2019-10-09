@@ -5,28 +5,25 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { SavedObjectAttributes } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { useFindSavedObject } from './use_find_saved_object';
 import { useCreateSavedObject } from './use_create_saved_object';
 import { useDeleteSavedObject } from './use_delete_saved_object';
 
-export interface SavedView {
+export type SavedView<ViewState> = ViewState & {
   name: string;
   id: string;
   isDefault?: boolean;
-}
+};
 
-export interface SavedViewSavedObject extends SavedObjectAttributes {
-  type: string;
+export type SavedViewSavedObject<ViewState> = ViewState & {
   name: string;
-  [p: string]: any;
-}
+};
 
 export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: string) => {
-  const { data, loading, find, error: errorOnFind } = useFindSavedObject<SavedViewSavedObject>(
-    viewType
-  );
+  const { data, loading, find, error: errorOnFind } = useFindSavedObject<
+    SavedViewSavedObject<ViewState>
+  >(viewType);
   const { create, error: errorOnCreate } = useCreateSavedObject(viewType);
   const { deleteObject, deletedId } = useDeleteSavedObject(viewType);
   const deleteView = useCallback((id: string) => deleteObject(id), []);
@@ -34,7 +31,7 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
 
   const savedObjects = data ? data.savedObjects : [];
   const views = useMemo(() => {
-    const items: SavedView[] = [
+    const items: Array<SavedView<ViewState>> = [
       {
         name: i18n.translate('xpack.infra.savedView.defaultViewName', {
           defaultMessage: 'Default',

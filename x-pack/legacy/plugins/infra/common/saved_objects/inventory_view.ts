@@ -5,23 +5,18 @@
  */
 
 import { ElasticsearchMappingOf } from '../../server/utils/typed_elasticsearch_mappings';
-import { SavedView } from '../../public/containers/waffle/with_waffle_view_state';
+import { WaffleViewState } from '../../public/containers/waffle/with_waffle_view_state';
 
 export const inventoryViewSavedObjectType = 'inventory-view';
+import { SavedViewSavedObject } from '../../public/hooks/use_saved_view';
 
 export const inventoryViewSavedObjectMappings: {
-  [inventoryViewSavedObjectType]: ElasticsearchMappingOf<SavedView>;
+  [inventoryViewSavedObjectType]: ElasticsearchMappingOf<SavedViewSavedObject<WaffleViewState>>;
 } = {
   [inventoryViewSavedObjectType]: {
     properties: {
       name: {
         type: 'keyword',
-      },
-      id: {
-        type: 'keyword',
-      },
-      isDefault: {
-        type: 'boolean',
       },
       metric: {
         properties: {
