@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { JsonEditor } from '../json_editor';
 import {
@@ -20,17 +20,23 @@ interface Props {
   defaultValue?: { [key: string]: any };
 }
 
-export const MappingsEditor = React.memo(({ onUpdate, defaultValue = {} }: Props) => {
-  const configurationDefaultValue = Object.entries(defaultValue)
-    .filter(([key]) => CONFIGURATION_FIELDS.includes(key))
-    .reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: value,
-      }),
-      {} as Types['MappingsConfiguration']
-    );
-  const fieldsDefaultValue = defaultValue.properties || {};
+export const MappingsEditor = React.memo(({ onUpdate, defaultValue }: Props) => {
+  const configurationDefaultValue = useMemo(
+    () =>
+      defaultValue === undefined
+        ? ({} as Types['MappingsConfiguration'])
+        : Object.entries(defaultValue)
+            .filter(([key]) => CONFIGURATION_FIELDS.includes(key))
+            .reduce(
+              (acc, [key, value]) => ({
+                ...acc,
+                [key]: value,
+              }),
+              {} as Types['MappingsConfiguration']
+            ),
+    [defaultValue]
+  );
+  const fieldsDefaultValue = defaultValue === undefined ? {} : defaultValue.properties;
 
   // Temporary logic
   const onJsonEditorUpdate = (args: any) => {

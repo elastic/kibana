@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { isJSON } from '../../../../../../../src/plugins/es_ui_shared/static/validators/string';
 
 export type OnUpdateHandler<T = { [key: string]: any }> = (arg: {
-  getData(): T;
+  data: {
+    raw: string;
+    format(): T;
+  };
   validate(): boolean;
   isValid: boolean;
 }) => void;
@@ -45,7 +48,7 @@ export const useJson = <T extends object = { [key: string]: any }>({
     return isValid;
   };
 
-  const getData = () => {
+  const formatContent = () => {
     const isValid = validate();
     const data = isValid && content.trim() !== '' ? JSON.parse(content) : {};
     return data as T;
@@ -54,7 +57,10 @@ export const useJson = <T extends object = { [key: string]: any }>({
   useEffect(() => {
     const isValid = validate();
     onUpdate({
-      getData,
+      data: {
+        raw: content,
+        format: formatContent,
+      },
       validate,
       isValid,
     });
