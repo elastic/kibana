@@ -60,7 +60,8 @@ export function lspRoute(
               method: `textDocument/${method}`,
               params: req.body,
             });
-            return await promiseTimeout(serverOptions.lsp.requestTimeoutMs, requestPromise);
+            const result = await promiseTimeout(serverOptions.lsp.requestTimeoutMs, requestPromise);
+            return res.ok({ body: result });
           } catch (error) {
             if (error instanceof ResponseError) {
               // hide some errors;
