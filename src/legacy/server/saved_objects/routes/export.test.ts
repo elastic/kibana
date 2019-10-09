@@ -164,6 +164,7 @@ describe('POST /api/saved_objects/_export', () => {
               "savedObjectsClient": Object {
                 "bulkCreate": [MockFunction],
                 "bulkGet": [MockFunction],
+                "bulkUpdate": [MockFunction],
                 "create": [MockFunction],
                 "delete": [MockFunction],
                 "errors": Object {},
