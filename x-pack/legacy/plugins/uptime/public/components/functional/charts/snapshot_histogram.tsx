@@ -113,12 +113,12 @@ export const SnapshotHistogramComponent = ({
   return (
     <>
       <EuiTitle size="xs">
-        <h5>
+        <h2>
           <FormattedMessage
             id="xpack.uptime.snapshot.pingsOverTimeTitle"
             defaultMessage="Pings over time"
           />
-        </h5>
+        </h2>
       </EuiTitle>
       <ChartWrapper
         height={height}

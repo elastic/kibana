@@ -56,7 +56,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
           // @ts-ignore attr does not expect a param of type Arc<Arc> but it behaves as desired
           d3.svg
             .arc()
-            .innerRadius(width * 0.2)
+            .innerRadius(width * 0.28)
             .outerRadius(Math.min(width, height) / 2 - 10)
         )
         .attr('fill', (d: any) => color(d.data.key));

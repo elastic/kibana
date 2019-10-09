@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { DonutChart } from './charts';
@@ -13,8 +13,8 @@ import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { snapshotQuery } from '../../queries';
 import { ChartWrapper } from './charts/chart_wrapper';
 
-const SNAPSHOT_CHART_WIDTH = 128;
-const SNAPSHOT_CHART_HEIGHT = 128;
+const SNAPSHOT_CHART_WIDTH = 144;
+const SNAPSHOT_CHART_HEIGHT = 144;
 
 interface SnapshotQueryResult {
   snapshot?: SnapshotType;
@@ -31,26 +31,20 @@ export const SnapshotComponent = ({
 }: UptimeGraphQLQueryProps<SnapshotQueryResult>) => (
   <ChartWrapper loading={loading}>
     <EuiTitle size="xs">
-      <h5>
+      <h2>
         <FormattedMessage
           id="xpack.uptime.snapshot.endpointStatusTitle"
           defaultMessage="Current status"
         />
-      </h5>
+      </h2>
     </EuiTitle>
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <DonutChart
-          up={data && data.snapshot ? data.snapshot.counts.up : 0}
-          down={data && data.snapshot ? data.snapshot.counts.down : 0}
-          height={SNAPSHOT_CHART_HEIGHT}
-          width={SNAPSHOT_CHART_WIDTH}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiSpacer size="xs" />
+    <DonutChart
+      up={data && data.snapshot ? data.snapshot.counts.up : 0}
+      down={data && data.snapshot ? data.snapshot.counts.down : 0}
+      height={SNAPSHOT_CHART_HEIGHT}
+      width={SNAPSHOT_CHART_WIDTH}
+    />
   </ChartWrapper>
 );
 

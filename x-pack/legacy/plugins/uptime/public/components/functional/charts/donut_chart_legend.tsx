@@ -34,7 +34,7 @@ export const DonutChartLegend = ({ down, up }: Props) => {
           defaultMessage: 'Down',
         })}
       />
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="m" />
       <DonutChartLegendRow
         color={gray}
         content={up}
