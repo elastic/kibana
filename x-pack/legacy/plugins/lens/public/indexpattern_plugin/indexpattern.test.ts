@@ -5,6 +5,7 @@
  */
 
 import chromeMock from 'ui/chrome';
+
 import { Storage } from 'ui/storage';
 import {
   getIndexPatternDatasource,
@@ -15,6 +16,7 @@ import {
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
+import { Plugin as DataPlugin } from '../../../../../../src/plugins/data/public';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -135,6 +137,7 @@ describe('IndexPattern Data Source', () => {
       chrome: chromeMock,
       storage: {} as Storage,
       core: coreMock.createStart(),
+      data: {} as ReturnType<DataPlugin['start']>,
     });
 
     persistedState = {

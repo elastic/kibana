@@ -14,8 +14,6 @@ import {
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-import { npStart } from 'ui/new_platform';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import {
   IndexPatternColumn,
@@ -157,22 +155,12 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           );
         }}
       >
-        <KibanaContextProvider
-          services={{
-            appName: 'lens',
-            store: props.storage,
-            uiSettings: props.uiSettings,
-            data: npStart.plugins.data,
-            savedObjects: npStart.core.savedObjects,
-          }}
-        >
-          <PopoverEditor
-            {...props}
-            currentIndexPattern={currentIndexPattern}
-            selectedColumn={selectedColumn}
-            operationFieldSupportMatrix={operationFieldSupportMatrix}
-          />
-        </KibanaContextProvider>
+        <PopoverEditor
+          {...props}
+          currentIndexPattern={currentIndexPattern}
+          selectedColumn={selectedColumn}
+          operationFieldSupportMatrix={operationFieldSupportMatrix}
+        />
         {selectedColumn && (
           <EuiButtonIcon
             data-test-subj="indexPattern-dimensionPopover-remove"
