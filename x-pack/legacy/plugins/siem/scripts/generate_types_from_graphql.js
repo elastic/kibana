@@ -29,7 +29,7 @@ async function main() {
       schema: SCHEMA_PATH,
       generates: {
         [OUTPUT_INTROSPECTION_PATH]: {
-          plugins: ['typescript'],
+          plugins: ['introspection'],
         },
       },
     },
