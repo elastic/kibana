@@ -1,0 +1,29 @@
+{
+  "transform.put_transform": {
+    "data_autocomplete_rules": {
+      "description": "",
+      "dest": {
+        "index": "",
+        "pipeline": ""
+      },
+      "frequency": "1m",
+      "pivot": {
+        "group_by": {
+          "__template": {
+            "NAME": {},
+            "__scope_link": "GLOBAL.groupByAggs"
+          }
+        }
+      },
+      "source": {
+        "__template": {
+          "index": ""
+        },
+        "index": "",
+        "query": {
+          "__scope_link": "GLOBAL.query"
+        }
+      }
+    }
+  }
+}

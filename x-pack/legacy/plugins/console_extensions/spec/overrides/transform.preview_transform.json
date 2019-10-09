@@ -1,0 +1,23 @@
+{
+  "transform.preview_transform": {
+    "data_autocomplete_rules": {
+      "source": {
+        "__template": {
+          "index": ""
+        },
+        "index": "",
+        "query": {
+          "__scope_link": "GLOBAL.query"
+       }
+      },
+      "pivot": {
+        "group_by": {
+          "__template": {
+            "NAME": {},
+            "__scope_link": "GLOBAL.groupByAggs"
+          }
+        }
+      }
+    }
+  }
+}

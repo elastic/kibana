@@ -1,0 +1,7 @@
+{
+  "transform.get_transform_stats": {
+    "patterns": [
+      "_transform/_stats"
+    ]
+  }
+}
