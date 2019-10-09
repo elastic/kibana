@@ -31,12 +31,6 @@ export interface TaskManagerOpts {
   serializer: SavedObjectsSerializer;
 }
 
-function generateTaskManagerUUID(logger: Logger): string {
-  const taskManagerUUID = uuid.v4();
-  logger.info(`Initialising Task Manager with UUID: ${taskManagerUUID}`);
-  return taskManagerUUID;
-}
-
 /*
  * The TaskManager is the public interface into the task manager system. This glues together
  * all of the disparate modules in one integration point. The task manager operates in two different ways:
@@ -76,6 +70,15 @@ export class TaskManager {
     this.definitions = {};
     this.logger = opts.logger;
 
+    const taskManagerId = opts.config.get('server.uuid');
+    if (!taskManagerId) {
+      this.logger.error(
+        `TaskManager is unable to start as there the Kibana UUID is invalid (value of the "server.uuid" configuration is ${taskManagerId})`
+      );
+    } else {
+      this.logger.info(`TaskManager is identified by the UUID: ${taskManagerId}`);
+    }
+
     /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
      * to initialize, and can change after startup */
     const store = new TaskStore({
@@ -85,7 +88,7 @@ export class TaskManager {
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
-      taskManagerId: generateTaskManagerUUID(this.logger),
+      taskManagerId,
     });
 
     const pool = new TaskPool({
