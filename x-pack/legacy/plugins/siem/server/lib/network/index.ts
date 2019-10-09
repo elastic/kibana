@@ -21,6 +21,10 @@ export interface NetworkTopNFlowRequestOptions extends RequestOptionsPaginated {
   flowTarget: FlowTargetNew;
 }
 
+export interface NetworkTopCountriesRequestOptions extends RequestOptionsPaginated {
+  flowTarget: FlowTargetNew;
+}
+
 export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
   isPtrIncluded: boolean;
   networkDnsSortField: NetworkDnsSortField;

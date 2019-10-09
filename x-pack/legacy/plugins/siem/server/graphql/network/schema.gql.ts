@@ -33,6 +33,39 @@ export const networkSchema = gql`
     number: Float
   }
 
+  type TopCountriesItemSource {
+    country: String
+    location: GeoItem
+    flows: Float
+    destination_ips: Float
+  }
+
+  type TopCountriesItemDestination {
+    country: String
+    location: GeoItem
+    flows: Float
+    source_ips: Float
+  }
+
+  type NetworkTopCountriesItem {
+    _id: String
+    source: TopCountriesItemSource
+    destination: TopCountriesItemDestination
+    network: TopNFlowNetworkEcsField
+  }
+
+  type NetworkTopCountriesEdges {
+    node: NetworkTopCountriesItem!
+    cursor: CursorType!
+  }
+
+  type NetworkTopCountriesData {
+    edges: [NetworkTopCountriesEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
+  }
+
   type TopNFlowItemSource {
     autonomous_system: AutonomousSystemItem
     domain: [String!]
@@ -118,7 +151,15 @@ export const networkSchema = gql`
   }
 
   extend type Source {
-    "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
+    NetworkTopCountries(
+      id: String
+      filterQuery: String
+      flowTarget: FlowTargetNew!
+      pagination: PaginationInputPaginated!
+      sort: NetworkTopNFlowSortField!
+      timerange: TimerangeInput!
+      defaultIndex: [String!]!
+    ): NetworkTopCountriesData!
     NetworkTopNFlow(
       id: String
       filterQuery: String

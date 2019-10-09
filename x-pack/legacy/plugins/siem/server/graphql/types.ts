@@ -444,7 +444,9 @@ export interface Source {
   KpiHosts: KpiHostsData;
 
   KpiHostDetails: KpiHostDetailsData;
-  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+
+  NetworkTopCountries: NetworkTopCountriesData;
+
   NetworkTopNFlow: NetworkTopNFlowData;
 
   NetworkDns: NetworkDnsData;
@@ -1458,6 +1460,64 @@ export interface KpiHostDetailsData {
   inspect?: Maybe<Inspect>;
 }
 
+export interface NetworkTopCountriesData {
+  edges: NetworkTopCountriesEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkTopCountriesEdges {
+  node: NetworkTopCountriesItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkTopCountriesItem {
+  _id?: Maybe<string>;
+
+  source?: Maybe<TopCountriesItemSource>;
+
+  destination?: Maybe<TopCountriesItemDestination>;
+
+  network?: Maybe<TopNFlowNetworkEcsField>;
+}
+
+export interface TopCountriesItemSource {
+  country?: Maybe<string>;
+
+  location?: Maybe<GeoItem>;
+
+  flows?: Maybe<number>;
+
+  destination_ips?: Maybe<number>;
+}
+
+export interface GeoItem {
+  geo?: Maybe<GeoEcsFields>;
+
+  flowTarget?: Maybe<FlowTarget>;
+}
+
+export interface TopCountriesItemDestination {
+  country?: Maybe<string>;
+
+  location?: Maybe<GeoItem>;
+
+  flows?: Maybe<number>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface TopNFlowNetworkEcsField {
+  bytes_in?: Maybe<number>;
+
+  bytes_out?: Maybe<number>;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1504,12 +1564,6 @@ export interface AutonomousSystemItem {
   number?: Maybe<number>;
 }
 
-export interface GeoItem {
-  geo?: Maybe<GeoEcsFields>;
-
-  flowTarget?: Maybe<FlowTarget>;
-}
-
 export interface TopNFlowItemDestination {
   autonomous_system?: Maybe<AutonomousSystemItem>;
 
@@ -1522,12 +1576,6 @@ export interface TopNFlowItemDestination {
   flows?: Maybe<number>;
 
   source_ips?: Maybe<number>;
-}
-
-export interface TopNFlowNetworkEcsField {
-  bytes_in?: Maybe<number>;
-
-  bytes_out?: Maybe<number>;
 }
 
 export interface NetworkDnsData {
@@ -2068,6 +2116,21 @@ export interface KpiHostDetailsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface NetworkTopCountriesSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  flowTarget: FlowTargetNew;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkTopNFlowSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
 export interface NetworkTopNFlowSourceArgs {
   id?: Maybe<string>;
 
@@ -2547,7 +2610,13 @@ export namespace SourceResolvers {
     KpiHosts?: KpiHostsResolver<KpiHostsData, TypeParent, TContext>;
 
     KpiHostDetails?: KpiHostDetailsResolver<KpiHostDetailsData, TypeParent, TContext>;
-    /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+
+    NetworkTopCountries?: NetworkTopCountriesResolver<
+      NetworkTopCountriesData,
+      TypeParent,
+      TContext
+    >;
+
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, TContext>;
 
     NetworkDns?: NetworkDnsResolver<NetworkDnsData, TypeParent, TContext>;
@@ -2829,6 +2898,27 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+  }
+
+  export type NetworkTopCountriesResolver<
+    R = NetworkTopCountriesData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, NetworkTopCountriesArgs>;
+  export interface NetworkTopCountriesArgs {
+    id?: Maybe<string>;
+
+    filterQuery?: Maybe<string>;
+
+    flowTarget: FlowTargetNew;
+
+    pagination: PaginationInputPaginated;
+
+    sort: NetworkTopNFlowSortField;
+
+    timerange: TimerangeInput;
 
     defaultIndex: string[];
   }
@@ -6278,6 +6368,195 @@ export namespace KpiHostDetailsDataResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
+export namespace NetworkTopCountriesDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = NetworkTopCountriesData> {
+    edges?: EdgesResolver<NetworkTopCountriesEdges[], TypeParent, TContext>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+  }
+
+  export type EdgesResolver<
+    R = NetworkTopCountriesEdges[],
+    Parent = NetworkTopCountriesData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = NetworkTopCountriesData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = NetworkTopCountriesData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = NetworkTopCountriesData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace NetworkTopCountriesEdgesResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = NetworkTopCountriesEdges> {
+    node?: NodeResolver<NetworkTopCountriesItem, TypeParent, TContext>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
+  }
+
+  export type NodeResolver<
+    R = NetworkTopCountriesItem,
+    Parent = NetworkTopCountriesEdges,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = NetworkTopCountriesEdges,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace NetworkTopCountriesItemResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = NetworkTopCountriesItem> {
+    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
+
+    source?: SourceResolver<Maybe<TopCountriesItemSource>, TypeParent, TContext>;
+
+    destination?: DestinationResolver<Maybe<TopCountriesItemDestination>, TypeParent, TContext>;
+
+    network?: NetworkResolver<Maybe<TopNFlowNetworkEcsField>, TypeParent, TContext>;
+  }
+
+  export type _IdResolver<
+    R = Maybe<string>,
+    Parent = NetworkTopCountriesItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SourceResolver<
+    R = Maybe<TopCountriesItemSource>,
+    Parent = NetworkTopCountriesItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DestinationResolver<
+    R = Maybe<TopCountriesItemDestination>,
+    Parent = NetworkTopCountriesItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type NetworkResolver<
+    R = Maybe<TopNFlowNetworkEcsField>,
+    Parent = NetworkTopCountriesItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace TopCountriesItemSourceResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = TopCountriesItemSource> {
+    country?: CountryResolver<Maybe<string>, TypeParent, TContext>;
+
+    location?: LocationResolver<Maybe<GeoItem>, TypeParent, TContext>;
+
+    flows?: FlowsResolver<Maybe<number>, TypeParent, TContext>;
+
+    destination_ips?: DestinationIpsResolver<Maybe<number>, TypeParent, TContext>;
+  }
+
+  export type CountryResolver<
+    R = Maybe<string>,
+    Parent = TopCountriesItemSource,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type LocationResolver<
+    R = Maybe<GeoItem>,
+    Parent = TopCountriesItemSource,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FlowsResolver<
+    R = Maybe<number>,
+    Parent = TopCountriesItemSource,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DestinationIpsResolver<
+    R = Maybe<number>,
+    Parent = TopCountriesItemSource,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace GeoItemResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = GeoItem> {
+    geo?: GeoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
+
+    flowTarget?: FlowTargetResolver<Maybe<FlowTarget>, TypeParent, TContext>;
+  }
+
+  export type GeoResolver<
+    R = Maybe<GeoEcsFields>,
+    Parent = GeoItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FlowTargetResolver<
+    R = Maybe<FlowTarget>,
+    Parent = GeoItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace TopCountriesItemDestinationResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = TopCountriesItemDestination> {
+    country?: CountryResolver<Maybe<string>, TypeParent, TContext>;
+
+    location?: LocationResolver<Maybe<GeoItem>, TypeParent, TContext>;
+
+    flows?: FlowsResolver<Maybe<number>, TypeParent, TContext>;
+
+    source_ips?: SourceIpsResolver<Maybe<number>, TypeParent, TContext>;
+  }
+
+  export type CountryResolver<
+    R = Maybe<string>,
+    Parent = TopCountriesItemDestination,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type LocationResolver<
+    R = Maybe<GeoItem>,
+    Parent = TopCountriesItemDestination,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FlowsResolver<
+    R = Maybe<number>,
+    Parent = TopCountriesItemDestination,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SourceIpsResolver<
+    R = Maybe<number>,
+    Parent = TopCountriesItemDestination,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace TopNFlowNetworkEcsFieldResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = TopNFlowNetworkEcsField> {
+    bytes_in?: BytesInResolver<Maybe<number>, TypeParent, TContext>;
+
+    bytes_out?: BytesOutResolver<Maybe<number>, TypeParent, TContext>;
+  }
+
+  export type BytesInResolver<
+    R = Maybe<number>,
+    Parent = TopNFlowNetworkEcsField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type BytesOutResolver<
+    R = Maybe<number>,
+    Parent = TopNFlowNetworkEcsField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 export namespace NetworkTopNFlowDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NetworkTopNFlowData> {
     edges?: EdgesResolver<NetworkTopNFlowEdges[], TypeParent, TContext>;
@@ -6429,25 +6708,6 @@ export namespace AutonomousSystemItemResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace GeoItemResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = GeoItem> {
-    geo?: GeoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
-
-    flowTarget?: FlowTargetResolver<Maybe<FlowTarget>, TypeParent, TContext>;
-  }
-
-  export type GeoResolver<
-    R = Maybe<GeoEcsFields>,
-    Parent = GeoItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FlowTargetResolver<
-    R = Maybe<FlowTarget>,
-    Parent = GeoItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace TopNFlowItemDestinationResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TopNFlowItemDestination> {
     autonomous_system?: AutonomousSystemResolver<Maybe<AutonomousSystemItem>, TypeParent, TContext>;
@@ -6491,25 +6751,6 @@ export namespace TopNFlowItemDestinationResolvers {
   export type SourceIpsResolver<
     R = Maybe<number>,
     Parent = TopNFlowItemDestination,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace TopNFlowNetworkEcsFieldResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = TopNFlowNetworkEcsField> {
-    bytes_in?: BytesInResolver<Maybe<number>, TypeParent, TContext>;
-
-    bytes_out?: BytesOutResolver<Maybe<number>, TypeParent, TContext>;
-  }
-
-  export type BytesInResolver<
-    R = Maybe<number>,
-    Parent = TopNFlowNetworkEcsField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type BytesOutResolver<
-    R = Maybe<number>,
-    Parent = TopNFlowNetworkEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -7846,14 +8087,19 @@ export type IResolvers<TContext = SiemContext> = {
   KpiHostsData?: KpiHostsDataResolvers.Resolvers<TContext>;
   KpiHostHistogramData?: KpiHostHistogramDataResolvers.Resolvers<TContext>;
   KpiHostDetailsData?: KpiHostDetailsDataResolvers.Resolvers<TContext>;
+  NetworkTopCountriesData?: NetworkTopCountriesDataResolvers.Resolvers<TContext>;
+  NetworkTopCountriesEdges?: NetworkTopCountriesEdgesResolvers.Resolvers<TContext>;
+  NetworkTopCountriesItem?: NetworkTopCountriesItemResolvers.Resolvers<TContext>;
+  TopCountriesItemSource?: TopCountriesItemSourceResolvers.Resolvers<TContext>;
+  GeoItem?: GeoItemResolvers.Resolvers<TContext>;
+  TopCountriesItemDestination?: TopCountriesItemDestinationResolvers.Resolvers<TContext>;
+  TopNFlowNetworkEcsField?: TopNFlowNetworkEcsFieldResolvers.Resolvers<TContext>;
   NetworkTopNFlowData?: NetworkTopNFlowDataResolvers.Resolvers<TContext>;
   NetworkTopNFlowEdges?: NetworkTopNFlowEdgesResolvers.Resolvers<TContext>;
   NetworkTopNFlowItem?: NetworkTopNFlowItemResolvers.Resolvers<TContext>;
   TopNFlowItemSource?: TopNFlowItemSourceResolvers.Resolvers<TContext>;
   AutonomousSystemItem?: AutonomousSystemItemResolvers.Resolvers<TContext>;
-  GeoItem?: GeoItemResolvers.Resolvers<TContext>;
   TopNFlowItemDestination?: TopNFlowItemDestinationResolvers.Resolvers<TContext>;
-  TopNFlowNetworkEcsField?: TopNFlowNetworkEcsFieldResolvers.Resolvers<TContext>;
   NetworkDnsData?: NetworkDnsDataResolvers.Resolvers<TContext>;
   NetworkDnsEdges?: NetworkDnsEdgesResolvers.Resolvers<TContext>;
   NetworkDnsItem?: NetworkDnsItemResolvers.Resolvers<TContext>;

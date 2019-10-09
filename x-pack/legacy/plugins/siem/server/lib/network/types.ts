@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
+import { GeoItem, NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { SearchHit, TotalValue } from '../types';
 
@@ -70,6 +70,20 @@ export interface NetworkTopNFlowBuckets {
     buckets: GenericBuckets[];
   };
   location: LocationHit<object>;
+  flows: number;
+  destination_ips?: number;
+  source_ips?: number;
+}
+
+export interface NetworkTopCountriesBuckets {
+  country: string;
+  key: string;
+  bytes_in: {
+    value: number;
+  };
+  bytes_out: {
+    value: number;
+  };
   flows: number;
   destination_ips?: number;
   source_ips?: number;

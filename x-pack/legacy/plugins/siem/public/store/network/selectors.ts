@@ -28,8 +28,10 @@ export const dnsSelector = () =>
   );
 export enum NetworkTableType {
   dns = 'dns',
-  topNFlowSource = 'topNFlowSource',
+  topCountriesDestination = 'topCountriesDestination',
+  topCountriesSource = 'topCountriesSource',
   topNFlowDestination = 'topNFlowDestination',
+  topNFlowSource = 'topNFlowSource',
 }
 export const topNFlowSelector = (flowTarget: FlowTargetNew) =>
   createSelector(
@@ -38,6 +40,15 @@ export const topNFlowSelector = (flowTarget: FlowTargetNew) =>
       flowTarget === FlowTargetNew.source
         ? network.queries[NetworkTableType.topNFlowSource]
         : network.queries[NetworkTableType.topNFlowDestination]
+  );
+
+export const topCountriesSelector = (flowTarget: FlowTargetNew) =>
+  createSelector(
+    selectNetworkPage,
+    network =>
+      flowTarget === FlowTargetNew.source
+        ? network.queries[NetworkTableType.topCountriesSource]
+        : network.queries[NetworkTableType.topCountriesDestination]
   );
 
 // Filter Query Selectors

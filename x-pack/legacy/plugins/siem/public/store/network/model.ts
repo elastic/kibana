@@ -24,11 +24,17 @@ export enum NetworkTableType {
   dns = 'dns',
   topNFlowSource = 'topNFlowSource',
   topNFlowDestination = 'topNFlowDestination',
+  topCountriesSource = 'topCountriesSource',
+  topCountriesDestination = 'topCountriesDestination',
 }
 
 export type TopNTableType =
   | networkModel.NetworkTableType.topNFlowDestination
   | networkModel.NetworkTableType.topNFlowSource;
+
+export type TopCountriesTableType =
+  | networkModel.NetworkTableType.topCountriesSource
+  | networkModel.NetworkTableType.topCountriesDestination;
 
 export enum IpDetailsTableType {
   domains = 'domains',
@@ -46,6 +52,10 @@ export interface TopNFlowQuery extends BasicQueryPaginated {
   topNFlowSort: NetworkTopNFlowSortField;
 }
 
+export interface TopCountriesQuery extends BasicQueryPaginated {
+  topCountriesSort: NetworkTopNFlowSortField;
+}
+
 export interface DnsQuery extends BasicQueryPaginated {
   dnsSortField: NetworkDnsSortField;
   isPtrIncluded: boolean;
@@ -53,8 +63,10 @@ export interface DnsQuery extends BasicQueryPaginated {
 
 export interface NetworkQueries {
   [NetworkTableType.dns]: DnsQuery;
-  [NetworkTableType.topNFlowSource]: TopNFlowQuery;
+  [NetworkTableType.topCountriesDestination]: TopCountriesQuery;
+  [NetworkTableType.topCountriesSource]: TopCountriesQuery;
   [NetworkTableType.topNFlowDestination]: TopNFlowQuery;
+  [NetworkTableType.topNFlowSource]: TopNFlowQuery;
 }
 
 export interface NetworkPageModel {

@@ -24,7 +24,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index';
 import { buildDnsQuery } from './query_dns.dsl';
 import { buildTopNFlowQuery, getOppositeField } from './query_top_n_flow.dsl';
-import { NetworkAdapter, NetworkDnsBuckets, NetworkTopNFlowBuckets } from './types';
+import { NetworkAdapter, NetworkDnsBuckets, NetworkTopCountriesBuckets, NetworkTopNFlowBuckets } from './types';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -113,6 +113,16 @@ const getTopNFlowEdges = (
   );
 };
 
+const getTopCountriesEdges = (
+  response: DatabaseSearchResponse<NetworkTopCountriesData, TermAggregation>,
+  options: NetworkTopCountriesRequestOptions
+): NetworkTopCountriesEdges[] => {
+  return formatTopCountriesEdges(
+    getOr([], `aggregations.${options.flowTarget}.buckets`, response),
+    options.flowTarget
+  );
+};
+
 const getFlowTargetFromString = (flowAsString: string) =>
   flowAsString === 'source' ? FlowTarget.source : FlowTarget.destination;
 
@@ -164,6 +174,33 @@ const formatTopNFlowEdges = (
         ip: bucket.key,
         location: getGeoItem(bucket),
         autonomous_system: getAsItem(bucket),
+        flows: getOr(0, 'flows.value', bucket),
+        [`${getOppositeField(flowTarget)}_ips`]: getOr(
+          0,
+          `${getOppositeField(flowTarget)}_ips.value`,
+          bucket
+        ),
+      },
+      network: {
+        bytes_in: getOr(0, 'bytes_in.value', bucket),
+        bytes_out: getOr(0, 'bytes_out.value', bucket),
+      },
+    },
+    cursor: {
+      value: bucket.key,
+      tiebreaker: null,
+    },
+  }));
+
+const formatTopCountriesEdges = (
+  buckets: NetworkTopCountriesBuckets[],
+  flowTarget: FlowTargetNew
+): NetworkTopNFlowEdges[] =>
+  buckets.map((bucket: NetworkTopCountriesBuckets) => ({
+    node: {
+      _id: bucket.key,
+      [flowTarget]: {
+        country: bucket.key,
         flows: getOr(0, 'flows.value', bucket),
         [`${getOppositeField(flowTarget)}_ips`]: getOr(
           0,
