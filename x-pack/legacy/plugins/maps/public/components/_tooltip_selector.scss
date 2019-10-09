@@ -36,7 +36,7 @@
 .mapTooltipSelector__propertyContent {
   overflow: hidden;
   flex-grow: 1;
-  min-height: 24px;
+  min-height: $euiSizeL;
 }
 
 .mapTooltipSelector__propertyIcons {
