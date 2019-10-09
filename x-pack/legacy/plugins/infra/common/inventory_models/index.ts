@@ -8,4 +8,4 @@ import { host } from './host';
 import { pod } from './pod';
 import { container } from './container';
 
-export const models = [host, pod, container];
+export const inventoryModels = [host, pod, container];

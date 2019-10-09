@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { metricAggregationCreators } from './metric_aggregation_creators';
+import { get } from 'lodash';
+import { inventoryModels } from '../../../common/inventory_models/index';
 import { InfraSnapshotRequestOptions } from './snapshot';
 import { NAME_FIELDS } from '../constants';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
+import { SnapshotModelRT, SnapshotModel } from '../../../common/inventory_models/types';
 
 interface GroupBySource {
   [id: string]: {
@@ -37,8 +39,18 @@ export const getMetricsSources = (options: InfraSnapshotRequestOptions) => {
   return [{ id: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } } }];
 };
 
-export const getMetricsAggregations = (options: InfraSnapshotRequestOptions) => {
-  return metricAggregationCreators[options.metric.type](options.nodeType);
+export const getMetricsAggregations = (options: InfraSnapshotRequestOptions): SnapshotModel => {
+  const model = inventoryModels.find(m => m.id === options.nodeType);
+  if (!model) {
+    throw new Error("The nodeType you provided doesn't appear to be valid");
+  }
+  const aggregation = get(model, ['metrics', 'snapshot', options.metric.type]);
+  if (!SnapshotModelRT.is(aggregation)) {
+    throw new Error(
+      'The aggregation for the metric you requested is not available for this node type'
+    );
+  }
+  return aggregation;
 };
 
 export const getDateHistogramOffset = (options: InfraSnapshotRequestOptions): string => {
