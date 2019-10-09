@@ -21,6 +21,7 @@ import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
+  NotificationsSetup,
 } from 'src/core/public';
 import { Field, FieldList, FieldType } from './fields';
 import { createFlattenHitWrapper } from './index_patterns';
@@ -36,6 +37,7 @@ export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
+  notifications: NotificationsSetup;
 }
 
 /**
@@ -44,12 +46,12 @@ export interface IndexPatternDependencies {
  * @internal
  */
 export class IndexPatternsService {
-  public setup({ uiSettings, savedObjectsClient, http }: IndexPatternDependencies) {
+  public setup({ uiSettings, savedObjectsClient, http, notifications }: IndexPatternDependencies) {
     return {
       FieldList,
       flattenHitWrapper: createFlattenHitWrapper(),
       formatHitProvider,
-      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http, notifications),
       IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
       __LEGACY: {
         // For BWC we must temporarily export the class implementation of Field,
