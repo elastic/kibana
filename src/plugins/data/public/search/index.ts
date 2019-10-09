@@ -38,3 +38,5 @@ export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../c
 export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
+
+export { ISearchStart } from './search_service';

@@ -36,6 +36,7 @@ import {
 } from './i_search_strategy';
 import { TStrategyTypes } from './strategy_types';
 import { esSearchService } from './es_search';
+import { ISearchGeneric } from './i_search';
 
 /**
  * Extends the AppMountContext so other plugins have access
@@ -47,6 +48,10 @@ declare module 'kibana/public' {
   }
 }
 
+export interface ISearchStart {
+  search: ISearchGeneric;
+}
+
 /**
  * The search plugin exposes two registration methods for other plugins:
  *  -  registerSearchStrategyProvider for plugins to add their own custom
@@ -56,7 +61,7 @@ declare module 'kibana/public' {
  *
  * It also comes with two search strategy implementations - SYNC_SEARCH_STRATEGY and ES_SEARCH_STRATEGY.
  */
-export class SearchService implements Plugin<ISearchSetup, void> {
+export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   /**
    * A mapping of search strategies keyed by a unique identifier.  Plugins can use this unique identifier
    * to override certain strategy implementations.
@@ -68,11 +73,14 @@ export class SearchService implements Plugin<ISearchSetup, void> {
    */
   private contextContainer?: IContextContainer<TSearchStrategyProvider<any>>;
 
+  private search?: ISearchGeneric;
+
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): ISearchSetup {
+    const search = (this.search = createAppMountSearchContext(this.searchStrategies).search);
     core.application.registerMountContext<'search'>('search', () => {
-      return createAppMountSearchContext(this.searchStrategies);
+      return { search };
     });
 
     this.contextContainer = core.context.createContextContainer();
@@ -107,6 +115,12 @@ export class SearchService implements Plugin<ISearchSetup, void> {
     return api;
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart) {
+    if (!this.search) {
+      throw new Error('Search should always be defined');
+    }
+    return { search: this.search };
+  }
+
   public stop() {}
 }
