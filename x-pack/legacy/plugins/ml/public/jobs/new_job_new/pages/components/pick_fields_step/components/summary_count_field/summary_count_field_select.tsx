@@ -45,7 +45,7 @@ export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, sele
       selectedOptions={selection}
       onChange={onChange}
       isClearable={true}
-      data-test-subj="summaryCountFieldNameSelect"
+      data-test-subj="mlSummaryCountFieldNameSelect"
     />
   );
 };

@@ -46,7 +46,7 @@ export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, se
       selectedOptions={selection}
       onChange={onChange}
       isClearable={true}
-      data-test-subj="summaryCountFieldNameSelect"
+      data-test-subj="mlCategorizationFieldNameSelect"
     />
   );
 };

@@ -147,7 +147,7 @@ export const WizardSteps: FC<Props> = ({
       )}
       {currentStep === WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED && (
         <Fragment>
-          <Title data-test-subj="mlJobWizardStepTitlePickFields">
+          <Title data-test-subj="mlJobWizardStepTitleConfigureDatafeed">
             <FormattedMessage
               id="xpack.ml.newJob.wizard.stepComponentWrapper.configureDatafeedTitle"
               defaultMessage="Configure datafeed"

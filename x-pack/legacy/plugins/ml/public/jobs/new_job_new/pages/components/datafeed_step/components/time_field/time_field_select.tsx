@@ -44,7 +44,7 @@ export const TimeFieldSelect: FC<Props> = ({ fields, changeHandler, selectedFiel
       selectedOptions={selection}
       onChange={onChange}
       isClearable={false}
-      data-test-subj="timeFieldNameSelect"
+      data-test-subj="mlTimeFieldNameSelect"
     />
   );
 };
