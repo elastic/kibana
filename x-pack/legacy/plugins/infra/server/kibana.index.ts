@@ -10,7 +10,7 @@ import JoiNamespace from 'joi';
 import { initInfraServer } from './infra_server';
 import { compose } from './lib/compose/kibana';
 import { UsageCollector } from './usage/usage_collector';
-import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
+import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 
 export interface KbnServer extends Server {
   usage: any;
@@ -42,7 +42,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
       all: {
         api: ['infra'],
         savedObject: {
-          all: ['infrastructure-ui-source', metricsExplorerViewSavedObjectType],
+          all: ['infrastructure-ui-source', inventoryViewSavedObjectType],
           read: ['index-pattern'],
         },
         ui: ['show', 'configureSource', 'save'],
@@ -51,7 +51,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
         api: ['infra'],
         savedObject: {
           all: [],
-          read: ['infrastructure-ui-source', 'index-pattern', metricsExplorerViewSavedObjectType],
+          read: ['infrastructure-ui-source', 'index-pattern', inventoryViewSavedObjectType],
         },
         ui: ['show'],
       },

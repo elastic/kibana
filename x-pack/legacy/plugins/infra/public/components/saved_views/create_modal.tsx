@@ -17,8 +17,9 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiFieldText,
-  EuiCheckbox,
   EuiSpacer,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 
 interface Props {
@@ -61,18 +62,25 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
               defaultMessage: 'Name',
             })}
           />
-          <EuiSpacer size="m" />
-          <EuiCheckbox
+          <EuiSpacer size="xl" />
+          <EuiSwitch
             id={'saved-view-save-time-checkbox'}
             label={
               <FormattedMessage
-                defaultMessage="Include time filter?"
+                defaultMessage="Store time with view"
                 id="xpack.infra.waffle.savedViews.includeTimeFilterLabel"
               />
             }
             checked={includeTime}
             onChange={onCheckChange}
           />
+          <EuiSpacer size="s" />
+          <EuiText size={'xs'} grow={false} style={{ maxWidth: 400 }}>
+            <FormattedMessage
+              defaultMessage="This changes the time filter to the currently selected time each time the view is loaded"
+              id="xpack.infra.waffle.savedViews.includeTimeHelpText"
+            />
+          </EuiText>
         </EuiModalBody>
 
         <EuiModalFooter>
@@ -82,7 +90,13 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
               id="xpack.infra.waffle.savedViews.cancelButton"
             />
           </EuiButtonEmpty>
-          <EuiButton color="primary" onClick={saveView} data-test-subj="createSavedViewButton">
+          <EuiButton
+            color="primary"
+            disabled={!viewName}
+            fill={true}
+            onClick={saveView}
+            data-test-subj="createSavedViewButton"
+          >
             <FormattedMessage defaultMessage="Save" id="xpack.infra.waffle.savedViews.saveButton" />
           </EuiButton>
         </EuiModalFooter>

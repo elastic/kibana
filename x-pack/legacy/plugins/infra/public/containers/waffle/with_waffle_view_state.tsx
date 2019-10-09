@@ -90,11 +90,11 @@ export const withWaffleViewState = connect(
         if (viewState.customOptions) {
           dispatch(waffleOptionsActions.changeCustomOptions(viewState.customOptions));
         }
-        if (viewState.bounds) {
-          dispatch(waffleOptionsActions.changeBoundsOverride(viewState.bounds));
+        if (viewState.boundsOverride) {
+          dispatch(waffleOptionsActions.changeBoundsOverride(viewState.boundsOverride));
         }
-        if (viewState.auto) {
-          dispatch(waffleOptionsActions.changeAutoBounds(viewState.auto));
+        if (viewState.autoBounds) {
+          dispatch(waffleOptionsActions.changeAutoBounds(viewState.autoBounds));
         }
         if (viewState.filterQuery) {
           dispatch(
@@ -123,8 +123,8 @@ export interface WaffleViewState {
   nodeType?: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
   view?: ReturnType<typeof waffleOptionsSelectors.selectView>;
   customOptions?: ReturnType<typeof waffleOptionsSelectors.selectCustomOptions>;
-  bounds?: ReturnType<typeof waffleOptionsSelectors.selectBoundsOverride>;
-  auto?: ReturnType<typeof waffleOptionsSelectors.selectAutoBounds>;
+  boundsOverride?: ReturnType<typeof waffleOptionsSelectors.selectBoundsOverride>;
+  autoBounds?: ReturnType<typeof waffleOptionsSelectors.selectAutoBounds>;
   time?: ReturnType<typeof waffleTimeSelectors.selectCurrentTime>;
   autoReload?: ReturnType<typeof waffleTimeSelectors.selectIsAutoReloading>;
   filterQuery?: ReturnType<typeof waffleFilterSelectors.selectWaffleFilterQuery>;

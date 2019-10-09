@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import React, { useCallback, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedViewListFlyout } from './view_list_flyout';
-import { SavedViewCreateModal } from './create_modal';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import { useSavedView } from '../../hooks/use_saved_view';
+import { inventoryViewSavedObjectType } from '../../../common/saved_objects/inventory_view';
+import { SavedViewCreateModal } from './create_modal';
+import { SavedViewListFlyout } from './view_list_flyout';
 interface Props<ViewState> {
   viewType: string;
   viewState: ViewState;
@@ -18,10 +21,16 @@ interface Props<ViewState> {
 }
 
 export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
-  const { views, saveView, loading, deletedId, deleteView, find } = useSavedView(
-    props.defaultViewState,
-    props.viewType
-  );
+  const {
+    views,
+    saveView,
+    loading,
+    deletedId,
+    deleteView,
+    find,
+    errorOnFind,
+    errorOnCreate,
+  } = useSavedView(props.defaultViewState, inventoryViewSavedObjectType);
   const [modalOpen, setModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const openSaveModal = useCallback(() => setCreateModalOpen(true), []);
@@ -49,29 +58,29 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     }
   }, [deletedId]);
 
+  useEffect(() => {
+    if (errorOnCreate) {
+      toastNotifications.addWarning(getErrorToast('create')!);
+    } else if (errorOnFind) {
+      toastNotifications.addWarning(getErrorToast('find')!);
+    }
+  }, [errorOnCreate, errorOnFind]);
+
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="save"
-            onClick={openSaveModal}
-            data-test-subj="openSaveViewModal"
-          >
-            <FormattedMessage
-              defaultMessage="Save view"
-              id="xpack.infra.waffle.savedViews.saveViewLabel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonEmpty onClick={loadViews} data-test-subj="loadViews">
-            <FormattedMessage
-              defaultMessage="Load views"
-              id="xpack.infra.waffle.savedViews.loadViewsLabel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        <EuiButtonEmpty iconType="save" onClick={openSaveModal} data-test-subj="openSaveViewModal">
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.infra.waffle.savedViews.saveViewLabel"
+          />
+        </EuiButtonEmpty>
+        <EuiButtonEmpty iconType="importAction" onClick={loadViews} data-test-subj="loadViews">
+          <FormattedMessage
+            defaultMessage="Load"
+            id="xpack.infra.waffle.savedViews.loadViewsLabel"
+          />
+        </EuiButtonEmpty>
       </EuiFlexGroup>
 
       {createModalOpen && <SavedViewCreateModal close={closeCreateModal} save={save} />}
@@ -87,3 +96,19 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     </>
   );
 }
+
+const getErrorToast = (type: 'create' | 'find') => {
+  if (type === 'create') {
+    return {
+      title: i18n.translate('xpack.infra.savedView.errorOnCreate.title', {
+        defaultMessage: `An error occured saving view.`,
+      }),
+    };
+  } else if (type === 'find') {
+    return {
+      title: i18n.translate('xpack.infra.savedView.findError.title', {
+        defaultMessage: `An error occurred while loading views.`,
+      }),
+    };
+  }
+};

@@ -18,11 +18,12 @@ export const useDeleteSavedObject = (type: string) => {
       const dobj = async () => {
         try {
           await npStart.core.savedObjects.client.delete(type, id);
+          setError(null);
           setDeletedId(id);
           setLoading(false);
         } catch (e) {
           setLoading(false);
-          setError('FAILED_TO_DELTE_SAVED_OBJECT');
+          setError(e);
         }
       };
       dobj();

@@ -24,11 +24,12 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
             search: query,
             searchFields,
           });
+          setError(null);
           setLoading(false);
           setData(d);
         } catch (e) {
           setLoading(false);
-          setError('FAILED_GETTING_SAVED_OBJECTS');
+          setError(e);
         }
       };
       fetchData();

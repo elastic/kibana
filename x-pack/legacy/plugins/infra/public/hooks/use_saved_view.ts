@@ -19,29 +19,27 @@ export type SavedView<ViewState> = ViewState & {
 
 export interface SavedViewSavedObject<ViewState> extends SavedObjectAttributes {
   type: string;
+  name: string;
   data: {
     name: string;
   } & ViewState;
 }
 
 export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: string) => {
-  const { data, loading, find, error } = useFindSavedObject<SavedViewSavedObject<ViewState>>(
-    'config'
-  );
-  const { create } = useCreateSavedObject('config');
-  const { deleteObject, deletedId } = useDeleteSavedObject('config');
+  const { data, loading, find, error: errorOnFind } = useFindSavedObject<
+    SavedViewSavedObject<ViewState>
+  >(viewType);
+  const { create, error: errorOnCreate } = useCreateSavedObject(viewType);
+  const { deleteObject, deletedId } = useDeleteSavedObject(viewType);
   const deleteView = useCallback((id: string) => deleteObject(id), []);
-  const saveView = useCallback(
-    (d: { [p: string]: any }) => create({ type: viewType, data: d }),
-    []
-  );
+  const saveView = useCallback((d: { [p: string]: any }) => create(d), []);
 
   const savedObjects = data ? data.savedObjects : [];
   const views = useMemo(() => {
     const items: Array<SavedView<ViewState>> = [
       {
         name: i18n.translate('xpack.infra.savedView.defaultViewName', {
-          defaultMessage: 'Default View',
+          defaultMessage: 'Default',
         }),
         id: '0',
         isDefault: true,
@@ -52,11 +50,11 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
     if (data) {
       data.savedObjects.forEach(
         o =>
-          o.attributes.type === viewType &&
+          o.type === viewType &&
           items.push({
-            ...o.attributes.data,
-            name: o.attributes.data.name,
             id: o.id,
+            name: o.attributes.data.name,
+            ...o.attributes.data,
           })
       );
     }
@@ -69,7 +67,8 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
     saveView,
     loading,
     deletedId,
-    error,
+    errorOnFind,
+    errorOnCreate,
     deleteView,
     find,
   };
