@@ -19,13 +19,12 @@ const VIEWS = {
 
 export class FeaturesTooltip extends React.Component {
 
-  state = {
-    currentFeature: this.props.features ? this.props.features[0] : null,
-  };
+  state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.features !== prevState.prevFeatures) {
       return {
+        currentFeature: nextProps.features ? nextProps.features[0] : null,
         view: VIEWS.PROPERTIES_VIEW,
         prevFeatures: nextProps.features
       };
@@ -44,22 +43,6 @@ export class FeaturesTooltip extends React.Component {
 
   _showPropertiesView = () => {
     this.setState({ view: VIEWS.PROPERTIES_VIEW });
-  }
-
-  _renderProperties() {
-    if (!this.state.currentFeature) {
-      return null;
-    }
-    return (
-      <FeatureProperties
-        featureId={this.state.currentFeature.id}
-        layerId={this.state.currentFeature.layerId}
-        loadFeatureProperties={this.props.loadFeatureProperties}
-        showFilterButtons={!!this.props.addFilters && this.props.isLocked}
-        onCloseTooltip={this._onCloseTooltip}
-        addFilters={this.props.addFilters}
-      />
-    );
   }
 
   _renderActions(geoFields) {
@@ -114,6 +97,10 @@ export class FeaturesTooltip extends React.Component {
   }
 
   render() {
+    if (!this.state.currentFeature) {
+      return null;
+    }
+
     const currentFeatureGeometry = this.props.loadFeatureGeometry({
       layerId: this.state.currentFeature.layerId,
       featureId: this.state.currentFeature.id
@@ -142,7 +129,14 @@ export class FeaturesTooltip extends React.Component {
           findLayerById={this.props.findLayerById}
           setCurrentFeature={this._setCurrentFeature}
         />
-        {this._renderProperties()}
+        <FeatureProperties
+          featureId={this.state.currentFeature.id}
+          layerId={this.state.currentFeature.layerId}
+          loadFeatureProperties={this.props.loadFeatureProperties}
+          showFilterButtons={!!this.props.addFilters && this.props.isLocked}
+          onCloseTooltip={this._onCloseTooltip}
+          addFilters={this.props.addFilters}
+        />
         {this._renderActions(filteredGeoFields)}
       </Fragment>
     );

@@ -321,7 +321,6 @@ export class TooltipControl extends React.Component {
       <EuiText size="xs" style={{ maxWidth: '425px' }}>
         <FeaturesTooltip
           {...publicProps}
-          anchorLocation={this.props.tooltipState.location}
           findLayerById={this._findLayerById}
           geoFields={this.props.geoFields}
           loadPreIndexedShape={this._loadPreIndexedShape}
