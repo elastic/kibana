@@ -17,28 +17,28 @@ interface Props {
 const [INFO, WARNING, ERROR] = ['info', 'warning', 'error'];
 
 export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
-  if (message !== undefined) {
-    let color = 'primary';
-    const icon = 'alert';
-
-    if (message.level === INFO) {
-      color = 'primary';
-    } else if (message.level === WARNING) {
-      color = 'warning';
-    } else if (message.level === ERROR) {
-      color = 'danger';
-    }
-
-    if (showTooltip) {
-      return (
-        <EuiToolTip position="bottom" content={message.text}>
-          <EuiIcon type={icon} color={color} />
-        </EuiToolTip>
-      );
-    } else {
-      return <EuiIcon type={icon} color={color} />;
-    }
-  } else {
+  if (message === undefined) {
     return <span />;
+  }
+
+  let color = 'primary';
+  const icon = 'alert';
+
+  if (message.level === INFO) {
+    color = 'primary';
+  } else if (message.level === WARNING) {
+    color = 'warning';
+  } else if (message.level === ERROR) {
+    color = 'danger';
+  }
+
+  if (showTooltip) {
+    return (
+      <EuiToolTip position="bottom" content={message.text}>
+        <EuiIcon type={icon} color={color} />
+      </EuiToolTip>
+    );
+  } else {
+    return <EuiIcon type={icon} color={color} />;
   }
 };
