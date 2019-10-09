@@ -46,6 +46,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     setQuery,
     isInitializing,
     hasMlUserPermissions,
+    capabilitiesFetched,
   }) => (
     <>
       <WithSource sourceId={sourceId}>
@@ -103,9 +104,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     )}
                   </KpiNetworkQuery>
 
-                  {isInitializing ? (
-                    <NetworkRoutesLoading />
-                  ) : (
+                  {capabilitiesFetched && !isInitializing ? (
                     <>
                       <EuiSpacer />
 
@@ -129,6 +128,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                         networkPagePath={networkPagePath}
                       />
                     </>
+                  ) : (
+                    <NetworkRoutesLoading />
                   )}
 
                   <EuiSpacer />
