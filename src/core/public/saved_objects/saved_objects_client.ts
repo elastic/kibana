@@ -73,6 +73,7 @@ export interface SavedObjectsBulkCreateOptions {
   overwrite?: boolean;
 }
 
+/** @public */
 export interface SavedObjectsBulkUpdateObject<
   T extends SavedObjectAttributes = SavedObjectAttributes
 > {
@@ -431,7 +432,7 @@ export class SavedObjectsClient {
    * Update multiple documents at once
    *
    * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
-   * @returns The result of the update operation containing btoh failed and updated saved objects.
+   * @returns The result of the update operation containing both failed and updated saved objects.
    */
   public bulkUpdate<T extends SavedObjectAttributes>(objects: SavedObjectsBulkUpdateObject[] = []) {
     const path = this.getPath(['_bulk_update']);
