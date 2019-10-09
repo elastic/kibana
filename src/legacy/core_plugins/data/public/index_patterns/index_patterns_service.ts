@@ -101,16 +101,4 @@ export {
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
 
 /** @public */
-export type IndexPattern = IndexPattern;
-
-/** @public */
-export type IndexPatterns = IndexPatterns;
-
-/** @public */
-export type StaticIndexPattern = StaticIndexPattern;
-
-/** @public */
-export type Field = Field;
-
-/** @public */
-export type FieldType = FieldType;
+export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType };
