@@ -8,6 +8,7 @@ import { Agent } from '../../../../common/types/domain_data';
 import { ReturnTypeGet, ReturnTypeList, ReturnTypeUpdate } from '../../../../common/return_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { AgentAdapter } from './memory_agent_adapter';
+import { AgentEvent } from '../../../../common/types/domain_data';
 
 export class RestAgentAdapter extends AgentAdapter {
   constructor(private readonly REST: RestAPIAdapter) {
@@ -16,10 +17,30 @@ export class RestAgentAdapter extends AgentAdapter {
 
   public async get(id: string): Promise<Agent | null> {
     try {
-      return (await this.REST.get<ReturnTypeGet<Agent>>(`/api/fleet/agent/${id}`)).item;
+      return (await this.REST.get<ReturnTypeGet<Agent>>(`/api/fleet/agents/${id}`)).item;
     } catch (e) {
       return null;
     }
+  }
+
+  public async getAgentEvents(
+    id: string,
+    search: string,
+    page: number,
+    perPage: number
+  ): Promise<{
+    total: number;
+    list: AgentEvent[];
+  }> {
+    const { total, list } = await this.REST.get<ReturnTypeList<AgentEvent>>(
+      `/api/fleet/agents/${id}/events`,
+      { page, per_page: perPage, search: search === '' ? undefined : search }
+    );
+
+    return {
+      total,
+      list,
+    };
   }
 
   public async getWithToken(enrollmentToken: string): Promise<Agent | null> {

@@ -118,10 +118,15 @@ export class AgentLib {
   public async getEventsById(
     user: FrameworkUser,
     agentId: string,
+    search?: string,
     page: number = 1,
     perPage: number = 25
   ): Promise<{ items: AgentEvent[]; total: number }> {
-    return await this.agentEventsRepository.getEventsForAgent(user, agentId, page, perPage);
+    return await this.agentEventsRepository.getEventsForAgent(user, agentId, {
+      search,
+      page,
+      perPage,
+    });
   }
 
   /**

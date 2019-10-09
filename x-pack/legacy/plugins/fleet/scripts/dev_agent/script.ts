@@ -6,6 +6,7 @@
 
 import { createFlagError, run, ToolingLog } from '@kbn/dev-utils';
 import fetch from 'node-fetch';
+import os from 'os';
 
 const CHECKIN_INTERVAL = 3000; // 3 seconds
 
@@ -78,9 +79,13 @@ async function enroll(kibanaURL: string, token: string): Promise<Agent> {
       metadata: {
         local: {
           host: 'localhost',
+          ip: '127.0.0.1',
+          system: `${os.type()} ${os.release()}`,
+          memory: os.totalmem(),
         },
         userProvided: {
-          key1: 'value1',
+          dev_agent_version: '0.0.1',
+          region: 'us-east',
         },
       },
     }),

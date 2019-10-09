@@ -5,7 +5,7 @@
  */
 
 import { omit } from 'lodash';
-import { Agent } from '../../../../common/types/domain_data';
+import { Agent, AgentEvent } from '../../../../common/types/domain_data';
 
 export class AgentAdapter {
   private memoryDB: Agent[];
@@ -16,6 +16,18 @@ export class AgentAdapter {
 
   public async get(id: string) {
     return this.memoryDB.find(beat => beat.id === id) || null;
+  }
+
+  public async getAgentEvents(
+    id: string,
+    search: string,
+    page: number,
+    perPage: number
+  ): Promise<{
+    total: number;
+    list: AgentEvent[];
+  }> {
+    return { total: 0, list: [] };
   }
 
   public async update(id: string, beatData: Partial<Agent>): Promise<boolean> {

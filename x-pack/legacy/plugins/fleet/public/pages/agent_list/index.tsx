@@ -16,20 +16,17 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiEmptyPrompt,
-  EuiLink,
   // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  DEFAULT_AGENTS_PAGE_SIZE,
-  AGENTS_PAGE_SIZE_OPTIONS,
-  AGENT_POLLING_THRESHOLD_MS,
-} from '../../../common/constants';
+import { AGENT_POLLING_THRESHOLD_MS } from '../../../common/constants';
 import { Agent } from '../../../common/types/domain_data';
 import { FrontendLibs } from '../../lib/types';
 import { AgentHealth } from '../../components/agent_health';
+import { ConnectedLink } from '../../components/navigation/connected_link';
+import { usePagination } from '../../hooks/use_pagination';
 
 interface RouterProps {
   libs: FrontendLibs;
@@ -46,21 +43,16 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
   const [currentQuery, setCurrentQuery] = useState<typeof EuiSearchBar.Query>(
     EuiSearchBar.Query.MATCH_ALL
   );
-  const [currentPagination, setCurrentPagination] = useState<{
-    pageSize: number;
-    currentPage: number;
-  }>({
-    pageSize: DEFAULT_AGENTS_PAGE_SIZE,
-    currentPage: 1,
-  });
+
+  const { pagination, pageSizeOptions, setPagination } = usePagination();
 
   // Fetch agents method
   const fetchAgents = async () => {
     setIsLoading(true);
     setLastPolledAgentsMs(new Date().getTime());
     const { list, total } = await libs.agents.getAll(
-      currentPagination.currentPage,
-      currentPagination.pageSize
+      pagination.currentPage,
+      pagination.pageSize
       // TODO: Adjust list endpoint to support query string
       // currentQuery
     );
@@ -77,7 +69,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
   // Update agents if pagination or query state changes
   useEffect(() => {
     fetchAgents();
-  }, [currentPagination, currentQuery]);
+  }, [pagination, currentQuery]);
 
   // Poll for agents on interval
   useInterval(() => {
@@ -134,14 +126,14 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
       }),
       actions: [
         {
-          render: () => {
+          render: (agent: Agent) => {
             return (
-              <EuiLink color="primary" onClick={() => {}}>
+              <ConnectedLink color="primary" path={`/agents/${agent.id}`}>
                 <FormattedMessage
                   id="xpack.fleet.agentList.viewActionLinkText"
                   defaultMessage="view"
                 />
-              </EuiLink>
+              </ConnectedLink>
             );
           },
         },
@@ -257,18 +249,18 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
           itemId="id"
           columns={columns}
           pagination={{
-            pageIndex: currentPagination.currentPage - 1,
-            pageSize: currentPagination.pageSize,
+            pageIndex: pagination.currentPage - 1,
+            pageSize: pagination.pageSize,
             totalItemCount: totalAgents,
-            pageSizeOptions: AGENTS_PAGE_SIZE_OPTIONS,
+            pageSizeOptions,
           }}
           onChange={({ page }: { page: { index: number; size: number } }) => {
             const newPagination = {
-              ...currentPagination,
+              ...pagination,
               currentPage: page.index + 1,
               pageSize: page.size,
             };
-            setCurrentPagination(newPagination);
+            setPagination(newPagination);
           }}
         />
       </EuiPageContent>
