@@ -6,6 +6,9 @@
 
 import React, { FC } from 'react';
 
+// @ts-ignore
+import { EuiHighlight } from '@elastic/eui';
+
 export interface StatsBarStat {
   label: string;
   value: string | number;
@@ -18,7 +21,7 @@ interface StatProps {
 export const Stat: FC<StatProps> = ({ stat }) => {
   return (
     <span className="transformStat">
-      <span>{stat.label}</span>: <span className="transformStat__value">{stat.value}</span>
+      <span>{stat.label}</span>: <EuiHighlight>{stat.value}</EuiHighlight>
     </span>
   );
 };
