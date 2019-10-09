@@ -21,6 +21,7 @@ import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocomp
 import { WithSource } from '../../../containers/with_source';
 import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
 import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
+import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
 
 export const SnapshotToolbar = () => (
   <Toolbar>
@@ -121,7 +122,7 @@ export const SnapshotToolbar = () => (
                         defaultViewState={defaultViewState}
                         viewState={viewState}
                         onViewChange={onViewChange}
-                        viewType={'INVENTORY_VIEW'}
+                        viewType={inventoryViewSavedObjectType}
                       />
                     )}
                   </WithWaffleViewState>
