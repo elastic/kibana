@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { useForm, Form, ValidationFunc } from '../../../../shared_imports';
+import { useForm, Form, ValidationFunc, OnFormUpdateArg } from '../../../../shared_imports';
 import { OnUpdateHandler } from '../../../../../json_editor';
 import { useDispatch } from '../../../../mappings_state';
 import { Field, NormalizedField } from '../../../../types';
@@ -35,22 +35,7 @@ export const EditField = React.memo(({ field, uniqueNameValidator }: Props) => {
   const dispatch = useDispatch();
 
   const fieldsSettings = useRef<Parameters<OnUpdateHandler>[0] | undefined>(undefined);
-
-  useEffect(() => {
-    const subscription = form.subscribe(updatedFieldForm => {
-      dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
-    });
-
-    return subscription.unsubscribe;
-  }, [form]);
-
-  const exitEdit = () => {
-    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
-  };
-
-  const onFieldsSettingsUpdate: OnUpdateHandler = fieldsSettingsUpdate => {
-    fieldsSettings.current = fieldsSettingsUpdate;
-  };
+  const fieldFormUpdate = useRef<OnFormUpdateArg<Field> | undefined>(undefined);
 
   const getSubmitForm = (updateField: UpdateFieldFunc) => async (e?: React.FormEvent) => {
     if (e) {
@@ -61,13 +46,65 @@ export const EditField = React.memo(({ field, uniqueNameValidator }: Props) => {
 
     const {
       isValid: isFieldsSettingsValid,
-      getData: getFieldsSettingsData,
+      data: { format: getFieldsSettingsData },
     } = fieldsSettings.current!;
 
     if (isFormValid && isFieldsSettingsValid) {
       const fieldsSettingsData = getFieldsSettingsData();
       updateField({ ...field, source: { ...formData, ...fieldsSettingsData } });
     }
+  };
+
+  const getUpdatedField = (): OnFormUpdateArg<Field> | void => {
+    if (fieldFormUpdate.current === undefined || fieldsSettings.current === undefined) {
+      return;
+    }
+
+    const isFormValid = fieldFormUpdate.current.isValid;
+    const isFieldsSettingsValid = fieldsSettings.current.isValid;
+
+    return {
+      isValid: isFormValid === undefined ? undefined : isFormValid && isFieldsSettingsValid,
+      data: {
+        raw: { ...fieldFormUpdate.current.data.raw, settings: fieldsSettings.current.data.raw },
+        format() {
+          return {
+            ...fieldFormUpdate.current!.data.format(),
+            ...fieldsSettings.current!.data.format(),
+          };
+        },
+      },
+      validate: async () => {
+        const isFieldFormValid = await fieldFormUpdate.current!.validate();
+        return isFieldFormValid && fieldsSettings.current!.isValid;
+      },
+    };
+  };
+
+  useEffect(() => {
+    const subscription = form.subscribe(updatedFieldForm => {
+      fieldFormUpdate.current = updatedFieldForm;
+
+      const updatedField = getUpdatedField();
+      if (updatedField) {
+        dispatch({ type: 'fieldForm.update', value: updatedField });
+      }
+    });
+
+    return subscription.unsubscribe;
+  }, [form]);
+
+  const onFieldsSettingsUpdate: OnUpdateHandler = fieldsSettingsUpdate => {
+    fieldsSettings.current = fieldsSettingsUpdate;
+
+    const updatedField = getUpdatedField();
+    if (updatedField) {
+      dispatch({ type: 'fieldForm.update', value: updatedField });
+    }
+  };
+
+  const exitEdit = () => {
+    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
   };
 
   const cancel = () => {
@@ -90,7 +127,7 @@ export const EditField = React.memo(({ field, uniqueNameValidator }: Props) => {
         >
           <EuiFlyoutHeader>
             <EuiTitle size="m">
-              <h2>Edit field</h2>
+              <h2>Edit field '{field.source.name}'</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
 

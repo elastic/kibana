@@ -14,5 +14,5 @@ interface Props {
 }
 
 export const FieldSettingsJsonEditor = ({ onUpdate, defaultValue = {} }: Props) => {
-  return <JsonEditor label="Fiels settings" onUpdate={onUpdate} defaultValue={defaultValue} />;
+  return <JsonEditor label="Field settings" onUpdate={onUpdate} defaultValue={defaultValue} />;
 };
