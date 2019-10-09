@@ -20,6 +20,7 @@
 export function HomePageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
 
   class HomePage {
     async clickSynopsis(title) {
@@ -67,7 +68,13 @@ export function HomePageProvider({ getService }) {
     }
 
     async launchSampleDataSet(id) {
-      await testSubjects.click(`launchSampleDataSet${id}`);
+      if(await find.existsByCssSelector(`#sampleDataLinks${id}`)) {
+        // omits cloud test failures
+        await find.clickByCssSelectorWhenNotDisabled(`#sampleDataLinks${id}`);
+        await find.clickByCssSelector('.euiContextMenuItem:nth-of-type(1)');
+      } else {
+        await testSubjects.click(`launchSampleDataSet${id}`);
+      }
     }
 
     async loadSavedObjects() {
