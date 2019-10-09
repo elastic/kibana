@@ -13,45 +13,45 @@ import { createConfig$, ConfigSchema } from './config';
 describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
-Object {
-  "authc": Object {
-    "providers": Array [
-      "basic",
-    ],
-  },
-  "cookieName": "sid",
-  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "secureCookies": false,
-  "sessionTimeout": null,
-}
-`);
+                        Object {
+                          "authc": Object {
+                            "providers": Array [
+                              "basic",
+                            ],
+                          },
+                          "cookieName": "sid",
+                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "secureCookies": false,
+                          "sessionTimeout": null,
+                        }
+                `);
 
     expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
-Object {
-  "authc": Object {
-    "providers": Array [
-      "basic",
-    ],
-  },
-  "cookieName": "sid",
-  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "secureCookies": false,
-  "sessionTimeout": null,
-}
-`);
+                        Object {
+                          "authc": Object {
+                            "providers": Array [
+                              "basic",
+                            ],
+                          },
+                          "cookieName": "sid",
+                          "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "secureCookies": false,
+                          "sessionTimeout": null,
+                        }
+                `);
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
-Object {
-  "authc": Object {
-    "providers": Array [
-      "basic",
-    ],
-  },
-  "cookieName": "sid",
-  "secureCookies": false,
-  "sessionTimeout": null,
-}
-`);
+                        Object {
+                          "authc": Object {
+                            "providers": Array [
+                              "basic",
+                            ],
+                          },
+                          "cookieName": "sid",
+                          "secureCookies": false,
+                          "sessionTimeout": null,
+                        }
+                `);
   });
 
   it('should throw error if xpack.security.encryptionKey is less than 32 characters', () => {
@@ -89,15 +89,15 @@ Object {
           authc: { providers: ['oidc'], oidc: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-Object {
-  "oidc": Object {
-    "realm": "realm-1",
-  },
-  "providers": Array [
-    "oidc",
-  ],
-}
-`);
+                                Object {
+                                  "oidc": Object {
+                                    "realm": "realm-1",
+                                  },
+                                  "providers": Array [
+                                    "oidc",
+                                  ],
+                                }
+                        `);
     });
 
     it(`returns a validation error when authc.providers is "['oidc', 'basic']" and realm is unspecified`, async () => {
@@ -114,16 +114,16 @@ Object {
           authc: { providers: ['oidc', 'basic'], oidc: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-Object {
-  "oidc": Object {
-    "realm": "realm-1",
-  },
-  "providers": Array [
-    "oidc",
-    "basic",
-  ],
-}
-`);
+                                Object {
+                                  "oidc": Object {
+                                    "realm": "realm-1",
+                                  },
+                                  "providers": Array [
+                                    "oidc",
+                                    "basic",
+                                  ],
+                                }
+                        `);
     });
 
     it(`realm is not allowed when authc.providers is "['basic']"`, async () => {
@@ -152,21 +152,91 @@ Object {
           authc: { providers: ['saml'], saml: { realm: 'realm-1' } },
         }).authc
       ).toMatchInlineSnapshot(`
-Object {
-  "providers": Array [
-    "saml",
-  ],
-  "saml": Object {
-    "realm": "realm-1",
-  },
-}
-`);
+                                Object {
+                                  "providers": Array [
+                                    "saml",
+                                  ],
+                                  "saml": Object {
+                                    "maxRedirectURLSize": ByteSizeValue {
+                                      "valueInBytes": 2048,
+                                    },
+                                    "realm": "realm-1",
+                                  },
+                                }
+                        `);
     });
 
     it('`realm` is not allowed if saml provider is not enabled', async () => {
       expect(() =>
         ConfigSchema.validate({ authc: { providers: ['basic'], saml: { realm: 'realm-1' } } })
       ).toThrowErrorMatchingInlineSnapshot(`"[authc.saml]: a value wasn't expected to be present"`);
+    });
+
+    it('`maxRedirectURLSize` accepts any positive value that can coerce to `ByteSizeValue`', async () => {
+      expect(
+        ConfigSchema.validate({
+          authc: { providers: ['saml'], saml: { realm: 'realm-1' } },
+        }).authc.saml
+      ).toMatchInlineSnapshot(`
+                        Object {
+                          "maxRedirectURLSize": ByteSizeValue {
+                            "valueInBytes": 2048,
+                          },
+                          "realm": "realm-1",
+                        }
+                  `);
+
+      expect(
+        ConfigSchema.validate({
+          authc: { providers: ['saml'], saml: { realm: 'realm-1', maxRedirectURLSize: 100 } },
+        }).authc.saml
+      ).toMatchInlineSnapshot(`
+        Object {
+          "maxRedirectURLSize": ByteSizeValue {
+            "valueInBytes": 100,
+          },
+          "realm": "realm-1",
+        }
+      `);
+
+      expect(
+        ConfigSchema.validate({
+          authc: { providers: ['saml'], saml: { realm: 'realm-1', maxRedirectURLSize: '1kb' } },
+        }).authc.saml
+      ).toMatchInlineSnapshot(`
+                        Object {
+                          "maxRedirectURLSize": ByteSizeValue {
+                            "valueInBytes": 1024,
+                          },
+                          "realm": "realm-1",
+                        }
+                  `);
+
+      expect(
+        ConfigSchema.validate({
+          authc: { providers: ['saml'], saml: { realm: 'realm-1', maxRedirectURLSize: '100b' } },
+        }).authc.saml
+      ).toMatchInlineSnapshot(`
+        Object {
+          "maxRedirectURLSize": ByteSizeValue {
+            "valueInBytes": 100,
+          },
+          "realm": "realm-1",
+        }
+      `);
+
+      expect(
+        ConfigSchema.validate({
+          authc: { providers: ['saml'], saml: { realm: 'realm-1', maxRedirectURLSize: 0 } },
+        }).authc.saml
+      ).toMatchInlineSnapshot(`
+                Object {
+                  "maxRedirectURLSize": ByteSizeValue {
+                    "valueInBytes": 0,
+                  },
+                  "realm": "realm-1",
+                }
+            `);
     });
   });
 });
@@ -183,12 +253,12 @@ describe('createConfig$()', () => {
     expect(config).toEqual({ encryptionKey: 'ab'.repeat(16), secureCookies: true });
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml",
-  ],
-]
-`);
+                        Array [
+                          Array [
+                            "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml",
+                          ],
+                        ]
+                `);
   });
 
   it('should log a warning if SSL is not configured', async () => {
@@ -203,12 +273,12 @@ Array [
     expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: false });
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "Session cookies will be transmitted over insecure connections. This is not recommended.",
-  ],
-]
-`);
+                        Array [
+                          Array [
+                            "Session cookies will be transmitted over insecure connections. This is not recommended.",
+                          ],
+                        ]
+                `);
   });
 
   it('should log a warning if SSL is not configured yet secure cookies are being used', async () => {
@@ -223,12 +293,12 @@ Array [
     expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: true });
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to function properly.",
-  ],
-]
-`);
+                        Array [
+                          Array [
+                            "Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to function properly.",
+                          ],
+                        ]
+                `);
   });
 
   it('should set xpack.security.secureCookies if SSL is configured', async () => {
