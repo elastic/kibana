@@ -13,7 +13,7 @@ const { Metric: strings } = ViewStrings;
 export const metric = () => ({
   name: 'metric',
   displayName: strings.getDisplayName(),
-  modelArgs: [['_', { label: 'Number' }]],
+  modelArgs: [['_', { label: strings.getNumberDisplayName() }]],
   requiresContext: false,
   args: [
     {
