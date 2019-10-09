@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+
+export const NotEnabled: React.FunctionComponent = () => (
+  <EuiCallOut
+    title={
+      <FormattedMessage
+        id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorTitle"
+        defaultMessage="API keys not enabled in Elasticsearch"
+      />
+    }
+    color="danger"
+    iconType="alert"
+  >
+    <FormattedMessage
+      id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorDescription"
+      defaultMessage="Please contact your administrator and refer to the {link} to enable API keys."
+      values={{
+        link: (
+          <EuiLink
+            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/security-settings.html#api-key-service-settings"
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
+              defaultMessage="docs"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  </EuiCallOut>
+);

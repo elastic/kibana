@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { Component } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore EuiInMemoryTable typings not yet available
   EuiInMemoryTable,
-  EuiLink,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
@@ -27,14 +26,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 import _ from 'lodash';
-import React, { Fragment, Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SectionLoading } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/section_loading';
 import { ApiKey, ApiKeyCore } from '../../../../../common/model/api_key';
 import { ApiKeysApi } from '../../../../lib/api_keys_api';
 import { PermissionDenied } from './permission_denied';
-import { ApiKeysInvalidateProvider } from './api_keys_invalidate_provider';
+import { EmptyPrompt } from './empty_prompt';
+import { NotEnabled } from './not_enabled';
+import { InvalidateProvider } from './invalidate_provider';
 
 interface Props {
   intl: InjectedIntl;
@@ -123,12 +123,12 @@ class ApiKeysGridPageUI extends Component<Props, State> {
 
   private onApiKeysInvalidated = (apiKeysInvalidated: ApiKeyCore[]): void => {
     if (apiKeysInvalidated.length) {
-      this.loadApiKeys(true);
+      this.reloadApiKeys();
     }
   };
 
   private renderContent = () => {
-    const { isLoadingApp, isLoadingTable, areApiKeysEnabled, error, apiKeys } = this.state;
+    const { isLoadingApp, isLoadingTable, areApiKeysEnabled, isAdmin, error, apiKeys } = this.state;
 
     if (isLoadingApp) {
       return (
@@ -163,71 +163,11 @@ class ApiKeysGridPageUI extends Component<Props, State> {
     }
 
     if (!areApiKeysEnabled) {
-      return (
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorTitle"
-              defaultMessage="API keys not enabled in Elasticsearch"
-            />
-          }
-          color="danger"
-          iconType="alert"
-        >
-          <FormattedMessage
-            id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorDescription"
-            defaultMessage="Please contact your administrator and refer to the {link} to enable API keys."
-            values={{
-              link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/security-settings.html#api-key-service-settings"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
-                    defaultMessage="docs"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
-      );
+      return <NotEnabled />;
     }
 
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
-      return (
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.emptyPromptTitle"
-                defaultMessage="No API keys"
-              />
-            </h1>
-          }
-          body={
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.security.management.apiKeys.table.emptyPromptDescription"
-                  defaultMessage="You can create an API key from Console."
-                />
-              </p>
-            </Fragment>
-          }
-          actions={
-            <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html">
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.emptyPromptDocsLinkMessage"
-                defaultMessage="Docs"
-              />
-            </EuiLink>
-          }
-          data-test-subj="emptyPrompt"
-        />
-      );
+      return <EmptyPrompt isAdmin={isAdmin} />;
     }
 
     return this.renderTable();
@@ -259,7 +199,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
 
     const search = {
       toolsLeft: selectedItems.length ? (
-        <ApiKeysInvalidateProvider isAdmin={isAdmin}>
+        <InvalidateProvider isAdmin={isAdmin}>
           {invalidateApiKeyPrompt => {
             return (
               <EuiButton
@@ -282,7 +222,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
               </EuiButton>
             );
           }}
-        </ApiKeysInvalidateProvider>
+        </InvalidateProvider>
       ) : (
         undefined
       ),
@@ -290,7 +230,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
         <EuiButton
           color="secondary"
           iconType="refresh"
-          onClick={() => this.loadApiKeys(true)}
+          onClick={() => this.reloadApiKeys()}
           data-test-subj="reloadButton"
         >
           <FormattedMessage
@@ -472,7 +412,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
               return (
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>
-                    <ApiKeysInvalidateProvider isAdmin={isAdmin}>
+                    <InvalidateProvider isAdmin={isAdmin}>
                       {invalidateApiKeyPrompt => {
                         return (
                           <EuiToolTip
@@ -499,7 +439,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
                           </EuiToolTip>
                         );
                       }}
-                    </ApiKeysInvalidateProvider>
+                    </InvalidateProvider>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               );
@@ -518,8 +458,9 @@ class ApiKeysGridPageUI extends Component<Props, State> {
       this.setState({ isAdmin, areApiKeysEnabled });
 
       if (areApiKeysEnabled) {
-        this.loadApiKeys();
+        this.initiallyLoadApiKeys();
       } else {
+        // We're done loading and will just show the "Disabled" error.
         this.setState({ isLoadingApp: false });
       }
     } catch (e) {
@@ -539,16 +480,19 @@ class ApiKeysGridPageUI extends Component<Props, State> {
     }
   }
 
+  private initiallyLoadApiKeys = () => {
+    this.setState({ isLoadingApp: true, isLoadingTable: false });
+    this.loadApiKeys();
+  };
+
+  private reloadApiKeys = () => {
+    this.setState({ apiKeys: [], isLoadingApp: false, isLoadingTable: true });
+    this.loadApiKeys();
+  };
+
   private loadApiKeys = async (isReload = false) => {
-    const { isAdmin } = this.state;
-
-    if (isReload) {
-      this.setState({ apiKeys: [], isLoadingApp: false, isLoadingTable: true });
-    } else {
-      this.setState({ isLoadingApp: true, isLoadingTable: false });
-    }
-
     try {
+      const { isAdmin } = this.state;
       const { apiKeys } = await ApiKeysApi.getApiKeys(isAdmin);
       this.setState({ apiKeys });
     } catch (e) {
