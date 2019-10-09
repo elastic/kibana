@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -19,7 +19,7 @@ import {
 import { ComponentStrings } from '../../../../../i18n';
 
 import { Clipboard } from '../../../clipboard';
-import { OnCopyFn } from '../workpad_export';
+import { OnCopyFn } from './share_website_flyout';
 
 const { ShareWebsiteSnippetsStep: strings } = ComponentStrings;
 
@@ -34,18 +34,13 @@ const HTML = `<!-- ${strings.getIncludeRuntimeLabel()} -->
   KbnCanvas.shareable();
 </script>`;
 
-export const SnippetsStep = ({ onCopy }: { onCopy: OnCopyFn }) => (
+export const SnippetsStep: FC<{ onCopy: OnCopyFn }> = ({ onCopy }) => (
   <div>
     <EuiText size="s">
       <p>{strings.getSnippetsStepDescription()}</p>
     </EuiText>
     <EuiSpacer size="s" />
-    <Clipboard
-      content={HTML}
-      onCopy={() => {
-        onCopy('share');
-      }}
-    >
+    <Clipboard content={HTML} onCopy={onCopy}>
       <EuiCodeBlock
         className="canvasWorkpadExport__reportingConfig"
         paddingSize="s"

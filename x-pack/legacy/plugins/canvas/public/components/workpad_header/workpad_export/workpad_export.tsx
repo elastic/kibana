@@ -11,15 +11,15 @@ import { EuiButtonIcon, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { Popover } from '../../popover';
 import { DisabledPanel } from './disabled_panel';
 import { PDFPanel } from './pdf_panel';
-import { ShareWebsiteFlyout } from './flyout/share_website_flyout';
+import { ShareWebsiteFlyout } from './flyout';
 
 import { ComponentStrings } from '../../../../i18n';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 type ClosePopoverFn = () => void;
 
-type CopyTypes = 'pdf' | 'reportingConfig' | 'share';
-type ExportTypes = 'pdf' | 'json' | 'share' | 'shareRuntime' | 'shareZip';
+type CopyTypes = 'pdf' | 'reportingConfig';
+type ExportTypes = 'pdf' | 'json';
 type ExportUrlTypes = 'pdf';
 type CloseTypes = 'share';
 
@@ -37,8 +37,6 @@ export interface Props {
   onExport: OnExportFn;
   /** Handler to retrive an export URL based on the type of export requested. */
   getExportUrl: GetExportUrlFn;
-  /** A warning, if applicable, about a Shareable Canvas having unsupported renderers. */
-  unsupportedRenderers?: string[];
 }
 
 /**
@@ -49,15 +47,13 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   onCopy,
   onExport,
   getExportUrl,
-  unsupportedRenderers = [],
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
-  const onClose = (type: CloseTypes) => {
-    if (type === 'share') {
-      setShowFlyout(false);
-    }
+  const onClose = () => {
+    setShowFlyout(false);
   };
+
   // TODO: Fix all of this magic from EUI; this code is boilerplate from
   // EUI examples and isn't easily typed.
   const flattenPanelTree = (tree: any, array: any[] = []) => {
@@ -141,14 +137,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
     />
   );
 
-  const flyout = showFlyout ? (
-    <ShareWebsiteFlyout
-      onClose={onClose}
-      onCopy={onCopy}
-      onExport={onExport}
-      unsupportedRenderers={unsupportedRenderers}
-    />
-  ) : null;
+  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={onClose} /> : null;
 
   return (
     <div>
