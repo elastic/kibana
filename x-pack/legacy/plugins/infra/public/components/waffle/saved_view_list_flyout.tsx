@@ -42,6 +42,9 @@ const DeleteConfimation = (props: DeleteConfimationProps) => {
     <>
       {confirmVisible && (
         <EuiFlexGroup>
+          <EuiButtonEmpty onClick={hideConfirm} data-test-subj="hideConfirm">
+            <FormattedMessage defaultMessage="cancel" id="xpack.infra.waffle.savedViews.cancel" />
+          </EuiButtonEmpty>
           <EuiButton
             fill={true}
             iconType="trash"
@@ -50,23 +53,13 @@ const DeleteConfimation = (props: DeleteConfimationProps) => {
             data-test-subj="showConfirm"
           >
             <FormattedMessage
-              defaultMessage="Are you sure?"
+              defaultMessage="Delete view?"
               id="xpack.infra.openView.actionNames.deleteConfirmation"
             />
           </EuiButton>
-          <EuiButtonEmpty onClick={hideConfirm} data-test-subj="hideConfirm">
-            <FormattedMessage defaultMessage="cancel" id="xpack.infra.waffle.savedViews.cancel" />
-          </EuiButtonEmpty>
         </EuiFlexGroup>
       )}
-      {!confirmVisible && (
-        <EuiButtonEmpty onClick={showConfirm}>
-          <FormattedMessage
-            defaultMessage="Delete view"
-            id="xpack.infra.openView.actionNames.delete"
-          />
-        </EuiButtonEmpty>
-      )}
+      {!confirmVisible && <EuiButtonEmpty iconType="trash" color="danger" onClick={showConfirm} />}
     </>
   );
 };
@@ -107,7 +100,7 @@ export const SavedViewListFlyout = ({ close, views, setView, deleteView, loading
   ];
 
   return (
-    <EuiFlyout onClose={close} data-test-subj="loadViewsFlyout">
+    <EuiFlyout onClose={close} data-test-subj="loadViewsFlyout" maxWidth={250}>
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2>

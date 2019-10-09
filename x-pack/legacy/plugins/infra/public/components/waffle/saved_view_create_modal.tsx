@@ -17,7 +17,6 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiFieldText,
-  EuiCheckbox,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -91,7 +90,13 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
               id="xpack.infra.waffle.savedViews.cancelButton"
             />
           </EuiButtonEmpty>
-          <EuiButton color="primary" onClick={saveView} data-test-subj="createSavedViewButton">
+          <EuiButton
+            color="primary"
+            disabled={!viewName}
+            fill={true}
+            onClick={saveView}
+            data-test-subj="createSavedViewButton"
+          >
             <FormattedMessage defaultMessage="Save" id="xpack.infra.waffle.savedViews.saveButton" />
           </EuiButton>
         </EuiModalFooter>

@@ -43,7 +43,7 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
     const items: SavedView[] = [
       {
         name: i18n.translate('xpack.infra.savedView.defaultViewName', {
-          defaultMessage: 'Default View',
+          defaultMessage: 'Default',
         }),
         id: '0',
         isDefault: true,

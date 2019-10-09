@@ -70,13 +70,13 @@ export const SavedViewsToolbarControls = (props: Props) => {
       <EuiFlexGroup>
         <EuiButtonEmpty iconType="save" onClick={openSaveModal} data-test-subj="openSaveViewModal">
           <FormattedMessage
-            defaultMessage="Save view"
+            defaultMessage="Save"
             id="xpack.infra.waffle.savedViews.saveViewLabel"
           />
         </EuiButtonEmpty>
-        <EuiButtonEmpty onClick={loadViews} data-test-subj="loadViews">
+        <EuiButtonEmpty iconType="importAction" onClick={loadViews} data-test-subj="loadViews">
           <FormattedMessage
-            defaultMessage="Load views"
+            defaultMessage="Load"
             id="xpack.infra.waffle.savedViews.loadViewsLabel"
           />
         </EuiButtonEmpty>
