@@ -75,20 +75,6 @@ export interface NetworkTopNFlowBuckets {
   source_ips?: number;
 }
 
-export interface NetworkTopNFlowData extends SearchHit {
-  aggregations: {
-    top_n_flow_count?: {
-      value: number;
-    };
-    destination?: {
-      buckets: NetworkTopNFlowBuckets[];
-    };
-    source?: {
-      buckets: NetworkTopNFlowBuckets[];
-    };
-  };
-}
-
 export interface NetworkDnsBuckets {
   key: string;
   doc_count: number;
