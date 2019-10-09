@@ -6,12 +6,165 @@ Programmatically integrate with the Logstash configuration management feature.
 
 WARNING: Do not directly access the `.logstash` index. The structure of the `.logstash` index is subject to change, which could cause your integration to break. Instead, use the Logstash configuration management APIs. 
 
-* <<logstash-configuration-management-api-create, Create Logstash pipeline API>>
-* <<logstash-configuration-management-api-retrieve, Retrieve pipeline API>>
-* <<logstash-configuration-management-api-delete, Delete Logstash pipeline API>>
-* <<logstash-configuration-management-api-list, List Logstash pipeline API>>
+[[logstash-configuration-management-api-create]]
+=== Create Logstash pipeline API
+++++
+<titleabbrev>Create pipeline</titleabbrev>
+++++
 
-include::logstash-configuration-management/create.asciidoc[]
-include::logstash-configuration-management/retrieve.asciidoc[]
-include::logstash-configuration-management/delete.asciidoc[]
-include::logstash-configuration-management/list.asciidoc[]
+experimental[] Create a centrally-managed Logstash pipeline, or update an existing pipeline.
+
+[[logstash-configuration-management-api-create-request]]
+==== Request
+
+`PUT /api/logstash/pipeline/<id>`
+
+[[logstash-configuration-management-api-create-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The pipeline ID. Only alphanumeric characters, hyphens, and underscores are supported.
+
+[[logstash-configuration-management-api-create-request-body]]
+==== Request body
+
+`description`::
+  (Optional, string) The pipeline description.
+
+`pipeline`::
+  (Required, string) The pipeline definition.
+
+`settings`::
+  (Optional, object) The pipeline settings. Supported settings, represented as object keys, are `pipeline.workers`, `pipeline.batch.size`, `pipeline.batch.delay`, `queue.type`, `queue.max_bytes`, and `queue.checkpoint.writes`.
+
+[[logstash-configuration-management-api-create-codes]]
+==== Response code
+
+`204 No Content`::
+    Indicates a successful call.
+
+[float]
+[[logstash-configuration-management-api-create-example]]
+==== Example
+
+[source,js]
+--------------------------------------------------
+PUT api/logstash/pipeline/hello-world
+{
+  "pipeline": "input { stdin {} } output { stdout {} }",
+  "settings": {
+    "queue.type": "persisted"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+[[logstash-configuration-management-api-retrieve]]
+=== Retrieve pipeline API
+++++
+<titleabbrev>Retrieve pipeline</titleabbrev>
+++++
+
+experimental[] Retrieves a centrally-managed Logstash pipeline.
+
+[[logstash-configuration-management-api-retrieve-request]]
+==== Request
+
+`GET /api/logstash/pipeline/<id>`
+
+[[logstash-configuration-management-api-retrieve-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The pipeline ID.
+  
+[[logstash-configuration-management-api-retrieve-example]]
+==== Example
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "id": "hello-world",
+  "description": "Just a simple pipeline",
+  "username": "elastic",
+  "pipeline": "input { stdin {} } output { stdout {} }",
+  "settings": {
+    "queue.type": "persistent"
+  }
+}
+--------------------------------------------------
+
+[[logstash-configuration-management-api-delete]]
+=== Delete Logstash pipeline API
+++++
+<titleabbrev>Delete pipeline</titleabbrev>
+++++
+
+experimental[] Delete a centrally-managed Logstash pipeline.
+
+[[logstash-configuration-management-api-delete-request]]
+==== Request
+
+`DELETE /api/logstash/pipeline/<id>`
+
+[[logstash-configuration-management-api-delete-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The pipeline ID.
+
+[[logstash-configuration-management-api-delete-codes]]
+==== Response code
+
+`204 No Content`::
+    Indicates a successful call.
+
+[[logstash-configuration-management-api-delete-example]]
+==== Example
+
+[source,js]
+--------------------------------------------------
+DELETE api/logstash/pipeline/hello-world
+--------------------------------------------------
+// KIBANA
+
+[[logstash-configuration-management-api-list]]
+=== List Logstash pipeline API
+++++
+<titleabbrev>List pipeline</titleabbrev>
+++++
+
+experimental[] List all centrally-managed Logstash pipelines.
+
+[[logstash-configuration-management-api-list-request]]
+==== Request
+
+`GET /api/logstash/pipelines`
+
+[[logstash-configuration-management-api-list-example]]
+==== Example
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "pipelines": [
+    {
+      "id": "hello-world",
+      "description": "Just a simple pipeline",
+      "last_modified": "2018-04-14T12:23:29.772Z",
+      "username": "elastic" <1>
+    },
+    {
+      "id": "sleepy-pipeline",
+      "description": "",
+      "last_modified": "2018-03-24T03:41:30.554Z"
+    }
+  ]
+}
+--------------------------------------------------
+
+<1> The `username` property may or may not be present, depending on if security was enabled when the pipeline was created or last updated.

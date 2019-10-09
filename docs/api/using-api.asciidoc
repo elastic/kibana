@@ -24,7 +24,7 @@ The following {kib} APIs are available:
 
 The API base path is `/api/`.
 
-You communicate with our API through HTTP and HTTPs protocols. We recommend that you use HTTPs on port 5601 because it is more secure.
+Communicate with the {kib} APIs through HTTP and HTTPs protocols. We recommend that you use HTTPs on port 5601 because it is more secure.
 
 API calls are stateless. Each request that you make happens in isolation from other calls and must include all of the necessary information for {kib} to fulfill the request. API requests return JSON output, which is a format that is machine-readable and works well for automation.
 
