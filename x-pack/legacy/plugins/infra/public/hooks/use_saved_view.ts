@@ -20,23 +20,18 @@ interface SavedView {
 
 export interface SavedViewSavedObject extends SavedObjectAttributes {
   type: string;
-  data: {
-    name: string;
-    [p: string]: any;
-  };
+  name: string;
+  [p: string]: any;
 }
 
 export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: string) => {
   const { data, loading, find, error: errorOnFind } = useFindSavedObject<SavedViewSavedObject>(
-    'config'
+    viewType
   );
-  const { create, error: errorOnCreate } = useCreateSavedObject('config');
-  const { deleteObject, deletedId } = useDeleteSavedObject('config');
+  const { create, error: errorOnCreate } = useCreateSavedObject(viewType);
+  const { deleteObject, deletedId } = useDeleteSavedObject(viewType);
   const deleteView = useCallback((id: string) => deleteObject(id), []);
-  const saveView = useCallback(
-    (d: { [p: string]: any }) => create({ type: viewType, data: d }),
-    []
-  );
+  const saveView = useCallback((d: { [p: string]: any }) => create(d), []);
 
   const savedObjects = data ? data.savedObjects : [];
   const views = useMemo(() => {
@@ -54,10 +49,9 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
     if (data) {
       data.savedObjects.forEach(
         o =>
-          o.attributes.type === viewType &&
+          o.type === viewType &&
           items.push({
-            ...o.attributes.data,
-            name: o.attributes.data.name,
+            ...o.attributes,
             id: o.id,
           })
       );

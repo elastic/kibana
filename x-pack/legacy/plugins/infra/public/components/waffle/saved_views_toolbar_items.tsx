@@ -13,6 +13,7 @@ import { SavedViewListFlyout } from './saved_view_list_flyout';
 import { SavedViewCreateModal } from './saved_view_create_modal';
 import { WaffleViewState } from '../../containers/waffle/with_waffle_view_state';
 import { useSavedView } from '../../hooks/use_saved_view';
+import { inventoryViewSavedObjectType } from '../../../common/saved_objects/inventory_view';
 interface Props {
   viewState: WaffleViewState;
   defaultViewState: WaffleViewState;
@@ -29,7 +30,7 @@ export const SavedViewsToolbarControls = (props: Props) => {
     find,
     errorOnFind,
     errorOnCreate,
-  } = useSavedView(props.defaultViewState, 'INVENTORY_VIEW');
+  } = useSavedView(props.defaultViewState, inventoryViewSavedObjectType);
   const [modalOpen, setModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const openSaveModal = useCallback(() => setCreateModalOpen(true), []);

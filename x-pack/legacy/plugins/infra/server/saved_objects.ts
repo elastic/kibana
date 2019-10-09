@@ -5,7 +5,9 @@
  */
 
 import { infraSourceConfigurationSavedObjectMappings } from './lib/sources';
+import { inventoryViewSavedObjectMappings } from '../common/saved_objects/inventory_view';
 
 export const savedObjectMappings = {
+  ...infraSourceConfigurationSavedObjectMappings,
   ...infraSourceConfigurationSavedObjectMappings,
 };
