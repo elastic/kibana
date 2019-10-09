@@ -71,7 +71,8 @@
     "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook",
     "spec_to_console": "node scripts/spec_to_console",
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
-    "cover:report": "nyc report --temp-dir target/coverage --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html"
+    "cover:report": "nyc report --temp-dir target/coverage --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html",
+    "cover:convert": "node scripts/convert_json_summary.js"
   },
   "repository": {
     "type": "git",
@@ -431,6 +432,7 @@
     "node-sass": "^4.9.4",
     "normalize-path": "^3.0.0",
     "nyc": "^14.1.1",
+    "oboe": "^2.1.5",
     "pixelmatch": "4.0.2",
     "pkg-up": "^2.0.0",
     "pngjs": "^3.4.0",
@@ -449,8 +451,8 @@
     "tree-kill": "^1.1.0",
     "typescript": "3.5.3",
     "typings-tester": "^0.3.2",
-    "wrapper-webpack-plugin": "2.1.0",
     "vinyl-fs": "^3.0.3",
+    "wrapper-webpack-plugin": "2.1.0",
     "xml2js": "^0.4.22",
     "xmlbuilder": "13.0.2",
     "zlib": "^1.0.5"
