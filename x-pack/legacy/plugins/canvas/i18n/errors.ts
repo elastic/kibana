@@ -8,6 +8,38 @@ import { i18n } from '@kbn/i18n';
 import { CANVAS, JSON } from './constants';
 
 export const ErrorStrings = {
+  WorkpadFileUpload: {
+    getAcceptJSONOnlyErrorMessage: () =>
+      i18n.translate('xpack.canvas.error.workpadUpload.acceptJSONOnlyErrorMessage', {
+        defaultMessage: 'Only {JSON} files are accepted',
+        values: {
+          JSON,
+        },
+      }),
+    getFileUploadFailureWithFileNameErrorMessage: (fileName: string) =>
+      i18n.translate('xpack.canvas.errors.workpadUpload.fileUploadFileWithFileNameErrorMessage', {
+        defaultMessage: `Couldn't upload '{fileName}'`,
+        values: {
+          fileName,
+        },
+      }),
+    getFileUploadFailureWithoutFileNameErrorMessage: () =>
+      i18n.translate(
+        'xpack.canvas.error.workpadUpload.fileUploadFailureWithoutFileNameErrorMessage',
+        {
+          defaultMessage: `Couldn't upload file`,
+        }
+      ),
+    getMissingPropertiesErrorMessage: () =>
+      i18n.translate('xpack.canvas.error.workpadUpload.missingPropertiesErrorMessage', {
+        defaultMessage:
+          'Some properties required for a {CANVAS} workpad are missing.  Edit your {JSON} file to provide the correct property values, and try again.',
+        values: {
+          CANVAS,
+          JSON,
+        },
+      }),
+  },
   WorkpadLoader: {
     getCloneFailureErrorMessage: () =>
       i18n.translate('xpack.canvas.error.workpadLoader.cloneFailureErrorMessage', {
@@ -24,38 +56,6 @@ export const ErrorStrings = {
     getUploadFailureErrorMessage: () =>
       i18n.translate('xpack.canvas.error.workpadLoader.uploadFailureErrorMessage', {
         defaultMessage: `Couldn't upload workpad`,
-      }),
-  },
-  WorkpadFileUpload: {
-    getFileUploadFailureWithFileNameErrorMessage: (fileName: string) =>
-      i18n.translate('xpack.canvas.errors.workpadUpload.fileUploadFileWithFileNameErrorMessage', {
-        defaultMessage: `Couldn't upload '{fileName}'`,
-        values: {
-          fileName,
-        },
-      }),
-    getFileUploadFailureWithoutFileNameErrorMessage: () =>
-      i18n.translate(
-        'xpack.canvas.error.workpadUpload.fileUploadFailureWithoutFileNameErrorMessage',
-        {
-          defaultMessage: `Couldn't upload file`,
-        }
-      ),
-    getAcceptJSONOnlyErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadUpload.acceptJSONOnlyErrorMessage', {
-        defaultMessage: 'Only {JSON} files are accepted',
-        values: {
-          JSON,
-        },
-      }),
-    getMissingPropertiesErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.workpadUpload.missingPropertiesErrorMessage', {
-        defaultMessage:
-          'Some properties required for a {CANVAS} workpad are missing.  Edit your {JSON} file to provide the correct property values, and try again.',
-        values: {
-          CANVAS,
-          JSON,
-        },
       }),
   },
 };
