@@ -97,7 +97,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'PATCH',
-        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}`),
+        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(String(issueNumber))}`),
         data: {
           state: 'open', // Reopen issue if it was closed.
           body: newBody,
@@ -111,7 +111,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'POST',
-        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}/comments`),
+        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(String(issueNumber))}/comments`),
         data: {
           body: commentBody,
         },
