@@ -6,7 +6,7 @@
 
 import { Chrome } from 'ui/chrome';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart, HttpStart } from 'kibana/public';
 import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
@@ -71,10 +71,13 @@ export function createMockGraphStore({
         addSuccess: jest.fn(),
       },
     } as unknown) as NotificationsStart,
+    http: {} as HttpStart,
     notifyAngular: jest.fn(),
     savePolicy: 'configAndData',
     showSaveModal: jest.fn(),
     setLiveResponseFields: jest.fn(),
+    setUrlTemplates: jest.fn(),
+    setWorkspaceInitialized: jest.fn(),
     ...mockedDepsOverwrites,
   };
   const sagaMiddleware = createSagaMiddleware();
