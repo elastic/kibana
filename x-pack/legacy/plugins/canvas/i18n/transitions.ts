@@ -8,41 +8,41 @@ import { i18n } from '@kbn/i18n';
 
 export const TransitionStrings = {
   fade: {
-    getDisplayName: () => () =>
+    getDisplayName: () =>
       i18n.translate('xpack.canvas.transitions.fade.displayName', {
         defaultMessage: 'Fade',
       }),
-    getHelp: () => () =>
+    getHelp: () =>
       i18n.translate('xpack.canvas.transitions.fade.help', {
         defaultMessage: 'Fade from one page to the next',
       }),
   },
   rotate: {
-    getDisplayName: () => () =>
+    getDisplayName: () =>
       i18n.translate('xpack.canvas.transitions.rotate.displayName', {
         defaultMessage: 'Rotate',
       }),
-    getHelp: () => () =>
+    getHelp: () =>
       i18n.translate('xpack.canvas.transitions.rotate.help', {
         defaultMessage: 'Rotate from one page to the next',
       }),
   },
   slide: {
-    getDisplayName: () => () =>
+    getDisplayName: () =>
       i18n.translate('xpack.canvas.transitions.slide.displayName', {
         defaultMessage: 'Slide',
       }),
-    getHelp: () => () =>
+    getHelp: () =>
       i18n.translate('xpack.canvas.transitions.slide.help', {
         defaultMessage: 'Rotate from one page to the next',
       }),
   },
   zoom: {
-    getDisplayName: () => () =>
+    getDisplayName: () =>
       i18n.translate('xpack.canvas.transitions.zoom.displayName', {
         defaultMessage: 'Zoom',
       }),
-    getHelp: () => () =>
+    getHelp: () =>
       i18n.translate('xpack.canvas.transitions.zoom.help', {
         defaultMessage: 'Zoom from one page to the next',
       }),
