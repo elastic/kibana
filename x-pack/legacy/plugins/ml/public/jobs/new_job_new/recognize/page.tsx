@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 // @ts-ignore
 import { ml } from 'plugins/ml/services/ml_api_service';
+import chrome from 'ui/chrome';
 import { merge, flatten } from 'lodash';
 import { useKibanaContext } from '../../../contexts/kibana';
 import {
@@ -81,6 +82,7 @@ export enum SAVE_STATE {
 }
 
 export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
   const { from, to } = getTimeFilterRange();
 
   // #region State
@@ -131,7 +133,9 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     try {
       const response: Module = await ml.getDataRecognizerModule({ moduleId });
       setJobs(response.jobs);
-      setKibanaObjects(response.kibana as KibanaObjects);
+
+      const kibanaObjectsResult = await checkForSavedObjects(response.kibana as KibanaObjects);
+      setKibanaObjects(kibanaObjectsResult);
 
       setFormState({
         ...formState,
@@ -144,6 +148,35 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       // eslint-disable-next-line no-console
       console.error(e);
     }
+  };
+
+  /**
+   * Gets kibana objects with an existence check.
+   */
+  const checkForSavedObjects = async (objects: KibanaObjects): Promise<KibanaObjects> => {
+    try {
+      return await Object.keys(objects).reduce(async (prevPromise, type) => {
+        const acc = await prevPromise;
+        const { savedObjects } = await savedObjectsClient.find({
+          type,
+          perPage: 1000,
+        });
+
+        acc[type] = objects[type].map(obj => {
+          const find = savedObjects.find(savedObject => savedObject.attributes.title === obj.title);
+          return {
+            ...obj,
+            exists: !!find,
+            id: (!!find && find.id) || obj.id,
+          };
+        });
+        return Promise.resolve(acc);
+      }, Promise.resolve({} as KibanaObjects));
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Could not load saved objects', e);
+    }
+    return Promise.resolve(objects);
   };
 
   useEffect(() => {

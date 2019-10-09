@@ -61,8 +61,8 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} style={{ width: '60px' }}>
                   <EuiText textAlign="center">
-                    {isSaving ? <EuiLoadingSpinner size="m" /> : null}
-                    {success !== undefined ? (
+                    {isSaving && !exists ? <EuiLoadingSpinner size="m" /> : null}
+                    {success !== undefined || exists ? (
                       <EuiIcon
                         type={success || exists ? 'check' : 'cross'}
                         color={success || exists ? 'success' : 'danger'}
