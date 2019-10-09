@@ -68,35 +68,39 @@ export class ReportingNotifierStreamHandler {
   /*
    * Use Kibana Toast API to show our messages
    */
-  public async showNotifications({
+  public showNotifications({
     completed: completedJobs,
     failed: failedJobs,
-  }: JobStatusBuckets): Promise<JobStatusBuckets> {
-    // notifications with download link
-    for (const job of completedJobs) {
-      if (job.csvContainsFormulas) {
-        this.notificationsFn().toasts.addWarning(
-          getWarningFormulasToast(job, this.getManagementLink, this.getDownloadLink)
-        );
-      } else if (job.maxSizeReached) {
-        this.notificationsFn().toasts.addWarning(
-          getWarningMaxSizeToast(job, this.getManagementLink, this.getDownloadLink)
-        );
-      } else {
-        this.notificationsFn().toasts.addSuccess(
-          getSuccessToast(job, this.getManagementLink, this.getDownloadLink)
+  }: JobStatusBuckets): Rx.Observable<JobStatusBuckets> {
+    const showNotificationsAsync = async () => {
+      // notifications with download link
+      for (const job of completedJobs) {
+        if (job.csvContainsFormulas) {
+          this.notificationsFn().toasts.addWarning(
+            getWarningFormulasToast(job, this.getManagementLink, this.getDownloadLink)
+          );
+        } else if (job.maxSizeReached) {
+          this.notificationsFn().toasts.addWarning(
+            getWarningMaxSizeToast(job, this.getManagementLink, this.getDownloadLink)
+          );
+        } else {
+          this.notificationsFn().toasts.addSuccess(
+            getSuccessToast(job, this.getManagementLink, this.getDownloadLink)
+          );
+        }
+      }
+
+      // no download link available
+      for (const job of failedJobs) {
+        const content = await this.jobQueueClient.getContent(this.httpFn, job.id);
+        this.notificationsFn().toasts.addDanger(
+          getFailureToast(content, job, this.getManagementLink)
         );
       }
-    }
+      return { completed: completedJobs, failed: failedJobs };
+    };
 
-    // no download link available
-    for (const job of failedJobs) {
-      const content = await this.jobQueueClient.getContent(this.httpFn, job.id);
-      this.notificationsFn().toasts.addDanger(
-        getFailureToast(content, job, this.getManagementLink)
-      );
-    }
-    return { completed: completedJobs, failed: failedJobs };
+    return Rx.from(showNotificationsAsync()); // convert Promise to Observable, for the convenience of the main stream
   }
 
   /*

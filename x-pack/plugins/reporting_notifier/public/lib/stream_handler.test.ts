@@ -120,13 +120,13 @@ describe('stream handler', () => {
   });
 
   describe('showNotifications', () => {
-    it('show success', async () => {
+    it('show success', done => {
       const sh = new ReportingNotifierStreamHandler(
         httpFnMock,
         notificationsFnMock,
         jobQueueClientMock
       );
-      await sh.showNotifications({
+      sh.showNotifications({
         completed: [
           {
             id: 'yas1',
@@ -136,22 +136,22 @@ describe('stream handler', () => {
           } as JobSummary,
         ],
         failed: [],
+      }).subscribe(() => {
+        expect(mockShowDanger.callCount).toBe(0);
+        expect(mockShowSuccess.callCount).toBe(1);
+        expect(mockShowWarning.callCount).toBe(0);
+        expect(mockShowSuccess.args[0]).toMatchSnapshot();
+        done();
       });
-
-      expect(mockShowDanger.callCount).toBe(0);
-      expect(mockShowSuccess.callCount).toBe(1);
-      expect(mockShowWarning.callCount).toBe(0);
-
-      expect(mockShowSuccess.args[0]).toMatchSnapshot();
     });
 
-    it('show max length warning', async () => {
+    it('show max length warning', done => {
       const sh = new ReportingNotifierStreamHandler(
         httpFnMock,
         notificationsFnMock,
         jobQueueClientMock
       );
-      await sh.showNotifications({
+      sh.showNotifications({
         completed: [
           {
             id: 'yas2',
@@ -162,22 +162,22 @@ describe('stream handler', () => {
           } as JobSummary,
         ],
         failed: [],
+      }).subscribe(() => {
+        expect(mockShowDanger.callCount).toBe(0);
+        expect(mockShowSuccess.callCount).toBe(0);
+        expect(mockShowWarning.callCount).toBe(1);
+        expect(mockShowWarning.args[0]).toMatchSnapshot();
+        done();
       });
-
-      expect(mockShowDanger.callCount).toBe(0);
-      expect(mockShowSuccess.callCount).toBe(0);
-      expect(mockShowWarning.callCount).toBe(1);
-
-      expect(mockShowWarning.args[0]).toMatchSnapshot();
     });
 
-    it('show csv formulas warning', async () => {
+    it('show csv formulas warning', done => {
       const sh = new ReportingNotifierStreamHandler(
         httpFnMock,
         notificationsFnMock,
         jobQueueClientMock
       );
-      await sh.showNotifications({
+      sh.showNotifications({
         completed: [
           {
             id: 'yas3',
@@ -188,22 +188,22 @@ describe('stream handler', () => {
           } as JobSummary,
         ],
         failed: [],
+      }).subscribe(() => {
+        expect(mockShowDanger.callCount).toBe(0);
+        expect(mockShowSuccess.callCount).toBe(0);
+        expect(mockShowWarning.callCount).toBe(1);
+        expect(mockShowWarning.args[0]).toMatchSnapshot();
+        done();
       });
-
-      expect(mockShowDanger.callCount).toBe(0);
-      expect(mockShowSuccess.callCount).toBe(0);
-      expect(mockShowWarning.callCount).toBe(1);
-
-      expect(mockShowWarning.args[0]).toMatchSnapshot();
     });
 
-    it('show failed job toast', async () => {
+    it('show failed job toast', done => {
       const sh = new ReportingNotifierStreamHandler(
         httpFnMock,
         notificationsFnMock,
         jobQueueClientMock
       );
-      await sh.showNotifications({
+      sh.showNotifications({
         completed: [],
         failed: [
           {
@@ -213,22 +213,22 @@ describe('stream handler', () => {
             status: 'failed',
           } as JobSummary,
         ],
+      }).subscribe(() => {
+        expect(mockShowSuccess.callCount).toBe(0);
+        expect(mockShowWarning.callCount).toBe(0);
+        expect(mockShowDanger.callCount).toBe(1);
+        expect(mockShowDanger.args[0]).toMatchSnapshot();
+        done();
       });
-
-      expect(mockShowSuccess.callCount).toBe(0);
-      expect(mockShowWarning.callCount).toBe(0);
-      expect(mockShowDanger.callCount).toBe(1);
-
-      expect(mockShowDanger.args[0]).toMatchSnapshot();
     });
 
-    it('show multiple toast', async () => {
+    it('show multiple toast', done => {
       const sh = new ReportingNotifierStreamHandler(
         httpFnMock,
         notificationsFnMock,
         jobQueueClientMock
       );
-      await sh.showNotifications({
+      sh.showNotifications({
         completed: [
           {
             id: 'yas8',
@@ -259,11 +259,12 @@ describe('stream handler', () => {
             status: 'failed',
           } as JobSummary,
         ],
+      }).subscribe(() => {
+        expect(mockShowSuccess.callCount).toBe(1);
+        expect(mockShowWarning.callCount).toBe(2);
+        expect(mockShowDanger.callCount).toBe(1);
+        done();
       });
-
-      expect(mockShowSuccess.callCount).toBe(1);
-      expect(mockShowWarning.callCount).toBe(2);
-      expect(mockShowDanger.callCount).toBe(1);
     });
   });
 });

@@ -51,7 +51,7 @@ export class ReportingNotifierPublicPlugin implements Plugin<any, any> {
       mergeMap((storedJobs: JobId[]) => {
         return streamHandler.findChangedStatusJobs(storedJobs); // look up the latest status of all pending jobs on the server
       }),
-      map(({ completed, failed }: JobStatusBuckets) => {
+      mergeMap(({ completed, failed }: JobStatusBuckets) => {
         return streamHandler.showNotifications({ completed, failed });
       }),
       catchError(err => {
