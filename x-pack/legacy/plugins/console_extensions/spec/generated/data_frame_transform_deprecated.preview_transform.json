@@ -1,5 +1,5 @@
 {
-  "data_frame.preview_data_frame_transform": {
+  "data_frame_transform_deprecated.preview_transform": {
     "methods": [
       "POST"
     ],

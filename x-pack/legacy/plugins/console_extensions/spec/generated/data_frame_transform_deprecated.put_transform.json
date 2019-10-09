@@ -1,5 +1,5 @@
 {
-  "data_frame.put_data_frame_transform": {
+  "data_frame_transform_deprecated.put_transform": {
     "url_params": {
       "defer_validation": "__flag__"
     },

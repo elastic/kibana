@@ -1,5 +1,5 @@
 {
-  "data_frame.get_data_frame_transform_stats": {
+  "data_frame_transform_deprecated.get_transform_stats": {
     "url_params": {
       "from": "",
       "size": "",
