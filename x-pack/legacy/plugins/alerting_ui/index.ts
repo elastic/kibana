@@ -6,11 +6,13 @@
 
 import { Legacy } from 'kibana';
 import { Root } from 'joi';
+import { resolve } from 'path';
 
 export function alertingUI(kibana: any) {
   return new kibana.Plugin({
     id: 'alerting_ui',
     configPrefix: 'xpack.alerting_ui',
+    publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'actions'],
     isEnabled(config: Legacy.KibanaConfig) {
       return (
@@ -24,6 +26,11 @@ export function alertingUI(kibana: any) {
           enabled: Joi.boolean().default(false),
         })
         .default();
+    },
+    uiExports: {
+      // styleSheetPaths: resolve(__dirname, 'public/np_ready/public/index.scss'),
+      hacks: ['plugins/alerting_ui/hacks/register'],
+      managementSections: ['plugins/alerting_ui'],
     },
   });
 }

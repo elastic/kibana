@@ -1,0 +1,7 @@
+{
+    "id": "xpackActions",
+    "version": "kibana",
+    "server": false,
+    "ui": true
+  }
+  
