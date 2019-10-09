@@ -45,11 +45,9 @@ export default function () {
       }
     },
     newPlatform: {
-      setup: {
-        core: {
-          elasticsearch: {
-            legacy: { config$: of({ shardTimeout: moment.duration(30000) }) }
-          }
+      __internals: {
+        elasticsearch: {
+          legacy: { config$: of({ shardTimeout: moment.duration(30000) }) }
         }
       }
     },

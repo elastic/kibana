@@ -17,6 +17,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 jest.mock('ui/new_platform');
 
 import { openSourceModal } from '../services/source_modal';
+
 import { GraphStore, setDatasource } from '../state_management';
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
@@ -40,6 +41,9 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
     notifications: {} as CoreStart['notifications'],
     http: {} as CoreStart['http'],
     overlays: {} as CoreStart['overlays'],
+    store: {
+      get: () => {},
+    },
   };
 
   return (
@@ -66,7 +70,7 @@ describe('search_bar', () => {
   let store: GraphStore;
 
   beforeEach(() => {
-    store = createMockGraphStore({ includeSagas: false }).store;
+    store = createMockGraphStore({}).store;
     store.dispatch(
       setDatasource({
         type: 'indexpattern',
@@ -79,6 +83,7 @@ describe('search_bar', () => {
   function mountSearchBar() {
     jest.clearAllMocks();
     const wrappedSearchBar = wrapSearchBarInContext({ ...defaultProps });
+
     instance = mountWithIntl(<Provider store={store}>{wrappedSearchBar}</Provider>);
   }
 
