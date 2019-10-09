@@ -5,7 +5,7 @@
  */
 
 import React, { FC, memo } from 'react';
-import { EuiCallOut, EuiButton, EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SAVE_STATE } from '../page';
@@ -65,9 +65,29 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
         )}
         <EuiSpacer size="l" />
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          {saveState !== SAVE_STATE.SAVING && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                fill={false}
+                aria-label={i18n.translate(
+                  'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
+                  { defaultMessage: 'Reset' }
+                )}
+                onClick={onReset}
+              >
+                <FormattedMessage
+                  id="xpack.ml.newJob.simple.recognize.someJobsCreationFailed.resetButtonLabel"
+                  defaultMessage="Reset"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
           {(saveState === SAVE_STATE.SAVED || saveState === SAVE_STATE.PARTIAL_FAILURE) && (
             <EuiFlexItem grow={false}>
-              <EuiLink
+              <EuiButton
+                color="primary"
+                fill={true}
                 href={resultsUrl}
                 aria-label={i18n.translate(
                   'xpack.ml.newJob.simple.recognize.viewResultsAriaLabel',
@@ -80,25 +100,9 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
                   id="xpack.ml.newJob.simple.recognize.viewResultsLinkText"
                   defaultMessage="View Results"
                 />
-              </EuiLink>
+              </EuiButton>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              fill={true}
-              aria-label={i18n.translate(
-                'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
-                { defaultMessage: 'Reset' }
-              )}
-              onClick={onReset}
-            >
-              <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.someJobsCreationFailed.resetButtonLabel"
-                defaultMessage="Reset"
-              />
-            </EuiButton>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </>
     );
