@@ -8,7 +8,7 @@ import { HttpServiceBase } from 'kibana/public';
 import { useRequestNp } from '../../../../public/shared_imports';
 import { BASE_API_PATH } from '../constants';
 
-import { ActionType } from '../../../../server/types';
+import { ActionType } from '../../../../../actions/server/types';
 import { Result, asOk, asErr } from './result_type';
 
 export interface RequestData<T> {
