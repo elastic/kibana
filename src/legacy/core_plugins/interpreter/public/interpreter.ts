@@ -63,8 +63,6 @@ registries.browserFunctions.register(clogFn);
 registries.browserFunctions.register(fontFn);
 registries.browserFunctions.register(kibanaFn);
 registries.browserFunctions.register(kibanaContextFn);
-registries.browserFunctions.register(rangeFn);
-registries.browserFunctions.register(visDimensionFn);
 registries.types.register(boolean);
 registries.types.register(datatable);
 registries.types.register(error);
@@ -85,8 +83,10 @@ registries.types.register(kibanaDatatable);
 registries.browserFunctions.register(esaggsFn);
 
 // These will be moved to Visualizations plugin.
-registries.renderers.register(visualization);
+registries.browserFunctions.register(rangeFn);
+registries.browserFunctions.register(visDimensionFn);
 registries.browserFunctions.register(visualizationFn);
+registries.renderers.register(visualization);
 
 let executorPromise: Promise<ExpressionExecutor> | undefined;
 
