@@ -8,7 +8,7 @@ import { EnforceSecurityPage } from './error/enforce_security';
 import { InvalidLicensePage } from './error/invalid_license';
 import { NoAccessPage } from './error/no_access';
 import { AgentListPage } from './agent_list';
-import { AgentDetailsPage } from './agent_details/details';
+import { AgentDetailsPage } from './agent_details';
 
 export const routeMap = [
   { path: '/error/enforce_security', component: EnforceSecurityPage },

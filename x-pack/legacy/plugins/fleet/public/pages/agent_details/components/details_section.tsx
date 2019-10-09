@@ -80,7 +80,7 @@ export const AgentDetailSection: SFC<{ agent: Agent }> = ({ agent }) => {
   ].concat(metadataItems);
 
   return (
-    <div>
+    <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
@@ -95,6 +95,6 @@ export const AgentDetailSection: SFC<{ agent: Agent }> = ({ agent }) => {
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiDescriptionList type="column" compressed listItems={items} />
-    </div>
+    </>
   );
 };

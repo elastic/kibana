@@ -5,19 +5,20 @@
  */
 
 import { useState } from 'react';
-
-const DEFAULT_PAGE_SIZE = 20;
-const PAGE_SIZES = [2, 20, 50];
+import { DEFAULT_AGENTS_PAGE_SIZE, AGENTS_PAGE_SIZE_OPTIONS } from '../../common/constants';
 
 export function usePagination() {
-  const [pageIndex, setCurrentPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [pagination, setPagination] = useState<{
+    currentPage: number;
+    pageSize: number;
+  }>({
+    currentPage: 1,
+    pageSize: DEFAULT_AGENTS_PAGE_SIZE,
+  });
 
   return {
-    pageIndex,
-    setCurrentPageIndex,
-    pageSize,
-    pageSizes: PAGE_SIZES,
-    setPageSize,
+    pagination,
+    setPagination,
+    pageSizeOptions: AGENTS_PAGE_SIZE_OPTIONS,
   };
 }

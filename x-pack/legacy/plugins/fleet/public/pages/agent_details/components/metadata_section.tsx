@@ -20,7 +20,7 @@ export const AgentMetadataSection: SFC<{ agent: Agent }> = ({ agent }) => {
   const items = mapMetadata(agent.local_metadata).concat(mapMetadata(agent.user_provided_metadata));
 
   return (
-    <div>
+    <>
       <EuiTitle size="s">
         <h3>
           <FormattedMessage
@@ -37,6 +37,6 @@ export const AgentMetadataSection: SFC<{ agent: Agent }> = ({ agent }) => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiDescriptionList type="column" compressed listItems={items} />
-    </div>
+    </>
   );
 };

@@ -34,8 +34,7 @@ function useGetAgentEvents(
   agents: AgentsLib,
   agent: Agent,
   search: string,
-  page: number,
-  pageSize: number
+  pagination: { currentPage: number; pageSize: number }
 ) {
   const [state, setState] = useState<{ list: AgentEvent[]; total: number; isLoading: boolean }>({
     list: [],
@@ -49,7 +48,12 @@ function useGetAgentEvents(
       list: state.list,
     });
     try {
-      const { list, total } = await agents.getAgentEvents(agent.id, search, page, pageSize);
+      const { list, total } = await agents.getAgentEvents(
+        agent.id,
+        search,
+        pagination.currentPage,
+        pagination.pageSize
+      );
 
       setState({
         isLoading: false,
@@ -66,27 +70,21 @@ function useGetAgentEvents(
   };
   useEffect(() => {
     fetchAgentEvents();
-  }, [agent.id, search, page, pageSize]);
+  }, [agent.id, search, pagination]);
 
   return { ...state, refresh: fetchAgentEvents };
 }
 
 export const AgentEventsTable: SFC<{ agents: AgentsLib; agent: Agent }> = ({ agents, agent }) => {
-  const { pageIndex, setCurrentPageIndex, setPageSize, pageSize, pageSizes } = usePagination();
+  const { pageSizeOptions, pagination, setPagination } = usePagination();
   const { search, setSearch } = useSearch();
 
-  const { list, total, isLoading, refresh } = useGetAgentEvents(
-    agents,
-    agent,
-    search,
-    pageIndex + 1,
-    pageSize
-  );
-  const pagination = {
-    pageIndex,
-    pageSize,
+  const { list, total, isLoading, refresh } = useGetAgentEvents(agents, agent, search, pagination);
+  const paginationOptions = {
+    pageIndex: pagination.currentPage - 1,
+    pageSize: pagination.pageSize,
     totalItemCount: total,
-    pageSizeOptions: pageSizes,
+    pageSizeOptions,
   };
 
   const columns = [
@@ -141,12 +139,17 @@ export const AgentEventsTable: SFC<{ agents: AgentsLib; agent: Agent }> = ({ age
     setSearch(e.queryText);
   };
   const onChange = ({ page }: { page: { index: number; size: number } }) => {
-    setCurrentPageIndex(page.index);
-    setPageSize(page.size);
+    const newPagination = {
+      ...pagination,
+      currentPage: page.index + 1,
+      pageSize: page.size,
+    };
+
+    setPagination(newPagination);
   };
 
   return (
-    <div>
+    <>
       <EuiTitle size="s">
         <h3>
           <FormattedMessage id="xpack.fleet.agentEventsList.title" defaultMessage="Activity Log" />
@@ -179,9 +182,9 @@ export const AgentEventsTable: SFC<{ agents: AgentsLib; agent: Agent }> = ({ age
         onChange={onChange}
         items={list}
         columns={columns}
-        pagination={pagination}
+        pagination={paginationOptions}
         loading={isLoading}
       />
-    </div>
+    </>
   );
 };

@@ -77,9 +77,6 @@ export class AppRoutes extends Component<RouterProps, RouterState> {
 
           {/* This app does not make use of a homepage. The main page is agents list */}
           <Route path="/" exact={true} render={() => <Redirect to="/agents" />} />
-          {/* This app does not make use of a homepage. The mainpage is overview/enrolled_agents */}
-          {/* <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_agents" />} /> */}
-          {/* <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_agents" />} /> */}
         </Switch>
 
         {/* Render routes from the FS */}

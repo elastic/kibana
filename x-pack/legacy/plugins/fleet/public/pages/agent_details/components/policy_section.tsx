@@ -10,7 +10,7 @@ import { EuiTitle, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from
 import { Agent } from '../../../../common/types/domain_data';
 
 export const PolicySection: SFC<{ agent: Agent }> = ({ agent }) => (
-  <div>
+  <>
     <EuiTitle size="s">
       <h3>
         <FormattedMessage
@@ -36,5 +36,5 @@ export const PolicySection: SFC<{ agent: Agent }> = ({ agent }) => (
         </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </div>
+  </>
 );

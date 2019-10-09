@@ -121,14 +121,22 @@ export const AgentDetailsPage: SFC<Props> = ({
     <Layout>
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={3}>
-          <AgentDetailSection agent={agent} />
-          <EuiHorizontalRule />
-          <PolicySection agent={agent} />
-          <EuiHorizontalRule />
-          <AgentMetadataSection agent={agent} />
+          <EuiFlexItem grow={null}>
+            <AgentDetailSection agent={agent} />
+            <EuiHorizontalRule />
+          </EuiFlexItem>
+          <EuiFlexItem grow={null}>
+            <PolicySection agent={agent} />
+            <EuiHorizontalRule />
+          </EuiFlexItem>
+          <EuiFlexItem grow={null}>
+            <AgentMetadataSection agent={agent} />
+          </EuiFlexItem>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <AgentEventsTable agents={agents} agent={agent} />
+          <EuiFlexItem grow={null}>
+            <AgentEventsTable agents={agents} agent={agent} />
+          </EuiFlexItem>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Layout>
