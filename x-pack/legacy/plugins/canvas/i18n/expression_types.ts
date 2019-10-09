@@ -206,7 +206,7 @@ export const DataSourceStrings = {
         defaultMessage: 'The fields to extract. Kibana scripted fields are not currently available',
       }),
     getFieldsWarningLabel: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.fieldsLabel', {
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.fieldsWarningLabel', {
         defaultMessage: 'This datasource performs best with 10 or fewer fields',
       }),
     getAscendingOption: () =>
