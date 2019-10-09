@@ -9,5 +9,5 @@ import { inventoryViewSavedObjectMappings } from '../common/saved_objects/invent
 
 export const savedObjectMappings = {
   ...infraSourceConfigurationSavedObjectMappings,
-  ...infraSourceConfigurationSavedObjectMappings,
+  ...inventoryViewSavedObjectMappings,
 };
