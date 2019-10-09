@@ -117,14 +117,19 @@ export const mostRecentCheckGroups = async (
             location: {
               terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },
               aggs: {
-                top: {
-                  top_hits: {
-                    sort: [{ '@timestamp': 'desc' }],
-                    _source: {
-                      includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
+                ips: {
+                  terms: { field: 'monitor.ip', missing: '0.0.0.0', size: 100 },
+                  aggs: {
+                    top: {
+                      top_hits: {
+                        sort: [{ '@timestamp': 'desc' }],
+                        _source: {
+                          includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
+                        },
+                        size: 1,
+                      },
                     },
-                    size: 1,
-                  },
+                  }
                 },
               },
             },

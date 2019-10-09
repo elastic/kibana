@@ -244,7 +244,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
     const result = await this.database.search(request, params);
     const buckets: HistogramQueryResult[] = get(result, 'aggregations.timeseries.buckets', []);
+    console.log("TS", get(result, 'aggregations.timeseries.buckets'));
     const mappedBuckets = buckets.map(bucket => {
+      console.log("BX", bucket);
       const key: number = get(bucket, 'key');
       const downCount: number = get(bucket, 'down.doc_count');
       const upCount: number = get(bucket, 'up.doc_count');

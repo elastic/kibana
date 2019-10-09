@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { dropLatestBucket } from './drop_latest_bucket';
 export { formatEsBucketsForHistogram } from './format_es_buckets_for_histogram';
 export { getFilterClause } from './get_filter_clause';
 export { getHistogramInterval } from './get_histogram_interval';

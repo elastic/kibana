@@ -5,7 +5,6 @@
  */
 
 import { UMESBucket, UMESHistogramBucket } from '../adapters/database';
-import { dropLatestBucket } from './drop_latest_bucket';
 
 /**
  * The charting library we're currently using requires histogram data points have an
@@ -21,17 +20,17 @@ import { dropLatestBucket } from './drop_latest_bucket';
 export function formatEsBucketsForHistogram<T extends UMESBucket>(
   buckets: T[]
 ): Array<T & UMESHistogramBucket> {
-  // wait for first bucket to fill up
-  if (buckets.length < 2) {
+  if (buckets.length < 1) {
     return [];
   }
-  const TERMINAL_INDEX = buckets.length - 1;
-  const { key: terminalBucketTime } = buckets[TERMINAL_INDEX];
-  // drop the most recent bucket to avoid returning incomplete bucket
-  return dropLatestBucket(buckets).map((item, index, array) => {
+  console.log("BUCKETS", buckets);
+  const { key: terminalBucketTime } = buckets[buckets.length -1];
+  return buckets.map((item, index, array) => {
     const { key } = item;
     const nextItem = array[index + 1];
-    const bucketSize = nextItem ? Math.abs(nextItem.key - key) : Math.abs(terminalBucketTime - key);
+    console.log("ITEM", item);
+    console.log("IDX", index);
+    const bucketSize = nextItem ? Math.abs(nextItem.key - key) : Math.abs(terminalBucketTime - key - 1000);
 
     return {
       x: key + bucketSize,
