@@ -178,6 +178,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
           className="conApp__editorActions"
           id="ConAppEditorActions"
           gutterSize="none"
+          responsive={false}
         >
           <EuiFlexItem>
             <EuiToolTip
