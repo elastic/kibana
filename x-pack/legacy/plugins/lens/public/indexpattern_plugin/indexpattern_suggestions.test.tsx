@@ -14,6 +14,7 @@ import { Datasource, DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
 import { Storage } from 'ui/storage';
 import { coreMock } from 'src/core/public/mocks';
+import { pluginsMock } from 'ui/new_platform/__mocks__/helpers';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -135,6 +136,7 @@ describe('IndexPattern Data Source suggestions', () => {
       core: coreMock.createStart(),
       chrome: chromeMock,
       storage: {} as Storage,
+      data: pluginsMock.createStart().data,
     });
 
     persistedState = {
