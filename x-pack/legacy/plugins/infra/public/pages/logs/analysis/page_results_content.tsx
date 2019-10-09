@@ -11,6 +11,7 @@ import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
+import euiStyled from '../../../../../../../legacy/common/eui_styled_components';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   StringTimeRange,
@@ -120,7 +121,7 @@ export const AnalysisResultsContent = ({
         />
       ) : (
         <>
-          <EuiPage>
+          <ResultsContentPage>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
                 <EuiPanel paddingSize="l">
@@ -161,7 +162,7 @@ export const AnalysisResultsContent = ({
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiPage>
+          </ResultsContentPage>
         </>
       )}
     </>
@@ -181,3 +182,11 @@ const stringToNumericTimeRange = (timeRange: StringTimeRange): TimeRange => ({
     })
   ).valueOf(),
 });
+
+// This is needed due to the flex-basis: 100% !important; rule that
+// kicks in on small screens via media queries breaking when using direction="column"
+export const ResultsContentPage = euiStyled(EuiPage)`
+  .euiFlexGroup--responsive > .euiFlexItem {
+    flex-basis: auto !important;
+  }
+`;
