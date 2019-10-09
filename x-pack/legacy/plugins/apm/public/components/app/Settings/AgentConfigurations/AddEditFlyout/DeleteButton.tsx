@@ -6,11 +6,12 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
+import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { Config } from '../index';
 import { callApmApi } from '../../../../../services/rest/callApmApi';
 import { getOptionLabel } from '../constants';
+import { useKibanaCore } from '../../../../../../../observability/public';
 
 interface Props {
   onDeleted: () => void;
@@ -19,6 +20,9 @@ interface Props {
 
 export function DeleteButton({ onDeleted, selectedConfig }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const {
+    notifications: { toasts }
+  } = useKibanaCore();
 
   return (
     <EuiButtonEmpty
@@ -27,7 +31,7 @@ export function DeleteButton({ onDeleted, selectedConfig }: Props) {
       iconSide="right"
       onClick={async () => {
         setIsDeleting(true);
-        await deleteConfig(selectedConfig);
+        await deleteConfig(selectedConfig, toasts);
         setIsDeleting(false);
         onDeleted();
       }}
@@ -40,7 +44,10 @@ export function DeleteButton({ onDeleted, selectedConfig }: Props) {
   );
 }
 
-async function deleteConfig(selectedConfig: Config) {
+async function deleteConfig(
+  selectedConfig: Config,
+  toasts: NotificationsStart['toasts']
+) {
   try {
     await callApmApi({
       pathname: '/api/apm/settings/agent-configuration/{configurationId}',
@@ -49,7 +56,7 @@ async function deleteConfig(selectedConfig: Config) {
         path: { configurationId: selectedConfig.id }
       }
     });
-    toastNotifications.addSuccess({
+    toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigSucceededTitle',
         { defaultMessage: 'Configuration was deleted' }
@@ -64,7 +71,7 @@ async function deleteConfig(selectedConfig: Config) {
       )
     });
   } catch (error) {
-    toastNotifications.addDanger({
+    toasts.addDanger({
       title: i18n.translate(
         'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigFailedTitle',
         { defaultMessage: 'Configuration could not be deleted' }

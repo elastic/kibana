@@ -34,6 +34,7 @@ import { useFetcher } from '../../../../../hooks/useFetcher';
 import { isRumAgentName } from '../../../../../../common/agent_name';
 import { ALL_OPTION_VALUE } from '../constants';
 import { saveConfig } from './saveConfig';
+import { useKibanaCore } from '../../../../../../../observability/public';
 
 const defaultSettings = {
   TRANSACTION_SAMPLE_RATE: '1.0',
@@ -54,6 +55,9 @@ export function AddEditFlyout({
   onDeleted,
   selectedConfig
 }: Props) {
+  const {
+    notifications: { toasts }
+  } = useKibanaCore();
   const [isSaving, setIsSaving] = useState(false);
 
   // config conditions (service)
@@ -129,7 +133,8 @@ export function AddEditFlyout({
       captureBody,
       transactionMaxSpans,
       configurationId: selectedConfig ? selectedConfig.id : undefined,
-      agentName
+      agentName,
+      toasts
     });
     setIsSaving(false);
     onSaved();

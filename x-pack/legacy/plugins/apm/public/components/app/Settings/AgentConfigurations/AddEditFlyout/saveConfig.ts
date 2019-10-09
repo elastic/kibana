@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+import { NotificationsStart } from 'kibana/public';
 import { trackEvent } from '../../../../../../../infra/public/hooks/use_track_metric';
 import { isRumAgentName } from '../../../../../../common/agent_name';
 import { getOptionValue, getOptionLabel } from '../constants';
@@ -24,7 +24,8 @@ export async function saveConfig({
   captureBody,
   transactionMaxSpans,
   configurationId,
-  agentName
+  agentName,
+  toasts
 }: {
   serviceName: string;
   environment: string;
@@ -33,6 +34,7 @@ export async function saveConfig({
   transactionMaxSpans: string;
   configurationId?: string;
   agentName?: string;
+  toasts: NotificationsStart['toasts'];
 }) {
   trackEvent({ app: 'apm', name: 'save_agent_configuration' });
 
@@ -74,7 +76,7 @@ export async function saveConfig({
       });
     }
 
-    toastNotifications.addSuccess({
+    toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.settings.agentConf.saveConfig.succeeded.title',
         { defaultMessage: 'Configuration saved' }
@@ -89,7 +91,7 @@ export async function saveConfig({
       )
     });
   } catch (error) {
-    toastNotifications.addDanger({
+    toasts.addDanger({
       title: i18n.translate(
         'xpack.apm.settings.agentConf.saveConfig.failed.title',
         { defaultMessage: 'Configuration could not be saved' }
