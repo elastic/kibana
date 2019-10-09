@@ -86,12 +86,13 @@ export const AnomaliesChart: React.FunctionComponent<{
           xAccessor={'time'}
           yAccessors={['value']}
           data={series}
+          barSeriesStyle={{ rect: { fill: '#D3DAE6' } }} // TODO: Acquire this from "theme" as euiColorLightShade
         />
         <RectAnnotation dataValues={annotations} annotationId={chartAnnotationsId} />
         <Settings
           onBrushEnd={handleBrushEnd}
           tooltip={tooltipProps}
-          theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
+          baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
           xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
         />
       </Chart>
