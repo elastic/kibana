@@ -53,6 +53,7 @@ export class FeatureProperties extends React.Component {
     this.prevLayerId = nextLayerId;
     this.prevFeatureId = nextFeatureId;
     this.setState({
+      properties: undefined,
       loadPropertiesErrorMsg: undefined,
     });
 

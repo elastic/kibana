@@ -30,13 +30,9 @@ export class TooltipHeader extends Component {
     layerOptions: [],
   };
 
-  constructor(props) {
-    super(props);
-    this._prevFeatures = null;
-  }
-
   componentDidMount() {
     this._isMounted = true;
+    this._prevFeatures = null;
     this._loadUniqueLayers();
   }
 

@@ -105,7 +105,7 @@ export class FeaturesTooltip extends React.Component {
       layerId: this.state.currentFeature.layerId,
       featureId: this.state.currentFeature.id
     });
-    const filteredGeoFields = this._filterGeoFields(currentFeatureGeometry);
+    const geoFields = this._filterGeoFields(currentFeatureGeometry);
 
     if (this.state.view === VIEWS.GEOMETRY_FILTER_VIEW && currentFeatureGeometry) {
       return (
@@ -113,7 +113,7 @@ export class FeaturesTooltip extends React.Component {
           onClose={this.props.closeTooltip}
           showPropertiesView={this._showPropertiesView}
           geometry={currentFeatureGeometry}
-          geoFields={filteredGeoFields}
+          geoFields={geoFields}
           addFilters={this.props.addFilters}
           loadPreIndexedShape={this._loadCurrentFeaturePreIndexedShape}
         />
@@ -137,7 +137,7 @@ export class FeaturesTooltip extends React.Component {
           onCloseTooltip={this._onCloseTooltip}
           addFilters={this.props.addFilters}
         />
-        {this._renderActions(filteredGeoFields)}
+        {this._renderActions(geoFields)}
       </Fragment>
     );
   }
