@@ -101,7 +101,7 @@ export const MetricsExplorerToolbar = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
