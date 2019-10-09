@@ -120,9 +120,9 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         },
       });
 
-      async function bulkIndex(someResult: SearchResponse<object>): Promise<boolean> {
-        logger.info('[+] starting bulk insertion');
-        const bulkBody = someResult.hits.hits.flatMap((doc: SearchHit) => [
+      // Makes a single bulk index request
+      const singleBulkIndex = async (sr: SearchResponse<object>): Promise<boolean> => {
+        const bulkBody = sr.hits.hits.flatMap((doc: SearchHit) => [
           {
             index: {
               _index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
@@ -131,46 +131,56 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
           },
           buildBulkBody(doc),
         ]);
-        await services.callCluster('bulk', {
+        const firstResult = await services.callCluster('bulk', {
           refresh: true,
           body: bulkBody,
         });
+        if (firstResult.errors) {
+          logger.error(
+            `[-] bulkResponse had errors: ${JSON.stringify(firstResult.errors, null, 2)}}`
+          );
+          return false;
+        }
+        return true;
+      };
+
+      // Makes a single scroll request, returning the new scroll result.
+      const singleScroll = async (
+        scrollId: string | undefined
+      ): Promise<SearchResponse<object>> => {
+        try {
+          const nextScrollResult = await services.callCluster('scroll', {
+            scroll,
+            scrollId,
+          });
+          return nextScrollResult;
+        } catch (exc) {
+          logger.error(`[-] nextScroll threw an error ${JSON.stringify(exc)}`);
+          throw exc;
+        }
+      };
+
+      async function bulkIndex(someResult: SearchResponse<object>): Promise<boolean> {
+        logger.info('[+] starting bulk insertion');
+        const firstBulkIndexSuccess = await singleBulkIndex(someResult);
+        if (!firstBulkIndexSuccess) {
+          logger.error('[-] First bulk index threw an error');
+          return false;
+        }
         while (true) {
-          let nextScrollResult;
           try {
-            nextScrollResult = await services.callCluster('scroll', {
-              scroll,
-              scrollId: someResult._scroll_id,
-            });
-            if (nextScrollResult.hits.hits.length === 0) {
-              // reached end of scroll
-              logger.info(`Returning concatenated result`);
+            // reusing scroll id from initial call
+            const scrollResult = await singleScroll(someResult._scroll_id);
+            if (scrollResult.hits.hits.length === 0) {
+              logger.info('[+] Finished indexing signals');
               return true;
             }
+            const bulkSuccess = await singleBulkIndex(scrollResult);
+            if (!bulkSuccess) {
+              logger.error('[-] bulk index failed');
+            }
           } catch (exc) {
-            logger.error(`[-] nextScroll threw an error ${JSON.stringify(exc)}`);
-          }
-          let bulkResponse;
-          try {
-            bulkResponse = await services.callCluster('bulk', {
-              refresh: true,
-              body: nextScrollResult.hits.hits.flatMap((doc: SearchHit) => [
-                {
-                  index: {
-                    _index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
-                    _id: doc._id,
-                  },
-                },
-                buildBulkBody(doc),
-              ]),
-            });
-          } catch (exc) {
-            logger.error(`[-] bulkResponse threw an error ${JSON.stringify(exc)}`);
-          }
-          if (bulkResponse.errors) {
-            logger.error(
-              `[-] bulkResponse had errors: ${JSON.stringify(bulkResponse.errors, null, 2)}}`
-            );
+            logger.error('[-] scroll and bulk threw an error');
             return false;
           }
         }
