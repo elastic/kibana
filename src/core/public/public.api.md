@@ -425,14 +425,25 @@ export interface HttpErrorRequest {
 export interface HttpErrorResponse {
     // (undocumented)
     body?: HttpBody;
-    // Warning: (ae-forgotten-export) The symbol "HttpFetchError" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     error: Error | HttpFetchError;
     // (undocumented)
     request?: Request;
     // (undocumented)
     response?: Response;
+}
+
+// Warning: (ae-missing-release-tag) "HttpFetchError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export class HttpFetchError extends Error {
+    constructor(message: string, request: Request, response?: Response | undefined, body?: any);
+    // (undocumented)
+    readonly body?: any;
+    // (undocumented)
+    readonly request: Request;
+    // (undocumented)
+    readonly response?: Response | undefined;
 }
 
 // @public (undocumented)
