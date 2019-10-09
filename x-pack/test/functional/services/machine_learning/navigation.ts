@@ -32,11 +32,11 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToArea(linkSubject: string, pageSubject: string) {
-      await retry.tryForTime(30 * 1000, async () => {
+      await retry.tryForTime(2 * 60 * 1000, async () => {
         if ((await testSubjects.exists(`${linkSubject} selected`)) === false) {
           await testSubjects.click(linkSubject);
-          await testSubjects.existOrFail(`${linkSubject} selected`, { timeout: 5000 });
-          await testSubjects.existOrFail(pageSubject, { timeout: 5000 });
+          await testSubjects.existOrFail(`${linkSubject} selected`, { timeout: 30 * 1000 });
+          await testSubjects.existOrFail(pageSubject, { timeout: 30 * 1000 });
         }
       });
     },
