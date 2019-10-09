@@ -5,8 +5,9 @@
  */
 
 import Boom from 'boom';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 
-import { RequestFacade, RequestQueryFacade } from '../../';
+import { RequestQueryFacade } from '../../';
 import { ServerOptions } from '../server_options';
 import { CodeServerRouter } from '../security';
 import { CodeServices } from '../distributed/code_services';
@@ -23,7 +24,11 @@ export function workspaceRoute(
   router.route({
     path: '/api/code/workspace',
     method: 'GET',
-    async handler() {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       return serverOptions.repoConfigs;
     },
   });
@@ -32,7 +37,11 @@ export function workspaceRoute(
     path: '/api/code/workspace/{uri*3}/{revision}',
     requireAdmin: true,
     method: 'POST',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       const repoUri = req.params.uri as string;
       getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
       const revision = req.params.revision as string;

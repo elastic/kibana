@@ -6,8 +6,7 @@
 
 import crypto from 'crypto';
 import * as _ from 'lodash';
-import { first } from 'rxjs/operators';
-import { CoreSetup, IClusterClient, IRouter } from 'src/core/server';
+import { CoreSetup, IRouter } from 'src/core/server';
 
 import { RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { Esqueue } from './lib/esqueue';
@@ -77,6 +76,7 @@ export class CodePlugin {
   private nodeService: NodeRepositoriesService | null = null;
 
   private rndString: string | null = null;
+  private router: IRouter | null = null;
 
   constructor(private readonly initContext: PluginSetupContract) {
     this.log = {} as Logger;
@@ -88,9 +88,8 @@ export class CodePlugin {
     this.serverOptions = new ServerOptions(this.initContext.legacy.config, server.config());
     this.log = new Logger(this.initContext.legacy.logger, this.serverOptions.verbose);
 
-    const router: IRouter = npHttp.createRouter();
+    this.router = npHttp.createRouter();
     this.rndString = crypto.randomBytes(20).toString('hex');
-    checkRoute(router, this.rndString);
 
     npHttp.registerRouteHandlerContext('code', () => {
       return {
@@ -104,8 +103,10 @@ export class CodePlugin {
   public async start(core: CoreSetup) {
     // called after all plugins are set up
     const { server } = core.http as any;
-    const codeServerRouter = new CodeServerRouter(server);
+    const codeServerRouter = new CodeServerRouter(this.router!);
     const codeNodeUrl = this.serverOptions.codeNodeUrl;
+
+    checkRoute(this.router!, this.rndString!);
 
     if (this.serverOptions.clusterEnabled) {
       this.initDevMode(server);
@@ -178,10 +179,10 @@ export class CodePlugin {
     );
     await this.nodeService.start();
 
+    this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
+
     // Execute index version checking and try to migrate index data if necessary.
     await tryMigrateIndices(esClient, this.log);
-
-    this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
 
     return codeServices;
   }
@@ -216,13 +217,13 @@ export class CodePlugin {
     this.indexScheduler = indexScheduler;
     this.updateScheduler = updateScheduler;
 
-    // Execute index version checking and try to migrate index data if necessary.
-    await tryMigrateIndices(esClient, this.log);
-
     this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
 
     // TODO: extend the usage collection to cluster mode.
     initCodeUsageCollector(server, esClient, lspService);
+
+    // Execute index version checking and try to migrate index data if necessary.
+    await tryMigrateIndices(esClient, this.log);
 
     return codeServices;
   }
@@ -267,7 +268,7 @@ export class CodePlugin {
     repoIndexInitializerFactory: RepositoryIndexInitializerFactory,
     repoConfigController: RepositoryConfigController
   ) {
-    const codeServerRouter = new CodeServerRouter(server);
+    const codeServerRouter = new CodeServerRouter(this.router!);
     repositoryRoute(
       codeServerRouter,
       codeServices,
@@ -285,7 +286,7 @@ export class CodePlugin {
     fileRoute(codeServerRouter, codeServices);
     workspaceRoute(codeServerRouter, this.serverOptions, codeServices);
     symbolByQnameRoute(codeServerRouter, this.log);
-    installRoute(codeServerRouter, codeServices, this.serverOptions);
+    installRoute(server, codeServerRouter, codeServices, this.serverOptions);
     lspRoute(codeServerRouter, codeServices, this.serverOptions, this.log);
     setupRoute(codeServerRouter, codeServices);
     statusRoute(codeServerRouter, codeServices);

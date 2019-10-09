@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { RequestFacade, RequestQueryFacade } from '../../';
 import {
   CommitSearchRequest,
@@ -32,7 +32,11 @@ export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
   router.route({
     path: '/api/code/search/repo',
     method: 'GET',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       let page = 1;
       const { p, q, repoScope } = req.query as RequestQueryFacade;
       if (p) {
@@ -57,7 +61,11 @@ export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
   router.route({
     path: '/api/code/suggestions/repo',
     method: 'GET',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       let page = 1;
       const { p, q, repoScope } = req.query as RequestQueryFacade;
       if (p) {
@@ -84,7 +92,11 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
   router.route({
     path: '/api/code/search/doc',
     method: 'GET',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       let page = 1;
       const { p, q, langs, repos, repoScope } = req.query as RequestQueryFacade;
       if (p) {
@@ -111,7 +123,11 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
   router.route({
     path: '/api/code/suggestions/doc',
     method: 'GET',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       let page = 1;
       const { p, q, repoScope } = req.query as RequestQueryFacade;
       if (p) {
@@ -143,7 +159,11 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
   router.route({
     path: '/api/code/integration/snippets',
     method: 'POST',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       const reqs: StackTraceSnippetsRequest[] = (req.payload as any).requests;
       const scopes = new Set(
         await getReferenceHelper(req.getSavedObjectsClient()).findReferences()
@@ -171,7 +191,11 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
 }
 
 export function symbolSearchRoute(router: CodeServerRouter, log: Logger) {
-  const symbolSearchHandler = async (req: RequestFacade) => {
+  const symbolSearchHandler = async (
+    context: RequestHandlerContext,
+    req: KibanaRequest,
+    res: KibanaResponseFactory
+  ) => {
     let page = 1;
     const { p, q, repoScope } = req.query as RequestQueryFacade;
     if (p) {
@@ -196,12 +220,12 @@ export function symbolSearchRoute(router: CodeServerRouter, log: Logger) {
   router.route({
     path: '/api/code/suggestions/symbol',
     method: 'GET',
-    handler: symbolSearchHandler,
+    npHandler: symbolSearchHandler,
   });
   router.route({
     path: '/api/code/search/symbol',
     method: 'GET',
-    handler: symbolSearchHandler,
+    npHandler: symbolSearchHandler,
   });
 }
 
@@ -209,7 +233,11 @@ export function commitSearchRoute(router: CodeServerRouter, log: Logger) {
   router.route({
     path: '/api/code/search/commit',
     method: 'GET',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       let page = 1;
       const { p, q, repos, repoScope } = req.query as RequestQueryFacade;
       if (p) {

@@ -5,9 +5,9 @@
  */
 
 import Boom from 'boom';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 
 import { CodeServerRouter } from '../security';
-import { RequestFacade } from '../../';
 import { LangServerType, RepoFileStatus, StatusReport } from '../../common/repo_file_status';
 import { CTAGS, LanguageServerDefinition } from '../lsp/language_servers';
 import { LanguageServerStatus } from '../../common/language_server';
@@ -108,8 +108,12 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
   router.route({
     path: '/api/code/repo/{uri*3}/status/{ref}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      const { uri, path, ref } = req.params;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, path, ref } = req.params as any;
       const report: StatusReport = {};
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       const endpoint = await codeServices.locate(req, uri);

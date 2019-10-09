@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 
-import { RequestFacade, RequestQueryFacade, ResponseToolkitFacade } from '../../';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { DEFAULT_TREE_CHILDREN_LIMIT } from '../git_operations';
 import { CodeServerRouter } from '../security';
 import { RepositoryObjectClient } from '../search';
@@ -20,10 +20,10 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   const gitService = codeServices.serviceFor(GitServiceDefinition);
 
   async function getRepoUriFromMeta(
-    req: RequestFacade,
+    context: RequestHandlerContext,
     repoUri: string
   ): Promise<string | undefined> {
-    const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
+    const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
 
     try {
       const repo = await repoObjectClient.getRepository(repoUri);
@@ -37,10 +37,14 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      const { uri, path, ref } = req.params;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, path, ref } = req.params as any;
       const revision = decodeRevisionString(ref);
-      const queries = req.query as RequestQueryFacade;
+      const queries = req.query as any;
       const limit = queries.limit
         ? parseInt(queries.limit as string, 10)
         : DEFAULT_TREE_CHILDREN_LIMIT;
@@ -75,8 +79,12 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/blob/{ref}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
-      const { uri, path, ref } = req.params;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, path, ref } = req.params as any;
       const revision = decodeRevisionString(ref);
       const repoUri = await getRepoUriFromMeta(req, uri);
       if (!repoUri) {
@@ -87,7 +95,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         const blob = await gitService.blob(endpoint, {
           uri,
           path,
-          line: (req.query as RequestQueryFacade).line as string,
+          line: (req.query as any).line as string,
           revision: decodeURIComponent(revision),
         });
 
@@ -123,8 +131,12 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/app/code/repo/{uri*3}/raw/{ref}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
-      const { uri, path, ref } = req.params;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, path, ref } = req.params as any;
       const revision = decodeRevisionString(ref);
       const repoUri = await getRepoUriFromMeta(req, uri);
       if (!repoUri) {
@@ -152,19 +164,23 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/history/{ref}',
     method: 'GET',
-    handler: historyHandler,
+    npHandler: historyHandler,
   });
 
   router.route({
     path: '/api/code/repo/{uri*3}/history/{ref}/{path*}',
     method: 'GET',
-    handler: historyHandler,
+    npHandler: historyHandler,
   });
 
-  async function historyHandler(req: RequestFacade) {
-    const { uri, ref, path } = req.params;
+  async function historyHandler(
+    context: RequestHandlerContext,
+    req: KibanaRequest,
+    res: KibanaResponseFactory
+  ) {
+    const { uri, ref, path } = req.params as any;
     const revision = decodeRevisionString(ref);
-    const queries = req.query as RequestQueryFacade;
+    const queries = req.query as any;
     const count = queries.count ? parseInt(queries.count as string, 10) : 10;
     const after = queries.after !== undefined;
     try {
@@ -186,8 +202,12 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/references',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      const uri = req.params.uri;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri } = req.params as any;
       const repoUri = await getRepoUriFromMeta(req, uri);
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
@@ -209,8 +229,12 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/diff/{revision}',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      const { uri, revision } = req.params;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, revision } = req.params as any;
       const repoUri = await getRepoUriFromMeta(req, uri);
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
@@ -234,8 +258,12 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
   router.route({
     path: '/api/code/repo/{uri*3}/blame/{revision}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade) {
-      const { uri, path, revision } = req.params;
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
+      const { uri, path, revision } = req.params as any;
       const repoUri = await getRepoUriFromMeta(req, uri);
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
@@ -255,6 +283,6 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
           return Boom.internal(e.message || e.name);
         }
       }
-    },
+    }
   });
 }

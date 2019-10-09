@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestFacade } from '../../';
+import { RequestHandlerContext } from 'src/core/server';
 import { AnyObject } from '../lib/esqueue';
 
 export class WithRequest {
   public readonly callCluster: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
 
-  constructor(readonly req: RequestFacade) {
-    const cluster = req.server.plugins.elasticsearch.getCluster('data');
+  constructor(readonly context: RequestHandlerContext) {
+    const cluster = context.elasticsearch.dataClient.callAsInternalUser;
 
     // @ts-ignore
     const securityPlugin = req.server.plugins.security;

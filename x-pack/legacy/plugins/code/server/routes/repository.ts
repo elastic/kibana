@@ -5,9 +5,8 @@
  */
 
 import Boom from 'boom';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 
-import { i18n } from '@kbn/i18n';
-import { RequestFacade, ResponseToolkitFacade } from '../..';
 import { validateGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { RepositoryConfig, RepositoryUri, WorkerReservedProgress } from '../../model';
@@ -36,7 +35,11 @@ export function repositoryRoute(
     path: '/api/code/repo',
     requireAdmin: true,
     method: 'POST',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       const repoUrl: string = (req.payload as any).url;
 
       // Reject the request if the url is an invalid git url.
@@ -124,7 +127,11 @@ export function repositoryRoute(
     path: '/api/code/repo/{uri*3}',
     requireAdmin: true,
     method: 'DELETE',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       const repoUri: string = req.params.uri as string;
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
@@ -171,7 +178,11 @@ export function repositoryRoute(
   router.route({
     path: '/api/code/repo/{uri*3}',
     method: 'GET',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       const repoUri = req.params.uri as string;
       try {
         await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
@@ -189,7 +200,11 @@ export function repositoryRoute(
   router.route({
     path: '/api/code/repo/status/{uri*3}',
     method: 'GET',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       const repoUri = req.params.uri as string;
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
@@ -236,7 +251,11 @@ export function repositoryRoute(
   router.route({
     path: '/api/code/repos',
     method: 'GET',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       try {
         const uris = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
@@ -257,7 +276,11 @@ export function repositoryRoute(
     path: '/api/code/repo/index/{uri*3}',
     method: 'POST',
     requireAdmin: true,
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       const repoUri = req.params.uri as string;
       const reindex: boolean = (req.payload as any).reindex;
       try {
@@ -287,7 +310,11 @@ export function repositoryRoute(
     path: '/api/code/repo/config/{uri*3}',
     method: 'PUT',
     requireAdmin: true,
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       const config: RepositoryConfig = req.payload as RepositoryConfig;
       const repoUri: RepositoryUri = config.uri;
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
@@ -318,7 +345,11 @@ export function repositoryRoute(
   router.route({
     path: '/api/code/repo/config/{uri*3}',
     method: 'GET',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       const repoUri = req.params.uri as string;
       try {
         await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);

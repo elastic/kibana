@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { RequestFacade, ServerFacade } from '../../';
 import { Logger } from '../log';
 
@@ -27,6 +28,7 @@ export function redirectRoute(server: ServerFacade, redirectUrl: string, log: Lo
 
   server.route({
     path: '/api/code/{p*}',
+    // TODO: support this
     method: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     handler: proxyHandler,
   });

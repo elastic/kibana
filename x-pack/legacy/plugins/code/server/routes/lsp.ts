@@ -8,6 +8,7 @@ import Boom from 'boom';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { SymbolLocator } from '@elastic/lsp-extension';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 
 import {
   LanguageServerStartFailed,
@@ -22,7 +23,6 @@ import { ServerOptions } from '../server_options';
 
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { promiseTimeout } from '../utils/timeout';
-import { RequestFacade, ResponseToolkitFacade } from '../..';
 import { CodeServices } from '../distributed/code_services';
 import { GitServiceDefinition, LspServiceDefinition } from '../distributed/apis';
 import { findTitleFromHover, groupFiles } from '../utils/lsp_utils';
@@ -42,7 +42,11 @@ export function lspRoute(
 
   server.route({
     path: '/api/code/lsp/textDocument/{method}',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       if (typeof req.payload === 'object' && req.payload != null) {
         const method = req.params.method;
         if (method) {
@@ -94,7 +98,11 @@ export function lspRoute(
   server.route({
     path: '/api/code/lsp/findDefinitions',
     method: 'POST',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       // @ts-ignore
       const { textDocument, position } = req.payload;
       const { uri } = textDocument;
@@ -142,7 +150,11 @@ export function lspRoute(
   server.route({
     path: '/api/code/lsp/findReferences',
     method: 'POST',
-    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       try {
         // @ts-ignore
         const { textDocument, position } = req.payload;
@@ -194,7 +206,11 @@ export function symbolByQnameRoute(router: CodeServerRouter, log: Logger) {
   router.route({
     path: '/api/code/lsp/symbol/{qname}',
     method: 'GET',
-    async handler(req: RequestFacade) {
+    async npHandler(
+      context: RequestHandlerContext,
+      req: KibanaRequest,
+      res: KibanaResponseFactory
+    ) {
       try {
         const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
         const repoScope = await getReferenceHelper(req.getSavedObjectsClient()).findReferences();
