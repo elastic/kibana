@@ -87,7 +87,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
       ...formState,
       jobPrefix: value && value.toLowerCase(),
     });
-    onChange(formState);
   };
 
   const handleValidation = () => {
@@ -106,6 +105,10 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   useEffect(() => {
     handleValidation();
   }, [formState.jobPrefix, formState.jobGroups]);
+
+  useEffect(() => {
+    onChange(formState);
+  }, [formState]);
 
   return (
     <>
