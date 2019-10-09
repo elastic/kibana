@@ -58,7 +58,7 @@ function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
   );
 }
 
-export function savedObjectsMixin(kbnServer, server) {
+export async function savedObjectsMixin(kbnServer, server) {
   const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
