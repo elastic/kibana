@@ -144,6 +144,7 @@ export {
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportError,

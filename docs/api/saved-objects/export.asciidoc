@@ -23,6 +23,9 @@ experimental[] Retrieve a set of saved objects that you want to import into {kib
 `includeReferencesDeep`::
   (Optional, boolean) Includes all of the referenced objects in the exported objects.
 
+`excludeExportDetails`::
+  (Optional, boolean) Do not add export details entry at the end of the stream.
+
 TIP: You must include `type` or `objects` in the request body.
 
 [[saved-objects-api-export-request-response-body]]
