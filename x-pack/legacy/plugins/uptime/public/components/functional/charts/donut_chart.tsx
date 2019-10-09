@@ -27,6 +27,8 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
 
   useEffect(() => {
     if (chartElement.current !== null) {
+      // we must remove any existing paths before painting
+      d3.selectAll('g').remove();
       const svgElement = d3
         .select(chartElement.current)
         .append('g')
