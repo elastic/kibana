@@ -27,6 +27,7 @@ export declare class SavedObjectsClient
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
+|  [bulkUpdate(objects)](./kibana-plugin-public.savedobjectsclient.bulkupdate.md) |  | Update multiple documents at once |
 |  [update(type, id, attributes, { version, migrationVersion, references })](./kibana-plugin-public.savedobjectsclient.update.md) |  | Updates an object |
 
 ## Remarks
