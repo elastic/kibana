@@ -105,22 +105,14 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
         <EuiFlexItem grow={false}>
           <ul className="gphGuidancePanel__list">
             <ListItem state={hasDatasource ? 'done' : 'active'}>
-              <FormattedMessage
-                id="xpack.graph.guidancePanel.datasourceItem.description"
-                defaultMessage="Select a {indexpattern}."
-                values={{
-                  indexpattern: (
-                    <EuiLink onClick={onOpenDatasourcePicker}>
-                      {i18n.translate(
-                        'xpack.graph.guidancePanel.datasourceItem.indexPatternButtonLabel',
-                        {
-                          defaultMessage: 'data source',
-                        }
-                      )}
-                    </EuiLink>
-                  ),
-                }}
-              />
+              <EuiLink onClick={onOpenDatasourcePicker}>
+                {i18n.translate(
+                  'xpack.graph.guidancePanel.datasourceItem.indexPatternButtonLabel',
+                  {
+                    defaultMessage: 'Select a data source.',
+                  }
+                )}
+              </EuiLink>
             </ListItem>
             <ListItem state={hasFields ? 'done' : hasDatasource ? 'active' : 'disabled'}>
               <EuiLink onClick={onOpenFieldPicker}>
@@ -132,7 +124,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
             <ListItem state={hasFields ? 'active' : 'disabled'}>
               <FormattedMessage
                 id="xpack.graph.guidancePanel.nodesItem.description"
-                defaultMessage="Search and graph your data. Don't know where to start? {topTerms}."
+                defaultMessage="Enter a query in the search bar to start exploring. Don't know where to start? {topTerms}."
                 values={{
                   topTerms: (
                     <EuiLink onClick={onFillWorkspace}>

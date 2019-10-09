@@ -38,7 +38,7 @@ export function BlacklistForm({
           title={
             <FormattedMessage
               id="xpack.graph.blacklist.noEntriesDescription"
-              defaultMessage="You don't have any blocked terms. Select vertices and click {stopSign} in the control panel to the right to block them. Documents that match blocked terms are no longer explored and relationships to them are hidden."
+              defaultMessage="You don't have any blocked terms. Select vertices and click {stopSign} in the control panel on the right to block them. Documents that match blocked terms are no longer explored and relationships to them are hidden."
               values={{ stopSign: <span className="kuiIcon fa-ban"></span> }}
             />
           }

@@ -363,11 +363,11 @@ app.controller('graphuiPlugin', function (
         defaultMessage: 'Leave anyway',
       }),
       title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
-        defaultMessage: 'Save changes to graph',
+        defaultMessage: 'Unsaved changes',
       }),
     };
     confirmModal(i18n.translate('xpack.graph.clearWorkspace.confirmText', {
-      defaultMessage: 'If you don\'t save, your changes will be lost.',
+      defaultMessage: 'If you leave now, you will lose unsaved changes.',
     }), confirmModalOptions);
   }
   $scope.confirmWipeWorkspace = canWipeWorkspace;

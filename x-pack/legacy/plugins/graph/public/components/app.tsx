@@ -37,7 +37,6 @@ export function GraphApp(props: GraphAppProps) {
     store,
     reduxStore,
     noIndexPatterns,
-    onFillWorkspace,
     ...searchBarProps
   } = props;
 

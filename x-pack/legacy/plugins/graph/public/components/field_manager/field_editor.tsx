@@ -165,6 +165,15 @@ export function FieldEditor({
                     }),
                 icon: <EuiIcon type={isDisabled ? 'eye' : 'eyeClosed'} size="m" />,
                 onClick: toggleDisabledState,
+                toolTipContent: isDisabled
+                  ? i18n.translate('xpack.graph.fieldManager.enableFieldTooltipContent', {
+                      defaultMessage:
+                        'Turn on discovery of vertices for this field. You can also Shift+click the field to enable it.',
+                    })
+                  : i18n.translate('xpack.graph.fieldManager.disableFieldTooltipContent', {
+                      defaultMessage:
+                        'Turn off discovery of vertices for this field. You can also Shift+click the field to disable it.',
+                    }),
               },
               {
                 name: i18n.translate('xpack.graph.fieldManager.deleteFieldLabel', {
