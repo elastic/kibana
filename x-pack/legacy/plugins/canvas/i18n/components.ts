@@ -341,13 +341,6 @@ export const ComponentStrings = {
       }),
   },
   ExpressionInput: {
-    getArgReferenceAcceptsDetail: (required: boolean) =>
-      i18n.translate('xpack.canvas.expressionInput.argReferenceAcceptsDetail', {
-        defaultMessage: '**Accepts**: {required}',
-        values: {
-          required,
-        },
-      }),
     getArgReferenceAliasesDetail: (aliases: string) =>
       i18n.translate('xpack.canvas.expressionInput.argReferenceAliasesDetail', {
         defaultMessage: '**Aliases**: {aliases}',
@@ -362,43 +355,31 @@ export const ComponentStrings = {
           defaultVal,
         },
       }),
-    getArgReferenceFirstDetail: (types: string, required: string) =>
-      i18n.translate('xpack.canvas.expressionInput.argReferenceFirstDetail', {
-        defaultMessage: '**Types**: {types}, **Required**: {required}',
+    getArgReferenceRequiredDetail: (required: string) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceRequiredDetail', {
+        defaultMessage: '**Required**: {required}',
         values: {
-          types,
           required,
         },
       }),
-    getArgReferenceSecondDetail: (def: string | null, aliases: string | null) =>
-      i18n.translate('xpack.canvas.expressionInput.argReferenceSecondDetail', {
-        defaultMessage: '{defString}{aliasesString}',
+    getArgReferenceTypesDetail: (types: string) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceTypesDetail', {
+        defaultMessage: '**Types**: {types}',
         values: {
-          defString:
-            def != null
-              ? i18n.translate('xpack.canvas.expressionInput.argReferenceDefaultDetail', {
-                  defaultMessage: '**Default**: {def}, ',
-                  values: {
-                    def,
-                  },
-                })
-              : '',
-          aliasesString:
-            aliases != null
-              ? i18n.translate('xpack.canvas.expressionInput.argReferenceAliasesDetail', {
-                  defaultMessage: '**Aliases**: {aliases}',
-                  values: {
-                    aliases,
-                  },
-                })
-              : '',
+          types,
         },
       }),
-    getFunctionReferenceDetail: (acceptTypes: string, returnType: string) =>
-      i18n.translate('xpack.canvas.expressionInput.functionReferenceDetail', {
-        defaultMessage: '**Accepts**: {acceptTypes}, **Returns**: {returnType}',
+    getFunctionReferenceAcceptsDetail: (acceptTypes: string) =>
+      i18n.translate('xpack.canvas.expressionInput.functionReferenceAccepts', {
+        defaultMessage: '**Accepts**: {acceptTypes}',
         values: {
           acceptTypes,
+        },
+      }),
+    getFunctionReferenceReturnsDetail: (returnType: string) =>
+      i18n.translate('xpack.canvas.expressionInput.functionReferenceReturns', {
+        defaultMessage: '**Returns**: {returnType}',
+        values: {
           returnType,
         },
       }),

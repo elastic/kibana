@@ -20,7 +20,9 @@ export function getFunctionReferenceStr(fnDef: CanvasFunction) {
   const acceptTypes = context && context.types ? context.types.join(' | ') : 'null';
   const returnType = type ? type : 'null';
 
-  const doc = `${strings.getFunctionReferenceDetail(acceptTypes, returnType)}
+  const doc = `${strings.getFunctionReferenceAcceptsDetail(
+    acceptTypes
+  )} ${strings.getFunctionReferenceReturnsDetail(returnType)}
 \n\n${help}`;
 
   return doc;
@@ -48,8 +50,10 @@ export function getArgReferenceStr(argDef: CanvasArgValue) {
   const typesStr = types && types.length ? types.join(' | ') : 'null';
   const requiredStr = String(Boolean(required));
 
-  const ref = `${strings.getArgReferenceTopDetail(typesStr, requiredStr)}
-  \n\n${secondLineArr.join(', ')}
+  const ref = `${strings.getArgReferenceTypesDetail(
+    typesStr
+  )} ${strings.getArgReferenceRequiredDetail(requiredStr)}
+  \n\n${secondLineArr.join(' ')}
   \n\n${help}`;
 
   return ref;
