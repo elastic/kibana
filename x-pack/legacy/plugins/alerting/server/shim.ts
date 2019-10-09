@@ -7,7 +7,6 @@
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import { SpacesPlugin as SpacesPluginStartContract } from '../../spaces';
-import { ActionsPlugin } from '../../actions';
 import { TaskManager } from '../../task_manager';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
@@ -18,6 +17,11 @@ import {
   LoggerFactory,
   SavedObjectsLegacyService,
 } from '../../../../../src/core/server';
+import {
+  ActionsPlugin,
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from '../../actions';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
 // due to being marked as dependencies
@@ -34,8 +38,6 @@ export interface Server extends Legacy.Server {
 /**
  * Shim what we're thinking setup and start contracts will look like
  */
-export type ActionsPluginSetupContract = Pick<ActionsPlugin, 'registerType'>;
-export type ActionsPluginStartContract = Pick<ActionsPlugin, 'listTypes' | 'execute'>;
 export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
 export type SecurityPluginSetupContract = Pick<SecurityPlugin, 'config' | 'registerLegacyAPI'>;
 export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
@@ -118,14 +120,14 @@ export function shim(
   const pluginsSetup: AlertingPluginsSetup = {
     security: newPlatform.setup.plugins.security as SecurityPluginSetupContract | undefined,
     task_manager: server.plugins.task_manager,
-    actions: server.plugins.actions,
+    actions: server.plugins.actions.setup,
     xpack_main: server.plugins.xpack_main,
     encrypted_saved_objects: server.plugins.encrypted_saved_objects,
   };
 
   const pluginsStart: AlertingPluginsStart = {
     security: newPlatform.setup.plugins.security as SecurityPluginStartContract | undefined,
-    actions: server.plugins.actions,
+    actions: server.plugins.actions.start,
     // TODO: Currently a function because it's an optional dependency that
     // initializes after this function is called
     spaces: () => server.plugins.spaces,

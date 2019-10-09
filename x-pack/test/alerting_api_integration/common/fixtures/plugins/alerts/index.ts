@@ -158,10 +158,10 @@ export default function(kibana: any) {
           };
         },
       };
-      server.plugins.actions.registerType(indexRecordActionType);
-      server.plugins.actions.registerType(failingActionType);
-      server.plugins.actions.registerType(rateLimitedActionType);
-      server.plugins.actions.registerType(authorizationActionType);
+      server.plugins.actions.setup.registerType(indexRecordActionType);
+      server.plugins.actions.setup.registerType(failingActionType);
+      server.plugins.actions.setup.registerType(rateLimitedActionType);
+      server.plugins.actions.setup.registerType(authorizationActionType);
 
       // Alert types
       const alwaysFiringAlertType: AlertType = {
