@@ -55,12 +55,7 @@ export const buildTopNFlowQuery = ({
               should: [
                 {
                   term: {
-                    'source.ip': ip,
-                  },
-                },
-                {
-                  term: {
-                    'destination.ip': ip,
+                    [`${getOppositeField(flowTarget)}.ip`]: ip,
                   },
                 },
               ],
@@ -86,7 +81,6 @@ const getFlowTargetAggs = (
   [flowTarget]: {
     terms: {
       field: `${flowTarget}.ip`,
-      exclude: ip ? [ip] : [],
       size: querySize,
       order: {
         ...getQueryOrder(networkTopNFlowSortField),
