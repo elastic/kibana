@@ -102,14 +102,3 @@ export interface NetworkDnsBuckets {
     value: number;
   };
 }
-
-export interface NetworkDnsData extends SearchHit {
-  aggregations: {
-    dns_count?: {
-      value: number;
-    };
-    dns_name_query_count?: {
-      buckets: NetworkDnsBuckets[];
-    };
-  };
-}
