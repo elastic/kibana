@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiText } from '@elastic/eui';
 
 import { useDispatch, useState } from '../mappings_state';
 import { FieldsEditor } from '../types';
