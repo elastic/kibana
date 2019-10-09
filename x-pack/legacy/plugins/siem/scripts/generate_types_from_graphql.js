@@ -8,8 +8,7 @@ require('../../../../../src/setup_node_env');
 
 const { join, resolve } = require('path');
 // eslint-disable-next-line import/no-extraneous-dependencies, import/no-unresolved
-const { generate } = require('graphql-code-generator');
-
+const { generate } = require('@graphql-codegen/cli');
 const GRAPHQL_GLOBS = [
   join('public', 'containers', '**', '*.gql_query.ts{,x}'),
   join('common', 'graphql', '**', '*.gql_query.ts{,x}'),
@@ -26,10 +25,13 @@ async function main() {
     {
       args: GRAPHQL_GLOBS,
       config: SERVER_CONFIG_PATH,
-      out: OUTPUT_INTROSPECTION_PATH,
       overwrite: true,
       schema: SCHEMA_PATH,
-      template: 'graphql-codegen-introspection-template',
+      generates: {
+        [OUTPUT_INTROSPECTION_PATH]: {
+          plugins: ['typescript'],
+        },
+      },
     },
     true
   );
@@ -37,10 +39,13 @@ async function main() {
     {
       args: GRAPHQL_GLOBS,
       config: CLIENT_CONFIG_PATH,
-      out: OUTPUT_CLIENT_TYPES_PATH,
       overwrite: true,
       schema: SCHEMA_PATH,
-      template: 'graphql-codegen-typescript-template',
+      generates: {
+        [OUTPUT_CLIENT_TYPES_PATH]: {
+          plugins: ['typescript', 'typescript-operations'],
+        },
+      },
     },
     true
   );
@@ -48,10 +53,13 @@ async function main() {
     {
       args: [],
       config: SERVER_CONFIG_PATH,
-      out: OUTPUT_SERVER_TYPES_PATH,
       overwrite: true,
       schema: SCHEMA_PATH,
-      template: 'graphql-codegen-typescript-resolvers-template',
+      generates: {
+        [OUTPUT_SERVER_TYPES_PATH]: {
+          plugins: ['typescript', 'typescript-resolvers'],
+        },
+      },
     },
     true
   );

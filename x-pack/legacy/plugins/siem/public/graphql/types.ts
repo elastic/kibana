@@ -1,5279 +1,1424 @@
-/* tslint:disable */
-/* eslint-disable */
-/*
-     * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-     * or more contributor license agreements. Licensed under the Elastic License;
-     * you may not use this file except in compliance with the Elastic License.
-     */
-
-// ====================================================
-// START: Typescript template
-// ====================================================
-
-// ====================================================
-// Scalars
-// ====================================================
-
-export type ToStringArray = string[];
-
-export type Date = string;
-
-export type ToNumberArray = number[];
-
-export type ToDateArray = string[];
-
-export type ToBooleanArray = boolean[];
-
-export type EsValue = any;
-
-// ====================================================
-// Types
-// ====================================================
-
-export interface Query {
-  getNote: NoteResult;
-
-  getNotesByTimelineId: NoteResult[];
-
-  getNotesByEventId: NoteResult[];
-
-  getAllNotes: ResponseNotes;
-
-  getAllPinnedEventsByTimelineId: PinnedEvent[];
-  /** Get a security data source by id */
-  source: Source;
-  /** Get a list of all security data sources */
-  allSources: Source[];
-
-  getOneTimeline: TimelineResult;
-
-  getAllTimeline: ResponseTimelines;
-}
-
-export interface NoteResult {
-  eventId?: string | null;
-
-  note?: string | null;
-
-  timelineId?: string | null;
-
-  noteId: string;
-
-  created?: number | null;
-
-  createdBy?: string | null;
-
-  timelineVersion?: string | null;
-
-  updated?: number | null;
-
-  updatedBy?: string | null;
-
-  version?: string | null;
-}
-
-export interface ResponseNotes {
-  notes: NoteResult[];
-
-  totalCount?: number | null;
-}
-
-export interface PinnedEvent {
-  code?: number | null;
-
-  message?: string | null;
-
-  pinnedEventId: string;
-
-  eventId?: string | null;
-
-  timelineId?: string | null;
-
-  timelineVersion?: string | null;
-
-  created?: number | null;
-
-  createdBy?: string | null;
-
-  updated?: number | null;
-
-  updatedBy?: string | null;
-
-  version?: string | null;
-}
-
-export interface Source {
-  /** The id of the source */
-  id: string;
-  /** The raw configuration of the source */
-  configuration: SourceConfiguration;
-  /** The status of the source */
-  status: SourceStatus;
-  /** Gets Authentication success and failures based on a timerange */
-  Authentications: AuthenticationsData;
-
-  Timeline: TimelineData;
-
-  TimelineDetails: TimelineDetailsData;
-
-  LastEventTime: LastEventTimeData;
-
-  EventsOverTime: EventsOverTimeData;
-  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  Hosts: HostsData;
-
-  HostOverview: HostItem;
-
-  HostFirstLastSeen: FirstLastSeenHost;
-
-  IpOverview?: IpOverviewData | null;
-
-  Domains: DomainsData;
-
-  Tls: TlsData;
-
-  Users: UsersData;
-
-  KpiNetwork?: KpiNetworkData | null;
-
-  KpiHosts: KpiHostsData;
-
-  KpiHostDetails: KpiHostDetailsData;
-  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  NetworkTopNFlow: NetworkTopNFlowData;
-
-  NetworkDns: NetworkDnsData;
-
-  OverviewNetwork?: OverviewNetworkData | null;
-
-  OverviewHost?: OverviewHostData | null;
-  /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
-  UncommonProcesses: UncommonProcessesData;
-  /** Just a simple example to get the app name */
-  whoAmI?: SayMyName | null;
-}
-/** A set of configuration options for a security data source */
-export interface SourceConfiguration {
-  /** The field mapping to use for this source */
-  fields: SourceFields;
-}
-/** A mapping of semantic fields to their document counterparts */
-export interface SourceFields {
-  /** The field to identify a container by */
-  container: string;
-  /** The fields to identify a host by */
-  host: string;
-  /** The fields that may contain the log event message. The first field found win. */
-  message: string[];
-  /** The field to identify a pod by */
-  pod: string;
-  /** The field to use as a tiebreaker for log events that have identical timestamps */
-  tiebreaker: string;
-  /** The field to use as a timestamp for metrics and logs */
-  timestamp: string;
-}
-/** The status of an infrastructure data source */
-export interface SourceStatus {
-  /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
-  indicesExist: boolean;
-  /** The list of fields defined in the index mappings */
-  indexFields: IndexField[];
-}
-/** A descriptor of a field in an index */
-export interface IndexField {
-  /** Where the field belong */
-  category: string;
-  /** Example of field's value */
-  example?: string | null;
-  /** whether the field's belong to an alias index */
-  indexes: (string | null)[];
-  /** The name of the field */
-  name: string;
-  /** The type of the field's values as recognized by Kibana */
-  type: string;
-  /** Whether the field's values can be efficiently searched for */
-  searchable: boolean;
-  /** Whether the field's values can be aggregated */
-  aggregatable: boolean;
-  /** Description of the field */
-  description?: string | null;
-
-  format?: string | null;
-}
-
-export interface AuthenticationsData {
-  edges: AuthenticationsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface AuthenticationsEdges {
-  node: AuthenticationItem;
-
-  cursor: CursorType;
-}
-
-export interface AuthenticationItem {
-  _id: string;
-
-  failures: number;
-
-  successes: number;
-
-  user: UserEcsFields;
-
-  lastSuccess?: LastSourceHost | null;
-
-  lastFailure?: LastSourceHost | null;
-}
-
-export interface UserEcsFields {
-  id?: ToStringArray | null;
-
-  name?: ToStringArray | null;
-
-  full_name?: ToStringArray | null;
-
-  email?: ToStringArray | null;
-
-  hash?: ToStringArray | null;
-
-  group?: ToStringArray | null;
-}
-
-export interface LastSourceHost {
-  timestamp?: Date | null;
-
-  source?: SourceEcsFields | null;
-
-  host?: HostEcsFields | null;
-}
-
-export interface SourceEcsFields {
-  bytes?: ToNumberArray | null;
-
-  ip?: ToStringArray | null;
-
-  port?: ToNumberArray | null;
-
-  domain?: ToStringArray | null;
-
-  geo?: GeoEcsFields | null;
-
-  packets?: ToNumberArray | null;
-}
-
-export interface GeoEcsFields {
-  city_name?: ToStringArray | null;
-
-  continent_name?: ToStringArray | null;
-
-  country_iso_code?: ToStringArray | null;
-
-  country_name?: ToStringArray | null;
-
-  location?: Location | null;
-
-  region_iso_code?: ToStringArray | null;
-
-  region_name?: ToStringArray | null;
-}
-
-export interface Location {
-  lon?: ToNumberArray | null;
-
-  lat?: ToNumberArray | null;
-}
-
-export interface HostEcsFields {
-  architecture?: ToStringArray | null;
-
-  id?: ToStringArray | null;
-
-  ip?: ToStringArray | null;
-
-  mac?: ToStringArray | null;
-
-  name?: ToStringArray | null;
-
-  os?: OsEcsFields | null;
-
-  type?: ToStringArray | null;
-}
-
-export interface OsEcsFields {
-  platform?: ToStringArray | null;
-
-  name?: ToStringArray | null;
-
-  full?: ToStringArray | null;
-
-  family?: ToStringArray | null;
-
-  version?: ToStringArray | null;
-
-  kernel?: ToStringArray | null;
-}
-
-export interface CursorType {
-  value?: string | null;
-
-  tiebreaker?: string | null;
-}
-
-export interface PageInfoPaginated {
-  activePage: number;
-
-  fakeTotalCount: number;
-
-  showMorePagesIndicator: boolean;
-}
-
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
-export interface TimelineData {
-  edges: TimelineEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
-export interface TimelineEdges {
-  node: TimelineItem;
-
-  cursor: CursorType;
-}
-
-export interface TimelineItem {
-  _id: string;
-
-  _index?: string | null;
-
-  data: TimelineNonEcsData[];
-
-  ecs: Ecs;
-}
-
-export interface TimelineNonEcsData {
-  field: string;
-
-  value?: ToStringArray | null;
-}
-
-export interface Ecs {
-  _id: string;
-
-  _index?: string | null;
-
-  auditd?: AuditdEcsFields | null;
-
-  destination?: DestinationEcsFields | null;
-
-  event?: EventEcsFields | null;
-
-  geo?: GeoEcsFields | null;
-
-  host?: HostEcsFields | null;
-
-  network?: NetworkEcsField | null;
-
-  source?: SourceEcsFields | null;
-
-  suricata?: SuricataEcsFields | null;
-
-  tls?: TlsEcsFields | null;
-
-  zeek?: ZeekEcsFields | null;
-
-  http?: HttpEcsFields | null;
-
-  url?: UrlEcsFields | null;
-
-  timestamp?: Date | null;
-
-  message?: ToStringArray | null;
-
-  user?: UserEcsFields | null;
-
-  process?: ProcessEcsFields | null;
-
-  file?: FileFields | null;
-
-  system?: SystemEcsField | null;
-}
-
-export interface AuditdEcsFields {
-  result?: ToStringArray | null;
-
-  session?: ToStringArray | null;
-
-  data?: AuditdData | null;
-
-  summary?: Summary | null;
-
-  sequence?: ToStringArray | null;
-}
-
-export interface AuditdData {
-  acct?: ToStringArray | null;
-
-  terminal?: ToStringArray | null;
-
-  op?: ToStringArray | null;
-}
-
-export interface Summary {
-  actor?: PrimarySecondary | null;
-
-  object?: PrimarySecondary | null;
-
-  how?: ToStringArray | null;
-
-  message_type?: ToStringArray | null;
-
-  sequence?: ToStringArray | null;
-}
-
-export interface PrimarySecondary {
-  primary?: ToStringArray | null;
-
-  secondary?: ToStringArray | null;
-
-  type?: ToStringArray | null;
-}
-
-export interface DestinationEcsFields {
-  bytes?: ToNumberArray | null;
-
-  ip?: ToStringArray | null;
-
-  port?: ToNumberArray | null;
-
-  domain?: ToStringArray | null;
-
-  geo?: GeoEcsFields | null;
-
-  packets?: ToNumberArray | null;
-}
-
-export interface EventEcsFields {
-  action?: ToStringArray | null;
-
-  category?: ToStringArray | null;
-
-  created?: ToDateArray | null;
-
-  dataset?: ToStringArray | null;
-
-  duration?: ToNumberArray | null;
-
-  end?: ToDateArray | null;
-
-  hash?: ToStringArray | null;
-
-  id?: ToStringArray | null;
-
-  kind?: ToStringArray | null;
-
-  module?: ToStringArray | null;
-
-  original?: ToStringArray | null;
-
-  outcome?: ToStringArray | null;
-
-  risk_score?: ToNumberArray | null;
-
-  risk_score_norm?: ToNumberArray | null;
-
-  severity?: ToNumberArray | null;
-
-  start?: ToDateArray | null;
-
-  timezone?: ToStringArray | null;
-
-  type?: ToStringArray | null;
-}
-
-export interface NetworkEcsField {
-  bytes?: ToNumberArray | null;
-
-  community_id?: ToStringArray | null;
-
-  direction?: ToStringArray | null;
-
-  packets?: ToNumberArray | null;
-
-  protocol?: ToStringArray | null;
-
-  transport?: ToStringArray | null;
-}
-
-export interface SuricataEcsFields {
-  eve?: SuricataEveData | null;
-}
-
-export interface SuricataEveData {
-  alert?: SuricataAlertData | null;
-
-  flow_id?: ToNumberArray | null;
-
-  proto?: ToStringArray | null;
-}
-
-export interface SuricataAlertData {
-  signature?: ToStringArray | null;
-
-  signature_id?: ToNumberArray | null;
-}
-
-export interface TlsEcsFields {
-  client_certificate?: TlsClientCertificateData | null;
-
-  fingerprints?: TlsFingerprintsData | null;
-
-  server_certificate?: TlsServerCertificateData | null;
-}
-
-export interface TlsClientCertificateData {
-  fingerprint?: FingerprintData | null;
-}
-
-export interface FingerprintData {
-  sha1?: ToStringArray | null;
-}
-
-export interface TlsFingerprintsData {
-  ja3?: TlsJa3Data | null;
-}
-
-export interface TlsJa3Data {
-  hash?: ToStringArray | null;
-}
-
-export interface TlsServerCertificateData {
-  fingerprint?: FingerprintData | null;
-}
-
-export interface ZeekEcsFields {
-  session_id?: ToStringArray | null;
-
-  connection?: ZeekConnectionData | null;
-
-  notice?: ZeekNoticeData | null;
-
-  dns?: ZeekDnsData | null;
-
-  http?: ZeekHttpData | null;
-
-  files?: ZeekFileData | null;
-
-  ssl?: ZeekSslData | null;
-}
-
-export interface ZeekConnectionData {
-  local_resp?: ToBooleanArray | null;
-
-  local_orig?: ToBooleanArray | null;
-
-  missed_bytes?: ToNumberArray | null;
-
-  state?: ToStringArray | null;
-
-  history?: ToStringArray | null;
-}
-
-export interface ZeekNoticeData {
-  suppress_for?: ToNumberArray | null;
-
-  msg?: ToStringArray | null;
-
-  note?: ToStringArray | null;
-
-  sub?: ToStringArray | null;
-
-  dst?: ToStringArray | null;
-
-  dropped?: ToBooleanArray | null;
-
-  peer_descr?: ToStringArray | null;
-}
-
-export interface ZeekDnsData {
-  AA?: ToBooleanArray | null;
-
-  qclass_name?: ToStringArray | null;
-
-  RD?: ToBooleanArray | null;
-
-  qtype_name?: ToStringArray | null;
-
-  rejected?: ToBooleanArray | null;
-
-  qtype?: ToStringArray | null;
-
-  query?: ToStringArray | null;
-
-  trans_id?: ToNumberArray | null;
-
-  qclass?: ToStringArray | null;
-
-  RA?: ToBooleanArray | null;
-
-  TC?: ToBooleanArray | null;
-}
-
-export interface ZeekHttpData {
-  resp_mime_types?: ToStringArray | null;
-
-  trans_depth?: ToStringArray | null;
-
-  status_msg?: ToStringArray | null;
-
-  resp_fuids?: ToStringArray | null;
-
-  tags?: ToStringArray | null;
-}
-
-export interface ZeekFileData {
-  session_ids?: ToStringArray | null;
-
-  timedout?: ToBooleanArray | null;
-
-  local_orig?: ToBooleanArray | null;
-
-  tx_host?: ToStringArray | null;
-
-  source?: ToStringArray | null;
-
-  is_orig?: ToBooleanArray | null;
-
-  overflow_bytes?: ToNumberArray | null;
-
-  sha1?: ToStringArray | null;
-
-  duration?: ToNumberArray | null;
-
-  depth?: ToNumberArray | null;
-
-  analyzers?: ToStringArray | null;
-
-  mime_type?: ToStringArray | null;
-
-  rx_host?: ToStringArray | null;
-
-  total_bytes?: ToNumberArray | null;
-
-  fuid?: ToStringArray | null;
-
-  seen_bytes?: ToNumberArray | null;
-
-  missing_bytes?: ToNumberArray | null;
-
-  md5?: ToStringArray | null;
-}
-
-export interface ZeekSslData {
-  cipher?: ToStringArray | null;
-
-  established?: ToBooleanArray | null;
-
-  resumed?: ToBooleanArray | null;
-
-  version?: ToStringArray | null;
-}
-
-export interface HttpEcsFields {
-  version?: ToStringArray | null;
-
-  request?: HttpRequestData | null;
-
-  response?: HttpResponseData | null;
-}
-
-export interface HttpRequestData {
-  method?: ToStringArray | null;
-
-  body?: HttpBodyData | null;
-
-  referrer?: ToStringArray | null;
-
-  bytes?: ToNumberArray | null;
-}
-
-export interface HttpBodyData {
-  content?: ToStringArray | null;
-
-  bytes?: ToNumberArray | null;
-}
-
-export interface HttpResponseData {
-  status_code?: ToNumberArray | null;
-
-  body?: HttpBodyData | null;
-
-  bytes?: ToNumberArray | null;
-}
-
-export interface UrlEcsFields {
-  domain?: ToStringArray | null;
-
-  original?: ToStringArray | null;
-
-  username?: ToStringArray | null;
-
-  password?: ToStringArray | null;
-}
-
-export interface ProcessEcsFields {
-  pid?: ToNumberArray | null;
-
-  name?: ToStringArray | null;
-
-  ppid?: ToNumberArray | null;
-
-  args?: ToStringArray | null;
-
-  executable?: ToStringArray | null;
-
-  title?: ToStringArray | null;
-
-  thread?: Thread | null;
-
-  working_directory?: ToStringArray | null;
-}
-
-export interface Thread {
-  id?: ToNumberArray | null;
-
-  start?: ToStringArray | null;
-}
-
-export interface FileFields {
-  path?: ToStringArray | null;
-
-  target_path?: ToStringArray | null;
-
-  extension?: ToStringArray | null;
-
-  type?: ToStringArray | null;
-
-  device?: ToStringArray | null;
-
-  inode?: ToStringArray | null;
-
-  uid?: ToStringArray | null;
-
-  owner?: ToStringArray | null;
-
-  gid?: ToStringArray | null;
-
-  group?: ToStringArray | null;
-
-  mode?: ToStringArray | null;
-
-  size?: ToNumberArray | null;
-
-  mtime?: ToDateArray | null;
-
-  ctime?: ToDateArray | null;
-}
-
-export interface SystemEcsField {
-  audit?: AuditEcsFields | null;
-
-  auth?: AuthEcsFields | null;
-}
-
-export interface AuditEcsFields {
-  package?: PackageEcsFields | null;
-}
-
-export interface PackageEcsFields {
-  arch?: ToStringArray | null;
-
-  entity_id?: ToStringArray | null;
-
-  name?: ToStringArray | null;
-
-  size?: ToNumberArray | null;
-
-  summary?: ToStringArray | null;
-
-  version?: ToStringArray | null;
-}
-
-export interface AuthEcsFields {
-  ssh?: SshEcsFields | null;
-}
-
-export interface SshEcsFields {
-  method?: ToStringArray | null;
-
-  signature?: ToStringArray | null;
-}
-
-export interface PageInfo {
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
-}
-
-export interface TimelineDetailsData {
-  data?: DetailItem[] | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface DetailItem {
-  field: string;
-
-  values?: ToStringArray | null;
-
-  originalValue?: EsValue | null;
-}
-
-export interface LastEventTimeData {
-  lastSeen?: Date | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface EventsOverTimeData {
-  inspect?: Inspect | null;
-
-  eventsOverTime: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
-export interface HostsData {
-  edges: HostsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface HostsEdges {
-  node: HostItem;
-
-  cursor: CursorType;
-}
-
-export interface HostItem {
-  _id?: string | null;
-
-  lastSeen?: Date | null;
-
-  host?: HostEcsFields | null;
-
-  cloud?: CloudFields | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface CloudFields {
-  instance?: CloudInstance | null;
-
-  machine?: CloudMachine | null;
-
-  provider?: (string | null)[] | null;
-
-  region?: (string | null)[] | null;
-}
-
-export interface CloudInstance {
-  id?: (string | null)[] | null;
-}
-
-export interface CloudMachine {
-  type?: (string | null)[] | null;
-}
-
-export interface FirstLastSeenHost {
-  inspect?: Inspect | null;
-
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-}
-
-export interface IpOverviewData {
-  client?: Overview | null;
-
-  destination?: Overview | null;
-
-  host: HostEcsFields;
-
-  server?: Overview | null;
-
-  source?: Overview | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface Overview {
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-
-  autonomousSystem: AutonomousSystem;
-
-  geo: GeoEcsFields;
-}
-
-export interface AutonomousSystem {
-  number?: number | null;
-
-  organization?: AutonomousSystemOrganization | null;
-}
-
-export interface AutonomousSystemOrganization {
-  name?: string | null;
-}
-
-export interface DomainsData {
-  edges: DomainsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface DomainsEdges {
-  node: DomainsNode;
-
-  cursor: CursorType;
-}
-
-export interface DomainsNode {
-  _id?: string | null;
-
-  timestamp?: Date | null;
-
-  source?: DomainsItem | null;
-
-  destination?: DomainsItem | null;
-
-  client?: DomainsItem | null;
-
-  server?: DomainsItem | null;
-
-  network?: DomainsNetworkField | null;
-}
-
-export interface DomainsItem {
-  uniqueIpCount?: number | null;
-
-  domainName?: string | null;
-
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-}
-
-export interface DomainsNetworkField {
-  bytes?: number | null;
-
-  packets?: number | null;
-
-  transport?: string | null;
-
-  direction?: NetworkDirectionEcs[] | null;
-}
-
-export interface TlsData {
-  edges: TlsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface TlsEdges {
-  node: TlsNode;
-
-  cursor: CursorType;
-}
-
-export interface TlsNode {
-  _id?: string | null;
-
-  timestamp?: Date | null;
-
-  alternativeNames?: string[] | null;
-
-  notAfter?: string[] | null;
-
-  commonNames?: string[] | null;
-
-  ja3?: string[] | null;
-
-  issuerNames?: string[] | null;
-}
-
-export interface UsersData {
-  edges: UsersEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface UsersEdges {
-  node: UsersNode;
-
-  cursor: CursorType;
-}
-
-export interface UsersNode {
-  _id?: string | null;
-
-  timestamp?: Date | null;
-
-  user?: UsersItem | null;
-}
-
-export interface UsersItem {
-  name?: string | null;
-
-  id?: ToStringArray | null;
-
-  groupId?: ToStringArray | null;
-
-  groupName?: ToStringArray | null;
-
-  count?: number | null;
-}
-
-export interface KpiNetworkData {
-  networkEvents?: number | null;
-
-  uniqueFlowId?: number | null;
-
-  uniqueSourcePrivateIps?: number | null;
-
-  uniqueSourcePrivateIpsHistogram?: KpiNetworkHistogramData[] | null;
-
-  uniqueDestinationPrivateIps?: number | null;
-
-  uniqueDestinationPrivateIpsHistogram?: KpiNetworkHistogramData[] | null;
-
-  dnsQueries?: number | null;
-
-  tlsHandshakes?: number | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface KpiNetworkHistogramData {
-  x?: number | null;
-
-  y?: number | null;
-}
-
-export interface KpiHostsData {
-  hosts?: number | null;
-
-  hostsHistogram?: KpiHostHistogramData[] | null;
-
-  authSuccess?: number | null;
-
-  authSuccessHistogram?: KpiHostHistogramData[] | null;
-
-  authFailure?: number | null;
-
-  authFailureHistogram?: KpiHostHistogramData[] | null;
-
-  uniqueSourceIps?: number | null;
-
-  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
-
-  uniqueDestinationIps?: number | null;
-
-  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface KpiHostHistogramData {
-  x?: number | null;
-
-  y?: number | null;
-}
-
-export interface KpiHostDetailsData {
-  authSuccess?: number | null;
-
-  authSuccessHistogram?: KpiHostHistogramData[] | null;
-
-  authFailure?: number | null;
-
-  authFailureHistogram?: KpiHostHistogramData[] | null;
-
-  uniqueSourceIps?: number | null;
-
-  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
-
-  uniqueDestinationIps?: number | null;
-
-  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface NetworkTopNFlowData {
-  edges: NetworkTopNFlowEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface NetworkTopNFlowEdges {
-  node: NetworkTopNFlowItem;
-
-  cursor: CursorType;
-}
-
-export interface NetworkTopNFlowItem {
-  _id?: string | null;
-
-  source?: TopNFlowItemSource | null;
-
-  destination?: TopNFlowItemDestination | null;
-
-  network?: TopNFlowNetworkEcsField | null;
-}
-
-export interface TopNFlowItemSource {
-  autonomous_system?: AutonomousSystemItem | null;
-
-  domain?: string[] | null;
-
-  ip?: string | null;
-
-  location?: GeoItem | null;
-
-  flows?: number | null;
-
-  destination_ips?: number | null;
-}
-
-export interface AutonomousSystemItem {
-  name?: string | null;
-
-  number?: number | null;
-}
-
-export interface GeoItem {
-  geo?: GeoEcsFields | null;
-
-  flowTarget?: FlowTarget | null;
-}
-
-export interface TopNFlowItemDestination {
-  autonomous_system?: AutonomousSystemItem | null;
-
-  domain?: string[] | null;
-
-  ip?: string | null;
-
-  location?: GeoItem | null;
-
-  flows?: number | null;
-
-  source_ips?: number | null;
-}
-
-export interface TopNFlowNetworkEcsField {
-  bytes_in?: number | null;
-
-  bytes_out?: number | null;
-}
-
-export interface NetworkDnsData {
-  edges: NetworkDnsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface NetworkDnsEdges {
-  node: NetworkDnsItem;
-
-  cursor: CursorType;
-}
-
-export interface NetworkDnsItem {
-  _id?: string | null;
-
-  dnsBytesIn?: number | null;
-
-  dnsBytesOut?: number | null;
-
-  dnsName?: string | null;
-
-  queryCount?: number | null;
-
-  uniqueDomains?: number | null;
-}
-
-export interface OverviewNetworkData {
-  auditbeatSocket?: number | null;
-
-  filebeatCisco?: number | null;
-
-  filebeatNetflow?: number | null;
-
-  filebeatPanw?: number | null;
-
-  filebeatSuricata?: number | null;
-
-  filebeatZeek?: number | null;
-
-  packetbeatDNS?: number | null;
-
-  packetbeatFlow?: number | null;
-
-  packetbeatTLS?: number | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface OverviewHostData {
-  auditbeatAuditd?: number | null;
-
-  auditbeatFIM?: number | null;
-
-  auditbeatLogin?: number | null;
-
-  auditbeatPackage?: number | null;
-
-  auditbeatProcess?: number | null;
-
-  auditbeatUser?: number | null;
-
-  filebeatSystemModule?: number | null;
-
-  winlogbeat?: number | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface UncommonProcessesData {
-  edges: UncommonProcessesEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface UncommonProcessesEdges {
-  node: UncommonProcessItem;
-
-  cursor: CursorType;
-}
-
-export interface UncommonProcessItem {
-  _id: string;
-
-  instances: number;
-
-  process: ProcessEcsFields;
-
-  hosts: HostEcsFields[];
-
-  user?: UserEcsFields | null;
-}
-
-export interface SayMyName {
-  /** The id of the source */
-  appName: string;
-}
-
-export interface TimelineResult {
-  savedObjectId: string;
-
-  columns?: ColumnHeaderResult[] | null;
-
-  dataProviders?: DataProviderResult[] | null;
-
-  dateRange?: DateRangePickerResult | null;
-
-  description?: string | null;
-
-  eventIdToNoteIds?: NoteResult[] | null;
-
-  favorite?: FavoriteTimelineResult[] | null;
-
-  kqlMode?: string | null;
-
-  kqlQuery?: SerializedFilterQueryResult | null;
-
-  notes?: NoteResult[] | null;
-
-  noteIds?: string[] | null;
-
-  pinnedEventIds?: string[] | null;
-
-  pinnedEventsSaveObject?: PinnedEvent[] | null;
-
-  title?: string | null;
-
-  sort?: SortTimelineResult | null;
-
-  created?: number | null;
-
-  createdBy?: string | null;
-
-  updated?: number | null;
-
-  updatedBy?: string | null;
-
-  version: string;
-}
-
-export interface ColumnHeaderResult {
-  aggregatable?: boolean | null;
-
-  category?: string | null;
-
-  columnHeaderType?: string | null;
-
-  description?: string | null;
-
-  example?: string | null;
-
-  indexes?: string[] | null;
-
-  id?: string | null;
-
-  name?: string | null;
-
-  placeholder?: string | null;
-
-  searchable?: boolean | null;
-
-  type?: string | null;
-}
-
-export interface DataProviderResult {
-  id?: string | null;
-
-  name?: string | null;
-
-  enabled?: boolean | null;
-
-  excluded?: boolean | null;
-
-  kqlQuery?: string | null;
-
-  queryMatch?: QueryMatchResult | null;
-
-  and?: DataProviderResult[] | null;
-}
-
-export interface QueryMatchResult {
-  field?: string | null;
-
-  displayField?: string | null;
-
-  value?: string | null;
-
-  displayValue?: string | null;
-
-  operator?: string | null;
-}
-
-export interface DateRangePickerResult {
-  start?: number | null;
-
-  end?: number | null;
-}
-
-export interface FavoriteTimelineResult {
-  fullName?: string | null;
-
-  userName?: string | null;
-
-  favoriteDate?: number | null;
-}
-
-export interface SerializedFilterQueryResult {
-  filterQuery?: SerializedKueryQueryResult | null;
-}
-
-export interface SerializedKueryQueryResult {
-  kuery?: KueryFilterQueryResult | null;
-
-  serializedQuery?: string | null;
-}
-
-export interface KueryFilterQueryResult {
-  kind?: string | null;
-
-  expression?: string | null;
-}
-
-export interface SortTimelineResult {
-  columnId?: string | null;
-
-  sortDirection?: string | null;
-}
-
-export interface ResponseTimelines {
-  timeline: (TimelineResult | null)[];
-
-  totalCount?: number | null;
-}
-
-export interface Mutation {
-  /** Persists a note */
-  persistNote: ResponseNote;
-
-  deleteNote?: boolean | null;
-
-  deleteNoteByTimelineId?: boolean | null;
-  /** Persists a pinned event in a timeline */
-  persistPinnedEventOnTimeline?: PinnedEvent | null;
-  /** Remove a pinned events in a timeline */
-  deletePinnedEventOnTimeline: boolean;
-  /** Remove all pinned events in a timeline */
-  deleteAllPinnedEventsOnTimeline: boolean;
-  /** Persists a timeline */
-  persistTimeline: ResponseTimeline;
-
-  persistFavorite: ResponseFavoriteTimeline;
-
-  deleteTimeline: boolean;
-}
-
-export interface ResponseNote {
-  code?: number | null;
-
-  message?: string | null;
-
-  note: NoteResult;
-}
-
-export interface ResponseTimeline {
-  code?: number | null;
-
-  message?: string | null;
-
-  timeline: TimelineResult;
-}
-
-export interface ResponseFavoriteTimeline {
-  code?: number | null;
-
-  message?: string | null;
-
-  savedObjectId: string;
-
-  version: string;
-
-  favorite?: FavoriteTimelineResult[] | null;
-}
-
-export interface EcsEdges {
-  node: Ecs;
-
-  cursor: CursorType;
-}
-
-export interface EventsTimelineData {
-  edges: EcsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
-export interface OsFields {
-  platform?: string | null;
-
-  name?: string | null;
-
-  full?: string | null;
-
-  family?: string | null;
-
-  version?: string | null;
-
-  kernel?: string | null;
-}
-
-export interface HostFields {
-  architecture?: string | null;
-
-  id?: string | null;
-
-  ip?: (string | null)[] | null;
-
-  mac?: (string | null)[] | null;
-
-  name?: string | null;
-
-  os?: OsFields | null;
-
-  type?: string | null;
-}
-
-// ====================================================
-// InputTypes
-// ====================================================
-
-export interface PageInfoNote {
-  pageIndex: number;
-
-  pageSize: number;
-}
-
-export interface SortNote {
-  sortField: SortFieldNote;
-
-  sortOrder: Direction;
-}
-
-export interface TimerangeInput {
-  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
-  interval: string;
-  /** The end of the timerange */
-  to: number;
-  /** The beginning of the timerange */
-  from: number;
-}
-
-export interface PaginationInputPaginated {
-  /** The activePage parameter defines the page of results you want to fetch */
-  activePage: number;
-  /** The cursorStart parameter defines the start of the results to be displayed */
-  cursorStart: number;
-  /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
-  fakePossibleCount: number;
-  /** The querySize parameter is the number of items to be returned */
-  querySize: number;
-}
-
-export interface PaginationInput {
-  /** The limit parameter allows you to configure the maximum amount of items to be returned */
-  limit: number;
-  /** The cursor parameter defines the next result you want to fetch */
-  cursor?: string | null;
-  /** The tiebreaker parameter allow to be more precise to fetch the next item */
-  tiebreaker?: string | null;
-}
-
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
-}
-
-export interface LastTimeDetails {
-  hostName?: string | null;
-
-  ip?: string | null;
-}
-
-export interface HostsSortField {
-  field: HostsFields;
-
-  direction: Direction;
-}
-
-export interface DomainsSortField {
-  field: DomainsFields;
-
-  direction: Direction;
-}
-
-export interface TlsSortField {
-  field: TlsFields;
-
-  direction: Direction;
-}
-
-export interface UsersSortField {
-  field: UsersFields;
-
-  direction: Direction;
-}
-
-export interface NetworkTopNFlowSortField {
-  field: NetworkTopNFlowFields;
-
-  direction: Direction;
-}
-
-export interface NetworkDnsSortField {
-  field: NetworkDnsFields;
-
-  direction: Direction;
-}
-
-export interface PageInfoTimeline {
-  pageIndex: number;
-
-  pageSize: number;
-}
-
-export interface SortTimeline {
-  sortField: SortFieldTimeline;
-
-  sortOrder: Direction;
-}
-
-export interface NoteInput {
-  eventId?: string | null;
-
-  note?: string | null;
-
-  timelineId?: string | null;
-}
-
-export interface TimelineInput {
-  columns?: ColumnHeaderInput[] | null;
-
-  dataProviders?: DataProviderInput[] | null;
-
-  description?: string | null;
-
-  kqlMode?: string | null;
-
-  kqlQuery?: SerializedFilterQueryInput | null;
-
-  title?: string | null;
-
-  dateRange?: DateRangePickerInput | null;
-
-  sort?: SortTimelineInput | null;
-}
-
-export interface ColumnHeaderInput {
-  aggregatable?: boolean | null;
-
-  category?: string | null;
-
-  columnHeaderType?: string | null;
-
-  description?: string | null;
-
-  example?: string | null;
-
-  indexes?: string[] | null;
-
-  id?: string | null;
-
-  name?: string | null;
-
-  placeholder?: string | null;
-
-  searchable?: boolean | null;
-
-  type?: string | null;
-}
-
-export interface DataProviderInput {
-  id?: string | null;
-
-  name?: string | null;
-
-  enabled?: boolean | null;
-
-  excluded?: boolean | null;
-
-  kqlQuery?: string | null;
-
-  queryMatch?: QueryMatchInput | null;
-
-  and?: DataProviderInput[] | null;
-}
-
-export interface QueryMatchInput {
-  field?: string | null;
-
-  displayField?: string | null;
-
-  value?: string | null;
-
-  displayValue?: string | null;
-
-  operator?: string | null;
-}
-
-export interface SerializedFilterQueryInput {
-  filterQuery?: SerializedKueryQueryInput | null;
-}
-
-export interface SerializedKueryQueryInput {
-  kuery?: KueryFilterQueryInput | null;
-
-  serializedQuery?: string | null;
-}
-
-export interface KueryFilterQueryInput {
-  kind?: string | null;
-
-  expression?: string | null;
-}
-
-export interface DateRangePickerInput {
-  start?: number | null;
-
-  end?: number | null;
-}
-
-export interface SortTimelineInput {
-  columnId?: string | null;
-
-  sortDirection?: string | null;
-}
-
-export interface FavoriteTimelineInput {
-  fullName?: string | null;
-
-  userName?: string | null;
-
-  favoriteDate?: number | null;
-}
-
-// ====================================================
-// Arguments
-// ====================================================
-
-export interface GetNoteQueryArgs {
-  id: string;
-}
-export interface GetNotesByTimelineIdQueryArgs {
-  timelineId: string;
-}
-export interface GetNotesByEventIdQueryArgs {
-  eventId: string;
-}
-export interface GetAllNotesQueryArgs {
-  pageInfo?: PageInfoNote | null;
-
-  search?: string | null;
-
-  sort?: SortNote | null;
-}
-export interface GetAllPinnedEventsByTimelineIdQueryArgs {
-  timelineId: string;
-}
-export interface SourceQueryArgs {
-  /** The id of the source */
-  id: string;
-}
-export interface GetOneTimelineQueryArgs {
-  id: string;
-}
-export interface GetAllTimelineQueryArgs {
-  pageInfo?: PageInfoTimeline | null;
-
-  search?: string | null;
-
-  sort?: SortTimeline | null;
-
-  onlyUserFavorite?: boolean | null;
-}
-export interface AuthenticationsSourceArgs {
-  timerange: TimerangeInput;
-
-  pagination: PaginationInputPaginated;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface TimelineSourceArgs {
-  pagination: PaginationInput;
-
-  sortField: SortField;
-
-  fieldRequested: string[];
-
-  timerange?: TimerangeInput | null;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface TimelineDetailsSourceArgs {
-  eventId: string;
-
-  indexName: string;
-
-  defaultIndex: string[];
-}
-export interface LastEventTimeSourceArgs {
-  id?: string | null;
-
-  indexKey: LastEventIndexKey;
-
-  details: LastTimeDetails;
-
-  defaultIndex: string[];
-}
-export interface EventsOverTimeSourceArgs {
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface HostsSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  pagination: PaginationInputPaginated;
-
-  sort: HostsSortField;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface HostOverviewSourceArgs {
-  id?: string | null;
-
-  hostName: string;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface HostFirstLastSeenSourceArgs {
-  id?: string | null;
-
-  hostName: string;
-
-  defaultIndex: string[];
-}
-export interface IpOverviewSourceArgs {
-  id?: string | null;
-
-  filterQuery?: string | null;
-
-  ip: string;
-
-  defaultIndex: string[];
-}
-export interface DomainsSourceArgs {
-  filterQuery?: string | null;
-
-  id?: string | null;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: DomainsSortField;
-
-  flowDirection: FlowDirection;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface TlsSourceArgs {
-  filterQuery?: string | null;
-
-  id?: string | null;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: TlsSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface UsersSourceArgs {
-  filterQuery?: string | null;
-
-  id?: string | null;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: UsersSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface KpiNetworkSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface KpiHostsSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface KpiHostDetailsSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface NetworkTopNFlowSourceArgs {
-  id?: string | null;
-
-  filterQuery?: string | null;
-
-  flowTarget: FlowTargetNew;
-
-  pagination: PaginationInputPaginated;
-
-  sort: NetworkTopNFlowSortField;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface NetworkDnsSourceArgs {
-  filterQuery?: string | null;
-
-  id?: string | null;
-
-  isPtrIncluded: boolean;
-
-  pagination: PaginationInputPaginated;
-
-  sort: NetworkDnsSortField;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface OverviewNetworkSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface OverviewHostSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface UncommonProcessesSourceArgs {
-  timerange: TimerangeInput;
-
-  pagination: PaginationInputPaginated;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface IndicesExistSourceStatusArgs {
-  defaultIndex: string[];
-}
-export interface IndexFieldsSourceStatusArgs {
-  defaultIndex: string[];
-}
-export interface PersistNoteMutationArgs {
-  noteId?: string | null;
-
-  version?: string | null;
-
-  note: NoteInput;
-}
-export interface DeleteNoteMutationArgs {
-  id: string[];
-}
-export interface DeleteNoteByTimelineIdMutationArgs {
-  timelineId: string;
-
-  version?: string | null;
-}
-export interface PersistPinnedEventOnTimelineMutationArgs {
-  pinnedEventId?: string | null;
-
-  eventId: string;
-
-  timelineId?: string | null;
-}
-export interface DeletePinnedEventOnTimelineMutationArgs {
-  id: string[];
-}
-export interface DeleteAllPinnedEventsOnTimelineMutationArgs {
-  timelineId: string;
-}
-export interface PersistTimelineMutationArgs {
-  id?: string | null;
-
-  version?: string | null;
-
-  timeline: TimelineInput;
-}
-export interface PersistFavoriteMutationArgs {
-  timelineId?: string | null;
-}
-export interface DeleteTimelineMutationArgs {
-  id: string[];
-}
-
-// ====================================================
-// Enums
-// ====================================================
-
-export enum SortFieldNote {
-  updatedBy = 'updatedBy',
-  updated = 'updated',
-}
+export type Maybe<T> = T | null;
+/** All built-in and custom scalars, mapped to their actual values */
+export type Scalars = {
+  ID: string,
+  String: string,
+  Boolean: boolean,
+  Int: number,
+  Float: number,
+  ToStringArray: any,
+  Date: any,
+  ToNumberArray: any,
+  ToDateArray: any,
+  ToBooleanArray: any,
+  EsValue: any,
+};
+
+export type AuditdData = {
+   __typename?: 'AuditdData',
+  acct?: Maybe<Scalars['ToStringArray']>,
+  terminal?: Maybe<Scalars['ToStringArray']>,
+  op?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type AuditdEcsFields = {
+   __typename?: 'AuditdEcsFields',
+  result?: Maybe<Scalars['ToStringArray']>,
+  session?: Maybe<Scalars['ToStringArray']>,
+  data?: Maybe<AuditdData>,
+  summary?: Maybe<Summary>,
+  sequence?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type AuditEcsFields = {
+   __typename?: 'AuditEcsFields',
+  package?: Maybe<PackageEcsFields>,
+};
+
+export type AuthEcsFields = {
+   __typename?: 'AuthEcsFields',
+  ssh?: Maybe<SshEcsFields>,
+};
+
+export type AuthenticationItem = {
+   __typename?: 'AuthenticationItem',
+  _id: Scalars['String'],
+  failures: Scalars['Float'],
+  successes: Scalars['Float'],
+  user: UserEcsFields,
+  lastSuccess?: Maybe<LastSourceHost>,
+  lastFailure?: Maybe<LastSourceHost>,
+};
+
+export type AuthenticationsData = {
+   __typename?: 'AuthenticationsData',
+  edges: Array<AuthenticationsEdges>,
+  totalCount: Scalars['Float'],
+  pageInfo: PageInfoPaginated,
+  inspect?: Maybe<Inspect>,
+};
+
+export type AuthenticationsEdges = {
+   __typename?: 'AuthenticationsEdges',
+  node: AuthenticationItem,
+  cursor: CursorType,
+};
+
+export type AutonomousSystem = {
+   __typename?: 'AutonomousSystem',
+  number?: Maybe<Scalars['Float']>,
+  organization?: Maybe<AutonomousSystemOrganization>,
+};
+
+export type AutonomousSystemItem = {
+   __typename?: 'AutonomousSystemItem',
+  name?: Maybe<Scalars['String']>,
+  number?: Maybe<Scalars['Float']>,
+};
+
+export type AutonomousSystemOrganization = {
+   __typename?: 'AutonomousSystemOrganization',
+  name?: Maybe<Scalars['String']>,
+};
+
+export type CloudFields = {
+   __typename?: 'CloudFields',
+  instance?: Maybe<CloudInstance>,
+  machine?: Maybe<CloudMachine>,
+  provider?: Maybe<Array<Maybe<Scalars['String']>>>,
+  region?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
+export type CloudInstance = {
+   __typename?: 'CloudInstance',
+  id?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
+export type CloudMachine = {
+   __typename?: 'CloudMachine',
+  type?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
+export type ColumnHeaderInput = {
+  aggregatable?: Maybe<Scalars['Boolean']>,
+  category?: Maybe<Scalars['String']>,
+  columnHeaderType?: Maybe<Scalars['String']>,
+  description?: Maybe<Scalars['String']>,
+  example?: Maybe<Scalars['String']>,
+  indexes?: Maybe<Array<Scalars['String']>>,
+  id?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  placeholder?: Maybe<Scalars['String']>,
+  searchable?: Maybe<Scalars['Boolean']>,
+  type?: Maybe<Scalars['String']>,
+};
+
+export type ColumnHeaderResult = {
+   __typename?: 'ColumnHeaderResult',
+  aggregatable?: Maybe<Scalars['Boolean']>,
+  category?: Maybe<Scalars['String']>,
+  columnHeaderType?: Maybe<Scalars['String']>,
+  description?: Maybe<Scalars['String']>,
+  example?: Maybe<Scalars['String']>,
+  indexes?: Maybe<Array<Scalars['String']>>,
+  id?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  placeholder?: Maybe<Scalars['String']>,
+  searchable?: Maybe<Scalars['Boolean']>,
+  type?: Maybe<Scalars['String']>,
+};
+
+export type CursorType = {
+   __typename?: 'CursorType',
+  value?: Maybe<Scalars['String']>,
+  tiebreaker?: Maybe<Scalars['String']>,
+};
+
+export type DataProviderInput = {
+  id?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  enabled?: Maybe<Scalars['Boolean']>,
+  excluded?: Maybe<Scalars['Boolean']>,
+  kqlQuery?: Maybe<Scalars['String']>,
+  queryMatch?: Maybe<QueryMatchInput>,
+  and?: Maybe<Array<DataProviderInput>>,
+};
+
+export type DataProviderResult = {
+   __typename?: 'DataProviderResult',
+  id?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  enabled?: Maybe<Scalars['Boolean']>,
+  excluded?: Maybe<Scalars['Boolean']>,
+  kqlQuery?: Maybe<Scalars['String']>,
+  queryMatch?: Maybe<QueryMatchResult>,
+  and?: Maybe<Array<DataProviderResult>>,
+};
+
+
+export type DateRangePickerInput = {
+  start?: Maybe<Scalars['Float']>,
+  end?: Maybe<Scalars['Float']>,
+};
+
+export type DateRangePickerResult = {
+   __typename?: 'DateRangePickerResult',
+  start?: Maybe<Scalars['Float']>,
+  end?: Maybe<Scalars['Float']>,
+};
+
+export type DestinationEcsFields = {
+   __typename?: 'DestinationEcsFields',
+  bytes?: Maybe<Scalars['ToNumberArray']>,
+  ip?: Maybe<Scalars['ToStringArray']>,
+  port?: Maybe<Scalars['ToNumberArray']>,
+  domain?: Maybe<Scalars['ToStringArray']>,
+  geo?: Maybe<GeoEcsFields>,
+  packets?: Maybe<Scalars['ToNumberArray']>,
+};
+
+export type DetailItem = {
+   __typename?: 'DetailItem',
+  field: Scalars['String'],
+  values?: Maybe<Scalars['ToStringArray']>,
+  originalValue?: Maybe<Scalars['EsValue']>,
+};
 
 export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
+  Asc = 'asc',
+  Desc = 'desc'
 }
 
-export enum LastEventIndexKey {
-  hostDetails = 'hostDetails',
-  hosts = 'hosts',
-  ipDetails = 'ipDetails',
-  network = 'network',
-}
+export type DomainsData = {
+   __typename?: 'DomainsData',
+  edges: Array<DomainsEdges>,
+  totalCount: Scalars['Float'],
+  pageInfo: PageInfoPaginated,
+  inspect?: Maybe<Inspect>,
+};
 
-export enum HostsFields {
-  hostName = 'hostName',
-  lastSeen = 'lastSeen',
-}
+export type DomainsEdges = {
+   __typename?: 'DomainsEdges',
+  node: DomainsNode,
+  cursor: CursorType,
+};
 
 export enum DomainsFields {
-  domainName = 'domainName',
-  direction = 'direction',
-  bytes = 'bytes',
-  packets = 'packets',
-  uniqueIpCount = 'uniqueIpCount',
+  DomainName = 'domainName',
+  Direction = 'direction',
+  Bytes = 'bytes',
+  Packets = 'packets',
+  UniqueIpCount = 'uniqueIpCount'
 }
 
+export type DomainsItem = {
+   __typename?: 'DomainsItem',
+  uniqueIpCount?: Maybe<Scalars['Float']>,
+  domainName?: Maybe<Scalars['String']>,
+  firstSeen?: Maybe<Scalars['Date']>,
+  lastSeen?: Maybe<Scalars['Date']>,
+};
+
+export type DomainsNetworkField = {
+   __typename?: 'DomainsNetworkField',
+  bytes?: Maybe<Scalars['Float']>,
+  packets?: Maybe<Scalars['Float']>,
+  transport?: Maybe<Scalars['String']>,
+  direction?: Maybe<Array<NetworkDirectionEcs>>,
+};
+
+export type DomainsNode = {
+   __typename?: 'DomainsNode',
+  _id?: Maybe<Scalars['String']>,
+  timestamp?: Maybe<Scalars['Date']>,
+  source?: Maybe<DomainsItem>,
+  destination?: Maybe<DomainsItem>,
+  client?: Maybe<DomainsItem>,
+  server?: Maybe<DomainsItem>,
+  network?: Maybe<DomainsNetworkField>,
+};
+
+export type DomainsSortField = {
+  field: DomainsFields,
+  direction: Direction,
+};
+
+export type Ecs = {
+   __typename?: 'ECS',
+  _id: Scalars['String'],
+  _index?: Maybe<Scalars['String']>,
+  auditd?: Maybe<AuditdEcsFields>,
+  destination?: Maybe<DestinationEcsFields>,
+  event?: Maybe<EventEcsFields>,
+  geo?: Maybe<GeoEcsFields>,
+  host?: Maybe<HostEcsFields>,
+  network?: Maybe<NetworkEcsField>,
+  source?: Maybe<SourceEcsFields>,
+  suricata?: Maybe<SuricataEcsFields>,
+  tls?: Maybe<TlsEcsFields>,
+  zeek?: Maybe<ZeekEcsFields>,
+  http?: Maybe<HttpEcsFields>,
+  url?: Maybe<UrlEcsFields>,
+  timestamp?: Maybe<Scalars['Date']>,
+  message?: Maybe<Scalars['ToStringArray']>,
+  user?: Maybe<UserEcsFields>,
+  process?: Maybe<ProcessEcsFields>,
+  file?: Maybe<FileFields>,
+  system?: Maybe<SystemEcsField>,
+};
+
+export type EcsEdges = {
+   __typename?: 'EcsEdges',
+  node: Ecs,
+  cursor: CursorType,
+};
+
+
+export type EventEcsFields = {
+   __typename?: 'EventEcsFields',
+  action?: Maybe<Scalars['ToStringArray']>,
+  category?: Maybe<Scalars['ToStringArray']>,
+  created?: Maybe<Scalars['ToDateArray']>,
+  dataset?: Maybe<Scalars['ToStringArray']>,
+  duration?: Maybe<Scalars['ToNumberArray']>,
+  end?: Maybe<Scalars['ToDateArray']>,
+  hash?: Maybe<Scalars['ToStringArray']>,
+  id?: Maybe<Scalars['ToStringArray']>,
+  kind?: Maybe<Scalars['ToStringArray']>,
+  module?: Maybe<Scalars['ToStringArray']>,
+  original?: Maybe<Scalars['ToStringArray']>,
+  outcome?: Maybe<Scalars['ToStringArray']>,
+  risk_score?: Maybe<Scalars['ToNumberArray']>,
+  risk_score_norm?: Maybe<Scalars['ToNumberArray']>,
+  severity?: Maybe<Scalars['ToNumberArray']>,
+  start?: Maybe<Scalars['ToDateArray']>,
+  timezone?: Maybe<Scalars['ToStringArray']>,
+  type?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type EventsOverTimeData = {
+   __typename?: 'EventsOverTimeData',
+  inspect?: Maybe<Inspect>,
+  eventsOverTime: Array<MatrixOverTimeHistogramData>,
+  totalCount: Scalars['Float'],
+};
+
+export type EventsTimelineData = {
+   __typename?: 'EventsTimelineData',
+  edges: Array<EcsEdges>,
+  totalCount: Scalars['Float'],
+  pageInfo: PageInfo,
+  inspect?: Maybe<Inspect>,
+};
+
+export type FavoriteTimelineInput = {
+  fullName?: Maybe<Scalars['String']>,
+  userName?: Maybe<Scalars['String']>,
+  favoriteDate?: Maybe<Scalars['Float']>,
+};
+
+export type FavoriteTimelineResult = {
+   __typename?: 'FavoriteTimelineResult',
+  fullName?: Maybe<Scalars['String']>,
+  userName?: Maybe<Scalars['String']>,
+  favoriteDate?: Maybe<Scalars['Float']>,
+};
+
+export type FileFields = {
+   __typename?: 'FileFields',
+  path?: Maybe<Scalars['ToStringArray']>,
+  target_path?: Maybe<Scalars['ToStringArray']>,
+  extension?: Maybe<Scalars['ToStringArray']>,
+  type?: Maybe<Scalars['ToStringArray']>,
+  device?: Maybe<Scalars['ToStringArray']>,
+  inode?: Maybe<Scalars['ToStringArray']>,
+  uid?: Maybe<Scalars['ToStringArray']>,
+  owner?: Maybe<Scalars['ToStringArray']>,
+  gid?: Maybe<Scalars['ToStringArray']>,
+  group?: Maybe<Scalars['ToStringArray']>,
+  mode?: Maybe<Scalars['ToStringArray']>,
+  size?: Maybe<Scalars['ToNumberArray']>,
+  mtime?: Maybe<Scalars['ToDateArray']>,
+  ctime?: Maybe<Scalars['ToDateArray']>,
+};
+
+export type FingerprintData = {
+   __typename?: 'FingerprintData',
+  sha1?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type FirstLastSeenHost = {
+   __typename?: 'FirstLastSeenHost',
+  inspect?: Maybe<Inspect>,
+  firstSeen?: Maybe<Scalars['Date']>,
+  lastSeen?: Maybe<Scalars['Date']>,
+};
+
 export enum FlowDirection {
-  uniDirectional = 'uniDirectional',
-  biDirectional = 'biDirectional',
+  UniDirectional = 'uniDirectional',
+  BiDirectional = 'biDirectional'
 }
 
 export enum FlowTarget {
-  client = 'client',
-  destination = 'destination',
-  server = 'server',
-  source = 'source',
-}
-
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  incoming = 'incoming',
-  outgoing = 'outgoing',
-  listening = 'listening',
-  unknown = 'unknown',
-}
-
-export enum TlsFields {
-  _id = '_id',
-}
-
-export enum UsersFields {
-  name = 'name',
-  count = 'count',
+  Client = 'client',
+  Destination = 'destination',
+  Server = 'server',
+  Source = 'source'
 }
 
 export enum FlowTargetNew {
-  destination = 'destination',
-  source = 'source',
+  Destination = 'destination',
+  Source = 'source'
 }
 
-export enum NetworkTopNFlowFields {
-  bytes_in = 'bytes_in',
-  bytes_out = 'bytes_out',
-  flows = 'flows',
-  destination_ips = 'destination_ips',
-  source_ips = 'source_ips',
+export type GeoEcsFields = {
+   __typename?: 'GeoEcsFields',
+  city_name?: Maybe<Scalars['ToStringArray']>,
+  continent_name?: Maybe<Scalars['ToStringArray']>,
+  country_iso_code?: Maybe<Scalars['ToStringArray']>,
+  country_name?: Maybe<Scalars['ToStringArray']>,
+  location?: Maybe<Location>,
+  region_iso_code?: Maybe<Scalars['ToStringArray']>,
+  region_name?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type GeoItem = {
+   __typename?: 'GeoItem',
+  geo?: Maybe<GeoEcsFields>,
+  flowTarget?: Maybe<FlowTarget>,
+};
+
+export type HostEcsFields = {
+   __typename?: 'HostEcsFields',
+  architecture?: Maybe<Scalars['ToStringArray']>,
+  id?: Maybe<Scalars['ToStringArray']>,
+  ip?: Maybe<Scalars['ToStringArray']>,
+  mac?: Maybe<Scalars['ToStringArray']>,
+  name?: Maybe<Scalars['ToStringArray']>,
+  os?: Maybe<OsEcsFields>,
+  type?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type HostFields = {
+   __typename?: 'HostFields',
+  architecture?: Maybe<Scalars['String']>,
+  id?: Maybe<Scalars['String']>,
+  ip?: Maybe<Array<Maybe<Scalars['String']>>>,
+  mac?: Maybe<Array<Maybe<Scalars['String']>>>,
+  name?: Maybe<Scalars['String']>,
+  os?: Maybe<OsFields>,
+  type?: Maybe<Scalars['String']>,
+};
+
+export type HostItem = {
+   __typename?: 'HostItem',
+  _id?: Maybe<Scalars['String']>,
+  lastSeen?: Maybe<Scalars['Date']>,
+  host?: Maybe<HostEcsFields>,
+  cloud?: Maybe<CloudFields>,
+  inspect?: Maybe<Inspect>,
+};
+
+export type HostsData = {
+   __typename?: 'HostsData',
+  edges: Array<HostsEdges>,
+  totalCount: Scalars['Float'],
+  pageInfo: PageInfoPaginated,
+  inspect?: Maybe<Inspect>,
+};
+
+export type HostsEdges = {
+   __typename?: 'HostsEdges',
+  node: HostItem,
+  cursor: CursorType,
+};
+
+export enum HostsFields {
+  HostName = 'hostName',
+  LastSeen = 'lastSeen'
 }
+
+export type HostsSortField = {
+  field: HostsFields,
+  direction: Direction,
+};
+
+export type HttpBodyData = {
+   __typename?: 'HttpBodyData',
+  content?: Maybe<Scalars['ToStringArray']>,
+  bytes?: Maybe<Scalars['ToNumberArray']>,
+};
+
+export type HttpEcsFields = {
+   __typename?: 'HttpEcsFields',
+  version?: Maybe<Scalars['ToStringArray']>,
+  request?: Maybe<HttpRequestData>,
+  response?: Maybe<HttpResponseData>,
+};
+
+export type HttpRequestData = {
+   __typename?: 'HttpRequestData',
+  method?: Maybe<Scalars['ToStringArray']>,
+  body?: Maybe<HttpBodyData>,
+  referrer?: Maybe<Scalars['ToStringArray']>,
+  bytes?: Maybe<Scalars['ToNumberArray']>,
+};
+
+export type HttpResponseData = {
+   __typename?: 'HttpResponseData',
+  status_code?: Maybe<Scalars['ToNumberArray']>,
+  body?: Maybe<HttpBodyData>,
+  bytes?: Maybe<Scalars['ToNumberArray']>,
+};
+
+/** A descriptor of a field in an index */
+export type IndexField = {
+   __typename?: 'IndexField',
+  /** Where the field belong */
+  category: Scalars['String'],
+  /** Example of field's value */
+  example?: Maybe<Scalars['String']>,
+  /** whether the field's belong to an alias index */
+  indexes: Array<Maybe<Scalars['String']>>,
+  /** The name of the field */
+  name: Scalars['String'],
+  /** The type of the field's values as recognized by Kibana */
+  type: Scalars['String'],
+  /** Whether the field's values can be efficiently searched for */
+  searchable: Scalars['Boolean'],
+  /** Whether the field's values can be aggregated */
+  aggregatable: Scalars['Boolean'],
+  /** Description of the field */
+  description?: Maybe<Scalars['String']>,
+  format?: Maybe<Scalars['String']>,
+};
+
+export type Inspect = {
+   __typename?: 'Inspect',
+  dsl: Array<Scalars['String']>,
+  response: Array<Scalars['String']>,
+};
+
+export type IpOverviewData = {
+   __typename?: 'IpOverviewData',
+  client?: Maybe<Overview>,
+  destination?: Maybe<Overview>,
+  host: HostEcsFields,
+  server?: Maybe<Overview>,
+  source?: Maybe<Overview>,
+  inspect?: Maybe<Inspect>,
+};
+
+export type KpiHostDetailsData = {
+   __typename?: 'KpiHostDetailsData',
+  authSuccess?: Maybe<Scalars['Float']>,
+  authSuccessHistogram?: Maybe<Array<KpiHostHistogramData>>,
+  authFailure?: Maybe<Scalars['Float']>,
+  authFailureHistogram?: Maybe<Array<KpiHostHistogramData>>,
+  uniqueSourceIps?: Maybe<Scalars['Float']>,
+  uniqueSourceIpsHistogram?: Maybe<Array<KpiHostHistogramData>>,
+  uniqueDestinationIps?: Maybe<Scalars['Float']>,
+  uniqueDestinationIpsHistogram?: Maybe<Array<KpiHostHistogramData>>,
+  inspect?: Maybe<Inspect>,
+};
+
+export type KpiHostHistogramData = {
+   __typename?: 'KpiHostHistogramData',
+  x?: Maybe<Scalars['Float']>,
+  y?: Maybe<Scalars['Float']>,
+};
+
+export type KpiHostsData = {
+   __typename?: 'KpiHostsData',
+  hosts?: Maybe<Scalars['Float']>,
+  hostsHistogram?: Maybe<Array<KpiHostHistogramData>>,
+  authSuccess?: Maybe<Scalars['Float']>,
+  authSuccessHistogram?: Maybe<Array<KpiHostHistogramData>>,
+  authFailure?: Maybe<Scalars['Float']>,
+  authFailureHistogram?: Maybe<Array<KpiHostHistogramData>>,
+  uniqueSourceIps?: Maybe<Scalars['Float']>,
+  uniqueSourceIpsHistogram?: Maybe<Array<KpiHostHistogramData>>,
+  uniqueDestinationIps?: Maybe<Scalars['Float']>,
+  uniqueDestinationIpsHistogram?: Maybe<Array<KpiHostHistogramData>>,
+  inspect?: Maybe<Inspect>,
+};
+
+export type KpiNetworkData = {
+   __typename?: 'KpiNetworkData',
+  networkEvents?: Maybe<Scalars['Float']>,
+  uniqueFlowId?: Maybe<Scalars['Float']>,
+  uniqueSourcePrivateIps?: Maybe<Scalars['Float']>,
+  uniqueSourcePrivateIpsHistogram?: Maybe<Array<KpiNetworkHistogramData>>,
+  uniqueDestinationPrivateIps?: Maybe<Scalars['Float']>,
+  uniqueDestinationPrivateIpsHistogram?: Maybe<Array<KpiNetworkHistogramData>>,
+  dnsQueries?: Maybe<Scalars['Float']>,
+  tlsHandshakes?: Maybe<Scalars['Float']>,
+  inspect?: Maybe<Inspect>,
+};
+
+export type KpiNetworkHistogramData = {
+   __typename?: 'KpiNetworkHistogramData',
+  x?: Maybe<Scalars['Float']>,
+  y?: Maybe<Scalars['Float']>,
+};
+
+export type KueryFilterQueryInput = {
+  kind?: Maybe<Scalars['String']>,
+  expression?: Maybe<Scalars['String']>,
+};
+
+export type KueryFilterQueryResult = {
+   __typename?: 'KueryFilterQueryResult',
+  kind?: Maybe<Scalars['String']>,
+  expression?: Maybe<Scalars['String']>,
+};
+
+export enum LastEventIndexKey {
+  HostDetails = 'hostDetails',
+  Hosts = 'hosts',
+  IpDetails = 'ipDetails',
+  Network = 'network'
+}
+
+export type LastEventTimeData = {
+   __typename?: 'LastEventTimeData',
+  lastSeen?: Maybe<Scalars['Date']>,
+  inspect?: Maybe<Inspect>,
+};
+
+export type LastSourceHost = {
+   __typename?: 'LastSourceHost',
+  timestamp?: Maybe<Scalars['Date']>,
+  source?: Maybe<SourceEcsFields>,
+  host?: Maybe<HostEcsFields>,
+};
+
+export type LastTimeDetails = {
+  hostName?: Maybe<Scalars['String']>,
+  ip?: Maybe<Scalars['String']>,
+};
+
+export type Location = {
+   __typename?: 'Location',
+  lon?: Maybe<Scalars['ToNumberArray']>,
+  lat?: Maybe<Scalars['ToNumberArray']>,
+};
+
+export type MatrixOverTimeHistogramData = {
+   __typename?: 'MatrixOverTimeHistogramData',
+  x: Scalars['Float'],
+  y: Scalars['Float'],
+  g: Scalars['String'],
+};
+
+export type Mutation = {
+   __typename?: 'Mutation',
+};
+
+export enum NetworkDirectionEcs {
+  Inbound = 'inbound',
+  Outbound = 'outbound',
+  Internal = 'internal',
+  External = 'external',
+  Incoming = 'incoming',
+  Outgoing = 'outgoing',
+  Listening = 'listening',
+  Unknown = 'unknown'
+}
+
+export type NetworkDnsData = {
+   __typename?: 'NetworkDnsData',
+  edges: Array<NetworkDnsEdges>,
+  totalCount: Scalars['Float'],
+  pageInfo: PageInfoPaginated,
+  inspect?: Maybe<Inspect>,
+};
+
+export type NetworkDnsEdges = {
+   __typename?: 'NetworkDnsEdges',
+  node: NetworkDnsItem,
+  cursor: CursorType,
+};
 
 export enum NetworkDnsFields {
-  dnsName = 'dnsName',
-  queryCount = 'queryCount',
-  uniqueDomains = 'uniqueDomains',
-  dnsBytesIn = 'dnsBytesIn',
-  dnsBytesOut = 'dnsBytesOut',
+  DnsName = 'dnsName',
+  QueryCount = 'queryCount',
+  UniqueDomains = 'uniqueDomains',
+  DnsBytesIn = 'dnsBytesIn',
+  DnsBytesOut = 'dnsBytesOut'
+}
+
+export type NetworkDnsItem = {
+   __typename?: 'NetworkDnsItem',
+  _id?: Maybe<Scalars['String']>,
+  dnsBytesIn?: Maybe<Scalars['Float']>,
+  dnsBytesOut?: Maybe<Scalars['Float']>,
+  dnsName?: Maybe<Scalars['String']>,
+  queryCount?: Maybe<Scalars['Float']>,
+  uniqueDomains?: Maybe<Scalars['Float']>,
+};
+
+export type NetworkDnsSortField = {
+  field: NetworkDnsFields,
+  direction: Direction,
+};
+
+export type NetworkEcsField = {
+   __typename?: 'NetworkEcsField',
+  bytes?: Maybe<Scalars['ToNumberArray']>,
+  community_id?: Maybe<Scalars['ToStringArray']>,
+  direction?: Maybe<Scalars['ToStringArray']>,
+  packets?: Maybe<Scalars['ToNumberArray']>,
+  protocol?: Maybe<Scalars['ToStringArray']>,
+  transport?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type NetworkTopNFlowData = {
+   __typename?: 'NetworkTopNFlowData',
+  edges: Array<NetworkTopNFlowEdges>,
+  totalCount: Scalars['Float'],
+  pageInfo: PageInfoPaginated,
+  inspect?: Maybe<Inspect>,
+};
+
+export type NetworkTopNFlowEdges = {
+   __typename?: 'NetworkTopNFlowEdges',
+  node: NetworkTopNFlowItem,
+  cursor: CursorType,
+};
+
+export enum NetworkTopNFlowFields {
+  BytesIn = 'bytes_in',
+  BytesOut = 'bytes_out',
+  Flows = 'flows',
+  DestinationIps = 'destination_ips',
+  SourceIps = 'source_ips'
+}
+
+export type NetworkTopNFlowItem = {
+   __typename?: 'NetworkTopNFlowItem',
+  _id?: Maybe<Scalars['String']>,
+  source?: Maybe<TopNFlowItemSource>,
+  destination?: Maybe<TopNFlowItemDestination>,
+  network?: Maybe<TopNFlowNetworkEcsField>,
+};
+
+export type NetworkTopNFlowSortField = {
+  field: NetworkTopNFlowFields,
+  direction: Direction,
+};
+
+export type NoteInput = {
+  eventId?: Maybe<Scalars['String']>,
+  note?: Maybe<Scalars['String']>,
+  timelineId?: Maybe<Scalars['String']>,
+};
+
+export type NoteResult = {
+   __typename?: 'NoteResult',
+  eventId?: Maybe<Scalars['String']>,
+  note?: Maybe<Scalars['String']>,
+  timelineId?: Maybe<Scalars['String']>,
+  noteId: Scalars['String'],
+  created?: Maybe<Scalars['Float']>,
+  createdBy?: Maybe<Scalars['String']>,
+  timelineVersion?: Maybe<Scalars['String']>,
+  updated?: Maybe<Scalars['Float']>,
+  updatedBy?: Maybe<Scalars['String']>,
+  version?: Maybe<Scalars['String']>,
+};
+
+export type OsEcsFields = {
+   __typename?: 'OsEcsFields',
+  platform?: Maybe<Scalars['ToStringArray']>,
+  name?: Maybe<Scalars['ToStringArray']>,
+  full?: Maybe<Scalars['ToStringArray']>,
+  family?: Maybe<Scalars['ToStringArray']>,
+  version?: Maybe<Scalars['ToStringArray']>,
+  kernel?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type OsFields = {
+   __typename?: 'OsFields',
+  platform?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  full?: Maybe<Scalars['String']>,
+  family?: Maybe<Scalars['String']>,
+  version?: Maybe<Scalars['String']>,
+  kernel?: Maybe<Scalars['String']>,
+};
+
+export type Overview = {
+   __typename?: 'Overview',
+  firstSeen?: Maybe<Scalars['Date']>,
+  lastSeen?: Maybe<Scalars['Date']>,
+  autonomousSystem: AutonomousSystem,
+  geo: GeoEcsFields,
+};
+
+export type OverviewHostData = {
+   __typename?: 'OverviewHostData',
+  auditbeatAuditd?: Maybe<Scalars['Float']>,
+  auditbeatFIM?: Maybe<Scalars['Float']>,
+  auditbeatLogin?: Maybe<Scalars['Float']>,
+  auditbeatPackage?: Maybe<Scalars['Float']>,
+  auditbeatProcess?: Maybe<Scalars['Float']>,
+  auditbeatUser?: Maybe<Scalars['Float']>,
+  filebeatSystemModule?: Maybe<Scalars['Float']>,
+  winlogbeat?: Maybe<Scalars['Float']>,
+  inspect?: Maybe<Inspect>,
+};
+
+export type OverviewNetworkData = {
+   __typename?: 'OverviewNetworkData',
+  auditbeatSocket?: Maybe<Scalars['Float']>,
+  filebeatCisco?: Maybe<Scalars['Float']>,
+  filebeatNetflow?: Maybe<Scalars['Float']>,
+  filebeatPanw?: Maybe<Scalars['Float']>,
+  filebeatSuricata?: Maybe<Scalars['Float']>,
+  filebeatZeek?: Maybe<Scalars['Float']>,
+  packetbeatDNS?: Maybe<Scalars['Float']>,
+  packetbeatFlow?: Maybe<Scalars['Float']>,
+  packetbeatTLS?: Maybe<Scalars['Float']>,
+  inspect?: Maybe<Inspect>,
+};
+
+export type PackageEcsFields = {
+   __typename?: 'PackageEcsFields',
+  arch?: Maybe<Scalars['ToStringArray']>,
+  entity_id?: Maybe<Scalars['ToStringArray']>,
+  name?: Maybe<Scalars['ToStringArray']>,
+  size?: Maybe<Scalars['ToNumberArray']>,
+  summary?: Maybe<Scalars['ToStringArray']>,
+  version?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type PageInfo = {
+   __typename?: 'PageInfo',
+  endCursor?: Maybe<CursorType>,
+  hasNextPage?: Maybe<Scalars['Boolean']>,
+};
+
+export type PageInfoNote = {
+  pageIndex: Scalars['Float'],
+  pageSize: Scalars['Float'],
+};
+
+export type PageInfoPaginated = {
+   __typename?: 'PageInfoPaginated',
+  activePage: Scalars['Float'],
+  fakeTotalCount: Scalars['Float'],
+  showMorePagesIndicator: Scalars['Boolean'],
+};
+
+export type PageInfoTimeline = {
+  pageIndex: Scalars['Float'],
+  pageSize: Scalars['Float'],
+};
+
+export type PaginationInput = {
+  /** The limit parameter allows you to configure the maximum amount of items to be returned */
+  limit: Scalars['Float'],
+  /** The cursor parameter defines the next result you want to fetch */
+  cursor?: Maybe<Scalars['String']>,
+  /** The tiebreaker parameter allow to be more precise to fetch the next item */
+  tiebreaker?: Maybe<Scalars['String']>,
+};
+
+export type PaginationInputPaginated = {
+  /** The activePage parameter defines the page of results you want to fetch */
+  activePage: Scalars['Float'],
+  /** The cursorStart parameter defines the start of the results to be displayed */
+  cursorStart: Scalars['Float'],
+  /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
+  fakePossibleCount: Scalars['Float'],
+  /** The querySize parameter is the number of items to be returned */
+  querySize: Scalars['Float'],
+};
+
+export type PinnedEvent = {
+   __typename?: 'PinnedEvent',
+  code?: Maybe<Scalars['Float']>,
+  message?: Maybe<Scalars['String']>,
+  pinnedEventId: Scalars['ID'],
+  eventId?: Maybe<Scalars['ID']>,
+  timelineId?: Maybe<Scalars['ID']>,
+  timelineVersion?: Maybe<Scalars['String']>,
+  created?: Maybe<Scalars['Float']>,
+  createdBy?: Maybe<Scalars['String']>,
+  updated?: Maybe<Scalars['Float']>,
+  updatedBy?: Maybe<Scalars['String']>,
+  version?: Maybe<Scalars['String']>,
+};
+
+export type PrimarySecondary = {
+   __typename?: 'PrimarySecondary',
+  primary?: Maybe<Scalars['ToStringArray']>,
+  secondary?: Maybe<Scalars['ToStringArray']>,
+  type?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type ProcessEcsFields = {
+   __typename?: 'ProcessEcsFields',
+  pid?: Maybe<Scalars['ToNumberArray']>,
+  name?: Maybe<Scalars['ToStringArray']>,
+  ppid?: Maybe<Scalars['ToNumberArray']>,
+  args?: Maybe<Scalars['ToStringArray']>,
+  executable?: Maybe<Scalars['ToStringArray']>,
+  title?: Maybe<Scalars['ToStringArray']>,
+  thread?: Maybe<Thread>,
+  working_directory?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type Query = {
+   __typename?: 'Query',
+};
+
+export type QueryMatchInput = {
+  field?: Maybe<Scalars['String']>,
+  displayField?: Maybe<Scalars['String']>,
+  value?: Maybe<Scalars['String']>,
+  displayValue?: Maybe<Scalars['String']>,
+  operator?: Maybe<Scalars['String']>,
+};
+
+export type QueryMatchResult = {
+   __typename?: 'QueryMatchResult',
+  field?: Maybe<Scalars['String']>,
+  displayField?: Maybe<Scalars['String']>,
+  value?: Maybe<Scalars['String']>,
+  displayValue?: Maybe<Scalars['String']>,
+  operator?: Maybe<Scalars['String']>,
+};
+
+export type ResponseFavoriteTimeline = {
+   __typename?: 'ResponseFavoriteTimeline',
+  code?: Maybe<Scalars['Float']>,
+  message?: Maybe<Scalars['String']>,
+  savedObjectId: Scalars['String'],
+  version: Scalars['String'],
+  favorite?: Maybe<Array<FavoriteTimelineResult>>,
+};
+
+export type ResponseNote = {
+   __typename?: 'ResponseNote',
+  code?: Maybe<Scalars['Float']>,
+  message?: Maybe<Scalars['String']>,
+  note: NoteResult,
+};
+
+export type ResponseNotes = {
+   __typename?: 'ResponseNotes',
+  notes: Array<NoteResult>,
+  totalCount?: Maybe<Scalars['Float']>,
+};
+
+export type ResponseTimeline = {
+   __typename?: 'ResponseTimeline',
+  code?: Maybe<Scalars['Float']>,
+  message?: Maybe<Scalars['String']>,
+  timeline: TimelineResult,
+};
+
+export type ResponseTimelines = {
+   __typename?: 'ResponseTimelines',
+  timeline: Array<Maybe<TimelineResult>>,
+  totalCount?: Maybe<Scalars['Float']>,
+};
+
+export type SayMyName = {
+   __typename?: 'SayMyName',
+  /** The id of the source */
+  appName: Scalars['String'],
+};
+
+export type SerializedFilterQueryInput = {
+  filterQuery?: Maybe<SerializedKueryQueryInput>,
+};
+
+export type SerializedFilterQueryResult = {
+   __typename?: 'SerializedFilterQueryResult',
+  filterQuery?: Maybe<SerializedKueryQueryResult>,
+};
+
+export type SerializedKueryQueryInput = {
+  kuery?: Maybe<KueryFilterQueryInput>,
+  serializedQuery?: Maybe<Scalars['String']>,
+};
+
+export type SerializedKueryQueryResult = {
+   __typename?: 'SerializedKueryQueryResult',
+  kuery?: Maybe<KueryFilterQueryResult>,
+  serializedQuery?: Maybe<Scalars['String']>,
+};
+
+export type SortField = {
+  sortFieldId: Scalars['String'],
+  direction: Direction,
+};
+
+export enum SortFieldNote {
+  UpdatedBy = 'updatedBy',
+  Updated = 'updated'
 }
 
 export enum SortFieldTimeline {
-  title = 'title',
-  description = 'description',
-  updated = 'updated',
-  created = 'created',
+  Title = 'title',
+  Description = 'description',
+  Updated = 'updated',
+  Created = 'created'
 }
 
-// ====================================================
-// END: Typescript template
-// ====================================================
+export type SortNote = {
+  sortField: SortFieldNote,
+  sortOrder: Direction,
+};
 
-// ====================================================
-// Documents
-// ====================================================
+export type SortTimeline = {
+  sortField: SortFieldTimeline,
+  sortOrder: Direction,
+};
 
-export namespace GetAuthenticationsQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
+export type SortTimelineInput = {
+  columnId?: Maybe<Scalars['String']>,
+  sortDirection?: Maybe<Scalars['String']>,
+};
 
-  export type Query = {
-    __typename?: 'Query';
+export type SortTimelineResult = {
+   __typename?: 'SortTimelineResult',
+  columnId?: Maybe<Scalars['String']>,
+  sortDirection?: Maybe<Scalars['String']>,
+};
 
-    source: Source;
-  };
+export type Source = {
+   __typename?: 'Source',
+  /** The id of the source */
+  id: Scalars['ID'],
+  /** The raw configuration of the source */
+  configuration: SourceConfiguration,
+  /** The status of the source */
+  status: SourceStatus,
+};
 
-  export type Source = {
-    __typename?: 'Source';
+/** A set of configuration options for a security data source */
+export type SourceConfiguration = {
+   __typename?: 'SourceConfiguration',
+  /** The field mapping to use for this source */
+  fields: SourceFields,
+};
 
-    id: string;
+export type SourceEcsFields = {
+   __typename?: 'SourceEcsFields',
+  bytes?: Maybe<Scalars['ToNumberArray']>,
+  ip?: Maybe<Scalars['ToStringArray']>,
+  port?: Maybe<Scalars['ToNumberArray']>,
+  domain?: Maybe<Scalars['ToStringArray']>,
+  geo?: Maybe<GeoEcsFields>,
+  packets?: Maybe<Scalars['ToNumberArray']>,
+};
 
-    Authentications: Authentications;
-  };
+/** A mapping of semantic fields to their document counterparts */
+export type SourceFields = {
+   __typename?: 'SourceFields',
+  /** The field to identify a container by */
+  container: Scalars['String'],
+  /** The fields to identify a host by */
+  host: Scalars['String'],
+  /** The fields that may contain the log event message. The first field found win. */
+  message: Array<Scalars['String']>,
+  /** The field to identify a pod by */
+  pod: Scalars['String'],
+  /** The field to use as a tiebreaker for log events that have identical timestamps */
+  tiebreaker: Scalars['String'],
+  /** The field to use as a timestamp for metrics and logs */
+  timestamp: Scalars['String'],
+};
 
-  export type Authentications = {
-    __typename?: 'AuthenticationsData';
+/** The status of an infrastructure data source */
+export type SourceStatus = {
+   __typename?: 'SourceStatus',
+};
 
-    totalCount: number;
+export type SshEcsFields = {
+   __typename?: 'SshEcsFields',
+  method?: Maybe<Scalars['ToStringArray']>,
+  signature?: Maybe<Scalars['ToStringArray']>,
+};
 
-    edges: Edges[];
+export type Summary = {
+   __typename?: 'Summary',
+  actor?: Maybe<PrimarySecondary>,
+  object?: Maybe<PrimarySecondary>,
+  how?: Maybe<Scalars['ToStringArray']>,
+  message_type?: Maybe<Scalars['ToStringArray']>,
+  sequence?: Maybe<Scalars['ToStringArray']>,
+};
 
-    pageInfo: PageInfo;
+export type SuricataAlertData = {
+   __typename?: 'SuricataAlertData',
+  signature?: Maybe<Scalars['ToStringArray']>,
+  signature_id?: Maybe<Scalars['ToNumberArray']>,
+};
 
-    inspect?: Inspect | null;
-  };
+export type SuricataEcsFields = {
+   __typename?: 'SuricataEcsFields',
+  eve?: Maybe<SuricataEveData>,
+};
 
-  export type Edges = {
-    __typename?: 'AuthenticationsEdges';
+export type SuricataEveData = {
+   __typename?: 'SuricataEveData',
+  alert?: Maybe<SuricataAlertData>,
+  flow_id?: Maybe<Scalars['ToNumberArray']>,
+  proto?: Maybe<Scalars['ToStringArray']>,
+};
 
-    node: Node;
+export type SystemEcsField = {
+   __typename?: 'SystemEcsField',
+  audit?: Maybe<AuditEcsFields>,
+  auth?: Maybe<AuthEcsFields>,
+};
 
-    cursor: Cursor;
-  };
+export type Thread = {
+   __typename?: 'Thread',
+  id?: Maybe<Scalars['ToNumberArray']>,
+  start?: Maybe<Scalars['ToStringArray']>,
+};
 
-  export type Node = {
-    __typename?: 'AuthenticationItem';
+export type TimelineData = {
+   __typename?: 'TimelineData',
+  edges: Array<TimelineEdges>,
+  totalCount: Scalars['Float'],
+  pageInfo: PageInfo,
+  inspect?: Maybe<Inspect>,
+};
 
-    _id: string;
+export type TimelineDetailsData = {
+   __typename?: 'TimelineDetailsData',
+  data?: Maybe<Array<DetailItem>>,
+  inspect?: Maybe<Inspect>,
+};
 
-    failures: number;
+export type TimelineEdges = {
+   __typename?: 'TimelineEdges',
+  node: TimelineItem,
+  cursor: CursorType,
+};
 
-    successes: number;
+export type TimelineInput = {
+  columns?: Maybe<Array<ColumnHeaderInput>>,
+  dataProviders?: Maybe<Array<DataProviderInput>>,
+  description?: Maybe<Scalars['String']>,
+  kqlMode?: Maybe<Scalars['String']>,
+  kqlQuery?: Maybe<SerializedFilterQueryInput>,
+  title?: Maybe<Scalars['String']>,
+  dateRange?: Maybe<DateRangePickerInput>,
+  sort?: Maybe<SortTimelineInput>,
+};
 
-    user: User;
+export type TimelineItem = {
+   __typename?: 'TimelineItem',
+  _id: Scalars['String'],
+  _index?: Maybe<Scalars['String']>,
+  data: Array<TimelineNonEcsData>,
+  ecs: Ecs,
+};
 
-    lastSuccess?: LastSuccess | null;
+export type TimelineNonEcsData = {
+   __typename?: 'TimelineNonEcsData',
+  field: Scalars['String'],
+  value?: Maybe<Scalars['ToStringArray']>,
+};
 
-    lastFailure?: LastFailure | null;
-  };
+export type TimelineResult = {
+   __typename?: 'TimelineResult',
+  savedObjectId: Scalars['String'],
+  columns?: Maybe<Array<ColumnHeaderResult>>,
+  dataProviders?: Maybe<Array<DataProviderResult>>,
+  dateRange?: Maybe<DateRangePickerResult>,
+  description?: Maybe<Scalars['String']>,
+  eventIdToNoteIds?: Maybe<Array<NoteResult>>,
+  favorite?: Maybe<Array<FavoriteTimelineResult>>,
+  kqlMode?: Maybe<Scalars['String']>,
+  kqlQuery?: Maybe<SerializedFilterQueryResult>,
+  notes?: Maybe<Array<NoteResult>>,
+  noteIds?: Maybe<Array<Scalars['String']>>,
+  pinnedEventIds?: Maybe<Array<Scalars['String']>>,
+  pinnedEventsSaveObject?: Maybe<Array<PinnedEvent>>,
+  title?: Maybe<Scalars['String']>,
+  sort?: Maybe<SortTimelineResult>,
+  created?: Maybe<Scalars['Float']>,
+  createdBy?: Maybe<Scalars['String']>,
+  updated?: Maybe<Scalars['Float']>,
+  updatedBy?: Maybe<Scalars['String']>,
+  version: Scalars['String'],
+};
 
-  export type User = {
-    __typename?: 'UserEcsFields';
+export type TimerangeInput = {
+  /** 
+ * The interval string to use for last bucket. The format is '{value}{unit}'. For
+   * example '5m' would return the metrics for the last 5 minutes of the timespan.
+ **/
+  interval: Scalars['String'],
+  /** The end of the timerange */
+  to: Scalars['Float'],
+  /** The beginning of the timerange */
+  from: Scalars['Float'],
+};
 
-    name?: ToStringArray | null;
-  };
+export type TlsClientCertificateData = {
+   __typename?: 'TlsClientCertificateData',
+  fingerprint?: Maybe<FingerprintData>,
+};
 
-  export type LastSuccess = {
-    __typename?: 'LastSourceHost';
+export type TlsData = {
+   __typename?: 'TlsData',
+  edges: Array<TlsEdges>,
+  totalCount: Scalars['Float'],
+  pageInfo: PageInfoPaginated,
+  inspect?: Maybe<Inspect>,
+};
 
-    timestamp?: Date | null;
+export type TlsEcsFields = {
+   __typename?: 'TlsEcsFields',
+  client_certificate?: Maybe<TlsClientCertificateData>,
+  fingerprints?: Maybe<TlsFingerprintsData>,
+  server_certificate?: Maybe<TlsServerCertificateData>,
+};
 
-    source?: _Source | null;
+export type TlsEdges = {
+   __typename?: 'TlsEdges',
+  node: TlsNode,
+  cursor: CursorType,
+};
 
-    host?: Host | null;
-  };
-
-  export type _Source = {
-    __typename?: 'SourceEcsFields';
-
-    ip?: ToStringArray | null;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    id?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-  };
-
-  export type LastFailure = {
-    __typename?: 'LastSourceHost';
-
-    timestamp?: Date | null;
-
-    source?: __Source | null;
-
-    host?: _Host | null;
-  };
-
-  export type __Source = {
-    __typename?: 'SourceEcsFields';
-
-    ip?: ToStringArray | null;
-  };
-
-  export type _Host = {
-    __typename?: 'HostEcsFields';
-
-    id?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
+export enum TlsFields {
+  Id = '_id'
 }
 
-export namespace GetDomainsQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: string | null;
-    flowDirection: FlowDirection;
-    flowTarget: FlowTarget;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: DomainsSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
+export type TlsFingerprintsData = {
+   __typename?: 'TlsFingerprintsData',
+  ja3?: Maybe<TlsJa3Data>,
+};
 
-  export type Query = {
-    __typename?: 'Query';
+export type TlsJa3Data = {
+   __typename?: 'TlsJa3Data',
+  hash?: Maybe<Scalars['ToStringArray']>,
+};
 
-    source: Source;
-  };
+export type TlsNode = {
+   __typename?: 'TlsNode',
+  _id?: Maybe<Scalars['String']>,
+  timestamp?: Maybe<Scalars['Date']>,
+  alternativeNames?: Maybe<Array<Scalars['String']>>,
+  notAfter?: Maybe<Array<Scalars['String']>>,
+  commonNames?: Maybe<Array<Scalars['String']>>,
+  ja3?: Maybe<Array<Scalars['String']>>,
+  issuerNames?: Maybe<Array<Scalars['String']>>,
+};
 
-  export type Source = {
-    __typename?: 'Source';
+export type TlsServerCertificateData = {
+   __typename?: 'TlsServerCertificateData',
+  fingerprint?: Maybe<FingerprintData>,
+};
 
-    id: string;
+export type TlsSortField = {
+  field: TlsFields,
+  direction: Direction,
+};
 
-    Domains: Domains;
-  };
 
-  export type Domains = {
-    __typename?: 'DomainsData';
 
-    totalCount: number;
 
-    edges: Edges[];
+export type TopNFlowItemDestination = {
+   __typename?: 'TopNFlowItemDestination',
+  autonomous_system?: Maybe<AutonomousSystemItem>,
+  domain?: Maybe<Array<Scalars['String']>>,
+  ip?: Maybe<Scalars['String']>,
+  location?: Maybe<GeoItem>,
+  flows?: Maybe<Scalars['Float']>,
+  source_ips?: Maybe<Scalars['Float']>,
+};
 
-    pageInfo: PageInfo;
+export type TopNFlowItemSource = {
+   __typename?: 'TopNFlowItemSource',
+  autonomous_system?: Maybe<AutonomousSystemItem>,
+  domain?: Maybe<Array<Scalars['String']>>,
+  ip?: Maybe<Scalars['String']>,
+  location?: Maybe<GeoItem>,
+  flows?: Maybe<Scalars['Float']>,
+  destination_ips?: Maybe<Scalars['Float']>,
+};
 
-    inspect?: Inspect | null;
-  };
+export type TopNFlowNetworkEcsField = {
+   __typename?: 'TopNFlowNetworkEcsField',
+  bytes_in?: Maybe<Scalars['Float']>,
+  bytes_out?: Maybe<Scalars['Float']>,
+};
 
-  export type Edges = {
-    __typename?: 'DomainsEdges';
 
-    node: Node;
+export type UncommonProcessesData = {
+   __typename?: 'UncommonProcessesData',
+  edges: Array<UncommonProcessesEdges>,
+  totalCount: Scalars['Float'],
+  pageInfo: PageInfoPaginated,
+  inspect?: Maybe<Inspect>,
+};
 
-    cursor: Cursor;
-  };
+export type UncommonProcessesEdges = {
+   __typename?: 'UncommonProcessesEdges',
+  node: UncommonProcessItem,
+  cursor: CursorType,
+};
 
-  export type Node = {
-    __typename?: 'DomainsNode';
+export type UncommonProcessItem = {
+   __typename?: 'UncommonProcessItem',
+  _id: Scalars['String'],
+  instances: Scalars['Float'],
+  process: ProcessEcsFields,
+  hosts: Array<HostEcsFields>,
+  user?: Maybe<UserEcsFields>,
+};
 
-    source?: _Source | null;
+export type UrlEcsFields = {
+   __typename?: 'UrlEcsFields',
+  domain?: Maybe<Scalars['ToStringArray']>,
+  original?: Maybe<Scalars['ToStringArray']>,
+  username?: Maybe<Scalars['ToStringArray']>,
+  password?: Maybe<Scalars['ToStringArray']>,
+};
 
-    destination?: Destination | null;
+export type UserEcsFields = {
+   __typename?: 'UserEcsFields',
+  id?: Maybe<Scalars['ToStringArray']>,
+  name?: Maybe<Scalars['ToStringArray']>,
+  full_name?: Maybe<Scalars['ToStringArray']>,
+  email?: Maybe<Scalars['ToStringArray']>,
+  hash?: Maybe<Scalars['ToStringArray']>,
+  group?: Maybe<Scalars['ToStringArray']>,
+};
 
-    network?: Network | null;
-  };
+export type UsersData = {
+   __typename?: 'UsersData',
+  edges: Array<UsersEdges>,
+  totalCount: Scalars['Float'],
+  pageInfo: PageInfoPaginated,
+  inspect?: Maybe<Inspect>,
+};
 
-  export type _Source = {
-    __typename?: 'DomainsItem';
+export type UsersEdges = {
+   __typename?: 'UsersEdges',
+  node: UsersNode,
+  cursor: CursorType,
+};
 
-    uniqueIpCount?: number | null;
-
-    domainName?: string | null;
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
-  };
-
-  export type Destination = {
-    __typename?: 'DomainsItem';
-
-    uniqueIpCount?: number | null;
-
-    domainName?: string | null;
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
-  };
-
-  export type Network = {
-    __typename?: 'DomainsNetworkField';
-
-    bytes?: number | null;
-
-    direction?: NetworkDirectionEcs[] | null;
-
-    packets?: number | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
+export enum UsersFields {
+  Name = 'name',
+  Count = 'count'
 }
 
-export namespace GetEventsOverTimeQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    filterQuery?: string | null;
-    inspect: boolean;
-  };
+export type UsersItem = {
+   __typename?: 'UsersItem',
+  name?: Maybe<Scalars['String']>,
+  id?: Maybe<Scalars['ToStringArray']>,
+  groupId?: Maybe<Scalars['ToStringArray']>,
+  groupName?: Maybe<Scalars['ToStringArray']>,
+  count?: Maybe<Scalars['Float']>,
+};
+
+export type UsersNode = {
+   __typename?: 'UsersNode',
+  _id?: Maybe<Scalars['String']>,
+  timestamp?: Maybe<Scalars['Date']>,
+  user?: Maybe<UsersItem>,
+};
+
+export type UsersSortField = {
+  field: UsersFields,
+  direction: Direction,
+};
+
+export type ZeekConnectionData = {
+   __typename?: 'ZeekConnectionData',
+  local_resp?: Maybe<Scalars['ToBooleanArray']>,
+  local_orig?: Maybe<Scalars['ToBooleanArray']>,
+  missed_bytes?: Maybe<Scalars['ToNumberArray']>,
+  state?: Maybe<Scalars['ToStringArray']>,
+  history?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type ZeekDnsData = {
+   __typename?: 'ZeekDnsData',
+  AA?: Maybe<Scalars['ToBooleanArray']>,
+  qclass_name?: Maybe<Scalars['ToStringArray']>,
+  RD?: Maybe<Scalars['ToBooleanArray']>,
+  qtype_name?: Maybe<Scalars['ToStringArray']>,
+  rejected?: Maybe<Scalars['ToBooleanArray']>,
+  qtype?: Maybe<Scalars['ToStringArray']>,
+  query?: Maybe<Scalars['ToStringArray']>,
+  trans_id?: Maybe<Scalars['ToNumberArray']>,
+  qclass?: Maybe<Scalars['ToStringArray']>,
+  RA?: Maybe<Scalars['ToBooleanArray']>,
+  TC?: Maybe<Scalars['ToBooleanArray']>,
+};
+
+export type ZeekEcsFields = {
+   __typename?: 'ZeekEcsFields',
+  session_id?: Maybe<Scalars['ToStringArray']>,
+  connection?: Maybe<ZeekConnectionData>,
+  notice?: Maybe<ZeekNoticeData>,
+  dns?: Maybe<ZeekDnsData>,
+  http?: Maybe<ZeekHttpData>,
+  files?: Maybe<ZeekFileData>,
+  ssl?: Maybe<ZeekSslData>,
+};
+
+export type ZeekFileData = {
+   __typename?: 'ZeekFileData',
+  session_ids?: Maybe<Scalars['ToStringArray']>,
+  timedout?: Maybe<Scalars['ToBooleanArray']>,
+  local_orig?: Maybe<Scalars['ToBooleanArray']>,
+  tx_host?: Maybe<Scalars['ToStringArray']>,
+  source?: Maybe<Scalars['ToStringArray']>,
+  is_orig?: Maybe<Scalars['ToBooleanArray']>,
+  overflow_bytes?: Maybe<Scalars['ToNumberArray']>,
+  sha1?: Maybe<Scalars['ToStringArray']>,
+  duration?: Maybe<Scalars['ToNumberArray']>,
+  depth?: Maybe<Scalars['ToNumberArray']>,
+  analyzers?: Maybe<Scalars['ToStringArray']>,
+  mime_type?: Maybe<Scalars['ToStringArray']>,
+  rx_host?: Maybe<Scalars['ToStringArray']>,
+  total_bytes?: Maybe<Scalars['ToNumberArray']>,
+  fuid?: Maybe<Scalars['ToStringArray']>,
+  seen_bytes?: Maybe<Scalars['ToNumberArray']>,
+  missing_bytes?: Maybe<Scalars['ToNumberArray']>,
+  md5?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type ZeekHttpData = {
+   __typename?: 'ZeekHttpData',
+  resp_mime_types?: Maybe<Scalars['ToStringArray']>,
+  trans_depth?: Maybe<Scalars['ToStringArray']>,
+  status_msg?: Maybe<Scalars['ToStringArray']>,
+  resp_fuids?: Maybe<Scalars['ToStringArray']>,
+  tags?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type ZeekNoticeData = {
+   __typename?: 'ZeekNoticeData',
+  suppress_for?: Maybe<Scalars['ToNumberArray']>,
+  msg?: Maybe<Scalars['ToStringArray']>,
+  note?: Maybe<Scalars['ToStringArray']>,
+  sub?: Maybe<Scalars['ToStringArray']>,
+  dst?: Maybe<Scalars['ToStringArray']>,
+  dropped?: Maybe<Scalars['ToBooleanArray']>,
+  peer_descr?: Maybe<Scalars['ToStringArray']>,
+};
+
+export type ZeekSslData = {
+   __typename?: 'ZeekSslData',
+  cipher?: Maybe<Scalars['ToStringArray']>,
+  established?: Maybe<Scalars['ToBooleanArray']>,
+  resumed?: Maybe<Scalars['ToBooleanArray']>,
+  version?: Maybe<Scalars['ToStringArray']>,
+};
 
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    EventsOverTime: EventsOverTime;
-  };
-
-  export type EventsOverTime = {
-    __typename?: 'EventsOverTimeData';
-
-    eventsOverTime: _EventsOverTime[];
-
-    totalCount: number;
-
-    inspect?: Inspect | null;
-  };
-
-  export type _EventsOverTime = {
-    __typename?: 'MatrixOverTimeHistogramData';
-
-    x: number;
-
-    y: number;
-
-    g: string;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetLastEventTimeQuery {
-  export type Variables = {
-    sourceId: string;
-    indexKey: LastEventIndexKey;
-    details: LastTimeDetails;
-    defaultIndex: string[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    LastEventTime: LastEventTime;
-  };
-
-  export type LastEventTime = {
-    __typename?: 'LastEventTimeData';
-
-    lastSeen?: Date | null;
-  };
-}
-
-export namespace GetHostFirstLastSeenQuery {
-  export type Variables = {
-    sourceId: string;
-    hostName: string;
-    defaultIndex: string[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    HostFirstLastSeen: HostFirstLastSeen;
-  };
-
-  export type HostFirstLastSeen = {
-    __typename?: 'FirstLastSeenHost';
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
-  };
-}
-
-export namespace GetHostsTableQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    sort: HostsSortField;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Hosts: Hosts;
-  };
-
-  export type Hosts = {
-    __typename?: 'HostsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect?: Inspect | null;
-  };
-
-  export type Edges = {
-    __typename?: 'HostsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'HostItem';
-
-    _id?: string | null;
-
-    lastSeen?: Date | null;
-
-    host?: Host | null;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    id?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    os?: Os | null;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    name?: ToStringArray | null;
-
-    version?: ToStringArray | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetHostOverviewQuery {
-  export type Variables = {
-    sourceId: string;
-    hostName: string;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    HostOverview: HostOverview;
-  };
-
-  export type HostOverview = {
-    __typename?: 'HostItem';
-
-    _id?: string | null;
-
-    host?: Host | null;
-
-    cloud?: Cloud | null;
-
-    inspect?: Inspect | null;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture?: ToStringArray | null;
-
-    id?: ToStringArray | null;
-
-    ip?: ToStringArray | null;
-
-    mac?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    os?: Os | null;
-
-    type?: ToStringArray | null;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    family?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    platform?: ToStringArray | null;
-
-    version?: ToStringArray | null;
-  };
-
-  export type Cloud = {
-    __typename?: 'CloudFields';
-
-    instance?: Instance | null;
-
-    machine?: Machine | null;
-
-    provider?: (string | null)[] | null;
-
-    region?: (string | null)[] | null;
-  };
-
-  export type Instance = {
-    __typename?: 'CloudInstance';
-
-    id?: (string | null)[] | null;
-  };
-
-  export type Machine = {
-    __typename?: 'CloudMachine';
-
-    type?: (string | null)[] | null;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetIpOverviewQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: string | null;
-    ip: string;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    IpOverview?: IpOverview | null;
-  };
-
-  export type IpOverview = {
-    __typename?: 'IpOverviewData';
-
-    source?: _Source | null;
-
-    destination?: Destination | null;
-
-    host: Host;
-
-    inspect?: Inspect | null;
-  };
-
-  export type _Source = {
-    __typename?: 'Overview';
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
-
-    autonomousSystem: AutonomousSystem;
-
-    geo: Geo;
-  };
-
-  export type AutonomousSystem = {
-    __typename?: 'AutonomousSystem';
-
-    number?: number | null;
-
-    organization?: Organization | null;
-  };
-
-  export type Organization = {
-    __typename?: 'AutonomousSystemOrganization';
-
-    name?: string | null;
-  };
-
-  export type Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name?: ToStringArray | null;
-
-    city_name?: ToStringArray | null;
-
-    country_iso_code?: ToStringArray | null;
-
-    country_name?: ToStringArray | null;
-
-    location?: Location | null;
-
-    region_iso_code?: ToStringArray | null;
-
-    region_name?: ToStringArray | null;
-  };
-
-  export type Location = {
-    __typename?: 'Location';
-
-    lat?: ToNumberArray | null;
-
-    lon?: ToNumberArray | null;
-  };
-
-  export type Destination = {
-    __typename?: 'Overview';
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
-
-    autonomousSystem: _AutonomousSystem;
-
-    geo: _Geo;
-  };
-
-  export type _AutonomousSystem = {
-    __typename?: 'AutonomousSystem';
-
-    number?: number | null;
-
-    organization?: _Organization | null;
-  };
-
-  export type _Organization = {
-    __typename?: 'AutonomousSystemOrganization';
-
-    name?: string | null;
-  };
-
-  export type _Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name?: ToStringArray | null;
-
-    city_name?: ToStringArray | null;
-
-    country_iso_code?: ToStringArray | null;
-
-    country_name?: ToStringArray | null;
-
-    location?: _Location | null;
-
-    region_iso_code?: ToStringArray | null;
-
-    region_name?: ToStringArray | null;
-  };
-
-  export type _Location = {
-    __typename?: 'Location';
-
-    lat?: ToNumberArray | null;
-
-    lon?: ToNumberArray | null;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture?: ToStringArray | null;
-
-    id?: ToStringArray | null;
-
-    ip?: ToStringArray | null;
-
-    mac?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    os?: Os | null;
-
-    type?: ToStringArray | null;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    family?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    platform?: ToStringArray | null;
-
-    version?: ToStringArray | null;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetKpiHostDetailsQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    KpiHostDetails: KpiHostDetails;
-  };
-
-  export type KpiHostDetails = {
-    __typename?: 'KpiHostDetailsData';
-
-    authSuccess?: number | null;
-
-    authSuccessHistogram?: AuthSuccessHistogram[] | null;
-
-    authFailure?: number | null;
-
-    authFailureHistogram?: AuthFailureHistogram[] | null;
-
-    uniqueSourceIps?: number | null;
-
-    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogram[] | null;
-
-    uniqueDestinationIps?: number | null;
-
-    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
-
-    inspect?: Inspect | null;
-  };
-
-  export type AuthSuccessHistogram = KpiHostDetailsChartFields.Fragment;
-
-  export type AuthFailureHistogram = KpiHostDetailsChartFields.Fragment;
-
-  export type UniqueSourceIpsHistogram = KpiHostDetailsChartFields.Fragment;
-
-  export type UniqueDestinationIpsHistogram = KpiHostDetailsChartFields.Fragment;
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetKpiHostsQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    KpiHosts: KpiHosts;
-  };
-
-  export type KpiHosts = {
-    __typename?: 'KpiHostsData';
-
-    hosts?: number | null;
-
-    hostsHistogram?: HostsHistogram[] | null;
-
-    authSuccess?: number | null;
-
-    authSuccessHistogram?: AuthSuccessHistogram[] | null;
-
-    authFailure?: number | null;
-
-    authFailureHistogram?: AuthFailureHistogram[] | null;
-
-    uniqueSourceIps?: number | null;
-
-    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogram[] | null;
-
-    uniqueDestinationIps?: number | null;
-
-    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
-
-    inspect?: Inspect | null;
-  };
-
-  export type HostsHistogram = KpiHostChartFields.Fragment;
-
-  export type AuthSuccessHistogram = KpiHostChartFields.Fragment;
-
-  export type AuthFailureHistogram = KpiHostChartFields.Fragment;
-
-  export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
-
-  export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetKpiNetworkQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    KpiNetwork?: KpiNetwork | null;
-  };
-
-  export type KpiNetwork = {
-    __typename?: 'KpiNetworkData';
-
-    networkEvents?: number | null;
-
-    uniqueFlowId?: number | null;
-
-    uniqueSourcePrivateIps?: number | null;
-
-    uniqueSourcePrivateIpsHistogram?: UniqueSourcePrivateIpsHistogram[] | null;
-
-    uniqueDestinationPrivateIps?: number | null;
-
-    uniqueDestinationPrivateIpsHistogram?: UniqueDestinationPrivateIpsHistogram[] | null;
-
-    dnsQueries?: number | null;
-
-    tlsHandshakes?: number | null;
-
-    inspect?: Inspect | null;
-  };
-
-  export type UniqueSourcePrivateIpsHistogram = KpiNetworkChartFields.Fragment;
-
-  export type UniqueDestinationPrivateIpsHistogram = KpiNetworkChartFields.Fragment;
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetNetworkDnsQuery {
-  export type Variables = {
-    sourceId: string;
-    sort: NetworkDnsSortField;
-    isPtrIncluded: boolean;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    NetworkDns: NetworkDns;
-  };
-
-  export type NetworkDns = {
-    __typename?: 'NetworkDnsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect?: Inspect | null;
-  };
-
-  export type Edges = {
-    __typename?: 'NetworkDnsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'NetworkDnsItem';
-
-    _id?: string | null;
-
-    dnsBytesIn?: number | null;
-
-    dnsBytesOut?: number | null;
-
-    dnsName?: string | null;
-
-    queryCount?: number | null;
-
-    uniqueDomains?: number | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetNetworkTopNFlowQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: string | null;
-    pagination: PaginationInputPaginated;
-    sort: NetworkTopNFlowSortField;
-    flowTarget: FlowTargetNew;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    NetworkTopNFlow: NetworkTopNFlow;
-  };
-
-  export type NetworkTopNFlow = {
-    __typename?: 'NetworkTopNFlowData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect?: Inspect | null;
-  };
-
-  export type Edges = {
-    __typename?: 'NetworkTopNFlowEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'NetworkTopNFlowItem';
-
-    source?: _Source | null;
-
-    destination?: Destination | null;
-
-    network?: Network | null;
-  };
-
-  export type _Source = {
-    __typename?: 'TopNFlowItemSource';
-
-    autonomous_system?: AutonomousSystem | null;
-
-    domain?: string[] | null;
-
-    ip?: string | null;
-
-    location?: Location | null;
-
-    flows?: number | null;
-
-    destination_ips?: number | null;
-  };
-
-  export type AutonomousSystem = {
-    __typename?: 'AutonomousSystemItem';
-
-    name?: string | null;
-
-    number?: number | null;
-  };
-
-  export type Location = {
-    __typename?: 'GeoItem';
-
-    geo?: Geo | null;
-
-    flowTarget?: FlowTarget | null;
-  };
-
-  export type Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name?: ToStringArray | null;
-
-    country_name?: ToStringArray | null;
-
-    country_iso_code?: ToStringArray | null;
-
-    city_name?: ToStringArray | null;
-
-    region_iso_code?: ToStringArray | null;
-
-    region_name?: ToStringArray | null;
-  };
-
-  export type Destination = {
-    __typename?: 'TopNFlowItemDestination';
-
-    autonomous_system?: _AutonomousSystem | null;
-
-    domain?: string[] | null;
-
-    ip?: string | null;
-
-    location?: _Location | null;
-
-    flows?: number | null;
-
-    source_ips?: number | null;
-  };
-
-  export type _AutonomousSystem = {
-    __typename?: 'AutonomousSystemItem';
-
-    name?: string | null;
-
-    number?: number | null;
-  };
-
-  export type _Location = {
-    __typename?: 'GeoItem';
-
-    geo?: _Geo | null;
-
-    flowTarget?: FlowTarget | null;
-  };
-
-  export type _Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name?: ToStringArray | null;
-
-    country_name?: ToStringArray | null;
-
-    country_iso_code?: ToStringArray | null;
-
-    city_name?: ToStringArray | null;
-
-    region_iso_code?: ToStringArray | null;
-
-    region_name?: ToStringArray | null;
-  };
-
-  export type Network = {
-    __typename?: 'TopNFlowNetworkEcsField';
-
-    bytes_in?: number | null;
-
-    bytes_out?: number | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetOverviewHostQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    OverviewHost?: OverviewHost | null;
-  };
-
-  export type OverviewHost = {
-    __typename?: 'OverviewHostData';
-
-    auditbeatAuditd?: number | null;
-
-    auditbeatFIM?: number | null;
-
-    auditbeatLogin?: number | null;
-
-    auditbeatPackage?: number | null;
-
-    auditbeatProcess?: number | null;
-
-    auditbeatUser?: number | null;
-
-    filebeatSystemModule?: number | null;
-
-    winlogbeat?: number | null;
-
-    inspect?: Inspect | null;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetOverviewNetworkQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    OverviewNetwork?: OverviewNetwork | null;
-  };
-
-  export type OverviewNetwork = {
-    __typename?: 'OverviewNetworkData';
-
-    auditbeatSocket?: number | null;
-
-    filebeatCisco?: number | null;
-
-    filebeatNetflow?: number | null;
-
-    filebeatPanw?: number | null;
-
-    filebeatSuricata?: number | null;
-
-    filebeatZeek?: number | null;
-
-    packetbeatDNS?: number | null;
-
-    packetbeatFlow?: number | null;
-
-    packetbeatTLS?: number | null;
-
-    inspect?: Inspect | null;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace SourceQuery {
-  export type Variables = {
-    sourceId?: string | null;
-    defaultIndex: string[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    status: Status;
-  };
-
-  export type Status = {
-    __typename?: 'SourceStatus';
-
-    indicesExist: boolean;
-
-    indexFields: IndexFields[];
-  };
-
-  export type IndexFields = {
-    __typename?: 'IndexField';
-
-    category: string;
-
-    description?: string | null;
-
-    example?: string | null;
-
-    indexes: (string | null)[];
-
-    name: string;
-
-    searchable: boolean;
-
-    type: string;
-
-    aggregatable: boolean;
-
-    format?: string | null;
-  };
-}
-
-export namespace GetAllTimeline {
-  export type Variables = {
-    pageInfo: PageInfoTimeline;
-    search?: string | null;
-    sort?: SortTimeline | null;
-    onlyUserFavorite?: boolean | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    getAllTimeline: GetAllTimeline;
-  };
-
-  export type GetAllTimeline = {
-    __typename?: 'ResponseTimelines';
-
-    totalCount?: number | null;
-
-    timeline: (Timeline | null)[];
-  };
-
-  export type Timeline = {
-    __typename?: 'TimelineResult';
-
-    savedObjectId: string;
-
-    description?: string | null;
-
-    favorite?: Favorite[] | null;
-
-    eventIdToNoteIds?: EventIdToNoteIds[] | null;
-
-    notes?: Notes[] | null;
-
-    noteIds?: string[] | null;
-
-    pinnedEventIds?: string[] | null;
-
-    title?: string | null;
-
-    created?: number | null;
-
-    createdBy?: string | null;
-
-    updated?: number | null;
-
-    updatedBy?: string | null;
-
-    version: string;
-  };
-
-  export type Favorite = {
-    __typename?: 'FavoriteTimelineResult';
-
-    fullName?: string | null;
-
-    userName?: string | null;
-
-    favoriteDate?: number | null;
-  };
-
-  export type EventIdToNoteIds = {
-    __typename?: 'NoteResult';
-
-    eventId?: string | null;
-
-    note?: string | null;
-
-    timelineId?: string | null;
-
-    noteId: string;
-
-    created?: number | null;
-
-    createdBy?: string | null;
-
-    timelineVersion?: string | null;
-
-    updated?: number | null;
-
-    updatedBy?: string | null;
-
-    version?: string | null;
-  };
-
-  export type Notes = {
-    __typename?: 'NoteResult';
-
-    eventId?: string | null;
-
-    note?: string | null;
-
-    timelineId?: string | null;
-
-    timelineVersion?: string | null;
-
-    noteId: string;
-
-    created?: number | null;
-
-    createdBy?: string | null;
-
-    updated?: number | null;
-
-    updatedBy?: string | null;
-
-    version?: string | null;
-  };
-}
-
-export namespace DeleteTimelineMutation {
-  export type Variables = {
-    id: string[];
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    deleteTimeline: boolean;
-  };
-}
-
-export namespace GetTimelineDetailsQuery {
-  export type Variables = {
-    sourceId: string;
-    eventId: string;
-    indexName: string;
-    defaultIndex: string[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    TimelineDetails: TimelineDetails;
-  };
-
-  export type TimelineDetails = {
-    __typename?: 'TimelineDetailsData';
-
-    data?: Data[] | null;
-  };
-
-  export type Data = {
-    __typename?: 'DetailItem';
-
-    field: string;
-
-    values?: ToStringArray | null;
-
-    originalValue?: EsValue | null;
-  };
-}
-
-export namespace PersistTimelineFavoriteMutation {
-  export type Variables = {
-    timelineId?: string | null;
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    persistFavorite: PersistFavorite;
-  };
-
-  export type PersistFavorite = {
-    __typename?: 'ResponseFavoriteTimeline';
-
-    savedObjectId: string;
-
-    version: string;
-
-    favorite?: Favorite[] | null;
-  };
-
-  export type Favorite = {
-    __typename?: 'FavoriteTimelineResult';
-
-    fullName?: string | null;
-
-    userName?: string | null;
-
-    favoriteDate?: number | null;
-  };
-}
-
-export namespace GetTimelineQuery {
-  export type Variables = {
-    sourceId: string;
-    fieldRequested: string[];
-    pagination: PaginationInput;
-    sortField: SortField;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Timeline: Timeline;
-  };
-
-  export type Timeline = {
-    __typename?: 'TimelineData';
-
-    totalCount: number;
-
-    inspect?: Inspect | null;
-
-    pageInfo: PageInfo;
-
-    edges: Edges[];
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfo';
-
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
-
-    tiebreaker?: string | null;
-  };
-
-  export type Edges = {
-    __typename?: 'TimelineEdges';
-
-    node: Node;
-  };
-
-  export type Node = {
-    __typename?: 'TimelineItem';
-
-    _id: string;
-
-    _index?: string | null;
-
-    data: Data[];
-
-    ecs: Ecs;
-  };
-
-  export type Data = {
-    __typename?: 'TimelineNonEcsData';
-
-    field: string;
-
-    value?: ToStringArray | null;
-  };
-
-  export type Ecs = {
-    __typename?: 'ECS';
-
-    _id: string;
-
-    _index?: string | null;
-
-    timestamp?: Date | null;
-
-    message?: ToStringArray | null;
-
-    system?: System | null;
-
-    event?: Event | null;
-
-    auditd?: Auditd | null;
-
-    file?: File | null;
-
-    host?: Host | null;
-
-    source?: _Source | null;
-
-    destination?: Destination | null;
-
-    geo?: __Geo | null;
-
-    suricata?: Suricata | null;
-
-    network?: Network | null;
-
-    http?: Http | null;
-
-    tls?: Tls | null;
-
-    url?: Url | null;
-
-    user?: User | null;
-
-    process?: Process | null;
-
-    zeek?: Zeek | null;
-  };
-
-  export type System = {
-    __typename?: 'SystemEcsField';
-
-    auth?: Auth | null;
-
-    audit?: Audit | null;
-  };
-
-  export type Auth = {
-    __typename?: 'AuthEcsFields';
-
-    ssh?: Ssh | null;
-  };
-
-  export type Ssh = {
-    __typename?: 'SshEcsFields';
-
-    signature?: ToStringArray | null;
-
-    method?: ToStringArray | null;
-  };
-
-  export type Audit = {
-    __typename?: 'AuditEcsFields';
-
-    package?: Package | null;
-  };
-
-  export type Package = {
-    __typename?: 'PackageEcsFields';
-
-    arch?: ToStringArray | null;
-
-    entity_id?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    size?: ToNumberArray | null;
-
-    summary?: ToStringArray | null;
-
-    version?: ToStringArray | null;
-  };
-
-  export type Event = {
-    __typename?: 'EventEcsFields';
-
-    action?: ToStringArray | null;
-
-    category?: ToStringArray | null;
-
-    created?: ToDateArray | null;
-
-    dataset?: ToStringArray | null;
-
-    duration?: ToNumberArray | null;
-
-    end?: ToDateArray | null;
-
-    hash?: ToStringArray | null;
-
-    id?: ToStringArray | null;
-
-    kind?: ToStringArray | null;
-
-    module?: ToStringArray | null;
-
-    original?: ToStringArray | null;
-
-    outcome?: ToStringArray | null;
-
-    risk_score?: ToNumberArray | null;
-
-    risk_score_norm?: ToNumberArray | null;
-
-    severity?: ToNumberArray | null;
-
-    start?: ToDateArray | null;
-
-    timezone?: ToStringArray | null;
-
-    type?: ToStringArray | null;
-  };
-
-  export type Auditd = {
-    __typename?: 'AuditdEcsFields';
-
-    result?: ToStringArray | null;
-
-    session?: ToStringArray | null;
-
-    data?: _Data | null;
-
-    summary?: Summary | null;
-  };
-
-  export type _Data = {
-    __typename?: 'AuditdData';
-
-    acct?: ToStringArray | null;
-
-    terminal?: ToStringArray | null;
-
-    op?: ToStringArray | null;
-  };
-
-  export type Summary = {
-    __typename?: 'Summary';
-
-    actor?: Actor | null;
-
-    object?: Object | null;
-
-    how?: ToStringArray | null;
-
-    message_type?: ToStringArray | null;
-
-    sequence?: ToStringArray | null;
-  };
-
-  export type Actor = {
-    __typename?: 'PrimarySecondary';
-
-    primary?: ToStringArray | null;
-
-    secondary?: ToStringArray | null;
-  };
-
-  export type Object = {
-    __typename?: 'PrimarySecondary';
-
-    primary?: ToStringArray | null;
-
-    secondary?: ToStringArray | null;
-
-    type?: ToStringArray | null;
-  };
-
-  export type File = {
-    __typename?: 'FileFields';
-
-    path?: ToStringArray | null;
-
-    target_path?: ToStringArray | null;
-
-    extension?: ToStringArray | null;
-
-    type?: ToStringArray | null;
-
-    device?: ToStringArray | null;
-
-    inode?: ToStringArray | null;
-
-    uid?: ToStringArray | null;
-
-    owner?: ToStringArray | null;
-
-    gid?: ToStringArray | null;
-
-    group?: ToStringArray | null;
-
-    mode?: ToStringArray | null;
-
-    size?: ToNumberArray | null;
-
-    mtime?: ToDateArray | null;
-
-    ctime?: ToDateArray | null;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    id?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-
-    ip?: ToStringArray | null;
-  };
-
-  export type _Source = {
-    __typename?: 'SourceEcsFields';
-
-    bytes?: ToNumberArray | null;
-
-    ip?: ToStringArray | null;
-
-    packets?: ToNumberArray | null;
-
-    port?: ToNumberArray | null;
-
-    geo?: Geo | null;
-  };
-
-  export type Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name?: ToStringArray | null;
-
-    country_name?: ToStringArray | null;
-
-    country_iso_code?: ToStringArray | null;
-
-    city_name?: ToStringArray | null;
-
-    region_iso_code?: ToStringArray | null;
-
-    region_name?: ToStringArray | null;
-  };
-
-  export type Destination = {
-    __typename?: 'DestinationEcsFields';
-
-    bytes?: ToNumberArray | null;
-
-    ip?: ToStringArray | null;
-
-    packets?: ToNumberArray | null;
-
-    port?: ToNumberArray | null;
-
-    geo?: _Geo | null;
-  };
-
-  export type _Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name?: ToStringArray | null;
-
-    country_name?: ToStringArray | null;
-
-    country_iso_code?: ToStringArray | null;
-
-    city_name?: ToStringArray | null;
-
-    region_iso_code?: ToStringArray | null;
-
-    region_name?: ToStringArray | null;
-  };
-
-  export type __Geo = {
-    __typename?: 'GeoEcsFields';
-
-    region_name?: ToStringArray | null;
-
-    country_iso_code?: ToStringArray | null;
-  };
-
-  export type Suricata = {
-    __typename?: 'SuricataEcsFields';
-
-    eve?: Eve | null;
-  };
-
-  export type Eve = {
-    __typename?: 'SuricataEveData';
-
-    proto?: ToStringArray | null;
-
-    flow_id?: ToNumberArray | null;
-
-    alert?: Alert | null;
-  };
-
-  export type Alert = {
-    __typename?: 'SuricataAlertData';
-
-    signature?: ToStringArray | null;
-
-    signature_id?: ToNumberArray | null;
-  };
-
-  export type Network = {
-    __typename?: 'NetworkEcsField';
-
-    bytes?: ToNumberArray | null;
-
-    community_id?: ToStringArray | null;
-
-    direction?: ToStringArray | null;
-
-    packets?: ToNumberArray | null;
-
-    protocol?: ToStringArray | null;
-
-    transport?: ToStringArray | null;
-  };
-
-  export type Http = {
-    __typename?: 'HttpEcsFields';
-
-    version?: ToStringArray | null;
-
-    request?: Request | null;
-
-    response?: Response | null;
-  };
-
-  export type Request = {
-    __typename?: 'HttpRequestData';
-
-    method?: ToStringArray | null;
-
-    body?: Body | null;
-
-    referrer?: ToStringArray | null;
-  };
-
-  export type Body = {
-    __typename?: 'HttpBodyData';
-
-    bytes?: ToNumberArray | null;
-
-    content?: ToStringArray | null;
-  };
-
-  export type Response = {
-    __typename?: 'HttpResponseData';
-
-    status_code?: ToNumberArray | null;
-
-    body?: _Body | null;
-  };
-
-  export type _Body = {
-    __typename?: 'HttpBodyData';
-
-    bytes?: ToNumberArray | null;
-
-    content?: ToStringArray | null;
-  };
-
-  export type Tls = {
-    __typename?: 'TlsEcsFields';
-
-    client_certificate?: ClientCertificate | null;
-
-    fingerprints?: Fingerprints | null;
-
-    server_certificate?: ServerCertificate | null;
-  };
-
-  export type ClientCertificate = {
-    __typename?: 'TlsClientCertificateData';
-
-    fingerprint?: Fingerprint | null;
-  };
-
-  export type Fingerprint = {
-    __typename?: 'FingerprintData';
-
-    sha1?: ToStringArray | null;
-  };
-
-  export type Fingerprints = {
-    __typename?: 'TlsFingerprintsData';
-
-    ja3?: Ja3 | null;
-  };
-
-  export type Ja3 = {
-    __typename?: 'TlsJa3Data';
-
-    hash?: ToStringArray | null;
-  };
-
-  export type ServerCertificate = {
-    __typename?: 'TlsServerCertificateData';
-
-    fingerprint?: _Fingerprint | null;
-  };
-
-  export type _Fingerprint = {
-    __typename?: 'FingerprintData';
-
-    sha1?: ToStringArray | null;
-  };
-
-  export type Url = {
-    __typename?: 'UrlEcsFields';
-
-    original?: ToStringArray | null;
-
-    domain?: ToStringArray | null;
-
-    username?: ToStringArray | null;
-
-    password?: ToStringArray | null;
-  };
-
-  export type User = {
-    __typename?: 'UserEcsFields';
-
-    name?: ToStringArray | null;
-  };
-
-  export type Process = {
-    __typename?: 'ProcessEcsFields';
-
-    pid?: ToNumberArray | null;
-
-    name?: ToStringArray | null;
-
-    ppid?: ToNumberArray | null;
-
-    args?: ToStringArray | null;
-
-    executable?: ToStringArray | null;
-
-    title?: ToStringArray | null;
-
-    working_directory?: ToStringArray | null;
-  };
-
-  export type Zeek = {
-    __typename?: 'ZeekEcsFields';
-
-    session_id?: ToStringArray | null;
-
-    connection?: Connection | null;
-
-    notice?: Notice | null;
-
-    dns?: Dns | null;
-
-    http?: _Http | null;
-
-    files?: Files | null;
-
-    ssl?: Ssl | null;
-  };
-
-  export type Connection = {
-    __typename?: 'ZeekConnectionData';
-
-    local_resp?: ToBooleanArray | null;
-
-    local_orig?: ToBooleanArray | null;
-
-    missed_bytes?: ToNumberArray | null;
-
-    state?: ToStringArray | null;
-
-    history?: ToStringArray | null;
-  };
-
-  export type Notice = {
-    __typename?: 'ZeekNoticeData';
-
-    suppress_for?: ToNumberArray | null;
-
-    msg?: ToStringArray | null;
-
-    note?: ToStringArray | null;
-
-    sub?: ToStringArray | null;
-
-    dst?: ToStringArray | null;
-
-    dropped?: ToBooleanArray | null;
-
-    peer_descr?: ToStringArray | null;
-  };
-
-  export type Dns = {
-    __typename?: 'ZeekDnsData';
-
-    AA?: ToBooleanArray | null;
-
-    qclass_name?: ToStringArray | null;
-
-    RD?: ToBooleanArray | null;
-
-    qtype_name?: ToStringArray | null;
-
-    rejected?: ToBooleanArray | null;
-
-    qtype?: ToStringArray | null;
-
-    query?: ToStringArray | null;
-
-    trans_id?: ToNumberArray | null;
-
-    qclass?: ToStringArray | null;
-
-    RA?: ToBooleanArray | null;
-
-    TC?: ToBooleanArray | null;
-  };
-
-  export type _Http = {
-    __typename?: 'ZeekHttpData';
-
-    resp_mime_types?: ToStringArray | null;
-
-    trans_depth?: ToStringArray | null;
-
-    status_msg?: ToStringArray | null;
-
-    resp_fuids?: ToStringArray | null;
-
-    tags?: ToStringArray | null;
-  };
-
-  export type Files = {
-    __typename?: 'ZeekFileData';
-
-    session_ids?: ToStringArray | null;
-
-    timedout?: ToBooleanArray | null;
-
-    local_orig?: ToBooleanArray | null;
-
-    tx_host?: ToStringArray | null;
-
-    source?: ToStringArray | null;
-
-    is_orig?: ToBooleanArray | null;
-
-    overflow_bytes?: ToNumberArray | null;
-
-    sha1?: ToStringArray | null;
-
-    duration?: ToNumberArray | null;
-
-    depth?: ToNumberArray | null;
-
-    analyzers?: ToStringArray | null;
-
-    mime_type?: ToStringArray | null;
-
-    rx_host?: ToStringArray | null;
-
-    total_bytes?: ToNumberArray | null;
-
-    fuid?: ToStringArray | null;
-
-    seen_bytes?: ToNumberArray | null;
-
-    missing_bytes?: ToNumberArray | null;
-
-    md5?: ToStringArray | null;
-  };
-
-  export type Ssl = {
-    __typename?: 'ZeekSslData';
-
-    cipher?: ToStringArray | null;
-
-    established?: ToBooleanArray | null;
-
-    resumed?: ToBooleanArray | null;
-
-    version?: ToStringArray | null;
-  };
-}
-
-export namespace PersistTimelineNoteMutation {
-  export type Variables = {
-    noteId?: string | null;
-    version?: string | null;
-    note: NoteInput;
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    persistNote: PersistNote;
-  };
-
-  export type PersistNote = {
-    __typename?: 'ResponseNote';
-
-    code?: number | null;
-
-    message?: string | null;
-
-    note: Note;
-  };
-
-  export type Note = {
-    __typename?: 'NoteResult';
-
-    eventId?: string | null;
-
-    note?: string | null;
-
-    timelineId?: string | null;
-
-    timelineVersion?: string | null;
-
-    noteId: string;
-
-    created?: number | null;
-
-    createdBy?: string | null;
-
-    updated?: number | null;
-
-    updatedBy?: string | null;
-
-    version?: string | null;
-  };
-}
-
-export namespace GetOneTimeline {
-  export type Variables = {
-    id: string;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    getOneTimeline: GetOneTimeline;
-  };
-
-  export type GetOneTimeline = {
-    __typename?: 'TimelineResult';
-
-    savedObjectId: string;
-
-    columns?: Columns[] | null;
-
-    dataProviders?: DataProviders[] | null;
-
-    dateRange?: DateRange | null;
-
-    description?: string | null;
-
-    eventIdToNoteIds?: EventIdToNoteIds[] | null;
-
-    favorite?: Favorite[] | null;
-
-    kqlMode?: string | null;
-
-    kqlQuery?: KqlQuery | null;
-
-    notes?: Notes[] | null;
-
-    noteIds?: string[] | null;
-
-    pinnedEventIds?: string[] | null;
-
-    pinnedEventsSaveObject?: PinnedEventsSaveObject[] | null;
-
-    title?: string | null;
-
-    sort?: Sort | null;
-
-    created?: number | null;
-
-    createdBy?: string | null;
-
-    updated?: number | null;
-
-    updatedBy?: string | null;
-
-    version: string;
-  };
-
-  export type Columns = {
-    __typename?: 'ColumnHeaderResult';
-
-    aggregatable?: boolean | null;
-
-    category?: string | null;
-
-    columnHeaderType?: string | null;
-
-    description?: string | null;
-
-    example?: string | null;
-
-    indexes?: string[] | null;
-
-    id?: string | null;
-
-    name?: string | null;
-
-    searchable?: boolean | null;
-
-    type?: string | null;
-  };
-
-  export type DataProviders = {
-    __typename?: 'DataProviderResult';
-
-    id?: string | null;
-
-    name?: string | null;
-
-    enabled?: boolean | null;
-
-    excluded?: boolean | null;
-
-    kqlQuery?: string | null;
-
-    queryMatch?: QueryMatch | null;
-
-    and?: And[] | null;
-  };
-
-  export type QueryMatch = {
-    __typename?: 'QueryMatchResult';
-
-    field?: string | null;
-
-    displayField?: string | null;
-
-    value?: string | null;
-
-    displayValue?: string | null;
-
-    operator?: string | null;
-  };
-
-  export type And = {
-    __typename?: 'DataProviderResult';
-
-    id?: string | null;
-
-    name?: string | null;
-
-    enabled?: boolean | null;
-
-    excluded?: boolean | null;
-
-    kqlQuery?: string | null;
-
-    queryMatch?: _QueryMatch | null;
-  };
-
-  export type _QueryMatch = {
-    __typename?: 'QueryMatchResult';
-
-    field?: string | null;
-
-    displayField?: string | null;
-
-    value?: string | null;
-
-    displayValue?: string | null;
-
-    operator?: string | null;
-  };
-
-  export type DateRange = {
-    __typename?: 'DateRangePickerResult';
-
-    start?: number | null;
-
-    end?: number | null;
-  };
-
-  export type EventIdToNoteIds = {
-    __typename?: 'NoteResult';
-
-    eventId?: string | null;
-
-    note?: string | null;
-
-    timelineId?: string | null;
-
-    noteId: string;
-
-    created?: number | null;
-
-    createdBy?: string | null;
-
-    timelineVersion?: string | null;
-
-    updated?: number | null;
-
-    updatedBy?: string | null;
-
-    version?: string | null;
-  };
-
-  export type Favorite = {
-    __typename?: 'FavoriteTimelineResult';
-
-    fullName?: string | null;
-
-    userName?: string | null;
-
-    favoriteDate?: number | null;
-  };
-
-  export type KqlQuery = {
-    __typename?: 'SerializedFilterQueryResult';
-
-    filterQuery?: FilterQuery | null;
-  };
-
-  export type FilterQuery = {
-    __typename?: 'SerializedKueryQueryResult';
-
-    kuery?: Kuery | null;
-
-    serializedQuery?: string | null;
-  };
-
-  export type Kuery = {
-    __typename?: 'KueryFilterQueryResult';
-
-    kind?: string | null;
-
-    expression?: string | null;
-  };
-
-  export type Notes = {
-    __typename?: 'NoteResult';
-
-    eventId?: string | null;
-
-    note?: string | null;
-
-    timelineId?: string | null;
-
-    timelineVersion?: string | null;
-
-    noteId: string;
-
-    created?: number | null;
-
-    createdBy?: string | null;
-
-    updated?: number | null;
-
-    updatedBy?: string | null;
-
-    version?: string | null;
-  };
-
-  export type PinnedEventsSaveObject = {
-    __typename?: 'PinnedEvent';
-
-    pinnedEventId: string;
-
-    eventId?: string | null;
-
-    timelineId?: string | null;
-
-    created?: number | null;
-
-    createdBy?: string | null;
-
-    updated?: number | null;
-
-    updatedBy?: string | null;
-
-    version?: string | null;
-  };
-
-  export type Sort = {
-    __typename?: 'SortTimelineResult';
-
-    columnId?: string | null;
-
-    sortDirection?: string | null;
-  };
-}
-
-export namespace PersistTimelineMutation {
-  export type Variables = {
-    timelineId?: string | null;
-    version?: string | null;
-    timeline: TimelineInput;
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    persistTimeline: PersistTimeline;
-  };
-
-  export type PersistTimeline = {
-    __typename?: 'ResponseTimeline';
-
-    code?: number | null;
-
-    message?: string | null;
-
-    timeline: Timeline;
-  };
-
-  export type Timeline = {
-    __typename?: 'TimelineResult';
-
-    savedObjectId: string;
-
-    version: string;
-
-    columns?: Columns[] | null;
-
-    dataProviders?: DataProviders[] | null;
-
-    description?: string | null;
-
-    favorite?: Favorite[] | null;
-
-    kqlMode?: string | null;
-
-    kqlQuery?: KqlQuery | null;
-
-    title?: string | null;
-
-    dateRange?: DateRange | null;
-
-    sort?: Sort | null;
-
-    created?: number | null;
-
-    createdBy?: string | null;
-
-    updated?: number | null;
-
-    updatedBy?: string | null;
-  };
-
-  export type Columns = {
-    __typename?: 'ColumnHeaderResult';
-
-    aggregatable?: boolean | null;
-
-    category?: string | null;
-
-    columnHeaderType?: string | null;
-
-    description?: string | null;
-
-    example?: string | null;
-
-    indexes?: string[] | null;
-
-    id?: string | null;
-
-    name?: string | null;
-
-    searchable?: boolean | null;
-
-    type?: string | null;
-  };
-
-  export type DataProviders = {
-    __typename?: 'DataProviderResult';
-
-    id?: string | null;
-
-    name?: string | null;
-
-    enabled?: boolean | null;
-
-    excluded?: boolean | null;
-
-    kqlQuery?: string | null;
-
-    queryMatch?: QueryMatch | null;
-
-    and?: And[] | null;
-  };
-
-  export type QueryMatch = {
-    __typename?: 'QueryMatchResult';
-
-    field?: string | null;
-
-    displayField?: string | null;
-
-    value?: string | null;
-
-    displayValue?: string | null;
-
-    operator?: string | null;
-  };
-
-  export type And = {
-    __typename?: 'DataProviderResult';
-
-    id?: string | null;
-
-    name?: string | null;
-
-    enabled?: boolean | null;
-
-    excluded?: boolean | null;
-
-    kqlQuery?: string | null;
-
-    queryMatch?: _QueryMatch | null;
-  };
-
-  export type _QueryMatch = {
-    __typename?: 'QueryMatchResult';
-
-    field?: string | null;
-
-    displayField?: string | null;
-
-    value?: string | null;
-
-    displayValue?: string | null;
-
-    operator?: string | null;
-  };
-
-  export type Favorite = {
-    __typename?: 'FavoriteTimelineResult';
-
-    fullName?: string | null;
-
-    userName?: string | null;
-
-    favoriteDate?: number | null;
-  };
-
-  export type KqlQuery = {
-    __typename?: 'SerializedFilterQueryResult';
-
-    filterQuery?: FilterQuery | null;
-  };
-
-  export type FilterQuery = {
-    __typename?: 'SerializedKueryQueryResult';
-
-    kuery?: Kuery | null;
-
-    serializedQuery?: string | null;
-  };
-
-  export type Kuery = {
-    __typename?: 'KueryFilterQueryResult';
-
-    kind?: string | null;
-
-    expression?: string | null;
-  };
-
-  export type DateRange = {
-    __typename?: 'DateRangePickerResult';
-
-    start?: number | null;
-
-    end?: number | null;
-  };
-
-  export type Sort = {
-    __typename?: 'SortTimelineResult';
-
-    columnId?: string | null;
-
-    sortDirection?: string | null;
-  };
-}
-
-export namespace PersistTimelinePinnedEventMutation {
-  export type Variables = {
-    pinnedEventId?: string | null;
-    eventId: string;
-    timelineId?: string | null;
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    persistPinnedEventOnTimeline?: PersistPinnedEventOnTimeline | null;
-  };
-
-  export type PersistPinnedEventOnTimeline = {
-    __typename?: 'PinnedEvent';
-
-    pinnedEventId: string;
-
-    eventId?: string | null;
-
-    timelineId?: string | null;
-
-    timelineVersion?: string | null;
-
-    created?: number | null;
-
-    createdBy?: string | null;
-
-    updated?: number | null;
-
-    updatedBy?: string | null;
-
-    version?: string | null;
-  };
-}
-
-export namespace GetTlsQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: string | null;
-    flowTarget: FlowTarget;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: TlsSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Tls: Tls;
-  };
-
-  export type Tls = {
-    __typename?: 'TlsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect?: Inspect | null;
-  };
-
-  export type Edges = {
-    __typename?: 'TlsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'TlsNode';
-
-    _id?: string | null;
-
-    alternativeNames?: string[] | null;
-
-    commonNames?: string[] | null;
-
-    ja3?: string[] | null;
-
-    issuerNames?: string[] | null;
-
-    notAfter?: string[] | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetUncommonProcessesQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    filterQuery?: string | null;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    UncommonProcesses: UncommonProcesses;
-  };
-
-  export type UncommonProcesses = {
-    __typename?: 'UncommonProcessesData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect?: Inspect | null;
-  };
-
-  export type Edges = {
-    __typename?: 'UncommonProcessesEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'UncommonProcessItem';
-
-    _id: string;
-
-    instances: number;
-
-    process: Process;
-
-    user?: User | null;
-
-    hosts: Hosts[];
-  };
-
-  export type Process = {
-    __typename?: 'ProcessEcsFields';
-
-    args?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-  };
-
-  export type User = {
-    __typename?: 'UserEcsFields';
-
-    id?: ToStringArray | null;
-
-    name?: ToStringArray | null;
-  };
-
-  export type Hosts = {
-    __typename?: 'HostEcsFields';
-
-    name?: ToStringArray | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetUsersQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: string | null;
-    flowTarget: FlowTarget;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: UsersSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Users: Users;
-  };
-
-  export type Users = {
-    __typename?: 'UsersData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect?: Inspect | null;
-  };
-
-  export type Edges = {
-    __typename?: 'UsersEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'UsersNode';
-
-    user?: User | null;
-  };
-
-  export type User = {
-    __typename?: 'UsersItem';
-
-    name?: string | null;
-
-    id?: ToStringArray | null;
-
-    groupId?: ToStringArray | null;
-
-    groupName?: ToStringArray | null;
-
-    count?: number | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace KpiHostDetailsChartFields {
-  export type Fragment = {
-    __typename?: 'KpiHostHistogramData';
-
-    x?: number | null;
-
-    y?: number | null;
-  };
-}
-
-export namespace KpiHostChartFields {
-  export type Fragment = {
-    __typename?: 'KpiHostHistogramData';
-
-    x?: number | null;
-
-    y?: number | null;
-  };
-}
-
-export namespace KpiNetworkChartFields {
-  export type Fragment = {
-    __typename?: 'KpiNetworkHistogramData';
-
-    x?: number | null;
-
-    y?: number | null;
-  };
-}
