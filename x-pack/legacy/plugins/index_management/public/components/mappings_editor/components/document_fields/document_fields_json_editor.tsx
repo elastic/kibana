@@ -6,8 +6,8 @@
 
 import React, { useRef } from 'react';
 
-import { useDispatch } from '../mappings_state';
-import { JsonEditor } from '../../json_editor';
+import { useDispatch } from '../../mappings_state';
+import { JsonEditor } from '../../../json_editor';
 
 export interface Props {
   defaultValue: object;

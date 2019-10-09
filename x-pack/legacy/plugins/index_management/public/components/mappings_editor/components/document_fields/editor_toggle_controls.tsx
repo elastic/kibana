@@ -7,15 +7,15 @@
 import React from 'react';
 import { EuiButton, EuiText } from '@elastic/eui';
 
-import { useDispatch, useState } from '../mappings_state';
-import { FieldsEditor } from '../types';
-import { canUseMappingsEditor, normalize } from '../lib';
+import { useDispatch, useState } from '../../mappings_state';
+import { FieldsEditor } from '../../types';
+import { canUseMappingsEditor, normalize } from '../../lib';
 
 interface Props {
   editor: FieldsEditor;
 }
 
-/* TODO: Review toggle controls */
+/* TODO: Review toggle controls UI */
 export const EditorToggleControls = ({ editor }: Props) => {
   const dispatch = useDispatch();
   const state = useState();
