@@ -48,20 +48,14 @@ export function checkViewOrCreateJobs(
         // eslint-disable-next-line no-console
         console.log(`Error checking whether jobs in module ${moduleId} exists`, err);
         toastNotifications.addWarning({
-          title: i18n.translate(
-            'xpack.ml.newJob.simple.recognize.moduleCheckJobsExistWarningTitle',
-            {
-              defaultMessage: 'Error checking module {moduleId}',
-              values: { moduleId },
-            }
-          ),
-          text: i18n.translate(
-            'xpack.ml.newJob.simple.recognize.moduleCheckJobsExistWarningDescription',
-            {
-              defaultMessage:
-                'An error occurred trying to check whether the jobs in the module have been created.',
-            }
-          ),
+          title: i18n.translate('xpack.ml.newJob.recognize.moduleCheckJobsExistWarningTitle', {
+            defaultMessage: 'Error checking module {moduleId}',
+            values: { moduleId },
+          }),
+          text: i18n.translate('xpack.ml.newJob.recognize.moduleCheckJobsExistWarningDescription', {
+            defaultMessage:
+              'An error occurred trying to check whether the jobs in the module have been created.',
+          }),
         });
 
         kbnUrl.redirect(`/jobs`);

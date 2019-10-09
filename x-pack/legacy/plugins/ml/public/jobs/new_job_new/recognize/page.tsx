@@ -82,11 +82,11 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   } = useKibanaContext();
   const pageTitle =
     savedSearch.id !== undefined
-      ? i18n.translate('xpack.ml.newJob.simple.recognize.savedSearchPageTitle', {
+      ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
           defaultMessage: 'saved search {savedSearchTitle}',
           values: { savedSearchTitle: savedSearch.title },
         })
-      : i18n.translate('xpack.ml.newJob.simple.recognize.indexPatternPageTitle', {
+      : i18n.translate('xpack.ml.newJob.recognize.indexPatternPageTitle', {
           defaultMessage: 'index pattern {indexPatternTitle}',
           values: { indexPatternTitle: indexPattern.title },
         });
@@ -193,20 +193,17 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       // eslint-disable-next-line no-console
       console.error('Error setting up module', e);
       toastNotifications.addDanger({
-        title: i18n.translate('xpack.ml.newJob.simple.recognize.moduleSetupFailedWarningTitle', {
+        title: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningTitle', {
           defaultMessage: 'Error setting up module {moduleId}',
           values: { moduleId },
         }),
-        text: i18n.translate(
-          'xpack.ml.newJob.simple.recognize.moduleSetupFailedWarningDescription',
-          {
-            defaultMessage:
-              'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
-            values: {
-              count: jobs.length,
-            },
-          }
-        ),
+        text: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningDescription', {
+          defaultMessage:
+            'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
+          values: {
+            count: jobs.length,
+          },
+        }),
       });
     }
   };
@@ -221,7 +218,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             <EuiTitle size="l">
               <h3>
                 <FormattedMessage
-                  id="xpack.ml.newJob.simple.recognize.newJobFromTitle"
+                  id="xpack.ml.newJob.recognize.newJobFromTitle"
                   defaultMessage="New job from {pageTitle}"
                   values={{ pageTitle }}
                 />
@@ -235,7 +232,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.ml.newJob.simple.recognize.searchWillBeOverwrittenLabel"
+                  id="xpack.ml.newJob.recognize.searchWillBeOverwrittenLabel"
                   defaultMessage="Search will be overwritten"
                 />
               }
@@ -244,7 +241,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             >
               <EuiText size="s">
                 <FormattedMessage
-                  id="xpack.ml.newJob.simple.recognize.usingSavedSearchDescription"
+                  id="xpack.ml.newJob.recognize.usingSavedSearchDescription"
                   defaultMessage="Using a saved search will mean the query used in the datafeeds will be different from the default ones we supply in the {moduleId} module."
                   values={{ moduleId }}
                 />
@@ -260,7 +257,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
               <EuiTitle size="s">
                 <h4>
                   <FormattedMessage
-                    id="xpack.ml.newJob.simple.recognize.jobSettingsTitle"
+                    id="xpack.ml.newJob.recognize.jobSettingsTitle"
                     defaultMessage="Job settings"
                   />
                 </h4>

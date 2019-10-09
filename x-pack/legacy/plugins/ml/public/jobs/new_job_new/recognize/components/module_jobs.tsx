@@ -33,7 +33,7 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) 
     <>
       <EuiTitle size="s">
         <h4>
-          <FormattedMessage id="xpack.ml.newJob.simple.recognize.jobsTitle" defaultMessage="Jobs" />
+          <FormattedMessage id="xpack.ml.newJob.recognize.jobsTitle" defaultMessage="Jobs" />
         </h4>
       </EuiTitle>
 
@@ -45,16 +45,13 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) 
             <EuiFlexGroup justifyContent="spaceAround" responsive={false} gutterSize="s">
               <EuiFlexItem grow={1}>
                 <EuiText size="s" textAlign="center">
-                  <FormattedMessage
-                    id="xpack.ml.newJob.simple.recognize.jobLabel"
-                    defaultMessage="Job"
-                  />
+                  <FormattedMessage id="xpack.ml.newJob.recognize.jobLabel" defaultMessage="Job" />
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={1}>
                 <EuiText size="s" textAlign="center">
                   <FormattedMessage
-                    id="xpack.ml.newJob.simple.recognize.datafeedLabel"
+                    id="xpack.ml.newJob.recognize.datafeedLabel"
                     defaultMessage="Datafeed"
                   />
                 </EuiText>
@@ -62,7 +59,7 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) 
               <EuiFlexItem grow={1}>
                 <EuiText size="s" textAlign="center">
                   <FormattedMessage
-                    id="xpack.ml.newJob.simple.recognize.runningLabel"
+                    id="xpack.ml.newJob.recognize.runningLabel"
                     defaultMessage="Running"
                   />
                 </EuiText>
@@ -119,18 +116,12 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) 
                         size="m"
                         aria-label={
                           setupResult.success
-                            ? i18n.translate(
-                                'xpack.ml.newJob.simple.recognize.job.savedAriaLabel',
-                                {
-                                  defaultMessage: 'Saved',
-                                }
-                              )
-                            : i18n.translate(
-                                'xpack.ml.newJob.simple.recognize.job.saveFailedAriaLabel',
-                                {
-                                  defaultMessage: 'Save failed',
-                                }
-                              )
+                            ? i18n.translate('xpack.ml.newJob.recognize.job.savedAriaLabel', {
+                                defaultMessage: 'Saved',
+                              })
+                            : i18n.translate('xpack.ml.newJob.recognize.job.saveFailedAriaLabel', {
+                                defaultMessage: 'Save failed',
+                              })
                         }
                       />
                     </EuiFlexItem>
@@ -142,14 +133,11 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) 
                         size="m"
                         aria-label={
                           setupResult.success
-                            ? i18n.translate(
-                                'xpack.ml.newJob.simple.recognize.datafeed.savedAriaLabel',
-                                {
-                                  defaultMessage: 'Saved',
-                                }
-                              )
+                            ? i18n.translate('xpack.ml.newJob.recognize.datafeed.savedAriaLabel', {
+                                defaultMessage: 'Saved',
+                              })
                             : i18n.translate(
-                                'xpack.ml.newJob.simple.recognize.datafeed.saveFailedAriaLabel',
+                                'xpack.ml.newJob.recognize.datafeed.saveFailedAriaLabel',
                                 {
                                   defaultMessage: 'Save failed',
                                 }
@@ -165,14 +153,11 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) 
                         size="m"
                         aria-label={
                           setupResult.success
-                            ? i18n.translate(
-                                'xpack.ml.newJob.simple.recognize.running.startedAriaLabel',
-                                {
-                                  defaultMessage: 'Started',
-                                }
-                              )
+                            ? i18n.translate('xpack.ml.newJob.recognize.running.startedAriaLabel', {
+                                defaultMessage: 'Started',
+                              })
                             : i18n.translate(
-                                'xpack.ml.newJob.simple.recognize.running.startFailedAriaLabel',
+                                'xpack.ml.newJob.recognize.running.startFailedAriaLabel',
                                 {
                                   defaultMessage: 'Start failed',
                                 }

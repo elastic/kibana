@@ -27,7 +27,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.jobsCreatedTitle"
+                id="xpack.ml.newJob.recognize.jobsCreatedTitle"
                 defaultMessage="Jobs created"
               />
             }
@@ -39,7 +39,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.jobsCreationFailed.saveFailedAriaLabel"
+                id="xpack.ml.newJob.recognize.jobsCreationFailed.saveFailedAriaLabel"
                 defaultMessage="Save failed"
               />
             }
@@ -51,14 +51,14 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.someJobsCreationFailedTitle"
+                id="xpack.ml.newJob.recognize.someJobsCreationFailedTitle"
                 defaultMessage="Some jobs failed to be created"
               />
             }
             color="warning"
             iconType="alert"
             aria-label={i18n.translate(
-              'xpack.ml.newJob.simple.recognize.someJobsCreationFailed.saveFailedAriaLabel',
+              'xpack.ml.newJob.recognize.someJobsCreationFailed.saveFailedAriaLabel',
               { defaultMessage: 'Save failed' }
             )}
           />
@@ -71,13 +71,13 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
                 color="primary"
                 fill={false}
                 aria-label={i18n.translate(
-                  'xpack.ml.newJi18n(ob.simple.recognize.jobsCreationFailed.resetButtonAriaLabel',
+                  'xpack.ml.newJi18n(ob.recognize.jobsCreationFailed.resetButtonAriaLabel',
                   { defaultMessage: 'Reset' }
                 )}
                 onClick={onReset}
               >
                 <FormattedMessage
-                  id="xpack.ml.newJob.simple.recognize.someJobsCreationFailed.resetButtonLabel"
+                  id="xpack.ml.newJob.recognize.someJobsCreationFailed.resetButtonLabel"
                   defaultMessage="Reset"
                 />
               </EuiButton>
@@ -89,15 +89,12 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
                 color="primary"
                 fill={true}
                 href={resultsUrl}
-                aria-label={i18n.translate(
-                  'xpack.ml.newJob.simple.recognize.viewResultsAriaLabel',
-                  {
-                    defaultMessage: 'View Results',
-                  }
-                )}
+                aria-label={i18n.translate('xpack.ml.newJob.recognize.viewResultsAriaLabel', {
+                  defaultMessage: 'View Results',
+                })}
               >
                 <FormattedMessage
-                  id="xpack.ml.newJob.simple.recognize.viewResultsLinkText"
+                  id="xpack.ml.newJob.recognize.viewResultsLinkText"
                   defaultMessage="View Results"
                 />
               </EuiButton>

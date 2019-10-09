@@ -115,7 +115,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           title={
             <h4>
               <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.jobIdPrefixLabel"
+                id="xpack.ml.newJob.recognize.jobIdPrefixLabel"
                 defaultMessage="Job ID prefix"
               />
             </h4>
@@ -130,7 +130,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.jobIdPrefixLabel"
+                id="xpack.ml.newJob.recognize.jobIdPrefixLabel"
                 defaultMessage="Job ID prefix"
               />
             }
@@ -141,7 +141,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
                 {validationResult.jobPrefix && validationResult.jobPrefix.maxLength ? (
                   <div>
                     <FormattedMessage
-                      id="xpack.ml.newJob.simple.recognize.jobPrefixInvalidMaxLengthErrorMessage"
+                      id="xpack.ml.newJob.recognize.jobPrefixInvalidMaxLengthErrorMessage"
                       defaultMessage="Job ID prefix must be no more than {maxLength, plural, one {# character} other {# characters}} long."
                       values={{
                         maxLength: validationResult.jobPrefix.maxLength.requiredLength,
@@ -152,7 +152,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
                 {validationResult.jobPrefix && validationResult.jobPrefix.pattern && (
                   <div>
                     <FormattedMessage
-                      id="xpack.ml.newJob.simple.recognize.jobLabelAllowedCharactersDescription"
+                      id="xpack.ml.newJob.recognize.jobLabelAllowedCharactersDescription"
                       defaultMessage="Job label can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
                     />
                   </div>
@@ -181,7 +181,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             valid: !validationResult.jobGroups || validationResult.jobGroups.length === 0,
             message: (
               <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.jobGroupAllowedCharactersDescription"
+                id="xpack.ml.newJob.recognize.jobGroupAllowedCharactersDescription"
                 defaultMessage="Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
               />
             ),
@@ -194,7 +194,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             name="startDataFeed"
             label={
               <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.startDatafeedAfterSaveLabel"
+                id="xpack.ml.newJob.recognize.startDatafeedAfterSaveLabel"
                 defaultMessage="Start datafeed after save"
               />
             }
@@ -213,7 +213,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             name="useFullData"
             label={
               <FormattedMessage
-                id="xpack.ml.newJob.simple.recognize.useFullDataLabel"
+                id="xpack.ml.newJob.recognize.useFullDataLabel"
                 defaultMessage="Use full {indexPatternTitle} data"
                 values={{ indexPatternTitle: indexPattern.title }}
               />
@@ -241,12 +241,12 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
         <EuiSpacer size="l" />
         <EuiAccordion
           id="advancedOptions"
-          area-label={i18n.translate('xpack.ml.newJob.simple.recognize.advancedSettingsAriaLabel', {
+          area-label={i18n.translate('xpack.ml.newJob.recognize.advancedSettingsAriaLabel', {
             defaultMessage: 'Advanced settings',
           })}
           buttonContent={
             <FormattedMessage
-              id="xpack.ml.newJob.simple.recognize.advancedLabel"
+              id="xpack.ml.newJob.recognize.advancedLabel"
               defaultMessage="Advanced"
             />
           }
@@ -257,7 +257,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             title={
               <h4>
                 <FormattedMessage
-                  id="xpack.ml.newJob.simple.recognize.useDedicatedIndexLabel"
+                  id="xpack.ml.newJob.recognize.useDedicatedIndexLabel"
                   defaultMessage="Use dedicated index"
                 />
               </h4>
@@ -295,20 +295,20 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           onClick={() => {
             onSubmit(formState);
           }}
-          area-label={i18n.translate('xpack.ml.newJob.simple.recognize.createJobButtonAriaLabel', {
+          area-label={i18n.translate('xpack.ml.newJob.recognize.createJobButtonAriaLabel', {
             defaultMessage: 'Create Job',
           })}
         >
           {saveState === SAVE_STATE.NOT_SAVED && (
             <FormattedMessage
-              id="xpack.ml.newJob.simple.recognize.createJobButtonLabel"
+              id="xpack.ml.newJob.recognize.createJobButtonLabel"
               defaultMessage="Create {numberOfJobs, plural, zero {Job} one {Job} other {Jobs}}"
               values={{ numberOfJobs: jobs.length }}
             />
           )}
           {saveState === SAVE_STATE.SAVING && (
             <FormattedMessage
-              id="xpack.ml.newJob.simple.recognize.analysisRunningLabel"
+              id="xpack.ml.newJob.recognize.analysisRunningLabel"
               defaultMessage="Analysis running"
             />
           )}

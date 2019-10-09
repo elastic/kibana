@@ -28,13 +28,13 @@ export interface KibanaObjectItemProps {
 export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
   ({ objectType, kibanaObjects, isSaving }) => {
     const kibanaObjectLabels: Record<string, string> = {
-      dashboard: i18n.translate('xpack.ml.newJob.simple.recognize.dashboardsLabel', {
+      dashboard: i18n.translate('xpack.ml.newJob.recognize.dashboardsLabel', {
         defaultMessage: 'Dashboards',
       }),
-      search: i18n.translate('xpack.ml.newJob.simple.recognize.searchesLabel', {
+      search: i18n.translate('xpack.ml.newJob.recognize.searchesLabel', {
         defaultMessage: 'Searches',
       }),
-      visualization: i18n.translate('xpack.ml.newJob.simple.recognize.visualizationsLabel', {
+      visualization: i18n.translate('xpack.ml.newJob.recognize.visualizationsLabel', {
         defaultMessage: 'Visualizations',
       }),
     };
@@ -60,7 +60,7 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                       <EuiFlexItem grow={false}>
                         <EuiText size="xs" color="default">
                           <FormattedMessage
-                            id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
+                            id="xpack.ml.newJob.recognize.alreadyExistsLabel"
                             defaultMessage="(already exists)"
                           />
                         </EuiText>
@@ -78,12 +78,11 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                           color={success ? 'success' : 'danger'}
                           aria-label={
                             success
-                              ? i18n.translate(
-                                  'xpack.ml.newJob.simple.recognize.results.savedAriaLabel',
-                                  { defaultMessage: 'Saved' }
-                                )
+                              ? i18n.translate('xpack.ml.newJob.recognize.results.savedAriaLabel', {
+                                  defaultMessage: 'Saved',
+                                })
                               : i18n.translate(
-                                  'xpack.ml.newJob.simple.recognize.results.saveFailedAriaLabel',
+                                  'xpack.ml.newJob.recognize.results.saveFailedAriaLabel',
                                   { defaultMessage: 'Save failed' }
                                 )
                           }
