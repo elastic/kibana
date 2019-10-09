@@ -63,7 +63,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     );
     // We are running xpack tests with different configs and cleanup will delete collected coverage
     // del.sync(coverageDir);
-    Fs.mkdirSync(coverageDir);
+    Fs.mkdirSync(coverageDir, { recursive: true });
 
     logSubscription = pollForLogEntry$(
       driver,
