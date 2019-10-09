@@ -33,7 +33,6 @@ describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
   let SavedObject;
-  let IndexPattern;
   let esDataStub;
   let savedObjectsClientStub;
   let window;
@@ -736,7 +735,7 @@ describe('Saved Object', function () {
         return savedObject.init().then(() => {
           expect(afterESRespCallback.called).to.be(true);
           const index = savedObject.searchSource.getField('index');
-          expect(index instanceof IndexPattern).to.be(true);
+          expect(index instanceof StubIndexPattern).to.be(true);
           expect(index.id).to.equal(indexPatternId);
         });
       });
