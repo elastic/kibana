@@ -116,6 +116,7 @@ export class ClusterNodeAdapter implements ServiceHandlerAdapter {
         this.server.route({
           method: 'post',
           path,
+          // TODO: update this one
           handler: async (req: Request) => {
             const { context, params } = req.payload as RequestPayload;
             this.log.debug(`Receiving RPC call ${req.url.path} ${util.inspect(params)}`);
