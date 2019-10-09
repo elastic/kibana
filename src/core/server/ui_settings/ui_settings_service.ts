@@ -94,7 +94,7 @@ export class UiSettingsService implements CoreService<UiSettingsServiceSetup> {
   private setDefaults(values: Record<string, UiSettingsParams> = {}) {
     Object.entries(values).forEach(([key, value]) => {
       if (this.uiSettingsDefaults.has(key)) {
-        throw new Error(`uiSettings defaults for key ${key} has been already set`);
+        throw new Error(`uiSettings defaults for key [${key}] has been already set`);
       }
       this.uiSettingsDefaults.set(key, value);
     });
@@ -102,7 +102,7 @@ export class UiSettingsService implements CoreService<UiSettingsServiceSetup> {
 
   private async getOverrides(deps: SetupDeps) {
     const config = await this.config$.pipe(first()).toPromise();
-    const overrides: Record<string, SavedObjectAttribute> = config;
+    const overrides: Record<string, SavedObjectAttribute> = config.overrides;
     // manually implemented deprecation until New platform Config service
     // supports them https://github.com/elastic/kibana/issues/40255
     if (typeof deps.http.config.defaultRoute !== 'undefined') {
