@@ -149,9 +149,24 @@ export const getAnnotationsForPartition = (
 export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayload['data']) => {
   return results.histogramBuckets.reduce<Record<MLSeverityScoreCategories, RectAnnotationDatum[]>>(
     (annotatedBucketsBySeverity, bucket) => {
-      const sumPartitionMaxAnomalyScores = bucket.partitions.reduce<number>(
-        (scoreSum, partition) => {
-          return scoreSum + partition.maximumAnomalyScore;
+      const maxAnomalyScoresByPartition = bucket.partitions.reduce<Record<string, number>>(
+        (bucketMaxAnomalyScoresByPartition, partition) => {
+          if (partition.maximumAnomalyScore < ML_SEVERITY_SCORES.warning) {
+            return bucketMaxAnomalyScoresByPartition;
+          }
+          return {
+            ...bucketMaxAnomalyScoresByPartition,
+            [partition.partitionId ? partition.partitionId : 'unknown']: parseInt(
+              Number(partition.maximumAnomalyScore).toFixed(0),
+              10
+            ),
+          };
+        },
+        {}
+      );
+      const sumPartitionMaxAnomalyScores = Object.entries(maxAnomalyScoresByPartition).reduce(
+        (sumMaxAnomalyScore, entry) => {
+          return (sumMaxAnomalyScore += entry[1]);
         },
         0
       );
@@ -172,15 +187,10 @@ export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayl
               x0: bucket.startTime,
               x1: bucket.startTime + results.bucketDuration,
             },
-            details: i18n.translate(
-              'xpack.infra.logs.analysis.logRateBucketMaxAnomalyScoreAnnotationLabel',
-              {
-                defaultMessage: 'Anomaly score: {sumPartitionMaxAnomalyScores}',
-                values: {
-                  sumPartitionMaxAnomalyScores: Number(sumPartitionMaxAnomalyScores).toFixed(0),
-                },
-              }
-            ),
+            details: JSON.stringify({
+              overallAnomalyScore: parseInt(Number(sumPartitionMaxAnomalyScores).toFixed(0), 10),
+              anomalyScoresByPartition: maxAnomalyScoresByPartition,
+            }),
           },
         ],
       };

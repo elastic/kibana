@@ -33,7 +33,8 @@ export const AnomaliesChart: React.FunctionComponent<{
   timeRange: TimeRange;
   series: Array<{ time: number; value: number }>;
   annotations: Record<MLSeverityScoreCategories, RectAnnotationDatum[]>;
-}> = ({ chartId, series, annotations, setTimeRange, timeRange }) => {
+  renderAnnotationTooltip?: (details?: string) => JSX.Element;
+}> = ({ chartId, series, annotations, setTimeRange, timeRange, renderAnnotationTooltip }) => {
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
 
@@ -96,21 +97,25 @@ export const AnomaliesChart: React.FunctionComponent<{
           dataValues={annotations.warning}
           annotationId={warningAnnotationsId}
           style={{ fill: '#006BB4', opacity: 0.8 }}
+          renderTooltip={renderAnnotationTooltip}
         />
         <RectAnnotation
           dataValues={annotations.minor}
           annotationId={minorAnnotationsId}
           style={{ fill: '#017D73', opacity: 0.8 }}
+          renderTooltip={renderAnnotationTooltip}
         />
         <RectAnnotation
           dataValues={annotations.major}
           annotationId={majorAnnotationsId}
           style={{ fill: '#F5A700', opacity: 0.8 }}
+          renderTooltip={renderAnnotationTooltip}
         />
         <RectAnnotation
           dataValues={annotations.critical}
           annotationId={criticalAnnotationsId}
           style={{ fill: '#BD271E', opacity: 0.8 }}
+          renderTooltip={renderAnnotationTooltip}
         />
         <Settings
           onBrushEnd={handleBrushEnd}

@@ -117,6 +117,7 @@ export const AnomaliesResults = ({
             timeRange={timeRange}
             series={logEntryRateSeries}
             annotations={anomalyAnnotations}
+            renderAnnotationTooltip={renderAnnotationTooltip}
           />
           <EuiSpacer size="l" />
           <AnomaliesTable results={results} setTimeRange={setTimeRange} timeRange={timeRange} />
@@ -125,3 +126,50 @@ export const AnomaliesResults = ({
     </>
   );
 };
+
+interface ParsedAnnotationDetails {
+  overallAnomalyScore: number;
+  anomalyScoresByPartition: Record<string, number>;
+}
+
+const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ details }) => {
+  const parsedDetails: ParsedAnnotationDetails = JSON.parse(details);
+  return (
+    <div>
+      <span>{`Overall anomaly score: ${parsedDetails.overallAnomalyScore}`}</span>
+      <ul>
+        {Object.entries(parsedDetails.anomalyScoresByPartition).map((entry, index) => {
+          return (
+            <li key={`${index}-overall-anomaly-chart-${entry[0]}-partition-score-${entry[1]}`}>
+              <>
+                <span>{entry[0]}</span>
+                {': '}
+                <span>
+                  <b>{entry[1]}</b>
+                </span>
+              </>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+};
+
+const renderAnnotationTooltip = (details?: string) => {
+  // Seems to be necessary to get things typed correctly all the way through to elastic-charts components
+  if (!details) {
+    return <div></div>;
+  }
+  return <AnnotationTooltip details={details} />;
+};
+
+// i18n.translate(
+//   'xpack.infra.logs.analysis.logRateBucketMaxAnomalyScoreAnnotationLabel',
+//   {
+//     defaultMessage: 'Anomaly score: {sumPartitionMaxAnomalyScores}',
+//     values: {
+//       sumPartitionMaxAnomalyScores: Number(sumPartitionMaxAnomalyScores).toFixed(0),
+//     },
+//   }
+// ),
