@@ -14,9 +14,8 @@ type SavedObjectClient = any;
 
 export interface NetworkPolicyRule {
   allow: boolean;
-  protocols: string[];
-  ips: string[];
-  hosts: string[];
+  protocol: string;
+  host: string;
 }
 
 export interface NetworkPolicy {

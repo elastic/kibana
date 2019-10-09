@@ -5,22 +5,23 @@
  */
 
 import * as _ from 'lodash';
-import * as url from 'url';
-
-interface FirewallRequest {
-  ip: string | null;
-  url: string;
-}
+import { parse } from 'url';
 
 interface FirewallRule {
   allow: boolean;
-  hosts?: string[];
-  protocols?: string[];
-  ips?: string[];
+  host?: string;
+  protocol?: string;
 }
 
-export const allowRequest = (request: FirewallRequest, rules: FirewallRule[]) => {
-  const parsed = url.parse(request.url);
+const isHostMatch = (actualHost: string, ruleHost: string) => {
+  const hostParts = actualHost.split('.').reverse();
+  const ruleParts = ruleHost.split('.').reverse();
+
+  return _.every(ruleParts, (part, idx) => part === hostParts[idx]);
+};
+
+export const allowRequest = (url: string, rules: FirewallRule[]) => {
+  const parsed = parse(url);
 
   if (!rules.length) {
     return true;
@@ -35,23 +36,13 @@ export const allowRequest = (request: FirewallRequest, rules: FirewallRule[]) =>
       return result;
     }
 
-    const isHostMatch = rule.hosts
-      ? _.some(rule.hosts, host => (parsed.host || '').endsWith(host))
-      : false;
+    const hostMatch = rule.host ? isHostMatch(parsed.host || '', rule.host) : true;
 
-    const isProtocolMatch = rule.protocols
-      ? _.some(rule.protocols, protocol => protocol === parsed.protocol)
-      : false;
+    const protocolMatch = rule.protocol ? parsed.protocol === rule.protocol : true;
 
-    const isIPMatch = rule.ips
-      ? request.ip
-        ? _.some(rule.ips, ip => ip === request.ip)
-        : rule.allow
-      : false;
+    const isRuleMatch = hostMatch && protocolMatch;
 
-    const isRuleMatch = isHostMatch || isProtocolMatch || isIPMatch;
-
-    return rule.allow || isRuleMatch ? rule.allow && isRuleMatch : undefined;
+    return isRuleMatch ? rule.allow : undefined;
   }, undefined);
 
   return typeof allowed === 'undefined' || allowed;

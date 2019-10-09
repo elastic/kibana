@@ -96,13 +96,16 @@ export const reporting = (kibana) => {
             enabled: Joi.boolean().default(true),
             rules: Joi.array().items(Joi.object({
               allow: Joi.boolean().required(),
-              protocols: Joi.array().items(Joi.string()),
-              hosts: Joi.array().items(Joi.string()),
-              ips: Joi.array().items(Joi.string()),
-            })).default([{
-              allow: true,
-              protocols: ['http:', 'https:', 'ws:', 'wss:', 'data:'],
-            }]),
+              protocol: Joi.string(),
+              host: Joi.string(),
+            })).default([
+              { allow: true, protocol: 'http:' },
+              { allow: true, protocol: 'https:' },
+              { allow: true, protocol: 'ws:' },
+              { allow: true, protocol: 'wss:' },
+              { allow: true, protocol: 'data:' },
+              { allow: false }, // Default action is to deny!
+            ]),
           }).default(),
           zoom: Joi.number().integer().default(2),
           viewport: Joi.object({

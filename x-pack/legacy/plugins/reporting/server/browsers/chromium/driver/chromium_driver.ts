@@ -40,8 +40,8 @@ export class HeadlessChromiumDriver {
     this.networkPolicy = networkPolicy;
   }
 
-  private allowRequest(url: string, ip: string | null) {
-    return !this.networkPolicy.enabled || allowRequest({ url, ip }, this.networkPolicy.rules);
+  private allowRequest(url: string) {
+    return !this.networkPolicy.enabled || allowRequest(url, this.networkPolicy.rules);
   }
 
   private truncateUrl(url: string) {
@@ -69,7 +69,7 @@ export class HeadlessChromiumDriver {
       const isData = interceptedUrl.startsWith('data:');
 
       // We should never ever let file protocol requests go through
-      if (!allowed || !this.allowRequest(interceptedUrl, null)) {
+      if (!allowed || !this.allowRequest(interceptedUrl)) {
         logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
         interceptedRequest.abort('blockedbyclient');
         this.page.browser().close();
@@ -92,12 +92,14 @@ export class HeadlessChromiumDriver {
       interceptedCount = interceptedCount + (isData ? 0 : 1);
     });
 
+    // Even though 3xx redirects go through our request
+    // handler, we should probably inspect responses just to
+    // avoid being bamboozled by some malicious request
     this.page.on('response', interceptedResponse => {
       const interceptedUrl = interceptedResponse.url();
-      const remoteIp = interceptedResponse.remoteAddress().ip;
       const allowed = !interceptedUrl.startsWith('file://');
 
-      if (!allowed || !this.allowRequest(interceptedUrl, remoteIp)) {
+      if (!allowed || !this.allowRequest(interceptedUrl)) {
         logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
         this.page.browser().close();
         throw new Error(`Received disallowed URL in response: ${interceptedUrl}`);

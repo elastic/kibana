@@ -7,348 +7,209 @@
 import { allowRequest } from './network_policy';
 
 describe('Network Policy', () => {
-  describe('base cases', () => {
-    it('allows requests when there are no rules', () => {
-      const request = {
-        url: 'https://kibana.com',
-        ip: null,
-      };
-
-      expect(allowRequest(request, [])).toBe(true);
-    });
-
-    it('allows requests when no rules match', () => {
-      const request = {
-        url: 'http://www.kibana.com',
-        ip: null,
-      };
-
-      const rules = [
-        { allow: false, hosts: ['west.kibana.com'], protocols: ['https:'] },
-        { allow: false, hosts: ['east.kibana.com'], protocols: ['https:'] },
-      ];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
+  it('allows requests when there are no rules', () => {
+    expect(allowRequest('https://kibana.com/cool/route/bro', [])).toEqual(true);
   });
 
-  describe('protocols', () => {
-    it('allows requests when they are whitelisted', () => {
-      const request = {
-        url: 'https://kibana.com',
-        ip: null,
-      };
+  it('allows requests when no rules match', () => {
+    const url = 'https://kibana.com/cool/route/bro';
+    const rules = [{ allow: true }];
 
-      const rules = [{ allow: true, protocols: ['https:'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
-
-    it('allows requests when they are not blacklisted', () => {
-      const request = {
-        url: 'https://kibana.com',
-        ip: null,
-      };
-
-      const rules = [{ allow: false, protocols: ['http:'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
-
-    it('rejects requests when they are not whitelisted', () => {
-      const request = {
-        url: 'http://kibana.com',
-        ip: null,
-      };
-
-      const rules = [{ allow: true, protocols: ['https:'] }];
-
-      expect(allowRequest(request, rules)).toBe(false);
-    });
-
-    it('rejects requests when they are blacklisted', () => {
-      const request = {
-        url: 'http://kibana.com',
-        ip: null,
-      };
-
-      const rules = [{ allow: false, protocols: ['http:'] }];
-
-      expect(allowRequest(request, rules)).toBe(false);
-    });
+    expect(allowRequest(url, rules)).toEqual(true);
   });
 
-  describe('hosts', () => {
-    it('allows requests by whitelist', () => {
-      const request = {
-        url: 'http://kibana.com',
-        ip: null,
-      };
+  it('denies requests when no rules match', () => {
+    const url = 'https://kibana.com/cool/route/bro';
+    const rules = [{ allow: false }];
 
-      const rules = [{ allow: true, hosts: ['kibana.com'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
-
-    it('allows requests when subdomains are not specific', () => {
-      const request = {
-        url: 'http://www.kibana.com',
-        ip: null,
-      };
-
-      const rules = [{ allow: true, hosts: ['kibana.com'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
-
-    it('rejects requests when subdomains are not specific', () => {
-      const request = {
-        url: 'http://east.kibana.com',
-        ip: null,
-      };
-
-      const rules = [{ allow: true, hosts: ['www.kibana.com'] }];
-
-      expect(allowRequest(request, rules)).toBe(false);
-    });
-
-    it('allows requests when subdomains are not specific and not blacklisted', () => {
-      const request = {
-        url: 'http://east.kibana.com',
-        ip: null,
-      };
-
-      const rules = [{ allow: false, hosts: ['www.kibana.com'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
-
-    it('allows requests when subdomains are not blacklisted', () => {
-      const request = {
-        url: 'http://west.kibana.com',
-        ip: null,
-      };
-
-      const rules = [{ allow: false, hosts: ['www.kibana.com'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
-
-    it('rejects requests by blacklist', () => {
-      const request = {
-        url: 'http://something-bad.com',
-        ip: null,
-      };
-
-      const rules = [{ allow: false, hosts: ['something-bad.com'] }];
-
-      expect(allowRequest(request, rules)).toBe(false);
-    });
-
-    it('rejects requests when not in the whitelist', () => {
-      const request = {
-        url: 'http://something-bad.com',
-        ip: '192.168.1.1',
-      };
-
-      const rules = [{ allow: true, hosts: ['kibana.com'] }];
-
-      expect(allowRequest(request, rules)).toBe(false);
-    });
-
-    it('allows requests when not in the blacklist', () => {
-      const request = {
-        url: 'http://kibana.com',
-        ip: '192.168.1.1',
-      };
-
-      const rules = [{ allow: false, hosts: ['something-bad.com'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
+    expect(allowRequest(url, rules)).toEqual(false);
   });
 
-  describe('IPs', () => {
-    it('allows requests when IP is not known with whitelists', () => {
-      const request = {
-        url: 'http://something-good.com',
-        ip: null,
-      };
+  it('allows requests when a rule matches', () => {
+    const url = 'https://kibana.com/cool/route/bro';
+    const rules = [{ allow: true, host: 'kibana.com' }, { allow: false }];
 
-      const rules = [{ allow: true, ips: ['192.168.1.1'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
-
-    it('allows requests when IP is not known with blacklists', () => {
-      const request = {
-        url: 'http://something-good.com',
-        ip: null,
-      };
-
-      const rules = [{ allow: false, ips: ['192.168.1.1'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
-
-    it('allows requests via whitelist', () => {
-      const request = {
-        url: 'http://something-good.com',
-        ip: '192.168.1.1',
-      };
-
-      const rules = [{ allow: true, ips: ['192.168.1.1'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
-
-    it('rejects requests via blacklist', () => {
-      const request = {
-        url: 'http://something-bad.com',
-        ip: '192.168.2.1',
-      };
-
-      const rules = [{ allow: false, ips: ['192.168.2.1'] }];
-
-      expect(allowRequest(request, rules)).toBe(false);
-    });
-
-    it('allows when not blacklisted', () => {
-      const request = {
-        url: 'http://something-good.com',
-        ip: '192.168.2.1',
-      };
-
-      const rules = [{ allow: false, ips: ['192.168.1.1'] }];
-
-      expect(allowRequest(request, rules)).toBe(true);
-    });
-
-    it('rejects requests when not whitelisted', () => {
-      const request = {
-        url: 'http://something-bad.com',
-        ip: '192.168.2.1',
-      };
-
-      const rules = [{ allow: true, ips: ['192.168.1.1'] }];
-
-      expect(allowRequest(request, rules)).toBe(false);
-    });
+    expect(allowRequest(url, rules)).toEqual(true);
   });
 
-  describe('complex cases', () => {
-    it('allows https traffic except to something forbidden', () => {
+  it('denies requests when a rule matches', () => {
+    const url = 'https://bad.com/cool/route/bro';
+    const rules = [{ allow: false, host: 'bad.com' }, { allow: true }];
+
+    expect(allowRequest(url, rules)).toEqual(false);
+  });
+
+  it('allows complex rules', () => {
+    const url = 'https://kibana.com/cool/route/bro';
+    const rules = [{ allow: true, host: 'kibana.com', protocol: 'https:' }, { allow: false }];
+
+    expect(allowRequest(url, rules)).toEqual(true);
+  });
+
+  it('denies complex rules', () => {
+    const url = 'http://bad.com/cool/route/bro';
+    const rules = [{ allow: false, host: 'bad.com', protocol: 'http:' }, { allow: false }];
+
+    expect(allowRequest(url, rules)).toEqual(false);
+  });
+
+  it('allows requests when a rule does not match exactly', () => {
+    const url = 'https://kibana.com/cool/route/bro';
+    const rules = [{ allow: false, host: 'kibana.com', protocol: 'http:' }, { allow: true }];
+
+    expect(allowRequest(url, rules)).toEqual(true);
+  });
+
+  it('denies requests when a rule does not match exactly', () => {
+    const url = 'http://kibana.com/cool/route/bro';
+    const rules = [{ allow: true, host: 'kibana.com', protocol: 'https:' }, { allow: false }];
+
+    expect(allowRequest(url, rules)).toEqual(false);
+  });
+
+  it('allows requests when a rule is defined later', () => {
+    const url = 'https://kibana.com/cool/route/bro';
+    const rules = [{ allow: true, host: 'kibana.com' }, { allow: false }];
+
+    expect(allowRequest(url, rules)).toEqual(true);
+  });
+
+  it('denies requests when a rule is defined later', () => {
+    const url = 'https://kibana.com/cool/route/bro';
+    const rules = [{ allow: false, host: 'kibana.com' }, { allow: true }];
+
+    expect(allowRequest(url, rules)).toEqual(false);
+  });
+
+  it('allows requests when hosts are specific', () => {
+    const url = 'https://www.kibana.com/cool/route/bro';
+    const rules = [{ allow: true, host: 'www.kibana.com' }, { allow: false }];
+
+    expect(allowRequest(url, rules)).toEqual(true);
+  });
+
+  it('denies requests when hosts are specific', () => {
+    const url = 'https://bad.kibana.com/cool/route/bro';
+    const rules = [{ allow: true, host: 'www.kibana.com' }, { allow: false }];
+
+    expect(allowRequest(url, rules)).toEqual(false);
+  });
+
+  it('denies requests when hosts are similar but not exact', () => {
+    const url = 'https://bad-kibana.com/cool/route/bro';
+    const rules = [{ allow: true, host: 'kibana.com' }, { allow: false }];
+
+    expect(allowRequest(url, rules)).toEqual(false);
+  });
+
+  it('allows requests when hosts are not specific', () => {
+    const url = 'https://www.kibana.com/cool/route/bro';
+    const rules = [{ allow: true, host: 'kibana.com' }, { allow: false }];
+
+    expect(allowRequest(url, rules)).toEqual(true);
+  });
+
+  it('denies requests when hosts are not specific', () => {
+    const url = 'https://www.kibana.com/cool/route/bro';
+    const rules = [{ allow: false, host: 'kibana.com' }, { allow: true }];
+
+    expect(allowRequest(url, rules)).toEqual(false);
+  });
+
+  it('allows requests when hosts are whitelisted IP addresses', () => {
+    const url = 'http://192.168.1.1/cool/route/bro';
+    const rules = [{ allow: true, host: '192.168.1.1' }, { allow: false }];
+
+    expect(allowRequest(url, rules)).toEqual(true);
+  });
+
+  it('denies requests when hosts are blacklisted IP addresses', () => {
+    const url = 'http://192.168.1.1/cool/route/bro';
+    const rules = [{ allow: false, host: '192.168.1.1' }, { allow: true }];
+
+    expect(allowRequest(url, rules)).toEqual(false);
+  });
+
+  it('allows requests when hosts are IP addresses not blacklisted', () => {
+    const url = 'http://192.168.2.1/cool/route/bro';
+    const rules = [{ allow: false, host: '192.168.1.1' }, { allow: true }];
+
+    expect(allowRequest(url, rules)).toEqual(true);
+  });
+
+  it('denies requests when hosts are IP addresses not whitelisted', () => {
+    const url = 'http://192.168.2.1/cool/route/bro';
+    const rules = [{ allow: true, host: '192.168.1.1' }, { allow: false }];
+
+    expect(allowRequest(url, rules)).toEqual(false);
+  });
+
+  describe('Common cases', () => {
+    it('allows whitelisting of certain routes based upon protocol', () => {
       const rules = [
-        { allow: false, hosts: ['something-forbidden'] },
-        { allow: true, protocols: ['https:'] },
+        { allow: true, host: 'kibana.com', protocol: 'http:' },
+        { allow: true, protocol: 'https:' },
+        { allow: false },
       ];
 
-      expect(allowRequest({ url: 'https://kibana.com', ip: '192.168.1.1' }, rules)).toBe(true);
-      expect(allowRequest({ url: 'https://something-forbidden/', ip: '192.168.1.1' }, rules)).toBe(
-        false
-      );
-      expect(
-        allowRequest(
-          { url: 'https://something-forbidden/some-file.html', ip: '192.168.1.1' },
-          rules
-        )
-      ).toBe(false);
+      expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(true);
+      expect(allowRequest('https://good.com/some/route', rules)).toEqual(true);
+      expect(allowRequest('http://bad.com/some/route', rules)).toEqual(false);
     });
 
-    it('allows http traffic only to a specific host', () => {
+    it('allows blacklisting of certain IPs', () => {
+      const rules = [{ allow: false, host: '169.254.0.0' }, { allow: true }];
+
+      expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(true);
+      expect(allowRequest('http://bad.com/some/route', rules)).toEqual(true);
+      expect(allowRequest('https://169.254.0.0/some/route', rules)).toEqual(false);
+    });
+
+    it('allows whitelisting a single host on https', () => {
+      const rules = [{ allow: true, host: 'kibana.com', protocol: 'https:' }, { allow: false }];
+
+      expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(false);
+      expect(allowRequest('http://bad.com/some/route', rules)).toEqual(false);
+      expect(allowRequest('https://kibana.com/some/route', rules)).toEqual(true);
+    });
+
+    it('allows whitelisting a single protocol to http', () => {
+      const rules = [{ allow: true, protocol: 'https:' }, { allow: false }];
+
+      expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(false);
+      expect(allowRequest('http://bad.com/some/route', rules)).toEqual(false);
+      expect(allowRequest('https://good.com/some/route', rules)).toEqual(true);
+    });
+
+    it('allows whitelisting a single domain', () => {
+      const rules = [{ allow: true, host: 'kibana.com' }, { allow: false }];
+
+      expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(true);
+      expect(allowRequest('http://www.kibana.com/some/route', rules)).toEqual(true);
+      expect(allowRequest('https://www-kibana.com/some/route', rules)).toEqual(false);
+    });
+
+    it('can blacklist bad protocols', () => {
       const rules = [
-        { allow: true, hosts: ['something-acceptable'] },
-        { allow: false, protocols: ['http:'] },
+        { allow: true, protocol: 'http:' },
+        { allow: true, protocol: 'https:' },
+        { allow: true, protocol: 'ws:' },
+        { allow: true, protocol: 'wss:' },
+        { allow: true, protocol: 'data:' },
+        { allow: false },
       ];
 
-      expect(allowRequest({ url: 'http://kibana.com', ip: '192.168.1.1' }, rules)).toBe(false);
-      expect(allowRequest({ url: 'http://something-acceptable/', ip: '192.168.1.1' }, rules)).toBe(
-        true
-      );
-      expect(
-        allowRequest(
-          { url: 'http://something-acceptable/some-file.html', ip: '192.168.1.1' },
-          rules
-        )
-      ).toBe(true);
+      expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(true);
+      expect(allowRequest('https://www.kibana.com/some/route', rules)).toEqual(true);
+      expect(allowRequest('file:///etc/passwd', rules)).toEqual(false);
     });
 
-    it('allows http traffic from only one IP', () => {
-      const rules = [{ allow: true, ips: ['192.168.1.1'] }, { allow: true, protocols: ['https:'] }];
+    it('can shoot you in the foot', () => {
+      const rules = [{ allow: false }];
 
-      expect(allowRequest({ url: 'http://kibana.com', ip: '192.168.1.1' }, rules)).toBe(true);
-      expect(allowRequest({ url: 'https://something-forbidden/', ip: '192.168.2.1' }, rules)).toBe(
-        false
-      );
-      expect(
-        allowRequest({ url: 'http://something-forbidden/some-file.html', ip: null }, rules)
-      ).toBe(true);
-    });
-
-    it('allows traffic only from localhost', () => {
-      const rules = [{ allow: true, hosts: ['localhosts:3000'] }];
-
-      expect(allowRequest({ url: 'http://kibana.com', ip: '192.168.1.1' }, rules)).toBe(false);
-      expect(allowRequest({ url: 'http://localhosts:3000/some-file.html', ip: null }, rules)).toBe(
-        true
-      );
-    });
-
-    it('allows traffic from multiple hosts', () => {
-      const rules = [{ allow: true, hosts: ['maps.elastic.com', 'localhost:3000'] }];
-
-      expect(allowRequest({ url: 'http://maps.elastic.com', ip: '192.168.1.1' }, rules)).toBe(true);
-      expect(allowRequest({ url: 'http://localhost:3000/some-file.html', ip: null }, rules)).toBe(
-        true
-      );
-    });
-
-    it('allows traffic from multiple protocols', () => {
-      const rules = [{ allow: true, protocols: ['https:', 'http:'] }];
-
-      expect(allowRequest({ url: 'https://localhost', ip: '192.168.1.1' }, rules)).toBe(true);
-      expect(allowRequest({ url: 'http://localhost', ip: null }, rules)).toBe(true);
-      expect(allowRequest({ url: 'wss://localhost', ip: null }, rules)).toBe(false);
-    });
-
-    it('allows traffic from multiple IPs when provided', () => {
-      const rules = [{ allow: true, ips: ['192.168.1.1', '192.168.2.1'] }];
-
-      expect(allowRequest({ url: 'https://localhost', ip: '192.168.1.1' }, rules)).toBe(true);
-      expect(allowRequest({ url: 'http://localhost', ip: '192.168.2.1' }, rules)).toBe(true);
-      expect(allowRequest({ url: 'http://localhost', ip: null }, rules)).toBe(true);
-      expect(allowRequest({ url: 'http://localhost', ip: '192.166.1.1' }, rules)).toBe(false);
-    });
-
-    it('allows traffic under a variety of conditions', () => {
-      const rules = [
-        { allow: true, hosts: ['kibana.com', 'elastic.com'], ips: ['192.168.1.1', '192.168.2.1'] },
-      ];
-
-      expect(allowRequest({ url: 'https://kibana.com', ip: '192.168.1.1' }, rules)).toBe(true);
-      expect(allowRequest({ url: 'http://elastic.com', ip: '192.168.2.1' }, rules)).toBe(true);
-      expect(allowRequest({ url: 'https://kibana.com', ip: null }, rules)).toBe(true);
-      expect(allowRequest({ url: 'http://elastic.com', ip: null }, rules)).toBe(true);
-      expect(allowRequest({ url: 'http://localhost', ip: null }, rules)).toBe(true);
-      expect(allowRequest({ url: 'http://localhost', ip: '192.166.1.1' }, rules)).toBe(false);
-    });
-
-    it('can OR between conditions', () => {
-      const rules = [{ allow: true, hosts: ['kibana.com'], ips: ['192.168.1.1'] }];
-
-      expect(allowRequest({ url: 'https://kibana.com', ip: '192.168.1.1' }, rules)).toBe(true);
-      expect(allowRequest({ url: 'http://elastic.com', ip: '192.168.2.1' }, rules)).toBe(false);
-    });
-
-    it('rejects traffic under a variety of conditions', () => {
-      const rules = [
-        { allow: false, hosts: ['bad.com', 'phish.com'], ips: ['192.168.1.1', '192.168.2.1'] },
-      ];
-
-      expect(allowRequest({ url: 'https://bad.com', ip: '192.168.1.1' }, rules)).toBe(false);
-      expect(allowRequest({ url: 'http://phish.com', ip: '192.168.2.1' }, rules)).toBe(false);
-      expect(allowRequest({ url: 'https://bad.com', ip: null }, rules)).toBe(false);
-      expect(allowRequest({ url: 'http://phish.com', ip: null }, rules)).toBe(false);
+      expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(false);
+      expect(allowRequest('http://www.kibana.com/some/route', rules)).toEqual(false);
+      expect(allowRequest('https://www-kibana.com/some/route', rules)).toEqual(false);
     });
   });
 });
