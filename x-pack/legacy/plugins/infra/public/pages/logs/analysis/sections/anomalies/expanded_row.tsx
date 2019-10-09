@@ -29,10 +29,16 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
         : [],
     [results, partitionId]
   );
-  // TODO: Split into various colours based on severity scoring
   const anomalyAnnotations = useMemo(
     () =>
-      results && results.histogramBuckets ? getAnnotationsForPartition(results, partitionId) : [],
+      results && results.histogramBuckets
+        ? getAnnotationsForPartition(results, partitionId)
+        : {
+            warning: [],
+            minor: [],
+            major: [],
+            critical: [],
+          },
     [results, partitionId]
   );
   return (

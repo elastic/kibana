@@ -55,9 +55,16 @@ export const AnomaliesResults = ({
     () => (results && results.histogramBuckets ? getLogEntryRateCombinedSeries(results) : []),
     [results]
   );
-  // TODO: Add grouping / colouring based on severity scoring
   const anomalyAnnotations = useMemo(
-    () => (results && results.histogramBuckets ? getAnnotationsForAll(results) : []),
+    () =>
+      results && results.histogramBuckets
+        ? getAnnotationsForAll(results)
+        : {
+            warning: [],
+            minor: [],
+            major: [],
+            critical: [],
+          },
     [results]
   );
 
