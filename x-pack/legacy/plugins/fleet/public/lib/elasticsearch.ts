@@ -7,28 +7,13 @@
 import { AutocompleteSuggestion } from '../../../../../../src/plugins/data/public';
 import { ElasticsearchAdapter } from './adapters/elasticsearch/adapter_types';
 
-interface HiddenFields {
-  op: 'is' | 'startsWith' | 'withoutPrefix';
-  value: string;
-}
+const HIDDEN_FIELDS = ['agents.actions'];
 
 export class ElasticsearchLib {
-  private readonly hiddenFields: HiddenFields[] = [
-    { op: 'startsWith', value: 'enrollment_token' },
-    { op: 'is', value: 'beat.active' },
-    { op: 'is', value: 'beat.enrollment_token' },
-    { op: 'is', value: 'beat.access_token' },
-    { op: 'is', value: 'beat.ephemeral_id' },
-    { op: 'is', value: 'beat.verified_on' },
-  ];
-
   constructor(private readonly adapter: ElasticsearchAdapter) {}
 
   public isKueryValid(kuery: string): boolean {
     return this.adapter.isKueryValid(kuery);
-  }
-  public async convertKueryToEsQuery(kuery: string): Promise<string> {
-    return await this.adapter.convertKueryToEsQuery(kuery);
   }
 
   public async getSuggestions(
@@ -39,29 +24,26 @@ export class ElasticsearchLib {
     const suggestions = await this.adapter.getSuggestions(kuery, selectionStart);
 
     const filteredSuggestions = suggestions.filter(suggestion => {
-      const hiddenFieldsCheck = this.hiddenFields;
-
-      if (fieldPrefix) {
-        hiddenFieldsCheck.push({
-          op: 'withoutPrefix',
-          value: `${fieldPrefix}.`,
-        });
+      if (suggestion.type === 'conjunction') {
+        return true;
+      }
+      if (suggestion.type === 'value') {
+        return true;
+      }
+      if (suggestion.type === 'operator') {
+        return true;
       }
 
-      return hiddenFieldsCheck.reduce((isvalid: boolean, field) => {
-        if (!isvalid) {
-          return false;
+      if (fieldPrefix && suggestion.text.startsWith(fieldPrefix)) {
+        for (const hiddenField of HIDDEN_FIELDS) {
+          if (suggestion.text.startsWith(hiddenField)) {
+            return false;
+          }
         }
+        return true;
+      }
 
-        switch (field.op) {
-          case 'startsWith':
-            return !suggestion.text.startsWith(field.value);
-          case 'is':
-            return suggestion.text.trim() !== field.value;
-          case 'withoutPrefix':
-            return suggestion.text.startsWith(field.value);
-        }
-      }, true);
+      return false;
     });
 
     return filteredSuggestions;

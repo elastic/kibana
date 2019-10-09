@@ -25,16 +25,16 @@ export class RestAgentAdapter extends AgentAdapter {
 
   public async getAgentEvents(
     id: string,
-    search: string,
     page: number,
-    perPage: number
+    perPage: number,
+    kuery?: string
   ): Promise<{
     total: number;
     list: AgentEvent[];
   }> {
     const { total, list } = await this.REST.get<ReturnTypeList<AgentEvent>>(
       `/api/fleet/agents/${id}/events`,
-      { page, per_page: perPage, search: search === '' ? undefined : search }
+      { page, per_page: perPage, kuery: kuery !== '' ? kuery : undefined }
     );
 
     return {
@@ -53,11 +53,16 @@ export class RestAgentAdapter extends AgentAdapter {
     }
   }
 
-  public async getAll(page: number, perPage: number): Promise<ReturnTypeList<Agent>> {
+  public async getAll(
+    page: number,
+    perPage: number,
+    kuery?: string
+  ): Promise<ReturnTypeList<Agent>> {
     try {
       return await this.REST.get<ReturnTypeList<Agent>>('/api/fleet/agents', {
         page,
         perPage,
+        kuery: kuery !== '' ? kuery : undefined,
       });
     } catch (e) {
       return {

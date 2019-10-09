@@ -184,7 +184,7 @@ describe('AgentsEventsRepository', () => {
         },
         {
           type: 'STATE',
-          subtype: 'STARTING',
+          subtype: 'STOPPED',
           timestamp: '2019-09-27T18:50:33+0000',
           message: '...',
         },
@@ -217,6 +217,17 @@ describe('AgentsEventsRepository', () => {
       expect((itemWithPayload as AgentEvent).payload).toMatchObject({
         previous_state: 'STOPPED',
       });
+    });
+
+    it('allow to filter using KQL', async () => {
+      const { items, total } = await repository.getEventsForAgent(getUser(), 'agent:1', {
+        search: 'agent_events.subtype:STOPPED',
+      });
+
+      expect(total).toBe(1);
+      expect(items).toHaveLength(1);
+
+      expect(items[0].subtype).toBe('STOPPED');
     });
   });
 });

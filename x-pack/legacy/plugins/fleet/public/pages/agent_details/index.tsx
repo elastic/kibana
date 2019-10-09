@@ -23,6 +23,7 @@ import { Loading } from '../../components/loading';
 import { PolicySection } from './components/policy_section';
 import { AgentDetailSection } from './components/details_section';
 import { AgentMetadataSection } from './components/metadata_section';
+import { FrontendLibs } from '../../lib/types';
 
 function useGetAgent(agents: AgentsLib, id: string) {
   const [state, setState] = useState<{
@@ -72,18 +73,18 @@ export const Layout: SFC = ({ children }) => (
 );
 
 type Props = {
-  libs: { agents: AgentsLib };
+  libs: FrontendLibs;
 } & RouteComponentProps<{
   agentId: string;
 }>;
 
 export const AgentDetailsPage: SFC<Props> = ({
-  libs: { agents },
+  libs,
   match: {
     params: { agentId },
   },
 }) => {
-  const { agent, isLoading, error } = useGetAgent(agents, agentId);
+  const { agent, isLoading, error } = useGetAgent(libs.agents, agentId);
   if (isLoading) {
     return <Loading />;
   }
@@ -135,7 +136,7 @@ export const AgentDetailsPage: SFC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <EuiFlexItem grow={null}>
-            <AgentEventsTable agents={agents} agent={agent} />
+            <AgentEventsTable libs={libs} agent={agent} />
           </EuiFlexItem>
         </EuiFlexItem>
       </EuiFlexGroup>

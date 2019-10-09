@@ -20,9 +20,9 @@ export class AgentAdapter {
 
   public async getAgentEvents(
     id: string,
-    search: string,
     page: number,
-    perPage: number
+    perPage: number,
+    kuery?: string
   ): Promise<{
     total: number;
     list: AgentEvent[];
@@ -41,7 +41,7 @@ export class AgentAdapter {
     return true;
   }
 
-  public async getAll(page: number, perPage: number) {
+  public async getAll(page: number, perPage: number, kuery?: string) {
     const list = this.memoryDB.map<Agent>((beat: any) => omit(beat, ['access_token']));
     return { list, success: true, page, perPage, total: list.length };
   }

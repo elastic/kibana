@@ -35,7 +35,7 @@ export function compose(
   );
   const elasticsearchLib = new ElasticsearchLib(esAdapter);
 
-  const agents = new AgentsLib(new MemoryAgentAdapter([]), elasticsearchLib);
+  const agents = new AgentsLib(new MemoryAgentAdapter([]));
 
   const pluginUIModule = uiModules.get('app/fleet');
 

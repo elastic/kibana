@@ -59,7 +59,16 @@ async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
   const res = await fetch(`${kibanaURL}/api/fleet/agents/${agent.id}/checkin`, {
     method: 'POST',
     body: JSON.stringify({
-      events: [],
+      events: [
+        {
+          type: 'STATE',
+          subtype: 'RUNNING',
+          message: 'state changed from STOPPED to RUNNING',
+          timestamp: new Date().toISOString(),
+          payload: { random: 'data', state: 'RUNNING', previous_state: 'STOPPED' },
+          data: '{}',
+        },
+      ],
     }),
     headers: {
       'kbn-xsrf': 'xxx',

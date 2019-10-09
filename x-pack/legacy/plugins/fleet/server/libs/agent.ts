@@ -207,9 +207,10 @@ export class AgentLib {
     user: FrameworkUser,
     sortOptions: SortOptions = SortOptions.EnrolledAtDESC,
     page?: number,
-    perPage?: number
+    perPage?: number,
+    kuery?: string
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
-    return this.agentsRepository.list(user, sortOptions, page, perPage);
+    return this.agentsRepository.list(user, sortOptions, page, perPage, kuery);
   }
 
   public _filterActionsForCheckin(agent: Agent): AgentAction[] {

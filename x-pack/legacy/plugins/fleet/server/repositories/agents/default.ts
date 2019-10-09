@@ -150,12 +150,14 @@ export class AgentsRepository implements AgentsRepositoryType {
     user: FrameworkUser,
     sortOptions?: SortOptions,
     page: number = 1,
-    perPage: number = DEFAULT_AGENTS_PAGE_SIZE
+    perPage: number = DEFAULT_AGENTS_PAGE_SIZE,
+    kuery?: string
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
     const { saved_objects, total } = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
       type: 'agents',
       page,
       perPage,
+      filter: kuery && kuery !== '' ? kuery.replace(/agents\./g, 'agents.attributes.') : undefined,
       ...this._getSortFields(sortOptions),
     });
 

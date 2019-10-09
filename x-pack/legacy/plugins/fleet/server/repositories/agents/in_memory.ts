@@ -65,7 +65,8 @@ export class InMemoryAgentsRepository implements AgentsRepository {
     user: FrameworkUser,
     sortOptions: any,
     page: number = 1,
-    perPage: number = DEFAULT_AGENTS_PAGE_SIZE
+    perPage: number = DEFAULT_AGENTS_PAGE_SIZE,
+    kuery?: string
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
     const start = (page - 1) * perPage;
     const agents = Object.values(this.agents).slice(start, start + perPage);

@@ -27,6 +27,7 @@ import { FrontendLibs } from '../../lib/types';
 import { AgentHealth } from '../../components/agent_health';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { usePagination } from '../../hooks/use_pagination';
+import { SearchBar } from '../../components/search_bar';
 
 interface RouterProps {
   libs: FrontendLibs;
@@ -40,9 +41,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
   const [totalAgents, setTotalAgents] = useState<number>(0);
 
   // Table and search states
-  const [currentQuery, setCurrentQuery] = useState<typeof EuiSearchBar.Query>(
-    EuiSearchBar.Query.MATCH_ALL
-  );
+  const [search, setSearch] = useState('');
 
   const { pagination, pageSizeOptions, setPagination } = usePagination();
 
@@ -52,9 +51,8 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
     setLastPolledAgentsMs(new Date().getTime());
     const { list, total } = await libs.agents.getAll(
       pagination.currentPage,
-      pagination.pageSize
-      // TODO: Adjust list endpoint to support query string
-      // currentQuery
+      pagination.pageSize,
+      search
     );
     setAgents(list);
     setTotalAgents(total);
@@ -69,7 +67,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
   // Update agents if pagination or query state changes
   useEffect(() => {
     fetchAgents();
-  }, [pagination, currentQuery]);
+  }, [pagination, search]);
 
   // Poll for agents on interval
   useInterval(() => {
@@ -184,42 +182,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
 
         <EuiFlexGroup>
           <EuiFlexItem grow={4}>
-            <EuiSearchBar
-              query={currentQuery}
-              box={{
-                incremental: true,
-                schema: {
-                  strict: true,
-                  fields: {
-                    policy_id: {
-                      type: 'string',
-                    },
-                  },
-                },
-              }}
-              filters={[
-                {
-                  type: 'field_value_selection',
-                  field: 'policy_id',
-                  name: i18n.translate('xpack.fleet.agentList.policyFilterLabel', {
-                    defaultMessage: 'Policy',
-                  }),
-                  multiSelect: 'or',
-                  cache: AGENT_POLLING_THRESHOLD_MS,
-                  // Temporary until we can load list of policies
-                  options: [...new Set(agents.map(agent => agent.policy_id))].map(policy => ({
-                    value: policy,
-                  })),
-                },
-              ]}
-              onChange={({ query, error }: { query: any; error: any }) => {
-                if (error) {
-                  // TODO: Handle malformed query error
-                } else {
-                  setCurrentQuery(query);
-                }
-              }}
-            />
+            <SearchBar libs={libs} value={search} onChange={setSearch} fieldPrefix="agents" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiButton fill iconType="plusInCircle">

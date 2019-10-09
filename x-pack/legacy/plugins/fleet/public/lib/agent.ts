@@ -7,13 +7,9 @@
 import { ReturnTypeList } from '../../common/return_types';
 import { Agent, AgentEvent } from '../../common/types/domain_data';
 import { AgentAdapter } from './adapters/agent/memory_agent_adapter';
-import { ElasticsearchLib } from './elasticsearch';
 
 export class AgentsLib {
-  constructor(
-    private readonly adapter: AgentAdapter,
-    private readonly elasticsearch: ElasticsearchLib
-  ) {}
+  constructor(private readonly adapter: AgentAdapter) {}
 
   /**
    * Get an agent by id
@@ -30,11 +26,11 @@ export class AgentsLib {
    */
   public async getAgentEvents(
     id: string,
-    search: string,
     page: number,
-    perPage: number
+    perPage: number,
+    kuery?: string
   ): Promise<{ total: number; list: AgentEvent[] }> {
-    return await this.adapter.getAgentEvents(id, search, page, perPage);
+    return await this.adapter.getAgentEvents(id, page, perPage, kuery);
   }
 
   /** Get a single agent using the token it was enrolled in for lookup */
@@ -55,13 +51,7 @@ export class AgentsLib {
     perPage: number,
     kuery?: string
   ): Promise<ReturnTypeList<Agent>> => {
-    // @ts-ignore
-    let ESQuery;
-    if (kuery) {
-      ESQuery = await this.elasticsearch.convertKueryToEsQuery(kuery);
-    }
-    // TODO: add back param to getAll() when endpoint supports query
-    return await this.adapter.getAll(page, perPage);
+    return await this.adapter.getAll(page, perPage, kuery);
   };
 
   /** Update a given agent via it's ID */

@@ -142,7 +142,8 @@ export interface AgentsRepository {
     user: FrameworkUser,
     sortOptions?: SortOptions,
     page?: number,
-    perPage?: number
+    perPage?: number,
+    kuery?: string
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }>;
 
   findEphemeralByPolicySharedId(user: FrameworkUser, policySharedId: string): Promise<Agent | null>;

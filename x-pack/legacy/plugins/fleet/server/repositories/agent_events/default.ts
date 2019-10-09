@@ -42,25 +42,27 @@ export class AgentEventsRepository implements AgentEventsRepositoryType {
     agentId: string,
     options: {
       search?: string;
-      page: number;
-      perPage: number;
+      page?: number;
+      perPage?: number;
     } = {
       page: 1,
       perPage: 25,
     }
   ) {
     const { page, perPage, search } = options;
-    if (search && search !== '') {
-      throw new Error('Search with options.search is not implemented');
-    }
     const { total, saved_objects } = await this.soAdapter.find<AgentEventSOAttributes>(user, {
       type: SO_TYPE,
       search: agentId,
       searchFields: ['agent_id'],
+      filter:
+        search && search !== ''
+          ? search.replace(/agent_events\./g, 'agent_events.attributes.')
+          : undefined,
       perPage,
       page,
       sortField: 'timestamp',
       sortOrder: 'DESC',
+      defaultSearchOperator: 'AND',
     });
 
     const items: AgentEvent[] = saved_objects.map(so => {

@@ -5,7 +5,7 @@
  */
 
 export const INDEX_NAMES = {
-  FLEET: '.kibana-fleet',
+  FLEET: '.kibana',
 };
 
 export const POLICY_NAMES = {};
