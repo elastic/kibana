@@ -20,6 +20,7 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
+import { SavedObjectsClientMock } from '../../../../core/server/mocks';
 import * as uiSettingsServiceFactoryNS from '../ui_settings_service_factory';
 import * as getUiSettingsServiceForRequestNS from '../ui_settings_service_for_request';
 // @ts-ignore
@@ -125,14 +126,16 @@ describe('uiSettingsMixin()', () => {
         uiSettingsServiceFactoryNS,
         'uiSettingsServiceFactory'
       );
+
       sinon.assert.notCalled(uiSettingsServiceFactoryStub);
+
+      const savedObjectsClient = SavedObjectsClientMock.create();
       decorations.server.uiSettingsServiceFactory({
-        foo: 'bar',
+        savedObjectsClient,
       });
       sinon.assert.calledOnce(uiSettingsServiceFactoryStub);
       sinon.assert.calledWithExactly(uiSettingsServiceFactoryStub, server as any, {
-        // @ts-ignore foo doesn't exist on Hapi.Server
-        foo: 'bar',
+        savedObjectsClient,
       });
     });
   });
