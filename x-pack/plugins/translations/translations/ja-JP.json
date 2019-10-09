@@ -7440,7 +7440,6 @@
     "xpack.ml.tooltips.newCustomUrlValueTooltip": "ドリルスルーリンクの URL です。分析されたフィールドの文字列置換をサポートします (例: {hostnameParam})。",
     "xpack.ml.tooltips.newFilterRuleActionTooltip": "ルールアクションを指定する文字列です。初めは有効なオプションが「filter_results」だけですが、プロビジョニングにより「disable_modeling」のようなアクションに拡張されます。",
     "xpack.ml.tooltips.newFilterTargetFieldNameTooltip": "フィールド名を入力する文字列です。フィルターは ruleConditions が適用される targetFieldName 値のすべての結果に適用されます。未入力の場合、フィルターは ruleConditions が適用される結果にのみ適用されます。",
-    "xpack.ml.tooltips.newJobAdvancedSettingsTooltip": "高度なオプション",
     "xpack.ml.tooltips.newJobBucketSpanTooltip": "時系列分析の間隔です。",
     "xpack.ml.tooltips.newJobCategorizationFieldNameTooltip": "オプション。非構造化ログデータの分析用。テキストデータタイプの使用をお勧めします。",
     "xpack.ml.tooltips.newJobCategorizationFiltersTooltip": "オプション。カテゴリー分けフィールドに正規表現を適用します",

@@ -7442,7 +7442,6 @@
     "xpack.ml.tooltips.newCustomUrlValueTooltip": "钻取链接的 URL。支持已分析字段（例如 {hostnameParam}）的字符串替代。",
     "xpack.ml.tooltips.newFilterRuleActionTooltip": "指定规则操作的字符串。初始，唯一有效选项是“filter_results”，但其通过配置可扩展操作，例如“disable_modeling”。",
     "xpack.ml.tooltips.newFilterTargetFieldNameTooltip": "应为字段名称的字符串。筛选将应用于 ruleConditions 应用的 targetFieldName 值的所有结果。为空时，筛选将应用于 ruleConditions 适用的结果。",
-    "xpack.ml.tooltips.newJobAdvancedSettingsTooltip": "高级选项",
     "xpack.ml.tooltips.newJobBucketSpanTooltip": "时间序列分析的时间间隔。",
     "xpack.ml.tooltips.newJobCategorizationFieldNameTooltip": "（可选）用于分析非结构化日志数据。建议使用文本数据类型。",
     "xpack.ml.tooltips.newJobCategorizationFiltersTooltip": "（可选）将正则表达式应用于分类字段",
