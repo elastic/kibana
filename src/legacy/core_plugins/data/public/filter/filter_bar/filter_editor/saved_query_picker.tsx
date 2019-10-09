@@ -19,9 +19,10 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { EuiSelectable, EuiLoadingContent, EuiText, EuiSpacer } from '@elastic/eui';
-// Types
+
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+// Types
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 import { SavedQuery } from '../../../search/search_bar';
 
