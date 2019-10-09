@@ -91,7 +91,7 @@ const app = uiModules.get('apps/discover', [
 
 uiRoutes
   .defaults(/^\/discover(\/|$)/, {
-    requireDefaultIndex: true,
+    requireDefaultIndex: false,
     requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke(
@@ -132,17 +132,26 @@ uiRoutes
            *  @type {State}
            */
           const state = new State('_a', {});
+          /**
+           * returns the id of the default index, if none is configured
+           * the value of the first available indexpattern/saved object is used
+           */
+          const getDefaultIndexId = () => {
+            if(config.get('defaultIndex')) {
+              return config.get('defaultIndex');
+            }
+            return !savedObjects.length ? '' : savedObjects[0].id;
+          };
 
-          const specified = !!state.index;
           const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
-          const id = exists ? state.index : config.get('defaultIndex');
+          const id = exists ? state.index : getDefaultIndexId();
           state.destroy();
 
           return Promise.props({
             list: savedObjects,
             loaded: indexPatterns.get(id),
             stateVal: state.index,
-            stateValFound: specified && exists
+            stateValFound: !!state.index && exists
           });
         });
       },
