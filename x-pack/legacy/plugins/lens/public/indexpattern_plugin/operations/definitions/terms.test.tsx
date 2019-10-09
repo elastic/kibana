@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPatternPrivateState } from '../../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
 import {
   UiSettingsClientContract,
@@ -17,6 +16,7 @@ import { Storage } from 'ui/storage';
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
 import { termsOperation } from '.';
+import { IndexPatternPrivateState } from '../../types';
 
 jest.mock('ui/new_platform');
 
@@ -26,6 +26,7 @@ describe('terms', () => {
 
   beforeEach(() => {
     state = {
+      indexPatternRefs: [],
       indexPatterns: {},
       currentIndexPatternId: '1',
       showEmptyFields: false,

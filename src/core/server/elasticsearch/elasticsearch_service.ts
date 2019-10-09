@@ -23,7 +23,7 @@ import { merge } from 'lodash';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { ClusterClient } from './cluster_client';
+import { ClusterClient, IClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { HttpServiceSetup, GetAuthHeaders } from '../http/';
@@ -65,9 +65,9 @@ export interface ElasticsearchServiceSetup {
   readonly createClient: (
     type: string,
     clientConfig?: Partial<ElasticsearchClientConfig>
-  ) => ClusterClient;
-  readonly adminClient$: Observable<ClusterClient>;
-  readonly dataClient$: Observable<ClusterClient>;
+  ) => IClusterClient;
+  readonly adminClient$: Observable<IClusterClient>;
+  readonly dataClient$: Observable<IClusterClient>;
 }
 
 /** @internal */

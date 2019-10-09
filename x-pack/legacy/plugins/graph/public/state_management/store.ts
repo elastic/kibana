@@ -15,7 +15,7 @@ import {
   syncFieldsSaga,
   updateSaveButtonSaga,
 } from './fields';
-import { UrlTemplatesState, urlTemplatesReducer } from './url_templates';
+import { UrlTemplatesState, urlTemplatesReducer, syncTemplatesSaga } from './url_templates';
 import {
   AdvancedSettingsState,
   advancedSettingsReducer,
@@ -30,9 +30,11 @@ import {
   GraphWorkspaceSavedObject,
   AdvancedSettings,
   WorkspaceField,
+  UrlTemplate,
 } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
 import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
+import { fillWorkspaceSaga } from './workspace';
 
 export interface GraphState {
   fields: FieldsState;
@@ -50,11 +52,14 @@ export interface GraphStoreDependencies {
   getWorkspace: () => Workspace | null;
   getSavedWorkspace: () => GraphWorkspaceSavedObject;
   notifications: CoreStart['notifications'];
+  http: CoreStart['http'];
   showSaveModal: (el: React.ReactNode) => void;
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
   notifyAngular: () => void;
   setLiveResponseFields: (fields: WorkspaceField[]) => void;
+  setUrlTemplates: (templates: UrlTemplate[]) => void;
+  setWorkspaceInitialized: () => void;
   chrome: Chrome;
 }
 
@@ -68,10 +73,7 @@ export function createRootReducer(basePath: string) {
   });
 }
 
-export function registerSagas(
-  sagaMiddleware: SagaMiddleware<object>,
-  deps: GraphStoreDependencies
-) {
+function registerSagas(sagaMiddleware: SagaMiddleware<object>, deps: GraphStoreDependencies) {
   sagaMiddleware.run(datasourceSaga(deps));
   sagaMiddleware.run(loadingSaga(deps));
   sagaMiddleware.run(savingSaga(deps));
@@ -80,6 +82,8 @@ export function registerSagas(
   sagaMiddleware.run(syncSettingsSaga(deps));
   sagaMiddleware.run(updateSaveButtonSaga(deps));
   sagaMiddleware.run(syncBreadcrumbSaga(deps));
+  sagaMiddleware.run(syncTemplatesSaga(deps));
+  sagaMiddleware.run(fillWorkspaceSaga(deps));
 }
 
 export const createGraphStore = (deps: GraphStoreDependencies) => {
