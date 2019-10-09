@@ -51,6 +51,8 @@ type SetState = StateSetter<IndexPatternPrivateState>;
 type SavedRestrictionsInfo = SavedRestrictionsObject | undefined;
 type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>;
 
+type ErrorHandler = (err: Error) => void;
+
 export async function loadIndexPatterns({
   patterns,
   savedObjectsClient,
@@ -131,29 +133,35 @@ export async function changeIndexPattern({
   savedObjectsClient,
   state,
   setState,
+  onError,
 }: {
   id: string;
   savedObjectsClient: SavedObjectsClient;
   state: IndexPatternPrivateState;
   setState: SetState;
+  onError: ErrorHandler;
 }) {
-  const indexPatterns = await loadIndexPatterns({
-    savedObjectsClient,
-    cache: state.indexPatterns,
-    patterns: [id],
-  });
+  try {
+    const indexPatterns = await loadIndexPatterns({
+      savedObjectsClient,
+      cache: state.indexPatterns,
+      patterns: [id],
+    });
 
-  setState(s => ({
-    ...s,
-    layers: isSingleEmptyLayer(state.layers)
-      ? _.mapValues(state.layers, layer => updateLayerIndexPattern(layer, indexPatterns[id]))
-      : state.layers,
-    indexPatterns: {
-      ...s.indexPatterns,
-      [id]: indexPatterns[id],
-    },
-    currentIndexPatternId: id,
-  }));
+    setState(s => ({
+      ...s,
+      layers: isSingleEmptyLayer(state.layers)
+        ? _.mapValues(state.layers, layer => updateLayerIndexPattern(layer, indexPatterns[id]))
+        : state.layers,
+      indexPatterns: {
+        ...s.indexPatterns,
+        [id]: indexPatterns[id],
+      },
+      currentIndexPatternId: id,
+    }));
+  } catch (err) {
+    onError(err);
+  }
 }
 
 export async function changeLayerIndexPattern({
@@ -162,30 +170,36 @@ export async function changeLayerIndexPattern({
   savedObjectsClient,
   state,
   setState,
+  onError,
 }: {
   indexPatternId: string;
   layerId: string;
   savedObjectsClient: SavedObjectsClient;
   state: IndexPatternPrivateState;
   setState: SetState;
+  onError: ErrorHandler;
 }) {
-  const indexPatterns = await loadIndexPatterns({
-    savedObjectsClient,
-    cache: state.indexPatterns,
-    patterns: [indexPatternId],
-  });
+  try {
+    const indexPatterns = await loadIndexPatterns({
+      savedObjectsClient,
+      cache: state.indexPatterns,
+      patterns: [indexPatternId],
+    });
 
-  setState(s => ({
-    ...s,
-    layers: {
-      ...s.layers,
-      [layerId]: updateLayerIndexPattern(s.layers[layerId], indexPatterns[indexPatternId]),
-    },
-    indexPatterns: {
-      ...s.indexPatterns,
-      [indexPatternId]: indexPatterns[indexPatternId],
-    },
-  }));
+    setState(s => ({
+      ...s,
+      layers: {
+        ...s.layers,
+        [layerId]: updateLayerIndexPattern(s.layers[layerId], indexPatterns[indexPatternId]),
+      },
+      indexPatterns: {
+        ...s.indexPatterns,
+        [indexPatternId]: indexPatterns[indexPatternId],
+      },
+    }));
+  } catch (err) {
+    onError(err);
+  }
 }
 
 async function loadIndexPatternRefs(

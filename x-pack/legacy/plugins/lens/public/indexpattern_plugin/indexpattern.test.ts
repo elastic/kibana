@@ -5,10 +5,8 @@
  */
 
 import chromeMock from 'ui/chrome';
-import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data/public/setup';
 import { Storage } from 'ui/storage';
-import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectsClientContract } from 'kibana/public';
 import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
@@ -20,7 +18,6 @@ jest.mock('../id_generator');
 jest.mock('ui/chrome');
 // Contains old and new platform data plugins, used for interpreter and filter ratio
 jest.mock('ui/new_platform');
-jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
 
 const expectedIndexPatterns = {
   1: {
@@ -146,9 +143,7 @@ describe('IndexPattern Data Source', () => {
     indexPatternDatasource = getIndexPatternDatasource({
       chrome: chromeMock,
       storage: {} as Storage,
-      interpreter: { functionsRegistry },
-      core: coreMock.createSetup(),
-      data: dataMock,
+      core: coreMock.createStart(),
       savedObjectsClient: {} as SavedObjectsClientContract,
     });
 

@@ -8,6 +8,8 @@ import React from 'react';
 import { render } from 'react-testing-library';
 import { delay, tick } from '../utils/testHelpers';
 import { useFetcher } from './useFetcher';
+import { KibanaCoreContext } from '../../../observability/public/context/kibana_core';
+import { LegacyCoreStart } from 'kibana/public';
 
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */
@@ -18,6 +20,19 @@ beforeAll(() => {
 afterAll(() => {
   console.error = originalError;
 });
+
+// Wrap the hook with a provider so it can useKibanaCore
+const wrapper = ({ children }: { children?: React.ReactNode }) => (
+  <KibanaCoreContext.Provider
+    value={
+      ({
+        notifications: { toasts: { addWarning: () => {} } }
+      } as unknown) as LegacyCoreStart
+    }
+  >
+    {children}
+  </KibanaCoreContext.Provider>
+);
 
 async function asyncFn(name: string, ms: number) {
   await delay(ms);
@@ -54,7 +69,8 @@ describe('when simulating race condition', () => {
     }
 
     const { rerender } = render(
-      <MyComponent name="John" ms={500} renderFn={renderSpy} />
+      <MyComponent name="John" ms={500} renderFn={renderSpy} />,
+      { wrapper }
     );
 
     rerender(<MyComponent name="Peter" ms={100} renderFn={renderSpy} />);

@@ -321,11 +321,13 @@ describe('loader', () => {
         layers: {},
         showEmptyFields: true,
       };
+
       await changeIndexPattern({
         state,
         setState,
         id: 'a',
         savedObjectsClient: mockClient(),
+        onError: jest.fn(),
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -335,6 +337,36 @@ describe('loader', () => {
           a: sampleIndexPatterns.a,
         },
       });
+    });
+
+    it('handles errors', async () => {
+      const setState = jest.fn();
+      const onError = jest.fn();
+      const err = new Error('NOPE!');
+      const state: IndexPatternPrivateState = {
+        currentIndexPatternId: 'b',
+        indexPatternRefs: [],
+        existingFields: {},
+        indexPatterns: {},
+        layers: {},
+        showEmptyFields: true,
+      };
+
+      await changeIndexPattern({
+        state,
+        setState,
+        id: 'a',
+        savedObjectsClient: {
+          ...mockClient(),
+          bulkGet: jest.fn(async () => {
+            throw err;
+          }),
+        },
+        onError,
+      });
+
+      expect(setState).not.toHaveBeenCalled();
+      expect(onError).toHaveBeenCalledWith(err);
     });
   });
 
@@ -373,12 +405,14 @@ describe('loader', () => {
         },
         showEmptyFields: true,
       };
+
       await changeLayerIndexPattern({
         state,
         setState,
         indexPatternId: 'b',
         layerId: 'l1',
         savedObjectsClient: mockClient(),
+        onError: jest.fn(),
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -412,6 +446,45 @@ describe('loader', () => {
           },
         },
       });
+    });
+
+    it('handles errors', async () => {
+      const setState = jest.fn();
+      const onError = jest.fn();
+      const err = new Error('NOPE!');
+      const state: IndexPatternPrivateState = {
+        currentIndexPatternId: 'b',
+        indexPatternRefs: [],
+        existingFields: {},
+        indexPatterns: {
+          a: sampleIndexPatterns.a,
+        },
+        layers: {
+          l0: {
+            columnOrder: ['col1'],
+            columns: {},
+            indexPatternId: 'a',
+          },
+        },
+        showEmptyFields: true,
+      };
+
+      await changeLayerIndexPattern({
+        state,
+        setState,
+        indexPatternId: 'b',
+        layerId: 'l0',
+        savedObjectsClient: {
+          ...mockClient(),
+          bulkGet: jest.fn(async () => {
+            throw err;
+          }),
+        },
+        onError,
+      });
+
+      expect(setState).not.toHaveBeenCalled();
+      expect(onError).toHaveBeenCalledWith(err);
     });
   });
 

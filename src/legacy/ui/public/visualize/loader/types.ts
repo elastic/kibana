@@ -21,7 +21,7 @@ import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { SavedObject } from 'ui/saved_objects/saved_object';
-
+import { VisResponseValue } from 'src/plugins/visualizations/public';
 import { SearchSource } from '../../courier';
 import { PersistedState } from '../../persisted_state';
 import { AppState } from '../../state_management/app_state';
@@ -34,13 +34,6 @@ export interface VisSavedObject extends SavedObject {
   title: string;
   uiStateJSON?: string;
   destroy: () => void;
-}
-
-interface VisResponseValue {
-  visType: string;
-  visData: object;
-  visConfig: object;
-  params?: object;
 }
 
 export interface VisResponseData {

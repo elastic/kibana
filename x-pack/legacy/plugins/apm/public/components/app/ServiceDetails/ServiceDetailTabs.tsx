@@ -7,36 +7,30 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiTabs, EuiSpacer } from '@elastic/eui';
+import { npStart } from 'ui/new_platform';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { TransactionOverview } from '../TransactionOverview';
 import { ServiceMetrics } from '../ServiceMetrics';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { isRumAgentName } from '../../../../common/agent_name';
-import { callApmApi } from '../../../services/rest/callApmApi';
+import { isRumAgentName, isJavaAgentName } from '../../../../common/agent_name';
 import { EuiTabLink } from '../../shared/EuiTabLink';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
 import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
+import { ServiceNodeOverviewLink } from '../../shared/Links/apm/ServiceNodeOverviewLink';
+import { ServiceNodeOverview } from '../ServiceNodeOverview';
+import { useAgentName } from '../../../hooks/useAgentName';
+import { ServiceMap } from '../ServiceMap';
+import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 
 interface Props {
-  tab: 'transactions' | 'errors' | 'metrics';
+  tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';
 }
 
 export function ServiceDetailTabs({ tab }: Props) {
   const { urlParams } = useUrlParams();
-  const { serviceName, start, end } = urlParams;
-  const { data: agentName } = useFetcher(() => {
-    if (serviceName && start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/agent_name',
-        params: {
-          path: { serviceName },
-          query: { start, end }
-        }
-      }).then(res => res.agentName);
-    }
-  }, [serviceName, start, end]);
+  const { serviceName } = urlParams;
+  const { agentName } = useAgentName();
 
   if (!serviceName) {
     // this never happens, urlParams type is not accurate enough
@@ -70,7 +64,21 @@ export function ServiceDetailTabs({ tab }: Props) {
   };
 
   const tabs = [transactionsTab, errorsTab];
-  if (agentName && !isRumAgentName(agentName)) {
+
+  if (isJavaAgentName(agentName)) {
+    const nodesListTab = {
+      link: (
+        <ServiceNodeOverviewLink serviceName={serviceName}>
+          {i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
+            defaultMessage: 'JVMs'
+          })}
+        </ServiceNodeOverviewLink>
+      ),
+      render: () => <ServiceNodeOverview />,
+      name: 'nodes'
+    };
+    tabs.push(nodesListTab);
+  } else if (agentName && !isRumAgentName(agentName)) {
     const metricsTab = {
       link: (
         <MetricOverviewLink serviceName={serviceName}>
@@ -82,8 +90,23 @@ export function ServiceDetailTabs({ tab }: Props) {
       render: () => <ServiceMetrics agentName={agentName} />,
       name: 'metrics'
     };
-
     tabs.push(metricsTab);
+  }
+
+  const serviceMapTab = {
+    link: (
+      <ServiceMapLink serviceName={serviceName}>
+        {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+          defaultMessage: 'Service Map'
+        })}
+      </ServiceMapLink>
+    ),
+    render: () => <ServiceMap serviceName={serviceName} />,
+    name: 'service-map'
+  };
+
+  if (npStart.core.injectedMetadata.getInjectedVar('apmServiceMapEnabled')) {
+    tabs.push(serviceMapTab);
   }
 
   const selectedTab = tabs.find(serviceTab => serviceTab.name === tab);

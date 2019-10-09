@@ -11,7 +11,7 @@ import _ from 'lodash';
 import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
-  ScopedClusterClient,
+  IScopedClusterClient,
 } from 'src/core/server';
 import { LensServerOptions } from '../server_options';
 import { ExistingFields } from '../../common';
@@ -88,7 +88,7 @@ async function fetchExistingFields({
 }: {
   indexPatternId: string;
   savedObjectsClient: SavedObjectsClientContract;
-  client: ScopedClusterClient;
+  client: IScopedClusterClient;
   fromDate?: string;
   toDate?: string;
   timeZone?: string;
@@ -132,7 +132,7 @@ async function fetchIndexPatternStats({
   fromDate?: string;
   toDate?: string;
   timeZone?: string;
-  client: ScopedClusterClient;
+  client: IScopedClusterClient;
 }) {
   const body =
     !indexPattern.timeFieldName || !fromDate || !toDate

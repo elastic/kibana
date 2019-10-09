@@ -46,7 +46,7 @@ describe('filter_ratio', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              label: 'Filter Ratio',
+              label: 'Filter ratio',
               dataType: 'number',
               isBucketed: false,
 

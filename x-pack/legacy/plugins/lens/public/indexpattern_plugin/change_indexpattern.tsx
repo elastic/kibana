@@ -12,6 +12,7 @@ import { IndexPatternRef } from './types';
 
 export interface ChangeIndexPatternTriggerProps extends EuiButtonEmptyProps {
   label: string;
+  title?: string;
 }
 
 export function ChangeIndexPattern({
@@ -30,12 +31,15 @@ export function ChangeIndexPattern({
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
   const createTrigger = function() {
-    const { label, ...rest } = trigger;
+    const { label, title, ...rest } = trigger;
     return (
       <EuiButtonEmpty
-        flush="left"
         className="eui-textTruncate"
-        size="xs"
+        flush="left"
+        color="text"
+        iconSide="right"
+        iconType="arrowDown"
+        title={title}
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         {...rest}
       >

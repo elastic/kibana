@@ -17,8 +17,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiLink,
-  EuiButtonIcon,
-  EuiTextColor,
+  EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
 import classNames from 'classnames';
@@ -221,7 +220,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
           </EuiLink>
         ) : (
           <>
-            <EuiButtonIcon
+            <EuiButtonEmpty
               iconType="plusInCircleFilled"
               data-test-subj="indexPattern-configure-dimension"
               aria-label={i18n.translate('xpack.lens.configure.addConfig', {
@@ -231,13 +230,13 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 defaultMessage: 'Add a configuration',
               })}
               onClick={() => setPopoverOpen(!isPopoverOpen)}
-            />{' '}
-            <EuiTextColor color="subdued">
+              size="xs"
+            >
               <FormattedMessage
                 id="xpack.lens.configure.emptyConfig"
                 defaultMessage="Drop a field here"
               />
-            </EuiTextColor>
+            </EuiButtonEmpty>
           </>
         )
       }
@@ -327,28 +326,21 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   <EuiCallOut
                     data-test-subj="indexPattern-invalid-operation"
                     title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-                      defaultMessage: 'Operation not applicable to field',
+                      defaultMessage: 'To use this function, select a different field.',
                     })}
-                    color="danger"
-                    iconType="cross"
+                    color="warning"
                     size="s"
-                  >
-                    <p>
-                      <FormattedMessage
-                        id="xpack.lens.indexPattern.invalidOperationDescription"
-                        defaultMessage="Please choose another field"
-                      />
-                    </p>
-                  </EuiCallOut>
+                    iconType="sortUp"
+                  />
                 )}
                 {incompatibleSelectedOperationType && !selectedColumn && (
                   <EuiCallOut
                     size="s"
                     data-test-subj="indexPattern-fieldless-operation"
                     title={i18n.translate('xpack.lens.indexPattern.fieldlessOperationLabel', {
-                      defaultMessage: 'Choose a field the operation is applied to',
+                      defaultMessage: 'To use this function, select a field.',
                     })}
-                    iconType="alert"
+                    iconType="sortUp"
                   ></EuiCallOut>
                 )}
                 {!incompatibleSelectedOperationType && ParamEditor && (
