@@ -27,12 +27,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const UrlTemplateFlyoutComponent = ({
+export const UrlTemplateFlyout = ({
   isVisible = false,
   onClose = () => {},
-  intl,
 }) => {
   return isVisible ? (
     <EuiFlyout
@@ -95,16 +95,16 @@ export const UrlTemplateFlyoutComponent = ({
             columns={[
               {
                 field: 'input',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.inputHeader', defaultMessage: 'Input' }),
+                name: i18n.translate('common.ui.fieldEditor.urlTemplate.inputHeader', { defaultMessage: 'Input' }),
                 width: '160px',
               },
               {
                 field: 'template',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.templateHeader', defaultMessage: 'Template' }),
+                name: i18n.translate('common.ui.fieldEditor.urlTemplate.templateHeader', { defaultMessage: 'Template' }),
               },
               {
                 field: 'output',
-                name: intl.formatMessage({ id: 'common.ui.fieldEditor.urlTemplate.outputHeader', defaultMessage: 'Output' }),
+                name: i18n.translate('common.ui.fieldEditor.urlTemplate.outputHeader', { defaultMessage: 'Output' }),
               },
             ]}
           />
@@ -113,7 +113,3 @@ export const UrlTemplateFlyoutComponent = ({
     </EuiFlyout>
   ) : null;
 };
-
-UrlTemplateFlyoutComponent.displayName = 'UrlTemplateFlyout';
-
-export const UrlTemplateFlyout = injectI18n(UrlTemplateFlyoutComponent);
