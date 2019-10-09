@@ -22,9 +22,10 @@ import PropTypes from 'prop-types';
 
 import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export class FormatEditorSamplesComponent extends PureComponent {
+export class FormatEditorSamples extends PureComponent {
   static propTypes = {
     samples: PropTypes.arrayOf(
       PropTypes.shape({
@@ -35,13 +36,12 @@ export class FormatEditorSamplesComponent extends PureComponent {
   };
 
   render() {
-    const { samples, intl } = this.props;
+    const { samples } = this.props;
 
     const columns = [
       {
         field: 'input',
-        name: intl.formatMessage({
-          id: 'common.ui.fieldEditor.samples.inputHeader',
+        name: i18n.translate('common.ui.fieldEditor.samples.inputHeader', {
           defaultMessage: 'Input',
         }),
         render: input => {
@@ -50,8 +50,7 @@ export class FormatEditorSamplesComponent extends PureComponent {
       },
       {
         field: 'output',
-        name: intl.formatMessage({
-          id: 'common.ui.fieldEditor.samples.outputHeader',
+        name: i18n.translate('common.ui.fieldEditor.samples.outputHeader', {
           defaultMessage: 'Output',
         }),
         render: output => {
@@ -84,5 +83,3 @@ export class FormatEditorSamplesComponent extends PureComponent {
     ) : null;
   }
 }
-
-export const FormatEditorSamples = injectI18n(FormatEditorSamplesComponent);

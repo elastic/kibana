@@ -18,14 +18,14 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { FormatEditorSamplesComponent } from './samples';
+import { FormatEditorSamples } from './samples';
 
 describe('FormatEditorSamples', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <FormatEditorSamplesComponent
+    const component = shallowWithI18nProvider(
+      <FormatEditorSamples
         samples={[
           { input: 'test', output: 'TEST' },
           { input: 123, output: 456 },
@@ -38,8 +38,8 @@ describe('FormatEditorSamples', () => {
   });
 
   it('should render nothing if there are no samples', async () => {
-    const component = shallowWithIntl(
-      <FormatEditorSamplesComponent
+    const component = shallowWithI18nProvider(
+      <FormatEditorSamples
         samples={[]}
       />
     );
