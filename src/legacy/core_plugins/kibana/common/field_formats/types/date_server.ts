@@ -17,16 +17,30 @@
  * under the License.
  */
 
-import { memoize } from 'lodash';
+import { memoize, noop } from 'lodash';
 import moment from 'moment-timezone';
+import {
+  FieldFormat,
+  KBN_FIELD_TYPES,
+  TextContextTypeConvert,
+} from '../../../../../../plugins/data/common/';
 
-export function createDateOnServerFormat(FieldFormat) {
+export function createDateOnServerFormat() {
   return class DateFormat extends FieldFormat {
-    constructor(params, getConfig) {
+    static id = 'date';
+    static title = 'Date';
+    static fieldType = KBN_FIELD_TYPES.DATE;
+
+    private getConfig: Function;
+    private memoizedConverter: Function = noop;
+    private memoizedPattern: string = '';
+    private timeZone: string = '';
+
+    constructor(params: Record<string, any>, getConfig: Function) {
       super(params);
 
       this.getConfig = getConfig;
-      this._memoizedConverter = memoize(val => {
+      this.memoizedConverter = memoize((val: any) => {
         if (val == null) {
           return '-';
         }
@@ -37,16 +51,16 @@ export function createDateOnServerFormat(FieldFormat) {
          * We need to set the timezone manually here. The date is taken in as
          * UTC and converted into the desired timezone. */
         let date;
-        if (this._timeZone === 'Browser') {
+        if (this.timeZone === 'Browser') {
           // Assume a warning has been logged this can be unpredictable. It
           // would be too verbose to log anything here.
           date = moment.utc(val);
         } else {
-          date = moment.utc(val).tz(this._timeZone);
+          date = moment.utc(val).tz(this.timeZone);
         }
 
         if (date.isValid()) {
-          return date.format(this._memoizedPattern);
+          return date.format(this.memoizedPattern);
         } else {
           return val;
         }
@@ -60,23 +74,19 @@ export function createDateOnServerFormat(FieldFormat) {
       };
     }
 
-    _convert(val) {
+    textConvert: TextContextTypeConvert = val => {
       // don't give away our ref to converter so we can hot-swap when config changes
       const pattern = this.param('pattern');
       const timezone = this.param('timezone');
 
-      const timezoneChanged = this._timeZone !== timezone;
-      const datePatternChanged = this._memoizedPattern !== pattern;
+      const timezoneChanged = this.timeZone !== timezone;
+      const datePatternChanged = this.memoizedPattern !== pattern;
       if (timezoneChanged || datePatternChanged) {
-        this._timeZone = timezone;
-        this._memoizedPattern = pattern;
+        this.timeZone = timezone;
+        this.memoizedPattern = pattern;
       }
 
-      return this._memoizedConverter(val);
-    }
-
-    static id = 'date';
-    static title = 'Date';
-    static fieldType = 'date';
+      return this.memoizedConverter(val);
+    };
   };
 }

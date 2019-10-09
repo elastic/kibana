@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { createBoolFormat } from '../boolean';
-import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
+import { createBoolFormat } from './boolean';
 
-const BoolFormat = createBoolFormat(FieldFormat);
+const BoolFormat = createBoolFormat();
 
-describe('Boolean Format', function () {
+describe('Boolean Format', () => {
+  let boolean: Record<string, any>;
 
-  let boolean;
   beforeEach(() => {
     boolean = new BoolFormat();
   });
@@ -33,49 +31,49 @@ describe('Boolean Format', function () {
   [
     {
       input: 0,
-      expected: 'false'
+      expected: 'false',
     },
     {
       input: 'no',
-      expected: 'false'
+      expected: 'false',
     },
     {
       input: false,
-      expected: 'false'
+      expected: 'false',
     },
     {
       input: 'false',
-      expected: 'false'
+      expected: 'false',
     },
     {
       input: 1,
-      expected: 'true'
+      expected: 'true',
     },
     {
       input: 'yes',
-      expected: 'true'
+      expected: 'true',
     },
     {
       input: true,
-      expected: 'true'
+      expected: 'true',
     },
     {
       input: 'true',
-      expected: 'true'
+      expected: 'true',
     },
     {
-      input: ' True  ', //should handle trailing and mixed case
-      expected: 'true'
-    }
-  ].forEach((test)=> {
-    it(`convert ${test.input} to boolean`, ()=> {
-      expect(boolean.convert(test.input)).to.be(test.expected);
+      input: ' True  ', // should handle trailing and mixed case
+      expected: 'true',
+    },
+  ].forEach(data => {
+    test(`convert ${data.input} to boolean`, () => {
+      expect(boolean.convert(data.input)).toBe(data.expected);
     });
   });
 
-  it('does not convert non-boolean values, instead returning original value', ()=> {
+  test('does not convert non-boolean values, instead returning original value', () => {
     const s = 'non-boolean value!!';
-    expect(boolean.convert(s)).to.be(s);
-  });
 
+    expect(boolean.convert(s)).toBe(s);
+  });
 });

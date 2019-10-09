@@ -17,11 +17,26 @@
  * under the License.
  */
 
-import { createNumeralFormat } from './_numeral';
+import { createBytesFormat } from './bytes';
 
-export function createNumberFormat(FieldFormat) {
-  return createNumeralFormat(FieldFormat, {
-    id: 'number',
-    title: 'Number'
+const BytesFormat = createBytesFormat();
+
+describe('BytesFormat', () => {
+  const config: Record<string, any> = {};
+
+  config['format:bytes:defaultPattern'] = '0,0.[000]b';
+
+  const getConfig = (key: string) => config[key];
+
+  test('default pattern', () => {
+    const formatter = new BytesFormat({}, getConfig);
+
+    expect(formatter.convert(5150000)).toBe('4.911MB');
   });
-}
+
+  test('custom pattern', () => {
+    const formatter = new BytesFormat({ pattern: '0,0b' }, getConfig);
+
+    expect(formatter.convert('5150000')).toBe('5MB');
+  });
+});

@@ -17,26 +17,23 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { createPercentFormat } from '../percent';
-import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
+import { createIpFormat } from './ip';
 
-const PercentFormat = createPercentFormat(FieldFormat);
+const IpFormat = createIpFormat();
 
-describe('PercentFormat', function () {
+describe('IP Address Format', () => {
+  let ip: Record<string, any>;
 
-  const config = {};
-  config['format:percent:defaultPattern'] = '0,0.[000]%';
-  const getConfig = (key) => config[key];
-
-  it('default pattern', ()=> {
-    const formatter = new PercentFormat({}, getConfig);
-    expect(formatter.convert(0.99999)).to.be('99.999%');
+  beforeEach(() => {
+    ip = new IpFormat();
   });
 
-  it('custom pattern', ()=> {
-    const formatter = new PercentFormat({ pattern: '0,0%' }, getConfig);
-    expect(formatter.convert('0.99999')).to.be('100%');
+  test('converts a value from a decimal to a string', () => {
+    expect(ip.convert(1186489492)).toBe('70.184.100.148');
   });
 
+  test('converts null and undefined to -', () => {
+    expect(ip.convert(null)).toBe('-');
+    expect(ip.convert(undefined)).toBe('-');
+  });
 });

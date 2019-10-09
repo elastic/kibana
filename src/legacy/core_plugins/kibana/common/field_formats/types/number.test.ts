@@ -17,11 +17,26 @@
  * under the License.
  */
 
-import { createNumeralFormat } from './_numeral';
+import { createNumberFormat } from './number';
 
-export function createBytesFormat(FieldFormat) {
-  return createNumeralFormat(FieldFormat, {
-    id: 'bytes',
-    title: 'Bytes'
+const NumberFormat = createNumberFormat();
+
+describe('NumberFormat', () => {
+  const config: Record<string, any> = {};
+
+  config['format:number:defaultPattern'] = '0,0.[000]';
+
+  const getConfig = (key: string) => config[key];
+
+  test('default pattern', () => {
+    const formatter = new NumberFormat({}, getConfig);
+
+    expect(formatter.convert(12.345678)).toBe('12.346');
   });
-}
+
+  test('custom pattern', () => {
+    const formatter = new NumberFormat({ pattern: '0,0' }, getConfig);
+
+    expect(formatter.convert('12.345678')).toBe('12');
+  });
+});
