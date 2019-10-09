@@ -115,6 +115,7 @@ export const SnapshotToolbar = () => (
                     customOptions={customOptions}
                   />
                 </EuiFlexItem>
+                <EuiFlexItem grow={true} />
                 <EuiFlexItem grow={false}>
                   <WithWaffleViewState indexPattern={createDerivedIndexPattern('metrics')}>
                     {({ defaultViewState, viewState, onViewChange }) => (
