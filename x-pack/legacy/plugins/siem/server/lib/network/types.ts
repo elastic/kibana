@@ -6,7 +6,7 @@
 
 import { NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
-import { SearchHit, TotalValue } from '../types';
+import { TotalValue } from '../types';
 
 export interface NetworkAdapter {
   getNetworkTopNFlow(
