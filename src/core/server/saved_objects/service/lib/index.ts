@@ -27,4 +27,4 @@ export {
 
 export { SavedObjectsErrorHelpers } from './errors';
 
-export { SavedObjectsCacheIndexPatterns } from './cache_index_patterns';
+export { IndexFieldCapabilitiesCache } from './cache_index_patterns';
