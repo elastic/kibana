@@ -49,4 +49,4 @@ This page has moved. Please see {stack-ov}/create-jobs.html[Creating {anomaly-jo
 [role="exclude",id="job-tips"]
 == Machine learning job tips
 
-// This page has moved. Please see {stack-ov}/create-jobs.html#job-tips[Machine learning job tips].
+This page has moved. Please see {stack-ov}/create-jobs.html#job-tips[Machine learning job tips].
