@@ -328,9 +328,9 @@ export default function (kibana) {
       }
     },
 
-    init: function (server) {
+    init: async function (server) {
       // uuid
-      manageUuid(server);
+      await manageUuid(server);
       // routes
       searchApi(server);
       scriptsApi(server);
