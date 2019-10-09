@@ -172,7 +172,7 @@ module.exports = {
           require.resolve('@elastic/eui/packages/react-datepicker'),
           require.resolve('highlight.js'),
         ],
-        use: 'null-loader',
+        use: require.resolve('null-loader'),
       },
     ],
   },
