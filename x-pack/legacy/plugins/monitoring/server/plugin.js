@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../common/constants';
 import { requireUIRoutes } from './routes';
 import { instantiateClient } from './es_client/instantiate_client';
@@ -16,7 +15,6 @@ import {
   getOpsStatsCollector,
   getSettingsCollector,
 } from './kibana_monitoring/collectors';
-import { initInfraSource } from './lib/logs/init_infra_source';
 
 export class Plugin {
   setup(core, plugins) {
@@ -133,10 +131,5 @@ export class Plugin {
         showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled') // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
       };
     });
-
-    // TODO
-    // This is not quite working but I don't know if we want to add a dependency
-    // on infra from the start....
-    initInfraSource(config, plugins.infra);
   }
 }

@@ -78,7 +78,6 @@ export const monitoring = (kibana) => new kibana.Plugin({
     };
 
     new Plugin().setup(serverFacade, plugins);
-    // init(serverFacade);
   },
   config,
   deprecations,
