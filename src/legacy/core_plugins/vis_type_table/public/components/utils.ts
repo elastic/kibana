@@ -1,0 +1,68 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { AggTypes, Dimensions } from '../types';
+
+function isAggConfigNumeric(
+  type: AggTypes,
+  { buckets, metrics }: Dimensions = { buckets: [], metrics: [] }
+) {
+  const dimension =
+    buckets.find(({ aggType }) => aggType === type) ||
+    metrics.find(({ aggType }) => aggType === type);
+  const formatType = get(dimension, 'format.id') || get(dimension, 'format.params.id');
+  return formatType === 'number';
+}
+
+const totalAggregations = [
+  {
+    value: AggTypes.SUM,
+    text: i18n.translate('visTypeTable.totalAggregations.sumText', {
+      defaultMessage: 'Sum',
+    }),
+  },
+  {
+    value: AggTypes.AVG,
+    text: i18n.translate('visTypeTable.totalAggregations.averageText', {
+      defaultMessage: 'Average',
+    }),
+  },
+  {
+    value: AggTypes.MIN,
+    text: i18n.translate('visTypeTable.totalAggregations.minText', {
+      defaultMessage: 'Min',
+    }),
+  },
+  {
+    value: AggTypes.MAX,
+    text: i18n.translate('visTypeTable.totalAggregations.maxText', {
+      defaultMessage: 'Max',
+    }),
+  },
+  {
+    value: AggTypes.COUNT,
+    text: i18n.translate('visTypeTable.totalAggregations.countText', {
+      defaultMessage: 'Count',
+    }),
+  },
+];
+
+export { isAggConfigNumeric, totalAggregations };

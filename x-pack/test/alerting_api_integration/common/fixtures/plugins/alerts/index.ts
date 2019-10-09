@@ -158,10 +158,10 @@ export default function(kibana: any) {
           };
         },
       };
-      server.plugins.actions.registerType(indexRecordActionType);
-      server.plugins.actions.registerType(failingActionType);
-      server.plugins.actions.registerType(rateLimitedActionType);
-      server.plugins.actions.registerType(authorizationActionType);
+      server.plugins.actions.setup.registerType(indexRecordActionType);
+      server.plugins.actions.setup.registerType(failingActionType);
+      server.plugins.actions.setup.registerType(rateLimitedActionType);
+      server.plugins.actions.setup.registerType(authorizationActionType);
 
       // Alert types
       const alwaysFiringAlertType: AlertType = {
@@ -314,12 +314,12 @@ export default function(kibana: any) {
         actionGroups: [],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
-      server.plugins.alerting.registerType(alwaysFiringAlertType);
-      server.plugins.alerting.registerType(neverFiringAlertType);
-      server.plugins.alerting.registerType(failingAlertType);
-      server.plugins.alerting.registerType(validationAlertType);
-      server.plugins.alerting.registerType(authorizationAlertType);
-      server.plugins.alerting.registerType(noopAlertType);
+      server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
+      server.plugins.alerting.setup.registerType(neverFiringAlertType);
+      server.plugins.alerting.setup.registerType(failingAlertType);
+      server.plugins.alerting.setup.registerType(validationAlertType);
+      server.plugins.alerting.setup.registerType(authorizationAlertType);
+      server.plugins.alerting.setup.registerType(noopAlertType);
     },
   });
 }
