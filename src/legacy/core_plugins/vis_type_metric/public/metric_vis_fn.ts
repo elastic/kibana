@@ -19,9 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { ExpressionFunction, KibanaDatatable, Render, Range, Style } from '../../interpreter/types';
+import { vislibColorMaps, ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { ExpressionFunction, KibanaDatatable, Range, Render, Style } from '../../interpreter/types';
+import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
+import { visType, DimensionsVisParam, VisParams } from './types';
 
 type Context = KibanaDatatable;
 
@@ -29,8 +30,8 @@ const name = 'metricVis';
 
 interface Arguments {
   percentage: boolean;
-  colorScheme: string;
-  colorMode: string;
+  colorScheme: ColorSchemas;
+  colorMode: ColorModes;
   useRanges: boolean;
   invertColors: boolean;
   showLabels: boolean;
@@ -42,39 +43,10 @@ interface Arguments {
   bucket: any; // these aren't typed yet
 }
 
-interface VisParams {
-  dimensions: DimensionsVisParam;
-  metric: MetricVisParam;
-}
-
-interface DimensionsVisParam {
-  metrics: any;
-  bucket?: any;
-}
-
-interface MetricVisParam {
-  percentageMode: Arguments['percentage'];
-  useRanges: Arguments['useRanges'];
-  colorSchema: Arguments['colorScheme'];
-  metricColorMode: Arguments['colorMode'];
-  colorsRange: Arguments['colorRange'];
-  labels: {
-    show: Arguments['showLabels'];
-  };
-  invertColors: Arguments['invertColors'];
-  style: {
-    bgFill: Arguments['bgFill'];
-    bgColor: boolean;
-    labelColor: boolean;
-    subText: Arguments['subText'];
-    fontSize: number;
-  };
-}
-
 interface RenderValue {
-  visType: 'metric';
+  visType: typeof visType;
   visData: Context;
-  visConfig: VisParams;
+  visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
   params: any;
 }
 
@@ -113,7 +85,7 @@ export const createMetricVisFn = (): ExpressionFunction<
     colorMode: {
       types: ['string'],
       default: '"None"',
-      options: ['None', 'Label', 'Background'],
+      options: [ColorModes.NONE, ColorModes.LABELS, ColorModes.BACKGROUND],
       help: i18n.translate('visTypeMetric.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
       }),
@@ -206,7 +178,7 @@ export const createMetricVisFn = (): ExpressionFunction<
       as: 'visualization',
       value: {
         visData: context,
-        visType: 'metric',
+        visType,
         visConfig: {
           metric: {
             percentageMode: args.percentage,
@@ -220,8 +192,8 @@ export const createMetricVisFn = (): ExpressionFunction<
             invertColors: args.invertColors,
             style: {
               bgFill: args.bgFill,
-              bgColor: args.colorMode === 'Background',
-              labelColor: args.colorMode === 'Labels',
+              bgColor: args.colorMode === ColorModes.BACKGROUND,
+              labelColor: args.colorMode === ColorModes.LABELS,
               subText: args.subText,
               fontSize,
             },

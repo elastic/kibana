@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { createPortalNode, InPortal } from 'react-reverse-portal';
 
 import styled from 'styled-components';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -23,6 +24,7 @@ import { MapEmbeddable, SetQuery } from './types';
 import * as i18n from './translations';
 import { useStateToaster } from '../toasters';
 import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
+import { MapToolTip } from './map_tool_tip/map_tool_tip';
 
 const EmbeddableWrapper = styled(EuiFlexGroup)`
   position: relative;
@@ -43,7 +45,7 @@ export interface EmbeddedMapProps {
 }
 
 export const EmbeddedMap = React.memo<EmbeddedMapProps>(
-  ({ applyFilterQueryFromKueryExpression, queryExpression, startDate, endDate, setQuery }) => {
+  ({ applyFilterQueryFromKueryExpression, endDate, queryExpression, setQuery, startDate }) => {
     const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
@@ -52,6 +54,12 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     const [, dispatchToaster] = useStateToaster();
     const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
     const [siemDefaultIndices] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
+
+    // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
+    // own component tree instead of the embeddables (default). This is necessary to have access to
+    // the Redux store, theme provider, etc, which is required to register and un-register the draggable
+    // Search InPortal/OutPortal for implementation touch points
+    const portalNode = React.useMemo(() => createPortalNode(), []);
 
     // Initial Load useEffect
     useEffect(() => {
@@ -84,7 +92,8 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
             queryExpression,
             startDate,
             endDate,
-            setQuery
+            setQuery,
+            portalNode
           );
           if (isSubscribed) {
             setEmbeddable(embeddableObject);
@@ -129,6 +138,9 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
 
     return isError ? null : (
       <>
+        <InPortal node={portalNode}>
+          <MapToolTip />
+        </InPortal>
         <EmbeddableWrapper>
           {embeddable != null ? (
             <EmbeddablePanel

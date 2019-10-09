@@ -8,7 +8,6 @@ import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
-import { toastNotifications } from 'ui/notify';
 import url from 'url';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { NoServicesMessage } from './NoServicesMessage';
@@ -48,7 +47,8 @@ export function ServiceOverview() {
   useEffect(() => {
     if (data.hasLegacyData && !hasDisplayedToast) {
       hasDisplayedToast = true;
-      toastNotifications.addWarning({
+
+      core.notifications.toasts.addWarning({
         title: i18n.translate('xpack.apm.serviceOverview.toastTitle', {
           defaultMessage:
             'Legacy data was detected within the selected time range'
@@ -77,7 +77,7 @@ export function ServiceOverview() {
         )
       });
     }
-  }, [data.hasLegacyData, core.http.basePath]);
+  }, [data.hasLegacyData, core.http.basePath, core.notifications.toasts]);
 
   useTrackPageview({ app: 'apm', path: 'services_overview' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });

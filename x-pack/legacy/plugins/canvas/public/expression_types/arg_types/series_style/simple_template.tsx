@@ -10,8 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon, EuiText } f
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
-// @ts-ignore Untyped local
-import { TooltipIcon } from '../../../components/tooltip_icon';
+import { TooltipIcon, IconType } from '../../../components/tooltip_icon';
 import { ExpressionAST, CanvasWorkpad } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 
@@ -91,7 +90,11 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
       )}
       {name !== 'defaultStyle' && (!labels || labels.length === 0) && (
         <EuiFlexItem grow={false}>
-          <TooltipIcon position="left" icon="warning" content={strings.getNoSeriesTooltip()} />
+          <TooltipIcon
+            position="left"
+            icon={IconType.warning}
+            content={strings.getNoSeriesTooltip()}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

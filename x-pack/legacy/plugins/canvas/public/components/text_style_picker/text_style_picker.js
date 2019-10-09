@@ -7,9 +7,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { ComponentStrings } from '../../../i18n';
 import { FontPicker } from '../font_picker';
 import { ColorPickerPopover } from '../color_picker_popover';
-import { ComponentStrings } from '../../../i18n';
 import { fontSizes } from './font_sizes';
 
 const { TextStylePicker: strings } = ComponentStrings;
@@ -28,17 +28,17 @@ export const TextStylePicker = ({
   const alignmentButtons = [
     {
       id: 'left',
-      label: strings.getAlignLeftLabel(),
+      label: strings.getAlignLeftOption(),
       iconType: 'editorAlignLeft',
     },
     {
       id: 'center',
-      label: strings.getAlignCenterLabel(),
+      label: strings.getAlignCenterOption(),
       iconType: 'editorAlignCenter',
     },
     {
       id: 'right',
-      label: strings.getAlignRightLabel(),
+      label: strings.getAlignRightOption(),
       iconType: 'editorAlignRight',
     },
   ];
@@ -46,17 +46,17 @@ export const TextStylePicker = ({
   const styleButtons = [
     {
       id: 'bold',
-      label: strings.getBoldLabel(),
+      label: strings.getStyleBoldOption(),
       iconType: 'editorBold',
     },
     {
       id: 'italic',
-      label: strings.getItalicLabel(),
+      label: strings.getStyleItalicOption(),
       iconType: 'editorItalic',
     },
     {
       id: 'underline',
-      label: strings.getUnderlineLabel(),
+      label: strings.getStyleUnderlineOption(),
       iconType: 'editorUnderline',
     },
   ];

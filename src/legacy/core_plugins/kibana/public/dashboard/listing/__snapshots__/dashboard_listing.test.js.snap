@@ -13,7 +13,6 @@ exports[`after fetch hideWriteControls 1`] = `
   noItemsFragment={
     <div>
       <EuiEmptyPrompt
-        iconColor="subdued"
         iconType="visualizeApp"
         title={
           <h2>
@@ -106,7 +105,6 @@ exports[`after fetch initialFilter 1`] = `
             </p>
           </React.Fragment>
         }
-        iconColor="subdued"
         iconType="dashboardApp"
         title={
           <h2>
@@ -199,7 +197,6 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
             </p>
           </React.Fragment>
         }
-        iconColor="subdued"
         iconType="dashboardApp"
         title={
           <h2>
@@ -292,7 +289,6 @@ exports[`after fetch renders table rows 1`] = `
             </p>
           </React.Fragment>
         }
-        iconColor="subdued"
         iconType="dashboardApp"
         title={
           <h2>
@@ -385,7 +381,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
             </p>
           </React.Fragment>
         }
-        iconColor="subdued"
         iconType="dashboardApp"
         title={
           <h2>
@@ -478,7 +473,6 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
             </p>
           </React.Fragment>
         }
-        iconColor="subdued"
         iconType="dashboardApp"
         title={
           <h2>
