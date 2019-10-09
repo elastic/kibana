@@ -29,6 +29,7 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import chrome from 'ui/chrome';
+import { toastNotifications } from 'ui/notify';
 import { merge, flatten } from 'lodash';
 import { ml } from '../../../services/ml_api_service';
 import { useKibanaContext } from '../../../contexts/kibana';
@@ -179,7 +180,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   };
 
   const getTimeRange = async (): Promise<{ start: number; end: number }> => {
-    const { useFullIndexData } = formState;
+    const { useFullIndexData, timeRange } = formState;
     if (useFullIndexData) {
       const { start, end } = await ml.getTimeFieldRange({
         index: indexPattern.title,
@@ -191,13 +192,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         end: end.epoch,
       };
     } else {
-      const {
-        timeRange: { start, end },
-      } = formState;
-      return Promise.resolve({
-        start,
-        end,
-      });
+      return Promise.resolve(timeRange);
     }
   };
 
@@ -279,8 +274,26 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           ? SAVE_STATE.FAILED
           : SAVE_STATE.PARTIAL_FAILURE
       );
-    } catch (ex) {
+    } catch (e) {
       setSaveState(SAVE_STATE.FAILED);
+      // eslint-disable-next-line no-console
+      console.error('Error setting up module', e);
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.ml.newJob.simple.recognize.moduleSetupFailedWarningTitle', {
+          defaultMessage: 'Error setting up module {moduleId}',
+          values: { moduleId },
+        }),
+        text: i18n.translate(
+          'xpack.ml.newJob.simple.recognize.moduleSetupFailedWarningDescription',
+          {
+            defaultMessage:
+              'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
+            values: {
+              count: jobs.length,
+            },
+          }
+        ),
+      });
     }
   };
 
