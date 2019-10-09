@@ -7725,7 +7725,7 @@ export type DeprecatedDirectiveResolver<Result> = DirectiveResolverFn<
   SiemContext
 >;
 export interface DeprecatedDirectiveArgs {
-  /** Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax (as specified by [CommonMark](https://commonmark.org/). */
+  /** Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted in [Markdown](https://daringfireball.net/projects/markdown/). */
   reason?: string;
 }
 

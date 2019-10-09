@@ -103,7 +103,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('Make sure that we get Host Overview data', () => {
-      const expectedHost: GetHostOverviewQuery.HostOverview = {
+      const expectedHost: Omit<GetHostOverviewQuery.HostOverview, 'inspect'> = {
         _id: 'zeek-sensor-san-francisco',
         host: {
           architecture: ['x86_64'],
@@ -133,10 +133,6 @@ export default function({ getService }: FtrProviderContext) {
           provider: ['digitalocean'],
           region: ['sfo2'],
           __typename: 'CloudFields',
-        },
-        inspect: {
-          dsl: [],
-          response: [],
         },
         __typename: 'HostItem',
       };
