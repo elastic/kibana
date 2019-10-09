@@ -23,7 +23,7 @@ describe('HttpInfoSummaryItem', () => {
     });
 
     it('renders empty component if no url is provided', () => {
-      const component = shallow(<HttpInfoSummaryItem />);
+      const component = shallow(<HttpInfoSummaryItem url="" />);
       expect(component.isEmptyRender()).toBeTruthy();
     });
 
