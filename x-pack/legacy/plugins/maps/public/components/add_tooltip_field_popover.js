@@ -13,6 +13,7 @@ import {
   EuiSelectable,
   EuiButton,
   EuiSpacer,
+  EuiTextAlign
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -142,13 +143,16 @@ export class AddTooltipFieldPopover extends Component {
 
         <EuiSpacer size="xs" />
         <EuiPopoverFooter>
-          <EuiButton
-            fill
-            isDisabled={this.state.checkedFields.length === 0}
-            onClick={this._onAdd}
-          >
-            {addLabel}
-          </EuiButton>
+          <EuiTextAlign textAlign="right">
+            <EuiButton
+              fill
+              isDisabled={this.state.checkedFields.length === 0}
+              onClick={this._onAdd}
+              size="s"
+            >
+              {addLabel}
+            </EuiButton>
+          </EuiTextAlign>
         </EuiPopoverFooter>
       </Fragment>
     );

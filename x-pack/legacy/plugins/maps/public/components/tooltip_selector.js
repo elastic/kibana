@@ -98,7 +98,7 @@ export class TooltipSelector extends Component {
                       'mapTooltipSelector__propertyRow-isDraggingOver': snapshot.isDraggingOver
                     })}
                   >
-                    <EuiText className="mapTooltipSelector__propertyContent">
+                    <EuiText className="mapTooltipSelector__propertyContent" size="s">
                       {this._getPropertyLabel(propertyName)}
                     </EuiText>
                     <div className="mapTooltipSelector__propertyIcons">
@@ -154,6 +154,8 @@ export class TooltipSelector extends Component {
         <EuiSpacer size="xs" />
 
         {this._renderProperties()}
+
+        <EuiSpacer size="s" />
 
         <EuiTextAlign textAlign="center">
           <AddTooltipFieldPopover

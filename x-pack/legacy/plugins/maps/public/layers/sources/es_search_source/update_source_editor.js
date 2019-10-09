@@ -196,13 +196,14 @@ export class UpdateSourceEditor extends Component {
     let topHitsCheckbox;
     if (this.state.dateFields && this.state.dateFields.length) {
       topHitsCheckbox = (
-        <EuiFormRow>
+        <EuiFormRow display="rowCompressed">
           <EuiSwitch
             label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
               defaultMessage: `Show most recent documents by entity`,
             })}
             checked={this.props.useTopHits}
             onChange={this.onUseTopHitsChange}
+            compressed
           />
         </EuiFormRow>
       );
@@ -218,13 +219,14 @@ export class UpdateSourceEditor extends Component {
           />
         </EuiFormRow>
 
-        <EuiFormRow>
+        <EuiFormRow display="rowCompressed">
           <EuiSwitch
             label={i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
               defaultMessage: `Dynamically filter for data in the visible map area`,
             })}
             checked={this.props.filterByMapBounds}
             onChange={this._onFilterByMapBoundsChange}
+            compressed
           />
         </EuiFormRow>
 
