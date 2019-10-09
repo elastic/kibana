@@ -128,7 +128,7 @@ export const createEmbeddable = async (
     id: 'embeddedMap', // Scope to page type if using map elsewhere
     inspect: null,
     loading: false,
-    refetch: embeddableObject.reload,
+    refetch: () => embeddableObject.reload(),
   });
 
   return embeddableObject;
