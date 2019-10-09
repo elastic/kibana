@@ -616,6 +616,24 @@ describe('conditional compression', () => {
     });
     expect(response.request.info.acceptEncoding).toEqual('gzip');
   });
+
+  test(`HapiJS doesn't suck`, async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({ body: 'hello', headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .get('/')
+      .set('accept-encoding', 'gzip')
+      .then(response => {
+        expect(response.header).toHaveProperty('content-encoding');
+      });
+  });
 });
 
 describe('setup contract', () => {
