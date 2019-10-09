@@ -152,7 +152,7 @@ export class WorkpadTemplates extends React.PureComponent {
       const lowercaseSearch = searchTerm.toLowerCase();
       const textMatch = lowercaseSearch
         ? name.toLowerCase().indexOf(lowercaseSearch) > -1 ||
-        help.toLowerCase().indexOf(lowercaseSearch) > -1
+          help.toLowerCase().indexOf(lowercaseSearch) > -1
         : true;
 
       return tagMatch && textMatch;

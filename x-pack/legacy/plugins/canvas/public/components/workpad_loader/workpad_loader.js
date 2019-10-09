@@ -17,6 +17,7 @@ import {
   EuiToolTip,
   EuiEmptyPrompt,
   EuiFilePicker,
+  EuiLink,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import moment from 'moment';
