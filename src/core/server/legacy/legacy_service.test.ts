@@ -46,6 +46,7 @@ import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins/plugins_service';
 import { SavedObjectsServiceStart } from 'src/core/server/saved_objects/saved_objects_service';
 import { KibanaMigrator } from '../saved_objects/migrations';
+import { httpServiceMock } from '../http/http_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -86,6 +87,7 @@ beforeEach(() => {
       context: contextServiceMock.createSetupContract(),
       elasticsearch: { legacy: {} } as any,
       http: {
+        ...httpServiceMock.createSetupContract(),
         auth: {
           getAuthHeaders: () => undefined,
         },
@@ -146,12 +148,7 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
       { server: { autoListen: true } },
-      {
-        setupDeps,
-        startDeps,
-        handledConfigPaths: ['foo.bar'],
-        logger,
-      },
+      expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
 
@@ -176,12 +173,7 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
       { server: { autoListen: true } },
-      {
-        setupDeps,
-        startDeps,
-        handledConfigPaths: ['foo.bar'],
-        logger,
-      },
+      expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
 
@@ -311,12 +303,7 @@ describe('once LegacyService is set up without connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
       { server: { autoListen: true } },
-      {
-        setupDeps,
-        startDeps,
-        handledConfigPaths: ['foo.bar'],
-        logger,
-      },
+      expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
   });

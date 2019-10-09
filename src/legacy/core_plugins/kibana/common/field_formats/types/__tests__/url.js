@@ -39,11 +39,54 @@ describe('UrlFormat', function () {
       .to.be('<span ng-non-bindable><audio controls preload="none" src="http://elastic.co"></span>');
   });
 
-  it('outputs an <image> if type === "img"', function () {
-    const url = new UrlFormat({ type: 'img' });
+  describe('outputs an <image> if type === "img"', function () {
+    it('default', function () {
+      const url = new UrlFormat({ type: 'img' });
 
-    expect(url.convert('http://elastic.co', 'html'))
-      .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co"></span>');
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>');
+    });
+
+    it('with correct width and height set', function () {
+      const url = new UrlFormat({ type: 'img', width: '12', height: '55' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:12px; max-height:55px;"></span>');
+    });
+
+    it('with correct width and height set if no width specified', function () {
+      const url = new UrlFormat({ type: 'img', height: '55' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:55px;"></span>');
+    });
+
+    it('with correct width and height set if no height specified', function () {
+      const url = new UrlFormat({ type: 'img', width: '22' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:22px; max-height:none;"></span>');
+    });
+
+    it('only accepts valid numbers for width', function () {
+      const url = new UrlFormat({ type: 'img', width: 'not a number' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>');
+    });
+
+    it('only accepts valid numbers for height', function () {
+      const url = new UrlFormat({ type: 'img', height: 'not a number' });
+
+      expect(url.convert('http://elastic.co', 'html'))
+        .to.be('<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+        'style="width:auto; height:auto; max-width:none; max-height:none;"></span>');
+    });
   });
 
   describe('url template', function () {
