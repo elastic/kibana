@@ -18,6 +18,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { AggParamType } from '../../../../agg_types/param_types/agg';
 import { AggConfig } from '../../..';
 import { AggParamEditorProps, DefaultEditorAggParams } from '..';
@@ -51,23 +52,26 @@ function SubAggParamEditor({
   }
 
   return (
-    <DefaultEditorAggParams
-      agg={agg.params.customMetric}
-      groupName="metrics"
-      className="visEditorAgg__subAgg"
-      formIsTouched={subAggParams.formIsTouched}
-      indexPattern={agg.getIndexPattern()}
-      metricAggs={metricAggs}
-      state={state}
-      onAggParamsChange={(...rest) => {
-        // to force update when sub-agg params are changed
-        setInnerState(!innerState);
-        subAggParams.onAggParamsChange(...rest);
-      }}
-      onAggTypeChange={subAggParams.onAggTypeChange}
-      setValidity={setValidity}
-      setTouched={setTouched}
-    />
+    <>
+      <EuiSpacer size="m" />
+      <DefaultEditorAggParams
+        agg={agg.params.customMetric}
+        groupName="metrics"
+        className="visEditorAgg__subAgg"
+        formIsTouched={subAggParams.formIsTouched}
+        indexPattern={agg.getIndexPattern()}
+        metricAggs={metricAggs}
+        state={state}
+        onAggParamsChange={(...rest) => {
+          // to force update when sub-agg params are changed
+          setInnerState(!innerState);
+          subAggParams.onAggParamsChange(...rest);
+        }}
+        onAggTypeChange={subAggParams.onAggTypeChange}
+        setValidity={setValidity}
+        setTouched={setTouched}
+      />
+    </>
   );
 }
 

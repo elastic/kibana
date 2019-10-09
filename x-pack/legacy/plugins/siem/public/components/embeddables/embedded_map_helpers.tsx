@@ -5,22 +5,24 @@
  */
 
 import uuid from 'uuid';
+import React from 'react';
 import { npStart } from 'ui/new_platform';
+import { OutPortal, PortalNode } from 'react-reverse-portal';
 import { ActionToaster, AppToast } from '../toasters';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   APPLY_FILTER_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/triggers';
+  APPLY_FILTER_ACTION,
+  ViewMode,
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   APPLY_SIEM_FILTER_ACTION_ID,
   ApplySiemFilterAction,
 } from './actions/apply_siem_filter_action';
-import { APPLY_FILTER_ACTION } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/actions';
-import { IndexPatternMapping, MapEmbeddable, SetQuery } from './types';
+import { IndexPatternMapping, MapEmbeddable, RenderTooltipContentParams, SetQuery } from './types';
 import { getLayerList } from './map_config';
-import { ViewMode } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
@@ -88,6 +90,7 @@ export const setupEmbeddablesAPI = (
  * @param startDate
  * @param endDate
  * @param setQuery function as provided by the GlobalTime component for reacting to refresh
+ * @param portalNode wrapper for MapToolTip so it is not rendered in the embeddables component tree
  *
  * @throws Error if EmbeddableFactory does not exist
  */
@@ -96,7 +99,8 @@ export const createEmbeddable = async (
   queryExpression: string,
   startDate: number,
   endDate: number,
-  setQuery: SetQuery
+  setQuery: SetQuery,
+  portalNode: PortalNode
 ): Promise<MapEmbeddable> => {
   const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
@@ -121,15 +125,41 @@ export const createEmbeddable = async (
     mapCenter: { lon: -1.05469, lat: 15.96133, zoom: 1 },
   };
 
+  const renderTooltipContent = ({
+    addFilters,
+    closeTooltip,
+    features,
+    isLocked,
+    getLayerName,
+    loadFeatureProperties,
+    loadFeatureGeometry,
+  }: RenderTooltipContentParams) => {
+    const props = {
+      addFilters,
+      closeTooltip,
+      features,
+      isLocked,
+      getLayerName,
+      loadFeatureProperties,
+      loadFeatureGeometry,
+    };
+    return <OutPortal node={portalNode} {...props} />;
+  };
+
   // @ts-ignore method added in https://github.com/elastic/kibana/pull/43878
-  const embeddableObject = await factory.createFromState(state, input);
+  const embeddableObject = await factory.createFromState(
+    state,
+    input,
+    undefined,
+    renderTooltipContent
+  );
 
   // Wire up to app refresh action
   setQuery({
     id: 'embeddedMap', // Scope to page type if using map elsewhere
     inspect: null,
     loading: false,
-    refetch: embeddableObject.reload,
+    refetch: () => embeddableObject.reload(),
   });
 
   return embeddableObject;

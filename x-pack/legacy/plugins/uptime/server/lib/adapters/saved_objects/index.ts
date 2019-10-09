@@ -5,5 +5,4 @@
  */
 
 export { UMKibanaSavedObjectsAdapter } from './kibana_saved_objects_adapter';
-export { UMMemorySavedObjectsAdapter } from './memory_saved_objects_adapter';
 export { UMSavedObjectsAdapter } from './types';

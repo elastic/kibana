@@ -9,7 +9,6 @@ import Git from '@elastic/nodegit';
 import assert from 'assert';
 import { execSync } from 'child_process';
 import fs from 'fs';
-import * as mkdirp from 'mkdirp';
 import path from 'path';
 import rimraf from 'rimraf';
 import { GitOperations } from '../git_operations';
@@ -19,7 +18,7 @@ describe('git_operations', () => {
   it('get default branch from a non master repo', async () => {
     const repoUri = 'github.com/foo/bar';
     const repoDir = path.join(serverOptions.repoPath, repoUri);
-    mkdirp.sync(repoDir);
+    fs.mkdirSync(repoDir, { recursive: true });
 
     // create a non-master using git commands
     const shell = `
@@ -47,7 +46,7 @@ describe('git_operations', () => {
   });
 
   async function prepareProject(repoPath: string) {
-    mkdirp.sync(repoPath);
+    fs.mkdirSync(repoPath, { recursive: true });
     const workDir = path.join(serverOptions.workspacePath, repoUri);
     const repo = await Git.Repository.init(workDir, 0);
     const content = '';

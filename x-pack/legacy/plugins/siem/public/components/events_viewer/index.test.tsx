@@ -20,7 +20,17 @@ jest.mock('../../lib/settings/use_kibana_ui_setting');
 const from = 1566943856794;
 const to = 1566857456791;
 
+// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
+/* eslint-disable no-console */
+const originalError = console.error;
 describe('StatefulEventsViewer', () => {
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+
+  afterAll(() => {
+    console.error = originalError;
+  });
   test('it renders the events viewer', async () => {
     const wrapper = mount(
       <TestProviders>

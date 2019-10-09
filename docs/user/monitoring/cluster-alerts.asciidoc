@@ -47,7 +47,7 @@ include::cluster-alerts-license.asciidoc[]
 To receive email notifications for the Cluster Alerts:
 
 . Configure an email account as described in
-{stack-ov}/actions-email.html#configuring-email[Configuring email accounts].
+{ref}/actions-email.html#configuring-email[Configuring email accounts].
 . Configure the
 `xpack.monitoring.cluster_alerts.email_notifications.email_address` setting in
 `kibana.yml` with your email address.
