@@ -96,15 +96,15 @@ export const SnapshotHistogramComponent = ({
       </>
     );
   const { histogram } = data;
-  const downMonitorsName = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
-    defaultMessage: 'Down Monitors',
-  });
 
   const {
     colors: { danger, gray },
   } = useContext(UptimeSettingsContext);
 
-  const downSpecId = getSpecId(downMonitorsName);
+  const downMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
+    defaultMessage: 'Down Monitors',
+  });
+  const downSpecId = getSpecId(downMonitorsId);
 
   const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
     defaultMessage: 'Up',
@@ -158,10 +158,12 @@ export const SnapshotHistogramComponent = ({
             })}
           />
           <BarSeries
-            customSeriesColors={getColorsMap(gray, upSpecId)}
-            data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
-            id={upSpecId}
-            name={upMonitorsId}
+            customSeriesColors={getColorsMap(danger, downSpecId)}
+            data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
+            id={downSpecId}
+            name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
+              defaultMessage: 'Down',
+            })}
             stackAccessors={[0]}
             timeZone="local"
             xAccessor={0}
@@ -170,12 +172,10 @@ export const SnapshotHistogramComponent = ({
             yScaleType="linear"
           />
           <BarSeries
-            customSeriesColors={getColorsMap(danger, downSpecId)}
-            data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
-            id={downSpecId}
-            name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
-              defaultMessage: 'Down',
-            })}
+            customSeriesColors={getColorsMap(gray, upSpecId)}
+            data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
+            id={upSpecId}
+            name={upMonitorsId}
             stackAccessors={[0]}
             timeZone="local"
             xAccessor={0}
