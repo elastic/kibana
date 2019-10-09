@@ -128,6 +128,15 @@ function create(opts) {
       config.valueAxes.forEach(axis => {
         if (axis.labels) {
           axis.labels.axisFormatter = data.data.yAxisFormatter || data.get('yAxisFormatter');
+          const seriesParams = config.seriesParams.find(seriesParams => seriesParams.valueAxis === axis.id);
+          // if there are series assigned to this axis, get the format from the first one
+          if (seriesParams) {
+            const seriesDataId = seriesParams.data.id;
+            const formatter = (data.data.series || data.get('series'))
+              .find(seri => seri.id.split('.')[0] === seriesDataId)
+              .yAxisFormatter;
+            axis.labels.axisFormatter = formatter;
+          }
         }
       });
     }
