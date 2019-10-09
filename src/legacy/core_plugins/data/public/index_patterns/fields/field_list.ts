@@ -37,7 +37,12 @@ export class FieldList extends Array<Field> implements FieldListInterface {
   private indexPattern: IndexPattern;
   private shortDotsEnable: boolean;
   private notifications: NotificationsSetup;
-  constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false, notifications: NotificationsSetup) {
+  constructor(
+    indexPattern: IndexPattern,
+    specs: FieldSpec[] = [],
+    shortDotsEnable = false,
+    notifications: NotificationsSetup
+  ) {
     super();
     this.indexPattern = indexPattern;
     this.shortDotsEnable = shortDotsEnable;

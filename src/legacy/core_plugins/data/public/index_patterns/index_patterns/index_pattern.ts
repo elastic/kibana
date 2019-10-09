@@ -279,18 +279,20 @@ export class IndexPattern implements StaticIndexPattern {
     }
 
     this.fields.add(
-      new Field(this, {
-        name,
-        script,
-        fieldType,
-        scripted: true,
-        lang,
-        aggregatable: true,
-        filterable: true,
-        searchable: true,
-      },
-      false,
-      this.notifications
+      new Field(
+        this,
+        {
+          name,
+          script,
+          fieldType,
+          scripted: true,
+          lang,
+          aggregatable: true,
+          filterable: true,
+          searchable: true,
+        },
+        false,
+        this.notifications
       )
     );
 
