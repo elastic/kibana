@@ -15,7 +15,7 @@ const FlexGroup = styled(EuiFlexGroup)`
 
 FlexGroup.displayName = 'FlexGroup';
 
-export const NetworkTabsLoading = () => (
+export const NetworkRoutesLoading = () => (
   <FlexGroup justifyContent="center" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="xl" />
@@ -23,4 +23,4 @@ export const NetworkTabsLoading = () => (
   </FlexGroup>
 );
 
-NetworkTabsLoading.displayName = 'NetworkTabsLoading';
+NetworkRoutesLoading.displayName = 'NetworkRoutesLoading';

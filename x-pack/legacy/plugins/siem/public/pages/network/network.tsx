@@ -28,11 +28,9 @@ import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 
-import { navTabsNetwork } from './nav_tabs';
-import { NetworkComponentProps } from './types';
+import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
 
-import { NetworkTabs } from './network_tabs';
-import { NetworkTabsLoading } from './network_tabs_loading';
+import { NetworkComponentProps } from './types';
 
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 const sourceId = 'default';
@@ -106,7 +104,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   </KpiNetworkQuery>
 
                   {isInitializing ? (
-                    <NetworkTabsLoading />
+                    <NetworkRoutesLoading />
                   ) : (
                     <>
                       <EuiSpacer />
@@ -119,7 +117,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
                       <EuiSpacer />
 
-                      <NetworkTabs
+                      <NetworkRoutes
                         to={to}
                         filterQuery={filterQuery}
                         isInitializing={isInitializing}

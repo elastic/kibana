@@ -6,11 +6,14 @@
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { NavTab } from '../../../components/navigation/types';
 import { FlowTargetNew } from '../../../graphql/types';
 import { networkModel } from '../../../store';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { NarrowDateRange } from '../../../components/ml/types';
 import { GlobalTimeArgs } from '../../../containers/global_time';
+
+import { SetAbsoluteRangeDatePicker } from '../types';
 
 interface QueryTabBodyProps {
   type: networkModel.NetworkType;
@@ -29,3 +32,32 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps &
   Pick<GlobalTimeArgs, 'to' | 'from' | 'isInitializing'> & {
     narrowDateRange: NarrowDateRange;
   };
+
+export type NetworkRoutesProps = GlobalTimeArgs & {
+  networkPagePath: string;
+  type: networkModel.NetworkType;
+  filterQuery?: string | ESTermQuery;
+  indexPattern: StaticIndexPattern;
+  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
+};
+
+export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.dns & NetworkRouteType.ips;
+
+type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
+  NetworkRouteType.anomalies;
+
+type KeyNetworkNavTab = KeyNetworkNavTabWithoutMlPermission | KeyNetworkNavTabWithMlPermission;
+
+export type NetworkNavTab = Record<KeyNetworkNavTab, NavTab>;
+
+export enum NetworkRouteType {
+  dns = 'dns',
+  ips = 'ips',
+  anomalies = 'anomalies',
+}
+
+export type GetNetworkRoutePath = (
+  pagePath: string,
+  capabilitiesFetched: boolean,
+  hasMlUserPermission: boolean
+) => string;

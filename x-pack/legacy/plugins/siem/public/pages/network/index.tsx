@@ -12,30 +12,14 @@ import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_use
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
-import { GetNetworkTabPath, NetworkTabType } from './types';
 import { GlobalTime } from '../../containers/global_time';
+import { getNetworkRoutePath } from './navigation';
+import { NetworkRouteType } from './navigation/types';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 const networkPagePath = `/:pageName(network)`;
 const ipDetailsPagePath = `${networkPagePath}/ip/:detailName`;
-
-const getNetworkTabPath: GetNetworkTabPath = (
-  pagePath,
-  capabilitiesFetched,
-  hasMlUserPermission
-) => {
-  if (capabilitiesFetched && !hasMlUserPermission) {
-    return `${pagePath}/:tabName(${NetworkTabType.dns}|${NetworkTabType.ips})`;
-  }
-
-  return (
-    `${pagePath}/:tabName(` +
-    `${NetworkTabType.dns}|` +
-    `${NetworkTabType.ips}|` +
-    `${NetworkTabType.anomalies})`
-  );
-};
 
 export const NetworkContainer = React.memo<Props>(() => {
   const capabilities = useContext(MlCapabilitiesContext);
@@ -46,7 +30,7 @@ export const NetworkContainer = React.memo<Props>(() => {
         <Switch>
           <Route
             strict
-            path={getNetworkTabPath(
+            path={getNetworkRoutePath(
               networkPagePath,
               capabilities.capabilitiesFetched,
               hasMlUserPermissions(capabilities)
@@ -84,7 +68,7 @@ export const NetworkContainer = React.memo<Props>(() => {
           <Route
             path="/network/"
             render={({ location: { search = '' } }) => (
-              <Redirect from="/network/" to={`/network/${NetworkTabType.dns}${search}`} />
+              <Redirect from="/network/" to={`/network/${NetworkRouteType.dns}${search}`} />
             )}
           />
         </Switch>

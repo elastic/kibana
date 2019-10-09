@@ -8,16 +8,16 @@ import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiFlexItem } from '@elastic/eui';
 
-import { IPsQueryTabBody } from './navigation/ips_query_tab_body';
-import { AnomaliesQueryTabBody } from './navigation/anomalies_query_tab_body';
-import { DnsQueryTabBody } from './navigation/dns_query_tab_body';
-import { FlowTargetNew } from '../../graphql/types';
-import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
+import { FlowTargetNew } from '../../../graphql/types';
+import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 
+import { IPsQueryTabBody } from './ips_query_tab_body';
+import { AnomaliesQueryTabBody } from './anomalies_query_tab_body';
+import { DnsQueryTabBody } from './dns_query_tab_body';
 import { ConditionalFlexGroup } from './conditional_flex_group';
-import { NetworkTabsProps, NetworkTabType } from './types';
+import { NetworkRoutesProps, NetworkRouteType } from './types';
 
-export const NetworkTabs = ({
+export const NetworkRoutes = ({
   networkPagePath,
   type,
   to,
@@ -27,7 +27,7 @@ export const NetworkTabs = ({
   indexPattern,
   setQuery,
   setAbsoluteRangeDatePicker,
-}: NetworkTabsProps) => {
+}: NetworkRoutesProps) => {
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -62,11 +62,11 @@ export const NetworkTabs = ({
   return (
     <Switch>
       <Route
-        path={`${networkPagePath}/:tabName(${NetworkTabType.dns})`}
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.dns})`}
         render={() => <DnsQueryTabBody {...tabProps} />}
       />
       <Route
-        path={`${networkPagePath}/:tabName(${NetworkTabType.ips})`}
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.ips})`}
         render={() => (
           <ConditionalFlexGroup direction="column">
             <EuiFlexItem>
@@ -80,11 +80,11 @@ export const NetworkTabs = ({
         )}
       />
       <Route
-        path={`${networkPagePath}/:tabName(${NetworkTabType.anomalies})`}
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}
         render={() => <AnomaliesQueryTabBody {...anomaliesProps} />}
       />
     </Switch>
   );
 };
 
-NetworkTabs.displayName = 'NetworkTabs';
+NetworkRoutes.displayName = 'NetworkRoutes';
