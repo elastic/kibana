@@ -105,6 +105,18 @@ const apiClient = {
   getFieldsForWildcard: jest.fn(),
 };
 
+const notifications = {
+  toasts: {
+    addDanger: jest.fn(),
+    addError: jest.fn(),
+    add: jest.fn(),
+    addWarning: jest.fn(),
+    addSuccess: jest.fn(),
+    remove: jest.fn(),
+    get$: jest.fn(),
+  },
+};
+
 // helper function to create index patterns
 function create(id: string, payload?: any): Promise<IndexPattern> {
   const indexPattern = new IndexPattern(
@@ -112,7 +124,8 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     (cfg: any) => config.get(cfg),
     savedObjectsClient as any,
     apiClient,
-    patternCache
+    patternCache,
+    notifications
   );
 
   setDocsourcePayload(id, payload);
@@ -374,7 +387,8 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache
+      patternCache,
+      notifications
     );
     await pattern.init();
 
@@ -386,7 +400,8 @@ describe('IndexPattern', () => {
       (cfg: any) => config.get(cfg),
       savedObjectsClient as any,
       apiClient,
-      patternCache
+      patternCache,
+      notifications
     );
     await samePattern.init();
 

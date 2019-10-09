@@ -33,6 +33,7 @@ export {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
+  SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,

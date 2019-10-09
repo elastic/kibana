@@ -13,20 +13,18 @@ interface UnmuteInstanceRequest extends Hapi.Request {
   };
 }
 
-export function unmuteAlertInstanceRoute(server: Hapi.Server) {
-  server.route({
-    method: 'POST',
-    path: '/api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute',
-    options: {
-      tags: ['access:alerting-all'],
-      response: {
-        emptyStatusCode: 204,
-      },
+export const unmuteAlertInstanceRoute = {
+  method: 'POST',
+  path: '/api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute',
+  config: {
+    tags: ['access:alerting-all'],
+    response: {
+      emptyStatusCode: 204,
     },
-    async handler(request: UnmuteInstanceRequest, h: Hapi.ResponseToolkit) {
-      const alertsClient = request.getAlertsClient!();
-      await alertsClient.unmuteInstance(request.params);
-      return h.response();
-    },
-  });
-}
+  },
+  async handler(request: UnmuteInstanceRequest, h: Hapi.ResponseToolkit) {
+    const alertsClient = request.getAlertsClient!();
+    await alertsClient.unmuteInstance(request.params);
+    return h.response();
+  },
+};
