@@ -53,7 +53,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
       placeholder="0,0.[000]b"
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
     samples={
       Array [
         Object {

@@ -53,7 +53,7 @@ exports[`NumberFormatEditor should render normally 1`] = `
       placeholder="0,0.[000]"
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
     samples={
       Array [
         Object {
