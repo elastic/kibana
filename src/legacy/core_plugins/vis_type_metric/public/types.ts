@@ -17,33 +17,34 @@
  * under the License.
  */
 
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
 import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
-import { Alignments, GaugeTypes } from './utils/collections';
-import { ColorSchemaVislibParams, Labels, Style } from './types';
+import { SchemaConfig } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
+import { Labels, Style } from '../../kbn_vislib_vis_types/public/types';
 
-interface Gauge extends ColorSchemaVislibParams {
-  backStyle: 'Full';
-  gaugeStyle: 'Full';
-  orientation: 'vertical';
-  type: 'meter';
-  alignment: Alignments;
-  colorsRange: RangeValues[];
-  extendRange: boolean;
-  gaugeType: GaugeTypes;
-  labels: Labels;
+export const visType = 'metric';
+
+export interface DimensionsVisParam {
+  metrics: SchemaConfig[];
+  bucket?: SchemaConfig[];
+}
+
+export interface MetricVisParam {
   percentageMode: boolean;
-  scale: {
-    show: boolean;
-    labels: false;
-    color: 'rgba(105,112,125,0.2)';
-  };
+  useRanges: boolean;
+  colorSchema: ColorSchemas;
+  metricColorMode: ColorModes;
+  colorsRange: RangeValues[];
+  labels: Labels;
+  invertColors: boolean;
   style: Style;
 }
 
-export interface GaugeVisParams {
-  type: 'gauge';
+export interface VisParams {
   addTooltip: boolean;
   addLegend: boolean;
-  isDisplayWarning: boolean;
-  gauge: Gauge;
+  dimensions: DimensionsVisParam;
+  metric: MetricVisParam;
+  type: typeof visType;
 }
