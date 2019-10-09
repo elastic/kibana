@@ -58,7 +58,7 @@ export class ActionsPlugin implements Plugin<any, any> {
     const esSection = getSection('elasticsearch');
     esSection.register('actions', {
       display: i18n.translate(
-        'xpack.actions.sections.actionsList.managementSection.actionsDisplayName',
+        'xpack.alertingUI.sections.actionsList.managementSection.actionsDisplayName',
         {
           defaultMessage: 'Alert Actions',
         }

@@ -14,7 +14,7 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'actions',
     title: 'Actions', // This is a product name so we don't translate it.
-    description: i18n.translate('xpack.actions.ActionsDescription', {
+    description: i18n.translate('xpack.alertingUI.ActionsDescription', {
       defaultMessage: 'Data by creating, managing, and monitoring actions.',
     }),
     icon: 'actionsApp',

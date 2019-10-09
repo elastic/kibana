@@ -17,7 +17,7 @@ export function PageErrorNotExist({ id }: { id: any }) {
       title={
         <h1>
           <FormattedMessage
-            id="xpack.actions.pageErrorNotExist.title"
+            id="xpack.alertingUI.pageErrorNotExist.title"
             defaultMessage="Couldn't find action"
           />
         </h1>
@@ -25,7 +25,7 @@ export function PageErrorNotExist({ id }: { id: any }) {
       body={
         <p>
           <FormattedMessage
-            id="xpack.actions.pageErrorNotExist.description"
+            id="xpack.alertingUI.pageErrorNotExist.description"
             defaultMessage="A action with ID '{id}' could not be found."
             values={{ id }}
           />

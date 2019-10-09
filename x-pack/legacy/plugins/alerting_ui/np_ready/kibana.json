@@ -1,7 +1,6 @@
 {
-    "id": "xpackActions",
+    "id": "xpackAlertingUI",
     "version": "kibana",
     "server": false,
     "ui": true
   }
-  

@@ -32,7 +32,7 @@ export const ActionsList = ({ api }: ActionsListProps) => {
   const actionTypesTableColumns = [
     {
       field: 'id',
-      name: i18n.translate('xpack.actions.sections.actionTypesList.actionTypesTable.idHeader', {
+      name: i18n.translate('xpack.alertingUI.sections.actionTypesList.actionTypesTable.idHeader', {
         defaultMessage: 'Id',
       }),
       sortable: true,
@@ -41,7 +41,7 @@ export const ActionsList = ({ api }: ActionsListProps) => {
     {
       field: 'name',
       name: i18n.translate(
-        'xpack.actions.sections.actionTypesList.actionTypesTable.actionTypeHeader',
+        'xpack.alertingUI.sections.actionTypesList.actionTypesTable.actionTypeHeader',
         {
           defaultMessage: 'Action Type',
         }
@@ -61,7 +61,7 @@ export const ActionsList = ({ api }: ActionsListProps) => {
         isSelectable={true}
         message={
           <FormattedMessage
-            id="xpack.actions.sections.actionTypesList.actionTypesTable.noActionTypesMessage"
+            id="xpack.alertingUI.sections.actionTypesList.actionTypesTable.noActionTypesMessage"
             defaultMessage="No action types to show"
           />
         }
@@ -78,7 +78,7 @@ export const ActionsList = ({ api }: ActionsListProps) => {
 
   const ActionTypesLoadingIndicator = () => (
     <FormattedMessage
-      id="xpack.actions.sections.actionTypesList.loadingActionTypesDescription"
+      id="xpack.alertingUI.sections.actionTypesList.loadingActionTypesDescription"
       defaultMessage="Loading action types"
     />
   );
@@ -127,7 +127,7 @@ export const NoActionTypes = () => {
         title={
           <h1>
             <FormattedMessage
-              id="xpack.actions.sections.actoinsTypesList.emptyPromptTitle"
+              id="xpack.alertingUI.sections.actoinsTypesList.emptyPromptTitle"
               defaultMessage="You don’t have any action types yet"
             />
           </h1>
