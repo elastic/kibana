@@ -9,11 +9,7 @@ import React, { FC, useEffect, Fragment } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContentBody } from '@elastic/eui';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
-import {
-  jobCreatorFactory,
-  isSingleMetricJobCreator,
-  isPopulationJobCreator,
-} from '../../common/job_creator';
+import { jobCreatorFactory } from '../../common/job_creator';
 import {
   JOB_TYPE,
   DEFAULT_MODEL_MEMORY_LIMIT,
@@ -25,7 +21,6 @@ import { JobValidator } from '../../common/job_validator';
 import { useKibanaContext } from '../../../../contexts/kibana';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { TimeBuckets } from '../../../../util/time_buckets';
-import { newJobDefaults } from '../../../new_job/utils/new_job_defaults';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { expandCombinedJobConfig } from '../../common/job_creator/configs';
 
@@ -41,7 +36,6 @@ export interface PageProps {
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const kibanaContext = useKibanaContext();
 
-  const jobDefaults = newJobDefaults();
   const jobCreator = jobCreatorFactory(jobType)(
     kibanaContext.currentIndexPattern,
     kibanaContext.currentSavedSearch,
@@ -88,15 +82,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     // creating a new job
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
 
-    if (isPopulationJobCreator(jobCreator) === true) {
-      // for population jobs use the default mml (1GB)
-      jobCreator.modelMemoryLimit = jobDefaults.anomaly_detectors.model_memory_limit;
-    } else {
-      // for all other jobs, use 10MB
+    if (jobCreator.type !== JOB_TYPE.POPULATION && jobCreator.type !== JOB_TYPE.ADVANCED) {
+      // for all other than population or advanced, use 10MB
       jobCreator.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
     }
 
-    if (isSingleMetricJobCreator(jobCreator) === true) {
+    if (jobCreator.type === JOB_TYPE.SINGLE_METRIC) {
       jobCreator.modelPlot = true;
     }
 
