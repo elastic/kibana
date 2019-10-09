@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { createBytesFormat } from '../bytes';
-import { FieldFormat } from '../../../../../../../plugins/data/common/field_formats';
+import { createPercentFormat } from './percent';
 
-const BytesFormat = createBytesFormat(FieldFormat);
+const PercentFormat = createPercentFormat();
 
-describe('BytesFormat', function () {
+describe('PercentFormat', () => {
+  const config: Record<string, any> = {};
 
-  const config = {};
-  config['format:bytes:defaultPattern'] = '0,0.[000]b';
-  const getConfig = (key) => config[key];
+  config['format:percent:defaultPattern'] = '0,0.[000]%';
 
-  it('default pattern', ()=> {
-    const formatter = new BytesFormat({}, getConfig);
-    expect(formatter.convert(5150000)).to.be('4.911MB');
+  const getConfig = (key: string) => config[key];
+
+  test('default pattern', () => {
+    const formatter = new PercentFormat({}, getConfig);
+
+    expect(formatter.convert(0.99999)).toBe('99.999%');
   });
 
-  it('custom pattern', ()=> {
-    const formatter = new BytesFormat({ pattern: '0,0b' }, getConfig);
-    expect(formatter.convert('5150000')).to.be('5MB');
-  });
+  test('custom pattern', () => {
+    const formatter = new PercentFormat({ pattern: '0,0%' }, getConfig);
 
+    expect(formatter.convert('0.99999')).toBe('100%');
+  });
 });

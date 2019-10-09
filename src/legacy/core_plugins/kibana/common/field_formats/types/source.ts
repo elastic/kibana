@@ -17,9 +17,17 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { template, escape, keys } from 'lodash';
+// @ts-ignore
 import { noWhiteSpace } from '../../utils/no_white_space';
+// @ts-ignore
 import { shortenDottedString } from '../../utils/shorten_dotted_string';
+import {
+  FieldFormat,
+  KBN_FIELD_TYPES,
+  TextContextTypeConvert,
+  HtmlContextTypeConvert,
+} from '../../../../../../plugins/data/common/';
 
 const templateHtml = `
   <dl class="source truncate-by-height">
@@ -29,42 +37,47 @@ const templateHtml = `
       <%= ' ' %>
     <% }); %>
   </dl>`;
-const template = _.template(noWhiteSpace(templateHtml));
+const doTemplate = template(noWhiteSpace(templateHtml));
 
-export function createSourceFormat(FieldFormat) {
+export function createSourceFormat() {
   class SourceFormat extends FieldFormat {
-    constructor(params, getConfig) {
+    static id = '_source';
+    static title = '_source';
+    static fieldType = KBN_FIELD_TYPES._SOURCE;
+
+    private getConfig: Function;
+
+    constructor(params: Record<string, any>, getConfig: Function) {
       super(params);
 
       this.getConfig = getConfig;
     }
 
-    static id = '_source';
-    static title = '_source';
-    static fieldType = '_source';
-  }
+    textConvert: TextContextTypeConvert = value => JSON.stringify(value);
 
-  SourceFormat.prototype._convert = {
-    text: (value) => JSON.stringify(value),
-    html: function sourceToHtml(source, field, hit) {
-      if (!field) return _.escape(this.getConverterFor('text')(source));
+    htmlConvert: HtmlContextTypeConvert = (value, field, hit) => {
+      if (!field) {
+        const converter = this.getConverterFor('text') as Function;
+
+        return escape(converter(value));
+      }
 
       const highlights = (hit && hit.highlight) || {};
       const formatted = field.indexPattern.formatHit(hit);
-      const highlightPairs = [];
-      const sourcePairs = [];
-
+      const highlightPairs: any[] = [];
+      const sourcePairs: any[] = [];
       const isShortDots = this.getConfig('shortDots:enable');
-      _.keys(formatted).forEach((key) => {
+
+      keys(formatted).forEach(key => {
         const pairs = highlights[key] ? highlightPairs : sourcePairs;
-        const field = isShortDots ? shortenDottedString(key) : key;
+        const newField = isShortDots ? shortenDottedString(key) : key;
         const val = formatted[key];
-        pairs.push([field, val]);
+        pairs.push([newField, val]);
       }, []);
 
-      return template({ defPairs: highlightPairs.concat(sourcePairs) });
-    }
-  };
+      return doTemplate({ defPairs: highlightPairs.concat(sourcePairs) });
+    };
+  }
 
   return SourceFormat;
 }

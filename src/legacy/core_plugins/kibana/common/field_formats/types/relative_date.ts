@@ -17,9 +17,36 @@
  * under the License.
  */
 
-export const DEFAULT_COLOR = {
-  range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
-  regex: '<insert regex>',
-  text: '#000000',
-  background: '#ffffff'
-};
+import moment from 'moment';
+import {
+  FieldFormat,
+  KBN_FIELD_TYPES,
+  TextContextTypeConvert,
+} from '../../../../../../plugins/data/common/';
+
+export function createRelativeDateFormat() {
+  class RelativeDateFormat extends FieldFormat {
+    static id = 'relative_date';
+    static title = 'Relative Date';
+    static fieldType = KBN_FIELD_TYPES.DATE;
+
+    constructor(params: Record<string, any>) {
+      super(params);
+    }
+
+    textConvert: TextContextTypeConvert = val => {
+      if (val === null || val === undefined) {
+        return '-';
+      }
+
+      const date = moment(val);
+      if (date.isValid()) {
+        return date.fromNow();
+      } else {
+        return val;
+      }
+    };
+  }
+
+  return RelativeDateFormat;
+}

@@ -17,26 +17,11 @@
  * under the License.
  */
 
-import { analysePatternForFract } from './date_nanos';
+import { createNumeralFormat } from './_numeral';
 
-test('analysePatternForFract using timestamp format containing fractional seconds', () => {
-  expect(analysePatternForFract('MMM, YYYY @ HH:mm:ss.SSS')).toMatchInlineSnapshot(`
-        Object {
-          "length": 3,
-          "pattern": "MMM, YYYY @ HH:mm:ss.SSS",
-          "patternEscaped": "MMM, YYYY @ HH:mm:ss.[SSS]",
-          "patternNanos": "SSS",
-        }
-    `);
-});
-
-test('analysePatternForFract using timestamp format without fractional seconds', () => {
-  expect(analysePatternForFract('MMM, YYYY @ HH:mm:ss')).toMatchInlineSnapshot(`
-    Object {
-      "length": 0,
-      "pattern": "MMM, YYYY @ HH:mm:ss",
-      "patternEscaped": "",
-      "patternNanos": "",
-    }
-  `);
-});
+export function createBytesFormat() {
+  return createNumeralFormat({
+    id: 'bytes',
+    title: 'Bytes',
+  });
+}
