@@ -28,21 +28,19 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({ onClick 
     !capabilities.canStartStopTransform;
 
   const createTransformButton = (
-    <>
-      <EuiButton
-        disabled={disabled}
-        fill
-        onClick={onClick}
-        iconType="plusInCircle"
-        size="s"
-        data-test-subj="transformButtonCreate"
-      >
-        <FormattedMessage
-          id="xpack.transform.transformList.createTransformButton"
-          defaultMessage="Create transform"
-        />
-      </EuiButton>
-    </>
+    <EuiButton
+      disabled={disabled}
+      fill
+      onClick={onClick}
+      iconType="plusInCircle"
+      size="s"
+      data-test-subj="transformButtonCreate"
+    >
+      <FormattedMessage
+        id="xpack.transform.transformList.createTransformButton"
+        defaultMessage="Create transform"
+      />
+    </EuiButton>
   );
 
   if (disabled) {

@@ -23,14 +23,6 @@ class DocumentationLinksService {
   public getTransformPluginDocUrl() {
     return `${this.esPluginDocBasePath}${TRANSFORM_DOC_PATHS.plugins}`;
   }
-
-  public getSnapshotDocUrl() {
-    return `${this.esDocBasePath}/modules-snapshots.html#snapshots-take-snapshot`;
-  }
-
-  public getCronUrl() {
-    return `${this.esStackOverviewDocBasePath}/trigger-schedule.html#schedule-cron`;
-  }
 }
 
 export const documentationLinksService = new DocumentationLinksService();
