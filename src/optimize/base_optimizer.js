@@ -45,6 +45,7 @@ const STATS_WARNINGS_FILTER = new RegExp([
   '(export .* was not found in)',
   '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
 ].join(''));
+const IS_CODE_COVERAGE = process.env.CODE_COVERAGE === '1';
 
 function recursiveIssuer(m) {
   if (m.issuer) {
@@ -397,10 +398,7 @@ export default class BaseOptimizer {
                 loader: 'babel-loader',
                 options: {
                   babelrc: false,
-                  presets: [
-                    ISTANBUL_PRESET_PATH,
-                    BABEL_PRESET_PATH,
-                  ],
+                  presets: this.getPresets()
                 },
               }
             ]),
@@ -470,6 +468,22 @@ export default class BaseOptimizer {
       ]
     };
 
+    const coverageConfig = {
+      plugins: [
+        new WrapperPlugin({
+          test: /commons\.bundle\.js$/, // only wrap output of bundle files with '.js' extension
+          header: `
+            window.flushCoverageToLog = function () {
+              if (window.__coverage__) {
+                console.log('coveragejson:' + btoa(JSON.stringify(window.__coverage__)));
+              }
+            };
+            window.addEventListener('beforeunload', window.flushCoverageToLog);
+          `
+        }),
+      ]
+    };
+
     // in production we set the process.env.NODE_ENV and run
     // the terser minimizer over our bundles
     const productionConfig = {
@@ -490,6 +504,9 @@ export default class BaseOptimizer {
 
     return this.uiBundles.getExtendedConfig(
       webpackMerge(
+        IS_CODE_COVERAGE
+          ? coverageConfig
+          : {},
         commonConfig,
         IS_KIBANA_DISTRIBUTABLE
           ? isDistributableConfig
@@ -548,5 +565,11 @@ export default class BaseOptimizer {
         entryPoints[`plugin/${pluginId}`] = `${plugin.path}/public`;
         return entryPoints;
       }, {});
+  }
+
+  getPresets() {
+    return IS_CODE_COVERAGE
+      ? [ ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH, ]
+      : [ BABEL_PRESET_PATH, ];
   }
 }

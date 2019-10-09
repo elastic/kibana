@@ -34,6 +34,10 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
+  const codeCoverage: string = process.env.CODE_COVERAGE as string;
+  const coveragePrefix = 'coveragejson:';
+  const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
+  let logSubscription: undefined | Rx.Subscription;
 
   const { driver, By, until, consoleLog$ } = await initWebDriver(
     log,
@@ -48,11 +52,6 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
 
-  const coveragePrefix = 'coveragejson:';
-  const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
-  let coverageCounter = 1;
-  let logSubscription: undefined | Rx.Subscription;
-
   if (browserType === Browsers.Chrome) {
     // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
     // See: https://github.com/w3c/webdriver/issues/406
@@ -61,41 +60,45 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     log.info(
       `Chromedriver version: ${caps.get('chrome').chromedriverVersion}, w3c=${isW3CEnabled}`
     );
-    // We are running xpack tests with different configs and cleanup will delete collected coverage
-    // del.sync(coverageDir);
-    Fs.mkdirSync(coverageDir, { recursive: true });
 
-    logSubscription = pollForLogEntry$(
-      driver,
-      logging.Type.BROWSER,
-      config.get('browser.logPollingMs'),
-      lifecycle.cleanup$ as any
-    )
-      .pipe(
-        mergeMap(logEntry => {
-          if (logEntry.message.includes(coveragePrefix)) {
-            const id = coverageCounter++;
-            const timestamp = Date.now();
-            const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
-            const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
-            const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
+    if (codeCoverage === '1') {
+      let coverageCounter = 1;
+      // We are running xpack tests with different configs and cleanup will delete collected coverage
+      // del.sync(coverageDir);
+      Fs.mkdirSync(coverageDir, { recursive: true });
 
-            log.info('writing coverage to', path);
-            Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
-
-            // filter out this message
-            return [];
-          }
-
-          return [logEntry];
-        })
+      logSubscription = pollForLogEntry$(
+        driver,
+        logging.Type.BROWSER,
+        config.get('browser.logPollingMs'),
+        lifecycle.cleanup$ as any
       )
-      .subscribe({
-        next({ message, level: { name: level } }) {
-          const msg = message.replace(/\\n/g, '\n');
-          log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
-        },
-      });
+        .pipe(
+          mergeMap(logEntry => {
+            if (logEntry.message.includes(coveragePrefix)) {
+              const id = coverageCounter++;
+              const timestamp = Date.now();
+              const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
+              const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
+              const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
+
+              log.info('writing coverage to', path);
+              Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
+
+              // filter out this message
+              return [];
+            }
+
+            return [logEntry];
+          })
+        )
+        .subscribe({
+          next({ message, level: { name: level } }) {
+            const msg = message.replace(/\\n/g, '\n');
+            log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
+          },
+        });
+    }
   }
 
   lifecycle.on('beforeTests', async () => {
