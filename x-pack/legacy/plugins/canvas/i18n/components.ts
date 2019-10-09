@@ -660,6 +660,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadConfig.globalCSSTooltip', {
         defaultMessage: `Apply styles to all pages in this workpad`,
       }),
+    getNameLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.nameLabel', {
+        defaultMessage: 'Name',
+      }),
     getPageHeightLabel: () =>
       i18n.translate('xpack.canvas.workpadConfig.heightLabel', {
         defaultMessage: 'Height',
