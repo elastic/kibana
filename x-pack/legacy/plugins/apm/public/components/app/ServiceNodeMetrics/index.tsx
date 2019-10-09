@@ -61,8 +61,7 @@ export function ServiceNodeMetrics() {
     }
   }, [serviceName, serviceNodeName]);
 
-  const isLoading =
-    status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
     <div>

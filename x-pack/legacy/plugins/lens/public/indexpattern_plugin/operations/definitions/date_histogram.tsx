@@ -8,10 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiForm, EuiFormRow, EuiRange, EuiSwitch } from '@elastic/eui';
-import { IndexPattern } from '../../indexpattern';
 import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
+import { IndexPattern } from '../../types';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 

@@ -50,7 +50,7 @@ const AddToKqlComponent = React.memo<Props>(
 
 AddToKqlComponent.displayName = 'AddToKqlComponent';
 
-const HoverActionsContainer = styled(EuiPanel)`
+export const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
   display: flex;
   flex-direction: row;
