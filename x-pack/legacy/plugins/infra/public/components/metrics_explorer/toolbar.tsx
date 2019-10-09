@@ -25,6 +25,7 @@ import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
 import { SavedViewsToolbarControls } from '../saved_views/toolbar_control';
 import { MetricExplorerViewState } from '../../pages/infrastructure/metrics_explorer/use_metric_explorer_state';
+import { metricsExplorerViewSavedObjectType } from '../../../common/saved_objects/metrics_explorer_view';
 
 interface Props {
   derivedIndexPattern: StaticIndexPattern;
@@ -123,7 +124,7 @@ export const MetricsExplorerToolbar = ({
               chartOptions,
               currentTimerange: timeRange,
             }}
-            viewType={'METRIC_EXPLORER_VIEW'}
+            viewType={metricsExplorerViewSavedObjectType}
             onViewChange={onViewStateChange}
           />
         </EuiFlexItem>
