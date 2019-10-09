@@ -72,11 +72,9 @@ export const MonitorListComponent = (props: Props) => {
       return {
         ...map,
         [id]: (
-          <>
-            <MonitorListDrawer
-              summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
-            />
-          </>
+          <MonitorListDrawer
+            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
+          />
         ),
       };
     }, {});
