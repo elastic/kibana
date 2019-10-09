@@ -24,14 +24,6 @@ import {
 } from '../../../../../core/public/mocks';
 const injectedMetadataMock = injectedMetadataServiceMock.createStartContract();
 
-// export const MockNotificationsService = notificationServiceMock.create();
-// export const NotificationServiceConstructor = jest
-//   .fn()
-//   .mockImplementation(() => MockNotificationsService);
-// jest.doMock('./notifications', () => ({
-
-// }));
-
 export function mockInjectedMetadata({ telemetryOptedIn }) {
   const mockGetInjectedVar = jest.fn().mockImplementation((key) => {
     switch (key) {
