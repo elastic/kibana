@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 
-import { IEmbeddable } from '../../../../../../embeddable_api/public/np_ready/public';
+import { IEmbeddable, ViewMode } from '../../../../../../embeddable_api/public/np_ready/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import {
   IAction,
@@ -67,6 +67,12 @@ export class ChangeViewAction implements IAction<ActionContext> {
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
+    if (embeddable.getInput().viewMode) {
+      if (embeddable.getInput().viewMode === ViewMode.VIEW) {
+        return false;
+      }
+    }
+
     return Boolean(embeddable.parent && isDashboard(embeddable.parent));
   }
 
@@ -80,7 +86,7 @@ export class ChangeViewAction implements IAction<ActionContext> {
     openChangeViewFlyout({
       embeddable: dash,
       core: this.core,
-      savedobjectfinder: this.savedobjectfinder,
+      savedObjectFinder: this.savedobjectfinder,
       notifications: this.notifications,
       viewToRemove: view,
     });

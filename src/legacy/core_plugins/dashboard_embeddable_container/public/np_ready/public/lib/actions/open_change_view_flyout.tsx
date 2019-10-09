@@ -32,11 +32,11 @@ import { NotificationsStart } from '../../../../../../../../core/public';
 export async function openChangeViewFlyout(options: {
   embeddable: IContainer;
   core: CoreStart;
-  savedobjectfinder: React.ComponentType<any>;
+  savedObjectFinder: React.ComponentType<any>;
   notifications: NotificationsStart;
   viewToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }) {
-  const { embeddable, core, viewToRemove, savedobjectfinder, notifications } = options;
+  const { embeddable, core, viewToRemove, savedObjectFinder, notifications } = options;
   const flyoutSession = core.overlays.openFlyout(
     <ChangeViewFlyout
       container={embeddable}
@@ -46,7 +46,7 @@ export async function openChangeViewFlyout(options: {
         }
       }}
       viewToRemove={viewToRemove}
-      sof={savedobjectfinder}
+      savedObjectsFinder={savedObjectFinder}
       notifications={notifications}
     />,
     {

@@ -23,7 +23,13 @@ import React from 'react';
 import { NotificationsStart } from 'src/core/public';
 import { DashboardPanelState } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiGlobalToastListToast as Toast,
+} from '@elastic/eui';
 
 import { IContainer } from '../../../../../../embeddable_api/public/np_ready/public';
 import {
@@ -36,14 +42,16 @@ import { start } from '../../../../../../embeddable_api/public/np_ready/public/l
 
 interface Props {
   container: IContainer;
-  sof: React.ComponentType<any>;
+  savedObjectsFinder: React.ComponentType<any>;
   onClose: () => void;
   notifications: NotificationsStart;
   viewToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }
 
 export class ChangeViewFlyout extends React.Component<Props> {
-  private lastToast: any;
+  private lastToast: Toast = {
+    id: 'viewReplaceToast',
+  };
 
   constructor(props: Props) {
     super(props);
@@ -100,7 +108,7 @@ export class ChangeViewFlyout extends React.Component<Props> {
   };
 
   public render() {
-    const SavedObjectFinder = this.props.sof;
+    const SavedObjectFinder = this.props.savedObjectsFinder;
     const savedObjectsFinder = (
       <SavedObjectFinder
         noItemsMessage={i18n.translate(
@@ -120,14 +128,14 @@ export class ChangeViewFlyout extends React.Component<Props> {
       />
     );
 
-    const vtr = 'Replace view ' + this.props.viewToRemove.getTitle() + ' with:';
+    const viewToReplace = 'Replace view ' + this.props.viewToRemove.getTitle() + ' with:';
 
     return (
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardChangeView">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <span>{vtr}</span>
+              <span>{viewToReplace}</span>
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
