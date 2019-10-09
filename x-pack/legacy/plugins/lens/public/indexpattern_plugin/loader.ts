@@ -21,7 +21,7 @@ import {
   IndexPatternField,
 } from './types';
 import { updateLayerIndexPattern } from './state_helpers';
-import { DateRange, ExistingFields } from '../../common';
+import { DateRange, ExistingFields } from '../../common/types';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -50,7 +50,6 @@ interface SavedRestrictionsObject {
 type SetState = StateSetter<IndexPatternPrivateState>;
 type SavedRestrictionsInfo = SavedRestrictionsObject | undefined;
 type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>;
-
 type ErrorHandler = (err: Error) => void;
 
 export async function loadIndexPatterns({
