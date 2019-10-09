@@ -17,48 +17,42 @@
  * under the License.
  */
 
-export function HomePageProvider({ getService }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function HomePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
 
   class HomePage {
-    async clickSynopsis(title) {
+    async clickSynopsis(title: string) {
       await testSubjects.click(`homeSynopsisLink${title}`);
     }
 
-    async doesSynopsisExist(title) {
+    async doesSynopsisExist(title: string) {
       return await testSubjects.exists(`homeSynopsisLink${title}`);
     }
 
-    async doesSampleDataSetExist(id) {
+    async doesSampleDataSetExist(id: string) {
       return await testSubjects.exists(`sampleDataSetCard${id}`);
     }
 
-    async doesSampleDataSetSuccessfulInstallToastExist() {
-      return await testSubjects.exists('sampleDataSetInstallToast');
-    }
-
-    async doesSampleDataSetSuccessfulUninstallToastExist() {
-      return await testSubjects.exists('sampleDataSetUninstallToast');
-    }
-
-    async isSampleDataSetInstalled(id) {
+    async isSampleDataSetInstalled(id: string) {
       return await testSubjects.exists(`removeSampleDataSet${id}`);
     }
 
-    async addSampleDataSet(id) {
+    async addSampleDataSet(id: string) {
       await testSubjects.click(`addSampleDataSet${id}`);
       await this._waitForSampleDataLoadingAction(id);
     }
 
-    async removeSampleDataSet(id) {
+    async removeSampleDataSet(id: string) {
       await testSubjects.click(`removeSampleDataSet${id}`);
       await this._waitForSampleDataLoadingAction(id);
     }
 
     // loading action is either uninstall and install
-    async _waitForSampleDataLoadingAction(id) {
+    async _waitForSampleDataLoadingAction(id: string) {
       const sampleDataCard = await testSubjects.find(`sampleDataSetCard${id}`);
       await retry.try(async () => {
         // waitForDeletedByCssSelector needs to be inside retry because it will timeout at least once
@@ -67,8 +61,8 @@ export function HomePageProvider({ getService }) {
       });
     }
 
-    async launchSampleDataSet(id) {
-      if(await find.existsByCssSelector(`#sampleDataLinks${id}`)) {
+    async launchSampleDataSet(id: string) {
+      if (await find.existsByCssSelector(`#sampleDataLinks${id}`)) {
         // omits cloud test failures
         await find.clickByCssSelectorWhenNotDisabled(`#sampleDataLinks${id}`);
         await find.clickByCssSelector('.euiContextMenuItem:nth-of-type(1)');
@@ -81,14 +75,13 @@ export function HomePageProvider({ getService }) {
       await retry.try(async () => {
         await testSubjects.click('loadSavedObjects');
         const successMsgExists = await testSubjects.exists('loadSavedObjects_success', {
-          timeout: 5000
+          timeout: 5000,
         });
         if (!successMsgExists) {
           throw new Error('Failed to load saved objects');
         }
       });
     }
-
   }
 
   return new HomePage();
