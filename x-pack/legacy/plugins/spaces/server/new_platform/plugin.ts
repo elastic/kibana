@@ -5,7 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { SavedObjectsService, CoreSetup } from 'src/core/server';
+import { SavedObjectsLegacyService, CoreSetup } from 'src/core/server';
 import { Logger, PluginInitializerContext } from 'src/core/server';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import { Legacy } from 'kibana';
@@ -20,7 +20,6 @@ import { checkLicense } from '../lib/check_license';
 import { spacesSavedObjectsClientWrapperFactory } from '../lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { SpacesAuditLogger } from '../lib/audit_logger';
 import { createSpacesTutorialContextFactory } from '../lib/spaces_tutorial_context_factory';
-import { initInternalApis } from '../routes/api/v1';
 import { initExternalSpacesApi } from '../routes/api/external';
 import { getSpacesUsageCollector } from '../lib/get_spaces_usage_collector';
 import { SpacesService } from './spaces_service';
@@ -36,7 +35,7 @@ import { initSpacesRequestInterceptors } from '../lib/request_interceptors';
  * to function properly.
  */
 export interface LegacyAPI {
-  savedObjects: SavedObjectsService;
+  savedObjects: SavedObjectsLegacyService;
   usage: {
     collectorSet: {
       register: (collector: any) => void;
@@ -177,13 +176,6 @@ export class Plugin {
         xpackMain: xpackMainPlugin,
       })
     );
-
-    initInternalApis({
-      legacyRouter: legacyAPI.router,
-      getLegacyAPI: this.getLegacyAPI,
-      spacesService,
-      xpackMain: xpackMainPlugin,
-    });
 
     initExternalSpacesApi({
       legacyRouter: legacyAPI.router,

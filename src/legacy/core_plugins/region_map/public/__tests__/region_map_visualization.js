@@ -39,7 +39,7 @@ import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
-import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
@@ -196,7 +196,7 @@ describe('RegionMapsVisualizationTests', function () {
       imageComparator.destroy();
     });
 
-    it('should instantiate at zoom level 2', async function () {
+    it('should instantiate at zoom level 2 (may fail in dev env)', async function () {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -236,7 +236,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should resize', async function () {
+    it('should resize (may fail in dev env)', async function () {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -273,7 +273,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixelsAfterSecondResize).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should redo data', async function () {
+    it('should redo data (may fail in dev env)', async function () {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -317,7 +317,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixelsAfterDataChangeAndResize).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should redo data and color ramp', async function () {
+    it('should redo data and color ramp (may fail in dev env)', async function () {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,

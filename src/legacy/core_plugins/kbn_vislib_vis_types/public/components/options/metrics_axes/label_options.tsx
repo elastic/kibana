@@ -27,7 +27,7 @@ import { BasicVislibParams, Axis } from '../../../types';
 import { SelectOption, SwitchOption, TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../utils/collections';
 
-interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
+export interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
   axis: Axis;
   axesName: 'categoryAxes' | 'valueAxes';
   index: number;
@@ -84,7 +84,9 @@ function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOpt
       />
 
       <SwitchOption
-        dataTestSubj={`${axesName === 'valueAxes' ? 'y' : 'x'}AxisFilterLabelsCheckbox-${axis.id}`}
+        data-test-subj={`${axesName === 'valueAxes' ? 'y' : 'x'}AxisFilterLabelsCheckbox-${
+          axis.id
+        }`}
         disabled={!axis.labels.show}
         label={i18n.translate(
           'kbnVislibVisTypes.controls.pointSeries.categoryAxis.filterLabelsLabel',

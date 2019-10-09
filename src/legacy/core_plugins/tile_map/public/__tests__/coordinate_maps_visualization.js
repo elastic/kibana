@@ -33,7 +33,7 @@ import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_
 import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
-import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 
 import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
@@ -172,7 +172,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       imageComparator.destroy();
     });
 
-    it('should initialize OK', async function () {
+    it('should initialize OK (may fail in dev env)', async function () {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
@@ -211,7 +211,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should toggle back&forth OK between mapTypes', async function () {
+    it('should toggle back&forth OK between mapTypes (may fail in dev env)', async function () {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,
@@ -244,7 +244,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should toggle to different color schema ok', async function () {
+    it('should toggle to different color schema ok (may fail in dev env)', async function () {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
       await coordinateMapVisualization.render(dummyESResponse, vis.params, {
         resize: false,

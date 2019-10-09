@@ -20,7 +20,7 @@ export const UNIT = (totalCount: number) =>
 export const DOMAIN_NAME = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.columns.domainNameTitle',
   {
-    defaultMessage: 'Domain name',
+    defaultMessage: 'Domain',
   }
 );
 

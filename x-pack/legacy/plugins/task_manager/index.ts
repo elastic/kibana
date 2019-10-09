@@ -12,7 +12,13 @@ import mappings from './mappings.json';
 import { migrations } from './migrations';
 
 export { PluginSetupContract as TaskManager };
-export { TaskInstance, ConcreteTaskInstance, TaskRunCreatorFunction } from './task';
+export {
+  TaskInstance,
+  ConcreteTaskInstance,
+  TaskRunCreatorFunction,
+  TaskStatus,
+  RunContext,
+} from './task';
 
 export function taskManager(kibana: any) {
   return new kibana.Plugin({
@@ -73,7 +79,7 @@ export function taskManager(kibana: any) {
           // executing. Saved objects repository waits for migrations to finish before
           // finishing the request. To avoid this, we'll await within a separate
           // function block.
-          await this.kbnServer.server.kibanaMigrator.awaitMigration();
+          await this.kbnServer.server.kibanaMigrator.runMigrations();
           plugin.start();
         })();
       });

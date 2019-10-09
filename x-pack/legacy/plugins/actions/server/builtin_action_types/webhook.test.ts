@@ -9,6 +9,7 @@ import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionType } from '../types';
 import { createActionTypeRegistry } from './index.test';
+import { Logger } from '../../../../../../src/core/server';
 
 const ACTION_TYPE_ID = '.webhook';
 const configUtilsMock: ActionsConfigurationUtilities = {
@@ -19,10 +20,12 @@ const configUtilsMock: ActionsConfigurationUtilities = {
 };
 
 let actionType: ActionType;
+let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
-  const actionTypeRegistry = createActionTypeRegistry();
+  const { logger, actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  mockedLogger = logger;
 });
 
 describe('actionType', () => {
@@ -154,9 +157,12 @@ describe('config validation', () => {
 
   test('config validation returns an error if the specified URL isnt whitelisted', () => {
     actionType = getActionType({
-      ...configUtilsMock,
-      ensureWhitelistedUri: _ => {
-        throw new Error(`target url is not whitelisted`);
+      logger: mockedLogger,
+      configurationUtilities: {
+        ...configUtilsMock,
+        ensureWhitelistedUri: _ => {
+          throw new Error(`target url is not whitelisted`);
+        },
       },
     });
 
