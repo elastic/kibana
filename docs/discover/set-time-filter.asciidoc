@@ -1,46 +1,56 @@
 [[set-time-filter]]
 == Setting the time filter
-You can
-set a time filter if your index contains time-based events and a time-field is
-configured for the selected index pattern.
-By default, the time filter is set to the last 15 minutes. You can use the time
-picker to change the time filter, or select a specific time 
+If your index contains time-based events, and a time-field is configured for the 
+selected index pattern, set a time filter that displays only the data within the 
+specified time range.
+
+You can use the time filter to change the time range, or select a specific time 
 range in the histogram.
 
-
 [float]
-=== Filter with the time picker
+[[use-time-filter]]
+=== Use the time filter
 
-To quickly select from popular time range options, click the calendar 
-dropdown image:infrastructure/images/time-filter-calendar.png[]. 
+Use the time filter to change the time range. By default, the time filter is set 
+to the last 15 minutes.
 
+. Click image:images/time-filter-calendar.png[]. 
+
+. Choose one of the following:
+
+* *Quick select* to use a recent time range, then use the back and forward 
+  arrows to move through the time ranges.
+  
+* *Commonly used* to use a time range from options such as *Last 15 minutes*, 
+  *Today*, and *Week to date*.
+  
+* *Recently used date ranges* to use a previously selected data range that 
+  you recently used.
+  
+* *Refresh every* to specify an automatic refresh rate.
++
 [role="screenshot"]
-image::images/Timepicker-View.png[Time picker menu]
+image::images/Timepicker-View.png[Time filter menu]
 
-With the time picker, you can choose from:
-
-* *Quick select* to choose a recent time range, and use the back and forward arrows to move through the time ranges.
-* *Commonly used* to choose a time range from options such as *Last 15 minutes*, *Today*, and *Week to date*.
-* *Refresh every* to specify an auto-refresh rate.
-
-For control over the start and end times, 
-click the start time or end time in 
-the bar next to the calendar dropdown. In this popup, 
-you can select *Absolute*, *Relative* or *Now*,
-and then specify the required options.
-
+. To set the start and end times, click the bar next to the time filter. 
+In the popup, select *Absolute*, *Relative* or *Now*, then specify the required 
+options.
++
+[role="screenshot"]
+image::images/time-filter-bar.png[Time filter bar]
 
 [float]
-=== Filter from the histogram
+=== Select a time range from the histogram
 
-You can set a time filter from the histogram in two ways:
+To select a specific time range in the histogram, choose one of the following:
 
-* Click the bar that represents the time interval you want to zoom in on.
-* Click and drag to view a specific timespan. You must start the selection with
+* Click the bar that represents the time range you want to zoom in on.
+
+* Click and drag to view a specific time range. You must start the selection with
 the cursor over the background of the chart--the cursor changes to a plus sign
 when you hover over a valid start point.
 
-To use a different interval, click the dropdown and select an interval.
+* Click the dropdown, then select an interval.
 
 [role="screenshot"]
 image::images/Histogram-Time.png[Time range selector in Histogram]
