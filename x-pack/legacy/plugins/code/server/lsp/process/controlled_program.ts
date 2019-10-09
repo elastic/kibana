@@ -9,7 +9,7 @@ export interface ControlledProgram {
 
   kill(force: boolean): void;
 
-  onExit(callback: () => void): void;
+  onExit(callback: () => void): { off(): void };
 
   killed(): boolean;
 }

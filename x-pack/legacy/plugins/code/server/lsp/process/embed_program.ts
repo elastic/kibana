@@ -32,7 +32,13 @@ export abstract class EmbedProgram implements ControlledProgram {
   }
 
   onExit(callback: () => void) {
-    this.eventEmitter.on('exit', callback);
+    const eventEmitter = this.eventEmitter;
+    eventEmitter.on('exit', callback);
+    return {
+      off() {
+        eventEmitter.off('exit', callback);
+      },
+    };
   }
 
   abstract async stop(): Promise<void>;

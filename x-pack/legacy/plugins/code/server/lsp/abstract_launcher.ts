@@ -15,17 +15,21 @@ import { RequestExpander } from './request_expander';
 import { ControlledProgram } from './process/controlled_program';
 
 let seqNo = 1;
+// Wait this time before try to reconnect.
+// Sometimes a sub process may dies or disconnected before kibana receives a sigint
+// We use this time to prevent restart a new process during the shutdown process.
+const RECONNECT_INTERVAL = 5000;
 
 export abstract class AbstractLauncher implements ILanguageServerLauncher {
   running: boolean = false;
   private currentPid: number = -1;
   private child: ControlledProgram | null = null;
   private startTime: number = -1;
-  private proxyConnected: boolean = false;
   protected readonly log: Logger;
   private spawnTimes: number = 0;
   private launchReject?: (reason?: any) => void;
   launchFailed: boolean = false;
+  private exitSubscribe: { off(): void } | null = null;
   protected constructor(
     readonly name: string,
     readonly targetHost: string,
@@ -59,12 +63,13 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
         if (!proxy.isClosed) this.reconnect(proxy);
       });
       proxy.onDisconnected(async () => {
-        this.proxyConnected = false;
         if (!proxy.isClosed) {
-          log.debug('proxy disconnected, reconnecting');
           setTimeout(async () => {
-            await this.reconnect(proxy, child);
-          }, 1000);
+            if (!proxy.isClosed) {
+              log.debug(`${this.name} disconnected, reconnecting`);
+              await this.reconnect(proxy, child);
+            }
+          }, RECONNECT_INTERVAL);
         } else if (this.child) {
           log.info('proxy closed, kill process');
           await this.killProcess(child);
@@ -82,7 +87,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     this.startConnect(proxy);
     await new Promise((resolve, reject) => {
       proxy.onConnected(() => {
-        this.proxyConnected = true;
+        this.log.debug('proxy connected');
         // reset spawn times
         this.spawnTimes = 0;
         resolve();
@@ -99,13 +104,17 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
 
   private onProcessExit(child: ControlledProgram, reconnectFn: () => void) {
     const pid = child.pid;
-    child.onExit(() => {
+    if (this.exitSubscribe) {
+      this.exitSubscribe.off();
+    }
+    this.exitSubscribe = child.onExit(() => {
       if (this.currentPid === pid) {
         this.running = false;
         // if the process exited before proxy connected, then we reconnect
-        if (!this.proxyConnected) {
+        setTimeout(() => {
+          this.log.debug('reconnect because of process exit.');
           reconnectFn();
-        }
+        }, RECONNECT_INTERVAL);
       }
     });
   }
@@ -137,7 +146,9 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
           const port = await this.getPort();
           proxy.changePort(port);
           this.child = await this.doSpawnProcess(port, this.log);
-          this.onProcessExit(this.child, () => this.reconnect(proxy, child));
+          this.onProcessExit(this.child, () => {
+            if (!proxy.isClosed) this.reconnect(proxy, child);
+          });
           this.startConnect(proxy);
         } else {
           const ServerStartFailed = new ResponseError(
@@ -185,6 +196,10 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
 
   protected killProcess(child: ControlledProgram) {
     if (!child.killed()) {
+      if (this.exitSubscribe) {
+        // prevent restart because of this kill
+        this.exitSubscribe.off();
+      }
       return new Promise<boolean>((resolve, reject) => {
         // if not killed within 1s
         const t = setTimeout(reject, 1000);

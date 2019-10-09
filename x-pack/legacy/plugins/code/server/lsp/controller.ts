@@ -131,6 +131,7 @@ export class LanguageServerController implements ILanguageServerHandler {
    * shutdown all language servers
    */
   public async exit() {
+    this.log.debug('shutting down lsp proxies.');
     for (const ls of this.languageServers) {
       if (ls.languageServerHandlers) {
         if (ls.builtinWorkspaceFolders) {

@@ -37,7 +37,13 @@ export class ExternalProgram implements ControlledProgram {
   }
 
   onExit(callback: () => void) {
-    this.child.on('exit', callback);
+    const c = this.child;
+    c.on('exit', callback);
+    return {
+      off() {
+        c.off('exit', callback);
+      },
+    };
   }
 
   readonly pid: number;

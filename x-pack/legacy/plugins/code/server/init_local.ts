@@ -55,11 +55,6 @@ export function initLocalService(
     serverLoggerFactory,
     repoConfigController
   );
-  server.events.on('stop', async () => {
-    loggerFactory.get().debug('shutdown lsp process');
-    await lspService.shutdown();
-    await gitOps.cleanAllRepo();
-  });
   codeServices.registerHandler(
     LspServiceDefinition,
     getLspServiceHandler(lspService),
