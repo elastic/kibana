@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RectAnnotationDatum } from '@elastic/charts';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -20,6 +19,7 @@ import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
+import { getLogEntryRateCombinedSeries, getAnnotationsForAll } from '../helpers/data_formatters';
 
 export const AnomaliesResults = ({
   isLoading,
@@ -52,59 +52,12 @@ export const AnomaliesResults = ({
   }, [results]);
 
   const logEntryRateSeries = useMemo(
-    () =>
-      results && results.histogramBuckets
-        ? results.histogramBuckets.reduce<Array<{ time: number; value: number }>>(
-            (buckets, bucket) => {
-              return [
-                ...buckets,
-                {
-                  time: bucket.startTime,
-                  value: bucket.partitions.reduce((accumulatedValue, partition) => {
-                    return accumulatedValue + partition.averageActualLogEntryRate;
-                  }, 0),
-                },
-              ];
-            },
-            []
-          )
-        : [],
+    () => (results && results.histogramBuckets ? getLogEntryRateCombinedSeries(results) : []),
     [results]
   );
   // TODO: Add grouping / colouring based on severity scoring
   const anomalyAnnotations = useMemo(
-    () =>
-      results && results.histogramBuckets
-        ? results.histogramBuckets.reduce<RectAnnotationDatum[]>((annotatedBuckets, bucket) => {
-            const sumPartitionMaxAnomalyScores = bucket.partitions.reduce<number>(
-              (scoreSum, partition) => {
-                return scoreSum + partition.maximumAnomalyScore;
-              },
-              0
-            );
-            if (sumPartitionMaxAnomalyScores === 0) {
-              return annotatedBuckets;
-            }
-            return [
-              ...annotatedBuckets,
-              {
-                coordinates: {
-                  x0: bucket.startTime,
-                  x1: bucket.startTime + results.bucketDuration,
-                },
-                details: i18n.translate(
-                  'xpack.infra.logs.analysis.logRateBucketMaxAnomalyScoreAnnotationLabel',
-                  {
-                    defaultMessage: 'Anomaly score: {sumPartitionMaxAnomalyScores}',
-                    values: {
-                      sumPartitionMaxAnomalyScores: Number(sumPartitionMaxAnomalyScores).toFixed(0),
-                    },
-                  }
-                ),
-              },
-            ];
-          }, [])
-        : [],
+    () => (results && results.histogramBuckets ? getAnnotationsForAll(results) : []),
     [results]
   );
 

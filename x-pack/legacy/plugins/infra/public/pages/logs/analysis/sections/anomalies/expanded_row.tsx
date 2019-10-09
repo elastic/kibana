@@ -5,12 +5,15 @@
  */
 
 import React, { useMemo } from 'react';
-import { RectAnnotationDatum } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { AnomaliesChart } from './chart';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import {
+  getLogEntryRateSeriesForPartition,
+  getAnnotationsForPartition,
+} from '../helpers/data_formatters';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   partitionId: string;
@@ -22,59 +25,15 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   const logEntryRateSeries = useMemo(
     () =>
       results && results.histogramBuckets
-        ? results.histogramBuckets.reduce<Array<{ time: number; value: number }>>(
-            (buckets, bucket) => {
-              const partitionResults = bucket.partitions.find(partition => {
-                return partition.partitionId === partitionId;
-              });
-              if (!partitionResults) {
-                return buckets;
-              }
-              return [
-                ...buckets,
-                {
-                  time: bucket.startTime,
-                  value: partitionResults.averageActualLogEntryRate,
-                },
-              ];
-            },
-            []
-          )
+        ? getLogEntryRateSeriesForPartition(results, partitionId)
         : [],
-    [results]
+    [results, partitionId]
   );
   // TODO: Split into various colours based on severity scoring
   const anomalyAnnotations = useMemo(
     () =>
-      results && results.histogramBuckets
-        ? results.histogramBuckets.reduce<RectAnnotationDatum[]>((annotatedBuckets, bucket) => {
-            const partitionResults = bucket.partitions.find(partition => {
-              return partition.partitionId === partitionId;
-            });
-            if (!partitionResults || !partitionResults.maximumAnomalyScore) {
-              return annotatedBuckets;
-            }
-            return [
-              ...annotatedBuckets,
-              {
-                coordinates: {
-                  x0: bucket.startTime,
-                  x1: bucket.startTime + results.bucketDuration,
-                },
-                details: i18n.translate(
-                  'xpack.infra.logs.analysis.partitionMaxAnomalyScoreAnnotationLabel',
-                  {
-                    defaultMessage: 'Anomaly score: {maxAnomalyScore}',
-                    values: {
-                      maxAnomalyScore: Number(partitionResults.maximumAnomalyScore).toFixed(0),
-                    },
-                  }
-                ),
-              },
-            ];
-          }, [])
-        : [],
-    [results]
+      results && results.histogramBuckets ? getAnnotationsForPartition(results, partitionId) : [],
+    [results, partitionId]
   );
   return (
     <EuiFlexGroup>

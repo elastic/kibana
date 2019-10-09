@@ -10,6 +10,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { AnomaliesTableExpandedRow } from './expanded_row';
+import { getTopAnomalyScoresByPartition } from '../helpers/data_formatters';
 
 export const AnomaliesTable: React.FunctionComponent<{
   results: GetLogEntryRateSuccessResponsePayload['data'];
@@ -17,29 +18,10 @@ export const AnomaliesTable: React.FunctionComponent<{
   timeRange: TimeRange;
 }> = ({ results, timeRange, setTimeRange }) => {
   const tableItems = useMemo(() => {
-    const partitionsTopAnomalyScores = results.histogramBuckets.reduce<Record<string, number>>(
-      (topScores, bucket) => {
-        bucket.partitions.forEach(partition => {
-          if (partition.maximumAnomalyScore > 0) {
-            topScores = {
-              ...topScores,
-              [partition.partitionId]:
-                !topScores[partition.partitionId] ||
-                partition.maximumAnomalyScore > topScores[partition.partitionId]
-                  ? partition.maximumAnomalyScore
-                  : topScores[partition.partitionId],
-            };
-          }
-        });
-        return topScores;
-      },
-      {}
-    );
-
-    return Object.entries(partitionsTopAnomalyScores).map(([key, value]) => {
+    return Object.entries(getTopAnomalyScoresByPartition(results)).map(([key, value]) => {
       return {
-        id: key,
-        partition: key,
+        id: key || 'unknown',
+        partition: key || 'unknown',
         topAnomalyScore: Number(value).toFixed(3),
       };
     });

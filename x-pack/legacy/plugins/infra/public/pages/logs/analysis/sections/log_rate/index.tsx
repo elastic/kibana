@@ -19,6 +19,7 @@ import React, { useMemo } from 'react';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { LogEntryRateBarChart } from './bar_chart';
+import { getLogEntryRatePartitionedSeries } from '../helpers/data_formatters';
 
 export const LogRateResults = ({
   isLoading,
@@ -41,22 +42,7 @@ export const LogRateResults = ({
   );
 
   const logEntryRateSeries = useMemo(
-    () =>
-      results && results.histogramBuckets
-        ? results.histogramBuckets.reduce<Array<{ group: string; time: number; value: number }>>(
-            (buckets, bucket) => {
-              return [
-                ...buckets,
-                ...bucket.partitions.map(partition => ({
-                  group: partition.partitionId === '' ? 'unknown' : partition.partitionId,
-                  time: bucket.startTime,
-                  value: partition.averageActualLogEntryRate,
-                })),
-              ];
-            },
-            []
-          )
-        : [],
+    () => (results && results.histogramBuckets ? getLogEntryRatePartitionedSeries(results) : []),
     [results]
   );
 
