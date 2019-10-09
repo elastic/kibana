@@ -41,6 +41,7 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     autocomplete: autocompleteMock as Start['autocomplete'],
     getSuggestions: jest.fn(),
+    search: { search: jest.fn() },
   };
   return startContract;
 };
