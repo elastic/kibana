@@ -13,6 +13,8 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
+  EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaObjectUi } from '../page';
@@ -42,22 +44,29 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
         <EuiTitle size="s">
           <h4>{kibanaObjectLabels[objectType]}</h4>
         </EuiTitle>
+        <EuiSpacer size="s" />
         <ul>
-          {kibanaObjects.map(({ id, title, success, exists }) => (
+          {kibanaObjects.map(({ id, title, success, exists }, i) => (
             <li key={id}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem>
-                  <EuiText size="s" color={exists ? 'subdued' : 'secondary'}>
-                    {title}
-                  </EuiText>
-                  {exists && (
-                    <EuiText size="xs" color="default">
-                      <FormattedMessage
-                        id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
-                        defaultMessage="(already exists)"
-                      />
-                    </EuiText>
-                  )}
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" color={exists ? 'subdued' : 'secondary'}>
+                        {title}
+                      </EuiText>
+                    </EuiFlexItem>
+                    {exists && (
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="default">
+                          <FormattedMessage
+                            id="xpack.ml.newJob.simple.recognize.alreadyExistsLabel"
+                            defaultMessage="(already exists)"
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} style={{ width: '60px' }}>
                   <EuiText textAlign="center">
@@ -87,6 +96,9 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
+              {(kibanaObjects.length === 1 || i < kibanaObjects.length - 1) && (
+                <EuiHorizontalRule margin="s" />
+              )}
             </li>
           ))}
         </ul>

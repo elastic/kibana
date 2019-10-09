@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -35,6 +36,8 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) 
           <FormattedMessage id="xpack.ml.newJob.simple.recognize.jobsTitle" defaultMessage="Jobs" />
         </h4>
       </EuiTitle>
+
+      <EuiSpacer size="s" />
 
       {saveState !== SAVE_STATE.SAVING && saveState !== SAVE_STATE.NOT_SAVED && (
         <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="s">
@@ -70,7 +73,7 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) 
       )}
 
       <ul>
-        {jobs.map(({ id, config: { description }, setupResult, datafeedResult }) => (
+        {jobs.map(({ id, config: { description }, setupResult, datafeedResult }, i) => (
           <li key={id}>
             <EuiFlexGroup
               alignItems="center"
@@ -181,7 +184,7 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) 
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="m" />
+            {i < jobs.length - 1 && <EuiHorizontalRule margin="s" />}
           </li>
         ))}
       </ul>
