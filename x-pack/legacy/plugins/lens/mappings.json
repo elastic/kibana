@@ -15,5 +15,18 @@
         "type": "keyword"
       }
     }
+  },
+  "lens-ui-telemetry": {
+    "properties": {
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "date": {
+        "type": "date"
+      }
+    }
   }
 }

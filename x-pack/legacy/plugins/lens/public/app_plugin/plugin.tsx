@@ -25,6 +25,7 @@ import {
 } from '../datatable_visualization_plugin';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
+import { LensReportManager, LensTelemetryContext } from '../lens_ui_telemetry';
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -33,6 +34,7 @@ export interface LensPluginStartDependencies {
 export class AppPlugin {
   private instance: EditorFrameInstance | null = null;
   private store: SavedObjectIndexStore | null = null;
+  private reporter: LensReportManager | null = null;
 
   constructor() {}
 
@@ -63,24 +65,40 @@ export class AppPlugin {
 
     this.instance = editorFrameStartInterface.createInstance({});
 
+    this.reporter = new LensReportManager({
+      storage: new Storage(localStorage),
+      basePath: core.http.basePath.get(),
+      http: core.http,
+    });
+
     const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
+      if (this.reporter) {
+        this.reporter.trackClick('loaded');
+      }
       return (
-        <App
-          core={core}
-          data={data}
-          dataShim={dataShim}
-          editorFrame={this.instance!}
-          store={new Storage(localStorage)}
-          docId={routeProps.match.params.id}
-          docStorage={store}
-          redirectTo={id => {
-            if (!id) {
-              routeProps.history.push('/');
-            } else {
-              routeProps.history.push(`/edit/${id}`);
-            }
+        <LensTelemetryContext.Provider
+          value={{
+            trackClick: name => this.reporter && this.reporter.trackClick(name),
+            trackSuggestionClick: name => this.reporter && this.reporter.trackSuggestionClick(name),
           }}
-        />
+        >
+          <App
+            core={core}
+            data={data}
+            dataShim={dataShim}
+            editorFrame={this.instance!}
+            store={new Storage(localStorage)}
+            docId={routeProps.match.params.id}
+            docStorage={store}
+            redirectTo={id => {
+              if (!id) {
+                routeProps.history.push('/');
+              } else {
+                routeProps.history.push(`/edit/${id}`);
+              }
+            }}
+          />
+        </LensTelemetryContext.Provider>
       );
     };
 
@@ -104,6 +122,10 @@ export class AppPlugin {
   stop() {
     if (this.instance) {
       this.instance.unmount();
+    }
+
+    if (this.reporter) {
+      this.reporter.stop();
     }
 
     // TODO this will be handled by the plugin platform itself

@@ -25,6 +25,7 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
+import { useLensTelemetry } from '../lens_ui_telemetry';
 
 interface State {
   isLoading: boolean;
@@ -64,6 +65,7 @@ export function App({
   const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
     store.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
+  const { trackClick } = useLensTelemetry();
 
   const [state, setState] = useState<State>({
     isLoading: !!docId,
@@ -84,6 +86,8 @@ export function App({
     const subscription = dataShim.filter.filterManager.getUpdates$().subscribe({
       next: () => {
         setState(s => ({ ...s, filters: dataShim.filter.filterManager.getFilters() }));
+
+        trackClick('app_filters_updated');
       },
     });
     return () => {
@@ -198,6 +202,7 @@ export function App({
                           }
                         })
                         .catch(() => {
+                          trackClick('save_failed');
                           core.notifications.toasts.addDanger(
                             i18n.translate('xpack.lens.editorFrame.docSavingError', {
                               defaultMessage: 'Error saving document',
@@ -222,6 +227,8 @@ export function App({
                   },
                   query: query || s.query,
                 }));
+
+                trackClick('date_or_query_change');
               }}
               appName={'lens'}
               indexPatterns={state.indexPatternsForTopNav}

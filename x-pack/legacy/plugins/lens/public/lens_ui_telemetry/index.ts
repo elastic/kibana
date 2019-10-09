@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './collectors';
-export * from './task';
+export * from './factory';
+export * from './provider';
