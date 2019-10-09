@@ -23,7 +23,6 @@ import {
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiFieldText,
-  EuiCheckbox,
   EuiAccordion,
   EuiButton,
   EuiTextAlign,
@@ -438,7 +437,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                     />
                     <EuiSpacer size="l" />
                     <EuiFormRow>
-                      <EuiCheckbox
+                      <EuiSwitch
                         id="startDataFeed"
                         name="startDataFeed"
                         label={
@@ -457,7 +456,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                       />
                     </EuiFormRow>
                     <EuiFormRow>
-                      <EuiCheckbox
+                      <EuiSwitch
                         id="useFullData"
                         name="useFullData"
                         label={
