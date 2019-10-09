@@ -32,3 +32,5 @@ export { setupUsers, DEFAULT_SUPERUSER_PASS } from './functional_tests/lib/auth'
 export { readConfigFile } from './functional_test_runner/lib/config/read_config_file';
 
 export { runFtrCli } from './functional_test_runner/cli';
+
+export { runFailedTestsReporterCli } from './failed_tests_reporter';
