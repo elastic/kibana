@@ -309,19 +309,6 @@ export default class BaseOptimizer {
       },
 
       plugins: [
-        // strict mode for the whole bundle
-        new WrapperPlugin({
-          test: /commons\.bundle\.js$/, // only wrap output of bundle files with '.js' extension
-          header: `
-            window.flushCoverageToLog = function () {
-              if (window.__coverage__) {
-                console.log('coveragejson:' + btoa(JSON.stringify(window.__coverage__)));
-              }
-            };
-
-            window.addEventListener('beforeunload', window.flushCoverageToLog);
-          `
-        }),
         new DynamicDllPlugin({
           uiBundles: this.uiBundles,
           threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
