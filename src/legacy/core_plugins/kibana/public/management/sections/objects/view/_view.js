@@ -35,7 +35,7 @@ import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 import { canViewInApp } from '../lib/in_app_url';
-import { Header, Errors, Intro } from './components';
+import { Header, Errors, Intro, Form } from './components';
 
 import { castEsToKbnFieldTypeName } from '../../../../../../../../plugins/data/public';
 
@@ -72,6 +72,9 @@ function updateReactComponent($scope) {
         }
         <EuiSpacer size="s" />
         <Intro />
+
+        <EuiSpacer size="m" />
+        <Form initialFields={$scope.fields} onChange={$scope.onChange} canEdit={$scope.canEdit} />
       </I18nContext>,
       node
     );
@@ -119,7 +122,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             parents = [key];
           }
 
-          const field = { type: 'text', name: parents.join('.'), value: val };
+          const field = { type: 'textarea', name: parents.join('.'), value: val };
 
           if (_.isString(field.value)) {
             try {
@@ -196,6 +199,9 @@ uiModules.get('apps/management', ['monospaced.elastic'])
         $scope.$watch('link', () => {
           updateReactComponent($scope);
         });
+        $scope.onChange = fields => {
+          $scope.fields = fields;
+        };
 
         savedObjectsClient.get(service.type, $routeParams.id)
           .then(function (obj) {

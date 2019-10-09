@@ -3,58 +3,6 @@
     <div id="reactViewSavedObjectsId"></div>
 
     <div class="kuiViewContentItem kuiVerticalRhythm">
-      <!-- Form -->
-      <form
-        role="form"
-        name="objectForm"
-        ng-submit="submit()"
-        data-test-subj="savedObjectEditForm"
-      >
-        <div class="kuiFormSection" ng-repeat="field in fields">
-          <label for="{{ field.name }}" class="kuiFormLabel">
-            {{ field.name }}
-          </label>
-
-          <input
-            id="{{ field.name }}"
-            ng-if="field.type === 'number'"
-            class="kuiTextInput"
-            type="number"
-            ng-model="field.value"
-            ng-disabled="{{ !canEdit }}"
-          >
-
-          <textarea
-            id="{{ field.name }}"
-            ng-if="field.type === 'text'"
-            class="kuiTextArea"
-            rows="1"
-            msd-elastic=" "
-            ng-model="field.value"
-            ng-disabled="{{ !canEdit }}"
-          ></textarea>
-
-          <input
-            ng-if="field.type === 'boolean'"
-            class="kuiCheckBox"
-            type="checkbox"
-            ng-model="field.value"
-            ng-checked="field.value"
-            ng-disabled="{{ !canEdit }}"
-          >
-
-          <div
-            ng-if="field.type === 'json' || field.type === 'array'"
-            kbn-ui-ace-keyboard-mod
-            ng-attr-readonly="{{ canEdit ? undefined : true }}"
-            ui-ace="{ onLoad: aceLoaded, mode: 'json' }"
-            id="{{field.name}}"
-            ng-model="field.value"
-            class="form-control"
-          ></div>
-        </div>
-      </form>
-
       <!-- Actions -->
       <div class="kuiButtonGroup">
         <button
