@@ -7,7 +7,6 @@
 import { call, put, takeLatest, select } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
 import {
-  MonitorActionTypes,
   FETCH_MONITOR_DETAILS,
   FETCH_MONITOR_DETAILS_SUCCESS,
   FETCH_MONITOR_DETAILS_FAIL,
@@ -15,8 +14,8 @@ import {
 import { fetchMonitorDetails } from '../api/monitor';
 import { getBasePath } from '../selectors';
 
-function* monitorDetailsSaga(action: Action<MonitorActionTypes>) {
-  const monitorId = action.payload;
+function* monitorDetailsSaga(action: Action<any>) {
+  const monitorId: string = action.payload;
   try {
     const basePath = yield select(getBasePath);
     const response = yield call(fetchMonitorDetails, { monitorId, basePath });

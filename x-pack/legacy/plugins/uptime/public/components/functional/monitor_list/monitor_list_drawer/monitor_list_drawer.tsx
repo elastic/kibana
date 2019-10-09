@@ -56,10 +56,6 @@ export function MonitorListDrawerComponent({
 
   const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
 
-  if (!summary || !summary.state.checks) {
-    return null;
-  }
-
   return (
     <ContainerDiv>
       <EuiFlexGroup>

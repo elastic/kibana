@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MostRecentError component renders properly with empty data 1`] = `
+Array [
+  <div
+    class="euiText euiText--extraSmall"
+  >
+    <h3>
+      Most recent error
+    </h3>
+  </div>,
+  <a
+    class="euiLink euiLink--primary"
+    href="Get https://expired.badssl.com: x509: certificate has expired or is not yet valid"
+    rel="noopener noreferrer"
+    target="_blank"
+  >
+    Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
+  </a>,
+]
+`;
+
+exports[`MostRecentError component validates props with shallow render 1`] = `
+<Fragment>
+  <EuiText
+    size="xs"
+  >
+    <h3>
+      Most recent error
+    </h3>
+  </EuiText>
+  <EuiLink
+    color="primary"
+    href="Get https://expired.badssl.com: x509: certificate has expired or is not yet valid"
+    target="_blank"
+    type="button"
+  >
+    Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
+  </EuiLink>
+</Fragment>
+`;

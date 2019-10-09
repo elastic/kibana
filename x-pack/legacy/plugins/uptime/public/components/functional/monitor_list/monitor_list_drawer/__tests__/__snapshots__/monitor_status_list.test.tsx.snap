@@ -1,6 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CondensedCheckList component renders checks 1`] = `
+exports[`MonitorStatusList component renders checks 1`] = `
+<Fragment>
+  <EuiHealth
+    color="#bd271e"
+  >
+    Down
+     in
+     
+    elastic
+    , elastic
+    , elastic
+    , elastic
+  </EuiHealth>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiHealth
+    color="#017d73"
+  >
+    Up
+     in
+     
+    elastic
+    , elastic
+    , elastic
+    , elastic
+  </EuiHealth>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;
+
+exports[`MonitorStatusList component renders null in place of child status with missing ip 1`] = `
 <Fragment>
   <EuiHealth
     color="#bd271e"

@@ -3,14 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { expect } from 'jest';
+import 'jest';
 import { MonitorSummary, Check } from '../../../../../../common/graphql/types';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { MonitorListDrawer } from '../monitor_list_drawer';
+import { MonitorListDrawerComponent } from '../monitor_list_drawer';
 
 describe('MonitorListDrawer component', () => {
   let summary: MonitorSummary;
+  let loadMonitorDetails: any;
+  let monitorDetails: any;
 
   beforeEach(() => {
     summary = {
@@ -32,39 +34,52 @@ describe('MonitorListDrawer component', () => {
         timestamp: '123',
       },
     };
+    monitorDetails = {
+      monitorId: 'bad-ssl',
+      error: {
+        type: 'io',
+        message:
+          'Get https://expired.badssl.com: x509: certificate has expired or is not yet valid',
+      },
+    };
+    loadMonitorDetails = () => null;
   });
 
   it('renders nothing when no summary data is present', () => {
-    const component = shallowWithIntl(<MonitorListDrawer />);
+    const component = shallowWithIntl(
+      <MonitorListDrawerComponent
+        loadMonitorDetails={loadMonitorDetails}
+        summary={summary}
+        monitorDetails={monitorDetails}
+      />
+    );
     expect(component).toEqual({});
   });
 
   it('renders nothing when no check data is present', () => {
     delete summary.state.checks;
     const component = shallowWithIntl(
-      <MonitorListDrawer
-        condensedCheckLimit={12}
-        dangerColor="danger"
-        successColor="success"
+      <MonitorListDrawerComponent
         summary={summary}
+        loadMonitorDetails={loadMonitorDetails}
+        monitorDetails={monitorDetails}
       />
     );
     expect(component).toEqual({});
   });
 
-  it('renders a Checklist when there is only one check', () => {
+  it('renders a MonitorListDrawer when there is only one check', () => {
     const component = shallowWithIntl(
-      <MonitorListDrawer
-        condensedCheckLimit={12}
-        dangerColor="danger"
-        successColor="success"
+      <MonitorListDrawerComponent
         summary={summary}
+        loadMonitorDetails={loadMonitorDetails}
+        monitorDetails={monitorDetails}
       />
     );
     expect(component).toMatchSnapshot();
   });
 
-  it('renders a CondensedCheckList when there are many checks', () => {
+  it('renders a MonitorListDrawer when there are many checks', () => {
     const checks: Check[] = [
       {
         monitor: {
@@ -90,11 +105,10 @@ describe('MonitorListDrawer component', () => {
     ];
     summary.state.checks = checks;
     const component = shallowWithIntl(
-      <MonitorListDrawer
-        condensedCheckLimit={3}
-        dangerColor="danger"
-        successColor="success"
+      <MonitorListDrawerComponent
         summary={summary}
+        loadMonitorDetails={loadMonitorDetails}
+        monitorDetails={monitorDetails}
       />
     );
     expect(component).toMatchSnapshot();

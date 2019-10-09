@@ -533,8 +533,6 @@ export interface State {
   tls?: (StateTls | null)[] | null;
 
   url?: StateUrl | null;
-
-  error?: Error | null;
 }
 
 export interface Agent {

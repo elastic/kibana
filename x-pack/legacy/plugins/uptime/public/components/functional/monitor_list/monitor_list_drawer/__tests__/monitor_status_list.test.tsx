@@ -10,7 +10,7 @@ import moment from 'moment';
 import { MonitorStatusList } from '../monitor_status_list';
 import { Check } from '../../../../../../common/graphql/types';
 
-describe('CondensedCheckList component', () => {
+describe('MonitorStatusList component', () => {
   let checks: Check[];
 
   beforeAll(() => {
@@ -135,7 +135,6 @@ describe('CondensedCheckList component', () => {
   });
 
   it('renders null in place of child status with missing ip', () => {
-    checks[0].childStatuses[0].ip = undefined;
     const component = shallowWithIntl(<MonitorStatusList checks={checks} />);
     expect(component).toMatchSnapshot();
   });

@@ -4,71 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import moment from 'moment';
-import { CondensedCheck } from '../types';
-import { CondensedCheckList } from '../condensed_check_list';
+import { MostRecentError } from '../most_recent_error';
 
-describe('CondensedCheckList component', () => {
-  let checks: CondensedCheck[];
-
-  beforeAll(() => {
-    moment.prototype.toLocaleString = jest.fn(() => '2019-06-21 15:29:26');
-    moment.prototype.from = jest.fn(() => 'a few moments ago');
-  });
+describe('MostRecentError component', () => {
+  let monitorDetails: any;
 
   beforeEach(() => {
-    checks = [
-      {
-        childStatuses: [
-          {
-            ip: '127.0.0.1',
-            status: 'up',
-            timestamp: '123',
-          },
-          {
-            ip: '127.0.0.2',
-            status: 'down',
-            timestamp: '122',
-          },
-        ],
-        location: 'us-east-1',
-        status: 'mixed',
-        timestamp: '123',
+    monitorDetails = {
+      monitorId: 'bad-ssl',
+      error: {
+        type: 'io',
+        message:
+          'Get https://expired.badssl.com: x509: certificate has expired or is not yet valid',
       },
-      {
-        childStatuses: [
-          {
-            ip: '127.0.0.1',
-            status: 'up',
-            timestamp: '120',
-          },
-          {
-            ip: '127.0.0.2',
-            status: 'up',
-            timestamp: '121',
-          },
-        ],
-        location: 'us-west-1',
-        status: 'up',
-        timestamp: '125',
-      },
-    ];
+    };
   });
 
-  it('renders checks', () => {
-    const component = shallowWithIntl(
-      <CondensedCheckList dangerColor="danger" successColor="primary" condensedChecks={checks} />
-    );
+  it('validates props with shallow render', () => {
+    const component = shallowWithIntl(<MostRecentError error={monitorDetails.error} />);
     expect(component).toMatchSnapshot();
   });
 
-  it('renders null in place of child status with missing ip', () => {
-    checks[0].childStatuses[0].ip = undefined;
-    const component = shallowWithIntl(
-      <CondensedCheckList dangerColor="danger" successColor="primary" condensedChecks={checks} />
-    );
+  it('renders properly with empty data', () => {
+    const component = renderWithIntl(<MostRecentError error={monitorDetails.error} />);
     expect(component).toMatchSnapshot();
   });
 });

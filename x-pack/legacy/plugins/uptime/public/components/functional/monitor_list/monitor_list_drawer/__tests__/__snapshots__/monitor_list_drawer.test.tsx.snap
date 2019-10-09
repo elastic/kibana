@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorListDrawer component renders a MonitorListDrawer when there are many checks 1`] = `
+<styled.div>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiLink
+        color="primary"
+        target="_blank"
+        type="button"
+      >
+        <EuiIcon
+          color="subbdued"
+          size="s"
+          type="popout"
+        />
+      </EuiLink>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        size="s"
+      >
+        Actions
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="s"
+  />
+  <MonitorStatusList
+    checks={
+      Array [
+        Object {
+          "monitor": Object {
+            "ip": "127.0.0.1",
+            "status": "up",
+          },
+          "timestamp": "121",
+        },
+        Object {
+          "monitor": Object {
+            "ip": "127.0.0.2",
+            "status": "down",
+          },
+          "timestamp": "123",
+        },
+        Object {
+          "monitor": Object {
+            "ip": "127.0.0.3",
+            "status": "up",
+          },
+          "timestamp": "125",
+        },
+      ]
+    }
+  />
+</styled.div>
+`;
+
+exports[`MonitorListDrawer component renders a MonitorListDrawer when there is only one check 1`] = `
+<styled.div>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiLink
+        color="primary"
+        target="_blank"
+        type="button"
+      >
+        <EuiIcon
+          color="subbdued"
+          size="s"
+          type="popout"
+        />
+      </EuiLink>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        size="s"
+      >
+        Actions
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="s"
+  />
+  <MonitorStatusList
+    checks={
+      Array [
+        Object {
+          "monitor": Object {
+            "ip": "127.0.0.1",
+            "status": "up",
+          },
+          "timestamp": "121",
+        },
+      ]
+    }
+  />
+</styled.div>
+`;
