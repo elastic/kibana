@@ -80,7 +80,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem className="gphGuidancePanel">
-        <EuiPanel>
+        <EuiPanel data-test-subj="graphGuidancePanel">
           <EuiFlexGroup direction="column" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="graphApp" size="xxl" />
