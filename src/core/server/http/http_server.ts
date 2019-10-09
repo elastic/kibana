@@ -200,13 +200,7 @@ export class HttpServer {
 
     const basePathService = new BasePath(config.basePath);
     this.setupBasePathRewrite(config, basePathService);
-
-    this.server.ext('onRequest', (request, h) => {
-      if (request.info.referrer !== '') {
-        request.info.acceptEncoding = '';
-      }
-      return h.continue;
-    });
+    this.setupConditionalCompression();
 
     return {
       registerRouter: this.registerRouter.bind(this),
@@ -283,6 +277,23 @@ export class HttpServer {
         return toolkit.rewriteUrl(newURL);
       }
       return response.notFound();
+    });
+  }
+
+  private setupConditionalCompression() {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+
+    this.server.ext('onRequest', (request, h) => {
+      // whenever there is a referrer, don't use compression even if the client supports it
+      if (request.info.referrer !== '') {
+        this.log.debug(
+          `Not using compression because there is a referer: ${request.info.referrer}`
+        );
+        request.info.acceptEncoding = '';
+      }
+      return h.continue;
     });
   }
 
