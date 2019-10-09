@@ -4,20 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React, { Fragment } from 'react';
-import {
-  EuiButtonIcon,
-  EuiLink,
-  EuiPagination,
-  EuiSelect,
-  EuiIconTip,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextColor
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiLink } from '@elastic/eui';
 import { FeatureProperties } from './feature_properties';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';

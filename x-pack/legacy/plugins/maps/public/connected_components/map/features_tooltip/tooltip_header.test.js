@@ -15,6 +15,9 @@ class MockLayer {
   async getDisplayName() {
     return `display + ${this._id}`;
   }
+  getId() {
+    return this._id;
+  }
 }
 
 const defaultProps = {

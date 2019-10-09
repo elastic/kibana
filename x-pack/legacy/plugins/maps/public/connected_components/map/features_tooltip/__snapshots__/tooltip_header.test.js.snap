@@ -18,7 +18,7 @@ exports[`TooltipHeader multiple features, multiple layers: locked should show pa
       />
     </EuiFlexItem>
     <EuiFlexItem
-      grow={true}
+      grow={false}
       key="pageNumber"
     >
       <EuiTextColor
@@ -35,6 +35,43 @@ exports[`TooltipHeader multiple features, multiple layers: locked should show pa
           }
         />
       </EuiTextColor>
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="layerSelect"
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="rowCompressed"
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+        labelType="label"
+      >
+        <EuiSelect
+          aria-label="Filter results by layer"
+          compressed={true}
+          fullWidth={true}
+          hasNoInitialSelection={false}
+          isLoading={false}
+          onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "All layers",
+                "value": "_ALL_LAYERS_",
+              },
+              Object {
+                "text": "(2) display + layer1",
+                "value": "layer1",
+              },
+              Object {
+                "text": "(1) display + layer2",
+                "value": "layer2",
+              },
+            ]
+          }
+          value="_ALL_LAYERS_"
+        />
+      </EuiFormRow>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
