@@ -687,6 +687,9 @@ export interface HttpServerSetup {
 export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
     createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
     registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(pluginOpaqueId: PluginOpaqueId, contextName: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
+    config: {
+        defaultRoute?: string;
+    };
 };
 
 // @public (undocumented)
@@ -736,6 +739,8 @@ export interface InternalCoreSetup {
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: HttpServiceSetup;
+    // (undocumented)
+    uiSettings: UiSettingsServiceSetup;
 }
 
 // @internal (undocumented)
@@ -764,6 +769,22 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+
+// @public
+export interface IUiSettingsClient {
+    get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
+    getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
+    getDefaults: () => Record<string, UiSettingsParams>;
+    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, {
+        userValue?: T;
+        isOverridden?: boolean;
+    }>>;
+    isOverridden: (key: string) => boolean;
+    remove: (key: string) => Promise<void>;
+    removeMany: (keys: string[]) => Promise<void>;
+    set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
+    setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+}
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
@@ -1548,6 +1569,28 @@ export interface SessionStorageFactory<T> {
     // (undocumented)
     asScoped: (request: KibanaRequest) => SessionStorage<T>;
 }
+
+// @public
+export interface UiSettingsParams {
+    category: string[];
+    description: string;
+    name: string;
+    optionLabels?: Record<string, string>;
+    options?: string[];
+    readonly?: boolean;
+    requiresPageReload?: boolean;
+    type?: UiSettingsType;
+    value: SavedObjectAttribute;
+}
+
+// @internal (undocumented)
+export interface UiSettingsServiceSetup {
+    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+    setDefaults(values: Record<string, UiSettingsParams>): void;
+}
+
+// @public
+export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
 
 // Warnings were encountered during analysis:

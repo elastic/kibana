@@ -33,25 +33,48 @@ interface SetupDeps {
   http: HttpServiceSetup;
 }
 
+/**
+ * UI element type to represent the settings.
+ * @public
+ * */
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
+/**
+ * UiSettings parameters defined by the plugins.
+ * @public
+ * */
 export interface UiSettingsParams {
+  /** title in the UI */
   name: string;
+  /** default value to fall back to if a user doesn't provide any */
   value: SavedObjectAttribute;
+  /** description provided to a user in UI */
   description: string;
+  /** used to group the configured setting in the UI */
   category: string[];
   /** a range of valid values */
   options?: string[];
+  /** text labels for 'select' type UI element */
   optionLabels?: Record<string, string>;
+  /** a flag indicating whether new value applying requires page reloading */
   requiresPageReload?: boolean;
+  /** a flag indicating that value cannot be changed */
   readonly?: boolean;
   /** defines a type of UI element */
   type?: UiSettingsType;
 }
 
-/** @public */
+/** @internal */
 export interface UiSettingsServiceSetup {
+  /**
+   * Sets the parameters with default values for the uiSettings.
+   * @param values
+   */
   setDefaults(values: Record<string, UiSettingsParams>): void;
+  /**
+   * Creates uiSettings client with provided *scoped* saved objects client.
+   * @param values
+   */
   asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 }
 

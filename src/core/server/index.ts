@@ -164,7 +164,12 @@ export {
   SavedObjectsUpdateResponse,
 } from './saved_objects';
 
-export { IUiSettingsClient } from './ui_settings';
+export {
+  IUiSettingsClient,
+  UiSettingsParams,
+  UiSettingsServiceSetup,
+  UiSettingsType,
+} from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
 

@@ -39,31 +39,62 @@ interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
 }
 
-interface UserProvidedValue {
-  userValue?: SavedObjectAttribute;
+interface UserProvidedValue<T extends SavedObjectAttribute = any> {
+  userValue?: T;
   isOverridden?: boolean;
 }
 
 type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
 
-type UserProvided = Record<string, UserProvidedValue>;
+type UserProvided<T extends SavedObjectAttribute = any> = Record<string, UserProvidedValue<T>>;
 type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
+/**
+ * Service that provides access to the UiSettings stored in elasticsearch.
+ *
+ * @public
+ */
 export interface IUiSettingsClient {
+  /**
+   * Returns uiSettings default values
+   */
   getDefaults: () => Record<string, UiSettingsParams>;
+  /**
+   * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
+   */
   get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
+  /**
+   * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
+   */
   getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
-  getUserProvided: () => Promise<UserProvided>;
+  /**
+   * Retrieves a set of all uiSettings values set by the user.
+   */
+  getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<
+    Record<string, { userValue?: T; isOverridden?: boolean }>
+  >;
+  /**
+   * Writes multiple uiSettings values and marks them as set by the user.
+   */
   setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+  /**
+   * Writes uiSettings value and marks it as set by the user.
+   */
   set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
+  /**
+   * Removes uiSettings value by key.
+   */
   remove: (key: string) => Promise<void>;
+  /**
+   * Removes multiple uiSettings values by keys.
+   */
   removeMany: (keys: string[]) => Promise<void>;
+  /**
+   * Shows whether the uiSettings value set by the user.
+   */
   isOverridden: (key: string) => boolean;
 }
-/**
- *  Service that provides access to the UiSettings stored in elasticsearch.
- *  @class UiSettingsService
- */
+
 export class UiSettingsClient implements IUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
   private readonly id: UiSettingsServiceOptions['id'];
@@ -89,7 +120,6 @@ export class UiSettingsClient implements IUiSettingsClient {
     return this.defaults;
   }
 
-  // returns a Promise for the value of the requested setting
   async get<T extends SavedObjectAttribute = any>(key: string): Promise<T> {
     const all = await this.getAll();
     return all[key];
@@ -114,7 +144,9 @@ export class UiSettingsClient implements IUiSettingsClient {
     return defaultsDeep(userProvided, this.defaults);
   }
 
-  async getUserProvided(options: ReadOptions = {}): Promise<UserProvided> {
+  async getUserProvided<T extends SavedObjectAttribute = any>(
+    options: ReadOptions = {}
+  ): Promise<UserProvided<T>> {
     const userProvided: UserProvided = {};
 
     // write the userValue for each key stored in the saved object that is not overridden
