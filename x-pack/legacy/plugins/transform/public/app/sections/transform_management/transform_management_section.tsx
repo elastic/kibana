@@ -25,21 +25,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { VisType } from 'ui/vis';
-import { SearchSelection } from '../../../../../../../../src/legacy/core_plugins/kibana/public/visualize/wizard/search_selection';
-
 import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { useRefreshTransformList, TransformListRow } from '../../common';
+import { useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 
-import { CreateTransformButton } from './components/create_transform_button';
-import { TransformList } from './components/transform_list';
-import { RefreshTransformListButton } from './components/refresh_transform_list_button';
-import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
-import { useGetTransforms } from '../../hooks';
 import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
+import { CreateTransformButton } from './components/create_transform_button';
+import { RefreshTransformListButton } from './components/refresh_transform_list_button';
+import { SearchSelection } from './components/search_selection';
+import { TransformList } from './components/transform_list';
+import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 
 export const TransformManagement: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -74,11 +72,9 @@ export const TransformManagement: FC = () => {
 
   const onCloseModal = () => setIsSearchSelectionVisible(false);
   const onOpenModal = () => setIsSearchSelectionVisible(true);
-
-  const fakeVisType = {
-    name: 'transform',
-    title: 'transform',
-  } as VisType;
+  const onSearchSelected = (id: string, type: string) => {
+    setSavedObjectId(id);
+  };
 
   return (
     <Fragment>
@@ -139,7 +135,7 @@ export const TransformManagement: FC = () => {
       {isSearchSelectionVisible && (
         <EuiOverlayMask>
           <EuiModal onClose={onCloseModal} className="transformCreateTransformSearchDialog">
-            <SearchSelection onSearchSelected={setSavedObjectId} visType={fakeVisType} />
+            <SearchSelection onSearchSelected={onSearchSelected} />
           </EuiModal>
         </EuiOverlayMask>
       )}
