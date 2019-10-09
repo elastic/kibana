@@ -25,13 +25,14 @@ import React, { useCallback, useMemo } from 'react';
 
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
+import { MLSeverityScoreCategories } from '../helpers/data_formatters';
 
 export const AnomaliesChart: React.FunctionComponent<{
   chartId: string;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   series: Array<{ time: number; value: number }>;
-  annotations: RectAnnotationDatum[];
+  annotations: Record<MLSeverityScoreCategories, RectAnnotationDatum[]>;
 }> = ({ chartId, series, annotations, setTimeRange, timeRange }) => {
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
@@ -60,7 +61,10 @@ export const AnomaliesChart: React.FunctionComponent<{
     },
     [setTimeRange]
   );
-  const chartAnnotationsId = getAnnotationId(`anomalies-${chartId}`);
+  const warningAnnotationsId = getAnnotationId(`anomalies-${chartId}-warning`);
+  const minorAnnotationsId = getAnnotationId(`anomalies-${chartId}-minor`);
+  const majorAnnotationsId = getAnnotationId(`anomalies-${chartId}-major`);
+  const criticalAnnotationsId = getAnnotationId(`anomalies-${chartId}-critical`);
 
   return (
     <div style={{ height: 160, width: '100%' }}>
@@ -86,9 +90,28 @@ export const AnomaliesChart: React.FunctionComponent<{
           xAccessor={'time'}
           yAccessors={['value']}
           data={series}
-          barSeriesStyle={{ rect: { fill: '#D3DAE6' } }} // TODO: Acquire this from "theme" as euiColorLightShade
+          barSeriesStyle={{ rect: { fill: '#D3DAE6', opacity: 0.7 } }} // TODO: Acquire this from "theme" as euiColorLightShade
         />
-        <RectAnnotation dataValues={annotations} annotationId={chartAnnotationsId} />
+        <RectAnnotation
+          dataValues={annotations.warning}
+          annotationId={warningAnnotationsId}
+          style={{ fill: '#006BB4', opacity: 0.8 }}
+        />
+        <RectAnnotation
+          dataValues={annotations.minor}
+          annotationId={minorAnnotationsId}
+          style={{ fill: '#017D73', opacity: 0.8 }}
+        />
+        <RectAnnotation
+          dataValues={annotations.major}
+          annotationId={majorAnnotationsId}
+          style={{ fill: '#F5A700', opacity: 0.8 }}
+        />
+        <RectAnnotation
+          dataValues={annotations.critical}
+          annotationId={criticalAnnotationsId}
+          style={{ fill: '#BD271E', opacity: 0.8 }}
+        />
         <Settings
           onBrushEnd={handleBrushEnd}
           tooltip={tooltipProps}

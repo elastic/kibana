@@ -8,6 +8,15 @@ import { RectAnnotationDatum } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 
+export type MLSeverityScoreCategories = 'warning' | 'minor' | 'major' | 'critical';
+type MLSeverityScores = Record<MLSeverityScoreCategories, number>;
+const ML_SEVERITY_SCORES: MLSeverityScores = {
+  warning: 3,
+  minor: 25,
+  major: 50,
+  critical: 75,
+};
+
 export const getLogEntryRatePartitionedSeries = (
   results: GetLogEntryRateSuccessResponsePayload['data']
 ) => {
@@ -93,60 +102,106 @@ export const getAnnotationsForPartition = (
   results: GetLogEntryRateSuccessResponsePayload['data'],
   partitionId: string
 ) => {
-  return results.histogramBuckets.reduce<RectAnnotationDatum[]>((annotatedBuckets, bucket) => {
-    const partitionResults = bucket.partitions.find(partition => {
-      return partition.partitionId === partitionId;
-    });
-    if (!partitionResults || !partitionResults.maximumAnomalyScore) {
-      return annotatedBuckets;
-    }
-    return [
-      ...annotatedBuckets,
-      {
-        coordinates: {
-          x0: bucket.startTime,
-          x1: bucket.startTime + results.bucketDuration,
-        },
-        details: i18n.translate(
-          'xpack.infra.logs.analysis.partitionMaxAnomalyScoreAnnotationLabel',
+  return results.histogramBuckets.reduce<Record<MLSeverityScoreCategories, RectAnnotationDatum[]>>(
+    (annotatedBucketsBySeverity, bucket) => {
+      const partitionResults = bucket.partitions.find(partition => {
+        return partition.partitionId === partitionId;
+      });
+      if (
+        !partitionResults ||
+        !partitionResults.maximumAnomalyScore ||
+        partitionResults.maximumAnomalyScore < ML_SEVERITY_SCORES.warning
+      ) {
+        return annotatedBucketsBySeverity;
+      }
+      const severityCategory = getSeverityCategoryForScore(partitionResults.maximumAnomalyScore);
+      return {
+        ...annotatedBucketsBySeverity,
+        [severityCategory]: [
+          ...annotatedBucketsBySeverity[severityCategory],
           {
-            defaultMessage: 'Anomaly score: {maxAnomalyScore}',
-            values: {
-              maxAnomalyScore: Number(partitionResults.maximumAnomalyScore).toFixed(0),
+            coordinates: {
+              x0: bucket.startTime,
+              x1: bucket.startTime + results.bucketDuration,
             },
-          }
-        ),
-      },
-    ];
-  }, []);
+            details: i18n.translate(
+              'xpack.infra.logs.analysis.partitionMaxAnomalyScoreAnnotationLabel',
+              {
+                defaultMessage: 'Anomaly score: {maxAnomalyScore}',
+                values: {
+                  maxAnomalyScore: Number(partitionResults.maximumAnomalyScore).toFixed(0),
+                },
+              }
+            ),
+          },
+        ],
+      };
+    },
+    {
+      warning: [],
+      minor: [],
+      major: [],
+      critical: [],
+    }
+  );
 };
 
 export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayload['data']) => {
-  return results.histogramBuckets.reduce<RectAnnotationDatum[]>((annotatedBuckets, bucket) => {
-    const sumPartitionMaxAnomalyScores = bucket.partitions.reduce<number>((scoreSum, partition) => {
-      return scoreSum + partition.maximumAnomalyScore;
-    }, 0);
-
-    if (sumPartitionMaxAnomalyScores === 0) {
-      return annotatedBuckets;
-    }
-    return [
-      ...annotatedBuckets,
-      {
-        coordinates: {
-          x0: bucket.startTime,
-          x1: bucket.startTime + results.bucketDuration,
+  return results.histogramBuckets.reduce<Record<MLSeverityScoreCategories, RectAnnotationDatum[]>>(
+    (annotatedBucketsBySeverity, bucket) => {
+      const sumPartitionMaxAnomalyScores = bucket.partitions.reduce<number>(
+        (scoreSum, partition) => {
+          return scoreSum + partition.maximumAnomalyScore;
         },
-        details: i18n.translate(
-          'xpack.infra.logs.analysis.logRateBucketMaxAnomalyScoreAnnotationLabel',
+        0
+      );
+
+      if (
+        sumPartitionMaxAnomalyScores === 0 ||
+        sumPartitionMaxAnomalyScores < ML_SEVERITY_SCORES.warning
+      ) {
+        return annotatedBucketsBySeverity;
+      }
+      const severityCategory = getSeverityCategoryForScore(sumPartitionMaxAnomalyScores);
+      return {
+        ...annotatedBucketsBySeverity,
+        [severityCategory]: [
+          ...annotatedBucketsBySeverity[severityCategory],
           {
-            defaultMessage: 'Anomaly score: {sumPartitionMaxAnomalyScores}',
-            values: {
-              sumPartitionMaxAnomalyScores: Number(sumPartitionMaxAnomalyScores).toFixed(0),
+            coordinates: {
+              x0: bucket.startTime,
+              x1: bucket.startTime + results.bucketDuration,
             },
-          }
-        ),
-      },
-    ];
-  }, []);
+            details: i18n.translate(
+              'xpack.infra.logs.analysis.logRateBucketMaxAnomalyScoreAnnotationLabel',
+              {
+                defaultMessage: 'Anomaly score: {sumPartitionMaxAnomalyScores}',
+                values: {
+                  sumPartitionMaxAnomalyScores: Number(sumPartitionMaxAnomalyScores).toFixed(0),
+                },
+              }
+            ),
+          },
+        ],
+      };
+    },
+    {
+      warning: [],
+      minor: [],
+      major: [],
+      critical: [],
+    }
+  );
+};
+
+const getSeverityCategoryForScore = (score: number) => {
+  if (score >= ML_SEVERITY_SCORES.warning && score < ML_SEVERITY_SCORES.minor) {
+    return 'warning';
+  } else if (score >= ML_SEVERITY_SCORES.minor && score < ML_SEVERITY_SCORES.major) {
+    return 'minor';
+  } else if (score >= ML_SEVERITY_SCORES.major && score < ML_SEVERITY_SCORES.critical) {
+    return 'major';
+  } else {
+    return 'critical';
+  }
 };
