@@ -32,6 +32,10 @@ describe('MonitorListDrawer component', () => {
           down: 0,
         },
         timestamp: '123',
+        url: {
+          domain: 'expired.badssl.com',
+          full: 'https://expired.badssl.com',
+        },
       },
     };
     monitorDetails = {

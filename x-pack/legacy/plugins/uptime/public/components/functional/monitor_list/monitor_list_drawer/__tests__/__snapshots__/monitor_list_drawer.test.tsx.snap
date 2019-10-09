@@ -6,9 +6,11 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
     <EuiFlexItem>
       <EuiLink
         color="primary"
+        href="https://expired.badssl.com"
         target="_blank"
         type="button"
       >
+        https://expired.badssl.com
         <EuiIcon
           color="subbdued"
           size="s"
@@ -56,6 +58,14 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
       ]
     }
   />
+  <MostRecentError
+    error={
+      Object {
+        "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
+        "type": "io",
+      }
+    }
+  />
 </styled.div>
 `;
 
@@ -65,9 +75,11 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
     <EuiFlexItem>
       <EuiLink
         color="primary"
+        href="https://expired.badssl.com"
         target="_blank"
         type="button"
       >
+        https://expired.badssl.com
         <EuiIcon
           color="subbdued"
           size="s"
@@ -99,6 +111,14 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
           "timestamp": "121",
         },
       ]
+    }
+  />
+  <MostRecentError
+    error={
+      Object {
+        "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
+        "type": "io",
+      }
     }
   />
 </styled.div>
