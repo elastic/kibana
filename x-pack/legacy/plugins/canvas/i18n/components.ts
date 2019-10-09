@@ -633,12 +633,6 @@ export const ComponentStrings = {
         defaultMessage: 'Create workpad',
       }),
   },
-  WorkpadCreate: {
-    getWorkpadCreateButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadCreate.createButtonLabel', {
-        defaultMessage: 'Create workpad',
-      }),
-  },
   WorkpadHeader: {
     getAddElementButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadHeader.addElementButtonLabel', {
