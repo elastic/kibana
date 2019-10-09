@@ -74,11 +74,11 @@ interface PageProps {
 }
 
 export enum SAVE_STATE {
-  NOT_SAVED = 'NOT_SAVED',
-  SAVING = 'SAVING',
-  SAVED = 'SAVED',
-  FAILED = 'FAILED',
-  PARTIAL_FAILURE = 'PARTIAL_FAILURE',
+  NOT_SAVED,
+  SAVING,
+  SAVED,
+  FAILED,
+  PARTIAL_FAILURE,
 }
 
 export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
@@ -98,7 +98,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     jobGroups: [] as string[],
   });
   const [jobs, setJobs] = useState<ModuleJobUI[]>([]);
-  const [kibanaObjects, setKibanaObjects] = useState<KibanaObjects>({} as KibanaObjects);
+  const [kibanaObjects, setKibanaObjects] = useState<KibanaObjects>({});
   const [saveState, setSaveState] = useState<SAVE_STATE>(SAVE_STATE.NOT_SAVED);
   const [resultsUrl, setResultsUrl] = useState<string>('');
   const [validationResult, setValidationResult] = useState<any>({});

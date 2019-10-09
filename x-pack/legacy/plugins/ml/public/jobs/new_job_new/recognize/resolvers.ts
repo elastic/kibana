@@ -8,10 +8,8 @@ import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { IPrivate } from 'ui/private';
-// @ts-ignore
-import { mlJobService } from 'plugins/ml/services/job_service';
-// @ts-ignore
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { mlJobService } from '../../../services/job_service';
+import { ml } from '../../../services/ml_api_service';
 
 /**
  * Checks whether the jobs in a data recognizer module have been created.

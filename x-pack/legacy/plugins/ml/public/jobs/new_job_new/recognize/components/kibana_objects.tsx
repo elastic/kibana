@@ -27,7 +27,7 @@ export interface KibanaObjectItemProps {
 
 export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
   ({ objectType, kibanaObjects, isSaving }) => {
-    const kibanaObjectLabels: { [key: string]: string } = {
+    const kibanaObjectLabels: Record<string, string> = {
       dashboard: i18n.translate('xpack.ml.newJob.simple.recognize.dashboardsLabel', {
         defaultMessage: 'Dashboards',
       }),

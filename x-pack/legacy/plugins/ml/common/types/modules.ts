@@ -5,21 +5,23 @@
  */
 
 import { Datafeed, Job } from '../../public/jobs/new_job_new/common/job_creator/configs';
+import { SavedObjectAttributes } from '../../../../../../target/types/core/server';
 
 export interface ModuleJob {
   id: string;
   config: Partial<Job>;
 }
 
+export interface KibanaObjectConfig extends SavedObjectAttributes {
+  description: string;
+  title: string;
+  version: number;
+}
+
 export interface KibanaObject {
   id: string;
   title: string;
-  config: {
-    kibanaSavedObjectMeta: { searchSourceJSON: string };
-    description: string;
-    title: string;
-    version: number;
-  };
+  config: KibanaObjectConfig;
 }
 
 export interface KibanaObjects {
