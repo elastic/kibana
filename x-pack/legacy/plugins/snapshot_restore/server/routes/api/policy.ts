@@ -25,6 +25,7 @@ export function registerPolicyRoutes(router: Router, plugins: Plugins) {
   router.get('policies/indices', getIndicesHandler);
   router.get('policies/retention_settings', getRetentionSettingsHandler);
   router.put('policies/retention_settings', updateRetentionSettingsHandler);
+  router.post('policies/retention', executeRetentionHandler);
 }
 
 export const getAllHandler: RouterRouteHandler = async (
@@ -201,4 +202,8 @@ export const updateRetentionSettingsHandler: RouterRouteHandler = async (req, ca
       },
     },
   });
+};
+
+export const executeRetentionHandler: RouterRouteHandler = async (_req, callWithRequest) => {
+  return await callWithRequest('slm.executeRetention');
 };
