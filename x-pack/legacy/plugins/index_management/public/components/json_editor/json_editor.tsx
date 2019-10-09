@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
+import { debounce } from 'lodash';
 
 import { useJson, OnUpdateHandler } from './use_json';
 
@@ -23,6 +24,8 @@ export const JsonEditor = React.memo(
       defaultValue,
       onUpdate,
     });
+
+    const debouncedSetContent = useCallback(debounce(setContent, 300), [setContent]);
 
     return (
       <EuiFormRow
@@ -48,7 +51,7 @@ export const JsonEditor = React.memo(
           minLines={6}
           value={content}
           onChange={(updated: string) => {
-            setContent(updated);
+            debouncedSetContent(updated);
           }}
           {...euiCodeEditorProps}
         />

@@ -246,3 +246,26 @@ export const shouldDeleteChildFieldsAfterTypeChange = (
 
 export const canUseMappingsEditor = (maxNestedDepth: number) =>
   maxNestedDepth < MAX_DEPTH_DEFAULT_EDITOR;
+
+interface FormComponentValidity {
+  isValid?: boolean;
+}
+
+export interface FormComponentsArgs {
+  configuration: FormComponentValidity;
+  fieldsJsonEditor: FormComponentValidity;
+  fieldForm?: FormComponentValidity;
+}
+
+export const determineIfValid = (components: FormComponentsArgs): boolean | undefined => {
+  return Object.values(components).reduce(
+    (valid, value) => {
+      // If one component is false, the form validity is false
+      if (valid === false) return valid;
+      // If even one component has a validity, that determines the validity of the form
+      if (value && value.isValid !== undefined) return value.isValid;
+      return valid;
+    },
+    undefined as boolean | undefined
+  );
+};

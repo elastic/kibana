@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
 import {
   ConfigurationForm,
   CONFIGURATION_FIELDS,
   DocumentFieldsHeaders,
   DocumentFields,
+  DocumentFieldsJsonEditor,
+  EditorToggleControls,
 } from './components';
 import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
-import { OnUpdateHandler } from '../json_editor/use_json';
-import { canUseMappingsEditor } from './lib';
-import { JsonEditor } from '../json_editor';
 
 interface Props {
   onUpdate: MappingsStateProps['onUpdate'];
@@ -37,18 +36,10 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue = {} }: Props
 
   return (
     <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
-      {({ editor, getProperties, dispatch, maxNestedDepth }) => {
-        const [jsonEditorDefault, setJsonEditorDefault] = useState({});
-        const onJsonEditorUpdate = useCallback<OnUpdateHandler>(
-          args => {
-            dispatch({ type: 'jsonEditor.update', value: { json: args.getData() } });
-          },
-          [dispatch]
-        );
-
+      {({ editor, getProperties }) => {
         const renderEditor = () => {
           if (editor === 'json') {
-            return <JsonEditor onUpdate={onJsonEditorUpdate} defaultValue={jsonEditorDefault} />;
+            return <DocumentFieldsJsonEditor defaultValue={getProperties()} />;
           }
           return <DocumentFields />;
         };
@@ -58,25 +49,8 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue = {} }: Props
             <ConfigurationForm defaultValue={configurationDefaultValue} />
             <DocumentFieldsHeaders />
             {renderEditor()}
-            {/* TODO: Review toggle controls below */}
             <EuiSpacer size={'l'} />
-            {editor === 'json' ? (
-              <EuiButton
-                disabled={!canUseMappingsEditor(maxNestedDepth)}
-                onClick={() => dispatch({ type: 'changeEditor', value: 'default' })}
-              >
-                {'Use Mappings Editor'}
-              </EuiButton>
-            ) : (
-              <EuiButton
-                onClick={() => {
-                  setJsonEditorDefault(getProperties());
-                  dispatch({ type: 'changeEditor', value: 'json' });
-                }}
-              >
-                {'Use JSON Editor'}
-              </EuiButton>
-            )}
+            <EditorToggleControls editor={editor} />
           </>
         );
       }}

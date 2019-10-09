@@ -11,6 +11,7 @@ import {
   shouldDeleteChildFieldsAfterTypeChange,
   getAllChildFields,
   getMaxNestedDepth,
+  determineIfValid,
   normalize,
 } from './lib';
 
@@ -40,6 +41,10 @@ export interface State {
   documentFields: DocumentFieldsState;
   fields: NormalizedFields;
   fieldForm?: OnFormUpdateArg<any>;
+  fieldsJsonEditor: {
+    format(): MappingsFields;
+    isValid: boolean | undefined;
+  };
 }
 
 export type Action =
@@ -51,36 +56,30 @@ export type Action =
   | { type: 'documentField.createField'; value?: string }
   | { type: 'documentField.editField'; value: string }
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
-  | { type: 'jsonEditor.update'; value: { json: { [key: string]: any } } }
-  | { type: 'changeEditor'; value: FieldsEditor }
-  | { type: 'documentField.changeEditor'; value: FieldsEditor };
+  | { type: 'documentField.changeEditor'; value: FieldsEditor }
+  | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } };
 
 export type Dispatch = (action: Action) => void;
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'configuration.update': {
-      const fieldFormValidity = state.fieldForm === undefined ? true : state.fieldForm.isValid;
-      const isValid =
-        action.value.isValid === undefined || fieldFormValidity === undefined
-          ? undefined
-          : action.value.isValid && fieldFormValidity;
-
       return {
         ...state,
-        isValid,
+        isValid: determineIfValid({
+          ...state,
+          configuration: action.value,
+        }),
         configuration: action.value,
       };
     }
     case 'fieldForm.update': {
-      const isValid =
-        action.value.isValid === undefined || state.configuration.isValid === undefined
-          ? undefined
-          : action.value.isValid && state.configuration.isValid;
-
       return {
         ...state,
-        isValid,
+        isValid: determineIfValid({
+          ...state,
+          fieldForm: action.value,
+        }),
         fieldForm: action.value,
       };
     }
@@ -115,9 +114,21 @@ export const reducer = (state: State, action: Action): State => {
           fieldToEdit: undefined,
         },
       };
-    case 'changeEditor':
     case 'documentField.changeEditor':
-      return { ...state, documentFields: { ...state.documentFields, editor: action.value } };
+      const switchingToDefault = action.value === 'default';
+      const fields = switchingToDefault ? normalize(state.fieldsJsonEditor.format()) : state.fields;
+      const nextState = {
+        ...state,
+        fields,
+        documentFields: { ...state.documentFields, editor: action.value },
+      };
+
+      if (switchingToDefault) {
+        nextState.fieldsJsonEditor.isValid = undefined;
+      } else {
+        if (nextState.fieldForm) nextState.fieldForm.isValid = false;
+      }
+      return nextState;
     case 'field.add': {
       const id = getUniqueId();
       const { fieldToAddFieldTo } = state.documentFields;
@@ -152,7 +163,7 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
-        isValid: state.configuration.isValid,
+        isValid: determineIfValid(state),
         fields: { ...state.fields, rootLevelFields, maxNestedDepth },
       };
     }
@@ -228,7 +239,7 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
-        isValid: state.configuration.isValid,
+        isValid: determineIfValid(state),
         fieldForm: undefined,
         documentFields: {
           ...state.documentFields,
@@ -244,21 +255,20 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
     }
-    case 'jsonEditor.update':
-      try {
-        const nextFields = normalize(action.value.json);
-        return {
+    case 'fieldsJsonEditor.update':
+      return {
+        ...state,
+        isValid: determineIfValid({
           ...state,
-          fields: nextFields,
-        };
-      } catch (e) {
-        // This shouldn't happen because the source of the JSON should have
-        // sanity checking for valid JSON.
-
-        // eslint-disable-next-line no-console
-        console.error(e);
-        return state;
-      }
+          fieldsJsonEditor: action.value,
+        }),
+        fieldsJsonEditor: {
+          format() {
+            return action.value.json;
+          },
+          isValid: action.value.isValid,
+        },
+      };
     default:
       throw new Error(`Action "${action!.type}" not recognized.`);
   }
