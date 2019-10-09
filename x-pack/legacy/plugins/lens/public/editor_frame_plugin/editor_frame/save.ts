@@ -58,7 +58,8 @@ export function getSavedObjectFormat({
       },
       visualization: visualization.getPersistableState(state.visualization.state),
       query: framePublicAPI.query,
-      filters: [], // TODO: Support filters
+      filters: framePublicAPI.filters,
+      dateRange: framePublicAPI.dateRange,
     },
   };
 }

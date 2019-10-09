@@ -1,5 +1,7 @@
 #!/bin/groovy
 
+library 'kibana-pipeline-library'
+
 stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
   timeout(time: 180, unit: 'MINUTES') {
     timestamps {
@@ -15,6 +17,8 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'oss-ciGroup4': getOssCiGroupWorker(4),
               'oss-ciGroup5': getOssCiGroupWorker(5),
               'oss-ciGroup6': getOssCiGroupWorker(6),
+            ]),
+            'kibana-oss-agent2': withWorkers('kibana-oss-tests2', { buildOss() }, [
               'oss-ciGroup7': getOssCiGroupWorker(7),
               'oss-ciGroup8': getOssCiGroupWorker(8),
               'oss-ciGroup9': getOssCiGroupWorker(9),
@@ -30,6 +34,8 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'xpack-ciGroup3': getXpackCiGroupWorker(3),
               'xpack-ciGroup4': getXpackCiGroupWorker(4),
               'xpack-ciGroup5': getXpackCiGroupWorker(5),
+            ]),
+            'kibana-xpack-agent2': withWorkers('kibana-xpack-tests2', { buildXpack() }, [
               'xpack-ciGroup6': getXpackCiGroupWorker(6),
               'xpack-ciGroup7': getXpackCiGroupWorker(7),
               'xpack-ciGroup8': getXpackCiGroupWorker(8),
@@ -246,10 +252,12 @@ def sendInfraMail() {
 
 def sendKibanaMail() {
   catchError {
-    if(params.NOTIFY_ON_FAILURE && currentBuild.result != 'SUCCESS' && currentBuild.result != 'ABORTED') {
+    def buildStatus = buildUtils.getBuildStatus()
+
+    if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
         to: 'build-kibana@elastic.co',
-        subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.result}",
+        subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}",
         body: '${SCRIPT,template="groovy-html.template"}',
         mimeType: 'text/html',
       )
@@ -286,6 +294,6 @@ def buildXpack() {
 def runErrorReporter() {
   bash """
     source src/dev/ci_setup/setup_env.sh
-    node src/dev/failed_tests/cli
+    node scripts/report_failed_tests
   """
 }

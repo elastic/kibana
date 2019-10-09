@@ -151,7 +151,7 @@ export class FeatureTooltip extends React.Component {
         featureId={feature.id}
         layerId={feature.layerId}
         loadFeatureProperties={this.props.loadFeatureProperties}
-        showFilterButtons={this.props.showFilterButtons}
+        showFilterButtons={!!this.props.addFilters && this.props.isLocked}
         onCloseTooltip={this._onCloseTooltip}
         addFilters={this.props.addFilters}
       />
@@ -338,6 +338,15 @@ export class FeatureTooltip extends React.Component {
     );
   }
 
+  _loadCurrentFeaturePreIndexedShape = () => {
+    const filteredFeatures = this._filterFeatures();
+    const currentFeature = filteredFeatures[this.state.pageNumber];
+    return this.props.loadPreIndexedShape({
+      layerId: currentFeature.layerId,
+      featureId: currentFeature.id
+    });
+  }
+
   render() {
     const filteredFeatures = this._filterFeatures();
     const currentFeature = filteredFeatures[this.state.pageNumber];
@@ -355,6 +364,7 @@ export class FeatureTooltip extends React.Component {
           geometry={currentFeatureGeometry}
           geoFields={filteredGeoFields}
           addFilters={this.props.addFilters}
+          loadPreIndexedShape={this._loadCurrentFeaturePreIndexedShape}
         />
       );
     }

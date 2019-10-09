@@ -1,6 +1,7 @@
 // TODO: Move all of the styles here (should be modularised by, e.g., CSS-in-JS or CSS modules).
 #consoleRoot {
-  height: 100%;
+  display: flex;
+  flex: 1 1 auto;
   // Make sure the editor actions don't create scrollbars on this container
   // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
   overflow: hidden;
@@ -36,12 +37,17 @@
 }
 
 .conApp__editorActions {
+  button {
+    line-height: inherit;
+  }
   position: absolute;
   z-index: $euiZLevel1;
   top: 0;
   // Adjust for possible scrollbars
   right: $euiSize;
   line-height: 1;
+  // For IE11
+  min-width: 40px;
 }
 
 .conApp__editorActionButton {

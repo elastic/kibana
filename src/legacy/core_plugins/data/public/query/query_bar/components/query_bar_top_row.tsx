@@ -21,37 +21,29 @@ import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 
 import classNames from 'classnames';
 import React, { useState, useEffect } from 'react';
-import { Storage } from 'ui/storage';
-import { documentationLinks } from 'ui/documentation_links';
-import { PersistedLog } from 'ui/persisted_log';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
+import { TimeRange } from 'src/plugins/data/public';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
-import { getQueryLog } from '../lib/get_query_log';
-import { Query } from '../index';
+import { Query, getQueryLog } from '../index';
 import { TimeHistoryContract } from '../../../timefilter';
-
-interface DateRange {
-  from: string;
-  to: string;
-}
+import { IDataPluginServices } from '../../../types';
+import { PersistedLog } from '../../persisted_log';
 
 interface Props {
   query?: Query;
-  onSubmit: (payload: { dateRange: DateRange; query?: Query }) => void;
-  onChange: (payload: { dateRange: DateRange; query?: Query }) => void;
+  onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   disableAutoFocus?: boolean;
-  appName: string;
   screenTitle?: string;
   indexPatterns?: Array<IndexPattern | string>;
-  store?: Storage;
   intl: InjectedIntl;
   prepend?: React.ReactNode;
   showQueryInput?: boolean;
@@ -70,15 +62,17 @@ interface Props {
 function QueryBarTopRowUI(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
-  const kibana = useKibana();
-  const { uiSettings, http, notifications, savedObjects } = kibana.services;
+  const kibana = useKibana<IDataPluginServices>();
+  const { uiSettings, notifications, store, appName, docLinks } = kibana.services;
+
+  const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
   const queryLanguage = props.query && props.query.language;
   let persistedLog: PersistedLog | undefined;
 
   useEffect(() => {
     if (!props.query) return;
-    persistedLog = getQueryLog(uiSettings!, props.appName, props.query.language);
+    persistedLog = getQueryLog(uiSettings!, store, appName, props.query.language);
   }, [queryLanguage]);
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
@@ -131,7 +125,7 @@ function QueryBarTopRowUI(props: Props) {
     }
   }
 
-  function onSubmit({ query, dateRange }: { query?: Query; dateRange: DateRange }) {
+  function onSubmit({ query, dateRange }: { query?: Query; dateRange: TimeRange }) {
     handleLuceneSyntaxWarning();
 
     if (props.timeHistory) {
@@ -153,19 +147,14 @@ function QueryBarTopRowUI(props: Props) {
     return (
       <EuiFlexItem>
         <QueryBarInput
-          appName={props.appName}
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
           query={props.query!}
           screenTitle={props.screenTitle}
-          store={props.store!}
           onChange={onQueryChange}
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
-          uiSettings={uiSettings!}
-          savedObjectsClient={savedObjects!.client}
-          http={http!}
         />
       </EuiFlexItem>
     );
@@ -176,7 +165,7 @@ function QueryBarTopRowUI(props: Props) {
   }
 
   function shouldRenderQueryInput(): boolean {
-    return Boolean(props.showQueryInput && props.indexPatterns && props.query && props.store);
+    return Boolean(props.showQueryInput && props.indexPatterns && props.query && store);
   }
 
   function renderUpdateButton() {
@@ -251,7 +240,7 @@ function QueryBarTopRowUI(props: Props) {
 
   function handleLuceneSyntaxWarning() {
     if (!props.query) return;
-    const { intl, store } = props;
+    const { intl } = props;
     const { query, language } = props.query;
     if (
       language === 'kuery' &&
@@ -273,7 +262,7 @@ function QueryBarTopRowUI(props: Props) {
                have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
                 values={{
                   link: (
-                    <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
+                    <EuiLink href={kueryQuerySyntaxLink} target="_blank">
                       <FormattedMessage
                         id="data.query.queryBar.syntaxOptionsDescription.docsLinkText"
                         defaultMessage="here"
@@ -300,8 +289,8 @@ function QueryBarTopRowUI(props: Props) {
   }
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
-    if (!props.store) return;
-    props.store.set('kibana.luceneSyntaxWarningOptOut', true);
+    if (!store) return;
+    store.set('kibana.luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 

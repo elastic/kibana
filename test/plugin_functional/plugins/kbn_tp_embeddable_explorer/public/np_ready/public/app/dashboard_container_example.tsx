@@ -19,19 +19,18 @@
 import React from 'react';
 import { EuiButton, EuiLoadingChart } from '@elastic/eui';
 import {
-  DASHBOARD_CONTAINER_TYPE,
-  DashboardContainer,
-  DashboardContainerFactory,
-} from '../../../../../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
-
-import {
   ErrorEmbeddable,
   ViewMode,
   isErrorEmbeddable,
   EmbeddablePanel,
   GetEmbeddableFactory,
   GetEmbeddableFactories,
-} from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from '../embeddable_api';
+import {
+  DASHBOARD_CONTAINER_TYPE,
+  DashboardContainer,
+  DashboardContainerFactory,
+} from '../../../../../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { dashboardInput } from './dashboard_input';

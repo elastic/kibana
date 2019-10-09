@@ -171,7 +171,6 @@ class FilterItemUI extends Component<Props, State> {
               indexPatterns={this.props.indexPatterns}
               onSubmit={this.onSubmit}
               onCancel={this.closePopover}
-              uiSettings={this.props.uiSettings}
             />
           </div>
         ),
