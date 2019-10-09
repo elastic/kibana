@@ -17,14 +17,20 @@
  * under the License.
  */
 
-export { withProcRunner } from './proc_runner';
-export {
-  ToolingLog,
-  ToolingLogTextWriter,
-  pickLevelFromFlags,
-  ToolingLogCollectingWriter,
-} from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
-export { run, createFailError, createFlagError, combineErrors, isFailError } from './run';
-export { REPO_ROOT } from './constants';
-export * from './axios';
+import { ToolingLogTextWriter } from './tooling_log_text_writer';
+
+export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
+  messages: string[] = [];
+
+  constructor() {
+    super({
+      level: 'verbose',
+      writeTo: {
+        write: msg => {
+          // trim trailing new line
+          this.messages.push(msg.slice(0, -1));
+        },
+      },
+    });
+  }
+}

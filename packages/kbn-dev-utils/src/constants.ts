@@ -17,14 +17,6 @@
  * under the License.
  */
 
-export { withProcRunner } from './proc_runner';
-export {
-  ToolingLog,
-  ToolingLogTextWriter,
-  pickLevelFromFlags,
-  ToolingLogCollectingWriter,
-} from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
-export { run, createFailError, createFlagError, combineErrors, isFailError } from './run';
-export { REPO_ROOT } from './constants';
-export * from './axios';
+import { dirname } from 'path';
+
+export const REPO_ROOT = dirname(require.resolve('../../../package.json'));
