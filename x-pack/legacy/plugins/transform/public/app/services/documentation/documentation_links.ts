@@ -6,18 +6,10 @@
 import { TRANSFORM_DOC_PATHS } from '../../constants';
 
 class DocumentationLinksService {
-  private esDocBasePath: string = '';
   private esPluginDocBasePath: string = '';
-  private esStackOverviewDocBasePath: string = '';
 
-  public init(
-    esDocBasePath: string,
-    esPluginDocBasePath: string,
-    esStackOverviewDocBasePath: string
-  ): void {
-    this.esDocBasePath = esDocBasePath;
+  public init(esPluginDocBasePath: string): void {
     this.esPluginDocBasePath = esPluginDocBasePath;
-    this.esStackOverviewDocBasePath = esStackOverviewDocBasePath;
   }
 
   public getTransformPluginDocUrl() {
