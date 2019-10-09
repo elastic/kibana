@@ -99,7 +99,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
       },
     ];
 
-    savedObjectsClient.update.mockImplementation(() => Promise.resolve(clientResponse));
+    savedObjectsClient.bulkUpdate.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
@@ -139,6 +139,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
         attributes: {
           title: 'An existing visualization',
         },
+        options: {},
       },
       {
         type: 'dashboard',
@@ -146,6 +147,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
         attributes: {
           title: 'An existing dashboard',
         },
+        options: {},
       },
     ]);
   });
