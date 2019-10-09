@@ -177,7 +177,7 @@ def jobRunner(label, useRamDisk, closure) {
         sh """
           mkdir -p /dev/shm/workspace
           mkdir -p '${originalWorkspace}' # create all of the directories leading up to the workspace, if they don't exist
-          rm -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
+          rm --preserve-root -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
           ln -s /dev/shm/workspace '${originalWorkspace}'
         """
       }
