@@ -5,7 +5,6 @@
  */
 
 import chromeMock from 'ui/chrome';
-
 import { Storage } from 'ui/storage';
 import {
   getIndexPatternDatasource,
