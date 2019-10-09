@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from 'lodash';
 import {
   InfraSnapshotGroupbyInput,
   InfraSnapshotMetricInput,
@@ -12,7 +13,11 @@ import {
   InfraNodeType,
   InfraSourceConfiguration,
 } from '../../graphql/types';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
+import {
+  InfraBackendFrameworkAdapter,
+  InfraFrameworkRequest,
+  InfraDatabaseSearchResponse,
+} from '../adapters/framework';
 import { InfraSources } from '../sources';
 
 import { JsonObject } from '../../../common/typed_json';
@@ -31,6 +36,7 @@ import {
   InfraSnapshotNodeMetricsBucket,
 } from './response_helpers';
 import { IP_FIELDS } from '../constants';
+import { getAllCompositeData } from '../../utils/get_all_composite_data';
 
 export interface InfraSnapshotRequestOptions {
   nodeType: InfraNodeType;
@@ -62,6 +68,24 @@ export class InfraSnapshot {
     return mergeNodeBuckets(groupedNodeBuckets, nodeMetricBuckets, options);
   }
 }
+
+// This is used by the getAllCompositeData to select the bucket to return.
+const bucketSelector = (
+  response: InfraDatabaseSearchResponse<{}, InfraSnapshotAggregationResponse>
+) => (response.aggregations && response.aggregations.nodes.buckets) || [];
+
+// This is used by getAllCompositeData to add the after key to the subsequent requests
+const handleAfterKey = (
+  options: object,
+  response: InfraDatabaseSearchResponse<{}, InfraSnapshotAggregationResponse>
+) => {
+  if (!response.aggregations) {
+    return options;
+  }
+  const newOptions = { ...options };
+  set(newOptions, 'body.aggregations.nodes.composite.after', response.aggregations.nodes.after_key);
+  return newOptions;
+};
 
 const requestGroupedNodes = async (
   request: InfraFrameworkRequest,
@@ -112,11 +136,10 @@ const requestGroupedNodes = async (
     },
   };
 
-  return await getAllCompositeAggregationData<InfraSnapshotNodeGroupByBucket>(
-    framework,
-    request,
-    query
-  );
+  return await getAllCompositeData<
+    InfraSnapshotAggregationResponse,
+    InfraSnapshotNodeGroupByBucket
+  >(framework, request, query, bucketSelector, handleAfterKey);
 };
 
 const requestNodeMetrics = async (
@@ -174,12 +197,10 @@ const requestNodeMetrics = async (
       },
     },
   };
-
-  return await getAllCompositeAggregationData<InfraSnapshotNodeMetricsBucket>(
-    framework,
-    request,
-    query
-  );
+  return await getAllCompositeData<
+    InfraSnapshotAggregationResponse,
+    InfraSnapshotNodeMetricsBucket
+  >(framework, request, query, bucketSelector, handleAfterKey);
 };
 
 // buckets can be InfraSnapshotNodeGroupByBucket[] or InfraSnapshotNodeMetricsBucket[]
@@ -190,46 +211,6 @@ interface InfraSnapshotAggregationResponse {
     after_key: { [id: string]: string };
   };
 }
-
-const getAllCompositeAggregationData = async <BucketType>(
-  framework: InfraBackendFrameworkAdapter,
-  request: InfraFrameworkRequest,
-  query: any,
-  previousBuckets: BucketType[] = []
-): Promise<BucketType[]> => {
-  const response = await framework.callWithRequest<{}, InfraSnapshotAggregationResponse>(
-    request,
-    'search',
-    query
-  );
-
-  // Nothing available, return the previous buckets.
-  if (response.hits.total.value === 0) {
-    return previousBuckets;
-  }
-
-  // if ES doesn't return an aggregations key, something went seriously wrong.
-  if (!response.aggregations) {
-    throw new Error('Whoops!, `aggregations` key must always be returned.');
-  }
-
-  const currentBuckets = response.aggregations.nodes.buckets;
-
-  // if there are no currentBuckets then we are finished paginating through the results
-  if (currentBuckets.length === 0) {
-    return previousBuckets;
-  }
-
-  // There is possibly more data, concat previous and current buckets and call ourselves recursively.
-  const newQuery = { ...query };
-  newQuery.body.aggregations.nodes.composite.after = response.aggregations.nodes.after_key;
-  return getAllCompositeAggregationData(
-    framework,
-    request,
-    newQuery,
-    previousBuckets.concat(currentBuckets)
-  );
-};
 
 const mergeNodeBuckets = (
   nodeGroupByBuckets: InfraSnapshotNodeGroupByBucket[],
