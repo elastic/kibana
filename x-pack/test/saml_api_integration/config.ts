@@ -5,9 +5,12 @@
  */
 
 import { resolve } from 'path';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function ({ readConfigFile }) {
-  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
+export default async function({ readConfigFile }: FtrConfigProviderContext) {
+  const kibanaAPITestsConfig = await readConfigFile(
+    require.resolve('../../../test/api_integration/config.js')
+  );
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
 
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
@@ -36,7 +39,7 @@ export default async function ({ readConfigFile }) {
         'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
-        `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/v1/saml`,
+        `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,
         'xpack.security.authc.realms.saml.saml1.attributes.principal=urn:oid:0.0.7',
       ],
     },
@@ -46,9 +49,10 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
-        '--server.xsrf.whitelist=[\"/api/security/v1/saml\"]',
+        '--server.xsrf.whitelist=["/api/security/saml/callback"]',
         `--xpack.security.authc.providers=${JSON.stringify(['saml', 'basic'])}`,
         '--xpack.security.authc.saml.realm=saml1',
+        '--xpack.security.authc.saml.maxRedirectURLSize=100b',
       ],
     },
   };

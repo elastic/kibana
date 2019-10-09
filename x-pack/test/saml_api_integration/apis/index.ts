@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('security', () => {
-    loadTestFile(require.resolve('./saml_login'));
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export default function({ loadTestFile }: FtrProviderContext) {
+  describe('apis SAML', function() {
+    this.tags('ciGroup6');
+    loadTestFile(require.resolve('./security'));
   });
 }

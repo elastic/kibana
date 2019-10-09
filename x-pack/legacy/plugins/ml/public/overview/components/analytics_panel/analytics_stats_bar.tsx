@@ -22,8 +22,8 @@ function getAnalyticsStats(analyticsList: any[]) {
       show: true,
     },
     started: {
-      label: i18n.translate('xpack.ml.overview.statsBar.startedAnalyticsLabel', {
-        defaultMessage: 'Started',
+      label: i18n.translate('xpack.ml.overview.statsBar.runningAnalyticsLabel', {
+        defaultMessage: 'Running',
       }),
       value: 0,
       show: true,
