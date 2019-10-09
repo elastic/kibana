@@ -7,9 +7,9 @@
 import React, { useState, Fragment } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
-import { useState as useMappingsState, useDispatch } from '../../../mappings_state';
-import { shouldDeleteChildFieldsAfterTypeChange } from '../../../lib';
-import { NormalizedField, DataType } from '../../../types';
+import { useState as useMappingsState, useDispatch } from '../../../../mappings_state';
+import { shouldDeleteChildFieldsAfterTypeChange } from '../../../../lib';
+import { NormalizedField, DataType } from '../../../../types';
 
 export type UpdateFieldFunc = (field: NormalizedField) => void;
 
