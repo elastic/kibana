@@ -31,7 +31,7 @@ import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter, FilterStateStore, RangeFilter } from '@kbn/es-query';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
@@ -78,7 +78,7 @@ export interface FilterManager {
     },
     values: string | string[],
     operation: string,
-    index: number
+    index?: string
   ) => Filter[];
 }
 
@@ -204,15 +204,11 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchScope.inspectorAdapters = this.inspectorAdaptors;
 
     const { searchSource } = this.savedSearch;
-    const indexPattern = (searchScope.indexPattern = searchSource.getField('index'));
+    const indexPattern = (searchScope.indexPattern = searchSource.getField('index'))!;
 
     const timeRangeSearchSource = searchSource.create();
-    timeRangeSearchSource.setField('filter', () => {
-      if (!this.searchScope || !this.input.timeRange) {
-        return;
-      }
-      return getTime(indexPattern, this.input.timeRange);
-    });
+    const timeFilter = getTime(indexPattern, this.input.timeRange);
+    if (timeFilter) timeRangeSearchSource.setField('filter', timeFilter as RangeFilter);
 
     this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);

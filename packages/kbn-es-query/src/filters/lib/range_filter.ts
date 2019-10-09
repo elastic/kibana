@@ -22,6 +22,7 @@ import { Filter, FilterMeta } from './meta_filter';
 interface FilterRange {
   from?: number | string;
   to?: number | string;
+  format?: string;
 }
 
 interface FilterRangeGt {

@@ -156,7 +156,7 @@ describe('SearchSource', function () {
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
       const options = {};
-      searchSource.requestIsStarting(options);
+      searchSource.fetch(options);
       expect(fn).toBeCalledWith(searchSource, options);
     });
 
@@ -169,7 +169,7 @@ describe('SearchSource', function () {
       const parentFn = jest.fn();
       parent.onRequestStart(parentFn);
       const options = {};
-      searchSource.requestIsStarting(options);
+      searchSource.fetch(options);
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).not.toBeCalled();
@@ -184,7 +184,7 @@ describe('SearchSource', function () {
       const parentFn = jest.fn();
       parent.onRequestStart(parentFn);
       const options = {};
-      searchSource.requestIsStarting(options);
+      searchSource.fetch(options);
 
       expect(fn).toBeCalledWith(searchSource, options);
       expect(parentFn).toBeCalledWith(searchSource, options);

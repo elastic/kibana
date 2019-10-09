@@ -19,9 +19,10 @@
 
 // @ts-ignore
 import { SearchSource } from 'ui/courier';
+import { SortDirection } from 'ui/courier/types';
 import { Filter } from '@kbn/es-query';
 import { IndexPatterns, IndexPattern } from 'ui/index_patterns';
-import { reverseSortDir, SortDirection } from './utils/sorting';
+import { reverseSortDir } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
 import { generateIntervals } from './utils/generate_intervals';
@@ -114,7 +115,7 @@ function fetchContextProvider(indexPatterns: IndexPatterns) {
 
   async function createSearchSource(indexPattern: IndexPattern, filters: Filter[]) {
     return new SearchSource()
-      .setParent(false)
+      .setParent(undefined)
       .setField('index', indexPattern)
       .setField('filter', filters);
   }

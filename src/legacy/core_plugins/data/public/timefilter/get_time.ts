@@ -43,7 +43,7 @@ export function calculateBounds(timeRange: TimeRange, options: CalculateBoundsOp
 }
 
 export function getTime(
-  indexPattern: IndexPattern,
+  indexPattern: IndexPattern | undefined,
   timeRange: TimeRange,
   forceNow?: Date
 ): Filter | undefined {

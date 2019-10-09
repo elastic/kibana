@@ -27,6 +27,7 @@ import chrome from 'ui/chrome';
 // need to get rid of angular from these
 // @ts-ignore
 import { TimeRange } from 'src/plugins/data/public';
+import { RangeFilter } from '@kbn/es-query';
 import { SearchSource } from '../../../../ui/public/courier/search_source';
 // @ts-ignore
 import { FilterBarQueryFilterProvider } from '../../../../ui/public/filter_manager/query_filter';
@@ -104,9 +105,8 @@ const handleCourierRequest = async ({
   });
 
   if (timeRange) {
-    timeFilterSearchSource.setField('filter', () => {
-      return getTime(searchSource.getField('index'), timeRange);
-    });
+    const timeFilter = getTime(searchSource.getField('index'), timeRange);
+    if (timeFilter) timeFilterSearchSource.setField('filter', timeFilter as RangeFilter);
   }
 
   requestSearchSource.setField('filter', filters);

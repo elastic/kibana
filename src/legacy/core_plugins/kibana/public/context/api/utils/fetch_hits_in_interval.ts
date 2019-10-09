@@ -17,11 +17,10 @@
  * under the License.
  */
 import { SearchSource } from 'ui/courier';
+import { EsQuerySortValue, SortDirection } from 'ui/courier/types';
 import { convertTimeValueToIso } from './date_conversion';
-import { SortDirection } from './sorting';
 import { EsHitRecordList } from '../context';
 import { IntervalValue } from './generate_intervals';
-import { EsQuerySort } from './get_es_query_sort';
 import { EsQuerySearchAfter } from './get_es_query_search_after';
 
 interface RangeQuery {
@@ -40,7 +39,7 @@ interface RangeQuery {
 export async function fetchHitsInInterval(
   searchSource: SearchSource,
   timeField: string,
-  sort: EsQuerySort,
+  sort: [EsQuerySortValue, EsQuerySortValue],
   sortDir: SortDirection,
   interval: IntervalValue[],
   searchAfter: EsQuerySearchAfter,

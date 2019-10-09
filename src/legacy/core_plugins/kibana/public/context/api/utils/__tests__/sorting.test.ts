@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { reverseSortDir, SortDirection } from '../sorting';
+import { reverseSortDir } from '../sorting';
+import { SortDirection } from 'ui/courier/types';
 
 describe('function reverseSortDir', function() {
   test('reverse a given sort direction', function() {

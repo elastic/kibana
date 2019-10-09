@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EsQuerySortValue, SortDirection } from '../../../../../../ui/public/courier';
+import { EsQuerySortValue, SortDirection } from '../../../../../../ui/public/courier/types';
 
 /**
  * Returns `EsQuerySort` which is used to sort records in the ES query
@@ -30,6 +30,6 @@ export function getEsQuerySort(
   timeField: string,
   tieBreakerField: string,
   sortDir: SortDirection
-): EsQuerySortValue[] {
+): [EsQuerySortValue, EsQuerySortValue] {
   return [{ [timeField]: sortDir }, { [tieBreakerField]: sortDir }];
 }

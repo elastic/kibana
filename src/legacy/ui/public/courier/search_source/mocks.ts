@@ -37,6 +37,7 @@
  */
 
 export const searchSourceMock = {
+  setPreferredSearchStrategyId: jest.fn(),
   setFields: jest.fn(),
   setField: jest.fn(),
   getId: jest.fn(),

@@ -18,7 +18,7 @@
  */
 
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
-import { SortDirection } from 'ui/courier';
+import { SortDirection } from 'ui/courier/types';
 
 /**
  * The list of field names that are allowed for sorting, but not included in

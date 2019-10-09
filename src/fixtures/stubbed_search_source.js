@@ -60,9 +60,6 @@ export default function stubSearchSource(Private, $q, Promise) {
     onRequestStart(fn) {
       this._requestStartHandlers.push(fn);
     },
-    requestIsStarting(req) {
-      return Promise.map(this._requestStartHandlers, fn => fn(req));
-    },
     requestIsStopped() {}
   };
 

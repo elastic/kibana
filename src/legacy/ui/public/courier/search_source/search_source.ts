@@ -258,27 +258,6 @@ export class SearchSource {
     this.requestStartHandlers.push(handler);
   }
 
-  /**
-   *  Called by requests of this search source when they are started
-   *  @param  {Courier.Request} request
-   *  @param options
-   *  @return {Promise<undefined>}
-   */
-  requestIsStarting(options: FetchOptions = {}) {
-    const handlers = [...this.requestStartHandlers];
-    // If callParentStartHandlers has been set to true, we also call all
-    // handlers of parent search sources.
-    if (this.inheritOptions.callParentStartHandlers) {
-      let searchSource = this.getParent();
-      while (searchSource) {
-        handlers.push(...searchSource.requestStartHandlers);
-        searchSource = searchSource.getParent();
-      }
-    }
-
-    return Promise.all(handlers.map(fn => fn(this, options)));
-  }
-
   async getSearchRequestBody() {
     const searchRequest = await this.flatten();
     return searchRequest.body;
@@ -297,6 +276,27 @@ export class SearchSource {
    ******/
 
   /**
+   *  Called by requests of this search source when they are started
+   *  @param  {Courier.Request} request
+   *  @param options
+   *  @return {Promise<undefined>}
+   */
+  private requestIsStarting(options: FetchOptions = {}) {
+    const handlers = [...this.requestStartHandlers];
+    // If callParentStartHandlers has been set to true, we also call all
+    // handlers of parent search sources.
+    if (this.inheritOptions.callParentStartHandlers) {
+      let searchSource = this.getParent();
+      while (searchSource) {
+        handlers.push(...searchSource.requestStartHandlers);
+        searchSource = searchSource.getParent();
+      }
+    }
+
+    return Promise.all(handlers.map(fn => fn(this, options)));
+  }
+
+  /**
    * Used to merge properties into the data within ._flatten().
    * The data is passed in and modified by the function
    *
@@ -310,6 +310,22 @@ export class SearchSource {
     val: SearchSourceFields[K],
     key: K
   ) {
+    const addToRoot = (rootKey: string, value: any) => {
+      if (rootKey && data[rootKey] == null) {
+        data[rootKey] = typeof value === 'function' ? value(this) : value;
+      }
+    };
+
+    /**
+     * Add the key and val to the body of the request
+     */
+    const addToBody = (bodyKey: string, value: any) => {
+      // ignore if we already have a value
+      if (data.body[bodyKey] == null) {
+        data.body[bodyKey] = value;
+      }
+    };
+
     switch (key) {
       case 'filter':
       case 'query':
@@ -330,22 +346,6 @@ export class SearchSource {
         return addToRoot(key, fields);
       default:
         return addToBody(key, val);
-    }
-
-    function addToRoot(rootKey: string, value: any) {
-      if (rootKey && data[rootKey] == null) {
-        data[rootKey] = value;
-      }
-    }
-
-    /**
-     * Add the key and val to the body of the request
-     */
-    function addToBody(bodyKey: string, value: any) {
-      // ignore if we already have a value
-      if (data.body[bodyKey] == null) {
-        data.body[bodyKey] = value;
-      }
     }
   }
 
