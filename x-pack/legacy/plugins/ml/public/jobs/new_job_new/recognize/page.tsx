@@ -28,10 +28,9 @@ import {
   EuiButton,
   EuiTextAlign,
 } from '@elastic/eui';
-// @ts-ignore
-import { ml } from 'plugins/ml/services/ml_api_service';
 import chrome from 'ui/chrome';
 import { merge, flatten } from 'lodash';
+import { ml } from '../../../services/ml_api_service';
 import { useKibanaContext } from '../../../contexts/kibana';
 import {
   DatafeedResponse,
@@ -179,6 +178,29 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     return Promise.resolve(objects);
   };
 
+  const getTimeRange = async (): Promise<{ start: number; end: number }> => {
+    const { useFullIndexData } = formState;
+    if (useFullIndexData) {
+      const { start, end } = await ml.getTimeFieldRange({
+        index: indexPattern.title,
+        timeFieldName: indexPattern.timeFieldName,
+        query: combinedQuery,
+      });
+      return {
+        start: start.epoch,
+        end: end.epoch,
+      };
+    } else {
+      const {
+        timeRange: { start, end },
+      } = formState;
+      return Promise.resolve({
+        start,
+        end,
+      });
+    }
+  };
+
   useEffect(() => {
     loadModule();
   }, []);
@@ -213,6 +235,9 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     event.preventDefault();
     setSaveState(SAVE_STATE.SAVING);
     const { jobPrefix, jobGroups, startDatafeedAfterSave, useDedicatedIndex } = formState;
+
+    const timeRange = await getTimeRange();
+
     try {
       const response: DataRecognizerConfigResponse = await ml.setupDataRecognizerConfig({
         moduleId,
@@ -222,6 +247,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         indexPatternName: indexPattern.title,
         useDedicatedIndex,
         startDatafeed: startDatafeedAfterSave,
+        ...timeRange,
       });
       const { datafeeds: datafeedsResponse, jobs: jobsResponse, kibana: kibanaResponse } = response;
 

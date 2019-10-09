@@ -73,7 +73,8 @@ declare interface Ml {
   getDatafeedStats(obj: object): Promise<any>;
   esSearch(obj: object): any;
   getIndices(): Promise<EsIndex[]>;
-
+  getDataRecognizerModule(obj: { moduleId: string }): Promise<any>;
+  setupDataRecognizerConfig(obj: object): Promise<any>;
   getTimeFieldRange(obj: object): Promise<GetTimeFieldRangeResponse>;
   calculateModelMemoryLimit(obj: object): Promise<{ modelMemoryLimit: string }>;
   calendars(): Promise<

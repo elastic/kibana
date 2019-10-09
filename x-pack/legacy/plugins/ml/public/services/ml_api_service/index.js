@@ -291,7 +291,9 @@ export const ml = {
       'indexPatternName',
       'query',
       'useDedicatedIndex',
-      'startDatafeed'
+      'startDatafeed',
+      'start',
+      'end'
     ]);
 
     return http({
