@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RawAlertAction, AlertAction } from '../../../../../alerting/server/types';
+import { AlertAction } from '../../../../../alerting/server/types';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 
@@ -14,31 +14,12 @@ export interface DeleteSignalParams {
   id: string;
 }
 
-interface ObjectWithId {
-  id: AlertAction['id'];
-}
-
-export const isObjectWithId = (obj: unknown): obj is ObjectWithId => {
-  return Object.getOwnPropertyDescriptor(obj, 'id') != null;
-};
-
-export const getObjectsWithId = (actions: unknown[] = []): ObjectWithId[] => {
-  return actions.reduce<ObjectWithId[]>((accum, current) => {
-    if (isObjectWithId(current)) {
-      return [...accum, current];
-    } else {
-      return accum;
-    }
-  }, []);
-};
-
 export const deleteAllSignalActions = async (
   actionsClient: ActionsClient,
-  actions: RawAlertAction[] | AlertAction[] | undefined
+  actions: AlertAction[] | undefined = []
 ): Promise<Error | null> => {
-  const actionsWithIds = getObjectsWithId(actions);
   try {
-    await Promise.all(actionsWithIds.map(async ({ id }) => actionsClient.delete({ id })));
+    await Promise.all(actions.map(async ({ id }) => actionsClient.delete({ id })));
     return null;
   } catch (error) {
     return error;
@@ -47,7 +28,12 @@ export const deleteAllSignalActions = async (
 
 export const deleteSignals = async ({ alertsClient, actionsClient, id }: DeleteSignalParams) => {
   const alert = await alertsClient.get({ id });
-  const actionsErrors = await deleteAllSignalActions(actionsClient, alert.actions);
+
+  // TODO: Remove this as cast as soon as signal.actions TypeScript bug is fixed
+  // where it is trying to return AlertAction[] or RawAlertAction[]
+  const actions = alert.actions as (AlertAction[] | undefined);
+
+  const actionsErrors = await deleteAllSignalActions(actionsClient, actions);
   const deletedAlert = alertsClient.delete({ id });
   if (actionsErrors != null) {
     throw actionsErrors;
