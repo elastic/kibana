@@ -1,30 +1,5 @@
 <kbn-management-app section="kibana/objects" class="kuiView" data-test-subj="savedObjectsEdit">
   <kbn-management-objects-view class="kuiViewContent kuiViewContent--constrainedWidth">
     <div id="reactViewSavedObjectsId"></div>
-
-    <div class="kuiViewContentItem kuiVerticalRhythm">
-      <!-- Actions -->
-      <div class="kuiButtonGroup">
-        <button
-          class="kuiButton kuiButton--primary"
-          aria-label="{{ 'kbn.management.objects.view.saveButtonAriaLabel' | i18n: { defaultMessage: 'Save { title } Object', values: { title } } }}"
-          ng-click="submit()"
-          ng-disabled="objectForm.$invalid || aceInvalidEditors.length !==0"
-          i18n-id="kbn.management.objects.view.saveButtonLabel"
-          i18n-default-message="Save { title } Object"
-          i18n-values="{ title }"
-          ng-if="canEdit"
-          data-test-subj="savedObjectEditSave"
-        ></button>
-
-        <button
-          class="kuiButton kuiButton--basic"
-          aria-label="{{ 'kbn.management.objects.view.cancelButtonAriaLabel' | i18n: { defaultMessage: 'Cancel'} }}"
-          ng-click="cancel()"
-          i18n-id="kbn.management.objects.view.cancelButtonLabel"
-          i18n-default-message="Cancel"
-        ></button>
-      </div>
-    </div>
   </kbn-management-objects-view>
 </kbn-management-app>

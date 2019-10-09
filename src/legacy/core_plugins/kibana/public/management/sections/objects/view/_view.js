@@ -74,7 +74,14 @@ function updateReactComponent($scope) {
         <Intro />
 
         <EuiSpacer size="m" />
-        <Form initialFields={$scope.fields} onChange={$scope.onChange} canEdit={$scope.canEdit} />
+        <Form
+          initialFields={$scope.fields}
+          onChange={$scope.onChange}
+          canEdit={$scope.canEdit}
+          title={$scope.title}
+          submit={$scope.submit}
+          cancel={$scope.cancel}
+        />
       </I18nContext>,
       node
     );
@@ -223,39 +230,6 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             });
           })
           .catch(error => fatalError(error, location));
-
-        // This handles the validation of the Ace Editor. Since we don't have any
-        // other hooks into the editors to tell us if the content is valid or not
-        // we need to use the annotations to see if they have any errors. If they
-        // do then we push the field.name to aceInvalidEditor variable.
-        // Otherwise we remove it.
-        const loadedEditors = [];
-        $scope.aceInvalidEditors = [];
-
-        $scope.aceLoaded = function (editor) {
-          if (_.contains(loadedEditors, editor)) return;
-          loadedEditors.push(editor);
-
-          editor.$blockScrolling = Infinity;
-
-          const session = editor.getSession();
-          const fieldName = editor.container.id;
-
-          session.setTabSize(2);
-          session.setUseSoftTabs(true);
-          session.on('changeAnnotation', function () {
-            const annotations = session.getAnnotations();
-            if (_.some(annotations, { type: 'error' })) {
-              if (!_.contains($scope.aceInvalidEditors, fieldName)) {
-                $scope.aceInvalidEditors.push(fieldName);
-              }
-            } else {
-              $scope.aceInvalidEditors = _.without($scope.aceInvalidEditors, fieldName);
-            }
-
-            if (!$rootScope.$$phase) $scope.$apply();
-          });
-        };
 
         $scope.cancel = function () {
           $window.history.back();

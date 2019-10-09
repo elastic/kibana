@@ -25,18 +25,25 @@ import {
   EuiCheckbox,
   EuiCodeEditor,
   EuiLoadingContent,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   initialFields: any[];
   canEdit: boolean;
+  title: string;
   onChange: (fields: object) => void;
   submit: () => void;
   cancel: () => void;
 }
 
 interface State {
-  fields: any;
+  fields: any[];
   updated: boolean;
   loading: boolean;
 }
@@ -44,7 +51,7 @@ interface State {
 type Action =
   | { type: 'UPDATE_FORM'; name: string; value: string | number | boolean }
   | { type: 'ONCHANGE_CALLED' }
-  | { type: 'LOADING_FINISHED'; fields: any };
+  | { type: 'LOADING_FINISHED'; fields: any[] };
 
 function reducer(state: State, action: Action) {
   switch (action.type) {
@@ -77,7 +84,7 @@ function reducer(state: State, action: Action) {
   }
 }
 
-export const Form = ({ initialFields, onChange, canEdit }: Props) => {
+export const Form = ({ initialFields, onChange, canEdit, submit, cancel, title }: Props) => {
   const [{ fields, updated, loading }, dispatch] = useReducer(reducer, {
     fields: initialFields,
     updated: false,
@@ -173,6 +180,53 @@ export const Form = ({ initialFields, onChange, canEdit }: Props) => {
           </EuiFormRow>
         );
       })}
+      <EuiFormRow fullWidth={true}>
+        <EuiFlexGroup>
+          {canEdit ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={true}
+                aria-label={i18n.translate('kbn.management.objects.view.saveButtonAriaLabel', {
+                  defaultMessage: 'Save { title } Object',
+                  values: { title },
+                })}
+                onClick={() => submit()}
+                disabled={fields
+                  .filter(f => f.type === 'json' || f.type === 'array')
+                  .map(f => {
+                    try {
+                      JSON.parse(f.value || '[]');
+                      return true;
+                    } catch (e) {
+                      return false;
+                    }
+                  })
+                  .includes(false)}
+                data-test-subj="savedObjectEditSave"
+              >
+                <FormattedMessage
+                  id="kbn.management.objects.view.saveButtonLabel"
+                  defaultMessage="Save { title } Object"
+                  values={{ title }}
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              aria-label={i18n.translate('kbn.management.objects.view.cancelButtonAriaLabel', {
+                defaultMessage: 'Cancel',
+              })}
+              onClick={() => cancel()}
+            >
+              <FormattedMessage
+                id="kbn.management.objects.view.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
     </EuiForm>
   );
 };
