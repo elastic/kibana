@@ -22,31 +22,33 @@ import { getInstalledPackages } from '../npm';
 
 import { LICENSE_WHITELIST, DEV_ONLY_LICENSE_WHITELIST, LICENSE_OVERRIDES } from './config';
 import { assertLicensesValid } from './valid';
-import { REPO_ROOT } from '../constants';
+import { REPO_ROOT, X_PACK_ROOT } from '../constants';
 
 run(
   async ({ log, flags }) => {
-    const packages = await getInstalledPackages({
-      directory: REPO_ROOT,
+    const prodPackages = await getInstalledPackages([REPO_ROOT, X_PACK_ROOT], {
       licenseOverrides: LICENSE_OVERRIDES,
-      includeDev: !!flags.dev,
+      productionOnly: true,
     });
 
-    // Assert if the found licenses in the production
-    // packages are valid
     assertLicensesValid({
-      packages: packages.filter(pkg => !pkg.isDevOnly),
+      packages: prodPackages,
       validLicenses: LICENSE_WHITELIST,
     });
+
     log.success('All production dependency licenses are allowed');
 
-    // Do the same as above for the packages only used in development
-    // if the dev flag is found
     if (flags.dev) {
+      const devPackages = await getInstalledPackages([REPO_ROOT, X_PACK_ROOT], {
+        licenseOverrides: LICENSE_OVERRIDES,
+        developmentOnly: true,
+      });
+
       assertLicensesValid({
-        packages: packages.filter(pkg => pkg.isDevOnly),
+        packages: devPackages,
         validLicenses: LICENSE_WHITELIST.concat(DEV_ONLY_LICENSE_WHITELIST),
       });
+
       log.success('All development dependency licenses are allowed');
     }
   },

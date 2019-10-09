@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { getInstalledPackages } from './installed_packages';
+export { getInstalledPackages, PackageDetails } from './installed_packages';

@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { dirname } from 'path';
+import { dirname, resolve } from 'path';
 
 export const REPO_ROOT = dirname(require.resolve('../../package.json'));
+export const X_PACK_ROOT = resolve(REPO_ROOT, 'x-pack');
 
 // Files in directories of this name will be treated as Jest integration tests with instances of
 // Elasticsearch and the Kibana server.

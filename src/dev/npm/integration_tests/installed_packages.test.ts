@@ -22,29 +22,26 @@ import { resolve, sep } from 'path';
 import { uniq } from 'lodash';
 
 import { getInstalledPackages, InstalledPackage } from '../installed_packages';
-import { REPO_ROOT } from '../../constants';
+import { REPO_ROOT, X_PACK_ROOT } from '../../constants';
 
 const FIXTURE1_ROOT = resolve(__dirname, '__fixtures__/fixture1');
 
 describe('src/dev/npm/installed_packages', () => {
   describe('getInstalledPackages()', function() {
     let kibanaPackages: InstalledPackage[];
-    let fixture1Packages: InstalledPackage[];
+    let fixturePackages: InstalledPackage[];
+    let fixtureProdPackages: InstalledPackage[];
 
     beforeAll(async function() {
-      [kibanaPackages, fixture1Packages] = await Promise.all([
-        getInstalledPackages({
-          directory: REPO_ROOT,
-        }),
-        getInstalledPackages({
-          directory: FIXTURE1_ROOT,
-          includeDev: true,
-        }),
+      [kibanaPackages, fixturePackages, fixtureProdPackages] = await Promise.all([
+        getInstalledPackages([REPO_ROOT, X_PACK_ROOT]),
+        getInstalledPackages([FIXTURE1_ROOT]),
+        getInstalledPackages([FIXTURE1_ROOT], { productionOnly: true }),
       ]);
     }, 60 * 1000);
 
     it('reads all installed packages of a module', () => {
-      expect(fixture1Packages).toEqual([
+      expect(fixturePackages).toEqual([
         {
           name: 'dep1',
           version: '0.0.2',
@@ -52,16 +49,6 @@ describe('src/dev/npm/installed_packages', () => {
           repository: 'https://github.com/mycorp/dep1',
           directory: resolve(FIXTURE1_ROOT, 'node_modules/dep1'),
           relative: ['node_modules', 'dep1'].join(sep),
-          isDevOnly: false,
-        },
-        {
-          name: 'privatedep',
-          version: '0.0.2',
-          repository: 'https://github.com/mycorp/privatedep',
-          licenses: ['Apache-2.0'],
-          directory: resolve(FIXTURE1_ROOT, 'node_modules/privatedep'),
-          relative: ['node_modules', 'privatedep'].join(sep),
-          isDevOnly: false,
         },
         {
           name: 'dep2',
@@ -70,7 +57,35 @@ describe('src/dev/npm/installed_packages', () => {
           repository: 'https://github.com/mycorp/dep2',
           directory: resolve(FIXTURE1_ROOT, 'node_modules/dep2'),
           relative: ['node_modules', 'dep2'].join(sep),
-          isDevOnly: true,
+        },
+        {
+          name: 'privatedep',
+          version: '0.0.2',
+          repository: 'https://github.com/mycorp/privatedep',
+          licenses: ['Apache-2.0'],
+          directory: resolve(FIXTURE1_ROOT, 'node_modules/privatedep'),
+          relative: ['node_modules', 'privatedep'].join(sep),
+        },
+      ]);
+    });
+
+    it('reads all production installed packages of a module', () => {
+      expect(fixtureProdPackages).toEqual([
+        {
+          name: 'dep1',
+          version: '0.0.2',
+          licenses: ['Apache-2.0'],
+          repository: 'https://github.com/mycorp/dep1',
+          directory: resolve(FIXTURE1_ROOT, 'node_modules/dep1'),
+          relative: ['node_modules', 'dep1'].join(sep),
+        },
+        {
+          name: 'privatedep',
+          version: '0.0.2',
+          repository: 'https://github.com/mycorp/privatedep',
+          licenses: ['Apache-2.0'],
+          directory: resolve(FIXTURE1_ROOT, 'node_modules/privatedep'),
+          relative: ['node_modules', 'privatedep'].join(sep),
         },
       ]);
     });
@@ -80,12 +95,20 @@ describe('src/dev/npm/installed_packages', () => {
       expect(tags).toEqual(uniq(tags));
     });
 
+    it('includes x-pack packages', () => {
+      if (
+        !kibanaPackages.find(pkg => pkg.directory.startsWith(resolve(X_PACK_ROOT, 'node_modules')))
+      ) {
+        throw new Error('Expected getInstalledPackages(kibana) also include x-pack packages');
+      }
+    });
+
     it('does not include root package in the list', () => {
       if (kibanaPackages.find(pkg => pkg.name === 'kibana')) {
         throw new Error('Expected getInstalledPackages(kibana) to not include kibana pkg');
       }
 
-      if (fixture1Packages.find(pkg => pkg.name === 'fixture1')) {
+      if (fixturePackages.find(pkg => pkg.name === 'fixture1')) {
         throw new Error('Expected getInstalledPackages(fixture1) to not include fixture1 pkg');
       }
     });

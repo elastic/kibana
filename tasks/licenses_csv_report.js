@@ -58,13 +58,12 @@ export default function licensesCSVReport(grunt) {
 
     try {
       const file = grunt.option('csv');
-      const directory = grunt.option('directory');
-      const dev = Boolean(grunt.option('dev'));
+      const xpackDir = resolve(grunt.config.get('root'), 'x-pack');
+      const directories = grunt.option('directory') ? [resolve(grunt.option('directory'))] : [grunt.config.get('root'), xpackDir];
 
-      const packages = await getInstalledPackages({
-        directory: directory ? resolve(directory) : grunt.config.get('root'),
+      const packages = await getInstalledPackages(directories, {
         licenseOverrides: LICENSE_OVERRIDES,
-        dev
+        ...!grunt.option('dev') && { productionOnly: true }
       });
 
       const csv = packages.map(pkg => {

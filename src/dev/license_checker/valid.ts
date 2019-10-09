@@ -20,13 +20,10 @@
 import dedent from 'dedent';
 import { createFailError } from '@kbn/dev-utils';
 
+import { PackageDetails } from '../npm';
+
 interface Options {
-  packages: Array<{
-    name: string;
-    version: string;
-    relative: string;
-    licenses: string[];
-  }>;
+  packages: PackageDetails[];
   validLicenses: string[];
 }
 

@@ -24,9 +24,19 @@ import { promisify } from 'util';
 import licenseChecker from 'license-checker';
 
 export type InstalledPackage = NonNullable<ReturnType<typeof readModuleInfo>>;
-interface Options {
+
+export interface PackageDetails {
+  name: string;
+  version: string;
+  relative: string;
+  licenses: string[];
   directory: string;
-  includeDev?: boolean;
+  repository: string | undefined;
+}
+
+interface Options {
+  productionOnly?: boolean;
+  developmentOnly?: boolean;
   licenseOverrides?: { [pgkNameAndVersion: string]: string[] };
 }
 
@@ -60,11 +70,13 @@ function resolveLicenses(
 function readModuleInfo(
   pkgAndVersion: string,
   moduleInfo: licenseChecker.ModuleInfo,
-  dev: boolean,
+  projectPath: string,
   options: Options
-) {
+): PackageDetails | undefined {
   const directory = (moduleInfo as any).realPath as string;
-  if (directory === options.directory) {
+
+  // exclude root packages
+  if (directory === projectPath) {
     return;
   }
 
@@ -77,48 +89,54 @@ function readModuleInfo(
   return {
     name,
     version,
-    isDevOnly: dev,
     repository: moduleInfo.repository,
     directory,
-    relative: relative(options.directory, directory),
+    relative: relative(projectPath, directory),
     licenses: toArray(
       override ? override : resolveLicenses(isPrivate, directory, moduleInfo.licenses)
     ),
   };
 }
 
-async function _getInstalledPackages(dev: boolean, options: Options) {
-  const lcResult = await promisify(licenseChecker.init)({
-    start: options.directory,
-    development: dev,
-    production: !dev,
-    json: true,
-    customFormat: {
-      realPath: true,
-      licenseText: false,
-      licenseFile: false,
+async function _getInstalledPackages(directory: string, options: Options) {
+  const packages = await promisify(licenseChecker.init)({
+    ...{
+      start: directory,
+      json: true,
+      customFormat: {
+        realPath: true,
+        licenseText: false,
+        licenseFile: false,
+      },
     },
+    ...(options.productionOnly && { production: true }),
+    ...(options.developmentOnly && { development: true }),
   } as any);
 
-  const result = [];
+  return Object.keys(packages).reduce((acc: any, pkgAndVersion) => {
+    const pkg = packages[pkgAndVersion];
+    const installedPackage = readModuleInfo(pkgAndVersion, pkg, directory, options);
 
-  for (const [pkgAndVersion, moduleInfo] of Object.entries(lcResult)) {
-    const installedPackage = readModuleInfo(pkgAndVersion, moduleInfo, dev, options);
     if (installedPackage) {
-      result.push(installedPackage);
+      acc[pkgAndVersion] = installedPackage;
     }
-  }
 
-  return result;
+    return acc;
+  }, {});
 }
 
 /**
- *  Get a list of objects with details about each installed
- *  NPM package.
+ *  Get a list of objects with details about each installed NPM package.
  */
-export async function getInstalledPackages(options: Options) {
-  return [
-    ...(await _getInstalledPackages(false, options)),
-    ...(options.includeDev ? await _getInstalledPackages(true, options) : []),
-  ];
+export async function getInstalledPackages(directories: string[], options: Options = {}) {
+  const packagePromises = directories.map(directory => {
+    return _getInstalledPackages(directory, options);
+  });
+
+  const dirPackages = await Promise.all(packagePromises);
+  const results = dirPackages.reduce((acc, packages) => {
+    return { ...acc, ...packages };
+  }, {});
+
+  return Object.values(results) as PackageDetails[];
 }
