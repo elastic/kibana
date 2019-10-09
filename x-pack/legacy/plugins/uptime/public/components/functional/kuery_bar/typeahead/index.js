@@ -161,7 +161,7 @@ export class Typeahead extends Component {
         onClickOutside={this.onClickOutside}
         style={{ position: 'relative' }}
       >
-        <div style={{ position: 'relative' }}>
+        <div data-test-subj="xpack.uptime.filterBar" style={{ position: 'relative' }}>
           <EuiFieldSearch
             fullWidth
             style={{
