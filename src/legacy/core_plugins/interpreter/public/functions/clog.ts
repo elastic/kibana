@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ExpressionFunction } from '../../types';
 
 const name = 'clog';
@@ -27,7 +28,9 @@ type ClogExpressionFunction = ExpressionFunction<typeof name, Context, {}, Conte
 export const clog = (): ClogExpressionFunction => ({
   name,
   args: {},
-  help: 'Outputs the context to the console',
+  help: i18n.translate('interpreter.functions.clog.help', {
+    defaultMessage: 'Outputs the context to the console',
+  }),
   fn: context => {
     console.log(context); // eslint-disable-line no-console
     return context;
