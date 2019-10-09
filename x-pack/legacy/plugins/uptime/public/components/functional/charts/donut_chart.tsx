@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useContext, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import { i18n } from '@kbn/i18n';
 import { DonutChartLegend } from './donut_chart_legend';
 import { UptimeSettingsContext } from '../../../contexts';
 
@@ -65,7 +66,16 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <svg ref={chartElement} width={width} height={height} />
+        <svg
+          aria-label={i18n.translate('xpack.uptime.donutChart.ariaLabel', {
+            defaultMessage:
+              'Pie chart showing the current status. {down} of {total} monitors are down.',
+            values: { down, total: up + down },
+          })}
+          ref={chartElement}
+          width={width}
+          height={height}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <DonutChartLegend down={down} up={up} />

@@ -12,8 +12,12 @@ import { DonutChartLegendRow } from './donut_chart_legend_row';
 import { UptimeSettingsContext } from '../../../contexts';
 
 const LegendContainer = styled.div`
-  margin-right: 32px;
-  max-width: 150px;
+  max-width: 260px;
+  min-width: 100px;
+  @media (max-width: 767px) {
+    min-width: 0px;
+    max-width: 100px;
+  }
 `;
 
 interface Props {

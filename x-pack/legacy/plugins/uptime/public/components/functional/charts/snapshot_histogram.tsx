@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
+import styled from 'styled-components';
 import { HistogramDataPoint } from '../../../../common/graphql/types';
 import { getColorsMap } from './get_colors_map';
 import { getChartDateLabel } from '../../../lib/helper';
@@ -26,6 +27,17 @@ import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { snapshotHistogramQuery } from '../../../queries/snapshot_histogram_query';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeSettingsContext } from '../../../contexts';
+
+const SnapshotHistogramWrapper = styled.div`
+  margin-left: 120px;
+  @media (max-width: 950px) {
+    margin-left: 48px;
+  }
+  @media (max-width: 767px) {
+    margin-left: 12px;
+    margin-top: 40px;
+  }
+`;
 
 export interface SnapshotHistogramProps {
   /**
@@ -111,7 +123,7 @@ export const SnapshotHistogramComponent = ({
   });
   const upSpecId = getSpecId(upMonitorsId);
   return (
-    <>
+    <SnapshotHistogramWrapper>
       <EuiTitle size="xs">
         <h2>
           <FormattedMessage
@@ -185,7 +197,7 @@ export const SnapshotHistogramComponent = ({
           />
         </Chart>
       </ChartWrapper>
-    </>
+    </SnapshotHistogramWrapper>
   );
 };
 

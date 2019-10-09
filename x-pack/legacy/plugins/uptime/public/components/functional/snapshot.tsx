@@ -7,6 +7,7 @@
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { get } from 'lodash';
 import { DonutChart } from './charts';
 import { Snapshot as SnapshotType } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
@@ -30,18 +31,22 @@ export const SnapshotComponent = ({
   loading,
 }: UptimeGraphQLQueryProps<SnapshotQueryResult>) => (
   <ChartWrapper loading={loading}>
-    <EuiTitle size="xs">
+    <EuiTitle size="s">
       <h2>
         <FormattedMessage
           id="xpack.uptime.snapshot.endpointStatusTitle"
-          defaultMessage="Current status"
+          defaultMessage="{down}/{total} monitors are down"
+          values={{
+            down: get<number>(data, 'snapshot.counts.down', 0),
+            total: get<number>(data, 'snapshot.counts.total', 0),
+          }}
         />
       </h2>
     </EuiTitle>
     <EuiSpacer size="xs" />
     <DonutChart
-      up={data && data.snapshot ? data.snapshot.counts.up : 0}
-      down={data && data.snapshot ? data.snapshot.counts.down : 0}
+      up={get<number>(data, 'snapshot.counts.up', 0)}
+      down={get<number>(data, 'snapshot.counts.down', 0)}
       height={SNAPSHOT_CHART_HEIGHT}
       width={SNAPSHOT_CHART_WIDTH}
     />
