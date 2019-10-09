@@ -96,6 +96,11 @@ exports[`Transform: Transform List <ExpandedRow /> Minimal initialization 1`] = 
   }
   onTabClick={[Function]}
   size="s"
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
   tabs={
     Array [
       Object {

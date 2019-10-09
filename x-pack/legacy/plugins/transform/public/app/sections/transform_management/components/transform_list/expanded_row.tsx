@@ -156,6 +156,11 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
       content: <ExpandedRowPreviewPane transformConfig={item.config} />,
     },
   ];
+
+  // Using `expand=false` here so the tabs themselves don't spread
+  // across the full width. The 100% width is used so the bottom line
+  // as well as the tab content spans across the full width,
+  // even if the tab content wouldn't extend to the full width.
   return (
     <EuiTabbedContent
       size="s"
@@ -163,6 +168,7 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
       initialSelectedTab={tabs[0]}
       onTabClick={() => {}}
       expand={false}
+      style={{ width: '100%' }}
     />
   );
 };
