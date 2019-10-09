@@ -67,7 +67,7 @@ export class MetricsPublicPlugin
       debug,
       storage: localStorage,
       async http(report: object) {
-        const url = `/api/telemetry/report`;
+        const url = `/api/metrics/report`;
         await http.post(url, {
           body: JSON.stringify({ report }),
         });

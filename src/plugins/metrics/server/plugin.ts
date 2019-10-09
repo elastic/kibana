@@ -19,30 +19,45 @@
 
 import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, RecursiveReadonly } from '../../../../src/core/server';
+import {
+  PluginInitializerContext,
+  RecursiveReadonly,
+  CoreSetup,
+} from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { ConfigSchema } from './config';
+import { setupRoutes } from './routes';
 
 /**
  * Describes public Timelion plugin contract returned at the `setup` stage.
  */
 export interface PluginSetupContract {
-  uiEnabled: boolean;
+  enabled: boolean;
+  registerLegacyAPI: (legacyAPI: LegacyApi) => void;
 }
 
+export type LegacyApi = any;
 /**
  * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
  */
 export class Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
+  private legacyAPI: LegacyApi;
+  private getLegacyAPI = (): LegacyApi => this.legacyAPI;
 
-  public async setup(): Promise<RecursiveReadonly<PluginSetupContract>> {
+  public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof ConfigSchema>>()
       .pipe(first())
       .toPromise();
 
-    return deepFreeze({ uiEnabled: config.ui.enabled });
+    const router = core.http.createRouter();
+    setupRoutes(router, this.getLegacyAPI);
+
+    return deepFreeze({
+      enabled: config.enabled,
+      registerLegacyAPI: (legacyAPI: LegacyApi) => (this.legacyAPI = legacyAPI),
+    });
   }
 
   public start() {

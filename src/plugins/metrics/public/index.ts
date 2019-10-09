@@ -25,5 +25,3 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { MetricsPublicPlugin as Plugin };
-
-export * from '../common/constants';

@@ -41,7 +41,7 @@ export default function ({ getService }) {
     };
     it('increments the count field in the document defined by the {app}/{action_type} path', async () => {
       await supertest
-        .post('/api/telemetry/report')
+        .post('/api/metrics/report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
         .send({ report })
@@ -66,7 +66,7 @@ export default function ({ getService }) {
         }
       };
       await supertest
-        .post('/api/telemetry/report')
+        .post('/api/metrics/report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
         .send({ report })

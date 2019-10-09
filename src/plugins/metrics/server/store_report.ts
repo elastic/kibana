@@ -17,18 +17,16 @@
  * under the License.
  */
 
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
-import { createAnalyticsReporter, setTelemetryReporter } from '../services/telemetry_analytics';
+import { Report } from '@kbn/analytics';
 
-function telemetryInit($injector: any) {
-  const localStorage = $injector.get('localStorage');
-  const debug = chrome.getInjected('debugUiMetric');
-  const $http = $injector.get('$http');
-  const basePath = chrome.getBasePath();
-  const uiReporter = createAnalyticsReporter({ localStorage, $http, basePath, debug });
-  setTelemetryReporter(uiReporter);
+export async function storeReport(internalRepository: any, report: Report) {
+  const metricKeys = Object.keys(report.uiStatsMetrics);
+  return Promise.all(
+    metricKeys.map(async key => {
+      const metric = report.uiStatsMetrics[key];
+      const { appName, eventName } = metric;
+      const savedObjectId = `${appName}:${eventName}`;
+      return internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
+    })
+  );
 }
-
-uiModules.get('kibana').run(telemetryInit);

@@ -21,9 +21,7 @@ import { UnreachableCaseError } from './util';
 import { Metric, Stats, UiStatsMetricReport, METRIC_TYPE } from './metrics';
 
 export interface Report {
-  uiStatsMetrics: {
-    [key: string]: UiStatsMetricReport;
-  };
+  uiStatsMetrics: Record<string, UiStatsMetricReport>;
 }
 
 export class ReportManager {

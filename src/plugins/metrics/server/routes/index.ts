@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export const API_BASE_PATH = '/api/ui_metric';
+import { IRouter } from '../../../../../src/core/server';
+import { LegacyApi } from '../plugin';
+import { registerReportMetricsRoute } from './report_metrics';
+
+export function setupRoutes(router: IRouter, getLegacyApi: () => LegacyApi) {
+  registerReportMetricsRoute(router, getLegacyApi);
+}
