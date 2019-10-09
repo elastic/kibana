@@ -22,7 +22,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       return {
         id: key || 'unknown',
         partition: key || 'unknown',
-        topAnomalyScore: Number(value).toFixed(3),
+        topAnomalyScore: Number(value).toFixed(0),
       };
     });
   }, [results]);

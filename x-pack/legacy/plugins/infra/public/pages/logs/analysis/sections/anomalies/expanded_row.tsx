@@ -54,7 +54,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <EuiStat
-          title={Number(topAnomalyScore).toFixed(1)}
+          title={Number(topAnomalyScore).toFixed(0)}
           description={i18n.translate(
             'xpack.infra.logs.analysis.anomaliesExpandedRowTopAnomalyScoreDescription',
             {
