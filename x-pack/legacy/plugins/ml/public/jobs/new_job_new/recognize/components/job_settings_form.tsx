@@ -1,0 +1,319 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { FC, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFieldText,
+  EuiDescribedFormGroup,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiAccordion,
+  EuiTextAlign,
+  EuiButton,
+} from '@elastic/eui';
+import { JobGroupsInput } from '../../pages/components/job_details_step/components/groups/job_groups_input';
+import { TimeRangePicker } from '../../pages/components/time_range_step/time_range_picker';
+import { ModuleJobUI, SAVE_STATE } from '../page';
+import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
+import { useKibanaContext } from '../../../../contexts/kibana';
+import {
+  composeValidators,
+  maxLengthValidator,
+  patternValidator,
+} from '../../../../../common/util/validators';
+import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
+import { isJobIdValid } from '../../../../../common/util/job_utils';
+import { TimeRange } from '../../pages/components/time_range_step/time_range';
+
+export interface JobSettingsFormValues {
+  jobPrefix: string;
+  startDatafeedAfterSave: boolean;
+  useFullIndexData: boolean;
+  timeRange: TimeRange;
+  useDedicatedIndex: boolean;
+  jobGroups: string[];
+}
+
+interface JobSettingsFormProps {
+  saveState: SAVE_STATE;
+  onSubmit: (values: JobSettingsFormValues) => any;
+  onChange: (values: JobSettingsFormValues) => any;
+  jobGroups: string[];
+  existingGroupIds: string[];
+  jobs: ModuleJobUI[];
+}
+
+export const JobSettingsForm: FC<JobSettingsFormProps> = ({
+  onSubmit,
+  onChange,
+  saveState,
+  existingGroupIds,
+  jobs,
+}) => {
+  const { from, to } = getTimeFilterRange();
+  const { currentIndexPattern: indexPattern } = useKibanaContext();
+
+  const jobPrefixValidator = composeValidators(
+    patternValidator(/^([a-z0-9]+[a-z0-9\-_]*)?$/),
+    maxLengthValidator(JOB_ID_MAX_LENGTH - Math.max(...jobs.map(({ id }) => id.length)))
+  );
+  const groupValidator = composeValidators(
+    (value: string) => (isJobIdValid(value) ? null : { pattern: true }),
+    maxLengthValidator(JOB_ID_MAX_LENGTH)
+  );
+
+  const [formState, setFormState] = useState<JobSettingsFormValues>({
+    jobPrefix: '',
+    startDatafeedAfterSave: true,
+    useFullIndexData: true,
+    timeRange: {
+      start: from,
+      end: to,
+    },
+    useDedicatedIndex: false,
+    jobGroups: [] as string[],
+  });
+  const [validationResult, setValidationResult] = useState<any>({});
+
+  const onJobPrefixChange = (value: string) => {
+    setFormState({
+      ...formState,
+      jobPrefix: value && value.toLowerCase(),
+    });
+    onChange(formState);
+  };
+
+  const handleValidation = () => {
+    const jobPrefixValidationResult = jobPrefixValidator(formState.jobPrefix);
+    const jobGroupsValidationResult = formState.jobGroups
+      .map(group => groupValidator(group))
+      .filter(result => result !== null);
+
+    setValidationResult({
+      jobPrefix: jobPrefixValidationResult,
+      jobGroups: jobGroupsValidationResult,
+      formValid: !jobPrefixValidationResult && jobGroupsValidationResult.length === 0,
+    });
+  };
+
+  useEffect(() => {
+    handleValidation();
+  }, [formState.jobPrefix, formState.jobGroups]);
+
+  return (
+    <>
+      <EuiForm>
+        <EuiDescribedFormGroup
+          idAria="ml_aria_label_new_job_recognizer_job_prefix"
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.ml.newJob.simple.recognize.jobIdPrefixLabel"
+                defaultMessage="Job ID prefix"
+              />
+            </h4>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.ml.tooltips.newJobRecognizerJobPrefixTooltip"
+              defaultMessage="A prefix which will be added to the beginning of each job ID."
+            />
+          }
+        >
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.newJob.simple.recognize.jobIdPrefixLabel"
+                defaultMessage="Job ID prefix"
+              />
+            }
+            describedByIds={['ml_aria_label_new_job_recognizer_job_prefix']}
+            isInvalid={!!validationResult.jobPrefix}
+            error={
+              <>
+                {validationResult.jobPrefix && validationResult.jobPrefix.maxLength ? (
+                  <div>
+                    <FormattedMessage
+                      id="xpack.ml.newJob.simple.recognize.jobPrefixInvalidMaxLengthErrorMessage"
+                      defaultMessage="Job ID prefix must be no more than {maxLength, plural, one {# character} other {# characters}} long."
+                      values={{
+                        maxLength: validationResult.jobPrefix.maxLength.requiredLength,
+                      }}
+                    />
+                  </div>
+                ) : null}
+                {validationResult.jobPrefix && validationResult.jobPrefix.pattern && (
+                  <div>
+                    <FormattedMessage
+                      id="xpack.ml.newJob.simple.recognize.jobLabelAllowedCharactersDescription"
+                      defaultMessage="Job label can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
+                    />
+                  </div>
+                )}
+              </>
+            }
+          >
+            <EuiFieldText
+              name="jobPrefix"
+              value={formState.jobPrefix}
+              onChange={({ target: { value } }) => onJobPrefixChange(value)}
+              isInvalid={!!validationResult.jobPrefix}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+        <JobGroupsInput
+          existingGroups={existingGroupIds}
+          selectedGroups={formState.jobGroups}
+          onChange={value => {
+            setFormState({
+              ...formState,
+              jobGroups: value,
+            });
+          }}
+          validation={{
+            valid: !validationResult.jobGroups || validationResult.jobGroups.length === 0,
+            message: (
+              <FormattedMessage
+                id="xpack.ml.newJob.simple.recognize.jobGroupAllowedCharactersDescription"
+                defaultMessage="Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
+              />
+            ),
+          }}
+        />
+        <EuiSpacer size="l" />
+        <EuiFormRow>
+          <EuiSwitch
+            id="startDataFeed"
+            name="startDataFeed"
+            label={
+              <FormattedMessage
+                id="xpack.ml.newJob.simple.recognize.startDatafeedAfterSaveLabel"
+                defaultMessage="Start datafeed after save"
+              />
+            }
+            checked={formState.startDatafeedAfterSave}
+            onChange={({ target: { checked } }) => {
+              setFormState({
+                ...formState,
+                startDatafeedAfterSave: checked,
+              });
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow>
+          <EuiSwitch
+            id="useFullData"
+            name="useFullData"
+            label={
+              <FormattedMessage
+                id="xpack.ml.newJob.simple.recognize.useFullDataLabel"
+                defaultMessage="Use full {indexPatternTitle} data"
+                values={{ indexPatternTitle: indexPattern.title }}
+              />
+            }
+            checked={formState.useFullIndexData}
+            onChange={({ target: { checked } }) => {
+              setFormState({
+                ...formState,
+                useFullIndexData: checked,
+              });
+            }}
+          />
+        </EuiFormRow>
+        {!formState.useFullIndexData && (
+          <TimeRangePicker
+            setTimeRange={value => {
+              setFormState({
+                ...formState,
+                timeRange: value,
+              });
+            }}
+            timeRange={formState.timeRange}
+          />
+        )}
+        <EuiSpacer size="l" />
+        <EuiAccordion
+          id="advancedOptions"
+          area-label={i18n.translate('xpack.ml.newJob.simple.recognize.advancedSettingsAriaLabel', {
+            defaultMessage: 'Advanced settings',
+          })}
+          buttonContent={
+            <FormattedMessage
+              id="xpack.ml.newJob.simple.recognize.advancedLabel"
+              defaultMessage="Advanced"
+            />
+          }
+          paddingSize="l"
+        >
+          <EuiDescribedFormGroup
+            idAria="ml_aria_label_new_job_dedicated_index"
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.ml.newJob.simple.recognize.useDedicatedIndexLabel"
+                  defaultMessage="Use dedicated index"
+                />
+              </h4>
+            }
+            description={
+              <FormattedMessage
+                id="xpack.ml.tooltips.newJobDedicatedIndexTooltip"
+                defaultMessage="Select to store results in a separate index for this job."
+              />
+            }
+          >
+            <EuiFormRow describedByIds={['ml_aria_label_new_job_dedicated_index']}>
+              <EuiSwitch
+                id="useDedicatedIndex"
+                name="useDedicatedIndex"
+                checked={formState.useDedicatedIndex}
+                onChange={({ target: { checked } }) => {
+                  setFormState({
+                    ...formState,
+                    useDedicatedIndex: checked,
+                  });
+                }}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+        </EuiAccordion>
+        <EuiSpacer size="l" />
+      </EuiForm>
+      <EuiTextAlign textAlign="right">
+        <EuiButton
+          fill
+          type="submit"
+          isLoading={saveState === SAVE_STATE.SAVING}
+          disabled={!validationResult.formValid}
+          onClick={() => {
+            onSubmit(formState);
+          }}
+          area-label={i18n.translate('xpack.ml.newJob.simple.recognize.createJobButtonAriaLabel', {
+            defaultMessage: 'Create Job',
+          })}
+        >
+          {saveState === SAVE_STATE.NOT_SAVED && (
+            <FormattedMessage
+              id="xpack.ml.newJob.simple.recognize.createJobButtonLabel"
+              defaultMessage="Create {numberOfJobs, plural, zero {Job} one {Job} other {Jobs}}"
+              values={{ numberOfJobs: jobs.length }}
+            />
+          )}
+          {saveState === SAVE_STATE.SAVING && (
+            <FormattedMessage
+              id="xpack.ml.newJob.simple.recognize.analysisRunningLabel"
+              defaultMessage="Analysis running"
+            />
+          )}
+        </EuiButton>
+      </EuiTextAlign>
+    </>
+  );
+};

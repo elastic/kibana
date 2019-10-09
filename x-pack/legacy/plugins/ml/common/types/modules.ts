@@ -9,7 +9,7 @@ import { SavedObjectAttributes } from '../../../../../../target/types/core/serve
 
 export interface ModuleJob {
   id: string;
-  config: Partial<Job>;
+  config: Omit<Job, 'job_id'>;
 }
 
 export interface KibanaObjectConfig extends SavedObjectAttributes {

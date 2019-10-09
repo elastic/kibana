@@ -10,6 +10,7 @@ import { toastNotifications } from 'ui/notify';
 import { IPrivate } from 'ui/private';
 import { mlJobService } from '../../../services/job_service';
 import { ml } from '../../../services/ml_api_service';
+import { KibanaObjects } from './page';
 
 /**
  * Checks whether the jobs in a data recognizer module have been created.
@@ -68,3 +69,33 @@ export function checkViewOrCreateJobs(
       });
   });
 }
+
+/**
+ * Gets kibana objects with an existence check.
+ */
+export const checkForSavedObjects = async (objects: KibanaObjects): Promise<KibanaObjects> => {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+  try {
+    return await Object.keys(objects).reduce(async (prevPromise, type) => {
+      const acc = await prevPromise;
+      const { savedObjects } = await savedObjectsClient.find({
+        type,
+        perPage: 1000,
+      });
+
+      acc[type] = objects[type].map(obj => {
+        const find = savedObjects.find(savedObject => savedObject.attributes.title === obj.title);
+        return {
+          ...obj,
+          exists: !!find,
+          id: (!!find && find.id) || obj.id,
+        };
+      });
+      return Promise.resolve(acc);
+    }, Promise.resolve({} as KibanaObjects));
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Could not load saved objects', e);
+  }
+  return Promise.resolve(objects);
+};
