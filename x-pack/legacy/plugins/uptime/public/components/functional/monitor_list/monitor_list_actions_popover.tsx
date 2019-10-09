@@ -20,14 +20,12 @@ interface MonitorListActionsPopoverProps {
   summary: MonitorSummary;
   popoverState: PopoverState | null;
   togglePopoverIsVisible: typeof toggleIntegrationsPopover;
-  loadMonitorDetails: any;
 }
 
 const MonitorListActionsPopoverComponent = ({
   summary,
   popoverState,
   togglePopoverIsVisible,
-  loadMonitorDetails,
 }: MonitorListActionsPopoverProps) => {
   const popoverId = `${summary.monitor_id}_popover`;
   const {

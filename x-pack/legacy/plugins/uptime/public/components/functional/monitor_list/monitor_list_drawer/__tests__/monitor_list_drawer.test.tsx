@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { expect } from 'jest';
 import { MonitorSummary, Check } from '../../../../../../common/graphql/types';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
@@ -35,9 +35,7 @@ describe('MonitorListDrawer component', () => {
   });
 
   it('renders nothing when no summary data is present', () => {
-    const component = shallowWithIntl(
-      <MonitorListDrawer condensedCheckLimit={12} dangerColor="danger" successColor="success" />
-    );
+    const component = shallowWithIntl(<MonitorListDrawer />);
     expect(component).toEqual({});
   });
 

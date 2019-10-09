@@ -64,7 +64,7 @@ export function MonitorListDrawerComponent({
     <ContainerDiv>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiLink href={monitorUrl}>
+          <EuiLink href={monitorUrl} target="_blank">
             {monitorUrl}
             <EuiIcon size="s" type="popout" color="subbdued" />
           </EuiLink>
