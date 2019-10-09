@@ -423,6 +423,44 @@ describe('SAMLAuthenticationProvider', () => {
         });
       });
 
+      it('prepends redirect URL fragment with `#` if it does not have one.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+          id: 'some-request-id',
+          redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+        });
+
+        const authenticationResult = await provider.login(
+          request,
+          {
+            step: SAMLLoginStep.RedirectURLFragmentCaptured,
+            redirectURLFragment: '../some-fragment',
+          },
+          { redirectURL: '/test-base-path/some-path' }
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlPrepare',
+          { body: { realm: 'test-realm' } }
+        );
+
+        expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
+        expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+          'Redirect URL fragment does not start with `#`.'
+        );
+
+        expect(authenticationResult.redirected()).toBe(true);
+        expect(authenticationResult.redirectURL).toBe(
+          'https://idp-host/path/login?SAMLRequest=some%20request%20'
+        );
+        expect(authenticationResult.state).toEqual({
+          requestId: 'some-request-id',
+          redirectURL: '/test-base-path/some-path#../some-fragment',
+        });
+      });
+
       it('redirects non-AJAX requests to the IdP remembering only redirect URL path if fragment is too large.', async () => {
         const request = httpServerMock.createKibanaRequest();
 

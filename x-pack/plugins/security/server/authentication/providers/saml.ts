@@ -114,7 +114,13 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         return AuthenticationResult.failed(Boom.badRequest(message));
       }
 
-      let redirectURL = `${state.redirectURL}${attempt.redirectURLFragment}`;
+      let redirectURLFragment = attempt.redirectURLFragment;
+      if (redirectURLFragment.length > 0 && !redirectURLFragment.startsWith('#')) {
+        this.logger.warn('Redirect URL fragment does not start with `#`.');
+        redirectURLFragment = `#${redirectURLFragment}`;
+      }
+
+      let redirectURL = `${state.redirectURL}${redirectURLFragment}`;
       const redirectURLSize = new ByteSizeValue(Buffer.byteLength(redirectURL));
       if (this.maxRedirectURLSize.isLessThan(redirectURLSize)) {
         this.logger.warn(
