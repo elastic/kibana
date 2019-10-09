@@ -23,7 +23,7 @@ import { mockAuthenticatedUser } from '../../common/model/authenticated_user.moc
 import {
   AuthenticationHandler,
   AuthToolkit,
-  ClusterClient,
+  IClusterClient,
   CoreSetup,
   ElasticsearchErrorHelpers,
   KibanaRequest,
@@ -57,7 +57,7 @@ describe('setupAuthentication()', () => {
     loggers: LoggerFactory;
     getLegacyAPI(): LegacyAPI;
     core: MockedKeys<CoreSetup>;
-    clusterClient: jest.Mocked<PublicMethodsOf<ClusterClient>>;
+    clusterClient: jest.Mocked<IClusterClient>;
   };
   let mockXpackInfo: jest.Mocked<LegacyAPI['xpackInfo']>;
   let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<ScopedClusterClient>>;

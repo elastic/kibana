@@ -35,7 +35,6 @@ function sampleArgs() {
   const args: XYArgs = {
     xTitle: '',
     yTitle: '',
-    isHorizontal: false,
     legend: {
       isVisible: false,
       position: Position.Top,
@@ -161,7 +160,7 @@ describe('xy_expression', () => {
       const component = shallow(
         <XYChart
           data={data}
-          args={{ ...args, isHorizontal: true, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_horizontal' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
         />
@@ -208,8 +207,7 @@ describe('xy_expression', () => {
           data={data}
           args={{
             ...args,
-            isHorizontal: true,
-            layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }],
+            layers: [{ ...args.layers[0], seriesType: 'bar_horizontal_stacked' }],
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"

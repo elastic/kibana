@@ -5,12 +5,12 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { TaskManager } from '../../task_manager';
+import { TaskManagerStartContract } from './shim';
 import { GetBasePathFunction } from './types';
 
 interface CreateExecuteFunctionOptions {
   isSecurityEnabled: boolean;
-  taskManager: TaskManager;
+  taskManager: TaskManagerStartContract;
   getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
   getBasePath: GetBasePathFunction;
 }
@@ -42,6 +42,16 @@ export function createExecuteFunction({
     const fakeRequest: any = {
       headers: requestHeaders,
       getBasePath: () => getBasePath(spaceId),
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
     };
 
     const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
