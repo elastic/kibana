@@ -134,7 +134,7 @@ export class FeaturesTooltip extends React.Component {
           layerId={this.state.currentFeature.layerId}
           loadFeatureProperties={this.props.loadFeatureProperties}
           showFilterButtons={!!this.props.addFilters && this.props.isLocked}
-          onCloseTooltip={this._onCloseTooltip}
+          onCloseTooltip={this.props.closeTooltip}
           addFilters={this.props.addFilters}
         />
         {this._renderActions(geoFields)}
