@@ -31,12 +31,12 @@ function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
 
 const cache = new LRU<string, any>({ max: 100, maxAge: 1000 * 60 * 60 });
 
-export function _clearCache() {
+export function clearCache() {
   cache.reset();
 }
 
 export async function callApi<T = void>(
-  fetchOptions: KFetchOptions,
+  fetchOptions: KFetchOptions & { forceCache?: boolean },
   options?: KFetchKibanaOptions
 ): Promise<T> {
   const cacheKey = getCacheKey(fetchOptions);
@@ -57,7 +57,11 @@ export async function callApi<T = void>(
 
 // only cache items that has a time range with `start` and `end` params,
 // and where `end` is not a timestamp in the future
-function isCachable(fetchOptions: KFetchOptions) {
+function isCachable(fetchOptions: KFetchOptions & { forceCache?: boolean }) {
+  if (fetchOptions.forceCache) {
+    return true;
+  }
+
   if (
     !(fetchOptions.query && fetchOptions.query.start && fetchOptions.query.end)
   ) {

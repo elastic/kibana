@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import 'ace';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { isColorDark, hexToRgb } from '@elastic/eui';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -98,13 +99,12 @@ app.directive('graphApp', function (reactDirective) {
     ['pluginDataStart', { watchDepth: 'reference' }],
     ['store', { watchDepth: 'reference' }],
     ['reduxStore', { watchDepth: 'reference' }],
-  ]);
+  ], { restrict: 'A' });
 });
 
 app.directive('graphVisualization', function (reactDirective) {
-  return reactDirective(GraphVisualization);
+  return reactDirective(GraphVisualization, undefined, { restrict: 'A' });
 });
-
 
 if (uiRoutes.enable) {
   uiRoutes.enable();
@@ -324,6 +324,7 @@ app.controller('graphuiPlugin', function (
   const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
   $scope.spymode = 'request';
   $scope.colors = colorChoices;
+  $scope.isColorDark = (color) => isColorDark(...hexToRgb(color));
   $scope.nodeClick = function (n, $event) {
 
     //Selection logic - shift key+click helps selects multiple nodes
