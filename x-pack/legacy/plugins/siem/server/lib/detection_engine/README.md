@@ -28,7 +28,7 @@ Optional env var when set to true will utilize `reindex` api for reindexing
 instead of the scroll and bulk index combination.
 
 ```
-export USE_REINDEX_API=USE_REINDEX_API
+export USE_REINDEX_API=true
 ```
 
 Add these lines to your `kibana.dev.yml` to turn on the feature toggles of alerting and actions:

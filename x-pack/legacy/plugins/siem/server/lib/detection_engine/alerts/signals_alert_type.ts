@@ -19,6 +19,9 @@ import { buildEventsScrollQuery } from './build_events_query';
 // search interface
 import { SearchResponse, SearchHit, SignalHit } from '../../types';
 
+// bulk scroll class
+import { ScrollAndBulkIndex } from './utils';
+
 export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
   return {
     id: SIGNALS_ID,
@@ -63,8 +66,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         scrollLock,
       } = params;
 
-      const indexPatterns = index.map((element: string) => `"${element}"`).join(',');
-      const refs = references.map((element: string) => `"${element}"`).join(',');
       const scroll = scrollLock ? scrollLock : '1m';
       const size = scrollSize ? scrollSize : 400;
 
@@ -99,100 +100,13 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         references,
       });
 
-      // format scroll search result for signals index.
-      const buildBulkBody = (doc: SearchHit): SignalHit => ({
-        ...doc._source,
-        signal: {
-          rule_revision: 1,
-          rule_id: id,
-          rule_type: type,
-          parent: {
-            id: doc._id,
-            type: 'event',
-            depth: 1,
-          },
-          name,
-          severity,
-          description,
-          time_detected: Date.now(),
-          index_patterns: indexPatterns,
-          references: refs,
-        },
-      });
-
-      // Makes a single bulk index request
-      const singleBulkIndex = async (sr: SearchResponse<object>): Promise<boolean> => {
-        const bulkBody = sr.hits.hits.flatMap((doc: SearchHit) => [
-          {
-            index: {
-              _index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
-              _id: doc._id,
-            },
-          },
-          buildBulkBody(doc),
-        ]);
-        const firstResult = await services.callCluster('bulk', {
-          refresh: true,
-          body: bulkBody,
-        });
-        if (firstResult.errors) {
-          logger.error(
-            `[-] bulkResponse had errors: ${JSON.stringify(firstResult.errors, null, 2)}}`
-          );
-          return false;
-        }
-        return true;
-      };
-
-      // Makes a single scroll request, returning the new scroll result.
-      const singleScroll = async (
-        scrollId: string | undefined
-      ): Promise<SearchResponse<object>> => {
-        try {
-          const nextScrollResult = await services.callCluster('scroll', {
-            scroll,
-            scrollId,
-          });
-          return nextScrollResult;
-        } catch (exc) {
-          logger.error(`[-] nextScroll threw an error ${JSON.stringify(exc)}`);
-          throw exc;
-        }
-      };
-
-      async function bulkIndex(someResult: SearchResponse<object>): Promise<boolean> {
-        logger.info('[+] starting bulk insertion');
-        const firstBulkIndexSuccess = await singleBulkIndex(someResult);
-        if (!firstBulkIndexSuccess) {
-          logger.error('[-] First bulk index threw an error');
-          return false;
-        }
-        while (true) {
-          try {
-            // reusing scroll id from initial call
-            const scrollResult = await singleScroll(someResult._scroll_id);
-            if (scrollResult.hits.hits.length === 0) {
-              logger.info('[+] Finished indexing signals');
-              return true;
-            }
-            const bulkSuccess = await singleBulkIndex(scrollResult);
-            if (!bulkSuccess) {
-              logger.error('[-] bulk index failed');
-            }
-          } catch (exc) {
-            logger.error('[-] scroll and bulk threw an error');
-            return false;
-          }
-        }
-      }
-
       try {
         logger.info('Starting SIEM signal job');
 
         // TODO: Comment this in eventually and use this for manual insertion of the
         // signals instead of the ReIndex() api
 
-        if (process.env.USE_REINDEX_API === 'USE_REINDEX_API') {
+        if (process.env.USE_REINDEX_API === 'true') {
           // eslint-disable-next-line
           const result = await services.callCluster('reindex', reIndex);
 
@@ -200,9 +114,13 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
           logger.info(`Result of reindex: ${JSON.stringify(result, null, 2)}`);
         } else {
           logger.info(`[+] Initial search call`);
+
           const noReIndexResult = await services.callCluster('search', noReIndex);
           logger.info(`Total docs to reindex: ${noReIndexResult.hits.total.value}`);
-          const bulkIndexResult = await bulkIndex(noReIndexResult);
+
+          const ScrollAndBulk = new ScrollAndBulkIndex(services, params, logger);
+          const bulkIndexResult = await ScrollAndBulk.bulkIndex(noReIndexResult);
+
           if (bulkIndexResult) {
             logger.info('Finished SIEM signal job');
           } else {
@@ -212,7 +130,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
       } catch (err) {
         // TODO: Error handling and writing of errors into a signal that has error
         // handling/conditions
-        logger.info(`You encountered an error of: ${err.message}`);
+        logger.error(`You encountered an error of: ${err.message}`);
       }
 
       // Schedule the default action which is nothing if it's a plain signal.
