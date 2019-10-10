@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import { editor, IRange } from 'monaco-editor';
-import React from 'react';
+import React, { createRef } from 'react';
 
 import { ResizeChecker } from '../shared/resize_checker';
 import { monaco } from '../../monaco/monaco';
@@ -19,7 +18,6 @@ export interface Position {
 
 export interface Props {
   content: string;
-  header: React.ReactNode;
   language: string;
   highlightRanges: IRange[];
   onClick: (event: Position) => void;
@@ -29,12 +27,10 @@ export interface Props {
    * @param lineIndex The index of the given line (0-indexed)
    */
   lineNumber: (lineIndex: number) => string;
-  className?: string;
 }
 
 export class CodeBlock extends React.PureComponent<Props> {
   static defaultProps = {
-    header: undefined,
     folding: false,
     highlightRanges: [],
     language: 'text',
@@ -42,7 +38,7 @@ export class CodeBlock extends React.PureComponent<Props> {
     onClick: () => {},
   };
 
-  private el: HTMLDivElement | null = null;
+  private el = createRef<HTMLDivElement>();
   private ed?: editor.IStandaloneCodeEditor;
   private resizeChecker?: ResizeChecker;
   private currentHighlightDecorations: string[] = [];
@@ -50,7 +46,7 @@ export class CodeBlock extends React.PureComponent<Props> {
   public async componentDidMount() {
     const { content, highlightRanges, language, onClick } = this.props;
 
-    if (this.el) {
+    if (this.el.current) {
       await this.tryLoadFile(content, language);
       this.ed!.onMouseDown((e: editor.IEditorMouseEvent) => {
         if (
@@ -80,7 +76,7 @@ export class CodeBlock extends React.PureComponent<Props> {
         });
         this.currentHighlightDecorations = this.ed!.deltaDecorations([], decorations);
       }
-      this.resizeChecker = new ResizeChecker(this.el!);
+      this.resizeChecker = new ResizeChecker(this.el.current!);
       this.resizeChecker.on('resize', () => {
         setTimeout(() => {
           this.ed!.layout();
@@ -99,7 +95,7 @@ export class CodeBlock extends React.PureComponent<Props> {
   }
 
   private loadFile(code: string, language: string = 'text') {
-    this.ed = monaco.editor.create(this.el!, {
+    this.ed = monaco.editor.create(this.el.current!, {
       value: code,
       language,
       lineNumbers: this.lineNumber,
@@ -160,15 +156,9 @@ export class CodeBlock extends React.PureComponent<Props> {
   }
 
   public render() {
-    const { className, header } = this.props;
     const height = this.lines.length * 18;
 
-    return (
-      <EuiPanel paddingSize="s" className={className}>
-        {header}
-        <div ref={r => (this.el = r)} style={{ height }} />
-      </EuiPanel>
-    );
+    return <div ref={this.el} className="codeContainer__monaco" style={{ height }} />;
   }
 
   private lineNumber = (lineIndex: number) => this.props.lineNumber(lineIndex - 1);
