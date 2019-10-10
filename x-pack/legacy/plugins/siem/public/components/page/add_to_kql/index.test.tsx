@@ -144,6 +144,22 @@ describe('AddToKql Component', () => {
 
     expect(store.getState().network.page).toEqual({
       queries: {
+        topCountriesDestination: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: {
+            direction: 'desc',
+            field: 'bytes_out',
+          },
+        },
+        topCountriesSource: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: {
+            direction: 'desc',
+            field: 'bytes_out',
+          },
+        },
         topNFlowDestination: {
           activePage: 0,
           limit: 10,

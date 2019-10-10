@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table 1`] = `
-<Connect(NetworkTopNFlowTableComponent)
+exports[`NetworkTopCountries Table Component rendering it renders the default NetworkTopCountries table 1`] = `
+<Connect(NetworkTopCountriesTableComponent)
   data={
     Array [
       Object {
@@ -15,37 +15,10 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
             "bytes_out": 1083495734,
           },
           "source": Object {
-            "autonomous_system": Object {
-              "name": "Google, Inc",
-              "number": 15169,
-            },
+            "country": "DE",
             "destination_ips": 12,
-            "domain": Array [
-              "test.domain.com",
-            ],
             "flows": 12345,
-            "ip": "8.8.8.8",
-            "location": Object {
-              "flowTarget": "source",
-              "geo": Object {
-                "city_name": Array [
-                  "Mountain View",
-                ],
-                "continent_name": Array [
-                  "North America",
-                ],
-                "country_iso_code": Array [
-                  "US",
-                ],
-                "country_name": null,
-                "region_iso_code": Array [
-                  "US-CA",
-                ],
-                "region_name": Array [
-                  "California",
-                ],
-              },
-            },
+            "source_ips": 55,
           },
         },
       },
@@ -60,38 +33,10 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
             "bytes_out": 1083495734,
           },
           "source": Object {
-            "autonomous_system": Object {
-              "name": "TM Net, Internet Service Provider",
-              "number": 4788,
-            },
+            "country": "US",
             "destination_ips": 12,
-            "domain": Array [
-              "test.domain.net",
-              "test.old.domain.net",
-            ],
             "flows": 12345,
-            "ip": "9.9.9.9",
-            "location": Object {
-              "flowTarget": "source",
-              "geo": Object {
-                "city_name": Array [
-                  "Petaling Jaya",
-                ],
-                "continent_name": Array [
-                  "Asia",
-                ],
-                "country_iso_code": Array [
-                  "MY",
-                ],
-                "country_name": null,
-                "region_iso_code": Array [
-                  "MY-10",
-                ],
-                "region_name": Array [
-                  "Selangor",
-                ],
-              },
-            },
+            "source_ips": 55,
           },
         },
       },
@@ -99,7 +44,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
   }
   fakeTotalCount={50}
   flowTargeted="source"
-  id="topNFlowSource"
+  id="topCountriesSource"
   indexPattern={
     Object {
       "fields": Array [

@@ -102,7 +102,7 @@ export const mockNetworkState: NetworkModel = {
 
 describe('Network redux store', () => {
   describe('#setNetworkQueriesActivePageToZero', () => {
-    test('set activePage to zero for all queries in hosts page  ', () => {
+    test('set activePage to zero for all queries in network page', () => {
       expect(setNetworkQueriesActivePageToZero(mockNetworkState, NetworkType.page)).toEqual({
         topNFlowSource: {
           activePage: 0,
@@ -120,10 +120,27 @@ describe('Network redux store', () => {
           dnsSortField: { field: 'uniqueDomains', direction: 'desc' },
           isPtrIncluded: false,
         },
+
+        topCountriesDestination: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: {
+            direction: 'desc',
+            field: 'bytes_out',
+          },
+        },
+        topCountriesSource: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: {
+            direction: 'desc',
+            field: 'bytes_out',
+          },
+        },
       });
     });
 
-    test('set activePage to zero for all queries in host details  ', () => {
+    test('set activePage to zero for all queries in ip details  ', () => {
       expect(setNetworkQueriesActivePageToZero(mockNetworkState, NetworkType.details)).toEqual({
         domains: {
           activePage: 0,
