@@ -7,3 +7,4 @@
 export { init } from './init';
 export { ActionsPlugin, ActionTypeExecutorOptions, ActionType } from './types';
 export { ActionsClient } from './actions_client';
+export { PluginSetupContract, PluginStartContract } from './plugin';

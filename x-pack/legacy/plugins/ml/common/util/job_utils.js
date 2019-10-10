@@ -224,7 +224,7 @@ export function mlFunctionToESAggregation(functionName) {
 // Job name must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores;
 // it must also start and end with an alphanumeric character'
 export function isJobIdValid(jobId) {
-  return (jobId.match(/^[a-z0-9\-\_]+$/g) && !jobId.match(/^([_-].*)?(.*[_-])?$/g)) ? true : false;
+  return /^[a-z0-9\-\_]+$/g.test(jobId) && !/^([_-].*)?(.*[_-])?$/g.test(jobId);
 }
 
 // To get median data for jobs and charts we need to use Elasticsearch's
