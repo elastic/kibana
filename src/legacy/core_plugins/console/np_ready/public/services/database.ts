@@ -17,7 +17,10 @@
  * under the License.
  */
 
-export { createDatabase, Database } from './database';
-export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
-export { createSettings, Settings, DevToolsSettings } from './settings';
+import { SavedObjectsClient } from '../../../../../../core/public';
+
+export class Database {
+  constructor(private readonly client: SavedObjectsClient) {}
+}
+
+export const createDatabase = ({ client }: { client: SavedObjectsClient }) => new Database(client);

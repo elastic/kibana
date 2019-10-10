@@ -17,7 +17,11 @@
  * under the License.
  */
 
-export { createDatabase, Database } from './database';
-export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
-export { createSettings, Settings, DevToolsSettings } from './settings';
+import { SavedObject } from '../../../../../../../core/public';
+
+export interface RecipeAttributes {
+  text: string;
+  [key: string]: any;
+}
+
+export type Recipe = SavedObject<RecipeAttributes>;
