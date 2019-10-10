@@ -289,22 +289,12 @@ export class SavedObjectsRepository {
 
         const id = requestedId || responseId;
         if (error) {
-          if (error.type === 'version_conflict_engine_exception') {
-            return {
-              id,
-              type,
-              error: { statusCode: 409, message: 'version conflict, document already exists' },
-            };
-          }
           return {
             id,
             type,
-            error: {
-              message: error.reason || JSON.stringify(error),
-            },
+            error: getBulkOperationError(error, type, id),
           };
         }
-
         return {
           id,
           type,
@@ -776,7 +766,7 @@ export class SavedObjectsRepository {
           return {
             id,
             type,
-            error: getBulkUpdateError(error, type, id),
+            error: getBulkOperationError(error, type, id),
           };
         }
         return {
@@ -921,7 +911,7 @@ export class SavedObjectsRepository {
   }
 }
 
-function getBulkUpdateError(error: { type: string; reason?: string }, type: string, id: string) {
+function getBulkOperationError(error: { type: string; reason?: string }, type: string, id: string) {
   switch (error.type) {
     case 'version_conflict_engine_exception':
       return { statusCode: 409, message: 'version conflict, document already exists' };

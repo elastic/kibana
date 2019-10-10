@@ -18,19 +18,10 @@
  */
 
 import { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
+import { SavedObjectsClientMock } from '../../mocks';
 
 describe('getNonExistingReferenceAsKeys()', () => {
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkUpdate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = SavedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -177,6 +168,8 @@ describe('getNonExistingReferenceAsKeys()', () => {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
         {
           id: '3',
@@ -185,6 +178,8 @@ describe('getNonExistingReferenceAsKeys()', () => {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
       ],
     });
@@ -227,17 +222,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
 });
 
 describe('validateReferences()', () => {
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkUpdate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = SavedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -264,6 +249,8 @@ Object {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
         {
           type: 'index-pattern',
@@ -272,6 +259,8 @@ Object {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
         {
           type: 'index-pattern',
@@ -280,6 +269,8 @@ Object {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
         {
           type: 'search',
@@ -288,6 +279,8 @@ Object {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
         {
           id: '8',
@@ -613,6 +606,8 @@ Object {
             statusCode: 400,
             message: 'Error',
           },
+          attributes: {},
+          references: [],
         },
       ],
     });

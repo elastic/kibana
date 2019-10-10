@@ -18,6 +18,7 @@
  */
 
 import { SavedObject } from '../types';
+import { SavedObjectsClientMock } from '../../mocks';
 import {
   getObjectReferencesToFetch,
   injectNestedDependencies,
@@ -111,17 +112,7 @@ describe('getObjectReferencesToFetch()', () => {
 });
 
 describe('injectNestedDependencies', () => {
-  const savedObjectsClient = {
-    errors: {} as any,
-    find: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    bulkCreate: jest.fn(),
-    bulkUpdate: jest.fn(),
-    delete: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = SavedObjectsClientMock.create();
 
   afterEach(() => {
     jest.resetAllMocks();
@@ -474,6 +465,8 @@ describe('injectNestedDependencies', () => {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
       ],
     });

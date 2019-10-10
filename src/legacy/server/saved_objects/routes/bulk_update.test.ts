@@ -20,23 +20,13 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createBulkUpdateRoute } from './bulk_update';
+import { SavedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('PUT /api/saved_objects/_bulk_update', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    bulkUpdate: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = SavedObjectsClientMock.create();
 
   beforeEach(() => {
-    savedObjectsClient.update.mockImplementation(() => Promise.resolve(''));
     server = createMockServer();
 
     const prereqs = {
@@ -52,7 +42,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.update.mockReset();
+    savedObjectsClient.bulkUpdate.mockReset();
   });
 
   it('formats successful response', async () => {
@@ -77,13 +67,14 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
       ],
     };
 
-    const time = Date.now();
+    const time = Date.now().toLocaleString();
     const clientResponse = [
       {
         type: 'visualization',
         id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
         updated_at: time,
         version: 'version',
+        references: undefined,
         attributes: {
           title: 'An existing visualization',
         },
@@ -93,22 +84,25 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
         id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
         updated_at: time,
         version: 'version',
+        references: undefined,
         attributes: {
           title: 'An existing dashboard',
         },
       },
     ];
 
-    savedObjectsClient.bulkUpdate.mockImplementation(() => Promise.resolve(clientResponse));
+    savedObjectsClient.bulkUpdate.mockImplementation(() =>
+      Promise.resolve({ saved_objects: clientResponse })
+    );
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
     expect(statusCode).toBe(200);
-    expect(response).toEqual(clientResponse);
+    expect(response).toEqual({ saved_objects: clientResponse });
   });
 
-  it('calls upon savedObjectClient.update', async () => {
+  it('calls upon savedObjectClient.bulkUpdate', async () => {
     const request = {
       method: 'PUT',
       url: '/api/saved_objects/_bulk_update',
@@ -129,6 +123,8 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
         },
       ],
     };
+
+    savedObjectsClient.bulkUpdate.mockImplementation(() => Promise.resolve({ saved_objects: [] }));
 
     await server.inject(request);
 
