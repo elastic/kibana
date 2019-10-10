@@ -8,7 +8,6 @@ import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -17,6 +16,7 @@ import { CommitInfo } from '../../../model/commit';
 import { RootState } from '../../reducers';
 import { hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
 import { fetchMoreCommits } from '../../actions';
+import { formatCommitDate } from '../../../common/commit_utils';
 
 const CommitHistoryLoading = () => (
   <div className="codeLoader">
@@ -40,11 +40,6 @@ const PageButtons = (props: { loading?: boolean; disabled: boolean; onClick: () 
   </EuiFlexGroup>
 );
 
-const commitDateFormatMap: { [key: string]: string } = {
-  en: 'MMM Do, YYYY',
-  'zh-cn': 'YYYY年MoDo',
-};
-
 export const CommitHistoryComponent = (props: {
   commits: CommitInfo[];
   repoUri: string;
@@ -56,13 +51,10 @@ export const CommitHistoryComponent = (props: {
 }) => {
   const commits = _.groupBy(props.commits, commit => moment(commit.updated).format('YYYYMMDD'));
   const commitDates = Object.keys(commits).sort((a, b) => b.localeCompare(a)); // sort desc
-  const locale = i18n.getLocale();
-  const commitDateFormat =
-    locale in commitDateFormatMap ? commitDateFormatMap[locale] : commitDateFormatMap.en;
   const commitList = commitDates.map(cd => (
     <CommitGroup
       commits={commits[cd]}
-      date={moment(cd).format(commitDateFormat)}
+      date={formatCommitDate(cd)}
       key={cd}
       repoUri={props.repoUri}
     />
