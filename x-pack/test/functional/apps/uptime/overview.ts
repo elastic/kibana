@@ -26,7 +26,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       await pageObjects.uptime.inputFilterQuery(
         'monitor.status:up and monitor.id:"0000-intermittent"'
       );
-      await pageObjects.uptime.pageHasExpectedIds(['monitor-page-link-0000-intermittent']);
+      await pageObjects.uptime.pageHasExpectedIds(['0000-intermittent']);
     });
 
     it('pagination is cleared when filter criteria changes', async () => {
