@@ -106,7 +106,7 @@ export function pie(): ExpressionFunction<'pie', PointSeries, Arguments, Render<
         types: ['string', 'boolean'],
         help: argHelp.legend,
         default: false,
-        options: Object.values(Legend).concat(false),
+        options: [...Object.values(Legend), false],
       },
       palette: {
         types: ['palette'],
