@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { indexPatternRoute } from './index_pattern';
 import {
   errorDistributionRoute,
@@ -46,6 +47,7 @@ import {
   uiFiltersEnvironmentsRoute
 } from './ui_filters';
 import { createApi } from './create_api';
+import { serviceMapRoute } from './services';
 
 const createApmApi = () => {
   const api = createApi()
@@ -96,7 +98,8 @@ const createApmApi = () => {
     .add(transactionGroupsLocalFiltersRoute)
     .add(transactionsLocalFiltersRoute)
     .add(serviceNodesLocalFiltersRoute)
-    .add(uiFiltersEnvironmentsRoute);
+    .add(uiFiltersEnvironmentsRoute)
+    .add(serviceMapRoute);
 
   return api;
 };
