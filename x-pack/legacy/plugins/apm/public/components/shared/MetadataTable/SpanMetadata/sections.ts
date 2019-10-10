@@ -6,29 +6,19 @@
 
 import {
   Section,
-  ERROR,
-  LABELS,
-  HTTP,
-  HOST,
-  CONTAINER,
-  SERVICE,
-  PROCESS,
   AGENT,
-  URL,
-  USER,
-  CUSTOM_ERROR
+  SERVICE,
+  SPAN,
+  LABELS,
+  TRANSACTION,
+  TRACE
 } from '../sections';
 
-export const ERROR_METADATA_SECTIONS: Section[] = [
-  ERROR,
-  { ...LABELS, required: true },
-  HTTP,
-  HOST,
-  CONTAINER,
-  SERVICE,
-  PROCESS,
+export const SPAN_METADATA_SECTIONS: Section[] = [
+  SPAN,
   AGENT,
-  URL,
-  { ...USER, required: true },
-  CUSTOM_ERROR
+  SERVICE,
+  TRANSACTION,
+  LABELS,
+  TRACE
 ];
