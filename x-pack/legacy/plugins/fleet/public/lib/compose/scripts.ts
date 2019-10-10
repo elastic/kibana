@@ -18,7 +18,7 @@ export function compose(basePath: string): FrontendLibs {
   const esAdapter = new MemoryElasticsearchAdapter(() => true, () => '', []);
   const elasticsearchLib = new ElasticsearchLib(esAdapter);
 
-  const agents = new AgentsLib(new RestAgentAdapter(api), elasticsearchLib);
+  const agents = new AgentsLib(new RestAgentAdapter(api));
 
   const framework = new FrameworkLib(
     new TestingFrameworkAdapter(

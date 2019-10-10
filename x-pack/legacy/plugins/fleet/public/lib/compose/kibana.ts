@@ -30,7 +30,7 @@ export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
   const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.FLEET);
   const elasticsearchLib = new ElasticsearchLib(esAdapter);
-  const agents = new AgentsLib(new RestAgentAdapter(api), elasticsearchLib);
+  const agents = new AgentsLib(new RestAgentAdapter(api));
 
   const framework = new FrameworkLib(
     new KibanaFrameworkAdapter(

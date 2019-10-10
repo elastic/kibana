@@ -8,30 +8,42 @@ import React, { useState, useEffect, SFC } from 'react';
 import {
   EuiBasicTable,
   // @ts-ignore
-  EuiSearchBar,
+  EuiSuggest,
   EuiFlexGroup,
   EuiButton,
   EuiSpacer,
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
-import { AgentsLib } from '../../../lib/agent';
 import { AgentEvent, Agent } from '../../../../common/types/domain_data';
 import { usePagination } from '../../../hooks/use_pagination';
+import { FrontendLibs } from '../../../lib/types';
+import { SearchBar } from '../../../components/search_bar';
+import { useDebounce } from '../../../hooks/use_debounce';
+
+const DEBOUNCE_SEARCH_MS = 300;
 
 function useSearch() {
-  const [search, setSearch] = useState('');
+  const [state, setState] = useState<{ search: string }>({
+    search: '',
+  });
+
+  const setSearch = (s: string) =>
+    setState({
+      search: s,
+    });
 
   return {
-    search,
+    ...state,
     setSearch,
   };
 }
 
 function useGetAgentEvents(
-  agents: AgentsLib,
+  libs: FrontendLibs,
   agent: Agent,
   search: string,
   pagination: { currentPage: number; pageSize: number }
@@ -41,18 +53,27 @@ function useGetAgentEvents(
     total: 0,
     isLoading: false,
   });
+  const debouncedSearch = useDebounce(search, DEBOUNCE_SEARCH_MS);
   const fetchAgentEvents = async () => {
     setState({
       isLoading: true,
       total: state.total,
       list: state.list,
     });
+    if (!libs.elasticsearch.isKueryValid(debouncedSearch)) {
+      return;
+      setState({
+        isLoading: false,
+        total: 0,
+        list: [],
+      });
+    }
     try {
-      const { list, total } = await agents.getAgentEvents(
+      const { list, total } = await libs.agents.getAgentEvents(
         agent.id,
-        search,
         pagination.currentPage,
-        pagination.pageSize
+        pagination.pageSize,
+        debouncedSearch
       );
 
       setState({
@@ -70,16 +91,16 @@ function useGetAgentEvents(
   };
   useEffect(() => {
     fetchAgentEvents();
-  }, [agent.id, search, pagination]);
+  }, [agent.id, debouncedSearch, pagination]);
 
   return { ...state, refresh: fetchAgentEvents };
 }
 
-export const AgentEventsTable: SFC<{ agents: AgentsLib; agent: Agent }> = ({ agents, agent }) => {
+export const AgentEventsTable: SFC<{ libs: FrontendLibs; agent: Agent }> = ({ libs, agent }) => {
   const { pageSizeOptions, pagination, setPagination } = usePagination();
   const { search, setSearch } = useSearch();
 
-  const { list, total, isLoading, refresh } = useGetAgentEvents(agents, agent, search, pagination);
+  const { list, total, isLoading, refresh } = useGetAgentEvents(libs, agent, search, pagination);
   const paginationOptions = {
     pageIndex: pagination.currentPage - 1,
     pageSize: pagination.pageSize,
@@ -135,9 +156,7 @@ export const AgentEventsTable: SFC<{ agents: AgentsLib; agent: Agent }> = ({ age
   const onClickRefresh = () => {
     refresh();
   };
-  const onChangeQuery = (e: any) => {
-    setSearch(e.queryText);
-  };
+
   const onChange = ({ page }: { page: { index: number; size: number } }) => {
     const newPagination = {
       ...pagination,
@@ -158,15 +177,7 @@ export const AgentEventsTable: SFC<{ agents: AgentsLib; agent: Agent }> = ({ age
       <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiSearchBar
-            query={search}
-            box={{
-              placeholder: 'e.g. type:STATE',
-              incremental: true,
-              schema: {},
-            }}
-            onChange={onChangeQuery}
-          />
+          <SearchBar value={search} libs={libs} onChange={setSearch} fieldPrefix={'agent_events'} />
         </EuiFlexItem>
         <EuiFlexItem grow={null}>
           <EuiButton color="secondary" iconType="refresh" onClick={onClickRefresh}>
