@@ -14,7 +14,7 @@ JOB:
   - kibana-ciGroup10
   - kibana-ciGroup11
   - kibana-ciGroup12
-  - kibana-visualRegression
+  # - kibana-visualRegression
 
   # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
   - x-pack-firefoxSmoke
@@ -23,11 +23,12 @@ JOB:
   - x-pack-ciGroup3
   - x-pack-ciGroup4
   - x-pack-ciGroup5
+  - x-pack-ciGroup6
   - x-pack-ciGroup7
   - x-pack-ciGroup8
   - x-pack-ciGroup9
   - x-pack-ciGroup10
-  - x-pack-visualRegression
+  # - x-pack-visualRegression
 
 # `~` is yaml for `null`
 exclude: ~
