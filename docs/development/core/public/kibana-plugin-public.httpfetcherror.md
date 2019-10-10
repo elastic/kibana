@@ -4,6 +4,7 @@
 
 ## HttpFetchError class
 
+
 <b>Signature:</b>
 
 ```typescript

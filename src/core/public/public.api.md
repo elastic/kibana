@@ -433,8 +433,6 @@ export interface HttpErrorResponse {
     response?: Response;
 }
 
-// Warning: (ae-missing-release-tag) "HttpFetchError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export class HttpFetchError extends Error {
     constructor(message: string, request: Request, response?: Response | undefined, body?: any);
