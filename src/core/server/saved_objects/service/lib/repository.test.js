@@ -1946,15 +1946,13 @@ describe('SavedObjectsRepository', () => {
             type: 'index-pattern',
             id: `logstash-${count}`,
             attributes: { title: `Testing ${count}` },
-            options: {
-              references: [
-                {
-                  name: 'ref_0',
-                  type: 'test',
-                  id: '1',
-                },
-              ],
-            }
+            references: [
+              {
+                name: 'ref_0',
+                type: 'test',
+                id: '1',
+              },
+            ],
           }, overrides);
         },
         reset() {
@@ -2014,12 +2012,12 @@ describe('SavedObjectsRepository', () => {
       expect(response.saved_objects[0]).toMatchObject({
         ..._.pick(objects[0], 'id', 'type', 'attributes'),
         version: mockVersion,
-        references: objects[0].options.references
+        references: objects[0].references
       });
       expect(response.saved_objects[1]).toMatchObject({
         ..._.pick(objects[1], 'id', 'type', 'attributes'),
         version: mockVersion,
-        references: objects[1].options.references
+        references: objects[1].references
       });
     });
 
@@ -2074,9 +2072,8 @@ describe('SavedObjectsRepository', () => {
       ] } = await savedObjectsRepository.bulkUpdate(objects);
 
       expect(firstUpdatedObject).toMatchObject({
-        ..._.pick(objects[0], 'id', 'type', 'attributes'),
-        version: mockVersion,
-        references: objects[0].options.references
+        ..._.pick(objects[0], 'id', 'type', 'attributes', 'references'),
+        version: mockVersion
       });
 
       expect(invalidType).toMatchObject({
@@ -2085,9 +2082,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       expect(secondUpdatedObject).toMatchObject({
-        ..._.pick(objects[2], 'id', 'type', 'attributes'),
-        version: mockVersion,
-        references: objects[2].options.references
+        ..._.pick(objects[2], 'id', 'type', 'attributes', 'references'),
+        version: mockVersion
       });
 
       expect(versionClashObject).toMatchObject({
@@ -2099,20 +2095,16 @@ describe('SavedObjectsRepository', () => {
     it('accepts version', async () => {
       const objects = [
         generateSavedObject({
-          options: {
-            version: encodeHitVersion({
-              _seq_no: 100,
-              _primary_term: 200,
-            }),
-          }
+          version: encodeHitVersion({
+            _seq_no: 100,
+            _primary_term: 200,
+          }),
         }),
         generateSavedObject({
-          options: {
-            version: encodeHitVersion({
-              _seq_no: 300,
-              _primary_term: 400,
-            }),
-          }
+          version: encodeHitVersion({
+            _seq_no: 300,
+            _primary_term: 400,
+          }),
         })
       ];
 
@@ -2140,8 +2132,7 @@ describe('SavedObjectsRepository', () => {
         {
           type: 'index-pattern',
           id: `logstash-no-ref`,
-          attributes: { title: `Testing no-ref` },
-          options: { }
+          attributes: { title: `Testing no-ref` }
         }
       ];
 
@@ -2161,15 +2152,13 @@ describe('SavedObjectsRepository', () => {
     it('passes references if they are provided', async () => {
       const objects = [
         generateSavedObject({
-          options: {
-            references: [
-              {
-                name: 'ref_0',
-                type: 'test',
-                id: '1',
-              },
-            ],
-          }
+          references: [
+            {
+              name: 'ref_0',
+              type: 'test',
+              id: '1',
+            },
+          ],
         })
       ];
 
@@ -2196,9 +2185,7 @@ describe('SavedObjectsRepository', () => {
           type: 'index-pattern',
           id: `logstash-no-ref`,
           attributes: { title: `Testing no-ref` },
-          options: {
-            references: []
-          }
+          references: []
         }
       ];
 
@@ -2219,14 +2206,10 @@ describe('SavedObjectsRepository', () => {
 
       const objects = [
         generateSavedObject({
-          options: {
-            namespace: 'foo-namespace'
-          }
+          namespace: 'foo-namespace'
         }),
         generateSavedObject({
-          options: {
-            namespace: 'foo-another-namespace'
-          }
+          namespace: 'foo-another-namespace'
         })
       ];
 
@@ -2345,9 +2328,7 @@ describe('SavedObjectsRepository', () => {
         generateSavedObject({
           type: 'globaltype',
           id: 'foo',
-          options: {
-            namespace: 'foo-namespace'
-          }
+          namespace: 'foo-namespace'
         })
       ];
 

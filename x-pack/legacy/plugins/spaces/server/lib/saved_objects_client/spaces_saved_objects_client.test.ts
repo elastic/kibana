@@ -358,9 +358,7 @@ const createMockResponse = () => ({
         });
 
         await expect(
-          client.bulkUpdate([
-            { id: '', type: 'foo', attributes: {}, options: { namespace: 'bar' } },
-          ])
+          client.bulkUpdate([{ id: '', type: 'foo', attributes: {}, namespace: 'bar' }])
         ).rejects.toThrowError('Spaces currently determines the namespaces');
       });
 
@@ -380,9 +378,8 @@ const createMockResponse = () => ({
           types,
         });
 
-        const options = Object.freeze({ references: [] });
         const actualReturnValue = await client.bulkUpdate([
-          { id: 'id', type: 'foo', attributes: {}, options },
+          { id: 'id', type: 'foo', attributes: {}, references: [] },
         ]);
 
         expect(actualReturnValue).toBe(expectedReturnValue);

@@ -704,10 +704,7 @@ export class SavedObjectsRepository {
         };
       }
 
-      const {
-        attributes,
-        options: { references, namespace, version },
-      } = object;
+      const { attributes, references, namespace, version } = object;
 
       const documentToSave = {
         [type]: attributes,

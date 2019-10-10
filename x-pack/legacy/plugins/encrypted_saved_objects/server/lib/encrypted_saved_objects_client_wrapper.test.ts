@@ -321,7 +321,6 @@ describe('#bulkCreate', () => {
 describe('#bulkUpdate', () => {
   it('redirects request to underlying base client if type is not registered', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { version: 'some-version' };
     const mockedResponse = {
       saved_objects: [{ id: 'some-id', type: 'unknown-type', attributes, references: [] }],
     };
@@ -329,12 +328,14 @@ describe('#bulkUpdate', () => {
     mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
 
     await expect(
-      wrapper.bulkUpdate([{ type: 'unknown-type', id: 'some-id', attributes, options }])
+      wrapper.bulkUpdate([
+        { type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' },
+      ])
     ).resolves.toEqual(mockedResponse);
 
     expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
     expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([
-      { type: 'unknown-type', id: 'some-id', attributes, options },
+      { type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' },
     ]);
   });
 
@@ -479,18 +480,19 @@ describe('#bulkUpdate', () => {
 
   it('fails if base client fails', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { version: 'some-version' };
 
     const failureReason = new Error('Something bad happened...');
     mockBaseClient.bulkUpdate.mockRejectedValue(failureReason);
 
     await expect(
-      wrapper.bulkUpdate([{ type: 'unknown-type', id: 'some-id', attributes, options }])
+      wrapper.bulkUpdate([
+        { type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' },
+      ])
     ).rejects.toThrowError(failureReason);
 
     expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
     expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([
-      { type: 'unknown-type', id: 'some-id', attributes, options },
+      { type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' },
     ]);
   });
 });

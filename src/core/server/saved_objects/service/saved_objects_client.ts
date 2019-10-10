@@ -61,11 +61,12 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
  *
  * @public
  */
-export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any>
+  extends SavedObjectsUpdateOptions,
+    SavedObjectsBaseOptions {
   type: string;
   id: string;
   attributes: Partial<T>;
-  options: SavedObjectsUpdateOptions;
 }
 
 /**
