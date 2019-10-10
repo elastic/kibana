@@ -14,7 +14,7 @@ import {
   IScopedClusterClient,
 } from 'src/core/server';
 import { LensServerOptions } from '../server_options';
-import { ExistingFields } from '../../common';
+import { ExistingFields, BASE_API_URL } from '../../common';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -41,7 +41,7 @@ const SAMPLE_SIZE = 500;
 export async function existingFieldsRoute(opts: LensServerOptions) {
   opts.router.get(
     {
-      path: '/existing_fields/{id}',
+      path: `${BASE_API_URL}/existing_fields/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),
