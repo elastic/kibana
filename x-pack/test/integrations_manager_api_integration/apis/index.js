@@ -5,8 +5,8 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Integrations Manager Endpoints', () => {
-    this.tags('ciGroup10');
+  describe('Integrations Manager Endpoints', function () {
+    this.tags('ciGroup7');
     loadTestFile(require.resolve('./list'));
   });
 }
