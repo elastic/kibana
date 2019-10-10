@@ -24,8 +24,13 @@ export const EditorToggleControls = ({ editor }: Props) => {
   const [showValidityWarning, setShowValidityWarning] = React.useState<boolean>(false);
 
   const clearWarnings = () => {
-    if (showMaxDepthWarning) setShowMaxDepthWarning(false);
-    if (showValidityWarning) setShowValidityWarning(false);
+    if (showMaxDepthWarning) {
+      setShowMaxDepthWarning(false);
+    }
+
+    if (showValidityWarning) {
+      setShowValidityWarning(false);
+    }
   };
 
   if (editor === 'default') {

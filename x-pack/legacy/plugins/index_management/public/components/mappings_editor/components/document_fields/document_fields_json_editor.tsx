@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 
 import { useDispatch } from '../../mappings_state';
 import { JsonEditor } from '../../../json_editor';
@@ -16,16 +16,13 @@ export interface Props {
 export const DocumentFieldsJsonEditor = ({ defaultValue }: Props) => {
   const dispatch = useDispatch();
   const defaultValueRef = useRef(defaultValue);
-
-  return (
-    <JsonEditor
-      onUpdate={({ data, isValid }) =>
-        dispatch({
-          type: 'fieldsJsonEditor.update',
-          value: { json: data.format(), isValid },
-        })
-      }
-      defaultValue={defaultValueRef.current}
-    />
+  const onUpdate = useCallback(
+    ({ data, isValid }) =>
+      dispatch({
+        type: 'fieldsJsonEditor.update',
+        value: { json: data.format(), isValid },
+      }),
+    [dispatch]
   );
+  return <JsonEditor onUpdate={onUpdate} defaultValue={defaultValueRef.current} />;
 };

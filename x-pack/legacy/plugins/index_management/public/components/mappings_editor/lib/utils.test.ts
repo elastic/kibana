@@ -6,11 +6,10 @@
 
 jest.mock('../constants', () => ({ DATA_TYPE_DEFINITION: {} }));
 
-// FormComponentsArgs will have to be changed with "State"
-import { determineIfValid, FormComponentsArgs } from '.';
+import { determineIfValid } from '.';
 
 describe('Mappings Editor form validity', () => {
-  let components: FormComponentsArgs;
+  let components: any;
   it('handles base case', () => {
     components = {
       fieldsJsonEditor: { isValid: undefined },
