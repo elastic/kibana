@@ -13,6 +13,7 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import React from 'react';
 import { $ElementType } from 'utility-types';
 import { ApmHeader } from '../../shared/ApmHeader';
@@ -23,6 +24,8 @@ import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink'
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { EuiTabLink } from '../../shared/EuiTabLink';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
+import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
+import { ServiceMap } from '../ServiceMap';
 
 const homeTabs = [
   {
@@ -49,12 +52,26 @@ const homeTabs = [
   }
 ];
 
+if (npStart.core.injectedMetadata.getInjectedVar('apmServiceMapEnabled')) {
+  homeTabs.push({
+    link: (
+      <ServiceMapLink>
+        {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+          defaultMessage: 'Service Map'
+        })}
+      </ServiceMapLink>
+    ),
+    render: () => <ServiceMap />,
+    name: 'service-map'
+  });
+}
+
 const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
   defaultMessage: 'Settings'
 });
 
 interface Props {
-  tab: 'traces' | 'services';
+  tab: 'traces' | 'services' | 'service-map';
 }
 
 export function Home({ tab }: Props) {

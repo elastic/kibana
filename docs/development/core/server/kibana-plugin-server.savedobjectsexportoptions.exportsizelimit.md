@@ -4,6 +4,8 @@
 
 ## SavedObjectsExportOptions.exportSizeLimit property
 
+the maximum number of objects to export.
+
 <b>Signature:</b>
 
 ```typescript

@@ -189,16 +189,6 @@ export const getTooltips = () => {
         defaultMessage: 'Advanced option. Select to retrieve unfiltered _source document, instead of specified fields.'
       })
     },
-    new_job_advanced_settings: {
-      text: i18n.translate('xpack.ml.tooltips.newJobAdvancedSettingsTooltip', {
-        defaultMessage: 'Advanced options'
-      })
-    },
-    new_job_dedicated_index: {
-      text: i18n.translate('xpack.ml.tooltips.newJobDedicatedIndexTooltip', {
-        defaultMessage: 'Select to store results in a separate index for this job.'
-      })
-    },
     new_job_enable_model_plot: {
       text: i18n.translate('xpack.ml.tooltips.newJobEnableModelPlotTooltip', {
         defaultMessage: 'Select to enable model plot. Stores model information along with results. ' +
