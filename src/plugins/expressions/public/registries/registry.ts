@@ -20,7 +20,7 @@
 export class Registry<T> {
   private data: Record<string, T> = {};
 
-  add(id: string, item: T) {
+  set(id: string, item: T) {
     this.data[id] = item;
   }
 

@@ -18,6 +18,7 @@
  */
 
 import { ExpressionInterpret } from '../interpreter_provider';
+import { FunctionHandlers } from './functions';
 
 export { ArgumentType } from './arguments';
 export {

@@ -122,6 +122,6 @@ export class FunctionsRegistry extends Registry<Function> {
     const fn = new Function(
       typeof functionDefinition === 'object' ? functionDefinition : functionDefinition()
     );
-    this.add(fn.name, fn);
+    this.set(fn.name, fn);
   }
 }
