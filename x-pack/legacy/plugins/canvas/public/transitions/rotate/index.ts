@@ -6,10 +6,14 @@
 
 import './rotate.css';
 
+import { TransitionStrings } from '../../../i18n';
+
+const { rotate: strings } = TransitionStrings;
+
 export const rotate = () => ({
   name: 'rotate',
-  displayName: 'Rotate',
-  help: 'Rotate from one page to the next',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   enter: 'rotateIn',
   exit: 'rotateOut',
 });
