@@ -103,9 +103,11 @@ export async function savedObjectsMixin(kbnServer, server) {
   server.route(createLogLegacyImportRoute());
 
   const serializer = new SavedObjectsSerializer(schema);
-  
+
   if (cacheIndexPatterns.getIndexPatternsService() == null) {
-    const adminClient = await server.newPlatform.__internals.elasticsearch.adminClient$.pipe(first()).toPromise();
+    const adminClient = await server.newPlatform.__internals.elasticsearch.adminClient$
+      .pipe(first())
+      .toPromise();
     cacheIndexPatterns.setIndexPatternsService(
       server.indexPatternsServiceFactory({ callCluster: adminClient.callAsInternalUser })
     );
@@ -123,7 +125,7 @@ export async function savedObjectsMixin(kbnServer, server) {
     });
     const combinedTypes = visibleTypes.concat(extraTypes);
     const allowedTypes = [...new Set(combinedTypes)];
-    
+
     const config = server.config();
 
     return new SavedObjectsRepository({
