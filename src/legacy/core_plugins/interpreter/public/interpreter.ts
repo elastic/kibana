@@ -31,47 +31,12 @@ import { visualization } from './renderers/visualization';
 import { esaggs as esaggsFn } from './functions/esaggs';
 import { visualization as visualizationFn } from './functions/visualization';
 
-/* eslint-disable */
-import { boolean } from '../../../../plugins/expressions/public/expression_types/boolean';
-import { datatable } from '../../../../plugins/expressions/public/expression_types/datatable';
-import { error } from '../../../../plugins/expressions/public/expression_types/error';
-import { filter } from '../../../../plugins/expressions/public/expression_types/filter';
-import { image } from '../../../../plugins/expressions/public/expression_types/image';
-import { nullType } from '../../../../plugins/expressions/public/expression_types/null';
-import { number } from '../../../../plugins/expressions/public/expression_types/number';
-import { pointseries } from '../../../../plugins/expressions/public/expression_types/pointseries';
-import { range } from '../../../../plugins/expressions/public/expression_types/range';
-import { render } from '../../../../plugins/expressions/public/expression_types/render';
-import { shape } from '../../../../plugins/expressions/public/expression_types/shape';
-import { string } from '../../../../plugins/expressions/public/expression_types/string';
-import { style } from '../../../../plugins/expressions/public/expression_types/style';
-import { kibanaContext } from '../../../../plugins/expressions/public/expression_types/kibana_context';
-import { kibanaDatatable } from '../../../../plugins/expressions/public/expression_types/kibana_datatable';
-/* eslint-enable */
-
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
 (global as any).kbnInterpreter = Object.assign(
   (global as any).kbnInterpreter || {},
   registryFactory(registries)
 );
-
-// These will be moved to Expression plugin.
-registries.types.register(boolean);
-registries.types.register(datatable);
-registries.types.register(error);
-registries.types.register(filter);
-registries.types.register(image);
-registries.types.register(nullType);
-registries.types.register(number);
-registries.types.register(pointseries);
-registries.types.register(range);
-registries.types.register(render);
-registries.types.register(shape);
-registries.types.register(string);
-registries.types.register(style);
-registries.types.register(kibanaContext);
-registries.types.register(kibanaDatatable);
 
 // This will be moved to Search service.
 registries.browserFunctions.register(esaggsFn);

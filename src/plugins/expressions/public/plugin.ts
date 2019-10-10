@@ -26,6 +26,23 @@ import { clog as clogFunction } from './functions/clog';
 import { font as fontFunction } from './functions/font';
 import { kibana as kibanaFunction } from './functions/kibana';
 import { kibanaContext as kibanaContextFunction } from './functions/kibana_context';
+import {
+  boolean as booleanType,
+  datatable as datatableType,
+  error as errorType,
+  filter as filterType,
+  image as imageType,
+  nullType,
+  number as numberType,
+  pointseries,
+  range as rangeType,
+  render as renderType,
+  shape as shapeType,
+  string as stringType,
+  style as styleType,
+  kibanaContext as kibanaContextType,
+  kibanaDatatable as kibanaDatatableType,
+} from './expression_types';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -60,20 +77,36 @@ export class ExpressionsPublicPlugin
   public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
     const { functions, renderers, types } = this;
 
-    this.functions.register(clogFunction);
-    this.functions.register(fontFunction);
-    this.functions.register(kibanaFunction);
-    this.functions.register(kibanaContextFunction);
+    functions.register(clogFunction);
+    functions.register(fontFunction);
+    functions.register(kibanaFunction);
+    functions.register(kibanaContextFunction);
+
+    types.register(booleanType);
+    types.register(datatableType);
+    types.register(errorType);
+    types.register(filterType);
+    types.register(imageType);
+    types.register(nullType);
+    types.register(numberType);
+    types.register(pointseries);
+    types.register(rangeType);
+    types.register(renderType);
+    types.register(shapeType);
+    types.register(stringType);
+    types.register(styleType);
+    types.register(kibanaContextType);
+    types.register(kibanaDatatableType);
 
     const setup: ExpressionsSetup = {
       registerFunction: fn => {
-        this.functions.register(fn);
+        functions.register(fn);
       },
       registerRenderer: (renderer: any) => {
-        this.renderers.register(renderer);
+        renderers.register(renderer);
       },
       registerType: type => {
-        this.types.register(type);
+        types.register(type);
       },
       __LEGACY: {
         functions,
