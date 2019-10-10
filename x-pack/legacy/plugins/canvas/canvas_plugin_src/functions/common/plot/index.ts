@@ -56,7 +56,7 @@ export function plot(): ExpressionFunction<'plot', PointSeries, Arguments, Rende
         types: ['string', 'boolean'],
         help: argHelp.legend,
         default: 'ne',
-        options: Object.values(Legend).concat(false),
+        options: [...Object.values(Legend), false],
       },
       palette: {
         types: ['palette'],
