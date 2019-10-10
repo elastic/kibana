@@ -27,6 +27,7 @@ import { intervalOptions } from './_interval_options';
 import { TimeIntervalParamEditor } from '../../vis/editors/default/controls/time_interval';
 import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../../vis/editors/default/controls/drop_partials';
+import { ScaleMetricsParamEditor } from '../../vis/editors/default/controls/scale_metrics';
 import { dateHistogramInterval } from '../../../../core_plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { writeParams } from '../agg_params';
@@ -114,6 +115,13 @@ export const dateHistogramBucketAgg = new BucketAggType({
       write: _.noop,
     },
     {
+      name: 'scaleMetricValues',
+      default: false,
+      write: _.noop,
+      advanced: true,
+      editorComponent: ScaleMetricsParamEditor,
+    },
+    {
       name: 'interval',
       editorComponent: TimeIntervalParamEditor,
       deserialize: function (state, agg) {
@@ -139,7 +147,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
       write: function (agg, output, aggs) {
         setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
-        const { useNormalizedEsInterval } = agg.params;
+        const { useNormalizedEsInterval, scaleMetricValues } = agg.params;
         const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;
         if (interval.expression === '0ms') {
@@ -156,7 +164,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
           ...dateHistogramInterval(interval.expression),
         };
 
-        const scaleMetrics = interval.scaled && interval.scale < 1;
+        const scaleMetrics = scaleMetricValues && interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
           const metrics = aggs.aggs.filter(agg => agg.type && agg.type.type === 'metrics');
           const all = _.every(metrics, function (agg) {
