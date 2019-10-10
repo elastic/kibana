@@ -145,7 +145,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           skip={isInitializing}
                           sourceId="default"
                           startDate={from}
-                          type={networkModel.NetworkType.page}
+                          type={networkModel.NetworkType.details}
                         >
                           {({
                             id,
@@ -176,7 +176,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                                 pageInfo
                               )}
                               totalCount={totalCount}
-                              type={networkModel.NetworkType.page}
+                              type={networkModel.NetworkType.details}
                             />
                           )}
                         </NetworkTopNFlowQuery>
@@ -191,7 +191,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           skip={isInitializing}
                           sourceId="default"
                           startDate={from}
-                          type={networkModel.NetworkType.page}
+                          type={networkModel.NetworkType.details}
                         >
                           {({
                             id,
@@ -222,7 +222,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                                 pageInfo
                               )}
                               totalCount={totalCount}
-                              type={networkModel.NetworkType.page}
+                              type={networkModel.NetworkType.details}
                             />
                           )}
                         </NetworkTopNFlowQuery>

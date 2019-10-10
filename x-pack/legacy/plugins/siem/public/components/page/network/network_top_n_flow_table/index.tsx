@@ -46,7 +46,11 @@ interface NetworkTopNFlowTableReduxProps {
 }
 
 interface NetworkTopNFlowTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
+  updateIpDetailsTableActivePage: ActionCreator<{
+    activePage: number;
+    tableType: networkModel.IpDetailsTableType;
+  }>;
+  updateNetworkPageTableActivePage: ActionCreator<{
     activePage: number;
     tableType: networkModel.NetworkTableType;
   }>;
@@ -95,9 +99,10 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     topNFlowSort,
     totalCount,
     type,
+    updateIpDetailsTableActivePage,
+    updateNetworkPageTableActivePage,
     updateTopNFlowLimit,
     updateTopNFlowSort,
-    updateTableActivePage,
   }) => {
     const onChange = (criteria: Criteria, tableType: networkModel.TopNTableType) => {
       if (criteria.sort != null) {
@@ -122,12 +127,23 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     let tableType: networkModel.TopNTableType;
     let headerTitle: string;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let updateTableActivePage: any;
+
     if (flowTargeted === FlowTargetNew.source) {
       headerTitle = i18n.SOURCE_IP;
-      tableType = networkModel.NetworkTableType.topNFlowSource;
+      tableType =
+        type === networkModel.NetworkType.page
+          ? networkModel.NetworkTableType.topNFlowSource
+          : networkModel.IpDetailsTableType.topNFlowSource;
+      updateTableActivePage = updateIpDetailsTableActivePage;
     } else {
       headerTitle = i18n.DESTINATION_IP;
-      tableType = networkModel.NetworkTableType.topNFlowDestination;
+      tableType =
+        type === networkModel.NetworkType.page
+          ? networkModel.NetworkTableType.topNFlowDestination
+          : networkModel.IpDetailsTableType.topNFlowDestination;
+      updateTableActivePage = updateNetworkPageTableActivePage;
     }
 
     const field =
@@ -184,7 +200,8 @@ export const NetworkTopNFlowTable = connect(
   {
     updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
     updateTopNFlowSort: networkActions.updateTopNFlowSort,
-    updateTableActivePage: networkActions.updateNetworkPageTableActivePage,
+    updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,
+    updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
   }
 )(NetworkTopNFlowTableComponent);
 

@@ -7,8 +7,6 @@
 import { DEFAULT_TIMELINE_WIDTH } from '../components/timeline/body/helpers';
 import {
   Direction,
-  DomainsFields,
-  FlowDirection,
   FlowTarget,
   HostsFields,
   NetworkDnsFields,
@@ -96,11 +94,15 @@ export const mockGlobalState: State = {
       filterQueryDraft: null,
       flowTarget: FlowTarget.source,
       queries: {
-        domains: {
+        topNFlowSource: {
           activePage: 0,
           limit: 10,
-          flowDirection: FlowDirection.uniDirectional,
-          domainsSortField: { field: DomainsFields.bytes, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+        },
+        topNFlowDestination: {
+          activePage: 0,
+          limit: 10,
+          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
         },
         tls: {
           activePage: 0,

@@ -6,7 +6,7 @@
 
 import { DomainsEdges, NetworkDirectionEcs, UsersEdges } from '../../graphql/types';
 
-import { DomainsBuckets, IpOverviewHit, UsersResponse } from './types';
+import { IpOverviewHit, UsersResponse } from './types';
 
 export const responseAggs: IpOverviewHit = {
   aggregations: {
@@ -251,37 +251,6 @@ export const formattedEmptySource = {
     geo: {},
   },
 };
-
-export const mockDomainsResponseBuckets: DomainsBuckets[] = [
-  {
-    key: 'example.com',
-    uniqueIpCount: {
-      value: 805,
-    },
-    lastSeen: {
-      value: 1554920919000,
-      value_as_string: '2019-04-10T18:28:39.000Z',
-    },
-    bytes: {
-      value: 974964465,
-    },
-    packets: {
-      value: 16946245,
-    },
-    direction: {
-      buckets: [
-        {
-          key: NetworkDirectionEcs.outbound,
-          doc_count: 51668,
-        },
-        {
-          key: NetworkDirectionEcs.inbound,
-          doc_count: 25681,
-        },
-      ],
-    },
-  },
-];
 
 export const mockFormattedSource: DomainsEdges[] = [
   {

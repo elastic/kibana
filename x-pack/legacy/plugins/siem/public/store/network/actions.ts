@@ -7,8 +7,6 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import {
-  DomainsSortField,
-  FlowDirection,
   FlowTarget,
   NetworkDnsSortField,
   NetworkTopNFlowSortField,
@@ -17,13 +15,13 @@ import {
 } from '../../graphql/types';
 import { KueryFilterQuery, networkModel, SerializedFilterQuery } from '../model';
 
-import { IpDetailsTableType, NetworkTableType, NetworkType } from './model';
+import { NetworkType } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/network');
 
 export const updateNetworkPageTableActivePage = actionCreator<{
   activePage: number;
-  tableType: NetworkTableType;
+  tableType: networkModel.NetworkTableType;
 }>('UPDATE_NETWORK_PAGE_TABLE_ACTIVE_PAGE');
 
 export const setNetworkTablesActivePageToZero = actionCreator(
@@ -32,7 +30,7 @@ export const setNetworkTablesActivePageToZero = actionCreator(
 
 export const updateIpDetailsTableActivePage = actionCreator<{
   activePage: number;
-  tableType: IpDetailsTableType;
+  tableType: networkModel.IpDetailsTableType;
 }>('UPDATE_NETWORK_DETAILS_TABLE_ACTIVE_PAGE');
 
 export const updateDnsLimit = actionCreator<{
@@ -76,19 +74,6 @@ export const applyNetworkFilterQuery = actionCreator<{
 export const updateIpDetailsFlowTarget = actionCreator<{
   flowTarget: FlowTarget;
 }>('UPDATE_IP_DETAILS_TARGET');
-
-// Domains Table Actions
-export const updateDomainsLimit = actionCreator<{
-  limit: number;
-}>('UPDATE_DOMAINS_LIMIT');
-
-export const updateDomainsFlowDirection = actionCreator<{
-  flowDirection: FlowDirection;
-}>('UPDATE_DOMAINS_DIRECTION');
-
-export const updateDomainsSort = actionCreator<{
-  domainsSortField: DomainsSortField;
-}>('UPDATE_DOMAINS_SORT');
 
 // TLS Table Actions
 export const updateTlsSort = actionCreator<{

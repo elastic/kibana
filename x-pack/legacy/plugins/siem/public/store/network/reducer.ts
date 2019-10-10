@@ -8,8 +8,6 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   Direction,
-  DomainsFields,
-  FlowDirection,
   FlowTarget,
   NetworkDnsFields,
   NetworkTopNFlowFields,
@@ -23,10 +21,7 @@ import {
   setNetworkFilterQueryDraft,
   updateDnsLimit,
   updateDnsSort,
-  updateDomainsFlowDirection,
-  updateDomainsLimit,
   updateTlsLimit,
-  updateDomainsSort,
   updateIpDetailsFlowTarget,
   updateIsPtrIncluded,
   updateIpDetailsTableActivePage,
@@ -81,12 +76,19 @@ export const initialNetworkState: NetworkState = {
   },
   details: {
     queries: {
-      [IpDetailsTableType.domains]: {
+      [IpDetailsTableType.topNFlowSource]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        flowDirection: FlowDirection.uniDirectional,
         limit: DEFAULT_TABLE_LIMIT,
-        domainsSortField: {
-          field: DomainsFields.bytes,
+        topNFlowSort: {
+          field: NetworkTopNFlowFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [IpDetailsTableType.topNFlowDestination]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        topNFlowSort: {
+          field: NetworkTopNFlowFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -239,19 +241,6 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       flowTarget,
     },
   }))
-  .case(updateDomainsLimit, (state, { limit }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      queries: {
-        ...state[NetworkType.details].queries,
-        [IpDetailsTableType.domains]: {
-          ...state[NetworkType.details].queries.domains,
-          limit,
-        },
-      },
-    },
-  }))
   .case(updateTlsLimit, (state, { limit }) => ({
     ...state,
     [NetworkType.details]: {
@@ -261,32 +250,6 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         [IpDetailsTableType.tls]: {
           ...state[NetworkType.details].queries.tls,
           limit,
-        },
-      },
-    },
-  }))
-  .case(updateDomainsFlowDirection, (state, { flowDirection }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      queries: {
-        ...state[NetworkType.details].queries,
-        [IpDetailsTableType.domains]: {
-          ...state[NetworkType.details].queries.domains,
-          flowDirection,
-        },
-      },
-    },
-  }))
-  .case(updateDomainsSort, (state, { domainsSortField }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      queries: {
-        ...state[NetworkType.details].queries,
-        [IpDetailsTableType.domains]: {
-          ...state[NetworkType.details].queries.domains,
-          domainsSortField,
         },
       },
     },

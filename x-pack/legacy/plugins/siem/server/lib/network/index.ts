@@ -6,6 +6,7 @@
 
 import {
   FlowTargetNew,
+  Maybe,
   NetworkDnsSortField,
   NetworkTopNFlowData,
   NetworkTopNFlowSortField,
@@ -19,7 +20,7 @@ export * from './types';
 export interface NetworkTopNFlowRequestOptions extends RequestOptionsPaginated {
   networkTopNFlowSort: NetworkTopNFlowSortField;
   flowTarget: FlowTargetNew;
-  ip?: string;
+  ip?: Maybe<string>;
 }
 
 export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {

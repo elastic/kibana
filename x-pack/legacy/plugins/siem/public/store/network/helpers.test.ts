@@ -8,8 +8,6 @@ import {
   Direction,
   NetworkTopNFlowFields,
   NetworkDnsFields,
-  FlowDirection,
-  DomainsFields,
   TlsFields,
   UsersFields,
   FlowTarget,
@@ -52,12 +50,19 @@ export const mockNetworkState: NetworkModel = {
   },
   details: {
     queries: {
-      [IpDetailsTableType.domains]: {
-        activePage: 8,
-        flowDirection: FlowDirection.uniDirectional,
+      [IpDetailsTableType.topNFlowSource]: {
+        activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
-        domainsSortField: {
-          field: DomainsFields.bytes,
+        topNFlowSort: {
+          field: NetworkTopNFlowFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [IpDetailsTableType.topNFlowDestination]: {
+        activePage: 3,
+        limit: DEFAULT_TABLE_LIMIT,
+        topNFlowSort: {
+          field: NetworkTopNFlowFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -109,11 +114,15 @@ describe('Network redux store', () => {
 
     test('set activePage to zero for all queries in host details  ', () => {
       expect(setNetworkQueriesActivePageToZero(mockNetworkState, NetworkType.details)).toEqual({
-        domains: {
+        topNFlowSource: {
           activePage: 0,
-          flowDirection: 'uniDirectional',
           limit: 10,
-          domainsSortField: { field: 'bytes', direction: 'desc' },
+          topNFlowSort: { field: 'bytes_out', direction: 'desc' },
+        },
+        topNFlowDestination: {
+          activePage: 0,
+          limit: 10,
+          topNFlowSort: { field: 'bytes_out', direction: 'desc' },
         },
         tls: { activePage: 0, limit: 10, tlsSortField: { field: '_id', direction: 'desc' } },
         users: { activePage: 0, limit: 10, usersSortField: { field: 'name', direction: 'asc' } },

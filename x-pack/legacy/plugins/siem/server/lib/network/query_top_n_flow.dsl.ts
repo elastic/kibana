@@ -46,7 +46,7 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getFlowTargetAggs(networkTopNFlowSort, flowTarget, querySize, ip),
+        ...getFlowTargetAggs(networkTopNFlowSort, flowTarget, querySize),
       },
       query: {
         bool: ip
@@ -75,8 +75,7 @@ export const buildTopNFlowQuery = ({
 const getFlowTargetAggs = (
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTargetNew,
-  querySize: number,
-  ip?: string
+  querySize: number
 ) => ({
   [flowTarget]: {
     terms: {

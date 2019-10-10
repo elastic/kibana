@@ -79,12 +79,6 @@ export const ipDetailsFlowTargetSelector = () =>
     network => network.flowTarget
   );
 
-export const domainsSelector = () =>
-  createSelector(
-    selectNetworkDetails,
-    network => network.queries.domains
-  );
-
 export const tlsSelector = () =>
   createSelector(
     selectNetworkDetails,

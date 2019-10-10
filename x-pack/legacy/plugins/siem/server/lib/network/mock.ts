@@ -7,7 +7,6 @@
 import { Direction, FlowTargetNew, NetworkTopNFlowFields } from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
-import { networkTopNFlowQueryString } from '../../../public/containers/network_top_n_flow/index.gql_query';
 
 export const mockOptions: NetworkTopNFlowRequestOptions = {
   defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -74,7 +73,96 @@ export const mockRequest = {
       sourceId: 'default',
       timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
     },
-    query: networkTopNFlowQueryString,
+    query: `
+  query GetNetworkTopNFlowQuery(
+    $sourceId: ID!
+    $ip: String
+    $filterQuery: String
+    $pagination: PaginationInputPaginated!
+    $sort: NetworkTopNFlowSortField!
+    $flowTarget: FlowTargetNew!
+    $timerange: TimerangeInput!
+    $defaultIndex: [String!]!
+    $inspect: Boolean!
+  ) {
+    source(id: $sourceId) {
+      id
+      NetworkTopNFlow(
+        filterQuery: $filterQuery
+        flowTarget: $flowTarget
+        ip: $ip
+        pagination: $pagination
+        sort: $sort
+        timerange: $timerange
+        defaultIndex: $defaultIndex
+      ) {
+        totalCount
+        edges {
+          node {
+            source {
+              autonomous_system {
+                name
+                number
+              }
+              domain
+              ip
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
+                }
+                flowTarget
+              }
+              flows
+              destination_ips
+            }
+            destination {
+              autonomous_system {
+                name
+                number
+              }
+              domain
+              ip
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
+                }
+                flowTarget
+              }
+              flows
+              source_ips
+            }
+            network {
+              bytes_in
+              bytes_out
+            }
+          }
+          cursor {
+            value
+          }
+        }
+        pageInfo {
+          activePage
+          fakeTotalCount
+          showMorePagesIndicator
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
+        }
+      }
+    }
+  }
+`,
   },
 };
 

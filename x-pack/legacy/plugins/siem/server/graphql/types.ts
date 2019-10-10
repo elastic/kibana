@@ -2073,6 +2073,8 @@ export interface NetworkTopNFlowSourceArgs {
 
   filterQuery?: Maybe<string>;
 
+  ip?: Maybe<string>;
+
   flowTarget: FlowTargetNew;
 
   pagination: PaginationInputPaginated;
@@ -2841,9 +2843,9 @@ export namespace SourceResolvers {
   export interface NetworkTopNFlowArgs {
     id?: Maybe<string>;
 
-    ip?: string;
-
     filterQuery?: Maybe<string>;
+
+    ip?: Maybe<string>;
 
     flowTarget: FlowTargetNew;
 
