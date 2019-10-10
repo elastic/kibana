@@ -22,10 +22,6 @@ export const SingleMetricDetectorsSummary: FC = () => {
   const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
     JobCreatorContext
   );
-
-  if (isSingleMetricJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as SingleMetricJobCreator;
 
   const [lineChartsData, setLineChartData] = useState<LineChartData>({});

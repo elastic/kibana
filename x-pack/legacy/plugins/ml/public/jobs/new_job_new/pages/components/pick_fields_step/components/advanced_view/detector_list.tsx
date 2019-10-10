@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { AdvancedJobCreator, isAdvancedJobCreator } from '../../../../../common/job_creator';
+import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { detectorToString } from '../../../../../../../util/string_utils';
 
 interface Props {
@@ -30,10 +30,6 @@ interface Props {
 
 export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
-
-  if (isAdvancedJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as AdvancedJobCreator;
   const [detectors, setDetectors] = useState(jobCreator.detectors);
 

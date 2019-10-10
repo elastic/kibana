@@ -30,9 +30,6 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     chartInterval,
   } = useContext(JobCreatorContext);
 
-  if (isMultiMetricJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as MultiMetricJobCreator;
 
   const { fields } = newJobCapsService;

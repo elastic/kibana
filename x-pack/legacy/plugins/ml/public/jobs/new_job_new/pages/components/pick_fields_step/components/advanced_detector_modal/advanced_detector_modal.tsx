@@ -14,11 +14,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
-import {
-  AdvancedJobCreator,
-  isAdvancedJobCreator,
-  JobCreatorType,
-} from '../../../../../common/job_creator';
+import { AdvancedJobCreator, JobCreatorType } from '../../../../../common/job_creator';
 import {
   Field,
   Aggregation,
@@ -73,11 +69,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
   closeModal,
 }) => {
   const { jobCreator: jc } = useContext(JobCreatorContext);
-
-  if (isAdvancedJobCreator(jc) === false) {
-    return null;
-  }
-
   const jobCreator = jc as AdvancedJobCreator;
 
   const [detector, setDetector] = useState(payload.detector);

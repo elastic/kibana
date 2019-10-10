@@ -7,7 +7,7 @@
 import React, { Fragment, FC, useContext, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { AdvancedJobCreator, isAdvancedJobCreator } from '../../../../../common/job_creator';
+import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { Aggregation, Field } from '../../../../../../../../common/types/fields';
 import { MetricSelector } from './metric_selector';
@@ -30,10 +30,6 @@ const emptyRichDetector: RichDetector = {
 
 export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
-
-  if (isAdvancedJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as AdvancedJobCreator;
 
   const { fields, aggs } = newJobCapsService;

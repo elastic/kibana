@@ -11,24 +11,13 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import {
   MultiMetricJobCreator,
-  isMultiMetricJobCreator,
   PopulationJobCreator,
-  isPopulationJobCreator,
   AdvancedJobCreator,
-  isAdvancedJobCreator,
 } from '../../../../../common/job_creator';
 import { Description } from './description';
 
 export const CategorizationField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  if (
-    isMultiMetricJobCreator(jc) === false &&
-    isPopulationJobCreator(jc) === false &&
-    isAdvancedJobCreator(jc) === false
-  ) {
-    return null;
-  }
-
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
   const { fields } = newJobCapsService;
   const [categorizationFieldName, setCategorizationFieldName] = useState(

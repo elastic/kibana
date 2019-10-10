@@ -33,10 +33,6 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
     chartLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-
-  if (isPopulationJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as PopulationJobCreator;
 
   const { fields } = newJobCapsService;

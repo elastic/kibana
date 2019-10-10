@@ -23,10 +23,6 @@ export const PopulationDetectorsSummary: FC = () => {
   const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
     JobCreatorContext
   );
-
-  if (isPopulationJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as PopulationJobCreator;
 
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(

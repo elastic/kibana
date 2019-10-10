@@ -19,9 +19,6 @@ export const MultiMetricDetectorsSummary: FC = () => {
     JobCreatorContext
   );
 
-  if (isMultiMetricJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as MultiMetricJobCreator;
 
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});

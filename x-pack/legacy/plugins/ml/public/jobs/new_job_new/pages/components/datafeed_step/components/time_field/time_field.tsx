@@ -9,15 +9,11 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 import { TimeFieldSelect } from './time_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { AdvancedJobCreator, isAdvancedJobCreator } from '../../../../../common/job_creator';
+import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { Description } from './description';
 
 export const TimeField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  if (isAdvancedJobCreator(jc) === false) {
-    return null;
-  }
-
   const jobCreator = jc as AdvancedJobCreator;
   const { fields } = newJobCapsService;
   const [timeFieldName, setTimeFieldName] = useState(jobCreator.timeFieldName);
