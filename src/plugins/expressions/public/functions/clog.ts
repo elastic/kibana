@@ -17,5 +17,19 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../../../plugins/expressions/public/functions/clog';
+import { ExpressionFunction } from '../types';
+
+const name = 'clog';
+
+type Context = any;
+type ClogExpressionFunction = ExpressionFunction<typeof name, Context, {}, Context>;
+
+export const clog = (): ClogExpressionFunction => ({
+  name,
+  args: {},
+  help: 'Outputs the context to the console',
+  fn: context => {
+    console.log(context); // eslint-disable-line no-console
+    return context;
+  },
+});
