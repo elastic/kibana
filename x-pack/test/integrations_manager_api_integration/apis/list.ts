@@ -67,5 +67,59 @@ export default function({ getService }: FtrProviderContext) {
       expect(listResponse[0]).to.eql({ ...searchResponse[0], status: 'not_installed' });
       expect(listResponse[1]).to.eql({ ...searchResponse[1], status: 'not_installed' });
     });
+
+    it('sorts the packages even if the registry sends them unsorted', async () => {
+      const searchResponse = [
+        {
+          description: 'BBB integration package',
+          download: '/package/bbb-1.0.1.tar.gz',
+          name: 'bbb',
+          title: 'BBB',
+          type: 'integration',
+          version: '1.0.1',
+        },
+        {
+          description: 'CCC integration package',
+          download: '/package/ccc-2.0.4.tar.gz',
+          name: 'ccc',
+          title: 'CCC',
+          type: 'integration',
+          version: '2.0.4',
+        },
+        {
+          description: 'AAA integration package',
+          download: '/package/aaa-0.0.1.tar.gz',
+          name: 'aaa',
+          title: 'AAA',
+          type: 'integration',
+          version: '0.0.1',
+        },
+      ];
+      server.on({
+        method: 'GET',
+        path: '/search',
+        reply: {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(searchResponse),
+        },
+      });
+
+      const supertest = getService('supertest');
+      const fetchPackageList = async () => {
+        const response = await supertest
+          .get('/api/integrations_manager/list')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        return response.body;
+      };
+
+      const listResponse = await fetchPackageList();
+
+      expect(listResponse.length).to.be(3);
+      expect(listResponse[0].name).to.eql('aaa');
+      expect(listResponse[1].name).to.eql('bbb');
+      expect(listResponse[2].name).to.eql('ccc');
+    });
   });
 }
