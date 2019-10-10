@@ -83,18 +83,10 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
 
     describe('with es instance', () => {
       const log = new ToolingLog();
-      let es;
 
-      before(async () => {
-        es = createLegacyEsTestCluster({ license: 'basic', log });
-        await es.start();
-      });
-
-      after(async () => {
-        if (es) {
-          await es.stop();
-        }
-      });
+      const es = createLegacyEsTestCluster({ license: 'basic', log });
+      beforeAll(es.start);
+      afterAll(es.stop);
 
       it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
         await withProcRunner(log, async proc => {
