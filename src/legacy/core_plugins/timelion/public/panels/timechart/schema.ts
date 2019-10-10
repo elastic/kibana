@@ -236,6 +236,7 @@ export function timechartFn(dependencies: TimelionStartDependencies) {
           }
           for (i = 0; i < dataset.length; ++i) {
             const series = dataset[i];
+            const useDistance = series.lines.show && !series.lines.steps;
             const precision = _.get(series, '_meta.precision', 2);
 
             if (series._hide) continue;
@@ -243,6 +244,10 @@ export function timechartFn(dependencies: TimelionStartDependencies) {
             // Nearest point
             for (j = 0; j < series.data.length; ++j) {
               if (series.data[j][0] > pos.x) break;
+            }
+            j--;
+            if (useDistance && pos.x - series.data[j][0] > series.data[j + 1][0] - pos.x) {
+              j++;
             }
 
             let y;
