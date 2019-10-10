@@ -5,7 +5,7 @@
  */
 
 import { getAllEnvironments } from './get_environments/get_all_environments';
-import { getUnavailableEnvironments } from './get_environments/get_unavailable_environments';
+import { getExistingEnvironmentsForService } from './get_environments/get_existing_environments_for_service';
 import { getServiceNames } from './get_service_names';
 import { listConfigurations } from './list_configurations';
 import { searchConfigurations } from './search';
@@ -34,7 +34,7 @@ describe('agent configuration queries', () => {
 
   it('fetches unavailable environments', async () => {
     mock = await inspectSearchParams(setup =>
-      getUnavailableEnvironments({
+      getExistingEnvironmentsForService({
         serviceName: 'foo',
         setup
       })

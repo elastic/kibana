@@ -1,0 +1,1911 @@
+{
+  "monitorStates": {
+    "prevPagePagination": null,
+    "nextPagePagination": "{\"cursorKey\":{\"monitor_id\":\"0009-up\"},\"sortOrder\":\"ASC\",\"cursorDirection\":\"AFTER\"}",
+    "totalSummaryCount": {
+      "count": 2000
+    },
+    "summaries": [
+      {
+        "monitor_id": "0000-intermittent",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1568172657286,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172680087,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172702888,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172725689,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172748490,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172771291,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172794092,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172816893,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172839694,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172862495,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172885296,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172908097,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172930898,
+              "up": 0,
+              "down": 1
+            },
+            {
+              "timestamp": 1568172953699,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172976500,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172999301,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173022102,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173044903,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173067704,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173090505,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173113306,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173136107,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173158908,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173181709,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173204510,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173227311,
+              "up": 1,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234371"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x5,500x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234371
+        }
+      },
+      {
+        "monitor_id": "0001-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1568172657286,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172680087,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172702888,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172725689,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172748490,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172771291,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172794092,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172816893,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172839694,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172862495,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172885296,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172908097,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172930898,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172953699,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172976500,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172999301,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173022102,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173044903,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173067704,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173090505,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173113306,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173136107,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173158908,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173181709,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173204510,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173227311,
+              "up": 1,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234371"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234371
+        }
+      },
+      {
+        "monitor_id": "0002-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1568172657286,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172680087,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172702888,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172725689,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172748490,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172771291,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172794092,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172816893,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172839694,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172862495,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172885296,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172908097,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172930898,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172953699,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172976500,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172999301,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173022102,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173044903,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173067704,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173090505,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173113306,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173136107,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173158908,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173181709,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173204510,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173227311,
+              "up": 1,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234371"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234371
+        }
+      },
+      {
+        "monitor_id": "0003-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1568172657286,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172680087,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172702888,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172725689,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172748490,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172771291,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172794092,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172816893,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172839694,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172862495,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172885296,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172908097,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172930898,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172953699,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172976500,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172999301,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173022102,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173044903,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173067704,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173090505,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173113306,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173136107,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173158908,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173181709,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173204510,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173227311,
+              "up": 1,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234371"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234371
+        }
+      },
+      {
+        "monitor_id": "0004-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1568172657286,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172680087,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172702888,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172725689,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172748490,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172771291,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172794092,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172816893,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172839694,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172862495,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172885296,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172908097,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172930898,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172953699,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172976500,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172999301,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173022102,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173044903,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173067704,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173090505,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173113306,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173136107,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173158908,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173181709,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173204510,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173227311,
+              "up": 1,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234371"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234371
+        }
+      },
+      {
+        "monitor_id": "0005-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1568172657286,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172680087,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172702888,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172725689,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172748490,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172771291,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172794092,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172816893,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172839694,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172862495,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172885296,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172908097,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172930898,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172953699,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172976500,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172999301,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173022102,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173044903,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173067704,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173090505,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173113306,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173136107,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173158908,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173181709,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173204510,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173227311,
+              "up": 1,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234371"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234371
+        }
+      },
+      {
+        "monitor_id": "0006-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1568172657286,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172680087,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172702888,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172725689,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172748490,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172771291,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172794092,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172816893,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172839694,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172862495,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172885296,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172908097,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172930898,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172953699,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172976500,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172999301,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173022102,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173044903,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173067704,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173090505,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173113306,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173136107,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173158908,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173181709,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173204510,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173227311,
+              "up": 1,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234371"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234371
+        }
+      },
+      {
+        "monitor_id": "0007-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1568172657286,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172680087,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172702888,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172725689,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172748490,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172771291,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172794092,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172816893,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172839694,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172862495,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172885296,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172908097,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172930898,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172953699,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172976500,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172999301,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173022102,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173044903,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173067704,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173090505,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173113306,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173136107,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173158908,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173181709,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173204510,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173227311,
+              "up": 1,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234371"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234371
+        }
+      },
+      {
+        "monitor_id": "0008-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1568172657286,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172680087,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172702888,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172725689,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172748490,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172771291,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172794092,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172816893,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172839694,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172862495,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172885296,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172908097,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172930898,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172953699,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172976500,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172999301,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173022102,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173044903,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173067704,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173090505,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173113306,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173136107,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173158908,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173181709,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173204510,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173227311,
+              "up": 1,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234371"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234371
+        }
+      },
+      {
+        "monitor_id": "0009-up",
+        "histogram": {
+          "count": 20,
+          "points": [
+            {
+              "timestamp": 1568172657286,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172680087,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172702888,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172725689,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172748490,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172771291,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172794092,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172816893,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172839694,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172862495,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172885296,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172908097,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172930898,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172953699,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172976500,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568172999301,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173022102,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173044903,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173067704,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173090505,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173113306,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173136107,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173158908,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173181709,
+              "up": 1,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173204510,
+              "up": 0,
+              "down": 0
+            },
+            {
+              "timestamp": 1568173227311,
+              "up": 1,
+              "down": 0
+            }
+          ]
+        },
+        "state": {
+          "agent": null,
+          "checks": [
+            {
+              "agent": {
+                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
+              },
+              "container": null,
+              "kubernetes": null,
+              "monitor": {
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "up"
+              },
+              "observer": {
+                "geo": {
+                  "name": "mpls",
+                  "location": {
+                    "lat": 37.926867976784706,
+                    "lon": -78.02490200847387
+                  }
+                }
+              },
+              "timestamp": "1568173234371"
+            }
+          ],
+          "geo": null,
+          "observer": {
+            "geo": {
+              "name": [
+                "mpls"
+              ],
+              "location": null
+            }
+          },
+          "monitor": {
+            "id": null,
+            "name": null,
+            "status": "up",
+            "type": null
+          },
+          "summary": {
+            "up": 1,
+            "down": 0,
+            "geo": null
+          },
+          "url": {
+            "full": "http://localhost:5678/pattern?r=200x1",
+            "domain": "localhost"
+          },
+          "timestamp": 1568173234371
+        }
+      }
+    ]
+  }
+}

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import 'ace';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { isColorDark, hexToRgb } from '@elastic/eui';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -48,16 +49,15 @@ import { GraphVisualization } from './components/graph_visualization';
 
 import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
-import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
+import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
 import { urlTemplateRegex } from  './helpers/url_template';
 import {
   asAngularSyncedObservable,
 } from './helpers/as_observable';
-import { fetchTopNodes } from './services/fetch_top_nodes';
+import { colorChoices } from './helpers/style_choices';
 import {
   createGraphStore,
-  selectedFieldsSelector,
   datasourceSelector,
   hasFieldsSelector
 } from './state_management';
@@ -66,26 +66,16 @@ import './angular/directives/graph_inspect';
 
 const app = uiModules.get('app/graph');
 
-function checkLicense(Promise, kbnBaseUrl) {
+function checkLicense(kbnBaseUrl) {
   const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
     xpackInfo.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
     const message = xpackInfo.get('features.graph.message');
     const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
     window.location.href = newUrl;
-    return Promise.halt();
+    throw new Error('Graph license error');
   }
-
-  return Promise.resolve();
 }
-
-app.directive('focusOn', function () {
-  return function (scope, elem, attr) {
-    scope.$on(attr.focusOn, function () {
-      elem[0].focus();
-    });
-  };
-});
 
 app.directive('vennDiagram', function (reactDirective) {
   return reactDirective(VennDiagram);
@@ -98,7 +88,6 @@ app.directive('graphListing', function (reactDirective) {
 app.directive('graphApp', function (reactDirective) {
   return reactDirective(GraphApp, [
     ['store', { watchDepth: 'reference' }],
-    ['onFillWorkspace', { watchDepth: 'reference' }],
     ['isInitialized', { watchDepth: 'reference' }],
     ['currentIndexPattern', { watchDepth: 'reference' }],
     ['indexPatternProvider', { watchDepth: 'reference' }],
@@ -110,13 +99,12 @@ app.directive('graphApp', function (reactDirective) {
     ['pluginDataStart', { watchDepth: 'reference' }],
     ['store', { watchDepth: 'reference' }],
     ['reduxStore', { watchDepth: 'reference' }],
-  ]);
+  ], { restrict: 'A' });
 });
 
 app.directive('graphVisualization', function (reactDirective) {
-  return reactDirective(GraphVisualization);
+  return reactDirective(GraphVisualization, undefined, { restrict: 'A' });
 });
-
 
 if (uiRoutes.enable) {
   uiRoutes.enable();
@@ -126,8 +114,8 @@ uiRoutes
   .when('/home', {
     template: listingTemplate,
     badge: getReadonlyBadge,
-    controller($injector, $location, $scope, Private, config, Promise, kbnBaseUrl) {
-      checkLicense(Promise, kbnBaseUrl);
+    controller($injector, $location, $scope, Private, config, kbnBaseUrl) {
+      checkLicense(kbnBaseUrl);
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const graphService = services['Graph workspace'];
       const kbnUrl = $injector.get('kbnUrl');
@@ -167,7 +155,6 @@ uiRoutes
             }
           ) : savedGraphWorkspaces.get();
       },
-      //Copied from example found in wizard.js ( Kibana TODO - can't
       indexPatterns: function (Private) {
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -196,17 +183,13 @@ app.controller('graphuiPlugin', function (
   $route,
   $http,
   kbnUrl,
-  Promise,
   confirmModal,
   kbnBaseUrl
 ) {
-  function handleSuccess(data) {
-    return checkLicense(Promise, kbnBaseUrl)
-      .then(() => data);
-  }
+  checkLicense(kbnBaseUrl);
 
   function handleError(err) {
-    return checkLicense(Promise, kbnBaseUrl)
+    return checkLicense(kbnBaseUrl)
       .then(() => {
         const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
           defaultMessage: 'Graph Error',
@@ -226,7 +209,7 @@ app.controller('graphuiPlugin', function (
   }
 
   function handleHttpError(error) {
-    return checkLicense(Promise, kbnBaseUrl)
+    return checkLicense(kbnBaseUrl)
       .then(() => {
         toastNotifications.addDanger(formatAngularHttpError(error));
       });
@@ -302,6 +285,9 @@ app.controller('graphuiPlugin', function (
     setLiveResponseFields: (fields) => {
       $scope.liveResponseFields = fields;
     },
+    setUrlTemplates: (urlTemplates) => {
+      $scope.urlTemplates = urlTemplates;
+    },
     getWorkspace: () => {
       return $scope.workspace;
     },
@@ -309,7 +295,11 @@ app.controller('graphuiPlugin', function (
       return $route.current.locals.savedWorkspace;
     },
     notifications: npStart.core.notifications,
+    http: npStart.core.http,
     showSaveModal,
+    setWorkspaceInitialized: () => {
+      $scope.workspaceInitialized = true;
+    },
     savePolicy: chrome.getInjected('graphSavePolicy'),
     changeUrl: (newUrl) => {
       $scope.$evalAsync(() => {
@@ -322,17 +312,19 @@ app.controller('graphuiPlugin', function (
     chrome,
   });
 
+  // register things on scope passed down to react components
   $scope.pluginDataStart = npStart.plugins.data;
   $scope.store = new Storage(window.localStorage);
   $scope.coreStart = npStart.core;
   $scope.loading = false;
-
-  $scope.spymode = 'request';
-
-  const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
-
   $scope.reduxStore = store;
+  $scope.savedWorkspace = $route.current.locals.savedWorkspace;
 
+  // register things for legacy angular UI
+  const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
+  $scope.spymode = 'request';
+  $scope.colors = colorChoices;
+  $scope.isColorDark = (color) => isColorDark(...hexToRgb(color));
   $scope.nodeClick = function (n, $event) {
 
     //Selection logic - shift key+click helps selects multiple nodes
@@ -382,30 +374,6 @@ app.controller('graphuiPlugin', function (
   };
 
 
-  $scope.fillWorkspace = async () => {
-    try {
-      const fields = selectedFieldsSelector(store.getState());
-      const topTermNodes = await fetchTopNodes(
-        npStart.core.http.post,
-        datasourceSelector(store.getState()).current.title,
-        fields
-      );
-      $scope.workspace.mergeGraph({
-        nodes: topTermNodes,
-        edges: []
-      });
-      $scope.workspaceInitialized = true;
-      $scope.workspace.fillInGraph(fields.length * 10);
-    } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.graph.fillWorkspaceError',
-          { defaultMessage: 'Fetching top terms failed: {message}', values: { message: e.message } }
-        ),
-      });
-    }
-  };
-
   $scope.submit = function (searchTerm) {
     $scope.workspaceInitialized = true;
     const numHops = 2;
@@ -427,13 +395,6 @@ app.controller('graphuiPlugin', function (
     }
     $scope.workspace.simpleSearch(searchTerm, $scope.liveResponseFields, numHops);
   };
-
-  $scope.clearWorkspace = function () {
-    $scope.workspace = null;
-    $scope.detail = null;
-    if ($scope.closeMenus) $scope.closeMenus();
-  };
-
 
   $scope.selectSelected = function (node) {
     $scope.detail = {
@@ -511,9 +472,7 @@ app.controller('graphuiPlugin', function (
     }),
     run: function () {
       canWipeWorkspace(function () {
-        $scope.$evalAsync(() => {
-          kbnUrl.change('/workspace/', {});
-        });
+        kbnUrl.change('/workspace/', {});
       });  },
     testId: 'graphNewButton',
   });
@@ -647,7 +606,5 @@ app.controller('graphuiPlugin', function (
       });
     }
   }
-
-  $scope.savedWorkspace = $route.current.locals.savedWorkspace;
 });
 
