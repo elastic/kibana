@@ -110,11 +110,11 @@ export class Function {
     }
   }
 
-  accepts(type: string): boolean {
+  accepts = (type: string): boolean => {
     // If you don't tell us about context, we'll assume you don't care what you get.
     if (!this.context.types) return true;
     return this.context.types.indexOf(type) > -1;
-  }
+  };
 }
 
 export class FunctionsRegistry extends Registry<Function> {

@@ -25,8 +25,6 @@
 
 /* eslint-disable max-classes-per-file */
 import { clone } from 'lodash';
-import { Type } from '../interpreter';
-import { ExpressionType } from '../types';
 
 export class Registry<ItemSpec, Item> {
   _prop: string;
@@ -115,10 +113,5 @@ export class RenderFunctionsRegistry extends Registry<any, any> {
   }
 }
 
-export class TypesRegistry extends Registry<ExpressionType<any, any, any>, any> {
-  wrapper(obj: any) {
-    return new (Type as any)(obj);
-  }
-}
-
+export * from './type_registry';
 export * from './function_registry';
