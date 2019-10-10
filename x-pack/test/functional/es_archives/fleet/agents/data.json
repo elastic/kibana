@@ -102,7 +102,11 @@
         "tokenHash" : "911e4ef197d476522e8fe65f3790cc39061a828924b1f9cfc9b16e5ed5e261ea84d4b1dc5319ced5cca7510ec360f2af3b048403dac133cfca90ea23da0d6db4",
         "policy_id" : "policy:1",
         "active" : true,
-        "enrollment_rules" : [ ]
+        "enrollment_rules" : [{
+          "id": "rule:1",
+          "ip_ranges": ["0.0.0.0/0"],
+          "created_at" : "2019-09-20T01:57:50.986Z"
+        }]
       },
       "type" : "tokens",
       "references": []
