@@ -6,10 +6,7 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import {
-  SingleMetricJobCreator,
-  isSingleMetricJobCreator,
-} from '../../../../../common/job_creator';
+import { SingleMetricJobCreator } from '../../../../../common/job_creator';
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';

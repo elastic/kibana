@@ -8,7 +8,7 @@ import React, { Fragment, FC, useContext, useEffect, useState, useReducer } from
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { PopulationJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
+import { PopulationJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';

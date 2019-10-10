@@ -7,7 +7,7 @@
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { MultiMetricJobCreator, isMultiMetricJobCreator } from '../../../../../common/job_creator';
+import { MultiMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
