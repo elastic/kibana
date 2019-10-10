@@ -27,12 +27,8 @@ export interface KUSavedObjectClient {
 }
 
 export const createSavedObjectsClient = (getCoreStart: Get<CoreStart>) => {
-  const method = <K extends keyof CoreSavedObjectClient>(key: K): CoreSavedObjectClient[K] => (
-    ...args: any
-  ) => (getCoreStart().savedObjects.client as any)[key](...args);
-
   const savedObjectsClient: KUSavedObjectClient = {
-    get: method('get'),
+    get: (...args) => getCoreStart().savedObjects.client.get(...args),
   };
 
   return savedObjectsClient;

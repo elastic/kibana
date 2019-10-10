@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction } from '../types';
 import { KibanaContext } from '../expression_types';
-import { savedObjects } from '../core';
+import { savedObjects } from '../services';
 
 interface Arguments {
   q?: string | null;

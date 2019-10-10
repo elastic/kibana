@@ -21,7 +21,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { AnyExpressionFunction, AnyExpressionType } from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
-import { setCoreStart } from './core';
+import { setCoreStart } from './services';
 import { kibanaContext } from './functions/kibana_context';
 
 export interface ExpressionsSetupDeps {
