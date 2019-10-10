@@ -140,7 +140,7 @@ describe('POST /api/saved_objects/_import', () => {
         'content-Type': 'multipart/form-data; boundary=EXAMPLE',
       },
     };
-    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
+    savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
         {

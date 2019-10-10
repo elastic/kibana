@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObject, SavedObjectsClient, SavedObjectAttributes } from 'src/core/server';
+import { SavedObject, SavedObjectAttributes } from 'src/core/server';
 import { collectReferencesDeep } from './collect_references_deep';
 import { SavedObjectsClientMock } from '../../../../../../core/server/mocks';
 
