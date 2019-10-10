@@ -71,24 +71,37 @@ export function SavedViewListFlyout<ViewState>({
   deleteView,
   loading,
 }: Props<ViewState>) {
+  const renderName = useCallback(
+    (name: string, item: SavedView<ViewState>) => (
+      <EuiButtonEmpty
+        onClick={() => {
+          setView(item);
+          close();
+        }}
+      >
+        {name}
+      </EuiButtonEmpty>
+    ),
+    [setView, close]
+  );
+
+  const renderDeleteAction = useCallback((item: SavedView<ViewState>) => {
+    return (
+      <DeleteConfimation
+        confirmedAction={() => {
+          deleteView(item.id);
+        }}
+      />
+    );
+  }, []);
+
   const columns = [
     {
       field: 'name',
       name: i18n.translate('xpack.infra.openView.columnNames.name', { defaultMessage: 'Name' }),
       sortable: true,
       truncateText: true,
-      render: (name: string, item: SavedView<ViewState>) => {
-        return (
-          <EuiButtonEmpty
-            onClick={() => {
-              setView(item);
-              close();
-            }}
-          >
-            {name}
-          </EuiButtonEmpty>
-        );
-      },
+      render: renderName,
     },
     {
       name: i18n.translate('xpack.infra.openView.columnNames.actions', {
@@ -97,9 +110,7 @@ export function SavedViewListFlyout<ViewState>({
       actions: [
         {
           available: (item: SavedView<ViewState>) => !item.isDefault,
-          render: (item: SavedView<ViewState>) => {
-            return <DeleteConfimation confirmedAction={() => deleteView(item.id)} />;
-          },
+          render: renderDeleteAction,
         },
       ],
     },
