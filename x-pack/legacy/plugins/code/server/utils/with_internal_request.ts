@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient } from 'src/core/server';
-import { AnyObject } from '../lib/esqueue';
+import { APICaller, IClusterClient } from 'src/core/server';
 
 export class WithInternalRequest {
-  public readonly callCluster: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
+  public readonly callCluster: APICaller;
 
   constructor(cluster: IClusterClient) {
     this.callCluster = cluster.callAsInternalUser;

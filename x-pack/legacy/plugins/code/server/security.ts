@@ -90,7 +90,7 @@ export class CodeServerRouter {
         break;
       }
       default: {
-        break;
+        throw new Error(`Unknown HTTP method: ${route.method}`);
       }
     }
   }

@@ -5,6 +5,7 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
+import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { createTestHapiServer } from '../test_utils';
 import { LocalHandlerAdapter } from './local_handler_adapter';
 import { CodeServerRouter } from '../security';
@@ -19,10 +20,11 @@ import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 let hapiServer = createTestHapiServer();
 
-let router: CodeServerRouter = new CodeServerRouter(hapiServer);
+const routerMock = httpServiceMock.createRouter();
+let router: CodeServerRouter = new CodeServerRouter(routerMock);
 beforeEach(async () => {
   hapiServer = createTestHapiServer();
-  router = new CodeServerRouter(hapiServer);
+  router = new CodeServerRouter(routerMock);
 });
 const TestDefinition = {
   test1: {
@@ -49,7 +51,7 @@ test('local adapter should work', async () => {
   const services = new CodeServices(new LocalHandlerAdapter());
   services.registerHandler(TestDefinition, testServiceHandler);
   const testApi = services.serviceFor(TestDefinition);
-  const endpoint = await services.locate({} as KibanaRequest, '');
+  const endpoint = await services.locate(httpServerMock.createKibanaRequest(), '');
   const { result } = await testApi.test1(endpoint, { name: 'tester' });
   expect(result).toBe(`hello tester`);
 });
