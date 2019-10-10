@@ -5,11 +5,20 @@
  */
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
+import { SearchParams, SearchResponse } from 'elasticsearch';
 import { LensUsage } from './types';
 
+type ClusterSearchType = (
+  endpoint: 'search',
+  params: SearchParams & {
+    rest_total_hits_as_int: boolean;
+  },
+  options?: CallClusterOptions
+) => Promise<SearchResponse<unknown>>;
+
 export async function getVisualizationCounts(
-  callCluster: CallCluster,
+  callCluster: ClusterSearchType,
   config: KibanaConfig
 ): Promise<LensUsage> {
   const scriptedMetric = {
@@ -28,11 +37,14 @@ export async function getVisualizationCounts(
       // Despite docs that say this is optional, this script can't be blank.
       combine_script: 'return state',
       // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+      // This also needs to account for having no data
       reduce_script: `
         Map result = [:];
         for (Map m : states.toArray()) {
-          for (String k : m.keySet()) {
-            result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+          if (m !== null) {
+            for (String k : m.keySet()) {
+              result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+            }
           }
         }
         return result;
