@@ -15,9 +15,7 @@ export const FrequencyInput: FC = () => {
     JobCreatorContext
   );
   const [validation, setValidation] = useState(jobValidator.frequency);
-  const [frequency, setFrequency] = useState(
-    jobCreator.frequency === null ? '' : jobCreator.frequency
-  );
+  const { frequency, setFrequency } = useFrequency(jobCreator.frequency);
 
   const [defaultFrequency, setDefaultFrequency] = useState(createDefaultFrequency());
 
@@ -27,7 +25,7 @@ export const FrequencyInput: FC = () => {
   }, [frequency]);
 
   useEffect(() => {
-    setFrequency(jobCreator.frequency === null ? '' : jobCreator.frequency);
+    setFrequency(jobCreator.frequency);
 
     const df = createDefaultFrequency();
     setDefaultFrequency(df);
@@ -54,3 +52,17 @@ export const FrequencyInput: FC = () => {
     </Description>
   );
 };
+
+function useFrequency(initialFrequency: string | null) {
+  const [frequency, setFrequencyInner] = useState(stringify(initialFrequency));
+
+  function stringify(f: string | null) {
+    return f === null ? '' : f;
+  }
+
+  function setFrequency(f: string | null) {
+    setFrequencyInner(stringify(f));
+  }
+
+  return { frequency, setFrequency };
+}
