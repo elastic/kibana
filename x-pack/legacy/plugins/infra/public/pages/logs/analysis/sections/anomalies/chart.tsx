@@ -121,7 +121,6 @@ export const AnomaliesChart: React.FunctionComponent<{
           onBrushEnd={handleBrushEnd}
           tooltip={tooltipProps}
           baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
-          xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
         />
       </Chart>
     </div>
