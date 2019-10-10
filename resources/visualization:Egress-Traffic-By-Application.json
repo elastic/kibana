@@ -1,0 +1,24 @@
+{
+   "migrationVersion": {
+      "visualization": "7.2.0"
+   }, 
+   "visualization": {
+      "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{\"field\":\"TotalBytes\"},\"schema\":\"metric\",\"type\":\"sum\"},{\"enabled\":true,\"id\":\"3\",\"params\":{\"field\":\"Application.keyword\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"size\":10},\"schema\":\"group\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"drop_partials\":false,\"extended_bounds\":{},\"field\":\"TimeUpdated\",\"interval\":\"auto\",\"min_doc_count\":1,\"timeRange\":{\"from\":\"now-15m\",\"to\":\"now\"},\"useNormalizedEsInterval\":true},\"schema\":\"segment\",\"type\":\"date_histogram\"}],\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{},\"type\":\"category\"}],\"defaultYExtents\":false,\"grid\":{\"categoryLines\":false},\"legendPosition\":\"right\",\"mode\":\"stacked\",\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Sum of TotalBytes\"},\"mode\":\"stacked\",\"show\":\"true\",\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"shareYAxis\":true,\"times\":[],\"type\":\"histogram\",\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"defaultYExtents\":false,\"mode\":\"normal\",\"setYExtents\":false,\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Count\"},\"type\":\"value\"}],\"yAxis\":{}},\"title\":\"Egress Traffic By Application\",\"type\":\"histogram\"}", 
+      "description": "", 
+      "title": "Egress Traffic By Application", 
+      "uiStateJSON": "{}", 
+      "version": 2, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"TrafficDirection_NM:egress\"}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }
+   }, 
+   "type": "visualization", 
+   "updated_at": "2019-09-26T21:09:27.077Z", 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }
+   ]
+}

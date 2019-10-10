@@ -1,0 +1,18 @@
+{
+   "migrationVersion": {
+      "visualization": "7.2.0"
+   }, 
+   "visualization": {
+      "visState": "{\"type\":\"markdown\",\"params\":{\"markdown\":\"**Replayed traffic will be visible in this dashboard after processing.**  Traffic data will appear when processing is complete. If you uploaded replay PCAPs but do not yet see any data, refresh the page. For more information see [PCAP Replay](/userDocs/NetworkMonitorHelp.htm#3c_Tools/NetMonTools_PcapReplay.htm?Highlight=PCAP%20Replay).\"},\"aggs\":[],\"listeners\":{},\"title\":\"Replayed Traffic Dashboard Description\"}", 
+      "description": "", 
+      "title": "Replayed Traffic Dashboard Description", 
+      "uiStateJSON": "{}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"filter\":[]}"
+      }
+   }, 
+   "type": "visualization", 
+   "updated_at": "2019-09-26T22:16:32.363Z", 
+   "references": []
+}

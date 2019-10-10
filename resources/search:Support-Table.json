@@ -1,0 +1,33 @@
+{
+   "migrationVersion": {
+      "search": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }
+   ], 
+   "search": {
+      "sort": [
+         "TimeUpdated", 
+         "asc"
+      ], 
+      "hits": 0, 
+      "description": "", 
+      "title": "Support Table", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"fragment_size\":2147483647},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }, 
+      "columns": [
+         "Application", 
+         "SrcIP", 
+         "DestIP", 
+         "Duration"
+      ]
+   }, 
+   "type": "search", 
+   "updated_at": "2019-09-27T18:04:47.554Z"
+}

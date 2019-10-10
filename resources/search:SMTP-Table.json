@@ -1,0 +1,40 @@
+{
+   "migrationVersion": {
+      "search": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }, 
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }
+   ], 
+   "search": {
+      "sort": [
+         "TimeUpdated", 
+         "desc"
+      ], 
+      "hits": 0, 
+      "description": "", 
+      "title": "SMTP Table", 
+      "version": 3, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"fragment_size\":2147483647},\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"},\"highlightAll\":true,\"version\":true,\"filter\":[{\"meta\":{\"alias\":\"SMTP Traffic\",\"negate\":false,\"type\":\"phrase\",\"key\":\"Application.keyword\",\"value\":\"smtp\",\"params\":{\"query\":\"smtp\"},\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"Application.keyword\":{\"query\":\"smtp\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }, 
+      "columns": [
+         "Attach", 
+         "Captured", 
+         "SenderEmail", 
+         "ReceiverEmail", 
+         "Subject", 
+         "TotalBytes"
+      ]
+   }, 
+   "type": "search", 
+   "updated_at": "2019-10-01T20:37:18.883Z"
+}

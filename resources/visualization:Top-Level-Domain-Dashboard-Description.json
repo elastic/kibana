@@ -1,0 +1,18 @@
+{
+   "migrationVersion": {
+      "visualization": "7.2.0"
+   }, 
+   "visualization": {
+      "visState": "{\"title\":\"Top Level Domain Dashboard Description\",\"type\":\"markdown\",\"params\":{\"markdown\":\"#### **Data will only be visible in this dashboard if you enable the Flow_TopLevelDomain system rule.**\\n* A **Top Level Domain (TLD)** is the highest level domain name. For example, \\\"com\\\" is the TLD of https://support.logrhythm.com. Domain_TLD_NM will be \\\"com\\\".\\n* A **Second Level Domain (SLD)** is the second highest level domain name. For example, \\\"logrhythm\\\" is the SLD of https://support.logrhythm.com. Domain_SLD_NM will be \\\"logrhythm.com\\\".\\n* A **Fully Qualified Domain Name (FQDN)** is the full domain after the application. For example, \\\"support.logrhythm.com\\\" is the FQDN of https://support.logrhythm.com. Domain_FQDN_NM will be \\\"support.logrhythm.com\\\".\",\"fontSize\":12,\"openLinksInNewTab\":false},\"aggs\":[]}", 
+      "description": "", 
+      "title": "Top Level Domain Dashboard Description", 
+      "uiStateJSON": "{}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"filter\":[]}"
+      }
+   }, 
+   "type": "visualization", 
+   "updated_at": "2019-09-27T17:24:58.456Z", 
+   "references": []
+}

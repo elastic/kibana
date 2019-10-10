@@ -1,0 +1,56 @@
+{
+   "migrationVersion": {
+      "dashboard": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_0", 
+         "id": "Top-10-Email-Senders"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_1", 
+         "id": "Top-10-Email-Subjects"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_2", 
+         "id": "Top-10-Email-Sender-Domains"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_3", 
+         "id": "Top-10-Attachment-Types-By-Count"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_4", 
+         "id": "Sessions-Over-Time"
+      }, 
+      {
+         "type": "search", 
+         "name": "panel_5", 
+         "id": "SMTP-Table"
+      }
+   ], 
+   "type": "dashboard", 
+   "dashboard": {
+      "hits": 0, 
+      "timeRestore": false, 
+      "description": "", 
+      "title": "SMTP Trends Dashboard", 
+      "panelsJSON": "[{\"gridData\":{\"h\":12,\"i\":\"1\",\"w\":12,\"x\":24,\"y\":0},\"panelIndex\":\"1\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"gridData\":{\"h\":12,\"i\":\"2\",\"w\":12,\"x\":24,\"y\":12},\"panelIndex\":\"2\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"gridData\":{\"h\":12,\"i\":\"3\",\"w\":12,\"x\":36,\"y\":12},\"panelIndex\":\"3\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"gridData\":{\"h\":12,\"i\":\"4\",\"w\":12,\"x\":36,\"y\":0},\"panelIndex\":\"4\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"},{\"gridData\":{\"h\":24,\"i\":\"5\",\"w\":24,\"x\":0,\"y\":0},\"panelIndex\":\"5\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"columns\":[\"Attach\",\"Captured\",\"SenderEmail\",\"ReceiverEmail\",\"Subject\",\"TotalBytes\"],\"sort\":[\"TimeUpdated\",\"desc\"]},\"gridData\":{\"h\":20,\"i\":\"6\",\"w\":48,\"x\":0,\"y\":24},\"panelIndex\":\"6\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_5\"}]", 
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}", 
+      "version": 3, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":\"smtp sessions\",\"disabled\":false,\"key\":\"Application.keyword\",\"negate\":false,\"params\":{\"query\":\"smtp\"},\"type\":\"phrase\",\"value\":\"smtp\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"Application.keyword\":{\"query\":\"smtp\",\"type\":\"phrase\"}}}}],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\",\"time_zone\":\"America/Denver\"}}}}"
+      }
+   }, 
+   "updated_at": "2019-10-01T20:37:31.718Z"
+}
