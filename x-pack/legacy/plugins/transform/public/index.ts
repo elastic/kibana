@@ -8,4 +8,5 @@ import { createPublicShim } from './shim';
 
 const { core, plugins } = createPublicShim();
 const transformPlugin = new TransformPlugin();
+transformPlugin.setup();
 transformPlugin.start(core, plugins);

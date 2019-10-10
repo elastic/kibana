@@ -10,8 +10,6 @@ import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import routes from 'ui/routes';
 import { docTitle } from 'ui/doc_title/doc_title';
 
-// @ts-ignore: allow traversal to fail on x-pack build
-import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
 export type npCore = typeof npStart.core;
@@ -60,9 +58,6 @@ export interface Plugins extends AppPlugins {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
     };
   };
-  uiMetric: {
-    createUiStatsReporter: typeof createUiStatsReporter;
-  };
 }
 
 export function createPublicShim(): { core: Core; plugins: Plugins } {
@@ -110,9 +105,6 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
           savedSearches = client;
         },
         getClient: (): any => savedSearches,
-      },
-      uiMetric: {
-        createUiStatsReporter,
       },
     },
   };

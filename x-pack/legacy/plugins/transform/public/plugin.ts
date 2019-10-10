@@ -7,10 +7,11 @@ import { unmountComponentAtNode } from 'react-dom';
 
 import { i18n } from '@kbn/i18n';
 
+import { npSetup } from 'ui/new_platform';
 import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
 import { PLUGIN } from '../common/constants';
-import { CLIENT_BASE_PATH } from './app/constants';
+import { CLIENT_BASE_PATH, UIM_APP_NAME } from './app/constants';
 import { renderReact } from './app/app';
 import { Core, Plugins } from './shim';
 
@@ -18,7 +19,6 @@ import { breadcrumbService, docTitleService } from './app/services/navigation';
 import { documentationLinksService } from './app/services/documentation';
 import { httpService } from './app/services/http';
 import { textService } from './app/services/text';
-import { uiMetricService } from './app/services/ui_metric';
 
 const REACT_ROOT_ID = 'transformReactRoot';
 const KBN_MANAGEMENT_SECTION = 'elasticsearch/transform';
@@ -26,9 +26,12 @@ const KBN_MANAGEMENT_SECTION = 'elasticsearch/transform';
 const template = `<kbn-management-app section="${KBN_MANAGEMENT_SECTION}"><div id="${REACT_ROOT_ID}"/></kbn-management-app>`;
 
 export class Plugin {
+  public setup() {
+    npSetup.plugins.metrics.registerApp(UIM_APP_NAME);
+  }
   public start(core: Core, plugins: Plugins): void {
     const { http, routing, legacyHttp, chrome, documentation, docTitle } = core;
-    const { management, savedSearches: coreSavedSearches, uiMetric } = plugins;
+    const { management, savedSearches: coreSavedSearches } = plugins;
 
     // AppCore/AppPlugins to be passed on as React context
     const AppDependencies = {
@@ -53,7 +56,6 @@ export class Plugin {
     // Initialize services
     textService.init();
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
-    uiMetricService.init(uiMetric.createUiStatsReporter);
     documentationLinksService.init(documentation.esPluginDocBasePath);
     docTitleService.init(docTitle.change);
 
