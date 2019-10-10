@@ -38,12 +38,13 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     public async inputFilterQuery(
       datePickerStartValue: string,
       datePickerEndValue: string,
-      filterQuery: string
+      filterQuery: string,
+      testId: string
     ) {
       await pageObjects.common.navigateToApp('uptime');
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
       await uptimeService.setFilterText(filterQuery);
-      await uptimeService.monitorIdExists('monitor-page-link-auto-http-0X131221E73F825974');
+      await uptimeService.monitorIdExists(testId);
     }
   })();
 }
