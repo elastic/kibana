@@ -13,7 +13,7 @@ import { AdvancedJobCreator } from '../../../../../common/job_creator';
 
 const EDITOR_HEIGHT = '400px';
 
-export const QueryInput: FC<{ setValidQuery(v: boolean): void }> = ({ setValidQuery }) => {
+export const QueryInput: FC<{ setIsValidQuery(v: boolean): void }> = ({ setIsValidQuery }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
   const [queryString, setQueryString] = useState(JSON.stringify(jobCreator.query, null, 2));
@@ -33,7 +33,7 @@ export const QueryInput: FC<{ setValidQuery(v: boolean): void }> = ({ setValidQu
 
   useEffect(() => {
     const validJson = isValidJson(queryString);
-    setValidQuery(validJson);
+    setIsValidQuery(validJson);
     if (validJson) {
       jobCreator.query = JSON.parse(queryString);
       jobCreatorUpdate();
@@ -42,7 +42,7 @@ export const QueryInput: FC<{ setValidQuery(v: boolean): void }> = ({ setValidQu
 
   useEffect(() => {
     const validJson = isValidJson(queryString);
-    setValidQuery(validJson);
+    setIsValidQuery(validJson);
   }, []);
 
   function onChange(qs: string) {

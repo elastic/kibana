@@ -19,17 +19,17 @@ import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
-  const [validQuery, setValidQuery] = useState(false);
+  const [isValidQuery, setIsValidQuery] = useState(false);
 
   useEffect(() => {
     const active =
-      validQuery &&
+      isValidQuery &&
       jobValidator.queryDelay.valid &&
       jobValidator.frequency.valid &&
       jobValidator.scrollSize.valid &&
       jobValidator.validating === false;
     setNextActive(active);
-  }, [jobValidatorUpdated, validQuery]);
+  }, [jobValidatorUpdated, isValidQuery]);
 
   return (
     <Fragment>
@@ -37,7 +37,7 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
         <Fragment>
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem>
-              <QueryInput setValidQuery={setValidQuery} />
+              <QueryInput setIsValidQuery={setIsValidQuery} />
             </EuiFlexItem>
             <EuiFlexItem>
               <QueryDelayInput />
