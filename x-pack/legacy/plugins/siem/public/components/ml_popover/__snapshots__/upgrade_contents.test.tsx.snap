@@ -53,7 +53,7 @@ exports[`FilterGroup renders correctly against snapshot 1`] = `
     >
       <EuiButton
         href="/test/base/path/app/kibana#/management/elasticsearch/license_management"
-        iconType="managementApp"
+        iconType="gear"
         target="_blank"
       >
         Manage license
