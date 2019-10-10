@@ -57,6 +57,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   saveState,
   existingGroupIds,
   jobs,
+  jobGroups,
 }) => {
   const { from, to } = getTimeFilterRange();
   const { currentIndexPattern: indexPattern } = useKibanaContext();
@@ -109,6 +110,10 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   useEffect(() => {
     onChange(formState);
   }, [formState]);
+
+  useEffect(() => {
+    setFormState({ jobGroups });
+  }, [jobGroups]);
 
   return (
     <>
