@@ -453,7 +453,6 @@ export class DashboardAppController {
     $scope.onClearSavedQuery = () => {
       delete $scope.savedQuery;
       dashboardStateManager.setSavedQueryId(undefined);
-      queryFilter.removeAll();
       dashboardStateManager.applyFilters(
         {
           query: '',
@@ -462,10 +461,12 @@ export class DashboardAppController {
         },
         []
       );
+      // Making this method sync broke the updates.
+      // Temporary fix, until we fix the complex state in this file.
+      setTimeout(queryFilter.removeAll, 0);
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
-      queryFilter.setFilters(savedQuery.attributes.filters || []);
       dashboardStateManager.applyFilters(
         savedQuery.attributes.query,
         savedQuery.attributes.filters || []
@@ -479,6 +480,11 @@ export class DashboardAppController {
           timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
       }
+      // Making this method sync broke the updates.
+      // Temporary fix, until we fix the complex state in this file.
+      setTimeout(() => {
+        queryFilter.setFilters(savedQuery.attributes.filters || []);
+      }, 0);
     };
 
     $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {
