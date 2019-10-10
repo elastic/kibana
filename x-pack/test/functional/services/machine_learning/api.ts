@@ -39,9 +39,5 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async cleanMlIndices() {
       await this.deleteIndices('.ml-*');
     },
-
-    async cleanDataframeIndices() {
-      await this.deleteIndices('.data-frame-*');
-    },
   };
 }
