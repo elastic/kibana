@@ -5,30 +5,28 @@
  */
 
 import { Setup } from '../../helpers/setup_request';
-import { PromiseReturnType } from '../../../../typings/common';
-import { AgentConfigurationIntake } from './configuration_types';
+import { AgentConfiguration } from './configuration_types';
 
-export type CreateAgentConfigurationAPIResponse = PromiseReturnType<
-  typeof createConfiguration
->;
-export async function createConfiguration({
-  configuration,
+export async function markAppliedByAgent({
+  id,
+  body,
   setup
 }: {
-  configuration: AgentConfigurationIntake;
+  id: string;
+  body: AgentConfiguration;
   setup: Setup;
 }) {
   const { client, config } = setup;
 
   const params = {
     type: '_doc',
-    refresh: true,
     index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
+    id, // by specifying the `id` elasticsearch will do an "upsert"
     body: {
-      '@timestamp': Date.now(),
-      ...configuration
+      ...body,
+      applied_by_agent: true
     }
   };
 
-  return client.index(params);
+  return client.index<AgentConfiguration>(params);
 }

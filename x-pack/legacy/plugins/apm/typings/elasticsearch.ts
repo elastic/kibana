@@ -6,14 +6,10 @@
 
 import { StringMap, IndexAsString } from './common';
 
-export interface BoolQuery {
-  must_not: Array<Record<string, any>>;
-  should: Array<Record<string, any>>;
-  filter: Array<Record<string, any>>;
-}
-
 declare module 'elasticsearch' {
   // extending SearchResponse to be able to have typed aggregations
+
+  type ESSearchHit<T> = SearchResponse<T>['hits']['hits'][0];
 
   type AggregationType =
     | 'date_histogram'

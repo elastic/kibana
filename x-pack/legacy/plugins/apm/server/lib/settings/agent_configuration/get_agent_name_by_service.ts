@@ -3,40 +3,45 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { idx } from '@kbn/elastic-idx';
+import { Setup } from '../../helpers/setup_request';
 import {
   PROCESSOR_EVENT,
-  SERVICE_AGENT_NAME,
   SERVICE_NAME
-} from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
 
-export async function getServiceAgentName(serviceName: string, setup: Setup) {
-  const { start, end, client, config } = setup;
+export async function getAgentNameByService({
+  serviceName,
+  setup
+}: {
+  serviceName: string;
+  setup: Setup;
+}) {
+  const { client, config } = setup;
 
   const params = {
     terminateAfter: 1,
     index: [
+      config.get<string>('apm_oss.metricsIndices'),
       config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices'),
-      config.get<string>('apm_oss.metricsIndices')
+      config.get<string>('apm_oss.transactionIndices')
     ],
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
             {
-              terms: { [PROCESSOR_EVENT]: ['error', 'transaction', 'metric'] }
+              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
             },
-            { range: rangeFilter(start, end) }
+            { term: { [SERVICE_NAME]: serviceName } }
           ]
         }
       },
       aggs: {
-        agents: {
+        agent_names: {
           terms: { field: SERVICE_AGENT_NAME, size: 1 }
         }
       }
@@ -44,6 +49,6 @@ export async function getServiceAgentName(serviceName: string, setup: Setup) {
   };
 
   const { aggregations } = await client.search(params);
-  const agentName = idx(aggregations, _ => _.agents.buckets[0].key);
+  const agentName = idx(aggregations, _ => _.agent_names.buckets[0].key);
   return { agentName };
 }
