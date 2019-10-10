@@ -122,4 +122,5 @@ export const UIM_POLICY_DELETE = 'policy_delete';
 export const UIM_POLICY_DELETE_MANY = 'policy_delete_many';
 export const UIM_POLICY_CREATE = 'policy_create';
 export const UIM_POLICY_UPDATE = 'policy_update';
-export const UIM_POLICY_RETENTION_SETTINGS_UPDATE = 'policy_retention_settings_update';
+export const UIM_RETENTION_SETTINGS_UPDATE = 'retention_settings_update';
+export const UIM_RETENTION_EXECUTE = 'retention_execute';
