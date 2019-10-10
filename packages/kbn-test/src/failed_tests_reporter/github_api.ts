@@ -82,7 +82,8 @@ export class GithubApi {
         issues.push(issue);
       }
 
-      const parsed = parseLinkHeader(resp.headers.link);
+      const parsed =
+        typeof resp.headers.link === 'string' ? parseLinkHeader(resp.headers.link) : undefined;
       if (parsed && parsed.next && parsed.next.url) {
         nextRequest = {
           safeForDryRun: true,
