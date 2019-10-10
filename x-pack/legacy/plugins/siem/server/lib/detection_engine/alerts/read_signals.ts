@@ -60,8 +60,6 @@ export const readSignalById = async ({
   return null;
 };
 
-// TODO: Change this from a search to a filter once this ticket is solved:
-// https://github.com/elastic/kibana/projects/26#card-27462236
 export const readSignals = async ({ alertsClient, id }: ReadSignalParams) => {
   const signalById = await readSignalById({ alertsClient, id });
   if (signalById != null) {
