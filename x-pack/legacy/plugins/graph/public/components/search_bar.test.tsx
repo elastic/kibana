@@ -39,6 +39,13 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
     } as CoreStart['uiSettings'],
     savedObjects: {} as CoreStart['savedObjects'],
     notifications: {} as CoreStart['notifications'],
+    docLinks: {
+      links: {
+        query: {
+          kueryQuerySyntax: '',
+        },
+      },
+    } as CoreStart['docLinks'],
     http: {} as CoreStart['http'],
     overlays: {} as CoreStart['overlays'],
     store: {
@@ -70,7 +77,7 @@ describe('search_bar', () => {
   let store: GraphStore;
 
   beforeEach(() => {
-    store = createMockGraphStore({ includeSagas: false }).store;
+    store = createMockGraphStore({}).store;
     store.dispatch(
       setDatasource({
         type: 'indexpattern',

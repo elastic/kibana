@@ -37,12 +37,17 @@
 }
 
 .conApp__editorActions {
+  button {
+    line-height: inherit;
+  }
   position: absolute;
   z-index: $euiZLevel1;
   top: 0;
   // Adjust for possible scrollbars
   right: $euiSize;
   line-height: 1;
+  // For IE11
+  min-width: 40px;
 }
 
 .conApp__editorActionButton {
