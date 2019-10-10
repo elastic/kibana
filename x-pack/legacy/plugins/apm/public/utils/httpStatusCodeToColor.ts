@@ -14,7 +14,7 @@ const {
   euiColorDanger
 } = theme;
 
-export const httpsStatusCodeColors: StringMap<string> = {
+const httpStatusCodeColors: StringMap<string> = {
   1: euiColorDarkShade,
   2: euiColorSecondary,
   3: euiColorDarkShade,
@@ -23,7 +23,7 @@ export const httpsStatusCodeColors: StringMap<string> = {
 };
 
 function getStatusColor(status: number) {
-  return httpsStatusCodeColors[status.toString().substr(0, 1)];
+  return httpStatusCodeColors[status.toString().substr(0, 1)];
 }
 
 /**
