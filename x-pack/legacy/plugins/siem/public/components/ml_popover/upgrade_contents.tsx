@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiLink,
   EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as i18n from './translations';
@@ -46,23 +47,26 @@ export const UpgradeContents = React.memo(() => {
         />
       </EuiText>
       <EuiSpacer />
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
-        <EuiButton
-          href="https://www.elastic.co/subscriptions"
-          iconType="popout"
-          iconSide="right"
-          target="_blank"
-        >
-          {i18n.UPGRADE_BUTTON}
-        </EuiButton>
-        <EuiButton
-          href={`${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`}
-          iconType="popout"
-          iconSide="right"
-          target="_blank"
-        >
-          {i18n.LICENSE_BUTTON}
-        </EuiButton>
+      <EuiFlexGroup gutterSize="s" wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            href="https://www.elastic.co/subscriptions"
+            iconType="popout"
+            iconSide="right"
+            target="_blank"
+          >
+            {i18n.UPGRADE_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            href={`${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`}
+            iconType="managementApp"
+            target="_blank"
+          >
+            {i18n.LICENSE_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </PopoverContentsDiv>
   );
