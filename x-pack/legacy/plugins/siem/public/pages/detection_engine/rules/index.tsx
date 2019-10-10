@@ -21,10 +21,98 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import React from 'react';
+import styled, { css } from 'styled-components';
 
 import { HeaderPage } from '../../../components/header_page';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import * as i18n from './translations';
+
+const TableCards = styled.table.attrs({
+  className: 'siemTableCards',
+})`
+  ${({ theme }) => css`
+    display: block;
+  `}
+`;
+TableCards.displayName = 'TableCards';
+
+const TableCardsThead = styled.thead.attrs({
+  className: 'siemTableCards__thead',
+})`
+  ${({ theme }) => css`
+    display: block;
+  `}
+`;
+TableCardsThead.displayName = 'TableCardsThead';
+
+const TableCardsTbody = styled.tbody.attrs({
+  className: 'siemTableCards__tbody',
+})`
+  ${({ theme }) => css`
+    display: block;
+  `}
+`;
+TableCardsTbody.displayName = 'TableCardsTbody';
+
+const TableCardsRow = styled.tr.attrs({
+  className: 'siemTableCards__tr',
+})`
+  ${({ theme }) => css`
+    border-collapse: separate;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+
+    .siemTableCards__thead & {
+      border: ${theme.eui.euiBorderWidthThin} solid transparent;
+      border-left-width: ${theme.eui.euiSizeXS};
+    }
+
+    .siemTableCards__tbody & {
+      background-color: ${theme.eui.euiColorEmptyShade};
+      border: ${theme.eui.euiBorderThin};
+      border-left-color: ${theme.eui.euiColorSuccess};
+      border-left-width: ${theme.eui.euiSizeXS};
+      border-radius: ${theme.eui.euiBorderRadius};
+    }
+
+    .siemTableCards__tbody & + & {
+      margin-top: ${theme.eui.euiSizeS};
+    }
+  `}
+`;
+TableCardsRow.displayName = 'TableCardsRow';
+
+const TableCardsTh = styled.th.attrs({
+  className: 'siemTableCards__th',
+})`
+  ${({ theme }) => css`
+    font-size: ${theme.eui.euiFontSizeXS};
+    font-weight: ${theme.eui.euiFontWeightSemiBold};
+    line-height: ${theme.eui.euiLineHeight};
+    padding: ${theme.eui.paddingSizes.s};
+    text-align: left;
+    vertical-align: middle;
+
+    .siemTableCards__tbody & {
+      font-size: ${theme.eui.euiFontSizeS};
+      font-weight: ${theme.eui.euiFontWeightRegular};
+    }
+  `}
+`;
+TableCardsTh.displayName = 'TableCardsTh';
+
+const TableCardsTd = styled.td.attrs({
+  className: 'siemTableCards__td',
+})`
+  ${({ theme }) => css`
+    font-size: ${theme.eui.euiFontSizeS};
+    line-height: ${theme.eui.euiLineHeight};
+    padding: ${theme.eui.paddingSizes.s};
+    vertical-align: middle;
+  `}
+`;
+TableCardsTd.displayName = 'TableCardsTd';
 
 export const RulesComponent = React.memo(() => {
   return (
@@ -97,66 +185,104 @@ export const RulesComponent = React.memo(() => {
 
         <EuiSpacer />
 
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">
+        <TableCards>
+          <TableCardsThead>
+            <TableCardsRow>
+              <TableCardsTh scope="col" style={{ width: '32px' }}>
                 <EuiCheckbox
                   id="test"
                   onChange={() => {
                     return null;
                   }}
                 />
-              </th>
-              <th scope="col">{'Rule'}</th>
-              <th scope="col">{'Method'}</th>
-              <th scope="col">{'Severity'}</th>
-              <th scope="col">{'Last completed run'}</th>
-              <th scope="col">{'Last response'}</th>
-              <th scope="col">{'Tags'}</th>
-              <th scope="col">{'Activate'}</th>
-              <th></th>
-            </tr>
-          </thead>
+              </TableCardsTh>
+              <TableCardsTh scope="col">{'Rule'}</TableCardsTh>
+              <TableCardsTh scope="col">{'Method'}</TableCardsTh>
+              <TableCardsTh scope="col">{'Severity'}</TableCardsTh>
+              <TableCardsTh scope="col">{'Last completed run'}</TableCardsTh>
+              <TableCardsTh scope="col">{'Last response'}</TableCardsTh>
+              <TableCardsTh scope="col">{'Tags'}</TableCardsTh>
+              <TableCardsTh scope="col" style={{ width: '48px' }}>
+                {'Activate'}
+              </TableCardsTh>
+              <TableCardsTh scope="col" style={{ width: '40px' }}></TableCardsTh>
+            </TableCardsRow>
+          </TableCardsThead>
 
-          <tbody>
-            <tr>
-              <td>
+          <TableCardsTbody>
+            <TableCardsRow>
+              <TableCardsTd style={{ width: '32px' }}>
                 <EuiCheckbox
                   id="test"
                   onChange={() => {
                     return null;
                   }}
                 />
-              </td>
-              <th scope="row">
+              </TableCardsTd>
+              <TableCardsTh scope="row">
                 <EuiLink href="#/detection-engine/rules/rule-details">
                   {'Automated exfiltration'}
                 </EuiLink>{' '}
                 <EuiBadge color="hollow">{'Experimental'}</EuiBadge>
-              </th>
-              <td>{'Kibana Query Language'}</td>
-              <td>
+              </TableCardsTh>
+              <TableCardsTd>{'Kibana Query Language'}</TableCardsTd>
+              <TableCardsTd>
                 <EuiHealth color="warning">{'Medium'}</EuiHealth>
-              </td>
-              <td>
+              </TableCardsTd>
+              <TableCardsTd>
                 <time>{'12/28/2019, 12:00 PM'}</time>
-              </td>
-              <td>
+              </TableCardsTd>
+              <TableCardsTd>
                 <span>{'Success'}</span>
-              </td>
-              <td>
+              </TableCardsTd>
+              <TableCardsTd>
                 <EuiBadge color="hollow">{'attack.t1234'}</EuiBadge>
-              </td>
-              <td>
+              </TableCardsTd>
+              <TableCardsTd style={{ width: '48px' }}>
                 <EuiSwitch />
-              </td>
-              <td>
+              </TableCardsTd>
+              <TableCardsTd style={{ width: '40px' }}>
                 <EuiButtonIcon iconType="boxesVertical" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </TableCardsTd>
+            </TableCardsRow>
+
+            <TableCardsRow>
+              <TableCardsTd style={{ width: '32px' }}>
+                <EuiCheckbox
+                  id="test"
+                  onChange={() => {
+                    return null;
+                  }}
+                />
+              </TableCardsTd>
+              <TableCardsTh scope="row">
+                <EuiLink href="#/detection-engine/rules/rule-details">
+                  {'Automated exfiltration'}
+                </EuiLink>{' '}
+                <EuiBadge color="hollow">{'Experimental'}</EuiBadge>
+              </TableCardsTh>
+              <TableCardsTd>{'Kibana Query Language'}</TableCardsTd>
+              <TableCardsTd>
+                <EuiHealth color="warning">{'Medium'}</EuiHealth>
+              </TableCardsTd>
+              <TableCardsTd>
+                <time>{'12/28/2019, 12:00 PM'}</time>
+              </TableCardsTd>
+              <TableCardsTd>
+                <span>{'Fail'}</span>
+              </TableCardsTd>
+              <TableCardsTd>
+                <EuiBadge color="hollow">{'attack.t1234'}</EuiBadge>
+              </TableCardsTd>
+              <TableCardsTd style={{ width: '48px' }}>
+                <EuiSwitch />
+              </TableCardsTd>
+              <TableCardsTd style={{ width: '40px' }}>
+                <EuiButtonIcon iconType="boxesVertical" />
+              </TableCardsTd>
+            </TableCardsRow>
+          </TableCardsTbody>
+        </TableCards>
       </section>
 
       <SpyRoute />
