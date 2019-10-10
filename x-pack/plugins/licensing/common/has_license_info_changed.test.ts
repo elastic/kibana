@@ -9,7 +9,7 @@ import { hasLicenseInfoChanged } from './has_license_info_changed';
 
 function license({ error, ...rawLicense }: { error?: Error; [key: string]: any } = {}) {
   return new License({
-    plugin: { sign: x => x.toString() },
+    sign: (serialized: string) => serialized,
     error,
     license: Object.keys(rawLicense).length ? rawLicense : undefined,
   });
