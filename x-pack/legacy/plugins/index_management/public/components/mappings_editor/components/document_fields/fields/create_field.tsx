@@ -6,29 +6,18 @@
 import React, { useEffect } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import {
-  useForm,
-  Form,
-  TextField,
-  SelectField,
-  UseField,
-  FieldConfig,
-  ValidationFunc,
-} from '../../../shared_imports';
+import { useForm, Form, SelectField, UseField, FieldConfig } from '../../../shared_imports';
 import { FIELD_TYPES_OPTIONS, PARAMETERS_DEFINITION } from '../../../constants';
 import { useDispatch } from '../../../mappings_state';
 import { Field, ParameterName } from '../../../types';
+import { NameParameter } from '../field_parameters';
 
 const formWrapper = (props: any) => <form {...props} />;
 
 const getFieldConfig = (param: ParameterName): FieldConfig =>
   PARAMETERS_DEFINITION[param].fieldConfig || {};
 
-interface Props {
-  uniqueNameValidator: ValidationFunc;
-}
-
-export const CreateField = React.memo(({ uniqueNameValidator }: Props) => {
+export const CreateField = React.memo(() => {
   const { form } = useForm<Field>();
   const dispatch = useDispatch();
 
@@ -57,22 +46,11 @@ export const CreateField = React.memo(({ uniqueNameValidator }: Props) => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });
   };
 
-  const { validations, ...rest } = getFieldConfig('name');
-  const nameConfig: FieldConfig = {
-    ...rest,
-    validations: [
-      ...validations!,
-      {
-        validator: uniqueNameValidator,
-      },
-    ],
-  };
-
   return (
     <Form form={form} style={{ padding: '20px 0' }} FormWrapper={formWrapper} onSubmit={submitForm}>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <UseField path="name" config={nameConfig} component={TextField} />
+          <NameParameter />
         </EuiFlexItem>
         <EuiFlexItem>
           <UseField

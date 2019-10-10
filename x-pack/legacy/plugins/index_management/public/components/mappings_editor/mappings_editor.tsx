@@ -5,6 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { pick } from 'lodash';
 
 import { JsonEditor } from '../json_editor';
 import {
@@ -23,19 +24,12 @@ interface Props {
 export const MappingsEditor = React.memo(({ onUpdate, defaultValue }: Props) => {
   const configurationDefaultValue = useMemo(
     () =>
-      defaultValue === undefined
-        ? ({} as Types['MappingsConfiguration'])
-        : Object.entries(defaultValue)
-            .filter(([key]) => CONFIGURATION_FIELDS.includes(key))
-            .reduce(
-              (acc, [key, value]) => ({
-                ...acc,
-                [key]: value,
-              }),
-              {} as Types['MappingsConfiguration']
-            ),
+      (defaultValue === undefined
+        ? {}
+        : pick(defaultValue, CONFIGURATION_FIELDS)) as Types['MappingsConfiguration'],
     [defaultValue]
   );
+
   const fieldsDefaultValue = defaultValue === undefined ? {} : defaultValue.properties;
 
   // Temporary logic

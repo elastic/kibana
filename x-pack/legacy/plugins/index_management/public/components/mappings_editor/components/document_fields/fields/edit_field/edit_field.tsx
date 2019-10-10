@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { useForm, Form, ValidationFunc, OnFormUpdateArg } from '../../../../shared_imports';
+import { useForm, Form, OnFormUpdateArg } from '../../../../shared_imports';
 import { OnUpdateHandler } from '../../../../../json_editor';
 import { useDispatch } from '../../../../mappings_state';
 import { Field, NormalizedField } from '../../../../types';
@@ -27,10 +27,9 @@ const formWrapper = (props: any) => <form {...props} />;
 
 interface Props {
   field: NormalizedField;
-  uniqueNameValidator: ValidationFunc;
 }
 
-export const EditField = React.memo(({ field, uniqueNameValidator }: Props) => {
+export const EditField = React.memo(({ field }: Props) => {
   const { form } = useForm<Field>({ defaultValue: field.source });
   const dispatch = useDispatch();
 
@@ -138,7 +137,7 @@ export const EditField = React.memo(({ field, uniqueNameValidator }: Props) => {
               FormWrapper={formWrapper}
               onSubmit={getSubmitForm(updateField)}
             >
-              <EditFieldHeaderForm uniqueNameValidator={uniqueNameValidator} />
+              <EditFieldHeaderForm />
             </Form>
             <FieldSettingsJsonEditor
               onUpdate={onFieldsSettingsUpdate}

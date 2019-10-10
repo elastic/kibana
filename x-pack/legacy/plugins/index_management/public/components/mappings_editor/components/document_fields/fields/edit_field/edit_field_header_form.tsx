@@ -6,39 +6,20 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  TextField,
-  SelectField,
-  UseField,
-  FieldConfig,
-  ValidationFunc,
-} from '../../../../shared_imports';
+
+import { SelectField, UseField, FieldConfig } from '../../../../shared_imports';
 import { ParameterName } from '../../../../types';
 import { FIELD_TYPES_OPTIONS, PARAMETERS_DEFINITION } from '../../../../constants';
+import { NameParameter } from '../../field_parameters';
 
 const getFieldConfig = (param: ParameterName): FieldConfig =>
   PARAMETERS_DEFINITION[param].fieldConfig || {};
 
-interface Props {
-  uniqueNameValidator: ValidationFunc;
-}
-
-export const EditFieldHeaderForm = ({ uniqueNameValidator }: Props) => {
-  const { validations, ...rest } = getFieldConfig('name');
-  const nameConfig: FieldConfig = {
-    ...rest,
-    validations: [
-      ...validations!,
-      {
-        validator: uniqueNameValidator,
-      },
-    ],
-  };
-
+export const EditFieldHeaderForm = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <UseField path="name" config={nameConfig} component={TextField} />
+        <NameParameter />
       </EuiFlexItem>
       <EuiFlexItem>
         <UseField
