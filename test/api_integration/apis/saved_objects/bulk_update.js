@@ -98,9 +98,7 @@ export default function ({ getService }) {
               attributes: {
                 title: 'Changed title but nothing else'
               },
-              options: {
-                version: visObject.version
-              }
+              version: visObject.version
             },
             {
               type: 'dashboard',
@@ -108,10 +106,8 @@ export default function ({ getService }) {
               attributes: {
                 title: 'Changed title and references'
               },
-              options: {
-                version: dashObject.version,
-                references: [{ id: 'foo', name: 'Foo', type: 'visualization' }]
-              }
+              version: dashObject.version,
+              references: [{ id: 'foo', name: 'Foo', type: 'visualization' }]
             },
           ])
           .expect(200);
@@ -156,10 +152,8 @@ export default function ({ getService }) {
               attributes: {
                 title: 'Changed title but nothing else'
               },
-              options: {
-                version,
-                references: []
-              }
+              version,
+              references: []
             }
           ])
           .expect(200);
