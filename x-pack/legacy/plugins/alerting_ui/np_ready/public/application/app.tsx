@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Component } from 'react';
-import { some } from 'fp-ts/lib/Option';
 import PropTypes from 'prop-types';
-import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
-
-import { ActionsList } from './sections/actions_list/components/actions_list';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import { registerRouter } from './lib/navigation';
-import { BASE_PATH } from './constants';
+import { BASE_PATH, Section } from './constants';
+import { AlertsUIHome } from './home';
 
 class ShareRouter extends Component {
   static contextTypes = {
@@ -38,18 +36,20 @@ class ShareRouter extends Component {
 }
 
 export const App = (api: any) => {
+  const sections: Section[] = ['alerts', 'actions', 'notifications', 'activity_logs'];
+
+  const sectionsRegex = sections.join('|');
+
   return (
-    <HashRouter>
-      <ShareRouter>
-        <AppWithoutRouter api={api} />
-      </ShareRouter>
-    </HashRouter>
+    <ShareRouter>
+      <AppWithoutRouter sectionsRegex={sectionsRegex} />
+    </ShareRouter>
   );
 };
 
-export const AppWithoutRouter = ({ api }: any) => (
+export const AppWithoutRouter = ({ sectionsRegex }: any) => (
   <Switch>
-    <Route exact path={`${BASE_PATH}actions`} render={() => <ActionsList api={some(api)} />} />
-    <Redirect from={BASE_PATH} to={`${BASE_PATH}actions`} />
+    <Route exact path={`${BASE_PATH}/:section(${sectionsRegex})`} component={AlertsUIHome} />
+    <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/alerts`} />
   </Switch>
 );

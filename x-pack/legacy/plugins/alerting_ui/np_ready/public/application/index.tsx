@@ -4,17 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { HashRouter } from 'react-router-dom';
 import { render } from 'react-dom';
-import { I18nContext } from 'ui/i18n';
-import { HttpServiceBase } from 'kibana/public';
+import { CoreStart } from 'src/core/public';
 import { App } from './app';
 
-export const renderReact = async (element: any, http: HttpServiceBase) => {
-  render(
+import { AppDependencies, AppPlugins } from '../../../public/shim';
+
+export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
+
+/**
+ * App dependencies
+ */
+let DependenciesContext: React.Context<AppDependencies>;
+
+export const setAppDependencies = (deps: AppDependencies) => {
+  DependenciesContext = createContext<AppDependencies>(deps);
+  return DependenciesContext.Provider;
+};
+
+export const useAppDependencies = () => {
+  if (!DependenciesContext) {
+    throw new Error(`The app dependencies Context hasn't been set.
+    Use the "setAppDependencies()" method when bootstrapping the app.`);
+  }
+  return useContext<AppDependencies>(DependenciesContext);
+};
+
+const getAppProviders = (deps: AppDependencies) => {
+  const {
+    i18n: { Context: I18nContext },
+  } = deps.core;
+
+  // Create App dependencies context and get its provider
+  const AppDependenciesProvider = setAppDependencies(deps);
+
+  return ({ children }: { children: ReactNode }) => (
     <I18nContext>
-      <App api={{ http }} />
-    </I18nContext>,
-    element
+      <HashRouter>
+        <AppDependenciesProvider value={deps}>{children}</AppDependenciesProvider>
+      </HashRouter>
+    </I18nContext>
+  );
+};
+
+export const renderReact = async (
+  elem: HTMLElement | null,
+  core: CoreStart,
+  plugins: AppPlugins
+) => {
+  const Providers = getAppProviders({ core, plugins });
+
+  render(
+    <Providers>
+      <App />
+    </Providers>,
+    elem
   );
 };

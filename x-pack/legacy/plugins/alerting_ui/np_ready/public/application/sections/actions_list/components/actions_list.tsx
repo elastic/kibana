@@ -4,31 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { Option, option, some, getOrElse } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import React, { Fragment } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { EuiText, EuiPageContent, EuiEmptyPrompt, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { flatMap } from '../../../lib/flat_map';
-import { mapResult } from '../../../lib/result_type';
 import { PageError } from '../../../components/page_error';
-import {
-  loadActionTypes,
-  RequestData,
-  LoadActionTypesResponse,
-  LoadActionTypesErrorResponse,
-  ActionTypesResponse,
-} from '../../../lib/api';
+import { loadActionTypes, ActionTypesResponse } from '../../../lib/api';
 import { ActionsContext } from '../../../context/app_context';
-
-const map = option.map;
+import { useAppDependencies } from '../../../index';
 
 interface ActionsListProps {
   api: any;
 }
 
-export const ActionsList = ({ api }: ActionsListProps) => {
+export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
+  match: {
+    params: { api },
+  },
+  history,
+}) => {
+  const {
+    core: { http },
+  } = useAppDependencies();
+
+  const { error, isLoading, data } = loadActionTypes(http);
+
   const actionTypesTableColumns = [
     {
       field: 'id',
@@ -83,33 +84,33 @@ export const ActionsList = ({ api }: ActionsListProps) => {
     />
   );
 
-  return pipe(
-    api,
-    flatMap((actionTypesApi: any) =>
-      mapResult<
-        RequestData<LoadActionTypesResponse>,
-        LoadActionTypesErrorResponse,
-        Option<JSX.Element>
-      >(
-        loadActionTypes(actionTypesApi.api.http),
-        ({ isLoading: isActionTypesLoading, data: actionTypes }) =>
-          isActionTypesLoading
-            ? some(<ActionTypesLoadingIndicator />)
-            : map(actionTypes, (data: any) => (
-                <ContentWrapper>
-                  <EuiSpacer size="m" />
-                  <ActionTypesTable actionTypes={data} />
-                </ContentWrapper>
-              )),
-        error =>
-          some(
-            <EuiPageContent>
-              <PageError errorCode={error} />
-            </EuiPageContent>
-          )
-      )
-    ),
-    getOrElse(() => <NoActionTypes />)
+  let content;
+
+  if (isLoading) {
+    content = ActionTypesLoadingIndicator();
+  } else if (error) {
+    content = (
+      <EuiPageContent>
+        <PageError errorCode={error} />
+      </EuiPageContent>
+    );
+  } else if (data.length === 0) {
+    content = NoActionTypes();
+  } else {
+    content = (
+      <Fragment>
+        <ActionTypesTable actionTypes={data} />
+      </Fragment>
+    );
+  }
+
+  return (
+    <section data-test-subj="actionTypesList">
+      <ContentWrapper>
+        <EuiSpacer size="m" />
+        {content}
+      </ContentWrapper>
+    </section>
   );
 };
 

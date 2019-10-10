@@ -12,9 +12,13 @@ import routes from 'ui/routes';
 import template from '../../public/index.html';
 import { renderReact } from './application';
 import { BASE_PATH } from './application/constants';
+import { breadcrumbService } from './application/lib/breadcrumb';
+import { textService } from './application/lib/text';
 
 export type Setup = void;
 export type Start = void;
+
+const REACT_ROOT_ID = 'alertingRoot';
 
 export class ActionsPlugin implements Plugin<any, any> {
   constructor(initializerContext: PluginInitializerContext) {}
@@ -61,40 +65,49 @@ export class ActionsPlugin implements Plugin<any, any> {
         defaultMessage: 'Alerting',
       }),
       order: 7,
-      url: `#${BASE_PATH}/`,
+      url: `#${BASE_PATH}`,
     });
 
-    routes.when('/management/kibana/alerting/:param1?/:param2?/:param3?/:param4?', {
+    textService.init(i18n);
+    breadcrumbService.init(coreStart.chrome, pluginsStart.management.breadcrumb);
+
+    const unmountReactApp = (): void => {
+      const elem = document.getElementById(REACT_ROOT_ID);
+      if (elem) {
+        unmountComponentAtNode(elem);
+      }
+    };
+
+    routes.when(`${BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
       template,
       controller: (() => {
-        let elReactRoot: HTMLElement | undefined | null;
-        return ($injector: any, $scope: any) => {
-          const $route = $injector.get('$route');
-          // clean up previously rendered React app if one exists
-          // this happens because of React Router redirects
-          if (elReactRoot) {
-            unmountComponentAtNode(elReactRoot);
-          }
-          $scope.$$postDigest(() => {
-            elReactRoot = document.getElementById('actionsRoot');
-            renderReact(elReactRoot, coreStart.http);
-            const lastRoute = $route.current;
+        return ($route: any, $scope: any) => {
+          const appRoute = $route.current;
+          const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
+            const currentRoute = $route.current;
+            const isNavigationInApp = currentRoute.$$route.template === appRoute.$$route.template;
 
-            const deregister = $scope.$on('$locationChangeSuccess', () => {
-              const currentRoute = $route.current;
-              if (lastRoute.$$route.template === currentRoute.$$route.template) {
-                $route.current = lastRoute;
-              }
-            });
+            // When we navigate within SR, prevent Angular from re-matching the route and rebuild the app
+            if (isNavigationInApp) {
+              $route.current = appRoute;
+            } else {
+              // Any clean up when user leaves SR
+            }
 
             $scope.$on('$destroy', () => {
-              if (deregister) {
-                deregister();
+              if (stopListeningForLocationChange) {
+                stopListeningForLocationChange();
               }
-              if (elReactRoot) {
-                unmountComponentAtNode(elReactRoot);
-              }
+              unmountReactApp();
             });
+          });
+
+          $scope.$$postDigest(() => {
+            unmountReactApp();
+            const elReactRoot = document.getElementById(REACT_ROOT_ID);
+            if (elReactRoot) {
+              renderReact(elReactRoot, coreStart, pluginsStart);
+            }
           });
         };
       })(),
