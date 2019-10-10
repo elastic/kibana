@@ -32,6 +32,7 @@ interface Gauge extends ColorSchemaVislibParams {
   gaugeType: GaugeTypes;
   labels: Labels;
   percentageMode: boolean;
+  outline?: boolean;
   scale: {
     show: boolean;
     labels: false;

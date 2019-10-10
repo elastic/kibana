@@ -22,9 +22,11 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
 import { ColorRanges, ColorSchemaOptions, SwitchOption } from '../../common';
-import { SetColorSchemaOptionsValue } from '../../common/color_schema';
 import { GaugeOptionsInternalProps } from '.';
+import { ColorSchemaVislibParams } from '../../../types';
+import { Gauge } from '../../../gauge';
 
 function RangesPanel({
   setGaugeValue,
@@ -84,7 +86,30 @@ function RangesPanel({
         colorSchemas={vis.type.editorConfig.collections.colorSchemas}
         invertColors={stateParams.gauge.invertColors}
         uiState={uiState}
-        setValue={setGaugeValue as SetColorSchemaOptionsValue}
+        setValue={<T extends keyof ColorSchemaVislibParams>(
+          paramName: T,
+          value: ColorSchemaVislibParams[T]
+        ) => {
+          setGaugeValue(paramName, value as Gauge[T]);
+          // set outline if color schema is changed to greys
+          // if outline wasn't set explicitly yet
+          if (
+            paramName === 'colorSchema' &&
+            (value as string) === ColorSchemas.Greys &&
+            typeof stateParams.gauge.outline === 'undefined'
+          ) {
+            setGaugeValue('outline', true);
+          }
+        }}
+      />
+
+      <SwitchOption
+        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.showOutline', {
+          defaultMessage: 'Show outline',
+        })}
+        paramName="outline"
+        value={stateParams.gauge.outline}
+        setValue={setGaugeValue}
       />
 
       <SwitchOption
