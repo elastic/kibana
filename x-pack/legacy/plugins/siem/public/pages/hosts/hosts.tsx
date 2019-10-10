@@ -72,6 +72,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
                 </FiltersGlobal>
 
                 <HeaderPage
+                  border
                   subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
                   title={i18n.PAGE_TITLE}
                 />
@@ -110,7 +111,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
               </StickyContainer>
             ) : (
               <>
-                <HeaderPage title={i18n.PAGE_TITLE} />
+                <HeaderPage border title={i18n.PAGE_TITLE} />
                 <HostsEmptyPage />
               </>
             )

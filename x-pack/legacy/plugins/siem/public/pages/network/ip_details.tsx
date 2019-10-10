@@ -81,10 +81,11 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     </FiltersGlobal>
 
                     <HeaderPage
+                      border
                       data-test-subj="ip-details-headline"
+                      draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
                       subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
                       title={ip}
-                      draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
                     >
                       <FlowTargetSelectConnected />
                     </HeaderPage>
@@ -280,7 +281,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
             </StickyContainer>
           ) : (
             <>
-              <HeaderPage title={ip} />
+              <HeaderPage border title={ip} />
 
               <NetworkEmptyPage />
             </>

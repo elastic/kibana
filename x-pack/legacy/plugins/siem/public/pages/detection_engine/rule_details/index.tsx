@@ -23,9 +23,14 @@ export const RuleDetailsComponent = React.memo(() => {
         </FiltersGlobal>
 
         <HeaderPage
-          backLink="#detection-engine/rules"
-          backText="Back to rules"
-          subtitle="Last signal: 23 minutes ago"
+          backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
+          badgeOptions={{ text: 'Experimental' }}
+          border
+          subtitle={[
+            'Created by: mmarcialis on 12/28/2019, 12:00 PM',
+            'Updated by: agoldstein on 12/28/2019, 12:00 PM',
+          ]}
+          subtitle2="Last signal: 23 minutes ago"
           title="Automated exfiltration"
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>

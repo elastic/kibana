@@ -33,8 +33,8 @@ export const OverviewComponent = pure(() => {
   return (
     <>
       <HeaderPage
-        badgeLabel={i18n.PAGE_BADGE_LABEL}
-        badgeTooltip={i18n.PAGE_BADGE_TOOLTIP}
+        badgeOptions={{ beta: true, text: i18n.PAGE_BADGE_LABEL, tooltip: i18n.PAGE_BADGE_TOOLTIP }}
+        border
         subtitle={i18n.PAGE_SUBTITLE}
         title={i18n.PAGE_TITLE}
       />

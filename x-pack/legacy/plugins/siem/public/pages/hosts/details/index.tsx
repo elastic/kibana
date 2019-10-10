@@ -65,6 +65,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                 </FiltersGlobal>
 
                 <HeaderPage
+                  border
                   subtitle={
                     <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={detailName} />
                   }
@@ -145,7 +146,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
               </StickyContainer>
             ) : (
               <>
-                <HeaderPage title={detailName} />
+                <HeaderPage border title={detailName} />
 
                 <HostsEmptyPage />
               </>

@@ -14,8 +14,8 @@ export const CreateRuleComponent = React.memo(() => {
   return (
     <>
       <HeaderPage
-        backLink="#detection-engine/rules"
-        backText="Back to rules"
+        backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
+        border
         title={i18n.PAGE_TITLE}
       />
 

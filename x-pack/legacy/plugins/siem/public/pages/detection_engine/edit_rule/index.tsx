@@ -15,8 +15,11 @@ export const EditRuleComponent = React.memo(() => {
   return (
     <>
       <HeaderPage
-        backLink="#detection-engine/rules/rule-details"
-        backText="Back to automated exfiltration"
+        backOptions={{
+          href: '#detection-engine/rules/rule-details',
+          text: 'Back to automated exfiltration',
+        }}
+        border
         title={i18n.PAGE_TITLE}
       >
         <EuiButton fill href="#/detection-engine/rules/rule-details" iconType="save">

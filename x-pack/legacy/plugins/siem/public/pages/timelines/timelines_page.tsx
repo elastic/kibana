@@ -30,7 +30,7 @@ export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 export const TimelinesPage = React.memo<OwnProps>(({ apolloClient }) => (
   <>
-    <HeaderPage title={i18n.PAGE_TITLE} />
+    <HeaderPage border title={i18n.PAGE_TITLE} />
 
     <TimelinesContainer>
       <StatefulOpenTimeline

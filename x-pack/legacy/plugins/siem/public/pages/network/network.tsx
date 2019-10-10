@@ -81,6 +81,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     </FiltersGlobal>
 
                     <HeaderPage
+                      border
                       subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
                       title={i18n.PAGE_TITLE}
                     />
@@ -275,7 +276,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             </StickyContainer>
           ) : (
             <>
-              <HeaderPage title={i18n.PAGE_TITLE} />
+              <HeaderPage border title={i18n.PAGE_TITLE} />
               <NetworkEmptyPage />
             </>
           )

@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
+import { Subtitle, SubtitleProps } from '../subtitle';
 
 interface HeaderProps {
   border?: boolean;
@@ -17,24 +18,23 @@ interface HeaderProps {
 const Header = styled.header.attrs({
   className: 'siemHeaderPanel',
 })<HeaderProps>`
-  ${props => css`
-    margin-bottom: ${props.theme.eui.euiSizeL};
+  ${({ border, theme }) => css`
+    margin-bottom: ${theme.eui.euiSizeL};
     user-select: text;
 
-    ${props.border &&
-      `
-      border-bottom: ${props.theme.eui.euiBorderThin};
-      padding-bottom: ${props.theme.eui.euiSizeL};
-    `}
+    ${border &&
+      css`
+        border-bottom: ${theme.eui.euiBorderThin};
+        padding-bottom: ${theme.eui.euiSizeL};
+      `}
   `}
 `;
-
 Header.displayName = 'Header';
 
 export interface HeaderPanelProps extends HeaderProps {
   children?: React.ReactNode;
   id?: string;
-  subtitle?: string | React.ReactNode;
+  subtitle?: SubtitleProps['text'];
   showInspect?: boolean;
   title: string | React.ReactNode;
   tooltip?: string;
@@ -59,11 +59,7 @@ export const HeaderPanel = React.memo<HeaderPanelProps>(
                 </h2>
               </EuiTitle>
 
-              {subtitle && (
-                <EuiText color="subdued" data-test-subj="header-panel-subtitle" size="xs">
-                  <p>{subtitle}</p>
-                </EuiText>
-              )}
+              {subtitle && <Subtitle text={subtitle} />}
             </EuiFlexItem>
 
             {id && (
@@ -83,5 +79,4 @@ export const HeaderPanel = React.memo<HeaderPanelProps>(
     </Header>
   )
 );
-
 HeaderPanel.displayName = 'HeaderPanel';
