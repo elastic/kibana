@@ -64,11 +64,6 @@ export function MachineLearningNavigationProvider({
       ]);
     },
 
-    async navigateToDataFrames() {
-      await this.navigateToArea('mlMainTab dataFrames', 'mlPageDataFrame');
-      await this.assertTabsExist('mlSubTab', []);
-    },
-
     async navigateToDataFrameAnalytics() {
       await this.navigateToArea('mlMainTab dataFrameAnalytics', 'mlPageDataFrameAnalytics');
       await this.assertTabsExist('mlSubTab', []);

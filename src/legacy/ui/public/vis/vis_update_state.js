@@ -57,6 +57,18 @@ function convertPropertyNames(visState) {
   }
 }
 
+function convertDateHistogramScaleMetrics(visState) {
+  if (visState.aggs) {
+    visState.aggs.forEach(agg => {
+      if (agg.type === 'date_histogram' && agg.params && agg.params.interval !== 'auto' && agg.params.scaleMetricValues === undefined) {
+        // Set scaleMetricValues to true for existing date histograms, that haven't had it defined and used an interval that's not equal auto,
+        // so that we keep the previous metric scaling example for existing visualizations that might be effected.
+        agg.params.scaleMetricValues = true;
+      }
+    });
+  }
+}
+
 /**
  * This function is responsible for updating old visStates - the actual saved object
  * object - into the format, that will be required by the current Kibana version.
@@ -70,6 +82,7 @@ export const updateOldState = (visState) => {
 
   convertTermAggregation(newState);
   convertPropertyNames(newState);
+  convertDateHistogramScaleMetrics(newState);
 
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;
