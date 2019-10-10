@@ -197,18 +197,18 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
         <EuiSpacer size="m" />
         <EuiBasicTable
           loading={isLoading}
-          message={
+          noItemsMessage={
             isLoading
               ? i18n.translate('xpack.fleet.agentList.loadingAgentsMessage', {
                   defaultMessage: 'Loading agents…',
                 })
-              : agents.length === 0
+              : totalAgents === 0
               ? emptyPrompt
               : i18n.translate('xpack.fleet.agentList.noFilteredAgentsPrompt', {
                   defaultMessage: 'No agents found',
                 })
           }
-          items={agents}
+          items={totalAgents ? agents : []}
           itemId="id"
           columns={columns}
           pagination={{
