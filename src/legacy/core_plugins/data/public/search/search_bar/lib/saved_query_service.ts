@@ -35,7 +35,11 @@ export interface SavedQueryService {
     config?: { overwrite: boolean }
   ) => Promise<SavedQuery>;
   getAllSavedQueries: (perPage?: number, activePage?: number) => Promise<SavedQuery[]>;
-  findSavedQueries: (searchText?: string) => Promise<SavedQuery[]>;
+  findSavedQueries: (
+    searchText?: string,
+    perPage?: number,
+    activePage?: number
+  ) => Promise<SavedQuery[]>;
   getSavedQuery: (id: string) => Promise<SavedQuery>;
   deleteSavedQuery: (id: string) => Promise<{}>;
   getSavedQueryCount: () => Promise<number>;
@@ -105,13 +109,19 @@ export const createSavedQueryService = (
         parseSavedQueryObject(savedObject)
     );
   };
-
-  const findSavedQueries = async (searchText: string = ''): Promise<SavedQuery[]> => {
+  // findSavedQueries will do a 'match_all' if no search string is passed in
+  const findSavedQueries = async (
+    searchText: string = '',
+    perPage: number = 50,
+    activePage: number = 1
+  ): Promise<SavedQuery[]> => {
     const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
       type: 'query',
       search: searchText,
       searchFields: ['title^5', 'description'],
       sortField: '_score',
+      perPage,
+      page: activePage,
     });
 
     return response.savedObjects.map(
