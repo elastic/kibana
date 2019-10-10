@@ -23,7 +23,7 @@ export async function extractExportDetails(
   const reader = new FileReader();
   const content = await new Promise<string>((resolve, reject) => {
     reader.addEventListener('loadend', e => {
-      resolve(e!.target!.result);
+      resolve((e as any).target.result);
     });
     reader.addEventListener('error', e => {
       reject(e);

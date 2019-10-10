@@ -20,10 +20,13 @@
 import { extractExportDetails, SavedObjectsExportResultDetails } from '../extract_export_details';
 
 describe('extractExportDetails', () => {
-  const objLine = (id, type) => {
+  const objLine = (id: string, type: string) => {
     return JSON.stringify({ attributes: {}, id, references: [], type }) + '\n';
   };
-  const detailsLine = (exported: number, missingRefs: SavedObjectsExportResultDetails[] = []) => {
+  const detailsLine = (
+    exported: number,
+    missingRefs: SavedObjectsExportResultDetails['missingReferences'] = []
+  ) => {
     return (
       JSON.stringify({
         exportedCount: exported,
@@ -37,9 +40,9 @@ describe('extractExportDetails', () => {
     const exportData = new Blob(
       [
         [
-          objLine(1, 'index-pattern'),
-          objLine(1, 'index-pattern'),
-          objLine(1, 'index-pattern'),
+          objLine('1', 'index-pattern'),
+          objLine('2', 'index-pattern'),
+          objLine('3', 'index-pattern'),
           detailsLine(3),
         ].join(''),
       ],
@@ -58,8 +61,8 @@ describe('extractExportDetails', () => {
     const exportData = new Blob(
       [
         [
-          objLine(1, 'index-pattern'),
-          detailsLine(1, [{ id: 2, type: 'index-pattern' }, { id: 3, type: 'index-pattern' }]),
+          objLine('1', 'index-pattern'),
+          detailsLine(1, [{ id: '2', type: 'index-pattern' }, { id: '3', type: 'index-pattern' }]),
         ].join(''),
       ],
       {
@@ -80,9 +83,9 @@ describe('extractExportDetails', () => {
     const exportData = new Blob(
       [
         [
-          objLine(1, 'index-pattern'),
-          objLine(1, 'index-pattern'),
-          objLine(1, 'index-pattern'),
+          objLine('1', 'index-pattern'),
+          objLine('2', 'index-pattern'),
+          objLine('3', 'index-pattern'),
         ].join(''),
       ],
       { type: 'application/ndjson', endings: 'transparent' }
