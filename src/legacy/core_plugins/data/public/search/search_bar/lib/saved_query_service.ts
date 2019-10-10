@@ -34,7 +34,7 @@ export interface SavedQueryService {
     attributes: SavedQueryAttributes,
     config?: { overwrite: boolean }
   ) => Promise<SavedQuery>;
-  getAllSavedQueries: (perPage?: number, activePage?: number) => Promise<SavedQuery[]>;
+  getAllSavedQueries: () => Promise<SavedQuery[]>;
   findSavedQueries: (
     searchText?: string,
     perPage?: number,
@@ -95,14 +95,12 @@ export const createSavedQueryService = (
     return parseSavedQueryObject(rawQueryResponse);
   };
   // we have to tell the saved objects client how many to fetch, otherwise it defaults to fetching 20 per page
-  const getAllSavedQueries = async (
-    perPage: number = 50, // the number of items to fetch for the active page
-    activePage: number = 1
-  ): Promise<SavedQuery[]> => {
+  const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
+    const count = await getSavedQueryCount();
     const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
       type: 'query',
-      perPage,
-      page: activePage,
+      perPage: count,
+      page: 1,
     });
     return response.savedObjects.map(
       (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>

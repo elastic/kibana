@@ -282,13 +282,11 @@ describe('saved query service', () => {
   });
 
   describe('getAllSavedQueries', function() {
-    it('should return saved queries when the number of saved queries is provided', async () => {
+    it('should return all the saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
       });
-      const perPage = 1;
-      const activePage = 1;
-      const response = await getAllSavedQueries(perPage, activePage);
+      const response = await getAllSavedQueries();
       expect(response).toEqual(
         expect.objectContaining([
           {
@@ -303,18 +301,7 @@ describe('saved query service', () => {
       );
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         page: 1,
-        perPage: 1,
-        type: 'query',
-      });
-    });
-    it('should use default arguments when none are provided', async () => {
-      mockSavedObjectsClient.find.mockReturnValue({
-        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
-      });
-      await getAllSavedQueries();
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-        page: 1,
-        perPage: 50,
+        perPage: 0,
         type: 'query',
       });
     });
