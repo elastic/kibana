@@ -21,7 +21,7 @@ const associateToService = (frame: Frame) => (repo: string) =>
 const handleImport = (repo: string) => alert(`import done: ${repo}`);
 
 export const Integrations = () => (
-  <div className="codeContainer__root codeIntegrations__container">
+  <div className="codeIntegrations__container">
     {frames.map(frame => {
       const { fileName, lineNumber } = frame;
       const key = `${fileName}#L${lineNumber}`;

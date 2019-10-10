@@ -158,7 +158,7 @@ export class CodeBlock extends React.PureComponent<Props> {
   public render() {
     const height = this.lines.length * 18;
 
-    return <div ref={this.el} style={{ height }} />;
+    return <div ref={this.el} className="codeContainer__monaco" style={{ height }} />;
   }
 
   private lineNumber = (lineIndex: number) => this.props.lineNumber(lineIndex - 1);
