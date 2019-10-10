@@ -22,7 +22,9 @@ import { AnyExpressionFunction, AnyExpressionType } from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import { setCoreStart } from './services';
-import { kibanaContext } from './functions/kibana_context';
+import { clog as clogFunction } from './functions/clog';
+import { font as fontFunction } from './functions/font';
+import { kibanaContext as kibanaContextFunction } from './functions/kibana_context';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -57,7 +59,9 @@ export class ExpressionsPublicPlugin
   public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
     const { functions, renderers, types } = this;
 
-    this.functions.register(kibanaContext);
+    this.functions.register(clogFunction);
+    this.functions.register(fontFunction);
+    this.functions.register(kibanaContextFunction);
 
     const setup: ExpressionsSetup = {
       registerFunction: fn => {

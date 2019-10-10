@@ -28,9 +28,7 @@ import {
 import { registries } from './registries';
 import { visualization } from './renderers/visualization';
 
-import { clog as clogFn } from './functions/clog';
 import { esaggs as esaggsFn } from './functions/esaggs';
-import { font as fontFn } from './functions/font';
 import { kibana as kibanaFn } from './functions/kibana';
 import { range as rangeFn } from './functions/range';
 import { visualization as visualizationFn } from './functions/visualization';
@@ -62,8 +60,6 @@ import { kibanaDatatable } from '../../../../plugins/expressions/public/expressi
 );
 
 // These will be moved to Expression plugin.
-registries.browserFunctions.register(clogFn);
-registries.browserFunctions.register(fontFn);
 registries.browserFunctions.register(kibanaFn);
 registries.types.register(boolean);
 registries.types.register(datatable);
