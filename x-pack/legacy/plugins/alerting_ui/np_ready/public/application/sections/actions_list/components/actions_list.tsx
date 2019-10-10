@@ -6,11 +6,10 @@
 
 import React, { Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiText, EuiPageContent, EuiEmptyPrompt, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiPageContent, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PageError } from '../../../components/page_error';
-import { loadActions, ActionsResponse } from '../../../lib/api';
+import { loadActions } from '../../../lib/api';
 import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
 
@@ -53,56 +52,40 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
       sortable: true,
       truncateText: true,
     },
+    {
+      field: 'config',
+      name: i18n.translate('xpack.alertingUI.sections.actionsList.actionsListTable.configHeader', {
+        defaultMessage: 'Config',
+      }),
+      sortable: false,
+      truncateText: false,
+    },
   ];
-
-  const ActionsTable = ({ actions }: { actions: ActionsResponse[] }) => {
-    return (
-      <EuiInMemoryTable
-        items={actions}
-        itemId="id"
-        columns={actionsTableColumns}
-        sorting={true}
-        isSelectable={true}
-        message={
-          <FormattedMessage
-            id="xpack.alertingUI.sections.actionsList.actionsListTable.noActionsMessage"
-            defaultMessage="No actions to show"
-          />
-        }
-        rowProps={() => ({
-          'data-test-subj': 'row',
-        })}
-        cellProps={() => ({
-          'data-test-subj': 'cell',
-        })}
-        data-test-subj="actionsTable"
-      />
-    );
-  };
-
-  const ActionsLoadingIndicator = () => (
-    <FormattedMessage
-      id="xpack.alertingUI.sections.actionsList.loadingActionsDescription"
-      defaultMessage="Loading actions"
-    />
-  );
 
   let content;
 
-  if (isLoading) {
-    content = ActionsLoadingIndicator();
-  } else if (error) {
+  if (error) {
     content = (
       <EuiPageContent>
         <PageError errorCode={error} />
       </EuiPageContent>
     );
-  } else if (result.data.length === 0) {
-    content = NoActions();
   } else {
     content = (
       <Fragment>
-        <ActionsTable actions={result.data} />
+        <EuiBasicTable
+          loading={isLoading}
+          items={result ? result.data : []}
+          itemId="id"
+          columns={actionsTableColumns}
+          rowProps={() => ({
+            'data-test-subj': 'row',
+          })}
+          cellProps={() => ({
+            'data-test-subj': 'cell',
+          })}
+          data-test-subj="actionsTable"
+        />
       </Fragment>
     );
   }
@@ -114,32 +97,6 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
         {content}
       </ContentWrapper>
     </section>
-  );
-};
-
-export const NoActions = () => {
-  const emptyPromptBody = (
-    <EuiText color="subdued">
-      <p>No Actions</p>
-    </EuiText>
-  );
-
-  return (
-    <EuiPageContent>
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.alertingUI.sections.actionsList.emptyPromptTitle"
-              defaultMessage="You don’t have any actions yet"
-            />
-          </h1>
-        }
-        body={emptyPromptBody}
-        data-test-subj="emptyPrompt"
-      />
-    </EuiPageContent>
   );
 };
 
