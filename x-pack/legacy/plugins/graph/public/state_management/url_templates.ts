@@ -44,7 +44,7 @@ function generateDefaultTemplate(
     '_a',
     rison.encode({
       columns: ['_source'],
-      index: datasource.title,
+      index: datasource.id,
       interval: 'auto',
       query: { language: 'kuery', query: urlTemplatePlaceholder },
       sort: ['_score', 'desc'],
@@ -106,6 +106,9 @@ export const syncTemplatesSaga = ({ setUrlTemplates, notifyAngular }: GraphStore
   }
 
   return function*() {
-    yield takeEvery(matchesOne(loadTemplates, saveTemplate, removeTemplate), syncTemplates);
+    yield takeEvery(
+      matchesOne(loadTemplates, saveTemplate, removeTemplate, requestDatasource, setDatasource),
+      syncTemplates
+    );
   };
 };
