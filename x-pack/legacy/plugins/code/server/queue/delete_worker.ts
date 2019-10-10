@@ -42,9 +42,16 @@ export class DeleteWorker extends AbstractWorker {
     const { uri } = job.payload;
 
     try {
+      // 1. Check if the uri exsits
       await this.objectClient.getRepository(uri);
+      // 2. Double check if the uri contains "../" which could result in
+      // deleting incorrect files in the file systems.
+      if (uri.includes('../')) {
+        throw new Error('Repository URI should not contain "../".');
+      }
     } catch (error) {
-      this.log.debug(`Repository ${uri} might not exist. Skip delete job.`);
+      this.log.error(`Invalid repository uri ${uri}. Skip delete job.`);
+      this.log.error(error);
       return {
         uri,
         // Because the repository does not exist, we can regard the delete job to be successful.

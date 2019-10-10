@@ -210,6 +210,106 @@ test('On delete job uri does not exist.', async () => {
   expect(deleteWorkspaceSpy.notCalled).toBeTruthy();
 });
 
+test('On delete job uri contains ../', async () => {
+  // Setup RepositoryService
+  const removeSpy = sinon.fake.returns(Promise.resolve());
+  const repoService = {
+    remove: emptyAsyncFunc,
+  };
+  repoService.remove = removeSpy;
+  const repoServiceFactory = {
+    newInstance: (): void => {
+      return;
+    },
+  };
+  const newInstanceSpy = sinon.fake.returns(repoService);
+  repoServiceFactory.newInstance = newInstanceSpy;
+
+  // Setup CancellationService
+  const cancelIndexJobSpy = sinon.spy();
+  const cancelCloneJobSpy = sinon.spy();
+  const cancelUpdateJobSpy = sinon.spy();
+  const cancellationService = {
+    cancelCloneJob: emptyAsyncFunc,
+    cancelUpdateJob: emptyAsyncFunc,
+    cancelIndexJob: emptyAsyncFunc,
+  };
+  cancellationService.cancelIndexJob = cancelIndexJobSpy;
+  cancellationService.cancelCloneJob = cancelCloneJobSpy;
+  cancellationService.cancelUpdateJob = cancelUpdateJobSpy;
+
+  // Setup EsClient
+  const deleteSpy = sinon.fake.returns(Promise.resolve());
+  const getSpy = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryIndexStatusReservedField]: {
+          uri: 'github.com/elastic/kibana/../../../../foo/bar',
+          progress: WorkerReservedProgress.COMPLETED,
+          timestamp: new Date(),
+          revision: 'abcdefg',
+        },
+      },
+    })
+  );
+  const esClient = {
+    indices: {
+      delete: emptyAsyncFunc,
+    },
+    get: emptyAsyncFunc,
+  };
+  esClient.indices.delete = deleteSpy;
+  esClient.get = getSpy;
+
+  // Setup LspService
+  const deleteWorkspaceSpy = sinon.fake.returns(Promise.resolve());
+  const lspService = {
+    deleteWorkspace: emptyAsyncFunc,
+  };
+  lspService.deleteWorkspace = deleteWorkspaceSpy;
+
+  // Setup GitOperations
+  const cleanRepoSpy = sinon.spy();
+  const gitOps = {
+    cleanRepo: cleanRepoSpy,
+  };
+
+  const deleteWorker = new DeleteWorker(
+    esQueue as Esqueue,
+    log,
+    esClient as EsClient,
+    {
+      security: {
+        enableGitCertCheck: true,
+      },
+    } as ServerOptions,
+    (gitOps as any) as GitOperations,
+    (cancellationService as any) as CancellationSerivce,
+    (lspService as any) as LspService,
+    (repoServiceFactory as any) as RepositoryServiceFactory
+  );
+
+  const result = await deleteWorker.executeJob({
+    payload: {
+      uri: 'github.com/elastic/kibana/../../../../foo/bar',
+    },
+    options: {},
+    timestamp: 0,
+  });
+
+  expect(result.uri).toEqual('github.com/elastic/kibana/../../../../foo/bar');
+  expect(result.res).toBeTruthy();
+
+  // Non of them should be called.
+  expect(cancelIndexJobSpy.notCalled).toBeTruthy();
+  expect(cancelCloneJobSpy.notCalled).toBeTruthy();
+  expect(cancelUpdateJobSpy.notCalled).toBeTruthy();
+  expect(newInstanceSpy.notCalled).toBeTruthy();
+  expect(removeSpy.notCalled).toBeTruthy();
+  expect(deleteSpy.notCalled).toBeTruthy();
+  expect(deleteWorkspaceSpy.notCalled).toBeTruthy();
+});
+
 test('On delete job enqueued.', async () => {
   // Setup EsClient
   const indexSpy = sinon.fake.returns(Promise.resolve());
