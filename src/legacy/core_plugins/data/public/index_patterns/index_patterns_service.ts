@@ -46,7 +46,7 @@ export interface IndexPatternDependencies {
  * @internal
  */
 export class IndexPatternsService {
-  setupApi: any;
+  private setupApi: any;
 
   public setup() {
     this.setupApi = {
