@@ -75,7 +75,7 @@ export const WizardSteps: FC<Props> = ({
       onClick: () => jumpToStep(WIZARD_STEPS.TIME_RANGE),
       isSelected: currentStep === WIZARD_STEPS.TIME_RANGE,
       isComplete: currentStep > WIZARD_STEPS.TIME_RANGE,
-      disabled: disableSteps,
+      disabled: true,
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.pickFieldsTitle', {
@@ -84,7 +84,7 @@ export const WizardSteps: FC<Props> = ({
       onClick: () => jumpToStep(WIZARD_STEPS.PICK_FIELDS),
       isSelected: currentStep === WIZARD_STEPS.PICK_FIELDS,
       isComplete: currentStep > WIZARD_STEPS.PICK_FIELDS,
-      disabled: disableSteps,
+      disabled: true,
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.jobDetailsTitle', {
@@ -93,7 +93,7 @@ export const WizardSteps: FC<Props> = ({
       onClick: () => jumpToStep(WIZARD_STEPS.JOB_DETAILS),
       isSelected: currentStep === WIZARD_STEPS.JOB_DETAILS,
       isComplete: currentStep > WIZARD_STEPS.JOB_DETAILS,
-      disabled: disableSteps,
+      disabled: true,
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.validationTitle', {
@@ -102,7 +102,7 @@ export const WizardSteps: FC<Props> = ({
       onClick: () => jumpToStep(WIZARD_STEPS.VALIDATION),
       isSelected: currentStep === WIZARD_STEPS.VALIDATION,
       isComplete: currentStep > WIZARD_STEPS.VALIDATION,
-      disabled: disableSteps,
+      disabled: true,
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.summaryTitle', {
@@ -111,7 +111,7 @@ export const WizardSteps: FC<Props> = ({
       onClick: () => jumpToStep(WIZARD_STEPS.SUMMARY),
       isSelected: currentStep === WIZARD_STEPS.SUMMARY,
       isComplete: currentStep > WIZARD_STEPS.SUMMARY,
-      disabled: disableSteps,
+      disabled: true,
     },
   ];
 
@@ -123,9 +123,11 @@ export const WizardSteps: FC<Props> = ({
       onClick: () => jumpToStep(WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED),
       isSelected: currentStep === WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED,
       isComplete: currentStep > WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED,
-      disabled: disableSteps,
+      disabled: true,
     });
   }
+
+  stepsConfig.forEach((s, i) => (s.disabled = disableSteps || i >= highestStep));
 
   return (
     <Fragment>
