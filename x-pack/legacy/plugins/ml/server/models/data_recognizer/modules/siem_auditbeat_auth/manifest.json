@@ -1,0 +1,38 @@
+{
+  "id": "siem_auditbeat_auth",
+  "title": "SIEM Auditbeat Authentication",
+  "description": "Detect suspicious authentication events in Auditbeat data (beta)",
+  "type": "Auditbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*",
+  "query": {
+    "bool": {
+      "filter": [
+        {"term": {"event.category": "authentication"}},
+        {"term": {"agent.type": "auditbeat"}}
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "suspicious_login_activity_ecs",
+      "file": "suspicious_login_activity_ecs.json"
+    },
+    {
+      "id": "linux_rare_country_for_user",
+      "file": "linux_rare_country_for_user.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-suspicious_login_activity_ecs",
+      "file": "datafeed_suspicious_login_activity_ecs.json",
+      "job_id": "suspicious_login_activity_ecs"
+    },
+    {
+      "id": "datafeed-linux_rare_country_for_user",
+      "file": "datafeed_linux_rare_country_for_user.json",
+      "job_id": "linux_rare_country_for_user"
+    }
+  ]
+}

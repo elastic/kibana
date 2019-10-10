@@ -1,0 +1,43 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "SIEM Auditbeat Auth: User logins from countries unusual for a particular user can indicate initial access, persistence, or defense evasion via the valid accounts technique (beta)",
+  "groups": [
+    "siem",
+    "auditbeat",
+    "authentication"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "rare by \"source.geo.country_iso_code\" partitionfield=\"user.name\"",
+        "function": "rare",
+        "by_field_name": "source.geo.country_iso_code",
+        "partition_field_name": "user.name"
+      }
+    ],
+    "influencers": [
+      "host.name",
+      "source.ip"
+    ]
+  },
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-siem-auditbeat-auth",
+    "custom_urls": [
+      {
+        "url_name": "Host Details by user name",
+        "url_value": "siem#/ml-hosts/$host.name$?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      },
+      {
+        "url_name": "Hosts Overview by user name",
+        "url_value": "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      }
+    ]
+  }
+}
