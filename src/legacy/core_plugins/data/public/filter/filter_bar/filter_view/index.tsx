@@ -36,12 +36,10 @@ export const FilterView: SFC<Props> = ({
   displayName,
   ...rest
 }: Props) => {
-  let title = `Filter: ${getFilterDisplayText(filter, displayName)}. ${i18n.translate(
-    'data.filter.filterBar.moreFilterActionsMessage',
-    {
-      defaultMessage: 'Select for more filter actions.',
-    }
-  )}`;
+  let title = i18n.translate('data.filter.filterBar.moreFilterActionsMessage', {
+    defaultMessage: 'Filter: {displayText}. Select for more filter actions.',
+    values: { displayText: getFilterDisplayText(filter, displayName) },
+  });
 
   if (isFilterPinned(filter)) {
     title = `${i18n.translate('data.filter.filterBar.pinnedFilterPrefix', {
