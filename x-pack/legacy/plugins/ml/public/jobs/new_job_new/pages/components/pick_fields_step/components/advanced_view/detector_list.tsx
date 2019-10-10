@@ -44,7 +44,12 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
   return (
     <Fragment>
       <EuiTitle size="xs">
-        <h3>Detectors</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.title"
+            defaultMessage="Detectors"
+          />
+        </h3>
       </EuiTitle>
 
       <NoDetectorsWarning show={detectors.length === 0} />
@@ -64,7 +69,12 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
                         color="primary"
                         onClick={() => onEditJob(i)}
                         iconType="pencil"
-                        aria-label="Edit"
+                        aria-label={i18n.translate(
+                          'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.editButton',
+                          {
+                            defaultMessage: 'Edit',
+                          }
+                        )}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -72,7 +82,12 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
                         color="danger"
                         onClick={() => onDeleteJob(i)}
                         iconType="trash"
-                        aria-label="Delete"
+                        aria-label={i18n.translate(
+                          'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.deleteButton',
+                          {
+                            defaultMessage: 'Delete',
+                          }
+                        )}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

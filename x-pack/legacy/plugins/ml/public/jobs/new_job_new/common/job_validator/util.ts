@@ -160,7 +160,7 @@ export function populateValidationMessages(
     basicValidations.query.message = msg;
   } else if (validationResults.contains('query_invalid')) {
     basicValidations.query.valid = false;
-    const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.queryIsInvalidJSON', {
+    const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.queryIsInvalidEsQuery', {
       defaultMessage: 'Datafeed query must be a valid elasticsearch query.',
     });
     basicValidations.query.message = msg;
