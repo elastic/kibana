@@ -26,7 +26,6 @@ import { act } from 'react-dom/test-utils';
 import { DefaultEditorAggParams } from './agg_params';
 import { IndexPattern } from 'ui/index_patterns';
 import { AggType } from 'ui/agg_types';
-import { Schema } from 'ui/vis/editors/default/schemas';
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,
