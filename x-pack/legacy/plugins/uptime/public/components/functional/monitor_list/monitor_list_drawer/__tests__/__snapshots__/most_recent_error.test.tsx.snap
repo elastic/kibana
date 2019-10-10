@@ -9,33 +9,51 @@ Array [
       Most recent error
     </h3>
   </div>,
-  <a
+  <button
     class="euiLink euiLink--primary"
-    href="Get https://expired.badssl.com: x509: certificate has expired or is not yet valid"
-    rel="noopener noreferrer"
-    target="_blank"
+    type="button"
   >
-    Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
-  </a>,
+    <a
+      data-test-subj="monitor-page-link-bad-ssl"
+      href="/monitor/YmFkLXNzbA==/?autorefreshInterval=60000&autorefreshIsPaused=false&dateRangeStart=now-15m&dateRangeEnd=now&filters=&search=&selectedPingStatus=down&statusFilter=&pagination="
+    >
+      Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
+    </a>
+  </button>,
 ]
 `;
 
 exports[`MostRecentError component validates props with shallow render 1`] = `
-<Fragment>
-  <EuiText
-    size="xs"
-  >
-    <h3>
-      Most recent error
-    </h3>
-  </EuiText>
-  <EuiLink
-    color="primary"
-    href="Get https://expired.badssl.com: x509: certificate has expired or is not yet valid"
-    target="_blank"
-    type="button"
-  >
-    Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
-  </EuiLink>
-</Fragment>
+<Router
+  history={
+    Object {
+      "action": "POP",
+      "block": [Function],
+      "createHref": [Function],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "length": 1,
+      "listen": [Function],
+      "location": Object {
+        "hash": "",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "push": [Function],
+      "replace": [Function],
+    }
+  }
+>
+  <MostRecentError
+    error={
+      Object {
+        "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
+        "type": "io",
+      }
+    }
+    monitorId="bad-ssl"
+  />
+</Router>
 `;

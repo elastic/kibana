@@ -65,6 +65,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
         "type": "io",
       }
     }
+    monitorId="foo"
   />
 </styled.div>
 `;
@@ -120,6 +121,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
         "type": "io",
       }
     }
+    monitorId="foo"
   />
 </styled.div>
 `;

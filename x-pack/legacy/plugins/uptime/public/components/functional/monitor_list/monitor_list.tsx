@@ -31,7 +31,7 @@ import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_l
 import { ExpandedRowMap } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
 import { MonitorBarSeries } from '../charts';
-import { MonitorPageLink } from '../monitor_page_link';
+import { MonitorPageLink } from './monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
 import { OverviewPageLink } from '../overview_page_link';
 
@@ -145,11 +145,7 @@ export const MonitorListComponent = (props: Props) => {
                 defaultMessage: 'Name',
               }),
               render: (name: string, summary: MonitorSummary) => (
-                <MonitorPageLink
-                  id={summary.monitor_id}
-                  linkParameters={linkParameters}
-                  location={undefined}
-                >
+                <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
                   {name ? name : `Unnamed - ${summary.monitor_id}`}
                 </MonitorPageLink>
               ),

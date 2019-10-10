@@ -6,6 +6,7 @@
 
 import { shallowWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { MostRecentError } from '../most_recent_error';
 
 describe('MostRecentError component', () => {
@@ -23,12 +24,20 @@ describe('MostRecentError component', () => {
   });
 
   it('validates props with shallow render', () => {
-    const component = shallowWithIntl(<MostRecentError error={monitorDetails.error} />);
+    const component = shallowWithIntl(
+      <Router>
+        <MostRecentError monitorId={monitorDetails.monitorId} error={monitorDetails.error} />
+      </Router>
+    );
     expect(component).toMatchSnapshot();
   });
 
   it('renders properly with empty data', () => {
-    const component = renderWithIntl(<MostRecentError error={monitorDetails.error} />);
+    const component = renderWithIntl(
+      <Router>
+        <MostRecentError monitorId={monitorDetails.monitorId} error={monitorDetails.error} />
+      </Router>
+    );
     expect(component).toMatchSnapshot();
   });
 });
