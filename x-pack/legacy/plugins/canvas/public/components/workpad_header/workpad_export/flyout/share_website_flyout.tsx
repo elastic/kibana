@@ -16,6 +16,9 @@ import {
   EuiTitle,
   EuiLink,
   EuiCode,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -110,7 +113,14 @@ export const ShareWebsiteFlyout: FC<Props> = ({
     <EuiFlyout onClose={() => onClose('share')} maxWidth>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutTitle">{strings.getTitle()}</h2>
+          <EuiFlexGroup alignItems="center">
+            <h2 id="flyoutTitle">
+              <EuiFlexItem grow={false}>{strings.getTitle()}</EuiFlexItem>
+            </h2>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge label="Beta" color="accent" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

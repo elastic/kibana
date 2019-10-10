@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
 import { useCanvasShareableState } from '../../context';
 
 interface Props {
@@ -21,7 +21,9 @@ interface Props {
 export const TitleComponent: FC<Props> = ({ title }) => (
   <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiIcon type="logoKibana" size="m" />
+      <EuiLink href="https://www.elastic.co" title="Powered by Elastic.co">
+        <EuiIcon type="logoElastic" size="l" />
+      </EuiLink>
     </EuiFlexItem>
     <EuiFlexItem grow={false} style={{ minWidth: 0, cursor: 'default' }}>
       <EuiText color="ghost" size="s">
