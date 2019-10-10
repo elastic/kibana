@@ -135,7 +135,6 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
       topCountriesSort.field === NetworkTopNFlowFields.bytes_in
         ? `node.network.${topCountriesSort.field}`
         : `node.${flowTargeted}.${topCountriesSort.field}`;
-
     return (
       <PaginatedTable
         activePage={activePage}

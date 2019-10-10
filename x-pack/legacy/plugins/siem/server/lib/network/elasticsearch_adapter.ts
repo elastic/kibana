@@ -246,7 +246,7 @@ const formatTopNFlowEdges = (
 const formatTopCountriesEdges = (
   buckets: NetworkTopCountriesBuckets[],
   flowTarget: FlowTargetNew
-): NetworkTopNFlowEdges[] =>
+): NetworkTopCountriesEdges[] =>
   buckets.map((bucket: NetworkTopCountriesBuckets) => ({
     node: {
       _id: bucket.key,
@@ -258,6 +258,7 @@ const formatTopCountriesEdges = (
           `${getOppositeField(flowTarget)}_ips.value`,
           bucket
         ),
+        [`${flowTarget}_ips`]: getOr(0, `${flowTarget}_ips.value`, bucket),
       },
       network: {
         bytes_in: getOr(0, 'bytes_in.value', bucket),

@@ -32,11 +32,13 @@ export const networkTopCountriesQuery = gql`
           node {
             source {
               country
-              flows
               destination_ips
+              flows
+              source_ips
             }
             destination {
               country
+              destination_ips
               flows
               source_ips
             }

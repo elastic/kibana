@@ -48,7 +48,7 @@ export interface NetworkTopCountriesComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  topNFlowSort: NetworkTopNFlowSortField;
+  topCountriesSort: NetworkTopNFlowSortField;
 }
 
 type NetworkTopCountriesProps = OwnProps & NetworkTopCountriesComponentReduxProps;
@@ -71,7 +71,7 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
       skip,
       sourceId,
       startDate,
-      topNFlowSort,
+      topCountriesSort,
     } = this.props;
     const variables: GetNetworkTopCountriesQuery.Variables = {
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
@@ -79,7 +79,7 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
       flowTarget,
       inspect: isInspected,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: topNFlowSort,
+      sort: topCountriesSort,
       sourceId,
       timerange: {
         interval: '12h',
@@ -137,7 +137,7 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
 }
 
 const mapStateToProps = (state: State, { flowTarget, id = `${ID}-${flowTarget}` }: OwnProps) => {
-  const getNetworkTopCountriesSelector = networkSelectors.topNFlowSelector(flowTarget);
+  const getNetworkTopCountriesSelector = networkSelectors.topCountriesSelector(flowTarget);
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const { isInspected } = getQuery(state, id);
   return {

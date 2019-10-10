@@ -3319,15 +3319,19 @@ export namespace GetNetworkTopCountriesQuery {
 
     country: Maybe<string>;
 
+    destination_ips: Maybe<number>;
+
     flows: Maybe<number>;
 
-    destination_ips: Maybe<number>;
+    source_ips: Maybe<number>;
   };
 
   export type Destination = {
     __typename?: 'TopCountriesItemDestination';
 
     country: Maybe<string>;
+
+    destination_ips: Maybe<number>;
 
     flows: Maybe<number>;
 
