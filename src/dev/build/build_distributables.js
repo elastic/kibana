@@ -26,7 +26,6 @@ import {
   CleanExtraBinScriptsTask,
   CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
-  CleanIrrelevantFilesFromBuildTask,
   CleanPackagesTask,
   CleanTypescriptTask,
   CleanNodeBuildsTask,
@@ -126,7 +125,6 @@ export async function buildDistributables(options) {
   await run(CleanTypescriptTask);
   await run(CleanExtraFilesFromModulesTask);
   await run(CleanEmptyFoldersTask);
-  await run(CleanIrrelevantFilesFromBuildTask);
 
   /**
    * copy generic build outputs into platform-specific build

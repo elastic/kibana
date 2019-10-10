@@ -1,40 +1,63 @@
 # Canvas Shareable Workpads
 
-![Canvas Shareable Runtime](demo.gif)
-
 - [Introduction](#introduction)
+- [Quick Start](#quick-start)
 - [Using the Runtime](#using-the-runtime)
-  * [Assumptions](#assumptions)
-  * [Restrictions](#restrictions)
-  * [JS](#js)
-  * [HTML](#html)
-  * [Options](#options)
+  - [Assumptions](#assumptions)
+  - [Restrictions](#restrictions)
+  - [JS](#js)
+  - [HTML](#html)
+  - [Options](#options)
 - [Testing](#testing)
-  * [Download a ZIP from Canvas](#download-a-zip-from-canvas)
-  * [Test the Runtime Directly from Webpack](#test-the-runtime-directly-from-webpack)
-  * [Run the Canvas Storybook](#run-the-canvas-storybook)
-  * [Run the Jest Tests](#run-the-jest-tests)
-    + [Gathering Test Coverage](#gathering-test-coverage)
+  - [Download a ZIP from Canvas](#download-a-zip-from-canvas)
+  - [Test the Runtime Directly from Webpack](#test-the-runtime-directly-from-webpack)
+  - [Run the Canvas Storybook](#run-the-canvas-storybook)
+  - [Run the Jest Tests](#run-the-jest-tests)
+    - [Gathering Test Coverage](#gathering-test-coverage)
 - [Building](#building)
-  * [Build Options](#build-options)
+  - [Build Options](#build-options)
 - [Development](#development)
-  * [Prerequisite](#prerequisite)
-  * [Webpack Dev Server](#webpack-dev-server)
-  * [Gathering Statistics](#gathering-statistics)
+  - [Prerequisite](#prerequisite)
+  - [Webpack Dev Server](#webpack-dev-server)
+  - [Gathering Statistics](#gathering-statistics)
 - [Architecture](#architecture)
-  * [The Build](#the-build)
-    + [Supported Expressions](#supported-expressions)
-    + [Expression Interpreter](#expression-interpreter)
-    + [Build Size](#build-size)
-  * [The App](#the-app)
-    + [App State](#app-state)
-    + [CSS](#css)
+  - [The Build](#the-build)
+    - [Supported Expressions](#supported-expressions)
+    - [Expression Interpreter](#expression-interpreter)
+    - [Build Size](#build-size)
+  - [The App](#the-app)
+    - [App State](#app-state)
+    - [CSS](#css)
 
 ## Introduction
 
 The Canvas Shareable Runtime is designed to render Shareable Canvas Workpads outside of Kibana in a different website or application. It uses the intermediate, "transient" state of a workpad, which is a JSON-blob state after element expressions are initially evaluated against their data sources, but before the elements are rendered to the screen. This "transient" state, therefore, has no dependency or access to ES/Kibana data, making it lightweight and portable.
 
 This directory contains the code necessary to build and test this runtime.
+
+## Quick Start
+
+- Load a workpad in Canvas.
+- Click "Export" -> "Share on a website" -> "download a ZIP file"
+- Extract and change to the extracted directory.
+- On your local machine:
+  - Start a web server, like: `python -m SimpleHTTPServer 9001`
+  - Open a web browser to `http://localhost:9001`
+- On a remote webserver:
+  - Add `kbn_canvas.js` and your Shared Workpad file to your web page:
+    ```
+    <script src="kbn_canvas.js"></script>
+    ```
+  - Add the HTML snippet to your webpage:
+    ```
+    <div kbn-canvas-shareable="canvas" kbn-canvas-url="[WORKPAD URL]" />
+    ```
+  - Execute the JS method:
+    ```
+      <script type="text/javascript">
+        KbnCanvas.share();
+      </script>
+    ```
 
 ## Using the Runtime
 
@@ -45,7 +68,7 @@ This directory contains the code necessary to build and test this runtime.
 
 ### Restrictions
 
-Not all elements from a workpad may render in the runtime.  See [Supported Expressions](#supported-expressions) for more details.
+Not all elements from a workpad may render in the runtime. See [Supported Expressions](#supported-expressions) for more details.
 
 ### JS
 
@@ -184,7 +207,7 @@ There are a number of options for the build script:
 
 ### Prerequisite
 
-Before testing or running this PR locally, you **must** run `node scripts/runtime` from `/canvas`. It is only built automatically when Kibana is built.
+Before testing or running this PR locally, you **must** run `node scripts/runtime` from `/canvas` _after_ `yarn kbn bootstrap` and _before_ starting Kibana. It is only built automatically when Kibana is built to avoid slowing down other development activities.
 
 ### Webpack Dev Server
 
@@ -238,7 +261,7 @@ Kibana and Canvas use an interpreter to register expressions and then eventually
 
 #### Build Size
 
-At the moment, the resulting library is relatively large, (5.6M).  This is due to the bundling of dependencies like EUI.  By trading off file size, we're able to keep the library contained without a need to download other external dependencies, (like React).  We're working to reduce that size through further tree-shaking or compression.
+At the moment, the resulting library is relatively large, (5.6M). This is due to the bundling of dependencies like EUI. By trading off file size, we're able to keep the library contained without a need to download other external dependencies, (like React). We're working to reduce that size through further tree-shaking or compression.
 
 ### The App
 
@@ -250,4 +273,4 @@ To minimize the distribution size, we opted to avoid as many libraries as possib
 
 #### CSS
 
-All CSS in the runtime UI uses CSS Modules to sandbox and obfuscate class names.  In addition, the Webpack build uses `postcss-prefix-selector` to prefix all public class names from Kibana and EUI with `.kbnCanvas`.  As a result, all class names should be sandboxed and not interfere with the host page in any way.
+All CSS in the runtime UI uses CSS Modules to sandbox and obfuscate class names. In addition, the Webpack build uses `postcss-prefix-selector` to prefix all public class names from Kibana and EUI with `.kbnCanvas`. As a result, all class names should be sandboxed and not interfere with the host page in any way.

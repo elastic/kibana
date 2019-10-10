@@ -24,14 +24,14 @@ import { OnCopyFn } from './share_website_flyout';
 const { ShareWebsiteSnippetsStep: strings } = ComponentStrings;
 
 const HTML = `<!-- ${strings.getIncludeRuntimeLabel()} -->
-<script src="kbnCanvas.js"></script>
+<script src="kbn_canvas.js"></script>
 
 <!-- ${strings.getPlaceholderLabel()} -->
 <div kbn-canvas-shareable="canvas" kbn-canvas-url="workpad.json" />
 
 <!-- ${strings.getCallRuntimeLabel()} -->
 <script type="text/javascript">
-  KbnCanvas.shareable();
+  KbnCanvas.share();
 </script>`;
 
 export const SnippetsStep: FC<{ onCopy: OnCopyFn }> = ({ onCopy }) => (
