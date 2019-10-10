@@ -126,7 +126,7 @@ export const reducer = (state: State, action: Action): State => {
       if (switchingToDefault) {
         nextState.fieldsJsonEditor.isValid = undefined;
       } else {
-        if (nextState.fieldForm) nextState.fieldForm.isValid = false;
+        if (nextState.fieldForm) nextState.fieldForm.isValid = undefined;
       }
       return nextState;
     case 'field.add': {
