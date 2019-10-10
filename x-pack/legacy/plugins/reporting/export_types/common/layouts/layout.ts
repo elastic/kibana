@@ -36,6 +36,15 @@ export interface PdfImageSize {
   height?: number;
 }
 
+export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
+  screenshot: '[data-shared-items-container]',
+  renderComplete: '[data-shared-item]',
+  itemsCountAttribute: 'data-shared-items-count',
+  timefilterFromAttribute: 'data-shared-timefilter-from',
+  timefilterToAttribute: 'data-shared-timefilter-to',
+  toastHeader: '[data-test-subj="euiToastHeader"]',
+});
+
 export abstract class Layout {
   public id: string = '';
 
