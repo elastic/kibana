@@ -106,7 +106,7 @@ export function SavedViewListFlyout<ViewState>({
   ];
 
   return (
-    <EuiFlyout onClose={close} data-test-subj="loadViewsFlyout" maxWidth={250}>
+    <EuiFlyout onClose={close} data-test-subj="loadViewsFlyout">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2>
