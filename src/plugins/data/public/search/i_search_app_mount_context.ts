@@ -17,20 +17,8 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { ISearchGeneric } from './i_search';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+export interface ISearchAppMountContext {
+  search: ISearchGeneric;
 }
-
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
-
-export { IGetSuggestions } from './suggestions_provider/types';

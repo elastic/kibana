@@ -16,21 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SearchParams, SearchResponse } from 'elasticsearch';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
-export * from './autocomplete_provider/types';
+export const ES_SEARCH_STRATEGY = 'es';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+export interface IEsSearchRequest extends IKibanaSearchRequest {
+  params: SearchParams;
 }
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
+export interface IEsSearchResponse<Hits = unknown> extends IKibanaSearchResponse {
+  rawResponse: SearchResponse<Hits>;
 }
-
-export { IGetSuggestions } from './suggestions_provider/types';

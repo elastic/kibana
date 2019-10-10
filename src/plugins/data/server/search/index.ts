@@ -17,20 +17,13 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+export { ISearchSetup } from './i_search_setup';
+export * from '../../common';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
-}
+export { ISearchContext } from './i_search_context';
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
+export { IRequestTypesMap, IResponseTypesMap } from './i_search';
 
-export { IGetSuggestions } from './suggestions_provider/types';
+export { TStrategyTypes } from './strategy_types';
+
+export { TSearchStrategyProvider } from './i_search_strategy';

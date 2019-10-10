@@ -17,20 +17,12 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
-}
+import { DemoDataPlugin } from './plugin';
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
+export { DEMO_SEARCH_STRATEGY } from '../common';
 
-export { IGetSuggestions } from './suggestions_provider/types';
+export const plugin: PluginInitializer<void, void> = (
+  initializerContext: PluginInitializerContext
+) => new DemoDataPlugin(initializerContext);

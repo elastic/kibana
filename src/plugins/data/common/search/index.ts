@@ -17,20 +17,10 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { ES_SEARCH_STRATEGY } from './es_search';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
-}
+export { IKibanaSearchResponse, IKibanaSearchRequest } from './types';
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
+export const DEFAULT_SEARCH_STRATEGY = ES_SEARCH_STRATEGY;
 
-export { IGetSuggestions } from './suggestions_provider/types';
+export { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from './es_search';

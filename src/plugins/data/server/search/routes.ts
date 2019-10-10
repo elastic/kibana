@@ -17,20 +17,30 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from '../../../../core/server';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+export function registerSearchRoute(router: IRouter): void {
+  router.post(
+    {
+      path: '/internal/search/{strategy}',
+      validate: {
+        params: schema.object({ strategy: schema.string() }),
+
+        query: schema.object({}, { allowUnknowns: true }),
+
+        body: schema.object({}, { allowUnknowns: true }),
+      },
+    },
+    async (context, request, res) => {
+      const searchRequest = request.body;
+      const strategy = request.params.strategy;
+      try {
+        const response = await context.search!.search(searchRequest, strategy);
+        return res.ok({ body: response });
+      } catch (err) {
+        return res.internalError({ body: err });
+      }
+    }
+  );
 }
-
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
-
-export { IGetSuggestions } from './suggestions_provider/types';

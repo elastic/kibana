@@ -17,20 +17,18 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
-
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+export interface StringMap<T = unknown> {
+  [key: string]: T;
 }
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
+export type IndexAsString<Map> = {
+  [k: string]: Map[keyof Map];
+} & Map;
 
-export { IGetSuggestions } from './suggestions_provider/types';
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+export interface BoolQuery {
+  must_not: Array<Record<string, any>>;
+  should: Array<Record<string, any>>;
+  filter: Array<Record<string, any>>;
+}

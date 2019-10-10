@@ -17,20 +17,23 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { ES_SEARCH_STRATEGY } from '../../common/search/es_search';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
-}
-
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
-
-export { IGetSuggestions } from './suggestions_provider/types';
+/**
+ * Contains all known strategy type identifiers that will be used to map to
+ * request and response shapes. Plugins that wish to add their own custom search
+ * strategies should extend this type via:
+ *
+ * const MY_STRATEGY = 'MY_STRATEGY';
+ *
+ * declare module 'src/plugins/search/server' {
+ *  export interface IRequestTypesMap {
+ *    [MY_STRATEGY]: IMySearchRequest;
+ *  }
+ *
+ *  export interface IResponseTypesMap {
+ *   [MY_STRATEGY]: IMySearchResponse
+ *  }
+ * }
+ */
+export type TStrategyTypes = typeof ES_SEARCH_STRATEGY | string;

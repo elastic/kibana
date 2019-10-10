@@ -17,20 +17,20 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+// eslint-disable-next-line import/no-default-export
+export default function({ getService }: FtrProviderContext) {
+  const testSubjects = getService('testSubjects');
+
+  describe('demo search strategy', () => {
+    before(async () => {
+      await testSubjects.click('demoSearch');
+    });
+
+    it('data is returned', async () => {
+      await testSubjects.click('doSearch');
+      await testSubjects.stringExistsInCodeBlockOrFail('response', '"Lovely to meet you, Molly"');
+    });
+  });
 }
-
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
-
-export { IGetSuggestions } from './suggestions_provider/types';

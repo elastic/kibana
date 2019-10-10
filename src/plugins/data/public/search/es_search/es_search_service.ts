@@ -17,20 +17,25 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { Plugin, CoreSetup, PluginInitializerContext } from '../../../../../core/public';
+import { ES_SEARCH_STRATEGY } from '../../../common/search/es_search';
+import { esSearchStrategyProvider } from './es_search_strategy';
+import { ISearchSetup } from '../i_search_setup';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
+export interface IEsSearchSetupDependencies {
   search: ISearchSetup;
 }
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
+export class EsSearchService implements Plugin {
+  constructor(private initializerContext: PluginInitializerContext) {}
+  public setup(core: CoreSetup, deps: IEsSearchSetupDependencies) {
+    deps.search.registerSearchStrategyProvider(
+      this.initializerContext.opaqueId,
+      ES_SEARCH_STRATEGY,
+      esSearchStrategyProvider
+    );
+  }
 
-export { IGetSuggestions } from './suggestions_provider/types';
+  public start() {}
+  public stop() {}
+}

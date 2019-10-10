@@ -17,20 +17,21 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { Observable } from 'rxjs';
+import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../../common/search';
+import { SYNC_SEARCH_STRATEGY } from '../sync_search_strategy';
+import { TSearchStrategyProvider, ISearchStrategy, ISearchGeneric, ISearchContext } from '..';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
-}
-
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
-
-export { IGetSuggestions } from './suggestions_provider/types';
+export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
+  context: ISearchContext,
+  search: ISearchGeneric
+): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
+  return {
+    search: (request, options) =>
+      search(
+        { ...request, serverStrategy: ES_SEARCH_STRATEGY },
+        options,
+        SYNC_SEARCH_STRATEGY
+      ) as Observable<IEsSearchResponse>,
+  };
+};

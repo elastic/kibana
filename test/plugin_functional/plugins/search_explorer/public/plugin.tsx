@@ -17,20 +17,26 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { Plugin, CoreSetup } from 'kibana/public';
+import { ISearchAppMountContext } from '../../../../../src/plugins/data/public';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+declare module 'kibana/public' {
+  interface AppMountContext {
+    search?: ISearchAppMountContext;
+  }
 }
+export class SearchExplorerPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    core.application.register({
+      id: 'searchExplorer',
+      title: 'Search Explorer',
+      async mount(context, params) {
+        const { renderApp } = await import('./application');
+        return renderApp(context, params);
+      },
+    });
+  }
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
+  public start() {}
+  public stop() {}
 }
-
-export { IGetSuggestions } from './suggestions_provider/types';

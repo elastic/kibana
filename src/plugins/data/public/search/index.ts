@@ -17,20 +17,26 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+export { ISearchAppMountContext } from './i_search_app_mount_context';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
-}
+export { ISearchSetup } from './i_search_setup';
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
+export { ISearchContext } from './i_search_context';
 
-export { IGetSuggestions } from './suggestions_provider/types';
+export {
+  ISearch,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchGeneric,
+} from './i_search';
+
+export { TSearchStrategyProvider, ISearchStrategy } from './i_search_strategy';
+
+export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
+
+export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
+
+export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
+
+export { ISearchStart } from './search_service';
