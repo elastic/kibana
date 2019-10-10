@@ -43,7 +43,7 @@ export type RangeFilterMeta = FilterMeta & {
 };
 
 export type RangeFilter = Filter & {
-  meta: RangeFilterMeta;
+  meta?: RangeFilterMeta;
   script?: {
     script: {
       params: any;

@@ -88,12 +88,14 @@ const esShardTimeout = npSetup.core.injectedMetadata.getInjectedVar('esShardTime
 const config = npSetup.core.uiSettings;
 const forIp = Symbol('for which index pattern?');
 
+export type SearchSourceContract = Pick<SearchSource, keyof SearchSource>;
+
 export class SearchSource {
   private id: string = _.uniqueId('data_source');
   private searchStrategyId?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
-    (searchSource: SearchSource, options?: FetchOptions) => Promise<unknown>
+    (searchSource: SearchSourceContract, options?: FetchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   private fields: SearchSourceFields = {};
@@ -203,8 +205,8 @@ export class SearchSource {
    * @param  {SearchSourceOptions} options - the inherit options
    * @return {this} - chainable
    */
-  setParent(parent?: SearchSource, options: SearchSourceOptions = {}) {
-    this.parent = parent;
+  setParent(parent?: SearchSourceContract, options: SearchSourceOptions = {}) {
+    this.parent = parent as SearchSource;
     this.inheritOptions = options;
     return this;
   }
@@ -253,7 +255,7 @@ export class SearchSource {
    *  @return {undefined}
    */
   onRequestStart(
-    handler: (searchSource: SearchSource, options?: FetchOptions) => Promise<unknown>
+    handler: (searchSource: SearchSourceContract, options?: FetchOptions) => Promise<unknown>
   ) {
     this.requestStartHandlers.push(handler);
   }

@@ -26,6 +26,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { SearchSourceContract, FetchOptions } from '../courier/types';
 import { AggType, FieldParamType, BucketAggType } from '.';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
 // @ts-ignore
@@ -223,10 +224,10 @@ export class AggConfig {
   /**
    *  Hook for pre-flight logic, see AggType#onSearchRequestStart
    *  @param {Courier.SearchSource} searchSource
-   *  @param {Courier.SearchRequest} searchRequest
+   *  @param {Courier.FetchOptions} options
    *  @return {Promise<undefined>}
    */
-  onSearchRequestStart(searchSource: any, options: any) {
+  onSearchRequestStart(searchSource: SearchSourceContract, options?: FetchOptions) {
     if (!this.type) {
       return Promise.resolve();
     }

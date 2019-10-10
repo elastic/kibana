@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { createSearchSourceMock } from '../../../../../ui/public/courier/search_source/mocks';
+import { searchSourceMock } from '../../../../../ui/public/courier/search_source/mocks';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
-export function getSavedDashboardMock(): MockedKeys<SavedObjectDashboard> {
+export function getSavedDashboardMock(
+  config?: Partial<SavedObjectDashboard>
+): SavedObjectDashboard {
   return {
     id: '123',
     title: 'my dashboard',
     panelsJSON: '[]',
-    searchSource: createSearchSourceMock(),
+    searchSource: searchSourceMock,
     copyOnSave: false,
     timeRestore: false,
     timeTo: 'now',
@@ -38,5 +40,6 @@ export function getSavedDashboardMock(): MockedKeys<SavedObjectDashboard> {
     },
     getQuery: () => ({ query: '', language: 'kuery' }),
     getFilters: () => [],
+    ...config,
   };
 }

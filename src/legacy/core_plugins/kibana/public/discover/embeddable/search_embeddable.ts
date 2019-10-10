@@ -21,7 +21,7 @@
 import { getFilterGenerator } from 'ui/filter_manager';
 import angular from 'angular';
 import _ from 'lodash';
-import { SearchSource } from 'ui/courier';
+import { SearchSourceContract } from 'ui/courier';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -102,7 +102,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private inspectorAdaptors: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
-  private filtersSearchSource?: SearchSource;
+  private filtersSearchSource?: SearchSourceContract;
   private searchInstance?: JQLite;
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;

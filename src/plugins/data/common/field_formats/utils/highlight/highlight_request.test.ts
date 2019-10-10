@@ -20,36 +20,19 @@
 import { getHighlightRequest } from './highlight_request';
 
 describe('getHighlightRequest', () => {
-  let configMock: Record<string, any>;
-  const getConfig = (key: string) => configMock[key];
   const queryStringQuery = { query_string: { query: 'foo' } };
-
-  beforeEach(function() {
-    configMock = {};
-    configMock['doc_table:highlight'] = true;
-  });
 
   test('should be a function', () => {
     expect(getHighlightRequest).toBeInstanceOf(Function);
   });
 
   test('should not modify the original query', () => {
-    getHighlightRequest(queryStringQuery, getConfig);
+    getHighlightRequest(queryStringQuery, true);
     expect(queryStringQuery.query_string).not.toHaveProperty('highlight');
   });
 
   test('should return undefined if highlighting is turned off', () => {
-    configMock['doc_table:highlight'] = false;
-    const request = getHighlightRequest(queryStringQuery, getConfig);
-    expect(request).toBe(undefined);
-  });
-
-  test('should enable/disable highlighting if config is changed', () => {
-    let request = getHighlightRequest(queryStringQuery, getConfig);
-    expect(request).not.toBe(undefined);
-
-    configMock['doc_table:highlight'] = false;
-    request = getHighlightRequest(queryStringQuery, getConfig);
+    const request = getHighlightRequest(queryStringQuery, false);
     expect(request).toBe(undefined);
   });
 });

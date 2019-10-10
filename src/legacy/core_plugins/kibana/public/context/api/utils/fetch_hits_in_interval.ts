@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchSource } from 'ui/courier';
-import { EsQuerySortValue, SortDirection } from 'ui/courier/types';
+import { EsQuerySortValue, SortDirection, SearchSourceContract } from 'ui/courier/types';
 import { convertTimeValueToIso } from './date_conversion';
 import { EsHitRecordList } from '../context';
 import { IntervalValue } from './generate_intervals';
@@ -37,7 +36,7 @@ interface RangeQuery {
  * and filters set.
  */
 export async function fetchHitsInInterval(
-  searchSource: SearchSource,
+  searchSource: SearchSourceContract,
   timeField: string,
   sort: [EsQuerySortValue, EsQuerySortValue],
   sortDir: SortDirection,

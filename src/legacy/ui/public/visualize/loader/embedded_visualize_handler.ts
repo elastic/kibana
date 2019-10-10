@@ -26,9 +26,9 @@ import { Filter } from '@kbn/es-query';
 import { toastNotifications } from 'ui/notify';
 // @ts-ignore untyped dependency
 import { AggConfigs } from 'ui/agg_types/agg_configs';
-import { SearchSource } from 'ui/courier';
 import { QueryFilter } from 'ui/filter_manager/query_filter';
 import { TimeRange } from 'src/plugins/data/public';
+import { SearchSourceContract } from '../../courier/types';
 import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
@@ -62,7 +62,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
 }
 
 export interface RequestHandlerParams {
-  searchSource: SearchSource;
+  searchSource: SearchSourceContract;
   aggs: AggConfigs;
   timeRange?: TimeRange;
   query?: Query;

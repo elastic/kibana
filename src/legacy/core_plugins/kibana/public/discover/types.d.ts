@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { SearchSource } from 'ui/courier';
+import { SearchSourceContract } from 'ui/courier';
 import { SortOrder } from './doc_table/components/table_header/helpers';
 export { SortOrder } from './doc_table/components/table_header/helpers';
 
 export interface SavedSearch {
   readonly id: string;
   title: string;
-  searchSource: SearchSource;
+  searchSource: SearchSourceContract;
   description?: string;
   columns: string[];
   sort: SortOrder[];

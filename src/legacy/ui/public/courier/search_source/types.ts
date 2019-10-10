@@ -49,3 +49,5 @@ export interface SearchSourceFields {
 export interface SearchSourceOptions {
   callParentStartHandlers?: boolean;
 }
+
+export { SearchSourceContract } from './search_source';

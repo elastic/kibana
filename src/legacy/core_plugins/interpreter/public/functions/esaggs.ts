@@ -28,7 +28,7 @@ import chrome from 'ui/chrome';
 // @ts-ignore
 import { TimeRange } from 'src/plugins/data/public';
 import { RangeFilter } from '@kbn/es-query';
-import { SearchSource } from '../../../../ui/public/courier/search_source';
+import { SearchSource } from '../../../../ui/public/courier';
 // @ts-ignore
 import { FilterBarQueryFilterProvider } from '../../../../ui/public/filter_manager/query_filter';
 
@@ -100,7 +100,7 @@ const handleCourierRequest = async ({
     return aggs.toDsl(metricsAtAllLevels);
   });
 
-  requestSearchSource.onRequestStart((paramSearchSource: SearchSource, options: any) => {
+  requestSearchSource.onRequestStart((paramSearchSource, options) => {
     return aggs.onSearchRequestStart(paramSearchSource, options);
   });
 

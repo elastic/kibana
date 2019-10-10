@@ -22,7 +22,7 @@ import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { SavedObject } from 'ui/saved_objects/saved_object';
 import { VisResponseValue } from 'src/plugins/visualizations/public';
-import { SearchSource } from '../../courier';
+import { SearchSourceContract } from '../../courier';
 import { PersistedState } from '../../persisted_state';
 import { AppState } from '../../state_management/app_state';
 import { Vis } from '../../vis';
@@ -30,7 +30,7 @@ import { Vis } from '../../vis';
 export interface VisSavedObject extends SavedObject {
   vis: Vis;
   description?: string;
-  searchSource: SearchSource;
+  searchSource: SearchSourceContract;
   title: string;
   uiStateJSON?: string;
   destroy: () => void;

@@ -85,6 +85,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     const queryFilter = Private(FilterBarQueryFilterProvider);
     try {
       const savedObject = await searchLoader.get(savedObjectId);
+      const indexPattern = savedObject.searchSource.getField('index');
       return new SearchEmbeddable(
         {
           savedSearch: savedObject,
@@ -93,7 +94,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
           editUrl,
           queryFilter,
           editable: capabilities.get().discover.save as boolean,
-          indexPatterns: _.compact([savedObject.searchSource.getField('index')]),
+          indexPatterns: indexPattern ? [indexPattern] : [],
         },
         input,
         this.executeTriggerActions,

@@ -32,7 +32,7 @@ export class VisualizationRequestError extends React.Component<VisualizationRequ
 
   public render() {
     const { error } = this.props;
-    const errorMessage = (error && error.message) || error;
+    const errorMessage = typeof error === 'string' ? error : error.message;
 
     return (
       <div className="visError" ref={this.containerDiv}>
