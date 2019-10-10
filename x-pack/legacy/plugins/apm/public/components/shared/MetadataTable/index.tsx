@@ -12,7 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-import { get, has } from 'lodash';
+import { get, has, pick } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
@@ -26,18 +26,6 @@ interface Props {
   item: Transaction | APMError | Span;
   sections: SectionType[];
 }
-
-export const reduceItemWithProperties = (
-  item: Record<string, unknown>,
-  properties: string[]
-) =>
-  properties.reduce((acc, property) => {
-    const value = item[property];
-    if (value) {
-      return { ...acc, [property]: value };
-    }
-    return acc;
-  }, {});
 
 export function MetadataTable({ item, sections }: Props) {
   const filteredSections = sections.filter(
@@ -57,10 +45,7 @@ export function MetadataTable({ item, sections }: Props) {
       {filteredSections.map(section => {
         let sectionData: Record<string, unknown> = get(item, section.key);
         if (section.properties) {
-          sectionData = reduceItemWithProperties(
-            sectionData,
-            section.properties
-          );
+          sectionData = pick(item, section.properties);
         }
         return (
           <div key={section.key}>
