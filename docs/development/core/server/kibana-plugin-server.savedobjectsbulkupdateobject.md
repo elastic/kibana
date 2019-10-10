@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> 
+export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> extends SavedObjectsUpdateOptions, SavedObjectsBaseOptions 
 ```
 
 ## Properties
@@ -17,6 +17,5 @@ export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = 
 |  --- | --- | --- |
 |  [attributes](./kibana-plugin-server.savedobjectsbulkupdateobject.attributes.md) | <code>Partial&lt;T&gt;</code> |  |
 |  [id](./kibana-plugin-server.savedobjectsbulkupdateobject.id.md) | <code>string</code> |  |
-|  [options](./kibana-plugin-server.savedobjectsbulkupdateobject.options.md) | <code>SavedObjectsUpdateOptions</code> |  |
 |  [type](./kibana-plugin-server.savedobjectsbulkupdateobject.type.md) | <code>string</code> |  |
 

@@ -1166,13 +1166,11 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> {
+export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> extends SavedObjectsUpdateOptions, SavedObjectsBaseOptions {
     // (undocumented)
     attributes: Partial<T>;
     // (undocumented)
     id: string;
-    // (undocumented)
-    options: SavedObjectsUpdateOptions;
     // (undocumented)
     type: string;
 }
