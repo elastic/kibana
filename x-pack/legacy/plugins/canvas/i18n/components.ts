@@ -301,13 +301,13 @@ export const ComponentStrings = {
       }),
   },
   Error: {
-    getTitle: () =>
-      i18n.translate('xpack.canvas.error.title', {
-        defaultMessage: 'Whoops! Expression failed',
-      }),
     getDescription: () =>
       i18n.translate('xpack.canvas.error.description', {
         defaultMessage: 'Expression failed with the message:',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.error.title', {
+        defaultMessage: 'Whoops! Expression failed',
       }),
   },
   Expression: {
@@ -397,6 +397,15 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
         defaultMessage: 'Keyboard Shortcuts',
+      }),
+  },
+  Link: {
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.link.errorMessage', {
+        defaultMessage: 'LINK ERROR: {message}',
+        values: {
+          message,
+        },
       }),
   },
   MultiElementSettings: {
