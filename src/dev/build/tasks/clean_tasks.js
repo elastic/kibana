@@ -293,12 +293,3 @@ export const CleanCtagBuildTask = {
     );
   },
 };
-
-export const CleanIrrelevantFilesFromBuildTask = {
-  description: 'Cleaning files that should not be included in the built asset',
-
-  async run(_config, log, build) {
-    const paths = [build.resolvePath('x-pack/legacy/plugins/canvas/shareable_runtime/test')];
-    await deleteAll(paths, log);
-  },
-};
