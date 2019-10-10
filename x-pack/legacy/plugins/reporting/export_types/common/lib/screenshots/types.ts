@@ -17,8 +17,7 @@ export interface ScreenshotObservableOpts {
 }
 
 export interface TimeRange {
-  from: any;
-  to: any;
+  duration: string;
 }
 
 export interface AttributesMap {

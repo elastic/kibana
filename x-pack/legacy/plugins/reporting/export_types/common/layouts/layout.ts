@@ -26,8 +26,7 @@ export interface LayoutSelectorDictionary {
   screenshot: string;
   renderComplete: string;
   itemsCountAttribute: string;
-  timefilterFromAttribute: string;
-  timefilterToAttribute: string;
+  timefilterDurationAttribute: string;
   toastHeader: string;
 }
 
@@ -40,8 +39,7 @@ export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
   screenshot: '[data-shared-items-container]',
   renderComplete: '[data-shared-item]',
   itemsCountAttribute: 'data-shared-items-count',
-  timefilterFromAttribute: 'data-shared-timefilter-from',
-  timefilterToAttribute: 'data-shared-timefilter-to',
+  timefilterDurationAttribute: 'data-shared-timefilter-duration',
   toastHeader: '[data-test-subj="euiToastHeader"]',
 });
 
