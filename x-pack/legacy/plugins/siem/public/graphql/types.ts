@@ -541,6 +541,8 @@ export interface AuthenticationItem {
 }
 
 export interface UserEcsFields {
+  domain?: Maybe<string[]>;
+
   id?: Maybe<string[]>;
 
   name?: Maybe<string[]>;
@@ -689,6 +691,10 @@ export interface Ecs {
 
   destination?: Maybe<DestinationEcsFields>;
 
+  dns?: Maybe<DnsEcsFields>;
+
+  endgame?: Maybe<EndgameEcsFields>;
+
   event?: Maybe<EventEcsFields>;
 
   geo?: Maybe<GeoEcsFields>;
@@ -714,6 +720,8 @@ export interface Ecs {
   message?: Maybe<string[]>;
 
   user?: Maybe<UserEcsFields>;
+
+  winlog?: Maybe<WinlogEcsFields>;
 
   process?: Maybe<ProcessEcsFields>;
 
@@ -776,10 +784,54 @@ export interface DestinationEcsFields {
   packets?: Maybe<number[]>;
 }
 
+export interface DnsEcsFields {
+  question?: Maybe<DnsQuestionData>;
+
+  resolved_ip?: Maybe<string[]>;
+
+  response_code?: Maybe<string[]>;
+}
+
+export interface DnsQuestionData {
+  name?: Maybe<string[]>;
+
+  type?: Maybe<string[]>;
+}
+
+export interface EndgameEcsFields {
+  exit_code?: Maybe<number[]>;
+
+  file_name?: Maybe<string[]>;
+
+  file_path?: Maybe<string[]>;
+
+  logon_type?: Maybe<number[]>;
+
+  parent_process_name?: Maybe<string[]>;
+
+  pid?: Maybe<number[]>;
+
+  process_name?: Maybe<string[]>;
+
+  subject_domain_name?: Maybe<string[]>;
+
+  subject_logon_id?: Maybe<string[]>;
+
+  subject_user_name?: Maybe<string[]>;
+
+  target_domain_name?: Maybe<string[]>;
+
+  target_logon_id?: Maybe<string[]>;
+
+  target_user_name?: Maybe<string[]>;
+}
+
 export interface EventEcsFields {
   action?: Maybe<string[]>;
 
   category?: Maybe<string[]>;
+
+  code?: Maybe<string[]>;
 
   created?: Maybe<string[]>;
 
@@ -1044,7 +1096,13 @@ export interface UrlEcsFields {
   password?: Maybe<string[]>;
 }
 
+export interface WinlogEcsFields {
+  event_id?: Maybe<number[]>;
+}
+
 export interface ProcessEcsFields {
+  hash?: Maybe<ProcessHashData>;
+
   pid?: Maybe<number[]>;
 
   name?: Maybe<string[]>;
@@ -1062,6 +1120,14 @@ export interface ProcessEcsFields {
   working_directory?: Maybe<string[]>;
 }
 
+export interface ProcessHashData {
+  md5?: Maybe<string[]>;
+
+  sha1?: Maybe<string[]>;
+
+  sha256?: Maybe<string[]>;
+}
+
 export interface Thread {
   id?: Maybe<number[]>;
 
@@ -1069,6 +1135,8 @@ export interface Thread {
 }
 
 export interface FileFields {
+  name?: Maybe<string[]>;
+
   path?: Maybe<string[]>;
 
   target_path?: Maybe<string[]>;
@@ -1644,6 +1712,20 @@ export interface OverviewHostData {
   auditbeatProcess?: Maybe<number>;
 
   auditbeatUser?: Maybe<number>;
+
+  endgameDns?: Maybe<number>;
+
+  endgameFile?: Maybe<number>;
+
+  endgameImageLoad?: Maybe<number>;
+
+  endgameNetwork?: Maybe<number>;
+
+  endgameProcess?: Maybe<number>;
+
+  endgameRegistry?: Maybe<number>;
+
+  endgameSecurity?: Maybe<number>;
 
   filebeatSystemModule?: Maybe<number>;
 
@@ -3594,6 +3676,20 @@ export namespace GetOverviewHostQuery {
 
     auditbeatUser: Maybe<number>;
 
+    endgameDns: Maybe<number>;
+
+    endgameFile: Maybe<number>;
+
+    endgameImageLoad: Maybe<number>;
+
+    endgameNetwork: Maybe<number>;
+
+    endgameProcess: Maybe<number>;
+
+    endgameRegistry: Maybe<number>;
+
+    endgameSecurity: Maybe<number>;
+
     filebeatSystemModule: Maybe<number>;
 
     winlogbeat: Maybe<number>;
@@ -4023,6 +4119,10 @@ export namespace GetTimelineQuery {
 
     destination: Maybe<Destination>;
 
+    dns: Maybe<Dns>;
+
+    endgame: Maybe<Endgame>;
+
     geo: Maybe<__Geo>;
 
     suricata: Maybe<Suricata>;
@@ -4036,6 +4136,8 @@ export namespace GetTimelineQuery {
     url: Maybe<Url>;
 
     user: Maybe<User>;
+
+    winlog: Maybe<Winlog>;
 
     process: Maybe<Process>;
 
@@ -4092,6 +4194,8 @@ export namespace GetTimelineQuery {
     action: Maybe<string[]>;
 
     category: Maybe<string[]>;
+
+    code: Maybe<string[]>;
 
     created: Maybe<string[]>;
 
@@ -4182,6 +4286,8 @@ export namespace GetTimelineQuery {
 
   export type File = {
     __typename?: 'FileFields';
+
+    name: Maybe<string[]>;
 
     path: Maybe<string[]>;
 
@@ -4280,6 +4386,54 @@ export namespace GetTimelineQuery {
     region_iso_code: Maybe<string[]>;
 
     region_name: Maybe<string[]>;
+  };
+
+  export type Dns = {
+    __typename?: 'DnsEcsFields';
+
+    question: Maybe<Question>;
+
+    resolved_ip: Maybe<string[]>;
+
+    response_code: Maybe<string[]>;
+  };
+
+  export type Question = {
+    __typename?: 'DnsQuestionData';
+
+    name: Maybe<string[]>;
+
+    type: Maybe<string[]>;
+  };
+
+  export type Endgame = {
+    __typename?: 'EndgameEcsFields';
+
+    exit_code: Maybe<number[]>;
+
+    file_name: Maybe<string[]>;
+
+    file_path: Maybe<string[]>;
+
+    logon_type: Maybe<number[]>;
+
+    parent_process_name: Maybe<string[]>;
+
+    pid: Maybe<number[]>;
+
+    process_name: Maybe<string[]>;
+
+    subject_domain_name: Maybe<string[]>;
+
+    subject_logon_id: Maybe<string[]>;
+
+    subject_user_name: Maybe<string[]>;
+
+    target_domain_name: Maybe<string[]>;
+
+    target_logon_id: Maybe<string[]>;
+
+    target_user_name: Maybe<string[]>;
   };
 
   export type __Geo = {
@@ -4435,11 +4589,21 @@ export namespace GetTimelineQuery {
   export type User = {
     __typename?: 'UserEcsFields';
 
+    domain: Maybe<string[]>;
+
     name: Maybe<string[]>;
+  };
+
+  export type Winlog = {
+    __typename?: 'WinlogEcsFields';
+
+    event_id: Maybe<number[]>;
   };
 
   export type Process = {
     __typename?: 'ProcessEcsFields';
+
+    hash: Maybe<Hash>;
 
     pid: Maybe<number[]>;
 
@@ -4456,6 +4620,16 @@ export namespace GetTimelineQuery {
     working_directory: Maybe<string[]>;
   };
 
+  export type Hash = {
+    __typename?: 'ProcessHashData';
+
+    md5: Maybe<string[]>;
+
+    sha1: Maybe<string[]>;
+
+    sha256: Maybe<string[]>;
+  };
+
   export type Zeek = {
     __typename?: 'ZeekEcsFields';
 
@@ -4465,7 +4639,7 @@ export namespace GetTimelineQuery {
 
     notice: Maybe<Notice>;
 
-    dns: Maybe<Dns>;
+    dns: Maybe<_Dns>;
 
     http: Maybe<_Http>;
 
@@ -4506,7 +4680,7 @@ export namespace GetTimelineQuery {
     peer_descr: Maybe<string[]>;
   };
 
-  export type Dns = {
+  export type _Dns = {
     __typename?: 'ZeekDnsData';
 
     AA: Maybe<boolean[]>;

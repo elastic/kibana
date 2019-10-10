@@ -22,6 +22,8 @@
  }
 
 .gphGraph__container {
+  display: flex;
+  flex-direction: column;
   background: $euiColorEmptyShade;
   position: relative;
   flex: 1;
