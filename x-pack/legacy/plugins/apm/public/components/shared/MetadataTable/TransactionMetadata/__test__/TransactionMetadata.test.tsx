@@ -27,6 +27,7 @@ function getTransaction() {
     user: { someKey: 'user value' },
     notIncluded: 'not included value',
     transaction: {
+      id: '7efbc7056b746fcb',
       notIncluded: 'transaction not included value',
       custom: {
         someKey: 'custom value'

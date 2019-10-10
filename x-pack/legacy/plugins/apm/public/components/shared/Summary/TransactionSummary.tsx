@@ -28,7 +28,7 @@ const getTransactionResultSummaryItem = (transaction: Transaction) => {
     : idx(transaction, _ => _.url.full);
 
   if (url) {
-    const method = idx(transaction, _ => _.http.request.method) || '';
+    const method = idx(transaction, _ => _.http.request.method);
     const status = idx(transaction, _ => _.http.response.status_code);
 
     return <HttpInfoSummaryItem method={method} status={status} url={url} />;
