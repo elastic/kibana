@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import ServerMock from 'mock-http-server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
   describe('list', () => {
