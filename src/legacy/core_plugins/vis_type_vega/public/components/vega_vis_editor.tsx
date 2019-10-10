@@ -65,12 +65,12 @@ function VegaVisEditor({ stateParams, setValue }: VisOptionsProps<VisParams>) {
 
   const formatJson = useCallback(
     () => setValue('spec', format(stateParams.spec, compactStringify)),
-    [setValue]
+    [setValue, stateParams.spec]
   );
 
   const formatHJson = useCallback(
     () => setValue('spec', format(stateParams.spec, hjson.stringify)),
-    [setValue]
+    [setValue, stateParams.spec]
   );
 
   return (
