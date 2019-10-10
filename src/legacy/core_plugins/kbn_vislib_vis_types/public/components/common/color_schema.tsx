@@ -38,6 +38,7 @@ interface ColorSchemaOptionsProps extends ColorSchemaVislibParams {
   colorSchemas: ColorSchema[];
   uiState: VisOptionsProps['uiState'];
   setValue: SetColorSchemaOptionsValue;
+  showHelpText?: boolean;
 }
 
 function ColorSchemaOptions({
@@ -47,6 +48,7 @@ function ColorSchemaOptions({
   invertColors,
   uiState,
   setValue,
+  showHelpText = true,
 }: ColorSchemaOptionsProps) {
   const [isCustomColors, setIsCustomColors] = useState(() => !!uiState.get('vis.colors'));
 
@@ -76,12 +78,12 @@ function ColorSchemaOptions({
     <>
       <SelectOption
         disabled={disabled}
-        helpText={i18n.translate(
-          'kbnVislibVisTypes.controls.colorSchema.howToChangeColorsDescription',
-          {
+        helpText={
+          showHelpText &&
+          i18n.translate('kbnVislibVisTypes.controls.colorSchema.howToChangeColorsDescription', {
             defaultMessage: 'Individual colors can be changed in the legend.',
-          }
-        )}
+          })
+        }
         label={i18n.translate('kbnVislibVisTypes.controls.colorSchema.colorSchemaLabel', {
           defaultMessage: 'Color schema',
         })}

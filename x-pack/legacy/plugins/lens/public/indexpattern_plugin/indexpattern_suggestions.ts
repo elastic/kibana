@@ -8,13 +8,7 @@ import _, { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../id_generator';
 import { DatasourceSuggestion, TableChangeType } from '../types';
-import {
-  columnToOperation,
-  IndexPatternField,
-  IndexPatternLayer,
-  IndexPatternPrivateState,
-  IndexPattern,
-} from './indexpattern';
+import { columnToOperation } from './indexpattern';
 import {
   buildColumn,
   getOperationTypesForField,
@@ -23,6 +17,12 @@ import {
 } from './operations';
 import { hasField } from './utils';
 import { operationDefinitions } from './operations/definitions';
+import {
+  IndexPattern,
+  IndexPatternPrivateState,
+  IndexPatternLayer,
+  IndexPatternField,
+} from './types';
 
 function buildSuggestion({
   state,

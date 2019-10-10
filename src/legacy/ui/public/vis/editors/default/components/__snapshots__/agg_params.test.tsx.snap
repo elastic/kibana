@@ -55,6 +55,7 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
   >
     <EuiAccordion
       buttonContent="Advanced"
+      data-test-subj="advancedParams-undefined"
       id="advancedAccordion"
       initialIsOpen={false}
       paddingSize="none"
