@@ -106,13 +106,13 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
         )}
       </div>
 
-      {renderCreateField()}
-
       {hasChildFields && (
         <div style={{ paddingLeft: '20px' }}>
           <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} />
         </div>
       )}
+
+      {renderCreateField()}
     </>
   );
 };
