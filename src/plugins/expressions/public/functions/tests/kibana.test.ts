@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../test_helpers';
-import { kibana } from './kibana';
-import { KibanaContext, FunctionHandlers } from '../../types';
+import { functionWrapper } from './utils';
+import { kibana } from '../kibana';
+import { FunctionHandlers } from '../../types';
+import { KibanaContext } from '../../expression_types';
 
 describe('interpreter/functions#kibana', () => {
   const fn = functionWrapper(kibana);

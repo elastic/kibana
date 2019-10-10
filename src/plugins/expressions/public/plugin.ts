@@ -24,6 +24,7 @@ import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspecto
 import { setCoreStart } from './services';
 import { clog as clogFunction } from './functions/clog';
 import { font as fontFunction } from './functions/font';
+import { kibana as kibanaFunction } from './functions/kibana';
 import { kibanaContext as kibanaContextFunction } from './functions/kibana_context';
 
 export interface ExpressionsSetupDeps {
@@ -61,6 +62,7 @@ export class ExpressionsPublicPlugin
 
     this.functions.register(clogFunction);
     this.functions.register(fontFunction);
+    this.functions.register(kibanaFunction);
     this.functions.register(kibanaContextFunction);
 
     const setup: ExpressionsSetup = {

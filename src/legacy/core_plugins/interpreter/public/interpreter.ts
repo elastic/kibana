@@ -29,7 +29,6 @@ import { registries } from './registries';
 import { visualization } from './renderers/visualization';
 
 import { esaggs as esaggsFn } from './functions/esaggs';
-import { kibana as kibanaFn } from './functions/kibana';
 import { range as rangeFn } from './functions/range';
 import { visualization as visualizationFn } from './functions/visualization';
 import { visDimension as visDimensionFn } from './functions/vis_dimension';
@@ -60,7 +59,6 @@ import { kibanaDatatable } from '../../../../plugins/expressions/public/expressi
 );
 
 // These will be moved to Expression plugin.
-registries.browserFunctions.register(kibanaFn);
 registries.types.register(boolean);
 registries.types.register(datatable);
 registries.types.register(error);
