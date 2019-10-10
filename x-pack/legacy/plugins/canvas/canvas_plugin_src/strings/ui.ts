@@ -35,25 +35,25 @@ export const ArgumentStrings = {
       i18n.translate('xpack.canvas.uis.arguments.axisConfigLabel', {
         defaultMessage: 'Visualization axis configuration',
       }),
+    getPositionBottom: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.bottomDropDown', {
+        defaultMessage: 'bottom',
+      }),
     getPositionLabel: () =>
       i18n.translate('xpack.canvas.uis.arguments.axisConfig.positionLabel', {
         defaultMessage: 'Position',
       }),
-    getPositionTop: () =>
-      i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.topDropDown', {
-        defaultMessage: 'top',
-      }),
-    getPositionBottom: () =>
-      i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.bottomDropDown', {
-        defaultMessage: 'bottom',
+    getPositionLeft: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.leftDropDown', {
+        defaultMessage: 'left',
       }),
     getPositionRight: () =>
       i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.rightDropDown', {
         defaultMessage: 'right',
       }),
-    getPositionLeft: () =>
-      i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.leftDropDown', {
-        defaultMessage: 'left',
+    getPositionTop: () =>
+      i18n.translate('xpack.canvas.uis.arguments.axisConfig.position.options.topDropDown', {
+        defaultMessage: 'top',
       }),
   },
   DataColumn: {
@@ -120,6 +120,10 @@ export const ArgumentStrings = {
       }),
   },
   FilterGroup: {
+    getCreateNewGroup: () =>
+      i18n.translate('xpack.canvas.uis.arguments.filterGroup.createNewGroupLinkText', {
+        defaultMessage: 'Create new group',
+      }),
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.arguments.filterGroupTitle', {
         defaultMessage: 'Filter Group',
@@ -128,15 +132,23 @@ export const ArgumentStrings = {
       i18n.translate('xpack.canvas.uis.arguments.filterGroupLabel', {
         defaultMessage: 'Create or select a filter group',
       }),
-    getCreateNewGroup: () =>
-      i18n.translate('xpack.canvas.uis.arguments.filterGroup.createNewGroupLinkText', {
-        defaultMessage: 'Create new group',
-      }),
   },
   ImageUpload: {
+    getAssetUrlType: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.assetDropDown', {
+        defaultMessage: 'Asset',
+      }),
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.arguments.imageUploadTitle', {
         defaultMessage: 'Image upload',
+      }),
+    getFileUploadPrompt: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.fileUploadPromptLabel', {
+        defaultMessage: 'Select or drag and drop an image',
+      }),
+    getFileUrlType: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.fileDropDown', {
+        defaultMessage: 'Import',
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.arguments.imageUploadLabel', {
@@ -146,9 +158,9 @@ export const ArgumentStrings = {
       i18n.translate('xpack.canvas.uis.arguments.imageUpload.imageUploadingLabel', {
         defaultMessage: 'Image uploading',
       }),
-    getFileUploadPrompt: () =>
-      i18n.translate('xpack.canvas.uis.arguments.imageUpload.fileUploadPromptLabel', {
-        defaultMessage: 'Select or drag and drop an image',
+    getLinkUrlType: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.linkDropDown', {
+        defaultMessage: 'Link',
       }),
     getUrlFieldPlaceholder: () =>
       i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlFieldPlaceholder', {
@@ -156,18 +168,6 @@ export const ArgumentStrings = {
         values: {
           url: URL,
         },
-      }),
-    getFileUrlType: () =>
-      i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.fileDropDown', {
-        defaultMessage: 'Import',
-      }),
-    getLinkUrlType: () =>
-      i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.linkDropDown', {
-        defaultMessage: 'Link',
-      }),
-    getAssetUrlType: () =>
-      i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.assetDropDown', {
-        defaultMessage: 'Asset',
       }),
   },
   Number: {
@@ -185,20 +185,9 @@ export const ArgumentStrings = {
       i18n.translate('xpack.canvas.uis.arguments.numberFormatTitle', {
         defaultMessage: 'Number Format',
       }),
-    getHelp: () =>
-      i18n.translate('xpack.canvas.uis.arguments.numberFormatLabel', {
-        defaultMessage: 'Select or enter a valid {numeralJS} format',
-        values: {
-          numeralJS: NUMERALJS,
-        },
-      }),
-    getFormatNumber: () =>
-      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.numberDropDown', {
-        defaultMessage: 'Number',
-      }),
-    getFormatPercent: () =>
-      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.percentDropDown', {
-        defaultMessage: 'Percent',
+    getFormatBytes: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.bytesDropDown', {
+        defaultMessage: 'Bytes',
       }),
     getFormatCurrency: () =>
       i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.currencyDropDown', {
@@ -208,9 +197,20 @@ export const ArgumentStrings = {
       i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.durationDropDown', {
         defaultMessage: 'Duration',
       }),
-    getFormatBytes: () =>
-      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.bytesDropDown', {
-        defaultMessage: 'Bytes',
+    getFormatNumber: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.numberDropDown', {
+        defaultMessage: 'Number',
+      }),
+    getFormatPercent: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormat.format.percentDropDown', {
+        defaultMessage: 'Percent',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.numberFormatLabel', {
+        defaultMessage: 'Select or enter a valid {numeralJS} format',
+        values: {
+          numeralJS: NUMERALJS,
+        },
       }),
   },
   Palette: {
@@ -301,13 +301,13 @@ export const DataSourceStrings = {
       i18n.translate('xpack.canvas.uis.dataSources.demoDataTitle', {
         defaultMessage: 'Demo data',
       }),
-    getHelp: () =>
-      i18n.translate('xpack.canvas.uis.dataSources.demoDataLabel', {
-        defaultMessage: 'Mock data set with usernames, prices, projects, countries, and phases',
-      }),
     getHeading: () =>
       i18n.translate('xpack.canvas.uis.dataSources.demoData.headingTitle', {
         defaultMessage: 'You are using demo data',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.demoDataLabel', {
+        defaultMessage: 'Mock data set with usernames, prices, projects, countries, and phases',
       }),
   },
   Essql: {
@@ -337,13 +337,6 @@ export const DataSourceStrings = {
       }),
   },
   Timelion: {
-    getHelp: () =>
-      i18n.translate('xpack.canvas.uis.dataSources.timelionLabel', {
-        defaultMessage: 'Use {timelion} syntax to retrieve a timeseries',
-        values: {
-          timelion: TIMELION,
-        },
-      }),
     getAbout: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.aboutDetail', {
         defaultMessage:
@@ -354,20 +347,12 @@ export const DataSourceStrings = {
           canvas: CANVAS,
         },
       }),
-    getQueryLabel: () =>
-      i18n.translate('xpack.canvas.uis.dataSources.timelion.queryTitle', {
-        defaultMessage: 'Query',
-      }),
-    getQueryHelp: () =>
-      i18n.translate('xpack.canvas.uis.dataSources.timelion.queryLabel', {
-        defaultMessage: '{lucene} Query String syntax',
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelionLabel', {
+        defaultMessage: 'Use {timelion} syntax to retrieve a timeseries',
         values: {
-          lucene: LUCENE,
+          timelion: TIMELION,
         },
-      }),
-    getIntervalLabel: () =>
-      i18n.translate('xpack.canvas.uis.dataSources.timelion.intervalTitle', {
-        defaultMessage: 'Interval',
       }),
     getIntervalHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.intervalLabel', {
@@ -381,6 +366,21 @@ export const DataSourceStrings = {
           auto: 'auto',
         },
       }),
+    getIntervalLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelion.intervalTitle', {
+        defaultMessage: 'Interval',
+      }),
+    getQueryHelp: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelion.queryLabel', {
+        defaultMessage: '{lucene} Query String syntax',
+        values: {
+          lucene: LUCENE,
+        },
+      }),
+    getQueryLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelion.queryTitle', {
+        defaultMessage: 'Query',
+      }),
     getTipsHeading: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.tipsTitle', {
         defaultMessage: 'Some tips',
@@ -389,27 +389,21 @@ export const DataSourceStrings = {
 };
 
 export const ModelStrings = {
-  PointSeries: {
+  Math: {
     getDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.pointSeriesTitle', {
-        defaultMessage: 'Dimensions & measures',
+      i18n.translate('xpack.canvas.uis.models.mathTitle', {
+        defaultMessage: 'Measure',
       }),
-    getXAxisDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.pointSeries.args.xaxisTitle', {
-        defaultMessage: 'X-axis',
+    getValueDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.math.args.valueTitle', {
+        defaultMessage: 'Value',
       }),
-    getXAxisHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.pointSeries.args.xaxisLabel', {
-        defaultMessage: 'Data along the horizontal axis. Usually a number, string or date',
+    getValueHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.math.args.valueLabel', {
+        defaultMessage: 'Function and column to use in extracting a value from the datasource',
       }),
-    getYaxisDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.pointSeries.args.yaxisTitle', {
-        defaultMessage: 'Y-axis',
-      }),
-    getYaxisHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.pointSeries.args.yaxisLabel', {
-        defaultMessage: 'Data along the vertical axis. Usually a number',
-      }),
+  },
+  PointSeries: {
     getColorDisplayName: () =>
       i18n.translate('xpack.canvas.uis.models.pointSeries.args.colorTitle', {
         defaultMessage: 'Color',
@@ -417,6 +411,10 @@ export const ModelStrings = {
     getColorHelp: () =>
       i18n.translate('xpack.canvas.uis.models.pointSeries.args.colorLabel', {
         defaultMessage: 'Determines the color of a mark or series',
+      }),
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeriesTitle', {
+        defaultMessage: 'Dimensions & measures',
       }),
     getSizeDisplayName: () =>
       i18n.translate('xpack.canvas.uis.models.pointSeries.args.sizeTitle', {
@@ -433,6 +431,22 @@ export const ModelStrings = {
     getTextHelp: () =>
       i18n.translate('xpack.canvas.uis.models.pointSeries.args.textLabel', {
         defaultMessage: 'Set the text to use as, or around, the mark',
+      }),
+    getXAxisDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.xaxisTitle', {
+        defaultMessage: 'X-axis',
+      }),
+    getXAxisHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.xaxisLabel', {
+        defaultMessage: 'Data along the horizontal axis. Usually a number, string or date',
+      }),
+    getYaxisDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.yaxisTitle', {
+        defaultMessage: 'Y-axis',
+      }),
+    getYaxisHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.pointSeries.args.yaxisLabel', {
+        defaultMessage: 'Data along the vertical axis. Usually a number',
       }),
   },
 };
@@ -480,13 +494,13 @@ export const TransformStrings = {
       i18n.translate('xpack.canvas.uis.transforms.sortTitle', {
         defaultMessage: 'Datatable sorting',
       }),
-    getSortFieldDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.transforms.sort.args.sortFieldTitle', {
-        defaultMessage: 'Sort field',
-      }),
     getReverseDisplayName: () =>
       i18n.translate('xpack.canvas.uis.transforms.sort.args.reverseToggleSwitch', {
         defaultMessage: 'Descending',
+      }),
+    getSortFieldDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.transforms.sort.args.sortFieldTitle', {
+        defaultMessage: 'Sort field',
       }),
   },
 };
@@ -497,21 +511,9 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.dropdownControlTitle', {
         defaultMessage: 'Dropdown filter',
       }),
-    getValueDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.dropdownControl.args.valueColumnTitle', {
-        defaultMessage: 'Values column',
-      }),
-    getValueHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.dropdownControl.args.valueColumnLabel', {
-        defaultMessage: 'Column from which to extract values to make available in the dropdown',
-      }),
     getFilterDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.dropdownControl.args.filterColumnTitle', {
         defaultMessage: 'Filter column',
-      }),
-    getFilterHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.dropdownControl.args.filterColumnLabel', {
-        defaultMessage: 'Column to which the value selected from the dropdown is applied',
       }),
     getFilterGroupDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.dropdownControl.args.filterGroupTitle', {
@@ -521,6 +523,18 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.dropdownControl.args.filterGroupLabel', {
         defaultMessage:
           "Apply the selected group name to an element's filters function to target this filter",
+      }),
+    getFilterHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.dropdownControl.args.filterColumnLabel', {
+        defaultMessage: 'Column to which the value selected from the dropdown is applied',
+      }),
+    getValueDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.dropdownControl.args.valueColumnTitle', {
+        defaultMessage: 'Values column',
+      }),
+    getValueHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.dropdownControl.args.valueColumnLabel', {
+        defaultMessage: 'Column from which to extract values to make available in the dropdown',
       }),
   },
   GetCell: {
@@ -534,6 +548,14 @@ export const ViewStrings = {
       }),
   },
   Image: {
+    getContainMode: () =>
+      i18n.translate('xpack.canvas.uis.views.image.args.mode.containDropDown', {
+        defaultMessage: 'Contain',
+      }),
+    getCoverMode: () =>
+      i18n.translate('xpack.canvas.uis.views.image.args.mode.coverDropDown', {
+        defaultMessage: 'Cover',
+      }),
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.imageTitle', {
         defaultMessage: 'Image',
@@ -546,34 +568,12 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.image.args.modeLabel', {
         defaultMessage: 'Note: Stretched fill may not work with vector images',
       }),
-    getContainMode: () =>
-      i18n.translate('xpack.canvas.uis.views.image.args.mode.containDropDown', {
-        defaultMessage: 'Contain',
-      }),
-    getCoverMode: () =>
-      i18n.translate('xpack.canvas.uis.views.image.args.mode.coverDropDown', {
-        defaultMessage: 'Cover',
-      }),
     getStretchMode: () =>
       i18n.translate('xpack.canvas.uis.views.image.args.mode.stretchDropDown', {
         defaultMessage: 'Stretch',
       }),
   },
   Markdown: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.markdownTitle', {
-        defaultMessage: '{markdown}',
-        values: {
-          markdown: MARKDOWN,
-        },
-      }),
-    getHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.markdownLabel', {
-        defaultMessage: 'Generate markup using {markdown}',
-        values: {
-          markdown: MARKDOWN,
-        },
-      }),
     getContentDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.markdown.args.contentTitle', {
         defaultMessage: '{markdown} content',
@@ -588,19 +588,33 @@ export const ViewStrings = {
           markdown: MARKDOWN,
         },
       }),
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.markdownTitle', {
+        defaultMessage: '{markdown}',
+        values: {
+          markdown: MARKDOWN,
+        },
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.markdownLabel', {
+        defaultMessage: 'Generate markup using {markdown}',
+        values: {
+          markdown: MARKDOWN,
+        },
+      }),
   },
   Metric: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metricTitle', {
         defaultMessage: 'Metric',
       }),
+    getNumberDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.numberArgTitle', {
+        defaultMessage: 'Number',
+      }),
     getLabelDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.labelArgTitle', {
         defaultMessage: 'Label',
-      }),
-    getLabelHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.metric.args.labelArgLabel', {
-        defaultMessage: 'Describes the metric',
       }),
     getLabelFontDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.labelFontTitle', {
@@ -609,6 +623,10 @@ export const ViewStrings = {
     getLabelFontHelp: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.labelFontLabel', {
         defaultMessage: 'Fonts, alignment and color',
+      }),
+    getLabelHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metric.args.labelArgLabel', {
+        defaultMessage: 'Describes the metric',
       }),
     getMetricFontDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.metric.args.metricFontTitle', {
@@ -640,14 +658,6 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.pie.args.holeLabel', {
         defaultMessage: 'Radius of the hole',
       }),
-    getLabelsDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.pie.args.labelsTitle', {
-        defaultMessage: 'Labels',
-      }),
-    getLabelsHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.pie.args.labelsToggleSwitch', {
-        defaultMessage: 'Show/hide labels',
-      }),
     getLabelRadiusDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.pie.args.labelRadiusTitle', {
         defaultMessage: 'Label radius',
@@ -655,6 +665,14 @@ export const ViewStrings = {
     getLabelRadiusHelp: () =>
       i18n.translate('xpack.canvas.uis.views.pie.args.labelRadiusLabel', {
         defaultMessage: 'Distance of the labels from the center of the pie',
+      }),
+    getLabelsDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.pie.args.labelsTitle', {
+        defaultMessage: 'Labels',
+      }),
+    getLabelsHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.pie.args.labelsToggleSwitch', {
+        defaultMessage: 'Show/hide labels',
       }),
     getLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.pie.args.legendTitle', {
@@ -682,6 +700,14 @@ export const ViewStrings = {
       }),
   },
   Plot: {
+    getDefaultStyleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.plot.args.defaultStyleTitle', {
+        defaultMessage: 'Default style',
+      }),
+    getDefaultStyleHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.plot.args.defaultStyleLabel', {
+        defaultMessage: 'Set the style to be used by default by every series, unless overridden',
+      }),
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.plotTitle', {
         defaultMessage: 'Chart style',
@@ -710,27 +736,48 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.plot.args.yaxisLabel', {
         defaultMessage: 'Configure or disable the Y-axis',
       }),
-    getDefaultStyleDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.plot.args.defaultStyleTitle', {
-        defaultMessage: 'Default style',
-      }),
-    getDefaultStyleHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.plot.args.defaultStyleLabel', {
-        defaultMessage: 'Set the style to be used by default by every series, unless overridden',
-      }),
   },
   Progress: {
+    getBarColorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.args.barColorTitle', {
+        defaultMessage: 'Background color',
+      }),
+    getBarColorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.args.barColorLabel', {
+        defaultMessage: 'Accepts HEX, RGB or HTML Color names',
+      }),
+    getBarWeightDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.args.barWeightTitle', {
+        defaultMessage: 'Background weight',
+      }),
+    getBarWeightHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.args.barWeightLabel', {
+        defaultMessage: 'Thickness of the background bar',
+      }),
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.progressTitle', {
         defaultMessage: 'Progress',
       }),
-    getShapeDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.progress.args.shapeTitle', {
-        defaultMessage: 'Shape',
+    getFontDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.args.fontTitle', {
+        defaultMessage: 'Label settings',
       }),
-    getShapeHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.progress.args.shapeLabel', {
-        defaultMessage: 'Shape of the progress indicator',
+    getFontHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.args.fontLabel', {
+        defaultMessage:
+          'Font settings for the label. Technically, you can add other styles as well',
+      }),
+    getLabelDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.args.labelArgTitle', {
+        defaultMessage: 'Label',
+      }),
+    getLabelHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.args.labelArgLabel', {
+        defaultMessage: `Set {true}/{false} to show/hide label or provide a string to display as the label`,
+        values: {
+          true: BOOLEAN_TRUE,
+          false: BOOLEAN_FALSE,
+        },
       }),
     getMaxDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.progress.args.maxTitle', {
@@ -739,6 +786,14 @@ export const ViewStrings = {
     getMaxHelp: () =>
       i18n.translate('xpack.canvas.uis.views.progress.args.maxLabel', {
         defaultMessage: 'Maximum value of the progress element',
+      }),
+    getShapeDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.args.shapeTitle', {
+        defaultMessage: 'Shape',
+      }),
+    getShapeHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.progress.args.shapeLabel', {
+        defaultMessage: 'Shape of the progress indicator',
       }),
     getValueColorDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.progress.args.valueColorTitle', {
@@ -761,52 +816,11 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.progress.args.valueWeightLabel', {
         defaultMessage: 'Thickness of the progress bar',
       }),
-    getBarColorDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.progress.args.barColorTitle', {
-        defaultMessage: 'Background color',
-      }),
-    getBarColorHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.progress.args.barColorLabel', {
-        defaultMessage: 'Accepts HEX, RGB or HTML Color names',
-      }),
-    getBarWeightDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.progress.args.barWeightTitle', {
-        defaultMessage: 'Background weight',
-      }),
-    getBarWeightHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.progress.args.barWeightLabel', {
-        defaultMessage: 'Thickness of the background bar',
-      }),
-    getLabelDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.progress.args.labelArgTitle', {
-        defaultMessage: 'Label',
-      }),
-    getLabelHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.progress.args.labelArgLabel', {
-        defaultMessage: `Set {true}/{false} to show/hide label or provide a string to display as the label`,
-        values: {
-          true: BOOLEAN_TRUE,
-          false: BOOLEAN_FALSE,
-        },
-      }),
-    getFontDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.progress.args.fontTitle', {
-        defaultMessage: 'Label settings',
-      }),
-    getFontHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.progress.args.fontLabel', {
-        defaultMessage:
-          'Font settings for the label. Technically, you can add other styles as well',
-      }),
   },
   Render: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.renderTitle', {
-        defaultMessage: 'Element style',
-      }),
-    getHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.renderLabel', {
-        defaultMessage: 'Setting for the container around your element',
+    getCssApply: () =>
+      i18n.translate('xpack.canvas.uis.views.render.args.css.applyButtonLabel', {
+        defaultMessage: 'Apply Stylesheet',
       }),
     getCssHelp: () =>
       i18n.translate('xpack.canvas.uis.views.render.args.cssLabel', {
@@ -815,15 +829,27 @@ export const ViewStrings = {
           css: CSS,
         },
       }),
-    getCssApply: () =>
-      i18n.translate('xpack.canvas.uis.views.render.args.css.applyButtonLabel', {
-        defaultMessage: 'Apply Stylesheet',
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.renderTitle', {
+        defaultMessage: 'Element style',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.renderLabel', {
+        defaultMessage: 'Setting for the container around your element',
       }),
   },
   RepeatImage: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.repeatImageTitle', {
         defaultMessage: 'Repeating image',
+      }),
+    getEmptyImageDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.repeatImage.args.emptyImageTitle', {
+        defaultMessage: 'Empty image',
+      }),
+    getEmptyImageHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.repeatImage.args.emptyImageLabel', {
+        defaultMessage: 'An image to fill up the difference between the value and the max count',
       }),
     getImageDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.repeatImage.args.imageTitle', {
@@ -833,13 +859,13 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.repeatImage.args.imageLabel', {
         defaultMessage: 'An image to repeat',
       }),
-    getEmptyImageDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.repeatImage.args.emptyImageTitle', {
-        defaultMessage: 'Empty image',
+    getMaxDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.repeatImage.args.maxTitle', {
+        defaultMessage: 'Max count',
       }),
-    getEmptyImageHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.repeatImage.args.emptyImageLabel', {
-        defaultMessage: 'An image to fill up the difference between the value and the max count',
+    getMaxHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.repeatImage.args.maxLabel', {
+        defaultMessage: 'The maximum number of repeated images',
       }),
     getSizeDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.repeatImage.args.sizeTitle', {
@@ -850,27 +876,11 @@ export const ViewStrings = {
         defaultMessage:
           'The size of the largest dimension of the image. Eg, if the image is tall but not wide, this is the height',
       }),
-    getMaxDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.repeatImage.args.maxTitle', {
-        defaultMessage: 'Max count',
-      }),
-    getMaxHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.repeatImage.args.maxLabel', {
-        defaultMessage: 'The maximum number of repeated images',
-      }),
   },
   RevealImage: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.revealImageTitle', {
         defaultMessage: 'Reveal image',
-      }),
-    getImageDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.revealImage.args.imageTitle', {
-        defaultMessage: 'Image',
-      }),
-    getImageHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.revealImage.args.imageLabel', {
-        defaultMessage: 'An image to reveal given the function input. Eg, a full glass',
       }),
     getEmptyImageDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.revealImage.args.emptyImageTitle', {
@@ -880,6 +890,18 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.revealImage.args.emptyImageLabel', {
         defaultMessage: 'A background image. Eg, an empty glass',
       }),
+    getImageDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.revealImage.args.imageTitle', {
+        defaultMessage: 'Image',
+      }),
+    getImageHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.revealImage.args.imageLabel', {
+        defaultMessage: 'An image to reveal given the function input. Eg, a full glass',
+      }),
+    getOriginBottom: () =>
+      i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.bottomDropDown', {
+        defaultMessage: 'Bottom',
+      }),
     getOriginDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.revealImage.args.originTitle', {
         defaultMessage: 'Reveal from',
@@ -888,40 +910,20 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.revealImage.args.originLabel', {
         defaultMessage: 'The direction from which to start the reveal',
       }),
-    getOriginTop: () =>
-      i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.topDropDown', {
-        defaultMessage: 'Top',
-      }),
     getOriginLeft: () =>
       i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.leftDropDown', {
         defaultMessage: 'Left',
-      }),
-    getOriginBottom: () =>
-      i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.bottomDropDown', {
-        defaultMessage: 'Bottom',
       }),
     getOriginRight: () =>
       i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.rightDropDown', {
         defaultMessage: 'Right',
       }),
+    getOriginTop: () =>
+      i18n.translate('xpack.canvas.uis.views.revealImage.args.origin.topDropDown', {
+        defaultMessage: 'Top',
+      }),
   },
   Shape: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.shapeTitle', {
-        defaultMessage: 'Shape',
-      }),
-    getShapeDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.shape.args.shapeTitle', {
-        defaultMessage: 'Select a shape',
-      }),
-    getFillDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.shape.args.fillTitle', {
-        defaultMessage: 'Fill',
-      }),
-    getFillHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.shape.args.fillLabel', {
-        defaultMessage: 'Accepts HEX, RGB or HTML Color names',
-      }),
     getBorderDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.borderTitle', {
         defaultMessage: 'Border',
@@ -938,6 +940,18 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.shape.args.borderWidthLabel', {
         defaultMessage: 'Border width',
       }),
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.shapeTitle', {
+        defaultMessage: 'Shape',
+      }),
+    getFillDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.shape.args.fillTitle', {
+        defaultMessage: 'Fill',
+      }),
+    getFillHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.shape.args.fillLabel', {
+        defaultMessage: 'Accepts HEX, RGB or HTML Color names',
+      }),
     getMaintainAspectDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectTitle', {
         defaultMessage: 'Maintain aspect ratio',
@@ -948,6 +962,10 @@ export const ViewStrings = {
         values: {
           true: BOOLEAN_TRUE,
         },
+      }),
+    getShapeDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.shape.args.shapeTitle', {
+        defaultMessage: 'Select a shape',
       }),
   },
   Table: {
@@ -986,9 +1004,9 @@ export const ViewStrings = {
       }),
   },
   Timefilter: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.timefilterTitle', {
-        defaultMessage: 'Time filter',
+    getColumnConfirm: () =>
+      i18n.translate('xpack.canvas.uis.views.timefilter.args.columnConfirmButtonLabel', {
+        defaultMessage: 'Set',
       }),
     getColumnDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.timefilter.args.columnTitle', {
@@ -998,9 +1016,9 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.timefilter.args.columnLabel', {
         defaultMessage: 'Column to which selected time is applied',
       }),
-    getColumnConfirm: () =>
-      i18n.translate('xpack.canvas.uis.views.timefilter.args.columnConfirmButtonLabel', {
-        defaultMessage: 'Set',
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.timefilterTitle', {
+        defaultMessage: 'Time filter',
       }),
     getFilterGroupDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.timefilter.args.filterGroupTitle', {

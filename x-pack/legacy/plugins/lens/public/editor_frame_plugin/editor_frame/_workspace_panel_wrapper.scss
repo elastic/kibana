@@ -10,7 +10,8 @@
   .lnsWorkspacePanelWrapper__pageContentHeader {
     padding: $euiSizeS;
     border-bottom: $euiBorderThin;
-    margin-bottom: 0;
+    // override EuiPage
+    margin-bottom: 0 !important; // sass-lint:disable-line no-important
   }
 
   .lnsWorkspacePanelWrapper__pageContentBody {

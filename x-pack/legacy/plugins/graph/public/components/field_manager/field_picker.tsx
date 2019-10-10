@@ -9,8 +9,7 @@ import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
-
-import { FieldIcon } from './field_icon';
+import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface FieldPickerProps {
   fieldMap: Record<string, WorkspaceField>;
@@ -60,6 +59,7 @@ export function FieldPicker({
       panelPaddingSize="none"
       button={
         <EuiBadge
+          data-test-subj="graph-add-field-button"
           className={classNames('gphFieldPicker__button', {
             'gphFieldPicker__button--disabled': !hasFields,
           })}
@@ -87,6 +87,7 @@ export function FieldPicker({
               defaultMessage: 'Filter fields',
             }),
             compressed: true,
+            'data-test-subj': 'graph-field-search',
           }}
           listProps={{
             className: 'gphFieldPicker__selectableList',
@@ -121,7 +122,7 @@ function toOptions(
 ): Array<{ label: string; checked?: 'on' | 'off'; prepend?: ReactNode }> {
   return fields.map(field => ({
     label: field.name,
-    prepend: <FieldIcon type={field.type} />,
+    prepend: <FieldIcon type={field.type} size="m" useColor />,
     checked: field.selected ? 'on' : undefined,
   }));
 }

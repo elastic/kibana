@@ -8,10 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiForm, EuiFormRow, EuiRange, EuiSwitch } from '@elastic/eui';
-import { IndexPattern } from '../../indexpattern';
 import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
+import { IndexPattern } from '../../types';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -196,7 +196,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
-                defaultMessage: 'Customize level of detail',
+                defaultMessage: 'Customize time intervals',
               })}
               checked={currentColumn.params.interval !== autoInterval}
               onChange={onChangeAutoInterval}
@@ -206,7 +206,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
         {currentColumn.params.interval !== autoInterval && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-              defaultMessage: 'Level of detail',
+              defaultMessage: 'Time intervals',
             })}
           >
             {intervalIsRestricted ? (
@@ -242,7 +242,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                   )
                 }
                 aria-label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-                  defaultMessage: 'Level of detail',
+                  defaultMessage: 'Time intervals',
                 })}
               />
             )}

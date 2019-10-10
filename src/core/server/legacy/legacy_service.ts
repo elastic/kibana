@@ -20,7 +20,7 @@
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types';
-import { InternalCoreSetup, InternalCoreStart } from '../';
+import { InternalCoreSetup, InternalCoreStart, CoreSetup, CoreStart } from '../';
 import { SavedObjectsLegacyUiExports } from '../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
@@ -81,6 +81,8 @@ export interface LegacyServiceSetup {
 
 /** @internal */
 export class LegacyService implements CoreService<LegacyServiceSetup> {
+  /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
+  public readonly legacyId = Symbol();
   private readonly log: Logger;
   private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
@@ -226,6 +228,29 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
       uiExports: SavedObjectsLegacyUiExports;
     }
   ) {
+    const coreSetup: CoreSetup = {
+      context: setupDeps.core.context,
+      elasticsearch: {
+        adminClient$: setupDeps.core.elasticsearch.adminClient$,
+        dataClient$: setupDeps.core.elasticsearch.dataClient$,
+        createClient: setupDeps.core.elasticsearch.createClient,
+      },
+      http: {
+        createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
+        registerRouteHandlerContext: setupDeps.core.http.registerRouteHandlerContext.bind(
+          null,
+          this.legacyId
+        ),
+        createRouter: () => setupDeps.core.http.createRouter('', this.legacyId),
+        registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
+        registerAuth: setupDeps.core.http.registerAuth,
+        registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
+        basePath: setupDeps.core.http.basePath,
+        isTlsEnabled: setupDeps.core.http.isTlsEnabled,
+      },
+    };
+    const coreStart: CoreStart = {};
+
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(
@@ -233,8 +258,20 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
       config,
       {
         handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
-        setupDeps,
-        startDeps,
+        setupDeps: {
+          core: coreSetup,
+          plugins: setupDeps.plugins,
+        },
+        startDeps: {
+          core: coreStart,
+          plugins: startDeps.plugins,
+        },
+        __internals: {
+          hapiServer: setupDeps.core.http.server,
+          kibanaMigrator: startDeps.core.savedObjects.migrator,
+          uiPlugins: setupDeps.core.plugins.uiPlugins,
+          elasticsearch: setupDeps.core.elasticsearch,
+        },
         logger: this.coreContext.logger,
       },
       legacyPlugins
