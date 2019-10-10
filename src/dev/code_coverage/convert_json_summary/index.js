@@ -20,30 +20,24 @@
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { fromEventPattern } from 'rxjs';
+import { map } from 'rxjs/operators';
 import moment from 'moment';
 import oboe from 'oboe';
 
 const kibanaRoot = resolve(__dirname, '../../../..');
 const path = resolve(kibanaRoot, './target/kibana-coverage/mocha/coverage-summary.json');
 
-const result = [];
-
 const jsonStream = oboe(createReadStream(path))
-  .on('done', () => {
-    result.forEach(x => console.log(`\n### x: \n\t${JSON.stringify(x, null, 2)}`));
-    console.log('\n### done');
-  });
+  .on('done', () => console.log('\n### done'));
 
-const nodes$ = fromEventPattern(handler => jsonStream.on('node', '!.*', handler));
-
-nodes$
-  .subscribe(function jsonStreamSubscriptionHandler(...args)  {
-    const [name] = args[0][1];
-    const [stats] = args[0];
-    const obj = {
+fromEventPattern(_ => jsonStream.on('node', '!.*', _))
+  .pipe(map((...xs) => {
+    const [name] = xs[0][1];
+    const [stats] = xs[0];
+    return {
       '@timestamp': moment().format(),
       'path': name.includes('kibana') ? name.replace(/.*kibana\//, '') : name,
       ...stats,
     };
-    result.push(obj);
-  });
+  }))
+  .subscribe(obj => console.log(`\n### x: \n${JSON.stringify(obj, null, 2)}`));
