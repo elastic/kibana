@@ -229,15 +229,14 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
   };
 
   private renderConfirmButton = () => {
-    const { isLoading, title, hasTitleDuplicate } = this.state;
+    const { isLoading, title } = this.state;
 
-    let confirmLabel: string | React.ReactNode = hasTitleDuplicate
-      ? i18n.translate('kibana-react.savedObjects.saveModal.confirmSaveButtonLabel', {
-          defaultMessage: 'Confirm save',
-        })
-      : i18n.translate('kibana-react.savedObjects.saveModal.saveButtonLabel', {
-          defaultMessage: 'Save',
-        });
+    let confirmLabel: string | React.ReactNode = i18n.translate(
+      'kibana-react.savedObjects.saveModal.saveButtonLabel',
+      {
+        defaultMessage: 'Save',
+      }
+    );
 
     if (this.props.confirmButtonLabel) {
       confirmLabel = this.props.confirmButtonLabel;
@@ -267,7 +266,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
           title={
             <FormattedMessage
               id="kibana-react.savedObjects.saveModal.duplicateTitleLabel"
-              defaultMessage="A {objectType} with the title '{title}' already exists."
+              defaultMessage="A {objectType} with the title '{title}' already exists"
               values={{ objectType: this.props.objectType, title: this.state.title }}
             />
           }
@@ -277,19 +276,16 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
           <p>
             <FormattedMessage
               id="kibana-react.savedObjects.saveModal.duplicateTitleDescription"
-              defaultMessage="Click {confirmSaveLabel} to save the {objectType} with the duplicate title."
+              defaultMessage="Clicking {confirmSaveLabel} overwrites the existing {objectType}."
               values={{
                 objectType: this.props.objectType,
                 confirmSaveLabel: (
                   <strong>
                     {this.props.confirmButtonLabel
                       ? this.props.confirmButtonLabel
-                      : i18n.translate(
-                          'kibana-react.savedObjects.saveModal.duplicateTitleDescription.confirmSaveText',
-                          {
-                            defaultMessage: 'Confirm save',
-                          }
-                        )}
+                      : i18n.translate('kibana-react.savedObjects.saveModal.saveButtonLabel', {
+                          defaultMessage: 'Save',
+                        })}
                   </strong>
                 ),
               }}
@@ -315,7 +311,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
           label={
             <FormattedMessage
               id="kibana-react.savedObjects.saveModal.saveAsNewLabel"
-              defaultMessage="Save as a new {objectType}"
+              defaultMessage="Save as new {objectType}"
               values={{ objectType: this.props.objectType }}
             />
           }
