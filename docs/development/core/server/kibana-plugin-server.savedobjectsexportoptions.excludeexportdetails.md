@@ -4,7 +4,7 @@
 
 ## SavedObjectsExportOptions.excludeExportDetails property
 
-flag to not add export details entry at the end of the stream.
+flag to not add export details in the export response.
 
 <b>Signature:</b>
 

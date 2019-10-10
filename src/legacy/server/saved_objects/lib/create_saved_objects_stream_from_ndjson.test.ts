@@ -78,7 +78,7 @@ describe('createSavedObjectsStreamFromNdJson', () => {
     ]);
   });
 
-  it('filter the export details entry from the stream', async () => {
+  it('filters the export details entry from the stream', async () => {
     const savedObjectsStream = createSavedObjectsStreamFromNdJson(
       new Readable({
         read() {
