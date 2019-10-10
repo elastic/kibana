@@ -7,6 +7,7 @@
 import { SIGNALS_ID } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
+import { updateSignal } from './update_signals';
 
 export interface SignalParams {
   alertsClient: AlertsClient;
@@ -27,7 +28,9 @@ export interface SignalParams {
   references: string[];
 }
 
-export const createSignal = async ({
+// TODO: This updateIfIdExists should be temporary and we will remove it once we can POST id's directly to
+// the alerting framework.
+export const updateIfIdExists = async ({
   alertsClient,
   actionsClient,
   description,
@@ -44,49 +47,116 @@ export const createSignal = async ({
   type,
   references,
 }: SignalParams) => {
-  // TODO: Right now we are using the .server-log as the default action as each alert has to have
-  // at least one action or it will not be able to do in-memory persistence. When adding in actions
-  // such as email, slack, etc... this should be the default action if not action is specified to
-  // create signals
-
-  const actionResults = await actionsClient.create({
-    action: {
-      actionTypeId: '.server-log',
-      description: 'SIEM Alerts Log',
-      config: {},
-      secrets: {},
-    },
-  });
-
-  return alertsClient.create({
-    data: {
-      alertTypeId: SIGNALS_ID,
-      alertTypeParams: {
-        description,
-        id,
-        index,
-        from,
-        filter,
-        kql,
-        name,
-        severity,
-        to,
-        type,
-        references,
-      },
-      interval,
+  try {
+    const signal = await updateSignal({
+      alertsClient,
+      actionsClient,
+      description,
       enabled,
-      actions: [
-        {
-          group: 'default',
-          id: actionResults.id,
-          params: {
-            message: 'SIEM Alert Fired',
-            level: 'info',
-          },
-        },
-      ],
-      throttle: null,
-    },
+      filter,
+      from,
+      id,
+      index,
+      interval,
+      kql,
+      name,
+      severity,
+      to,
+      type,
+      references,
+    });
+    return signal;
+  } catch (err) {
+    // This happens when we cannot get a saved object back from reading a signal.
+    // So we continue normally as we have nothing we can upsert.
+  }
+  return null;
+};
+
+export const createSignal = async ({
+  alertsClient,
+  actionsClient,
+  description,
+  enabled,
+  filter,
+  from,
+  id,
+  index,
+  interval,
+  kql,
+  maxSignals,
+  name,
+  severity,
+  to,
+  type,
+  references,
+}: SignalParams) => {
+  // TODO: Once we can post directly to _id we will not have to do this part anymore.
+  const signalUpdating = await updateIfIdExists({
+    alertsClient,
+    actionsClient,
+    description,
+    enabled,
+    filter,
+    from,
+    id,
+    index,
+    interval,
+    kql,
+    maxSignals,
+    name,
+    severity,
+    to,
+    type,
+    references,
   });
+  if (signalUpdating == null) {
+    // TODO: Right now we are using the .server-log as the default action as each alert has to have
+    // at least one action or it will not be able to do in-memory persistence. When adding in actions
+    // such as email, slack, etc... this should be the default action if not action is specified to
+    // create signals
+    const actionResults = await actionsClient.create({
+      action: {
+        actionTypeId: '.server-log',
+        description: 'SIEM Alerts Log',
+        config: {},
+        secrets: {},
+      },
+    });
+
+    return alertsClient.create({
+      data: {
+        alertTypeId: SIGNALS_ID,
+        alertTypeParams: {
+          description,
+          id,
+          index,
+          from,
+          filter,
+          kql,
+          maxSignals,
+          name,
+          severity,
+          to,
+          type,
+          references,
+        },
+        interval,
+        enabled,
+        actions: [
+          {
+            group: 'default',
+            id: actionResults.id,
+            params: {
+              message: 'SIEM Alert Fired',
+              level: 'info',
+            },
+          },
+        ],
+        throttle: null,
+      },
+    });
+  } else {
+    return signalUpdating;
+  }
 };

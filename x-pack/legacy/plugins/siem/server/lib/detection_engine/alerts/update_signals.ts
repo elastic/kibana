@@ -103,13 +103,13 @@ export const updateSignal = async ({
   );
 
   if (signal.enabled && !enabled) {
-    await alertsClient.disable({ id });
+    await alertsClient.disable({ id: signal.id });
   } else if (!signal.enabled && enabled) {
-    await alertsClient.enable({ id });
+    await alertsClient.enable({ id: signal.id });
   }
 
   return alertsClient.update({
-    id,
+    id: signal.id,
     data: {
       interval: calculateInterval(interval, signal.interval),
       actions,
