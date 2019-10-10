@@ -14,8 +14,6 @@ import { APP_TITLE } from './common/constants';
 import { codePlugin } from './server';
 import { PluginSetupContract } from '../../../plugins/code/server';
 
-export * from './shared';
-
 export type RequestFacade = Legacy.Request;
 export type RequestQueryFacade = RequestQuery;
 export type ResponseToolkitFacade = ResponseToolkit;
