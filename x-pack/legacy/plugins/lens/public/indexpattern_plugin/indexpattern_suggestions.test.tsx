@@ -705,7 +705,10 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternId: '1',
         });
 
-        expect(suggestions).toHaveLength(0);
+        expect(suggestions).toHaveLength(1);
+        // Check that the suggestion is a single metric
+        expect(suggestions[0].table.columns).toHaveLength(1);
+        expect(suggestions[0].table.columns[0].operation.isBucketed).toBeFalsy();
       });
 
       it('prepends a terms column on string field', () => {
