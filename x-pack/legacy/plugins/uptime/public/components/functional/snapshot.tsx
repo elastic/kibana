@@ -34,7 +34,7 @@ export const SnapshotComponent = ({
     <EuiTitle size="s">
       <h2>
         <FormattedMessage
-          id="xpack.uptime.snapshot.endpointStatusTitle"
+          id="xpack.uptime.snapshot.downCountsMessage"
           defaultMessage="{down}/{total} monitors are down"
           values={{
             down: get<number>(data, 'snapshot.counts.down', 0),
