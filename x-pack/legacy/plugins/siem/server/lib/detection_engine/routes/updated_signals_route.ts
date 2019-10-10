@@ -31,19 +31,26 @@ interface SignalsRequest extends Hapi.Request {
 export const updateSignalsRoute = (server: Hapi.Server) => {
   server.route({
     method: 'PUT',
-    path: '/api/siem/signals',
+    path: '/api/siem/signals/{id?}',
     options: {
       tags: ['access:signals-all'],
       validate: {
         options: {
           abortEarly: false,
         },
+        params: {
+          id: Joi.when(Joi.ref('$payload.id'), {
+            is: Joi.exist(),
+            then: Joi.string().optional(),
+            otherwise: Joi.string().required(),
+          }),
+        },
         payload: Joi.object({
           description: Joi.string(),
           enabled: Joi.boolean(),
           filter: Joi.object(),
           from: Joi.string(),
-          id: Joi.string().required(),
+          id: Joi.string(),
           index: Joi.array(),
           interval: Joi.string(),
           kql: Joi.string(),
@@ -74,7 +81,6 @@ export const updateSignalsRoute = (server: Hapi.Server) => {
         type,
         references,
       } = request.payload;
-
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
 
       const actionsClient = isFunction(request.getActionsClient)
@@ -92,7 +98,7 @@ export const updateSignalsRoute = (server: Hapi.Server) => {
         enabled,
         filter,
         from,
-        id,
+        id: request.params.id ? request.params.id : id,
         index,
         interval,
         kql,
