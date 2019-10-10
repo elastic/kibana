@@ -372,12 +372,12 @@ export class SearchSource {
 
     const computedFields = searchRequest.index.getComputedFields();
 
-    searchRequest.body.storedfields = computedFields.storedFields;
-    searchRequest.body.scriptfields = searchRequest.body.scriptfields || {};
-    _.extend(searchRequest.body.scriptfields, computedFields.scriptFields);
+    searchRequest.body.stored_fields = computedFields.storedFields;
+    searchRequest.body.script_fields = searchRequest.body.script_fields || {};
+    _.extend(searchRequest.body.script_fields, computedFields.scriptFields);
 
-    const defaultDocValueFields = computedFields.docvalueFields || [];
-    searchRequest.body.docvaluefields = searchRequest.body.docvaluefields || defaultDocValueFields;
+    searchRequest.body.docvalue_fields =
+      searchRequest.body.docvalue_fields || computedFields.docvalueFields || [];
 
     if (searchRequest.body._source) {
       // exclude source fields for this index pattern specified by the user
@@ -385,7 +385,7 @@ export class SearchSource {
         searchRequest.body._source.excludes,
         config.get('metaFields')
       );
-      searchRequest.body.docvaluefields = searchRequest.body.docvaluefields.filter(
+      searchRequest.body.docvalue_fields = searchRequest.body.docvalue_fields.filter(
         (docvalueField: any) => filter(docvalueField.field)
       );
     }
@@ -393,16 +393,16 @@ export class SearchSource {
     // if we only want to search for certain fields
     const fields = searchRequest.fields;
     if (fields) {
-      // filter out the docvaluefields, and scriptfields to only include those that we are concerned with
-      searchRequest.body.docvaluefields = filterDocvalueFields(
-        searchRequest.body.docvaluefields,
+      // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
+      searchRequest.body.docvalue_fields = filterDocvalueFields(
+        searchRequest.body.docvalue_fields,
         fields
       );
-      searchRequest.body.scriptfields = _.pick(searchRequest.body.scriptfields, fields);
+      searchRequest.body.script_fields = _.pick(searchRequest.body.script_fields, fields);
 
-      // request the remaining fields from both storedfields and _source
-      const remainingFields = _.difference(fields, _.keys(searchRequest.body.scriptfields));
-      searchRequest.body.storedfields = remainingFields;
+      // request the remaining fields from both stored_fields and _source
+      const remainingFields = _.difference(fields, _.keys(searchRequest.body.script_fields));
+      searchRequest.body.stored_fields = remainingFields;
       _.set(searchRequest.body, '_source.includes', remainingFields);
     }
 
