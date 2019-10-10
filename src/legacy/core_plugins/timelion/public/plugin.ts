@@ -31,11 +31,14 @@ import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisualization } from './vis';
 import { getTimeChart } from './panels/timechart/timechart';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginStart } from './shim';
+import { DataSetup } from '../../data/public';
+import { TimefilterSetup } from '../../data/public/timefilter';
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  data: DataSetup;
 
   // Temporary solution
   __LEGACY: LegacyDependenciesPlugin;
@@ -53,6 +56,7 @@ export interface TimelionPluginStartDependencies {
 export interface TimelionVisualizationDependencies {
   uiSettings: UiSettingsClientContract;
   http: HttpSetup;
+  timefilter: TimefilterSetup;
 }
 
 /** @internal */
@@ -73,6 +77,7 @@ export class TimelionPlugin
     const dependencies: TimelionVisualizationDependencies = {
       uiSettings: core.uiSettings,
       http: core.http,
+      timefilter: plugins.data.timefilter,
     };
 
     plugins.__LEGACY.setup();
