@@ -85,15 +85,18 @@ export function SavedViewListFlyout<ViewState>({
     [setView, close]
   );
 
-  const renderDeleteAction = useCallback((item: SavedView<ViewState>) => {
-    return (
-      <DeleteConfimation
-        confirmedAction={() => {
-          deleteView(item.id);
-        }}
-      />
-    );
-  }, []);
+  const renderDeleteAction = useCallback(
+    (item: SavedView<ViewState>) => {
+      return (
+        <DeleteConfimation
+          confirmedAction={() => {
+            deleteView(item.id);
+          }}
+        />
+      );
+    },
+    [deleteView]
+  );
 
   const columns = [
     {
