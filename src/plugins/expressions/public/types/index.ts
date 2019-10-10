@@ -28,7 +28,8 @@ export {
 } from './common';
 export { ExpressionFunction, AnyExpressionFunction, FunctionHandlers } from './functions';
 export { ExpressionType, AnyExpressionType } from './types';
-export * from '../expression_types';
+
+export * from './style';
 
 export type ExpressionArgAST = string | boolean | number | ExpressionAST;
 

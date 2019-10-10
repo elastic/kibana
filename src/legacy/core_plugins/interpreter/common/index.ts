@@ -36,6 +36,7 @@ export {
   PointSeriesColumn,
   PointSeriesColumnName,
   Render,
+  ExpressionTypeStyle,
   Style,
   Type,
 } from '../../../../plugins/expressions/public';

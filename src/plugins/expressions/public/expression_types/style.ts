@@ -17,17 +17,11 @@
  * under the License.
  */
 
-import { ExpressionType } from '../types';
+import { ExpressionType, ExpressionTypeStyle } from '../types';
 
 const name = 'style';
 
-export interface Style {
-  type: typeof name;
-  spec: any;
-  css: string;
-}
-
-export const style = (): ExpressionType<typeof name, Style> => ({
+export const style = (): ExpressionType<typeof name, ExpressionTypeStyle> => ({
   name,
   from: {
     null: () => {

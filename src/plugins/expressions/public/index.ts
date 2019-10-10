@@ -31,3 +31,4 @@ export * from './types';
 export { Type, getType } from './interpreter';
 export { interpreterProvider, ExpressionInterpret } from './interpreter_provider';
 export * from './serialize_provider';
+export * from './expression_types';
