@@ -61,7 +61,7 @@ export const UpgradeContents = React.memo(() => {
         <EuiFlexItem grow={false}>
           <EuiButton
             href={`${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`}
-            iconType="managementApp"
+            iconType="gear"
             target="_blank"
           >
             {i18n.LICENSE_BUTTON}
