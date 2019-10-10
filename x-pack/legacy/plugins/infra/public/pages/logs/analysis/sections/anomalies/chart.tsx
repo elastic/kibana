@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RectAnnotationDatum } from '@elastic/charts';
+import { RectAnnotationDatum, AnnotationId } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
@@ -62,10 +62,6 @@ export const AnomaliesChart: React.FunctionComponent<{
     },
     [setTimeRange]
   );
-  const warningAnnotationsId = getAnnotationId(`anomalies-${chartId}-warning`);
-  const minorAnnotationsId = getAnnotationId(`anomalies-${chartId}-minor`);
-  const majorAnnotationsId = getAnnotationId(`anomalies-${chartId}-major`);
-  const criticalAnnotationsId = getAnnotationId(`anomalies-${chartId}-critical`);
 
   return (
     <div style={{ height: 160, width: '100%' }}>
@@ -91,32 +87,9 @@ export const AnomaliesChart: React.FunctionComponent<{
           xAccessor={'time'}
           yAccessors={['value']}
           data={series}
-          barSeriesStyle={{ rect: { fill: '#D3DAE6', opacity: 0.7 } }} // TODO: Acquire this from "theme" as euiColorLightShade
+          barSeriesStyle={{ rect: { fill: '#D3DAE6', opacity: 0.6 } }} // TODO: Acquire this from "theme" as euiColorLightShade
         />
-        <RectAnnotation
-          dataValues={annotations.warning}
-          annotationId={warningAnnotationsId}
-          style={{ fill: '#006BB4', opacity: 0.8 }}
-          renderTooltip={renderAnnotationTooltip}
-        />
-        <RectAnnotation
-          dataValues={annotations.minor}
-          annotationId={minorAnnotationsId}
-          style={{ fill: '#017D73', opacity: 0.8 }}
-          renderTooltip={renderAnnotationTooltip}
-        />
-        <RectAnnotation
-          dataValues={annotations.major}
-          annotationId={majorAnnotationsId}
-          style={{ fill: '#F5A700', opacity: 0.8 }}
-          renderTooltip={renderAnnotationTooltip}
-        />
-        <RectAnnotation
-          dataValues={annotations.critical}
-          annotationId={criticalAnnotationsId}
-          style={{ fill: '#BD271E', opacity: 0.8 }}
-          renderTooltip={renderAnnotationTooltip}
-        />
+        {renderAnnotations(annotations, chartId, renderAnnotationTooltip)}
         <Settings
           onBrushEnd={handleBrushEnd}
           tooltip={tooltipProps}
@@ -125,4 +98,49 @@ export const AnomaliesChart: React.FunctionComponent<{
       </Chart>
     </div>
   );
+};
+
+interface SeverityConfig {
+  annotationId: AnnotationId;
+  style: {
+    fill: string;
+    opacity: number;
+  };
+}
+
+const severityConfigs: Record<string, SeverityConfig> = {
+  warning: {
+    annotationId: getAnnotationId(`anomalies-warning`),
+    style: { fill: 'rgb(125, 180, 226)', opacity: 0.7 },
+  },
+  minor: {
+    annotationId: getAnnotationId(`anomalies-minor`),
+    style: { fill: 'rgb(255, 221, 0)', opacity: 0.7 },
+  },
+  major: {
+    annotationId: getAnnotationId(`anomalies-major`),
+    style: { fill: 'rgb(229, 113, 0)', opacity: 0.7 },
+  },
+  critical: {
+    annotationId: getAnnotationId(`anomalies-critical`),
+    style: { fill: 'rgb(228, 72, 72)', opacity: 0.7 },
+  },
+};
+
+const renderAnnotations = (
+  annotations: Record<MLSeverityScoreCategories, RectAnnotationDatum[]>,
+  chartId: string,
+  renderAnnotationTooltip?: (details?: string) => JSX.Element
+) => {
+  return Object.entries(annotations).map((entry, index) => {
+    return (
+      <RectAnnotation
+        key={`${index}:${chartId}:${entry[0]}`}
+        dataValues={entry[1]}
+        annotationId={severityConfigs[entry[0]].annotationId}
+        style={severityConfigs[entry[0]].style}
+        renderTooltip={renderAnnotationTooltip}
+      />
+    );
+  });
 };
