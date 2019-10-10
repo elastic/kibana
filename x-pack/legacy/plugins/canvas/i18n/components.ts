@@ -497,7 +497,7 @@ export const ComponentStrings = {
   ShareWebsiteRuntimeStep: {
     getDownloadLabel: () =>
       i18n.translate('xpack.canvas.shareWebsiteFlyout.runtimeStep.downloadLabel', {
-        defaultMessage: 'Download runtime.',
+        defaultMessage: 'Download runtime',
       }),
     getStepDescription: () =>
       i18n.translate('xpack.canvas.shareWebsiteFlyout.runtimeStep.description', {
@@ -590,7 +590,7 @@ export const ComponentStrings = {
   ShareWebsiteWorkpadStep: {
     getDownloadLabel: () =>
       i18n.translate('xpack.canvas.shareWebsiteFlyout.workpadStep.downloadLabel', {
-        defaultMessage: 'Download workpad.',
+        defaultMessage: 'Download workpad',
       }),
     getStepDescription: () =>
       i18n.translate('xpack.canvas.shareWebsiteFlyout.workpadStep.description', {
