@@ -12,17 +12,23 @@ import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/
 import { AnomaliesTableExpandedRow } from './expanded_row';
 import { getTopAnomalyScoresByPartition } from '../helpers/data_formatters';
 
+interface TableItem {
+  id: string;
+  partition: string;
+  topAnomalyScore: number;
+}
+
 export const AnomaliesTable: React.FunctionComponent<{
   results: GetLogEntryRateSuccessResponsePayload['data'];
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
 }> = ({ results, timeRange, setTimeRange }) => {
-  const tableItems = useMemo(() => {
+  const tableItems: TableItem[] = useMemo(() => {
     return Object.entries(getTopAnomalyScoresByPartition(results)).map(([key, value]) => {
       return {
         id: key || 'unknown', // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap
         partition: key || 'unknown',
-        topAnomalyScore: Number(value).toFixed(0),
+        topAnomalyScore: parseInt(Number(value).toFixed(0), 10),
       };
     });
   }, [results]);
@@ -30,6 +36,43 @@ export const AnomaliesTable: React.FunctionComponent<{
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
+
+  interface SortingOptions {
+    sort: {
+      field: string;
+      direction: string;
+    };
+  }
+
+  const [sorting, setSorting] = useState<SortingOptions>({
+    sort: {
+      field: 'topAnomalyScore',
+      direction: 'desc',
+    },
+  });
+
+  const handleTableChange = useCallback(
+    ({ sort = {} }) => {
+      const { field, direction } = sort;
+      setSorting({
+        sort: {
+          field,
+          direction,
+        },
+      });
+    },
+    [setSorting]
+  );
+
+  const sortedTableItems = useMemo(() => {
+    let sortedItems: TableItem[] = [];
+    if (sorting.sort.field === 'partition') {
+      sortedItems = tableItems.sort((a, b) => (a.partition > b.partition ? 1 : -1));
+    } else if (sorting.sort.field === 'topAnomalyScore') {
+      sortedItems = tableItems.sort((a, b) => a.topAnomalyScore - b.topAnomalyScore);
+    }
+    return sorting.sort.direction === 'asc' ? sortedItems : sortedItems.reverse();
+  }, [tableItems, sorting]);
 
   const toggleExpandedItems = useCallback(
     item => {
@@ -75,7 +118,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
-      render: item => (
+      render: (item: TableItem) => (
         <EuiButtonIcon
           onClick={() => toggleExpandedItems(item)}
           aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
@@ -87,12 +130,14 @@ export const AnomaliesTable: React.FunctionComponent<{
 
   return (
     <EuiBasicTable
-      items={tableItems}
+      items={sortedTableItems}
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isExpandable={true}
       hasActions={true}
       columns={columns}
+      sorting={sorting}
+      onChange={handleTableChange}
     />
   );
 };
