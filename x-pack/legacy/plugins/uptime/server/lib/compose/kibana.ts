@@ -13,20 +13,23 @@ import { UMAuthDomain } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
 import { ElasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
 import { UMKibanaSavedObjectsAdapter } from '../adapters/saved_objects/kibana_saved_objects_adapter';
-import { KibanaCore } from '../adapters/framework';
+import { CorePlugins, KibanaCore } from '../adapters/framework';
 
-export function compose(server: KibanaCore): UMServerLibs {
+export function compose(
+  server: KibanaCore,
+  { elasticsearch, savedObjects, xpack }: CorePlugins
+): UMServerLibs {
   const framework = new UMKibanaBackendFrameworkAdapter(server);
-  const database = new UMKibanaDatabaseAdapter(server.elasticsearch);
+  const database = new UMKibanaDatabaseAdapter(elasticsearch);
 
-  const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(server.xpack), {});
+  const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(xpack), {});
 
   const domainLibs: UMDomainLibs = {
     auth: authDomain,
     monitors: new ElasticsearchMonitorsAdapter(database),
     monitorStates: new ElasticsearchMonitorStatesAdapter(database),
     pings: new ElasticsearchPingsAdapter(database),
-    savedObjects: new UMKibanaSavedObjectsAdapter(server.savedObjects, server.elasticsearch),
+    savedObjects: new UMKibanaSavedObjectsAdapter(savedObjects, elasticsearch),
   };
 
   return {

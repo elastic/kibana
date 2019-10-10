@@ -6,14 +6,14 @@
 
 import { PluginInitializerContext } from 'src/core/server';
 import { initServerWithKibana } from './kibana.index';
-import { KibanaCore } from './lib/adapters/framework';
+import { KibanaCore, CorePlugins } from './lib/adapters/framework';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin();
 }
 
 export class Plugin {
-  public setup(core: KibanaCore) {
-    initServerWithKibana(core);
+  public setup(core: KibanaCore, plugins: CorePlugins) {
+    initServerWithKibana(core, plugins);
   }
 }

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaCore } from '../framework';
-
 interface UptimeTelemetry {
   overview_page: number;
   monitor_page: number;
@@ -21,8 +19,8 @@ const BUCKET_SIZE = 3600;
 const BUCKET_NUMBER = 24;
 
 export class KibanaTelemetryAdapter {
-  public static initUsageCollector(server: KibanaCore) {
-    const { collectorSet } = server.usageCollector;
+  public static initUsageCollector(usageCollector: any) {
+    const { collectorSet } = usageCollector;
     return collectorSet.makeUsageCollector({
       type: 'uptime',
       fetch: async () => {

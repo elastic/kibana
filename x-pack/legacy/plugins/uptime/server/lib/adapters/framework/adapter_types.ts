@@ -31,8 +31,11 @@ export interface UMFrameworkRouteOptions<
 }
 
 export interface KibanaCore {
-  elasticsearch: any;
   route: any;
+}
+
+export interface CorePlugins {
+  elasticsearch: any;
   savedObjects: SavedObjectsLegacyService<any>;
   usageCollector: any;
   xpack: any;
