@@ -8,17 +8,13 @@ import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 
-interface Props {
-  children: JSX.Element;
-}
-
-export const Description: FC<Props> = memo(({ children }) => {
+export const Description: FC = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.datafeedStep.query.title', {
     defaultMessage: 'Elasticsearch query',
   });
   return (
     <EuiFormRow label={title} describedByIds={['description']} fullWidth={true}>
-      {children}
+      <>{children}</>
     </EuiFormRow>
   );
 });

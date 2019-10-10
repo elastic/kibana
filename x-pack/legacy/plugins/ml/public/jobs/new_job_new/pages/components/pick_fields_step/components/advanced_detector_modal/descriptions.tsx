@@ -9,11 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-interface Props {
-  children: JSX.Element;
-}
-
-export const AggDescription: FC<Props> = memo(({ children }) => {
+export const AggDescription: FC = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.aggSelect.title',
     {
@@ -32,13 +28,13 @@ export const AggDescription: FC<Props> = memo(({ children }) => {
       }
     >
       <EuiFormRow label={title} describedByIds={['description']}>
-        {children}
+        <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
 });
 
-export const FieldDescription: FC<Props> = memo(({ children }) => {
+export const FieldDescription: FC = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.fieldSelect.title',
     {
@@ -57,13 +53,13 @@ export const FieldDescription: FC<Props> = memo(({ children }) => {
       }
     >
       <EuiFormRow label={title} describedByIds={['description']}>
-        {children}
+        <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
 });
 
-export const ByFieldDescription: FC<Props> = memo(({ children }) => {
+export const ByFieldDescription: FC = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.byFieldSelect.title',
     {
@@ -82,13 +78,13 @@ export const ByFieldDescription: FC<Props> = memo(({ children }) => {
       }
     >
       <EuiFormRow label={title} describedByIds={['description']}>
-        {children}
+        <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
 });
 
-export const OverFieldDescription: FC<Props> = memo(({ children }) => {
+export const OverFieldDescription: FC = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.overFieldSelect.title',
     {
@@ -107,13 +103,13 @@ export const OverFieldDescription: FC<Props> = memo(({ children }) => {
       }
     >
       <EuiFormRow label={title} describedByIds={['description']}>
-        {children}
+        <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
 });
 
-export const PartitionFieldDescription: FC<Props> = memo(({ children }) => {
+export const PartitionFieldDescription: FC = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.partitionFieldSelect.title',
     {
@@ -132,13 +128,13 @@ export const PartitionFieldDescription: FC<Props> = memo(({ children }) => {
       }
     >
       <EuiFormRow label={title} describedByIds={['description']}>
-        {children}
+        <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
 });
 
-export const ExcludeFrequentDescription: FC<Props> = memo(({ children }) => {
+export const ExcludeFrequentDescription: FC = memo(({ children }) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.excludeFrequent.title',
     {
@@ -157,7 +153,7 @@ export const ExcludeFrequentDescription: FC<Props> = memo(({ children }) => {
       }
     >
       <EuiFormRow label={title} describedByIds={['description']}>
-        {children}
+        <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
