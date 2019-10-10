@@ -34,31 +34,18 @@ import {
 import { adminRoutePattern, searchRoutePattern } from './patterns';
 
 function requestDocumentSearch(payload: DocumentSearchPayload) {
-  const { query, page, languages, repositories, repoScope } = payload;
-  const queryParams: { [key: string]: string | number | boolean } = {
-    q: query,
-  };
+  const { query: _query, languages, page, repositories, repoScope } = payload;
 
-  if (page) {
-    queryParams.p = page;
-  }
+  if (_query && _query.length > 0) {
+    const query = {
+      q: _query,
+      ...(languages && { langs: languages }),
+      ...(page && { p: page }),
+      ...(repositories && { repos: repositories }),
+      ...(repoScope && { repoScope }),
+    };
 
-  if (languages) {
-    queryParams.langs = languages;
-  }
-
-  if (repositories) {
-    queryParams.repos = repositories;
-  }
-
-  if (repoScope) {
-    queryParams.repoScope = repoScope;
-  }
-
-  if (query && query.length > 0) {
-    return npStart.core.http.get(`/api/code/search/doc`, {
-      query: queryParams,
-    });
+    return npStart.core.http.get(`/api/code/search/doc`, { query });
   } else {
     return {
       documents: [],
