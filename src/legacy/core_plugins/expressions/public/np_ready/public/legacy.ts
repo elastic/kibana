@@ -17,4 +17,17 @@
  * under the License.
  */
 
-export * from './np_ready/public/mocks';
+/* eslint-disable */
+import { npSetup, npStart } from 'ui/new_platform';
+/* eslint-enable */
+import { plugin } from '.';
+
+const expressionsPlugin = plugin({} as any);
+
+export const setup = expressionsPlugin.setup(npSetup.core, {
+  inspector: npSetup.plugins.inspector,
+});
+
+export const start = expressionsPlugin.start(npStart.core, {
+  inspector: npStart.plugins.inspector,
+});
