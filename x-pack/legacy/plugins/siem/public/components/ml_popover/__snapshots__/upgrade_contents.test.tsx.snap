@@ -32,13 +32,26 @@ exports[`FilterGroup renders correctly against snapshot 1`] = `
     />
   </EuiText>
   <EuiSpacer />
-  <EuiButton
-    href="https://www.elastic.co/subscriptions"
-    iconSide="right"
-    iconType="popout"
-    target="_blank"
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="spaceBetween"
   >
-    Subscription options
-  </EuiButton>
+    <EuiButton
+      href="https://www.elastic.co/subscriptions"
+      iconSide="right"
+      iconType="popout"
+      target="_blank"
+    >
+      Subscription plans
+    </EuiButton>
+    <EuiButton
+      href="/test/base/path/app/kibana#/management/elasticsearch/license_management"
+      iconSide="right"
+      iconType="popout"
+      target="_blank"
+    >
+      Manage license
+    </EuiButton>
+  </EuiFlexGroup>
 </PopoverContentsDiv>
 `;

@@ -5,9 +5,17 @@
  */
 
 import React from 'react';
+import chrome from 'ui/chrome';
 
 import styled from 'styled-components';
-import { EuiButton, EuiPopoverTitle, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiText,
+  EuiLink,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as i18n from './translations';
 
@@ -38,14 +46,24 @@ export const UpgradeContents = React.memo(() => {
         />
       </EuiText>
       <EuiSpacer />
-      <EuiButton
-        href="https://www.elastic.co/subscriptions"
-        iconType="popout"
-        iconSide="right"
-        target="_blank"
-      >
-        {i18n.UPGRADE_BUTTON}
-      </EuiButton>
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+        <EuiButton
+          href="https://www.elastic.co/subscriptions"
+          iconType="popout"
+          iconSide="right"
+          target="_blank"
+        >
+          {i18n.UPGRADE_BUTTON}
+        </EuiButton>
+        <EuiButton
+          href={`${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`}
+          iconType="popout"
+          iconSide="right"
+          target="_blank"
+        >
+          {i18n.LICENSE_BUTTON}
+        </EuiButton>
+      </EuiFlexGroup>
     </PopoverContentsDiv>
   );
 });
