@@ -31,9 +31,12 @@ import {
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../common/lib/dataurl';
 import { ElementCard } from '../element_card';
+import { ComponentStrings } from '../../../i18n';
 
 const MAX_NAME_LENGTH = 40;
 const MAX_DESCRIPTION_LENGTH = 100;
+
+const { CustomElementModal: strings } = ComponentStrings;
 
 interface Props {
   /**
@@ -126,8 +129,8 @@ export class CustomElementModal extends PureComponent<Props, State> {
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
             <EuiFlexItem className="canvasCustomElementForm" grow={2}>
               <EuiFormRow
-                label="Name"
-                helpText={`${MAX_NAME_LENGTH - name.length} characters remaining`}
+                label={strings.getNameInputLabel()}
+                helpText={strings.getCharactersRemainingDescription(MAX_NAME_LENGTH - name.length)}
                 compressed
               >
                 <EuiFieldText
@@ -141,8 +144,10 @@ export class CustomElementModal extends PureComponent<Props, State> {
                 />
               </EuiFormRow>
               <EuiFormRow
-                label="Description"
-                helpText={`${MAX_DESCRIPTION_LENGTH - description.length} characters remaining`}
+                label={strings.getDescriptionInputLabel()}
+                helpText={strings.getCharactersRemainingDescription(
+                  MAX_DESCRIPTION_LENGTH - description.length
+                )}
               >
                 <EuiTextArea
                   value={description}
@@ -155,21 +160,18 @@ export class CustomElementModal extends PureComponent<Props, State> {
               </EuiFormRow>
               <EuiFormRow
                 className="canvasCustomElementForm__thumbnail"
-                label="Thumbnail image"
+                label={strings.getImageInputLabel()}
                 compressed
               >
                 <EuiFilePicker
-                  initialPromptText="Select or drag and drop an image"
+                  initialPromptText={strings.getImageFilePickerPlaceholder()}
                   onChange={this._handleUpload}
                   className="canvasImageUpload"
                   accept="image/*"
                 />
               </EuiFormRow>
               <EuiText className="canvasCustomElementForm__thumbnailHelp" size="xs">
-                <p>
-                  Take a screenshot of your element and upload it here. This can also be done after
-                  saving.
-                </p>
+                <p>{strings.getImageInputDescription()}</p>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem
@@ -177,7 +179,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
               grow={1}
             >
               <EuiTitle size="xxxs">
-                <h4>Element preview</h4>
+                <h4>{strings.getElementPreviewTitle()}</h4>
               </EuiTitle>
               <EuiSpacer size="s" />
               <ElementCard title={name} description={description} image={image} />
@@ -187,7 +189,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
         <EuiModalFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={onCancel}>{strings.getCancelButtonLabel()}</EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
@@ -196,7 +198,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
                   onSave(name, description, image);
                 }}
               >
-                Save
+                {strings.getSaveButtonLabel()}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

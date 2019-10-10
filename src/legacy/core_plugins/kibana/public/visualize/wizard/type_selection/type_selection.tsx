@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { sortByOrder } from 'lodash';
 import React, { ChangeEvent } from 'react';
-import chrome from 'ui/chrome';
 
 import {
   EuiFieldSearch,
@@ -41,6 +40,7 @@ import { VisTypeAlias } from '../../../../../visualizations/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
+import { TypesStart } from '../../../../../visualizations/public/np_ready/public/types';
 
 interface VisTypeListEntry extends VisType {
   highlighted: boolean;
@@ -51,9 +51,8 @@ interface VisTypeAliasListEntry extends VisTypeAlias {
 }
 
 interface TypeSelectionProps {
-  onVisTypeSelected: (visType: VisType) => void;
-  visTypesRegistry: VisType[];
-  visTypeAliases?: VisTypeAlias[];
+  onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
+  visTypesRegistry: TypesStart;
   showExperimental: boolean;
 }
 
@@ -79,11 +78,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
 
   public render() {
     const { query, highlightedType } = this.state;
-    const visTypes = this.getFilteredVisTypes(
-      this.props.visTypesRegistry,
-      this.props.visTypeAliases,
-      query
-    );
+    const visTypes = this.getFilteredVisTypes(this.props.visTypesRegistry, query);
     return (
       <React.Fragment>
         <EuiModalHeader>
@@ -167,11 +162,10 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   }
 
   private filteredVisTypes(
-    visTypes: VisType[],
-    visTypeAliases: any[] = [],
+    visTypes: TypesStart,
     query: string
   ): Array<VisTypeListEntry | VisTypeAliasListEntry> {
-    const types = visTypes.filter(type => {
+    const types = visTypes.all().filter(type => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;
@@ -185,7 +179,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       return true;
     });
 
-    const allTypes = [...types, ...visTypeAliases];
+    const allTypes = [...types, ...visTypes.getAliases()];
 
     let entries: Array<VisTypeListEntry | VisTypeAliasListEntry>;
     if (!query) {
@@ -239,12 +233,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     }
 
     const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const onClick =
-      'aliasUrl' in visType
-        ? () => {
-            window.location = chrome.addBasePath(visType.aliasUrl);
-          }
-        : () => this.props.onVisTypeSelected(visType);
+    const onClick = () => this.props.onVisTypeSelected(visType);
 
     const highlightedType: HighlightedType = {
       title: visType.title,

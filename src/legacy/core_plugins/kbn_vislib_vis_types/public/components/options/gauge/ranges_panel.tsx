@@ -38,12 +38,12 @@ function RangesPanel({
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.gaugeOptions.rangesTitle"
             defaultMessage="Ranges"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 
@@ -69,7 +69,7 @@ function RangesPanel({
       />
 
       <SwitchOption
-        dataTestSubj="gaugePercentageMode"
+        data-test-subj="gaugePercentageMode"
         label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.percentageModeLabel', {
           defaultMessage: 'Percentage mode',
         })}

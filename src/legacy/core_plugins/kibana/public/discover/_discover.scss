@@ -19,9 +19,15 @@ discover-app {
   margin-top: 5px;
 }
 
-// SASSTODO: replace the padding-top value with a variable
 .dscFieldList--popular {
-  padding-top: 10px;
+  padding-top: $euiSizeS;
+}
+
+.dscFieldList--selected,
+.dscFieldList--unpopular,
+.dscFieldList--popular {
+  padding-left: $euiSizeS;
+  padding-right: $euiSizeS;
 }
 
 // SASSTODO: replace the z-index value with a variable
@@ -151,9 +157,16 @@ discover-app {
   }
 }
 
-// SASSTODO: replace the padding value with a variable
+.dscFieldSearch {
+  padding: $euiSizeS;
+}
+
+.dscFieldFilter {
+  margin-top: $euiSizeS;
+}
+
 .dscFieldDetails {
-  padding: 10px;
+  padding: $euiSizeS;
   background-color: $euiColorLightestShade;
   color: $euiTextColor;
 }

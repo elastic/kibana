@@ -41,7 +41,7 @@ export const InitialConfiguration: React.FunctionComponent<InitialConfigurationP
           <EuiText size="s">
             <FormattedMessage
               id="xpack.infra.analysisSetup.timeRangeByDefault"
-              defaultMessage="By default, Machine Learning will analyze all past and future log messages in your logs indices."
+              defaultMessage="By default, Machine Learning analyzes log messages in your log indices no older than four weeks, and continues indefinitely."
             />{' '}
             <EuiLink
               onClick={e => {

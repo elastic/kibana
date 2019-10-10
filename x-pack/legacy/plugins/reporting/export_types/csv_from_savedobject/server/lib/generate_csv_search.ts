@@ -6,7 +6,6 @@
 
 import { Request } from 'hapi';
 
-// @ts-ignore no module definition
 import { buildEsQuery } from '@kbn/es-query';
 // @ts-ignore no module definition
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';

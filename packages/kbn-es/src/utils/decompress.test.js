@@ -20,7 +20,6 @@
 const { decompress } = require('./decompress');
 const fs = require('fs');
 const path = require('path');
-const mkdirp = require('mkdirp');
 const del = require('del');
 const os = require('os');
 
@@ -34,9 +33,9 @@ const zipSnapshot = path.resolve(dataFolder, 'snapshot.zip');
 const tarGzSnapshot = path.resolve(dataFolder, 'snapshot.tar.gz');
 
 beforeEach(() => {
-  mkdirp.sync(tmpFolder);
-  mkdirp.sync(dataFolder);
-  mkdirp.sync(esFolder);
+  fs.mkdirSync(tmpFolder, { recursive: true });
+  fs.mkdirSync(dataFolder, { recursive: true });
+  fs.mkdirSync(esFolder, { recursive: true });
 
   fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.zip'), zipSnapshot);
   fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.tar.gz'), tarGzSnapshot);
