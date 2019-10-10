@@ -25,7 +25,7 @@ import { fromExpression, getByAlias, castProvider } from '@kbn/interpreter/commo
 
 import { createError } from './create_error';
 import { ExpressionAST, ExpressionFunctionAST, AnyExpressionFunction, ArgumentType } from './types';
-import { getType } from '../../common';
+import { getType } from './interpreter';
 
 export { createError };
 

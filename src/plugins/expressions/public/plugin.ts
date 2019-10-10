@@ -18,30 +18,64 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import {
-  ExpressionsService,
-  ExpressionsSetupContract,
-  ExpressionsStartContract,
-} from './expressions/expressions_service';
+import { AnyExpressionFunction, AnyExpressionType } from './types';
+import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
+import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
+
+export interface ExpressionsSetupDeps {
+  inspector: InspectorSetup;
+}
+
+export interface ExpressionsStartDeps {
+  inspector: InspectorStart;
+}
+
+export interface ExpressionsSetup {
+  registerFunction: (fn: () => AnyExpressionFunction) => void;
+  registerRenderer: (renderer: any) => void;
+  registerType: (type: () => AnyExpressionType) => void;
+  __LEGACY: {
+    functions: FunctionsRegistry;
+    renderers: RenderFunctionsRegistry;
+    types: TypesRegistry;
+  };
+}
+
+export type ExpressionsStart = void;
 
 export class ExpressionsPublicPlugin
-  implements Plugin<{}, {}, ExpressionsSetupContract, ExpressionsStartContract> {
-  private readonly expressions = new ExpressionsService();
+  implements
+    Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
+  private readonly functions = new FunctionsRegistry();
+  private readonly renderers = new RenderFunctionsRegistry();
+  private readonly types = new TypesRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): ExpressionsSetupContract {
-    const expressions = this.expressions.setup();
-    return {
-      ...expressions,
+  public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
+    const { functions, renderers, types } = this;
+
+    const setup: ExpressionsSetup = {
+      registerFunction: fn => {
+        this.functions.register(fn);
+      },
+      registerRenderer: (renderer: any) => {
+        this.renderers.register(renderer);
+      },
+      registerType: type => {
+        this.types.register(type);
+      },
+      __LEGACY: {
+        functions,
+        renderers,
+        types,
+      },
     };
+
+    return setup;
   }
 
-  public start(core: CoreStart): ExpressionsStartContract {
-    const expressions = this.expressions.start();
-    return {
-      ...expressions,
-    };
-  }
+  public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {}
+
   public stop() {}
 }

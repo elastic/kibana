@@ -22,7 +22,7 @@ import { loader, ExpressionLoader } from './loader';
 import { fromExpression } from '@kbn/interpreter/common';
 import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';
-import { ExpressionAST } from '../../../../../../plugins/expressions/common';
+import { ExpressionAST } from '../../../../../../plugins/expressions/public';
 
 const element: HTMLElement = null as any;
 

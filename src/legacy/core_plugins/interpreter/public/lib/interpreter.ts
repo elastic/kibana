@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionInterpret } from 'src/plugins/expressions/common/expressions/interpreter_provider';
+import { ExpressionInterpret } from 'src/plugins/expressions/public';
 import { interpreterProvider } from '../../common';
 import { createHandlers } from './create_handlers';
 import { registries } from '../registries';

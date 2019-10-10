@@ -24,6 +24,7 @@ export {
   TypeString,
   UnmappedTypeStrings,
   UnwrapPromise,
+  SerializedFieldFormat,
 } from './common';
 export { ExpressionFunction, AnyExpressionFunction, FunctionHandlers } from './functions';
 export { ExpressionType, AnyExpressionType } from './types';

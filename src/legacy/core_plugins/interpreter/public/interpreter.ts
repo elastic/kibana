@@ -28,7 +28,7 @@ import {
 import { registries } from './registries';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
-import { typeSpecs } from '../../../../plugins/expressions/common';
+import { typeSpecs } from '../../../../plugins/expressions/public';
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.

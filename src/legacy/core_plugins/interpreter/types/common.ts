@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from '../../../../plugins/expressions/common/expressions/types/common';
+// eslint-disable-next-line
+export * from '../../../../plugins/expressions/public/types/common';

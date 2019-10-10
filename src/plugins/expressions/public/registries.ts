@@ -25,8 +25,8 @@
 
 /* eslint-disable max-classes-per-file */
 import { clone, mapValues, includes } from 'lodash';
-import { Type } from '../../common/expressions/interpreter';
-import { ExpressionType, AnyExpressionFunction } from '../../common/expressions/types';
+import { Type } from './interpreter';
+import { ExpressionType, AnyExpressionFunction } from './types';
 
 export class Registry<ItemSpec, Item> {
   _prop: string;

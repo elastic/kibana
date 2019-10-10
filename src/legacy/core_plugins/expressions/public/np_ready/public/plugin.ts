@@ -19,8 +19,9 @@
 
 /* eslint-disable */
 import { npSetup } from 'ui/new_platform';
-import { ExpressionsSetupContract } from '../../../../../../plugins/expressions/public/expressions/expressions_service';
 /* eslint-enable */
+
+import { ExpressionsSetup } from '../../../../../../plugins/expressions/public';
 
 import {
   CoreSetup,
@@ -47,7 +48,7 @@ export interface ExpressionsStartDeps {
   inspector: InspectorStart;
 }
 
-export type ExpressionsSetup = ExpressionsSetupContract;
+export { ExpressionsSetup };
 export type ExpressionsStart = ReturnType<ExpressionsPublicPlugin['start']>;
 
 export class ExpressionsPublicPlugin

@@ -21,7 +21,7 @@ import { Filter } from '@kbn/es-query';
 import { TimeRange } from '../../../../../../plugins/data/public';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 import { Query } from '../../../../../../plugins/data/public';
-import { ExpressionAST } from '../../../../../../plugins/expressions/common';
+import { ExpressionAST } from '../../../../../../plugins/expressions/public';
 
 export { ExpressionAST, TimeRange, Adapters, Filter, Query };
 
