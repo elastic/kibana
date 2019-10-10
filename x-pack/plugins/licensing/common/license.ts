@@ -7,14 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { LicenseFeature } from './license_feature';
 import { LICENSE_CHECK_STATE, LICENSE_TYPE } from './constants';
-import {
-  LicenseType,
-  ILicense,
-  ILicensingPlugin,
-  ObjectifiedLicense,
-  RawLicense,
-  RawFeatures,
-} from './types';
+import { LicenseType, ILicense, ObjectifiedLicense, RawLicense, RawFeatures } from './types';
 
 function toLicenseType(minimumLicenseRequired: LICENSE_TYPE | string) {
   if (typeof minimumLicenseRequired !== 'string') {
@@ -29,7 +22,7 @@ function toLicenseType(minimumLicenseRequired: LICENSE_TYPE | string) {
 }
 
 interface LicenseArgs {
-  plugin: ILicensingPlugin;
+  sign(serialized: string): string;
   license?: RawLicense;
   features?: RawFeatures;
   error?: Error;
@@ -37,7 +30,7 @@ interface LicenseArgs {
 }
 
 export class License implements ILicense {
-  private readonly plugin: ILicensingPlugin;
+  private readonly sign: (serialized: string) => string;
   private readonly hasLicense: boolean;
   private readonly license: RawLicense;
   private readonly features: RawFeatures;
@@ -49,7 +42,7 @@ export class License implements ILicense {
 
   static fromObjectified(
     objectified: ObjectifiedLicense,
-    { plugin, error, clusterSource }: LicenseArgs
+    { sign, error, clusterSource }: LicenseArgs
   ) {
     const license = {
       uid: objectified.license.uid,
@@ -69,7 +62,7 @@ export class License implements ILicense {
     );
 
     return new License({
-      plugin,
+      sign,
       error,
       clusterSource,
       license,
@@ -77,8 +70,8 @@ export class License implements ILicense {
     });
   }
 
-  constructor({ plugin, license, features, error, clusterSource }: LicenseArgs) {
-    this.plugin = plugin;
+  constructor({ sign, license, features, error, clusterSource }: LicenseArgs) {
+    this.sign = sign;
     this.hasLicense = Boolean(license);
     this.license = license || {};
     this.features = features || {};
@@ -132,11 +125,11 @@ export class License implements ILicense {
   }
 
   public get signature() {
-    if (this._signature !== undefined) {
+    if (this._signature) {
       return this._signature;
     }
 
-    this._signature = this.plugin.sign(JSON.stringify(this.toObject()));
+    this._signature = this.sign(JSON.stringify(this.toObject()));
 
     return this._signature;
   }

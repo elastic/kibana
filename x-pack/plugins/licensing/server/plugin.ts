@@ -4,8 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject, Observable, Subject, Subscription, merge, of, timer } from 'rxjs';
-import { filter, first, map, pairwise, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, Subscription, defer, merge, of, timer } from 'rxjs';
+import {
+  filter,
+  first,
+  map,
+  pairwise,
+  repeatWhen,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import moment from 'moment';
 import { createHash } from 'crypto';
 import { TypeOf } from '@kbn/config-schema';
@@ -16,7 +25,7 @@ import {
   Plugin as CorePlugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { LicensingPluginSetup, ILicensingPlugin, ILicense } from '../common/types';
+import { LicensingPluginSetup, ILicense } from '../common/types';
 import { License } from '../common/license';
 import { hasLicenseInfoChanged } from '../common/has_license_info_changed';
 import { LicensingConfig } from './licensing_config';
@@ -33,7 +42,13 @@ declare module 'src/core/server' {
 
 type LicensingConfigType = TypeOf<typeof schema>;
 
-export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugin {
+function sign(serialized: string) {
+  return createHash('md5')
+    .update(serialized)
+    .digest('hex');
+}
+
+export class Plugin implements CorePlugin<LicensingPluginSetup> {
   private stop$ = new Subject();
   private refresher$ = new BehaviorSubject(true);
   private readonly logger: Logger;
@@ -58,59 +73,52 @@ export class Plugin implements CorePlugin<LicensingPluginSetup>, ILicensingPlugi
     });
   }
 
-  public sign(serialized: string) {
-    return createHash('md5')
-      .update(serialized)
-      .digest('hex');
-  }
-
   public async setup(core: CoreSetup) {
     this.elasticsearch = core.elasticsearch;
 
     const { clusterSource, pollingFrequency } = this.currentConfig;
-    const initial$ = of(new License({ plugin: this, features: {}, clusterSource }));
+    const initial$ = of(new License({ sign, features: {}, clusterSource }));
     const setup = {
       refresh: () => this.refresher$.next(true),
       license$: initial$,
     };
-    const licenseFetches$ = merge(timer(0, pollingFrequency), this.refresher$).pipe(
-      takeUntil(this.stop$),
-      switchMap(async () => {
-        const config = this.currentConfig;
 
-        this.logger.debug(
-          `Calling [${config.clusterSource}] Elasticsearch _xpack API. Polling frequency: ${config.pollingFrequency}`
+    // The license fetches occur in a defer/repeatWhen pair to avoid race conditions between refreshes and timers
+    const licenseFetches$ = defer(async () => {
+      const config = this.currentConfig;
+
+      this.logger.debug(
+        `Calling [${config.clusterSource}] Elasticsearch _xpack API. Polling frequency: ${config.pollingFrequency}`
+      );
+
+      try {
+        const cluster = await this.elasticsearch.dataClient$.pipe(first()).toPromise();
+        const response = await cluster.callAsInternalUser('transport.request', {
+          method: 'GET',
+          path: '/_xpack',
+        });
+        const rawLicense = response && response.license;
+        const features = (response && response.features) || {};
+
+        return new License({
+          sign,
+          license: rawLicense,
+          features,
+          clusterSource: config.clusterSource,
+        });
+      } catch (err) {
+        this.logger.warn(
+          `License information could not be obtained from Elasticsearch for the [${config.clusterSource}] cluster. ${err}`
         );
 
-        try {
-          const cluster = await this.elasticsearch.dataClient$.pipe(first()).toPromise();
-          const response = await cluster.callAsInternalUser('transport.request', {
-            method: 'GET',
-            path: '/_xpack',
-          });
-          const rawLicense = response && response.license;
-          const features = (response && response.features) || {};
-
-          return new License({
-            plugin: this,
-            license: rawLicense,
-            features,
-            clusterSource: config.clusterSource,
-          });
-        } catch (err) {
-          this.logger.warn(
-            `License information could not be obtained from Elasticsearch for the [${config.clusterSource}] cluster. ${err}`
-          );
-
-          return new License({
-            plugin: this,
-            features: {},
-            error: err,
-            clusterSource: config.clusterSource,
-          });
-        }
-      })
-    );
+        return new License({
+          sign,
+          features: {},
+          error: err,
+          clusterSource: config.clusterSource,
+        });
+      }
+    }).pipe(repeatWhen(complete$ => complete$.pipe(switchMap(() => timer(0, pollingFrequency)))));
     const updates$ = merge(initial$, licenseFetches$).pipe(
       pairwise(),
       filter(([previous, next]) => hasLicenseInfoChanged(previous, next)),

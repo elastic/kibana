@@ -68,6 +68,8 @@ describe('license', () => {
     expect(license.isOneOf(['platinum', 'gold'])).toBe(true);
     expect(license.isOneOf(['basic', 'gold'])).toBe(false);
     expect(license.isOneOf(['basic'])).toBe(false);
+    expect(license.isOneOf('alpha')).toBe(false);
+    expect(license.isOneOf(['alpha', 'beta'])).toBe(false);
   });
 
   test('type returns the license type', async () => {

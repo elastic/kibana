@@ -36,15 +36,18 @@ describe('licensing plugin', () => {
 
     const { license$ } = await plugin.setup(coreSetup);
 
-    await license$
+    license = await license$
       .pipe(
         skip(1),
         take(1)
       )
       .toPromise();
+
+    expect(license.signature).toBe('');
+
     await coreSetup.http.get('/api/fake');
 
-    expect(plugin.sign()).toBe('fake-signature');
+    expect(license.signature).toBe('fake-signature');
   });
 
   test('intercepted HTTP request causes a refresh if the signature changes', async () => {
@@ -189,5 +192,23 @@ describe('licensing plugin | session storage', () => {
     const initial = await license$.pipe(first()).toPromise();
 
     expect(initial.signature).toBe('fake-signature');
+  });
+
+  test('session is cleared when request fails', async () => {
+    const { coreSetup, plugin: _plugin } = await setupOnly();
+
+    plugin = _plugin;
+    coreSetup.http.get.mockRejectedValue(new Error('test'));
+    ({ license$ } = await plugin.setup(coreSetup));
+
+    await license$
+      .pipe(
+        skip(1),
+        take(1)
+      )
+      .toPromise();
+
+    expect(sessionStorage.removeItem).toHaveBeenCalledWith(LICENSING_SESSION);
+    expect(sessionStorage.removeItem).toHaveBeenCalledWith(LICENSING_SESSION_SIGNATURE);
   });
 });
