@@ -3316,7 +3316,6 @@
     "xpack.apm.notAvailableLabel": "N/A",
     "xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel": "利用可能なデータがありません",
     "xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel": "例外のスタックトレース",
-    "xpack.apm.propertiesTable.tabs.labelsLabel": "ラベル",
     "xpack.apm.propertiesTable.tabs.logStacktraceLabel": "ログのスタックトレース",
     "xpack.apm.propertiesTable.tabs.metadataLabel": "メタデータ",
     "xpack.apm.propertiesTable.tabs.timelineLabel": "タイムライン",
