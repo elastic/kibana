@@ -1,0 +1,25 @@
+{
+  "title": "Datasource",
+  "type": "object",
+  "description": "A package with a use case (eg prod_west). The use case ID must be unique. A datasource can have multiple streams.",
+  "properties": {
+    "use_case": {
+      "type": "string",
+      "example": "prod_west"
+    },
+    "package": {
+      "$ref": "./package.v1.json"
+    },
+    "streams": {
+      "type": "array",
+      "items": {
+        "$ref": "./stream.v1.json"
+      }
+    }
+  },
+  "required": [
+    "use_case",
+    "package",
+    "streams"
+  ]
+}

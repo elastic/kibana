@@ -1,0 +1,27 @@
+{
+        "title": "Input",
+        "type": "object",
+        "description": "Where the data comes from",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "log",
+              "metric/system",
+              "metric/docker",
+              "etc"
+            ]
+          },
+          "input_configs": {
+            "type": "object",
+            "example": "{paths: \"/var/log/*.log\"} or {metricsets: [\"container\", \"cpu\"]} or {username: \"elastic\", password: \"changeme\"}"
+          },
+          "pipeline": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "input_configs"
+        ]
+      }
