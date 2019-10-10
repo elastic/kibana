@@ -60,7 +60,7 @@ export interface ExpressionsStartDeps {
 }
 
 export interface ExpressionsSetup {
-  registerFunction: (fn: () => AnyExpressionFunction) => void;
+  registerFunction: (fn: AnyExpressionFunction | (() => AnyExpressionFunction)) => void;
   registerRenderer: (renderer: any) => void;
   registerType: (type: () => AnyExpressionType) => void;
   __LEGACY: {
@@ -85,10 +85,14 @@ export class ExpressionsPublicPlugin
   public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
     const { functions, renderers, types } = this;
 
-    functions.register(clogFunction);
-    functions.register(fontFunction);
-    functions.register(kibanaFunction);
-    functions.register(kibanaContextFunction);
+    const registerFunction: ExpressionsSetup['registerFunction'] = fn => {
+      functions.register(fn);
+    };
+
+    registerFunction(clogFunction);
+    registerFunction(fontFunction);
+    registerFunction(kibanaFunction);
+    registerFunction(kibanaContextFunction);
 
     types.register(booleanType);
     types.register(datatableType);
@@ -121,9 +125,7 @@ export class ExpressionsPublicPlugin
     };
 
     const setup: ExpressionsSetup = {
-      registerFunction: fn => {
-        functions.register(fn);
-      },
+      registerFunction,
       registerRenderer: (renderer: any) => {
         renderers.register(renderer);
       },

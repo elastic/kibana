@@ -24,9 +24,9 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { clone, mapValues, includes } from 'lodash';
-import { Type } from './interpreter';
-import { ExpressionType, AnyExpressionFunction } from './types';
+import { clone, includes, mapValues } from 'lodash';
+import { Type } from '../interpreter';
+import { ExpressionType, AnyExpressionFunction } from '../types';
 
 export class Registry<ItemSpec, Item> {
   _prop: string;
@@ -109,60 +109,9 @@ function RenderFunction(this: any, config: any) {
     };
 }
 
-export function Arg(this: any, config: any) {
-  if (config.name === '_') throw Error('Arg names must not be _. Use it in aliases instead.');
-  this.name = config.name;
-  this.required = config.required || false;
-  this.help = config.help || '';
-  this.types = config.types || [];
-  this.default = config.default;
-  this.aliases = config.aliases || [];
-  this.multi = config.multi == null ? false : config.multi;
-  this.resolve = config.resolve == null ? true : config.resolve;
-  this.options = config.options || [];
-  this.accepts = (type: any) => {
-    if (!this.types.length) return true;
-    return includes(config.types, type);
-  };
-}
-
-export function Fn(this: any, config: any) {
-  // Required
-  this.name = config.name; // Name of function
-
-  // Return type of function.
-  // This SHOULD be supplied. We use it for UI and autocomplete hinting,
-  // We may also use it for optimizations in the future.
-  this.type = config.type;
-  this.aliases = config.aliases || [];
-
-  // Function to run function (context, args)
-  this.fn = (...args: any) => Promise.resolve(config.fn(...args));
-
-  // Optional
-  this.help = config.help || ''; // A short help text
-  this.args = mapValues(
-    config.args || {},
-    (arg: any, name: any) => new (Arg as any)({ name, ...arg })
-  );
-
-  this.context = config.context || {};
-
-  this.accepts = (type: any) => {
-    if (!this.context.types) return true; // If you don't tell us about context, we'll assume you don't care what you get
-    return includes(this.context.types, type); // Otherwise, check it
-  };
-}
-
 export class RenderFunctionsRegistry extends Registry<any, any> {
   wrapper(obj: any) {
     return new (RenderFunction as any)(obj);
-  }
-}
-
-export class FunctionsRegistry extends Registry<AnyExpressionFunction, any> {
-  wrapper(obj: any) {
-    return new (Fn as any)(obj);
   }
 }
 
@@ -171,3 +120,5 @@ export class TypesRegistry extends Registry<ExpressionType<any, any, any>, any> 
     return new (Type as any)(obj);
   }
 }
+
+export * from './function_registry';
