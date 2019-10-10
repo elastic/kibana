@@ -17,6 +17,13 @@
  * under the License.
  */
 
-export { ExpressionsService, ExpressionsSetup, ExpressionsStart } from './expressions_service';
+import { PluginInitializerContext } from '../../../../../../core/public';
+import { ExpressionsPublicPlugin } from './plugin';
+
+export * from './plugin';
 export { ExpressionRenderer, ExpressionRendererProps } from './expression_renderer';
-export { IInterpreterRenderFunction } from './lib/_types';
+export { IInterpreterRenderFunction } from './types';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ExpressionsPublicPlugin(initializerContext);
+}

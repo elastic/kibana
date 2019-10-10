@@ -19,9 +19,9 @@
 
 import { execute, ExpressionDataHandler } from './execute';
 import { fromExpression } from '@kbn/interpreter/common';
-import { ExpressionAST } from './_types';
+import { ExpressionAST } from './types';
 
-jest.mock('../services', () => ({
+jest.mock('./services', () => ({
   getInterpreter: () => {
     return {
       interpretAst: async (expression: ExpressionAST) => {

@@ -19,9 +19,8 @@
 
 import { useRef, useEffect } from 'react';
 import React from 'react';
-
-import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './lib/_types';
-import { IExpressionLoader, ExpressionLoader } from './lib/loader';
+import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './types';
+import { IExpressionLoader, ExpressionLoader } from './loader';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
@@ -45,7 +44,6 @@ export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer =>
   ...options
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
-
   const handlerRef: React.MutableRefObject<null | ExpressionLoader> = useRef(null);
 
   useEffect(() => {
@@ -70,12 +68,5 @@ export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer =>
     mountpoint.current,
   ]);
 
-  return (
-    <div
-      className={className}
-      ref={el => {
-        mountpoint.current = el;
-      }}
-    />
-  );
+  return <div className={className} ref={mountpoint} />;
 };
