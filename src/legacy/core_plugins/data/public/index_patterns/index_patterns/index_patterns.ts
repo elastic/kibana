@@ -47,7 +47,7 @@ export class IndexPatterns {
     config: UiSettingsClientContract,
     savedObjectsClient: SavedObjectsClientContract,
     http: HttpServiceBase,
-    // TODO: Get rid of '?' as Legacy will be removed
+    // TODO: Make notifications mandatory as shim is removed
     notifications?: NotificationsSetup
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
