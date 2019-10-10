@@ -16,10 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { resolve } from 'path';
-import convert from './convert';
-import send from './send';
 
-const kibanaRoot = resolve(__dirname, '../../../..');
-const path = resolve(kibanaRoot, './target/kibana-coverage/mocha/coverage-summary.json');
-send(convert(path));
+import Wreck from '@hapi/wreck';
+import { of } from 'rxjs';
+import { delay, concatMap } from 'rxjs/operators';
+
+const wreck = Wreck.defaults({
+  baseUrl: 'http://localhost:9200',
+});
+
+export default obs$ => {
+  obs$
+    .pipe(concatMap(x => of(x).pipe(delay(50))))
+    .subscribe(async payload => {
+      const { path } = payload;
+      try {
+        await wreck.post('kibana_coverage/_doc', { payload });
+        console.log(`\n### Posted coverage for\n\t${path}`);
+      } catch (e) {
+        console.error(`\n### Failed to post ${path}`);
+      }
+    });
+};

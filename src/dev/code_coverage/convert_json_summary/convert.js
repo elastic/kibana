@@ -16,10 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { resolve } from 'path';
-import convert from './convert';
-import send from './send';
 
-const kibanaRoot = resolve(__dirname, '../../../..');
-const path = resolve(kibanaRoot, './target/kibana-coverage/mocha/coverage-summary.json');
-send(convert(path));
+import { createReadStream } from 'fs';
+import { fromEventPattern } from 'rxjs';
+import { map } from 'rxjs/operators';
+import moment from 'moment';
+import oboe from 'oboe';
+
+export default path => {
+  const jsonStream = oboe(createReadStream(path))
+    .on('done', () => console.log('\n### done'));
+
+  return fromEventPattern(_ => jsonStream.on('node', '!.*', _))
+    .pipe(
+      map((...xs) => {
+        const [name] = xs[0][1];
+        const [stats] = xs[0];
+        return {
+          'path': name.includes('kibana') ? name.replace(/.*kibana\//, '') : name,
+          '@timestamp': moment().format(),
+          ...stats,
+        };
+      }),
+    );
+};
