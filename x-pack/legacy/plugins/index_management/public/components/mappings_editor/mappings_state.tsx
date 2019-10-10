@@ -7,9 +7,8 @@
 import React, { useReducer, useEffect, createContext, useContext } from 'react';
 
 import { reducer, MappingsConfiguration, MappingsFields, State, Dispatch } from './reducer';
-import { MAX_DEPTH_DEFAULT_EDITOR } from './constants';
 import { Field, FieldsEditor } from './types';
-import { normalize, deNormalize } from './lib';
+import { normalize, deNormalize, canUseMappingsEditor } from './lib';
 
 type Mappings = MappingsConfiguration & {
   properties: MappingsFields;
@@ -44,6 +43,7 @@ export interface Props {
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
   const { byId, rootLevelFields, maxNestedDepth } = normalize(defaultValue.fields);
 
+  const canUseDefaultEditor = canUseMappingsEditor(maxNestedDepth);
   const initialState: State = {
     isValid: undefined,
     configuration: {
@@ -60,7 +60,11 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     },
     documentFields: {
       status: 'idle',
-      editor: maxNestedDepth >= MAX_DEPTH_DEFAULT_EDITOR ? 'json' : 'default',
+      editor: canUseDefaultEditor ? 'default' : 'json',
+    },
+    fieldsJsonEditor: {
+      format: () => ({}),
+      isValid: true,
     },
   };
 
@@ -71,15 +75,20 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     onUpdate({
       getData: () => ({
         ...state.configuration.data.format(),
-        properties: deNormalize(state.fields),
+        properties:
+          // Pull the mappings properties from the current editor
+          state.documentFields.editor === 'json'
+            ? state.fieldsJsonEditor.format()
+            : deNormalize(state.fields),
       }),
       validate: async () => {
         if (state.fieldForm === undefined) {
-          return await state.configuration.validate();
+          return (await state.configuration.validate()) && state.fieldsJsonEditor.isValid;
         }
 
         return Promise.all([state.configuration.validate(), state.fieldForm.validate()]).then(
-          ([isConfigurationValid, isFormFieldValid]) => isConfigurationValid && isFormFieldValid
+          ([isConfigurationValid, isFormFieldValid]) =>
+            isConfigurationValid && isFormFieldValid && state.fieldsJsonEditor.isValid
         );
       },
       isValid: state.isValid,

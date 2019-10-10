@@ -19,7 +19,7 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 import {
-  createEsTestCluster,
+  createLegacyEsTestCluster,
   DEFAULT_SUPERUSER_PASS,
   esTestConfig,
   kbnTestConfig,
@@ -205,7 +205,7 @@ export function createTestServers({
   log.info('starting elasticsearch');
   log.indent(4);
 
-  const es = createEsTestCluster(
+  const es = createLegacyEsTestCluster(
     defaultsDeep({}, get(settings, 'es', {}), {
       log,
       license,

@@ -6,13 +6,15 @@
 
 import React, { useMemo } from 'react';
 import { pick } from 'lodash';
+import { EuiSpacer } from '@elastic/eui';
 
-import { JsonEditor } from '../json_editor';
 import {
   ConfigurationForm,
   CONFIGURATION_FIELDS,
   DocumentFieldsHeaders,
   DocumentFields,
+  DocumentFieldsJsonEditor,
+  EditorToggleControls,
 } from './components';
 import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
 
@@ -32,25 +34,26 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue }: Props) => 
 
   const fieldsDefaultValue = defaultValue === undefined ? {} : defaultValue.properties;
 
-  // Temporary logic
-  const onJsonEditorUpdate = (args: any) => {
-    // eslint-disable-next-line
-    console.log(args);
-  };
-
   return (
     <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
-      {({ editor, getProperties }) => (
-        <>
-          <ConfigurationForm defaultValue={configurationDefaultValue} />
-          <DocumentFieldsHeaders />
-          {editor === 'json' ? (
-            <JsonEditor onUpdate={onJsonEditorUpdate} defaultValue={getProperties()} />
-          ) : (
-            <DocumentFields />
-          )}
-        </>
-      )}
+      {({ editor, getProperties }) => {
+        const renderEditor = () => {
+          if (editor === 'json') {
+            return <DocumentFieldsJsonEditor defaultValue={getProperties()} />;
+          }
+          return <DocumentFields />;
+        };
+
+        return (
+          <>
+            <ConfigurationForm defaultValue={configurationDefaultValue} />
+            <DocumentFieldsHeaders />
+            {renderEditor()}
+            <EuiSpacer size={'l'} />
+            <EditorToggleControls editor={editor} />
+          </>
+        );
+      }}
     </MappingsState>
   );
 });

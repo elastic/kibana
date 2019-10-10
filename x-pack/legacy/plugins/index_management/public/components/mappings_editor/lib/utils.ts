@@ -15,7 +15,8 @@ import {
   SubType,
   ChildFieldName,
 } from '../types';
-import { DATA_TYPE_DEFINITION } from '../constants';
+import { DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
+import { State } from '../reducer';
 
 export const getUniqueId = () => {
   return (
@@ -243,3 +244,27 @@ export const shouldDeleteChildFieldsAfterTypeChange = (
 
   return false;
 };
+
+export const canUseMappingsEditor = (maxNestedDepth: number) =>
+  maxNestedDepth < MAX_DEPTH_DEFAULT_EDITOR;
+
+const stateWithValidity: Array<keyof State> = ['configuration', 'fieldsJsonEditor', 'fieldForm'];
+
+export const determineIfValid = (state: State): boolean | undefined =>
+  Object.entries(state)
+    .filter(([key]) => stateWithValidity.includes(key as keyof State))
+    .reduce(
+      (isValid, { 1: value }) => {
+        if (value === undefined) {
+          return isValid;
+        }
+
+        // If one section validity of the state is "undefined", the mappings validity is also "undefined"
+        if (isValid === undefined || value.isValid === undefined) {
+          return undefined;
+        }
+
+        return isValid && value.isValid;
+      },
+      true as undefined | boolean
+    );
