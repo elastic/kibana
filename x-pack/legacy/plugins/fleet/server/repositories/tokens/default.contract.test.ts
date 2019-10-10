@@ -93,7 +93,7 @@ describe('Token Repository', () => {
         type: TokenType.ACCESS_TOKEN,
         token: 'notencryptedtoken',
         tokenHash: 'qwerty',
-        policy: { id: 'policyId', sharedId: 'sharedId' },
+        policyId: 'policyId',
       });
       const soToken = (await soAdapter.get<Token>(user, 'tokens', token.id)) as SavedObject;
       expect(soToken).toBeDefined();
@@ -118,7 +118,6 @@ describe('Token Repository', () => {
           type: TokenType.ACCESS_TOKEN,
           tokenHash: 'qwerty',
           policy_id: 'policyId',
-          policy_shared_id: 'sharedId',
         },
       ]);
 

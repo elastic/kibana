@@ -92,25 +92,20 @@
 {
   "type": "doc",
   "value": {
-    "id": "tokens:f2e6bcd8-e68c-4da8-826e-ae6f5c1def4e",
+    "id": "tokens:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0",
     "index": ".kibana",
     "source": {
-      "tokens" : {
-        "created_at" : "2019-09-16T19:31:48.500Z",
-        "type" : "ENROLMENT_TOKEN",
-        "token" : "CAxY1fEepPxyJ5oASPWpi/w/49nwO0qhPeEMtUkqm01CAnpOkxf5KM9pXJ+NmYGAJmIw+QnfneOG1+f4xCyWgGf/wEtYuwRO9yd23X0YBZZApxTrgTR0WoWFKyXRI0KzhmD5BKj3eut9AwTySEfU8cNJzSQ+3SVbsYKIxbn0QcEOgiV+L+aIko6m7o6pvWUPnkxirdXxXjrOLLdeSe0/Wh0Yp05aUG4OYsyYnQqFOeGw37WpG8n1uTtqkHVs/r8o4Gh0eQgLI9+zQWW73rvPnQ7dabZ1Mh4VScOkn+/hGCfSfP0ULRXR8QPsmnh3ppY3OHMeHnUHP1SRsXraUoSRRTypzwXrkwwBL74jeY/Dh+YaZF+elusF3sQ1pE8y52QS7sWMFLIxUfb9vg==",
-        "tokenHash" : "b0e83363575be247419c69d0f9e1379e362e2d9928f7d80e65d0c3e4470c6082892d6f63855044bc101584e6e299090945911da23b27de8ebcd3761e23787e61",
+      "tokens" :  {
+        "created_at" : "2019-10-10T16:31:12.518Z",
+        "type" : "ENROLLMENT_TOKEN",
+        "token" : "RQVHuNv3+KS82GnUHjgjdQFhJ8GOMBa5qMnfYEYdfalg5JChSAUmZNxt8rK9WQTEvQmoXCcoRgJK/4/vfmF8W0bZyTPlm8vVdci53nz03L2bfSlYExZ+0Dbjc+8e04DWQP06Qu+3Nx0OmDDRvRjTdJkrnz+xayHH0pZ7M3mjEd5gO7GBdn6OgM/J0kgqPCJEkKk4uxqu7PieX7miyYX9+paDcmuSMrWf83l43ocreWxXLlhZKFhHL2ed2thr4zixD/2Y+1j3WSWXsU5cIBfOeyfw8DLd0+ssLWPZue9MKqLfwvz4vuhDHFzFeIyYq3/8pRKZ7vmixDh0npy3m1QiHT0LFj8mAG/Fwg==",
+        "tokenHash" : "911e4ef197d476522e8fe65f3790cc39061a828924b1f9cfc9b16e5ed5e261ea84d4b1dc5319ced5cca7510ec360f2af3b048403dac133cfca90ea23da0d6db4",
         "policy_id" : "policy:1",
-        "policy_shared_id" : "policy:1",
         "active" : true,
-        "enrollment_rules": [{
-          "id": "rule:1",
-          "ip_ranges": ["0.0.0.0/0"],
-          "created_at" : "2019-09-20T01:57:50.986Z"
-        }]
+        "enrollment_rules" : [ ]
       },
       "type" : "tokens",
-      "updated_at" : "2019-09-16T19:31:48.518Z"
+      "references": []
     }
   }
 }

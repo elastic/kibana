@@ -9,11 +9,11 @@ import { FrameworkUser } from '../../adapters/framework/adapter_types';
 import { RuntimeAgentType } from '../agents/types';
 
 export interface EnrollmentTokenData {
-  policy: { id: string; sharedId: string };
+  policy_id: string;
 }
 
 export interface AccessTokenData {
-  policy: { id: string; sharedId: string };
+  policy_id: string;
 }
 
 export const RuntimeEnrollmentRuleData = t.partial(
@@ -42,7 +42,12 @@ export type EnrollmentRule = EnrollmentRuleData & {
 export type TokenVerificationResponse =
   | {
       valid: true;
-      type: TokenType;
+      type: TokenType.ENROLLMENT_TOKEN;
+      token: EnrollmentTokenData;
+    }
+  | {
+      valid: true;
+      type: TokenType.ACCESS_TOKEN;
       token: AccessTokenData;
     }
   | {
@@ -51,7 +56,7 @@ export type TokenVerificationResponse =
     };
 
 export enum TokenType {
-  ENROLMENT_TOKEN = 'ENROLMENT_TOKEN',
+  ENROLLMENT_TOKEN = 'ENROLLMENT_TOKEN',
   ACCESS_TOKEN = 'ACCESS_TOKEN',
 }
 
@@ -65,7 +70,6 @@ export interface Token {
   active: boolean;
   enrollment_rules: EnrollmentRule[];
   policy_id: string;
-  policy_shared_id: string;
   [k: string]: any; // allow to use it as saved object attributes type
 }
 
@@ -77,7 +81,7 @@ export interface TokensRepository {
       token: string;
       tokenHash: string;
       active: boolean;
-      policy: { id: string };
+      policyId: string;
       expire_at?: string;
     }
   ): Promise<Token>;

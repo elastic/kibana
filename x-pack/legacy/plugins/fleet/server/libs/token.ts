@@ -20,7 +20,7 @@ import { FrameworkLib } from './framework';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 
 interface JWTToken {
-  policy: { id: string; sharedId: string };
+  policy_id: string;
   type: TokenType;
 }
 
@@ -38,7 +38,7 @@ export class TokenLib {
     try {
       const decodedToken = this._verifyJWTToken(token);
 
-      if (decodedToken.type === TokenType.ENROLMENT_TOKEN) {
+      if (decodedToken.type === TokenType.ENROLLMENT_TOKEN) {
         await this._verifyPersistedToken(user, token);
       }
 
@@ -46,7 +46,7 @@ export class TokenLib {
         valid: true,
         type: decodedToken.type,
         token: {
-          policy: decodedToken.policy,
+          policy_id: decodedToken.policy_id,
         },
       };
     } catch (error) {
@@ -57,16 +57,13 @@ export class TokenLib {
     }
   }
 
-  public async generateAccessToken(
-    agentId: string,
-    config: { id: string; sharedId: string }
-  ): Promise<string> {
+  public async generateAccessToken(agentId: string, policyId: string): Promise<string> {
     const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
     const token = signToken(
       {
         type: TokenType.ACCESS_TOKEN,
         agentId,
-        config,
+        policy_id: policyId,
       },
       encryptionKey
     );
@@ -75,21 +72,19 @@ export class TokenLib {
   }
 
   /**
-   * Generate a new enrolment token for a config
-   * @param config
-   * @param expire
+   * Generate a new enrolment token for a policy
    */
   public async generateEnrolmentToken(
     user: FrameworkUser,
-    policy: { id: string },
+    policyId: string,
     expire?: string
   ): Promise<string> {
     const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
 
     const token = signToken(
       {
-        type: TokenType.ENROLMENT_TOKEN,
-        policy,
+        type: TokenType.ENROLLMENT_TOKEN,
+        policy_id: policyId,
       },
       encryptionKey,
       expire
@@ -102,10 +97,10 @@ export class TokenLib {
 
     await this.tokensRepository.create(user, {
       active: true,
-      type: TokenType.ENROLMENT_TOKEN,
+      type: TokenType.ENROLLMENT_TOKEN,
       tokenHash,
       token,
-      policy,
+      policyId,
     });
 
     return token;
@@ -119,13 +114,10 @@ export class TokenLib {
     let token = await this.tokensRepository.getByPolicyId(user, policyId);
 
     if (regenerate) {
-      const policy = {
-        id: policyId,
-      };
       if (token) {
         await this.tokensRepository.delete(user, token.id);
       }
-      await this.generateEnrolmentToken(user, policy);
+      await this.generateEnrolmentToken(user, policyId);
       token = await this.tokensRepository.getByPolicyId(user, policyId);
     }
 

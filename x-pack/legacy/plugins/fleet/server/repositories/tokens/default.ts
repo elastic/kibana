@@ -33,7 +33,7 @@ export class TokensRepository implements TokensRepositoryType {
       token,
       tokenHash,
       active,
-      policy,
+      policyId,
       expire_at,
     }: {
       type: TokenType;
@@ -41,7 +41,7 @@ export class TokensRepository implements TokensRepositoryType {
       tokenHash: string;
       active: boolean;
       expire_at?: string;
-      policy: { id: string; sharedId: string };
+      policyId: string;
     }
   ): Promise<Token> {
     if (user.kind !== 'authenticated') {
@@ -52,8 +52,7 @@ export class TokensRepository implements TokensRepositoryType {
       type,
       token,
       tokenHash,
-      policy_id: policy.id,
-      policy_shared_id: policy.sharedId,
+      policy_id: policyId,
       expire_at,
       active,
       enrollment_rules: [],

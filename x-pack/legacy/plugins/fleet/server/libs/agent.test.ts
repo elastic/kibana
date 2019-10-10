@@ -66,7 +66,6 @@ describe('Agent lib', () => {
       expect(agent).toMatchObject({
         access_token: 'mock-access-token-1',
         policy_id: 'policyId',
-        policy_shared_id: 'configSharedId',
       });
     });
 
@@ -146,7 +145,6 @@ describe('Agent lib', () => {
       expect(agent).toMatchObject({
         access_token: 'mock-access-token-1',
         policy_id: 'policyId',
-        policy_shared_id: 'configSharedId',
       });
     });
 
@@ -440,7 +438,6 @@ describe('Agent lib', () => {
         actions: [],
         active: true,
         type: 'PERMANENT',
-        policy_shared_id: 'config1',
         policy_id: 'config1',
       };
       const spy = jest.spyOn(agentsRepository, 'update');
