@@ -17,12 +17,20 @@
  * under the License.
  */
 
+import dateMath from '@elastic/datemath';
 import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 
 import classNames from 'classnames';
 import React, { useState, useEffect } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSuperDatePicker,
+  prettyDuration,
+} from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -142,6 +150,14 @@ function QueryBarTopRowUI(props: Props) {
     });
   }
 
+  function toAbsoluteString(value: string, roundUp = false) {
+    const valueAsMoment = dateMath.parse(value, { roundUp });
+    if (!valueAsMoment) {
+      return value;
+    }
+    return valueAsMoment.toISOString();
+  }
+
   function renderQueryInput() {
     if (!shouldRenderQueryInput()) return;
     return (
@@ -158,6 +174,17 @@ function QueryBarTopRowUI(props: Props) {
         />
       </EuiFlexItem>
     );
+  }
+
+  function renderSharingMetaFields() {
+    const { from, to } = getDateRange();
+    const dateRangePretty = prettyDuration(
+      toAbsoluteString(from),
+      toAbsoluteString(to),
+      [],
+      uiSettings.get('dateFormat')
+    );
+    return <div data-shared-timefilter-duration={dateRangePretty} />;
   }
 
   function shouldRenderDatePicker(): boolean {
@@ -306,6 +333,7 @@ function QueryBarTopRowUI(props: Props) {
       justifyContent="flexEnd"
     >
       {renderQueryInput()}
+      {renderSharingMetaFields()}
       <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
     </EuiFlexGroup>
   );
