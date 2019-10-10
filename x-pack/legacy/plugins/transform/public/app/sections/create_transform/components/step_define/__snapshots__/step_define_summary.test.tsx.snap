@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: <DefinePivotSummary /> Minimal initialization 1`] = `
+<div>
+  <ContextProvider
+    value={
+      Object {
+        "initialized": false,
+      }
+    }
+  >
+    <StepDefineSummary
+      aggList={
+        Object {
+          "the-agg-name": Object {
+            "agg": "avg",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-agg-field",
+          },
+        }
+      }
+      groupByList={
+        Object {
+          "the-group-by-name": Object {
+            "agg": "terms",
+            "aggName": "the-group-by-agg-name",
+            "dropDownName": "the-group-by-drop-down-name",
+            "field": "the-group-by-field",
+          },
+        }
+      }
+      isAdvancedPivotEditorEnabled={false}
+      isAdvancedSourceEditorEnabled={false}
+      searchQuery="the-search-query"
+      searchString="the-query"
+      sourceConfigUpdated={false}
+      valid={true}
+    />
+  </ContextProvider>
+</div>
+`;
