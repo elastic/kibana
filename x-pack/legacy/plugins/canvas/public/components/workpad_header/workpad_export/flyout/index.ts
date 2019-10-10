@@ -18,8 +18,8 @@ import { notify } from '../../../../lib/notify';
 // @ts-ignore Untyped local
 import {
   downloadRenderedWorkpad,
-  downloadEmbedRuntime,
-  downloadZippedEmbed,
+  downloadRuntime,
+  downloadZippedRuntime,
   // @ts-ignore Untyped local
 } from '../../../../lib/download_workpad';
 import { ShareWebsiteFlyout as Component, Props as ComponentProps } from './share_website_flyout';
@@ -74,13 +74,13 @@ export const ShareWebsiteFlyout = compose<ComponentProps, Pick<Props, 'onClose'>
             downloadRenderedWorkpad(renderedWorkpad);
             return;
           case 'shareRuntime':
-            downloadEmbedRuntime();
+            downloadRuntime();
             return;
           case 'shareZip':
             const basePath = chrome.getBasePath();
             arrayBufferFetch
               .post(`${basePath}${API_ROUTE_SHAREABLE_ZIP}`, JSON.stringify(renderedWorkpad))
-              .then(blob => downloadZippedEmbed(blob.data))
+              .then(blob => downloadZippedRuntime(blob.data))
               .catch((err: Error) => {
                 notify.error(err, { title: strings.getShareableZipErrorTitle(workpad.name) });
               });
