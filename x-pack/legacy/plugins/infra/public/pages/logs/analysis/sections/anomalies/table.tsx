@@ -20,7 +20,7 @@ export const AnomaliesTable: React.FunctionComponent<{
   const tableItems = useMemo(() => {
     return Object.entries(getTopAnomalyScoresByPartition(results)).map(([key, value]) => {
       return {
-        id: key || 'unknown',
+        id: key || 'unknown', // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap
         partition: key || 'unknown',
         topAnomalyScore: Number(value).toFixed(0),
       };

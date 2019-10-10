@@ -61,7 +61,10 @@ export const getLogEntryRateSeriesForPartition = (
   return results.histogramBuckets.reduce<Array<{ time: number; value: number }>>(
     (buckets, bucket) => {
       const partitionResults = bucket.partitions.find(partition => {
-        return partition.partitionId === partitionId;
+        return (
+          partition.partitionId === partitionId ||
+          (partition.partitionId === '' && partitionId === 'unknown')
+        );
       });
       if (!partitionResults) {
         return buckets;
@@ -105,7 +108,10 @@ export const getAnnotationsForPartition = (
   return results.histogramBuckets.reduce<Record<MLSeverityScoreCategories, RectAnnotationDatum[]>>(
     (annotatedBucketsBySeverity, bucket) => {
       const partitionResults = bucket.partitions.find(partition => {
-        return partition.partitionId === partitionId;
+        return (
+          partition.partitionId === partitionId ||
+          (partition.partitionId === '' && partitionId === 'unknown')
+        );
       });
       if (
         !partitionResults ||
