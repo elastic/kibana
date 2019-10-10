@@ -108,9 +108,20 @@ function* handleSearchRouteChange(action: Action<Match>) {
   const rawSearchStr = location.search.length > 0 ? location.search.substring(1) : '';
   const queryParams = queryString.parse(rawSearchStr);
   const { q, p, langs, repos, scope, repoScope } = queryParams;
+
   yield put(changeSearchScope(scope as SearchScope));
+
   if (scope === SearchScope.REPOSITORY) {
     yield put(repositorySearch({ query: q as string }));
+  } else if (scope === SearchScope.COMMIT) {
+    yield put(
+      commitSearch({
+        query: q as string,
+        page: p as string,
+        repositories: repos as string,
+        repoScope: repoScope as string,
+      })
+    );
   } else {
     yield put(
       documentSearch({
