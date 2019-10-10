@@ -8,7 +8,7 @@ import { idx } from '@kbn/elastic-idx';
 import { mlJobService } from '../../../../services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { CombinedJob } from '../../common/job_creator/configs';
-import { CREATED_BY_LABEL } from '../../common/job_creator/util/constants';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../common/job_creator/util/constants';
 
 export async function preConfiguredJobRedirect() {
   const { job } = mlJobService.tempJobCloningObjects;
@@ -33,13 +33,13 @@ function getWizardUrlFromCloningJob(job: CombinedJob) {
   let page = '';
 
   if (created === CREATED_BY_LABEL.SINGLE_METRIC) {
-    page = 'single_metric';
+    page = JOB_TYPE.SINGLE_METRIC;
   } else if (created === CREATED_BY_LABEL.MULTI_METRIC) {
-    page = 'multi_metric';
+    page = JOB_TYPE.MULTI_METRIC;
   } else if (created === CREATED_BY_LABEL.POPULATION) {
-    page = 'population';
+    page = JOB_TYPE.POPULATION;
   } else {
-    page = 'advanced';
+    page = JOB_TYPE.ADVANCED;
   }
   const indexPatternId = getIndexPatternIdFromName(job.datafeed_config.indices[0]);
 
