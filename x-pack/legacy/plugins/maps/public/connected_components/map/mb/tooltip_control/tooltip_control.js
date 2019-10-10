@@ -251,6 +251,7 @@ export class TooltipControl extends React.Component {
     if (!tooltipLayer) {
       return null;
     }
+
     const targetFeature = tooltipLayer.getFeatureById(featureId);
     if (!targetFeature) {
       return null;
@@ -264,11 +265,26 @@ export class TooltipControl extends React.Component {
     if (!tooltipLayer) {
       return [];
     }
+
     const targetFeature = tooltipLayer.getFeatureById(featureId);
     if (!targetFeature) {
       return [];
     }
     return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
+  };
+
+  _loadPreIndexedShape = async ({ layerId, featureId }) => {
+    const tooltipLayer = this._findLayerById(layerId);
+    if (!tooltipLayer) {
+      return null;
+    }
+
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
   };
 
   _findLayerById = (layerId) => {
@@ -308,6 +324,7 @@ export class TooltipControl extends React.Component {
           anchorLocation={this.props.tooltipState.location}
           findLayerById={this._findLayerById}
           geoFields={this.props.geoFields}
+          loadPreIndexedShape={this._loadPreIndexedShape}
         />
       </EuiText>
     );

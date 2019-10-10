@@ -253,7 +253,8 @@ export enum GaugeTypes {
   CIRCLE = 'Circle',
 }
 
-export enum GaugeColorModes {
+export enum ColorModes {
+  BACKGROUND = 'Background',
   LABELS = 'Labels',
   NONE = 'None',
 }
@@ -330,4 +331,8 @@ export {
   getPositions,
   getRotateOptions,
   getScaleTypes,
+  getInterpolationModes,
+  getChartTypes,
+  getChartModes,
+  getAxisModes,
 };

@@ -21,11 +21,8 @@ export const FilterStatusButton = ({ content, value, withNext }: FilterStatusBut
     <EuiFilterButton
       hasActiveFilters={urlValue === value}
       onClick={() => {
-        if (urlValue === value) {
-          setUrlParams({ statusFilter: '' });
-        } else {
-          setUrlParams({ statusFilter: value });
-        }
+        const nextFilter = { statusFilter: urlValue === value ? '' : value, pagination: '' };
+        setUrlParams(nextFilter);
       }}
       withNext={withNext}
     >

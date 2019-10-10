@@ -4,33 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./lib/get_create_task_runner_function', () => ({
-  getCreateTaskRunnerFunction: jest.fn(),
-}));
-
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecutorType } from './types';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { ExecutorError } from './lib';
+import { ActionExecutor, ExecutorError, TaskRunnerFactory } from './lib';
 
 const mockTaskManager = taskManagerMock.create();
-
-function getServices() {
-  return {
-    log: jest.fn(),
-    callCluster: jest.fn(),
-    savedObjectsClient: SavedObjectsClientMock.create(),
-  };
-}
 const actionTypeRegistryParams = {
-  getServices,
-  isSecurityEnabled: true,
   taskManager: mockTaskManager,
-  encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
-  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-  getBasePath: jest.fn().mockReturnValue(undefined),
+  taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -41,9 +23,6 @@ const executor: ExecutorType = async options => {
 
 describe('register()', () => {
   test('able to register action types', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
-    getCreateTaskRunnerFunction.mockReturnValueOnce(jest.fn());
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -56,7 +35,7 @@ describe('register()', () => {
       Array [
         Object {
           "actions:my-action-type": Object {
-            "createTaskRunner": [MockFunction],
+            "createTaskRunner": [Function],
             "getRetry": [Function],
             "maxAttempts": 1,
             "title": "My action type",
@@ -65,14 +44,6 @@ describe('register()', () => {
         },
       ]
     `);
-    expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
-      actionTypeRegistry,
-      isSecurityEnabled: true,
-      encryptedSavedObjectsPlugin: actionTypeRegistryParams.encryptedSavedObjectsPlugin,
-      getServices: actionTypeRegistryParams.getServices,
-      getBasePath: actionTypeRegistryParams.getBasePath,
-      spaceIdToNamespace: actionTypeRegistryParams.spaceIdToNamespace,
-    });
   });
 
   test('throws error if action type already registered', () => {
