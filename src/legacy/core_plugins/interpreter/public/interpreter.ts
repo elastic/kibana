@@ -29,7 +29,6 @@ import { registries } from './registries';
 import { visualization } from './renderers/visualization';
 
 import { esaggs as esaggsFn } from './functions/esaggs';
-import { range as rangeFn } from './functions/range';
 import { visualization as visualizationFn } from './functions/visualization';
 import { visDimension as visDimensionFn } from './functions/vis_dimension';
 
@@ -79,7 +78,6 @@ registries.types.register(kibanaDatatable);
 registries.browserFunctions.register(esaggsFn);
 
 // These will be moved to Visualizations plugin.
-registries.browserFunctions.register(rangeFn);
 registries.browserFunctions.register(visDimensionFn);
 registries.browserFunctions.register(visualizationFn);
 registries.renderers.register(visualization);

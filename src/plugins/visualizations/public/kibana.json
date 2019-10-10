@@ -1,9 +1,9 @@
 {
-  "id": "expressions",
+  "id": "visualizations",
   "version": "kibana",
   "server": false,
   "ui": true,
   "requiredPlugins": [
-    "inspector"
+    "expressions"
   ]
 }

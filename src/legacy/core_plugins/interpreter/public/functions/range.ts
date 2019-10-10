@@ -17,48 +17,5 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { KibanaDatatable, Range } from '../../types';
-import { ExpressionFunction } from '../../types';
-
-const name = 'range';
-
-type Context = KibanaDatatable | null;
-
-interface Arguments {
-  from: number;
-  to: number;
-}
-
-type Return = Range; // imported from type
-
-export const range = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
-  name,
-  help: i18n.translate('interpreter.function.range.help', {
-    defaultMessage: 'Generates range object',
-  }),
-  type: 'range',
-  args: {
-    from: {
-      types: ['number'],
-      help: i18n.translate('interpreter.function.range.from.help', {
-        defaultMessage: 'Start of range',
-      }),
-      required: true,
-    },
-    to: {
-      types: ['number'],
-      help: i18n.translate('interpreter.function.range.to.help', {
-        defaultMessage: 'End of range',
-      }),
-      required: true,
-    },
-  },
-  fn: (context, args) => {
-    return {
-      type: 'range',
-      from: args.from,
-      to: args.to,
-    };
-  },
-});
+// eslint-disable-next-line
+export * from '../../../../../plugins/visualizations/public/expression_functions/range';

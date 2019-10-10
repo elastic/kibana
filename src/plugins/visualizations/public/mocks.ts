@@ -16,14 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { VisualizationsSetup, VisualizationsStart } from '.';
 
-import { PluginInitializerContext } from '../../../core/public';
-import { VisualizationsPublicPlugin } from './plugin';
+export type Setup = jest.Mocked<VisualizationsSetup>;
+export type Start = jest.Mocked<VisualizationsStart>;
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new VisualizationsPublicPlugin(initializerContext);
-}
+const createSetupContract = (): Setup => {
+  const setupContract: Setup = undefined;
+  return setupContract;
+};
 
-export { VisualizationsPublicPlugin as Plugin };
-export * from './plugin';
-export * from './types';
+const createStartContract = (): Start => {
+  const startContract: Start = undefined;
+  return startContract;
+};
+
+export const expressionsPluginMock = {
+  createSetupContract,
+  createStartContract,
+};
