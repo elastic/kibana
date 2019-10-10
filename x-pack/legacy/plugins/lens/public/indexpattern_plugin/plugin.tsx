@@ -57,6 +57,7 @@ export const indexPatternDatasourceSetup = () => {
     core: npStart.core,
     chrome,
     storage: new Storage(localStorage),
+    savedObjectsClient: chrome.getSavedObjectsClient(),
   });
 };
 export const indexPatternDatasourceStop = () => plugin.stop();

@@ -18,8 +18,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ExpressionFunction, KibanaDatatable } from '../../types';
 
-export const visDimension = () => ({
+const name = 'visdimension';
+
+type Context = KibanaDatatable | null;
+
+interface Arguments {
+  accessor: string | number;
+  format?: string;
+  formatParams?: string;
+}
+
+type Return = any;
+
+export const visDimension = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
   name: 'visdimension',
   help: i18n.translate('interpreter.function.visDimension.help', {
     defaultMessage: 'Generates visConfig dimension object',
@@ -39,16 +52,23 @@ export const visDimension = () => ({
     format: {
       types: ['string'],
       default: 'string',
+      help: i18n.translate('interpreter.function.visDimension.format.help', {
+        defaultMessage: 'Format',
+      }),
     },
     formatParams: {
       types: ['string'],
       default: '"{}"',
+      help: i18n.translate('interpreter.function.visDimension.formatParams.help', {
+        defaultMessage: 'Format params',
+      }),
     },
   },
-  fn: (context: any, args: any) => {
-    const accessor = Number.isInteger(args.accessor)
-      ? args.accessor
-      : context.columns.find((c: any) => c.id === args.accessor);
+  fn: (context, args) => {
+    const accessor =
+      typeof args.accessor === 'number'
+        ? args.accessor
+        : context!.columns.find(c => c.id === args.accessor);
     if (accessor === undefined) {
       throw new Error(
         i18n.translate('interpreter.function.visDimension.error.accessor', {
@@ -62,7 +82,7 @@ export const visDimension = () => ({
       accessor,
       format: {
         id: args.format,
-        params: JSON.parse(args.formatParams),
+        params: JSON.parse(args.formatParams!),
       },
     };
   },

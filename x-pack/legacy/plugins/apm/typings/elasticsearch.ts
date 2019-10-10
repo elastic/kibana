@@ -30,7 +30,9 @@ declare module 'elasticsearch' {
     | 'filters'
     | 'cardinality'
     | 'sampler'
-    | 'value_count';
+    | 'value_count'
+    | 'derivative'
+    | 'bucket_script';
 
   type AggOptions = AggregationOptionMap & {
     [key: string]: any;
@@ -139,6 +141,13 @@ declare module 'elasticsearch' {
           value: number;
         };
         sampler: SamplerAggregation<AggregationOption[AggregationName]>;
+        derivative: BucketAggregation<
+          AggregationOption[AggregationName],
+          number
+        >;
+        bucket_script: {
+          value: number | null;
+        };
       }[AggregationType & keyof AggregationOption[AggregationName]];
     }
   >;

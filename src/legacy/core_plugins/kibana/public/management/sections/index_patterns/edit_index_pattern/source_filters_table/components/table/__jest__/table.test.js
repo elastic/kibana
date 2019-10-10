@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { TableComponent } from '../table';
+import { Table } from '../table';
 import { keyCodes } from '@elastic/eui';
 
 const indexPattern = {};
@@ -29,8 +29,8 @@ const items = [{ value: 'tim*' }];
 
 describe('Table', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}
@@ -44,8 +44,8 @@ describe('Table', () => {
   });
 
   it('should render filter matches', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={{
           getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
         }}
@@ -57,9 +57,7 @@ describe('Table', () => {
       />
     );
 
-    const matchesTableCell = shallow(
-      component.prop('columns')[1].render('tim', { clientId: 1 })
-    );
+    const matchesTableCell = shallow(component.prop('columns')[1].render('tim', { clientId: 1 }));
     expect(matchesTableCell).toMatchSnapshot();
   });
 
@@ -69,8 +67,8 @@ describe('Table', () => {
     let component;
 
     beforeEach(() => {
-      component = shallowWithIntl(
-        <TableComponent
+      component = shallowWithI18nProvider(
+        <Table
           indexPattern={indexPattern}
           items={items}
           deleteFilter={() => {}}
@@ -85,9 +83,7 @@ describe('Table', () => {
       // Start the editing process
       const editingComponent = shallow(
         // Wrap in a div because: https://github.com/airbnb/enzyme/issues/1213
-        <div>
-          {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
-        </div>
+        <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
       editingComponent
         .find('EuiButtonIcon')
@@ -107,9 +103,7 @@ describe('Table', () => {
       // Start the editing process
       const editingComponent = shallow(
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-        <div>
-          {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
-        </div>
+        <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
       editingComponent
         .find('EuiButtonIcon')
@@ -122,16 +116,14 @@ describe('Table', () => {
       // Verify save button
       const saveTableCell = shallow(
         // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-        <div>
-          {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
-        </div>
+        <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
       expect(saveTableCell).toMatchSnapshot();
     });
 
     it('should update the matches dynamically as input value is changed', () => {
-      const localComponent = shallowWithIntl(
-        <TableComponent
+      const localComponent = shallowWithI18nProvider(
+        <Table
           indexPattern={{
             getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
           }}
@@ -148,11 +140,7 @@ describe('Table', () => {
       // Start the editing process
       const editingComponent = shallow(
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-        <div>
-          {localComponent
-            .prop('columns')[2]
-            .render({ clientId, value: 'tim*' })}
-        </div>
+        <div>{localComponent.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
       editingComponent
         .find('EuiButtonIcon')
@@ -168,9 +156,7 @@ describe('Table', () => {
       // Verify updated matches
       const matchesTableCell = shallow(
         // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-        <div>
-          {localComponent.prop('columns')[1].render('tim*', { clientId })}
-        </div>
+        <div>{localComponent.prop('columns')[1].render('tim*', { clientId })}</div>
       );
       expect(matchesTableCell).toMatchSnapshot();
     });
@@ -185,9 +171,7 @@ describe('Table', () => {
       // Click the save button
       const editingComponent = shallow(
         // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-        <div>
-          {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
-        </div>
+        <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
       editingComponent
         .find('EuiButtonIcon')
@@ -208,8 +192,8 @@ describe('Table', () => {
   it('should allow deletes', () => {
     const deleteFilter = jest.fn();
 
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         deleteFilter={deleteFilter}
@@ -222,9 +206,7 @@ describe('Table', () => {
     // Click the delete button
     const deleteCellComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-      <div>
-        {component.prop('columns')[2].render({ clientId: 1, value: 'tim*' })}
-      </div>
+      <div>{component.prop('columns')[2].render({ clientId: 1, value: 'tim*' })}</div>
     );
     deleteCellComponent
       .find('EuiButtonIcon')
@@ -237,8 +219,8 @@ describe('Table', () => {
     const saveFilter = jest.fn();
     const clientId = 1;
 
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}
@@ -251,9 +233,7 @@ describe('Table', () => {
     // Start the editing process
     const editingComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-      <div>
-        {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
-      </div>
+      <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
     );
     editingComponent
       .find('EuiButtonIcon')
@@ -269,9 +249,7 @@ describe('Table', () => {
     );
 
     // Press the enter key
-    filterNameTableCell
-      .find('EuiFieldText')
-      .simulate('keydown', { keyCode: keyCodes.ENTER });
+    filterNameTableCell.find('EuiFieldText').simulate('keydown', { keyCode: keyCodes.ENTER });
     expect(saveFilter).toBeCalled();
 
     // It should reset
@@ -282,8 +260,8 @@ describe('Table', () => {
     const saveFilter = jest.fn();
     const clientId = 1;
 
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}
@@ -296,9 +274,7 @@ describe('Table', () => {
     // Start the editing process
     const editingComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-      <div>
-        {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
-      </div>
+      <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
     );
     editingComponent
       .find('EuiButtonIcon')
@@ -314,9 +290,7 @@ describe('Table', () => {
     );
 
     // Press the enter key
-    filterNameTableCell
-      .find('EuiFieldText')
-      .simulate('keydown', { keyCode: keyCodes.ESCAPE });
+    filterNameTableCell.find('EuiFieldText').simulate('keydown', { keyCode: keyCodes.ESCAPE });
     expect(saveFilter).not.toBeCalled();
 
     // It should reset
