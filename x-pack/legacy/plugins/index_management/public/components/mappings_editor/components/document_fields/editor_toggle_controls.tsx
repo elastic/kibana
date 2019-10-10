@@ -18,7 +18,7 @@ interface Props {
 /* TODO: Review toggle controls UI */
 export const EditorToggleControls = ({ editor }: Props) => {
   const dispatch = useDispatch();
-  const state = useState();
+  const { fieldsJsonEditor } = useState();
 
   const [showMaxDepthWarning, setShowMaxDepthWarning] = React.useState<boolean>(false);
   const [showValidityWarning, setShowValidityWarning] = React.useState<boolean>(false);
@@ -46,16 +46,19 @@ export const EditorToggleControls = ({ editor }: Props) => {
       <EuiButton
         onClick={() => {
           clearWarnings();
-          const deNormalizedFields = state.fieldsJsonEditor.format();
-          const normalizedFields = normalize(deNormalizedFields);
-          const maxDepthOk = canUseMappingsEditor(normalizedFields.maxNestedDepth);
-          const validJSON = state.fieldsJsonEditor.isValid;
-
-          if (maxDepthOk && validJSON) {
-            dispatch({ type: 'documentField.changeEditor', value: 'default' });
+          const { isValid } = fieldsJsonEditor;
+          if (!isValid) {
+            setShowValidityWarning(true);
           } else {
-            if (!maxDepthOk) setShowMaxDepthWarning(true);
-            if (!validJSON) setShowValidityWarning(true);
+            const deNormalizedFields = fieldsJsonEditor.format();
+            const { maxNestedDepth } = normalize(deNormalizedFields);
+            const canUseDefaultEditor = canUseMappingsEditor(maxNestedDepth);
+
+            if (canUseDefaultEditor) {
+              dispatch({ type: 'documentField.changeEditor', value: 'default' });
+            } else {
+              setShowMaxDepthWarning(true);
+            }
           }
         }}
       >
@@ -66,7 +69,7 @@ export const EditorToggleControls = ({ editor }: Props) => {
           Max depth for Mappings Editor exceeded
         </EuiText>
       ) : null}
-      {showValidityWarning ? (
+      {showValidityWarning && !fieldsJsonEditor.isValid ? (
         <EuiText size="s" color="danger">
           JSON is invalid
         </EuiText>

@@ -43,7 +43,7 @@ export interface State {
   fieldForm?: OnFormUpdateArg<any>;
   fieldsJsonEditor: {
     format(): MappingsFields;
-    isValid: boolean | undefined;
+    isValid: boolean;
   };
 }
 
@@ -114,21 +114,22 @@ export const reducer = (state: State, action: Action): State => {
           fieldToEdit: undefined,
         },
       };
-    case 'documentField.changeEditor':
+    case 'documentField.changeEditor': {
       const switchingToDefault = action.value === 'default';
       const fields = switchingToDefault ? normalize(state.fieldsJsonEditor.format()) : state.fields;
-      const nextState = {
+      return {
         ...state,
         fields,
-        documentFields: { ...state.documentFields, editor: action.value },
+        fieldForm: undefined,
+        documentFields: {
+          ...state.documentFields,
+          status: 'idle',
+          fieldToAddFieldTo: undefined,
+          fieldToEdit: undefined,
+          editor: action.value,
+        },
       };
-
-      if (switchingToDefault) {
-        nextState.fieldsJsonEditor.isValid = undefined;
-      } else {
-        if (nextState.fieldForm) nextState.fieldForm.isValid = undefined;
-      }
-      return nextState;
+    }
     case 'field.add': {
       const id = getUniqueId();
       const { fieldToAddFieldTo } = state.documentFields;
@@ -255,13 +256,9 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
     }
-    case 'fieldsJsonEditor.update':
-      return {
+    case 'fieldsJsonEditor.update': {
+      const nextState = {
         ...state,
-        isValid: determineIfValid({
-          ...state,
-          fieldsJsonEditor: action.value,
-        }),
         fieldsJsonEditor: {
           format() {
             return action.value.json;
@@ -269,6 +266,11 @@ export const reducer = (state: State, action: Action): State => {
           isValid: action.value.isValid,
         },
       };
+
+      nextState.isValid = determineIfValid(nextState);
+
+      return nextState;
+    }
     default:
       throw new Error(`Action "${action!.type}" not recognized.`);
   }

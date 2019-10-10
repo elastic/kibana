@@ -6,6 +6,7 @@
 
 jest.mock('../constants', () => ({ DATA_TYPE_DEFINITION: {} }));
 
+// FormComponentsArgs will have to be changed with "State"
 import { determineIfValid, FormComponentsArgs } from '.';
 
 describe('Mappings Editor form validity', () => {
@@ -34,7 +35,7 @@ describe('Mappings Editor form validity', () => {
       fieldForm: undefined,
     };
 
-    expect(determineIfValid(components)).toBe(false);
+    expect(determineIfValid(components)).toBe(undefined);
 
     components = {
       fieldsJsonEditor: { isValid: true },
@@ -42,7 +43,7 @@ describe('Mappings Editor form validity', () => {
       fieldForm: undefined,
     };
 
-    expect(determineIfValid(components)).toBe(true);
+    expect(determineIfValid(components)).toBe(undefined);
 
     components = {
       fieldsJsonEditor: { isValid: true },

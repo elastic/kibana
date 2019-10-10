@@ -64,7 +64,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     },
     fieldsJsonEditor: {
       format: () => ({}),
-      isValid: undefined,
+      isValid: true,
     },
   };
 
@@ -83,11 +83,12 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       }),
       validate: async () => {
         if (state.fieldForm === undefined) {
-          return await state.configuration.validate();
+          return (await state.configuration.validate()) && state.fieldsJsonEditor.isValid;
         }
 
         return Promise.all([state.configuration.validate(), state.fieldForm.validate()]).then(
-          ([isConfigurationValid, isFormFieldValid]) => isConfigurationValid && isFormFieldValid
+          ([isConfigurationValid, isFormFieldValid]) =>
+            isConfigurationValid && isFormFieldValid && state.fieldsJsonEditor.isValid
         );
       },
       isValid: state.isValid,
