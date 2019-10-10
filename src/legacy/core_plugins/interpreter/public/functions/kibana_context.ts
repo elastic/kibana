@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction, KibanaContext } from '../../types';
 
@@ -76,18 +76,16 @@ export const kibanaContext = (): ExpressionFunctionKibanaContext => ({
     },
   },
   async fn(context, args, handlers) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const savedSearches = $injector.get('savedSearches') as any;
     const queryArg = args.q ? JSON.parse(args.q) : [];
     let queries = Array.isArray(queryArg) ? queryArg : [queryArg];
     let filters = args.filters ? JSON.parse(args.filters) : [];
 
     if (args.savedSearchId) {
-      const savedSearch = await savedSearches.get(args.savedSearchId);
-      const searchQuery = savedSearch.searchSource.getField('query');
-      const searchFilters = savedSearch.searchSource.getField('filter');
-      queries = queries.concat(searchQuery);
-      filters = filters.concat(searchFilters);
+      const obj = await npStart.core.savedObjects.client.get('search', args.savedSearchId);
+      const search = obj.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
+      const data = JSON.parse(search.searchSourceJSON) as { query: string; filter: any[] };
+      queries = queries.concat(data.query);
+      filters = filters.concat(data.filter);
     }
 
     if (context && context.query) {
