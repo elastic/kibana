@@ -108,7 +108,6 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
       for (const agentRequest of agentsRequests) {
         it(`${agentRequest.service.name} / ${agentRequest.service.environment}`, async () => {
-          await new Promise(resolve => setTimeout(resolve, 2000));
           const { statusCode, body } = await searchConfigurations({
             service: agentRequest.service,
             etag: 'abc',
@@ -163,7 +162,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
 async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<boolean> {
   if (retries === 0) {
-    throw new Error(`Maximum number of retries reached: ${retries}`);
+    throw new Error(`Maximum number of retries reached`);
   }
 
   const res = await cb();
