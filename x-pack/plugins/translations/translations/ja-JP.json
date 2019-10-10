@@ -10837,7 +10837,6 @@
     "xpack.uptime.pingList.statusOptions.downStatusOptionLabel": "ダウン",
     "xpack.uptime.pingList.statusOptions.upStatusOptionLabel": "アップ",
     "xpack.uptime.pluginDescription": "アップタイム監視",
-    "xpack.uptime.snapshot.endpointStatusTitle": "現在のステータス",
     "xpack.uptime.snapshot.noDataDescription": "申し訳ございませんが、ヒストグラムに利用可能なデータがありません",
     "xpack.uptime.snapshot.noDataTitle": "ヒストグラムデータがありません",
     "xpack.uptime.snapshotHistogram.series.downLabel": "ダウン",
