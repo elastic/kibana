@@ -8,15 +8,19 @@ import routes from 'ui/routes';
 
 import template from './index.html';
 import { PLUGIN } from '../common/constants';
-import { BASE_PATH, REACT_ROOT_ID } from './constants';
 import { Core, Plugins } from './legacy';
-import { mountReactApp, unmountReactApp } from './app';
+import { mountReactApp, unmountReactApp, BASE_PATH, REACT_ROOT_ID } from './app';
+
+import { documentationService } from './app/services/documentation';
+import { uiMetricService } from './app/services/ui_metric';
 
 export class TasksPlugin {
   public start(core: Core, plugins: Plugins): void {
     const {
-      __LEGACY: { management },
+      __LEGACY: { management, uiMetric },
     } = plugins;
+
+    const { docLinks } = core;
 
     // Register Management section
     const esSection = management.getSection('elasticsearch');
@@ -26,6 +30,10 @@ export class TasksPlugin {
       order: 11,
       url: `#${BASE_PATH}`,
     });
+
+    // Initialize services
+    documentationService.init(docLinks);
+    uiMetricService.init(uiMetric.createUiStatsReporter);
 
     // Register Angular route
     routes.when(`${BASE_PATH}/:section?/:subsection?`, {

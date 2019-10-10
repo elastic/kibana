@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+
 import {
   EuiPageBody,
   EuiPageContent,
@@ -14,7 +15,10 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+
 import { useCore } from './app_context';
+
+import { documentationService } from './services/documentation';
 
 export const App = () => {
   const {
@@ -32,7 +36,7 @@ export const App = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              href={'#'} // TODO
+              href={documentationService.getTasksDocUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="documentationLink"

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const BASE_PATH = '/management/elasticsearch/tasks';
+export const BASE_PATH: string = '/management/elasticsearch/tasks';
 
-export const REACT_ROOT_ID = 'tasksReactRoot';
+export const REACT_ROOT_ID: string = 'tasksReactRoot';
 
-export const UIM_APP_NAME = 'tasks';
+export * from './ui_metric';

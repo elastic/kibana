@@ -12,6 +12,8 @@ import { getAppProviders } from './app_context';
 
 import { Core } from '../legacy';
 
+export { BASE_PATH, REACT_ROOT_ID } from './constants';
+
 export const mountReactApp = (elem: HTMLElement | null, { core }: { core: Core }): void => {
   if (elem) {
     const AppProviders = getAppProviders({ core });
