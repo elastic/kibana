@@ -3,7 +3,7 @@
     "data_autocomplete_rules": {
       "source": {
         "__template": {
-          "index": ""
+          "index": "SOURCE_INDEX_NAME"
         },
         "index": "",
         "query": {
@@ -13,9 +13,15 @@
       "pivot": {
         "group_by": {
           "__template": {
-            "NAME": {},
-            "__scope_link": "GLOBAL.groupByAggs"
-          }
+            "NAME": {}
+          },
+          "__scope_link": "GLOBAL.groupByAggs"
+        },
+        "aggregations": {
+          "__template": {
+            "NAME": {}
+          },
+          "__scope_link": "GLOBAL.aggregations"
         }
       }
     }
