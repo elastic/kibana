@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { ExpressionInterpret } from '../interpreter_provider';
+
 export { ArgumentType } from './arguments';
 export {
   TypeToString,
@@ -26,6 +28,7 @@ export {
   UnwrapPromise,
   SerializedFieldFormat,
 } from './common';
+
 export { ExpressionFunction, AnyExpressionFunction, FunctionHandlers } from './functions';
 export { ExpressionType, AnyExpressionType } from './types';
 
@@ -44,4 +47,18 @@ export interface ExpressionFunctionAST {
 export interface ExpressionAST {
   type: 'expression';
   chain: ExpressionFunctionAST[];
+}
+
+export type ExpressionInterpretWithHandlers = (
+  ast: Parameters<ExpressionInterpret>[0],
+  context: Parameters<ExpressionInterpret>[1],
+  handlers: FunctionHandlers
+) => ReturnType<ExpressionInterpret>;
+
+export interface ExpressionInterpreter {
+  interpretAst: ExpressionInterpretWithHandlers;
+}
+
+export interface ExpressionExecutor {
+  interpreter: ExpressionInterpreter;
 }

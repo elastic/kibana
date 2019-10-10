@@ -18,7 +18,12 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { AnyExpressionFunction, AnyExpressionType } from './types';
+import {
+  AnyExpressionFunction,
+  AnyExpressionType,
+  ExpressionInterpretWithHandlers,
+  ExpressionExecutor,
+} from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import { setCoreStart } from './services';
@@ -43,6 +48,8 @@ import {
   kibanaContext as kibanaContextType,
   kibanaDatatable as kibanaDatatableType,
 } from './expression_types';
+import { interpreterProvider } from './interpreter_provider';
+import { createHandlers } from './create_handlers';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -60,6 +67,7 @@ export interface ExpressionsSetup {
     functions: FunctionsRegistry;
     renderers: RenderFunctionsRegistry;
     types: TypesRegistry;
+    getExecutor: () => ExpressionExecutor;
   };
 }
 
@@ -98,6 +106,20 @@ export class ExpressionsPublicPlugin
     types.register(kibanaContextType);
     types.register(kibanaDatatableType);
 
+    // TODO: Refactor this function.
+    const getExecutor = () => {
+      const interpretAst: ExpressionInterpretWithHandlers = (ast, context, handlers) => {
+        const interpret = interpreterProvider({
+          types: types.toJS(),
+          handlers: { ...handlers, ...createHandlers() },
+          functions: functions.toJS(),
+        });
+        return interpret(ast, context);
+      };
+      const executor: ExpressionExecutor = { interpreter: { interpretAst } };
+      return executor;
+    };
+
     const setup: ExpressionsSetup = {
       registerFunction: fn => {
         functions.register(fn);
@@ -112,6 +134,7 @@ export class ExpressionsPublicPlugin
         functions,
         renderers,
         types,
+        getExecutor,
       },
     };
 

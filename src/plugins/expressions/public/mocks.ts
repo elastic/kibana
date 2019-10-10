@@ -36,6 +36,11 @@ const createSetupContract = (): Setup => {
       types: {
         register: () => {},
       } as any,
+      getExecutor: () => ({
+        interpreter: {
+          interpretAst: () => {},
+        },
+      }),
     },
   };
   return setupContract;

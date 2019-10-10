@@ -36,6 +36,11 @@ export const npSetup = {
           register: () => undefined,
           get: () => null,
         },
+        getExecutor: () => ({
+          interpreter: {
+            interpretAst: () => {},
+          },
+        }),
       },
     },
     data: {
