@@ -10,12 +10,10 @@ import {
   TRACE_ID,
   TRANSACTION_ID
 } from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
 
-export type TransactionAPIResponse = PromiseReturnType<typeof getTransaction>;
 export async function getTransaction(
   transactionId: string,
   traceId: string,
