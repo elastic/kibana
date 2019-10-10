@@ -203,7 +203,7 @@ uiModules.get('apps/management')
     $scope.refreshFilters = function () {
       const indexedFieldTypes = [];
       const scriptedFieldLanguages = [];
-      $scope.indexPattern.fields.forEach(field => {
+      $scope.indexPattern.fields.getAll().forEach(field => {
         if (field.scripted) {
           scriptedFieldLanguages.push(field.lang);
         } else {
@@ -232,7 +232,7 @@ uiModules.get('apps/management')
     });
 
     $scope.$watchCollection('indexPattern.fields', function () {
-      $scope.conflictFields = $scope.indexPattern.fields
+      $scope.conflictFields = $scope.indexPattern.fields.getAll()
         .filter(field => field.type === 'conflict');
     });
 

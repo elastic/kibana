@@ -112,7 +112,7 @@ export class FieldEditorComponent extends PureComponent {
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: indexPattern.fields.map(f => f.name),
+      existingFieldNames: indexPattern.fields.getAll().map(f => f.name),
       field: copyField(field, indexPattern, Field),
       fieldFormatId: undefined,
       fieldFormatParams: {},
@@ -715,12 +715,12 @@ export class FieldEditorComponent extends PureComponent {
     }
 
     const { redirectAway } = this.props.helpers;
-    const index = indexPattern.fields.findIndex(f => f.name === field.name);
+    const index = indexPattern.fields.getAll().findIndex(f => f.name === field.name);
 
     if (index > -1) {
-      indexPattern.fields.splice(index, 1, field);
+      indexPattern.fields.getAll().splice(index, 1, field);
     } else {
-      indexPattern.fields.push(field);
+      indexPattern.fields.add(field);
     }
 
     if (!fieldFormatId) {

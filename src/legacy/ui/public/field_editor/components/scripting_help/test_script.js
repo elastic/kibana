@@ -138,7 +138,7 @@ export class TestScript extends Component {
     const fieldsByTypeMap = new Map();
     const fields = [];
 
-    this.props.indexPattern.fields
+    this.props.indexPattern.fields.getAll()
       .filter(field => {
         return !field.name.startsWith('_');
       })

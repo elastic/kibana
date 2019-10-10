@@ -88,7 +88,7 @@ class FieldSelectUi extends Component {
 
     const fieldsByTypeMap = new Map();
     const fields = [];
-    indexPattern.fields
+    indexPattern.fields.getAll()
       .filter(this.filterField)
       .forEach(field => {
         if (fieldsByTypeMap.has(field.type)) {

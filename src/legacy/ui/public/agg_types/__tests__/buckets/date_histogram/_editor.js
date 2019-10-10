@@ -98,7 +98,7 @@ describe.skip('editor', function () {
     let interval;
 
     beforeEach(ngMock.inject(function () {
-      field = _.sample(indexPattern.fields);
+      field = _.sample(indexPattern.fields.getAll());
       interval = _.sample(intervalOptions);
       params = render({ field: field, interval: interval.val });
     }));

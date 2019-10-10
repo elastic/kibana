@@ -29,7 +29,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryBarInput, QueryBarInputUI } from './query_bar_input';
 import { coreMock } from '../../../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
-import { IndexPattern } from '../../../index';
+import { StaticIndexPattern } from '../../../index';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { mount } from 'enzyme';
@@ -78,7 +78,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-} as IndexPattern;
+} as StaticIndexPattern;
 
 function wrapQueryBarInputInContext(testProps: any, store?: any) {
   const defaultOptions = {

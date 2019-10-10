@@ -81,7 +81,7 @@ export class ListControlEditor extends Component {
       return;
     }
 
-    const field = indexPattern.fields.find(field => {
+    const field = indexPattern.fields.getAll().find(field => {
       return field.name === this.props.controlParams.fieldName;
     });
     if (!field) {

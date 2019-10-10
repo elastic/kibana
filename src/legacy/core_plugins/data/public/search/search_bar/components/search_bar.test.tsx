@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { SearchBar } from './search_bar';
-import { IndexPattern } from '../../../index_patterns';
+import { StaticIndexPattern } from '../../../index_patterns';
 
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -76,7 +76,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-} as IndexPattern;
+} as StaticIndexPattern;
 
 const kqlQuery = {
   query: 'response:200',

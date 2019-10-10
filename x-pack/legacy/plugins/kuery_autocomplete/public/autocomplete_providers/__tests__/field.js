@@ -28,7 +28,7 @@ describe('Kuery field suggestions', function () {
     const prefix = '';
     const suffix = '';
     const suggestions = getSuggestions({ prefix, suffix });
-    const filterableFields = indexPattern.fields.filter(isFilterable);
+    const filterableFields = indexPattern.fields.getAll().filter(isFilterable);
     expect(suggestions.length).to.be(filterableFields.length);
   });
 

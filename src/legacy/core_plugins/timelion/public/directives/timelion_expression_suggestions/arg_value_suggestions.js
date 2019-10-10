@@ -97,7 +97,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
         }
 
         const valueSplit = partial.split(':');
-        return indexPattern.fields
+        return indexPattern.fields.getAll()
           .filter(field => {
             return field.aggregatable && 'number' === field.type && containsFieldName(valueSplit[1], field);
           })
@@ -112,7 +112,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
           return [];
         }
 
-        return indexPattern.fields
+        return indexPattern.fields.getAll()
           .filter(field => {
             return field.aggregatable
               && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
@@ -128,7 +128,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
           return [];
         }
 
-        return indexPattern.fields
+        return indexPattern.fields.getAll()
           .filter(field => {
             return 'date' === field.type && containsFieldName(partial, field);
           })

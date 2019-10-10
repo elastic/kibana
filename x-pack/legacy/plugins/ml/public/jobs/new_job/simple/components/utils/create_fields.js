@@ -78,7 +78,7 @@ export function createFields(scope, indexPattern) {
 }
 
 export function getIndexedFields(indexPattern, fieldTypes) {
-  let fields = indexPattern.fields.raw.filter(f => f.aggregatable === true);
+  let fields = indexPattern.fields.getAll().raw.filter(f => f.aggregatable === true);
 
   if (fieldTypes) {
     // filter out _type, _id and _index and scripted fields

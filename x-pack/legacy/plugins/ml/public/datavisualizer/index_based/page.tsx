@@ -113,7 +113,7 @@ export const Page: FC = () => {
 
   // Obtain the list of non metric field types which appear in the index pattern.
   let indexedFieldTypes: ML_JOB_FIELD_TYPES[] = [];
-  const indexPatternFields: FieldType[] = currentIndexPattern.fields;
+  const indexPatternFields: FieldType[] = currentIndexPattern.fields.getAll();
   indexPatternFields.forEach(field => {
     if (field.scripted !== true) {
       const dataVisualizerType: ML_JOB_FIELD_TYPES = kbnTypeToMLJobType(field);

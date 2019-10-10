@@ -49,7 +49,7 @@ interface MappingObject {
 }
 
 export interface StaticIndexPattern {
-  fields: FieldType[];
+  fields: FieldType[] | FieldListInterface;
   title: string;
   id?: string;
   type?: string;
@@ -150,7 +150,7 @@ export class IndexPattern implements StaticIndexPattern {
       return true;
     }
 
-    return this.fields.every(field => {
+    return this.fields.getAll().every(field => {
       // See https://github.com/elastic/kibana/pull/8421
       const hasFieldCaps = 'aggregatable' in field && 'searchable' in field;
 
@@ -318,11 +318,11 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   getNonScriptedFields() {
-    return _.where(this.fields, { scripted: false });
+    return _.where(this.fields.getAll(), { scripted: false });
   }
 
   getScriptedFields() {
-    return _.where(this.fields, { scripted: true });
+    return _.where(this.fields.getAll(), { scripted: true });
   }
 
   isTimeBased(): boolean {

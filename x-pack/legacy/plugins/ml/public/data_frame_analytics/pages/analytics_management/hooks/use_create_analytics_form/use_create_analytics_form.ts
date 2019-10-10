@@ -241,6 +241,7 @@ export const useCreateAnalyticsForm = () => {
           const indexPattern = await kibanaContext.indexPatterns.get(id!);
           if (
             indexPattern.fields
+              .getAll()
               .filter(f => !OMIT_FIELDS.includes(f.name))
               .map(f => f.type)
               .includes('number')

@@ -264,9 +264,9 @@ app.directive('discFieldChooser', function ($location, config, $route) {
 
         if (!indexPattern || !hits || !fieldCounts) return;
 
-        const fieldSpecs = indexPattern.fields.slice(0);
+        const fieldSpecs = indexPattern.fields.getAll().slice(0);
         const fieldNamesInDocs = _.keys(fieldCounts);
-        const fieldNamesInIndexPattern = _.map(indexPattern.fields, 'name');
+        const fieldNamesInIndexPattern = _.map(indexPattern.fields.getAll(), 'name');
 
         _.difference(fieldNamesInDocs, fieldNamesInIndexPattern)
           .forEach(function (unknownFieldName) {

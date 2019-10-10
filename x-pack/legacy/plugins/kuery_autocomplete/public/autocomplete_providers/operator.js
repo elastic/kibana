@@ -121,7 +121,7 @@ function getDescription(operator) {
 
 export function getSuggestionsProvider({ indexPatterns }) {
   const allFields = flatten(indexPatterns.map(indexPattern => {
-    return indexPattern.fields.slice();
+    return indexPattern.fields.getAll().slice();
   }));
   return function getOperatorSuggestions({ end, fieldName }) {
     const fields = allFields.filter(field => field.name === fieldName);

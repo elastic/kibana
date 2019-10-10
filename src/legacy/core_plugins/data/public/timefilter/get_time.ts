@@ -52,9 +52,9 @@ export function getTime(
     return;
   }
 
-  const timefield: Field | undefined = indexPattern.fields.find(
-    field => field.name === indexPattern.timeFieldName
-  );
+  const timefield: Field | undefined = indexPattern.fields
+    .getAll()
+    .find(field => field.name === indexPattern.timeFieldName);
 
   if (!timefield) {
     return;

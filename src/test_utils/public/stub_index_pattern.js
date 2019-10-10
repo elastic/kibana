@@ -52,7 +52,7 @@ export default  function StubIndexPattern(pattern, getConfig, timeField, fields)
   this.formatField = this.formatHit.formatField;
 
   this._reindexFields = function () {
-    this.fields = new FieldList(this, this.fields || fields);
+    this.fields = new FieldList(this, (this.fields && this.fields.getAll()) || fields);
   };
 
   this.stubSetFieldFormat = function (fieldName, id, params) {

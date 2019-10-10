@@ -498,7 +498,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
   // TODO This should use the actual value of `indices.query.bool.max_clause_count`
   const maxIndexFields = 1024;
-  const numIndexFields = indexPattern.fields.length;
+  const numIndexFields = indexPattern.fields.getAll().length;
   const disabledQuery = numIndexFields > maxIndexFields;
 
   return (

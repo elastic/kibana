@@ -74,6 +74,7 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
 
   const ignoreFieldNames = ['_id', '_index', '_type'];
   const fields = indexPattern.fields
+    .getAll()
     .filter(field => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
     .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
 

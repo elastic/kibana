@@ -44,7 +44,7 @@ export function getIndexPatternFromFilter(
 }
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IndexPattern) {
-  return indexPattern.fields.find(field => field.name === filter.meta.key);
+  return indexPattern.fields.getAll().find(field => field.name === filter.meta.key);
 }
 
 export function getOperatorFromFilter(filter: Filter) {
@@ -58,7 +58,7 @@ export function getQueryDslFromFilter(filter: Filter) {
 }
 
 export function getFilterableFields(indexPattern: IndexPattern) {
-  return indexPattern.fields.filter(isFilterable);
+  return indexPattern.fields.getAll().filter(isFilterable);
 }
 
 export function getOperatorOptions(field: Field) {

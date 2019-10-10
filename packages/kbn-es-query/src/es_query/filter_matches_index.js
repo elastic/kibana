@@ -24,5 +24,5 @@ export function filterMatchesIndex(filter, indexPattern) {
   if (!filter.meta || !indexPattern) {
     return true;
   }
-  return indexPattern.fields.some(field => field.name === filter.meta.key);
+  return indexPattern.fields.getAll().some(field => field.name === filter.meta.key);
 }

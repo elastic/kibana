@@ -152,5 +152,5 @@ describe('Filter Manager', function () {
 });
 
 function getField(indexPattern, name) {
-  return indexPattern.fields.find(field => field.name === name);
+  return indexPattern.fields.getAll().find(field => field.name === name);
 }

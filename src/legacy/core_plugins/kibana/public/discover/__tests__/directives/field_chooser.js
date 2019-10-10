@@ -168,7 +168,7 @@ describe('discover field chooser directives', function () {
       // Re-init
       destroy();
 
-      _.each(indexPattern.fields, function (field) { field.$$spec.count = 0; }); // Reset the popular fields
+      _.each(indexPattern.fields.getAll(), function (field) { field.$$spec.count = 0; }); // Reset the popular fields
       init($elem, {
         columns: [],
         toggle: sinon.spy(),

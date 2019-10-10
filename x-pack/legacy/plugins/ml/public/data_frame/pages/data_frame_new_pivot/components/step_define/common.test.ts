@@ -24,15 +24,17 @@ describe('Data Frame: Define Pivot Common', () => {
     const indexPattern = {
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
-      fields: [
-        {
-          name: ' the-f[i]e>ld ',
-          type: 'number',
-          aggregatable: true,
-          filterable: true,
-          searchable: true,
-        },
-      ],
+      fields: {
+        getAll: () => [
+          {
+            name: ' the-f[i]e>ld ',
+            type: 'number',
+            aggregatable: true,
+            filterable: true,
+            searchable: true,
+          },
+        ],
+      },
     } as IndexPattern;
 
     const options = getPivotDropdownOptions(indexPattern);

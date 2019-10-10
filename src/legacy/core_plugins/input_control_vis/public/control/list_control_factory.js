@@ -177,7 +177,7 @@ export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
     // dynamic options are only allowed on String fields but the setting defaults to true so it could
     // be enabled for non-string fields (since UI input is hidden for non-string fields).
     // If field is not string, then disable dynamic options.
-    const field = indexPattern.fields.find((field) => {
+    const field = indexPattern.fields.getAll().find((field) => {
       return field.name === controlParams.fieldName;
     });
     if (field && field.type !== 'string') {

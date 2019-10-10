@@ -76,6 +76,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     defaults.isContinuousModeEnabled
   );
   const dateFieldNames = kibanaContext.currentIndexPattern.fields
+    .getAll()
     .filter(f => f.type === 'date')
     .map(f => f.name)
     .sort();

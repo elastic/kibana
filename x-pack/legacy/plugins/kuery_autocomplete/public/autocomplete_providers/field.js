@@ -27,7 +27,7 @@ function getDescription(fieldName) {
 
 export function getSuggestionsProvider({ indexPatterns }) {
   const allFields = flatten(indexPatterns.map(indexPattern => {
-    return indexPattern.fields.filter(isFilterable);
+    return indexPattern.fields.getAll().filter(isFilterable);
   }));
   return function getFieldSuggestions({ start, end, prefix, suffix }) {
     const search = `${prefix}${suffix}`.toLowerCase();

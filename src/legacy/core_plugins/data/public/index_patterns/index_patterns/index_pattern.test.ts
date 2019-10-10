@@ -168,17 +168,17 @@ describe('IndexPattern', () => {
   describe('init', () => {
     test('should append the found fields', () => {
       expect(savedObjectsClient.get).toHaveBeenCalled();
-      expect(indexPattern.fields).toHaveLength(mockLogStashFields().length);
+      expect(indexPattern.fields.getAll()).toHaveLength(mockLogStashFields().length);
     });
   });
 
   describe('fields', () => {
     test('should have expected properties on fields', function() {
-      expect(indexPattern.fields[0]).toHaveProperty('displayName');
-      expect(indexPattern.fields[0]).toHaveProperty('filterable');
-      expect(indexPattern.fields[0]).toHaveProperty('format');
-      expect(indexPattern.fields[0]).toHaveProperty('sortable');
-      expect(indexPattern.fields[0]).toHaveProperty('scripted');
+      expect(indexPattern.fields.getAll()[0]).toHaveProperty('displayName');
+      expect(indexPattern.fields.getAll()[0]).toHaveProperty('filterable');
+      expect(indexPattern.fields.getAll()[0]).toHaveProperty('format');
+      expect(indexPattern.fields.getAll()[0]).toHaveProperty('sortable');
+      expect(indexPattern.fields.getAll()[0]).toHaveProperty('scripted');
     });
   });
 
@@ -239,7 +239,7 @@ describe('IndexPattern', () => {
 
   describe('refresh fields', () => {
     test('should fetch fields from the fieldsFetcher', async () => {
-      expect(indexPattern.fields.length).toBeGreaterThan(2);
+      expect(indexPattern.fields.getAll().length).toBeGreaterThan(2);
 
       mockFieldsFetcherResponse = [{ name: 'foo' }, { name: 'bar' }];
 
@@ -326,7 +326,7 @@ describe('IndexPattern', () => {
   describe('popularizeField', () => {
     test('should increment the popularity count by default', () => {
       // const saveSpy = sinon.stub(indexPattern, 'save');
-      indexPattern.fields.forEach(async field => {
+      indexPattern.fields.getAll().forEach(async field => {
         const oldCount = field.count || 0;
 
         await indexPattern.popularizeField(field.name);
@@ -338,7 +338,7 @@ describe('IndexPattern', () => {
 
     test('should increment the popularity count', () => {
       // const saveSpy = sinon.stub(indexPattern, 'save');
-      indexPattern.fields.forEach(async field => {
+      indexPattern.fields.getAll().forEach(async field => {
         const oldCount = field.count || 0;
         const incrementAmount = 4;
 
@@ -350,7 +350,7 @@ describe('IndexPattern', () => {
     });
 
     test('should decrement the popularity count', () => {
-      indexPattern.fields.forEach(async field => {
+      indexPattern.fields.getAll().forEach(async field => {
         const oldCount = field.count || 0;
         const incrementAmount = 4;
         const decrementAmount = -2;
@@ -363,7 +363,7 @@ describe('IndexPattern', () => {
     });
 
     test('should not go below 0', () => {
-      indexPattern.fields.forEach(async field => {
+      indexPattern.fields.getAll().forEach(async field => {
         const decrementAmount = -Number.MAX_VALUE;
 
         await indexPattern.popularizeField(field.name, decrementAmount);

@@ -191,7 +191,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       truncateText: true,
     };
 
-    const field = indexPattern.fields.find(f => f.name === k);
+    const field = indexPattern.fields.getAll().find(f => f.name === k);
 
     const formatField = (d: string) => {
       return field !== undefined && field.type === KBN_FIELD_TYPES.DATE

@@ -13,7 +13,7 @@ const type = 'value';
 export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
   const allFields = flatten(
     indexPatterns.map(indexPattern => {
-      return indexPattern.fields.map(field => ({
+      return indexPattern.fields.getAll().map(field => ({
         ...field,
         indexPatternTitle: indexPattern.title,
       }));

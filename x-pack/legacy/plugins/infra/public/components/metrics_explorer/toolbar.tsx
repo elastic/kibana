@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { StaticIndexPattern, FieldType } from 'ui/index_patterns';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -75,7 +75,7 @@ export const MetricsExplorerToolbar = ({
           <EuiFlexItem grow={2}>
             <MetricsExplorerMetrics
               autoFocus={isDefaultOptions}
-              fields={derivedIndexPattern.fields}
+              fields={derivedIndexPattern.fields as FieldType[]}
               options={options}
               onChange={onMetricsChange}
             />
@@ -90,7 +90,7 @@ export const MetricsExplorerToolbar = ({
         <EuiFlexItem grow={1}>
           <MetricsExplorerGroupBy
             onChange={onGroupByChange}
-            fields={derivedIndexPattern.fields}
+            fields={derivedIndexPattern.fields as FieldType[]}
             options={options}
           />
         </EuiFlexItem>

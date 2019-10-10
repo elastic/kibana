@@ -79,7 +79,7 @@ export class GisMap extends Component {
     try {
       const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
       indexPatterns.forEach((indexPattern) => {
-        indexPattern.fields.forEach(field => {
+        indexPattern.fields.getAll().forEach(field => {
           if (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
             geoFields.push({
               geoFieldName: field.name,

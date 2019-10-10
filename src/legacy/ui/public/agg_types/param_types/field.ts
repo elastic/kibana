@@ -112,7 +112,7 @@ export class FieldParamType extends BaseParamType {
    * filter the fields to the available ones
    */
   getAvailableFields = (fields: FieldListInterface) => {
-    const filteredFields = fields.filter((field: Field) => {
+    const filteredFields = fields.getAll().filter((field: Field) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
       if ((onlyAggregatable && !field.aggregatable) || (!scriptable && field.scripted)) {

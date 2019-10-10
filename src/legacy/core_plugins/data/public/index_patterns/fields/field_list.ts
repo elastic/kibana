@@ -18,20 +18,20 @@
  */
 
 import { NotificationsSetup } from 'kibana/public';
-import { findIndex } from 'lodash';
 import { IndexPattern } from '../index_patterns';
 import { Field, FieldType, FieldSpec } from './field';
 
 type FieldMap = Map<Field['name'], Field>;
 
-export interface FieldListInterface extends Array<Field> {
+export interface FieldListInterface {
+  getAll(): Field[];
   getByName(name: Field['name']): Field | undefined;
   getByType(type: Field['type']): Field[];
   add(field: FieldSpec): void;
   remove(field: FieldType): void;
 }
 
-export class FieldList extends Array<Field> implements FieldListInterface {
+export class FieldList implements FieldListInterface {
   private byName: FieldMap = new Map();
   private groups: Map<Field['type'], FieldMap> = new Map();
   private indexPattern: IndexPattern;
@@ -43,18 +43,17 @@ export class FieldList extends Array<Field> implements FieldListInterface {
     shortDotsEnable = false,
     notifications: NotificationsSetup
   ) {
-    super();
     this.indexPattern = indexPattern;
     this.shortDotsEnable = shortDotsEnable;
     this.notifications = notifications;
     specs.map(field => this.add(field));
   }
 
+  getAll = () => [...this.byName.values()];
   getByName = (name: Field['name']) => this.byName.get(name);
   getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
   add = (field: FieldSpec) => {
     const newField = new Field(this.indexPattern, field, this.shortDotsEnable, this.notifications);
-    this.push(newField);
     this.byName.set(newField.name, newField);
 
     // add to group, for speed
@@ -68,8 +67,5 @@ export class FieldList extends Array<Field> implements FieldListInterface {
     // maybe this just needs to take name
     (this.groups.get(field.type) as FieldMap).delete(field.name);
     this.byName.delete(field.name);
-
-    const fieldIndex = findIndex(this, { name: field.name });
-    this.splice(fieldIndex, 1);
   };
 }

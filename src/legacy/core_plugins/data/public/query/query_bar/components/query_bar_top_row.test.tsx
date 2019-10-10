@@ -22,7 +22,7 @@ import { mockPersistedLogFactory } from './query_bar_input.test.mocks';
 import React from 'react';
 import { mount } from 'enzyme';
 import { QueryBarTopRow } from './query_bar_top_row';
-import { IndexPattern } from '../../../index';
+import { StaticIndexPattern } from '../../../index';
 
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
@@ -94,7 +94,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-} as IndexPattern;
+} as StaticIndexPattern;
 
 function wrapQueryBarTopRowInContext(testProps: any) {
   const defaultOptions = {

@@ -44,7 +44,7 @@ describe('Doc Table', function () {
       config = _config_;
       $parentScope = $rootScope;
       $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      mapping = $parentScope.indexPattern.fields;
+      mapping = $parentScope.indexPattern.fields.getAll();
 
       // Stub `getConverterFor` for a field in the indexPattern to return mock data.
       // Returns `val` if provided, otherwise generates fake data for the field.
@@ -252,7 +252,7 @@ describe('Doc Table', function () {
         $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
         // Stub field format converters for every field in the indexPattern
-        $root.indexPattern.fields.forEach(f =>
+        $root.indexPattern.fields.getAll().forEach(f =>
           stubFieldFormatConverter($root, f.name)
         );
 

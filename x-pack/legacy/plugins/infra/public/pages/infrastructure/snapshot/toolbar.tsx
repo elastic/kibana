@@ -19,6 +19,7 @@ import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_option
 import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 import { WithSource } from '../../../containers/with_source';
+import { FieldType } from '../../../../../../../../src/legacy/core_plugins/data/public/index_patterns';
 
 export const SnapshotToolbar = () => (
   <Toolbar>
@@ -107,7 +108,7 @@ export const SnapshotToolbar = () => (
                     groupBy={groupBy}
                     nodeType={nodeType}
                     onChange={changeGroupBy}
-                    fields={createDerivedIndexPattern('metrics').fields}
+                    fields={createDerivedIndexPattern('metrics').fields as FieldType[]}
                     onChangeCustomOptions={changeCustomOptions}
                     customOptions={customOptions}
                   />

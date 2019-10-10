@@ -110,7 +110,7 @@ describe('kuery functions', function () {
         const node = nodeTypes.function.buildNode('is', '*', 200);
         const result = is.toElasticsearchQuery(node, indexPattern);
         expect(result).to.have.property('bool');
-        expect(result.bool.should).to.have.length(indexPattern.fields.length);
+        expect(result.bool.should).to.have.length(indexPattern.fields.getAll().length);
       });
 
       it('should return an ES exists query when value is "*"', function () {

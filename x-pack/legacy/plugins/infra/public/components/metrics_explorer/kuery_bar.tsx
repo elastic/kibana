@@ -8,7 +8,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect, useState } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { StaticIndexPattern, FieldType } from 'ui/index_patterns';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../autocomplete_field';
 import { isDisplayable } from '../../utils/is_displayable';
@@ -46,7 +46,7 @@ export const MetricsExplorerKueryBar = ({ derivedIndexPattern, onSubmit, value }
 
   const filteredDerivedIndexPattern = {
     ...derivedIndexPattern,
-    fields: derivedIndexPattern.fields.filter(field => isDisplayable(field)),
+    fields: (derivedIndexPattern.fields as FieldType[]).filter(field => isDisplayable(field)),
   };
 
   return (

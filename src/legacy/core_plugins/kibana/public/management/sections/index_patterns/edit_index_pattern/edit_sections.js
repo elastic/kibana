@@ -41,8 +41,8 @@ function getCounts(fields, sourceFilters, fieldFilter = '') {
 
 export function IndicesEditSectionsProvider() {
   return function (indexPattern, fieldFilter, indexPatternListProvider) {
-    const totalCount = getCounts(indexPattern.fields, indexPattern.sourceFilters);
-    const filteredCount = getCounts(indexPattern.fields, indexPattern.sourceFilters, fieldFilter);
+    const totalCount = getCounts(indexPattern.fields.getAll(), indexPattern.sourceFilters);
+    const filteredCount = getCounts(indexPattern.fields.getAll(), indexPattern.sourceFilters, fieldFilter);
 
     const editSections = [];
 
