@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
 import { useKibanaContext } from '../../../../contexts/kibana';
@@ -22,7 +22,6 @@ interface Props {
   timeRange: TimeRange;
 }
 
-export type Moment = moment.Moment;
 export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
   const kibanaContext = useKibanaContext();
   const dateFormat: string = kibanaContext.kibanaConfig.get('dateFormat');
