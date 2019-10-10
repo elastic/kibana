@@ -300,6 +300,16 @@ export const ComponentStrings = {
         description: 'This tab contains the settings for how data is displayed in a Canvas element',
       }),
   },
+  Error: {
+    getTitle: () =>
+      i18n.translate('xpack.canvas.error.title', {
+        defaultMessage: 'Whoops! Expression failed',
+      }),
+    getDescription: () =>
+      i18n.translate('xpack.canvas.error.description', {
+        defaultMessage: 'Expression failed with the message:',
+      }),
+  },
   Expression: {
     getCancelButtonLabel: () =>
       i18n.translate('xpack.canvas.expression.cancelButtonLabel', {
