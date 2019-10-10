@@ -9,10 +9,10 @@ import { UMKibanaDatabaseAdapter } from '../adapters/database/kibana_database_ad
 import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
 import { ElasticsearchMonitorsAdapter } from '../adapters/monitors';
 import { ElasticsearchPingsAdapter } from '../adapters/pings';
-import { UMAuthDomain, UMMonitorsDomain, UMPingsDomain } from '../domains';
+import { UMAuthDomain } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
-import { UMMonitorStatesDomain } from '../domains/monitor_states';
 import { ElasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
+import { UMKibanaSavedObjectsAdapter } from '../adapters/saved_objects/kibana_saved_objects_adapter';
 import { KibanaCore } from '../adapters/framework';
 
 export function compose(server: KibanaCore): UMServerLibs {
@@ -20,20 +20,13 @@ export function compose(server: KibanaCore): UMServerLibs {
   const database = new UMKibanaDatabaseAdapter(server.elasticsearch);
 
   const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(server.xpack), {});
-  const monitorsDomain = new UMMonitorsDomain(new ElasticsearchMonitorsAdapter(database), {});
-  const monitorStatesDomain = new UMMonitorStatesDomain(
-    new ElasticsearchMonitorStatesAdapter(database),
-    {}
-  );
-  const pingsDomain = new UMPingsDomain(new ElasticsearchPingsAdapter(database), {});
-  const savedObjectsDomain = new UMSavedObjectsDomain(savedObjects, {});
 
   const domainLibs: UMDomainLibs = {
     auth: authDomain,
-    monitors: monitorsDomain,
-    monitorStates: monitorStatesDomain,
-    pings: pingsDomain,
-    savedObjects: savedObjectsDomain,
+    monitors: new ElasticsearchMonitorsAdapter(database),
+    monitorStates: new ElasticsearchMonitorStatesAdapter(database),
+    pings: new ElasticsearchPingsAdapter(database),
+    savedObjects: new UMKibanaSavedObjectsAdapter(server.savedObjects, server.elasticsearch),
   };
 
   return {

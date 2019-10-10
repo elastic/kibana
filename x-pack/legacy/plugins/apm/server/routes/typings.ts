@@ -115,6 +115,7 @@ export type Client<TRouteState> = <
     : undefined
 >(
   options: Omit<KFetchOptions, 'query' | 'body' | 'pathname' | 'method'> & {
+    forceCache?: boolean;
     pathname: TPath;
   } & (TMethod extends 'GET' ? { method?: TMethod } : { method: TMethod }) &
     // Makes sure params can only be set when types were defined

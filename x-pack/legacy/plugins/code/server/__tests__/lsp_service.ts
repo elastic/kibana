@@ -6,7 +6,6 @@
 
 import Git from '@elastic/nodegit';
 import fs from 'fs';
-import mkdirp from 'mkdirp';
 import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
@@ -43,7 +42,7 @@ describe('lsp_service tests', () => {
   let firstCommitSha = '';
   let secondCommitSha = '';
   async function prepareProject(repoPath: string) {
-    mkdirp.sync(repoPath);
+    fs.mkdirSync(repoPath, { recursive: true });
     const repo = await Git.Repository.init(repoPath, 0);
     const helloContent = "console.log('hello world');";
     fs.writeFileSync(path.join(repo.workdir(), filename), helloContent, 'utf8');

@@ -50,6 +50,7 @@ function IpRangeTypeParamEditor({ agg, value, setValue }: AggParamEditorProps<Ip
 
   return (
     <>
+      <EuiSpacer size="m" />
       <EuiButtonGroup
         isFullWidth={true}
         onChange={onClick}

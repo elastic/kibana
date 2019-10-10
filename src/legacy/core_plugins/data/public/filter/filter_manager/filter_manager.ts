@@ -23,21 +23,12 @@ import _ from 'lodash';
 import { Subject } from 'rxjs';
 
 import { UiSettingsClientContract } from 'src/core/public';
-// @ts-ignore
+
 import { compareFilters } from './lib/compare_filters';
-// @ts-ignore
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-// @ts-ignore
 import { uniqFilters } from './lib/uniq_filters';
-// @ts-ignore
-import { extractTimeFilter } from './lib/extract_time_filter';
-// @ts-ignore
-import { changeTimeFilter } from './lib/change_time_filter';
-
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
-
 import { PartitionedFilters } from './partitioned_filters';
-
 import { IndexPatterns } from '../../index_patterns';
 
 export class FilterManager {
@@ -187,12 +178,6 @@ export class FilterManager {
 
   public async removeAll() {
     await this.setFilters([]);
-  }
-
-  public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
-    const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
-    if (timeFilter) changeTimeFilter(timeFilter);
-    return this.addFilters(filters.filter(filter => filter !== timeFilter));
   }
 
   public static setFiltersStore(filters: Filter[], store: FilterStateStore) {

@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
 import { FilterRatioIndexPatternColumn } from './filter_ratio';
 import { filterRatioOperation } from '.';
-import { IndexPatternPrivateState } from '../../indexpattern';
 import { Storage } from 'ui/storage';
 import {
   UiSettingsClientContract,
@@ -18,6 +17,8 @@ import {
 } from 'src/core/public';
 import { QueryBarInput } from '../../../../../../../../src/legacy/core_plugins/data/public/query';
 import { createMockedIndexPattern } from '../../mocks';
+import { EuiFormRow } from '@elastic/eui';
+import { IndexPatternPrivateState } from '../../types';
 
 jest.mock('ui/new_platform');
 
@@ -28,6 +29,7 @@ describe('filter_ratio', () => {
 
   beforeEach(() => {
     state = {
+      indexPatternRefs: [],
       indexPatterns: {
         1: {
           id: '1',
@@ -43,7 +45,7 @@ describe('filter_ratio', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              label: 'Filter Ratio',
+              label: 'Filter ratio',
               dataType: 'number',
               isBucketed: false,
 
@@ -195,8 +197,13 @@ describe('filter_ratio', () => {
         />
       );
 
+      const formRow = wrapper
+        .find('[data-test-subj="lns-indexPatternFilterRatio-dividedByRow"]')
+        .find(EuiFormRow);
+      const labelAppend = shallowWithIntl(formRow.prop('labelAppend') as ReactElement);
+
       act(() => {
-        wrapper
+        labelAppend
           .find('[data-test-subj="lns-indexPatternFilterRatio-showDenominatorButton"]')
           .first()
           .simulate('click');
@@ -230,6 +237,72 @@ describe('filter_ratio', () => {
           },
         },
       });
+    });
+  });
+
+  it('should allow removing a set denominator', () => {
+    const setState = jest.fn();
+    const currentColumn: FilterRatioIndexPatternColumn = {
+      ...(state.layers.first.columns.col1 as FilterRatioIndexPatternColumn),
+      params: {
+        numerator: { query: 'a: 123', language: 'kuery' },
+        denominator: { query: 'b: 123', language: 'kuery' },
+      },
+    };
+
+    const wrapper = shallowWithIntl(
+      <InlineOptions
+        layerId="first"
+        state={{
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                col1: currentColumn,
+              },
+            },
+          },
+        }}
+        setState={setState}
+        columnId="col1"
+        currentColumn={currentColumn}
+        storage={storageMock}
+        uiSettings={{} as UiSettingsClientContract}
+        savedObjectsClient={{} as SavedObjectsClientContract}
+        http={{} as HttpServiceBase}
+      />
+    );
+
+    const formRow = wrapper
+      .find('[data-test-subj="lns-indexPatternFilterRatio-dividedByRow"]')
+      .find(EuiFormRow);
+    const labelAppend = shallowWithIntl(formRow.prop('labelAppend') as ReactElement);
+
+    act(() => {
+      labelAppend
+        .find('[data-test-subj="lns-indexPatternFilterRatio-hideDenominatorButton"]')
+        .first()
+        .simulate('click');
+    });
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      layers: {
+        ...state.layers,
+        first: {
+          ...state.layers.first,
+          columns: {
+            col1: {
+              ...state.layers.first.columns.col1,
+              params: {
+                numerator: { query: 'a: 123', language: 'kuery' },
+                denominator: { query: '', language: 'kuery' },
+              },
+            },
+          },
+        },
+      },
     });
   });
 });

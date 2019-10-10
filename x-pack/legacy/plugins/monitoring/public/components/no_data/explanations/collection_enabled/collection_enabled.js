@@ -39,10 +39,10 @@ export class ExplainCollectionEnabled extends React.Component {
     const { enabler } = this.props;
     enabler.enableCollectionEnabled();
 
-    // wait 19 seconds, show link to reload
+    // wait 22 seconds, show link to reload
     this.waitedTooLongTimer = setTimeout(() => {
       this.setState({ waitedTooLong: true });
-    }, 19 * 1000);
+    }, 22 * 1000);
   }
 
   render() {

@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { NotificationsSetup } from '../../../../../../core/public';
 import { AppContextProvider } from './context';
 import { EditorContextProvider } from './containers/editor/context';
 import { Main } from './containers';
@@ -28,8 +29,13 @@ export function legacyBackDoorToSettings() {
   return settingsRef;
 }
 
-export function boot(deps: { docLinkVersion: string; I18nContext: any; ResizeChecker: any }) {
-  const { I18nContext, ResizeChecker } = deps;
+export function boot(deps: {
+  docLinkVersion: string;
+  I18nContext: any;
+  ResizeChecker: any;
+  notifications: NotificationsSetup;
+}) {
+  const { I18nContext, ResizeChecker, notifications, docLinkVersion } = deps;
 
   const storage = createStorage({
     engine: window.localStorage,
@@ -42,7 +48,11 @@ export function boot(deps: { docLinkVersion: string; I18nContext: any; ResizeChe
   return (
     <I18nContext>
       <AppContextProvider
-        value={{ ...deps, services: { storage, history, settings }, ResizeChecker }}
+        value={{
+          docLinkVersion,
+          services: { storage, history, settings, notifications },
+          ResizeChecker,
+        }}
       >
         <EditorContextProvider settings={settings.toJSON()}>
           <Main />

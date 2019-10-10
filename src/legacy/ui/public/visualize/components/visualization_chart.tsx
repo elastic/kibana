@@ -22,7 +22,10 @@ import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap, tap } from 'rxjs/operators';
 
 import { PersistedState } from '../../persisted_state';
-import { dispatchRenderComplete, dispatchRenderStart } from '../../render_complete';
+import {
+  dispatchRenderComplete,
+  dispatchRenderStart,
+} from '../../../../../plugins/kibana_utils/public';
 import { ResizeChecker } from '../../resize_checker';
 import { Vis, VisualizationController } from '../../vis';
 import { getUpdateStatus } from '../../vis/update_status';
@@ -116,7 +119,8 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     if (onInit) {
       // In case the visualization implementation has an isLoaded function, we
       // call that and wait for the result to resolve (in case it was a promise).
-      const visLoaded = this.visualization.isLoaded && this.visualization.isLoaded();
+      const visLoaded =
+        this.visualization && this.visualization.isLoaded && this.visualization.isLoaded();
       Promise.resolve(visLoaded).then(onInit);
     }
 

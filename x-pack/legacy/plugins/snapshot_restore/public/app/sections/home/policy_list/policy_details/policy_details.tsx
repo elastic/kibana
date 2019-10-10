@@ -37,6 +37,7 @@ import {
   SectionLoading,
   PolicyExecuteProvider,
   PolicyDeleteProvider,
+  Error,
 } from '../../../../components';
 import { TabSummary, TabHistory } from './tabs';
 
@@ -144,7 +145,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
   };
 
   const renderError = () => {
-    const notFound = error.status === 404;
+    const notFound = (error as any).status === 404;
     const errorObject = notFound
       ? {
           data: {
@@ -168,7 +169,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
             defaultMessage="Error loading policy"
           />
         }
-        error={errorObject}
+        error={errorObject as Error}
       />
     );
   };

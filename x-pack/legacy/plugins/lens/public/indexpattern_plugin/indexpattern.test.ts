@@ -5,18 +5,12 @@
  */
 
 import chromeMock from 'ui/chrome';
-import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data/public/setup';
 import { Storage } from 'ui/storage';
-import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import { SavedObjectsClientContract } from 'src/core/public';
-import {
-  getIndexPatternDatasource,
-  IndexPatternPersistedState,
-  IndexPatternPrivateState,
-  IndexPatternColumn,
-} from './indexpattern';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
+import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -24,7 +18,6 @@ jest.mock('../id_generator');
 jest.mock('ui/chrome');
 // Contains old and new platform data plugins, used for interpreter and filter ratio
 jest.mock('ui/new_platform');
-jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
 
 const expectedIndexPatterns = {
   1: {
@@ -129,6 +122,18 @@ const expectedIndexPatterns = {
   },
 };
 
+function stateFromPersistedState(
+  persistedState: IndexPatternPersistedState
+): IndexPatternPrivateState {
+  return {
+    currentIndexPatternId: persistedState.currentIndexPatternId,
+    layers: persistedState.layers,
+    indexPatterns: expectedIndexPatterns,
+    indexPatternRefs: [],
+    showEmptyFields: true,
+  };
+}
+
 describe('IndexPattern Data Source', () => {
   let persistedState: IndexPatternPersistedState;
   let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
@@ -137,9 +142,7 @@ describe('IndexPattern Data Source', () => {
     indexPatternDatasource = getIndexPatternDatasource({
       chrome: chromeMock,
       storage: {} as Storage,
-      interpreter: { functionsRegistry },
-      core: coreMock.createSetup(),
-      data: dataMock,
+      core: coreMock.createStart(),
       savedObjectsClient: {} as SavedObjectsClientContract,
     });
 
@@ -170,30 +173,50 @@ describe('IndexPattern Data Source', () => {
     };
   });
 
-  describe('#initialize', () => {
-    it('should load a default state', async () => {
-      const state = await indexPatternDatasource.initialize();
-      expect(state).toEqual({
-        currentIndexPatternId: '1',
-        indexPatterns: expectedIndexPatterns,
-        layers: {},
-        showEmptyFields: false,
+  describe('uniqueLabels', () => {
+    it('appends a suffix to duplicates', () => {
+      const col: IndexPatternColumn = {
+        dataType: 'number',
+        isBucketed: false,
+        label: 'Foo',
+        operationType: 'count',
+      };
+      const map = uniqueLabels({
+        a: {
+          columnOrder: ['a', 'b'],
+          columns: {
+            a: col,
+            b: col,
+          },
+          indexPatternId: 'foo',
+        },
+        b: {
+          columnOrder: ['c', 'd'],
+          columns: {
+            c: col,
+            d: {
+              ...col,
+              label: 'Foo [1]',
+            },
+          },
+          indexPatternId: 'foo',
+        },
       });
-    });
 
-    it('should initialize from saved state', async () => {
-      const state = await indexPatternDatasource.initialize(persistedState);
-      expect(state).toEqual({
-        ...persistedState,
-        indexPatterns: expectedIndexPatterns,
-        showEmptyFields: false,
-      });
+      expect(map).toMatchInlineSnapshot(`
+        Object {
+          "a": "Foo",
+          "b": "Foo [1]",
+          "c": "Foo [2]",
+          "d": "Foo [1] [1]",
+        }
+      `);
     });
   });
 
   describe('#getPersistedState', () => {
     it('should persist from saved state', async () => {
-      const state = await indexPatternDatasource.initialize(persistedState);
+      const state = stateFromPersistedState(persistedState);
 
       expect(indexPatternDatasource.getPersistableState(state)).toEqual(persistedState);
     });
@@ -237,21 +260,24 @@ describe('IndexPattern Data Source', () => {
           },
         },
       };
-      const state = await indexPatternDatasource.initialize(queryPersistedState);
+
+      const state = stateFromPersistedState(queryPersistedState);
+
       expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
-        "esaggs
-              index=\\"1\\"
-              metricsAtAllLevels=false
-              partialRows=false
-              includeFormatHints=true
-              aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]' | lens_rename_columns idMap='{\\"col-0-col1\\":\\"col1\\",\\"col-1-col2\\":\\"col2\\"}'"
-      `);
+                "esaggs
+                      index=\\"1\\"
+                      metricsAtAllLevels=false
+                      partialRows=false
+                      includeFormatHints=true
+                      aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]' | lens_rename_columns idMap='{\\"col-0-col1\\":\\"col1\\",\\"col-1-col2\\":\\"col2\\"}'"
+            `);
     });
   });
 
   describe('#insertLayer', () => {
     it('should insert an empty layer into the previous state', () => {
       const state = {
+        indexPatternRefs: [],
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -285,6 +311,7 @@ describe('IndexPattern Data Source', () => {
   describe('#removeLayer', () => {
     it('should remove a layer', () => {
       const state = {
+        indexPatternRefs: [],
         showEmptyFields: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
@@ -318,6 +345,7 @@ describe('IndexPattern Data Source', () => {
     it('should list the current layers', () => {
       expect(
         indexPatternDatasource.getLayers({
+          indexPatternRefs: [],
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
@@ -342,6 +370,7 @@ describe('IndexPattern Data Source', () => {
     it('should return the title of the index patterns', () => {
       expect(
         indexPatternDatasource.getMetaData({
+          indexPatternRefs: [],
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
@@ -377,7 +406,7 @@ describe('IndexPattern Data Source', () => {
     let publicAPI: DatasourcePublicAPI;
 
     beforeEach(async () => {
-      const initialState = await indexPatternDatasource.initialize(persistedState);
+      const initialState = stateFromPersistedState(persistedState);
       publicAPI = indexPatternDatasource.getPublicAPI(initialState, () => {}, 'first');
     });
 

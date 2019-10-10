@@ -18,6 +18,8 @@ import { SearchBar } from '../search_bar';
 import { EmptyProject } from './empty_project';
 import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
+import { METRIC_TYPE, trackCodeUiMetric } from '../../services/ui_metric';
+import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
 enum AdminTabs {
   projects = '0',
@@ -80,6 +82,11 @@ class AdminPage extends React.PureComponent<Props, State> {
     this.state = {
       tab: getTab() as AdminTabs,
     };
+  }
+
+  componentDidMount() {
+    // track admin page load count
+    trackCodeUiMetric(METRIC_TYPE.LOADED, CodeUIUsageMetrics.ADMIN_PAGE_LOAD_COUNT);
   }
 
   public getAdminTabClickHandler = (tab: AdminTabs) => () => {

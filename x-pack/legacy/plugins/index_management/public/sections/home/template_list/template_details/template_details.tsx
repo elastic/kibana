@@ -31,10 +31,11 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
 } from '../../../../../common/constants';
 import { Template } from '../../../../../common/types';
-import { TemplateDeleteModal, SectionLoading, SectionError } from '../../../../components';
+import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
 import { loadIndexTemplate } from '../../../../services/api';
 import { decodePath } from '../../../../services/routing';
 import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
+import { SendRequestResponse } from '../../../../shared_imports';
 import { TabSummary, TabMappings, TabSettings, TabAliases } from './tabs';
 
 interface Props {
@@ -42,7 +43,7 @@ interface Props {
   onClose: () => void;
   editTemplate: (templateName: Template['name']) => void;
   cloneTemplate: (templateName: Template['name']) => void;
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
 }
 
 const SUMMARY_TAB_ID = 'summary';
@@ -128,7 +129,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
             defaultMessage="Error loading template"
           />
         }
-        error={error}
+        error={error as Error}
         data-test-subj="sectionError"
       />
     );

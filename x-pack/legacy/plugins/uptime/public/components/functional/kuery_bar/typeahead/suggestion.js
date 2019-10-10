@@ -62,6 +62,10 @@ const ListItem = styled.li`
       background: ${props =>
     props.selected ? theme.euiColorEmptyShade : theme.euiColorLightestShade};
     }
+    @media only screen and (max-width: ${theme.euiBreakpoints.s}) {
+      margin-left: auto;
+      text-align: end;
+    }
   }
 `;
 
@@ -76,9 +80,16 @@ const Icon = styled.div`
 `;
 
 const TextValue = styled.div`
-  flex: 0 0 ${px(unit * 16)};
+  flex: 0 0 ${px(unit * 12)};
   color: ${theme.euiColorDarkestShade};
   padding: 0 ${px(units.half)};
+
+  @media only screen and (max-width: ${theme.euiBreakpoints.s}) {
+    flex: 0 0 ${px(unit * 8)};
+  }
+  @media only screen and (min-width: 1300px) {
+    flex: 0 0 ${px(unit * 16)};
+  }
 `;
 
 function getEuiIconType(type) {

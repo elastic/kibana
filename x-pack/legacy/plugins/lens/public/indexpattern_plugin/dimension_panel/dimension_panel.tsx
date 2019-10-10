@@ -15,18 +15,13 @@ import {
   HttpServiceBase,
 } from 'src/core/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
-import {
-  IndexPatternColumn,
-  IndexPatternPrivateState,
-  IndexPatternField,
-  OperationType,
-} from '../indexpattern';
-
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
+import { IndexPatternPrivateState, IndexPatternField } from '../types';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -37,6 +32,7 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
   http: HttpServiceBase;
+  uniqueLabel: string;
 };
 
 export interface OperationFieldSupportMatrix {
@@ -133,6 +129,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           const newColumn = hasFieldChanged
             ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
             : buildColumn({
+                op: operationsForNewField ? operationsForNewField[0] : undefined,
                 columns: props.state.layers[props.layerId].columns,
                 indexPattern: currentIndexPattern,
                 layerId,

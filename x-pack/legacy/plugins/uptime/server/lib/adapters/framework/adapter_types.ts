@@ -8,6 +8,7 @@ import { GraphQLOptions } from 'apollo-server-core';
 import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import { RouteOptions } from 'hapi';
+import { SavedObjectsLegacyService } from 'src/core/server';
 
 export interface UMFrameworkRequest {
   user: string;
@@ -31,9 +32,10 @@ export interface UMFrameworkRouteOptions<
 
 export interface KibanaCore {
   elasticsearch: any;
+  route: any;
+  savedObjects: SavedObjectsLegacyService<any>;
   usageCollector: any;
   xpack: any;
-  route: any;
 }
 
 export type UMFrameworkRouteHandler<RouteRequest extends UMFrameworkRequest> = (

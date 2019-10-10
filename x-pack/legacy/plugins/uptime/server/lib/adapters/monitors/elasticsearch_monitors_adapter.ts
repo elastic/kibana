@@ -101,6 +101,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
+
     const dateHistogramBuckets = dropLatestBucket(
       get(result, 'aggregations.timeseries.buckets', [])
     );

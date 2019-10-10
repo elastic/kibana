@@ -3,7 +3,7 @@
 set -e
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+  trap 'node "$KIBANA_DIR/scripts/report_failed_tests"' EXIT
 else
   source src/dev/ci_setup/setup_env.sh
 fi
@@ -18,7 +18,12 @@ if [[ -z "$IS_PIPELINE_JOB" ]] ; then
     --include-tag ciGroup2 \
     --include-tag ciGroup3 \
     --include-tag ciGroup4 \
-    --include-tag ciGroup5
+    --include-tag ciGroup5 \
+    --include-tag ciGroup6 \
+    --include-tag ciGroup7 \
+    --include-tag ciGroup8 \
+    --include-tag ciGroup9 \
+    --include-tag ciGroup10
 fi
 
 cd "$KIBANA_DIR"

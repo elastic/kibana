@@ -8,7 +8,6 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
-import { IndexPatternPrivateState } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
 import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
@@ -20,6 +19,7 @@ import {
   HttpServiceBase,
 } from 'src/core/public';
 import { Storage } from 'ui/storage';
+import { IndexPatternPrivateState } from '../types';
 
 jest.mock('ui/new_platform');
 jest.mock('../loader');
@@ -87,6 +87,7 @@ describe('IndexPatternDimensionPanel', () => {
 
   beforeEach(() => {
     state = {
+      indexPatternRefs: [],
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
       showEmptyFields: false,
@@ -96,7 +97,7 @@ describe('IndexPatternDimensionPanel', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              label: 'Date Histogram of timestamp',
+              label: 'Date histogram of timestamp',
               dataType: 'date',
               isBucketed: true,
 
@@ -122,6 +123,7 @@ describe('IndexPatternDimensionPanel', () => {
       setState,
       columnId: 'col1',
       layerId: 'first',
+      uniqueLabel: 'stuff',
       filterOperations: () => true,
       storage: {} as Storage,
       uiSettings: {} as UiSettingsClientContract,
@@ -279,7 +281,7 @@ describe('IndexPatternDimensionPanel', () => {
       'Incompatible'
     );
 
-    expect(options.find(({ name }) => name === 'Date Histogram')!['data-test-subj']).toContain(
+    expect(options.find(({ name }) => name === 'Date histogram')!['data-test-subj']).toContain(
       'Incompatible'
     );
   });
@@ -821,7 +823,7 @@ describe('IndexPatternDimensionPanel', () => {
         .find(EuiSideNav)
         .prop('items')[0]
         .items.map(({ name }) => name)
-    ).toEqual(['Average', 'Count', 'Filter Ratio', 'Maximum', 'Minimum', 'Sum']);
+    ).toEqual(['Unique count', 'Average', 'Count', 'Filter ratio', 'Maximum', 'Minimum', 'Sum']);
   });
 
   it('should add a column on selection of a field', () => {
@@ -944,6 +946,7 @@ describe('IndexPatternDimensionPanel', () => {
   describe('drag and drop', () => {
     function dragDropState(): IndexPatternPrivateState {
       return {
+        indexPatternRefs: [],
         indexPatterns: {
           foo: {
             id: 'foo',
@@ -954,6 +957,12 @@ describe('IndexPatternDimensionPanel', () => {
                 name: 'bar',
                 searchable: true,
                 type: 'number',
+              },
+              {
+                aggregatable: true,
+                name: 'mystring',
+                searchable: true,
+                type: 'string',
               },
             ],
           },
@@ -966,7 +975,7 @@ describe('IndexPatternDimensionPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Date Histogram of timestamp',
+                label: 'Date histogram of timestamp',
                 dataType: 'date',
                 isBucketed: true,
 
@@ -1025,7 +1034,7 @@ describe('IndexPatternDimensionPanel', () => {
             ...dragDropContext,
             dragging: {
               indexPatternId: 'foo',
-              field: { type: 'number', name: 'bar', aggregatable: true },
+              field: { type: 'string', name: 'mystring', aggregatable: true },
             },
           }}
           state={dragDropState()}
@@ -1133,6 +1142,54 @@ describe('IndexPatternDimensionPanel', () => {
               col2: expect.objectContaining({
                 dataType: 'number',
                 sourceField: 'bar',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('selects the specific operation that was valid on drop', () => {
+      const dragging = {
+        field: { type: 'string', name: 'mystring', aggregatable: true },
+        indexPatternId: 'foo',
+      };
+      const testState = dragDropState();
+      wrapper = shallow(
+        <IndexPatternDimensionPanel
+          {...defaultProps}
+          dragDropContext={{
+            ...dragDropContext,
+            dragging,
+          }}
+          state={testState}
+          columnId={'col2'}
+          filterOperations={op => op.isBucketed}
+          layerId="myLayer"
+        />
+      );
+
+      act(() => {
+        const onDrop = wrapper
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('onDrop') as DropHandler;
+
+        onDrop(dragging);
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              ...testState.layers.myLayer.columns,
+              col2: expect.objectContaining({
+                dataType: 'string',
+                sourceField: 'mystring',
               }),
             },
           },
