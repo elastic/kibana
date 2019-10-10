@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action } from 'redux';
+import { Action as ReduxAction } from 'redux';
 import { createAction } from 'redux-actions';
 
 export const setLoadingActionType = 'setResolvedLoading';
@@ -12,13 +12,13 @@ export const setValueActionType = 'setResolvedValue';
 export const inFlightActiveActionType = 'inFlightActive';
 export const inFlightCompleteActionType = 'inFlightComplete';
 
-type InFlightActive = Action<typeof inFlightActiveActionType>;
-type InFlightComplete = Action<typeof inFlightCompleteActionType>;
+type InFlightActive = ReduxAction<typeof inFlightActiveActionType>;
+type InFlightComplete = ReduxAction<typeof inFlightCompleteActionType>;
 
 interface SetResolvedLoadingPayload {
   path: any[];
 }
-type SetResolvedLoading = Action<typeof setLoadingActionType> & {
+type SetResolvedLoading = ReduxAction<typeof setLoadingActionType> & {
   payload: SetResolvedLoadingPayload;
 };
 
@@ -26,7 +26,7 @@ interface SetResolvedValuePayload {
   path: any[];
   value: any;
 }
-type SetResolvedValue = Action<typeof setValueActionType> & {
+type SetResolvedValue = ReduxAction<typeof setValueActionType> & {
   payload: SetResolvedValuePayload;
 };
 

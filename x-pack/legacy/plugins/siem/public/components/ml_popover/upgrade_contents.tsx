@@ -7,7 +7,8 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import { EuiButton, EuiPopoverTitle, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiPopoverTitle, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as i18n from './translations';
 
 const PopoverContentsDiv = styled.div`
@@ -20,7 +21,22 @@ export const UpgradeContents = React.memo(() => {
   return (
     <PopoverContentsDiv data-test-subj="ml-popover-upgrade-contents">
       <EuiPopoverTitle>{i18n.UPGRADE_TITLE}</EuiPopoverTitle>
-      <EuiText size="s">{i18n.UPGRADE_DESCRIPTION}</EuiText>
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.siem.components.mlPopup.upgradeDescription"
+          defaultMessage="To access SIEM’s anomaly detection features, you must update your license to Platinum, start a free 30-day trial, or spin up a {cloudLink} on AWS, GCP, or Azure. You can then run Machine Learning jobs and view anomalies."
+          values={{
+            cloudLink: (
+              <EuiLink href={`https://www.elastic.co/cloud/`} target="_blank">
+                <FormattedMessage
+                  id="xpack.siem.components.mlPopup.cloudLink"
+                  defaultMessage="cloud deployment"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
       <EuiSpacer />
       <EuiButton
         href="https://www.elastic.co/subscriptions"

@@ -28,6 +28,7 @@ import { intervalOptions } from './_interval_options';
 import { TimeIntervalParamEditor } from '../../vis/editors/default/controls/time_interval';
 import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../../vis/editors/default/controls/drop_partials';
+import { ScaleMetricsParamEditor } from '../../vis/editors/default/controls/scale_metrics';
 import { dateHistogramInterval } from '../../../../core_plugins/data/public';
 import { writeParams } from '../agg_params';
 import { AggConfigs } from '../agg_configs';
@@ -136,6 +137,13 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
       write: _.noop,
     },
     {
+      name: 'scaleMetricValues',
+      default: false,
+      write: _.noop,
+      advanced: true,
+      editorComponent: ScaleMetricsParamEditor,
+    },
+    {
       name: 'interval',
       editorComponent: TimeIntervalParamEditor,
       deserialize(state: any, agg: IBucketDateHistogramAggConfig) {
@@ -161,7 +169,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
       write(agg: IBucketDateHistogramAggConfig, output: Record<string, any>, aggs: AggConfigs) {
         setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
-        const { useNormalizedEsInterval } = agg.params;
+        const { useNormalizedEsInterval, scaleMetricValues } = agg.params;
         const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;
         if (interval.expression === '0ms') {
@@ -178,7 +186,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
           ...dateHistogramInterval(interval.expression),
         };
 
-        const scaleMetrics = interval.scaled && interval.scale < 1;
+        const scaleMetrics = scaleMetricValues && interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
           const metrics = aggs.aggs.filter(a => isMetricAggType(a.type));
           const all = _.every(metrics, (a: AggConfig) => {
