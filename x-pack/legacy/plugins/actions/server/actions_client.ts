@@ -15,7 +15,7 @@ interface ActionUpdate extends SavedObjectAttributes {
   secrets: SavedObjectAttributes;
 }
 
-interface Action extends ActionUpdate {
+export interface Action extends ActionUpdate {
   actionTypeId: string;
 }
 

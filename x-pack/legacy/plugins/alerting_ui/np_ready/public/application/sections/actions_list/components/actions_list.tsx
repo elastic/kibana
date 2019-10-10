@@ -10,7 +10,7 @@ import { EuiText, EuiPageContent, EuiEmptyPrompt, EuiInMemoryTable, EuiSpacer } 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PageError } from '../../../components/page_error';
-import { loadActionTypes, ActionTypesResponse } from '../../../lib/api';
+import { loadActions, ActionsResponse } from '../../../lib/api';
 import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
 
@@ -28,21 +28,24 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     core: { http },
   } = useAppDependencies();
 
-  const { error, isLoading, data } = loadActionTypes(http);
+  const { error, isLoading, data: result } = loadActions(http);
 
-  const actionTypesTableColumns = [
+  const actionsTableColumns = [
     {
-      field: 'id',
-      name: i18n.translate('xpack.alertingUI.sections.actionTypesList.actionTypesTable.idHeader', {
-        defaultMessage: 'Id',
-      }),
+      field: 'description',
+      name: i18n.translate(
+        'xpack.alertingUI.sections.actionsList.actionsListTable.descriptionHeader',
+        {
+          defaultMessage: 'Description',
+        }
+      ),
       sortable: true,
       truncateText: true,
     },
     {
-      field: 'name',
+      field: 'actionTypeId',
       name: i18n.translate(
-        'xpack.alertingUI.sections.actionTypesList.actionTypesTable.actionTypeHeader',
+        'xpack.alertingUI.sections.actionsList.actionsListTable.actionTypeIdHeader',
         {
           defaultMessage: 'Action Type',
         }
@@ -52,18 +55,18 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     },
   ];
 
-  const ActionTypesTable = ({ actionTypes }: { actionTypes: ActionTypesResponse[] }) => {
+  const ActionsTable = ({ actions }: { actions: ActionsResponse[] }) => {
     return (
       <EuiInMemoryTable
-        items={actionTypes}
+        items={actions}
         itemId="id"
-        columns={actionTypesTableColumns}
+        columns={actionsTableColumns}
         sorting={true}
         isSelectable={true}
         message={
           <FormattedMessage
-            id="xpack.alertingUI.sections.actionTypesList.actionTypesTable.noActionTypesMessage"
-            defaultMessage="No action types to show"
+            id="xpack.alertingUI.sections.actionsList.actionsListTable.noActionsMessage"
+            defaultMessage="No actions to show"
           />
         }
         rowProps={() => ({
@@ -72,40 +75,40 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
         cellProps={() => ({
           'data-test-subj': 'cell',
         })}
-        data-test-subj="actionTypesTable"
+        data-test-subj="actionsTable"
       />
     );
   };
 
-  const ActionTypesLoadingIndicator = () => (
+  const ActionsLoadingIndicator = () => (
     <FormattedMessage
-      id="xpack.alertingUI.sections.actionTypesList.loadingActionTypesDescription"
-      defaultMessage="Loading action types"
+      id="xpack.alertingUI.sections.actionsList.loadingActionsDescription"
+      defaultMessage="Loading actions"
     />
   );
 
   let content;
 
   if (isLoading) {
-    content = ActionTypesLoadingIndicator();
+    content = ActionsLoadingIndicator();
   } else if (error) {
     content = (
       <EuiPageContent>
         <PageError errorCode={error} />
       </EuiPageContent>
     );
-  } else if (data.length === 0) {
-    content = NoActionTypes();
+  } else if (result.data.length === 0) {
+    content = NoActions();
   } else {
     content = (
       <Fragment>
-        <ActionTypesTable actionTypes={data} />
+        <ActionsTable actions={result.data} />
       </Fragment>
     );
   }
 
   return (
-    <section data-test-subj="actionTypesList">
+    <section data-test-subj="actionsList">
       <ContentWrapper>
         <EuiSpacer size="m" />
         {content}
@@ -114,10 +117,10 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   );
 };
 
-export const NoActionTypes = () => {
+export const NoActions = () => {
   const emptyPromptBody = (
     <EuiText color="subdued">
-      <p>No Action Types</p>
+      <p>No Actions</p>
     </EuiText>
   );
 
@@ -128,8 +131,8 @@ export const NoActionTypes = () => {
         title={
           <h1>
             <FormattedMessage
-              id="xpack.alertingUI.sections.actoinsTypesList.emptyPromptTitle"
-              defaultMessage="You don’t have any action types yet"
+              id="xpack.alertingUI.sections.actionsList.emptyPromptTitle"
+              defaultMessage="You don’t have any actions yet"
             />
           </h1>
         }

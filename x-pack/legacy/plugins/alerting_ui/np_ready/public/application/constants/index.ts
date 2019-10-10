@@ -5,7 +5,7 @@
  */
 
 export const BASE_PATH = '/management/kibana/alerting';
-export const BASE_API_PATH = '../api/action';
+export const BASE_ACTION_API_PATH = '../api/action';
 
 export const DEFAULT_SECTION: Section = 'alerts';
 export type Section = 'actions' | 'alerts' | 'activity_logs' | 'notifications';

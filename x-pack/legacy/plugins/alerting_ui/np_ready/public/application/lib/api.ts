@@ -6,9 +6,9 @@
 import { Option } from 'fp-ts/lib/Option';
 import { HttpServiceBase } from 'kibana/public';
 import { useRequestNp } from '../../../../public/shared_imports';
-import { BASE_API_PATH } from '../constants';
+import { BASE_ACTION_API_PATH } from '../constants';
 
-import { ActionType } from '../../../../../actions/server/types';
+import { ActionType, Action } from '../../../../../actions/server';
 
 export interface RequestData<T> {
   isLoading: boolean;
@@ -67,10 +67,27 @@ export interface ActionTypesApi {
 
 export function loadActionTypes(http: HttpServiceBase, pollIntervalMs?: number) {
   return useRequestNp(http, {
-    path: `${BASE_API_PATH}/types`,
+    path: `${BASE_ACTION_API_PATH}/types`,
     method: 'get',
     pollIntervalMs,
     deserializer: (response: { data?: any[]; error?: any }) => {
+      return response;
+    },
+  });
+}
+
+export interface ActionsResponse extends Action {
+  id: string;
+  description: string;
+  actionTypeId: string;
+}
+
+export function loadActions(http: HttpServiceBase, pollIntervalMs?: number) {
+  return useRequestNp(http, {
+    path: `${BASE_ACTION_API_PATH}/_find`,
+    method: 'get',
+    pollIntervalMs,
+    deserializer(response: { data?: any[]; error?: any }) {
       return response;
     },
   });
