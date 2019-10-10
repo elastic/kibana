@@ -36,7 +36,7 @@ import {
   logStacktraceTab
 } from './ErrorTabs';
 import { Summary } from '../../../shared/Summary';
-import { TimestampSummaryItem } from '../../../shared/Summary/TimestampSummaryItem';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 
@@ -113,7 +113,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
 
       <Summary
         items={[
-          <TimestampSummaryItem time={error.timestamp.us / 1000} />,
+          <TimestampTooltip time={error.timestamp.us / 1000} />,
           errorUrl && method ? (
             <HttpInfoSummaryItem
               url={errorUrl}

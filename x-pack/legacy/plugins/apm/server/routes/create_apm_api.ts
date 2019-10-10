@@ -22,7 +22,8 @@ import {
   deleteAgentConfigurationRoute,
   listAgentConfigurationEnvironmentsRoute,
   listAgentConfigurationServicesRoute,
-  updateAgentConfigurationRoute
+  updateAgentConfigurationRoute,
+  agentConfigurationAgentNameRoute
 } from './settings';
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
@@ -48,14 +49,22 @@ import { createApi } from './create_api';
 
 const createApmApi = () => {
   const api = createApi()
+    // index pattern
     .add(indexPatternRoute)
+
+    // Errors
     .add(errorDistributionRoute)
     .add(errorGroupsRoute)
     .add(errorsRoute)
+
+    // Services
     .add(serviceAgentNameRoute)
     .add(serviceTransactionTypesRoute)
     .add(servicesRoute)
     .add(serviceNodeMetadataRoute)
+
+    // Agent configuration
+    .add(agentConfigurationAgentNameRoute)
     .add(agentConfigurationRoute)
     .add(agentConfigurationSearchRoute)
     .add(createAgentConfigurationRoute)
@@ -63,15 +72,23 @@ const createApmApi = () => {
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
     .add(updateAgentConfigurationRoute)
+
+    // Metrics
     .add(metricsChartsRoute)
     .add(serviceNodesRoute)
+
+    // Traces
     .add(tracesRoute)
     .add(tracesByIdRoute)
+
+    // Transaction groups
     .add(transactionGroupsBreakdownRoute)
     .add(transactionGroupsChartsRoute)
     .add(transactionGroupsDistributionRoute)
     .add(transactionGroupsRoute)
     .add(transactionGroupsAvgDurationByCountry)
+
+    // UI filters
     .add(errorGroupsLocalFiltersRoute)
     .add(metricsLocalFiltersRoute)
     .add(servicesLocalFiltersRoute)
