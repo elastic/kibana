@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
 import { i18n } from '@kbn/i18n';
-const oboe = require('oboe');
+import { PatternReader } from './pattern_reader';
 
 // In local testing, performance improvements leveled off around this size
 export const FILE_BUFFER = 1024000;
@@ -17,18 +17,10 @@ const readSlice = (fileReader, file, start, stop) => {
   fileReader.readAsBinaryString(blob);
 };
 
-const createOboeStreamAndPatterns = featureHandling => {
-  const oboeStream = oboe();
-  oboeStream.node({
-    'features.*': feature => featureHandling(feature)
-  });
-  return oboeStream;
-};
-
 let previousFileReader;
 export const fileHandler = (
   file, chunkHandler, cleanAndValidate, getFileParseActive,
-  fileReader = new FileReader(), fileBuffer = FILE_BUFFER, oboeStream
+  fileReader = new FileReader(), fileBuffer = FILE_BUFFER
 ) => {
 
   if (!file) {
@@ -51,39 +43,31 @@ export const fileHandler = (
   let stop = fileBuffer;
   previousFileReader = fileReader;
 
-  let updateProgress;
-  if (!oboeStream) {
-    // Set up feature tracking
-    let featuresProcessed = 0;
-    const featureHandling = feature => {
-      // TODO: Add handling and tracking for cleanAndValidate fails
-      featuresProcessed++;
-      return cleanAndValidate(feature);
-    };
-    // Create local oboeStream instance and track features
-    oboeStream = createOboeStreamAndPatterns(featureHandling);
-    updateProgress = () => chunkHandler({
-      featuresProcessed,
-      bytesProcessed: stop || file.size,
-      totalBytes: file.size
-    });
-  } else {
-    updateProgress = chunkHandler({
-      bytesProcessed: stop || file.size,
-      totalBytes: file.size
-    });
-  }
+  // Set up feature tracking
+  let featuresProcessed = 0;
+  const onFeatureRead = feature => {
+    // TODO: Add handling and tracking for cleanAndValidate fails
+    featuresProcessed++;
+    return cleanAndValidate(feature);
+  };
+
+  const patternReader = new PatternReader();
+  patternReader.onGeoJSONFeaturePatternDetect(onFeatureRead);
 
   const filePromise = new Promise((resolve, reject) => {
     fileReader.onloadend = ({ target: { readyState, result } }) => {
       if (readyState === FileReader.DONE) {
         if (!getFileParseActive() || !result) {
-          oboeStream.abort();
+          patternReader.abortStream();
           resolve(null);
           return;
         }
-        updateProgress();
-        oboeStream.emit('data', result);
+        chunkHandler({
+          featuresProcessed,
+          bytesProcessed: stop || file.size,
+          totalBytes: file.size
+        });
+        patternReader.writeDataToPatternStream(result);
         if (!stop) {
           return;
         }
@@ -97,13 +81,13 @@ export const fileHandler = (
     };
     fileReader.onerror = () => {
       fileReader.abort();
-      oboeStream.abort();
+      patternReader.abortStream();
       reject(new Error(i18n.translate(
         'xpack.fileUpload.fileParser.errorReadingFile', {
           defaultMessage: 'Error reading file',
         })));
     };
-    oboeStream.done(parsedGeojson => {
+    patternReader.onStreamComplete(parsedGeojson => {
       resolve(parsedGeojson);
     });
   });
