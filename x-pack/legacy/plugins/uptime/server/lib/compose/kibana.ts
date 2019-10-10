@@ -13,13 +13,11 @@ import { UMAuthDomain } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
 import { ElasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
 import { UMKibanaSavedObjectsAdapter } from '../adapters/saved_objects/kibana_saved_objects_adapter';
-import { CorePlugins, KibanaCore } from '../adapters/framework';
+import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters/framework';
 
-export function compose(
-  server: KibanaCore,
-  { elasticsearch, savedObjects, xpack }: CorePlugins
-): UMServerLibs {
-  const framework = new UMKibanaBackendFrameworkAdapter(server);
+export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UMServerLibs {
+  const { elasticsearch, savedObjects, xpack } = plugins;
+  const framework = new UMKibanaBackendFrameworkAdapter(server, plugins);
   const database = new UMKibanaDatabaseAdapter(elasticsearch);
 
   const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(xpack), {});

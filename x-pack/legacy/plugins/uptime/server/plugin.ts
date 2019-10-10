@@ -6,14 +6,14 @@
 
 import { PluginInitializerContext } from 'src/core/server';
 import { initServerWithKibana } from './kibana.index';
-import { KibanaCore, CorePlugins } from './lib/adapters/framework';
+import { UptimeCoreSetup, UptimeCorePlugins } from './lib/adapters/framework';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin();
 }
 
 export class Plugin {
-  public setup(core: KibanaCore, plugins: CorePlugins) {
+  public setup(core: UptimeCoreSetup, plugins: UptimeCorePlugins) {
     initServerWithKibana(core, plugins);
   }
 }

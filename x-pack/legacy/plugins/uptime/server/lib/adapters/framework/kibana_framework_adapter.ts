@@ -7,7 +7,7 @@
 import { GraphQLSchema } from 'graphql';
 import { Request, ResponseToolkit } from 'hapi';
 import { runHttpQuery } from 'apollo-server-core';
-import { KibanaCore } from './adapter_types';
+import { UptimeCorePlugins, UptimeCoreSetup } from './adapter_types';
 import {
   UMBackendFrameworkAdapter,
   UMFrameworkRequest,
@@ -17,8 +17,12 @@ import {
 import { DEFAULT_GRAPHQL_PATH } from '../../../graphql';
 
 export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
-  constructor(private readonly server: KibanaCore) {
+  constructor(
+    private readonly server: UptimeCoreSetup,
+    private readonly plugins: UptimeCorePlugins
+  ) {
     this.server = server;
+    this.plugins = plugins;
   }
 
   public registerRoute<
@@ -73,8 +77,9 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
   }
 
   public getSavedObjectsClient() {
-    const { SavedObjectsClient, getSavedObjectsRepository } = this.server.savedObjects;
-    const { callWithInternalUser } = this.server.plugins.elasticsearch.getCluster('admin');
+    const { elasticsearch, savedObjects } = this.plugins;
+    const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
+    const { callWithInternalUser } = elasticsearch.getCluster('admin');
     const internalRepository = getSavedObjectsRepository(callWithInternalUser);
     return new SavedObjectsClient(internalRepository);
   }

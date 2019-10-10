@@ -10,7 +10,7 @@ import { PLUGIN } from '../common/constants';
 import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
-import { CorePlugins, KibanaCore } from './lib/adapters/framework';
+import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -29,7 +29,7 @@ export interface KibanaServer extends Server {
   };
 }
 
-export const initServerWithKibana = (server: KibanaCore, plugins: CorePlugins) => {
+export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCorePlugins) => {
   const { usageCollector, xpack } = plugins;
   const libs = compose(
     server,

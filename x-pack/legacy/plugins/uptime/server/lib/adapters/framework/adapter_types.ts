@@ -30,11 +30,11 @@ export interface UMFrameworkRouteOptions<
   config?: any;
 }
 
-export interface KibanaCore {
+export interface UptimeCoreSetup {
   route: any;
 }
 
-export interface CorePlugins {
+export interface UptimeCorePlugins {
   elasticsearch: any;
   savedObjects: SavedObjectsLegacyService<any>;
   usageCollector: any;
