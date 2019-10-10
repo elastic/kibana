@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { Fragment, FC, useEffect } from 'react';
 
 import {
   EuiComboBox,
@@ -19,8 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { metadata } from 'ui/metadata';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
+import { IndexPattern, INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
+import { Field } from '../../../../../../common/types/fields';
 
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import { JOB_TYPES } from '../../hooks/use_create_analytics_form/state';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
@@ -32,11 +35,24 @@ import { JobType } from './job_type';
 INDEX_PATTERN_ILLEGAL_CHARACTERS.pop();
 const characterList = INDEX_PATTERN_ILLEGAL_CHARACTERS.join(', ');
 
+const NUMERICAL_FIELD_TYPES = new Set([
+  'long',
+  'integer',
+  'short',
+  'byte',
+  'double',
+  'float',
+  'half_float',
+  'scaled_float',
+]);
+
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
+  const kibanaContext = useKibanaContext();
 
   const {
     form,
+    indexPatternsMap,
     indexPatternsWithNumericFields,
     indexPatternTitles,
     isAdvancedEditorEnabled,
@@ -47,6 +63,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const {
     createIndexPattern,
     dependentVariable,
+    dependentVariableFetchFail,
+    dependentVariableOptions,
     destinationIndex,
     destinationIndexNameEmpty,
     destinationIndexNameExists,
@@ -58,11 +76,49 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     jobIdValid,
     jobIdInvalidMaxLength,
     jobType,
+    loadingDepFieldOptions,
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
     trainingPercent,
   } = form;
+
+  const loadDependentFieldOptions = async () => {
+    setFormState({ loadingDepFieldOptions: true, dependentVariable: '' });
+    try {
+      const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
+        indexPatternsMap[sourceIndex]
+      );
+
+      if (indexPattern !== undefined) {
+        await newJobCapsService.initializeFromIndexPattern(indexPattern);
+        // get fields and filter for numeric fields
+        const { fields } = newJobCapsService;
+        const options: Array<{ label: string }> = [];
+
+        fields.forEach((field: Field) => {
+          if (NUMERICAL_FIELD_TYPES.has(field.type)) {
+            options.push({ label: field.id }); // TODO: field.id or field.name?
+          }
+        });
+
+        setFormState({
+          dependentVariableOptions: options,
+          loadingDepFieldOptions: false,
+          dependentVariableFetchFail: false,
+        });
+      }
+    } catch (e) {
+      // TODO: ensure error messages show up correctly
+      setFormState({ loadingDepFieldOptions: false, dependentVariableFetchFail: true });
+    }
+  };
+
+  useEffect(() => {
+    if (jobType === JOB_TYPES.REGRESSION && sourceIndexNameEmpty === false) {
+      loadDependentFieldOptions();
+    }
+  }, [sourceIndex]);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
@@ -248,7 +304,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
             />
           </EuiFormRow>
-          {/* TODO: fetch options for dependent variable? Can fetch numerical fields with field_caps api */}
           {jobType === JOB_TYPES.REGRESSION && (
             <Fragment>
               <EuiFormRow
@@ -258,18 +313,41 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     defaultMessage: 'Dependent variable',
                   }
                 )}
+                error={
+                  dependentVariableFetchFail === true && [
+                    <Fragment>
+                      {i18n.translate(
+                        'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
+                        {
+                          defaultMessage: 'There was a problem fetching fields. Please try again.',
+                        }
+                      )}
+                    </Fragment>,
+                  ]
+                }
               >
-                <EuiFieldText
-                  disabled={isJobCreated}
-                  placeholder="dependent variable"
-                  value={dependentVariable}
-                  onChange={e => setFormState({ dependentVariable: e.target.value })}
+                <EuiComboBox
                   aria-label={i18n.translate(
                     'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
                     {
                       defaultMessage: 'Enter field to be used as dependent variable.',
                     }
                   )}
+                  placeholder={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
+                    {
+                      defaultMessage: 'dependent variable',
+                    }
+                  )}
+                  isDisabled={isJobCreated}
+                  isLoading={loadingDepFieldOptions}
+                  singleSelection={true}
+                  options={dependentVariableOptions}
+                  selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
+                  onChange={selectedOptions =>
+                    setFormState({ dependentVariable: selectedOptions[0].label || '' })
+                  }
+                  isClearable={false}
                   isInvalid={dependentVariable === ''}
                 />
               </EuiFormRow>

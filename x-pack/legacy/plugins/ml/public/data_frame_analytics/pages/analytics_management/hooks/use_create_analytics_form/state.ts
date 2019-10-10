@@ -32,6 +32,8 @@ export interface State {
   form: {
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
+    dependentVariableFetchFail: boolean;
+    dependentVariableOptions: Array<{ label: DependentVariable }> | [];
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
@@ -43,6 +45,7 @@ export interface State {
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
+    loadingDepFieldOptions: boolean;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -50,6 +53,7 @@ export interface State {
   };
   disabled: boolean;
   indexNames: EsIndexName[];
+  indexPatternsMap: any; // TODO: update type
   indexPatternTitles: IndexPatternTitle[];
   indexPatternsWithNumericFields: IndexPatternTitle[];
   isAdvancedEditorEnabled: boolean;
@@ -69,6 +73,8 @@ export const getInitialState = (): State => ({
   form: {
     createIndexPattern: false,
     dependentVariable: '',
+    dependentVariableFetchFail: false,
+    dependentVariableOptions: [],
     destinationIndex: '',
     destinationIndexNameExists: false,
     destinationIndexNameEmpty: true,
@@ -80,16 +86,18 @@ export const getInitialState = (): State => ({
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
+    loadingDepFieldOptions: false,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
-    trainingPercent: 70,
+    trainingPercent: 80,
   },
   jobConfig: {},
   disabled:
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics'),
   indexNames: [],
+  indexPatternsMap: {},
   indexPatternTitles: [],
   indexPatternsWithNumericFields: [],
   isAdvancedEditorEnabled: false,
