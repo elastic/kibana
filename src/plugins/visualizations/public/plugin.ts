@@ -20,6 +20,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import { range as rangeExpressionFunction } from './expression_functions/range';
+import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
 
 export interface VisualizationsSetupDeps {
   expressions: ExpressionsSetup;
@@ -45,6 +46,7 @@ export class VisualizationsPublicPlugin
 
   public setup(core: CoreSetup, { expressions }: VisualizationsSetupDeps): VisualizationsSetup {
     expressions.registerFunction(rangeExpressionFunction);
+    expressions.registerFunction(visDimensionExpressionFunction);
 
     return undefined;
   }

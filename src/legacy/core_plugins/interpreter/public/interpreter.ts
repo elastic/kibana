@@ -30,7 +30,6 @@ import { visualization } from './renderers/visualization';
 
 import { esaggs as esaggsFn } from './functions/esaggs';
 import { visualization as visualizationFn } from './functions/visualization';
-import { visDimension as visDimensionFn } from './functions/vis_dimension';
 
 /* eslint-disable */
 import { boolean } from '../../../../plugins/expressions/public/expression_types/boolean';
@@ -78,7 +77,6 @@ registries.types.register(kibanaDatatable);
 registries.browserFunctions.register(esaggsFn);
 
 // These will be moved to Visualizations plugin.
-registries.browserFunctions.register(visDimensionFn);
 registries.browserFunctions.register(visualizationFn);
 registries.renderers.register(visualization);
 
