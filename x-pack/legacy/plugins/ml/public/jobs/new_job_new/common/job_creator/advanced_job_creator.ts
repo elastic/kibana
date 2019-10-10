@@ -22,7 +22,6 @@ export interface RichDetector {
   overField: SplitField;
   partitionField: SplitField;
   excludeFrequent: string | null;
-  [key: string]: Aggregation | SplitField | string | null;
 }
 
 export class AdvancedJobCreator extends JobCreator {
