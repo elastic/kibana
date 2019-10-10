@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './slide.css';
-
-export const slide = () => ({
-  name: 'slide',
-  displayName: 'Slide',
-  help: 'Slide from one page to the next',
-  enter: 'slideIn',
-  exit: 'slideOut',
-});
+/** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
+export const defaultIndexPattern = [
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+];

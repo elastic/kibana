@@ -33,6 +33,7 @@ export const cloudFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const fileMap: Readonly<Record<string, string>> = {
+  'file.name': 'file.name',
   'file.path': 'file.path',
   'file.target_path': 'file.target_path',
   'file.extension': 'file.extension',
@@ -68,6 +69,9 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const processFieldsMap: Readonly<Record<string, string>> = {
+  'process.hash.md5': 'process.hash.md5',
+  'process.hash.sha1': 'process.hash.sha1',
+  'process.hash.sha256': 'process.hash.sha256',
   'process.pid': 'process.pid',
   'process.name': 'process.name',
   'process.ppid': 'process.ppid',
@@ -79,6 +83,7 @@ export const processFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const userFieldsMap: Readonly<Record<string, string>> = {
+  'user.domain': 'user.domain',
   'user.id': 'user.id',
   'user.name': 'user.name',
   // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
@@ -89,6 +94,10 @@ export const userFieldsMap: Readonly<Record<string, string>> = {
   'user.hash': 'user.hash',
   // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
   'user.group': 'user.group',
+};
+
+export const winlogFieldsMap: Readonly<Record<string, string>> = {
+  'winlog.event_id': 'winlog.event_id',
 };
 
 export const suricataFieldsMap: Readonly<Record<string, string>> = {
@@ -219,9 +228,33 @@ export const geoFieldsMap: Readonly<Record<string, string>> = {
   'geo.country_iso_code': 'destination.geo.country_iso_code',
 };
 
+export const dnsFieldsMap: Readonly<Record<string, string>> = {
+  'dns.question.name': 'dns.question.name',
+  'dns.question.type': 'dns.question.type',
+  'dns.resolved_ip': 'dns.resolved_ip',
+  'dns.response_code': 'dns.response_code',
+};
+
+export const endgameFieldsMap: Readonly<Record<string, string>> = {
+  'endgame.exit_code': 'endgame.exit_code',
+  'endgame.file_name': 'endgame.file_name',
+  'endgame.file_path': 'endgame.file_path',
+  'endgame.logon_type': 'endgame.logon_type',
+  'endgame.parent_process_name': 'endgame.parent_process_name',
+  'endgame.pid': 'endgame.pid',
+  'endgame.process_name': 'endgame.process_name',
+  'endgame.subject_domain_name': 'endgame.subject_domain_name',
+  'endgame.subject_logon_id': 'endgame.subject_logon_id',
+  'endgame.subject_user_name': 'endgame.subject_user_name',
+  'endgame.target_domain_name': 'endgame.target_domain_name',
+  'endgame.target_logon_id': 'endgame.target_logon_id',
+  'endgame.target_user_name': 'endgame.target_user_name',
+};
+
 export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
   'event.action': 'event.action',
   'event.category': 'event.category',
+  'event.code': 'event.code',
   'event.created': 'event.created',
   'event.dataset': 'event.dataset',
   'event.duration': 'event.duration',
@@ -257,6 +290,8 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   message: 'message',
   ...{ ...auditdMap },
   ...{ ...destinationFieldsMap },
+  ...{ ...dnsFieldsMap },
+  ...{ ...endgameFieldsMap },
   ...{ ...eventBaseFieldsMap },
   ...{ ...geoFieldsMap },
   ...{ ...hostFieldsMap },
@@ -268,6 +303,7 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...zeekFieldsMap },
   ...{ ...httpFieldsMap },
   ...{ ...userFieldsMap },
+  ...{ ...winlogFieldsMap },
   ...{ ...processFieldsMap },
   ...{ ...fileMap },
 };
