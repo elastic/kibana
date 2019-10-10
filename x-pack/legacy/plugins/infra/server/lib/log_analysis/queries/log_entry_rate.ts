@@ -82,6 +82,11 @@ export const createLogEntryRateQuery = (
                   field: 'actual',
                 },
               },
+              sum_actual: {
+                sum: {
+                  field: 'actual',
+                },
+              },
             },
           },
           filter_records: {
@@ -157,6 +162,7 @@ export const logRateModelPlotBucketRT = rt.type({
   filter_model_plot: rt.type({
     doc_count: rt.number,
     average_actual: metricAggregationRT,
+    sum_actual: metricAggregationRT,
   }),
 });
 

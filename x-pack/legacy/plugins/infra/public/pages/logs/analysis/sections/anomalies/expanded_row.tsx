@@ -13,6 +13,7 @@ import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   getLogEntryRateSeriesForPartition,
   getAnnotationsForPartition,
+  getTotalNumberOfLogsForPartition,
 } from '../helpers/data_formatters';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
@@ -41,6 +42,13 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           },
     [results, partitionId]
   );
+  const totalNumberOfLogs = useMemo(
+    () =>
+      results && results.histogramBuckets
+        ? getTotalNumberOfLogsForPartition(results, partitionId)
+        : undefined,
+    [results, partitionId]
+  );
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={8}>
@@ -53,6 +61,16 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
         />
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
+        <EuiStat
+          title={totalNumberOfLogs}
+          description={i18n.translate(
+            'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogsDescription',
+            {
+              defaultMessage: 'Number of logs',
+            }
+          )}
+          reverse
+        />
         <EuiStat
           title={Number(topAnomalyScore).toFixed(0)}
           description={i18n.translate(

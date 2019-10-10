@@ -152,6 +152,25 @@ export const getAnnotationsForPartition = (
   );
 };
 
+export const getTotalNumberOfLogsForPartition = (
+  results: GetLogEntryRateSuccessResponsePayload['data'],
+  partitionId: string
+) => {
+  return results.histogramBuckets.reduce<number>((sumPartitionNumberOfLogs, bucket) => {
+    const partitionResults = bucket.partitions.find(partition => {
+      return (
+        partition.partitionId === partitionId ||
+        (partition.partitionId === '' && partitionId === 'unknown')
+      );
+    });
+    if (!partitionResults || !partitionResults.numberOfLogs) {
+      return sumPartitionNumberOfLogs;
+    } else {
+      return (sumPartitionNumberOfLogs += partitionResults.numberOfLogs);
+    }
+  }, 0);
+};
+
 export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayload['data']) => {
   return results.histogramBuckets.reduce<Record<MLSeverityScoreCategories, RectAnnotationDatum[]>>(
     (annotatedBucketsBySeverity, bucket) => {

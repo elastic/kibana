@@ -137,6 +137,16 @@ export const AnomaliesResults = ({
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <EuiStat
+                title={results.totalNumberOfLogs}
+                description={i18n.translate(
+                  'xpack.infra.logs.analysis.overallAnomaliesNumberOfLogsDescription',
+                  {
+                    defaultMessage: 'Number of logs',
+                  }
+                )}
+                reverse
+              />
+              <EuiStat
                 title={Number(topAnomalyScore).toFixed(0)}
                 description={i18n.translate(
                   'xpack.infra.logs.analysis.overallAnomaliesTopAnomalyScoreDescription',
