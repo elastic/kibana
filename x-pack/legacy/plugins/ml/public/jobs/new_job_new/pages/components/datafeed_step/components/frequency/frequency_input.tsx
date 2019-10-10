@@ -9,13 +9,14 @@ import { EuiFieldText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../common/util/job_utils';
+import { useStringifiedValue } from '../hooks';
 
 export const FrequencyInput: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
     JobCreatorContext
   );
   const [validation, setValidation] = useState(jobValidator.frequency);
-  const { frequency, setFrequency } = useFrequency(jobCreator.frequency);
+  const { value: frequency, setValue: setFrequency } = useStringifiedValue(jobCreator.frequency);
 
   const [defaultFrequency, setDefaultFrequency] = useState(createDefaultFrequency());
 
@@ -52,17 +53,3 @@ export const FrequencyInput: FC = () => {
     </Description>
   );
 };
-
-function useFrequency(initialFrequency: string | null) {
-  const [frequency, setFrequencyInner] = useState(stringify(initialFrequency));
-
-  function stringify(f: string | null) {
-    return f === null ? '' : f;
-  }
-
-  function setFrequency(f: string | null) {
-    setFrequencyInner(stringify(f));
-  }
-
-  return { frequency, setFrequency };
-}

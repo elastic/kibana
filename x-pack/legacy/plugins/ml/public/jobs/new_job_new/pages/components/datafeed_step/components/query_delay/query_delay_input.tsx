@@ -8,6 +8,7 @@ import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
+import { useStringifiedValue } from '../hooks';
 
 const DEFAULT_QUERY_DELAY = '60s';
 
@@ -16,9 +17,7 @@ export const QueryDelayInput: FC = () => {
     JobCreatorContext
   );
   const [validation, setValidation] = useState(jobValidator.queryDelay);
-  const [queryDelay, setQueryDelay] = useState(
-    jobCreator.queryDelay === null ? '' : jobCreator.queryDelay
-  );
+  const { value: queryDelay, setValue: setQueryDelay } = useStringifiedValue(jobCreator.queryDelay);
 
   useEffect(() => {
     jobCreator.queryDelay = queryDelay === '' ? null : queryDelay;
