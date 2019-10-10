@@ -394,12 +394,12 @@ describe('interception', () => {
 
     const unusedSpy = jest.fn();
 
-    http.intercept({ response: unusedSpy });
     http.intercept({
       responseError(response, controller) {
         controller.halt();
       },
     });
+    http.intercept({ response: unusedSpy, responseError: unusedSpy });
 
     http.post('/my/path').then(unusedSpy, unusedSpy);
     await delay(1000);
@@ -416,21 +416,21 @@ describe('interception', () => {
       request: unusedSpy,
       requestError: usedSpy,
       response: unusedSpy,
-      responseError: usedSpy,
+      responseError: unusedSpy,
     });
     http.intercept({
       request() {
         throw new Error('Interception Error');
       },
       response: unusedSpy,
-      responseError: usedSpy,
+      responseError: unusedSpy,
     });
-    http.intercept({ request: usedSpy, response: unusedSpy, responseError: usedSpy });
+    http.intercept({ request: usedSpy, response: unusedSpy, responseError: unusedSpy });
 
     await expect(http.fetch('/my/path')).rejects.toThrow(/Interception Error/);
     expect(fetchMock.called()).toBe(false);
     expect(unusedSpy).toHaveBeenCalledTimes(0);
-    expect(usedSpy).toHaveBeenCalledTimes(5);
+    expect(usedSpy).toHaveBeenCalledTimes(2);
   });
 
   it('should succeed if request throws but caught by interceptor', async () => {

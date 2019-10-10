@@ -100,51 +100,47 @@ export const setup = (
 
   // Request/response interceptors are called in opposite orders.
   // Request hooks start from the newest interceptor and end with the oldest.
-  async function interceptRequest(
+  function interceptRequest(
     request: Request,
     controller: HttpInterceptController
   ): Promise<Request> {
     let next = request;
 
-    try {
-      return await [...interceptors].reduceRight(
-        (promise, interceptor) =>
-          promise.then(
-            async (current: Request) => {
-              next = current;
-              checkHalt(controller);
+    return [...interceptors].reduceRight(
+      (promise, interceptor) =>
+        promise.then(
+          async (current: Request) => {
+            next = current;
+            checkHalt(controller);
 
-              if (!interceptor.request) {
-                return current;
-              }
-
-              return (await interceptor.request(current, controller)) || current;
-            },
-            async error => {
-              checkHalt(controller, error);
-
-              if (!interceptor.requestError) {
-                throw error;
-              }
-
-              const nextRequest = await interceptor.requestError(
-                { error, request: next },
-                controller
-              );
-
-              if (!nextRequest) {
-                throw error;
-              }
-
-              next = nextRequest;
-              return next;
+            if (!interceptor.request) {
+              return current;
             }
-          ),
-        Promise.resolve(request)
-      );
-    } catch (innerError) {
-      throw Object.assign(new Error(), { request: next, innerError });
-    }
+
+            return (await interceptor.request(current, controller)) || current;
+          },
+          async error => {
+            checkHalt(controller, error);
+
+            if (!interceptor.requestError) {
+              throw error;
+            }
+
+            const nextRequest = await interceptor.requestError(
+              { error, request: next },
+              controller
+            );
+
+            if (!nextRequest) {
+              throw error;
+            }
+
+            next = nextRequest;
+            return next;
+          }
+        ),
+      Promise.resolve(request)
+    );
   }
 
   // Response hooks start from the oldest interceptor and end with the newest.
@@ -153,12 +149,6 @@ export const setup = (
     controller: HttpInterceptController
   ) {
     let current: HttpResponse | undefined;
-
-    try {
-      current = await responsePromise;
-    } catch (err) {
-      throw err;
-    }
 
     const finalHttpResponse = await [...interceptors].reduce(
       (promise, interceptor) =>
@@ -178,12 +168,7 @@ export const setup = (
             };
           },
           async error => {
-            const request =
-              error.request || (error.innerError && error.innerError.request) || current!.request;
-
-            if (error.innerError) {
-              error = error.innerError;
-            }
+            const request = error.request || (current && current.request);
 
             checkHalt(controller, error);
 
@@ -196,8 +181,8 @@ export const setup = (
                 {
                   error,
                   request,
-                  response: error.response || current!.response,
-                  body: error.body || current!.body,
+                  response: error.response || (current && current.response),
+                  body: error.body || (current && current.body),
                 },
                 controller
               );
@@ -215,7 +200,7 @@ export const setup = (
             }
           }
         ),
-      Promise.resolve(current)
+      responsePromise
     );
 
     return finalHttpResponse.body;
@@ -265,17 +250,22 @@ export const setup = (
     // We wrap the interception in a separate promise to ensure that when
     // a halt is called we do not resolve or reject, halting handling of the promise.
     return new Promise(async (resolve, reject) => {
-      try {
-        const value = await interceptResponse(
-          interceptRequest(initialRequest, controller).then(fetcher),
-          controller
-        );
-
-        resolve(value);
-      } catch (err) {
+      function rejectIfNotHalted(err: any) {
         if (!(err instanceof HttpInterceptHaltError)) {
           reject(err);
         }
+      }
+
+      try {
+        const request = await interceptRequest(initialRequest, controller);
+
+        try {
+          resolve(await interceptResponse(fetcher(request), controller));
+        } catch (err) {
+          rejectIfNotHalted(err);
+        }
+      } catch (err) {
+        rejectIfNotHalted(err);
       }
     });
   }
