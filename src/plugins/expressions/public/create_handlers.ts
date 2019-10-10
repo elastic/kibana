@@ -17,5 +17,8 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../../../plugins/expressions/public/create_handlers';
+export function createHandlers() {
+  return {
+    environment: 'client',
+  };
+}
