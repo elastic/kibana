@@ -49,7 +49,7 @@ describe('DiscoverFieldSearch', () => {
     expect(props.onShowFilter).toBeCalledTimes(1);
   });
 
-  test('change showFilter value should change button label', () => {
+  test('change showFilter value should change aria label', () => {
     const { btn, comp } = mountComponent();
     const prevFilterBtnHTML = btn.html();
     comp.setProps({ showFilter: true });

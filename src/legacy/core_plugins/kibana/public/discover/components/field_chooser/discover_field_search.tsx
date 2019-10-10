@@ -18,7 +18,16 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFacetButton,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface Props {
   /**
@@ -61,31 +70,33 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value 
   });
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize={'s'}>
-      <EuiFlexItem>
-        <EuiFieldSearch
-          aria-label={searchPlaceholder}
-          data-test-subj="fieldFilterSearchInput"
-          compressed
-          fullWidth
-          onChange={event => onChange('name', event.currentTarget.value)}
-          placeholder={searchPlaceholder}
-          value={value}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={filterBtnAriaLabel} position="right">
-          <EuiButtonIcon
-            aria-expanded={showFilter}
-            aria-label={filterBtnAriaLabel}
-            className="dscToggleFieldFilterButton"
-            data-test-subj="toggleFieldFilterButton"
-            iconType="filter"
-            onClick={() => onShowFilter()}
-            size="m"
+    <div>
+      <EuiFlexGroup responsive={false} gutterSize={'s'}>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            aria-label={searchPlaceholder}
+            data-test-subj="fieldFilterSearchInput"
+            compressed
+            fullWidth
+            onChange={event => onChange('name', event.currentTarget.value)}
+            placeholder={searchPlaceholder}
+            value={value}
           />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFacetButton
+        aria-label={filterBtnAriaLabel}
+        data-test-subj="toggleFieldFilterButton"
+        className="dscToggleFieldFilterButton"
+        icon={<EuiIcon type="filter" />}
+        isSelected={false}
+        onClick={() => onShowFilter()}
+      >
+        <FormattedMessage
+          id="kbn.discover.fieldChooser.fieldFilterFacetButtonLabel"
+          defaultMessage="Field filter settings"
+        />
+      </EuiFacetButton>
+    </div>
   );
 }

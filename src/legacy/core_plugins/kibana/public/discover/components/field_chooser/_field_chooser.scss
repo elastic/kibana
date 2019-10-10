@@ -22,5 +22,8 @@
 }
 
 .dscToggleFieldFilterButton {
-  min-height: $euiSizeXL;
+  width: calc(100% - 8px);
+  color: #006BB4;
+  padding-left: 2px;
+  margin-left: 4px;
 }
