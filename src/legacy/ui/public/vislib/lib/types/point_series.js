@@ -20,12 +20,16 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
+function getSeriId(seri) {
+  return seri.id && seri.id.indexOf('.') !== -1
+    ? seri.id.split('.')[0]
+    : seri.id;
+}
+
 const createSeriesFromParams = (cfg, seri) => {
   //percentile data id format is {mainId}.{percentileValue}, this has to be cleaned
   //up to match with ids in cfg.seriesParams entry that contain only {mainId}
-  const seriId = seri.id && seri.id.indexOf('.') !== -1
-    ? seri.id.split('.')[0]
-    : seri.id;
+  const seriId = getSeriId(seri);
   const matchingSeriesParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
     return seriId === seriConfig.data.id;
   }) : null;
@@ -133,7 +137,7 @@ function create(opts) {
           if (seriesParams) {
             const seriesDataId = seriesParams.data.id;
             const series = (data.data.series || data.get('series'))
-              .find(series => series.id.split('.')[0] === seriesDataId);
+              .find(series => getSeriId(series) === seriesDataId);
             if (series) {
               axis.labels.axisFormatter = series.yAxisFormatter;
             }
