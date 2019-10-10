@@ -166,11 +166,13 @@ export class UpdateSourceEditor extends Component {
   render() {
     return (
       <Fragment>
-        <TooltipSelector
-          value={this.props.tooltipProperties}
-          onChange={this._onTooltipPropertiesChange}
-          fields={this.state.tooltipFields}
-        />
+        <EuiFormRow>
+          <TooltipSelector
+            tooltipProperties={this.props.tooltipProperties}
+            onChange={this._onTooltipPropertiesChange}
+            fields={this.state.tooltipFields}
+          />
+        </EuiFormRow>
 
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.esSearch.sortLabel', {
@@ -210,25 +212,27 @@ export class UpdateSourceEditor extends Component {
           </EuiFlexGroup>
         </EuiFormRow>
 
-        <EuiFormRow>
+        <EuiFormRow display="rowCompressed">
           <EuiSwitch
             label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
               defaultMessage: `Show top documents based on sort order`,
             })}
             checked={this.props.useTopHits}
             onChange={this.onUseTopHitsChange}
+            compressed
           />
         </EuiFormRow>
 
         {this.renderTopHitsForm()}
 
-        <EuiFormRow>
+        <EuiFormRow display="rowCompressed">
           <EuiSwitch
             label={i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
               defaultMessage: `Dynamically filter for data in the visible map area`,
             })}
             checked={this.props.filterByMapBounds}
             onChange={this._onFilterByMapBoundsChange}
+            compressed
           />
         </EuiFormRow>
 
