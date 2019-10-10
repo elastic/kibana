@@ -75,7 +75,7 @@ describe('extractExportDetails', () => {
     expect(result).toEqual({
       exportedCount: 1,
       missingRefCount: 2,
-      missingReferences: [{ id: 2, type: 'index-pattern' }, { id: 3, type: 'index-pattern' }],
+      missingReferences: [{ id: '2', type: 'index-pattern' }, { id: '3', type: 'index-pattern' }],
     });
   });
 
