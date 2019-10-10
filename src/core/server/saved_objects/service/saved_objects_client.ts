@@ -64,8 +64,11 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
 export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any>
   extends SavedObjectsUpdateOptions,
     SavedObjectsBaseOptions {
-  type: string;
+  /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
+  /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
+  type: string;
+  /** {@inheritdoc SavedObjectAttributes} */
   attributes: Partial<T>;
 }
 
@@ -97,8 +100,9 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
  * @public
  */
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
-  /** Ensures version matches that of persisted object */
+  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
+  /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
 }
 

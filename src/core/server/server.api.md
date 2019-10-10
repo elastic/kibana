@@ -1167,11 +1167,8 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
 
 // @public (undocumented)
 export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> extends SavedObjectsUpdateOptions, SavedObjectsBaseOptions {
-    // (undocumented)
     attributes: Partial<T>;
-    // (undocumented)
     id: string;
-    // (undocumented)
     type: string;
 }
 
@@ -1523,7 +1520,6 @@ export class SavedObjectsSerializer {
 
 // @public (undocumented)
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
-    // (undocumented)
     references?: SavedObjectReference[];
     version?: string;
 }
