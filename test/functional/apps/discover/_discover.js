@@ -94,21 +94,22 @@ export default function ({ getService, getPageObjects }) {
       it('should modify the time range when a bar is clicked', async function () {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.discover.clickHistogramBar();
+        await PageObjects.common.sleep(5000);
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
-        expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
+        expect(time.start).to.be('Sep 22, 2015 @ 09:00:00.000');
+        expect(time.end).to.be('Sep 22, 2015 @ 12:00:00.000');
         const rowData = await PageObjects.discover.getDocTableField(1);
-        expect(rowData).to.have.string('Sep 21, 2015 @ 11:59:22.316');
+        expect(rowData).to.have.string('Sep 22, 2015 @ 11:59:58.747');
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.discover.brushHistogram();
-
+        await PageObjects.common.sleep(5000);
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(108);
+        expect(Math.round(newDurationHours)).to.be(1);
         const rowData = await PageObjects.discover.getDocTableField(1);
-        expect(rowData).to.have.string('Sep 22, 2015 @ 23:50:13.253');
+        expect(rowData).to.have.string('Sep 22, 2015 @ 11:43:53.104');
       });
 
       it('should show correct initial chart interval of Auto', async function () {
@@ -144,8 +145,10 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show "no results"', async () => {
-        const isVisible = await PageObjects.discover.hasNoResults();
-        expect(isVisible).to.be(true);
+        await retry.try(async () => {
+          const isVisible = await PageObjects.discover.hasNoResults();
+          expect(isVisible).to.be(true);
+        });
       });
 
       it('should suggest a new time range is picked', async () => {

@@ -119,11 +119,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async clickHistogramBar() {
       const el = await find.byCssSelector('.echChart canvas:last-of-type');
-
-      await browser.getActions()
-        .move({ x: 200, y: 20, origin: el._webElement })
-        .click()
-        .perform();
+      await el.clickMouseButton({ xOffset: 200, yOffset: 20 });
     }
 
     async brushHistogram() {
