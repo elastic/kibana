@@ -171,6 +171,7 @@ export class ESSearchSource extends AbstractESSource {
 
     const indexPattern = await this._getIndexPattern();
     const geoField = await this._getGeoField();
+    const timeFields = await this.getTimeFields();
 
     const scriptFields = {};
     searchFilters.fieldNames.forEach(fieldName => {
@@ -188,13 +189,21 @@ export class ESSearchSource extends AbstractESSource {
     const topHits = {
       size: topHitsSize,
       script_fields: scriptFields,
+      docvalue_fields: [],
     };
+
+    timeFields.forEach(field => {
+      topHits.docvalue_fields.push({
+        field: field.name,
+        format: 'epoch_millis'
+      });
+    });
     if (this._hasSort()) {
       topHits.sort = this._buildEsSort();
     }
     if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
       topHits._source = false;
-      topHits.docvalue_fields = searchFilters.fieldNames;
+      topHits.docvalue_fields.push(...searchFilters.fieldNames);
     } else {
       topHits._source = {
         includes: searchFilters.fieldNames
