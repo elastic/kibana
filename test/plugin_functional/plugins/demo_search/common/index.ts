@@ -17,20 +17,18 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '../../../../../src/plugins/data/common/search';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
+
+export interface IDemoRequest extends IKibanaSearchRequest {
+  mood: string | 'sad' | 'happy';
+  name: string;
 }
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
+export interface IDemoResponse extends IKibanaSearchResponse {
+  greeting: string;
 }
-
-export { IGetSuggestions } from './suggestions_provider/types';

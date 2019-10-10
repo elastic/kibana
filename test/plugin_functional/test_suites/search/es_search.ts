@@ -16,21 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 
-export * from './autocomplete_provider/types';
+// eslint-disable-next-line import/no-default-export
+export default function({ getService }: FtrProviderContext) {
+  const testSubjects = getService('testSubjects');
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+  describe('es search strategy', () => {
+    before(async () => {
+      await testSubjects.click('esSearch');
+    });
+
+    it('data is returned', async () => {
+      await testSubjects.click('doSearch');
+      await testSubjects.stringExistsInCodeBlockOrFail('response', '"animal weights"');
+    });
+  });
 }
-
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
-
-export { IGetSuggestions } from './suggestions_provider/types';
