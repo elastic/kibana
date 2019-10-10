@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mapValues, uniq, indexBy } from 'lodash';
+import { uniq, indexBy } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
   EuiLoadingSpinner,
@@ -25,12 +25,24 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DatasourceDataPanelProps, DataType } from '../types';
-import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
+import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
+import {
+  IndexPattern,
+  IndexPatternPrivateState,
+  IndexPatternField,
+  IndexPatternRef,
+} from './types';
+
+type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
+  changeIndexPattern: (
+    id: string,
+    state: IndexPatternPrivateState,
+    setState: StateSetter<IndexPatternPrivateState>
+  ) => void;
+};
 import { LensFieldIcon } from './lens_field_icon';
-import { updateLayerIndexPattern } from './state_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
@@ -53,11 +65,6 @@ const fieldTypeNames: Record<DataType, string> = {
   ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
 };
 
-function isSingleEmptyLayer(layerMap: IndexPatternPrivateState['layers']) {
-  const layers = Object.values(layerMap);
-  return layers.length === 1 && layers[0].columnOrder.length === 0;
-}
-
 export function IndexPatternDataPanel({
   setState,
   state,
@@ -66,22 +73,13 @@ export function IndexPatternDataPanel({
   query,
   filters,
   dateRange,
-}: DatasourceDataPanelProps<IndexPatternPrivateState>) {
-  const { indexPatterns, currentIndexPatternId } = state;
+  changeIndexPattern,
+}: Props) {
+  const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
 
   const onChangeIndexPattern = useCallback(
-    (newIndexPattern: string) => {
-      setState(prevState => ({
-        ...prevState,
-        layers: isSingleEmptyLayer(prevState.layers)
-          ? mapValues(prevState.layers, layer =>
-              updateLayerIndexPattern(layer, indexPatterns[newIndexPattern])
-            )
-          : prevState.layers,
-        currentIndexPatternId: newIndexPattern,
-      }));
-    },
-    [setState]
+    (id: string) => changeIndexPattern(id, state, setState),
+    [state, setState]
   );
 
   const updateFieldsWithCounts = useCallback(
@@ -110,6 +108,7 @@ export function IndexPatternDataPanel({
   return (
     <MemoizedDataPanel
       currentIndexPatternId={currentIndexPatternId}
+      indexPatternRefs={indexPatternRefs}
       indexPatterns={indexPatterns}
       query={query}
       dateRange={dateRange}
@@ -143,6 +142,7 @@ interface DataPanelState {
 
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
+  indexPatternRefs,
   indexPatterns,
   query,
   dateRange,
@@ -155,6 +155,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   core,
 }: Pick<DatasourceDataPanelProps, Exclude<keyof DatasourceDataPanelProps, 'state' | 'setState'>> & {
   currentIndexPatternId: string;
+  indexPatternRefs: IndexPatternRef[];
   indexPatterns: Record<string, IndexPattern>;
   dragDropContext: DragContextState;
   showEmptyFields: boolean;
@@ -331,8 +332,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 'data-test-subj': 'indexPattern-switch-link',
                 className: 'lnsInnerIndexPatternDataPanel__triggerButton',
               }}
-              currentIndexPatternId={currentIndexPatternId}
-              indexPatterns={indexPatterns}
+              indexPatternRefs={indexPatternRefs}
               onChangeIndexPattern={(newId: string) => {
                 onChangeIndexPattern(newId);
 
@@ -392,7 +392,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               anchorPosition="downLeft"
               display="block"
               isOpen={localState.isTypeFilterOpen}
-              closePopover={() => setLocalState(s => ({ ...localState, isTypeFilterOpen: false }))}
+              closePopover={() => setLocalState(() => ({ ...localState, isTypeFilterOpen: false }))}
               button={
                 <EuiFacetButton
                   data-test-subj="lnsIndexPatternFiltersToggle"
