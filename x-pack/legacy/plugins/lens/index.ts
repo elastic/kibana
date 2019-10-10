@@ -8,7 +8,6 @@ import * as Joi from 'joi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { CoreSetup } from 'src/core/server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath } from './common';
 import { LensServer } from './server';
@@ -83,12 +82,13 @@ export const lens: LegacyPluginInitializer = kibana => {
       });
 
       // Set up with the new platform plugin lifecycle API.
-      const plugin = new LensServer(server.savedObjects.getScopedSavedObjectsClient);
-      plugin.setup(({
-        http: {
-          ...kbnServer.newPlatform.setup.core.http,
-        },
-      } as unknown) as CoreSetup);
+      const plugin = lensServerPlugin();
+      plugin.setup(kbnServer.newPlatform.setup.core, {
+        // Legacy APIs
+        savedObjects: server.savedObjects,
+        usage: server.usage,
+        config: server.config(),
+      });
 
       server.events.on('stop', () => {
         plugin.stop();

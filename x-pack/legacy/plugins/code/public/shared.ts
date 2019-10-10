@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './slide.css';
-
-export const slide = () => ({
-  name: 'slide',
-  displayName: 'Slide',
-  help: 'Slide from one page to the next',
-  enter: 'slideIn',
-  exit: 'slideOut',
-});
+export * from './components/code_block';
+export {
+  CodeIntegrator,
+  Props as CodeIntegratorProps,
+} from './components/integrations/code_integrator';
