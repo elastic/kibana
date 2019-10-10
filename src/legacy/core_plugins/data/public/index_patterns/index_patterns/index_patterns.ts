@@ -47,10 +47,11 @@ export class IndexPatterns {
     config: UiSettingsClientContract,
     savedObjectsClient: SavedObjectsClientContract,
     http: HttpServiceBase,
-    notifications: NotificationsSetup
+    // TODO: Get rid of '?' as Legacy will be removed
+    notifications?: NotificationsSetup
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
-    this.notifications = notifications;
+    this.notifications = notifications!;
 
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;

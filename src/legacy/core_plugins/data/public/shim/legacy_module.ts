@@ -112,8 +112,7 @@ export const initLegacyModule = once((): void => {
       _service = new IndexPatterns(
         npStart.core.uiSettings,
         npStart.core.savedObjects.client,
-        npStart.core.http,
-        npStart.core.notifications
+        npStart.core.http
       );
     return _service;
   });
