@@ -76,8 +76,7 @@ async function getParamsForSearchRequest(
   const includeFrozen = await uiSettings.get('search:includeFrozen');
   return {
     ...addFilterForLegacyData(apmIndices, params, apmOptions), // filter out pre-7.0 data
-    ignore_throttled: !includeFrozen, // whether to query frozen indices or not
-    rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
+    ignore_throttled: !includeFrozen // whether to query frozen indices or not
   };
 }
 

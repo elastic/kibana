@@ -101,7 +101,9 @@ declare module 'elasticsearch' {
         >;
         top_hits: {
           hits: {
-            total: number;
+            total: {
+              value: number;
+            };
             max_score: number | null;
             hits: Array<{
               _source: AggregationOption[AggregationName] extends {
@@ -148,11 +150,19 @@ declare module 'elasticsearch' {
     }
   >;
 
+  interface TotalValue {
+    value: number;
+    relation: string;
+  }
+
   export type AggregationSearchResponse<HitType, SearchParams> = Pick<
     SearchResponse<HitType>,
-    Exclude<keyof SearchResponse<HitType>, 'aggregations'>
-  > &
-    (SearchParams extends { body: Required<AggregationOptionMap> }
+    Exclude<keyof SearchResponse<HitType>, 'aggregations' | 'hits'>
+  > & {
+    hits: Omit<SearchResponse<HitType>['hits'], 'total'> & {
+      total: TotalValue;
+    };
+  } & (SearchParams extends { body: Required<AggregationOptionMap> }
       ? {
           aggregations?: AggregationResultMap<SearchParams['body']['aggs']>;
         }
