@@ -3,33 +3,38 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-import {
-  InfraMetricModelCreator,
-  InfraMetricModelMetricType,
-  InfraMetricModel,
-} from '../../adapter_types';
-import { InfraMetric } from '../../../../../graphql/types';
-
-export const hostDockerInfo: InfraMetricModelCreator = (
+export const hostDockerOverview: TSVBMetricModelCreator = (
   timeField,
   indexPattern,
   interval
-): InfraMetricModel => ({
-  id: InfraMetric.hostDockerInfo,
+): TSVBMetricModel => ({
+  id: 'hostDockerOverview',
   requires: ['docker.info'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,
-  type: 'timeseries',
+  type: 'gauge',
   series: [
+    {
+      id: 'total',
+      metrics: [
+        {
+          field: 'docker.info.containers.total',
+          id: 'max-total',
+          type: 'max',
+        },
+      ],
+      split_mode: 'everything',
+    },
     {
       id: 'running',
       metrics: [
         {
           field: 'docker.info.containers.running',
           id: 'max-running',
-          type: InfraMetricModelMetricType.max,
+          type: 'max',
         },
       ],
       split_mode: 'everything',
@@ -40,7 +45,7 @@ export const hostDockerInfo: InfraMetricModelCreator = (
         {
           field: 'docker.info.containers.paused',
           id: 'max-paused',
-          type: InfraMetricModelMetricType.max,
+          type: 'max',
         },
       ],
       split_mode: 'everything',
@@ -51,7 +56,7 @@ export const hostDockerInfo: InfraMetricModelCreator = (
         {
           field: 'docker.info.containers.stopped',
           id: 'max-stopped',
-          type: InfraMetricModelMetricType.max,
+          type: 'max',
         },
       ],
       split_mode: 'everything',

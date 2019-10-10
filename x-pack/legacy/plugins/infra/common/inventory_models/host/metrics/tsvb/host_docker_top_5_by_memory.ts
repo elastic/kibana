@@ -4,19 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  InfraMetricModelCreator,
-  InfraMetricModelMetricType,
-  InfraMetricModel,
-} from '../../adapter_types';
-import { InfraMetric } from '../../../../../graphql/types';
+import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const hostDockerTop5ByMemory: InfraMetricModelCreator = (
+export const hostDockerTop5ByMemory: TSVBMetricModelCreator = (
   timeField,
   indexPattern,
   interval
-): InfraMetricModel => ({
-  id: InfraMetric.hostDockerTop5ByMemory,
+): TSVBMetricModel => ({
+  id: 'hostDockerTop5ByMemory',
   requires: ['docker.memory'],
   index_pattern: indexPattern,
   interval,
@@ -29,7 +24,7 @@ export const hostDockerTop5ByMemory: InfraMetricModelCreator = (
         {
           field: 'docker.memory.usage.pct',
           id: 'avg-memory-metric',
-          type: InfraMetricModelMetricType.avg,
+          type: 'avg',
         },
       ],
       split_mode: 'terms',

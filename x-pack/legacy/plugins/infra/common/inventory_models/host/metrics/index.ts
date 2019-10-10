@@ -24,6 +24,12 @@ import { hostK8sCpuCap } from './tsvb/host_k8s_cpu_cap';
 import { hostK8sPodCap } from './tsvb/host_k8s_pod_cap';
 import { hostK8sDiskCap } from './tsvb/host_k8s_disk_cap';
 import { hostK8sMemoryCap } from './tsvb/host_k8s_memory_cap';
+
+import { hostDockerTop5ByMemory } from './tsvb/host_docker_top_5_by_memory';
+import { hostDockerTop5ByCpu } from './tsvb/host_docker_top_5_by_cpu';
+import { hostDockerOverview } from './tsvb/host_docker_overview';
+import { hostDockerInfo } from './tsvb/host_docker_info';
+
 import { InventoryMetrics } from '../../types';
 
 export const metrics: InventoryMetrics = {
@@ -39,6 +45,10 @@ export const metrics: InventoryMetrics = {
     hostK8sPodCap,
     hostK8sDiskCap,
     hostK8sMemoryCap,
+    hostDockerOverview,
+    hostDockerInfo,
+    hostDockerTop5ByMemory,
+    hostDockerTop5ByCpu,
   },
   snapshot: { count, cpu, load, logRate, memory, rx, tx },
 };

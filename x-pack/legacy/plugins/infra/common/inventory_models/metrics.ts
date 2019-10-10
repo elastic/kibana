@@ -7,11 +7,13 @@
 import { metrics as hostMetrics } from './host/metrics';
 import { metrics as sharedMetrics } from './shared/metrics';
 import { metrics as podMetrics } from './pod/metrics';
+import { metrics as containerMetrics } from './container/metrics';
 
 export const metrics = {
   tsvb: {
     ...hostMetrics.tsvb,
     ...sharedMetrics.tsvb,
     ...podMetrics.tsvb,
+    ...containerMetrics.tsvb,
   },
 };
