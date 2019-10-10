@@ -7,12 +7,11 @@
 import fs from 'fs';
 import { promisify } from 'util';
 import path from 'path';
-import mkdirp from 'mkdirp';
 import { ArtifactsRepository } from './types';
 
 const existsAsync = promisify(fs.exists);
 const unlinkAsync = promisify(fs.unlink);
-const mkdirpAsync = promisify(mkdirp);
+const mkdirAsync = promisify(fs.mkdir);
 
 /**
  * File system artifact store
@@ -29,7 +28,9 @@ export class FileSystemArtifactRepository implements ArtifactsRepository {
 
   public async setCacheStream(key: string) {
     const filePath = this.getPathForKey(key);
-    await mkdirpAsync(path.dirname(filePath));
+    await mkdirAsync(path.dirname(filePath), {
+      recursive: true,
+    });
     return fs.createWriteStream(filePath);
   }
 
