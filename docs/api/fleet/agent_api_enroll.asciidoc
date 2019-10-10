@@ -1,0 +1,68 @@
+[[fleet-agent-enroll]]
+=== Enroll Fleet agent API
+++++
+<titleabbrev>Enroll agent</titleabbrev>
+++++
+
+[[fleet-agent-enroll-request]]
+==== Request
+
+`POST /api/fleet/agents/enroll` 
+
+==== Headers
+
+`kbn-fleet-enrollment-token`::
+  (Required, string) A fleet enrollment token.
+
+[[fleet-agent-enroll-request-body]]
+==== Request body
+
+`sharedId`::
+  (Optional, string) An ID for the agent.
+
+`metadata`::
+  (Optional, object) Objects with `local` and `userProvided` properties that contain the metadata for an agent. The metadata is a dictionary of strings (example: `"local": { "os": "macos" }`).
+
+[[fleet-agent-enroll-request-codes]]
+==== Response code
+
+`200`:: 
+    Indicates a successful call.
+    
+[[leet-agent-enroll-example]]
+==== Example
+
+[source,js]
+--------------------------------------------------
+POST /api/fleet/agents/enroll
+{
+  "type": "PERMANENT",
+  "metadata": {
+    "local": { "os": "macos"},
+    "userProvided": { "region": "us-east"}
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "action": "created",
+  "success": true,
+  "item": {
+    "id": "a4937110-e53e-11e9-934f-47a8e38a522c",
+    "active": true,
+    "policy_id": "default",
+    "type": "PERMANENT",
+    "enrolled_at": "2019-10-02T18:01:22.337Z",
+    "user_provided_metadata": {},
+    "local_metadata": {},
+    "actions": [],
+    "access_token": "ACCESS_TOKEN"
+  }
+}
+--------------------------------------------------
+

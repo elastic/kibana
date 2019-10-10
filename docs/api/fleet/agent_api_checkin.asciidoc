@@ -1,0 +1,65 @@
+[[fleet-agent-checkin]]
+=== Fleet agent checkin API
+++++
+<titleabbrev>Agent checkin</titleabbrev>
+++++
+
+Report current state of a Fleet agent.
+
+[[fleet-agent-checkin-request]]
+==== Request
+
+`POST /api/fleet/agents/{agentId}/checkin` 
+
+==== Headers
+
+`kbn-fleet-access-token`::
+  (Required, string) A fleet agent access token.
+
+[[fleet-agent-checkin-request-body]]
+==== Request body
+
+`events`::
+  (Required, array) An array of events with the properties `type`, `subtype`, `message`, `timestamp`, `payload`, and `data`.
+
+`local_metadata`::
+  (Optional, object) An object that contains the local metadata for an agent. The metadata is a dictionary of strings (example: `{ "os": "macos" }`).
+
+[[fleet-agent-checkin-request-request-codes]]
+==== Response code
+
+`200`:: 
+    Indicates a successful call.
+    
+[[fleet-agent-checkin-example]]
+==== Example
+
+[source,js]
+--------------------------------------------------
+POST /api/fleet/agents/a4937110-e53e-11e9-934f-47a8e38a522c/checkin
+{
+  "events": [{
+    "type": "STATE",
+    "subtype": "STARTING",
+    "message": "state changed from STOPPED to STARTING",
+    "timestamp": "2019-10-01T13:42:54.323Z",
+    "payload": {},
+    "data": "{}"
+  }]
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "action": "checkin",
+  "success": true,
+  "policy": {
+  },
+  "actions": []
+}
+--------------------------------------------------
+
