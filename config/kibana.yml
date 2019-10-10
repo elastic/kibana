@@ -91,11 +91,10 @@
 
 # Enables you specify a file where Kibana stores log output.
 #logging.dest: /Users/tiagocosta/Desktop/merd/kibana.log
-#logging.json: true
 
-#logging.rotateEveryBytes
-#logging.keepFiles
 #logging.interval
+#logging.keepFiles
+#logging.rotateEveryBytes
 #logging.rotateOnStartup
 
 # Set the value of this setting to true to suppress all logging output.
