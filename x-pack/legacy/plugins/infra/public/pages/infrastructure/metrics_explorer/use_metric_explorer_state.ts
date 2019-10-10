@@ -112,17 +112,20 @@ export const useMetricsExplorerState = (
     [options]
   );
 
-  const onViewStateChange = useCallback((vs: MetricExplorerViewState) => {
-    if (vs.chartOptions) {
-      setChartOptions(vs.chartOptions);
-    }
-    if (vs.currentTimerange) {
-      setTimeRange(vs.currentTimerange);
-    }
-    if (vs.options) {
-      setOptions(vs.options);
-    }
-  }, []);
+  const onViewStateChange = useCallback(
+    (vs: MetricExplorerViewState) => {
+      if (vs.chartOptions) {
+        setChartOptions(vs.chartOptions);
+      }
+      if (vs.currentTimerange) {
+        setTimeRange(vs.currentTimerange);
+      }
+      if (vs.options) {
+        setOptions(vs.options);
+      }
+    },
+    [setChartOptions, setTimeRange, setTimeRange]
+  );
 
   return {
     loading,

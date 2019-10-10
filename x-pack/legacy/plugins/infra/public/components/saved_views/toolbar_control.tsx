@@ -38,7 +38,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   const loadViews = useCallback(() => {
     find();
     setModalOpen(true);
-  }, []);
+  }, [find]);
   const save = useCallback(
     (name: string, hasTime: boolean = false) => {
       const currentState = {
@@ -47,7 +47,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
       };
       saveView({ name, ...currentState });
     },
-    [props.viewState]
+    [props.viewState, saveView]
   );
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
       // INFO: Refresh view list after an item is deleted
       find();
     }
-  }, [deletedId]);
+  }, [deletedId, find]);
 
   useEffect(() => {
     if (errorOnCreate) {
