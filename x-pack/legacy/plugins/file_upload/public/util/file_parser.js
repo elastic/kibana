@@ -17,14 +17,10 @@ const readSlice = (fileReader, file, start, stop) => {
   fileReader.readAsBinaryString(blob);
 };
 
-const createOboeStreamAndPatterns = (cleanAndValidate, featureTracking) => {
+const createOboeStreamAndPatterns = featureHandling => {
   const oboeStream = oboe();
   oboeStream.node({
-    'features.*': feature => {
-      // TODO: Add handling and tracking for cleanAndValidate fails
-      featureTracking();
-      return cleanAndValidate(feature);
-    }
+    'features.*': feature => featureHandling(feature)
   });
   return oboeStream;
 };
@@ -59,9 +55,13 @@ export const fileHandler = (
   if (!oboeStream) {
     // Set up feature tracking
     let featuresProcessed = 0;
-    const featureTracking = () => featuresProcessed++;
+    const featureHandling = feature => {
+      // TODO: Add handling and tracking for cleanAndValidate fails
+      featuresProcessed++;
+      return cleanAndValidate(feature);
+    };
     // Create local oboeStream instance and track features
-    oboeStream = createOboeStreamAndPatterns(cleanAndValidate, featureTracking);
+    oboeStream = createOboeStreamAndPatterns(featureHandling);
     updateProgress = () => chunkHandler({
       featuresProcessed,
       bytesProcessed: stop || file.size,
