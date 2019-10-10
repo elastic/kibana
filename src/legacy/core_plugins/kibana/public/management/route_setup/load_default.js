@@ -67,12 +67,16 @@ export default function (opts) {
     .addSetupWork(function loadDefaultIndexPattern(Promise, $route, config, indexPatterns) {
       const route = _.get($route, 'current.$$route');
 
-      if (!route.requireDefaultIndex) {
+      if (!route.requireDefaultIndex && !route.requireIndexPatternLength) {
         return;
       }
 
       return indexPatterns.getIds()
         .then(function (patterns) {
+          if (route.requireIndexPatternLength && !patterns.length) {
+            throw new NoDefaultIndexPattern();
+          }
+
           let defaultId = config.get('defaultIndex');
           let defined = !!defaultId;
           const exists = _.contains(patterns, defaultId);

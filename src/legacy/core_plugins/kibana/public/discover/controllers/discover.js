@@ -92,6 +92,7 @@ const app = uiModules.get('apps/discover', [
 uiRoutes
   .defaults(/^\/discover(\/|$)/, {
     requireDefaultIndex: false,
+    requireIndexPatternLength: true,
     requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke(
