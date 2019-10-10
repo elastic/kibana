@@ -253,7 +253,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                       aria-label={i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
                         {
-                          defaultMessage: 'Save as a new saved query',
+                          defaultMessage: 'Save as new saved query',
                         }
                       )}
                       data-test-subj="saved-query-management-save-as-new-button"

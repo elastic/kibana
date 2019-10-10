@@ -17,21 +17,4 @@
  * under the License.
  */
 
-import { ExpressionsSetup, ExpressionsStart } from '.';
-
-function createExpressionsSetupMock() {
-  const mock: MockedKeys<Partial<ExpressionsSetup>> = {};
-
-  return mock;
-}
-
-function createExpressionsStartMock() {
-  const mock: MockedKeys<Partial<ExpressionsStart>> = {};
-
-  return mock;
-}
-
-export const expressionsPluginMock = {
-  createSetup: createExpressionsSetupMock,
-  createStart: createExpressionsStartMock,
-};
+export * from './np_ready/public/mocks';
