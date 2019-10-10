@@ -101,7 +101,12 @@ async function attemptToCreateCommand(
 
         return {
           session,
-          consoleLog$: pollForLogEntry$(session, logging.Type.BROWSER, logPollingMs).pipe(
+          consoleLog$: pollForLogEntry$(
+            session,
+            logging.Type.BROWSER,
+            logPollingMs,
+            lifecycle.cleanup$
+          ).pipe(
             takeUntil(lifecycle.cleanup$),
             map(({ message, level: { name: level } }) => ({
               message: message.replace(/\\n/g, '\n'),
