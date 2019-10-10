@@ -86,19 +86,14 @@ function MetricAggParamEditor({
   }
 
   return (
-    <EuiFormRow
-      label={label}
-      fullWidth={true}
-      isInvalid={showValidation ? !isValid : false}
-      compressed
-    >
+    <EuiFormRow label={label} fullWidth={true} isInvalid={showValidation && !isValid} compressed>
       <EuiSelect
         options={options}
         value={value || EMPTY_VALUE}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
         compressed
-        isInvalid={showValidation ? !isValid : false}
+        isInvalid={showValidation && !isValid}
         onBlur={setTouched}
         data-test-subj={`visEditorSubAggMetric${agg.id}`}
       />

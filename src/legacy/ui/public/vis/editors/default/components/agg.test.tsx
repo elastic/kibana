@@ -158,7 +158,7 @@ describe('DefaultEditorAgg component', () => {
   it('should add schema component', () => {
     defaultProps.agg.schema = {
       editorComponent: () => <div className="schemaComponent"></div>,
-    } as Schema;
+    } as any;
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     expect(comp.find('.schemaComponent').exists()).toBeTruthy();
