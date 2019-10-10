@@ -20,44 +20,19 @@ export type Start = void;
 
 const REACT_ROOT_ID = 'alertingRoot';
 
-export class ActionsPlugin implements Plugin<any, any> {
+export class ActionsPlugin implements Plugin<Setup, Start> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(coreSetup: CoreSetup): Setup {
-    // TODO: management doesn't exposed in core yet
+  public setup(coreSetup: CoreSetup, pluginsSetup: any): Setup {
     /*
       The code below would be replacing for current:
       uiExports: {
         managementSections: ['myplugin/management'],
       }
     */
-    // Registering a new app to a new section
-    /* const mySection = coreSetup.management.sections.register({
-      id: 'my-section',
-      title: 'My Main Section', // display name
-      order: 10,
-      euiIconType: 'iconName',
-      });
-      mySection.registerApp({
-        id: 'my-management-app',
-        title: 'My Management App', // display name
-        order: 20,
-        async mount(context, params) {
-          const { renderApp } = await import('./my-section');
-          return renderApp(context, params);
-        }
-    });
-
-    // Registering a new app to an existing section
-    const kibanaSection = management.sections.get('kibana');
-    kibanaSection.registerApp({ id: 'my-kibana-management-app', ... });
-    */
-  }
-
-  public start(coreStart: CoreStart, pluginsStart: any) {
     const {
       management: { getSection },
-    } = pluginsStart;
+    } = pluginsSetup;
 
     const kbnSection = getSection('kibana');
     kbnSection.register('alerting', {
@@ -67,7 +42,9 @@ export class ActionsPlugin implements Plugin<any, any> {
       order: 7,
       url: `#${BASE_PATH}`,
     });
+  }
 
+  public start(coreStart: CoreStart, pluginsStart: any) {
     textService.init(i18n);
     breadcrumbService.init(coreStart.chrome, pluginsStart.management.breadcrumb);
 

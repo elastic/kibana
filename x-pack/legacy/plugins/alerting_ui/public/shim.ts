@@ -22,9 +22,13 @@ export interface AppDependencies {
 
 export function createShim() {
   return {
-    pluginsStart: {
+    pluginsSetup: {
       management: {
         getSection: management.getSection.bind(management),
+      },
+    },
+    pluginsStart: {
+      management: {
         breadcrumb: MANAGEMENT_BREADCRUMB,
       },
     },
