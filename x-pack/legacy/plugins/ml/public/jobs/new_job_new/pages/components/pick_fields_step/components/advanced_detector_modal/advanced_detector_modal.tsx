@@ -28,6 +28,8 @@ import { RichDetector } from '../../../../../common/job_creator/advanced_job_cre
 import { ES_FIELD_TYPES } from '../../../../../../../../../../../../src/plugins/data/public';
 import { ModalWrapper } from './modal_wrapper';
 import { ES_AGGREGATION } from '../../../../../../../../common/constants/aggregation_types';
+import { MLCATEGORY } from '../../../../../../../../common/constants/field_types';
+
 import {
   AggDescription,
   FieldDescription,
@@ -55,8 +57,8 @@ const emptyOption: EuiComboBoxOptionProps = {
 };
 
 const mlCategory: Field = {
-  id: 'mlcategory',
-  name: 'mlcategory',
+  id: MLCATEGORY,
+  name: MLCATEGORY,
   type: ES_FIELD_TYPES.KEYWORD,
   aggregatable: false,
 };
@@ -93,7 +95,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
 
   const aggOptions: EuiComboBoxOptionProps[] = aggs.map(createAggOption);
-  // .sort((a, b) => a.label.localeCompare(b.label));
   const fieldOptions: EuiComboBoxOptionProps[] = fields
     .filter(f => f.id !== EVENT_RATE_FIELD_ID)
     .map(createFieldOption);
@@ -302,7 +303,7 @@ function createMlcategoryField(jobCreator: JobCreatorType): EuiComboBoxOptionPro
   }
   return [
     {
-      label: 'mlcategory',
+      label: MLCATEGORY,
     },
   ];
 }
