@@ -31,7 +31,7 @@ export default function ({ getService }) {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
       it('should return 200', async () => {
-        await supertest
+        const response = await supertest
           .put(`/api/saved_objects/_bulk_update`)
           .send([
             {
@@ -49,32 +49,30 @@ export default function ({ getService }) {
               }
             },
           ])
-          .expect(200)
-          .then(resp => {
+          .expect(200);
 
-            const { saved_objects: [ firstObject, secondObject ] } = resp.body;
+        const { saved_objects: [ firstObject, secondObject ] } = response.body;
 
-            // loose ISO8601 UTC time with milliseconds validation
-            expect(firstObject).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-            expect(_.omit(firstObject, ['updated_at'])).to.eql({
-              id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-              type: 'visualization',
-              version: 'WzgsMV0=',
-              attributes: {
-                title: 'An existing visualization',
-              },
-            });
+        // loose ISO8601 UTC time with milliseconds validation
+        expect(firstObject).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+        expect(_.omit(firstObject, ['updated_at'])).to.eql({
+          id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+          type: 'visualization',
+          version: 'WzgsMV0=',
+          attributes: {
+            title: 'An existing visualization',
+          },
+        });
 
-            expect(secondObject).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-            expect(_.omit(secondObject, ['updated_at'])).to.eql({
-              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-              type: 'dashboard',
-              version: 'WzksMV0=',
-              attributes: {
-                title: 'An existing dashboard',
-              },
-            });
-          });
+        expect(secondObject).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+        expect(_.omit(secondObject, ['updated_at'])).to.eql({
+          id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+          type: 'dashboard',
+          version: 'WzksMV0=',
+          attributes: {
+            title: 'An existing dashboard',
+          },
+        });
       });
 
       it('does not pass references if omitted', async () => {
@@ -91,7 +89,7 @@ export default function ({ getService }) {
             }
           ]);
 
-        await supertest
+        const response = await supertest
           .put(`/api/saved_objects/_bulk_update`)
           .send([
             {
@@ -116,29 +114,27 @@ export default function ({ getService }) {
               }
             },
           ])
-          .expect(200)
-          .then(async (resp) => {
+          .expect(200);
 
-            const { saved_objects: [ firstUpdatedObject, secondUpdatedObject ] } = resp.body;
-            expect(firstUpdatedObject).to.not.have.property('error');
-            expect(secondUpdatedObject).to.not.have.property('error');
+        const { saved_objects: [ firstUpdatedObject, secondUpdatedObject ] } = response.body;
+        expect(firstUpdatedObject).to.not.have.property('error');
+        expect(secondUpdatedObject).to.not.have.property('error');
 
-            const { body: { saved_objects: [ visObjectAfterUpdate, dashObjectAfterUpdate ] } } = await supertest
-              .post(`/api/saved_objects/_bulk_get`)
-              .send([
-                {
-                  type: 'visualization',
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                },
-                {
-                  type: 'dashboard',
-                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                }
-              ]);
+        const { body: { saved_objects: [ visObjectAfterUpdate, dashObjectAfterUpdate ] } } = await supertest
+          .post(`/api/saved_objects/_bulk_get`)
+          .send([
+            {
+              type: 'visualization',
+              id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+            },
+            {
+              type: 'dashboard',
+              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+            }
+          ]);
 
-            expect(visObjectAfterUpdate.references).to.eql(visObject.references);
-            expect(dashObjectAfterUpdate.references).to.eql([{ id: 'foo', name: 'Foo', type: 'visualization' }]);
-          });
+        expect(visObjectAfterUpdate.references).to.eql(visObject.references);
+        expect(dashObjectAfterUpdate.references).to.eql([{ id: 'foo', name: 'Foo', type: 'visualization' }]);
       });
 
       it('passes empty references array if empty references array is provided', async () => {
@@ -182,7 +178,7 @@ export default function ({ getService }) {
 
       describe('unknown id', () => {
         it('should return a generic 404', async () => {
-          await supertest
+          const response = await supertest
             .put(`/api/saved_objects/_bulk_update`)
             .send([
               {
@@ -200,31 +196,29 @@ export default function ({ getService }) {
                 }
               },
             ])
-            .expect(200)
-            .then(resp => {
+            .expect(200);
 
-              const { saved_objects: [ missingObject, updatedObject ] } = resp.body;
+          const { saved_objects: [ missingObject, updatedObject ] } = response.body;
 
-              // loose ISO8601 UTC time with milliseconds validation
-              expect(missingObject).eql({
-                type: 'visualization',
-                id: 'not an id',
-                error: {
-                  statusCode: 404,
-                  error: 'Not Found',
-                  message: 'Saved object [visualization/not an id] not found'
-                }
-              });
+          // loose ISO8601 UTC time with milliseconds validation
+          expect(missingObject).eql({
+            type: 'visualization',
+            id: 'not an id',
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [visualization/not an id] not found'
+            }
+          });
 
-              expect(updatedObject).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-              expect(_.omit(updatedObject, ['updated_at', 'version'])).to.eql({
-                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                type: 'dashboard',
-                attributes: {
-                  title: 'An existing dashboard',
-                },
-              });
-            });
+          expect(updatedObject).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+          expect(_.omit(updatedObject, ['updated_at', 'version'])).to.eql({
+            id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+            type: 'dashboard',
+            attributes: {
+              title: 'An existing dashboard',
+            },
+          });
         });
       });
     });
@@ -238,8 +232,8 @@ export default function ({ getService }) {
         })
       ));
 
-      it('should return generic 404', async () => (
-        await supertest
+      it('should return generic 404', async () => {
+        const response = await supertest
           .put(`/api/saved_objects/_bulk_update`)
           .send([
             {
@@ -257,32 +251,30 @@ export default function ({ getService }) {
               }
             },
           ])
-          .expect(200)
-          .then(resp => {
+          .expect(200);
 
-            const { saved_objects: [ firstObject, secondObject ] } = resp.body;
+        const { saved_objects: [ firstObject, secondObject ] } = response.body;
 
-            expect(firstObject).to.eql({
-              id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-              type: 'visualization',
-              error: {
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found'
-              },
-            });
+        expect(firstObject).to.eql({
+          id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+          type: 'visualization',
+          error: {
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found'
+          },
+        });
 
-            expect(secondObject).to.eql({
-              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-              type: 'dashboard',
-              error: {
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Saved object [dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab] not found'
-              },
-            });
-          })
-      ));
+        expect(secondObject).to.eql({
+          id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+          type: 'dashboard',
+          error: {
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Saved object [dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab] not found'
+          },
+        });
+      });
     });
   });
 }
