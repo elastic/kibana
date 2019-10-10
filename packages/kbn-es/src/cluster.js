@@ -278,6 +278,8 @@ exports.Cluster = class Cluster {
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
+        ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR'),
+
         ...process.env,
         ...(options.bundledJDK ? { JAVA_HOME: '' } : {}),
         ...(options.esEnvVars || {}),
