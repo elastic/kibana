@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import dateMath from '@elastic/datemath';
 // @ts-ignore
 import { buildEsQuery, getEsQueryConfig, Filter } from '@kbn/es-query';
 // @ts-ignore
