@@ -41,6 +41,10 @@ export function addJobValidationMethods($scope, service) {
 }
 
 export function isValidJson(json) {
+  if(json === null) {
+    return false;
+  }
+
   try {
     JSON.parse(json);
     return true;

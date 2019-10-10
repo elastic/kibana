@@ -15,9 +15,11 @@ export async function checkMlNodesAvailable() {
     if (nodes.count !== undefined && nodes.count > 0) {
       Promise.resolve();
     } else {
-      throw Error;
+      throw Error('Cannot load count of ML nodes');
     }
   } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
     window.location.href = '#/jobs';
     Promise.reject();
   }

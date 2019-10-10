@@ -46,11 +46,7 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
               <TimeField />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <WizardNav
-            // previous={() => setCurrentStep(WIZARD_STEPS.TIME_RANGE)}
-            next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)}
-            nextActive={nextActive}
-          >
+          <WizardNav next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)} nextActive={nextActive}>
             <JsonEditorFlyout
               isDisabled={false}
               jobEditorMode={EDITOR_MODE.HIDDEN}

@@ -19,6 +19,7 @@ import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 import { WizardSteps } from './wizard_steps';
+import { WizardHorizontalSteps } from './wizard_horizontal_steps';
 
 interface Props {
   jobCreator: JobCreatorType;
@@ -103,13 +104,14 @@ export const Wizard: FC<Props> = ({
 
   return (
     <JobCreatorContext.Provider value={jobCreatorContext}>
-      <WizardSteps
+      <WizardHorizontalSteps
         currentStep={currentStep}
         highestStep={highestStep}
         setCurrentStep={setCurrentStep}
         disableSteps={disableSteps}
         jobType={jobCreator.type}
       />
+      <WizardSteps currentStep={currentStep} setCurrentStep={setCurrentStep} />
     </JobCreatorContext.Provider>
   );
 };

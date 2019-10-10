@@ -9,9 +9,8 @@ import React, { Fragment, FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiStepsHorizontal, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { WIZARD_STEPS } from '../components/step_types';
-import { JOB_TYPE } from '../../common/job_creator/util/constants';
 
 import { TimeRangeStep } from '../components/time_range_step';
 
@@ -24,30 +23,15 @@ import { useKibanaContext } from '../../../../contexts/kibana';
 
 interface Props {
   currentStep: WIZARD_STEPS;
-  highestStep: WIZARD_STEPS;
   setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
-  disableSteps: boolean;
-  jobType: JOB_TYPE;
 }
 
-export const WizardSteps: FC<Props> = ({
-  currentStep,
-  highestStep,
-  setCurrentStep,
-  disableSteps,
-  jobType,
-}) => {
+export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   const kibanaContext = useKibanaContext();
   // store whether the advanced and additional sections have been expanded.
   // has to be stored at this level to ensure it's remembered on wizard step change
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [additionalExpanded, setAdditionalExpanded] = useState(false);
-
-  function jumpToStep(step: WIZARD_STEPS) {
-    if (step <= highestStep) {
-      setCurrentStep(step);
-    }
-  }
 
   function getSummaryStepTitle() {
     if (kibanaContext.currentSavedSearch.id !== undefined) {
@@ -67,61 +51,8 @@ export const WizardSteps: FC<Props> = ({
     return '';
   }
 
-  const stepsConfig = [
-    {
-      title: i18n.translate('xpack.ml.newJob.wizard.step.timeRangeTitle', {
-        defaultMessage: 'Time range',
-      }),
-      ...createStepProps(WIZARD_STEPS.TIME_RANGE),
-    },
-    {
-      title: i18n.translate('xpack.ml.newJob.wizard.step.pickFieldsTitle', {
-        defaultMessage: 'Pick fields',
-      }),
-      ...createStepProps(WIZARD_STEPS.PICK_FIELDS),
-    },
-    {
-      title: i18n.translate('xpack.ml.newJob.wizard.step.jobDetailsTitle', {
-        defaultMessage: 'Job details',
-      }),
-      ...createStepProps(WIZARD_STEPS.JOB_DETAILS),
-    },
-    {
-      title: i18n.translate('xpack.ml.newJob.wizard.step.validationTitle', {
-        defaultMessage: 'Validation',
-      }),
-      ...createStepProps(WIZARD_STEPS.VALIDATION),
-    },
-    {
-      title: i18n.translate('xpack.ml.newJob.wizard.step.summaryTitle', {
-        defaultMessage: 'Summary',
-      }),
-      ...createStepProps(WIZARD_STEPS.SUMMARY),
-    },
-  ];
-
-  if (jobType === JOB_TYPE.ADVANCED) {
-    stepsConfig.splice(0, 1, {
-      title: i18n.translate('xpack.ml.newJob.wizard.step.configureDatafeedTitle', {
-        defaultMessage: 'Configure datafeed',
-      }),
-      ...createStepProps(WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED),
-    });
-  }
-
-  function createStepProps(step: WIZARD_STEPS) {
-    return {
-      onClick: () => jumpToStep(step),
-      isSelected: currentStep === step,
-      isComplete: currentStep > step,
-      disabled: disableSteps || highestStep < step,
-    };
-  }
-
   return (
     <Fragment>
-      <EuiStepsHorizontal steps={stepsConfig} style={{ backgroundColor: 'inherit' }} />
-
       {currentStep === WIZARD_STEPS.TIME_RANGE && (
         <Fragment>
           <Title data-test-subj="mlJobWizardStepTitleTimeRange">

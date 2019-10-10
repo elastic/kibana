@@ -184,7 +184,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={[aggOption]}
                 onChange={onOptionChange(setAggOption)}
                 isClearable={true}
-                // data-test-subj={testSubject}
               />
             </AggDescription>
           </EuiFlexItem>
@@ -197,7 +196,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false || fieldOptionEnabled === false}
-                // data-test-subj={testSubject}
               />
             </FieldDescription>
           </EuiFlexItem>
@@ -213,7 +211,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
-                // data-test-subj={testSubject}
               />
             </ByFieldDescription>
           </EuiFlexItem>
@@ -226,7 +223,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
-                // data-test-subj={testSubject}
               />
             </OverFieldDescription>
           </EuiFlexItem>
@@ -239,7 +235,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
-                // data-test-subj={testSubject}
               />
             </PartitionFieldDescription>
           </EuiFlexItem>
@@ -255,7 +250,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
                 isDisabled={fieldsEnabled === false}
-                // data-test-subj={testSubject}
               />
             </ExcludeFrequentDescription>
           </EuiFlexItem>
