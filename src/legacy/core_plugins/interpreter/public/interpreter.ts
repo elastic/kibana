@@ -26,9 +26,34 @@ import {
   ExpressionInterpretWithHandlers,
 } from './lib/interpreter';
 import { registries } from './registries';
-import { functions } from './functions';
 import { visualization } from './renderers/visualization';
-import { typeSpecs } from '../../../../plugins/expressions/public';
+
+import { clog as clogFn } from './functions/clog';
+import { esaggs as esaggsFn } from './functions/esaggs';
+import { font as fontFn } from './functions/font';
+import { kibana as kibanaFn } from './functions/kibana';
+import { kibanaContext as kibanaContextFn } from './functions/kibana_context';
+import { range as rangeFn } from './functions/range';
+import { visualization as visualizationFn } from './functions/visualization';
+import { visDimension as visDimensionFn } from './functions/vis_dimension';
+
+/* eslint-disable */
+import { boolean } from '../../../../plugins/expressions/public/expression_types/boolean';
+import { datatable } from '../../../../plugins/expressions/public/expression_types/datatable';
+import { error } from '../../../../plugins/expressions/public/expression_types/error';
+import { filter } from '../../../../plugins/expressions/public/expression_types/filter';
+import { image } from '../../../../plugins/expressions/public/expression_types/image';
+import { nullType } from '../../../../plugins/expressions/public/expression_types/null';
+import { number } from '../../../../plugins/expressions/public/expression_types/number';
+import { pointseries } from '../../../../plugins/expressions/public/expression_types/pointseries';
+import { range } from '../../../../plugins/expressions/public/expression_types/range';
+import { render } from '../../../../plugins/expressions/public/expression_types/render';
+import { shape } from '../../../../plugins/expressions/public/expression_types/shape';
+import { string } from '../../../../plugins/expressions/public/expression_types/string';
+import { style } from '../../../../plugins/expressions/public/expression_types/style';
+import { kibanaContext } from '../../../../plugins/expressions/public/expression_types/kibana_context';
+import { kibanaDatatable } from '../../../../plugins/expressions/public/expression_types/kibana_datatable';
+/* eslint-enable */
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
@@ -37,11 +62,35 @@ import { typeSpecs } from '../../../../plugins/expressions/public';
   registryFactory(registries)
 );
 
-register(registries, {
-  types: typeSpecs,
-  browserFunctions: functions,
-  renderers: [visualization],
-});
+// These will be moved to Expression plugin.
+registries.browserFunctions.register(clogFn);
+registries.browserFunctions.register(fontFn);
+registries.browserFunctions.register(kibanaFn);
+registries.browserFunctions.register(kibanaContextFn);
+registries.types.register(boolean);
+registries.types.register(datatable);
+registries.types.register(error);
+registries.types.register(filter);
+registries.types.register(image);
+registries.types.register(nullType);
+registries.types.register(number);
+registries.types.register(pointseries);
+registries.types.register(range);
+registries.types.register(render);
+registries.types.register(shape);
+registries.types.register(string);
+registries.types.register(style);
+registries.types.register(kibanaContext);
+registries.types.register(kibanaDatatable);
+
+// This will be moved to Search service.
+registries.browserFunctions.register(esaggsFn);
+
+// These will be moved to Visualizations plugin.
+registries.browserFunctions.register(rangeFn);
+registries.browserFunctions.register(visDimensionFn);
+registries.browserFunctions.register(visualizationFn);
+registries.renderers.register(visualization);
 
 let executorPromise: Promise<ExpressionExecutor> | undefined;
 

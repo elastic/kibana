@@ -166,7 +166,7 @@ export class FunctionsRegistry extends Registry<AnyExpressionFunction, any> {
   }
 }
 
-export class TypesRegistry extends Registry<ExpressionType<any, any>, any> {
+export class TypesRegistry extends Registry<ExpressionType<any, any, any>, any> {
   wrapper(obj: any) {
     return new (Type as any)(obj);
   }
