@@ -12,6 +12,10 @@ import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { SearchScope } from '../../model';
 import {
   changeSearchScope,
+  commitSearch,
+  commitSearchFailed,
+  CommitSearchPayload,
+  commitSearchSuccess,
   documentSearch,
   documentSearchFailed,
   DocumentSearchPayload,
@@ -141,4 +145,38 @@ function* handleReposSearchForScope(action: Action<RepositorySearchPayload>) {
 
 export function* watchRepoScopeSearch() {
   yield takeEvery(searchReposForScope, handleReposSearchForScope);
+}
+
+function requestCommitSearch(payload: CommitSearchPayload) {
+  const { query: _query, page, repositories, repoScope } = payload;
+
+  if (_query && _query.length > 0) {
+    const query = {
+      q: _query,
+      ...(page && { p: page }),
+      ...(repositories && { repos: repositories }),
+      ...(repoScope && { repoScope }),
+    };
+
+    return npStart.core.http.get(`/api/code/search/commit`, { query });
+  } else {
+    return {
+      commits: [],
+      took: 0,
+      total: 0,
+    };
+  }
+}
+
+function* handleCommitSearch(action: Action<CommitSearchPayload>) {
+  try {
+    const data = yield call(requestCommitSearch, action.payload!);
+    yield put(commitSearchSuccess(data));
+  } catch (err) {
+    yield put(commitSearchFailed(err));
+  }
+}
+
+export function* watchCommitSearch() {
+  yield takeLatest(String(commitSearch), handleCommitSearch);
 }

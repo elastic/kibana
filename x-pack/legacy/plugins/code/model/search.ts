@@ -193,8 +193,14 @@ export interface DocumentSearchResult extends SearchResult {
 
 export type CommitSearchResultItem = Commit;
 
-export interface CommitSearchResult extends DocumentSearchResult {
+export interface CommitSearchResult extends SearchResult {
+  query: string;
+  from?: number;
+  page?: number;
+  totalPage?: number;
+  stats?: SearchResultStats;
   commits: CommitSearchResultItem[];
+  repoAggregations?: any[];
 }
 
 export interface IntegrationsSearchResult extends SearchResult {

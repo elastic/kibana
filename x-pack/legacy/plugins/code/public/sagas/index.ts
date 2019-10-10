@@ -41,6 +41,7 @@ import {
   watchInitRepoCmd,
 } from './repository';
 import {
+  watchCommitSearch,
   watchDocumentSearch,
   watchRepoScopeSearch,
   watchRepositorySearch,
@@ -64,6 +65,7 @@ export function* rootSaga() {
   yield fork(watchFetchRepoTree);
   yield fork(watchFetchRootRepoTree);
   yield fork(watchFetchBranchesAndCommits);
+  yield fork(watchCommitSearch);
   yield fork(watchDocumentSearch);
   yield fork(watchRepositorySearch);
   yield fork(watchLoadStructure);

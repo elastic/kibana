@@ -6,12 +6,20 @@
 
 import { createAction } from 'redux-actions';
 import {
+  CommitSearchResult,
   DocumentSearchResult,
   Repository,
   SearchOptions,
   SearchScope,
   RepositorySearchResult,
 } from '../../model';
+
+export interface CommitSearchPayload {
+  query: string;
+  page?: string;
+  repositories?: string;
+  repoScope?: string;
+}
 
 export interface DocumentSearchPayload {
   query: string;
@@ -58,3 +66,8 @@ export const searchReposForScopeSuccess = createAction<RepositorySearchResult>(
   'SEARCH REPOS FOR SCOPE SUCCESS'
 );
 export const searchReposForScopeFailed = createAction<Error>('SEARCH REPOS FOR SCOPE FAILED');
+
+// For commit search page
+export const commitSearch = createAction<CommitSearchPayload>('COMMIT SEARCH');
+export const commitSearchSuccess = createAction<CommitSearchResult>('COMMIT SEARCH SUCCESS');
+export const commitSearchFailed = createAction<Error>('COMMIT SEARCH FAILED');

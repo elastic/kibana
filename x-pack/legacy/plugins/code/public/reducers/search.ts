@@ -10,6 +10,7 @@ import { Action, handleActions } from 'redux-actions';
 import { history } from '../utils/url';
 
 import {
+  CommitSearchResult,
   DocumentSearchResult,
   RepositoryUri,
   SearchOptions,
@@ -19,6 +20,10 @@ import {
 } from '../../model';
 import {
   changeSearchScope,
+  commitSearch as commitSearchRequest,
+  commitSearchFailed,
+  CommitSearchPayload,
+  commitSearchSuccess,
   documentSearch as documentSearchQuery,
   documentSearchFailed,
   DocumentSearchPayload,
@@ -45,6 +50,7 @@ export interface SearchState {
   isLoading: boolean;
   isScopeSearchLoading: boolean;
   error?: Error;
+  commitSearchResults?: CommitSearchResult;
   documentSearchResults?: DocumentSearchResult;
   repositorySearchResults?: any;
   searchOptions: SearchOptions;
@@ -80,7 +86,9 @@ const initialState: SearchState = {
   scopeSearchResults: { repositories, total: 0, took: 0 },
 };
 
-type SearchPayload = DocumentSearchPayload &
+type SearchPayload = CommitSearchPayload &
+  CommitSearchResult &
+  DocumentSearchPayload &
   DocumentSearchResult &
   Error &
   string &
@@ -100,6 +108,60 @@ export const search = handleActions<SearchState, SearchPayload>(
         }
         draft.isLoading = false;
       }),
+    [String(commitSearchRequest)]: (state: SearchState, action: Action<CommitSearchPayload>) =>
+      produce<SearchState>(state, draft => {
+        if (action.payload) {
+          draft.query = action.payload.query;
+          draft.page = parseInt(action.payload.page as string, 10);
+
+          if (action.payload.repositories) {
+            draft.repositories = new Set(
+              decodeURIComponent(action.payload.repositories).split(',')
+            );
+          } else {
+            draft.repositories = new Set();
+          }
+          draft.isLoading = true;
+          delete draft.error;
+        }
+      }),
+    [String(commitSearchSuccess)]: (state: SearchState, action: Action<CommitSearchResult>) =>
+      produce<SearchState>(state, (draft: SearchState) => {
+        const { commits, from, page, totalPage, total, repoAggregations, took } = action.payload!;
+        draft.isLoading = false;
+
+        const repoStats = repoAggregations!.map(agg => ({
+          name: agg.key,
+          value: agg.doc_count,
+        }));
+
+        draft.commitSearchResults = {
+          ...draft.commitSearchResults,
+          query: state.query,
+          total,
+          took,
+          commits,
+          stats: {
+            total,
+            from: from!,
+            to: from! + commits!.length,
+            page: page!,
+            totalPage: totalPage!,
+            repoStats,
+            languageStats: [],
+          },
+        };
+      }),
+    [String(commitSearchFailed)]: (state: SearchState, action: Action<Error>) => {
+      if (action.payload) {
+        return produce<SearchState>(state, draft => {
+          draft.isLoading = false;
+          draft.error = action.payload!;
+        });
+      } else {
+        return state;
+      }
+    },
     [String(documentSearchQuery)]: (state: SearchState, action: Action<DocumentSearchPayload>) =>
       produce<SearchState>(state, draft => {
         if (action.payload) {
