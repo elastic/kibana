@@ -16,21 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CoreSetup } from '../../../../core/server';
 
-export * from './autocomplete_provider/types';
-
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+export interface ISearchContext {
+  core: CoreSetup;
 }
-
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
-
-export { IGetSuggestions } from './suggestions_provider/types';

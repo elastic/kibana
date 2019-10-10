@@ -17,20 +17,35 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import React from 'react';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+import {
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+} from '@elastic/eui';
+
+interface PageProps {
+  title: string;
+  children: React.ReactNode;
 }
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
+export function Page({ title, children }: PageProps) {
+  return (
+    <EuiPageBody data-test-subj="searchTestPage">
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiTitle size="l">
+            <h1>{title}</h1>
+          </EuiTitle>
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiPageContent>
+        <EuiPageContentBody>{children}</EuiPageContentBody>
+      </EuiPageContent>
+    </EuiPageBody>
+  );
 }
-
-export { IGetSuggestions } from './suggestions_provider/types';

@@ -17,20 +17,24 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { IContextProvider } from 'kibana/public';
+import { ISearchContext } from './i_search_context';
+import { TRegisterSearchStrategyProvider, TSearchStrategyProvider } from './i_search_strategy';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+/**
+ * The setup contract exposed by the Search plugin exposes the search strategy extension
+ * point.
+ */
+export interface ISearchSetup {
+  registerSearchStrategyContext: <TContextName extends keyof ISearchContext>(
+    pluginId: symbol,
+    contextName: TContextName,
+    provider: IContextProvider<TSearchStrategyProvider<any>, TContextName>
+  ) => void;
+
+  /**
+   * Extension point exposed for other plugins to register their own search
+   * strategies.
+   */
+  registerSearchStrategyProvider: TRegisterSearchStrategyProvider;
 }
-
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
-
-export { IGetSuggestions } from './suggestions_provider/types';

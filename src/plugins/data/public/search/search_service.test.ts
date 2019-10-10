@@ -17,20 +17,25 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { coreMock } from '../../../../core/public/mocks';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
-}
+import { SearchService } from './search_service';
+import { CoreSetup } from '../../../../core/public';
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-}
+describe('Search service', () => {
+  let searchService: SearchService;
+  let mockCoreSetup: MockedKeys<CoreSetup>;
+  const opaqueId = Symbol();
+  beforeEach(() => {
+    searchService = new SearchService({ opaqueId });
+    mockCoreSetup = coreMock.createSetup();
+  });
 
-export { IGetSuggestions } from './suggestions_provider/types';
+  describe('setup()', () => {
+    it('exposes proper contract', async () => {
+      const setup = searchService.setup(mockCoreSetup);
+      expect(setup).toHaveProperty('registerSearchStrategyContext');
+      expect(setup).toHaveProperty('registerSearchStrategyProvider');
+    });
+  });
+});

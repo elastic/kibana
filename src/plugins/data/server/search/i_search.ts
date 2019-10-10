@@ -17,20 +17,26 @@
  * under the License.
  */
 
-export * from './autocomplete_provider/types';
+import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
+import { TStrategyTypes } from './strategy_types';
+import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../common/search/es_search';
+import { IEsSearchRequest } from './es_search';
 
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
+export interface IRequestTypesMap {
+  [ES_SEARCH_STRATEGY]: IEsSearchRequest;
+  [key: string]: IKibanaSearchRequest;
 }
 
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
+export interface IResponseTypesMap {
+  [ES_SEARCH_STRATEGY]: IEsSearchResponse;
+  [key: string]: IKibanaSearchResponse;
 }
 
-export { IGetSuggestions } from './suggestions_provider/types';
+export type ISearchGeneric = <T extends TStrategyTypes = typeof ES_SEARCH_STRATEGY>(
+  request: IRequestTypesMap[T],
+  strategy?: T
+) => Promise<IResponseTypesMap[T]>;
+
+export type ISearch<T extends TStrategyTypes> = (
+  request: IRequestTypesMap[T]
+) => Promise<IResponseTypesMap[T]>;
