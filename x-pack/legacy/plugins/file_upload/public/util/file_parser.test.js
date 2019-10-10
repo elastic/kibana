@@ -5,6 +5,7 @@
  */
 
 import { fileHandler, FILE_BUFFER } from './file_parser';
+jest.mock('./pattern_reader', () => ({}));
 
 describe('parse file', () => {
   const cleanAndValidate = jest.fn(a => a);
@@ -18,10 +19,9 @@ describe('parse file', () => {
     )
   );
 
-  const oboeStream = {
-    abort: jest.fn(),
-    emit: jest.fn(),
-    done: jest.fn(),
+  const patternReader = {
+    writeDataToPatternStream: jest.fn(),
+    abortStream: jest.fn(),
   };
 
   const testJson = {
@@ -49,6 +49,13 @@ describe('parse file', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    require('./pattern_reader').PatternReader = function () {
+      this.onGeoJSONFeaturePatternDetect = () => {};
+      this.onStreamComplete = () => {};
+      this.writeDataToPatternStream = () => patternReader.writeDataToPatternStream();
+      this.abortStream = () => patternReader.abortStream();
+    };
   });
 
   it('should reject and throw error if no file provided', async () => {
@@ -67,11 +74,11 @@ describe('parse file', () => {
     const getFileParseActive = getFileParseActiveFactory();
     expect(fileHandler(
       fileRef, chunkHandler, cleanAndValidate, getFileParseActive,
-      fileReaderWithErrorCall, FILE_BUFFER, oboeStream
+      fileReaderWithErrorCall, FILE_BUFFER
     )).rejects.toThrow();
 
     expect(fileReader.abort.mock.calls.length).toEqual(1);
-    expect(oboeStream.abort.mock.calls.length).toEqual(1);
+    expect(patternReader.abortStream.mock.calls.length).toEqual(1);
   });
 
   it('should abort and resolve to null if file parse cancelled', async () => {
@@ -82,24 +89,24 @@ describe('parse file', () => {
 
     const fileHandlerResult = await fileHandler(
       fileRef, chunkHandler, cleanAndValidate, getFileParseActive,
-      fileReader, FILE_BUFFER, oboeStream
+      fileReader, FILE_BUFFER
     );
 
     expect(fileHandlerResult).toBeNull();
-    expect(oboeStream.abort.mock.calls.length).toEqual(1);
+    expect(patternReader.abortStream.mock.calls.length).toEqual(1);
   });
 
   // Expect 2 calls, one reads file, next is 'undefined' to
-  // both fileReader and oboeStream
-  it('should normally read binary and emit to oboeStream for valid data', async () => {
+  // both fileReader and patternReader
+  it('should normally read binary and emit to patternReader for valid data', async () => {
     const fileRef = getFileRef();
     const getFileParseActive = getFileParseActiveFactory();
     fileHandler(
       fileRef, chunkHandler, cleanAndValidate, getFileParseActive,
-      fileReader, FILE_BUFFER, oboeStream
+      fileReader, FILE_BUFFER
     );
 
     expect(fileReader.readAsBinaryString.mock.calls.length).toEqual(2);
-    expect(oboeStream.emit.mock.calls.length).toEqual(2);
+    expect(patternReader.writeDataToPatternStream.mock.calls.length).toEqual(2);
   });
 });
