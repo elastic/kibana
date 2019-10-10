@@ -5,7 +5,6 @@
  */
 
 import { SearchResponse, SearchHit, SignalHit } from '../../types';
-import { AlertExecutorOptions } from '../../../../../alerting';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
 

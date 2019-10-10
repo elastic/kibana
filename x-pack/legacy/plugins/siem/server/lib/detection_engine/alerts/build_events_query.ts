@@ -5,7 +5,6 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { defaultIndexPattern } from '../../../../default_index_pattern';
 
 interface BuildEventsScrollQuery {
   index: string[];
@@ -77,7 +76,7 @@ export const buildEventsScrollQuery = ({
   ];
   return {
     allowNoIndices: true,
-    index: defaultIndexPattern,
+    index,
     scroll,
     size,
     ignoreUnavailable: true,

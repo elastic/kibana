@@ -16,9 +16,6 @@ import { buildEventsReIndex } from './build_events_reindex';
 // once scrolling and other things are done with it.
 import { buildEventsScrollQuery } from './build_events_query';
 
-// search interface
-import { SearchResponse, SearchHit, SignalHit } from '../../types';
-
 // bulk scroll class
 import { ScrollAndBulkIndex } from './utils';
 
