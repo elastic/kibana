@@ -32,6 +32,7 @@ import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_clie
 import { deepFreeze } from './server/lib/deep_freeze';
 import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 import { KibanaRequest } from '../../../../src/core/server';
+import { createCSPRuleString } from '../../../../src/legacy/server/csp';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -129,6 +130,7 @@ export const security = (kibana) => new kibana.Plugin({
       throw new Error('New Platform XPack Security plugin is not available.');
     }
 
+    const config = server.config();
     const xpackMainPlugin = server.plugins.xpack_main;
     const xpackInfo = xpackMainPlugin.info;
     securityPlugin.registerLegacyAPI({
@@ -136,10 +138,10 @@ export const security = (kibana) => new kibana.Plugin({
       isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
         server.plugins.kibana.systemApi
       ),
+      cspRules: createCSPRuleString(config.get('csp.rules')),
     });
 
     const plugin = this;
-    const config = server.config();
     const xpackInfoFeature = xpackInfo.feature(plugin.id);
 
     // Register a function that is called whenever the xpack info changes,
