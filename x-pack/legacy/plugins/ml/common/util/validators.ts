@@ -47,12 +47,12 @@ export function composeValidators(
   ...validators: Array<(value: string) => { [key: string]: any } | null>
 ): (value: string) => { [key: string]: any } | null {
   return value => {
-    const valudationResult = validators.reduce((acc, validator) => {
+    const validationResult = validators.reduce((acc, validator) => {
       return {
         ...acc,
         ...(validator(value) || {}),
       };
     }, {});
-    return Object.keys(valudationResult).length > 0 ? valudationResult : null;
+    return Object.keys(validationResult).length > 0 ? validationResult : null;
   };
 }

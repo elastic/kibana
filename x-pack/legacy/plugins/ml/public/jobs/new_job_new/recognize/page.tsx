@@ -39,7 +39,7 @@ import { KibanaObjects } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
 import { checkForSavedObjects } from './resolvers';
 import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
-import { TimeRange } from '../pages/components/time_range_step/time_range';
+import { TimeRange } from '../common/components';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;

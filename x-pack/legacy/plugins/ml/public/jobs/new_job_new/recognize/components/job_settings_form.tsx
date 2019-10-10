@@ -18,8 +18,6 @@ import {
   EuiSwitch,
   EuiTextAlign,
 } from '@elastic/eui';
-import { JobGroupsInput } from '../../pages/components/job_details_step/components/groups/job_groups_input';
-import { TimeRangePicker } from '../../pages/components/time_range_step/time_range_picker';
 import { ModuleJobUI, SAVE_STATE } from '../page';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { useKibanaContext } from '../../../../contexts/kibana';
@@ -30,8 +28,8 @@ import {
 } from '../../../../../common/util/validators';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
-import { TimeRange } from '../../pages/components/time_range_step/time_range';
 import { usePartialState } from '../../../../components/custom_hooks';
+import { JobGroupsInput, TimeRangePicker, TimeRange } from '../../common/components';
 
 export interface JobSettingsFormValues {
   jobPrefix: string;
@@ -82,7 +80,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
     useDedicatedIndex: false,
     jobGroups: [] as string[],
   });
-  const [validationResult, setValidationResult] = useState<any>({});
+  const [validationResult, setValidationResult] = useState<Record<string, any>>({});
 
   const onJobPrefixChange = (value: string) => {
     setFormState({

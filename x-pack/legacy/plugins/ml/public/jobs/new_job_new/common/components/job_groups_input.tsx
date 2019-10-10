@@ -5,11 +5,10 @@
  */
 
 import React, { FC, memo } from 'react';
-import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { tabColor } from '../../../../../../../../common/util/group_color_utils';
-import { Description } from './description';
-import { Validation } from '../../../../../common/job_validator';
+import { Validation } from '../job_validator';
+import { tabColor } from '../../../../../common/util/group_color_utils';
+import { Description } from '../../pages/components/job_details_step/components/groups/description';
 
 export interface JobGroupsInputProps {
   existingGroups: string[];

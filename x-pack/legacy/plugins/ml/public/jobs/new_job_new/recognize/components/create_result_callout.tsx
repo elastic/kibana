@@ -39,8 +39,8 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.ml.newJob.recognize.jobsCreationFailed.saveFailedAriaLabel"
-                defaultMessage="Save failed"
+                id="xpack.ml.newJob.simple.recognize.jobsCreationFailedTitle"
+                defaultMessage="Jobs creation failed"
               />
             }
             color="danger"
@@ -57,10 +57,6 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
             }
             color="warning"
             iconType="alert"
-            aria-label={i18n.translate(
-              'xpack.ml.newJob.recognize.someJobsCreationFailed.saveFailedAriaLabel',
-              { defaultMessage: 'Save failed' }
-            )}
           />
         )}
         <EuiSpacer size="l" />

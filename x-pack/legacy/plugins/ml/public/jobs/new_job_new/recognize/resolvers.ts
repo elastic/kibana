@@ -46,7 +46,7 @@ export function checkViewOrCreateJobs(
       })
       .catch((err: Error) => {
         // eslint-disable-next-line no-console
-        console.log(`Error checking whether jobs in module ${moduleId} exists`, err);
+        console.error(`Error checking whether jobs in module ${moduleId} exists`, err);
         toastNotifications.addWarning({
           title: i18n.translate('xpack.ml.newJob.recognize.moduleCheckJobsExistWarningTitle', {
             defaultMessage: 'Error checking module {moduleId}',
