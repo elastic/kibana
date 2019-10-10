@@ -34,7 +34,7 @@ export const TransitionStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.transitions.slide.help', {
-        defaultMessage: 'Rotate from one page to the next',
+        defaultMessage: 'Slide from one page to the next',
       }),
   },
   zoom: {
