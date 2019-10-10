@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { documentationLinks } from '../../services/documentation_links';
 
 interface Props {
   isAdmin: boolean;
@@ -38,10 +39,7 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({ isAdmin }) => (
             defaultMessage="You can create an {link} from Console."
             values={{
               link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html"
-                  target="_blank"
-                >
+                <EuiLink href={documentationLinks.getCreateApiKeyDocUrl()} target="_blank">
                   <FormattedMessage
                     id="xpack.security.management.apiKeys.table.emptyPromptDocsLinkMessage"
                     defaultMessage="API key"
