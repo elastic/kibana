@@ -18,6 +18,7 @@ import {
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
 } from '../../common/constants';
+import { defaultIndexPattern } from '../../default_index_pattern';
 
 chrome.getUiSettingsClient().get.mockImplementation((key: string) => {
   switch (key) {
@@ -36,7 +37,7 @@ chrome.getUiSettingsClient().get.mockImplementation((key: string) => {
         value: DEFAULT_INTERVAL_VALUE,
       };
     case DEFAULT_INDEX_KEY:
-      return ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
+      return defaultIndexPattern;
     case DEFAULT_DATE_FORMAT_TZ:
       return 'Asia/Taipei';
     case DEFAULT_DARK_MODE:
