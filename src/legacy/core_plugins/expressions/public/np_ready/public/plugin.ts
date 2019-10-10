@@ -17,29 +17,49 @@
  * under the License.
  */
 
+/* eslint-disable */
 import { npSetup } from 'ui/new_platform';
-// @ts-ignore
+import { ExpressionsSetupContract } from '../../../../../../plugins/expressions/public/expressions/expressions_service';
+/* eslint-enable */
 
-import { setInspector, setInterpreter } from './services';
-import { execute } from './lib/execute';
-import { loader } from './lib/loader';
-import { render } from './lib/render';
-import { IInterpreter } from './lib/_types';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../../../../core/public';
+import {
+  Start as InspectorStart,
+  Setup as InspectorSetup,
+} from '../../../../../../plugins/inspector/public';
+import { IInterpreter } from './types';
+import { setInterpreter, setInspector, setRenderersRegistry } from './services';
 import { createRenderer } from './expression_renderer';
+import { loader } from './loader';
+import { execute } from './execute';
+import { render } from './render';
 
-import { Start as IInspector } from '../../../../../plugins/inspector/public';
-
-export interface ExpressionsServiceStartDependencies {
-  inspector: IInspector;
+export interface ExpressionsSetupDeps {
+  inspector: InspectorSetup;
 }
-/**
- * Expressions Service
- * @internal
- */
-export class ExpressionsService {
-  public setup() {
+
+export interface ExpressionsStartDeps {
+  inspector: InspectorStart;
+}
+
+export type ExpressionsSetup = ExpressionsSetupContract;
+export type ExpressionsStart = ReturnType<ExpressionsPublicPlugin['start']>;
+
+export class ExpressionsPublicPlugin
+  implements
+    Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, plugins: ExpressionsSetupDeps): ExpressionsSetup {
+    setRenderersRegistry(npSetup.plugins.expressions.__LEGACY.renderers);
+
     // eslint-disable-next-line
-    const { getInterpreter } = require('../../../interpreter/public/interpreter');
+    const { getInterpreter } = require('../../../../interpreter/public/interpreter');
     getInterpreter()
       .then(({ interpreter }: { interpreter: IInterpreter }) => {
         setInterpreter(interpreter);
@@ -52,10 +72,11 @@ export class ExpressionsService {
       registerType: npSetup.plugins.expressions.registerType,
       registerFunction: npSetup.plugins.expressions.registerFunction,
       registerRenderer: npSetup.plugins.expressions.registerRenderer,
+      __LEGACY: npSetup.plugins.expressions.__LEGACY,
     };
   }
 
-  public start({ inspector }: ExpressionsServiceStartDependencies) {
+  public start(core: CoreStart, { inspector }: ExpressionsStartDeps) {
     const ExpressionRenderer = createRenderer(loader);
     setInspector(inspector);
 
@@ -63,16 +84,9 @@ export class ExpressionsService {
       execute,
       render,
       loader,
-
       ExpressionRenderer,
     };
   }
 
-  public stop() {
-    // nothing to do here yet
-  }
+  public stop() {}
 }
-
-/** @public */
-export type ExpressionsSetup = ReturnType<ExpressionsService['setup']>;
-export type ExpressionsStart = ReturnType<ExpressionsService['start']>;
