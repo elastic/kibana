@@ -1885,7 +1885,6 @@
     "kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModalTitle": "保存されたオブジェクトの削除",
     "kbn.management.objects.objectsTable.export.dangerNotification": "エクスポートを生成できません",
     "kbn.management.objects.objectsTable.export.successNotification": "ファイルはバックグラウンドでダウンロード中です",
-    "kbn.management.objects.objectsTable.export.successWithMissingRefsNotification": "ファイルはバックグラウンドでダウンロードしています。一部の参照をエクスポートできませんでした。詳細については、エクスポートファイルを参照してください",
     "kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel": "キャンセル",
     "kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel": "すべてエクスポート:",
     "kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportOptionsLabel": "オプション",
