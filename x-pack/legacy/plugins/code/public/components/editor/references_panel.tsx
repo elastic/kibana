@@ -19,7 +19,7 @@ import React from 'react';
 import { parseSchema } from '../../../common/uri_util';
 import { GroupedFileResults, GroupedRepoResults } from '../../actions';
 import { history } from '../../utils/url';
-import { CodeBlock, Position } from '../codeblock';
+import { CodeBlockPanel, Position } from '../code_block';
 
 interface Props {
   isLoading: boolean;
@@ -123,7 +123,7 @@ export class ReferencesPanel extends React.Component<Props, State> {
     );
 
     return (
-      <CodeBlock
+      <CodeBlockPanel
         className="referencesPanel__code-block"
         key={key}
         header={header}

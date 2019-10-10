@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { history } from '../../utils/url';
-import { CodeBlock, Position } from '../codeblock';
+import { CodeBlockPanel, Position } from '../code_block';
 
 interface Props {
   query: string;
@@ -71,7 +71,7 @@ export class CodeResult extends React.PureComponent<Props> {
               </Link>
             </EuiText>
           </EuiFlexGroup>
-          <CodeBlock
+          <CodeBlockPanel
             key={`code${key}`}
             className="codeResult__code-block"
             content={content}

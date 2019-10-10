@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
 
-import { BareCodeBlock } from '../codeblock';
+import { CodeBlock } from '../code_block';
 import { history } from '../../utils/url';
 import { FrameHeader } from './frame_header';
 import { RepoTitle } from './repo_title';
@@ -41,11 +41,7 @@ export const Integrations = () => (
                 lineNumber={lineNumber}
                 onClick={() => history.push(fileUrl)}
               />
-              <BareCodeBlock
-                content={content}
-                language={language}
-                lineNumber={i => lineMapping[i]}
-              />
+              <CodeBlock content={content} language={language} lineNumber={i => lineMapping[i]} />
             </EuiPanel>
           </div>
         );

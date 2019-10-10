@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './components/codeblock';
+export * from './components/code_block';
 export {
   CodeIntegrator,
   Props as CodeIntegratorProps,

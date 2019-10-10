@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { BareCodeBlock, Position, Props as BareCodeBlockProps } from './bare_codeblock';
-export { CodeBlock, Props as CodeBlockProps } from './codeblock';
+export { CodeBlock, Position, Props as CodeBlockProps } from './code_block';
+export { CodeBlockPanel, Props as CodeBlockPanelProps } from './code_block_panel';

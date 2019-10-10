@@ -7,18 +7,18 @@
 import React, { ReactNode } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import { BareCodeBlock, Props as BareProps } from './bare_codeblock';
+import { CodeBlock, Props as CodeBlockProps } from './code_block';
 
-export interface Props extends BareProps {
+export interface Props extends CodeBlockProps {
   className?: string;
   header?: ReactNode;
 }
 
-export const CodeBlock = ({ className, header, ...rest }: Props) => (
+export const CodeBlockPanel = ({ className, header, ...rest }: Props) => (
   <EuiPanel paddingSize="s" className={className}>
     {header}
-    <BareCodeBlock {...rest} />
+    <CodeBlock {...rest} />
   </EuiPanel>
 );
 
-CodeBlock.defaultProps = BareCodeBlock.defaultProps;
+CodeBlockPanel.defaultProps = CodeBlock.defaultProps;

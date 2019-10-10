@@ -29,7 +29,7 @@ export interface Props {
   lineNumber: (lineIndex: number) => string;
 }
 
-export class BareCodeBlock extends React.PureComponent<Props> {
+export class CodeBlock extends React.PureComponent<Props> {
   static defaultProps = {
     folding: false,
     highlightRanges: [],
