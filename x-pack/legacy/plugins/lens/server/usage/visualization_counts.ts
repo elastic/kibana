@@ -4,59 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClient, SavedObjectsFindResponse } from 'src/core/server';
-import { Document } from '../../public/persistence';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { LensUsage } from './types';
 
-function getTypeName(doc: Document): string {
-  if (doc.visualizationType === 'lnsXY') {
-    return (doc.state.visualization as { preferredSeriesType: string }).preferredSeriesType;
-  } else {
-    return doc.visualizationType as string;
-  }
-}
+export async function getVisualizationCounts(
+  callCluster: CallCluster,
+  config: KibanaConfig
+): Promise<LensUsage> {
+  const scriptedMetric = {
+    scripted_metric: {
+      // Each cluster collects its own type data in a key-value Map that looks like:
+      // { lnsDatatable: 5, area_stacked: 3 }
+      init_script: 'state.types = [:]',
+      // The map script relies on having flattened keyword mapping for the Lens saved object,
+      // without this kind of mapping we would not be able to access `lens.state` in painless
+      map_script: `
+        String visType = doc['lens.visualizationType'].value;
+        String niceType = visType == 'lnsXY' ? doc['lens.state.visualization.preferredSeriesType'].value : visType;
+        state.types.put(niceType, state.types.containsKey(niceType) ? state.types.get(niceType) + 1 : 1);
+      `,
+      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+      // Despite docs that say this is optional, this script can't be blank.
+      combine_script: 'return state',
+      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+      reduce_script: `
+        Map result = [:];
+        for (Map m : states.toArray()) {
+          for (String k : m.keySet()) {
+            result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+          }
+        }
+        return result;
+      `,
+    },
+  };
 
-function groupByType(response: SavedObjectsFindResponse) {
-  const byVisType: Record<string, number> = {};
-
-  response.saved_objects.forEach(({ attributes }) => {
-    const type = getTypeName(attributes as Document);
-
-    if (byVisType[type]) {
-      byVisType[type] += 1;
-    } else {
-      byVisType[type] = 1;
-    }
+  const results = await callCluster('search', {
+    index: config.get('kibana.index'),
+    rest_total_hits_as_int: true,
+    body: {
+      query: {
+        bool: {
+          filter: [{ term: { type: 'lens' } }],
+        },
+      },
+      aggs: {
+        groups: {
+          filters: {
+            filters: {
+              last30: { bool: { filter: { range: { updated_at: { gte: 'now-30d' } } } } },
+              last90: { bool: { filter: { range: { updated_at: { gte: 'now-90d' } } } } },
+              overall: { match_all: {} },
+            },
+          },
+          aggs: {
+            byType: scriptedMetric,
+          },
+        },
+      },
+      size: 0,
+    },
   });
 
-  return byVisType;
-}
-
-export async function getVisualizationCounts(
-  savedObjectsClient: SavedObjectsClient
-): Promise<LensUsage> {
-  const [overall, last30, last90] = await Promise.all([
-    savedObjectsClient.find({
-      type: 'lens',
-    }),
-
-    savedObjectsClient.find({
-      type: 'lens',
-      filter: 'lens.updated_at >= "now-30d"',
-    }),
-
-    savedObjectsClient.find({
-      type: 'lens',
-      filter: 'lens.updated_at >= "now-90d"',
-    }),
-  ]);
+  const buckets = results.aggregations.groups.buckets;
 
   return {
-    visualization_types_overall: groupByType(overall),
-    visualization_types_last_30_days: groupByType(last30),
-    visualization_types_last_90_days: groupByType(last90),
-    saved_total: overall.total,
-    saved_last_30_days: last30.total,
-    saved_last_90_days: last90.total,
+    visualization_types_overall: buckets.overall.byType.value.types,
+    visualization_types_last_30_days: buckets.last30.byType.value.types,
+    visualization_types_last_90_days: buckets.last90.byType.value.types,
+    saved_total: buckets.overall.doc_count,
+    saved_last_30_days: buckets.last30.doc_count,
+    saved_last_90_days: buckets.last90.doc_count,
   };
 }

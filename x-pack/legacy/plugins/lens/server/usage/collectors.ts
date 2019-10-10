@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
 import { getVisualizationCounts } from './visualization_counts';
 import { LensUsage } from './types';
-
-export function getSavedObjectsClient(
-  savedObjects: SavedObjectsLegacyService,
-  callAsInternalUser: unknown
-) {
-  const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
-  const internalRepository = getSavedObjectsRepository(callAsInternalUser);
-  return new SavedObjectsClient(internalRepository);
-}
 
 export function registerLensUsageCollector(
   core: CoreSetup,
@@ -28,14 +20,14 @@ export function registerLensUsageCollector(
         register: (options: unknown) => unknown;
       };
     };
+    config: KibanaConfig;
   }
 ) {
   const lensUsageCollector = plugins.usage.collectorSet.makeUsageCollector({
     type: 'lens',
     fetch: async (callCluster: CallCluster): Promise<LensUsage> => {
-      const savedObjectsClient = getSavedObjectsClient(plugins.savedObjects, callCluster);
       try {
-        return getVisualizationCounts(savedObjectsClient);
+        return getVisualizationCounts(callCluster, plugins.config);
       } catch (err) {
         return {
           saved_total: 0,

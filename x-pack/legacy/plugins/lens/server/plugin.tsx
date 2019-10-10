@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { Plugin, CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
 import { setupRoutes } from './routes';
 import { registerLensUsageCollector } from './usage';
@@ -21,6 +22,7 @@ export class LensServer implements Plugin<{}, {}, {}, {}> {
           register: (options: unknown) => unknown;
         };
       };
+      config: KibanaConfig;
     }
   ) {
     setupRoutes(core);
