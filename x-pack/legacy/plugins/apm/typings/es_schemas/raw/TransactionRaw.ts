@@ -42,6 +42,7 @@ export interface TransactionRaw extends APMBaseDoc {
       dropped?: number;
     };
     type: string;
+    custom?: Record<string, unknown>;
   };
 
   // Shared by errors and transactions

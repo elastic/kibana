@@ -10,6 +10,7 @@ export * from './angular';
 export * from './components';
 export * from './constants';
 export * from './errors';
+export * from './expression_types';
 export * from './shortcuts';
 export * from './units';
 

@@ -62,6 +62,7 @@ const defaultCoreSystemParams = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  MockPluginsService.getOpaqueIds.mockReturnValue(new Map());
 });
 
 function createCoreSystem(params = {}) {

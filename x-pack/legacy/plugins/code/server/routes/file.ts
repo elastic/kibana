@@ -133,7 +133,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       try {
         const blob = await gitService.raw(endpoint, { uri: repoUri, path, revision });
         if (blob.isBinary) {
-          return h.response(blob.content).type('application/octet-stream');
+          return h.response(blob.content).encoding('binary');
         } else {
           return h.response(blob.content).type('text/plain');
         }

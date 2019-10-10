@@ -9,7 +9,7 @@ Calls specified `endpoint` with provided `clientParams` on behalf of the user in
 <b>Signature:</b>
 
 ```typescript
-callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<unknown>;
+callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
 ```
 
 ## Parameters
@@ -22,5 +22,5 @@ callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?
 
 <b>Returns:</b>
 
-`Promise<unknown>`
+`Promise<any>`
 
