@@ -2,11 +2,19 @@
 
 exports[`should enable sort order select when sort field provided 1`] = `
 <Fragment>
-  <TooltipSelector
-    fields={null}
-    onChange={[Function]}
-    value={Array []}
-  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <TooltipSelector
+      fields={null}
+      onChange={[Function]}
+      tooltipProperties={Array []}
+    />
+  </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
     display="row"
@@ -58,26 +66,28 @@ exports[`should enable sort order select when sort field provided 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
     <EuiSwitch
       checked={false}
+      compressed={true}
       label="Show top documents based on sort order"
       onChange={[Function]}
     />
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
     <EuiSwitch
       checked={true}
+      compressed={true}
       label="Dynamically filter for data in the visible map area"
       onChange={[Function]}
     />
@@ -87,11 +97,19 @@ exports[`should enable sort order select when sort field provided 1`] = `
 
 exports[`should render top hits form when useTopHits is true 1`] = `
 <Fragment>
-  <TooltipSelector
-    fields={null}
-    onChange={[Function]}
-    value={Array []}
-  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <TooltipSelector
+      fields={null}
+      onChange={[Function]}
+      tooltipProperties={Array []}
+    />
+  </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
     display="row"
@@ -142,13 +160,14 @@ exports[`should render top hits form when useTopHits is true 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
     <EuiSwitch
       checked={true}
+      compressed={true}
       label="Show top documents based on sort order"
       onChange={[Function]}
     />
@@ -193,13 +212,14 @@ exports[`should render top hits form when useTopHits is true 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
     <EuiSwitch
       checked={true}
+      compressed={true}
       label="Dynamically filter for data in the visible map area"
       onChange={[Function]}
     />
@@ -209,11 +229,19 @@ exports[`should render top hits form when useTopHits is true 1`] = `
 
 exports[`should render update source editor 1`] = `
 <Fragment>
-  <TooltipSelector
-    fields={null}
-    onChange={[Function]}
-    value={Array []}
-  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <TooltipSelector
+      fields={null}
+      onChange={[Function]}
+      tooltipProperties={Array []}
+    />
+  </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
     display="row"
@@ -264,26 +292,28 @@ exports[`should render update source editor 1`] = `
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
     <EuiSwitch
       checked={false}
+      compressed={true}
       label="Show top documents based on sort order"
       onChange={[Function]}
     />
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
     <EuiSwitch
       checked={true}
+      compressed={true}
       label="Dynamically filter for data in the visible map area"
       onChange={[Function]}
     />
