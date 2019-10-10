@@ -8,15 +8,15 @@ import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFieldText,
+  EuiAccordion,
+  EuiButton,
   EuiDescribedFormGroup,
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
-  EuiAccordion,
   EuiTextAlign,
-  EuiButton,
 } from '@elastic/eui';
 import { JobGroupsInput } from '../../pages/components/job_details_step/components/groups/job_groups_input';
 import { TimeRangePicker } from '../../pages/components/time_range_step/time_range_picker';
@@ -31,6 +31,7 @@ import {
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { TimeRange } from '../../pages/components/time_range_step/time_range';
+import { usePartialState } from '../../../../components/custom_hooks';
 
 export interface JobSettingsFormValues {
   jobPrefix: string;
@@ -69,7 +70,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
     maxLengthValidator(JOB_ID_MAX_LENGTH)
   );
 
-  const [formState, setFormState] = useState<JobSettingsFormValues>({
+  const [formState, setFormState] = usePartialState({
     jobPrefix: '',
     startDatafeedAfterSave: true,
     useFullIndexData: true,
@@ -84,7 +85,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
 
   const onJobPrefixChange = (value: string) => {
     setFormState({
-      ...formState,
       jobPrefix: value && value.toLowerCase(),
     });
   };
@@ -176,7 +176,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           selectedGroups={formState.jobGroups}
           onChange={value => {
             setFormState({
-              ...formState,
               jobGroups: value,
             });
           }}
@@ -204,7 +203,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             checked={formState.startDatafeedAfterSave}
             onChange={({ target: { checked } }) => {
               setFormState({
-                ...formState,
                 startDatafeedAfterSave: checked,
               });
             }}
@@ -224,22 +222,23 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             checked={formState.useFullIndexData}
             onChange={({ target: { checked } }) => {
               setFormState({
-                ...formState,
                 useFullIndexData: checked,
               });
             }}
           />
         </EuiFormRow>
         {!formState.useFullIndexData && (
-          <TimeRangePicker
-            setTimeRange={value => {
-              setFormState({
-                ...formState,
-                timeRange: value,
-              });
-            }}
-            timeRange={formState.timeRange}
-          />
+          <>
+            <EuiSpacer size="m" />
+            <TimeRangePicker
+              setTimeRange={value => {
+                setFormState({
+                  timeRange: value,
+                });
+              }}
+              timeRange={formState.timeRange}
+            />
+          </>
         )}
         <EuiSpacer size="l" />
         <EuiAccordion
@@ -279,7 +278,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
                 checked={formState.useDedicatedIndex}
                 onChange={({ target: { checked } }) => {
                   setFormState({
-                    ...formState,
                     useDedicatedIndex: checked,
                   });
                 }}

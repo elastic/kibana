@@ -114,7 +114,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const getTimeRange = async (
     useFullIndexData: boolean,
     timeRange: TimeRange
-  ): Promise<{ start: number; end: number }> => {
+  ): Promise<TimeRange> => {
     if (useFullIndexData) {
       const { start, end } = await ml.getTimeFieldRange({
         index: indexPattern.title,
