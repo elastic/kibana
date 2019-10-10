@@ -83,7 +83,7 @@ export function repositoryRoute(
         }
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
         log.info(msg);
-        return res.notModified({ body: msg });
+        return res.custom({ statusCode: 304, body: msg });
       } catch (error) {
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
@@ -153,7 +153,7 @@ export function repositoryRoute(
           if (status.progress !== WorkerReservedProgress.ERROR) {
             const msg = `Repository ${repoUri} is already in delete.`;
             log.info(msg);
-            return res.notModified({ body: msg });
+            return res.custom({ statusCode: 304, body: msg });
           }
         } catch (error) {
           // Do nothing here since this error is expected.

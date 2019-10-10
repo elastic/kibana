@@ -11,9 +11,6 @@ export class WithRequest {
 
   constructor(readonly context: RequestHandlerContext) {
     // @ts-ignore
-    // const cluster = context.elasticsearch.dataClient.callAsInternalUser;
-
-    // @ts-ignore
     // const securityPlugin = req.server.plugins.security;
     // if (securityPlugin) {
     //   const useRbac = securityPlugin.authorization.mode.useRbacForRequest(req);
