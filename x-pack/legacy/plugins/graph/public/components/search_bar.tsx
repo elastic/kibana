@@ -18,6 +18,7 @@ import {
   IndexPattern,
 } from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
+
 import {
   GraphState,
   datasourceSelector,
@@ -31,6 +32,7 @@ export interface OuterSearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
   onQuerySubmit: (query: string) => void;
+
   confirmWipeWorkspace: (onConfirm: () => void) => void;
   indexPatternProvider: IndexPatternProvider;
 }
@@ -138,7 +140,12 @@ export function SearchBarComponent(props: SearchBarProps) {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill type="submit" disabled={isLoading || !currentIndexPattern}>
+          <EuiButton
+            fill
+            type="submit"
+            disabled={isLoading || !currentIndexPattern}
+            data-test-subj="graph-explore-button"
+          >
             {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Explore' })}
           </EuiButton>
         </EuiFlexItem>

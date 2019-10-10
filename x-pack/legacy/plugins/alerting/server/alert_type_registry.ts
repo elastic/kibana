@@ -6,53 +6,24 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { TaskManager } from '../../task_manager';
-import { getCreateTaskRunnerFunction } from './lib';
-import { ActionsPlugin } from '../../actions';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
-import {
-  AlertType,
-  GetBasePathFunction,
-  GetServicesFunction,
-  SpaceIdToNamespaceFunction,
-} from './types';
+import { TaskRunnerFactory } from './lib';
+import { RunContext } from '../../task_manager';
+import { TaskManagerSetupContract } from './shim';
+import { AlertType } from './types';
 
 interface ConstructorOptions {
-  isSecurityEnabled: boolean;
-  getServices: GetServicesFunction;
-  taskManager: TaskManager;
-  executeAction: ActionsPlugin['execute'];
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  getBasePath: GetBasePathFunction;
+  taskManager: TaskManagerSetupContract;
+  taskRunnerFactory: TaskRunnerFactory;
 }
 
 export class AlertTypeRegistry {
-  private readonly getServices: GetServicesFunction;
-  private readonly taskManager: TaskManager;
-  private readonly executeAction: ActionsPlugin['execute'];
+  private readonly taskManager: TaskManagerSetupContract;
   private readonly alertTypes: Map<string, AlertType> = new Map();
-  private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  private readonly spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  private readonly getBasePath: GetBasePathFunction;
-  private readonly isSecurityEnabled: boolean;
+  private readonly taskRunnerFactory: TaskRunnerFactory;
 
-  constructor({
-    encryptedSavedObjectsPlugin,
-    executeAction,
-    taskManager,
-    getServices,
-    spaceIdToNamespace,
-    getBasePath,
-    isSecurityEnabled,
-  }: ConstructorOptions) {
+  constructor({ taskManager, taskRunnerFactory }: ConstructorOptions) {
     this.taskManager = taskManager;
-    this.executeAction = executeAction;
-    this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
-    this.getServices = getServices;
-    this.getBasePath = getBasePath;
-    this.spaceIdToNamespace = spaceIdToNamespace;
-    this.isSecurityEnabled = isSecurityEnabled;
+    this.taskRunnerFactory = taskRunnerFactory;
   }
 
   public has(id: string) {
@@ -75,15 +46,8 @@ export class AlertTypeRegistry {
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
         type: `alerting:${alertType.id}`,
-        createTaskRunner: getCreateTaskRunnerFunction({
-          alertType,
-          isSecurityEnabled: this.isSecurityEnabled,
-          getServices: this.getServices,
-          executeAction: this.executeAction,
-          encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
-          getBasePath: this.getBasePath,
-          spaceIdToNamespace: this.spaceIdToNamespace,
-        }),
+        createTaskRunner: (context: RunContext) =>
+          this.taskRunnerFactory.create(alertType, context),
       },
     });
   }

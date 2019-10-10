@@ -177,6 +177,12 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     name: 'storybook',
     packageWords: ['storybook'],
   },
+
+  {
+    name: 'typescript',
+    packageWords: ['ts', 'typescript'],
+    packageNames: ['tslib'],
+  },
 ];
 
 /**

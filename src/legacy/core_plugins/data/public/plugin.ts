@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { SearchService, SearchSetup, createSearchBar, StatetfulSearchBarProps } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
@@ -96,24 +96,25 @@ export class DataPlugin
   private setupApi!: DataSetup;
 
   public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
-    const { uiSettings, http } = core;
+    const { uiSettings, http, notifications } = core;
     const savedObjectsClient = __LEGACY.savedObjectsClient;
 
     const indexPatternsService = this.indexPatterns.setup({
       uiSettings,
       savedObjectsClient,
       http,
+      notifications,
     });
 
     const timefilterService = this.timefilter.setup({
       uiSettings,
+      store: __LEGACY.storage,
     });
     this.setupApi = {
       indexPatterns: indexPatternsService,
       filter: this.filter.setup({
         uiSettings,
         indexPatterns: indexPatternsService.indexPatterns,
-        timefilter: timefilterService.timefilter,
       }),
       query: this.query.setup(),
       search: this.search.setup(savedObjectsClient),
@@ -126,10 +127,10 @@ export class DataPlugin
   public start(core: CoreStart, { __LEGACY, data }: DataPluginStartDependencies) {
     const SearchBar = createSearchBar({
       core,
+      data,
       store: __LEGACY.storage,
       timefilter: this.setupApi.timefilter,
       filterManager: this.setupApi.filter.filterManager,
-      autocomplete: data.autocomplete,
     });
 
     return {

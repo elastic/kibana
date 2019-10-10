@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
+import { intervalFromNow } from './lib/intervals';
 import {
   TaskDefinition,
   TaskDictionary,
@@ -27,6 +29,12 @@ export interface TaskManagerOpts {
   callWithInternalUser: any;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
+}
+
+function generateTaskManagerUUID(logger: Logger): string {
+  const taskManagerUUID = uuid.v4();
+  logger.info(`Initialising Task Manager with UUID: ${taskManagerUUID}`);
+  return taskManagerUUID;
 }
 
 /*
@@ -77,7 +85,9 @@ export class TaskManager {
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
+      taskManagerId: generateTaskManagerUUID(this.logger),
     });
+
     const pool = new TaskPool({
       logger: this.logger,
       maxWorkers: this.maxWorkers,
@@ -93,9 +103,7 @@ export class TaskManager {
     const poller = new TaskPoller({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work(): Promise<void> {
-        return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
-      },
+      work: (): Promise<void> => fillPool(pool.run, () => this.claimAvailableTasks(), createRunner),
     });
 
     this.pool = pool;
@@ -125,6 +133,20 @@ export class TaskManager {
       }
     };
     startPoller();
+  }
+
+  private async claimAvailableTasks() {
+    const { docs, claimedTasks } = await this.store.claimAvailableTasks({
+      size: this.pool.availableWorkers,
+      claimOwnershipUntil: intervalFromNow('30s')!,
+    });
+
+    if (docs.length !== claimedTasks) {
+      this.logger.warn(
+        `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) tasks were fetched`
+      );
+    }
+    return docs;
   }
 
   private async waitUntilStarted() {
