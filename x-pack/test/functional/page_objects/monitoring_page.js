@@ -5,11 +5,17 @@
  */
 
 export function MonitoringPageProvider({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'shield', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
 
   return new class MonitoringPage {
     async navigateTo() {
+      await PageObjects.common.navigateToApp('login');
+      await PageObjects.shield.login(
+        'monitoring_user',
+        'monitoring_user-password'
+      );
+      await PageObjects.spaceSelector.clickSpaceAvatar('default');
       await PageObjects.common.navigateToApp('monitoring');
     }
 

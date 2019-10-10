@@ -6,7 +6,8 @@
 
 export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['monitoring', 'timePicker']);
+  const security = getService('security');
+  const PageObjects = getPageObjects(['monitoring', 'timePicker', 'security']);
   const noData = getService('monitoringNoData');
   let _archive;
 
@@ -16,6 +17,12 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
 
       const kibanaServer = getService('kibanaServer');
       const browser = getService('browser');
+
+      await security.user.create('monitoring_user', {
+        password: 'monitoring_user-password',
+        roles: ['monitoring_user', 'kibana_user'],
+        full_name: 'monitoring all',
+      });
 
       // provide extra height for the page and avoid clusters sending telemetry during tests
       await browser.setWindowSize(1600, 1000);
@@ -33,7 +40,9 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       await PageObjects.timePicker.setAbsoluteRange(from, to);
     },
 
-    tearDown() {
+    async tearDown() {
+      await PageObjects.security.logout();
+      await security.user.delete('monitoring_user');
       return esArchiver.unload(_archive);
     }
   };
