@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
-import React, { Fragment, FC, useState, useEffect } from 'react';
+import React, { FC, Fragment, useEffect, useState } from 'react';
+import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiDatePickerRange, EuiDatePicker } from '@elastic/eui';
-
-import { useKibanaContext } from '../../../../../contexts/kibana';
-import { TimeRange } from './time_range';
+import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
+import { useKibanaContext } from '../../../../contexts/kibana';
 
 const WIDTH = '512px';
+
+export interface TimeRange {
+  start: number;
+  end: number;
+}
 
 interface Props {
   setTimeRange: (d: TimeRange) => void;
   timeRange: TimeRange;
 }
-
-type Moment = moment.Moment;
 
 export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
   const kibanaContext = useKibanaContext();
