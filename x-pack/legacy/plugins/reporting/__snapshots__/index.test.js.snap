@@ -22,13 +22,26 @@ Object {
       "rules": Array [
         Object {
           "allow": true,
-          "protocols": Array [
-            "http:",
-            "https:",
-            "ws:",
-            "wss:",
-            "data:",
-          ],
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
         },
       ],
     },
@@ -100,13 +113,26 @@ Object {
       "rules": Array [
         Object {
           "allow": true,
-          "protocols": Array [
-            "http:",
-            "https:",
-            "ws:",
-            "wss:",
-            "data:",
-          ],
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
         },
       ],
     },
@@ -177,13 +203,26 @@ Object {
       "rules": Array [
         Object {
           "allow": true,
-          "protocols": Array [
-            "http:",
-            "https:",
-            "ws:",
-            "wss:",
-            "data:",
-          ],
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
         },
       ],
     },
@@ -255,13 +294,26 @@ Object {
       "rules": Array [
         Object {
           "allow": true,
-          "protocols": Array [
-            "http:",
-            "https:",
-            "ws:",
-            "wss:",
-            "data:",
-          ],
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
         },
       ],
     },
