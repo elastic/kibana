@@ -29,6 +29,14 @@ const savedQueryAttributes: SavedQueryAttributes = {
     query: 'response:200',
   },
 };
+const savedQueryAttributesBar: SavedQueryAttributes = {
+  title: 'bar',
+  description: 'baz',
+  query: {
+    language: 'kuery',
+    query: 'response:200',
+  },
+};
 
 const savedQueryAttributesWithFilters: SavedQueryAttributes = {
   ...savedQueryAttributes,
@@ -158,7 +166,7 @@ describe('saved query service', () => {
     });
   });
   describe('findSavedQueries', function() {
-    it('should find and return saved queries without search text', async () => {
+    it('should find and return saved queries without search text or pagination parameters', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
       });
@@ -173,6 +181,8 @@ describe('saved query service', () => {
       });
       const response = await findSavedQueries('foo');
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 50,
         search: 'foo',
         searchFields: ['title^5', 'description'],
         sortField: '_score',
@@ -206,6 +216,43 @@ describe('saved query service', () => {
               title: 'foo',
             },
             id: 'foo',
+          },
+        ])
+      );
+    });
+    it('should accept perPage and page properties', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [
+          { id: 'foo', attributes: savedQueryAttributes },
+          { id: 'bar', attributes: savedQueryAttributesBar },
+        ],
+      });
+      const response = await findSavedQueries(undefined, 2, 1);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 2,
+        search: '',
+        searchFields: ['title^5', 'description'],
+        sortField: '_score',
+        type: 'query',
+      });
+      expect(response).toEqual(
+        expect.objectContaining([
+          {
+            attributes: {
+              description: 'bar',
+              query: { language: 'kuery', query: 'response:200' },
+              title: 'foo',
+            },
+            id: 'foo',
+          },
+          {
+            attributes: {
+              description: 'baz',
+              query: { language: 'kuery', query: 'response:200' },
+              title: 'bar',
+            },
+            id: 'bar',
           },
         ])
       );
@@ -254,6 +301,11 @@ describe('saved query service', () => {
           },
         ])
       );
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 1,
+        type: 'query',
+      });
     });
     it('should use default arguments when none are provided', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
