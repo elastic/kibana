@@ -107,47 +107,6 @@ const domainsSchema = gql`
   }
 `;
 
-const tlsSchema = gql`
-  enum TlsFields {
-    _id
-  }
-  type TlsNode {
-    _id: String
-    timestamp: Date
-    alternativeNames: [String!]
-    notAfter: [String!]
-    commonNames: [String!]
-    ja3: [String!]
-    issuerNames: [String!]
-  }
-  input TlsSortField {
-    field: TlsFields!
-    direction: Direction!
-  }
-  type TlsEdges {
-    node: TlsNode!
-    cursor: CursorType!
-  }
-  type TlsData {
-    edges: [TlsEdges!]!
-    totalCount: Float!
-    pageInfo: PageInfoPaginated!
-    inspect: Inspect
-  }
-  extend type Source {
-    Tls(
-      filterQuery: String
-      id: String
-      ip: String!
-      pagination: PaginationInputPaginated!
-      sort: TlsSortField!
-      flowTarget: FlowTarget!
-      timerange: TimerangeInput!
-      defaultIndex: [String!]!
-    ): TlsData!
-  }
-`;
-
 const usersSchema = gql`
   enum UsersFields {
     name
@@ -199,4 +158,4 @@ const usersSchema = gql`
   }
 `;
 
-export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, tlsSchema, usersSchema];
+export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, usersSchema];

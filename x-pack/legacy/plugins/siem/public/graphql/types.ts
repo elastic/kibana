@@ -73,12 +73,6 @@ export interface DomainsSortField {
   direction: Direction;
 }
 
-export interface TlsSortField {
-  field: TlsFields;
-
-  direction: Direction;
-}
-
 export interface UsersSortField {
   field: UsersFields;
 
@@ -93,6 +87,12 @@ export interface NetworkTopNFlowSortField {
 
 export interface NetworkDnsSortField {
   field: NetworkDnsFields;
+
+  direction: Direction;
+}
+
+export interface TlsSortField {
+  field: TlsFields;
 
   direction: Direction;
 }
@@ -276,10 +276,6 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
-export enum TlsFields {
-  _id = '_id',
-}
-
 export enum UsersFields {
   name = 'name',
   count = 'count',
@@ -304,6 +300,10 @@ export enum NetworkDnsFields {
   uniqueDomains = 'uniqueDomains',
   dnsBytesIn = 'dnsBytesIn',
   dnsBytesOut = 'dnsBytesOut',
+}
+
+export enum TlsFields {
+  _id = '_id',
 }
 
 export enum SortFieldTimeline {
@@ -433,8 +433,6 @@ export interface Source {
 
   Domains: DomainsData;
 
-  Tls: TlsData;
-
   Users: UsersData;
 
   KpiNetwork?: Maybe<KpiNetworkData>;
@@ -450,6 +448,8 @@ export interface Source {
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
   OverviewHost?: Maybe<OverviewHostData>;
+
+  Tls: TlsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -1380,38 +1380,6 @@ export interface DomainsNetworkField {
   direction?: Maybe<NetworkDirectionEcs[]>;
 }
 
-export interface TlsData {
-  edges: TlsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface TlsEdges {
-  node: TlsNode;
-
-  cursor: CursorType;
-}
-
-export interface TlsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  alternativeNames?: Maybe<string[]>;
-
-  notAfter?: Maybe<string[]>;
-
-  commonNames?: Maybe<string[]>;
-
-  ja3?: Maybe<string[]>;
-
-  issuerNames?: Maybe<string[]>;
-}
-
 export interface UsersData {
   edges: UsersEdges[];
 
@@ -1680,6 +1648,38 @@ export interface OverviewHostData {
   winlogbeat?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
+}
+
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: Maybe<string>;
+
+  timestamp?: Maybe<string>;
+
+  alternativeNames?: Maybe<string[]>;
+
+  notAfter?: Maybe<string[]>;
+
+  commonNames?: Maybe<string[]>;
+
+  ja3?: Maybe<string[]>;
+
+  issuerNames?: Maybe<string[]>;
 }
 
 export interface UncommonProcessesData {
@@ -2087,23 +2087,6 @@ export interface DomainsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface TlsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: TlsSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
 export interface UsersSourceArgs {
   filterQuery?: Maybe<string>;
 
@@ -2193,6 +2176,23 @@ export interface OverviewHostSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface TlsSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  id?: Maybe<string>;
+
+  ip: string;
+
+  pagination: PaginationInputPaginated;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
 
   defaultIndex: string[];
 }

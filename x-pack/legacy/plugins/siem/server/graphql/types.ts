@@ -75,12 +75,6 @@ export interface DomainsSortField {
   direction: Direction;
 }
 
-export interface TlsSortField {
-  field: TlsFields;
-
-  direction: Direction;
-}
-
 export interface UsersSortField {
   field: UsersFields;
 
@@ -95,6 +89,12 @@ export interface NetworkTopNFlowSortField {
 
 export interface NetworkDnsSortField {
   field: NetworkDnsFields;
+
+  direction: Direction;
+}
+
+export interface TlsSortField {
+  field: TlsFields;
 
   direction: Direction;
 }
@@ -278,10 +278,6 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
-export enum TlsFields {
-  _id = '_id',
-}
-
 export enum UsersFields {
   name = 'name',
   count = 'count',
@@ -306,6 +302,10 @@ export enum NetworkDnsFields {
   uniqueDomains = 'uniqueDomains',
   dnsBytesIn = 'dnsBytesIn',
   dnsBytesOut = 'dnsBytesOut',
+}
+
+export enum TlsFields {
+  _id = '_id',
 }
 
 export enum SortFieldTimeline {
@@ -435,8 +435,6 @@ export interface Source {
 
   Domains: DomainsData;
 
-  Tls: TlsData;
-
   Users: UsersData;
 
   KpiNetwork?: Maybe<KpiNetworkData>;
@@ -452,6 +450,8 @@ export interface Source {
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
   OverviewHost?: Maybe<OverviewHostData>;
+
+  Tls: TlsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -1382,38 +1382,6 @@ export interface DomainsNetworkField {
   direction?: Maybe<NetworkDirectionEcs[]>;
 }
 
-export interface TlsData {
-  edges: TlsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface TlsEdges {
-  node: TlsNode;
-
-  cursor: CursorType;
-}
-
-export interface TlsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  alternativeNames?: Maybe<string[]>;
-
-  notAfter?: Maybe<string[]>;
-
-  commonNames?: Maybe<string[]>;
-
-  ja3?: Maybe<string[]>;
-
-  issuerNames?: Maybe<string[]>;
-}
-
 export interface UsersData {
   edges: UsersEdges[];
 
@@ -1682,6 +1650,38 @@ export interface OverviewHostData {
   winlogbeat?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
+}
+
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: Maybe<string>;
+
+  timestamp?: Maybe<string>;
+
+  alternativeNames?: Maybe<string[]>;
+
+  notAfter?: Maybe<string[]>;
+
+  commonNames?: Maybe<string[]>;
+
+  ja3?: Maybe<string[]>;
+
+  issuerNames?: Maybe<string[]>;
 }
 
 export interface UncommonProcessesData {
@@ -2089,23 +2089,6 @@ export interface DomainsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface TlsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: TlsSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
 export interface UsersSourceArgs {
   filterQuery?: Maybe<string>;
 
@@ -2195,6 +2178,23 @@ export interface OverviewHostSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface TlsSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  id?: Maybe<string>;
+
+  ip: string;
+
+  pagination: PaginationInputPaginated;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
 
   defaultIndex: string[];
 }
@@ -2620,8 +2620,6 @@ export namespace SourceResolvers {
 
     Domains?: DomainsResolver<DomainsData, TypeParent, TContext>;
 
-    Tls?: TlsResolver<TlsData, TypeParent, TContext>;
-
     Users?: UsersResolver<UsersData, TypeParent, TContext>;
 
     KpiNetwork?: KpiNetworkResolver<Maybe<KpiNetworkData>, TypeParent, TContext>;
@@ -2637,6 +2635,8 @@ export namespace SourceResolvers {
     OverviewNetwork?: OverviewNetworkResolver<Maybe<OverviewNetworkData>, TypeParent, TContext>;
 
     OverviewHost?: OverviewHostResolver<Maybe<OverviewHostData>, TypeParent, TContext>;
+
+    Tls?: TlsResolver<TlsData, TypeParent, TContext>;
     /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
     UncommonProcesses?: UncommonProcessesResolver<UncommonProcessesData, TypeParent, TContext>;
     /** Just a simple example to get the app name */
@@ -2822,30 +2822,6 @@ export namespace SourceResolvers {
     defaultIndex: string[];
   }
 
-  export type TlsResolver<R = TlsData, Parent = Source, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext,
-    TlsArgs
-  >;
-  export interface TlsArgs {
-    filterQuery?: Maybe<string>;
-
-    id?: Maybe<string>;
-
-    ip: string;
-
-    pagination: PaginationInputPaginated;
-
-    sort: TlsSortField;
-
-    flowTarget: FlowTarget;
-
-    timerange: TimerangeInput;
-
-    defaultIndex: string[];
-  }
-
   export type UsersResolver<R = UsersData, Parent = Source, TContext = SiemContext> = Resolver<
     R,
     Parent,
@@ -2983,6 +2959,30 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+  }
+
+  export type TlsResolver<R = TlsData, Parent = Source, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext,
+    TlsArgs
+  >;
+  export interface TlsArgs {
+    filterQuery?: Maybe<string>;
+
+    id?: Maybe<string>;
+
+    ip: string;
+
+    pagination: PaginationInputPaginated;
+
+    sort: TlsSortField;
+
+    flowTarget: FlowTarget;
+
+    timerange: TimerangeInput;
 
     defaultIndex: string[];
   }
@@ -6064,112 +6064,6 @@ export namespace DomainsNetworkFieldResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace TlsDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = TlsData> {
-    edges?: EdgesResolver<TlsEdges[], TypeParent, TContext>;
-
-    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
-
-    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type EdgesResolver<R = TlsEdges[], Parent = TlsData, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type TotalCountResolver<R = number, Parent = TlsData, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type PageInfoResolver<
-    R = PageInfoPaginated,
-    Parent = TlsData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = TlsData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace TlsEdgesResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = TlsEdges> {
-    node?: NodeResolver<TlsNode, TypeParent, TContext>;
-
-    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
-  }
-
-  export type NodeResolver<R = TlsNode, Parent = TlsEdges, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type CursorResolver<R = CursorType, Parent = TlsEdges, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-}
-
-export namespace TlsNodeResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = TlsNode> {
-    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
-
-    timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
-
-    alternativeNames?: AlternativeNamesResolver<Maybe<string[]>, TypeParent, TContext>;
-
-    notAfter?: NotAfterResolver<Maybe<string[]>, TypeParent, TContext>;
-
-    commonNames?: CommonNamesResolver<Maybe<string[]>, TypeParent, TContext>;
-
-    ja3?: Ja3Resolver<Maybe<string[]>, TypeParent, TContext>;
-
-    issuerNames?: IssuerNamesResolver<Maybe<string[]>, TypeParent, TContext>;
-  }
-
-  export type _IdResolver<R = Maybe<string>, Parent = TlsNode, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type TimestampResolver<
-    R = Maybe<string>,
-    Parent = TlsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type AlternativeNamesResolver<
-    R = Maybe<string[]>,
-    Parent = TlsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type NotAfterResolver<
-    R = Maybe<string[]>,
-    Parent = TlsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type CommonNamesResolver<
-    R = Maybe<string[]>,
-    Parent = TlsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type Ja3Resolver<R = Maybe<string[]>, Parent = TlsNode, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type IssuerNamesResolver<
-    R = Maybe<string[]>,
-    Parent = TlsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace UsersDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UsersData> {
     edges?: EdgesResolver<UsersEdges[], TypeParent, TContext>;
@@ -7111,6 +7005,112 @@ export namespace OverviewHostDataResolvers {
   export type InspectResolver<
     R = Maybe<Inspect>,
     Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace TlsDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = TlsData> {
+    edges?: EdgesResolver<TlsEdges[], TypeParent, TContext>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+  }
+
+  export type EdgesResolver<R = TlsEdges[], Parent = TlsData, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type TotalCountResolver<R = number, Parent = TlsData, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = TlsData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = TlsData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace TlsEdgesResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = TlsEdges> {
+    node?: NodeResolver<TlsNode, TypeParent, TContext>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
+  }
+
+  export type NodeResolver<R = TlsNode, Parent = TlsEdges, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type CursorResolver<R = CursorType, Parent = TlsEdges, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+}
+
+export namespace TlsNodeResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = TlsNode> {
+    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
+
+    timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
+
+    alternativeNames?: AlternativeNamesResolver<Maybe<string[]>, TypeParent, TContext>;
+
+    notAfter?: NotAfterResolver<Maybe<string[]>, TypeParent, TContext>;
+
+    commonNames?: CommonNamesResolver<Maybe<string[]>, TypeParent, TContext>;
+
+    ja3?: Ja3Resolver<Maybe<string[]>, TypeParent, TContext>;
+
+    issuerNames?: IssuerNamesResolver<Maybe<string[]>, TypeParent, TContext>;
+  }
+
+  export type _IdResolver<R = Maybe<string>, Parent = TlsNode, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type TimestampResolver<
+    R = Maybe<string>,
+    Parent = TlsNode,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type AlternativeNamesResolver<
+    R = Maybe<string[]>,
+    Parent = TlsNode,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type NotAfterResolver<
+    R = Maybe<string[]>,
+    Parent = TlsNode,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type CommonNamesResolver<
+    R = Maybe<string[]>,
+    Parent = TlsNode,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type Ja3Resolver<R = Maybe<string[]>, Parent = TlsNode, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type IssuerNamesResolver<
+    R = Maybe<string[]>,
+    Parent = TlsNode,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -8198,9 +8198,6 @@ export type IResolvers<TContext = SiemContext> = {
   DomainsNode?: DomainsNodeResolvers.Resolvers<TContext>;
   DomainsItem?: DomainsItemResolvers.Resolvers<TContext>;
   DomainsNetworkField?: DomainsNetworkFieldResolvers.Resolvers<TContext>;
-  TlsData?: TlsDataResolvers.Resolvers<TContext>;
-  TlsEdges?: TlsEdgesResolvers.Resolvers<TContext>;
-  TlsNode?: TlsNodeResolvers.Resolvers<TContext>;
   UsersData?: UsersDataResolvers.Resolvers<TContext>;
   UsersEdges?: UsersEdgesResolvers.Resolvers<TContext>;
   UsersNode?: UsersNodeResolvers.Resolvers<TContext>;
@@ -8223,6 +8220,9 @@ export type IResolvers<TContext = SiemContext> = {
   NetworkDnsItem?: NetworkDnsItemResolvers.Resolvers<TContext>;
   OverviewNetworkData?: OverviewNetworkDataResolvers.Resolvers<TContext>;
   OverviewHostData?: OverviewHostDataResolvers.Resolvers<TContext>;
+  TlsData?: TlsDataResolvers.Resolvers<TContext>;
+  TlsEdges?: TlsEdgesResolvers.Resolvers<TContext>;
+  TlsNode?: TlsNodeResolvers.Resolvers<TContext>;
   UncommonProcessesData?: UncommonProcessesDataResolvers.Resolvers<TContext>;
   UncommonProcessesEdges?: UncommonProcessesEdgesResolvers.Resolvers<TContext>;
   UncommonProcessItem?: UncommonProcessItemResolvers.Resolvers<TContext>;
