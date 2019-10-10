@@ -17,13 +17,28 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { MetricsPublicPlugin } from './plugin';
+import { MetricsSetupContract, MetricsStartContract, METRIC_TYPE } from '.';
 
-export { METRIC_TYPE } from '@kbn/analytics';
-export { MetricsSetupContract, MetricsStartContract } from './plugin';
-export { MetricsPublicPlugin as Plugin };
+export type Setup = jest.Mocked<MetricsSetupContract>;
+export type Start = jest.Mocked<MetricsStartContract>;
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new MetricsPublicPlugin(initializerContext);
-}
+const createSetupContract = (): Setup => {
+  const setupContract: Setup = {
+    registerApp: jest.fn(),
+  };
+  return setupContract;
+};
+
+const createStartContract = (): Start => {
+  const startContract: Start = {
+    reportUiStats: jest.fn(),
+    METRIC_TYPE,
+  };
+
+  return startContract;
+};
+
+export const metricsPluginMock = {
+  createSetupContract,
+  createStartContract,
+};

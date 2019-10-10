@@ -18,7 +18,6 @@
  */
 
 import { createReporter, UiStatsMetricType, METRIC_TYPE } from '@kbn/analytics';
-export { METRIC_TYPE } from '@kbn/analytics';
 import { Storage } from 'ui/storage';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
