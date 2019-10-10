@@ -11,6 +11,7 @@ import {
   EuiLoadingChart,
   EuiSpacer,
   EuiTitle,
+  EuiStat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -19,7 +20,11 @@ import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
-import { getLogEntryRateCombinedSeries, getAnnotationsForAll } from '../helpers/data_formatters';
+import {
+  getLogEntryRateCombinedSeries,
+  getAnnotationsForAll,
+  getTopAnomalyScoreAcrossAllPartitions,
+} from '../helpers/data_formatters';
 
 export const AnomaliesResults = ({
   isLoading,
@@ -68,6 +73,14 @@ export const AnomaliesResults = ({
     [results]
   );
 
+  const topAnomalyScore = useMemo(
+    () =>
+      results && results.histogramBuckets
+        ? getTopAnomalyScoreAcrossAllPartitions(results)
+        : undefined,
+    [results]
+  );
+
   return (
     <>
       <EuiTitle size="s" aria-label={title}>
@@ -111,14 +124,30 @@ export const AnomaliesResults = ({
         />
       ) : (
         <>
-          <AnomaliesChart
-            chartId="overall"
-            setTimeRange={setTimeRange}
-            timeRange={timeRange}
-            series={logEntryRateSeries}
-            annotations={anomalyAnnotations}
-            renderAnnotationTooltip={renderAnnotationTooltip}
-          />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={8}>
+              <AnomaliesChart
+                chartId="overall"
+                setTimeRange={setTimeRange}
+                timeRange={timeRange}
+                series={logEntryRateSeries}
+                annotations={anomalyAnnotations}
+                renderAnnotationTooltip={renderAnnotationTooltip}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={2}>
+              <EuiStat
+                title={Number(topAnomalyScore).toFixed(0)}
+                description={i18n.translate(
+                  'xpack.infra.logs.analysis.overallAnomaliesTopAnomalyScoreDescription',
+                  {
+                    defaultMessage: 'Top anomaly score',
+                  }
+                )}
+                reverse
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="l" />
           <AnomaliesTable results={results} setTimeRange={setTimeRange} timeRange={timeRange} />
         </>
@@ -132,22 +161,27 @@ interface ParsedAnnotationDetails {
   anomalyScoresByPartition: Record<string, number>;
 }
 
+const overallAnomalyScoreLabel = i18n.translate(
+  'xpack.infra.logs.analysis.overallAnomalyChartOverallScoreLabel',
+  {
+    defaultMessage: 'Overall anomaly score',
+  }
+);
 const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ details }) => {
   const parsedDetails: ParsedAnnotationDetails = JSON.parse(details);
   return (
     <div>
-      <span>{`Overall anomaly score: ${parsedDetails.overallAnomalyScore}`}</span>
+      <span>
+        {`${overallAnomalyScoreLabel}: `} <b>{parsedDetails.overallAnomalyScore}</b>
+      </span>
       <ul>
         {Object.entries(parsedDetails.anomalyScoresByPartition).map((entry, index) => {
           return (
             <li key={`${index}-overall-anomaly-chart-${entry[0]}-partition-score-${entry[1]}`}>
-              <>
-                <span>{entry[0]}</span>
-                {': '}
-                <span>
-                  <b>{entry[1]}</b>
-                </span>
-              </>
+              <span>
+                {`${entry[0]}: `}
+                <b>{entry[1]}</b>
+              </span>
             </li>
           );
         })}
@@ -157,19 +191,9 @@ const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ detai
 };
 
 const renderAnnotationTooltip = (details?: string) => {
-  // Seems to be necessary to get things typed correctly all the way through to elastic-charts components
+  // Note: Seems to be necessary to get things typed correctly all the way through to elastic-charts components
   if (!details) {
     return <div></div>;
   }
   return <AnnotationTooltip details={details} />;
 };
-
-// i18n.translate(
-//   'xpack.infra.logs.analysis.logRateBucketMaxAnomalyScoreAnnotationLabel',
-//   {
-//     defaultMessage: 'Anomaly score: {sumPartitionMaxAnomalyScores}',
-//     values: {
-//       sumPartitionMaxAnomalyScores: Number(sumPartitionMaxAnomalyScores).toFixed(0),
-//     },
-//   }
-// ),

@@ -210,6 +210,18 @@ export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayl
   );
 };
 
+export const getTopAnomalyScoreAcrossAllPartitions = (
+  results: GetLogEntryRateSuccessResponsePayload['data']
+) => {
+  const allMaxScores = results.histogramBuckets.reduce<number[]>((scores, bucket) => {
+    const bucketMaxScores = bucket.partitions.reduce<number[]>((bucketScores, partition) => {
+      return [...bucketScores, partition.maximumAnomalyScore];
+    }, []);
+    return [...scores, ...bucketMaxScores];
+  }, []);
+  return Math.max(...allMaxScores);
+};
+
 const getSeverityCategoryForScore = (score: number) => {
   if (score >= ML_SEVERITY_SCORES.warning && score < ML_SEVERITY_SCORES.minor) {
     return 'warning';
