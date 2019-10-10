@@ -394,7 +394,10 @@ export class VectorStyle extends AbstractStyle {
 
       for (let j = 0; j < styleFields.length; j++) {
         const { supportsFeatureState, isScaled, name, range, computedName } = styleFields[j];
-        const value = parseFloat(feature.properties[name]);
+        //Date fields pulled from doc_values is an array of epoch_millis and a date string
+        const value = Array.isArray(feature.properties[name])
+          ? parseFloat(feature.properties[name][0])
+          : parseFloat(feature.properties[name]);
         let styleValue;
         if (isScaled) {
           if (isNaN(value) || !range) {//cannot scale
@@ -402,7 +405,7 @@ export class VectorStyle extends AbstractStyle {
           } else if (range.delta === 0) {//values are identical
             styleValue = 1;//snap to end of color range
           } else {
-            styleValue = (feature.properties[name] - range.min) / range.delta;
+            styleValue = (value - range.min) / range.delta;
           }
         } else {
           if (isNaN(value)) {

@@ -166,6 +166,7 @@ export class ESSearchSource extends AbstractESSource {
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
     const {
       topHitsSplitField,
+      topHitsTimeField,
       topHitsSize,
     } = this._descriptor;
 
@@ -249,22 +250,30 @@ export class ESSearchSource extends AbstractESSource {
   // searchFilters.fieldNames contains geo field and any fields needed for styling features
   // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
   async _getSearchHits(layerName, searchFilters, registerCancelCallback) {
+    const initialSearchContext = {
+      docvalue_fields: []
+    };
     const geoField = await this._getGeoField();
+    const timeFields = await this.getTimeFields();
+    timeFields.forEach(field => {
+      initialSearchContext.docvalue_fields.push({
+        field: field.name,
+        format: 'epoch_millis'
+      });
+    });
 
     let searchSource;
     if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
       // Request geo_point and style fields in docvalue_fields insted of _source
       // 1) Returns geo_point in a consistent format regardless of how geo_point is stored in source
       // 2) Setting _source to false so we avoid pulling back unneeded fields.
-      const initialSearchContext = {
-        docvalue_fields: searchFilters.fieldNames
-      };
+      initialSearchContext.docvalue_fields.push(...searchFilters.fieldNames);
       searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT, initialSearchContext);
       searchSource.setField('source', false); // do not need anything from _source
       searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     } else {
       // geo_shape fields do not support docvalue_fields yet, so still have to be pulled from _source
-      searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT);
+      searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT, initialSearchContext);
       // Setting "fields" instead of "source: { includes: []}"
       // because SearchSource automatically adds the following by default
       // 1) all scripted fields
