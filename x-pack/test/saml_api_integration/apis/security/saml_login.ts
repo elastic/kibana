@@ -22,7 +22,7 @@ export default function({ getService }: FtrProviderContext) {
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
-      destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
+      destination: `http://localhost:${kibanaServerConfig.port}/api/security/v1/saml`,
       sessionIndex: chance.natural(),
       ...options,
     });
