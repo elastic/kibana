@@ -7,6 +7,8 @@
 import {
   // @ts-ignore No typings for EuiSpacer
   EuiSpacer,
+  EuiComboBoxOptionProps,
+  EuiPanel,
 } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
@@ -24,6 +26,7 @@ import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { getTitle } from '../lib/helper/get_title';
+import { LocationMap } from '../components/functional/map/map';
 
 interface MonitorPageProps {
   logMonitorPageLoad: () => void;
@@ -94,6 +97,9 @@ export const MonitorPage = ({
       <EuiSpacer size="s" />
       <MonitorStatusBar monitorId={monitorId} variables={sharedVariables} />
       <EuiSpacer size="s" />
+      <EuiPanel>
+        <LocationMap></LocationMap>
+      </EuiPanel>
       <MonitorCharts
         {...colors}
         monitorId={monitorId}
