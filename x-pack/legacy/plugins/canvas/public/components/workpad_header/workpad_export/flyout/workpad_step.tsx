@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
 
 import { ComponentStrings } from '../../../../../i18n';
 
-import { OnExportFn } from '../workpad_export';
+import { OnDownloadFn } from './share_website_flyout';
 
 const { ShareWebsiteWorkpadStep: strings } = ComponentStrings;
 
-export const WorkpadStep = ({ onExport }: { onExport: OnExportFn }) => (
+export const WorkpadStep: FC<{ onDownload: OnDownloadFn }> = ({ onDownload }) => (
   <EuiText size="s">
     <p>{strings.getStepDescription()}</p>
     <EuiSpacer size="s" />
     <EuiButton
       onClick={() => {
-        onExport('share');
+        onDownload('share');
       }}
       size="s"
     >
