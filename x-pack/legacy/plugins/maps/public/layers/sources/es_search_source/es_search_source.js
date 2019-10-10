@@ -166,7 +166,6 @@ export class ESSearchSource extends AbstractESSource {
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
     const {
       topHitsSplitField,
-      topHitsTimeField,
       topHitsSize,
     } = this._descriptor;
 
@@ -186,8 +185,24 @@ export class ESSearchSource extends AbstractESSource {
       }
     });
 
+    const topHits = {
+      size: topHitsSize,
+      script_fields: scriptFields,
+    };
+    if (this._hasSort()) {
+      topHits.sort = this._buildEsSort();
+    }
+    if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
+      topHits._source = false;
+      topHits.docvalue_fields = searchFilters.fieldNames;
+    } else {
+      topHits._source = {
+        includes: searchFilters.fieldNames
+      };
+    }
+
     const searchSource = await this._makeSearchSource(searchFilters, 0);
-    const aggs = {
+    searchSource.setField('aggs', {
       entitySplit: {
         terms: {
           field: topHitsSplitField,
@@ -195,33 +210,11 @@ export class ESSearchSource extends AbstractESSource {
         },
         aggs: {
           entityHits: {
-            top_hits: {
-              sort: [
-                {
-                  [topHitsTimeField]: {
-                    order: 'desc'
-                  }
-                }
-              ],
-              size: topHitsSize,
-              script_fields: scriptFields,
-            }
+            top_hits: topHits
           }
         }
       }
-    };
-    if (this._hasSort()) {
-      aggs.entitySplit.aggs.entityHits.top_hits.sort = this._buildEsSort();
-    }
-    if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
-      aggs.entitySplit.aggs.entityHits.top_hits._source = false;
-      aggs.entitySplit.aggs.entityHits.top_hits.docvalue_fields = searchFilters.fieldNames;
-    } else {
-      aggs.entitySplit.aggs.entityHits.top_hits._source = {
-        includes: searchFilters.fieldNames
-      };
-    }
-    searchSource.setField('aggs', aggs);
+    });
 
     const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document top hits request');
 
