@@ -24,6 +24,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { HeaderPage } from '../../../components/header_page';
+import { HeaderSection } from '../../../components/header_section';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import * as i18n from './translations';
 
@@ -145,19 +146,13 @@ export const RulesComponent = React.memo(() => {
       <EuiSpacer />
 
       <section>
-        <header>
-          <div>
-            <h2>{'All rules'}</h2>
-          </div>
-
-          <div>
-            <EuiFieldSearch
-              aria-label="Search rules"
-              fullWidth
-              placeholder="e.g. rule name or description"
-            />
-          </div>
-        </header>
+        <HeaderSection title="All rules">
+          <EuiFieldSearch
+            aria-label="Search rules"
+            fullWidth
+            placeholder="e.g. rule name or description"
+          />
+        </HeaderSection>
 
         <EuiSpacer />
 

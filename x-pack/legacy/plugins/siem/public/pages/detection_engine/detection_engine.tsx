@@ -21,7 +21,7 @@ import { StickyContainer } from 'react-sticky';
 
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
-import { HeaderPanel } from '../../components/header_panel';
+import { HeaderSection } from '../../components/header_section';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { DetectionEngineKql } from './kql';
 import * as i18n from './translations';
@@ -66,9 +66,9 @@ export const DetectionEngineComponent = React.memo(() => {
         </HeaderPage>
 
         <EuiPanel>
-          <HeaderPanel title="Signal detection frequency">
+          <HeaderSection title="Signal detection frequency">
             <EuiSelect options={stackOptions} prepend="Stack by" value={stackOptions[0].value} />
-          </HeaderPanel>
+          </HeaderSection>
 
           <Chart size={['100%', 259]}>
             <Settings legendPosition="bottom" showLegend />
@@ -98,7 +98,7 @@ export const DetectionEngineComponent = React.memo(() => {
         <EuiSpacer />
 
         <EuiPanel>
-          <HeaderPanel
+          <HeaderSection
             subtitle={`${i18n.PANEL_SUBTITLE_SHOWING}: 7,712 signals`}
             title="All signals"
           >
@@ -110,7 +110,7 @@ export const DetectionEngineComponent = React.memo(() => {
               }}
               options={toggleButtons}
             />
-          </HeaderPanel>
+          </HeaderSection>
           {'Datagrid here (talk to Chandler Prall about possibility of early access)...'}
         </EuiPanel>
       </StickyContainer>

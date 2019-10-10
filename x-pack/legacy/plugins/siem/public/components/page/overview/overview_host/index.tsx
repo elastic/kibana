@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { pure } from 'recompose';
 
-import { HeaderPanel } from '../../../header_panel';
+import { HeaderSection } from '../../../header_section';
 import { manageQuery } from '../../../page/manage_query';
 import {
   ID as OverviewHostQueryId,
@@ -41,7 +41,7 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
   return (
     <EuiFlexItem>
       <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
-        <HeaderPanel
+        <HeaderSection
           border
           id={OverviewHostQueryId}
           showInspect={isHover}
@@ -58,7 +58,7 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
           <EuiButton href="#/link-to/hosts">
             <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View hosts" />
           </EuiButton>
-        </HeaderPanel>
+        </HeaderSection>
 
         <OverviewHostQuery endDate={endDate} sourceId="default" startDate={startDate}>
           {({ overviewHost, loading, id, inspect, refetch }) => (

@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { pure } from 'recompose';
 
-import { HeaderPanel } from '../../../header_panel';
+import { HeaderSection } from '../../../header_section';
 import { manageQuery } from '../../../page/manage_query';
 import {
   ID as OverviewNetworkQueryId,
@@ -41,7 +41,7 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
   return (
     <EuiFlexItem>
       <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
-        <HeaderPanel
+        <HeaderSection
           border
           id={OverviewNetworkQueryId}
           showInspect={isHover}
@@ -64,7 +64,7 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
               defaultMessage="View network"
             />
           </EuiButton>
-        </HeaderPanel>
+        </HeaderSection>
 
         <OverviewNetworkQuery endDate={endDate} sourceId="default" startDate={startDate}>
           {({ overviewNetwork, loading, id, inspect, refetch }) => (

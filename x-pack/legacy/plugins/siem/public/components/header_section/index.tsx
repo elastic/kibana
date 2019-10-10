@@ -16,7 +16,7 @@ interface HeaderProps {
 }
 
 const Header = styled.header.attrs({
-  className: 'siemHeaderPanel',
+  className: 'siemHeaderSection',
 })<HeaderProps>`
   ${({ border, theme }) => css`
     margin-bottom: ${theme.eui.euiSizeL};
@@ -31,7 +31,7 @@ const Header = styled.header.attrs({
 `;
 Header.displayName = 'Header';
 
-export interface HeaderPanelProps extends HeaderProps {
+export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
   id?: string;
   subtitle?: SubtitleProps['text'];
@@ -40,7 +40,7 @@ export interface HeaderPanelProps extends HeaderProps {
   tooltip?: string;
 }
 
-export const HeaderPanel = React.memo<HeaderPanelProps>(
+export const HeaderSection = React.memo<HeaderSectionProps>(
   ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
     <Header border={border}>
       <EuiFlexGroup alignItems="center">
@@ -48,7 +48,7 @@ export const HeaderPanel = React.memo<HeaderPanelProps>(
           <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiTitle>
-                <h2 data-test-subj="header-panel-title">
+                <h2 data-test-subj="header-section-title">
                   {title}
                   {tooltip && (
                     <>
@@ -71,7 +71,7 @@ export const HeaderPanel = React.memo<HeaderPanelProps>(
         </EuiFlexItem>
 
         {children && (
-          <EuiFlexItem data-test-subj="header-panel-supplements" grow={false}>
+          <EuiFlexItem data-test-subj="header-section-supplements" grow={false}>
             {children}
           </EuiFlexItem>
         )}
@@ -79,4 +79,4 @@ export const HeaderPanel = React.memo<HeaderPanelProps>(
     </Header>
   )
 );
-HeaderPanel.displayName = 'HeaderPanel';
+HeaderSection.displayName = 'HeaderSection';
