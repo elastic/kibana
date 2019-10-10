@@ -72,46 +72,31 @@ export const WizardSteps: FC<Props> = ({
       title: i18n.translate('xpack.ml.newJob.wizard.step.timeRangeTitle', {
         defaultMessage: 'Time range',
       }),
-      onClick: () => jumpToStep(WIZARD_STEPS.TIME_RANGE),
-      isSelected: currentStep === WIZARD_STEPS.TIME_RANGE,
-      isComplete: currentStep > WIZARD_STEPS.TIME_RANGE,
-      disabled: true,
+      ...createStepProps(WIZARD_STEPS.TIME_RANGE),
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.pickFieldsTitle', {
         defaultMessage: 'Pick fields',
       }),
-      onClick: () => jumpToStep(WIZARD_STEPS.PICK_FIELDS),
-      isSelected: currentStep === WIZARD_STEPS.PICK_FIELDS,
-      isComplete: currentStep > WIZARD_STEPS.PICK_FIELDS,
-      disabled: true,
+      ...createStepProps(WIZARD_STEPS.PICK_FIELDS),
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.jobDetailsTitle', {
         defaultMessage: 'Job details',
       }),
-      onClick: () => jumpToStep(WIZARD_STEPS.JOB_DETAILS),
-      isSelected: currentStep === WIZARD_STEPS.JOB_DETAILS,
-      isComplete: currentStep > WIZARD_STEPS.JOB_DETAILS,
-      disabled: true,
+      ...createStepProps(WIZARD_STEPS.JOB_DETAILS),
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.validationTitle', {
         defaultMessage: 'Validation',
       }),
-      onClick: () => jumpToStep(WIZARD_STEPS.VALIDATION),
-      isSelected: currentStep === WIZARD_STEPS.VALIDATION,
-      isComplete: currentStep > WIZARD_STEPS.VALIDATION,
-      disabled: true,
+      ...createStepProps(WIZARD_STEPS.VALIDATION),
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.summaryTitle', {
         defaultMessage: 'Summary',
       }),
-      onClick: () => jumpToStep(WIZARD_STEPS.SUMMARY),
-      isSelected: currentStep === WIZARD_STEPS.SUMMARY,
-      isComplete: currentStep > WIZARD_STEPS.SUMMARY,
-      disabled: true,
+      ...createStepProps(WIZARD_STEPS.SUMMARY),
     },
   ];
 
@@ -120,14 +105,18 @@ export const WizardSteps: FC<Props> = ({
       title: i18n.translate('xpack.ml.newJob.wizard.step.configureDatafeedTitle', {
         defaultMessage: 'Configure datafeed',
       }),
-      onClick: () => jumpToStep(WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED),
-      isSelected: currentStep === WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED,
-      isComplete: currentStep > WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED,
-      disabled: true,
+      ...createStepProps(WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED),
     });
   }
 
-  stepsConfig.forEach((s, i) => (s.disabled = disableSteps || i >= highestStep));
+  function createStepProps(step: WIZARD_STEPS) {
+    return {
+      onClick: () => jumpToStep(step),
+      isSelected: currentStep === step,
+      isComplete: currentStep > step,
+      disabled: disableSteps || highestStep < step,
+    };
+  }
 
   return (
     <Fragment>

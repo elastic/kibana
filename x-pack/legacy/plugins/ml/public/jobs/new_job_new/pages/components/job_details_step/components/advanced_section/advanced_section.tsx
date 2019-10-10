@@ -48,33 +48,33 @@ export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpand
         </EuiFlexGroup>
       </Fragment>
     );
-  } else {
-    return (
-      <Fragment>
-        <EuiSpacer size="xl" />
-        <EuiAccordion
-          id="advanced-section"
-          buttonContent={ButtonContent}
-          onToggle={setAdvancedExpanded}
-          initialIsOpen={advancedExpanded}
-          data-test-subj="mlJobWizardToggleAdvancedSection"
-        >
-          <EuiSpacer />
-          <EuiFlexGroup
-            gutterSize="xl"
-            style={{ marginLeft: '0px', marginRight: '0px' }}
-            data-test-subj="mlJobWizardAdvancedSection"
-          >
-            <EuiFlexItem>
-              <ModelPlotSwitch />
-              <ModelMemoryLimitInput />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <DedicatedIndexSwitch />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiAccordion>
-      </Fragment>
-    );
   }
+
+  return (
+    <Fragment>
+      <EuiSpacer size="xl" />
+      <EuiAccordion
+        id="advanced-section"
+        buttonContent={ButtonContent}
+        onToggle={setAdvancedExpanded}
+        initialIsOpen={advancedExpanded}
+        data-test-subj="mlJobWizardToggleAdvancedSection"
+      >
+        <EuiSpacer />
+        <EuiFlexGroup
+          gutterSize="xl"
+          style={{ marginLeft: '0px', marginRight: '0px' }}
+          data-test-subj="mlJobWizardAdvancedSection"
+        >
+          <EuiFlexItem>
+            <ModelPlotSwitch />
+            <ModelMemoryLimitInput />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <DedicatedIndexSwitch />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiAccordion>
+    </Fragment>
+  );
 };
