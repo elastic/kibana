@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import sinon from 'sinon';
+import { ByteSizeValue } from '@kbn/config-schema';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
@@ -15,14 +16,17 @@ import {
   mockScopedClusterClient,
 } from './base.mock';
 
-import { SAMLAuthenticationProvider } from './saml';
+import { SAMLAuthenticationProvider, SAMLLoginStep } from './saml';
 
 describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
     mockOptions = mockAuthenticationProviderOptions();
-    provider = new SAMLAuthenticationProvider(mockOptions, { realm: 'test-realm' });
+    provider = new SAMLAuthenticationProvider(mockOptions, {
+      realm: 'test-realm',
+      maxRedirectURLSize: new ByteSizeValue(100),
+    });
   });
 
   it('throws if `realm` option is not specified', () => {
@@ -39,6 +43,22 @@ describe('SAMLAuthenticationProvider', () => {
     );
   });
 
+  it('throws if `maxRedirectURLSize` option is not specified', () => {
+    const providerOptions = mockAuthenticationProviderOptions();
+
+    expect(
+      () => new SAMLAuthenticationProvider(providerOptions, { realm: 'test-realm' })
+    ).toThrowError('Maximum redirect URL size must be specified');
+
+    expect(
+      () =>
+        new SAMLAuthenticationProvider(providerOptions, {
+          realm: 'test-realm',
+          maxRedirectURLSize: undefined,
+        })
+    ).toThrowError('Maximum redirect URL size must be specified');
+  });
+
   describe('`login` method', () => {
     it('gets token and redirects user to requested URL if SAML Response is valid.', async () => {
       const request = httpServerMock.createKibanaRequest();
@@ -51,8 +71,8 @@ describe('SAMLAuthenticationProvider', () => {
 
       const authenticationResult = await provider.login(
         request,
-        { samlResponse: 'saml-response-xml' },
-        { requestId: 'some-request-id', nextURL: '/test-base-path/some-path' }
+        { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+        { requestId: 'some-request-id', redirectURL: '/test-base-path/some-path#some-app' }
       );
 
       sinon.assert.calledWithExactly(
@@ -62,7 +82,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/test-base-path/some-path');
+      expect(authenticationResult.redirectURL).toBe('/test-base-path/some-path#some-app');
       expect(authenticationResult.state).toEqual({
         username: 'user',
         accessToken: 'some-token',
@@ -75,37 +95,44 @@ describe('SAMLAuthenticationProvider', () => {
 
       const authenticationResult = await provider.login(
         request,
-        { samlResponse: 'saml-response-xml' },
-        { nextURL: '/test-base-path/some-path' }
+        { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+        {}
       );
 
       sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toEqual(
-        Boom.badRequest(
-          'SAML response state does not have corresponding request id or redirect URL.'
-        )
+        Boom.badRequest('SAML response state does not have corresponding request id.')
       );
     });
 
-    it('fails if SAML Response payload is presented but state does not contain redirect URL.', async () => {
+    it('redirects to the default location if state contains empty redirect URL.', async () => {
       const request = httpServerMock.createKibanaRequest();
+
+      mockOptions.client.callAsInternalUser.withArgs('shield.samlAuthenticate').resolves({
+        access_token: 'user-initiated-login-token',
+        refresh_token: 'user-initiated-login-refresh-token',
+      });
 
       const authenticationResult = await provider.login(
         request,
-        { samlResponse: 'saml-response-xml' },
-        { requestId: 'some-request-id' }
+        { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+        { requestId: 'some-request-id', redirectURL: '' }
       );
 
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toEqual(
-        Boom.badRequest(
-          'SAML response state does not have corresponding request id or redirect URL.'
-        )
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.samlAuthenticate',
+        { body: { ids: ['some-request-id'], content: 'saml-response-xml', realm: 'test-realm' } }
       );
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.redirectURL).toBe('/base-path/');
+      expect(authenticationResult.state).toEqual({
+        accessToken: 'user-initiated-login-token',
+        refreshToken: 'user-initiated-login-refresh-token',
+      });
     });
 
     it('redirects to the default location if state is not presented.', async () => {
@@ -117,6 +144,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       const authenticationResult = await provider.login(request, {
+        step: SAMLLoginStep.SAMLResponseReceived,
         samlResponse: 'saml-response-xml',
       });
 
@@ -144,8 +172,8 @@ describe('SAMLAuthenticationProvider', () => {
 
       const authenticationResult = await provider.login(
         request,
-        { samlResponse: 'saml-response-xml' },
-        { requestId: 'some-request-id', nextURL: '/test-base-path/some-path' }
+        { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+        { requestId: 'some-request-id', redirectURL: '/test-base-path/some-path' }
       );
 
       sinon.assert.calledWithExactly(
@@ -174,7 +202,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(
           request,
-          { samlResponse: 'saml-response-xml' },
+          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
           {
             username: 'user',
             accessToken: 'some-valid-token',
@@ -216,7 +244,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(
           request,
-          { samlResponse: 'saml-response-xml' },
+          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
           state
         );
 
@@ -259,7 +287,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(
           request,
-          { samlResponse: 'saml-response-xml' },
+          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
           state
         );
 
@@ -305,7 +333,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(
           request,
-          { samlResponse: 'saml-response-xml' },
+          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
           state
         );
 
@@ -323,6 +351,177 @@ describe('SAMLAuthenticationProvider', () => {
 
         expect(authenticationResult.redirected()).toBe(true);
         expect(authenticationResult.redirectURL).toBe('/base-path/overwritten_session');
+      });
+    });
+
+    describe('User initiated login with captured redirect URL', () => {
+      it('fails if state is not available', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        const authenticationResult = await provider.login(request, {
+          step: SAMLLoginStep.RedirectURLFragmentCaptured,
+          redirectURLFragment: '#some-fragment',
+        });
+
+        sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+
+        expect(authenticationResult.failed()).toBe(true);
+        expect(authenticationResult.error).toEqual(
+          Boom.badRequest('State does not include URL path to redirect to.')
+        );
+      });
+
+      it('does not handle AJAX requests.', async () => {
+        const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+
+        const authenticationResult = await provider.login(
+          request,
+          {
+            step: SAMLLoginStep.RedirectURLFragmentCaptured,
+            redirectURLFragment: '#some-fragment',
+          },
+          { redirectURL: '/test-base-path/some-path' }
+        );
+
+        sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+
+        expect(authenticationResult.notHandled()).toBe(true);
+      });
+
+      it('redirects non-AJAX requests to the IdP remembering combined redirect URL.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+          id: 'some-request-id',
+          redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+        });
+
+        const authenticationResult = await provider.login(
+          request,
+          {
+            step: SAMLLoginStep.RedirectURLFragmentCaptured,
+            redirectURLFragment: '#some-fragment',
+          },
+          { redirectURL: '/test-base-path/some-path' }
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlPrepare',
+          { body: { realm: 'test-realm' } }
+        );
+
+        expect(mockOptions.logger.warn).not.toHaveBeenCalled();
+
+        expect(authenticationResult.redirected()).toBe(true);
+        expect(authenticationResult.redirectURL).toBe(
+          'https://idp-host/path/login?SAMLRequest=some%20request%20'
+        );
+        expect(authenticationResult.state).toEqual({
+          requestId: 'some-request-id',
+          redirectURL: '/test-base-path/some-path#some-fragment',
+        });
+      });
+
+      it('prepends redirect URL fragment with `#` if it does not have one.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+          id: 'some-request-id',
+          redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+        });
+
+        const authenticationResult = await provider.login(
+          request,
+          {
+            step: SAMLLoginStep.RedirectURLFragmentCaptured,
+            redirectURLFragment: '../some-fragment',
+          },
+          { redirectURL: '/test-base-path/some-path' }
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlPrepare',
+          { body: { realm: 'test-realm' } }
+        );
+
+        expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
+        expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+          'Redirect URL fragment does not start with `#`.'
+        );
+
+        expect(authenticationResult.redirected()).toBe(true);
+        expect(authenticationResult.redirectURL).toBe(
+          'https://idp-host/path/login?SAMLRequest=some%20request%20'
+        );
+        expect(authenticationResult.state).toEqual({
+          requestId: 'some-request-id',
+          redirectURL: '/test-base-path/some-path#../some-fragment',
+        });
+      });
+
+      it('redirects non-AJAX requests to the IdP remembering only redirect URL path if fragment is too large.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+          id: 'some-request-id',
+          redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+        });
+
+        const authenticationResult = await provider.login(
+          request,
+          {
+            step: SAMLLoginStep.RedirectURLFragmentCaptured,
+            redirectURLFragment: '#some-fragment'.repeat(10),
+          },
+          { redirectURL: '/test-base-path/some-path' }
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlPrepare',
+          { body: { realm: 'test-realm' } }
+        );
+
+        expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
+        expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+          'Max URL size should not exceed 100b but it was 165b. Only URL path is captured.'
+        );
+
+        expect(authenticationResult.redirected()).toBe(true);
+        expect(authenticationResult.redirectURL).toBe(
+          'https://idp-host/path/login?SAMLRequest=some%20request%20'
+        );
+        expect(authenticationResult.state).toEqual({
+          requestId: 'some-request-id',
+          redirectURL: '/test-base-path/some-path',
+        });
+      });
+
+      it('fails if SAML request preparation fails.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        const failureReason = new Error('Realm is misconfigured!');
+        mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').rejects(failureReason);
+
+        const authenticationResult = await provider.login(
+          request,
+          {
+            step: SAMLLoginStep.RedirectURLFragmentCaptured,
+            redirectURLFragment: '#some-fragment',
+          },
+          { redirectURL: '/test-base-path/some-path' }
+        );
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.samlPrepare',
+          { body: { realm: 'test-realm' } }
+        );
+
+        expect(authenticationResult.failed()).toBe(true);
+        expect(authenticationResult.error).toBe(failureReason);
       });
     });
   });
@@ -352,7 +551,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
-    it('redirects non-AJAX request that can not be authenticated to the IdP.', async () => {
+    it('redirects non-AJAX request that can not be authenticated to the "capture fragment" page.', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
 
       mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
@@ -360,24 +559,49 @@ describe('SAMLAuthenticationProvider', () => {
         redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
       });
 
-      const authenticationResult = await provider.authenticate(request, null);
+      const authenticationResult = await provider.authenticate(request);
+
+      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.redirectURL).toBe(
+        '/mock-server-basepath/api/security/saml/capture-url-fragment'
+      );
+      expect(authenticationResult.state).toEqual({ redirectURL: '/base-path/s/foo/some-path' });
+    });
+
+    it('redirects non-AJAX request that can not be authenticated to the IdP if request path is too large.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        path: `/s/foo/${'some-path'.repeat(10)}`,
+      });
+
+      mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
+        id: 'some-request-id',
+        redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
+      });
+
+      const authenticationResult = await provider.authenticate(request);
 
       sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
         body: { realm: 'test-realm' },
       });
 
+      expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
+      expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+        'Max URL path size should not exceed 100b but it was 107b. URL is not captured.'
+      );
+
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
         'https://idp-host/path/login?SAMLRequest=some%20request%20'
       );
-      expect(authenticationResult.state).toEqual({
-        requestId: 'some-request-id',
-        nextURL: `/base-path/s/foo/some-path`,
-      });
+      expect(authenticationResult.state).toEqual({ requestId: 'some-request-id', redirectURL: '' });
     });
 
     it('fails if SAML request preparation fails.', async () => {
-      const request = httpServerMock.createKibanaRequest({ path: '/some-path' });
+      const request = httpServerMock.createKibanaRequest({
+        path: `/s/foo/${'some-path'.repeat(10)}`,
+      });
 
       const failureReason = new Error('Realm is misconfigured!');
       mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').rejects(failureReason);
@@ -534,8 +758,41 @@ describe('SAMLAuthenticationProvider', () => {
       );
     });
 
-    it('initiates SAML handshake for non-AJAX requests if access token document is missing.', async () => {
+    it('re-capture URL for non-AJAX requests if access token document is missing.', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
+      const state = {
+        username: 'user',
+        accessToken: 'expired-token',
+        refreshToken: 'expired-refresh-token',
+      };
+
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .rejects({
+          statusCode: 500,
+          body: { error: { reason: 'token document is missing and must be present' } },
+        });
+
+      mockOptions.tokens.refresh.withArgs(state.refreshToken).resolves(null);
+
+      const authenticationResult = await provider.authenticate(request, state);
+
+      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.redirectURL).toBe(
+        '/mock-server-basepath/api/security/saml/capture-url-fragment'
+      );
+      expect(authenticationResult.state).toEqual({ redirectURL: '/base-path/s/foo/some-path' });
+    });
+
+    it('initiates SAML handshake for non-AJAX requests if access token document is missing and request path is too large.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        path: `/s/foo/${'some-path'.repeat(10)}`,
+      });
       const state = {
         username: 'user',
         accessToken: 'expired-token',
@@ -565,18 +822,50 @@ describe('SAMLAuthenticationProvider', () => {
         body: { realm: 'test-realm' },
       });
 
+      expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
+      expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+        'Max URL path size should not exceed 100b but it was 107b. URL is not captured.'
+      );
+
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
         'https://idp-host/path/login?SAMLRequest=some%20request%20'
       );
-      expect(authenticationResult.state).toEqual({
-        requestId: 'some-request-id',
-        nextURL: `/base-path/s/foo/some-path`,
-      });
+      expect(authenticationResult.state).toEqual({ requestId: 'some-request-id', redirectURL: '' });
     });
 
-    it('initiates SAML handshake for non-AJAX requests if refresh token is expired.', async () => {
+    it('re-capture URL for non-AJAX requests if refresh token is expired.', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
+      const state = {
+        username: 'user',
+        accessToken: 'expired-token',
+        refreshToken: 'expired-refresh-token',
+      };
+
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .rejects({ statusCode: 401 });
+
+      mockOptions.tokens.refresh.withArgs(state.refreshToken).resolves(null);
+
+      const authenticationResult = await provider.authenticate(request, state);
+
+      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.redirectURL).toBe(
+        '/mock-server-basepath/api/security/saml/capture-url-fragment'
+      );
+      expect(authenticationResult.state).toEqual({ redirectURL: '/base-path/s/foo/some-path' });
+    });
+
+    it('initiates SAML handshake for non-AJAX requests if refresh token is expired and request path is too large.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        path: `/s/foo/${'some-path'.repeat(10)}`,
+      });
       const state = {
         username: 'user',
         accessToken: 'expired-token',
@@ -603,14 +892,16 @@ describe('SAMLAuthenticationProvider', () => {
         body: { realm: 'test-realm' },
       });
 
+      expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
+      expect(mockOptions.logger.warn).toHaveBeenCalledWith(
+        'Max URL path size should not exceed 100b but it was 107b. URL is not captured.'
+      );
+
       expect(authenticationResult.redirected()).toBe(true);
       expect(authenticationResult.redirectURL).toBe(
         'https://idp-host/path/login?SAMLRequest=some%20request%20'
       );
-      expect(authenticationResult.state).toEqual({
-        requestId: 'some-request-id',
-        nextURL: `/base-path/s/foo/some-path`,
-      });
+      expect(authenticationResult.state).toEqual({ requestId: 'some-request-id', redirectURL: '' });
     });
 
     it('succeeds if `authorization` contains a valid token.', async () => {
