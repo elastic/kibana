@@ -93,21 +93,21 @@ describe('chartSelectors', () => {
     it('produces correct series', () => {
       expect(getTpmSeries(apmTimeseries, transactionType)).toEqual([
         {
-          color: '#00b3a4',
+          color: theme.euiColorSecondary,
           data: [{ x: 0, y: 5 }, { x: 0, y: 2 }],
           legendValue: '3.5 tpm',
           title: 'HTTP 2xx',
           type: 'linemark'
         },
         {
-          color: '#f98510',
+          color: theme.euiColorWarning,
           data: [{ x: 0, y: 1 }],
           legendValue: '1.0 tpm',
           title: 'HTTP 4xx',
           type: 'linemark'
         },
         {
-          color: '#db1374',
+          color: theme.euiColorDanger,
           data: [{ x: 0, y: 0 }],
           legendValue: '0.0 tpm',
           title: 'HTTP 5xx',
@@ -124,7 +124,7 @@ describe('chartSelectors', () => {
             ...apmTimeseries,
             tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
           })[0].color
-        ).toEqual(theme.euiColorVis0);
+        ).toEqual(theme.euiColorSecondary);
       });
     });
 
@@ -136,7 +136,7 @@ describe('chartSelectors', () => {
             ...apmTimeseries,
             tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
           })[0].color
-        ).toEqual(theme.euiColorVis0);
+        ).toEqual(theme.euiColorSecondary);
       });
     });
 
@@ -148,7 +148,7 @@ describe('chartSelectors', () => {
             ...apmTimeseries,
             tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
           })[0].color
-        ).toEqual(theme.euiColorVis0);
+        ).toEqual(theme.euiColorSecondary);
       });
     });
 
@@ -160,7 +160,7 @@ describe('chartSelectors', () => {
             ...apmTimeseries,
             tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
           })[0].color
-        ).toEqual(theme.euiColorVis0);
+        ).toEqual(theme.euiColorSecondary);
       });
     });
 
@@ -172,7 +172,7 @@ describe('chartSelectors', () => {
             ...apmTimeseries,
             tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
           })[0].color
-        ).toEqual(theme.euiColorVis2);
+        ).toEqual(theme.euiColorDanger);
       });
     });
 
@@ -184,7 +184,7 @@ describe('chartSelectors', () => {
             ...apmTimeseries,
             tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
           })[0].color
-        ).toEqual(theme.euiColorVis2);
+        ).toEqual(theme.euiColorDanger);
       });
     });
 
@@ -196,7 +196,7 @@ describe('chartSelectors', () => {
             ...apmTimeseries,
             tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
           })[0].color
-        ).toEqual(theme.euiColorVis2);
+        ).toEqual(theme.euiColorDanger);
       });
     });
 
@@ -208,7 +208,7 @@ describe('chartSelectors', () => {
             ...apmTimeseries,
             tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
           })[0].color
-        ).toEqual(theme.euiColorVis2);
+        ).toEqual(theme.euiColorDanger);
       });
     });
 
