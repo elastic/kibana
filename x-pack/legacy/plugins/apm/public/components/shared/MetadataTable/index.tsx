@@ -12,7 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-import { get, has, pick } from 'lodash';
+import { get, has, pick, isEmpty } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
@@ -45,7 +45,10 @@ export function MetadataTable({ item, sections }: Props) {
       {filteredSections.map(section => {
         let sectionData: Record<string, unknown> = get(item, section.key);
         if (section.properties) {
-          sectionData = pick(item, section.properties);
+          sectionData = pick(sectionData, section.properties);
+          if (isEmpty(sectionData) && !section.required) {
+            return;
+          }
         }
         return (
           <div key={section.key}>
@@ -63,24 +66,24 @@ export function MetadataTable({ item, sections }: Props) {
 }
 
 function Section({
-  propData,
+  propData = {},
   propKey
 }: {
   propData?: Record<string, unknown>;
   propKey?: string;
 }) {
+  if (isEmpty(propData)) {
+    return (
+      <EuiText size="s">
+        {i18n.translate(
+          'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
+          { defaultMessage: 'No data available' }
+        )}
+      </EuiText>
+    );
+  }
+
   return (
-    <React.Fragment>
-      {propData ? (
-        <DottedKeyValueTable data={propData} parentKey={propKey} maxDepth={5} />
-      ) : (
-        <EuiText size="s">
-          {i18n.translate(
-            'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
-            { defaultMessage: 'No data available' }
-          )}
-        </EuiText>
-      )}
-    </React.Fragment>
+    <DottedKeyValueTable data={propData} parentKey={propKey} maxDepth={5} />
   );
 }
