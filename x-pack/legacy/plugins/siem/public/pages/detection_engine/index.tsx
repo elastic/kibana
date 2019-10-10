@@ -8,8 +8,8 @@ import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { CreateRuleComponent } from './create_rule';
-import { EditRuleComponent } from './edit_rule';
 import { DetectionEngineComponent } from './detection_engine';
+import { EditRuleComponent } from './edit_rule';
 import { RuleDetailsComponent } from './rule_details';
 import { RulesComponent } from './rules';
 

@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HeaderPage it renders 1`] = `
+<Component>
+  <HeaderPage
+    badgeOptions={
+      Object {
+        "beta": true,
+        "text": "Beta",
+        "tooltip": "Test tooltip",
+      }
+    }
+    border={true}
+    subtitle="Test subtitle"
+    subtitle2="Test subtitle 2"
+    title="Test title"
+  >
+    <p>
+      Test supplement
+    </p>
+  </HeaderPage>
+</Component>
+`;

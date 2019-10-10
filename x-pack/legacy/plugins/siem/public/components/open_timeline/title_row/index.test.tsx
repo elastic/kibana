@@ -30,7 +30,7 @@ describe('TitleRow', () => {
 
     expect(
       wrapper
-        .find('[data-test-subj="header-panel-title"]')
+        .find('[data-test-subj="header-section-title"]')
         .first()
         .text()
     ).toEqual(title);

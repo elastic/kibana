@@ -5,15 +5,15 @@
  */
 
 import {
-  Chart,
-  BarSeries,
   Axis,
+  BarSeries,
+  Chart,
   HistogramBarSeries,
   Position,
-  getAxisId,
-  getSpecId,
   ScaleType,
   Settings,
+  getAxisId,
+  getSpecId,
 } from '@elastic/charts';
 import { EuiButton, EuiButtonGroup, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import React from 'react';

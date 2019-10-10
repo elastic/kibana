@@ -51,7 +51,7 @@ describe('HeaderSection', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="header-section-subtitle"]`)
+        .find('[data-test-subj="header-section-subtitle"]')
         .first()
         .exists()
     ).toBe(true);
@@ -66,7 +66,7 @@ describe('HeaderSection', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="header-section-subtitle"]`)
+        .find('[data-test-subj="header-section-subtitle"]')
         .first()
         .exists()
     ).toBe(false);
@@ -81,7 +81,7 @@ describe('HeaderSection', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="transparent-inspect-container"]`)
+        .find('[data-test-subj="transparent-inspect-container"]')
         .first()
         .exists()
     ).toBe(true);
@@ -96,7 +96,7 @@ describe('HeaderSection', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="opaque-inspect-container"]`)
+        .find('[data-test-subj="opaque-inspect-container"]')
         .first()
         .exists()
     ).toBe(true);

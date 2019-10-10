@@ -82,15 +82,21 @@ export const HeaderPage = React.memo<HeaderPageProps>(
     <Header border={border} {...rest}>
       <EuiFlexGroup alignItems="center">
         <FlexItem>
-          {backOptions && <LinkBack href={backOptions.href} text={backOptions.text} />}
+          {backOptions && (
+            <LinkBack
+              data-test-subj="header-page-back-link"
+              href={backOptions.href}
+              text={backOptions.text}
+            />
+          )}
 
           <EuiTitle size="l">
-            <h1 data-test-subj="page_headline_title">
+            <h1 data-test-subj="header-page-title">
               {!draggableArguments ? (
                 title
               ) : (
                 <DefaultDraggable
-                  data-test-subj="page_headline_draggable"
+                  data-test-subj="header-page-draggable"
                   id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
                   field={draggableArguments.field}
                   value={`${draggableArguments.value}`}
@@ -113,11 +119,15 @@ export const HeaderPage = React.memo<HeaderPageProps>(
             </h1>
           </EuiTitle>
 
-          {subtitle && <Subtitle text={subtitle} />}
-          {subtitle2 && <Subtitle text={subtitle2} />}
+          {subtitle && <Subtitle data-test-subj="header-page-subtitle" text={subtitle} />}
+          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" text={subtitle2} />}
         </FlexItem>
 
-        {children && <FlexItem grow={false}>{children}</FlexItem>}
+        {children && (
+          <FlexItem data-test-subj="header-page-supplements" grow={false}>
+            {children}
+          </FlexItem>
+        )}
       </EuiFlexGroup>
     </Header>
   )

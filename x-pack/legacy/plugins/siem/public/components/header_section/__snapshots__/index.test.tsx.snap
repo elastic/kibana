@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`HeaderPanel it renders 1`] = `
+exports[`HeaderSection it renders 1`] = `
 <Component>
-  <HeaderPanel
+  <HeaderSection
     title="Test title"
   />
 </Component>

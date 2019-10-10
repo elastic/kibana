@@ -10,11 +10,11 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { MemoryRouter } from 'react-router-dom';
 
-import { DetectionEngine } from './index';
-
-import '../../mock/ui_settings';
 import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
+import '../../mock/match_media';
+import '../../mock/ui_settings';
+import { DetectionEngineComponent } from './detection_engine';
 
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
@@ -35,7 +35,7 @@ let localSource: Array<{
   };
 }>;
 
-describe('DetectionEngine', () => {
+describe('DetectionEngineComponent', () => {
   describe('rendering', () => {
     beforeEach(() => {
       localSource = cloneDeep(mocksSource);
@@ -47,7 +47,7 @@ describe('DetectionEngine', () => {
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
             <MemoryRouter>
-              <DetectionEngine />
+              <DetectionEngineComponent />
             </MemoryRouter>
           </MockedProvider>
         </TestProviders>
@@ -64,7 +64,7 @@ describe('DetectionEngine', () => {
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
             <MemoryRouter>
-              <DetectionEngine />
+              <DetectionEngineComponent />
             </MemoryRouter>
           </MockedProvider>
         </TestProviders>
