@@ -9845,7 +9845,6 @@
     "xpack.siem.components.mlPopup.showAllJobsLabel": "Elastic ジョブ",
     "xpack.siem.components.mlPopup.showingLabel": "{filterResultsLength} 件の{filterResultsLength, plural, one {ジョブ} other {ジョブ}}を表示中",
     "xpack.siem.components.mlPopup.upgradeButtonLabel": "サブスクリプションオプション",
-    "xpack.siem.components.mlPopup.upgradeDescription": "SIEM の異常検知機能を利用するには、Elastic Platinum ライセンスが必要です。個のライセンスでは、機械学習ジョブを実行して SIEM 全体の異常イベントを表示することができます。",
     "xpack.siem.components.mlPopup.upgradeTitle": "E lastic Platinum へのアップグレード",
     "xpack.siem.containers.errors.stopJobFailureTitle": "ジョブ停止エラー",
     "xpack.siem.eventDetails.blank": " ",
