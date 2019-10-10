@@ -72,9 +72,10 @@ export class ScrollAndBulkIndex {
   }
 
   async singleScroll(scrollId: string | undefined): Promise<SearchResponse<object>> {
+    const scroll = this.signalParams.scrollLock ? this.signalParams.scrollLock : '1m';
     try {
       const nextScrollResult = await this.service.callCluster('scroll', {
-        scroll: this.signalParams.scroll,
+        scroll,
         scrollId,
       });
       return nextScrollResult;
@@ -91,10 +92,11 @@ export class ScrollAndBulkIndex {
       this.logger.error('[-] First bulk index threw an error');
       return false;
     }
+    let newScrollId = someResult._scroll_id;
     while (true) {
       try {
-        // reusing scroll id from initial call
-        const scrollResult = await this.singleScroll(someResult._scroll_id);
+        const scrollResult = await this.singleScroll(newScrollId);
+        newScrollId = scrollResult._scroll_id;
         if (scrollResult.hits.hits.length === 0) {
           this.logger.info('[+] Finished indexing signals');
           return true;
