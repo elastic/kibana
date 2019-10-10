@@ -18,6 +18,11 @@ import 'plugins/monitoring/services/breadcrumbs';
 import 'plugins/monitoring/directives/all';
 import 'plugins/monitoring/views/all';
 
+import { App } from './react';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+/*
 const uiSettings = chrome.getUiSettingsClient();
 
 // default timepicker default to the last hour
@@ -32,6 +37,27 @@ uiSettings.overrideLocalDefault('timepicker:refreshIntervalDefaults', JSON.strin
   pause: false,
   value: 10000
 }));
+*/
 
 // Enable Angular routing
-uiRoutes.enable();
+//uiRoutes.enable();
+
+// NP Progress: Converting angularjs to React and ui-router to react-router
+const REACT_APP_ROOT_ID = 'monitoring-app-content';
+
+chrome.setRootTemplate(`<div data-test-subj="pluginContent" id="${REACT_APP_ROOT_ID}">`);
+
+const checkForRoot = () => {
+  return new Promise(resolve => {
+    const ready = !!document.getElementById(REACT_APP_ROOT_ID);
+    if (ready) {
+      resolve();
+    } else {
+      setTimeout(() => resolve(checkForRoot()), 10);
+    }
+  });
+};
+
+checkForRoot().then(() => {
+  ReactDOM.render(<App />, document.getElementById(REACT_APP_ROOT_ID));
+});
