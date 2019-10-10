@@ -97,7 +97,7 @@ function fetchSeries(req, indexPattern, metric, metricOptions, groupBy, min, max
     check: {
       date_histogram: {
         field: metric.timestampField,
-        interval: bucketSize + 's'
+        fixed_interval: bucketSize + 's'
       },
       aggs: {
         ...dateHistogramSubAggs

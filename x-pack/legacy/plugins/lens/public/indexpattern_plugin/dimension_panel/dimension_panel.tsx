@@ -15,18 +15,13 @@ import {
   HttpServiceBase,
 } from 'src/core/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
-import {
-  IndexPatternColumn,
-  IndexPatternPrivateState,
-  IndexPatternField,
-  OperationType,
-} from '../indexpattern';
-
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
+import { IndexPatternPrivateState, IndexPatternField } from '../types';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
