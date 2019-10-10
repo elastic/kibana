@@ -17,23 +17,6 @@
  * under the License.
  */
 
-import { CoreStart } from '../../../../core/public';
-import { Get } from './create_getter_setter';
+import { createKibanaUtilsCore } from '../../kibana_utils/public';
 
-type CoreSavedObjectClient = CoreStart['savedObjects']['client'];
-
-export interface KUSavedObjectClient {
-  get: CoreSavedObjectClient['get'];
-}
-
-export const createSavedObjectsClient = (getCoreStart: Get<CoreStart>) => {
-  const method = <K extends keyof CoreSavedObjectClient>(key: K): CoreSavedObjectClient[K] => (
-    ...args: any
-  ) => (getCoreStart().savedObjects.client as any)[key](...args);
-
-  const savedObjectsClient: KUSavedObjectClient = {
-    get: method('get'),
-  };
-
-  return savedObjectsClient;
-};
+export const { getCoreStart, setCoreStart, savedObjects } = createKibanaUtilsCore();

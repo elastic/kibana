@@ -32,7 +32,6 @@ import { clog as clogFn } from './functions/clog';
 import { esaggs as esaggsFn } from './functions/esaggs';
 import { font as fontFn } from './functions/font';
 import { kibana as kibanaFn } from './functions/kibana';
-import { kibanaContext as kibanaContextFn } from './functions/kibana_context';
 import { range as rangeFn } from './functions/range';
 import { visualization as visualizationFn } from './functions/visualization';
 import { visDimension as visDimensionFn } from './functions/vis_dimension';
@@ -66,7 +65,6 @@ import { kibanaDatatable } from '../../../../plugins/expressions/public/expressi
 registries.browserFunctions.register(clogFn);
 registries.browserFunctions.register(fontFn);
 registries.browserFunctions.register(kibanaFn);
-registries.browserFunctions.register(kibanaContextFn);
 registries.types.register(boolean);
 registries.types.register(datatable);
 registries.types.register(error);

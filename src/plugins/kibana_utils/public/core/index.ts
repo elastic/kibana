@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './state';
-export * from './saved_objects_client';
+export * from './create_kibana_utils_core';

@@ -17,17 +17,18 @@
  * under the License.
  */
 
-export const createGetterSetter = <T extends object>(
-  name: string
-): [() => T, (value: T) => void] => {
+export type Get<T> = () => T;
+export type Set<T> = (value: T) => void;
+
+export const createGetterSetter = <T extends object>(name: string): [Get<T>, Set<T>] => {
   let value: T;
 
-  const get = (): T => {
+  const get: Get<T> = () => {
     if (!value) throw new Error(`${name} was not set.`);
     return value;
   };
 
-  const set = (newValue: T) => {
+  const set: Set<T> = newValue => {
     value = newValue;
   };
 

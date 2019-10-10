@@ -21,6 +21,8 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { AnyExpressionFunction, AnyExpressionType } from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
+import { setCoreStart } from './core';
+import { kibanaContext } from './functions/kibana_context';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -55,6 +57,8 @@ export class ExpressionsPublicPlugin
   public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
     const { functions, renderers, types } = this;
 
+    this.functions.register(kibanaContext);
+
     const setup: ExpressionsSetup = {
       registerFunction: fn => {
         this.functions.register(fn);
@@ -75,7 +79,9 @@ export class ExpressionsPublicPlugin
     return setup;
   }
 
-  public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {}
+  public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {
+    setCoreStart(core);
+  }
 
   public stop() {}
 }
