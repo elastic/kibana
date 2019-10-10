@@ -35,6 +35,28 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_export')
             .send({
               type: ['index-pattern', 'search', 'visualization', 'dashboard'],
+            })
+            .expect(200)
+            .then(resp => {
+              const objects = resp.text.split('\n').map(JSON.parse);
+              expect(objects).to.have.length(4);
+              expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[0]).to.have.property('type', 'index-pattern');
+              expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[1]).to.have.property('type', 'visualization');
+              expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
+              expect(objects[2]).to.have.property('type', 'dashboard');
+              expect(objects[3]).to.have.property('exportedCount', 3);
+              expect(objects[3]).to.have.property('missingRefCount', 0);
+              expect(objects[3].missingReferences).to.have.length(0);
+            });
+        });
+
+        it('should exclude the export details if asked', async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              type: ['index-pattern', 'search', 'visualization', 'dashboard'],
               excludeExportDetails: true,
             })
             .expect(200)
@@ -55,7 +77,6 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_export')
             .send({
               includeReferencesDeep: true,
-              excludeExportDetails: true,
               objects: [
                 {
                   type: 'dashboard',
@@ -66,13 +87,16 @@ export default function ({ getService }) {
             .expect(200)
             .then(resp => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(3);
+              expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
               expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
               expect(objects[1]).to.have.property('type', 'visualization');
               expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
               expect(objects[2]).to.have.property('type', 'dashboard');
+              expect(objects[3]).to.have.property('exportedCount', 3);
+              expect(objects[3]).to.have.property('missingRefCount', 0);
+              expect(objects[3].missingReferences).to.have.length(0);
             });
         });
 
@@ -81,19 +105,21 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_export')
             .send({
               includeReferencesDeep: true,
-              excludeExportDetails: true,
               type: ['dashboard'],
             })
             .expect(200)
             .then(resp => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(3);
+              expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
               expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
               expect(objects[1]).to.have.property('type', 'visualization');
               expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
               expect(objects[2]).to.have.property('type', 'dashboard');
+              expect(objects[3]).to.have.property('exportedCount', 3);
+              expect(objects[3]).to.have.property('missingRefCount', 0);
+              expect(objects[3].missingReferences).to.have.length(0);
             });
         });
 
@@ -102,20 +128,22 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_export')
             .send({
               includeReferencesDeep: true,
-              excludeExportDetails: true,
               type: ['dashboard'],
               search: 'Requests*',
             })
             .expect(200)
             .then(resp => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(3);
+              expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
               expect(objects[0]).to.have.property('type', 'index-pattern');
               expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
               expect(objects[1]).to.have.property('type', 'visualization');
               expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
               expect(objects[2]).to.have.property('type', 'dashboard');
+              expect(objects[3]).to.have.property('exportedCount', 3);
+              expect(objects[3]).to.have.property('missingRefCount', 0);
+              expect(objects[3].missingReferences).to.have.length(0);
             });
         });
 
@@ -129,7 +157,6 @@ export default function ({ getService }) {
                   id: '1',
                 },
               ],
-              excludeExportDetails: true,
             })
             .expect(400)
             .then(resp => {
@@ -158,7 +185,6 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_export')
             .send({
               type: ['wigwags'],
-              excludeExportDetails: true,
             })
             .expect(400)
             .then(resp => {
