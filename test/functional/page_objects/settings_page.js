@@ -666,6 +666,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await checkBox.click();
       return await this.canSavedObjectsBeDeleted();
     }
+    async isOss() {
+      const hasLicenceManagement = await testSubjects.exists('license_management');
+      return !hasLicenceManagement;
+    }
   }
 
   return new SettingsPage();
