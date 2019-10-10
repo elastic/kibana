@@ -95,6 +95,12 @@ export function A11yProvider({ getService }: FtrProviderContext) {
           'color-contrast': {
             enabled: false,
           },
+          'scrollable-region-focusable': {
+            matches: '.euiCodeEditorWrapper',
+          },
+          'duplicate-id': {
+            matches: '.euiCodeEditorWrapper', // TODO remove after #<FILL THIS IN> is resolved
+          },
         },
       };
 
