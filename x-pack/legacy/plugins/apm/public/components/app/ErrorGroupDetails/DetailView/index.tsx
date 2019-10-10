@@ -39,6 +39,7 @@ import { Summary } from '../../../shared/Summary';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
 
 const HeaderContainer = styled.div`
   display: flex;
@@ -120,6 +121,9 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
               method={method}
               status={status}
             />
+          ) : null,
+          transaction && transaction.user_agent ? (
+            <UserAgentSummaryItem {...transaction.user_agent} />
           ) : null,
           transaction && (
             <EuiToolTip
