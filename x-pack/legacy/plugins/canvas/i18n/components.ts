@@ -302,11 +302,11 @@ export const ComponentStrings = {
   },
   Error: {
     getDescription: () =>
-      i18n.translate('xpack.canvas.error.description', {
+      i18n.translate('xpack.canvas.errorComponent.description', {
         defaultMessage: 'Expression failed with the message:',
       }),
     getTitle: () =>
-      i18n.translate('xpack.canvas.error.title', {
+      i18n.translate('xpack.canvas.errorComponent.title', {
         defaultMessage: 'Whoops! Expression failed',
       }),
   },
