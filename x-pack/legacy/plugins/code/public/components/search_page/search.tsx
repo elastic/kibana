@@ -19,7 +19,7 @@ import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { ProjectItem } from '../admin_page/project_item';
 import { SearchBar } from '../search_bar';
-import { CodeResult } from './code_result';
+import { DocumentResults } from './document_results';
 import { EmptyPlaceholder } from './empty_placeholder';
 import { Pagination } from './pagination';
 import { SideBar } from './side_bar';
@@ -220,7 +220,7 @@ class SearchPage extends React.PureComponent<Props, State> {
             {statsComp}
             <EuiSpacer />
             <div className="codeContainer__search--results">
-              <CodeResult results={results!} query={this.props.query} />
+              <DocumentResults results={results!} query={this.props.query} />
             </div>
             <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
           </div>

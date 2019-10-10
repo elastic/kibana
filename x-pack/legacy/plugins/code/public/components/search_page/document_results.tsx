@@ -18,7 +18,7 @@ interface Props {
   results: any[];
 }
 
-export class CodeResult extends React.PureComponent<Props> {
+export class DocumentResults extends React.PureComponent<Props> {
   public render() {
     const { results, query } = this.props;
 
