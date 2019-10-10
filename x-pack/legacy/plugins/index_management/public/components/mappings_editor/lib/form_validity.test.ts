@@ -23,14 +23,6 @@ describe('Mappings Editor form validity', () => {
     components = {
       fieldsJsonEditor: { isValid: false },
       configuration: { isValid: true },
-      fieldForm: { isValid: true },
-    };
-
-    expect(determineIfValid(components)).toBe(false);
-
-    components = {
-      fieldsJsonEditor: { isValid: false },
-      configuration: { isValid: true },
       fieldForm: undefined,
     };
 
@@ -43,14 +35,6 @@ describe('Mappings Editor form validity', () => {
     };
 
     expect(determineIfValid(components)).toBe(false);
-
-    components = {
-      fieldsJsonEditor: { isValid: undefined },
-      configuration: { isValid: undefined },
-      fieldForm: undefined,
-    };
-
-    expect(determineIfValid(components)).toBe(undefined);
 
     components = {
       fieldsJsonEditor: { isValid: true },
@@ -64,6 +48,14 @@ describe('Mappings Editor form validity', () => {
       fieldsJsonEditor: { isValid: true },
       configuration: { isValid: false },
       fieldForm: undefined,
+    };
+
+    expect(determineIfValid(components)).toBe(false);
+
+    components = {
+      fieldsJsonEditor: { isValid: false },
+      configuration: { isValid: true },
+      fieldForm: { isValid: true },
     };
 
     expect(determineIfValid(components)).toBe(false);
