@@ -17,8 +17,19 @@
  * under the License.
  */
 
-export * from './core';
-export * from './errors';
-export * from './parse';
-export * from './render_complete';
-export * from './store';
+export const createGetterSetter = <T extends object>(
+  name: string
+): [() => T, (value: T) => void] => {
+  let value: T;
+
+  const get = (): T => {
+    if (!value) throw new Error(`${name} was not set.`);
+    return value;
+  };
+
+  const set = (newValue: T) => {
+    value = newValue;
+  };
+
+  return [get, set];
+};

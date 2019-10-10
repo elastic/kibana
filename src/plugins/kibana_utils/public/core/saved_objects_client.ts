@@ -17,8 +17,19 @@
  * under the License.
  */
 
-export * from './core';
-export * from './errors';
-export * from './parse';
-export * from './render_complete';
-export * from './store';
+import { CoreStart } from '../../../../core/public';
+import { getCoreStart } from './state';
+
+type CoreSavedObjectClient = CoreStart['savedObjects']['client'];
+
+export interface KUSavedObjectClient {
+  get: CoreSavedObjectClient['get'];
+}
+
+const method = <K extends keyof CoreSavedObjectClient>(key: K): CoreSavedObjectClient[K] => (
+  ...args: any
+) => (getCoreStart().savedObjects.client as any)[key](...args);
+
+export const savedObjectsClient: KUSavedObjectClient = {
+  get: method('get'),
+};

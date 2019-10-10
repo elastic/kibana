@@ -17,8 +17,7 @@
  * under the License.
  */
 
-export * from './core';
-export * from './errors';
-export * from './parse';
-export * from './render_complete';
-export * from './store';
+import { createGetterSetter } from './create_getter_setter';
+import { CoreStart } from '../../../../core/public';
+
+export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');

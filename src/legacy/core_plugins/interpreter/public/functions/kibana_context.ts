@@ -19,7 +19,10 @@
 
 import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
+import { setCoreStart, savedObjectsClient } from '../../../../../plugins/kibana_utils/public';
 import { ExpressionFunction, KibanaContext } from '../../types';
+
+setCoreStart(npStart.core);
 
 interface Arguments {
   q?: string | null;
@@ -81,7 +84,7 @@ export const kibanaContext = (): ExpressionFunctionKibanaContext => ({
     let filters = args.filters ? JSON.parse(args.filters) : [];
 
     if (args.savedSearchId) {
-      const obj = await npStart.core.savedObjects.client.get('search', args.savedSearchId);
+      const obj = await savedObjectsClient.get('search', args.savedSearchId);
       const search = obj.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
       const data = JSON.parse(search.searchSourceJSON) as { query: string; filter: any[] };
       queries = queries.concat(data.query);
