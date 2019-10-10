@@ -7,7 +7,7 @@ import React from 'react';
 import { idx } from '@kbn/elastic-idx';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { Summary } from './';
-import { TimestampSummaryItem } from './TimestampSummaryItem';
+import { TimestampTooltip } from '../TimestampTooltip';
 import { DurationSummaryItem } from './DurationSummaryItem';
 import { ErrorCountSummaryItem } from './ErrorCountSummaryItem';
 import { isRumAgentName } from '../../../../common/agent_name';
@@ -47,7 +47,7 @@ const TransactionSummary = ({
   errorCount
 }: Props) => {
   const items = [
-    <TimestampSummaryItem time={transaction.timestamp.us / 1000} />,
+    <TimestampTooltip time={transaction.timestamp.us / 1000} />,
     <DurationSummaryItem
       duration={transaction.transaction.duration.us}
       totalDuration={totalDuration}
