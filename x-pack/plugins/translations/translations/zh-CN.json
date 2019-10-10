@@ -10147,7 +10147,6 @@
     "xpack.siem.components.mlPopup.showAllJobsLabel": "Elastic 作业",
     "xpack.siem.components.mlPopup.showingLabel": "显示：{filterResultsLength} 个 {filterResultsLength, plural, one {作业} other {作业}}",
     "xpack.siem.components.mlPopup.upgradeButtonLabel": "订阅选项",
-    "xpack.siem.components.mlPopup.upgradeDescription": "要访问 SIEM 的异常检测功能，必须订阅 Elastic 白金级许可。使用该许可，您将能够运行 Machine Learning 作业，来查看 SIEM 的所有异常事件。",
     "xpack.siem.components.mlPopup.upgradeTitle": "升级 Elastic 白金级",
     "xpack.siem.containers.errors.stopJobFailureTitle": "停止作业失败",
     "xpack.siem.eventDetails.blank": " ",
