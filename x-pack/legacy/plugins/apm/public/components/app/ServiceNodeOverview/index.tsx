@@ -20,9 +20,9 @@ import {
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { truncate, px, unit } from '../../../style/variables';
 
-const INITIAL_PAGE_SIZE = 10;
-const INITIAL_SORT_FIELD = 'name';
-const INITIAL_SORT_DIRECTION = 'asc';
+const INITIAL_PAGE_SIZE = 25;
+const INITIAL_SORT_FIELD = 'cpu';
+const INITIAL_SORT_DIRECTION = 'desc';
 
 const ServiceNodeName = styled.div`
   ${truncate(px(8 * unit))}
@@ -73,9 +73,19 @@ const ServiceNodeOverview = () => {
 
   const columns: Array<ITableColumn<typeof items[0]>> = [
     {
-      name: i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
-        defaultMessage: 'Name'
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate('xpack.apm.jvmsTable.nameExplanation', {
+            defaultMessage: `By default, the JVM name is the container ID (where applicable) or the hostname, but it can be manually configured through the agent's 'service_node_name' configuration.`
+          })}
+        >
+          <>
+            {i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
+              defaultMessage: 'Name'
+            })}
+          </>
+        </EuiToolTip>
+      ),
       field: 'name',
       sortable: true,
       render: (name: string) => {
@@ -93,7 +103,7 @@ const ServiceNodeOverview = () => {
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.cpuColumnLabel', {
-        defaultMessage: 'CPU'
+        defaultMessage: 'CPU avg'
       }),
       field: 'cpu',
       sortable: true,
@@ -101,7 +111,7 @@ const ServiceNodeOverview = () => {
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {
-        defaultMessage: 'Heap memory max'
+        defaultMessage: 'Heap memory avg'
       }),
       field: 'heapMemory',
       sortable: true,
@@ -109,7 +119,7 @@ const ServiceNodeOverview = () => {
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.nonHeapMemoryColumnLabel', {
-        defaultMessage: 'Non-heap memory max'
+        defaultMessage: 'Non-heap memory avg'
       }),
       field: 'nonHeapMemory',
       sortable: true,
@@ -117,7 +127,7 @@ const ServiceNodeOverview = () => {
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.threadCountColumnLabel', {
-        defaultMessage: 'Thread count'
+        defaultMessage: 'Thread count max'
       }),
       field: 'threadCount',
       sortable: true,

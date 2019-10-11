@@ -16,6 +16,7 @@ import VoronoiPlot from './VoronoiPlot';
 import { createSelector } from 'reselect';
 import { getPlotValues } from './plotUtils';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import moment from 'moment';
 
 const VISIBLE_LEGEND_COUNT = 4;
 
@@ -214,7 +215,7 @@ InnerCustomPlot.propTypes = {
 
 InnerCustomPlot.defaultProps = {
   formatTooltipValue: p => p.y,
-  tickFormatX: undefined,
+  tickFormatX: x => moment(x).format('HH:mm'),
   tickFormatY: y => y,
   truncateLegends: false
 };
