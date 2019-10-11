@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import { wrapError } from '../../../../../../../../plugins/security/server';
 
 export function initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseFn) {
@@ -13,14 +14,12 @@ export function initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseF
     async handler(request) {
       try {
         const { isAdmin } = request.query;
-        const path = `/_security/api_key${isAdmin === 'true' ? '' : '?owner=true'}`;
 
         const result = await callWithRequest(
           request,
-          'transport.request',
+          'shield.getAPIKeys',
           {
-            method: 'GET',
-            path,
+            owner: !isAdmin
           }
         );
 
@@ -34,7 +33,12 @@ export function initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseF
       }
     },
     config: {
-      pre: [routePreCheckLicenseFn]
+      pre: [routePreCheckLicenseFn],
+      validate: {
+        query: Joi.object().keys({
+          isAdmin: Joi.bool(),
+        }),
+      },
     }
   });
 }
