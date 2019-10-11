@@ -32,7 +32,7 @@ const coreMock = ({
     }
   }
 } as unknown) as LegacyCoreStart & {
-  http: { get: jest.SpyInstance<LegacyCoreStart['http']['get'], any> };
+  http: { get: jest.Mock<any, any> };
 };
 
 describe('Service Overview -> View', () => {
@@ -94,7 +94,7 @@ describe('Service Overview -> View', () => {
           environments: []
         }
       ]
-    } as never);
+    });
 
     const { container, getByText } = renderServiceOverview();
 
@@ -110,7 +110,7 @@ describe('Service Overview -> View', () => {
       hasLegacyData: false,
       hasHistoricalData: false,
       items: []
-    } as never);
+    });
 
     const { container, getByText } = renderServiceOverview();
 
@@ -132,7 +132,7 @@ describe('Service Overview -> View', () => {
       hasLegacyData: false,
       hasHistoricalData: true,
       items: []
-    } as never);
+    });
 
     const { container, getByText } = renderServiceOverview();
 
@@ -155,7 +155,7 @@ describe('Service Overview -> View', () => {
         hasLegacyData: true,
         hasHistoricalData: true,
         items: []
-      } as never);
+      });
 
       renderServiceOverview();
 
@@ -181,7 +181,7 @@ describe('Service Overview -> View', () => {
         hasLegacyData: false,
         hasHistoricalData: true,
         items: []
-      } as never);
+      });
 
       renderServiceOverview();
 
