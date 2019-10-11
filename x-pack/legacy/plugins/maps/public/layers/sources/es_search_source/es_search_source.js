@@ -472,7 +472,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       index: properties._index, // Can not use index pattern title because it may reference many indices
-      id: properties._id,
+      id: properties[FEATURE_ID_PROPERTY_NAME],
       path: geoField.name,
     };
   }
