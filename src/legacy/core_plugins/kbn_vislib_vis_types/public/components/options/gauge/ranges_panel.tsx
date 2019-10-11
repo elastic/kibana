@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -37,6 +37,22 @@ function RangesPanel({
   uiState,
   vis,
 }: GaugeOptionsInternalProps) {
+  const setColorSchemaOptions = useCallback(
+    <T extends keyof ColorSchemaVislibParams>(paramName: T, value: ColorSchemaVislibParams[T]) => {
+      setGaugeValue(paramName, value as Gauge[T]);
+      // set outline if color schema is changed to greys
+      // if outline wasn't set explicitly yet
+      if (
+        paramName === 'colorSchema' &&
+        (value as string) === ColorSchemas.Greys &&
+        typeof stateParams.gauge.outline === 'undefined'
+      ) {
+        setGaugeValue('outline', true);
+      }
+    },
+    [setGaugeValue, stateParams]
+  );
+
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
@@ -86,21 +102,7 @@ function RangesPanel({
         colorSchemas={vis.type.editorConfig.collections.colorSchemas}
         invertColors={stateParams.gauge.invertColors}
         uiState={uiState}
-        setValue={<T extends keyof ColorSchemaVislibParams>(
-          paramName: T,
-          value: ColorSchemaVislibParams[T]
-        ) => {
-          setGaugeValue(paramName, value as Gauge[T]);
-          // set outline if color schema is changed to greys
-          // if outline wasn't set explicitly yet
-          if (
-            paramName === 'colorSchema' &&
-            (value as string) === ColorSchemas.Greys &&
-            typeof stateParams.gauge.outline === 'undefined'
-          ) {
-            setGaugeValue('outline', true);
-          }
-        }}
+        setValue={setColorSchemaOptions}
       />
 
       <SwitchOption
