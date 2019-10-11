@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { getPhraseScript } from '@kbn/es-query';
+import { getPhraseFilterField, getPhraseFilterValue, getPhraseScript, isPhraseFilter } from '@kbn/es-query';
 
 // Adds a filter to a passed state
 export function getFilterGenerator(queryFilter) {
@@ -42,8 +42,8 @@ export function getFilterGenerator(queryFilter) {
           return filter.exists.field === value;
         }
 
-        if (_.has(filter, 'query.match')) {
-          return filter.query.match[fieldName] && filter.query.match[fieldName].query === value;
+        if (isPhraseFilter(filter)) {
+          return getPhraseFilterField(filter) === fieldName && getPhraseFilterValue(filter) === value;
         }
 
         if (filter.script) {
@@ -76,8 +76,8 @@ export function getFilterGenerator(queryFilter) {
               script: getPhraseScript(field, value)
             };
           } else {
-            filter = { meta: { negate, index }, query: { match: {} } };
-            filter.query.match[fieldName] = { query: value, type: 'phrase' };
+            filter = { meta: { negate, index }, query: { match_phrase: {} } };
+            filter.query.match_phrase[fieldName] = value;
           }
 
           break;

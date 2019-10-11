@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get, isPlainObject } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
 
 export type PhraseFilterMeta = FilterMeta & {
@@ -36,8 +36,30 @@ export type PhraseFilter = Filter & {
   meta: PhraseFilterMeta;
 };
 
-export const isPhraseFilter = (filter: any): filter is PhraseFilter =>
-  filter && (filter.query && filter.query.match);
+type PhraseFilterValue = string | number | boolean;
+
+export const isPhraseFilter = (filter: any): filter is PhraseFilter => {
+  const isMatchPhraseQuery = filter && filter.query && filter.query.match_phrase;
+
+  const isDeprecatedMatchPhraseQuery =
+    filter &&
+    filter.query &&
+    filter.query.match &&
+    Object.values(filter.query.match).find((params: any) => params.type === 'phrase');
+
+  return !!(isMatchPhraseQuery || isDeprecatedMatchPhraseQuery);
+};
 
 export const isScriptedPhraseFilter = (filter: any): filter is PhraseFilter =>
   Boolean(get(filter, 'script.script.params.value'));
+
+export const getPhraseFilterField = (filter: PhraseFilter) => {
+  const queryConfig = filter.query.match_phrase || filter.query.match;
+  return Object.keys(queryConfig)[0];
+};
+
+export const getPhraseFilterValue = (filter: PhraseFilter): PhraseFilterValue => {
+  const queryConfig = filter.query.match_phrase || filter.query.match;
+  const queryValue = Object.values(queryConfig)[0] as any;
+  return isPlainObject(queryValue) ? queryValue.query : queryValue;
+};

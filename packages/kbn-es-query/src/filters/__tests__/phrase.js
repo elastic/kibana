@@ -39,11 +39,8 @@ describe('Filter Manager', function () {
     it('should return a match query filter when passed a standard field', function () {
       const field = getField(indexPattern, 'bytes');
       expected.query = {
-        match: {
-          bytes: {
-            query: 5,
-            type: 'phrase'
-          }
+        match_phrase: {
+          bytes: 5
         }
       };
       expect(buildPhraseFilter(field, 5, indexPattern)).to.eql(expected);
