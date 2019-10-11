@@ -12,7 +12,7 @@ import React from 'react';
 export const JobDefinitionOutdatedCallout: React.FC<{
   onRecreateMlJob: () => void;
 }> = ({ onRecreateMlJob }) => (
-  <EuiCallOut color="warning" title={jobDefinitionOutdatedTitle}>
+  <EuiCallOut color="warning" iconType="alert" title={jobDefinitionOutdatedTitle}>
     <FormattedMessage
       id="xpack.infra.logs.analysis.jobDefinitionOutdatedCalloutMessage"
       defaultMessage="A newer version of the ML job is available. Recreate the job to deploy the newest version. This removes previously detected anomalies."

@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const JobConfigurationOutdatedCallout: React.FC<{
   onRecreateMlJob: () => void;
 }> = ({ onRecreateMlJob }) => (
-  <EuiCallOut color="warning" title={jobConfigurationOutdatedTitle}>
+  <EuiCallOut color="warning" iconType="alert" title={jobConfigurationOutdatedTitle}>
     <FormattedMessage
       id="xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutMessage"
       defaultMessage="The job was created based on a different source configuration. Recreate the job to apply the current configuration. This removes previously detected anomalies."
