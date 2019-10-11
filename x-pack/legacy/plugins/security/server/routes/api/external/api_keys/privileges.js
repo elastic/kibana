@@ -15,10 +15,8 @@ export function initCheckPrivilegesApi(server, callWithRequest, routePreCheckLic
         const result = await Promise.all([
           callWithRequest(
             request,
-            'transport.request',
+            'shield.hasPrivileges',
             {
-              method: 'POST',
-              path: '/_security/user/_has_privileges',
               body: {
                 cluster: [
                   'manage_security',
@@ -31,10 +29,9 @@ export function initCheckPrivilegesApi(server, callWithRequest, routePreCheckLic
             try {
               const result = await callWithRequest(
                 request,
-                'transport.request',
+                'shield.getAPIKeys',
                 {
-                  method: 'GET',
-                  path: '/_security/api_key?owner=true',
+                  owner: true
                 }
               );
               //  If the API returns a truthy result that means it's enabled.
