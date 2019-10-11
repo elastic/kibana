@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import PEG from 'pegjs';
 import grammar from 'raw-loader!../../chain.peg';
 import {
@@ -60,7 +60,7 @@ describe('Timelion expression suggestions', () => {
     };
     const argValueSuggestions = ArgValueSuggestionsProvider(privateStub, indexPatternsStub); // eslint-disable-line new-cap
     beforeEach(function () {
-      Parser = PEG.buildParser(grammar);
+      Parser = PEG.generate(grammar);
     });
 
     describe('parse exception', () => {

@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "node",
+      "mocha"
+    ],
+    "lib": [
+      "esnext",
+      "dom"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../typings/lodash.topath/*.ts",
+    "typings/**/*"
+  ],
+  "exclude": [
+    "plugin_functional/plugins/**/*"
+  ]
+}

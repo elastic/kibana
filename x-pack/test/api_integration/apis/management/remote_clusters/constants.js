@@ -5,4 +5,3 @@
  */
 
 export const API_BASE_PATH = '/api/remote_clusters';
-export const NODE_SEED = 'localhost:9300';

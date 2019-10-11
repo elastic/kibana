@@ -5,7 +5,11 @@
     "declarationDir": "./target/types",
     "outDir": "./target/out",
     "stripInternal": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
     "./types/joi.d.ts",

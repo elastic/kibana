@@ -2,12 +2,6 @@
   "type": "index",
   "value": {
     "index": ".kibana",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "1"
-      }
-    },
     "mappings": {
       "properties": {
         "config": {
@@ -17,13 +11,13 @@
               "type": "keyword"
             },
             "dateFormat:tz": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
+                  "ignore_above": 256,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "xPackMonitoring:showBanner": {
               "type": "boolean"
@@ -181,6 +175,34 @@
             }
           }
         },
+        "space": {
+          "properties": {
+            "_reserved": {
+              "type": "boolean"
+            },
+            "color": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "initials": {
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "spaceId": {
+          "type": "keyword"
+        },
         "timelion-sheet": {
           "dynamic": "strict",
           "properties": {
@@ -239,13 +261,13 @@
               "type": "date"
             },
             "url": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
+                  "ignore_above": 2048,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -278,35 +300,13 @@
               "type": "text"
             }
           }
-        },
-        "spaceId": {
-          "type": "keyword"
-        },
-        "space": {
-          "properties": {
-            "name": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
-                }
-              }
-            },
-            "description": {
-              "type": "text"
-            },
-            "initials": {
-              "type": "keyword"
-            },
-            "color": {
-              "type": "keyword"
-            },
-            "_reserved": {
-              "type": "boolean"
-            }
-          }
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
       }
     }
   }

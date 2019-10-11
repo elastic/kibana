@@ -1,36 +1,34 @@
 [role="xpack"]
 [[security-settings-kb]]
-=== Security Settings in Kibana
+=== Security settings in Kibana
 ++++
-<titleabbrev>Security Settings</titleabbrev>
+<titleabbrev>Security settings</titleabbrev>
 ++++
 
-You do not need to configure any additional settings to use {security} in {kib}.
-It is enabled by default.
+You do not need to configure any additional settings to use the
+{security-features} in {kib}. They are enabled by default.
 
 [float]
 [[general-security-settings]]
-==== General Security Settings
-`xpack.security.enabled`::
-Set to `true` (default) to enable {security}. +
-+
-Do not set this to `false`. To disable {security} entirely, see
-{ref}/security-settings.html[{es} Security Settings]. +
-+
-If set to `false` in `kibana.yml`, the login form, user and role management screens, and 
-authorization using <<kibana-privileges>> are disabled. +
-+
-`xpack.security.audit.enabled`::
-Set to `true` to enable audit logging for security events. This is set to `false` by default.
-For more details see <<xpack-security-audit-logging>>.
+==== General security settings
 
-`xpack.security.authorization.legacyFallback`::
-Set to `true` (default) to enable the legacy fallback. See <<xpack-security-authorization>>
-for more details.
+`xpack.security.enabled`::
+By default, {kib} automatically detects whether to enable the
+{security-features} based on the license and whether {es} {security-features}
+are enabled.
++
+Do not set this to `false`; it disables the login form, user and role management
+screens, and authorization using <<kibana-privileges>>. To disable
+{security-features} entirely, see
+{ref}/security-settings.html[{es} security settings]. 
+
+`xpack.security.audit.enabled`::
+Set to `true` to enable audit logging for security events. By default, it is set
+to `false`. For more details see <<xpack-security-audit-logging>>.
 
 [float]
 [[security-ui-settings]]
-==== User Interface Security Settings
+==== User interface security settings
 
 You can configure the following settings in the `kibana.yml` file:
 
@@ -51,4 +49,5 @@ routing requests through a load balancer or proxy).
 
 `xpack.security.sessionTimeout`::
 Sets the session duration (in milliseconds). By default, sessions stay active
-until the browser is closed.
+until the browser is closed. When this is set to an explicit timeout, closing the
+browser still requires the user to log back in to {kib}.

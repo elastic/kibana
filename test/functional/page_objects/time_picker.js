@@ -23,16 +23,54 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const find = getService('find');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['header']);
+  const PageObjects = getPageObjects(['header', 'common']);
 
   class TimePickerPage {
+
+    async timePickerExists() {
+      return await testSubjects.exists('superDatePickerToggleQuickMenuButton');
+    }
 
     formatDateToAbsoluteTimeString(date) {
       // toISOString returns dates in format 'YYYY-MM-DDTHH:mm:ss.sssZ'
       // Need to replace T with space and remove timezone
       const dateString = date.toISOString().replace('T', ' ');
       return dateString.substring(0, 23);
+    }
+
+    async getTimePickerPanel() {
+      return await find.byCssSelector('div.euiPopover__panel-isOpen');
+    }
+
+    async waitPanelIsGone(panelElement) {
+      await find.waitForElementStale(panelElement);
+    }
+
+    /**
+     * @param {String} commonlyUsedOption 'superDatePickerCommonlyUsed_This_week'
+     */
+    async setCommonlyUsedTime(commonlyUsedOption) {
+      await testSubjects.click('superDatePickerToggleQuickMenuButton');
+      await testSubjects.click(commonlyUsedOption);
+    }
+
+    async inputValue(dataTestsubj, value) {
+      if (browser.isFirefox) {
+        const input = await testSubjects.find(dataTestsubj);
+        await input.clearValue();
+        await input.type(value);
+      } else if (browser.isInternetExplorer) {
+        const input = await testSubjects.find(dataTestsubj);
+        const currentValue = await input.getAttribute('value');
+        await input.type((browser.keys.ARROW_RIGHT).repeat(currentValue.length));
+        await input.type((browser.keys.BACK_SPACE).repeat(currentValue.length));
+        await input.type(value);
+        await input.click();
+      } else {
+        await testSubjects.setValue(dataTestsubj, value);
+      }
     }
 
     /**
@@ -45,13 +83,19 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
       // set to time
       await testSubjects.click('superDatePickerendDatePopoverButton');
+      let panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.setValue('superDatePickerAbsoluteDateInput', toTime);
+      await testSubjects.click('superDatePickerAbsoluteDateInput');
+      await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
+      await PageObjects.common.sleep(500);
 
       // set from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await this.waitPanelIsGone(panel);
+      panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.setValue('superDatePickerAbsoluteDateInput', fromTime);
+      await testSubjects.click('superDatePickerAbsoluteDateInput');
+      await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
 
       const superDatePickerApplyButtonExists = await testSubjects.exists('superDatePickerApplyTimeButton');
       if (superDatePickerApplyButtonExists) {
@@ -64,6 +108,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
         await testSubjects.click('querySubmitButton');
       }
 
+      await this.waitPanelIsGone(panel);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
@@ -94,10 +139,13 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
     }
 
     async showStartEndTimes() {
+      // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
+      await testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
       const isShowDatesButton = await testSubjects.exists('superDatePickerShowDatesButton');
       if (isShowDatesButton) {
         await testSubjects.click('superDatePickerShowDatesButton');
       }
+      await testSubjects.exists('superDatePickerstartDatePopoverButton');
     }
 
     async getRefreshConfig(keepQuickSelectOpen = false) {
@@ -141,11 +189,13 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
       // get to time
       await testSubjects.click('superDatePickerendDatePopoverButton');
+      const panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
       const end = await testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
 
       // get from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await this.waitPanelIsGone(panel);
       await testSubjects.click('superDatePickerAbsoluteTab');
       const start = await testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
 
@@ -156,7 +206,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
     }
 
     async getTimeDurationInHours() {
-      const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+      const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS';
       const { start, end } = await this.getTimeConfigAsAbsoluteTimes();
 
       const startMoment = moment(start, DEFAULT_DATE_FORMAT);

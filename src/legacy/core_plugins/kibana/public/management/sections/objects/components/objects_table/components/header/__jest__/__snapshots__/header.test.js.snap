@@ -4,21 +4,12 @@ exports[`Header should render normally 1`] = `
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EuiTitle
-        size="m"
-        textTransform="none"
-      >
+      <EuiTitle>
         <h1>
           <FormattedMessage
             defaultMessage="Saved Objects"
@@ -29,30 +20,21 @@ exports[`Header should render normally 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             data-test-subj="exportAllObjects"
-            iconSide="left"
             iconType="exportAction"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
@@ -66,17 +48,13 @@ exports[`Header should render normally 1`] = `
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             data-test-subj="importObjects"
-            iconSide="left"
             iconType="importAction"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Import"
@@ -86,16 +64,12 @@ exports[`Header should render normally 1`] = `
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
             iconType="refresh"
             onClick={[Function]}
             size="s"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Refresh"
@@ -111,13 +85,11 @@ exports[`Header should render normally 1`] = `
     size="m"
   />
   <EuiText
-    grow={true}
     size="s"
   >
     <p>
       <EuiTextColor
         color="subdued"
-        component="span"
       >
         <FormattedMessage
           defaultMessage="From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen."

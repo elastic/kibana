@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot } from '../../utils';
+import { fromRoot } from '../../legacy/utils';
 import { resolve } from 'path';
 import { parseMilliseconds, parse } from './settings';
 

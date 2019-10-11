@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function PieChartProvider({ getService }) {
   const log = getService('log');
@@ -42,6 +42,12 @@ export function PieChartProvider({ getService }) {
           return slices[0].click();
         });
       }
+    }
+
+    async filterByLegendItem(label) {
+      log.debug(`PieChart.filterByLegendItem(${label})`);
+      await testSubjects.click(`legend-${label}`);
+      await testSubjects.click(`legend-${label}-filterIn`);
     }
 
     async getPieSlice(name) {
@@ -87,7 +93,7 @@ export function PieChartProvider({ getService }) {
     async getPieSliceCount() {
       log.debug('PieChart.getPieSliceCount');
       return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice', 2500);
         return slices.length;
       });
     }

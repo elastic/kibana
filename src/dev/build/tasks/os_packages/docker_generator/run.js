@@ -22,6 +22,7 @@ import { resolve } from 'path';
 import { promisify } from 'util';
 import { write, copyAll, mkdirp, exec } from '../../../lib';
 import * as dockerTemplates from './templates';
+import { bundleDockerFiles } from './bundle_dockerfiles';
 
 const accessAsync = promisify(access);
 const linkAsync = promisify(link);
@@ -37,6 +38,16 @@ export async function runDockerGenerator(config, log, build) {
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', build.isOss() ? 'oss' : 'default');
   const dockerOutputDir = config.resolveFromTarget(`kibana${ imageFlavor }-${ versionTag }-docker.tar.gz`);
+  const scope = {
+    artifactTarball,
+    imageFlavor,
+    versionTag,
+    license,
+    artifactsDir,
+    imageTag,
+    dockerBuildDir,
+    dockerOutputDir
+  };
 
   // Verify if we have the needed kibana target in order
   // to build the kibana docker image.
@@ -65,16 +76,6 @@ export async function runDockerGenerator(config, log, build) {
 
   // Write all the needed docker config files
   // into kibana-docker folder
-  const scope = {
-    artifactTarball,
-    imageFlavor,
-    versionTag,
-    license,
-    artifactsDir,
-    imageTag,
-    dockerOutputDir
-  };
-
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
     await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
   }
@@ -96,4 +97,7 @@ export async function runDockerGenerator(config, log, build) {
     cwd: dockerBuildDir,
     level: 'info',
   });
+
+  // Pack Dockerfiles and create a target for them
+  await bundleDockerFiles(config, log, build, scope);
 }

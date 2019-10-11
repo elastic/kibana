@@ -5,18 +5,10 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
   className="icvContainer"
 >
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       data-test-subj="inputControlItem"
-      grow={true}
       key="mock-list-control"
       style={
         Object {
@@ -44,26 +36,16 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="inputControlSubmitBtn"
         disabled={false}
         fill={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Apply changes"
@@ -73,16 +55,12 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       </EuiButton>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlCancelBtn"
         disabled={false}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel changes"
@@ -92,16 +70,12 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       </EuiButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlClearBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Clear form"
@@ -119,18 +93,10 @@ exports[`Clear btns enabled when there are values 1`] = `
   className="icvContainer"
 >
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       data-test-subj="inputControlItem"
-      grow={true}
       key="mock-list-control"
       style={
         Object {
@@ -158,26 +124,16 @@ exports[`Clear btns enabled when there are values 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="inputControlSubmitBtn"
         disabled={true}
         fill={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Apply changes"
@@ -187,16 +143,12 @@ exports[`Clear btns enabled when there are values 1`] = `
       </EuiButton>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlCancelBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel changes"
@@ -206,16 +158,12 @@ exports[`Clear btns enabled when there are values 1`] = `
       </EuiButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlClearBtn"
         disabled={false}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Clear form"
@@ -233,18 +181,10 @@ exports[`Renders list control 1`] = `
   className="icvContainer"
 >
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       data-test-subj="inputControlItem"
-      grow={true}
       key="mock-list-control"
       style={
         Object {
@@ -272,26 +212,16 @@ exports[`Renders list control 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="inputControlSubmitBtn"
         disabled={true}
         fill={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Apply changes"
@@ -301,16 +231,12 @@ exports[`Renders list control 1`] = `
       </EuiButton>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlCancelBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel changes"
@@ -320,16 +246,12 @@ exports[`Renders list control 1`] = `
       </EuiButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlClearBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Clear form"
@@ -347,18 +269,10 @@ exports[`Renders range control 1`] = `
   className="icvContainer"
 >
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       data-test-subj="inputControlItem"
-      grow={true}
       key="mock-range-control"
       style={
         Object {
@@ -366,7 +280,7 @@ exports[`Renders range control 1`] = `
         }
       }
     >
-      <InjectIntl(RangeControlUi)
+      <RangeControl
         control={
           Object {
             "format": [Function],
@@ -392,26 +306,16 @@ exports[`Renders range control 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="inputControlSubmitBtn"
         disabled={true}
         fill={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Apply changes"
@@ -421,16 +325,12 @@ exports[`Renders range control 1`] = `
       </EuiButton>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlCancelBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Cancel changes"
@@ -440,16 +340,12 @@ exports[`Renders range control 1`] = `
       </EuiButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButtonEmpty
-        color="primary"
         data-test-subj="inputControlClearBtn"
         disabled={true}
-        iconSide="left"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Clear form"

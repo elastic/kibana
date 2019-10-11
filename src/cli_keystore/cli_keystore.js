@@ -19,10 +19,10 @@
 
 import { join } from 'path';
 
-import { pkg } from '../utils';
+import { pkg } from '../legacy/utils';
 import Command from '../cli/command';
-import { getData } from '../server/path';
-import { Keystore } from '../server/keystore';
+import { getData } from '../legacy/server/path';
+import { Keystore } from '../legacy/server/keystore';
 
 const path = join(getData(), 'kibana.keystore');
 const keystore = new Keystore(path);

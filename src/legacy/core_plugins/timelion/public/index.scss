@@ -1,5 +1,5 @@
 // Should import both the EUI constants and any Kibana ones that are considered global
-@import 'ui/public/styles/styling_constants';
+@import 'src/legacy/ui/public/styles/styling_constants';
 
 /* Timelion plugin styles */
 
@@ -12,4 +12,4 @@
 
 @import './app';
 @import './directives/index';
-@import './vis/index'
+@import './vis/index';

@@ -1,0 +1,25 @@
+.secAuthenticationStatePage {
+  @include kibanaFullScreenGraphics;
+}
+
+.secAuthenticationStatePage__header {
+  position: relative;
+  padding: $euiSizeXL;
+  z-index: 10;
+}
+
+.secAuthenticationStatePage__logo {
+  @include kibanaCircleLogo;
+  @include euiBottomShadowMedium;
+
+  margin-bottom: $euiSizeXL;
+}
+
+.secAuthenticationStatePage__content {
+  position: relative;
+  margin: auto;
+  max-width: 460px;
+  padding-left: $euiSizeXL;
+  padding-right: $euiSizeXL;
+  z-index: 10;
+}

@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Node Listing Metric Cell should format N/A as the metric for an offline node 1`] = `
+<div
+  class="monTableCell__number monTableCell__offline"
+>
+  N/A
+</div>
+`;
+
+exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  intl="[object Object]"
+>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <span
+      class="euiTitle euiTitle--small"
+      style="overflow-x:hidden;white-space:nowrap"
+    >
+      206.3 GB 
+      <span
+        class="fa fa-long-arrow-down"
+      />
+    </span>
+    <div
+      class="euiText euiText--extraSmall"
+    >
+      206.5 GB max
+    </div>
+    <div
+      class="euiText euiText--extraSmall"
+    >
+      206.3 GB min
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  intl="[object Object]"
+>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <span
+      class="euiTitle euiTitle--small"
+      style="overflow-x:hidden;white-space:nowrap"
+    >
+      0% 
+      <span
+        class="fa fa-long-arrow-down"
+      />
+    </span>
+    <div
+      class="euiText euiText--extraSmall"
+    >
+      2% max
+    </div>
+    <div
+      class="euiText euiText--extraSmall"
+    >
+      0% min
+    </div>
+  </div>
+</div>
+`;

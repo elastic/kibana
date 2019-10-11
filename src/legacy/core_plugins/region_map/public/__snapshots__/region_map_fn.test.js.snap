@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`interpreter/functions#regionmap returns an object with the correct structure 1`] = `
+Object {
+  "as": "visualization",
+  "type": "render",
+  "value": Object {
+    "params": Object {
+      "listenOnChange": true,
+    },
+    "visConfig": Object {
+      "addTooltip": true,
+      "colorSchema": "Yellow to Red",
+      "emsHotLink": "",
+      "isDisplayWarning": true,
+      "legendPosition": "bottomright",
+      "mapCenter": Array [
+        0,
+        0,
+      ],
+      "mapZoom": 2,
+      "metric": Object {
+        "accessor": 0,
+        "aggType": "count",
+        "format": Object {
+          "id": "number",
+        },
+        "params": Object {},
+      },
+      "outlineWeight": 1,
+      "selectedJoinField": null,
+      "showAllShapes": true,
+      "wms": Object {
+        "enabled": false,
+        "options": Object {
+          "format": "image/png",
+          "transparent": true,
+        },
+      },
+    },
+    "visData": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "name": "Count",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "kibana_datatable",
+    },
+    "visType": "region_map",
+  },
+}
+`;

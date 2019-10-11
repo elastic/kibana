@@ -22,7 +22,7 @@ import { readFileSync } from 'fs';
 import crypto from 'crypto';
 
 import Chance from 'chance';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import Hapi from 'hapi';
 import Inert from 'inert';
 import sinon from 'sinon';
@@ -32,6 +32,18 @@ import { PUBLIC_PATH_PLACEHOLDER } from '../../public_path_placeholder';
 
 const chance = new Chance();
 const outputFixture = resolve(__dirname, './fixtures/output');
+
+const randomWordsCache = new Set();
+const uniqueRandomWord = () => {
+  const word = chance.word();
+
+  if (randomWordsCache.has(word)) {
+    return uniqueRandomWord();
+  }
+
+  randomWordsCache.add(word);
+  return word;
+};
 
 function replaceAll(source, replace, replaceWith) {
   return source.split(replace).join(replaceWith);
@@ -172,7 +184,7 @@ describe('optimizer/bundle route', () => {
 
   describe('js file with placeholder', () => {
     it('responds with no content-length and modified file data', async () => {
-      const basePublicPath = `/${chance.word()}`;
+      const basePublicPath = `/${uniqueRandomWord()}`;
       const server = createServer({ basePublicPath });
 
       const response = await server.inject({
@@ -209,7 +221,7 @@ describe('optimizer/bundle route', () => {
 
   describe('css file with placeholder', () => {
     it('responds with no content-length and modified file data', async () => {
-      const basePublicPath = `/${chance.word()}`;
+      const basePublicPath = `/${uniqueRandomWord()}`;
       const server = createServer({ basePublicPath });
 
       const response = await server.inject({
@@ -306,8 +318,8 @@ describe('optimizer/bundle route', () => {
     });
 
     it('is unique per basePublicPath although content is the same', async () => {
-      const basePublicPath1 = `/${chance.word()}`;
-      const basePublicPath2 = `/${chance.word()}`;
+      const basePublicPath1 = `/${uniqueRandomWord()}`;
+      const basePublicPath2 = `/${uniqueRandomWord()}`;
 
       const [resp1, resp2] = await Promise.all([
         createServer({ basePublicPath: basePublicPath1 }).inject({

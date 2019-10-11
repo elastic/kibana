@@ -2,12 +2,6 @@
   "type": "index",
   "value": {
     "index": ".kibana",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "0"
-      }
-    },
     "mappings": {
       "dynamic": "strict",
       "properties": {
@@ -18,13 +12,13 @@
               "type": "keyword"
             },
             "defaultIndex": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
+                  "ignore_above": 256,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -205,13 +199,13 @@
               "type": "date"
             },
             "url": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
+                  "ignore_above": 2048,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -244,6 +238,12 @@
             }
           }
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }

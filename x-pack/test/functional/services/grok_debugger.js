@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function GrokDebuggerProvider({ getService }) {
   const aceEditor = getService('aceEditor');
@@ -14,13 +14,13 @@ export function GrokDebuggerProvider({ getService }) {
   // test subject selectors
   const SUBJ_CONTAINER = 'grokDebugger';
 
-  const SUBJ_UI_ACE_EVENT_INPUT = `${SUBJ_CONTAINER} aceEventInput codeEditorContainer`;
-  const SUBJ_UI_ACE_PATTERN_INPUT = `${SUBJ_CONTAINER} acePatternInput codeEditorContainer`;
-  const SUBJ_UI_ACE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} aceCustomPatternsInput codeEditorContainer`;
-  const SUBJ_UI_ACE_EVENT_OUTPUT = `${SUBJ_CONTAINER} aceEventOutput codeEditorContainer`;
+  const SUBJ_UI_ACE_EVENT_INPUT = `${SUBJ_CONTAINER} > aceEventInput > codeEditorContainer`;
+  const SUBJ_UI_ACE_PATTERN_INPUT = `${SUBJ_CONTAINER} > acePatternInput > codeEditorContainer`;
+  const SUBJ_UI_ACE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} > aceCustomPatternsInput > codeEditorContainer`;
+  const SUBJ_UI_ACE_EVENT_OUTPUT = `${SUBJ_CONTAINER} > aceEventOutput > codeEditorContainer`;
 
-  const SUBJ_BTN_TOGGLE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} btnToggleCustomPatternsInput`;
-  const SUBJ_BTN_SIMULATE = `${SUBJ_CONTAINER} btnSimulate`;
+  const SUBJ_BTN_TOGGLE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} > btnToggleCustomPatternsInput`;
+  const SUBJ_BTN_SIMULATE = `${SUBJ_CONTAINER} > btnSimulate`;
 
   return new class GrokDebugger {
     async clickSimulate() {

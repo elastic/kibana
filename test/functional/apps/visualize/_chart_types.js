@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   describe('chart types', function () {
     before(function () {
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new');
+      return PageObjects.visualize.navigateToNewVisualization();
     });
 
     it('should show the correct chart types', async function () {
@@ -44,11 +44,11 @@ export default function ({ getService, getPageObjects }) {
         'Metric',
         'Pie',
         'Region Map',
+        'TSVB',
         'Tag Cloud',
         'Timelion',
         'Vega',
         'Vertical Bar',
-        'Visual Builder',
       ];
 
       // find all the chart types and make sure there all there

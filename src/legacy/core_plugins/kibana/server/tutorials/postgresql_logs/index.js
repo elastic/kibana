@@ -23,8 +23,6 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function postgresqlLogsSpecProvider(server, context) {
   const moduleName = 'postgresql';
-  const geoipRequired = false;
-  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'postgresqlLogs',
@@ -46,7 +44,7 @@ export function postgresqlLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '158be870-87f4-11e7-ad9c-db80de0bf8d3',
+          id: '158be870-87f4-11e7-ad9c-db80de0bf8d3-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.postgresqlLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'PostgreSQL logs dashboard',
           }),
@@ -59,7 +57,7 @@ export function postgresqlLogsSpecProvider(server, context) {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

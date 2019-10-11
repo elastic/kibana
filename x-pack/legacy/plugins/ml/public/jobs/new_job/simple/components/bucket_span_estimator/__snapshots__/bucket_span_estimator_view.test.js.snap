@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BucketSpanEstimator renders the button 1`] = `
+<div
+  className="bucket-span-estimator"
+>
+  <EuiToolTip
+    content={
+      <FormattedMessage
+        defaultMessage="Experimental feature for estimating bucket span."
+        id="xpack.ml.newJob.simple.bucketSpanEstimator.estimateBucketSpanButtonTooltip"
+        values={Object {}}
+      />
+    }
+    delay="regular"
+    position="bottom"
+  >
+    <EuiButton
+      disabled={false}
+      fill={true}
+      iconSide="right"
+      isLoading={false}
+      onClick={[Function]}
+      size="s"
+    >
+      Estimate bucket span
+    </EuiButton>
+  </EuiToolTip>
+</div>
+`;
+
+exports[`BucketSpanEstimator renders the loading button 1`] = `
+<div
+  className="bucket-span-estimator"
+>
+  <EuiToolTip
+    content={
+      <FormattedMessage
+        defaultMessage="Experimental feature for estimating bucket span."
+        id="xpack.ml.newJob.simple.bucketSpanEstimator.estimateBucketSpanButtonTooltip"
+        values={Object {}}
+      />
+    }
+    delay="regular"
+    position="bottom"
+  >
+    <EuiButton
+      disabled={true}
+      fill={true}
+      iconSide="right"
+      isLoading={true}
+      onClick={[Function]}
+      size="s"
+    >
+      Estimating bucket span
+    </EuiButton>
+  </EuiToolTip>
+</div>
+`;

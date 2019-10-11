@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -35,8 +35,8 @@ export default function ({ getService, getPageObjects }) {
         nodesCount: 'Nodes\n3',
         indicesCount: 'Indices\n20',
         memory: 'Memory\n575.3 MB / 2.0 GB',
-        totalShards: 'Total Shards\n80',
-        unassignedShards: 'Unassigned Shards\n5',
+        totalShards: 'Total shards\n80',
+        unassignedShards: 'Unassigned shards\n5',
         documentCount: 'Documents\n25,927',
         dataSize: 'Data\n101.6 MB',
         health: 'Health: yellow',

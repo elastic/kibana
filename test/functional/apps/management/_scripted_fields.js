@@ -29,7 +29,11 @@
 // 3. Filter in Discover by the scripted field
 // 4. Visualize with aggregation on the scripted field by clicking discover.clickFieldListItemVisualize
 
-import expect from 'expect.js';
+// NOTE: Scripted field input is managed by Ace editor, which automatically
+//   appends closing braces, for exmaple, if you type opening square brace [
+//   it will automatically insert a a closing square brace ], etc.
+
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -41,31 +45,32 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover', 'timePicker']);
 
-  describe('scripted fields', () => {
+  describe('scripted fields', function () {
+    this.tags(['skipFirefox']);
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
+      await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.createIndexPattern();
-      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
+      await kibanaServer.uiSettings.update({});
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.removeIndexPattern();
     });
 
     it('should not allow saving of invalid scripts', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName('doomedScriptedField');
-      await PageObjects.settings.setScriptedFieldScript(`doc['iHaveNoClosingTick].value`);
+      await PageObjects.settings.setScriptedFieldScript(`i n v a l i d  s c r i p t`);
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async () => {
         const invalidScriptErrorExists = await testSubjects.exists('invalidScriptError');
@@ -73,20 +78,46 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+
+    describe('testing regression for issue #33251', function describeIndexTests() {
+      const scriptedPainlessFieldName = 'ram_Pain_reg';
+
+      it('should create and edit scripted field', async function () {
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
+        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
+        await PageObjects.settings.clickScriptedFieldsTab();
+        await log.debug('add scripted field');
+        const script = `1`;
+        await PageObjects.settings.addScriptedField(scriptedPainlessFieldName, 'painless', 'number', null, '1', script);
+        await retry.try(async function () {
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
+        });
+
+        for (let i = 0; i < 3; i++) {
+          await PageObjects.settings.editScriptedField(scriptedPainlessFieldName);
+          const fieldSaveButton = await testSubjects.exists('fieldSaveButton');
+          expect(fieldSaveButton).to.be(true);
+          await PageObjects.settings.clickSaveScriptedField();
+        }
+      });
+    });
+
+
     describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain1';
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
-        const script = `if (doc['machine.ram'].size() == 0) {
-          return -1;
-        } else {
-          return doc['machine.ram'].value / (1024 * 1024 * 1024);
-        }`;
+        const script = `if (doc['machine.ram'].size() == 0) return -1;
+          else return doc['machine.ram'].value / (1024 * 1024 * 1024);
+        `;
         await PageObjects.settings.addScriptedField(scriptedPainlessFieldName, 'painless', 'number', null, '1', script);
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
@@ -98,13 +129,13 @@ export default function ({ getService, getPageObjects }) {
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
+
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\n18');
@@ -116,7 +147,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('filter by the first value (14) in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('31');
         });
@@ -130,7 +161,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await inspector.open();
         await inspector.setTablePageSize(50);
         await inspector.expectTableData(expectedChartValues);
@@ -143,6 +174,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -159,13 +191,13 @@ export default function ({ getService, getPageObjects }) {
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
+
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ngood');
@@ -178,7 +210,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('filter by "bad" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('27');
         });
@@ -188,7 +220,6 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
         await inspector.open();
         await inspector.expectTableData([
           ['good', '359'],
@@ -203,6 +234,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -219,13 +251,13 @@ export default function ({ getService, getPageObjects }) {
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
+
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
@@ -238,7 +270,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('filter by "true" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('359');
         });
@@ -248,7 +280,6 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
         await inspector.open();
         await inspector.expectTableData([
           ['true', '359'],
@@ -263,6 +294,7 @@ export default function ({ getService, getPageObjects }) {
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
@@ -280,13 +312,13 @@ export default function ({ getService, getPageObjects }) {
         const toTime = '2015-09-18 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForVisualization();
+
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 06:52:55.953\n2015-09-18 07:00');
@@ -298,7 +330,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('filter by "2015-09-17 23:00" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, '2015-09-17 23:00');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
+
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
@@ -308,7 +340,6 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.waitForVisualization();
         await inspector.open();
         await inspector.setTablePageSize(50);
         await inspector.expectTableData([

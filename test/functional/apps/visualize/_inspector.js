@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
+    this.tags('smoke');
     before(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
@@ -42,8 +43,7 @@ export default function ({ getService, getPageObjects }) {
         await inspector.expectTableHeaders(['Count']);
 
         log.debug('Add Average Metric on machine.ram field');
-        await PageObjects.visualize.clickAddMetric();
-        await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
+        await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
         await PageObjects.visualize.selectAggregation('Average', 'metrics');
         await PageObjects.visualize.selectField('machine.ram', 'metrics');
         await PageObjects.visualize.clickGo();
@@ -53,22 +53,24 @@ export default function ({ getService, getPageObjects }) {
 
       describe('filtering on inspector table values', function () {
         before(async function () {
-          log.debug('Add X-Axis terms agg on machine.os.raw');
-          await PageObjects.visualize.clickBucket('X-Axis');
+          log.debug('Add X-axis terms agg on machine.os.raw');
+          await PageObjects.visualize.clickBucket('X-axis');
           await PageObjects.visualize.selectAggregation('Terms');
           await PageObjects.visualize.selectField('machine.os.raw');
           await PageObjects.visualize.setSize(2);
-          await PageObjects.visualize.toggleOtherBucket();
+          await PageObjects.visualize.toggleOtherBucket(3);
           await PageObjects.visualize.clickGo();
         });
 
         beforeEach(async function () {
           await inspector.open();
+          await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         });
 
         afterEach(async function () {
           await inspector.close();
           await filterBar.removeFilter('machine.os.raw');
+          await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         });
 
         it('should allow filtering for values', async function () {

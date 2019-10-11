@@ -1,4 +1,4 @@
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('suite', () => {
   it('is a test', () => {

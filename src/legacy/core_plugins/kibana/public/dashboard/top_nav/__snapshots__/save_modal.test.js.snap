@@ -9,6 +9,7 @@ exports[`renders DashboardSaveModal 1`] = `
     <React.Fragment>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -18,9 +19,9 @@ exports[`renders DashboardSaveModal 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiTextArea
-          compressed={true}
           data-test-subj="dashboardDescription"
           fullWidth={false}
           onChange={[Function]}
@@ -30,6 +31,7 @@ exports[`renders DashboardSaveModal 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         helpText={
@@ -39,17 +41,18 @@ exports[`renders DashboardSaveModal 1`] = `
             values={Object {}}
           />
         }
-        label={
-          <FormattedMessage
-            defaultMessage="Store time with dashboard"
-            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
-            values={Object {}}
-          />
-        }
+        labelType="label"
       >
         <EuiSwitch
           checked={true}
           data-test-subj="storeTimeWithDashboard"
+          label={
+            <FormattedMessage
+              defaultMessage="Store time with dashboard"
+              id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
         />
       </EuiFormRow>

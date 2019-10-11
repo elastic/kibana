@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
 
   const PageObjects = getPageObjects(['maps', 'header', 'timePicker']);
   const queryBar = getService('queryBar');
+  const filterBar = getService('filterBar');
   const browser = getService('browser');
   const inspector = getService('inspector');
 
@@ -39,9 +40,9 @@ export default function ({ getPageObjects, getService }) {
 
       it('should set map location to value stored with map', async () => {
         const { lat, lon, zoom } = await PageObjects.maps.getView();
-        expect(lat).to.equal('-0.04647');
-        expect(lon).to.equal('77.33426');
-        expect(zoom).to.equal('3.02');
+        expect(lat).to.equal(-0.04647);
+        expect(lon).to.equal(77.33426);
+        expect(zoom).to.equal(3.02);
       });
 
       it('should load map layers stored with map', async () => {
@@ -62,11 +63,12 @@ export default function ({ getPageObjects, getService }) {
         it('should update app state with query stored with map', async () => {
           const currentUrl = await browser.getCurrentUrl();
           const appState = currentUrl.substring(currentUrl.indexOf('_a='));
-          expect(appState).to.equal('_a=(query:(language:kuery,query:%27machine.os.raw%20:%20%22ios%22%27))');
+          expect(appState).to.equal('_a=(filters:!(),query:(language:kuery,query:%27machine.os.raw%20:%20%22ios%22%27))');
         });
 
         it('should apply query stored with map', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
@@ -80,15 +82,43 @@ export default function ({ getPageObjects, getService }) {
           const urlWithQueryInAppState = `${kibanaBaseUrl}#/map/8eabdab0-144f-11e9-809f-ad25bb78262c?${appState}`;
 
           await browser.get(urlWithQueryInAppState, true);
+          await PageObjects.maps.waitForLayersToLoad();
 
           const query = await queryBar.getQueryString();
           expect(query).to.equal('machine.os.raw : "win 8"');
 
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           await inspector.close();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           expect(hits).to.equal('1');
+        });
+      });
+
+      describe('mapState contains filters', () => {
+        before(async () => {
+          await PageObjects.maps.loadSavedMap('document example with filter');
+        });
+
+        it('should update filter bar with filters stored with map', async () => {
+          const hasSourceFilter = await filterBar.hasFilter('machine.os.raw', 'ios');
+          expect(hasSourceFilter).to.be(true);
+        });
+
+        it('should update app state with query stored with map', async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const appState = currentUrl.substring(currentUrl.indexOf('_a='));
+          expect(appState).to.equal('_a=(filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase,value:ios),query:(match:(machine.os.raw:(query:ios,type:phrase))))),query:(language:kuery,query:%27%27))'); // eslint-disable-line max-len
+        });
+
+        it('should apply query stored with map', async () => {
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
+          const requestStats = await inspector.getTableData();
+          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+          await inspector.close();
+          expect(hits).to.equal('2');
         });
       });
     });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createReplaceStream } from '../utils';
+import { createReplaceStream } from '../legacy/utils';
 
 import * as Rx from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';

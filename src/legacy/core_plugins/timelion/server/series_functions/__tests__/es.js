@@ -26,7 +26,7 @@ import buildRequest from '../es/lib/build_request';
 import createDateAgg from '../es/lib/create_date_agg';
 import esResponse from './fixtures/es_response';
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import _ from 'lodash';
 import { expect } from 'chai';
 import sinon from 'sinon';
@@ -39,7 +39,7 @@ function stubRequestAndServer(response, indexPatternSavedObjects = []) {
         elasticsearch: {
           getCluster: sinon.stub().withArgs('data').returns({
             callWithRequest: function () {
-              return Promise.resolve(response);
+              return Bluebird.resolve(response);
             }
           })
         }
@@ -49,7 +49,7 @@ function stubRequestAndServer(response, indexPatternSavedObjects = []) {
       getSavedObjectsClient: function () {
         return {
           find: function () {
-            return Promise.resolve({
+            return Bluebird.resolve({
               saved_objects: indexPatternSavedObjects
             });
           }
@@ -143,7 +143,7 @@ describe(filename, () => {
         expect(agg.time_buckets.aggs['avg(scriptedBytes)']).to.eql({
           avg: {
             script: {
-              inline: 'doc["bytes"].value',
+              source: 'doc["bytes"].value',
               lang: 'painless'
             }
           }
@@ -198,27 +198,16 @@ describe(filename, () => {
     });
 
     describe('timeouts', () => {
-      let sandbox;
-
-      beforeEach(() => {
-        sandbox = sinon.createSandbox();
-      });
-
-      afterEach(() => {
-        sandbox.restore();
-      });
-
       it('sets the timeout on the request', () => {
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptedFields, 30000);
 
         expect(request.timeout).to.equal('30000ms');
       });
 
       it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
-        sandbox.stub(tlConfig.server.config(), 'get').withArgs('elasticsearch.shardTimeout').returns(0);
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptedFields, 0);
 
         expect(request).to.not.have.property('timeout');
       });
@@ -291,9 +280,9 @@ describe(filename, () => {
         let request = fn(config, tlConfig, emptyScriptedFields);
         expect(request.body.query.bool.must.length).to.eql(1);
         expect(request.body.query.bool.must[0]).to.eql({ range: { '@timestamp': {
-          lte: 5,
-          gte: 1,
-          format: 'epoch_millis'
+          format: 'strict_date_optional_time',
+          gte: '1970-01-01T00:00:00.001Z',
+          lte: '1970-01-01T00:00:00.005Z'
         } } });
 
         config.kibana = true;
@@ -338,14 +327,14 @@ describe(filename, () => {
 
         expect(aggs.scriptedBeer.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.terms.script).to.eql({
-          inline: 'doc["beer"].value',
+          source: 'doc["beer"].value',
           lang: 'painless'
         });
         expect(aggs.scriptedBeer.terms.size).to.eql(5);
 
         expect(aggs.scriptedBeer.aggs.scriptedWine.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.aggs.scriptedWine.terms.script).to.eql({
-          inline: 'doc["wine"].value',
+          source: 'doc["wine"].value',
           lang: 'painless'
         });
         expect(aggs.scriptedBeer.aggs.scriptedWine.terms.size).to.eql(10);

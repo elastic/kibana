@@ -282,33 +282,6 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
       }),
     }
   },
-  PLUGINS: {
-    GEOIP_AND_UA: {
-      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.plugins.geoipUaTitle', {
-        defaultMessage: 'Install Elasticsearch GeoIP and user agent plugins',
-      }),
-      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.plugins.geoipUaTextPre', {
-        defaultMessage: 'This module requires two Elasticsearch plugins that are not installed by default.\n\n\
-From the Elasticsearch installation folder, run:',
-      }),
-      commands: [
-        'bin/elasticsearch-plugin install ingest-geoip',
-        'bin/elasticsearch-plugin install ingest-user-agent',
-      ],
-    },
-    GEOIP: {
-      title: i18n.translate('kbn.common.tutorials.filebeatInstructions.plugins.geoipTitle', {
-        defaultMessage: 'Install Elasticsearch GeoIP plugin',
-      }),
-      textPre: i18n.translate('kbn.common.tutorials.filebeatInstructions.plugins.geoipTextPre', {
-        defaultMessage: 'This module requires two Elasticsearch plugins that are not installed by default.\n\n\
-From the Elasticsearch installation folder, run:',
-      }),
-      commands: [
-        'bin/elasticsearch-plugin install ingest-geoip'
-      ]
-    }
-  }
 });
 
 export const createFilebeatCloudInstructions = () => ({
@@ -480,7 +453,7 @@ export function filebeatStatusCheck(moduleName) {
         bool: {
           filter: {
             term: {
-              'fileset.module': moduleName,
+              'event.module': moduleName,
             },
           },
         },
@@ -489,18 +462,13 @@ export function filebeatStatusCheck(moduleName) {
   };
 }
 
-export function onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context) {
+export function onPremInstructions(moduleName, platforms, context) {
   const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions(context);
 
   const variants = [];
   for (let i = 0; i < platforms.length; i++) {
     const platform = platforms[i];
     const instructions = [];
-    if (geoipRequired && uaRequired) {
-      instructions.push(FILEBEAT_INSTRUCTIONS.PLUGINS.GEOIP_AND_UA);
-    } else if (geoipRequired) {
-      instructions.push(FILEBEAT_INSTRUCTIONS.PLUGINS.GEOIP);
-    }
     instructions.push(FILEBEAT_INSTRUCTIONS.INSTALL[platform]);
     instructions.push(FILEBEAT_INSTRUCTIONS.CONFIG[platform]);
     instructions.push(filebeatEnableInstructions(moduleName)[platform]);

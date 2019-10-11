@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function tryingForTime() {
         await PageObjects.visualize.selectField(termsField);
       });
-      await PageObjects.visualize.selectOrderBy('_key');
+      await PageObjects.visualize.selectOrderByMetric(2, '_key');
       await PageObjects.visualize.clickGo();
     });
 
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       await inspector.open();
-      await await inspector.setTablePageSize('50');
+      await await inspector.setTablePageSize(50);
       await inspector.expectTableData(expectedTableData);
     });
 
@@ -132,6 +132,7 @@ export default function ({ getService, getPageObjects }) {
       before(async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('bytes');
@@ -147,6 +148,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeFilter(termsField);
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('');

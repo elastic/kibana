@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('heatmap chart', function indexPatternCreation() {
+    this.tags('smoke');
     const vizName1 = 'Visualization HeatmapChart';
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
@@ -37,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');
@@ -113,22 +114,18 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickOptionsTab();
       await PageObjects.visualize.clickEnableCustomRanges();
       await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.isCustomRangeTableShown();
-      await PageObjects.visualize.addCustomRange(0, 100);
       await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.addCustomRange(100, 200);
       await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.addCustomRange(200, 300);
       await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.addCustomRange(300, 400);
       await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.addCustomRange(400, 500);
       await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.addCustomRange(500, 600);
       await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.addCustomRange(600, 700);
-      await PageObjects.visualize.clickAddRange();
-      await PageObjects.visualize.addCustomRange(700, 800);
+
+      log.debug('customize 2 last ranges');
+      await PageObjects.visualize.setCustomRangeByIndex(6, '650', '720');
+      await PageObjects.visualize.setCustomRangeByIndex(7, '800', '905');
+
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await PageObjects.visualize.clickGo();
       const legends = await PageObjects.visualize.getLegendEntries();
       const expectedLegends = [
@@ -138,8 +135,8 @@ export default function ({ getService, getPageObjects }) {
         '300 - 400',
         '400 - 500',
         '500 - 600',
-        '600 - 700',
-        '700 - 800',
+        '650 - 720',
+        '800 - 905',
       ];
       expect(legends).to.eql(expectedLegends);
     });

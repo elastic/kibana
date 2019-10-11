@@ -1,61 +1,58 @@
 [[saved-objects-api-bulk-create]]
-=== Bulk Create Objects
+=== Bulk create saved objects API
+++++
+<titleabbrev>Bulk create objects</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Create multiple {kib} saved objects.
 
-The bulk-create saved object API enables you to persist multiple Kibana saved
-objects.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-bulk-create-request]]
 ==== Request
 
 `POST /api/saved_objects/_bulk_create`
 
+[[saved-objects-api-bulk-create-query-params]]
+==== Query parameters
 
-==== Query Parameters
+`overwrite`::
+  (Optional, boolean) When `true`, overwrites the document with the same ID.
 
-`overwrite` (optional)::
-  (boolean) If true, will overwrite the document with the same ID.
+[[saved-objects-api-bulk-create-request-body]]
+==== Request body
 
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
-==== Request Body
+`id`::
+  (Optional, string) Specifies an ID instead of using a randomly generated ID.
 
-The request body must be a JSON array containing objects, each of which
-contains the following properties:
+`attributes`::
+  (Required, object) The data that you want to create.
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+`references`::
+  (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects in the referenced object. To refer to the other saved object, use `name` in the attributes. Never use `id` to refer to the other saved object. `id` can be automatically updated during migrations, import, or export.
 
-`id` (optional)::
-  (string) Enables specifying an ID to use, as opposed to one being randomly generated
+`version`::
+  (Optional, number) Specifies the version.
 
-`attributes` (required)::
-  (object) The data to persist
-
-`references` (optional)::
-  (array) An array of objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. The `name` can be used in the attributes to refer to the other saved object, but never the `id`, which may be updated automatically in the future during migrations or import/export.
-
-`version` (optional)::
-  (number) Enables specifying a version
-
-
+[[saved-objects-api-bulk-create-response-body]]
 ==== Response body
 
-The response body will have a top level `saved_objects` property that contains
-an array of objects, which represent the response for each of the requested
-objects. The order of the objects in the response is identical to the order of
-the objects in the request.
+`saved_objects`:: 
+  (array) Top-level property the contains objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
 
-For any saved object that could not be persisted, an error object will exist in its
-place.
+Saved objects that are unable to persist are replaced with an error object.
 
+[[saved-objects-api-bulk-create-codes]]
+==== Response code
 
-==== Examples
+`200`:: 
+  Indicates a successful call.
 
-The following example attempts to persist an index pattern with id
-`my-pattern` and a dashboard with id `my-dashboard`, but only the index pattern
-could be persisted because there was an id collision with `my-dashboard` as a saved object with that id alread exists.
+[[saved-objects-api-bulk-create-example]]
+==== Example
+
+Create an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID: 
 
 [source,js]
 --------------------------------------------------
@@ -79,8 +76,7 @@ POST api/saved_objects/_bulk_create
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------
@@ -105,3 +101,5 @@ containing a JSON structure similar to the following example:
   ]
 }
 --------------------------------------------------
+
+There is already a saved object with the `my-dashboard` ID, so only the index pattern is created.

@@ -24,9 +24,7 @@ exports[`rendering render matches snapshot 1`] = `
               color="primary"
               data-test-subj="clearSession"
               fill={true}
-              iconSide="left"
               onClick={[Function]}
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Clear your session"
@@ -35,11 +33,8 @@ exports[`rendering render matches snapshot 1`] = `
               />
             </EuiButton>,
             <EuiButtonEmpty
-              color="primary"
               data-test-subj="goBack"
-              iconSide="left"
               onClick={[Function]}
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Go back"
@@ -52,8 +47,7 @@ exports[`rendering render matches snapshot 1`] = `
         body={
           <p>
             <FormattedMessage
-              defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or
-                    clear your session data."
+              defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or clear your session data."
               id="core.fatalErrors.tryRefreshingPageDescription"
               values={Object {}}
             />
@@ -75,7 +69,6 @@ exports[`rendering render matches snapshot 1`] = `
         color="danger"
         iconType="alert"
         key="0"
-        size="m"
         title="foo"
       >
         <EuiCodeBlock
@@ -92,7 +85,6 @@ Error: foo
         color="danger"
         iconType="alert"
         key="1"
-        size="m"
         title="bar"
       >
         <EuiCodeBlock

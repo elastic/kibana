@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Package rendering it renders against shallow snapshot 1`] = `
+<Component
+  contextId="[context-123]"
+  eventId="[event-123]"
+  packageName="package-name-123"
+  packageSummary="package-summary-123"
+  packageVersion="package-version-123"
+/>
+`;

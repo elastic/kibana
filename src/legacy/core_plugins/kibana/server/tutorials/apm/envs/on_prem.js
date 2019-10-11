@@ -37,9 +37,10 @@ import {
   createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
+  createDotNetAgentInstructions,
 } from '../instructions/apm_agent_instructions';
 
-export function onPremInstructions(apmIndexPattern) {
+export function onPremInstructions(config) {
   const EDIT_CONFIG = createEditConfig();
   const START_SERVER_UNIX = createStartServerUnix();
   const START_SERVER_UNIX_SYSV = createStartServerUnixSysv();
@@ -50,6 +51,16 @@ export function onPremInstructions(apmIndexPattern) {
         title: i18n.translate('kbn.server.tutorials.apm.apmServer.title', {
           defaultMessage: 'APM Server',
         }),
+        callOut: {
+          title: i18n.translate('kbn.server.tutorials.apm.apmServer.callOut.title', {
+            defaultMessage: 'Important: Updating to 7.0 or higher',
+          }),
+          message: i18n.translate('kbn.server.tutorials.apm.apmServer.callOut.message', {
+            defaultMessage: `Please make sure your APM Server is updated to 7.0 or higher. \
+            You can also migrate your 6.x data with the migration assistant found in Kibana's management section.`,
+          }),
+          iconType: 'alert'
+        },
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.OSX,
@@ -83,17 +94,17 @@ export function onPremInstructions(apmIndexPattern) {
             defaultMessage: 'You have correctly setup APM Server',
           }),
           error: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.errorMessage', {
-            defaultMessage: 'APM Server has still not connected to Elasticsearch',
+            defaultMessage:
+              'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
           }),
           esHitsCheck: {
-            index: apmIndexPattern,
+            index: config.get('apm_oss.onboardingIndices'),
             query: {
               bool: {
-                filter: {
-                  exists: {
-                    field: 'observer.listening',
-                  },
-                },
+                filter: [
+                  { term: { 'processor.event': 'onboarding' } },
+                  { range: { 'observer.version_major': { gte: 7 } } },
+                ],
               },
             },
           },
@@ -136,6 +147,10 @@ export function onPremInstructions(apmIndexPattern) {
             id: INSTRUCTION_VARIANT.GO,
             instructions: createGoAgentInstructions(),
           },
+          {
+            id: INSTRUCTION_VARIANT.DOTNET,
+            instructions: createDotNetAgentInstructions(),
+          },
         ],
         statusCheck: {
           title: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.title', {
@@ -155,14 +170,17 @@ export function onPremInstructions(apmIndexPattern) {
             defaultMessage: 'No data has been received from agents yet',
           }),
           esHitsCheck: {
-            index: apmIndexPattern,
+            index: [
+              config.get('apm_oss.errorIndices'),
+              config.get('apm_oss.transactionIndices'),
+              config.get('apm_oss.metricsIndices'),
+              config.get('apm_oss.sourcemapIndices'),
+            ],
             query: {
               bool: {
-                should: [
-                  { term: { 'processor.name': 'error' } },
-                  { term: { 'processor.name': 'transaction' } },
-                  { term: { 'processor.name': 'metric' } },
-                  { term: { 'processor.name': 'sourcemap' } },
+                filter: [
+                  { terms: { 'processor.event': ['error', 'transaction', 'metric', 'sourcemap'] } },
+                  { range: { 'observer.version_major': { gte: 7 } } },
                 ],
               },
             },

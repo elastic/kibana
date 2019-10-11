@@ -17,16 +17,18 @@
 * under the License.
 */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const toasts = getService('toasts');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
 
   describe('discover tab', function describeIndexTests() {
+    this.tags('smoke');
     before(async function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
@@ -35,7 +37,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('discover');
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
 
@@ -94,12 +95,13 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('a bad syntax query should show an error message', async function () {
-        const expectedError = 'Discover: Failed to parse query [xxx(yyy))]';
+        const expectedError = 'Expected ":", "<", "<=", ">", ">=", AND, OR, end of input, ' +
+          'whitespace but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
-        const toastMessage =  await PageObjects.header.getToastMessage();
-        expect(toastMessage).to.contain(expectedError);
-        await PageObjects.header.clickToastOK();
+        const { message } = await toasts.getErrorToast();
+        expect(message).to.contain(expectedError);
+        await toasts.dismissToast();
       });
     });
   });

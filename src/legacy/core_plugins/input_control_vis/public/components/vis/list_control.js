@@ -23,33 +23,30 @@ import _ from 'lodash';
 import { FormRow } from './form_row';
 import { injectI18n } from '@kbn/i18n/react';
 
-import {
-  EuiFieldText,
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiFieldText, EuiComboBox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 class ListControlUi extends Component {
-
   state = {
-    isLoading: false
-  }
+    isLoading: false,
+  };
 
   componentDidMount = () => {
     this._isMounted = true;
-  }
+  };
 
   componentWillUnmount = () => {
     this._isMounted = false;
-  }
+  };
 
-  handleOnChange = (selectedOptions) => {
+  handleOnChange = selectedOptions => {
     const selectedValues = selectedOptions.map(({ value }) => {
       return value;
     });
     this.props.stageFilter(this.props.controlIndex, selectedValues);
-  }
+  };
 
-  debouncedFetch = _.debounce(async (searchValue) => {
+  debouncedFetch = _.debounce(async searchValue => {
     await this.props.fetchOptions(searchValue);
 
     if (this._isMounted) {
@@ -59,11 +56,14 @@ class ListControlUi extends Component {
     }
   }, 300);
 
-  onSearchChange = (searchValue) => {
-    this.setState({
-      isLoading: true,
-    }, this.debouncedFetch.bind(null, searchValue));
-  }
+  onSearchChange = searchValue => {
+    this.setState(
+      {
+        isLoading: true,
+      },
+      this.debouncedFetch.bind(null, searchValue)
+    );
+  };
 
   renderControl() {
     const { intl } = this.props;
@@ -73,7 +73,7 @@ class ListControlUi extends Component {
         <EuiFieldText
           placeholder={intl.formatMessage({
             id: 'inputControl.vis.listControl.selectTextPlaceholder',
-            defaultMessage: 'Select...'
+            defaultMessage: 'Select...',
           })}
           disabled={true}
         />
@@ -85,7 +85,7 @@ class ListControlUi extends Component {
         return {
           label: this.props.formatOptionLabel(option).toString(),
           value: option,
-          ['data-test-subj']: `option_${option.toString().replace(' ', '_')}`
+          ['data-test-subj']: `option_${option.toString().replace(' ', '_')}`,
         };
       })
       .sort((a, b) => {
@@ -103,7 +103,7 @@ class ListControlUi extends Component {
       <EuiComboBox
         placeholder={intl.formatMessage({
           id: 'inputControl.vis.listControl.selectPlaceholder',
-          defaultMessage: 'Select...'
+          defaultMessage: 'Select...',
         })}
         options={options}
         isLoading={this.state.isLoading}
@@ -118,10 +118,20 @@ class ListControlUi extends Component {
   }
 
   render() {
+    const partialResultsWarningMessage = i18n.translate(
+      'inputControl.vis.listControl.partialResultsWarningMessage',
+      {
+        defaultMessage:
+          'Terms list might be incomplete because the request is taking too long. ' +
+          'Adjust the autocomplete settings in kibana.yml for complete results.',
+      }
+    );
+
     return (
       <FormRow
         id={this.props.id}
         label={this.props.label}
+        warningMsg={this.props.partialResults ? partialResultsWarningMessage : undefined}
         controlIndex={this.props.controlIndex}
         disableMsg={this.props.disableMsg}
       >
@@ -140,6 +150,7 @@ ListControlUi.propTypes = {
   disableMsg: PropTypes.string,
   multiselect: PropTypes.bool,
   dynamicOptions: PropTypes.bool,
+  partialResults: PropTypes.bool,
   controlIndex: PropTypes.number.isRequired,
   stageFilter: PropTypes.func.isRequired,
   fetchOptions: PropTypes.func,

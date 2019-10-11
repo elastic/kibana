@@ -135,16 +135,11 @@ exports[`Table should render normally 1`] = `
 exports[`Table should render the boolean template (false) 1`] = `<span />`;
 
 exports[`Table should render the boolean template (true) 1`] = `
-<dot
+<EuiIconEmpty
   aria-label="Is searchable"
-  className="euiIcon euiIcon--medium euiIcon--secondary"
+  className="euiIcon euiIcon--medium euiIcon--secondary euiIcon-isLoading"
   focusable="false"
-  height="16"
   style={null}
-  viewBox="0 0 16 16"
-  width="16"
-  xmlns="http://www.w3.org/2000/svg"
-  xmlnsXlink="http://www.w3.org/1999/xlink"
 />
 `;
 

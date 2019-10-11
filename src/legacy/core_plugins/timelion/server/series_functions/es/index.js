@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import Datasource from '../../lib/classes/datasource';
@@ -126,7 +127,12 @@ export default new Datasource('es', {
       });
     }
 
-    const body = buildRequest(config, tlConfig, scriptedFields);
+    const esShardTimeout = await tlConfig.server.newPlatform.__internals.elasticsearch.legacy.config$.pipe(
+      first(),
+      map(config => config.shardTimeout.asMilliseconds())
+    ).toPromise();
+
+    const body = buildRequest(config, tlConfig, scriptedFields, esShardTimeout);
 
     const { callWithRequest } = tlConfig.server.plugins.elasticsearch.getCluster('data');
     const resp = await callWithRequest(tlConfig.request, 'search', body);

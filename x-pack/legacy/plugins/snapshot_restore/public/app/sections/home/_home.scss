@@ -1,0 +1,46 @@
+/*
+ * 1. Allow child progress bar to expand to container size
+ * 2. Adjust table styling to differentiate from parent table
+ */
+.snapshotRestore__shardsTable {
+  .euiToolTipAnchor {
+    width: 100%; /* 1 */
+  }
+
+  margin: $euiSizeS 0 $euiSizeS $euiSizeL; /* 2 */
+  .euiTable {
+    background: none;
+    .euiTableRow:last-child > .euiTableRowCell {
+      border-bottom: none;
+    }
+    .euiTableRow:hover,
+    .euiTableRow:hover > .euiTableRowCell {
+      background: $euiColorLightestShade;
+    }
+  }
+}
+
+/*
+ * 1. Make in progress snapshot loading indicator be centered vertically
+ *    when it is inside tooltip wrapper
+ */
+.snapshotRestore__policyTable {
+  .euiToolTipAnchor {
+    display: flex;
+  }
+}
+
+/*
+ * Wraps long snapshot name with ellipsis when it is rendered with an icon
+ */
+.snapshotRestorePolicyTableSnapshotFailureContainer {
+  max-width: 200px;
+  > .euiFlexItem:last-child {
+      min-width: 0;
+      .euiText {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+  }
+}

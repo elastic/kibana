@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 export default {
+  'xAxisOrderedValues': ['_all'],
   'yAxisLabel': 'Count',
   'zAxisLabel': 'machine.os.raw: Descending',
   'yScale': null,

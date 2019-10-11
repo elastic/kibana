@@ -17,12 +17,15 @@
  * under the License.
  */
 
+import { KbnClient } from '@kbn/dev-utils';
+
 import {
   saveAction,
   loadAction,
   unloadAction,
   rebuildAllAction,
   emptyKibanaIndexAction,
+  editAction,
 } from './actions';
 
 export class EsArchiver {
@@ -30,7 +33,7 @@ export class EsArchiver {
     this.client = client;
     this.dataDir = dataDir;
     this.log = log;
-    this.kibanaUrl = kibanaUrl;
+    this.kbnClient = new KbnClient(log, [kibanaUrl]);
   }
 
   /**
@@ -72,7 +75,7 @@ export class EsArchiver {
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
-      kibanaUrl: this.kibanaUrl,
+      kbnClient: this.kbnClient,
     });
   }
 
@@ -88,7 +91,7 @@ export class EsArchiver {
       client: this.client,
       dataDir: this.dataDir,
       log: this.log,
-      kibanaUrl: this.kibanaUrl,
+      kbnClient: this.kbnClient,
     });
   }
 
@@ -103,6 +106,23 @@ export class EsArchiver {
       client: this.client,
       dataDir: this.dataDir,
       log: this.log
+    });
+  }
+
+  /**
+   *  Extract the gzipped files in an archive, then call the handler. When it
+   *  resolves re-archive the gzipped files.
+   *
+   *  @param {String} prefix optional prefix to limit archives that are extracted
+   *  @param {() => Promise<any>} handler
+   *  @return Promise<void>
+   */
+  async edit(prefix, handler) {
+    return await editAction({
+      prefix,
+      log: this.log,
+      dataDir: this.dataDir,
+      handler
     });
   }
 
@@ -126,6 +146,7 @@ export class EsArchiver {
     await emptyKibanaIndexAction({
       client: this.client,
       log: this.log,
+      kbnClient: this.kbnClient,
     });
   }
 }

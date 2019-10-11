@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ImportModal Renders import modal 1`] = `
+<Fragment>
+  <EuiModal
+    maxWidth={true}
+    onClose={[MockFunction]}
+  >
+    <EuiModalHeader>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              defaultMessage="Import events"
+              id="xpack.ml.calendarsEdit.eventsTable.importEventsTitle"
+              values={Object {}}
+            />
+          </EuiModalHeaderTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Import events from an ICS file."
+              id="xpack.ml.calendarsEdit.eventsTable.importEventsDescription"
+              values={Object {}}
+            />
+          </p>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiFlexGroup
+        direction="column"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFilePicker
+            compressed={true}
+            disabled={false}
+            display="large"
+            initialPromptText="Select or drag and drop a file"
+            onChange={[Function]}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButtonEmpty
+        onClick={[MockFunction]}
+      >
+        <FormattedMessage
+          defaultMessage="Cancel"
+          id="xpack.ml.calendarsEdit.eventsTable.cancelButtonLabel"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+      <EuiButton
+        disabled={true}
+        fill={true}
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Import"
+          id="xpack.ml.calendarsEdit.eventsTable.importButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
+</Fragment>
+`;

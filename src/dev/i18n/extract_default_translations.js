@@ -23,11 +23,10 @@ import {
   extractHtmlMessages,
   extractCodeMessages,
   extractPugMessages,
-  extractHandlebarsMessages,
 } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
-import { createFailError, isFailError } from '../run';
+import { createFailError, isFailError } from '@kbn/dev-utils';
 
 function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);
@@ -42,30 +41,6 @@ function addMessageToMap(targetMap, key, value, reporter) {
   }
 }
 
-export function filterPaths(inputPaths, paths) {
-  const availablePaths = Object.values(paths);
-  const pathsForExtraction = new Set();
-
-  for (const inputPath of inputPaths) {
-    const normalizedPath = normalizePath(inputPath);
-
-    // If input path is the sub path of or equal to any available path, include it.
-    if (
-      availablePaths.some(path => normalizedPath.startsWith(`${path}/`) || path === normalizedPath)
-    ) {
-      pathsForExtraction.add(normalizedPath);
-    } else {
-      // Otherwise go through all available paths and see if any of them is the sub
-      // path of the input path (empty normalized path corresponds to root or above).
-      availablePaths
-        .filter(path => !normalizedPath || path.startsWith(`${normalizedPath}/`))
-        .forEach(ePath => pathsForExtraction.add(ePath));
-    }
-  }
-
-  return [...pathsForExtraction];
-}
-
 function filterEntries(entries, exclude) {
   return entries.filter(entry =>
     exclude.every(excludedPath => !normalizePath(entry).startsWith(excludedPath))
@@ -75,8 +50,8 @@ function filterEntries(entries, exclude) {
 export function validateMessageNamespace(id, filePath, allowedPaths, reporter) {
   const normalizedPath = normalizePath(filePath);
 
-  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPath]) =>
-    normalizedPath.startsWith(`${pluginPath}/`)
+  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPaths]) =>
+    pluginPaths.some(pluginPath => normalizedPath.startsWith(`${pluginPath}/`))
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
@@ -87,14 +62,23 @@ See .i18nrc.json for the list of supported namespaces.`)
   }
 }
 
-export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
-  const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
+export async function matchEntriesWithExctractors(inputPath, options = {}) {
+  const {
+    additionalIgnore = [],
+    mark = false,
+    absolute = false,
+  } = options;
+  const ignore = ['**/node_modules/**', '**/__tests__/**', '**/*.test.{js,jsx,ts,tsx}', '**/*.d.ts'].concat(additionalIgnore);
+
+  const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html}', {
     cwd: inputPath,
     matchBase: true,
-    ignore: ['**/node_modules/**', '**/__tests__/**', '**/*.test.{js,jsx,ts,tsx}', '**/*.d.ts'],
+    ignore,
+    mark,
+    absolute,
   });
 
-  const { htmlEntries, codeEntries, pugEntries, hbsEntries } = entries.reduce(
+  const { htmlEntries, codeEntries, pugEntries } = entries.reduce(
     (paths, entry) => {
       const resolvedPath = path.resolve(inputPath, entry);
 
@@ -102,59 +86,52 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
         paths.htmlEntries.push(resolvedPath);
       } else if (resolvedPath.endsWith('.pug')) {
         paths.pugEntries.push(resolvedPath);
-      } else if (resolvedPath.endsWith('.hbs') || resolvedPath.endsWith('.handlebars')) {
-        paths.hbsEntries.push(resolvedPath);
       } else {
         paths.codeEntries.push(resolvedPath);
       }
 
       return paths;
     },
-    { htmlEntries: [], codeEntries: [], pugEntries: [], hbsEntries: [] }
+    { htmlEntries: [], codeEntries: [], pugEntries: [] }
   );
 
-  await Promise.all(
-    [
-      [htmlEntries, extractHtmlMessages],
-      [codeEntries, extractCodeMessages],
-      [pugEntries, extractPugMessages],
-      [hbsEntries, extractHandlebarsMessages],
-    ].map(async ([entries, extractFunction]) => {
-      const files = await Promise.all(
-        filterEntries(entries, config.exclude).map(async entry => {
-          return {
-            name: entry,
-            content: await readFileAsync(entry),
-          };
-        })
-      );
-
-      for (const { name, content } of files) {
-        const reporterWithContext = reporter.withContext({ name });
-
-        try {
-          for (const [id, value] of extractFunction(content, reporterWithContext)) {
-            validateMessageNamespace(id, name, config.paths, reporterWithContext);
-            addMessageToMap(targetMap, id, value, reporterWithContext);
-          }
-        } catch (error) {
-          if (!isFailError(error)) {
-            throw error;
-          }
-
-          reporterWithContext.report(error);
-        }
-      }
-    })
-  );
+  return [
+    [htmlEntries, extractHtmlMessages],
+    [codeEntries, extractCodeMessages],
+    [pugEntries, extractPugMessages],
+  ];
 }
 
-export async function getDefaultMessagesMap(inputPaths, config, reporter) {
-  const defaultMessagesMap = new Map();
+export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
+  const categorizedEntries = await matchEntriesWithExctractors(inputPath);
+  return Promise.all(
+    categorizedEntries
+      .map(async ([entries, extractFunction]) => {
+        const files = await Promise.all(
+          filterEntries(entries, config.exclude).map(async entry => {
+            return {
+              name: entry,
+              content: await readFileAsync(entry),
+            };
+          })
+        );
 
-  for (const inputPath of filterPaths(inputPaths, config.paths)) {
-    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap, config, reporter);
-  }
+        for (const { name, content } of files) {
+          const reporterWithContext = reporter.withContext({ name });
 
-  return defaultMessagesMap;
+          try {
+            for (const [id, value] of extractFunction(content, reporterWithContext)) {
+              validateMessageNamespace(id, name, config.paths, reporterWithContext);
+              addMessageToMap(targetMap, id, value, reporterWithContext);
+            }
+          } catch (error) {
+            if (!isFailError(error)) {
+              throw error;
+            }
+
+            reporterWithContext.report(error);
+          }
+        }
+      })
+  );
 }

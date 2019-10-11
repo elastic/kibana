@@ -24,14 +24,18 @@ export async function getReportingApiConfig({ readConfigFile }) {
     junit: {
       reportName: 'X-Pack Reporting API Tests',
     },
+    testFiles: [require.resolve('../api/generate')],
     esTestCluster: apiConfig.get('esTestCluster'),
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
       serverArgs: [
         ...apiConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.reporting.csv.enablePanelActionDownload=true',
         `--optimize.enabled=true`,
         '--logging.events.log', JSON.stringify(['info', 'warning', 'error', 'fatal', 'optimize', 'reporting'])
       ],
     },
   };
 }
+
+export default getReportingApiConfig;

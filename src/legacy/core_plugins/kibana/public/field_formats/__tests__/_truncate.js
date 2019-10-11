@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { fieldFormats } from 'ui/registry/field_formats';
 describe('String Truncate Format', function () {
 

@@ -1,40 +1,46 @@
-[[url-shortening-api-api-shorten-url]]
-=== Shorten URL
+[[shorten-url-api]]
+=== Shorten URL API
+++++
+<titleabbrev>Shorten URL</titleabbrev>
+++++
 
-The Shorten URL API allows for converting a Kibana URL into a token.
+experimental[] Convert a {kib} URL into a token.
 
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[url-shortening-api-request]]
 ==== Request
 
 `POST /api/shorten_url`
 
-==== Request Body
+[[url-shortening-api-request-body]]
+==== Request body
 
-The request body must be a JSON object containing the following properties:
+`url`::
+  (Required, string) The {kib} URL that you want to shorten, Relative to `/app/kibana`.
 
-`url` (required)::
-  (string) Kibana URL, relative to `/app/kibana`, to be shortened.
-
+[[url-shortening-api-response-body]]
 ==== Response body
 
-The response body will have a top level `urlId` property that contains
-the shortened URL token for the provided request body.
+urlId:: A top level property that contains the shortened URL token for the provided request body.
 
-==== Examples
+[[url-shortening-api-codes]]
+==== Response code
 
+`200`::
+  Indicates a successful call.
+
+[[url-shortening-api-example]]  
+==== Example
 
 [source,js]
 --------------------------------------------------
 POST api/shorten_url
 {
-  "url": "/app/kibana#/dashboard?_g=()&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!((embeddableConfig:(),gridData:(h:15,i:'1',w:24,x:0,y:0),id:'8f4d0c00-4c86-11e8-b3d7-01146121b73d',panelIndex:'1',type:visualization,version:'7.0.0-alpha1')),query:(language:lucene,query:''),timeRestore:!f,title:'New%20Dashboard',viewMode:edit)",
+  "url": "/app/kibana#/dashboard?_g=()&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!((embeddableConfig:(),gridData:(h:15,i:'1',w:24,x:0,y:0),id:'8f4d0c00-4c86-11e8-b3d7-01146121b73d',panelIndex:'1',type:visualization,version:'7.0.0-alpha1')),query:(language:lucene,query:''),timeRestore:!f,title:'New%20Dashboard',viewMode:edit)"
 }
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following result:
 
 [source,js]
 --------------------------------------------------
@@ -43,6 +49,7 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-A shortened Kibana URL can then be constructed for easier sharing.
+For easy sharing, construct the shortened {kib} URL:
+
 `http://localhost:5601/goto/f73b295ff92718b26bc94edac766d8e3`
 

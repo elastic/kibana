@@ -20,12 +20,9 @@
 import './_saved_search';
 import 'ui/notify';
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
-const module = uiModules.get('discover/saved_searches', [
-  'kibana/notify'
-]);
+const module = uiModules.get('discover/saved_searches');
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
@@ -34,9 +31,9 @@ savedObjectManagementRegistry.register({
   title: 'searches'
 });
 
-module.service('savedSearches', function (Private, Promise, config, kbnIndex, createNotifier, SavedSearch, kbnUrl, $http, chrome) {
+module.service('savedSearches', function (Private, SavedSearch, kbnUrl, chrome) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
-  const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnIndex, kbnUrl, $http, chrome, savedObjectClient);
+  const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnUrl, chrome, savedObjectClient);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',

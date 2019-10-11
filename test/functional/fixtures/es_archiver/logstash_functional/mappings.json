@@ -2,27 +2,10 @@
   "type": "index",
   "value": {
     "index": "logstash-2015.09.22",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "analysis": {
-          "analyzer": {
-            "url": {
-              "type": "standard",
-              "max_token_length": "1000",
-              "tokenizer": "uax_url_email"
-            }
-          }
-        },
-        "number_of_replicas": "0"
-      }
-    },
     "mappings": {
       "dynamic_templates": [
         {
           "string_fields": {
-            "match": "*",
-            "match_mapping_type": "string",
             "mapping": {
               "fields": {
                 "raw": {
@@ -30,40 +13,39 @@
                 }
               },
               "type": "text"
-            }
+            },
+            "match": "*",
+            "match_mapping_type": "string"
           }
         }
       ],
       "properties": {
-        "type": {
-          "type": "keyword"
-        },
         "@message": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "@tags": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "@timestamp": {
           "type": "date"
         },
         "agent": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "bytes": {
           "type": "long"
@@ -72,12 +54,12 @@
           "type": "ip"
         },
         "extension": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "geo": {
           "properties": {
@@ -96,52 +78,52 @@
           }
         },
         "headings": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "host": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "id": {
           "type": "integer"
         },
         "index": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "ip": {
           "type": "ip"
         },
         "links": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "machine": {
           "properties": {
             "os": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "ram": {
               "type": "long"
@@ -186,178 +168,196 @@
               "type": "date"
             },
             "article:section": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "article:tag": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:description": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:image": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:image:height": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:image:width": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:site_name": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:title": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:type": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:url": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:card": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:description": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:image": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:site": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:title": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "url": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
         "request": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "response": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "spaces": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
+        },
+        "type": {
+          "type": "keyword"
         },
         "url": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "utc_time": {
           "type": "date"
         },
         "xss": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "analysis": {
+          "analyzer": {
+            "url": {
+              "max_token_length": "1000",
+              "tokenizer": "uax_url_email",
+              "type": "standard"
+            }
+          }
+        },
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }
@@ -367,27 +367,10 @@
   "type": "index",
   "value": {
     "index": "logstash-2015.09.20",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "analysis": {
-          "analyzer": {
-            "url": {
-              "type": "standard",
-              "max_token_length": "1000",
-              "tokenizer": "uax_url_email"
-            }
-          }
-        },
-        "number_of_replicas": "0"
-      }
-    },
     "mappings": {
       "dynamic_templates": [
         {
           "string_fields": {
-            "match": "*",
-            "match_mapping_type": "string",
             "mapping": {
               "fields": {
                 "raw": {
@@ -395,40 +378,39 @@
                 }
               },
               "type": "text"
-            }
+            },
+            "match": "*",
+            "match_mapping_type": "string"
           }
         }
       ],
       "properties": {
-        "type": {
-          "type": "keyword"
-        },
         "@message": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "@tags": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "@timestamp": {
           "type": "date"
         },
         "agent": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "bytes": {
           "type": "long"
@@ -437,12 +419,12 @@
           "type": "ip"
         },
         "extension": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "geo": {
           "properties": {
@@ -461,52 +443,52 @@
           }
         },
         "headings": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "host": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "id": {
           "type": "integer"
         },
         "index": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "ip": {
           "type": "ip"
         },
         "links": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "machine": {
           "properties": {
             "os": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "ram": {
               "type": "long"
@@ -551,178 +533,196 @@
               "type": "date"
             },
             "article:section": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "article:tag": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:description": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:image": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:image:height": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:image:width": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:site_name": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:title": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:type": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:url": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:card": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:description": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:image": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:site": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:title": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "url": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
         "request": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "response": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "spaces": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
+        },
+        "type": {
+          "type": "keyword"
         },
         "url": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "utc_time": {
           "type": "date"
         },
         "xss": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "analysis": {
+          "analyzer": {
+            "url": {
+              "max_token_length": "1000",
+              "tokenizer": "uax_url_email",
+              "type": "standard"
+            }
+          }
+        },
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }
@@ -732,27 +732,10 @@
   "type": "index",
   "value": {
     "index": "logstash-2015.09.21",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "analysis": {
-          "analyzer": {
-            "url": {
-              "type": "standard",
-              "max_token_length": "1000",
-              "tokenizer": "uax_url_email"
-            }
-          }
-        },
-        "number_of_replicas": "0"
-      }
-    },
     "mappings": {
       "dynamic_templates": [
         {
           "string_fields": {
-            "match": "*",
-            "match_mapping_type": "string",
             "mapping": {
               "fields": {
                 "raw": {
@@ -760,40 +743,39 @@
                 }
               },
               "type": "text"
-            }
+            },
+            "match": "*",
+            "match_mapping_type": "string"
           }
         }
       ],
       "properties": {
-        "type": {
-          "type": "keyword"
-        },
         "@message": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "@tags": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "@timestamp": {
           "type": "date"
         },
         "agent": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "bytes": {
           "type": "long"
@@ -802,12 +784,12 @@
           "type": "ip"
         },
         "extension": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "geo": {
           "properties": {
@@ -826,52 +808,52 @@
           }
         },
         "headings": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "host": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "id": {
           "type": "integer"
         },
         "index": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "ip": {
           "type": "ip"
         },
         "links": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "machine": {
           "properties": {
             "os": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "ram": {
               "type": "long"
@@ -916,178 +898,196 @@
               "type": "date"
             },
             "article:section": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "article:tag": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:description": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:image": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:image:height": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:image:width": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:site_name": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:title": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:type": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "og:url": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:card": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:description": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:image": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:site": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "twitter:title": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             },
             "url": {
-              "type": "text",
               "fields": {
                 "raw": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
         "request": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "response": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "spaces": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
+        },
+        "type": {
+          "type": "keyword"
         },
         "url": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         },
         "utc_time": {
           "type": "date"
         },
         "xss": {
-          "type": "text",
           "fields": {
             "raw": {
               "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "analysis": {
+          "analyzer": {
+            "url": {
+              "max_token_length": "1000",
+              "tokenizer": "uax_url_email",
+              "type": "standard"
+            }
+          }
+        },
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }

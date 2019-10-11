@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
 import { GeohashLayer } from '../geohash_layer';
-import heatmapPng from './heatmap.png';
+// import heatmapPng from './heatmap.png';
 import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 // import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
@@ -86,18 +86,19 @@ describe('geohash_layer', function () {
       //   options: { mapType: 'Shaded Circle Markers', colorRamp: 'Yellow to Red' },
       //   expected: shadedCircleMarkersPng
       // },
-      {
-        options: {
-          mapType: 'Heatmap',
-          heatmap: {
-            heatClusterSize: '2'
-          }
-        },
-        expected: heatmapPng
-      }
+      // FAILING: https://github.com/elastic/kibana/issues/33323
+      // {
+      //   options: {
+      //     mapType: 'Heatmap',
+      //     heatmap: {
+      //       heatClusterSize: '2'
+      //     }
+      //   },
+      //   expected: heatmapPng
+      // }
     ].forEach(function (test) {
 
-      it(test.options.mapType, async function () {
+      it(`${test.options.mapType} (may fail in dev env)`, async function () {
 
         const geohashGridOptions = test.options;
         const geohashLayer = new GeohashLayer(

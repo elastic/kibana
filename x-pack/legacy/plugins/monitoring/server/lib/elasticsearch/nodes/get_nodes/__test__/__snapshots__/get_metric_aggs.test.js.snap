@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get metric aggs should create aggregations for "basic" metrics 1`] = `
+Object {
+  "odh_node_cpu_utilization__metric": Object {
+    "max": Object {
+      "field": "node_stats.process.cpu.percent",
+    },
+  },
+  "odh_node_cpu_utilization__metric_deriv": Object {
+    "derivative": Object {
+      "buckets_path": "odh_node_cpu_utilization__metric",
+      "unit": "1s",
+    },
+  },
+  "odh_node_jvm_mem_percent__metric": Object {
+    "max": Object {
+      "field": "node_stats.jvm.mem.heap_used_percent",
+    },
+  },
+  "odh_node_jvm_mem_percent__metric_deriv": Object {
+    "derivative": Object {
+      "buckets_path": "odh_node_jvm_mem_percent__metric",
+      "unit": "1s",
+    },
+  },
+}
+`;
+
+exports[`get metric aggs should incorporate a metric custom aggs 1`] = `
+Object {
+  "odh_node_index_latency__event_time_in_millis": Object {
+    "max": Object {
+      "field": "node_stats.indices.indexing.index_time_in_millis",
+    },
+  },
+  "odh_node_index_latency__event_time_in_millis_deriv": Object {
+    "derivative": Object {
+      "buckets_path": "odh_node_index_latency__event_time_in_millis",
+      "gap_policy": "skip",
+      "unit": "1s",
+    },
+  },
+  "odh_node_index_latency__event_total": Object {
+    "max": Object {
+      "field": "node_stats.indices.indexing.index_total",
+    },
+  },
+  "odh_node_index_latency__event_total_deriv": Object {
+    "derivative": Object {
+      "buckets_path": "odh_node_index_latency__event_total",
+      "gap_policy": "skip",
+      "unit": "1s",
+    },
+  },
+  "odh_node_query_latency__event_time_in_millis": Object {
+    "max": Object {
+      "field": "node_stats.indices.search.query_time_in_millis",
+    },
+  },
+  "odh_node_query_latency__event_time_in_millis_deriv": Object {
+    "derivative": Object {
+      "buckets_path": "odh_node_query_latency__event_time_in_millis",
+      "gap_policy": "skip",
+      "unit": "1s",
+    },
+  },
+  "odh_node_query_latency__event_total": Object {
+    "max": Object {
+      "field": "node_stats.indices.search.query_total",
+    },
+  },
+  "odh_node_query_latency__event_total_deriv": Object {
+    "derivative": Object {
+      "buckets_path": "odh_node_query_latency__event_total",
+      "gap_policy": "skip",
+      "unit": "1s",
+    },
+  },
+}
+`;

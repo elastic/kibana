@@ -20,13 +20,13 @@
 import Stream, { PassThrough, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import {
   createConcatStream,
   createListStream,
   createPromiseFromStreams,
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import { createParseArchiveStreams } from '../parse';
 
@@ -159,6 +159,17 @@ describe('esArchiver createParseArchiveStreams', () => {
 
         expect(output).to.eql([{ a: 1 }, { a: 2 }]);
       });
+    });
+
+    it('parses blank files', async () => {
+      const output = await createPromiseFromStreams([
+        createListStream([]),
+        createGzip(),
+        ...createParseArchiveStreams(({ gzip: true })),
+        createConcatStream([])
+      ]);
+
+      expect(output).to.eql([]);
     });
 
     describe('stream errors', () => {

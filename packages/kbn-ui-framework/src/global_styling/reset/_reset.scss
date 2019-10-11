@@ -1,12 +1,3 @@
-// We apply brute force focus states to anything not coming from Eui
-// which has focus states designed at the component level.
-:focus {
-  &:not([class^="eui"]),
-  {
-    @include focus;
-  }
-}
-
 /**
  * 1. Required for IE11.
  */

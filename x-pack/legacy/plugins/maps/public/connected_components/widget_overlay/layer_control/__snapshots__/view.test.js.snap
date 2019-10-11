@@ -1,0 +1,188 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LayerControl is rendered 1`] = `
+<Fragment>
+  <EuiPanel
+    className="mapWidgetControl mapWidgetControl-hasShadow"
+    grow={false}
+    paddingSize="none"
+  >
+    <EuiFlexItem
+      className="mapWidgetControl__headerFlexItem"
+      grow={false}
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiTitle
+            className="mapWidgetControl__header"
+            size="xxxs"
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Layers"
+                id="xpack.maps.layerControl.layersTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
+            content="Collapse layers panel"
+            delay="long"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Collapse layers panel"
+              className="mapLayerControl__closeLayerTOCButton"
+              color="text"
+              data-test-subj="mapToggleLegendButton"
+              iconType="menuRight"
+              onClick={[Function]}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="mapLayerControl"
+    >
+      <LayerTOC />
+    </EuiFlexItem>
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButton
+    className="mapLayerControl__addLayerButton"
+    data-test-subj="addLayerButton"
+    fill={true}
+    fullWidth={true}
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Add layer"
+      id="xpack.maps.layerControl.addLayerButtonLabel"
+      values={Object {}}
+    />
+  </EuiButton>
+</Fragment>
+`;
+
+exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
+<EuiToolTip
+  content="Expand layers panel"
+  delay="long"
+  position="left"
+>
+  <EuiButtonIcon
+    aria-label="Expand layers panel"
+    className="mapLayerControl__openLayerTOCButton"
+    color="text"
+    iconType="menuLeft"
+    onClick={[Function]}
+  />
+</EuiToolTip>
+`;
+
+exports[`LayerControl isLayerTOCOpen Should render expand button with error icon when layer has error 1`] = `
+<EuiToolTip
+  content="Expand layers panel"
+  delay="long"
+  position="left"
+>
+  <EuiButtonIcon
+    aria-label="Expand layers panel"
+    className="mapLayerControl__openLayerTOCButton"
+    color="text"
+    iconType="alert"
+    onClick={[Function]}
+  />
+</EuiToolTip>
+`;
+
+exports[`LayerControl isLayerTOCOpen Should render expand button with loading icon when layer is loading 1`] = `
+<EuiToolTip
+  content="Expand layers panel"
+  delay="long"
+  position="left"
+>
+  <button
+    aria-label="Expand layers panel"
+    className="euiButtonIcon euiButtonIcon--text mapLayerControl__openLayerTOCButton"
+    onClick={[Function]}
+    type="button"
+  >
+    <EuiLoadingSpinner
+      size="m"
+    />
+  </button>
+</EuiToolTip>
+`;
+
+exports[`LayerControl isReadOnly 1`] = `
+<Fragment>
+  <EuiPanel
+    className="mapWidgetControl mapWidgetControl-hasShadow"
+    grow={false}
+    paddingSize="none"
+  >
+    <EuiFlexItem
+      className="mapWidgetControl__headerFlexItem"
+      grow={false}
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiTitle
+            className="mapWidgetControl__header"
+            size="xxxs"
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Layers"
+                id="xpack.maps.layerControl.layersTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
+            content="Collapse layers panel"
+            delay="long"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Collapse layers panel"
+              className="mapLayerControl__closeLayerTOCButton"
+              color="text"
+              data-test-subj="mapToggleLegendButton"
+              iconType="menuRight"
+              onClick={[Function]}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="mapLayerControl"
+    >
+      <LayerTOC />
+    </EuiFlexItem>
+  </EuiPanel>
+</Fragment>
+`;

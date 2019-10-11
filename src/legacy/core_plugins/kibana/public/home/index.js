@@ -26,8 +26,8 @@ import { uiModules } from 'ui/modules';
 import {
   HomeApp
 } from './components/home_app';
-import { recentlyAccessed } from 'ui/persisted_log';
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 
 const app = uiModules.get('apps/home', []);
 app.directive('homeApp', function (reactDirective) {
@@ -39,9 +39,9 @@ const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMess
 function getRoute() {
   return {
     template,
-    controller($scope, config, indexPatterns, Private) {
+    controller($scope, Private) {
       $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
-      $scope.recentlyAccessed = recentlyAccessed.get().map(item => {
+      $scope.recentlyAccessed = npStart.core.chrome.recentlyAccessed.get().map(item => {
         item.link = chrome.addBasePath(item.link);
         return item;
       });

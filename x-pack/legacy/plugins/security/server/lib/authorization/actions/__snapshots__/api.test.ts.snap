@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#get operation of "" throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of {} throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of 1 throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of null throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of true throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get operation of undefined throws error 1`] = `"operation is required and must be a string"`;

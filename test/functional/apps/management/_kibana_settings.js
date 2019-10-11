@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -28,8 +28,6 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern();
       await PageObjects.settings.navigateTo();
     });
@@ -37,6 +35,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.removeIndexPattern();
     });
 
@@ -48,10 +47,10 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('state:storeInSessionStorage', () => {
-      it ('defaults to false', async () => {
+      it ('defaults to null', async () => {
         await PageObjects.settings.clickKibanaSettings();
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be(false);
+        expect(storeInSessionStorage).to.be(null);
       });
 
       it('when false, dashboard state is unhashed', async function () {
@@ -74,7 +73,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be(true);
+        expect(storeInSessionStorage).to.be('true');
       });
 
       it('when true, dashboard state is hashed', async function () {

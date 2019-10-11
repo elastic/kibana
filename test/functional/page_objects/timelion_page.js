@@ -28,7 +28,6 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
   class TimelionPage {
     async initTests() {
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
 
@@ -68,6 +67,24 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
       await elements[suggestionIndex].click();
       // Wait for timelion expression to be updated after clicking suggestions
       await PageObjects.common.sleep(waitTime);
+    }
+
+    async saveTimelionSheet() {
+      await testSubjects.click('timelionSaveButton');
+      await testSubjects.click('timelionSaveAsSheetButton');
+      await testSubjects.click('timelionFinishSaveButton');
+      await testSubjects.existOrFail('timelionSaveSuccessToast');
+      await testSubjects.waitForDeleted('timelionSaveSuccessToast');
+    }
+
+    async expectWriteControls() {
+      await testSubjects.existOrFail('timelionSaveButton');
+      await testSubjects.existOrFail('timelionDeleteButton');
+    }
+
+    async expectMissingWriteControls() {
+      await testSubjects.missingOrFail('timelionSaveButton');
+      await testSubjects.missingOrFail('timelionDeleteButton');
     }
   }
 

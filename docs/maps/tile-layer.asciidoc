@@ -1,0 +1,19 @@
+[role="xpack"]
+[[tile-layer]]
+== Tile layer
+
+The tile layer displays image tiles served from a tile server.
+
+[role="screenshot"]
+image::maps/images/tile_layer.png[]
+
+You can create a tile layer from the following data sources:
+
+*Configured Tile Map Service*:: Tile map service configured in kibana.yml.
+See map.tilemap.url in <<settings>> for details.
+
+*EMS Basemaps*:: Tile map service from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
+
+*Tile Map Service*:: Tile map service configured in interface.
+
+*Web Map Service*:: Maps from OGC Standard WMS.

@@ -1,0 +1,2 @@
+- Embeddables have been moved to `/src/plugins/embeddable` NP plugin.
+- This legacy plugin is still there to make necessary CSS working, but soon will be completely deleted.

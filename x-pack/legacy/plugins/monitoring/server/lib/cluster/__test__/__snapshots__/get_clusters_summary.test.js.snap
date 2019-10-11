@@ -1,0 +1,427 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getClustersSummary should summarize cluster data with a primary cluster 1`] = `
+Array [
+  Object {
+    "alerts": Object {
+      "alertsMeta": Object {
+        "enabled": true,
+      },
+    },
+    "apm": undefined,
+    "beats": Object {
+      "beats": Object {
+        "total": null,
+        "types": Array [],
+      },
+      "bytesSent": null,
+      "totalEvents": null,
+    },
+    "ccs": "proddy1",
+    "cluster_name": "Custom name",
+    "cluster_uuid": "fOt6KT9KTICAMm2ncRhsMg",
+    "elasticsearch": Object {
+      "cluster_stats": Object {
+        "indices": Object {
+          "count": 1,
+          "docs": Object {
+            "count": 9,
+            "deleted": 0,
+          },
+          "shards": Object {
+            "index": Object {
+              "primaries": Object {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+              },
+              "replication": Object {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+              },
+              "shards": Object {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+              },
+            },
+            "primaries": 1,
+            "replication": 0,
+            "total": 1,
+          },
+          "store": Object {
+            "size_in_bytes": 37182,
+          },
+        },
+        "nodes": Object {
+          "count": Object {
+            "total": 1,
+          },
+          "fs": Object {
+            "available_in_bytes": 224468717568,
+            "free_in_bytes": 228403855360,
+            "total_in_bytes": 499963170816,
+          },
+          "jvm": Object {
+            "max_uptime_in_millis": 898395,
+            "mem": Object {
+              "heap_max_in_bytes": 731840512,
+              "heap_used_in_bytes": 273930776,
+            },
+          },
+        },
+        "status": "green",
+      },
+      "logs": undefined,
+    },
+    "isCcrEnabled": undefined,
+    "isPrimary": true,
+    "isSupported": true,
+    "kibana": Object {
+      "concurrent_connections": 1,
+      "count": 1,
+      "memory_limit": 1501560832,
+      "memory_size": 208977920,
+      "requests_total": 1,
+      "response_time_max": 69,
+      "status": "green",
+    },
+    "license": Object {
+      "expiry_date_in_millis": 1526499128764,
+      "status": "active",
+      "type": "trial",
+    },
+    "logstash": Object {
+      "avg_memory": 0,
+      "avg_memory_used": 0,
+      "events_in_total": 0,
+      "events_out_total": 0,
+      "max_uptime": 0,
+      "node_count": 0,
+      "pipeline_count": 0,
+      "versions": Array [],
+    },
+    "ml": undefined,
+    "status": "green",
+    "version": "7.0.0-alpha1",
+  },
+  Object {
+    "alerts": Object {
+      "alertsMeta": Object {
+        "enabled": true,
+      },
+    },
+    "apm": undefined,
+    "beats": Object {
+      "beats": Object {
+        "total": null,
+        "types": Array [],
+      },
+      "bytesSent": null,
+      "totalEvents": null,
+    },
+    "ccs": undefined,
+    "cluster_name": "monitoring-one",
+    "cluster_uuid": "F4hFnr5JQQayOzd8yG1rSg",
+    "elasticsearch": Object {
+      "cluster_stats": Object {
+        "indices": Object {
+          "count": 6,
+          "docs": Object {
+            "count": 557,
+            "deleted": 1,
+          },
+          "shards": Object {
+            "index": Object {
+              "primaries": Object {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+              },
+              "replication": Object {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+              },
+              "shards": Object {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+              },
+            },
+            "primaries": 6,
+            "replication": 0,
+            "total": 6,
+          },
+          "store": Object {
+            "size_in_bytes": 651556,
+          },
+        },
+        "nodes": Object {
+          "count": Object {
+            "total": 1,
+          },
+          "fs": Object {
+            "available_in_bytes": 224468783104,
+            "free_in_bytes": 228403920896,
+            "total_in_bytes": 499963170816,
+          },
+          "jvm": Object {
+            "max_uptime_in_millis": 922788,
+            "mem": Object {
+              "heap_max_in_bytes": 731840512,
+              "heap_used_in_bytes": 271001920,
+            },
+          },
+        },
+        "status": "green",
+      },
+      "logs": undefined,
+    },
+    "isCcrEnabled": undefined,
+    "isPrimary": false,
+    "isSupported": true,
+    "kibana": Object {
+      "concurrent_connections": 0,
+      "count": 0,
+      "memory_limit": 0,
+      "memory_size": 0,
+      "requests_total": 0,
+      "response_time_max": 0,
+      "status": null,
+    },
+    "license": Object {
+      "expiry_date_in_millis": 1526499102070,
+      "status": "active",
+      "type": "trial",
+    },
+    "logstash": Object {
+      "avg_memory": 0,
+      "avg_memory_used": 0,
+      "events_in_total": 0,
+      "events_out_total": 0,
+      "max_uptime": 0,
+      "node_count": 0,
+      "pipeline_count": 0,
+      "versions": Array [],
+    },
+    "ml": undefined,
+    "status": "green",
+    "version": "7.0.0-alpha1",
+  },
+]
+`;
+
+exports[`getClustersSummary should summarize cluster data with no primary cluster 1`] = `
+Array [
+  Object {
+    "alerts": Object {
+      "alertsMeta": Object {
+        "enabled": true,
+      },
+    },
+    "apm": undefined,
+    "beats": Object {
+      "beats": Object {
+        "total": null,
+        "types": Array [],
+      },
+      "bytesSent": null,
+      "totalEvents": null,
+    },
+    "ccs": "proddy1",
+    "cluster_name": "Custom name",
+    "cluster_uuid": "fOt6KT9KTICAMm2ncRhsMg",
+    "elasticsearch": Object {
+      "cluster_stats": Object {
+        "indices": Object {
+          "count": 1,
+          "docs": Object {
+            "count": 9,
+            "deleted": 0,
+          },
+          "shards": Object {
+            "index": Object {
+              "primaries": Object {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+              },
+              "replication": Object {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+              },
+              "shards": Object {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+              },
+            },
+            "primaries": 1,
+            "replication": 0,
+            "total": 1,
+          },
+          "store": Object {
+            "size_in_bytes": 37182,
+          },
+        },
+        "nodes": Object {
+          "count": Object {
+            "total": 1,
+          },
+          "fs": Object {
+            "available_in_bytes": 224468717568,
+            "free_in_bytes": 228403855360,
+            "total_in_bytes": 499963170816,
+          },
+          "jvm": Object {
+            "max_uptime_in_millis": 898395,
+            "mem": Object {
+              "heap_max_in_bytes": 731840512,
+              "heap_used_in_bytes": 273930776,
+            },
+          },
+        },
+        "status": "green",
+      },
+      "logs": undefined,
+    },
+    "isCcrEnabled": undefined,
+    "isPrimary": false,
+    "isSupported": true,
+    "kibana": Object {
+      "concurrent_connections": 1,
+      "count": 1,
+      "memory_limit": 1501560832,
+      "memory_size": 208977920,
+      "requests_total": 1,
+      "response_time_max": 69,
+      "status": "green",
+    },
+    "license": Object {
+      "expiry_date_in_millis": 1526499128764,
+      "status": "active",
+      "type": "trial",
+    },
+    "logstash": Object {
+      "avg_memory": 0,
+      "avg_memory_used": 0,
+      "events_in_total": 0,
+      "events_out_total": 0,
+      "max_uptime": 0,
+      "node_count": 0,
+      "pipeline_count": 0,
+      "versions": Array [],
+    },
+    "ml": undefined,
+    "status": "green",
+    "version": "7.0.0-alpha1",
+  },
+  Object {
+    "alerts": Object {
+      "alertsMeta": Object {
+        "enabled": true,
+      },
+    },
+    "apm": undefined,
+    "beats": Object {
+      "beats": Object {
+        "total": null,
+        "types": Array [],
+      },
+      "bytesSent": null,
+      "totalEvents": null,
+    },
+    "ccs": undefined,
+    "cluster_name": "monitoring-one",
+    "cluster_uuid": "F4hFnr5JQQayOzd8yG1rSg",
+    "elasticsearch": Object {
+      "cluster_stats": Object {
+        "indices": Object {
+          "count": 6,
+          "docs": Object {
+            "count": 557,
+            "deleted": 1,
+          },
+          "shards": Object {
+            "index": Object {
+              "primaries": Object {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+              },
+              "replication": Object {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+              },
+              "shards": Object {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+              },
+            },
+            "primaries": 6,
+            "replication": 0,
+            "total": 6,
+          },
+          "store": Object {
+            "size_in_bytes": 651556,
+          },
+        },
+        "nodes": Object {
+          "count": Object {
+            "total": 1,
+          },
+          "fs": Object {
+            "available_in_bytes": 224468783104,
+            "free_in_bytes": 228403920896,
+            "total_in_bytes": 499963170816,
+          },
+          "jvm": Object {
+            "max_uptime_in_millis": 922788,
+            "mem": Object {
+              "heap_max_in_bytes": 731840512,
+              "heap_used_in_bytes": 271001920,
+            },
+          },
+        },
+        "status": "green",
+      },
+      "logs": undefined,
+    },
+    "isCcrEnabled": undefined,
+    "isPrimary": false,
+    "isSupported": true,
+    "kibana": Object {
+      "concurrent_connections": 0,
+      "count": 0,
+      "memory_limit": 0,
+      "memory_size": 0,
+      "requests_total": 0,
+      "response_time_max": 0,
+      "status": null,
+    },
+    "license": Object {
+      "expiry_date_in_millis": 1526499102070,
+      "status": "active",
+      "type": "trial",
+    },
+    "logstash": Object {
+      "avg_memory": 0,
+      "avg_memory_used": 0,
+      "events_in_total": 0,
+      "events_out_total": 0,
+      "max_uptime": 0,
+      "node_count": 0,
+      "pipeline_count": 0,
+      "versions": Array [],
+    },
+    "ml": undefined,
+    "status": "green",
+    "version": "7.0.0-alpha1",
+  },
+]
+`;

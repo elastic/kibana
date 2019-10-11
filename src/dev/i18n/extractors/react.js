@@ -30,7 +30,7 @@ import {
   checkValuesProperty,
 } from '../utils';
 import { DEFAULT_MESSAGE_KEY, VALUES_KEY, DESCRIPTION_KEY } from '../constants';
-import { createFailError } from '../../run';
+import { createFailError } from '@kbn/dev-utils';
 
 /**
  * Extract default messages from ReactJS intl.formatMessage(...) AST
@@ -57,7 +57,7 @@ export function extractIntlMessages(node) {
     : undefined;
 
   if (!messageId) {
-    createFailError(`Empty "id" value in intl.formatMessage() is not allowed.`);
+    throw createFailError(`Empty "id" value in intl.formatMessage() is not allowed.`);
   }
 
   const message = messageProperty

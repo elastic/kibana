@@ -1,0 +1,121 @@
+[role="xpack"]
+[[maps-search]]
+== Searching your data
+
+**Elastic Maps** embeds the search bar for real-time search.
+Only layers requesting data from {es} are filtered when you submit a search request.
+Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] to the right of layer name in the legend.
+
+You can create a layer that requests data from {es} from the following:
+
+* <<vector-layer>> with:
+
+** Documents source
+
+** Grid aggregation source
+
+** <<terms-join>>. The search context is applied to both the terms join and the vector source when the vector source is provided by Elasticsearch documents.
+
+* <<heatmap-layer>> with Grid aggregation source
+
+[role="screenshot"]
+image::maps/images/global_search_bar.png[]
+
+[role="xpack"]
+[[maps-create-filter-from-map]]
+=== Creating filters from your map
+
+You can create two types of filters by interacting with your map:
+
+* <<maps-spatial-filters, Spatial filters>>
+* <<maps-phrase-filter, Phrase filters>>
+
+[float]
+[[maps-spatial-filters]]
+==== Spatial filters
+
+A spatial filter narrows search results to documents that either intersect with, are within, or do not intersect with the specified geometry.
+
+You can create spatial filters in two ways:
+
+* Click the tool icon image:maps/images/tools_icon.png[], and then draw a polygon or bounding box on the map to define the spatial filter.
+* Click *Filter by geometry* in a tooltip, and then use the feature's geometry for the spatial filter.
++
+[role="screenshot"]
+image::maps/images/create_spatial_filter.png[]
+
+Spatial filters have the following properties:
+
+* *Geometry label* enables you to provide a meaningful name for your spatial filter.
+* *Spatial field* specifies the geo_point or geo_shape field used to determine if a document matches the spatial relation with the specified geometry.
+* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations[spatial relation operator] to use at search time. Only available when *Spatial field* is set to geo_shape.
+
+[float]
+[[maps-phrase-filter]]
+==== Phrase filters
+
+A phrase filter narrows search results to documents that contain the specified text.
+You can create a phrase filter by clicking the plus icon image:maps/images/gs_plus_icon.png[] in a feature tooltip.
+
+[role="screenshot"]
+image::maps/images/create_phrase_filter.png[]
+
+[role="xpack"]
+[[maps-layer-based-filtering]]
+=== Filtering a single layer
+
+You can apply a search request to individual layers by setting `Filters` in the layer details panel.
+Click the *Add filter* button to add a filter to a layer.
+
+NOTE: Layer filters are not applied to *term joins*. You can apply a search request to *term joins* by setting the *where* clause in the join definition.
+
+[role="screenshot"]
+image::maps/images/layer_search.png[]
+
+[role="xpack"]
+[[maps-search-across-multiple-indices]]
+=== Searching across multiple indices
+
+Your map might contain multiple {es} indices.
+This can occur when your map contains two or more layers with {es} sources from different indices.
+This can also occur with a single layer with an {es} source and a <<terms-join>>.
+
+Searching across multiple indices might sometimes result in empty layers.
+The most common cause for empty layers are searches for a field that exists in one index, but does not exist in other indices.
+
+[float]
+[[maps-disable-search-for-layer]]
+==== Disable search for layer
+
+To prevent the global search bar from applying search context to a layer, clear the *Apply global filter to layer* checkbox in Layer settings.
+Disabling the search context applies to the layer source and all <<terms-join, term joins>> configured for the layer.
+
+[float]
+[[maps-add-index-search]]
+==== Use _index in your search
+
+Add {ref}/mapping-index-field.html[_index] to your search to include documents from indices that do not contain a search field.
+
+For example, suppose you have a vector layer showing the `kibana_sample_data_logs` documents
+and another vector layer with `kibana_sample_data_flights` documents.
+(See <<add-sample-data, adding sample data>>
+to install the `kibana_sample_data_logs` and `kibana_sample_data_flights` indices.)
+
+If you query for
+--------------------------------------------------
+machine.os.keyword : "osx"
+--------------------------------------------------
+the `kibana_sample_data_flights` layer is empty because the index
+`kibana_sample_data_flights` does not contain the field `machine.os.keyword` and no documents match the query.
+
+[role="screenshot"]
+image::maps/images/global_search_multiple_indices_query1.png[]
+
+If you instead query for
+--------------------------------------------------
+machine.os.keyword : "osx" or _index : "kibana_sample_data_flights"
+--------------------------------------------------
+the `kibana_sample_data_flights` layer includes data.
+
+[role="screenshot"]
+image::maps/images/global_search_multiple_indices_query2.png[]

@@ -478,7 +478,7 @@ export function heartbeatStatusCheck() {
   };
 }
 
-export function onPremInstructions(platforms, geoipRequired, uaRequired, context) {
+export function onPremInstructions(platforms, context) {
   const HEARTBEAT_INSTRUCTIONS = createHeartbeatInstructions(context);
 
   return {

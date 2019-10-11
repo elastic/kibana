@@ -1,0 +1,7 @@
+repos:
+    - url: 'https://github.com/javaee-samples/javaee7-simple-sample.git'
+      path: '/tmp/test/code/repos/github.com/javaee-samples/javaee7-simple-sample'
+      language: 'java'
+    - url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git'
+      path: '/tmp/test/code/repos/github.com/Microsoft/TypeScript-Node-Starter'
+      language: 'ts'

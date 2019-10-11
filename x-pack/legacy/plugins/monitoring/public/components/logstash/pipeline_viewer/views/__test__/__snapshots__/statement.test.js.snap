@@ -1,0 +1,157 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Statement component renders a CollapsibleStatement with else body for non-IfElement 1`] = `
+<li
+  className="monPipelineViewer__listItem"
+>
+  <div
+    className="monPipelineViewer__spaceContainer"
+  />
+  <CollapsibleStatement
+    collapse={[MockFunction]}
+    expand={[MockFunction]}
+    id="mutate2"
+    isCollapsed={false}
+  >
+    <EuiFlexItem
+      grow={false}
+      key="statementName"
+    >
+      <EuiButtonEmpty
+        aria-label="else"
+        color="text"
+        flush="left"
+        onClick={[Function]}
+        size="xs"
+      >
+        <span
+          className="monPipelineViewer__conditional"
+        >
+          else
+        </span>
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </CollapsibleStatement>
+</li>
+`;
+
+exports[`Statement component renders a CollapsibleStatement with if body for branch model 1`] = `
+<li
+  className="monPipelineViewer__listItem"
+>
+  <div
+    className="monPipelineViewer__spaceContainer"
+  />
+  <CollapsibleStatement
+    collapse={[MockFunction]}
+    expand={[MockFunction]}
+    id="ifStatement"
+    isCollapsed={false}
+  >
+    <EuiFlexItem
+      grow={false}
+      key="statementName"
+    >
+      <EuiButtonEmpty
+        aria-label="if"
+        color="text"
+        flush="left"
+        onClick={[Function]}
+        size="xs"
+      >
+        <span
+          className="monPipelineViewer__conditional"
+        >
+          if
+        </span>
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+      key="ifContent"
+    >
+      <EuiCodeBlock
+        fontSize="s"
+        paddingSize="none"
+        transparentBackground={true}
+      />
+    </EuiFlexItem>
+  </CollapsibleStatement>
+</li>
+`;
+
+exports[`Statement component renders a PluginStatement component for plugin model 1`] = `
+<li
+  className="monPipelineViewer__listItem"
+>
+  <div
+    className="monPipelineViewer__spaceContainer"
+  />
+  <PluginStatement
+    onShowVertexDetails={[MockFunction]}
+    statement={
+      PluginStatement {
+        "hasExplicitId": true,
+        "id": "mutate2",
+        "meta": null,
+        "name": "mutate",
+        "pluginType": "filter",
+        "stats": Array [],
+        "vertex": Object {
+          "hasExplicitId": true,
+          "id": "mutate2",
+          "latestEventsPerSecond": 23,
+          "meta": null,
+          "name": "mutate",
+          "pluginType": "filter",
+          "stats": Array [],
+        },
+      }
+    }
+  />
+</li>
+`;
+
+exports[`Statement component renders spacers for element with depth > 0 1`] = `
+<li
+  className="monPipelineViewer__listItem"
+>
+  <div
+    className="monPipelineViewer__spaceContainer"
+  >
+    <div
+      className="monPipelineViewer__spacer"
+      key="spacer_0"
+    />
+    <div
+      className="monPipelineViewer__spacer"
+      key="spacer_1"
+    />
+  </div>
+  <CollapsibleStatement
+    collapse={[MockFunction]}
+    expand={[MockFunction]}
+    id="mutate2"
+    isCollapsed={false}
+  >
+    <EuiFlexItem
+      grow={false}
+      key="statementName"
+    >
+      <EuiButtonEmpty
+        aria-label="else"
+        color="text"
+        flush="left"
+        onClick={[Function]}
+        size="xs"
+      >
+        <span
+          className="monPipelineViewer__conditional"
+        >
+          else
+        </span>
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </CollapsibleStatement>
+</li>
+`;

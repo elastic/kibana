@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -121,19 +121,13 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      it('should return to index pattern creation page', function returnToPage() {
-        return retry.try(function tryingForTime() {
-          return PageObjects.settings.getCreateIndexPatternGoToStep2Button();
-        });
-      });
-
-      it('should remove index pattern from url', function indexNotInUrl() {
+      it('should return to index pattern list', function indexNotInUrl() {
         // give the url time to settle
         return retry.try(function tryingForTime() {
           return browser.getCurrentUrl()
             .then(function (currentUrl) {
               log.debug('currentUrl = ' + currentUrl);
-              expect(currentUrl).to.not.contain('logstash-*');
+              expect(currentUrl).to.contain('management/kibana/index_patterns');
             });
         });
       });

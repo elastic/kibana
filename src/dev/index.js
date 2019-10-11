@@ -20,7 +20,7 @@
 export {
   createAutoJUnitReporter,
   setupJUnitReportGeneration,
-} from './mocha';
+} from '@kbn/test';
 
 export {
   generateNoticeFromSource,

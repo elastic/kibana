@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
+import expect from '@kbn/expect';
+import { ES_INDEX_NAME } from './constants';
 import moment from 'moment';
 
 export default function ({ getService }) {
@@ -25,6 +25,7 @@ export default function ({ getService }) {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
         'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
         'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI';
+
       const version =
         chance.integer({ min: 1, max: 10 }) +
         '.' +
@@ -42,7 +43,6 @@ export default function ({ getService }) {
 
       await es.index({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `enrollment_token:${validEnrollmentToken}`,
         body: {
           type: 'enrollment_token',
@@ -63,13 +63,17 @@ export default function ({ getService }) {
       await supertest
         .put(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')
-        .set('kbn-beats-access-token', validEnrollmentToken)
+        .set(
+          'kbn-beats-access-token',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+            'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
+            'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI'
+        )
         .send(beat)
-        .expect(204);
+        .expect(200);
 
       const beatInEs = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:${beatId}`,
       });
 
@@ -90,11 +94,10 @@ export default function ({ getService }) {
         .send(beat)
         .expect(401);
 
-      expect(body.message).to.be('Invalid access token');
+      expect(body.error.message).to.be('Invalid access token');
 
       const beatInEs = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:${beatId}`,
       });
 
@@ -114,7 +117,7 @@ export default function ({ getService }) {
         .send(beat)
         .expect(404);
 
-      expect(body.message).to.be('Beat not found');
+      expect(body.error.message).to.be('Beat not found');
     });
   });
 }

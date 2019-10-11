@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`draggables rendering it renders the default Badge 1`] = `
+<Component
+  contextId="context-id"
+  eventId="event-id"
+  field="some-field"
+  iconType="number"
+  queryValue="some-query-value"
+  value="some-value"
+>
+  <span>
+    A child of this
+  </span>
+</Component>
+`;
+
+exports[`draggables rendering it renders the default DefaultDraggable 1`] = `
+<Component
+  field="some-field"
+  id="draggable-id"
+  queryValue="some-query-value"
+  value="some-value"
+>
+  <span>
+    A child of this
+  </span>
+</Component>
+`;

@@ -1,0 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import * as euiVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { stringHash } from './string_utils';
+
+
+const COLORS = [
+  euiVars.euiColorVis0,
+  euiVars.euiColorVis1,
+  euiVars.euiColorVis2,
+  euiVars.euiColorVis3,
+  // euiVars.euiColorVis4, // light pink, too hard to read with white text
+  euiVars.euiColorVis5,
+  euiVars.euiColorVis6,
+  euiVars.euiColorVis7,
+  euiVars.euiColorVis8,
+  euiVars.euiColorVis9,
+  euiVars.euiColorDarkShade,
+  euiVars.euiColorPrimary
+];
+
+const colorMap = {};
+
+export function tabColor(name) {
+  if (colorMap[name] === undefined) {
+    const n = stringHash(name);
+    const color = COLORS[(n % COLORS.length)];
+    colorMap[name] = color;
+    return color;
+  } else {
+    return colorMap[name];
+  }
+}

@@ -1,3 +1,4 @@
+[role="xpack"]
 [[index-lifecycle-policies]]
 == Index lifecycle policies
 

@@ -2,12 +2,6 @@
   "type": "index",
   "value": {
     "index": "geo_shapes",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "0"
-      }
-    },
     "mappings": {
       "properties": {
         "geometry": {
@@ -15,7 +9,16 @@
         },
         "name": {
           "type": "keyword"
+        },
+        "prop1": {
+          "type": "byte"
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }
@@ -25,17 +28,17 @@
   "type": "index",
   "value": {
     "index": "meta_for_geo_shapes",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "0"
-      }
-    },
     "mappings": {
       "properties": {
         "shape_name": {
           "type": "keyword"
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }
@@ -45,17 +48,17 @@
   "type": "index",
   "value": {
     "index": "antimeridian_points",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "0"
-      }
-    },
     "mappings": {
       "properties": {
         "location": {
           "type": "geo_point"
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }
@@ -65,17 +68,66 @@
   "type": "index",
   "value": {
     "index": "antimeridian_shapes",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "0"
-      }
-    },
     "mappings": {
       "properties": {
         "location": {
           "type": "geo_shape"
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "flights",
+    "mappings": {
+      "properties": {
+        "location": {
+          "type": "geo_point"
+        },
+        "heading": {
+          "type": "integer"
+        },
+        "altitude": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "connections",
+    "mappings": {
+      "properties": {
+        "source": {
+          "type": "geo_point"
+        },
+        "destination": {
+          "type": "geo_point"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }

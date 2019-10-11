@@ -22,8 +22,9 @@ import { dirname } from 'path';
 
 import chalk from 'chalk';
 import { createHash } from 'crypto';
-import wreck from 'wreck';
-import mkdirp from 'mkdirp';
+import wreck from '@hapi/wreck';
+
+import { mkdirp } from '../../lib';
 
 function tryUnlink(path) {
   try {
@@ -39,13 +40,11 @@ export async function download(options) {
   const { log, url, destination, sha256, retries = 0 } = options;
 
   if (!sha256) {
-    throw new Error(
-      `sha256 checksum of ${url} not provided, refusing to download.`
-    );
+    throw new Error(`sha256 checksum of ${url} not provided, refusing to download.`);
   }
 
   // mkdirp and open file outside of try/catch, we don't retry for those errors
-  mkdirp.sync(dirname(destination));
+  await mkdirp(dirname(destination));
   const fileHandle = openSync(destination, 'w');
 
   let error;
@@ -55,9 +54,7 @@ export async function download(options) {
     const response = await wreck.request('GET', url);
 
     if (response.statusCode !== 200) {
-      throw new Error(
-        `Unexpected status code ${response.statusCode} when downloading ${url}`
-      );
+      throw new Error(`Unexpected status code ${response.statusCode} when downloading ${url}`);
     }
 
     const hash = createHash('sha256');

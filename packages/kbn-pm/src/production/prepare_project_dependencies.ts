@@ -21,7 +21,8 @@ import { isLinkDependency } from '../utils/package_json';
 import { Project } from '../utils/project';
 
 /**
- * All external projects are located within `../kibana-extra/{plugin}` relative
+ * All external projects are located within `./plugins/{plugin}` relative
+ * to the Kibana root directory or `../kibana-extra/{plugin}` relative
  * to Kibana itself.
  */
 const isKibanaDep = (depVersion: string) => depVersion.includes('../../kibana/');

@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
 
-  describe('maps loaded from sample data', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/38137
+  describe.skip('maps loaded from sample data', () => {
 
     // Sample data is shifted to be relative to current time
     // This means that a static timerange will return different documents
@@ -21,7 +22,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       past.setMonth(past.getMonth() - 6);
       const future = new Date();
       future.setMonth(future.getMonth() + 6);
-      await PageObjects.timePicker.setAbsoluteRange(
+      await PageObjects.maps.setAbsoluteRange(
         PageObjects.timePicker.formatDateToAbsoluteTimeString(past),
         PageObjects.timePicker.formatDateToAbsoluteTimeString(future)
       );
@@ -34,13 +35,12 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('ecommerce');
         await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
-        await PageObjects.maps.toggleLayerVisibility('road_map');
+        await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.maps.toggleLayerVisibility('United Kingdom');
         await PageObjects.maps.toggleLayerVisibility('France');
         await PageObjects.maps.toggleLayerVisibility('United States');
         await PageObjects.maps.toggleLayerVisibility('World Countries');
         await setTimerangeToCoverAllSampleData();
-        await PageObjects.maps.waitForLayersToLoad();
         await PageObjects.maps.enterFullScreen();
       });
 
@@ -63,9 +63,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('flights');
         await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
-        await PageObjects.maps.toggleLayerVisibility('road_map');
+        await PageObjects.maps.toggleLayerVisibility('Road map');
         await setTimerangeToCoverAllSampleData();
-        await PageObjects.maps.waitForLayersToLoad();
         await PageObjects.maps.enterFullScreen();
       });
 
@@ -89,10 +88,9 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
-        await PageObjects.maps.toggleLayerVisibility('road_map');
+        await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
         await setTimerangeToCoverAllSampleData();
-        await PageObjects.maps.waitForLayersToLoad();
         await PageObjects.maps.enterFullScreen();
       });
 

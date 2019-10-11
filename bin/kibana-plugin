@@ -21,4 +21,4 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
-NODE_ENV=production exec "${NODE}" $NODE_OPTIONS --no-warnings "${DIR}/src/cli_plugin" "$@"
+NODE_OPTIONS="--no-warnings ${NODE_OPTIONS}" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli_plugin" "$@"

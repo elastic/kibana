@@ -19,28 +19,28 @@
 
 import Joi from 'joi';
 import Boom from 'boom';
-import Wreck from 'wreck';
 import { trimLeft, trimRight } from 'lodash';
+import { sendRequest } from './request';
+import * as url from 'url';
 
-function resolveUri(base, path) {
-  let pathToUse = `${trimRight(base, '/')}/${trimLeft(path, '/')}`;
-  const questionMarkIndex = pathToUse.indexOf('?');
-  // no query string in pathToUse, append '?pretty'
-  if (questionMarkIndex === -1) {
-    pathToUse = `${pathToUse}?pretty`;
-  } else {
-    // pathToUse has query string, append '&pretty'
-    pathToUse = `${pathToUse}&pretty`;
+function toURL(base, path) {
+  const urlResult = new url.URL(`${trimRight(base, '/')}/${trimLeft(path, '/')}`);
+  // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
+  // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
+  // measurement precision)
+  if (!urlResult.searchParams.get('pretty')) {
+    urlResult.searchParams.append('pretty', 'true');
   }
-  return pathToUse;
-}
-
-function extendCommaList(obj, property, value) {
-  obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
+  return urlResult;
 }
 
 function getProxyHeaders(req) {
-  const headers = {};
+  const headers = Object.create(null);
+
+  // Scope this proto-unsafe functionality to where it is being used.
+  function extendCommaList(obj, property, value) {
+    obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
+  }
 
   if (req.info.remotePort && req.info.remoteAddress) {
     // see https://git.io/vytQ7
@@ -54,7 +54,6 @@ function getProxyHeaders(req) {
   if (contentType) {
     headers['content-type'] = contentType;
   }
-
   return headers;
 }
 
@@ -66,19 +65,21 @@ export const createProxyRoute = ({
   path: '/api/console/proxy',
   method: 'POST',
   config: {
+    tags: ['access:console'],
     payload: {
       output: 'stream',
-      parse: false
+      parse: false,
     },
-
     validate: {
-      query: Joi.object().keys({
-        method: Joi.string()
-          .valid('HEAD', 'GET', 'POST', 'PUT', 'DELETE')
-          .insensitive()
-          .required(),
-        path: Joi.string().required()
-      }).unknown(true),
+      query: Joi.object()
+        .keys({
+          method: Joi.string()
+            .valid('HEAD', 'GET', 'POST', 'PUT', 'DELETE')
+            .insensitive()
+            .required(),
+          path: Joi.string().required(),
+        })
+        .unknown(true),
     },
 
     pre: [
@@ -99,38 +100,47 @@ export const createProxyRoute = ({
     handler: async (req, h) => {
       const { payload, query } = req;
       const { path, method } = query;
-      const uri = resolveUri(baseUrl, path);
+      const uri = toURL(baseUrl, path);
 
-      const {
-        timeout,
-        rejectUnauthorized,
-        agent,
-        headers,
-      } = getConfigForReq(req, uri);
+      // Because this can technically be provided by a settings-defined proxy config, we need to
+      // preserve these property names to maintain BWC.
+      const { timeout, agent, headers, rejectUnauthorized } = getConfigForReq(req, uri.toString());
 
-      const wreckOptions = {
-        payload,
-        timeout,
-        rejectUnauthorized,
-        agent,
-        headers: {
-          ...headers,
-          ...getProxyHeaders(req)
-        },
+      const requestHeaders = {
+        ...headers,
+        ...getProxyHeaders(req),
       };
 
-      const esResponse = await Wreck.request(method, uri, wreckOptions);
+      const esIncomingMessage = await sendRequest({
+        method,
+        headers: requestHeaders,
+        uri,
+        timeout,
+        payload,
+        rejectUnauthorized,
+        agent,
+      });
+
+      const {
+        statusCode,
+        statusMessage,
+        headers: responseHeaders,
+      } = esIncomingMessage;
+
+      const { warning } = responseHeaders;
 
       if (method.toUpperCase() !== 'HEAD') {
-        return h.response(esResponse)
-          .code(esResponse.statusCode)
-          .header('warning', esResponse.headers.warning);
+        return h
+          .response(esIncomingMessage)
+          .code(statusCode)
+          .header('warning', warning);
+      } else {
+        return h
+          .response(`${statusCode} - ${statusMessage}`)
+          .code(statusCode)
+          .type('text/plain')
+          .header('warning', warning);
       }
-
-      return h.response(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
-        .code(esResponse.statusCode)
-        .type('text/plain')
-        .header('warning', esResponse.headers.warning);
-    }
-  }
+    },
+  },
 });

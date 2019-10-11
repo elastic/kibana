@@ -35,6 +35,7 @@ import {
   EuiFlexGrid,
   EuiText,
   EuiPageBody,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
 import { Welcome } from './welcome';
@@ -116,7 +117,7 @@ export class Home extends Component {
       })
       .map(directory => {
         return (
-          <EuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
+          <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
             <Synopsis
               description={directory.description}
               iconType={directory.icon}
@@ -132,8 +133,17 @@ export class Home extends Component {
     const { apmUiEnabled, mlEnabled } = this.props;
 
     return (
-      <EuiPage className="homPage">
-        <EuiPageBody>
+      <EuiPage restrictWidth={1200}>
+        <EuiPageBody className="eui-displayBlock">
+
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="kbn.home.welcomeHomePageHeader"
+                defaultMessage="Kibana home"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
 
           <AddData
             apmUiEnabled={apmUiEnabled}
@@ -147,15 +157,15 @@ export class Home extends Component {
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
                 <EuiTitle size="s">
-                  <h3>
+                  <h2>
                     <FormattedMessage
                       id="kbn.home.directories.visualize.nameTitle"
                       defaultMessage="Visualize and Explore Data"
                     />
-                  </h3>
+                  </h2>
                 </EuiTitle>
                 <EuiSpacer size="m" />
-                <EuiFlexGrid columns={2}>
+                <EuiFlexGrid columns={2} gutterSize="s">
                   {this.renderDirectories(FeatureCatalogueCategory.DATA)}
                 </EuiFlexGrid>
               </EuiPanel>
@@ -163,12 +173,12 @@ export class Home extends Component {
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
                 <EuiTitle size="s">
-                  <h3>
+                  <h2>
                     <FormattedMessage
                       id="kbn.home.directories.manage.nameTitle"
                       defaultMessage="Manage and Administer the Elastic Stack"
                     />
-                  </h3>
+                  </h2>
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiFlexGrid columns={2}>
@@ -215,6 +225,10 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
+        shouldShowTelemetryOptIn={this.props.shouldShowTelemetryOptIn}
+        fetchTelemetry={this.props.fetchTelemetry}
+        setOptIn={this.props.setOptIn}
+        getTelemetryBannerId={this.props.getTelemetryBannerId}
       />
     );
   }
@@ -237,6 +251,10 @@ export class Home extends Component {
 
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
+  fetchTelemetry: PropTypes.func.isRequired,
+  getTelemetryBannerId: PropTypes.func.isRequired,
+  setOptIn: PropTypes.func.isRequired,
+  shouldShowTelemetryOptIn: PropTypes.bool.isRequired,
   directories: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

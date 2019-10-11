@@ -17,35 +17,85 @@
  * under the License.
  */
 
-import { ObjectType, Schema } from '@kbn/config-schema';
-export type RouteMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+import { ObjectType } from '@kbn/config-schema';
+/**
+ * The set of common HTTP methods supported by Kibana routing.
+ * @public
+ */
+export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
 
+/**
+ * Additional route options.
+ * @public
+ */
+export interface RouteConfigOptions {
+  /**
+   * A flag shows that authentication for a route:
+   * `enabled`  when true
+   * `disabled` when false
+   *
+   * Enabled by default.
+   */
+  authRequired?: boolean;
+
+  /**
+   * Additional metadata tag strings to attach to the route.
+   */
+  tags?: readonly string[];
+}
+
+/**
+ * Route specific configuration.
+ * @public
+ */
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
   /**
    * The endpoint _within_ the router path to register the route. E.g. if the
    * router is registered at `/elasticsearch` and the route path is `/search`,
    * the full path for the route is `/elasticsearch/search`.
+   * Supports:
+   *   - named path segments `path/{name}`.
+   *   - optional path segments `path/{position?}`.
+   *   - multi-segments `path/{coordinates*2}`.
+   * Segments are accessible within a handler function as `params` property of {@link KibanaRequest} object.
+   * To have read access to `params` you *must* specify validation schema with {@link RouteConfig.validate}.
    */
   path: string;
 
   /**
-   * A function that will be called when setting up the route and that returns
-   * a schema that every request will be validated against.
-   *
+   * A schema created with `@kbn/config-schema` that every request will be validated against.
+   * You *must* specify a validation schema to be able to read:
+   *   - url path segments
+   *   - request query
+   *   - request body
    * To opt out of validating the request, specify `false`.
+   * @example
+   * ```ts
+   *  import { schema } from '@kbn/config-schema';
+   *  router.get({
+   *   path: 'path/{id}'
+   *   validate: {
+   *     params: schema.object({
+   *       id: schema.string(),
+   *     }),
+   *     query: schema.object({...}),
+   *     body: schema.object({...}),
+   *   },
+   *  })
+   * ```
    */
-  validate: RouteValidateFactory<P, Q, B> | false;
-}
+  validate: RouteSchemas<P, Q, B> | false;
 
-export type RouteValidateFactory<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType
-> = (schema: Schema) => RouteSchemas<P, Q, B>;
+  /**
+   * Additional route options {@link RouteConfigOptions}.
+   */
+  options?: RouteConfigOptions;
+}
 
 /**
  * RouteSchemas contains the schemas for validating the different parts of a
  * request.
+ * @public
  */
 export interface RouteSchemas<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
   params?: P;

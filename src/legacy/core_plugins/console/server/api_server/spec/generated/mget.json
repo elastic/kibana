@@ -1,0 +1,24 @@
+{
+  "mget": {
+    "url_params": {
+      "stored_fields": [],
+      "preference": "random",
+      "realtime": "__flag__",
+      "refresh": "__flag__",
+      "routing": "",
+      "_source": [],
+      "_source_excludes": [],
+      "_source_includes": []
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_mget",
+      "{indices}/_mget",
+      "{indices}/{type}/_mget"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-get.html"
+  }
+}

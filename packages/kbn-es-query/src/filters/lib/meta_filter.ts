@@ -35,10 +35,11 @@ export interface FilterMeta {
   alias: string | null;
   key?: string;
   value?: string;
+  params?: any;
 }
 
 export interface Filter {
-  $state: FilterState;
+  $state?: FilterState;
   meta: FilterMeta;
   query?: any;
 }
@@ -62,7 +63,7 @@ export function buildEmptyFilter(isPinned: boolean, index?: string): Filter {
 }
 
 export function isFilterPinned(filter: Filter) {
-  return filter.$state.store === FilterStateStore.GLOBAL_STATE;
+  return filter.$state && filter.$state.store === FilterStateStore.GLOBAL_STATE;
 }
 
 export function toggleFilterDisabled(filter: Filter) {

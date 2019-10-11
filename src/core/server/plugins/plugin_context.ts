@@ -17,28 +17,11 @@
  * under the License.
  */
 
-import { Type } from '@kbn/config-schema';
-import { Observable } from 'rxjs';
-import { CoreContext } from '../../types';
-import { ConfigWithSchema, EnvironmentMode } from '../config';
-import { LoggerFactory } from '../logging';
-import { Plugin, PluginManifest } from './plugin';
-
-export interface PluginInitializerContext {
-  env: { mode: EnvironmentMode };
-  logger: LoggerFactory;
-  config: {
-    create: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config>;
-    createIfExists: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config | undefined>;
-  };
-}
-
-// tslint:disable no-empty-interface
-export interface PluginStartContext {}
+import { CoreContext } from '../core_context';
+import { PluginWrapper } from './plugin';
+import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
+import { CoreSetup, CoreStart } from '..';
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -55,9 +38,12 @@ export interface PluginStartContext {}
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
+  opaqueId: PluginOpaqueId,
   pluginManifest: PluginManifest
 ): PluginInitializerContext {
   return {
+    opaqueId,
+
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
      */
@@ -83,12 +69,56 @@ export function createPluginInitializerContext(
        * @param ConfigClass A class (not an instance of a class) that contains a
        * static `schema` that we validate the config at the given `path` against.
        */
-      create(ConfigClass) {
-        return coreContext.configService.atPath(pluginManifest.configPath, ConfigClass);
+      create() {
+        return coreContext.configService.atPath(pluginManifest.configPath);
       },
-      createIfExists(ConfigClass) {
-        return coreContext.configService.optionalAtPath(pluginManifest.configPath, ConfigClass);
+      createIfExists() {
+        return coreContext.configService.optionalAtPath(pluginManifest.configPath);
       },
+    },
+  };
+}
+
+/**
+ * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.
+ * This facade should be safe to use only within `setup` itself.
+ *
+ * This is called for each plugin when it's set up, so each plugin gets its own
+ * version of these values.
+ *
+ * We should aim to be restrictive and specific in the APIs that we expose.
+ *
+ * @param coreContext Kibana core context
+ * @param plugin The plugin we're building these values for.
+ * @param deps Dependencies that Plugins services gets during setup.
+ * @internal
+ */
+export function createPluginSetupContext<TPlugin, TPluginDependencies>(
+  coreContext: CoreContext,
+  deps: PluginsServiceSetupDeps,
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+): CoreSetup {
+  return {
+    context: {
+      createContextContainer: deps.context.createContextContainer,
+    },
+    elasticsearch: {
+      adminClient$: deps.elasticsearch.adminClient$,
+      dataClient$: deps.elasticsearch.dataClient$,
+      createClient: deps.elasticsearch.createClient,
+    },
+    http: {
+      createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
+      registerRouteHandlerContext: deps.http.registerRouteHandlerContext.bind(
+        null,
+        plugin.opaqueId
+      ),
+      createRouter: () => deps.http.createRouter('', plugin.opaqueId),
+      registerOnPreAuth: deps.http.registerOnPreAuth,
+      registerAuth: deps.http.registerAuth,
+      registerOnPostAuth: deps.http.registerOnPostAuth,
+      basePath: deps.http.basePath,
+      isTlsEnabled: deps.http.isTlsEnabled,
     },
   };
 }
@@ -97,18 +127,18 @@ export function createPluginInitializerContext(
  * This returns a facade for `CoreContext` that will be exposed to the plugin `start` method.
  * This facade should be safe to use only within `start` itself.
  *
- * This is called for each plugin when it's started, so each plugin gets its own
+ * This is called for each plugin when it starts, so each plugin gets its own
  * version of these values.
- *
- * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param coreContext Kibana core context
  * @param plugin The plugin we're building these values for.
+ * @param deps Dependencies that Plugins services gets during start.
  * @internal
  */
-export function createPluginStartContext<TPluginContract, TPluginDependencies>(
+export function createPluginStartContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
-  plugin: Plugin<TPluginContract, TPluginDependencies>
-): PluginStartContext {
+  deps: PluginsServiceStartDeps,
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+): CoreStart {
   return {};
 }

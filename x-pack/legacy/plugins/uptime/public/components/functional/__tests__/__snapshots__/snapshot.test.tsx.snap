@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshot component renders without errors 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Current status"
+          id="xpack.uptime.snapshot.endpointStatusTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="m"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiSpacer
+          size="xs"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="s"
+          justifyContent="spaceEvenly"
+        >
+          <EuiFlexItem>
+            <EuiStat
+              description="Up"
+              textAlign="center"
+              title={8}
+              titleColor="secondary"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiStat
+              description="Down"
+              textAlign="center"
+              title={2}
+              titleColor="danger"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiStat
+              description="Total"
+              textAlign="center"
+              title={10}
+              titleColor="subdued"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+</Fragment>
+`;

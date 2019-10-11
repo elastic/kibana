@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterBar renders 1`] = `
+<EuiFlexItem
+  grow={false}
+>
+  <EuiFilterGroup>
+    <EuiFilterButton
+      color="text"
+      grow={true}
+      hasActiveFilters={false}
+      iconSide="right"
+      key="all"
+      numFilters={2}
+      onClick={[Function]}
+      type="button"
+    >
+      all
+    </EuiFilterButton>
+    <EuiFilterButton
+      color="text"
+      grow={true}
+      hasActiveFilters={true}
+      iconSide="right"
+      key="critical"
+      numFilters={2}
+      onClick={[Function]}
+      type="button"
+    >
+      critical
+    </EuiFilterButton>
+  </EuiFilterGroup>
+</EuiFlexItem>
+`;

@@ -27,7 +27,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     await PageObjects.dashboard.initTests({
       kibanaIndex: 'dashboard/current/kibana',
       dataIndex: 'dashboard/current/data',
-      defaultIndex: 'logstash-*',
+      defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
     });
     await PageObjects.dashboard.preserveCrossAppState();
   }
@@ -46,18 +46,18 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       before(loadCurrentData);
       after(unloadCurrentData);
 
-      loadTestFile(require.resolve('./_empty_dashboard'));
-      loadTestFile(require.resolve('./_embeddable_rendering'));
-      loadTestFile(require.resolve('./_create_and_add_embeddables'));
-      loadTestFile(require.resolve('./_time_zones'));
-      loadTestFile(require.resolve('./_dashboard_options'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_embed_mode'));
+      loadTestFile(require.resolve('./empty_dashboard'));
+      loadTestFile(require.resolve('./embeddable_rendering'));
+      loadTestFile(require.resolve('./create_and_add_embeddables'));
+      loadTestFile(require.resolve('./time_zones'));
+      loadTestFile(require.resolve('./dashboard_options'));
+      loadTestFile(require.resolve('./data_shared_attributes'));
+      loadTestFile(require.resolve('./embed_mode'));
 
       // Note: This one must be last because it unloads some data for one of its tests!
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
       // to improve efficiency...
-      loadTestFile(require.resolve('./_dashboard_query_bar'));
+      loadTestFile(require.resolve('./dashboard_query_bar'));
     });
 
     describe('using current data', function () {
@@ -65,13 +65,17 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       before(loadCurrentData);
       after(unloadCurrentData);
 
-      loadTestFile(require.resolve('./_full_screen_mode'));
-      loadTestFile(require.resolve('./_dashboard_filter_bar'));
-      loadTestFile(require.resolve('./_dashboard_filtering'));
-      loadTestFile(require.resolve('./_panel_expand_toggle'));
-      loadTestFile(require.resolve('./_dashboard_grid'));
-      loadTestFile(require.resolve('./_dashboard_snapshots'));
-      loadTestFile(require.resolve('./_view_edit'));
+      loadTestFile(require.resolve('./full_screen_mode'));
+      loadTestFile(require.resolve('./dashboard_filter_bar'));
+      loadTestFile(require.resolve('./dashboard_filtering'));
+      loadTestFile(require.resolve('./panel_expand_toggle'));
+      loadTestFile(require.resolve('./dashboard_grid'));
+      loadTestFile(require.resolve('./view_edit'));
+      // Order of test suites *shouldn't* be important but there's a bug for the view_edit test above
+      // https://github.com/elastic/kibana/issues/46752
+      // The dashboard_snapshot test below requires the timestamped URL which breaks the view_edit test.
+      // If we don't use the timestamp in the URL, the colors in the charts will be different.
+      loadTestFile(require.resolve('./dashboard_snapshots'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
@@ -81,20 +85,20 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       this.tags('ciGroup4');
       before(() => browser.setWindowSize(1200, 900));
 
-      loadTestFile(require.resolve('./_dashboard_time_picker'));
-      loadTestFile(require.resolve('./_bwc_shared_urls'));
-      loadTestFile(require.resolve('./_panel_controls'));
-      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./dashboard_time_picker'));
+      loadTestFile(require.resolve('./bwc_shared_urls'));
+      loadTestFile(require.resolve('./panel_controls'));
+      loadTestFile(require.resolve('./dashboard_state'));
     });
 
     describe('using legacy data', function () {
       this.tags('ciGroup5');
       before(() => browser.setWindowSize(1200, 900));
 
-      loadTestFile(require.resolve('./_dashboard_save'));
-      loadTestFile(require.resolve('./_dashboard_time'));
-      loadTestFile(require.resolve('./_dashboard_listing'));
-      loadTestFile(require.resolve('./_dashboard_clone'));
+      loadTestFile(require.resolve('./dashboard_save'));
+      loadTestFile(require.resolve('./dashboard_time'));
+      loadTestFile(require.resolve('./dashboard_listing'));
+      loadTestFile(require.resolve('./dashboard_clone'));
     });
   });
 }

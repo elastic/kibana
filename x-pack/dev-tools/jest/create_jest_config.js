@@ -4,53 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function createJestConfig({
-  kibanaDirectory,
-  xPackKibanaDirectory,
-}) {
+export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
+  const fileMockPath = `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`;
   return {
     rootDir: xPackKibanaDirectory,
     roots: [
-      "<rootDir>/plugins",
-      "<rootDir>/server",
+      '<rootDir>/plugins',
+      '<rootDir>/legacy/plugins',
+      '<rootDir>/legacy/server',
+      '<rootDir>/test_utils/jest/contract_tests',
     ],
-    moduleFileExtensions: [
-      "js",
-      "json",
-      "ts",
-      "tsx",
-    ],
+    moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
     moduleNameMapper: {
-      "^ui/(.*)": `${kibanaDirectory}/src/ui/public/$1`,
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$":
-        `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`,
-      "\\.(css|less|scss)$": `${kibanaDirectory}/src/dev/jest/mocks/style_mock.js`,
-      "^test_utils/enzyme_helpers": `${xPackKibanaDirectory}/test_utils/enzyme_helpers.tsx`
+      '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
+      'uiExports/(.*)': fileMockPath,
+      '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,
+      '^src/legacy/(.*)': `${kibanaDirectory}/src/legacy/$1`,
+      '^plugins/watcher/models/(.*)': `${xPackKibanaDirectory}/legacy/plugins/watcher/public/models/$1`,
+      '^plugins/([^/.]*)(.*)': `${kibanaDirectory}/src/legacy/core_plugins/$1/public$2`,
+      '^legacy/plugins/xpack_main/(.*);': `${xPackKibanaDirectory}/legacy/plugins/xpack_main/public/$1`,
+      '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': fileMockPath,
+      '\\.(css|less|scss)$': `${kibanaDirectory}/src/dev/jest/mocks/style_mock.js`,
+      '^test_utils/enzyme_helpers': `${xPackKibanaDirectory}/test_utils/enzyme_helpers.tsx`,
+      '^test_utils/find_test_subject': `${xPackKibanaDirectory}/test_utils/find_test_subject.ts`,
     },
+    coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
+    coverageReporters: [
+      'html',
+    ],
     setupFiles: [
       `${kibanaDirectory}/src/dev/jest/setup/babel_polyfill.js`,
       `<rootDir>/dev-tools/jest/setup/polyfills.js`,
       `<rootDir>/dev-tools/jest/setup/enzyme.js`,
     ],
-    testMatch: [
-      "**/*.test.{js,ts,tsx}"
-    ],
+    setupFilesAfterEnv: [`${kibanaDirectory}/src/dev/jest/setup/mocks.js`],
+    testMatch: ['**/*.test.{js,ts,tsx}'],
     transform: {
-      "^.+\\.js$": `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
-      "^.+\\.tsx?$": `${kibanaDirectory}/src/dev/jest/ts_transform.js`,
+      '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
+      '^.+\\.html?$': 'jest-raw-loader',
     },
     transformIgnorePatterns: [
-      "[/\\\\]node_modules[/\\\\].+\\.js$"
+      // ignore all node_modules except @elastic/eui and monaco-editor which both require babel transforms to handle dynamic import()
+      // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
+      '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
     ],
-    snapshotSerializers: [
-      `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`
-    ],
-    "reporters": [
-      "default",
-      [`${kibanaDirectory}/src/dev/jest/junit_reporter.js`, {
-        reportName: 'X-Pack Jest Tests',
-        rootDirectory: xPackKibanaDirectory,
-      }]
+    snapshotSerializers: [`${kibanaDirectory}/node_modules/enzyme-to-json/serializer`],
+    reporters: [
+      'default',
+      [
+        `${kibanaDirectory}/src/dev/jest/junit_reporter.js`,
+        {
+          reportName: 'X-Pack Jest Tests',
+        },
+      ],
     ],
   };
 }

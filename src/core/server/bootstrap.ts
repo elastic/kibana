@@ -20,7 +20,7 @@
 import chalk from 'chalk';
 import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
-import { LegacyObjectToConfigAdapter } from './legacy_compat';
+import { LegacyObjectToConfigAdapter } from './legacy';
 import { Root } from './root';
 
 interface KibanaFeatures {
@@ -29,15 +29,8 @@ interface KibanaFeatures {
   // that are orchestrated by the "master" process (dev mode only feature).
   isClusterModeSupported: boolean;
 
-  // Indicates whether we can run Kibana without X-Pack plugin pack even if it's
-  // installed (dev mode only feature).
-  isOssModeSupported: boolean;
-
   // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
   isReplModeSupported: boolean;
-
-  // Indicates whether X-Pack plugin pack is installed and available.
-  isXPackInstalled: boolean;
 }
 
 interface BootstrapArgs {
@@ -47,6 +40,11 @@ interface BootstrapArgs {
   features: KibanaFeatures;
 }
 
+/**
+ *
+ * @internal
+ * @param param0 - options
+ */
 export async function bootstrap({
   configs,
   cliArgs,
@@ -72,23 +70,6 @@ export async function bootstrap({
 
   const root = new Root(rawConfigService.getConfig$(), env, onRootShutdown);
 
-  function shutdown(reason?: Error) {
-    rawConfigService.stop();
-    return root.shutdown(reason);
-  }
-
-  try {
-    await root.start();
-  } catch (err) {
-    await shutdown(err);
-  }
-
-  if (cliArgs.optimize) {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Optimization done.');
-    await shutdown();
-  }
-
   process.on('SIGHUP', () => {
     const cliLogger = root.logger.get('cli');
     cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
@@ -104,6 +85,24 @@ export async function bootstrap({
 
   process.on('SIGINT', () => shutdown());
   process.on('SIGTERM', () => shutdown());
+
+  function shutdown(reason?: Error) {
+    rawConfigService.stop();
+    return root.shutdown(reason);
+  }
+
+  try {
+    await root.setup();
+    await root.start();
+  } catch (err) {
+    await shutdown(err);
+  }
+
+  if (cliArgs.optimize) {
+    const cliLogger = root.logger.get('cli');
+    cliLogger.info('Optimization done.');
+    await shutdown();
+  }
 }
 
 function onRootShutdown(reason?: any) {
@@ -111,7 +110,7 @@ function onRootShutdown(reason?: any) {
     // There is a chance that logger wasn't configured properly and error that
     // that forced root to shut down could go unnoticed. To prevent this we always
     // mirror such fatal errors in standard output with `console.error`.
-    // tslint:disable no-console
+    // eslint-disable-next-line
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
   }
 

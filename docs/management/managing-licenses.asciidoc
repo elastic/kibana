@@ -2,32 +2,27 @@
 == License Management
 
 When you install {kib}, it generates a Basic license
-with no expiration date.  To start a 30-day trial,
-view the status of your license, or install a new license
-go to *Management* and click *License
-Management*.
+with no expiration date.  Go to *Management > License Management* to view the 
+status of your license, start a 30-day trial, or install a new license. 
+
+To learn more about the available license levels,
+see https://www.elastic.co/subscriptions[the subscription page]. 
+
+You can activate a 30-day trial license to try out the full set of 
+https://www.elastic.co/subscriptions[Platinum features], including machine learning, 
+advanced security, alerting, graph capabilities, and more. 
+
+When you activate a new license level, new features will appear in the left sidebar 
+of the *Management* page.
 
 [role="screenshot"]
 image::images/management-license.png[]
-
-The 30-day trial enables you to try out the full set of
-https://www.elastic.co/subscriptions[Platinum features],
-including security, machine learning, alerting, graph capabilities,
-and more. For example, the following pages are added to the side navigation:
-
-* **Machine Learning**
-* **Graph**
-
-The **Management** page gains options related to configuring security, managing 
-{ls} pipelines, and using {watcher}. 
 
 At the end of the trial period, the Platinum features operate in a 
 {stack-ov}/license-expiration.html[degraded mode]. You can revert to a Basic 
 license, extend the trial, or purchase a subscription. 
 
-For a comparison of the Elastic license levels,
-see https://www.elastic.co/subscriptions[the subscription page]. 
 
-TIP: If {security} is enabled, before you can install a gold or platinum 
-license, you must configure Transport Layer Security (TLS) in {es}. See 
-{stack-ov}/encrypting-communications.html[Encrypting communications].
+TIP: If {security-features} are enabled, before you revert to a Basic license or install 
+a Gold or Platinum license, you must configure Transport Layer Security (TLS) in {es}. 
+See {stack-ov}/encrypting-communications.html[Encrypting communications].

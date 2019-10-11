@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UpgradeFailureActions component renders component as expected 1`] = `
+<EuiFlexGroup
+  justifyContent="flexStart"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiButton
+      fill={true}
+      onClick={[MockFunction]}
+    >
+      upgrade button text
+    </EuiButton>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiButtonEmpty
+      color="primary"
+      onClick={[MockFunction]}
+    >
+      <FormattedMessage
+        defaultMessage="Go back"
+        id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

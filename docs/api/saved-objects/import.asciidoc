@@ -1,0 +1,151 @@
+[[saved-objects-api-import]]
+=== Import objects API
+++++
+<titleabbrev>Import objects</titleabbrev>
+++++
+
+experimental[] Create a set of {kib} saved objects from a file created by the export API.
+
+[[saved-objects-api-import-request]]
+==== Request
+
+`POST /api/saved_objects/_import`
+
+[[saved-objects-api-import-query-params]]
+==== Query parameter
+
+`overwrite`::
+  (Optional, boolean) Overwrites saved objects.
+
+[[saved-objects-api-import-request-body]]
+==== Request body
+
+The request body must include the multipart/form-data type.
+
+`file`::
+  A file exported using the export API.
+
+[[saved-objects-api-import-response-body]]
+==== Response body
+
+`success`:: 
+  Top-level property that indicates if the import was successful. 
+
+`successCount`:: 
+  Indicates the number of successfully imported records.
+
+`errors`::
+  (array) Indicates the import was unsuccessful and specifies the objects that failed to import.
+  
+[[saved-objects-api-import-codes]]
+==== Response code
+
+`200`:: 
+    Indicates a successful call.
+
+==== Examples
+
+Import an index pattern and dashboard:
+
+[source,js]
+--------------------------------------------------
+$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson <1>
+--------------------------------------------------
+
+The `file.ndjson` file contains the following:
+
+[source,js]
+--------------------------------------------------
+{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
+--------------------------------------------------
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "success": true,
+  "successCount": 2
+}
+--------------------------------------------------
+
+Import an index pattern and dashboard that includes a conflict on the index pattern:
+
+[source,js]
+--------------------------------------------------
+$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
+--------------------------------------------------
+
+The `file.ndjson` file contains the following:
+
+[source,js]
+--------------------------------------------------
+{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
+--------------------------------------------------
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "success": false,
+  "successCount": 1,
+  "errors": [
+    {
+      "id": "my-pattern",
+      "type": "index-pattern",
+      "title": "my-pattern-*",
+      "error": {
+        "type": "conflict"
+      },
+    },
+  ],
+}
+--------------------------------------------------
+
+Import a visualization and dashboard with an index pattern for the visualization reference that doesn't exist:
+
+[source,js]
+--------------------------------------------------
+$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
+--------------------------------------------------
+
+The `file.ndjson` file contains the following:
+
+[source,js]
+--------------------------------------------------
+{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}
+--------------------------------------------------
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+  "success": false,
+  "successCount": 0,
+  "errors": [
+    {
+      "id": "my-vis",
+      "type": "visualization",
+      "title": "my-vis",
+      "error": {
+        "type": "missing_references",
+        "references": [
+          {
+            "type": "index-pattern",
+            "id": "my-pattern-*"
+          }
+        ],
+        "blocking": [
+          {
+            "type": "dashboard",
+            "id": "my-dashboard"
+          }
+        ]
+      }
+    }
+  ]
+--------------------------------------------------

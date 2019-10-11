@@ -1,0 +1,38 @@
+{
+  "index": {
+    "url_params": {
+      "wait_for_active_shards": "",
+      "op_type": [
+        "index",
+        "create"
+      ],
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ],
+      "routing": "",
+      "timeout": "",
+      "version": "",
+      "version_type": [
+        "internal",
+        "external",
+        "external_gte"
+      ],
+      "if_seq_no": "",
+      "if_primary_term": "",
+      "pipeline": ""
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_doc/{id}",
+      "{indices}/_doc",
+      "{indices}/{type}",
+      "{indices}/{type}/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
+  }
+}

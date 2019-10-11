@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram handles simple_text_query without issues 1`] = `
+Array [
+  Object {
+    "downCount": 1,
+    "key": 1,
+    "upCount": 2,
+    "x": 2,
+    "x0": 1,
+    "y": 1,
+  },
+  Object {
+    "downCount": 2,
+    "key": 2,
+    "upCount": 1,
+    "x": 3,
+    "x0": 2,
+    "y": 1,
+  },
+]
+`;
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram handles status + additional user queries 1`] = `
+Array [
+  Object {
+    "downCount": 1,
+    "key": 1,
+    "upCount": 0,
+    "x": 2,
+    "x0": 1,
+    "y": 1,
+  },
+  Object {
+    "downCount": 2,
+    "key": 2,
+    "upCount": 0,
+    "x": 3,
+    "x0": 2,
+    "y": 1,
+  },
+]
+`;
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram returns a down-filtered array for when filtered by down status 1`] = `
+Array [
+  Object {
+    "downCount": 1,
+    "key": 1,
+    "upCount": 0,
+    "x": 2,
+    "x0": 1,
+    "y": 1,
+  },
+]
+`;
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram returns a down-filtered array for when filtered by up status 1`] = `
+Array [
+  Object {
+    "downCount": 0,
+    "key": 1,
+    "upCount": 2,
+    "x": 2,
+    "x0": 1,
+    "y": 1,
+  },
+]
+`;
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram returns expected result for no status filter 1`] = `
+Array [
+  Object {
+    "downCount": 1,
+    "key": 1,
+    "upCount": 2,
+    "x": 2,
+    "x0": 1,
+    "y": 1,
+  },
+]
+`;

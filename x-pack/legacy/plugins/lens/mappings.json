@@ -1,0 +1,19 @@
+{
+  "lens": {
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "visualizationType": {
+        "type": "keyword"
+      },
+      "state": {
+        "type": "flattened"
+      },
+      "expression": {
+        "index": false,
+        "type": "keyword"
+      }
+    }
+  }
+}

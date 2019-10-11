@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('task_manager', function taskManagerSuite() {
-    this.tags('ciGroup4');
+    this.tags('ciGroup2');
     loadTestFile(require.resolve('./task_manager_integration'));
   });
 }

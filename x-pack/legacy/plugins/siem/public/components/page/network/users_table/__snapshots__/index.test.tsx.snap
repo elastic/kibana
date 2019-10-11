@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Users Table Component Rendering it renders the default Users table 1`] = `
+<Connect(UsersTableComponent)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "tiebreaker": null,
+          "value": "_apt",
+        },
+        "node": Object {
+          "_id": "_apt",
+          "user": Object {
+            "count": 10,
+            "groupId": Array [
+              "65534",
+            ],
+            "groupName": Array [
+              "nogroup",
+            ],
+            "id": Array [
+              "104",
+            ],
+            "name": "_apt",
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "tiebreaker": null,
+          "value": "root",
+        },
+        "node": Object {
+          "_id": "root",
+          "user": Object {
+            "count": 108,
+            "groupId": Array [
+              "116",
+              "0",
+            ],
+            "groupName": Array [
+              "Debian-exim",
+              "root",
+            ],
+            "id": Array [
+              "0",
+            ],
+            "name": "root",
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "tiebreaker": null,
+          "value": "systemd-resolve",
+        },
+        "node": Object {
+          "_id": "systemd-resolve",
+          "user": Object {
+            "count": 4,
+            "groupId": Array [],
+            "groupName": Array [],
+            "id": Array [
+              "102",
+            ],
+            "name": "systemd-resolve",
+          },
+        },
+      },
+    ]
+  }
+  fakeTotalCount={3}
+  flowTarget="source"
+  id="user"
+  isInspect={false}
+  loadPage={[MockFunction]}
+  loading={false}
+  showMorePagesIndicator={true}
+  totalCount={1}
+  type="details"
+/>
+`;

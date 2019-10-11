@@ -1,0 +1,21 @@
+.kbnSavedQueryListItem {
+  margin-top: 0;
+  color: $euiLinkColor;
+}
+
+// Can't actually target the button with classes, but styles to override
+// are just user agent styles
+.kbnSavedQueryListItem-selected button {
+  font-weight: $euiFontWeightBold;
+}
+
+// This will ensure the info icon and tooltip shows even if the label gets truncated
+.kbnSavedQueryListItem__label {
+  display: flex;
+  align-items: center;
+}
+
+.kbnSavedQueryListItem__labelText {
+  @include euiTextTruncate;
+  margin-right: $euiSizeXS;
+}

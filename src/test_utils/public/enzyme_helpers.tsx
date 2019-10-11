@@ -126,3 +126,17 @@ export function renderWithIntl<T>(
 
   return render(nodeWithIntlProp(node), options);
 }
+
+export const nextTick = () => new Promise(res => process.nextTick(res));
+
+export function shallowWithI18nProvider<T>(child: ReactElement<T>) {
+  const wrapped = shallow(<I18nProvider>{child}</I18nProvider>);
+  const name = typeof child.type === 'string' ? child.type : child.type.name;
+  return wrapped.find(name).dive();
+}
+
+export function mountWithI18nProvider<T>(child: ReactElement<T>) {
+  const wrapped = mount(<I18nProvider>{child}</I18nProvider>);
+  const name = typeof child.type === 'string' ? child.type : child.type.name;
+  return wrapped.find(name);
+}

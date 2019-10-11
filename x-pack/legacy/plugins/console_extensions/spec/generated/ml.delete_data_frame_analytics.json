@@ -1,0 +1,11 @@
+{
+  "ml.delete_data_frame_analytics": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ml/data_frame/analytics/{id}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/delete-dfanalytics.html"
+  }
+}

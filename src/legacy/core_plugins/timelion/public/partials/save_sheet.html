@@ -1,5 +1,5 @@
 <div class="list-group">
-  <button class="list-group-item" ng-click="section = 'sheet'" type="button">
+  <button class="list-group-item" ng-click="section = 'sheet'" type="button" data-test-subj="timelionSaveAsSheetButton">
     <h4
       class="list-group-item-heading"
       i18n-id="timelion.topNavMenu.save.saveEntireSheetTitle"
@@ -44,6 +44,7 @@
         class="kuiButton kuiButton--primary kuiVerticalRhythmSmall"
         i18n-id="timelion.topNavMenu.save.saveEntireSheet.submitButtonLabel"
         i18n-default-message="Save"
+        data-test-subj="timelionFinishSaveButton"
       ></button>
     </form>
   </div>

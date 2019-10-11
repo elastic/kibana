@@ -51,7 +51,6 @@ Object {
 Object {
   "attributes": Object {
     "foo": true,
-    "savedSearchId": undefined,
     "savedSearchRefName": "search_0",
   },
   "references": Array [
@@ -63,6 +62,46 @@ Object {
   ],
 }
 `);
+  });
+
+  test('extracts references from controls', () => {
+    const doc = {
+      id: '1',
+      attributes: {
+        foo: true,
+        visState: JSON.stringify({
+          params: {
+            controls: [
+              {
+                bar: true,
+                indexPattern: 'pattern*',
+              },
+              {
+                bar: false,
+              },
+            ],
+          },
+        }),
+      },
+    };
+    const updatedDoc = extractReferences(doc);
+    /* eslint-disable max-len */
+    expect(updatedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "visState": "{\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"bar\\":false}]}}",
+  },
+  "references": Array [
+    Object {
+      "id": "pattern*",
+      "name": "control_0_index_pattern",
+      "type": "index-pattern",
+    },
+  ],
+}
+`);
+  /* eslint-enable max-len */
   });
 });
 
@@ -86,12 +125,30 @@ Object {
       id: '1',
       foo: true,
       savedSearchRefName: 'search_0',
+      visState: {
+        params: {
+          controls: [
+            {
+              foo: true,
+              indexPatternRefName: 'control_0_index_pattern',
+            },
+            {
+              foo: false,
+            },
+          ],
+        },
+      },
     };
     const references = [
       {
         name: 'search_0',
         type: 'search',
         id: '123',
+      },
+      {
+        name: 'control_0_index_pattern',
+        type: 'index-pattern',
+        id: 'pattern*',
       },
     ];
     injectReferences(context, references);
@@ -100,18 +157,50 @@ Object {
   "foo": true,
   "id": "1",
   "savedSearchId": "123",
+  "visState": Object {
+    "params": Object {
+      "controls": Array [
+        Object {
+          "foo": true,
+          "indexPattern": "pattern*",
+        },
+        Object {
+          "foo": false,
+        },
+      ],
+    },
+  },
 }
 `);
   });
 
-  test(`fails when it can't find the reference in the array`, () => {
+  test(`fails when it can't find the saved search reference in the array`, () => {
     const context = {
       id: '1',
       foo: true,
       savedSearchRefName: 'search_0',
     };
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find reference \\"search_0\\""`
+      `"Could not find saved search reference \\"search_0\\""`
+    );
+  });
+
+  test(`fails when it can't find the index pattern reference in the array`, () => {
+    const context = {
+      id: '1',
+      visState: {
+        params: {
+          controls: [
+            {
+              foo: true,
+              indexPatternRefName: 'control_0_index_pattern',
+            },
+          ],
+        },
+      },
+    };
+    expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
+      `"Could not find index pattern reference \\"control_0_index_pattern\\""`
     );
   });
 });

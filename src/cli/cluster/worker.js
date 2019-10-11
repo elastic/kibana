@@ -21,7 +21,7 @@ import _ from 'lodash';
 import cluster from 'cluster';
 import { EventEmitter } from 'events';
 
-import { BinderFor, fromRoot } from '../../utils';
+import { BinderFor, fromRoot } from '../../legacy/utils';
 
 const cliPath = fromRoot('src/cli');
 const baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);

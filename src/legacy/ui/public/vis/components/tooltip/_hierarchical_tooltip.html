@@ -1,0 +1,28 @@
+<table class="visTooltip__table">
+  <thead>
+    <tr class="eui-textLeft visTooltip__label">
+      <th
+        scope="col"
+        i18n-id="common.ui.aggResponse.fieldLabel"
+        i18n-default-message="field"
+      ></th>
+      <th
+        scope="col"
+        i18n-id="common.ui.aggResponse.valueLabel"
+        i18n-default-message="value"
+      ></th>
+      <th scope="col">{{metricCol.label}}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="visTooltip__value" ng-repeat="row in rows track by $index">
+      <td>
+        <div class="visTooltip__labelContainer"><span ng-bind-html="row.spacer"></span>{{row.field}}</div>
+      </td>
+      <td>
+        <div class="visTooltip__labelContainer">{{row.bucket}}
+      </td>
+      <td>{{row.metric}}</td>
+    </tr>
+  </tbody>
+</table>

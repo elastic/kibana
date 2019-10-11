@@ -20,7 +20,7 @@
 import execa from 'execa';
 import chalk from 'chalk';
 
-import { watchStdioForLine } from '../../../utils';
+import { watchStdioForLine } from '../../../legacy/utils';
 
 export async function exec(log, cmd, args, options = {}) {
   const {

@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "logs": [{
+    "timestamp": 1552669641089,
+    "component": "o.e.n.Node",
+    "node": "Elastic-MBP.local",
+    "index": ".monitoring-es",
+    "level": "INFO",
+    "type": "server",
+    "message": "started"
+  }],
+  "limit": 10
+}

@@ -81,16 +81,14 @@ query status and results.
 **query_parameters**: Exports the actions, reducers and selectors related to
 the parameters used to construct the query.
 
-**components/loading_button**: Defines the `<context-loading-button>`
+**components/action_bar**: Defines the `<context-action-bar>`
 directive including its respective styles.
 
-**components/size_picker**: Defines the `<context-size-picker>`
-directive including its respective styles.
 
 **api/anchor.js**: Exports `fetchAnchor()` that creates and executes the
 query for the anchor document.
 
-**api/context.js**: Exports `fetchPredecessors()` and `fetchSuccessors()` that
+**api/context.js**: Exports `fetchPredecessors()`, `fetchSuccessors()`, `fetchSurroundingDocs()` that
 create and execute the queries for the preceeding and succeeding documents.
 
 **api/utils**: Exports various functions used to create and transform

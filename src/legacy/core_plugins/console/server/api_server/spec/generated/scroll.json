@@ -1,0 +1,18 @@
+{
+  "scroll": {
+    "url_params": {
+      "scroll": "",
+      "scroll_id": "",
+      "rest_total_hits_as_int": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_search/scroll",
+      "_search/scroll/{scroll_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-request-body.html#request-body-search-scroll"
+  }
+}

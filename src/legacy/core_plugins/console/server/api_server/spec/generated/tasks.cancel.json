@@ -1,0 +1,17 @@
+{
+  "tasks.cancel": {
+    "url_params": {
+      "nodes": [],
+      "actions": [],
+      "parent_task_id": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_tasks/_cancel",
+      "_tasks/{task_id}/_cancel"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html"
+  }
+}

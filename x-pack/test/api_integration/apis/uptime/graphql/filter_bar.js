@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { getFilterBarQueryString } from '../../../../../plugins/uptime/public/components/queries/filter_bar/get_filter_bar';
-import filterList from './fixtures/filter_list';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
+import { filterBarQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 
 export default function ({ getService }) {
   describe('filterBar query', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('returns the expected filters', async () => {
       const getFilterBarQuery = {
         operationName: 'FilterBar',
-        query: getFilterBarQueryString,
+        query: filterBarQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
         },
       };
       const {
@@ -27,7 +29,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getFilterBarQuery });
-      expect(data).to.eql(filterList);
+      expectFixtureEql(data, 'filter_list');
     });
   });
 }

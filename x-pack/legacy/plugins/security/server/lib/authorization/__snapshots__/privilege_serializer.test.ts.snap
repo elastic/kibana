@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#deserializeFeaturePrivilege throws error when deserializing feature_.privilege-1 1`] = `"Feature privilege 'feature_.privilege-1' didn't match pattern"`;
+
+exports[`#deserializeFeaturePrivilege throws error when deserializing feature_foo. 1`] = `"Feature privilege 'feature_foo.' didn't match pattern"`;
+
+exports[`#deserializeFeaturePrivilege throws error when deserializing feature_foo_privilege-1 1`] = `"Feature privilege 'feature_foo_privilege-1' didn't match pattern"`;
+
+exports[`#deserializeFeaturePrivilege throws error when deserializing feature-foo.privilege-1 1`] = `"Feature privilege 'feature-foo.privilege-1' didn't match pattern"`;
+
+exports[`#deserializeFeaturePrivilege throws error when deserializing foo_feature_foo.privilege-1 1`] = `"Feature privilege 'foo_feature_foo.privilege-1' didn't match pattern"`;
+
+exports[`#deserializeGlobalBasePrivilege throws Error if isn't a base privilege 1`] = `"Unrecognized global base privilege"`;
+
+exports[`#deserializeReservedPrivilege throws Error if doesn't start with reserved_ 1`] = `"Unrecognized reserved privilege"`;
+
+exports[`#deserializeSpaceBasePrivilege throws Error if prefixed with space_ but not a reserved privilege 1`] = `"Unrecognized space base privilege"`;
+
+exports[`#deserializeSpaceBasePrivilege throws Error if provided 'all' 1`] = `"Unrecognized space base privilege"`;
+
+exports[`#serializeGlobalBasePrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized global base privilege"`;
+
+exports[`#serializeSpaceBasePrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized space base privilege"`;

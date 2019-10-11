@@ -1,0 +1,10 @@
+.visEditorAgg__subAgg {
+  border: $euiBorderThick;
+  border-radius: $euiBorderRadius;
+  background-color: transparent;
+  padding: $euiSizeS;
+}
+
+.visEditorAgg__subAgg + .visEditorAggParam__string {
+  margin-top: $euiSize;
+}

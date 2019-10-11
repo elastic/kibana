@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import pkg from '../../../../../package.json';
 import { getVersionInfo } from '../version_info';

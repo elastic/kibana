@@ -1,0 +1,7 @@
+.canvasDateTimeRangeAbsolute {
+  display: flex;
+
+  > div:not(:last-child) {
+    margin-right: $euiSizeS;
+  }
+}

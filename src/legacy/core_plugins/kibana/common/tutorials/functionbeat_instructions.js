@@ -88,7 +88,7 @@ Kibana index pattern. It is normally safe to omit this command.',
       }),
       commands: [
         './functionbeat setup',
-        './functionbeat deploy fn_cloudwatch_logs',
+        './functionbeat deploy fn-cloudwatch-logs',
       ]
     },
     WINDOWS: {
@@ -102,7 +102,7 @@ Kibana index pattern. It is normally safe to omit this command.',
       }),
       commands: [
         '.\\functionbeat.exe setup',
-        '.\\functionbeat.exe deploy fn_cloudwatch_logs',
+        '.\\functionbeat.exe deploy fn-cloudwatch-logs',
       ],
     },
   },
@@ -217,7 +217,7 @@ export function functionbeatEnableInstructions() {
   });
   const defaultCommands = [
     'functionbeat.provider.aws.functions:',
-    '  - name: fn_cloudwatch_logs',
+    '  - name: fn-cloudwatch-logs',
     '    enabled: true',
     '    type: cloudwatch_logs',
     '    triggers:',
@@ -315,7 +315,7 @@ export function functionbeatStatusCheck() {
   };
 }
 
-export function onPremInstructions(platforms, geoipRequired, uaRequired, context) {
+export function onPremInstructions(platforms, context) {
   const FUNCTIONBEAT_INSTRUCTIONS = createFunctionbeatInstructions(context);
 
   return {

@@ -20,7 +20,8 @@ export default function ({ getService }) {
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
 
-  describe('BWC report generation into existing indexes', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/42725
+  describe.skip('BWC report generation into existing indexes', () => {
     let expectedCompletedReportCount;
     let cleanupIndexAlias;
 

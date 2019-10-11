@@ -20,16 +20,18 @@
 import { createGzip, Z_BEST_COMPRESSION } from 'zlib';
 import { PassThrough } from 'stream';
 
+import stringify from 'json-stable-stringify';
+
 import {
+  createMapStream,
   createIntersperseStream,
-  createJsonStringifyStream
-} from '../../../utils';
+} from '../../../legacy/utils';
 
 import { RECORD_SEPARATOR } from './constants';
 
 export function createFormatArchiveStreams({ gzip = false } = {}) {
   return [
-    createJsonStringifyStream({ pretty: true }),
+    createMapStream(record => stringify(record, { space: '  ' })),
     createIntersperseStream(RECORD_SEPARATOR),
     gzip ? createGzip({ level: Z_BEST_COMPRESSION }) : new PassThrough(),
   ];

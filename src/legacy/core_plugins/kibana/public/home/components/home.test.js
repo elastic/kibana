@@ -17,20 +17,13 @@
  * under the License.
  */
 
+import './home.test.mocks';
+
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { Home } from './home';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getBasePath: jest.fn(() => 'path'),
-    getInjected: jest.fn(() => ''),
-  }),
-  { virtual: true }
-);
 
 describe('home', () => {
   let defaultProps;
@@ -41,6 +34,10 @@ describe('home', () => {
       apmUiEnabled: true,
       mlEnabled: true,
       kibanaVersion: '99.2.1',
+      fetchTelemetry: jest.fn(),
+      getTelemetryBannerId: jest.fn(),
+      setOptIn: jest.fn(),
+      showTelemetryOptIn: false,
       addBasePath(url) {
         return `base_path/${url}`;
       },

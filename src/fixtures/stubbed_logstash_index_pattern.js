@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import TestUtilsStubIndexPatternProvider from 'test_utils/stub_index_pattern';
-import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
-import { getKbnFieldType } from '../utils';
+import StubIndexPattern from 'test_utils/stub_index_pattern';
+import stubbedLogstashFields from 'fixtures/logstash_fields';
 
-export default function stubbedLogstashIndexPatternService(Private) {
-  const StubIndexPattern = Private(TestUtilsStubIndexPatternProvider);
-  const mockLogstashFields = Private(FixturesLogstashFieldsProvider);
+import { getKbnFieldType } from '../plugins/data/common';
+
+export default function stubbedLogstashIndexPatternService() {
+  const mockLogstashFields = stubbedLogstashFields();
 
   const fields = mockLogstashFields.map(function (field) {
     const kbnType = getKbnFieldType(field.type);
 
-    if (kbnType.name === 'unknown') {
+    if (!kbnType || kbnType.name === 'unknown') {
       throw new TypeError(`unknown type ${field.type}`);
     }
 
@@ -40,8 +40,9 @@ export default function stubbedLogstashIndexPatternService(Private) {
     };
   });
 
-  const indexPattern = new StubIndexPattern('logstash-*', 'time', fields);
+  const indexPattern = new StubIndexPattern('logstash-*', cfg => cfg, 'time', fields);
   indexPattern.id = 'logstash-*';
+  indexPattern.isTimeNanosBased = () => false;
 
   return indexPattern;
 

@@ -5,17 +5,18 @@
 The {searchprofiler} queries the cluster that the Kibana node is attached to.
 It does this by executing the query against the cluster and collecting the results.
 
-This is convenient, but sometimes performance problems are temporal in nature. For example,
-a query might only be slow at certain time of day when many customers are using your system.
+But sometimes you may want to investigate performance problems that are temporal in nature. 
+For example, a query might only be slow at certain time of day when many customers are using your system.
 You can setup a process to automatically profile slow queries when they occur and then
 save those profile responses for later analysis.
 
-The {searchprofiler} supports this workflow by enabling you to paste the
-pre-captured JSON.  The tool will detect that this is a profiler response JSON
-rather than a query, and render the visualization rather than querying the cluster.
+The {searchprofiler} supports this workflow by allowing you to paste the
+pre-captured JSON in the query editor.  The {searchprofiler} will detect that you 
+have entered a JSON response (rather than a query) and will just render the visualization,
+rather than querying the cluster.
 
 To see how this works, copy and paste the following profile response into the
-query editor and click *Profile*:
+query editor and click *Profile*.
 
 [source,js]
 --------------------------------------------------

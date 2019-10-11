@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -78,24 +78,27 @@ function generateDLL(config) {
               test: /\.js$/,
               include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
               exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
+            },
+            // TODO: remove when we drop support for IE11
+            // We need because normalize-url is distributed without
+            // any kind of transpilation
+            // More info: https://github.com/elastic/kibana/pull/35804
+            {
+              test: /\.js$/,
+              include: /[\/\\]node_modules[\/\\]normalize-url[\/\\]/,
+              exclude: /[\/\\]node_modules[\/\\]normalize-url[\/\\](.+?[\/\\])*node_modules[\/\\]/,
             }
           ],
           // Self calling function with the equivalent logic
           // from maybeAddCacheLoader one from base optimizer
           use: ((babelLoaderCacheDirPath, loaders) => {
-            // Only deactivate cache-loader and thread-loader on
-            // distributable. It is valid when running from source
-            // both with dev or prod bundles or even when running
-            // kibana for dev only.
-            if (IS_KIBANA_DISTRIBUTABLE) {
-              return loaders;
-            }
-
             return [
               {
                 loader: 'cache-loader',
                 options: {
-                  cacheDirectory: babelLoaderCacheDirPath
+                  cacheContext: fromRoot('.'),
+                  cacheDirectory: babelLoaderCacheDirPath,
+                  readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE
                 }
               },
               ...loaders

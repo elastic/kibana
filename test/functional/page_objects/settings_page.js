@@ -18,7 +18,7 @@
  */
 
 import { map as mapAsync } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -50,17 +50,30 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickKibanaIndexPatterns() {
       log.debug('clickKibanaIndexPatterns link');
       await testSubjects.click('index_patterns');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // check for the index pattern info flyout that covers the
+      // create index pattern button on smaller screens
+      if (await testSubjects.exists('CreateIndexPatternPrompt')) {
+        await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');
+      }
     }
 
     async getAdvancedSettings(propertyName) {
       log.debug('in getAdvancedSettings');
       const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
-      return await setting.getProperty('value');
+      return await setting.getAttribute('value');
+    }
+
+    async expectDisabledAdvancedSetting(propertyName) {
+      const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      expect(setting.getAttribute('disabled')).to.eql('');
     }
 
     async getAdvancedSettingCheckbox(propertyName) {
       log.debug('in getAdvancedSettingCheckbox');
-      return await testSubjects.getProperty(`advancedSetting-editField-${propertyName}`, 'checked');
+      return await testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'checked');
     }
 
     async clearAdvancedSettings(propertyName) {
@@ -128,7 +141,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getCreateIndexPatternButton() {
-      return await testSubjects.find('createIndexPatternCreateButton');
+      return await testSubjects.find('createIndexPatternButton');
     }
 
     async getCreateButton() {
@@ -195,21 +208,21 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getFieldNames() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldName');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldName');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
     }
 
     async getFieldTypes() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldType');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldType');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
     }
 
     async getScriptedFieldLangs() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern scriptedFieldLang');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > scriptedFieldLang');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
@@ -249,12 +262,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async increasePopularity() {
       const field = await testSubjects.find('editorFieldCount');
-      await field.clearValue();
+      await field.clearValueWithKeyboard();
       await field.type('1');
     }
 
     async getPopularity() {
-      return await testSubjects.getProperty('editorFieldCount', 'value');
+      return await testSubjects.getAttribute('editorFieldCount', 'value');
     }
 
     async controlChangeCancel() {
@@ -265,6 +278,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async controlChangeSave() {
       await testSubjects.click('fieldSaveButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickIndexPatternLogstash() {
+      const indexLink = await find.byXPath(`//a[descendant::*[text()='logstash-*']]`);
+      await indexLink.click();
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
@@ -284,7 +302,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
         }
-        await (await this.getCreateIndexPatternCreateButton()).click();
+        await (await this.getCreateIndexPatternButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -320,7 +338,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
-      await field.type(indexPatternName);
+      await field.type(indexPatternName, { charByChar: true });
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
       expect(currentName).to.eql(`${indexPatternName}${expectWildcard ? '*' : ''}`);
@@ -328,14 +346,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getCreateIndexPatternGoToStep2Button() {
       return await testSubjects.find('createIndexPatternGoToStep2Button');
-    }
-
-    async getCreateIndexPatternCreateButton() {
-      return await testSubjects.find('createIndexPatternCreateButton');
-    }
-
-    async clickOnOnlyIndexPattern() {
-      return await testSubjects.click('indexPatternLink');
     }
 
     async removeIndexPattern() {
@@ -374,6 +384,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickSourceFiltersTab() {
       log.debug('click Source Filters tab');
       await testSubjects.click('tab-sourceFilters');
+    }
+
+    async editScriptedField(name) {
+      await this.filterField(name);
+      await find.clickByCssSelector('.euiTableRowCell--hasActions button:first-child');
     }
 
     async addScriptedField(name, language, type, format, popularity, script) {
@@ -473,7 +488,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const datePatternField = await find.byCssSelector(
         'input[data-test-subj="dateEditorPattern"]'
       );
-      await datePatternField.clearValue();
+      // clearValue does not work here
+      // Send Backspace event for each char in value string to clear field
+      await datePatternField.clearValueWithKeyboard({ charByChar: true });
       await datePatternField.type(datePattern);
     }
 
@@ -493,9 +510,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
-      const field = await testSubjects.find('editorFieldScript');
-      await field.clearValue();
-      await field.type(script);
+      const aceEditorCssSelector = '[data-test-subj="codeEditorContainer"] .ace_editor';
+      await find.clickByCssSelector(aceEditorCssSelector);
+      for (let i = 0; i < 1000; i++) {
+        await browser.pressKeys(browser.keys.BACK_SPACE);
+      }
+      await browser.pressKeys(...script.split(''));
     }
 
     async openScriptedFieldHelp(activeTab) {
@@ -527,7 +547,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.openScriptedFieldHelp('testTab');
       if (additionalField) {
         await comboBox.set('additionalFieldsSelect', additionalField);
+        await testSubjects.find('scriptedFieldPreview');
         await testSubjects.click('runScriptButton');
+        await testSubjects.waitForDeleted('.euiLoadingSpinner');
       }
       let scriptResults;
       await retry.try(async () => {
@@ -542,7 +564,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
       log.debug(`Setting the path on the file input`);
-      await find.setValue('.euiFilePicker__input', path);
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
+
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
         await testSubjects.click('importSavedObjectsOverwriteToggle');
@@ -551,6 +575,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
       await testSubjects.click('importSavedObjectsImportBtn');
       log.debug(`done importing the file`);
+
+      // Wait for all the saves to happen
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickImportDone() {
@@ -594,6 +621,50 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
 
       return objects;
+    }
+
+    async getSavedObjectsTableSummary() {
+      const table = await testSubjects.find('savedObjectsTable');
+      const rows = await table.findAllByCssSelector('tbody tr');
+
+      const summary = [];
+      for (const row of rows) {
+        const titleCell = await row.findByCssSelector('td:nth-child(3)');
+        const title = await titleCell.getVisibleText();
+
+
+        const viewInAppButtons = await row.findAllByCssSelector('td:nth-child(3) a');
+        const canViewInApp = Boolean(viewInAppButtons.length);
+        summary.push({
+          title,
+          canViewInApp,
+        });
+      }
+
+      return summary;
+    }
+
+    async clickSavedObjectsTableSelectAll() {
+      const checkboxSelectAll = await testSubjects.find('checkboxSelectAll');
+      await checkboxSelectAll.click();
+    }
+
+    async canSavedObjectsBeDeleted() {
+      const deleteButton = await testSubjects.find('savedObjectsManagementDelete');
+      return await deleteButton.isEnabled();
+    }
+
+    async canSavedObjectBeDeleted(id) {
+      const allCheckBoxes = await testSubjects.findAll('checkboxSelectRow*');
+      for (const checkBox of allCheckBoxes) {
+        if (await checkBox.isSelected()) {
+          await checkBox.click();
+        }
+      }
+
+      const checkBox = await testSubjects.find(`checkboxSelectRow-${id}`);
+      await checkBox.click();
+      return await this.canSavedObjectsBeDeleted();
     }
   }
 

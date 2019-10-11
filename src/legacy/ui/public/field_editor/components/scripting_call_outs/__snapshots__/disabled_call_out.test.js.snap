@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScriptingDisabledCallOut should render normally 1`] = `
+<Fragment>
+  <EuiCallOut
+    color="danger"
+    iconType="alert"
+    title={
+      <FormattedMessage
+        defaultMessage="Scripting disabled"
+        description="Showing the status that scripting is disabled in Elasticsearch. Not an update message, that it JUST got disabled."
+        id="common.ui.fieldEditor.disabledCallOutHeader"
+        values={Object {}}
+      />
+    }
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one language in order to use scripted fields in Kibana."
+        id="common.ui.fieldEditor.disabledCallOutLabel"
+        values={Object {}}
+      />
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;
+
+exports[`ScriptingDisabledCallOut should render nothing if not visible 1`] = `""`;

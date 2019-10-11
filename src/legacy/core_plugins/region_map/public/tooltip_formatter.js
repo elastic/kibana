@@ -18,14 +18,18 @@
  */
 
 import $ from 'jquery';
-export const TileMapTooltipFormatter = ($compile, $rootScope) => {
+import template from './tooltip.html';
+
+export const TileMapTooltipFormatter = ($injector) => {
+  const $rootScope = $injector.get('$rootScope');
+  const $compile = $injector.get('$compile');
 
   const $tooltipScope = $rootScope.$new();
-  const $el = $('<div>').html(require('./tooltip.html'));
+  const $el = $('<div>').html(template);
+
   $compile($el)($tooltipScope);
 
   return function tooltipFormatter(metric, fieldFormatter, fieldName, metricName) {
-
     if (!metric) {
       return '';
     }

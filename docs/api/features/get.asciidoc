@@ -1,0 +1,216 @@
+[[features-api-get]]
+=== Get features API
+++++
+<titleabbrev>Get features</titleabbrev>
+++++
+
+experimental[] Retrieves all {kib} features.
+
+[[features-api-get-request]]
+==== Request
+
+`GET /api/features`
+
+[[features-api-get-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+[[features-api-get-example]]
+==== Example
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+  {
+    "id": "discover",
+    "name": "Discover",
+    "icon": "discoverApp",
+    "navLinkId": "kibana:discover",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "discover"
+    ],
+    "privileges": {
+      "all": {
+        "savedObject": {
+          "all": [
+            "search",
+            "url"
+          ],
+          "read": [
+            "config",
+            "index-pattern"
+          ]
+        },
+        "ui": [
+          "show",
+          "createShortUrl",
+          "save"
+        ]
+      },
+      "read": {
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "url"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    }
+  },
+  {
+    "id": "visualize",
+    "name": "Visualize",
+    "icon": "visualizeApp",
+    "navLinkId": "kibana:visualize",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "visualize"
+    ],
+    "privileges": {
+      "all": {
+        "savedObject": {
+          "all": [
+            "visualization",
+            "url"
+          ],
+          "read": [
+            "config",
+            "index-pattern",
+            "search"
+          ]
+        },
+        "ui": [
+          "show",
+          "createShortUrl",
+          "delete",
+          "save"
+        ]
+      },
+      "read": {
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "visualization"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    }
+  },
+  {
+    "id": "dashboard",
+    "name": "Dashboard",
+    "icon": "dashboardApp",
+    "navLinkId": "kibana:dashboard",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "dashboard"
+    ],
+    "privileges": {
+      "all": {
+        "savedObject": {
+          "all": [
+            "dashboard",
+            "url"
+          ],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "visualization",
+            "timelion-sheet",
+            "canvas-workpad"
+          ]
+        },
+        "ui": [
+          "createNew",
+          "show",
+          "showWriteControls"
+        ]
+      },
+      "read": {
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "visualization",
+            "timelion-sheet",
+            "canvas-workpad",
+            "dashboard"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    }
+  },
+  {
+    "id": "dev_tools",
+    "name": "Dev Tools",
+    "icon": "devToolsApp",
+    "navLinkId": "kibana:dev_tools",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "console",
+      "searchprofiler",
+      "grokdebugger"
+    ],
+    "privileges": {
+      "all": {
+        "api": [
+          "console"
+        ],
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      },
+      "read": {
+        "api": [
+          "console"
+        ],
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    },
+    "privilegesTooltip": "User should also be granted the appropriate Elasticsearch cluster and index privileges"
+  },
+--------------------------------------------------

@@ -1,0 +1,102 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UpdateBreadcrumbs /services/:serviceName/errors 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+  Object {
+    "href": "#/services?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Services",
+  },
+  Object {
+    "href": "#/services/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "opbeans-node",
+  },
+  Object {
+    "href": "#/services/opbeans-node/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Errors",
+  },
+]
+`;
+
+exports[`UpdateBreadcrumbs /services/:serviceName/errors/:groupId 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+  Object {
+    "href": "#/services?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Services",
+  },
+  Object {
+    "href": "#/services/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "opbeans-node",
+  },
+  Object {
+    "href": "#/services/opbeans-node/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Errors",
+  },
+  Object {
+    "href": "#/services/opbeans-node/errors/myGroupId?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "myGroupId",
+  },
+]
+`;
+
+exports[`UpdateBreadcrumbs /services/:serviceName/transactions 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+  Object {
+    "href": "#/services?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Services",
+  },
+  Object {
+    "href": "#/services/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "opbeans-node",
+  },
+  Object {
+    "href": "#/services/opbeans-node/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Transactions",
+  },
+]
+`;
+
+exports[`UpdateBreadcrumbs /services/:serviceName/transactions/view?transactionName=my-transaction-name 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+  Object {
+    "href": "#/services?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Services",
+  },
+  Object {
+    "href": "#/services/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "opbeans-node",
+  },
+  Object {
+    "href": "#/services/opbeans-node/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Transactions",
+  },
+  Object {
+    "href": "#/services/opbeans-node/transactions/view?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "my-transaction-name",
+  },
+]
+`;
+
+exports[`UpdateBreadcrumbs Homepage 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+]
+`;

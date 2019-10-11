@@ -440,7 +440,7 @@ export function metricbeatStatusCheck(moduleName) {
         bool: {
           filter: {
             term: {
-              'metricset.module': moduleName,
+              'event.module': moduleName,
             },
           },
         },
@@ -449,7 +449,7 @@ export function metricbeatStatusCheck(moduleName) {
   };
 }
 
-export function onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context) {
+export function onPremInstructions(moduleName, platforms, context) {
   const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions(context);
 
   return {

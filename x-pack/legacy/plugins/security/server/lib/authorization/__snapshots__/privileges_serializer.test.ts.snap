@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`global throws Error if unrecognized global privilege is specified 1`] = `"Unrecognized global base privilege"`;
+
+exports[`space throws Error if unrecognized space privilege is specified 1`] = `"Unrecognized space base privilege"`;

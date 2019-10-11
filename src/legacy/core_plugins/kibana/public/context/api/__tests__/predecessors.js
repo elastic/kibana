@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
+import moment from 'moment';
 import * as _ from 'lodash';
 
 import { createIndexPatternsStub, createSearchSourceStubProvider } from './_stubs';
@@ -27,6 +28,10 @@ import { SearchSourceProvider } from 'ui/courier';
 import { fetchContextProvider } from '../context';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const ANCHOR_TIMESTAMP = (new Date(MS_PER_DAY)).toJSON();
+const ANCHOR_TIMESTAMP_3 = (new Date(MS_PER_DAY * 3)).toJSON();
+const ANCHOR_TIMESTAMP_1000 = (new Date(MS_PER_DAY * 1000)).toJSON();
+const ANCHOR_TIMESTAMP_3000 = (new Date(MS_PER_DAY * 3000)).toJSON();
 
 describe('context app', function () {
   beforeEach(ngMock.module('kibana'));
@@ -43,7 +48,25 @@ describe('context app', function () {
       getSearchSourceStub = createSearchSourceStubProvider([], '@timestamp', MS_PER_DAY * 8);
       Private.stub(SearchSourceProvider, getSearchSourceStub);
 
-      fetchPredecessors = Private(fetchContextProvider).fetchPredecessors;
+      fetchPredecessors = (indexPatternId, timeField, sortDir, timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
+        const anchor = {
+          _source: {
+            [timeField]: timeValIso
+          },
+          sort: [timeValNr, tieBreakerValue]
+        };
+
+        return Private(fetchContextProvider).fetchSurroundingDocs(
+          'predecessors',
+          indexPatternId,
+          anchor,
+          timeField,
+          tieBreakerField,
+          sortDir,
+          size,
+          []
+        );
+      };
     }));
 
     it('should perform exactly one query when enough hits are returned', function () {
@@ -60,9 +83,9 @@ describe('context app', function () {
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
+        ANCHOR_TIMESTAMP_3000,
         MS_PER_DAY * 3000,
         '_doc',
-        'asc',
         0,
         3,
         []
@@ -87,9 +110,9 @@ describe('context app', function () {
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
+        ANCHOR_TIMESTAMP_3000,
         MS_PER_DAY * 3000,
         '_doc',
-        'asc',
         0,
         6,
         []
@@ -99,9 +122,9 @@ describe('context app', function () {
             .filter(([property]) => property === 'query')
             .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
-          expect(intervals.every(({ gte, lte }) => (gte && lte) ? gte < lte : true)).to.be(true);
+          expect(intervals.every(({ gte, lte }) => (gte && lte) ? moment(gte).isBefore(lte) : true)).to.be(true);
           // should have started at the given time
-          expect(intervals[0].gte).to.eql(MS_PER_DAY * 3000);
+          expect(intervals[0].gte).to.eql(moment(MS_PER_DAY * 3000).toISOString());
           // should have ended with a half-open interval
           expect(_.last(intervals)).to.only.have.keys('gte', 'format');
           expect(intervals.length).to.be.greaterThan(1);
@@ -123,9 +146,9 @@ describe('context app', function () {
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
+        ANCHOR_TIMESTAMP_1000,
         MS_PER_DAY * 1000,
         '_doc',
-        'asc',
         0,
         3,
         []
@@ -136,11 +159,10 @@ describe('context app', function () {
             .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
           // should have started at the given time
-          expect(intervals[0].gte).to.eql(MS_PER_DAY * 1000);
+          expect(intervals[0].gte).to.eql(moment(MS_PER_DAY * 1000).toISOString());
           // should have stopped before reaching MS_PER_DAY * 1700
-          expect(_.last(intervals).lte).to.be.lessThan(MS_PER_DAY * 1700);
+          expect(moment(_.last(intervals).lte).valueOf()).to.be.lessThan(MS_PER_DAY * 1700);
           expect(intervals.length).to.be.greaterThan(1);
-
           expect(hits).to.eql(searchSourceStub._stubHits.slice(-3));
         });
     });
@@ -150,9 +172,9 @@ describe('context app', function () {
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
+        ANCHOR_TIMESTAMP_3,
         MS_PER_DAY * 3,
         '_doc',
-        'asc',
         0,
         3,
         []
@@ -169,9 +191,9 @@ describe('context app', function () {
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
+        ANCHOR_TIMESTAMP_3,
         MS_PER_DAY * 3,
         '_doc',
-        'asc',
         0,
         3,
         []
@@ -180,6 +202,28 @@ describe('context app', function () {
           const setParentSpy = searchSourceStub.setParent;
           expect(setParentSpy.alwaysCalledWith(false)).to.be(true);
           expect(setParentSpy.called).to.be(true);
+        });
+    });
+
+    it('should set the tiebreaker sort order to the opposite as the time field', function () {
+      const searchSourceStub = getSearchSourceStub();
+
+      return fetchPredecessors(
+        'INDEX_PATTERN_ID',
+        '@timestamp',
+        'desc',
+        ANCHOR_TIMESTAMP,
+        MS_PER_DAY,
+        '_doc',
+        0,
+        3,
+        []
+      )
+        .then(() => {
+          expect(searchSourceStub.setField.calledWith('sort', [
+            { '@timestamp': 'asc' },
+            { '_doc': 'asc' },
+          ])).to.be(true);
         });
     });
   });

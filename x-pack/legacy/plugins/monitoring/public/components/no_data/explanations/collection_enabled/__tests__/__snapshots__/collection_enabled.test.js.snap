@@ -1,0 +1,296 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collection.enabled setting 1`] = `
+<ExplainCollectionEnabled
+  enabler={
+    Object {
+      "enableCollectionEnabled": [Function],
+    }
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  reason={
+    Object {
+      "context": "cluster",
+      "data": "-1",
+      "property": "xpack.monitoring.collection.enabled",
+    }
+  }
+>
+  <WhatIs>
+    <EuiTitle
+      size="l"
+    >
+      <h2
+        className="euiTitle euiTitle--large"
+      >
+        <FormattedMessage
+          defaultMessage="Monitoring is currently off"
+          id="xpack.monitoring.noData.blurbs.monitoringIsOffTitle"
+          values={Object {}}
+        >
+          Monitoring is currently off
+        </FormattedMessage>
+      </h2>
+    </EuiTitle>
+    <EuiTextColor
+      color="subdued"
+    >
+      <span
+        className="euiTextColor euiTextColor--subdued"
+      >
+        <EuiText>
+          <div
+            className="euiText euiText--medium"
+          >
+            <p>
+              <FormattedMessage
+                defaultMessage="Monitoring provides insight to your hardware performance and load."
+                id="xpack.monitoring.noData.blurbs.monitoringIsOffDescription"
+                values={Object {}}
+              >
+                Monitoring provides insight to your hardware performance and load.
+              </FormattedMessage>
+            </p>
+          </div>
+        </EuiText>
+      </span>
+    </EuiTextColor>
+  </WhatIs>
+  <EuiHorizontalRule
+    size="half"
+  >
+    <hr
+      className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    />
+  </EuiHorizontalRule>
+  <EuiText>
+    <div
+      className="euiText euiText--medium"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="We checked the {context} settings and found that {property} is set to {data}."
+          id="xpack.monitoring.noData.explanations.collectionEnabledDescription"
+          values={
+            Object {
+              "context": "cluster",
+              "data": <EuiCode>
+                -1
+              </EuiCode>,
+              "property": <EuiCode>
+                xpack.monitoring.collection.enabled
+              </EuiCode>,
+            }
+          }
+        >
+          We checked the cluster settings and found that 
+          <EuiCode>
+            <EuiCodeBlockImpl
+              fontSize="s"
+              inline={true}
+              isCopyable={false}
+              paddingSize="l"
+              transparentBackground={false}
+            >
+              <span
+                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                style={Object {}}
+              >
+                <code
+                  className="euiCodeBlock__code"
+                >
+                  xpack.monitoring.collection.enabled
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
+          </EuiCode>
+           is set to 
+          <EuiCode>
+            <EuiCodeBlockImpl
+              fontSize="s"
+              inline={true}
+              isCopyable={false}
+              paddingSize="l"
+              transparentBackground={false}
+            >
+              <span
+                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                style={Object {}}
+              >
+                <code
+                  className="euiCodeBlock__code"
+                >
+                  -1
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
+          </EuiCode>
+          .
+        </FormattedMessage>
+      </p>
+      <p>
+        <FormattedMessage
+          defaultMessage="Would you like to turn it on?"
+          id="xpack.monitoring.noData.explanations.collectionEnabled.turnItOnDescription"
+          values={Object {}}
+        >
+          Would you like to turn it on?
+        </FormattedMessage>
+      </p>
+    </div>
+  </EuiText>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    justifyContent="spaceAround"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiButton
+            data-test-subj="enableCollectionEnabled"
+            fill={true}
+            onClick={[Function]}
+            type="button"
+          >
+            <button
+              className="euiButton euiButton--primary euiButton--fill"
+              data-test-subj="enableCollectionEnabled"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  <FormattedMessage
+                    defaultMessage="Turn on monitoring"
+                    id="xpack.monitoring.noData.explanations.collectionEnabled.turnOnMonitoringButtonLabel"
+                    values={Object {}}
+                  >
+                    Turn on monitoring
+                  </FormattedMessage>
+                </span>
+              </span>
+            </button>
+          </EuiButton>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</ExplainCollectionEnabled>
+`;

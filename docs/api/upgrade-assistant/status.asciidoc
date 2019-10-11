@@ -1,0 +1,52 @@
+[[upgrade-assistant-api-status]]
+=== Upgrade readiness status API
+++++
+<titleabbrev>Upgrade readiness status</titleabbrev>
+++++
+
+Check the status of your cluster.
+
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+[[upgrade-assistant-api-status-request]]
+==== Request
+
+`GET /api/upgrade_assistant/status`
+
+[[upgrade-assistant-api-status-response-codes]]
+==== Response codes
+
+`200`::
+  Indicates a successful call.
+
+[[upgrade-assistant-api-status-example]]
+==== Example
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "readyForUpgrade": false,
+  "cluster": [
+    {
+      "message": "Cluster deprecated issue",
+      "details": "...",
+      "level": "warning",
+      "url": "https://docs.elastic.co/..."
+    }
+  ],
+  "indices": [
+    {
+      "message": "Index was created before 6.0",
+      "details": "...",
+      "index": "myIndex",
+      "level": "critical",
+      "reindex": true, <1>
+      "url": "https://docs.elastic.co/..."
+    }
+  ]
+}
+--------------------------------------------------
+
+<1> To fix indices with the `reindex` attribute, set to `true` using the <<start-resume-reindex, Start or resume reindex API>>.

@@ -1,5 +1,5 @@
 [[secure-settings]]
-=== Secure Settings
+=== Secure settings
 
 Some settings are sensitive, and relying on filesystem permissions to protect
 their values is not sufficient. For this use case, Kibana provides a

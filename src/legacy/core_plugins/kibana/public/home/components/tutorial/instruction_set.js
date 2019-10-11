@@ -253,6 +253,14 @@ class InstructionSetUi extends React.Component {
     );
   };
 
+  renderCallOut = () => {
+    if(!this.props.callOut) {
+      return null;
+    }
+
+    return <EuiCallOut title={this.props.callOut.title} children={this.props.callOut.message} iconType={this.props.callOut.iconType} />;
+  }
+
   render() {
     let paramsForm;
     if (this.props.params && this.state.isParamFormVisible) {
@@ -269,6 +277,8 @@ class InstructionSetUi extends React.Component {
       <div>
 
         {this.renderHeader()}
+
+        {this.renderCallOut()}
 
         {paramsForm}
 
@@ -307,6 +317,7 @@ const statusCheckConfigShape = PropTypes.shape({
 
 InstructionSetUi.propTypes = {
   title: PropTypes.string.isRequired,
+  callOut: PropTypes.object,
   instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
   statusCheckConfig: statusCheckConfigShape,
   statusCheckState: PropTypes.oneOf([

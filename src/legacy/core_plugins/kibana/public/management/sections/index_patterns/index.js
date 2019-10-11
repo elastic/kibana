@@ -25,22 +25,24 @@ import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
+import indexPatternListTemplate from './list.html';
+import { IndexPatternTable } from './index_pattern_table';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
+import { UICapabilitiesProvider } from 'ui/capabilities/react';
+import { getListBreadcrumbs } from './breadcrumbs';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { IndexPatternList } from './index_pattern_list';
 
 const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
 
 export function updateIndexPatternList(
-  $scope,
-  indexPatternCreationOptions,
-  defaultIndex,
   indexPatterns,
+  kbnUrl,
+  indexPatternCreationOptions,
 ) {
   const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
   if (!node) {
@@ -49,11 +51,13 @@ export function updateIndexPatternList(
 
   render(
     <I18nContext>
-      <IndexPatternList
-        indexPatternCreationOptions={indexPatternCreationOptions}
-        defaultIndex={defaultIndex}
-        indexPatterns={indexPatterns}
-      />
+      <UICapabilitiesProvider>
+        <IndexPatternTable
+          indexPatterns={indexPatterns}
+          navTo={kbnUrl.redirect}
+          indexPatternCreationOptions={indexPatternCreationOptions}
+        />
+      </UICapabilitiesProvider>
     </I18nContext>,
     node,
   );
@@ -79,7 +83,29 @@ const indexPatternsResolutions = {
 // add a dependency to all of the subsection routes
 uiRoutes
   .defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
-    resolve: indexPatternsResolutions
+    resolve: indexPatternsResolutions,
+    requireUICapability: 'management.kibana.index_patterns',
+    badge: uiCapabilities => {
+      if (uiCapabilities.indexPatterns.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n.translate('kbn.management.indexPatterns.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n.translate('kbn.management.indexPatterns.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save index patterns',
+        }),
+        iconType: 'glasses'
+      };
+    }
+  });
+
+uiRoutes
+  .when('/management/kibana/index_patterns', {
+    template: indexPatternListTemplate,
+    k7Breadcrumbs: getListBreadcrumbs
   });
 
 // wrapper directive, which sets some global stuff up like the left nav
@@ -97,35 +123,41 @@ uiModules.get('apps/management')
         });
 
         const renderList = () => {
-          $scope.indexPatternList = $route.current.locals.indexPatterns.map(pattern => {
-            const id = pattern.id;
-            const tags = indexPatternListProvider.getIndexPatternTags(pattern, $scope.defaultIndex === id);
+          $scope.indexPatternList =
+            $route.current.locals.indexPatterns
+              .map(pattern => {
+                const id = pattern.id;
+                const title = pattern.get('title');
+                const isDefault = $scope.defaultIndex === id;
+                const tags = indexPatternListProvider.getIndexPatternTags(
+                  pattern,
+                  isDefault
+                );
 
-            return {
-              id: id,
-              title: pattern.get('title'),
-              url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
-              active: $scope.editingId === id,
-              default: $scope.defaultIndex === id,
-              tag: tags && tags.length ? tags[0] : null,
-            };
-          }).sort((a, b) => {
-            if(a.default) {
-              return -1;
-            }
-            if(b.default) {
-              return 1;
-            }
-            if(a.title < b.title) {
-              return -1;
-            }
-            if(a.title > b.title) {
-              return 1;
-            }
-            return 0;
-          }) || [];
+                return {
+                  id,
+                  title,
+                  url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
+                  active: $scope.editingId === id,
+                  default: isDefault,
+                  tags,
+                  //the prepending of 0 at the default pattern takes care of prioritization
+                  //so the sorting will but the default index on top
+                  //or on bottom of a the table
+                  sort: `${isDefault ? '0' : '1'}${title}`,
+                };
+              })
+              .sort((a, b) => {
+                if (a.sort < b.sort) {
+                  return -1;
+                } else if (a.sort > b.sort) {
+                  return 1;
+                } else {
+                  return 0;
+                }
+              }) || [];
 
-          updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList);
+          updateIndexPatternList($scope.indexPatternList, kbnUrl, indexPatternCreationOptions);
         };
 
         $scope.$on('$destroy', destroyIndexPatternList);

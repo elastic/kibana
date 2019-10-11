@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -29,11 +31,11 @@ import {
 } from '../../components';
 
 import { EmptyTablePrompt } from './empty_table_prompt';
-const emptyTablePromptSource = require('!!raw-loader!./empty_table_prompt');
+import emptyTablePromptSource from '!!raw-loader!./empty_table_prompt'; // eslint-disable-line import/default
 const emptyTablePromptHtml = renderToHtml(EmptyTablePrompt);
 
 import { ControlledTableWithEmptyPrompt } from './table_with_empty_prompt';
-const tableWithEmptyPromptSource = require('!!raw-loader!./table_with_empty_prompt');
+import tableWithEmptyPromptSource from '!!raw-loader!./table_with_empty_prompt'; // eslint-disable-line import/default
 const tableWithEmptyPromptHtml = renderToHtml(ControlledTableWithEmptyPrompt);
 
 export default props => (

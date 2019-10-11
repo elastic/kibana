@@ -1,44 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`props exportedFieldsUrl 1`] = `
-<EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
->
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+<EuiFlexGroup>
+  <EuiFlexItem>
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+      gutterSize="l"
     >
       <EuiFlexItem
-        component="div"
-        grow={false}
-      />
-      <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiTitle
           size="l"
-          textTransform="none"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -46,17 +24,11 @@ exports[`props exportedFieldsUrl 1`] = `
       text="this is a great tutorial about..."
     />
     <div>
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiButton
-        color="primary"
-        fill={false}
         href="exported_fields_url"
-        iconSide="left"
-        rel="noopener noreferrer"
+        rel="noopener"
         target="_blank"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="View exported fields"
@@ -67,61 +39,36 @@ exports[`props exportedFieldsUrl 1`] = `
     </div>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
 `;
 
 exports[`props iconType 1`] = `
-<EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
->
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+<EuiFlexGroup>
+  <EuiFlexItem>
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+      gutterSize="l"
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           size="xl"
-          style={
-            Object {
-              "marginRight": 16,
-            }
-          }
           type="logoElastic"
         />
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiTitle
           size="l"
-          textTransform="none"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -130,55 +77,31 @@ exports[`props iconType 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
 `;
 
 exports[`props isBeta 1`] = `
-<EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
->
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+<EuiFlexGroup>
+  <EuiFlexItem>
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+      gutterSize="l"
     >
       <EuiFlexItem
-        component="div"
-        grow={false}
-      />
-      <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiTitle
           size="l"
-          textTransform="none"
         >
-          <h2>
+          <h1>
             Great tutorial
               
             <EuiBetaBadge
               label="Beta"
-              tooltipPosition="top"
             />
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -187,51 +110,28 @@ exports[`props isBeta 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
 `;
 
 exports[`props previewUrl 1`] = `
-<EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
->
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+<EuiFlexGroup>
+  <EuiFlexItem>
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+      gutterSize="l"
     >
       <EuiFlexItem
-        component="div"
-        grow={false}
-      />
-      <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiTitle
           size="l"
-          textTransform="none"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -240,7 +140,6 @@ exports[`props previewUrl 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiImage
@@ -256,44 +155,22 @@ exports[`props previewUrl 1`] = `
 `;
 
 exports[`render 1`] = `
-<EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
->
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+<EuiFlexGroup>
+  <EuiFlexItem>
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
-      gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+      gutterSize="l"
     >
       <EuiFlexItem
-        component="div"
-        grow={false}
-      />
-      <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiTitle
           size="l"
-          textTransform="none"
         >
-          <h2>
+          <h1>
             Great tutorial
               
-          </h2>
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -302,7 +179,6 @@ exports[`render 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
