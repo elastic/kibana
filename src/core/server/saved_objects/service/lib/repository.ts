@@ -718,7 +718,7 @@ export class SavedObjectsRepository {
 
       const expectedResult = {
         type,
-        requestedId: id,
+        id,
         esRequestIndex: requestIndexCounter++,
         documentToSave,
       };
@@ -750,17 +750,13 @@ export class SavedObjectsRepository {
           return expectedResult.error;
         }
 
-        const { type, requestedId, documentToSave, esRequestIndex } = expectedResult.value;
+        const { type, id, documentToSave, esRequestIndex } = expectedResult.value;
         const response = esResponse.items[esRequestIndex];
-        const {
-          error,
-          _id: responseId,
-          _seq_no: seqNo,
-          _primary_term: primaryTerm,
-        } = Object.values(response)[0] as any;
+        const { error, _seq_no: seqNo, _primary_term: primaryTerm } = Object.values(
+          response
+        )[0] as any;
 
         const { [type]: attributes, references, updated_at } = documentToSave;
-        const id = requestedId || responseId;
         if (error) {
           return {
             id,
