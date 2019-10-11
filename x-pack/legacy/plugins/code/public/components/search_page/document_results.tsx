@@ -31,7 +31,11 @@ export class DocumentResults extends React.PureComponent<Props> {
       const lines = content.split('\n');
 
       return (
-        <div key={`resultitem${key}`} data-test-subj="codeSearchResultList">
+        <div
+          key={`resultitem${key}`}
+          className="codeSearch__result"
+          data-test-subj="codeSearchResultList"
+        >
           <div style={{ marginBottom: '.5rem' }}>
             <Link to={repoLinkUrl}>
               <EuiFlexGroup
@@ -74,7 +78,6 @@ export class DocumentResults extends React.PureComponent<Props> {
           </EuiFlexGroup>
           <CodeBlockPanel
             key={`code${key}`}
-            className="codeResult__code-block"
             lines={lines}
             language={language}
             highlightRanges={ranges}
