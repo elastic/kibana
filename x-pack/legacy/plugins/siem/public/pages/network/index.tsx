@@ -68,7 +68,7 @@ export const NetworkContainer = React.memo<Props>(() => {
           <Route
             path="/network/"
             render={({ location: { search = '' } }) => (
-              <Redirect from="/network/" to={`/network/${NetworkRouteType.dns}${search}`} />
+              <Redirect from="/network/" to={`/network/${NetworkRouteType.ips}${search}`} />
             )}
           />
         </Switch>

@@ -12,17 +12,17 @@ const getTabsOnNetworkUrl = (tabName: NetworkRouteType) => `#/network/${tabName}
 
 export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => {
   const networkNavTabs = {
-    [NetworkRouteType.dns]: {
-      id: NetworkRouteType.dns,
-      name: i18n.NAVIGATION_DNS_TITLE,
-      href: getTabsOnNetworkUrl(NetworkRouteType.dns),
-      disabled: false,
-      urlKey: 'network',
-    },
     [NetworkRouteType.ips]: {
       id: NetworkRouteType.ips,
       name: i18n.NAVIGATION_IPS_TITLE,
       href: getTabsOnNetworkUrl(NetworkRouteType.ips),
+      disabled: false,
+      urlKey: 'network',
+    },
+    [NetworkRouteType.dns]: {
+      id: NetworkRouteType.dns,
+      name: i18n.NAVIGATION_DNS_TITLE,
+      href: getTabsOnNetworkUrl(NetworkRouteType.dns),
       disabled: false,
       urlKey: 'network',
     },
