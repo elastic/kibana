@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { createColorFormat } from './color';
+import { ColorFormat } from './color';
 import { HTML_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
-
-const ColorFormat = createColorFormat();
 
 describe('Color Format', () => {
   describe('field is a number', () => {

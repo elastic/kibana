@@ -19,7 +19,6 @@
 
 import { memoize, forOwn, isFunction } from 'lodash';
 import { npStart } from 'ui/new_platform';
-import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 
 class FieldFormatRegistry {
   constructor() {
@@ -177,9 +176,9 @@ class FieldFormatRegistry {
     });
   }
 
-  register = (module) => {
-    const fieldFormatInstance = module(FieldFormat);
-    this.fieldFormats.set(fieldFormatInstance.id, fieldFormatInstance);
+  register = derivedFieldFormat => {
+    this.fieldFormats.set(derivedFieldFormat.id, derivedFieldFormat);
+
     return this;
   };
 }

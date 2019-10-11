@@ -25,68 +25,66 @@ import {
   TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
-export function createDateOnServerFormat() {
-  return class DateFormat extends FieldFormat {
-    static id = 'date';
-    static title = 'Date';
-    static fieldType = KBN_FIELD_TYPES.DATE;
+export class DateFormat extends FieldFormat {
+  static id = 'date';
+  static title = 'Date';
+  static fieldType = KBN_FIELD_TYPES.DATE;
 
-    private getConfig: Function;
-    private memoizedConverter: Function = noop;
-    private memoizedPattern: string = '';
-    private timeZone: string = '';
+  private getConfig: Function;
+  private memoizedConverter: Function = noop;
+  private memoizedPattern: string = '';
+  private timeZone: string = '';
 
-    constructor(params: Record<string, any>, getConfig: Function) {
-      super(params);
+  constructor(params: Record<string, any>, getConfig: Function) {
+    super(params);
 
-      this.getConfig = getConfig;
-      this.memoizedConverter = memoize((val: any) => {
-        if (val == null) {
-          return '-';
-        }
-
-        /* On the server, importing moment returns a new instance. Unlike on
-         * the client side, it doesn't have the dateFormat:tz configuration
-         * baked in.
-         * We need to set the timezone manually here. The date is taken in as
-         * UTC and converted into the desired timezone. */
-        let date;
-        if (this.timeZone === 'Browser') {
-          // Assume a warning has been logged this can be unpredictable. It
-          // would be too verbose to log anything here.
-          date = moment.utc(val);
-        } else {
-          date = moment.utc(val).tz(this.timeZone);
-        }
-
-        if (date.isValid()) {
-          return date.format(this.memoizedPattern);
-        } else {
-          return val;
-        }
-      });
-    }
-
-    getParamDefaults() {
-      return {
-        pattern: this.getConfig('dateFormat'),
-        timezone: this.getConfig('dateFormat:tz'),
-      };
-    }
-
-    textConvert: TextContextTypeConvert = val => {
-      // don't give away our ref to converter so we can hot-swap when config changes
-      const pattern = this.param('pattern');
-      const timezone = this.param('timezone');
-
-      const timezoneChanged = this.timeZone !== timezone;
-      const datePatternChanged = this.memoizedPattern !== pattern;
-      if (timezoneChanged || datePatternChanged) {
-        this.timeZone = timezone;
-        this.memoizedPattern = pattern;
+    this.getConfig = getConfig;
+    this.memoizedConverter = memoize((val: any) => {
+      if (val == null) {
+        return '-';
       }
 
-      return this.memoizedConverter(val);
+      /* On the server, importing moment returns a new instance. Unlike on
+       * the client side, it doesn't have the dateFormat:tz configuration
+       * baked in.
+       * We need to set the timezone manually here. The date is taken in as
+       * UTC and converted into the desired timezone. */
+      let date;
+      if (this.timeZone === 'Browser') {
+        // Assume a warning has been logged this can be unpredictable. It
+        // would be too verbose to log anything here.
+        date = moment.utc(val);
+      } else {
+        date = moment.utc(val).tz(this.timeZone);
+      }
+
+      if (date.isValid()) {
+        return date.format(this.memoizedPattern);
+      } else {
+        return val;
+      }
+    });
+  }
+
+  getParamDefaults() {
+    return {
+      pattern: this.getConfig('dateFormat'),
+      timezone: this.getConfig('dateFormat:tz'),
     };
+  }
+
+  textConvert: TextContextTypeConvert = val => {
+    // don't give away our ref to converter so we can hot-swap when config changes
+    const pattern = this.param('pattern');
+    const timezone = this.param('timezone');
+
+    const timezoneChanged = this.timeZone !== timezone;
+    const datePatternChanged = this.memoizedPattern !== pattern;
+    if (timezoneChanged || datePatternChanged) {
+      this.timeZone = timezone;
+      this.memoizedPattern = pattern;
+    }
+
+    return this.memoizedConverter(val);
   };
 }

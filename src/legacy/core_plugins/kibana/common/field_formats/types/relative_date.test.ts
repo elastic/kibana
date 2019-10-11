@@ -18,9 +18,7 @@
  */
 
 import moment from 'moment-timezone';
-import { createRelativeDateFormat } from './relative_date';
-
-const RelativeDateFormat = createRelativeDateFormat();
+import { RelativeDateFormat } from './relative_date';
 
 describe('Relative Date Format', () => {
   let convert: Function;

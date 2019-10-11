@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { createIpFormat } from './ip';
-
-const IpFormat = createIpFormat();
+import { IpFormat } from './ip';
 
 describe('IP Address Format', () => {
   let ip: Record<string, any>;

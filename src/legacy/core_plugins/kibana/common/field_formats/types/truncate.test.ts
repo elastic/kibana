@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { createTruncateFormat } from './truncate';
-
-const TruncateFormat = createTruncateFormat();
+import { TruncateFormat } from './truncate';
 
 describe('String TruncateFormat', () => {
   test('truncate large string', () => {

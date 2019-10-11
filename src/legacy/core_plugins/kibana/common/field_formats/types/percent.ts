@@ -19,20 +19,18 @@
 
 import { createNumeralFormat } from './_numeral';
 
-export function createPercentFormat() {
-  return createNumeralFormat({
-    id: 'percent',
-    title: 'Percentage',
+export const PercentFormat = createNumeralFormat({
+  id: 'percent',
+  title: 'Percentage',
 
-    getParamDefaults: (getConfig: Function) => {
-      return {
-        pattern: getConfig('format:percent:defaultPattern'),
-        fractional: true,
-      };
-    },
+  getParamDefaults: (getConfig: Function) => {
+    return {
+      pattern: getConfig('format:percent:defaultPattern'),
+      fractional: true,
+    };
+  },
 
-    afterConvert(val: number) {
-      return this.param('fractional') ? val : val / 100;
-    },
-  });
-}
+  afterConvert(val: number) {
+    return this.param('fractional') ? val : val / 100;
+  },
+});

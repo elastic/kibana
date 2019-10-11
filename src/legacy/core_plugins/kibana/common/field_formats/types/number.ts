@@ -19,9 +19,7 @@
 
 import { createNumeralFormat } from './_numeral';
 
-export function createNumberFormat() {
-  return createNumeralFormat({
-    id: 'number',
-    title: 'Number',
-  });
-}
+export const NumberFormat = createNumeralFormat({
+  id: 'number',
+  title: 'Number',
+});

@@ -25,58 +25,56 @@ import {
   TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
-export function createDateFormat() {
-  return class DateFormat extends FieldFormat {
-    static id = 'date';
-    static title = 'Date';
-    static fieldType = KBN_FIELD_TYPES.DATE;
+export class DateFormat extends FieldFormat {
+  static id = 'date';
+  static title = 'Date';
+  static fieldType = KBN_FIELD_TYPES.DATE;
 
-    private getConfig: Function;
-    private memoizedConverter: Function = noop;
-    private memoizedPattern: string = '';
-    private timeZone: string = '';
+  private getConfig: Function;
+  private memoizedConverter: Function = noop;
+  private memoizedPattern: string = '';
+  private timeZone: string = '';
 
-    constructor(params: Record<string, any>, getConfig: Function) {
-      super(params);
+  constructor(params: Record<string, any>, getConfig: Function) {
+    super(params);
 
-      this.getConfig = getConfig;
-    }
+    this.getConfig = getConfig;
+  }
 
-    getParamDefaults() {
-      return {
-        pattern: this.getConfig('dateFormat'),
-        timezone: this.getConfig('dateFormat:tz'),
-      };
-    }
-
-    textConvert: TextContextTypeConvert = val => {
-      // don't give away our ref to converter so
-      // we can hot-swap when config changes
-      const pattern = this.param('pattern');
-      const timezone = this.param('timezone');
-
-      const timezoneChanged = this.timeZone !== timezone;
-      const datePatternChanged = this.memoizedPattern !== pattern;
-      if (timezoneChanged || datePatternChanged) {
-        this.timeZone = timezone;
-        this.memoizedPattern = pattern;
-
-        this.memoizedConverter = memoize(function converter(value: any) {
-          if (value === null || value === undefined) {
-            return '-';
-          }
-
-          const date = moment(value);
-
-          if (date.isValid()) {
-            return date.format(pattern);
-          } else {
-            return value;
-          }
-        });
-      }
-
-      return this.memoizedConverter(val);
+  getParamDefaults() {
+    return {
+      pattern: this.getConfig('dateFormat'),
+      timezone: this.getConfig('dateFormat:tz'),
     };
+  }
+
+  textConvert: TextContextTypeConvert = val => {
+    // don't give away our ref to converter so
+    // we can hot-swap when config changes
+    const pattern = this.param('pattern');
+    const timezone = this.param('timezone');
+
+    const timezoneChanged = this.timeZone !== timezone;
+    const datePatternChanged = this.memoizedPattern !== pattern;
+    if (timezoneChanged || datePatternChanged) {
+      this.timeZone = timezone;
+      this.memoizedPattern = pattern;
+
+      this.memoizedConverter = memoize(function converter(value: any) {
+        if (value === null || value === undefined) {
+          return '-';
+        }
+
+        const date = moment(value);
+
+        if (date.isValid()) {
+          return date.format(pattern);
+        } else {
+          return value;
+        }
+      });
+    }
+
+    return this.memoizedConverter(val);
   };
 }

@@ -39,45 +39,41 @@ const templateHtml = `
   </dl>`;
 const doTemplate = template(noWhiteSpace(templateHtml));
 
-export function createSourceFormat() {
-  class SourceFormat extends FieldFormat {
-    static id = '_source';
-    static title = '_source';
-    static fieldType = KBN_FIELD_TYPES._SOURCE;
+export class SourceFormat extends FieldFormat {
+  static id = '_source';
+  static title = '_source';
+  static fieldType = KBN_FIELD_TYPES._SOURCE;
 
-    private getConfig: Function;
+  private getConfig: Function;
 
-    constructor(params: Record<string, any>, getConfig: Function) {
-      super(params);
+  constructor(params: Record<string, any>, getConfig: Function) {
+    super(params);
 
-      this.getConfig = getConfig;
-    }
-
-    textConvert: TextContextTypeConvert = value => JSON.stringify(value);
-
-    htmlConvert: HtmlContextTypeConvert = (value, field, hit) => {
-      if (!field) {
-        const converter = this.getConverterFor('text') as Function;
-
-        return escape(converter(value));
-      }
-
-      const highlights = (hit && hit.highlight) || {};
-      const formatted = field.indexPattern.formatHit(hit);
-      const highlightPairs: any[] = [];
-      const sourcePairs: any[] = [];
-      const isShortDots = this.getConfig('shortDots:enable');
-
-      keys(formatted).forEach(key => {
-        const pairs = highlights[key] ? highlightPairs : sourcePairs;
-        const newField = isShortDots ? shortenDottedString(key) : key;
-        const val = formatted[key];
-        pairs.push([newField, val]);
-      }, []);
-
-      return doTemplate({ defPairs: highlightPairs.concat(sourcePairs) });
-    };
+    this.getConfig = getConfig;
   }
 
-  return SourceFormat;
+  textConvert: TextContextTypeConvert = value => JSON.stringify(value);
+
+  htmlConvert: HtmlContextTypeConvert = (value, field, hit) => {
+    if (!field) {
+      const converter = this.getConverterFor('text') as Function;
+
+      return escape(converter(value));
+    }
+
+    const highlights = (hit && hit.highlight) || {};
+    const formatted = field.indexPattern.formatHit(hit);
+    const highlightPairs: any[] = [];
+    const sourcePairs: any[] = [];
+    const isShortDots = this.getConfig('shortDots:enable');
+
+    keys(formatted).forEach(key => {
+      const pairs = highlights[key] ? highlightPairs : sourcePairs;
+      const newField = isShortDots ? shortenDottedString(key) : key;
+      const val = formatted[key];
+      pairs.push([newField, val]);
+    }, []);
+
+    return doTemplate({ defPairs: highlightPairs.concat(sourcePairs) });
+  };
 }

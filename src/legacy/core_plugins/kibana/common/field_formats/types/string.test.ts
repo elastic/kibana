@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { createStringFormat } from './string';
-
-const StringFormat = createStringFormat();
+import { StringFormat } from './string';
 
 describe('String Format', () => {
   test('convert a string to lower case', () => {

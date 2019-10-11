@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { createPercentFormat } from './percent';
-
-const PercentFormat = createPercentFormat();
+import { PercentFormat } from './percent';
 
 describe('PercentFormat', () => {
   const config: Record<string, any> = {};

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { createDurationFormat } from './duration';
-
-const DurationFormat = createDurationFormat();
+import { DurationFormat } from './duration';
 
 describe('Duration Format', () => {
   testCase({

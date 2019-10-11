@@ -18,9 +18,7 @@
  */
 
 import moment from 'moment-timezone';
-import { createDateFormat } from './date';
-
-const DateFormat = createDateFormat();
+import { DateFormat } from './date';
 
 describe('Date Format', () => {
   let convert: Function;

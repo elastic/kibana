@@ -70,65 +70,63 @@ export function formatWithNanos(
   }
 }
 
-export function createDateNanosFormat() {
-  return class DateNanosFormat extends FieldFormat {
-    static id = 'date_nanos';
-    static title = 'Date Nanos';
-    static fieldType = KBN_FIELD_TYPES.DATE;
+export class DateNanosFormat extends FieldFormat {
+  static id = 'date_nanos';
+  static title = 'Date Nanos';
+  static fieldType = KBN_FIELD_TYPES.DATE;
 
-    private getConfig: Function;
-    private memoizedConverter: Function = noop;
-    private memoizedPattern: string = '';
-    private timeZone: string = '';
+  private getConfig: Function;
+  private memoizedConverter: Function = noop;
+  private memoizedPattern: string = '';
+  private timeZone: string = '';
 
-    constructor(params: Record<string, any>, getConfig: Function) {
-      super(params);
+  constructor(params: Record<string, any>, getConfig: Function) {
+    super(params);
 
-      this.getConfig = getConfig;
-    }
+    this.getConfig = getConfig;
+  }
 
-    getParamDefaults() {
-      return {
-        pattern: this.getConfig('dateNanosFormat'),
-        fallbackPattern: this.getConfig('dateFormat'),
-        timezone: this.getConfig('dateFormat:tz'),
-      };
-    }
-
-    textConvert: TextContextTypeConvert = val => {
-      // don't give away our ref to converter so
-      // we can hot-swap when config changes
-      const pattern = this.param('pattern');
-      const timezone = this.param('timezone');
-      const fractPattern = analysePatternForFract(pattern);
-      const fallbackPattern = this.param('patternFallback');
-
-      const timezoneChanged = this.timeZone !== timezone;
-      const datePatternChanged = this.memoizedPattern !== pattern;
-      if (timezoneChanged || datePatternChanged) {
-        this.timeZone = timezone;
-        this.memoizedPattern = pattern;
-
-        this.memoizedConverter = memoize(function converter(value: any) {
-          if (value === null || value === undefined) {
-            return '-';
-          }
-
-          const date = moment(value);
-
-          if (typeof value !== 'string' && date.isValid()) {
-            // fallback for max/min aggregation, where unixtime in ms is returned as a number
-            // aggregations in Elasticsearch generally just return ms
-            return date.format(fallbackPattern);
-          } else if (date.isValid()) {
-            return formatWithNanos(date, value, fractPattern);
-          } else {
-            return value;
-          }
-        });
-      }
-
-      return this.memoizedConverter(val);
+  getParamDefaults() {
+    return {
+      pattern: this.getConfig('dateNanosFormat'),
+      fallbackPattern: this.getConfig('dateFormat'),
+      timezone: this.getConfig('dateFormat:tz'),
     };
+  }
+
+  textConvert: TextContextTypeConvert = val => {
+    // don't give away our ref to converter so
+    // we can hot-swap when config changes
+    const pattern = this.param('pattern');
+    const timezone = this.param('timezone');
+    const fractPattern = analysePatternForFract(pattern);
+    const fallbackPattern = this.param('patternFallback');
+
+    const timezoneChanged = this.timeZone !== timezone;
+    const datePatternChanged = this.memoizedPattern !== pattern;
+    if (timezoneChanged || datePatternChanged) {
+      this.timeZone = timezone;
+      this.memoizedPattern = pattern;
+
+      this.memoizedConverter = memoize(function converter(value: any) {
+        if (value === null || value === undefined) {
+          return '-';
+        }
+
+        const date = moment(value);
+
+        if (typeof value !== 'string' && date.isValid()) {
+          // fallback for max/min aggregation, where unixtime in ms is returned as a number
+          // aggregations in Elasticsearch generally just return ms
+          return date.format(fallbackPattern);
+        } else if (date.isValid()) {
+          return formatWithNanos(date, value, fractPattern);
+        } else {
+          return value;
+        }
+      });
+    }
+
+    return this.memoizedConverter(val);
   };
 }

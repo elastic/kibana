@@ -167,35 +167,33 @@ function parseInputAsDuration(val: number, inputFormat: string) {
   return moment.duration(val * ratio, kind);
 }
 
-export function createDurationFormat() {
-  return class DurationFormat extends FieldFormat {
-    static id = 'duration';
-    static title = 'Duration';
-    static fieldType = KBN_FIELD_TYPES.NUMBER;
-    static inputFormats = inputFormats;
-    static outputFormats = outputFormats;
+export class DurationFormat extends FieldFormat {
+  static id = 'duration';
+  static title = 'Duration';
+  static fieldType = KBN_FIELD_TYPES.NUMBER;
+  static inputFormats = inputFormats;
+  static outputFormats = outputFormats;
 
-    isHuman() {
-      return this.param('outputFormat') === HUMAN_FRIENDLY;
-    }
-    getParamDefaults() {
-      return {
-        inputFormat: DEFAULT_INPUT_FORMAT.kind,
-        outputFormat: DEFAULT_OUTPUT_FORMAT.method,
-        outputPrecision: DEFAULT_OUTPUT_PRECISION,
-      };
-    }
-
-    textConvert: TextContextTypeConvert = val => {
-      const inputFormat = this.param('inputFormat');
-      const outputFormat = this.param('outputFormat') as keyof Duration;
-      const outputPrecision = this.param('outputPrecision');
-      const human = this.isHuman();
-      const prefix = val < 0 && human ? 'minus ' : '';
-      const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
-      const formatted = duration[outputFormat]();
-      const precise = human ? formatted : formatted.toFixed(outputPrecision);
-      return prefix + precise;
+  isHuman() {
+    return this.param('outputFormat') === HUMAN_FRIENDLY;
+  }
+  getParamDefaults() {
+    return {
+      inputFormat: DEFAULT_INPUT_FORMAT.kind,
+      outputFormat: DEFAULT_OUTPUT_FORMAT.method,
+      outputPrecision: DEFAULT_OUTPUT_PRECISION,
     };
+  }
+
+  textConvert: TextContextTypeConvert = val => {
+    const inputFormat = this.param('inputFormat');
+    const outputFormat = this.param('outputFormat') as keyof Duration;
+    const outputPrecision = this.param('outputPrecision');
+    const human = this.isHuman();
+    const prefix = val < 0 && human ? 'minus ' : '';
+    const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
+    const formatted = duration[outputFormat]();
+    const precise = human ? formatted : formatted.toFixed(outputPrecision);
+    return prefix + precise;
   };
 }

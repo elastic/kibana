@@ -26,24 +26,20 @@ import {
 
 const omission = '...';
 
-export function createTruncateFormat() {
-  class TruncateFormat extends FieldFormat {
-    static id = 'truncate';
-    static title = 'Truncated String';
-    static fieldType = KBN_FIELD_TYPES.STRING;
+export class TruncateFormat extends FieldFormat {
+  static id = 'truncate';
+  static title = 'Truncated String';
+  static fieldType = KBN_FIELD_TYPES.STRING;
 
-    textConvert: TextContextTypeConvert = val => {
-      const length = this.param('fieldLength');
-      if (length > 0) {
-        return trunc(val, {
-          length: length + omission.length,
-          omission,
-        });
-      }
+  textConvert: TextContextTypeConvert = val => {
+    const length = this.param('fieldLength');
+    if (length > 0) {
+      return trunc(val, {
+        length: length + omission.length,
+        omission,
+      });
+    }
 
-      return val;
-    };
-  }
-
-  return TruncateFormat;
+    return val;
+  };
 }

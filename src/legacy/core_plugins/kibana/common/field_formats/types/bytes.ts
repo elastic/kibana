@@ -19,9 +19,7 @@
 
 import { createNumeralFormat } from './_numeral';
 
-export function createBytesFormat() {
-  return createNumeralFormat({
-    id: 'bytes',
-    title: 'Bytes',
-  });
-}
+export const BytesFormat = createNumeralFormat({
+  id: 'bytes',
+  title: 'Bytes',
+});

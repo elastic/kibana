@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { createUrlFormat } from './url';
+import { UrlFormat } from './url';
 import { TEXT_CONTEXT_TYPE, HTML_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
-
-const UrlFormat = createUrlFormat();
 
 describe('UrlFormat', () => {
   test('outputs a simple <a> tag by default', () => {

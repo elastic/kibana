@@ -18,9 +18,7 @@
  */
 
 import moment from 'moment-timezone';
-import { createDateNanosFormat, analysePatternForFract, formatWithNanos } from './date_nanos';
-
-const DateFormat = createDateNanosFormat();
+import { DateNanosFormat, analysePatternForFract, formatWithNanos } from './date_nanos';
 
 describe('Date Nanos Format', () => {
   let convert: Function;
@@ -32,7 +30,7 @@ describe('Date Nanos Format', () => {
     mockConfig['dateFormat:tz'] = 'Browser';
 
     const getConfig = (key: string) => mockConfig[key];
-    const date = new DateFormat({}, getConfig);
+    const date = new DateNanosFormat({}, getConfig);
 
     convert = date.convert.bind(date);
   });

@@ -23,19 +23,17 @@ import {
   TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
-export function createIpFormat() {
-  return class IpFormat extends FieldFormat {
-    static id = 'ip';
-    static title = 'IP Address';
-    static fieldType = KBN_FIELD_TYPES.IP;
+export class IpFormat extends FieldFormat {
+  static id = 'ip';
+  static title = 'IP Address';
+  static fieldType = KBN_FIELD_TYPES.IP;
 
-    textConvert: TextContextTypeConvert = val => {
-      if (val === undefined || val === null) return '-';
-      if (!isFinite(val)) return val;
+  textConvert: TextContextTypeConvert = val => {
+    if (val === undefined || val === null) return '-';
+    if (!isFinite(val)) return val;
 
-      // shazzam!
-      // eslint-disable-next-line no-bitwise
-      return [val >>> 24, (val >>> 16) & 0xff, (val >>> 8) & 0xff, val & 0xff].join('.');
-    };
+    // shazzam!
+    // eslint-disable-next-line no-bitwise
+    return [val >>> 24, (val >>> 16) & 0xff, (val >>> 8) & 0xff, val & 0xff].join('.');
   };
 }

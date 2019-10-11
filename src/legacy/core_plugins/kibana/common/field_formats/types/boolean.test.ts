@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { createBoolFormat } from './boolean';
-
-const BoolFormat = createBoolFormat();
+import { BoolFormat } from './boolean';
 
 describe('Boolean Format', () => {
   let boolean: Record<string, any>;

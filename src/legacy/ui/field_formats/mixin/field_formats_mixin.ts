@@ -39,7 +39,7 @@ export function fieldFormatsMixin(kbnServer: any, server: Legacy.Server) {
     return new FieldFormatsService(fieldFormatClasses, getConfig);
   });
 
-  server.decorate('server', 'registerFieldFormat', createFormat => {
-    fieldFormatClasses.push(createFormat(FieldFormat));
+  server.decorate('server', 'registerFieldFormat', customFieldFormat => {
+    fieldFormatClasses.push(customFieldFormat);
   });
 }

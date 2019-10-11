@@ -33,30 +33,28 @@ function convertLookupEntriesToMap(lookupEntries: any[]) {
   );
 }
 
-export function createStaticLookupFormat() {
-  return class StaticLookupFormat extends FieldFormat {
-    static id = 'static_lookup';
-    static title = 'Static Lookup';
-    static fieldType = [
-      KBN_FIELD_TYPES.STRING,
-      KBN_FIELD_TYPES.NUMBER,
-      KBN_FIELD_TYPES.IP,
-      KBN_FIELD_TYPES.BOOLEAN,
-    ];
+export class StaticLookupFormat extends FieldFormat {
+  static id = 'static_lookup';
+  static title = 'Static Lookup';
+  static fieldType = [
+    KBN_FIELD_TYPES.STRING,
+    KBN_FIELD_TYPES.NUMBER,
+    KBN_FIELD_TYPES.IP,
+    KBN_FIELD_TYPES.BOOLEAN,
+  ];
 
-    getParamDefaults() {
-      return {
-        lookupEntries: [{}],
-        unknownKeyValue: null,
-      };
-    }
-
-    textConvert: TextContextTypeConvert = val => {
-      const lookupEntries = this.param('lookupEntries');
-      const unknownKeyValue = this.param('unknownKeyValue');
-
-      const lookupMap = convertLookupEntriesToMap(lookupEntries);
-      return lookupMap[val] || unknownKeyValue || val;
+  getParamDefaults() {
+    return {
+      lookupEntries: [{}],
+      unknownKeyValue: null,
     };
+  }
+
+  textConvert: TextContextTypeConvert = val => {
+    const lookupEntries = this.param('lookupEntries');
+    const unknownKeyValue = this.param('unknownKeyValue');
+
+    const lookupMap = convertLookupEntriesToMap(lookupEntries);
+    return lookupMap[val] || unknownKeyValue || val;
   };
 }

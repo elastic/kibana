@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { createNumberFormat } from './number';
-
-const NumberFormat = createNumberFormat();
+import { NumberFormat } from './number';
 
 describe('NumberFormat', () => {
   const config: Record<string, any> = {};

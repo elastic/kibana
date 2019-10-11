@@ -24,29 +24,25 @@ import {
   TextContextTypeConvert,
 } from '../../../../../../plugins/data/common/';
 
-export function createRelativeDateFormat() {
-  class RelativeDateFormat extends FieldFormat {
-    static id = 'relative_date';
-    static title = 'Relative Date';
-    static fieldType = KBN_FIELD_TYPES.DATE;
+export class RelativeDateFormat extends FieldFormat {
+  static id = 'relative_date';
+  static title = 'Relative Date';
+  static fieldType = KBN_FIELD_TYPES.DATE;
 
-    constructor(params: Record<string, any>) {
-      super(params);
-    }
-
-    textConvert: TextContextTypeConvert = val => {
-      if (val === null || val === undefined) {
-        return '-';
-      }
-
-      const date = moment(val);
-      if (date.isValid()) {
-        return date.fromNow();
-      } else {
-        return val;
-      }
-    };
+  constructor(params: Record<string, any>) {
+    super(params);
   }
 
-  return RelativeDateFormat;
+  textConvert: TextContextTypeConvert = val => {
+    if (val === null || val === undefined) {
+      return '-';
+    }
+
+    const date = moment(val);
+    if (date.isValid()) {
+      return date.fromNow();
+    } else {
+      return val;
+    }
+  };
 }

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { createBytesFormat } from './bytes';
-
-const BytesFormat = createBytesFormat();
+import { BytesFormat } from './bytes';
 
 describe('BytesFormat', () => {
   const config: Record<string, any> = {};

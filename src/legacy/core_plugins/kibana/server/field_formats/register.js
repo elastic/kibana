@@ -17,36 +17,36 @@
  * under the License.
  */
 
-import { createUrlFormat } from '../../common/field_formats/types/url';
-import { createBytesFormat } from '../../common/field_formats/types/bytes';
-import { createDateOnServerFormat } from '../../common/field_formats/types/date_server';
-import { createDateNanosFormat } from '../../common/field_formats/types/date_nanos';
-import { createRelativeDateFormat } from '../../common/field_formats/types/relative_date';
-import { createDurationFormat } from '../../common/field_formats/types/duration';
-import { createIpFormat } from '../../common/field_formats/types/ip';
-import { createNumberFormat } from '../../common/field_formats/types/number';
-import { createPercentFormat } from '../../common/field_formats/types/percent';
-import { createStringFormat } from '../../common/field_formats/types/string';
-import { createSourceFormat } from '../../common/field_formats/types/source';
-import { createColorFormat } from '../../common/field_formats/types/color';
-import { createTruncateFormat } from '../../common/field_formats/types/truncate';
-import { createBoolFormat } from '../../common/field_formats/types/boolean';
-import { createStaticLookupFormat } from '../../common/field_formats/types/static_lookup';
+import { UrlFormat } from '../../common/field_formats/types/url';
+import { BytesFormat } from '../../common/field_formats/types/bytes';
+import { DateFormat } from '../../common/field_formats/types/date_server';
+import { DateNanosFormat } from '../../common/field_formats/types/date_nanos';
+import { RelativeDateFormat } from '../../common/field_formats/types/relative_date';
+import { DurationFormat } from '../../common/field_formats/types/duration';
+import { IpFormat } from '../../common/field_formats/types/ip';
+import { NumberFormat } from '../../common/field_formats/types/number';
+import { PercentFormat } from '../../common/field_formats/types/percent';
+import { StringFormat } from '../../common/field_formats/types/string';
+import { SourceFormat } from '../../common/field_formats/types/source';
+import { ColorFormat } from '../../common/field_formats/types/color';
+import { TruncateFormat } from '../../common/field_formats/types/truncate';
+import { BoolFormat } from '../../common/field_formats/types/boolean';
+import { StaticLookupFormat } from '../../common/field_formats/types/static_lookup';
 
 export function registerFieldFormats(server) {
-  server.registerFieldFormat(createUrlFormat);
-  server.registerFieldFormat(createBytesFormat);
-  server.registerFieldFormat(createDateOnServerFormat);
-  server.registerFieldFormat(createDateNanosFormat);
-  server.registerFieldFormat(createRelativeDateFormat);
-  server.registerFieldFormat(createDurationFormat);
-  server.registerFieldFormat(createIpFormat);
-  server.registerFieldFormat(createNumberFormat);
-  server.registerFieldFormat(createPercentFormat);
-  server.registerFieldFormat(createStringFormat);
-  server.registerFieldFormat(createSourceFormat);
-  server.registerFieldFormat(createColorFormat);
-  server.registerFieldFormat(createTruncateFormat);
-  server.registerFieldFormat(createBoolFormat);
-  server.registerFieldFormat(createStaticLookupFormat);
+  server.registerFieldFormat(UrlFormat);
+  server.registerFieldFormat(BytesFormat);
+  server.registerFieldFormat(DateFormat);
+  server.registerFieldFormat(DateNanosFormat);
+  server.registerFieldFormat(RelativeDateFormat);
+  server.registerFieldFormat(DurationFormat);
+  server.registerFieldFormat(IpFormat);
+  server.registerFieldFormat(NumberFormat);
+  server.registerFieldFormat(PercentFormat);
+  server.registerFieldFormat(StringFormat);
+  server.registerFieldFormat(SourceFormat);
+  server.registerFieldFormat(ColorFormat);
+  server.registerFieldFormat(TruncateFormat);
+  server.registerFieldFormat(BoolFormat);
+  server.registerFieldFormat(StaticLookupFormat);
 }

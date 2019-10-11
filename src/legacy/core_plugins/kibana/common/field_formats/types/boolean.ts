@@ -24,31 +24,29 @@ import {
   TextContextTypeConvert,
 } from '../../../../../../plugins/data/common';
 
-export function createBoolFormat() {
-  return class BoolFormat extends FieldFormat {
-    static id = 'boolean';
-    static title = 'Boolean';
-    static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
+export class BoolFormat extends FieldFormat {
+  static id = 'boolean';
+  static title = 'Boolean';
+  static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 
-    textConvert: TextContextTypeConvert = value => {
-      if (typeof value === 'string') {
-        value = value.trim().toLowerCase();
-      }
+  textConvert: TextContextTypeConvert = value => {
+    if (typeof value === 'string') {
+      value = value.trim().toLowerCase();
+    }
 
-      switch (value) {
-        case false:
-        case 0:
-        case 'false':
-        case 'no':
-          return 'false';
-        case true:
-        case 1:
-        case 'true':
-        case 'yes':
-          return 'true';
-        default:
-          return asPrettyString(value);
-      }
-    };
+    switch (value) {
+      case false:
+      case 0:
+      case 'false':
+      case 'no':
+        return 'false';
+      case true:
+      case 1:
+      case 'true':
+      case 'yes':
+        return 'true';
+      default:
+        return asPrettyString(value);
+    }
   };
 }
