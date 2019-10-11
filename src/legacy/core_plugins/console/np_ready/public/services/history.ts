@@ -66,19 +66,30 @@ export class History {
     this.changeEmitter.next(this.getHistory());
   }
 
-  updateCurrentState(content: any) {
-    const timestamp = new Date().getTime();
-    this.storage.set('editor_state', {
-      time: timestamp,
-      content,
-    });
-  }
+  // updateCurrentState(content: any) {
+  //   const timestamp = new Date().getTime();
+  //   this.storage.set('editor_state', {
+  //     time: timestamp,
+  //     content,
+  //   });
+  // }
 
-  getSavedEditorState() {
+  /**
+   * Only use this to for backwards-compatibility. We have since moved editor state
+   * to Saved Objects.
+   */
+  getLegacySavedEditorState() {
     const saved = this.storage.get('editor_state');
     if (!saved) return;
     const { time, content } = saved;
     return { time, content };
+  }
+
+  /**
+   * This function should only ever be called once for a user if they had legacy state.
+   */
+  deleteLegacySavedEditorState() {
+    this.storage.delete('editor_state');
   }
 
   clearHistory() {

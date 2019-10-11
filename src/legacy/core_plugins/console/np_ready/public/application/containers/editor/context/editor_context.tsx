@@ -20,10 +20,17 @@
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
 import { Action, reducer } from './reducer';
 import { DevToolsSettings } from '../../../../services';
+import { RecipeAttributes } from '../../../models/recipe';
 
 export interface ContextValue {
-  editorsReady: boolean;
+  ready: boolean;
+  initialContentLoaded: boolean;
+  savingRecipe: boolean;
   settings: DevToolsSettings;
+  currentRecipe: RecipeAttributes;
+  recipes: { [id: string]: RecipeAttributes };
+  initializationErrors: string[];
+  recipeSaveErrors: string[];
 }
 
 const EditorReadContext = createContext<ContextValue>(null as any);
@@ -35,8 +42,14 @@ export interface EditorContextArgs {
 }
 
 const initialValue: ContextValue = {
-  editorsReady: false,
+  ready: false,
+  initialContentLoaded: false,
   settings: null as any,
+  savingRecipe: false,
+  currentRecipe: null as any,
+  recipes: {},
+  recipeSaveErrors: [],
+  initializationErrors: [],
 };
 
 export function EditorContextProvider({ children, settings }: EditorContextArgs) {

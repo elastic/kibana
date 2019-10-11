@@ -17,17 +17,5 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from '../../../../../../../core/public';
-
-import { CRUDObject } from './crud_object';
-import * as recipe from '../models/recipe';
-
-export interface Dependencies {
-  client: SavedObjectsClientContract;
-}
-
-export const createAppDatabase = ({ client }: Dependencies) => ({
-  recipes: new CRUDObject<recipe.RecipeAttributes>(recipe.type, client),
-});
-
-export type AppDatabase = ReturnType<typeof createAppDatabase>;
+export * from './local_storage_to_saved_objects';
+export { useAppMigrations } from './use_app_migrations';

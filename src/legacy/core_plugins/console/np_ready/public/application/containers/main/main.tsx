@@ -19,10 +19,11 @@
 
 import React, { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { EditorOutput, Editor, ConsoleHistory } from '../editor';
 import { Settings } from '../settings';
+import { useAppMigrations } from '../../app_database/migrations';
 
 // TODO: find out what this is: $(document.body).removeClass('fouc');
 
@@ -39,10 +40,10 @@ const PANEL_MIN_WIDTH = '100px';
 
 export function Main() {
   const {
-    services: { storage },
+    services: { storage, database, history },
   } = useAppContext();
 
-  const { editorsReady } = useEditorReadContext();
+  const { ready: editorReady } = useEditorReadContext();
 
   const [showWelcome, setShowWelcomePanel] = useState(
     () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
@@ -65,8 +66,18 @@ export function Main() {
   );
 
   const renderConsoleHistory = () => {
-    return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
+    return editorReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
   };
+
+  const { done: migrationsDone, error: migrationError } = useAppMigrations({ database, history });
+
+  if (migrationError) {
+    return <EuiText size="s">Migrating Failed: {migrationError}</EuiText>;
+  }
+
+  if (!migrationsDone) {
+    return <EuiText size="s">Migrating...</EuiText>;
+  }
 
   return (
     <>

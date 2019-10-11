@@ -18,7 +18,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { NotificationsSetup } from '../../../../../../../core/public';
+import { NotificationsStart } from '../../../../../../../core/public';
 import { History, Storage, Settings } from '../../services';
 import { AppDatabase } from '../app_database';
 
@@ -27,7 +27,7 @@ interface ContextValue {
     history: History;
     storage: Storage;
     settings: Settings;
-    notifications: NotificationsSetup;
+    notifications: NotificationsStart;
     database: AppDatabase;
   };
   docLinkVersion: string;

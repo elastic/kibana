@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import { SavedObject } from '../../../../../../../core/public';
+import { SavedObject, SavedObjectAttributes } from '../../../../../../../../core/public';
 
-export interface RecipeAttributes {
+// Please note: this interface must be kept in sync with ./mappings.json.
+export interface RecipeAttributes extends SavedObjectAttributes {
+  id: string;
+  name: string;
+  isScratchPad: boolean;
+  lastUpdatedAt: number;
+  createdAt: number;
   text: string;
-  [key: string]: any;
 }
 
 export type Recipe = SavedObject<RecipeAttributes>;
 
-export const type = 'recipe';
+export const type = 'console-recipe';
+
+export const scratchPadName = 'scratch-pad';

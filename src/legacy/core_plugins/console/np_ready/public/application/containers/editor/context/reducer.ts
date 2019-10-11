@@ -21,6 +21,7 @@ import { Reducer } from 'react';
 
 import { instance as registry } from './editor_registry';
 import { ContextValue } from './editor_context';
+import { RecipeAttributes } from '../../../models/recipe';
 
 import { restoreRequestFromHistory } from '../legacy/console_history/restore_request_from_history';
 import {
@@ -30,6 +31,13 @@ import {
 import { DevToolsSettings } from '../../../../services';
 
 export type Action =
+  | { type: 'initialContentLoaded'; value: true }
+  | { type: 'setInitializationErrors'; value: string[] }
+  | { type: 'recipes.update'; value: { [id: string]: RecipeAttributes } }
+  | { type: 'recipe.saving'; value: boolean }
+  | { type: 'recipe.clearSaveErrors'; value: undefined }
+  | { type: 'recipe.setSaveErrors'; value: string[] }
+  | { type: 'recipe.setCurrentRecipe'; value: RecipeAttributes }
   | { type: 'setInputEditor'; value: any }
   | { type: 'setOutputEditor'; value: any }
   | { type: 'restoreRequest'; value: any }
@@ -37,40 +45,64 @@ export type Action =
   | { type: 'sendRequestToEs'; value: EsRequestArgs }
   | { type: 'updateRequestHistory'; value: any };
 
+const determineIfReady = (state: ContextValue) => {
+  return Boolean(
+    registry.getInputEditor() && registry.getOutputEditor() && state.initialContentLoaded
+  );
+};
+
 export const reducer: Reducer<ContextValue, Action> = (state, action) => {
   const nextState = { ...state };
 
-  if (action.type === 'setInputEditor') {
-    registry.setInputEditor(action.value);
-    if (registry.getOutputEditor()) {
-      nextState.editorsReady = true;
-    }
-  }
-
-  if (action.type === 'setOutputEditor') {
-    registry.setOutputEditor(action.value);
-    if (registry.getInputEditor()) {
-      nextState.editorsReady = true;
-    }
-  }
-
-  if (action.type === 'restoreRequest') {
-    restoreRequestFromHistory(registry.getInputEditor(), action.value);
-  }
-
-  if (action.type === 'updateSettings') {
-    nextState.settings = action.value;
-  }
-
-  if (action.type === 'sendRequestToEs') {
-    const { callback, isPolling, isUsingTripleQuotes } = action.value;
-    sendCurrentRequestToES({
-      input: registry.getInputEditor(),
-      output: registry.getOutputEditor(),
-      callback,
-      isUsingTripleQuotes,
-      isPolling,
-    });
+  switch (action.type) {
+    case 'initialContentLoaded':
+      nextState.initialContentLoaded = true;
+      nextState.ready = determineIfReady(nextState);
+      break;
+    case 'setInputEditor':
+      registry.setInputEditor(action.value);
+      nextState.ready = determineIfReady(nextState);
+      break;
+    case 'setOutputEditor':
+      registry.setOutputEditor(action.value);
+      nextState.ready = determineIfReady(nextState);
+      break;
+    case 'restoreRequest':
+      restoreRequestFromHistory(registry.getInputEditor(), action.value);
+      break;
+    case 'updateSettings':
+      nextState.settings = action.value;
+      break;
+    case 'sendRequestToEs':
+      const { callback, isPolling, isUsingTripleQuotes } = action.value;
+      sendCurrentRequestToES({
+        input: registry.getInputEditor(),
+        output: registry.getOutputEditor(),
+        callback,
+        isUsingTripleQuotes,
+        isPolling,
+      });
+      break;
+    case 'setInitializationErrors':
+      nextState.initializationErrors = action.value;
+      break;
+    case 'recipes.update':
+      nextState.recipes = action.value;
+      break;
+    case 'recipe.setCurrentRecipe':
+      nextState.currentRecipe = action.value;
+      break;
+    case 'recipe.saving':
+      nextState.savingRecipe = action.value;
+      break;
+    case 'recipe.setSaveErrors':
+      nextState.recipeSaveErrors = action.value;
+      break;
+    case 'recipe.clearSaveErrors':
+      nextState.recipeSaveErrors = [];
+      break;
+    default:
+      throw new Error(`Unknown action ${action.type}`);
   }
 
   return nextState;

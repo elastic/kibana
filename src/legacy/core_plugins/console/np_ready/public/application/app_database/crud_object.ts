@@ -17,23 +17,55 @@
  * under the License.
  */
 
-import { SavedObjectsClient, SavedObjectAttributes } from '../../../../../../../core/public';
+import {
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+} from '../../../../../../../core/public';
 
-export class CRUDObject<A extends SavedObjectAttributes> {
-  constructor(private readonly type: string, private readonly client: SavedObjectsClient) {}
+interface FindAllResponse<A> {
+  [id: string]: A;
+}
+
+export class CRUDObject<A extends SavedObjectAttributes & { id: string }> {
+  constructor(private readonly type: string, private readonly client: SavedObjectsClientContract) {}
+
+  async create(obj: Omit<A, 'id'>): Promise<A> {
+    const simpleObj = await this.client.create(this.type, obj, {});
+    return {
+      ...simpleObj.attributes,
+      id: simpleObj.id,
+    } as A;
+  }
 
   async get(id: string): Promise<A> {
     const simpleObj = await this.client.get<A>(this.type, id);
-    return simpleObj.attributes;
+    return { ...simpleObj.attributes, id: simpleObj.id };
   }
 
-  async create(obj: A): Promise<void> {
-    await this.client.create(this.type, obj, {});
+  async update(obj: A): Promise<void> {
+    const { id, ...rest } = obj;
+    await this.client.update(this.type, id, rest);
   }
 
   async delete(id: string): Promise<void> {
     await this.client.delete(this.type, id);
   }
 
-  // TODO: Figure out get all.
+  async findAll(): Promise<FindAllResponse<A> | null> {
+    const findResponse = await this.client.find<A>({
+      type: this.type,
+    });
+    if (findResponse.savedObjects && findResponse.savedObjects.length) {
+      return findResponse.savedObjects.reduce((acc, so) => {
+        return {
+          ...acc,
+          [so.id]: {
+            ...so.attributes,
+            id: so.id,
+          },
+        };
+      }, {});
+    }
+    return null;
+  }
 }

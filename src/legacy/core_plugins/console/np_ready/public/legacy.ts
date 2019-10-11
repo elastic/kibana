@@ -24,7 +24,6 @@ import 'brace/mode/json';
 import 'brace/mode/text';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { toastNotifications as notifications } from 'ui/notify';
 import { npSetup, npStart } from 'ui/new_platform';
 import uiRoutes from 'ui/routes';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
@@ -35,21 +34,20 @@ import 'ui/capabilities/route_setup';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import template from '../../public/quarantined/index.html';
-import { App, AppUnmount, NotificationsSetup } from '../../../../../core/public';
+import { AppUnmount } from '../../../../../core/public';
 
 export interface XPluginSet {
   __LEGACY: {
     I18nContext: any;
     ResizeChecker: any;
     docLinkVersion: string;
+    element: HTMLDivElement;
   };
 }
 
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as any);
-
-const anyObject = {} as any;
 
 uiRoutes.when('/dev_tools/console', {
   requireUICapability: 'dev_tools.show',
@@ -67,30 +65,16 @@ uiRoutes.when('/dev_tools/console', {
 
       let unmount: AppUnmount | Promise<AppUnmount>;
 
-      const mockedSetupCore = {
-        ...npSetup.core,
-        notifications: (notifications as unknown) as NotificationsSetup,
-        application: {
-          register(app: App): void {
-            try {
-              unmount = app.mount(anyObject, { element: targetElement, appBasePath: '' });
-            } catch (e) {
-              npSetup.core.fatalErrors.add(e);
-            }
-          },
-          registerMountContext() {},
-        },
-      };
-
-      pluginInstance.setup(mockedSetupCore, {
-        ...npSetup.plugins,
+      pluginInstance.setup(npSetup.core);
+      pluginInstance.start(npStart.core, {
+        ...npStart.plugins,
         __LEGACY: {
+          element: targetElement,
           I18nContext,
           ResizeChecker,
           docLinkVersion: DOC_LINK_VERSION,
         },
       });
-      pluginInstance.start(npStart.core);
 
       $scope.$on('$destroy', async () => {
         if (unmount) {

@@ -17,17 +17,27 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from '../../../../../../../core/public';
+import { useEffect, useState } from 'react';
 
-import { CRUDObject } from './crud_object';
-import * as recipe from '../models/recipe';
+import * as migrations from '.';
+import { AppDatabase } from '../';
+import { History } from '../../../services';
 
-export interface Dependencies {
-  client: SavedObjectsClientContract;
+interface Dependencies {
+  database: AppDatabase;
+  history: History;
 }
 
-export const createAppDatabase = ({ client }: Dependencies) => ({
-  recipes: new CRUDObject<recipe.RecipeAttributes>(recipe.type, client),
-});
+export function useAppMigrations(deps: Dependencies) {
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState('');
 
-export type AppDatabase = ReturnType<typeof createAppDatabase>;
+  useEffect(() => {
+    migrations
+      .localStorageToSavedObjects(deps)
+      .then(() => setDone(true))
+      .catch(e => setError(e.message));
+  }, []);
+
+  return { done, error };
+}

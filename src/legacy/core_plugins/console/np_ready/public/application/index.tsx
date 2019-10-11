@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { NotificationsSetup, SavedObjectsClient } from '../../../../../../core/public';
+import { NotificationsStart, SavedObjectsClientContract } from '../../../../../../core/public';
 import { createAppDatabase } from './app_database';
 import { AppContextProvider } from './context';
 import { EditorContextProvider } from './containers/editor/context';
@@ -34,8 +34,8 @@ export function boot(deps: {
   docLinkVersion: string;
   I18nContext: any;
   ResizeChecker: any;
-  notifications: NotificationsSetup;
-  savedObjectsClient: SavedObjectsClient;
+  notifications: NotificationsStart;
+  savedObjectsClient: SavedObjectsClientContract;
 }) {
   const { I18nContext, ResizeChecker, notifications, docLinkVersion, savedObjectsClient } = deps;
   const database = createAppDatabase({ client: savedObjectsClient });

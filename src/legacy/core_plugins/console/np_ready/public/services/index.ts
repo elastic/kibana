@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { createDatabase, Database } from './database';
 export { createHistory, History } from './history';
 export { createStorage, Storage, StorageKeys } from './storage';
 export { createSettings, Settings, DevToolsSettings } from './settings';

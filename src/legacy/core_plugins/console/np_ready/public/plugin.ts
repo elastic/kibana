@@ -27,23 +27,34 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
   // @ts-ignore
   constructor(private readonly ctx: PluginInitializerContext) {}
 
-  async setup({ application, notifications }: CoreSetup, pluginSet: XPluginSet) {
-    const {
-      __LEGACY: { docLinkVersion, I18nContext, ResizeChecker },
-    } = pluginSet;
-
+  async setup({ application }: CoreSetup) {
     application.register({
       id: 'console',
       order: 1,
       title: 'Console',
-      mount(ctx, { element }) {
-        render(boot({ docLinkVersion, I18nContext, ResizeChecker, notifications }), element);
-        return () => {
-          unmountComponentAtNode(element);
-        };
+      async mount(ctx, { element }) {
+        return () => {};
       },
     });
   }
 
-  async start(core: CoreStart) {}
+  async start({ application, notifications, savedObjects }: CoreStart, pluginSet: XPluginSet) {
+    const {
+      __LEGACY: { docLinkVersion, I18nContext, ResizeChecker, element },
+    } = pluginSet;
+
+    render(
+      boot({
+        docLinkVersion,
+        I18nContext,
+        ResizeChecker,
+        notifications,
+        savedObjectsClient: savedObjects.client,
+      }),
+      element
+    );
+    return () => {
+      unmountComponentAtNode(element);
+    };
+  }
 }

@@ -20,6 +20,7 @@
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
 
 import $ from 'jquery';
 
@@ -39,11 +40,7 @@ import mappings from '../../../../../../../public/quarantined/src/mappings';
 
 import { useEditorActionContext, useEditorReadContext } from '../../context';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { loadRemoteState } from './load_remote_editor_state';
-
-export interface EditorProps {
-  previousStateLocation?: 'stored' | string;
-}
+import { useRecipeSave, useRecipeContentInit } from '../../hooks';
 
 const abs: CSSProperties = {
   position: 'absolute',
@@ -60,14 +57,14 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
-function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
+function _Editor() {
   const {
-    services: { history, notifications },
+    services: { history, notifications, database },
     ResizeChecker,
     docLinkVersion,
   } = useAppContext();
 
-  const { settings } = useEditorReadContext();
+  const { settings, recipes, ready, currentRecipe } = useEditorReadContext();
   const dispatch = useEditorActionContext();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -77,6 +74,9 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
   useUIAceKeyboardMode(textArea);
 
+  useRecipeContentInit({ database });
+  const { save } = useRecipeSave({ database });
+
   const openDocumentation = async () => {
     const documentation = await getDocumentation(editorInstanceRef.current!, docLinkVersion);
     if (!documentation) {
@@ -85,40 +85,34 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
     window.open(documentation, '_blank');
   };
 
+  const sendCurrentRequestToES = () => {
+    dispatch({
+      type: 'sendRequestToEs',
+      value: {
+        isUsingTripleQuotes: settings.tripleQuotes,
+        isPolling: settings.polling,
+        callback: (esPath: any, esMethod: any, esData: any) =>
+          history.addToHistory(esPath, esMethod, esData),
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (ready) {
+      const scratchPad = find(recipes, recipe => recipe.isScratchPad)!;
+      dispatch({ type: 'recipe.setCurrentRecipe', value: scratchPad });
+      editorInstanceRef.current.update(scratchPad.text || DEFAULT_INPUT_VALUE);
+      const unsubscribe = editorInstanceRef.current.getSession().on('change', function onChange() {
+        save({ ...currentRecipe, text: editorInstanceRef.current.getSession().getValue() });
+      });
+      return () => unsubscribe();
+    }
+  }, [ready]);
+
   useEffect(() => {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
     editorInstanceRef.current = initializeInput($editor, $actions);
-
-    if (previousStateLocation === 'stored') {
-      const { content } = history.getSavedEditorState() || {
-        content: DEFAULT_INPUT_VALUE,
-      };
-      editorInstanceRef.current.update(content);
-    } else {
-      loadRemoteState({ url: previousStateLocation, input: editorInstanceRef.current });
-    }
-
-    function setupAutosave() {
-      let timer: number;
-      const saveDelay = 500;
-
-      return editorInstanceRef.current.getSession().on('change', function onChange() {
-        if (timer) {
-          clearTimeout(timer);
-        }
-        timer = window.setTimeout(saveCurrentState, saveDelay);
-      });
-    }
-
-    function saveCurrentState() {
-      try {
-        const content = editorInstanceRef.current.getValue();
-        history.updateCurrentState(content);
-      } catch (e) {
-        // Ignoring saving error
-      }
-    }
 
     dispatch({
       type: 'setInputEditor',
@@ -134,26 +128,12 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
       editorRef.current!,
       editorInstanceRef.current
     );
-    const unsubscribeAutoSave = setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      unsubscribeAutoSave();
       mappings.clearSubscriptions();
     };
   }, []);
-
-  const sendCurrentRequestToES = () => {
-    dispatch({
-      type: 'sendRequestToEs',
-      value: {
-        isUsingTripleQuotes: settings.tripleQuotes,
-        isPolling: settings.polling,
-        callback: (esPath: any, esMethod: any, esData: any) =>
-          history.addToHistory(esPath, esMethod, esData),
-      },
-    });
-  };
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current!, settings);

@@ -31,6 +31,8 @@ import { addExtensionSpecFilePath } from './server/api_server/spec';
 import { setHeaders } from './server/set_headers';
 // @ts-ignore
 import { ProxyConfigCollection, getElasticsearchProxyConfig, createProxyRoute } from './server';
+// @ts-ignore
+import mappings from './np_ready/public/application/models/recipe/mappings.json';
 
 function filterHeaders(originalHeaders: any, headersToKeep: any) {
   const normalizeHeader = function(header: any) {
@@ -189,6 +191,13 @@ export default function(kibana: any) {
         join(modules, 'moment_src/moment' + sep),
         join(quarantinedSrc, 'sense_editor/mode/worker.js'),
       ],
+      mappings,
+      savedObjectSchemas: {
+        'console-recipe': {
+          hidden: false,
+          isNamespaceAgnostic: true,
+        },
+      },
     },
   } as any);
 }
