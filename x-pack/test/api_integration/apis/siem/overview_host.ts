@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { overviewHostQuery } from '../../../../legacy/plugins/siem/public/containers/overview/overview_host/index.gql_query';
 import { GetOverviewHostQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { defaultIndexPattern } from '../../../../legacy/plugins/siem/default_index_pattern';
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -26,6 +27,13 @@ export default function({ getService }: FtrProviderContext) {
         auditbeatPackage: 3,
         auditbeatProcess: 7,
         auditbeatUser: 6,
+        endgameDns: 1,
+        endgameFile: 2,
+        endgameImageLoad: 1,
+        endgameNetwork: 4,
+        endgameProcess: 2,
+        endgameRegistry: 1,
+        endgameSecurity: 4,
         filebeatSystemModule: 0,
         winlogbeat: 1,
         __typename: 'OverviewHostData',
@@ -42,7 +50,7 @@ export default function({ getService }: FtrProviderContext) {
                 to: TO,
                 from: FROM,
               },
-              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              defaultIndex: defaultIndexPattern,
               inspect: false,
             },
           })
