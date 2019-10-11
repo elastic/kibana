@@ -5,31 +5,12 @@
  */
 import { Template, TemplateEs, TemplateListItem } from '../types';
 
-const parseJson = (jsonString: string) => {
-  let parsedJson;
-
-  try {
-    parsedJson = JSON.parse(jsonString);
-
-    // Do not send empty object
-    if (!hasEntries(parsedJson)) {
-      parsedJson = undefined;
-    }
-  } catch (e) {
-    // Silently swallow parsing errors since parsing validation is done on client
-    // so we should never reach this point
-  }
-
-  return parsedJson;
-};
-
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
-const stringifyJson = (json: any) => {
-  return JSON.stringify(json, null, 2);
-};
-
-export function deserializeTemplateList(indexTemplatesByName: any): TemplateListItem[] {
+export function deserializeTemplateList(
+  indexTemplatesByName: any,
+  managedTemplatePrefix?: string
+): TemplateListItem[] {
   const indexTemplateNames: string[] = Object.keys(indexTemplatesByName);
 
   const deserializedTemplates: TemplateListItem[] = indexTemplateNames.map((name: string) => {
@@ -51,6 +32,7 @@ export function deserializeTemplateList(indexTemplatesByName: any): TemplateList
       hasAliases: hasEntries(aliases),
       hasMappings: hasEntries(mappings),
       ilmPolicy: settings && settings.index && settings.index.lifecycle,
+      isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
     };
   });
 
@@ -62,18 +44,21 @@ export function serializeTemplate(template: Template): TemplateEs {
 
   const serializedTemplate: TemplateEs = {
     name,
-    version: version ? Number(version) : undefined,
-    order: order ? Number(order) : undefined,
+    version,
+    order,
     index_patterns: indexPatterns,
-    settings: settings ? parseJson(settings) : undefined,
-    aliases: aliases ? parseJson(aliases) : undefined,
-    mappings: mappings ? parseJson(mappings) : undefined,
+    settings,
+    aliases,
+    mappings,
   };
 
   return serializedTemplate;
 }
 
-export function deserializeTemplate(templateEs: TemplateEs): Template {
+export function deserializeTemplate(
+  templateEs: TemplateEs,
+  managedTemplatePrefix?: string
+): Template {
   const {
     name,
     version,
@@ -86,13 +71,14 @@ export function deserializeTemplate(templateEs: TemplateEs): Template {
 
   const deserializedTemplate: Template = {
     name,
-    version: version || version === 0 ? version : '',
-    order: order || order === 0 ? order : '',
+    version,
+    order,
     indexPatterns: indexPatterns.sort(),
-    settings: hasEntries(settings) ? stringifyJson(settings) : undefined,
-    aliases: hasEntries(aliases) ? stringifyJson(aliases) : undefined,
-    mappings: hasEntries(mappings) ? stringifyJson(mappings) : undefined,
+    settings,
+    aliases,
+    mappings,
     ilmPolicy: settings && settings.index && settings.index.lifecycle,
+    isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
   };
 
   return deserializedTemplate;

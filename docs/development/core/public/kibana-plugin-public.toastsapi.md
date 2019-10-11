@@ -15,7 +15,7 @@ export declare class ToastsApi
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(deps)](./kibana-plugin-public.toastsapi.(constructor).md) |  | Constructs a new instance of the <code>ToastsApi</code> class |
+|  [(constructor)(deps)](./kibana-plugin-public.toastsapi._constructor_.md) |  | Constructs a new instance of the <code>ToastsApi</code> class |
 
 ## Methods
 
@@ -26,7 +26,7 @@ export declare class ToastsApi
 |  [addError(error, options)](./kibana-plugin-public.toastsapi.adderror.md) |  |  |
 |  [addSuccess(toastOrTitle)](./kibana-plugin-public.toastsapi.addsuccess.md) |  |  |
 |  [addWarning(toastOrTitle)](./kibana-plugin-public.toastsapi.addwarning.md) |  |  |
-|  [get$()](./kibana-plugin-public.toastsapi.get$.md) |  |  |
+|  [get$()](./kibana-plugin-public.toastsapi.get_.md) |  |  |
 |  [registerOverlays(overlays)](./kibana-plugin-public.toastsapi.registeroverlays.md) |  |  |
 |  [remove(toast)](./kibana-plugin-public.toastsapi.remove.md) |  |  |
 

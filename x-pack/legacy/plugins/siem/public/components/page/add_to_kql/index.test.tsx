@@ -90,7 +90,7 @@ describe('AddToKql Component', () => {
           activePage: 0,
           limit: 10,
         },
-        hosts: {
+        allHosts: {
           activePage: 0,
           limit: 10,
           direction: 'desc',
@@ -104,18 +104,19 @@ describe('AddToKql Component', () => {
           activePage: 0,
           limit: 10,
         },
+        anomalies: null,
       },
       filterQuery: {
         kuery: {
           kind: 'kuery',
-          expression: 'host.name: siem-kibana',
+          expression: 'host.name: "siem-kibana"',
         },
         serializedQuery:
-          '{"bool":{"should":[{"match":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
+          '{"bool":{"should":[{"match_phrase":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
       },
       filterQueryDraft: {
         kind: 'kuery',
-        expression: 'host.name: siem-kibana',
+        expression: 'host.name: "siem-kibana"',
       },
     });
   });
@@ -143,13 +144,19 @@ describe('AddToKql Component', () => {
 
     expect(store.getState().network.page).toEqual({
       queries: {
-        topNFlow: {
+        topNFlowDestination: {
           activePage: 0,
           limit: 10,
-          flowDirection: 'uniDirectional',
-          flowTarget: 'source',
           topNFlowSort: {
-            field: 'bytes',
+            field: 'bytes_out',
+            direction: 'desc',
+          },
+        },
+        topNFlowSource: {
+          activePage: 0,
+          limit: 10,
+          topNFlowSort: {
+            field: 'bytes_out',
             direction: 'desc',
           },
         },
@@ -166,14 +173,14 @@ describe('AddToKql Component', () => {
       filterQuery: {
         kuery: {
           kind: 'kuery',
-          expression: 'host.name: siem-kibana',
+          expression: 'host.name: "siem-kibana"',
         },
         serializedQuery:
-          '{"bool":{"should":[{"match":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
+          '{"bool":{"should":[{"match_phrase":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
       },
       filterQueryDraft: {
         kind: 'kuery',
-        expression: 'host.name: siem-kibana',
+        expression: 'host.name: "siem-kibana"',
       },
     });
   });

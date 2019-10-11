@@ -18,6 +18,8 @@ export interface FieldBrowserProps {
   browserFields: BrowserFields;
   /** The height of the field browser */
   height: number;
+  /** When true, this Fields Browser is being used as an "events viewer" */
+  isEventViewer?: boolean;
   /**
    * Overrides the default behavior of the `FieldBrowser` to enable
    * "selection" mode, where a field is selected by clicking a button

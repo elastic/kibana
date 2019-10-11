@@ -18,11 +18,11 @@
  */
 import { CapabilitiesService, CapabilitiesStart } from './capabilities_service';
 import { deepFreeze } from '../../../utils/';
-import { App, LegacyApp } from '../application_service';
+import { App, LegacyApp } from '../types';
 
 const createStartContractMock = (
-  apps: readonly App[] = [],
-  legacyApps: readonly LegacyApp[] = []
+  apps: ReadonlyMap<string, App> = new Map(),
+  legacyApps: ReadonlyMap<string, LegacyApp> = new Map()
 ): jest.Mocked<CapabilitiesStart> => ({
   availableApps: apps,
   availableLegacyApps: legacyApps,

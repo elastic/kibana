@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DragDrop droppable is reflected in the className 1`] = `
+<div
+  class="lnsDragDrop lnsDragDrop-isDropTarget"
+  data-test-subj="lnsDragDrop"
+>
+  Hello!
+</div>
+`;
+
+exports[`DragDrop renders if nothing is being dragged 1`] = `
+<div
+  class="lnsDragDrop"
+  data-test-subj="lnsDragDrop"
+  draggable="true"
+>
+  Hello!
+</div>
+`;

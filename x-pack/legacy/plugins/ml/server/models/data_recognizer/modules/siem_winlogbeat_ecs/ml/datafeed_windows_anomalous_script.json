@@ -1,0 +1,17 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "query": {
+        "bool": {
+          "filter": [
+            {
+              "term": {
+                "winlog.channel": "Microsoft-Windows-PowerShell/Operational"
+              }
+            }
+          ]
+        }
+      }
+  }

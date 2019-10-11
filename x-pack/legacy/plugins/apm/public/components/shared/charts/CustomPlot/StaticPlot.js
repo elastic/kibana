@@ -27,8 +27,6 @@ import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue
 // see https://github.com/uber/react-vis/issues/1214
 const getNull = d => isValidCoordinateValue(d.y) && !isNaN(d.y);
 
-const X_TICK_TOTAL = 7;
-
 class StaticPlot extends PureComponent {
   getVisSeries(series, plotValues) {
     return series
@@ -141,12 +139,23 @@ class StaticPlot extends PureComponent {
   }
 
   render() {
-    const { series, tickFormatX, tickFormatY, plotValues, noHits } = this.props;
+    const {
+      width,
+      series,
+      tickFormatX,
+      tickFormatY,
+      plotValues,
+      noHits
+    } = this.props;
     const { yTickValues } = plotValues;
+
+    // approximate number of x-axis ticks based on the width of the plot. There should by approx 1 tick per 100px
+    // d3 will determine the exact number of ticks based on the selected range
+    const xTickTotal = Math.floor(width / 100);
 
     return (
       <SharedPlot plotValues={plotValues}>
-        <XAxis tickSize={0} tickTotal={X_TICK_TOTAL} tickFormat={tickFormatX} />
+        <XAxis tickSize={0} tickTotal={xTickTotal} tickFormat={tickFormatX} />
         {noHits ? (
           <StatusText
             marginLeft={30}
@@ -181,5 +190,6 @@ StaticPlot.propTypes = {
   series: PropTypes.array.isRequired,
   plotValues: PropTypes.object.isRequired,
   tickFormatX: PropTypes.func,
-  tickFormatY: PropTypes.func.isRequired
+  tickFormatY: PropTypes.func.isRequired,
+  width: PropTypes.number.isRequired
 };

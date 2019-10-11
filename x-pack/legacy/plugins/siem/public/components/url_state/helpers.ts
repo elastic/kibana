@@ -7,8 +7,11 @@
 import { decode, encode, RisonValue } from 'rison-node';
 import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
-import { KqlQuery, LocationTypes } from './types';
-import { CONSTANTS } from './constants';
+
+import { SiemPageName } from '../../pages/home/home_navigations';
+import { NavTab } from '../navigation/types';
+import { CONSTANTS, UrlStateType } from './constants';
+import { LocationTypes } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
@@ -38,6 +41,18 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   urlState: UrlState | undefined
 ) => (queryString: string) => {
   const previousQueryValues = QueryString.decode(queryString);
+  if (
+    urlState == null ||
+    (typeof urlState === 'string' && urlState === '') ||
+    (urlState && urlState.filterQuery === null) ||
+    (urlState && urlState.filterQuery != null && urlState.filterQuery.expression === '')
+  ) {
+    delete previousQueryValues[stateKey];
+    return QueryString.encode({
+      ...previousQueryValues,
+    });
+  }
+
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
   // Remove this if these utilities are promoted to kibana core
   const encodedUrlState =
@@ -59,33 +74,61 @@ export const replaceQueryStringInLocation = (location: Location, queryString: st
   }
 };
 
-export const getCurrentLocation = (pathname: string): LocationTypes | null => {
-  const removeSlash = pathname.replace(/\/$/, '');
-  const trailingPath = removeSlash.match(/([^\/]+$)/);
-  if (trailingPath !== null) {
-    if (trailingPath[0] === 'hosts') {
-      return CONSTANTS.hostsPage;
-    }
-    if (trailingPath[0] === 'network') {
-      return CONSTANTS.networkPage;
-    }
-    if (pathname.match(/hosts\/.*?/)) {
-      return CONSTANTS.hostsDetails;
-    }
-    if (pathname.match(/network\/ip\/.*?/)) {
-      return CONSTANTS.networkDetails;
-    }
+export const getUrlType = (pageName: string): UrlStateType => {
+  if (pageName === SiemPageName.hosts) {
+    return 'host';
+  } else if (pageName === SiemPageName.network) {
+    return 'network';
+  } else if (pageName === SiemPageName.overview) {
+    return 'overview';
+  } else if (pageName === SiemPageName.timelines) {
+    return 'timeline';
   }
-  return null;
+  return 'overview';
 };
 
-export const isKqlForRoute = (pathname: string, kql: KqlQuery): boolean => {
-  const currentLocation = getCurrentLocation(pathname);
+export const getTitle = (
+  pageName: string,
+  detailName: string | undefined,
+  navTabs: Record<string, NavTab>
+): string => {
+  if (detailName != null) return detailName;
+  return navTabs[pageName] != null ? navTabs[pageName].name : '';
+};
+
+export const getCurrentLocation = (
+  pageName: string,
+  detailName: string | undefined
+): LocationTypes => {
+  if (pageName === SiemPageName.hosts) {
+    if (detailName != null) {
+      return CONSTANTS.hostsDetails;
+    }
+    return CONSTANTS.hostsPage;
+  } else if (pageName === SiemPageName.network) {
+    if (detailName != null) {
+      return CONSTANTS.networkDetails;
+    }
+    return CONSTANTS.networkPage;
+  } else if (pageName === SiemPageName.overview) {
+    return CONSTANTS.overviewPage;
+  } else if (pageName === SiemPageName.timelines) {
+    return CONSTANTS.timelinePage;
+  }
+  return CONSTANTS.unknown;
+};
+
+export const isKqlForRoute = (
+  pageName: string,
+  detailName: string | undefined,
+  queryLocation: LocationTypes | null = null
+): boolean => {
+  const currentLocation = getCurrentLocation(pageName, detailName);
   if (
-    (currentLocation === CONSTANTS.hostsPage && kql.queryLocation === CONSTANTS.hostsPage) ||
-    (currentLocation === CONSTANTS.networkPage && kql.queryLocation === CONSTANTS.networkPage) ||
-    (currentLocation === CONSTANTS.hostsDetails && kql.queryLocation === CONSTANTS.hostsDetails) ||
-    (currentLocation === CONSTANTS.networkDetails && kql.queryLocation === CONSTANTS.networkDetails)
+    (currentLocation === CONSTANTS.hostsPage && queryLocation === CONSTANTS.hostsPage) ||
+    (currentLocation === CONSTANTS.networkPage && queryLocation === CONSTANTS.networkPage) ||
+    (currentLocation === CONSTANTS.hostsDetails && queryLocation === CONSTANTS.hostsDetails) ||
+    (currentLocation === CONSTANTS.networkDetails && queryLocation === CONSTANTS.networkDetails)
   ) {
     return true;
   }

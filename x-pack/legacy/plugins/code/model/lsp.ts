@@ -12,5 +12,4 @@ export interface LspRequest {
   workspacePath?: string;
   workspaceRevision?: string;
   isNotification?: boolean; // if this is a notification request that doesn't need response
-  timeoutForInitializeMs?: number; // If the language server is initialize, how many milliseconds should we wait for it. Default infinite.
 }

@@ -6,6 +6,6 @@
 
 export { LinkToPage } from './link_to';
 export { getOverviewUrl, RedirectToOverviewPage } from './redirect_to_overview';
-export { getHostsUrl, RedirectToHostsPage } from './redirect_to_hosts';
+export { getHostsUrl } from './redirect_to_hosts';
 export { getNetworkUrl, RedirectToNetworkPage } from './redirect_to_network';
 export { getTimelinesUrl, RedirectToTimelinesPage } from './redirect_to_timelines';

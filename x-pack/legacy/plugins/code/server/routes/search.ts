@@ -11,12 +11,16 @@ import {
   CommitSearchRequest,
   DocumentSearchRequest,
   RepositorySearchRequest,
+  ResolveSnippetsRequest,
+  StackTraceItem,
+  StackTraceSnippetsRequest,
   SymbolSearchRequest,
 } from '../../model';
 import { Logger } from '../log';
 import {
   CommitSearchClient,
   DocumentSearchClient,
+  IntegrationsSearchClient,
   RepositorySearchClient,
   SymbolSearchClient,
 } from '../search';
@@ -147,6 +151,38 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
       } catch (error) {
         return Boom.internal(`Search Exception`);
       }
+    },
+  });
+
+  // Resolve source code snippets base on APM's stacktrace item data including:
+  // * repoUri: ID of the repository
+  // * revision: Optional. Revision of the file.
+  // * filePath: the path of the file.
+  // * lineNumStart: the start line number of the snippet.
+  // * lineNumEnd: Optional. The end line number of the snippet.
+  // We can always add more context for snippet resolution in the future.
+  router.route({
+    path: '/api/code/integration/snippets',
+    method: 'POST',
+    async handler(req: RequestFacade) {
+      const reqs: StackTraceSnippetsRequest[] = (req.payload as any).requests;
+      return await Promise.all(
+        reqs.map((stacktraceReq: StackTraceSnippetsRequest) => {
+          const integClient = new IntegrationsSearchClient(new EsClientWithRequest(req), log);
+          return Promise.all(
+            stacktraceReq.stacktraceItems.map((stacktrace: StackTraceItem) => {
+              const integrationReq: ResolveSnippetsRequest = {
+                repoUris: stacktraceReq.repoUris,
+                revision: stacktraceReq.revision,
+                filePath: stacktrace.filePath,
+                lineNumStart: stacktrace.lineNumStart,
+                lineNumEnd: stacktrace.lineNumEnd,
+              };
+              return integClient.resolveSnippets(integrationReq);
+            })
+          );
+        })
+      );
     },
   });
 }

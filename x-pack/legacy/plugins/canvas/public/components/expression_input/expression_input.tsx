@@ -48,6 +48,8 @@ export class ExpressionInput extends React.Component<Props> {
     onChange: PropTypes.func.isRequired,
   };
 
+  editor: monacoEditor.editor.IStandaloneCodeEditor | null;
+
   undoHistory: string[];
   redoHistory: string[];
 
@@ -56,6 +58,8 @@ export class ExpressionInput extends React.Component<Props> {
 
     this.undoHistory = [];
     this.redoHistory = [];
+
+    this.editor = null;
   }
 
   undo() {
@@ -239,6 +243,19 @@ export class ExpressionInput extends React.Component<Props> {
     };
   };
 
+  editorDidMount = (
+    editor: monacoEditor.editor.IStandaloneCodeEditor,
+    monaco: typeof monacoEditor
+  ) => {
+    // Updating tab size for the editor
+    const model = editor.getModel();
+    if (model) {
+      model.updateOptions({ tabSize: 2 });
+    }
+
+    this.editor = editor;
+  };
+
   render() {
     const { value, error, isCompact } = this.props;
 
@@ -270,7 +287,10 @@ export class ExpressionInput extends React.Component<Props> {
                   enabled: false,
                 },
                 wordBasedSuggestions: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent',
               }}
+              editorDidMount={this.editorDidMount}
             />
           </div>
         </EuiFormRow>

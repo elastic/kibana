@@ -44,6 +44,11 @@ export const setQuery = actionCreator<{
   inspect: InspectQuery | null;
 }>('SET_QUERY');
 
+export const deleteOneQuery = actionCreator<{
+  inputId: InputsModelId;
+  id: string;
+}>('DELETE_QUERY');
+
 export const setInspectionParameter = actionCreator<{
   id: string;
   inputId: InputsModelId;
@@ -56,3 +61,9 @@ export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_Q
 export const toggleTimelineLinkTo = actionCreator<{ linkToId: InputsModelId }>(
   'TOGGLE_TIMELINE_LINK_TO'
 );
+
+export const removeTimelineLinkTo = actionCreator('REMOVE_TIMELINE_LINK_TO');
+export const addTimelineLinkTo = actionCreator<{ linkToId: InputsModelId }>('ADD_TIMELINE_LINK_TO');
+
+export const removeGlobalLinkTo = actionCreator('REMOVE_GLOBAL_LINK_TO');
+export const addGlobalLinkTo = actionCreator<{ linkToId: InputsModelId }>('ADD_GLOBAL_LINK_TO');

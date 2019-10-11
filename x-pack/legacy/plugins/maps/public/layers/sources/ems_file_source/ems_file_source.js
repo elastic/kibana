@@ -19,10 +19,10 @@ export class EMSFileSource extends AbstractVectorSource {
 
   static type = EMS_FILE;
   static title =  i18n.translate('xpack.maps.source.emsFileTitle', {
-    defaultMessage: 'Vector shapes'
+    defaultMessage: 'EMS Boundaries'
   });
   static description = i18n.translate('xpack.maps.source.emsFileDescription', {
-    defaultMessage: 'Vector shapes of administrative boundaries from Elastic Maps Service'
+    defaultMessage: 'Administrative boundaries from Elastic Maps Service'
   });
   static icon = 'emsApp';
 
@@ -138,21 +138,17 @@ export class EMSFileSource extends AbstractVectorSource {
 
   async filterAndFormatPropertiesToHtml(properties) {
     const emsFileLayer = await this._getEMSFileLayer();
-    const tooltipProperties = [];
-    const fields = emsFileLayer.getFieldsInLanguage();
-    for (const key in properties) {
-      if (properties.hasOwnProperty(key) && this._descriptor.tooltipProperties.indexOf(key) > -1) {
-        let newFieldName = key;
-        for (let i = 0; i < fields.length; i++) {
-          if (fields[i].name === key) {
-            newFieldName = fields[i].description;
-            break;
-          }
-        }
-        tooltipProperties.push(new TooltipProperty(key, newFieldName, properties[key]));
-      }
-    }
-    return tooltipProperties;
+    const emsFields = emsFileLayer.getFieldsInLanguage();
+
+    return this._descriptor.tooltipProperties.map(propertyName => {
+      // Map EMS field name to language specific label
+      const emsField = emsFields.find(field => {
+        return field.name === propertyName;
+      });
+      const label = emsField ? emsField.description : propertyName;
+
+      return new TooltipProperty(propertyName, label, properties[propertyName]);
+    });
   }
 
   async getSupportedShapeTypes() {

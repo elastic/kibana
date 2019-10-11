@@ -21,20 +21,20 @@ import {
 import {
   DetailItem,
   EcsEdges,
-  EventsData,
   LastEventTimeData,
   TimelineData,
   TimelineDetailsData,
   TimelineEdges,
+  EventsOverTimeData,
 } from '../../graphql/types';
 import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
-import { FrameworkAdapter, FrameworkRequest, RequestOptionsPaginated } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 import { TermAggregation } from '../types';
 
-import { buildDetailsQuery, buildQuery, buildTimelineQuery } from './query.dsl';
+import { buildDetailsQuery, buildTimelineQuery } from './query.dsl';
 import { buildLastEventTimeQuery } from './query.last_event_time.dsl';
 import {
   EventHit,
@@ -43,53 +43,13 @@ import {
   LastEventTimeRequestOptions,
   RequestDetailsOptions,
   TimelineRequestOptions,
+  EventsActionGroupData,
 } from './types';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import { buildEventsOverTimeQuery } from './query.events_over_time.dsl';
+import { MatrixOverTimeHistogramData } from '../../../public/graphql/types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
-
-  public async getEvents(
-    request: FrameworkRequest,
-    options: RequestOptionsPaginated
-  ): Promise<EventsData> {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-    const queryOptions = cloneDeep(options);
-    queryOptions.fields = reduceFields(options.fields, eventFieldsMap);
-
-    const dsl = buildQuery(queryOptions);
-    const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
-      request,
-      'search',
-      dsl
-    );
-
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'hits.total.value', response);
-    const hits = response.hits.hits;
-    const eventsEdges: EcsEdges[] = hits.map(hit =>
-      formatEventsData(options.fields, hit, eventFieldsMap)
-    );
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const edges = eventsEdges.splice(cursorStart, querySize - cursorStart);
-    const inspect = {
-      dsl: [inspectStringifyObject(dsl)],
-      response: [inspectStringifyObject(response)],
-    };
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
-    return {
-      inspect,
-      edges,
-      pageInfo: {
-        activePage: activePage ? activePage : 0,
-        fakeTotalCount,
-        showMorePagesIndicator,
-      },
-      totalCount,
-    };
-  }
 
   public async getTimelineData(
     request: FrameworkRequest,
@@ -143,9 +103,9 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(searchResponse)],
     };
-
+    const data = getDataFromHits(merge(sourceData, hitsData));
     return {
-      data: getDataFromHits(merge(sourceData, hitsData)),
+      data,
       inspect,
     };
   }
@@ -169,7 +129,64 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       lastSeen: getOr(null, 'aggregations.last_seen_event.value_as_string', response),
     };
   }
+
+  public async getEventsOverTime(
+    request: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<EventsOverTimeData> {
+    const dsl = buildEventsOverTimeQuery(options);
+    const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
+      request,
+      'search',
+      dsl
+    );
+    const totalCount = getOr(0, 'hits.total.value', response);
+    const eventsOverTimeBucket = getOr([], 'aggregations.eventActionGroup.buckets', response);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+    return {
+      inspect,
+      eventsOverTime: getEventsOverTimeByActionName(eventsOverTimeBucket),
+      totalCount,
+    };
+  }
 }
+
+/**
+ * Not in use at the moment,
+ * reserved this parser for next feature of switchign between total events and grouped events
+ */
+export const getTotalEventsOverTime = (
+  data: EventsActionGroupData[]
+): MatrixOverTimeHistogramData[] => {
+  return data && data.length > 0
+    ? data.map<MatrixOverTimeHistogramData>(({ key, doc_count }) => ({
+        x: key,
+        y: doc_count,
+        g: 'total events',
+      }))
+    : [];
+};
+
+const getEventsOverTimeByActionName = (
+  data: EventsActionGroupData[]
+): MatrixOverTimeHistogramData[] => {
+  let result: MatrixOverTimeHistogramData[] = [];
+  data.forEach(({ key: group, events }) => {
+    const eventsData = getOr([], 'buckets', events).map(
+      ({ key, doc_count }: { key: number; doc_count: number }) => ({
+        x: key,
+        y: doc_count,
+        g: group,
+      })
+    );
+    result = [...result, ...eventsData];
+  });
+
+  return result;
+};
 
 export const formatEventsData = (
   fields: readonly string[],
@@ -275,19 +292,24 @@ const mergeTimelineFieldsWithHit = <T>(
   }
 };
 
+export const getFieldCategory = (field: string): string => {
+  const fieldCategory = field.split('.')[0];
+  if (!isEmpty(fieldCategory) && baseCategoryFields.includes(fieldCategory)) {
+    return 'base';
+  }
+  return fieldCategory;
+};
+
 const getDataFromHits = (sources: EventSource, category?: string, path?: string): DetailItem[] =>
   Object.keys(sources).reduce<DetailItem[]>((accumulator, source) => {
     const item: EventSource = get(source, sources);
     if (Array.isArray(item) || isString(item) || isNumber(item)) {
       const field = path ? `${path}.${source}` : source;
-      category = field.split('.')[0];
-      if (isEmpty(category) && baseCategoryFields.includes(category)) {
-        category = 'base';
-      }
+      const fieldCategory = getFieldCategory(field);
       return [
         ...accumulator,
         {
-          category,
+          category: fieldCategory,
           field,
           values: item,
           originalValue: item,

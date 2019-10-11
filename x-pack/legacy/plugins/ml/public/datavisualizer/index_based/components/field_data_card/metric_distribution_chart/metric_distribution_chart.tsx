@@ -13,7 +13,6 @@ import {
   Axis,
   Chart,
   CurveType,
-  DataSeriesColorsValues,
   getAxisId,
   getSpecId,
   Position,
@@ -55,17 +54,11 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
     defaultMessage: 'distribution',
   });
 
-  // TODO - switch to use inline areaSeriesStyle to set series fill once charts version is 8.0.0+
   const IS_DARK_THEME = useUiChromeContext()
     .getUiSettingsClient()
     .get('theme:darkMode');
   const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
-  const EVENT_RATE_COLOR = themeName.euiColorVis1;
-  const seriesColorValues: DataSeriesColorsValues = {
-    colorValues: [],
-    specId: getSpecId(SPEC_ID),
-  };
-  const seriesColors = new Map([[seriesColorValues, EVENT_RATE_COLOR]]);
+  const AREA_SERIES_COLOR = themeName.euiColorVis1;
 
   const headerFormatter: TooltipValueFormatter = (tooltipData: TooltipValue) => {
     const xValue = tooltipData.value;
@@ -87,9 +80,11 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
       <Chart>
         <Settings
           theme={{
+            colors: {
+              vizColors: [AREA_SERIES_COLOR],
+            },
             areaSeriesStyle: {
               line: {
-                stroke: 'red',
                 strokeWidth: 1,
                 visible: true,
               },
@@ -98,7 +93,7 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
                 radius: 0,
                 opacity: 0,
               },
-              area: { fill: 'red', visible: true, opacity: 1 },
+              area: { visible: true, opacity: 1 },
             },
           }}
           tooltip={{ headerFormatter }}
@@ -123,21 +118,6 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
           yAccessors={['y']}
           data={chartData.length > 0 ? chartData : [{ x: 0, y: 0 }]}
           curve={CurveType.CURVE_STEP_AFTER}
-          // TODO - switch to use inline areaSeriesStyle to set series fill once charts version is 8.0.0+
-          // areaSeriesStyle={{
-          //   line: {
-          //     stroke: 'red',
-          //     strokeWidth: 0,
-          //     visible: false,
-          //   },
-          //   point: {
-          //     visible: false,
-          //     radius: 0,
-          //     opacity: 0,
-          //   },
-          //   area: { fill: 'red', visible: true, opacity: 1 },
-          // }}
-          customSeriesColors={seriesColors}
         />
       </Chart>
     </div>

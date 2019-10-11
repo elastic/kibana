@@ -19,10 +19,10 @@
 
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
-import { AutoPrecisionParamEditor } from '../controls/auto_precision';
-import { UseGeocentroidParamEditor } from '../controls/use_geocentroid';
-import { IsFilteredByCollarParamEditor } from '../controls/is_filtered_by_collar';
-import { PrecisionParamEditor } from '../controls/precision';
+import { AutoPrecisionParamEditor } from '../../vis/editors/default/controls/auto_precision';
+import { UseGeocentroidParamEditor } from '../../vis/editors/default/controls/use_geocentroid';
+import { IsFilteredByCollarParamEditor } from '../../vis/editors/default/controls/is_filtered_by_collar';
+import { PrecisionParamEditor } from '../../vis/editors/default/controls/precision';
 import { geohashColumns } from '../../utils/decode_geo_hash';
 import { geoContains, scaleBounds } from '../../utils/geo_utils';
 import { i18n } from '@kbn/i18n';

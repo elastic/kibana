@@ -22,7 +22,7 @@ export const Description: FC<Props> = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="single-example-aria"
+      idAria="description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -31,7 +31,7 @@ export const Description: FC<Props> = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['single-example-aria']}>
+      <EuiFormRow label={title} describedByIds={['description']}>
         {children}
       </EuiFormRow>
     </EuiDescribedFormGroup>

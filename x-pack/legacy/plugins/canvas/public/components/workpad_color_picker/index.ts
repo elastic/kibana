@@ -7,14 +7,10 @@
 import { connect } from 'react-redux';
 // @ts-ignore
 import { addColor, removeColor } from '../../state/actions/workpad';
-// @ts-ignore
 import { getWorkpadColors } from '../../state/selectors/workpad';
 
 import { WorkpadColorPicker as Component } from '../workpad_color_picker/workpad_color_picker';
-
-export interface State {
-  colors: string[];
-}
+import { State } from '../../../types';
 
 const mapStateToProps = (state: State) => ({
   colors: getWorkpadColors(state),

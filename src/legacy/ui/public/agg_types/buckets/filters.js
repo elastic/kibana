@@ -22,8 +22,9 @@ import angular from 'angular';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterFilters } from './create_filter/filters';
-import { FiltersParamEditor } from '../controls/filters';
+import { FiltersParamEditor } from '../../vis/editors/default/controls/filters';
 import { i18n } from '@kbn/i18n';
+import { Storage } from 'ui/storage';
 
 import chrome from 'ui/chrome';
 import { buildEsQuery } from '@kbn/es-query';
@@ -31,6 +32,7 @@ import { setup as data } from '../../../../core_plugins/data/public/legacy';
 
 const { getQueryLog } = data.query.helpers;
 const config = chrome.getUiSettingsClient();
+const storage = new Storage(window.localStorage);
 
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
@@ -50,7 +52,7 @@ export const filtersBucketAgg = new BucketAggType({
         if (!_.size(inFilters)) return;
 
         inFilters.forEach((filter) => {
-          const persistedLog = getQueryLog(config, 'filtersAgg', filter.input.language);
+          const persistedLog = getQueryLog(config, storage, 'filtersAgg', filter.input.language);
           persistedLog.add(filter.input.query);
         });
 

@@ -7,14 +7,21 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { npStart } from 'ui/new_platform';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
 import { ServiceDetails } from '../../ServiceDetails';
 import { TransactionDetails } from '../../TransactionDetails';
 import { Home } from '../../Home';
 import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
 import { RouteName } from './route_names';
-import { SettingsList } from '../../Settings/SettingsList';
+import { AgentConfigurations } from '../../Settings/AgentConfigurations';
 import { toQuery } from '../../../shared/Links/url_helpers';
+import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
+import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUrlParams';
+
+const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
+  defaultMessage: 'Metrics'
+});
 
 interface RouteParams {
   serviceName: string;
@@ -42,7 +49,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/services',
-    component: Home,
+    component: () => <Home tab="services" />,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
       defaultMessage: 'Services'
     }),
@@ -51,7 +58,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/traces',
-    component: Home,
+    component: () => <Home tab="traces" />,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
       defaultMessage: 'Traces'
     }),
@@ -60,7 +67,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/settings',
-    component: SettingsList,
+    component: AgentConfigurations,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
       defaultMessage: 'Settings'
     }),
@@ -76,7 +83,6 @@ export const routes: BreadcrumbRoute[] = [
       )(props),
     name: RouteName.SERVICE
   },
-
   // errors
   {
     exact: true,
@@ -88,22 +94,50 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/services/:serviceName/errors',
-    component: ServiceDetails,
+    component: () => <ServiceDetails tab="errors" />,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.errorsTitle', {
       defaultMessage: 'Errors'
     }),
     name: RouteName.ERRORS
   },
-
   // transactions
   {
     exact: true,
     path: '/services/:serviceName/transactions',
-    component: ServiceDetails,
+    component: () => <ServiceDetails tab="transactions" />,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.transactionsTitle', {
       defaultMessage: 'Transactions'
     }),
     name: RouteName.TRANSACTIONS
+  },
+  // metrics
+  {
+    exact: true,
+    path: '/services/:serviceName/metrics',
+    component: () => <ServiceDetails tab="metrics" />,
+    breadcrumb: metricsBreadcrumb,
+    name: RouteName.METRICS
+  },
+  // service nodes, only enabled for java agents for now
+  {
+    exact: true,
+    path: '/services/:serviceName/nodes',
+    component: () => <ServiceDetails tab="nodes" />,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.nodesTitle', {
+      defaultMessage: 'JVMs'
+    }),
+    name: RouteName.SERVICE_NODES
+  },
+  // node metrics
+  {
+    exact: true,
+    path: '/services/:serviceName/nodes/:serviceNodeName/metrics',
+    component: () => <ServiceNodeMetrics />,
+    breadcrumb: ({ location }) => {
+      const { serviceNodeName } = resolveUrlParams(location, {});
+      return serviceNodeName || '';
+    },
+    name: RouteName.SERVICE_NODE_METRICS
   },
   {
     exact: true,
@@ -114,16 +148,28 @@ export const routes: BreadcrumbRoute[] = [
       return query.transactionName as string;
     },
     name: RouteName.TRANSACTION_NAME
-  },
-
-  // metrics
-  {
-    exact: true,
-    path: '/services/:serviceName/metrics',
-    component: ServiceDetails,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
-      defaultMessage: 'Metrics'
-    }),
-    name: RouteName.METRICS
   }
 ];
+
+if (npStart.core.injectedMetadata.getInjectedVar('apmServiceMapEnabled')) {
+  routes.push(
+    {
+      exact: true,
+      path: '/service-map',
+      component: () => <Home tab="service-map" />,
+      breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+        defaultMessage: 'Service Map'
+      }),
+      name: RouteName.SERVICE_MAP
+    },
+    {
+      exact: true,
+      path: '/services/:serviceName/service-map',
+      component: () => <ServiceDetails tab="service-map" />,
+      breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceMapTitle', {
+        defaultMessage: 'Service Map'
+      }),
+      name: RouteName.SINGLE_SERVICE_MAP
+    }
+  );
+}

@@ -1,41 +1,44 @@
 [role="xpack"]
 [[logstash-configuration-management-api-create]]
-=== Create Pipeline
+=== Create Logstash pipeline API
+++++
+<titleabbrev>Create pipeline</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Create a centrally-managed Logstash pipeline, or update an existing pipeline.
 
-The Create Pipeline API enables you to create a centrally-managed Logstash pipeline. You can also use
-it to update an existing pipeline.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
-[float]
+[[logstash-configuration-management-api-create-request]]
 ==== Request
 
 `PUT /api/logstash/pipeline/<id>`
 
+[[logstash-configuration-management-api-create-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The pipeline ID. Only alphanumeric characters, hyphens, and underscores are supported.
+
+[[logstash-configuration-management-api-create-request-body]]
+==== Request body
+
+`description`::
+  (Optional, string) The pipeline description.
+
+`pipeline`::
+  (Required, string) The pipeline definition.
+
+`settings`::
+  (Optional, object) The pipeline settings. Supported settings, represented as object keys, are `pipeline.workers`, `pipeline.batch.size`, `pipeline.batch.delay`, `queue.type`, `queue.max_bytes`, and `queue.checkpoint.writes`.
+
+[[logstash-configuration-management-api-create-codes]]
+==== Response code
+
+`204 No Content`::
+    Indicates a successful call.
+
 [float]
-==== Path Parameters
-
-`id` (required)::
-  (string) ID for pipeline. Only alphanumeric characters, hyphens, and underscores may be used.
-
-
-[float]
-==== Request Body
-
-`description` (optional)::
-  (string) Description for the pipeline
-
-`pipeline` (required)::
-  (string) Pipeline definition
-
-`settings` (optional)::
-  (object) Pipeline settings. Supported settings, represented as object keys, are `pipeline.workers`, `pipeline.batch.size`, `pipeline.batch.delay`, `queue.type`, `queue.max_bytes`, and `queue.checkpoint.writes`
-
-
-[float]
-==== Examples
+[[logstash-configuration-management-api-create-example]]
+==== Example
 
 [source,js]
 --------------------------------------------------
@@ -48,5 +51,3 @@ PUT api/logstash/pipeline/hello-world
 }
 --------------------------------------------------
 // KIBANA
-
-A successful call returns an HTTP `204 No Content` response.

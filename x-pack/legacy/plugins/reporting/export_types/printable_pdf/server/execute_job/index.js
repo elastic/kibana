@@ -10,21 +10,19 @@ import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
 import { LevelLogger, oncePerServer } from '../../../../server/lib';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { compatibilityShimFactory } from './compatibility_shim';
 import {
   decryptJobHeaders,
   omitBlacklistedHeaders,
   getConditionalHeaders,
-  addForceNowQuerystring,
+  getFullUrls,
   getCustomLogo,
 } from '../../../common/execute_job/';
 
 function executeJobFn(server) {
   const generatePdfObservable = generatePdfObservableFactory(server);
-  const compatibilityShim = compatibilityShimFactory(server);
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
 
-  return compatibilityShim(function executeJob(jobId, jobToExecute, cancellationToken) {
+  return function executeJob(jobId, jobToExecute, cancellationToken) {
     const jobLogger = logger.clone([jobId]);
 
     const process$ = Rx.of({ job: jobToExecute, server }).pipe(
@@ -45,7 +43,7 @@ function executeJobFn(server) {
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
       mergeMap(getCustomLogo),
-      mergeMap(addForceNowQuerystring),
+      mergeMap(getFullUrls),
       mergeMap(({ job, conditionalHeaders, logo, urls }) => {
         return generatePdfObservable(
           jobLogger,
@@ -71,7 +69,7 @@ function executeJobFn(server) {
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
     return process$.pipe(takeUntil(stop$)).toPromise();
-  });
+  };
 }
 
 export const executeJobFactory = oncePerServer(executeJobFn);

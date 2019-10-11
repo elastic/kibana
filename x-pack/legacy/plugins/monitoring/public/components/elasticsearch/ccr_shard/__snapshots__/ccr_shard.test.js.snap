@@ -1,11 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CcrShard that is renders an exception properly 1`] = `
-<EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="m"
->
+<EuiPanel>
   <EuiTitle
     color="danger"
     size="s"
@@ -115,11 +111,7 @@ exports[`CcrShard that it renders normally 1`] = `
           }
         }
       >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="m"
-        >
+        <EuiPanel>
           <MonitoringTimeseriesContainer />
         </EuiPanel>
       </EuiFlexItem>
@@ -131,11 +123,7 @@ exports[`CcrShard that it renders normally 1`] = `
           }
         }
       >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="m"
-        >
+        <EuiPanel>
           <MonitoringTimeseriesContainer />
         </EuiPanel>
       </EuiFlexItem>

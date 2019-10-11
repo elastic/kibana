@@ -25,7 +25,7 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { PreferenceFormattedDate } from '../../../formatted_date';
-import { Columns } from '../../../load_more_table';
+import { Columns } from '../../../paginated_table';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { PreferenceFormattedBytes } from '../../../formatted_bytes';
@@ -106,7 +106,7 @@ export const getDomainsColumns = (
               key={escapeDataProviderId(
                 `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}
-              expression={`network.direction: "${escapeQueryValue(direction)}"`}
+              expression={`network.direction: ${escapeQueryValue(direction)}`}
               type={type}
               componentFilterType={'network'}
             >

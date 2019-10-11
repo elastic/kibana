@@ -12,9 +12,9 @@ import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_s
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
-import { APMLink } from '../../../shared/Links/apm/APMLink';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
+import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
 
 interface Props {
   items: ServiceListAPIResponse['items'];
@@ -35,7 +35,7 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(APMLink)`
+const AppLink = styled(TransactionOverviewLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -50,9 +50,7 @@ export const SERVICE_COLUMNS = [
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink path={`/services/${serviceName}/transactions`}>
-          {formatString(serviceName)}
-        </AppLink>
+        <AppLink serviceName={serviceName}>{formatString(serviceName)}</AppLink>
       </EuiToolTip>
     )
   },

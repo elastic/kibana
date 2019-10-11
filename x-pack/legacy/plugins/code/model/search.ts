@@ -8,7 +8,7 @@ import { DetailSymbolInformation } from '@elastic/lsp-extension';
 import { IRange } from 'monaco-editor';
 
 import { DiffKind } from '../common/git_diff';
-import { Repository, SourceHit } from '../model';
+import { Repository } from '../model';
 import { RepositoryUri } from './repository';
 
 export interface Document {
@@ -109,6 +109,27 @@ export interface SymbolSearchRequest extends SearchRequest {
   repoScope?: RepositoryUri[];
 }
 
+export interface StackTraceItem {
+  filePath: string;
+  lineNumStart: number;
+  lineNumEnd?: number;
+  // We could add more in here in the future, e.g. qname.
+}
+
+export interface StackTraceSnippetsRequest {
+  repoUris: RepositoryUri[];
+  revision?: string; // Not used for now.
+  stacktraceItems: StackTraceItem[];
+}
+
+export interface ResolveSnippetsRequest {
+  repoUris: RepositoryUri[];
+  revision?: string; // Not used for now.
+  filePath: string;
+  lineNumStart: number;
+  lineNumEnd?: number;
+}
+
 // The base interface of any kind of search result.
 export interface SearchResult {
   total: number;
@@ -123,7 +144,7 @@ export interface RepositorySearchResult extends SearchResult {
 }
 
 export interface SymbolSearchResult extends SearchResult {
-  // TODO: we migit need an additional data structure for symbol search result.
+  // TODO: we might need an additional data structure for symbol search result.
   symbols: DetailSymbolInformation[];
 }
 
@@ -174,6 +195,11 @@ export type CommitSearchResultItem = Commit;
 
 export interface CommitSearchResult extends DocumentSearchResult {
   commits: CommitSearchResultItem[];
+}
+
+export interface IntegrationsSearchResult extends SearchResult {
+  results?: SearchResultItem[];
+  fallback: boolean;
 }
 
 export interface SourceLocation {

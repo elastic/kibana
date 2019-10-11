@@ -26,7 +26,7 @@ import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 import { uiModules } from 'ui/modules';
 import { disableFilter } from '@kbn/es-query';
-import { dispatchRenderComplete } from 'ui/render_complete';
+import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 
@@ -109,9 +109,8 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       };
 
       $scope.getContextAppHref = () => {
-        const path = kbnUrl.eval('#/context/{{ indexPattern }}/{{ anchorType }}/{{ anchorId }}', {
+        const path = kbnUrl.eval('#/context/{{ indexPattern }}/{{ anchorId }}', {
           anchorId: $scope.row._id,
-          anchorType: $scope.row._type,
           indexPattern: $scope.indexPattern.id,
         });
         const hash = $httpParamSerializer({

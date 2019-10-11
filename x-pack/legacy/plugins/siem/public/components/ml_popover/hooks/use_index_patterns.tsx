@@ -13,32 +13,49 @@ import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting'
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
+import { IndexPatternSavedObject } from '../types';
 
-type Return = [boolean, string[]];
+type Return = [boolean, IndexPatternSavedObject[]];
+
+// TODO: Used by more than just ML now -- refactor to shared component https://github.com/elastic/siem-team/issues/448
 
 export const useIndexPatterns = (refreshToggle = false): Return => {
-  const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
-  const fetchFunc = async () => {
-    try {
-      const data = await getIndexPatterns({
-        'kbn-version': kbnVersion,
-      });
-
-      setIndexPatterns(data);
-      setIsLoading(false);
-    } catch (error) {
-      errorToToaster({ title: i18n.INDEX_PATTERN_FETCH_FAILURE, error, dispatchToaster });
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
     setIsLoading(true);
-    fetchFunc();
+
+    async function fetchIndexPatterns() {
+      try {
+        const data = await getIndexPatterns(
+          {
+            'kbn-version': kbnVersion,
+          },
+          abortCtrl.signal
+        );
+
+        if (isSubscribed) {
+          setIndexPatterns(data);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        if (isSubscribed) {
+          errorToToaster({ title: i18n.INDEX_PATTERN_FETCH_FAILURE, error, dispatchToaster });
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchIndexPatterns();
+    return () => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
   }, [refreshToggle]);
 
   return [isLoading, indexPatterns];

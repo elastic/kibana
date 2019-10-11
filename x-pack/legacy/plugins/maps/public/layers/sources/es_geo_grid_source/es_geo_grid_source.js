@@ -12,10 +12,11 @@ import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector_style';
+import { vectorStyles } from '../../styles/vector_style_defaults';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -182,14 +183,18 @@ export class ESGeoGridSource extends AbstractESSource {
     });
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this._getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
-    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-      defaultMessage: 'Elasticsearch geo grid aggregation request'
-    }));
+    const esResponse = await this._runEsQuery(
+      layerName,
+      searchSource,
+      registerCancelCallback,
+      i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
+        defaultMessage: 'Elasticsearch geo grid aggregation request'
+      }));
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
     const { featureCollection } = convertToGeoJson({
@@ -261,7 +266,7 @@ export class ESGeoGridSource extends AbstractESSource {
       ...options
     });
     descriptor.style = VectorStyle.createDescriptor({
-      fillColor: {
+      [vectorStyles.FILL_COLOR]: {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {
@@ -272,7 +277,7 @@ export class ESGeoGridSource extends AbstractESSource {
           color: 'Blues'
         }
       },
-      iconSize: {
+      [vectorStyles.ICON_SIZE]: {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
           field: {

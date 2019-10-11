@@ -5,7 +5,8 @@
  */
 
 /** Clicking this button in the timeline opens the Fields browser */
-export const FIELDS_BUTTON = '[data-test-subj="show-field-browser"]';
+export const TIMELINE_FIELDS_BUTTON =
+  '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
 
 /** The title displayed in the fields browser (i.e. Customize Columns) */
 export const FIELDS_BROWSER_TITLE = '[data-test-subj="field-browser-title"]';

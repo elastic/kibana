@@ -139,6 +139,7 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
     }
     fileIcon="document"
     text="generic-text-123"
+    timelineId="test"
   />
 </Component>
 `;

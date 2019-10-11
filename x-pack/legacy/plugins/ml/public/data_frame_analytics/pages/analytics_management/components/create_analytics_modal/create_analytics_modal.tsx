@@ -24,18 +24,26 @@ import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form'
 export const CreateAnalyticsModal: FC<CreateAnalyticsFormProps> = ({
   actions,
   children,
-  formState,
+  state,
 }) => {
   const { closeModal, createAnalyticsJob, startAnalyticsJob } = actions;
-  const { isJobCreated, isJobStarted, isModalButtonDisabled, isValid } = formState;
+  const {
+    isAdvancedEditorEnabled,
+    isJobCreated,
+    isJobStarted,
+    isModalButtonDisabled,
+    isValid,
+  } = state;
+
+  const width = isAdvancedEditorEnabled ? '640px' : '450px';
 
   return (
     <EuiOverlayMask>
-      <EuiModal onClose={closeModal} style={{ width: '450px' }}>
+      <EuiModal onClose={closeModal} style={{ width }}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             {i18n.translate('xpack.ml.dataframe.analytics.create.modalHeaderTitle', {
-              defaultMessage: 'Create outlier detection job',
+              defaultMessage: 'Create analytics job',
             })}
           </EuiModalHeaderTitle>
         </EuiModalHeader>

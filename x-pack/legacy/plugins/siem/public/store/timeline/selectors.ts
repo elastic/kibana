@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
-import { timelineDefaults, TimelineModel } from './model';
+import { eventsDefaults, timelineDefaults, TimelineModel } from './model';
 import { TimelineById, AutoSavedWarningMsg } from './types';
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
@@ -38,10 +38,18 @@ export const getShowCallOutUnauthorizedMsg = () =>
     showCallOutUnauthorizedMsg => showCallOutUnauthorizedMsg
   );
 
+export const getTimelines = () => timelineByIdSelector;
+
 export const getTimelineByIdSelector = () =>
   createSelector(
     selectTimeline,
     timeline => timeline || timelineDefaults
+  );
+
+export const getEventsByIdSelector = () =>
+  createSelector(
+    selectTimeline,
+    timeline => timeline || eventsDefaults
   );
 
 export const getKqlFilterQuerySelector = () =>
@@ -60,6 +68,18 @@ export const getKqlFilterQueryDraftSelector = () =>
   createSelector(
     selectTimeline,
     timeline => (timeline && timeline.kqlQuery ? timeline.kqlQuery.filterQueryDraft : null)
+  );
+
+export const getKqlFilterKuerySelector = () =>
+  createSelector(
+    selectTimeline,
+    timeline =>
+      timeline &&
+      timeline.kqlQuery &&
+      timeline.kqlQuery.filterQuery &&
+      timeline.kqlQuery.filterQuery.kuery
+        ? timeline.kqlQuery.filterQuery.kuery
+        : null
   );
 
 export const isFilterQueryDraftValidSelector = () =>

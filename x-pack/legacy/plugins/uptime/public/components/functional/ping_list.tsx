@@ -15,20 +15,23 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   EuiFormRow,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
+// @ts-ignore formatNumber
+import { formatNumber } from '@elastic/eui/lib/services/format';
 import { Ping, PingResults } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
 import { LocationName } from './location_name';
 import { Criteria, Pagination } from './monitor_list';
+import { PingListExpandedRowComponent } from './ping_list/expanded_row';
 
 interface PingListQueryResult {
   allPings?: PingResults;
@@ -45,8 +48,28 @@ interface PingListProps {
 }
 
 type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
+interface ExpandedRowMap {
+  [key: string]: JSX.Element;
+}
 
 export const BaseLocationOptions = [{ label: 'All', value: 'All' }];
+
+export const toggleDetails = (
+  ping: Ping,
+  itemIdToExpandedRowMap: ExpandedRowMap,
+  setItemIdToExpandedRowMap: (update: ExpandedRowMap) => any
+) => {
+  // If the user has clicked on the expanded map, close all expanded rows.
+  if (itemIdToExpandedRowMap[ping.id]) {
+    setItemIdToExpandedRowMap({});
+    return;
+  }
+
+  // Otherwise expand this row
+  const newItemIdToExpandedRowMap: ExpandedRowMap = {};
+  newItemIdToExpandedRowMap[ping.id] = <PingListExpandedRowComponent ping={ping} />;
+  setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
+};
 
 export const PingListComponent = ({
   data,
@@ -59,6 +82,8 @@ export const PingListComponent = ({
   selectedOption,
   selectedLocation,
 }: Props) => {
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
+
   const statusOptions: EuiComboBoxOptionProps[] = [
     {
       label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
@@ -88,7 +113,7 @@ export const PingListComponent = ({
         })
       );
 
-  const columns = [
+  const columns: any[] = [
     {
       field: 'monitor.status',
       name: i18n.translate('xpack.uptime.pingList.statusColumnLabel', {
@@ -152,38 +177,13 @@ export const PingListComponent = ({
         defaultMessage: 'Error type',
       }),
     },
-    {
-      align: 'left',
-      field: 'error.message',
-      name: i18n.translate('xpack.uptime.pingList.errorMessageColumnLabel', {
-        defaultMessage: 'Error message',
-      }),
-      render: (message: string) =>
-        message && message.length > 25 ? (
-          <EuiToolTip
-            position="top"
-            title={i18n.translate('xpack.uptime.pingList.columns.errorMessageTooltipTitle', {
-              defaultMessage: 'Error message',
-            })}
-            content={<p>{message}</p>}
-          >
-            <code>{message.slice(0, 24)}…</code>
-          </EuiToolTip>
-        ) : (
-          <EuiText size="s">
-            <code>{message}</code>
-          </EuiText>
-        ),
-    },
   ];
   useEffect(() => {
     onUpdateApp();
   }, [selectedOption]);
   let pings: Ping[] = [];
-  let total: number = 0;
   if (data && data.allPings && data.allPings.pings) {
     pings = data.allPings.pings;
-    total = data.allPings.total;
     const hasStatus: boolean = pings.reduce(
       (hasHttpStatus: boolean, currentPing: Ping) =>
         hasHttpStatus || !!get(currentPing, 'http.response.status_code'),
@@ -201,6 +201,22 @@ export const PingListComponent = ({
       });
     }
   }
+  columns.push({
+    align: 'right',
+    width: '40px',
+    isExpander: true,
+    render: (item: Ping) => (
+      <EuiButtonIcon
+        onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
+        aria-label={
+          itemIdToExpandedRowMap[item.id]
+            ? i18n.translate('xpack.uptime.pingList.collapseRow', { defaultMessage: 'Collapse' })
+            : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
+        }
+        iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+      />
+    ),
+  });
   const pagination: Pagination = {
     initialPageSize: 20,
     pageIndex: 0,
@@ -215,24 +231,16 @@ export const PingListComponent = ({
 
   return (
     <Fragment>
-      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h4>
-              <FormattedMessage
-                id="xpack.uptime.pingList.checkHistoryTitle"
-                defaultMessage="History"
-              />
-            </h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        {!!total && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{total}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiPanel paddingSize="s">
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h4>
+            <FormattedMessage
+              id="xpack.uptime.pingList.checkHistoryTitle"
+              defaultMessage="History"
+            />
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
@@ -298,6 +306,8 @@ export const PingListComponent = ({
           loading={loading}
           columns={columns}
           items={pings}
+          itemId="id"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           pagination={pagination}
           onChange={({ page: { size } }: Criteria) => onPageCountChange(size)}
         />

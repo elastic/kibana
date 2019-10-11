@@ -1,10 +1,11 @@
 [role="xpack"]
 [[xpack-logs-getting-started]]
-== Getting started with the Logs UI
+== Getting started with logs monitoring
 
-Kibana provides step-by-step instructions to help you add log data. The
-{infra-guide}[Infrastructure Monitoring Guide] is a good source for more
-detailed information and instructions.
+To get started with the Logs app in Kibana, you need to start collecting logs data for your infrastructure.
+
+Kibana provides step-by-step instructions to help you add logs data.
+The {infra-guide}[Infrastructure Monitoring Guide] is a good source for more detailed information and instructions.
 
 [role="screenshot"]
-image::logs/images/logs-add-data.png[Included data ingestion tutorials in Kibana]
+image::logs/images/logs-add-data.png[Screenshot showing Add logging data in Kibana]

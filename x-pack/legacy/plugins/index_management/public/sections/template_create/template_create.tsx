@@ -13,18 +13,6 @@ import { Template } from '../../../common/types';
 import { saveTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 
-const emptyObject = '{\n\n}';
-
-const DEFAULT_TEMPLATE: Template = {
-  name: '',
-  indexPatterns: [],
-  version: '',
-  order: '',
-  settings: emptyObject,
-  mappings: emptyObject,
-  aliases: emptyObject,
-};
-
 export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
@@ -68,7 +56,6 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
         </EuiTitle>
         <EuiSpacer size="l" />
         <TemplateForm
-          template={DEFAULT_TEMPLATE}
           onSave={onSave}
           isSaving={isSaving}
           saveError={saveError}

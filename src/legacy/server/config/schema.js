@@ -19,10 +19,7 @@
 
 import Joi from 'joi';
 import os from 'os';
-
-import {
-  fromRoot
-} from '../../utils';
+import { join } from 'path';
 import {
   getData
 } from '../path';
@@ -81,7 +78,7 @@ export default () => Joi.object({
   server: Joi.object({
     uuid: Joi.string().guid().default(),
     name: Joi.string().default(os.hostname()),
-    defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
+    defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
     customResponseHeaders: Joi.object().unknown(true).default({}),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),
@@ -157,12 +154,6 @@ export default () => Joi.object({
     data: Joi.string().default(getData())
   }).default(),
 
-  migrations: Joi.object({
-    batchSize: Joi.number().default(100),
-    scrollDuration: Joi.string().default('15m'),
-    pollInterval: Joi.number().default(1500),
-  }).default(),
-
   stats: Joi.object({
     maximumWaitTimeForAllCollectorsInS: Joi.number().default(60)
   }).default(),
@@ -170,13 +161,13 @@ export default () => Joi.object({
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),
-    bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
+    bundleDir: Joi.string().default(join(getData(), 'optimize')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
     watch: Joi.boolean().default(false),
     watchPort: Joi.number().default(5602),
     watchHost: Joi.string().hostname().default('localhost'),
     watchPrebuild: Joi.boolean().default(false),
-    watchProxyTimeout: Joi.number().default(5 * 60000),
+    watchProxyTimeout: Joi.number().default(10 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
     sourceMaps: Joi.when('$prod', {
       is: true,
@@ -187,7 +178,7 @@ export default () => Joi.object({
           Joi.string().required(),
           Joi.boolean()
         )
-        .default('#cheap-source-map'),
+        .default(!!process.env.CODE_COVERAGE ? 'true' : '#cheap-source-map'),
     }),
     workers: Joi.number().min(1),
     profile: Joi.boolean().default(false)
@@ -238,7 +229,7 @@ export default () => Joi.object({
       })).default([])
     }).default(),
     manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.2/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.2'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.4'),
     emsFontLibraryUrl: Joi.string().default('https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'),
     emsTileLayerId: Joi.object({
       bright: Joi.string().default('road_map'),

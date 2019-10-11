@@ -1,34 +1,27 @@
 [role="xpack"]
 [[logstash-configuration-management-api-retrieve]]
-=== Retrieve Pipeline
+=== Retrieve pipeline API
+++++
+<titleabbrev>Retrieve pipeline</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieves a centrally-managed Logstash pipeline.
 
-The Retrieve Pipeline API enables you to retrieve a centrally-managed Logstash pipeline.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
-[float]
+[[logstash-configuration-management-api-retrieve-request]]
 ==== Request
 
 `GET /api/logstash/pipeline/<id>`
 
-[float]
-==== Path Parameters
+[[logstash-configuration-management-api-retrieve-path-params]]
+==== Path parameters
 
-`id` (required)::
-  (string) ID for pipeline.
+`id`::
+  (Required, string) The pipeline ID.
+  
+[[logstash-configuration-management-api-retrieve-example]]
+==== Example
 
-[float]
-==== Examples
-
-[source,js]
---------------------------------------------------
-GET api/logstash/pipeline/hello-world
---------------------------------------------------
-// KIBANA
-
-A successful call returns a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------

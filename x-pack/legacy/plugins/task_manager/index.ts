@@ -12,7 +12,13 @@ import mappings from './mappings.json';
 import { migrations } from './migrations';
 
 export { PluginSetupContract as TaskManager };
-export { TaskInstance, ConcreteTaskInstance, TaskRunCreatorFunction } from './task';
+export {
+  TaskInstance,
+  ConcreteTaskInstance,
+  TaskRunCreatorFunction,
+  TaskStatus,
+  RunContext,
+} from './task';
 
 export function taskManager(kibana: any) {
   return new kibana.Plugin({
@@ -41,12 +47,6 @@ export function taskManager(kibana: any) {
           )
           .min(1) // disable the task manager rather than trying to specify it with 0 workers
           .default(10),
-        override_num_workers: Joi.object()
-          .pattern(/.*/, Joi.number().greater(0))
-          .description(
-            'Customize the number of workers occupied by specific tasks (e.g. override_num_workers.reporting: 2)'
-          )
-          .default({}),
       }).default();
     },
     init(server: Legacy.Server) {
@@ -79,7 +79,7 @@ export function taskManager(kibana: any) {
           // executing. Saved objects repository waits for migrations to finish before
           // finishing the request. To avoid this, we'll await within a separate
           // function block.
-          await this.kbnServer.server.kibanaMigrator.awaitMigration();
+          await this.kbnServer.server.kibanaMigrator.runMigrations();
           plugin.start();
         })();
       });

@@ -33,8 +33,7 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import { docTitle } from 'ui/doc_title/doc_title';
 
-// @ts-ignore
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
@@ -58,6 +57,7 @@ import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { extractTimeFilter, changeTimeFilter } from '../../../data/public';
 import { data } from '../../../data/public/setup';
 
 import {
@@ -332,7 +332,8 @@ export class DashboardAppController {
       getDashboardTitle(
         dashboardStateManager.getTitle(),
         dashboardStateManager.getViewMode(),
-        dashboardStateManager.getIsDirty(timefilter)
+        dashboardStateManager.getIsDirty(timefilter),
+        dashboardStateManager.isNew()
       );
 
     // Push breadcrumbs to new header navigation
@@ -423,7 +424,21 @@ export class DashboardAppController {
     };
 
     $scope.onApplyFilters = filters => {
-      queryFilter.addFiltersAndChangeTimeFilter(filters);
+      // All filters originated from one visualization.
+      const indexPatternId = filters[0].meta.index;
+      const indexPattern = _.find(
+        $scope.indexPatterns,
+        (p: IndexPattern) => p.id === indexPatternId
+      );
+      if (indexPattern && indexPattern.timeFieldName) {
+        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+          indexPattern.timeFieldName,
+          filters
+        );
+        queryFilter.addFilters(restOfFilters);
+        if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
+      }
+
       $scope.appState.$newFilters = [];
     };
 
@@ -447,7 +462,6 @@ export class DashboardAppController {
         },
         []
       );
-      courier.fetch();
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
@@ -465,16 +479,13 @@ export class DashboardAppController {
           timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
       }
-      courier.fetch();
     };
 
-    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery, oldSavedQuery: SavedQuery) => {
+    $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {
       if (!newSavedQuery) return;
       dashboardStateManager.setSavedQueryId(newSavedQuery.id);
 
-      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-        updateStateFromSavedQuery(newSavedQuery);
-      }
+      updateStateFromSavedQuery(newSavedQuery);
     });
 
     $scope.$watch(
@@ -486,13 +497,14 @@ export class DashboardAppController {
           $scope.savedQuery = undefined;
           return;
         }
-
-        savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
-          $scope.$evalAsync(() => {
-            $scope.savedQuery = savedQuery;
-            updateStateFromSavedQuery(savedQuery);
+        if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+          savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
+            $scope.$evalAsync(() => {
+              $scope.savedQuery = savedQuery;
+              updateStateFromSavedQuery(savedQuery);
+            });
           });
-        });
+        }
       }
     );
 
@@ -517,17 +529,6 @@ export class DashboardAppController {
     );
 
     $scope.timefilterSubscriptions$ = new Subscription();
-    // The only reason this is here is so that search embeddables work on a dashboard with
-    // a refresh interval turned on. This kicks off the search poller. It should be
-    // refactored so no embeddables need to listen to the timefilter directly but instead
-    // the container tells it when to reload.
-    $scope.timefilterSubscriptions$.add(
-      subscribeWithScope($scope, timefilter.getFetch$(), {
-        next: () => {
-          courier.fetch();
-        },
-      })
-    );
 
     $scope.timefilterSubscriptions$.add(
       subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
@@ -617,7 +618,7 @@ export class DashboardAppController {
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    function save(saveOptions: SaveOptions): Promise<{ id?: string } | { error: Error }> {
+    function save(saveOptions: SaveOptions): Promise<SaveResult> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {
@@ -708,7 +709,7 @@ export class DashboardAppController {
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
+        return save(saveOptions).then((response: SaveResult) => {
           // If the save wasn't successful, put the original values back.
           if (!(response as { id: string }).id) {
             dashboardStateManager.setTitle(currentTitle);

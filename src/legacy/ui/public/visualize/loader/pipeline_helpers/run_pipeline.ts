@@ -19,10 +19,8 @@
 
 // @ts-ignore
 import { fromExpression } from '@kbn/interpreter/common';
-// @ts-ignore
-import { getInterpreter } from 'plugins/interpreter/interpreter';
-
 import { Adapters } from 'ui/inspector';
+import { getInterpreter } from '../../../../../core_plugins/interpreter/public/interpreter';
 import { KibanaContext } from '../../../../../core_plugins/interpreter/public';
 
 type getInitialContextFunction = () => KibanaContext;
@@ -30,15 +28,16 @@ type getInitialContextFunction = () => KibanaContext;
 export interface RunPipelineHandlers {
   getInitialContext: getInitialContextFunction;
   inspectorAdapters?: Adapters;
+  abortSignal?: AbortSignal;
 }
 
 export const runPipeline = async (
   expression: string,
-  context: object,
+  context: any,
   handlers: RunPipelineHandlers
 ) => {
   const ast = fromExpression(expression);
   const { interpreter } = await getInterpreter();
-  const pipelineResponse = await interpreter.interpretAst(ast, context, handlers);
+  const pipelineResponse = await interpreter.interpretAst(ast, context, handlers as any);
   return pipelineResponse;
 };

@@ -18,6 +18,7 @@ export const setRefreshInterval = createAction('setRefreshInterval');
 export const setWorkpadCSS = createAction('setWorkpadCSS');
 export const enableAutoplay = createAction('enableAutoplay');
 export const setAutoplayInterval = createAction('setAutoplayInterval');
+export const resetWorkpad = createAction('resetWorkpad');
 
 export const initializeWorkpad = createThunk('initializeWorkpad', ({ dispatch }) => {
   dispatch(fetchAllRenderables());

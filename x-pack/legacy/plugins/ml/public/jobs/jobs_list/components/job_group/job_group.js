@@ -16,6 +16,7 @@ export function JobGroup({ name }) {
   return (
     <div
       className="inline-group"
+      data-test-subj="mlJobGroup"
       style={{
         backgroundColor: tabColor(name),
         display: 'inline-block',

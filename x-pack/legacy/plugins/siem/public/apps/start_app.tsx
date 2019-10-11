@@ -5,7 +5,7 @@
  */
 
 import { createHashHistory } from 'history';
-import React, { memo } from 'react';
+import React, { memo, FC } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -27,8 +27,9 @@ import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 import { useKibanaUiSetting } from '../lib/settings/use_kibana_ui_setting';
+import { ApolloClientContext } from '../utils/apollo_context';
 
-const startApp = (libs: AppFrontendLibs) => {
+const StartApp: FC<AppFrontendLibs> = memo(libs => {
   const history = createHashHistory();
 
   const libs$ = new BehaviorSubject(libs);
@@ -43,18 +44,20 @@ const startApp = (libs: AppFrontendLibs) => {
           <ManageGlobalToaster>
             <ReduxStoreProvider store={store}>
               <ApolloProvider client={libs.apolloClient}>
-                <ThemeProvider
-                  theme={() => ({
-                    eui: darkMode ? euiDarkVars : euiLightVars,
-                    darkMode,
-                  })}
-                >
-                  <MlCapabilitiesProvider>
-                    <PageRouter history={history} />
-                  </MlCapabilitiesProvider>
-                </ThemeProvider>
-                <ErrorToastDispatcher />
-                <GlobalToaster />
+                <ApolloClientContext.Provider value={libs.apolloClient}>
+                  <ThemeProvider
+                    theme={() => ({
+                      eui: darkMode ? euiDarkVars : euiLightVars,
+                      darkMode,
+                    })}
+                  >
+                    <MlCapabilitiesProvider>
+                      <PageRouter history={history} />
+                    </MlCapabilitiesProvider>
+                  </ThemeProvider>
+                  <ErrorToastDispatcher />
+                  <GlobalToaster />
+                </ApolloClientContext.Provider>
               </ApolloProvider>
             </ReduxStoreProvider>
           </ManageGlobalToaster>
@@ -63,14 +66,15 @@ const startApp = (libs: AppFrontendLibs) => {
     );
   });
   return <AppPluginRoot />;
-};
+});
 
 const ROOT_ELEMENT_ID = 'react-siem-root';
 
-const App = memo(() => {
-  const libs: AppFrontendLibs = compose();
-  return <div id={ROOT_ELEMENT_ID}>{startApp(libs)}</div>;
-});
+const App = memo(() => (
+  <div id={ROOT_ELEMENT_ID}>
+    <StartApp {...compose()} />
+  </div>
+));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const SiemRootController = ($scope: any, $element: any) => {

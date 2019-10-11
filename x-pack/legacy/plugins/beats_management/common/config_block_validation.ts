@@ -5,6 +5,7 @@
  */
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isLeft } from 'fp-ts/lib/Either';
 import { configBlockSchemas } from './config_schemas';
 import { ConfigurationBlock, createConfigurationBlockInterface } from './domain_types';
 
@@ -29,7 +30,9 @@ export const validateConfigurationBlocks = (configurationBlocks: ConfigurationBl
     const interfaceConfig = blockSchema.configs.reduce(
       (props, config) => {
         if (config.options) {
-          props[config.id] = t.union(config.options.map(opt => t.literal(opt.value)));
+          props[config.id] = t.keyof(Object.fromEntries(
+            config.options.map(opt => [opt.value, null])
+          ) as Record<string, null>);
         } else if (config.validation) {
           props[config.id] = validationMap[config.validation];
         }
@@ -46,7 +49,7 @@ export const validateConfigurationBlocks = (configurationBlocks: ConfigurationBl
 
     const validationResults = runtimeInterface.decode(block);
 
-    if (validationResults.isLeft()) {
+    if (isLeft(validationResults)) {
       throw new Error(
         `configuration_blocks validation error, configuration_blocks at index ${index} is invalid. ${
           PathReporter.report(validationResults)[0]

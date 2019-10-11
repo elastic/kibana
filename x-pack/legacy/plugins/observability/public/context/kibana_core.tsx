@@ -5,10 +5,10 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { InternalCoreStart } from '../../../../../../src/core/public';
+import { LegacyCoreStart } from '../../../../../../src/core/public';
 
 interface AppMountContext {
-  core: InternalCoreStart;
+  core: LegacyCoreStart;
 }
 
 // TODO: Replace CoreStart/CoreSetup with AppMountContext

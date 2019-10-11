@@ -6,14 +6,10 @@
 
 import { StringMap, IndexAsString } from './common';
 
-export interface BoolQuery {
-  must_not: Array<Record<string, any>>;
-  should: Array<Record<string, any>>;
-  filter: Array<Record<string, any>>;
-}
-
 declare module 'elasticsearch' {
   // extending SearchResponse to be able to have typed aggregations
+
+  type ESSearchHit<T> = SearchResponse<T>['hits']['hits'][0];
 
   type AggregationType =
     | 'date_histogram'
@@ -28,7 +24,11 @@ declare module 'elasticsearch' {
     | 'extended_stats'
     | 'filter'
     | 'filters'
-    | 'cardinality';
+    | 'cardinality'
+    | 'sampler'
+    | 'value_count'
+    | 'derivative'
+    | 'bucket_script';
 
   type AggOptions = AggregationOptionMap & {
     [key: string]: any;
@@ -71,6 +71,12 @@ declare module 'elasticsearch' {
     >;
   };
 
+  type SamplerAggregation<SubAggregationMap> = SubAggregation<
+    SubAggregationMap
+  > & {
+    doc_count: number;
+  };
+
   interface AggregatedValue {
     value: number | null;
   }
@@ -82,7 +88,9 @@ declare module 'elasticsearch' {
         max: AggregatedValue;
         min: AggregatedValue;
         sum: AggregatedValue;
-        terms: BucketAggregation<AggregationOption[AggregationName]>;
+        value_count: AggregatedValue;
+        // Elasticsearch might return terms with numbers, but this is a more limited type
+        terms: BucketAggregation<AggregationOption[AggregationName], string>;
         date_histogram: BucketAggregation<
           AggregationOption[AggregationName],
           number
@@ -127,6 +135,14 @@ declare module 'elasticsearch' {
         filters: FiltersAggregation<AggregationOption[AggregationName]>;
         cardinality: {
           value: number;
+        };
+        sampler: SamplerAggregation<AggregationOption[AggregationName]>;
+        derivative: BucketAggregation<
+          AggregationOption[AggregationName],
+          number
+        >;
+        bucket_script: {
+          value: number | null;
         };
       }[AggregationType & keyof AggregationOption[AggregationName]];
     }

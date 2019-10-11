@@ -5,7 +5,6 @@
  */
 
 
-import chrome from 'ui/chrome';
 import { get } from  'lodash';
 import { WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -13,7 +12,6 @@ import { loadIndexPatterns, getIndexPatternIdFromName } from 'plugins/ml/util/in
 
 export function preConfiguredJobRedirect(AppState, Private, courier) {
   return new Promise((resolve, reject) => {
-    const basePath = `${chrome.getBasePath()}/app/ml#`;
 
     const stateDefaults = {
       mlJobSettings: {}
@@ -35,10 +33,10 @@ export function preConfiguredJobRedirect(AppState, Private, courier) {
             redirectUrl = getWizardUrlFromCloningJob(job);
             if (redirectUrl === null) {
               // no created_by setting in job, use advanced job creation
-              window.location.href = `${basePath}/jobs/new_job/advanced`;
+              window.location.href = '#/jobs/new_job/advanced';
               reject();
             } else {
-              window.location.href = `${basePath}/${redirectUrl}`;
+              window.location.href = `#/${redirectUrl}`;
               reject();
             }
           })
@@ -53,7 +51,7 @@ export function preConfiguredJobRedirect(AppState, Private, courier) {
       }
     } else {
       // settings in appState
-      window.location.href = `${basePath}/${redirectUrl}`;
+      window.location.href = `#/${redirectUrl}`;
       reject();
     }
   });
@@ -76,7 +74,7 @@ function getWizardUrlFromAppState(appState) {
         page = 'single_metric';
       }
     }
-    return `jobs/new_job/simple/${page}`;
+    return `jobs/new_job/${page}`;
   } else {
     return null;
   }
@@ -98,7 +96,7 @@ function getWizardUrlFromCloningJob(job) {
     }
     const indexPatternId = getIndexPatternIdFromName(job.datafeed_config.indices[0]);
 
-    return `jobs/new_job/new_new_job/${page}?index=${indexPatternId}&_g=()`;
+    return `jobs/new_job/${page}?index=${indexPatternId}&_g=()`;
   } else {
     return null;
   }

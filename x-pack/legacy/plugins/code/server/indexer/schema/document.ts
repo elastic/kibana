@@ -42,6 +42,9 @@ export const DocumentSchema = {
         type: 'text',
         analyzer: 'path_hierarchy_analyzer',
       },
+      keyword: {
+        type: 'keyword',
+      },
     },
   },
   content: {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,6 +18,7 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiCallOut,
+  EuiSpacer,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { BASE_PATH } from '../../../common/constants';
@@ -38,9 +39,12 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     const { indexName, httpClient, closeModal, reloadIndices } = this.props;
     const { selectedPolicyName, selectedAlias } = this.state;
     if (!selectedPolicyName) {
-      this.setState({ policyError: i18n.translate(
-        'xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPolicySelectedErrorMessage',
-        { defaultMessage: 'You must select a policy.' }) });
+      this.setState({
+        policyError: i18n.translate(
+          'xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPolicySelectedErrorMessage',
+          { defaultMessage: 'You must select a policy.' }
+        ),
+      });
       return;
     }
     try {
@@ -87,26 +91,29 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     const { aliases } = index;
     if (aliases === 'none') {
       return (
-        <EuiCallOut
-          style={{ maxWidth: 400 }}
-          title={
+        <Fragment>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            style={{ maxWidth: 400 }}
+            title={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningTitle"
+                defaultMessage="Index has no aliases"
+              />
+            }
+            color="warning"
+          >
             <FormattedMessage
-              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningTitle"
-              defaultMessage="Index has no aliases"
+              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningMessage"
+              defaultMessage="Policy {policyName} is configured for rollover,
+                but index {indexName} does not have an alias, which is required for rollover."
+              values={{
+                policyName: selectedPolicy.name,
+                indexName: index.name,
+              }}
             />
-          }
-          color="warning"
-        >
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningMessage"
-            defaultMessage="Policy {policyName} is configured for rollover,
-              but index {indexName} does not have an alias, which is required for rollover."
-            values={{
-              policyName: selectedPolicy.name,
-              indexName: index.name,
-            }}
-          />
-        </EuiCallOut>
+          </EuiCallOut>
+        </Fragment>
       );
     }
     const aliasOptions = aliases.map(alias => {
@@ -211,7 +218,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     const title = (
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
-        defaultMessage="Add lifecycle policy to &quot;{indexName}&quot;"
+        defaultMessage='Add lifecycle policy to "{indexName}"'
         values={{
           indexName,
         }}
@@ -220,13 +227,9 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     if (!policies.length) {
       return (
         <EuiOverlayMask>
-          <EuiModal
-            onClose={closeModal}
-          >
+          <EuiModal onClose={closeModal}>
             <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                {title}
-              </EuiModalHeaderTitle>
+              <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
             </EuiModalHeader>
 
             <EuiModalBody>

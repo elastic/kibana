@@ -39,7 +39,7 @@ const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) =
       <I18nContext>
         <EmbeddablePanel
           embeddable={embeddableObject}
-          getActions={start.getTriggerCompatibleActions}
+          getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
           getEmbeddableFactory={start.getEmbeddableFactory}
           getAllEmbeddableFactories={start.getEmbeddableFactories}
           notifications={npStart.core.notifications}

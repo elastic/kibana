@@ -118,10 +118,7 @@ const VisFiltersProvider = (getAppState, $timeout) => {
 
   return {
     pushFilters,
-    brush: (event) => {
-      onBrushEvent(event, getAppState());
-    },
   };
 };
 
-export { VisFiltersProvider, createFilter, createFiltersFromEvent };
+export { VisFiltersProvider, createFilter, createFiltersFromEvent, onBrushEvent };

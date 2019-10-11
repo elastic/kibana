@@ -11,28 +11,26 @@ import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
 import { useKibanaContext } from '../../../../../contexts/kibana';
 
-import { useRefreshAnalyticsList, DataFrameAnalyticsOutlierConfig } from '../../../../common';
+import {
+  useRefreshAnalyticsList,
+  DataFrameAnalyticsId,
+  DataFrameAnalyticsConfig,
+} from '../../../../common';
 
+import { ActionDispatchers, ACTION } from './actions';
+import { reducer } from './reducer';
 import {
   getInitialState,
-  reducer,
+  getJobConfigFromFormState,
+  EsIndexName,
+  FormMessage,
   IndexPatternTitle,
-  RequestMessage,
   State,
-  ACTION,
-} from './reducer';
-
-export interface Actions {
-  closeModal: () => void;
-  createAnalyticsJob: () => void;
-  openModal: () => void;
-  startAnalyticsJob: () => void;
-  setFormState: (payload: Partial<State>) => void;
-}
+} from './state';
 
 export interface CreateAnalyticsFormProps {
-  actions: Actions;
-  formState: State;
+  actions: ActionDispatchers;
+  state: State;
 }
 
 // List of system fields we want to ignore for the numeric field check.
@@ -51,29 +49,55 @@ export const useCreateAnalyticsForm = () => {
   const [state, dispatch] = useReducer(reducer, getInitialState());
   const { refresh } = useRefreshAnalyticsList();
 
-  const { createIndexPattern, destinationIndex, jobId, sourceIndex } = state;
+  const { form, jobConfig, isAdvancedEditorEnabled } = state;
+  const { createIndexPattern, destinationIndex, jobId } = form;
 
-  const addRequestMessage = (requestMessage: RequestMessage) =>
+  const addRequestMessage = (requestMessage: FormMessage) =>
     dispatch({ type: ACTION.ADD_REQUEST_MESSAGE, requestMessage });
+
   const closeModal = () => dispatch({ type: ACTION.CLOSE_MODAL });
+
+  const resetAdvancedEditorMessages = () =>
+    dispatch({ type: ACTION.RESET_ADVANCED_EDITOR_MESSAGES });
+
+  const setIndexNames = (indexNames: EsIndexName[]) =>
+    dispatch({ type: ACTION.SET_INDEX_NAMES, indexNames });
+
+  const setAdvancedEditorRawString = (advancedEditorRawString: string) =>
+    dispatch({ type: ACTION.SET_ADVANCED_EDITOR_RAW_STRING, advancedEditorRawString });
+
+  const setIndexPatternTitles = (payload: {
+    indexPatternTitles: IndexPatternTitle[];
+    indexPatternsWithNumericFields: IndexPatternTitle[];
+  }) => dispatch({ type: ACTION.SET_INDEX_PATTERN_TITLES, payload });
+
+  const setIsJobCreated = (isJobCreated: boolean) =>
+    dispatch({ type: ACTION.SET_IS_JOB_CREATED, isJobCreated });
+
+  const setIsJobStarted = (isJobStarted: boolean) => {
+    dispatch({ type: ACTION.SET_IS_JOB_STARTED, isJobStarted });
+  };
+
+  const setIsModalButtonDisabled = (isModalButtonDisabled: boolean) =>
+    dispatch({ type: ACTION.SET_IS_MODAL_BUTTON_DISABLED, isModalButtonDisabled });
+
+  const setIsModalVisible = (isModalVisible: boolean) =>
+    dispatch({ type: ACTION.SET_IS_MODAL_VISIBLE, isModalVisible });
+
+  const setJobIds = (jobIds: DataFrameAnalyticsId[]) =>
+    dispatch({ type: ACTION.SET_JOB_IDS, jobIds });
+
   const resetRequestMessages = () => dispatch({ type: ACTION.RESET_REQUEST_MESSAGES });
+
   const resetForm = () => dispatch({ type: ACTION.RESET_FORM });
 
   const createAnalyticsJob = async () => {
     resetRequestMessages();
-    setFormState({ isModalButtonDisabled: true });
+    setIsModalButtonDisabled(true);
 
-    const analyticsJobConfig = {
-      source: {
-        index: sourceIndex,
-      },
-      dest: {
-        index: destinationIndex,
-      },
-      analysis: {
-        outlier_detection: {},
-      },
-    };
+    const analyticsJobConfig = isAdvancedEditorEnabled
+      ? jobConfig
+      : getJobConfigFromFormState(form);
 
     try {
       await ml.dataFrameAnalytics.createDataFrameAnalytics(jobId, analyticsJobConfig);
@@ -81,12 +105,13 @@ export const useCreateAnalyticsForm = () => {
         message: i18n.translate(
           'xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage',
           {
-            defaultMessage: 'Analytics job {jobId} created.',
+            defaultMessage: 'Request to create data frame analytics {jobId} acknowledged.',
             values: { jobId },
           }
         ),
       });
-      setFormState({ isJobCreated: true, isModalButtonDisabled: false });
+      setIsModalButtonDisabled(false);
+      setIsJobCreated(true);
       if (createIndexPattern) {
         createKibanaIndexPattern();
       }
@@ -101,9 +126,7 @@ export const useCreateAnalyticsForm = () => {
           }
         ),
       });
-      setFormState({
-        isModalButtonDisabled: false,
-      });
+      setIsModalButtonDisabled(false);
     }
   };
 
@@ -111,7 +134,7 @@ export const useCreateAnalyticsForm = () => {
     const indexPatternName = destinationIndex;
 
     try {
-      const newIndexPattern = await kibanaContext.indexPatterns.get();
+      const newIndexPattern = await kibanaContext.indexPatterns.make();
 
       Object.assign(newIndexPattern, {
         id: '',
@@ -173,25 +196,25 @@ export const useCreateAnalyticsForm = () => {
 
     // re-fetch existing analytics job IDs and indices for form validation
     try {
-      setFormState({
-        jobIds: (await ml.dataFrameAnalytics.getDataFrameAnalytics()).data_frame_analytics.map(
-          (job: DataFrameAnalyticsOutlierConfig) => job.id
-        ),
-      });
+      setJobIds(
+        (await ml.dataFrameAnalytics.getDataFrameAnalytics()).data_frame_analytics.map(
+          (job: DataFrameAnalyticsConfig) => job.id
+        )
+      );
     } catch (e) {
       addRequestMessage({
         error: getErrorMessage(e),
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.errorGettingDataFrameAnalyticsList',
           {
-            defaultMessage: 'An error occurred getting the existing data frame analytics job Ids:',
+            defaultMessage: 'An error occurred getting the existing data frame analytics job IDs:',
           }
         ),
       });
     }
 
     try {
-      setFormState({ indexNames: (await ml.getIndices()).map(index => index.name) });
+      setIndexNames((await ml.getIndices()).map(index => index.name));
     } catch (e) {
       addRequestMessage({
         error: getErrorMessage(e),
@@ -206,26 +229,26 @@ export const useCreateAnalyticsForm = () => {
 
     try {
       // Set the index pattern titles which the user can choose as the source.
-      setFormState({ indexPatternTitles: await kibanaContext.indexPatterns.getTitles(true) });
+      const indexPatternTitles = await kibanaContext.indexPatterns.getTitles(true);
       // Find out which index patterns contain numeric fields.
       // This will be used to provide a hint in the form that an analytics jobs is not
       // able to identify outliers if there are no numeric fields present.
       const ids = await kibanaContext.indexPatterns.getIds(true);
-      const newIndexPatternsWithNumericFields: IndexPatternTitle[] = [];
-      ids.forEach(async id => {
-        const indexPattern = await kibanaContext.indexPatterns.get(id);
-        if (
-          indexPattern.fields
-            .filter(f => !OMIT_FIELDS.includes(f.name))
-            .map(f => f.type)
-            .includes('number')
-        ) {
-          newIndexPatternsWithNumericFields.push(indexPattern.title);
-        }
-      });
-      setFormState({
-        indexPatternsWithNumericFields: newIndexPatternsWithNumericFields,
-      });
+      const indexPatternsWithNumericFields: IndexPatternTitle[] = [];
+      ids
+        .filter(f => !!f)
+        .forEach(async id => {
+          const indexPattern = await kibanaContext.indexPatterns.get(id!);
+          if (
+            indexPattern.fields
+              .filter(f => !OMIT_FIELDS.includes(f.name))
+              .map(f => f.type)
+              .includes('number')
+          ) {
+            indexPatternsWithNumericFields.push(indexPattern.title);
+          }
+        });
+      setIndexPatternTitles({ indexPatternTitles, indexPatternsWithNumericFields });
     } catch (e) {
       addRequestMessage({
         error: getErrorMessage(e),
@@ -242,7 +265,7 @@ export const useCreateAnalyticsForm = () => {
   };
 
   const startAnalyticsJob = async () => {
-    setFormState({ isModalButtonDisabled: true });
+    setIsModalButtonDisabled(true);
     try {
       const response = await ml.dataFrameAnalytics.startDataFrameAnalytics(jobId);
       if (response.acknowledged !== true) {
@@ -252,37 +275,51 @@ export const useCreateAnalyticsForm = () => {
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.startDataFrameAnalyticsSuccessMessage',
           {
-            defaultMessage: 'Analytics job {jobId} started.',
+            defaultMessage: 'Request to start data frame analytics {jobId} acknowledged.',
             values: { jobId },
           }
         ),
       });
-      setFormState({ isJobStarted: true, isModalButtonDisabled: false });
+      setIsJobStarted(true);
+      setIsModalButtonDisabled(false);
       refresh();
     } catch (e) {
       addRequestMessage({
         error: getErrorMessage(e),
         message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
+          'xpack.ml.dataframe.analytics.create.errorStartingDataFrameAnalyticsJob',
           {
-            defaultMessage: 'An error occurred creating the data frame analytics job:',
+            defaultMessage: 'An error occurred starting the data frame analytics job:',
           }
         ),
       });
-      setFormState({ isModalButtonDisabled: false });
+      setIsModalButtonDisabled(false);
     }
   };
 
-  const setFormState = (payload: Partial<State>) => {
+  const setJobConfig = (payload: Record<string, any>) => {
+    dispatch({ type: ACTION.SET_JOB_CONFIG, payload });
+  };
+
+  const setFormState = (payload: Partial<State['form']>) => {
     dispatch({ type: ACTION.SET_FORM_STATE, payload });
   };
 
-  const actions: Actions = {
+  const switchToAdvancedEditor = () => {
+    dispatch({ type: ACTION.SWITCH_TO_ADVANCED_EDITOR });
+  };
+
+  const actions: ActionDispatchers = {
     closeModal,
     createAnalyticsJob,
     openModal,
-    startAnalyticsJob,
+    resetAdvancedEditorMessages,
+    setAdvancedEditorRawString,
     setFormState,
+    setIsModalVisible,
+    setJobConfig,
+    startAnalyticsJob,
+    switchToAdvancedEditor,
   };
 
   return { state, actions };

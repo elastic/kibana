@@ -124,7 +124,7 @@ export class JobsListView extends Component {
   initAutoRefreshUpdate() {
     // update the interval if it changes
     this.refreshIntervalSubscription = timefilter.getRefreshIntervalUpdate$().subscribe({
-      next: this.setAutoRefresh
+      next: () => this.setAutoRefresh()
     });
   }
 

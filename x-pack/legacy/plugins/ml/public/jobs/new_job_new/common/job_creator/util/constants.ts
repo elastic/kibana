@@ -8,6 +8,7 @@ export enum JOB_TYPE {
   SINGLE_METRIC = 'single_metric',
   MULTI_METRIC = 'multi_metric',
   POPULATION = 'population',
+  ADVANCED = 'advanced',
 }
 
 export enum CREATED_BY_LABEL {
@@ -18,3 +19,5 @@ export enum CREATED_BY_LABEL {
 
 export const DEFAULT_MODEL_MEMORY_LIMIT = '10MB';
 export const DEFAULT_BUCKET_SPAN = '15m';
+
+export const SHARED_RESULTS_INDEX_NAME = 'shared';

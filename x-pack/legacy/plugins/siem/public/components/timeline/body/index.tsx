@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
 import * as React from 'react';
-import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
@@ -21,17 +19,16 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { footerHeight } from '../footer';
-
+import { EventsTable, TimelineBody } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { Events } from './events';
-import { ACTIONS_COLUMN_WIDTH } from './helpers';
-import { Sort } from './sort';
+import { getActionsColumnWidth } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
+import { Sort } from './sort';
 
-interface Props {
+export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
@@ -40,6 +37,7 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   height: number;
   id: string;
+  isEventViewer?: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
@@ -56,33 +54,8 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-const HorizontalScroll = styled.div<{
-  height: number;
-}>`
-  display: block;
-  height: ${({ height }) => `${height}px`};
-  overflow: hidden;
-  overflow-x: auto;
-  min-height: 0px;
-`;
-
-HorizontalScroll.displayName = 'HorizontalScroll';
-
-const VerticalScrollContainer = styled.div<{
-  height: number;
-  minWidth: number;
-}>`
-  display: block;
-  height: ${({ height }) => `${height - footerHeight - 12}px`};
-  overflow: hidden;
-  overflow-y: auto;
-  min-width: ${({ minWidth }) => `${minWidth}px`};
-`;
-
-VerticalScrollContainer.displayName = 'VerticalScrollContainer';
-
 /** Renders the timeline body */
-export const Body = React.memo<Props>(
+export const Body = React.memo<BodyProps>(
   ({
     addNoteToEvent,
     browserFields,
@@ -93,6 +66,7 @@ export const Body = React.memo<Props>(
     getNotesByIds,
     height,
     id,
+    isEventViewer = false,
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
@@ -108,16 +82,21 @@ export const Body = React.memo<Props>(
   }) => {
     const columnWidths = columnHeaders.reduce(
       (totalWidth, header) => totalWidth + header.width,
-      ACTIONS_COLUMN_WIDTH
+      getActionsColumnWidth(isEventViewer)
     );
 
     return (
-      <HorizontalScroll data-test-subj="horizontal-scroll" height={height}>
-        <EuiText size="s">
+      <TimelineBody data-test-subj="timeline-body" bodyHeight={height}>
+        <EventsTable
+          data-test-subj="events-table"
+          // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+          style={{ minWidth: columnWidths + 'px' }}
+        >
           <ColumnHeaders
-            actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
             browserFields={browserFields}
             columnHeaders={columnHeaders}
+            isEventViewer={isEventViewer}
             onColumnRemoved={onColumnRemoved}
             onColumnResized={onColumnResized}
             onColumnSorted={onColumnSorted}
@@ -127,39 +106,31 @@ export const Body = React.memo<Props>(
             sort={sort}
             timelineId={id}
             toggleColumn={toggleColumn}
-            minWidth={columnWidths}
           />
 
-          <VerticalScrollContainer
-            data-test-subj="vertical-scroll-container"
-            height={height}
-            minWidth={columnWidths}
-          >
-            <Events
-              actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
-              addNoteToEvent={addNoteToEvent}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              columnRenderers={columnRenderers}
-              data={data}
-              eventIdToNoteIds={eventIdToNoteIds}
-              getNotesByIds={getNotesByIds}
-              id={id}
-              onColumnResized={onColumnResized}
-              onPinEvent={onPinEvent}
-              onUpdateColumns={onUpdateColumns}
-              onUnPinEvent={onUnPinEvent}
-              pinnedEventIds={pinnedEventIds}
-              rowRenderers={rowRenderers}
-              toggleColumn={toggleColumn}
-              updateNote={updateNote}
-              minWidth={columnWidths}
-            />
-          </VerticalScrollContainer>
-        </EuiText>
-      </HorizontalScroll>
+          <Events
+            actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
+            addNoteToEvent={addNoteToEvent}
+            browserFields={browserFields}
+            columnHeaders={columnHeaders}
+            columnRenderers={columnRenderers}
+            data={data}
+            eventIdToNoteIds={eventIdToNoteIds}
+            getNotesByIds={getNotesByIds}
+            id={id}
+            isEventViewer={isEventViewer}
+            onColumnResized={onColumnResized}
+            onPinEvent={onPinEvent}
+            onUpdateColumns={onUpdateColumns}
+            onUnPinEvent={onUnPinEvent}
+            pinnedEventIds={pinnedEventIds}
+            rowRenderers={rowRenderers}
+            toggleColumn={toggleColumn}
+            updateNote={updateNote}
+          />
+        </EventsTable>
+      </TimelineBody>
     );
   }
 );
-
 Body.displayName = 'Body';

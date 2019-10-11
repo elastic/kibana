@@ -9,7 +9,7 @@ import { pie } from '../../functions/common/pie';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
 import { Position } from '../../../types';
-import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../constants';
+import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../../i18n';
 
 export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
   help: i18n.translate('xpack.canvas.functions.pieHelpText', {

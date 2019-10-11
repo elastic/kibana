@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
 exports[`Error CONTAINER_ID 1`] = `undefined`;
 
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
@@ -17,6 +19,12 @@ exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
+
+exports[`Error LABEL_NAME 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_GC_COUNT 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_GC_TIME 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
 
@@ -56,6 +64,8 @@ exports[`Error SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Error SERVICE_NAME 1`] = `"service name"`;
 
+exports[`Error SERVICE_NODE_NAME 1`] = `undefined`;
+
 exports[`Error SPAN_ACTION 1`] = `undefined`;
 
 exports[`Error SPAN_DURATION 1`] = `undefined`;
@@ -92,6 +102,8 @@ exports[`Error URL_FULL 1`] = `undefined`;
 
 exports[`Error USER_ID 1`] = `undefined`;
 
+exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
 exports[`Span CONTAINER_ID 1`] = `undefined`;
 
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
@@ -109,6 +121,12 @@ exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
+
+exports[`Span LABEL_NAME 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_GC_COUNT 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_GC_TIME 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
 
@@ -148,6 +166,8 @@ exports[`Span SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Span SERVICE_NAME 1`] = `"service name"`;
 
+exports[`Span SERVICE_NODE_NAME 1`] = `undefined`;
+
 exports[`Span SPAN_ACTION 1`] = `"my action"`;
 
 exports[`Span SPAN_DURATION 1`] = `1337`;
@@ -184,6 +204,8 @@ exports[`Span URL_FULL 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
 
+exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
 
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
@@ -201,6 +223,12 @@ exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
+
+exports[`Transaction LABEL_NAME 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_GC_COUNT 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_GC_TIME 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
 
@@ -239,6 +267,8 @@ exports[`Transaction SERVICE_AGENT_NAME 1`] = `"java"`;
 exports[`Transaction SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Transaction SERVICE_NODE_NAME 1`] = `undefined`;
 
 exports[`Transaction SPAN_ACTION 1`] = `undefined`;
 

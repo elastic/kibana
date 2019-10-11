@@ -16,7 +16,7 @@ import { loginAndWaitForPage } from '../../lib/util/helpers';
 
 describe('top-level navigation common to all pages in the SIEM app', () => {
   afterEach(() => {
-    logout();
+    return logout();
   });
 
   it('navigates to the Overview page', () => {

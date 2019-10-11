@@ -7,6 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, getOrElse } from 'fp-ts/lib/Option';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 
 import {
@@ -35,9 +37,9 @@ const ParamsSchema = schema.object({
 // action type definition
 
 // customizing executor is only used for tests
-export function getActionType({ executor }: { executor?: ExecutorType } = {}): ActionType {
-  if (executor == null) executor = slackExecutor;
-
+export function getActionType(
+  { executor }: { executor: ExecutorType } = { executor: slackExecutor }
+): ActionType {
   return {
     id: '.slack',
     name: 'slack',
@@ -49,15 +51,12 @@ export function getActionType({ executor }: { executor?: ExecutorType } = {}): A
   };
 }
 
-// the production executor for this action
-export const actionType = getActionType();
-
 // action executor
 
 async function slackExecutor(
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
-  const id = execOptions.id;
+  const actionId = execOptions.actionId;
   const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
 
@@ -70,24 +69,26 @@ async function slackExecutor(
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {
-      return errorResult(id, err.message);
+      return errorResult(actionId, err.message);
     }
 
     const { status, statusText, headers } = err.original.response;
 
     // special handling for 5xx
     if (status >= 500) {
-      return retryResult(id, err.message);
+      return retryResult(actionId, err.message);
     }
 
     // special handling for rate limiting
     if (status === 429) {
-      return getRetryAfterIntervalFromHeaders(headers)
-        .map(retry => retryResultSeconds(id, err.message, retry))
-        .getOrElse(retryResult(id, err.message));
+      return pipe(
+        getRetryAfterIntervalFromHeaders(headers),
+        map(retry => retryResultSeconds(actionId, err.message, retry)),
+        getOrElse(() => retryResult(actionId, err.message))
+      );
     }
 
-    return errorResult(id, `${err.message} - ${statusText}`);
+    return errorResult(actionId, `${err.message} - ${statusText}`);
   }
 
   if (result == null) {
@@ -97,7 +98,7 @@ async function slackExecutor(
         defaultMessage: 'unexpected null response from slack',
       }
     );
-    return errorResult(id, errMessage);
+    return errorResult(actionId, errMessage);
   }
 
   if (result.text !== 'ok') {
@@ -107,7 +108,7 @@ async function slackExecutor(
         defaultMessage: 'unexpected text response from slack',
       }
     );
-    return errorResult(id, errMessage);
+    return errorResult(actionId, errMessage);
   }
 
   return successResult(result);

@@ -24,6 +24,7 @@ interface Language extends monaco.languages.IMonarchLanguage {
   escapes: RegExp;
   digits: RegExp;
   boolean: ['true', 'false'];
+  null: ['null'];
 }
 
 /**
@@ -40,6 +41,7 @@ export const language: Language = {
   escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
   digits: /\d+(_+\d+)*/,
   boolean: ['true', 'false'],
+  null: ['null'],
 
   tokenizer: {
     root: [
@@ -50,12 +52,16 @@ export const language: Language = {
     ],
 
     common: [
+      // arguments (some args share the same name as functions which are keywords)
+      [/[a-z_$][\w$]*=/, 'identifier'],
+
       // identifiers and keywords
       [
         /[a-z_$][\w$]*/,
         {
           cases: {
             '@keywords': 'keyword',
+            '@null': 'keyword',
             '@boolean': 'keyword',
             '@default': 'identifier',
           },
@@ -64,8 +70,6 @@ export const language: Language = {
 
       [/(@digits)/, 'number'],
 
-      [/"([^"\\]|\\.)*$/, 'string.invalid'], // non-teminated string
-      [/'([^'\\]|\\.)*$/, 'string.invalid'], // non-teminated string
       [/"/, 'string', '@string_double'],
       [/'/, 'string', '@string_single'],
 

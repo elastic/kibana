@@ -114,7 +114,7 @@ describe('FieldName', () => {
         example: '2016-05-23T08:05:34.853Z',
         id: '@timestamp',
         type: 'date',
-        width: 240,
+        width: 190,
       },
     ]);
   });

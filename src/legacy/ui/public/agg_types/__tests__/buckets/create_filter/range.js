@@ -52,7 +52,7 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.byTypeName.range[0];
+      const aggConfig = vis.aggs.byName('range')[0];
       const filter = createFilterRange(aggConfig, { gte: 1024, lt: 2048.0 });
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
@@ -60,7 +60,7 @@ describe('AggConfig Filters', function () {
       expect(filter.range).to.have.property('bytes');
       expect(filter.range.bytes).to.have.property('gte', 1024.0);
       expect(filter.range.bytes).to.have.property('lt', 2048.0);
-      expect(filter.meta).to.have.property('formattedValue', '1,024 to 2,048');
+      expect(filter.meta).to.have.property('formattedValue', '≥ 1,024 and < 2,048');
     });
   });
 });

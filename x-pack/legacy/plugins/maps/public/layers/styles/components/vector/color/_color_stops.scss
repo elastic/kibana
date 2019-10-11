@@ -1,6 +1,10 @@
 .mapColorStop {
   position: relative;
-  padding-right: $euiSizeXL + $euiSizeXS;
+  padding-right: $euiSizeXL + $euiSizeS;
+
+  & + & {
+    margin-top: $euiSizeS;
+  }
 
   &:hover,
   &:focus {
@@ -24,6 +28,12 @@
 }
 
 @keyframes mapColorStopBecomeVisible {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }

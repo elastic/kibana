@@ -25,7 +25,7 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../../../../../plugins/features/server';
 import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import {
   AllowedPrivilege,

@@ -5,47 +5,74 @@
  */
 
 import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { toastNotifications } from 'ui/notify';
 import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
 import { KFetchError } from '../../../../../../src/legacy/ui/public/kfetch/kfetch_error';
+import { useKibanaCore } from '../../../observability/public';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
   SUCCESS = 'success',
-  FAILURE = 'failure'
+  FAILURE = 'failure',
+  PENDING = 'pending'
 }
 
-type Fetcher = (...args: any[]) => any;
-type GetReturn<TFetcher extends Fetcher> = Exclude<
-  ReturnType<TFetcher>,
-  undefined
-> extends Promise<infer TReturn>
-  ? TReturn
-  : ReturnType<TFetcher>;
+interface Result<Data> {
+  data: Data;
+  status: FETCH_STATUS;
+  error?: Error;
+}
 
-export function useFetcher<TFetcher extends Fetcher>(
-  fn: TFetcher,
+export function useFetcher<TState>(
+  fn: () => Promise<TState> | TState | undefined,
   fnDeps: any[],
-  options: { preservePreviousResponse?: boolean } = {}
+  options?: {
+    preservePreviousData?: boolean;
+  }
+): Result<TState> & { refetch: () => void };
+
+// To avoid infinite rescursion when infering the type of `TState` `initialState` must be given if `prevResult` is consumed
+export function useFetcher<TState>(
+  fn: (prevResult: Result<TState>) => Promise<TState> | TState | undefined,
+  fnDeps: any[],
+  options: {
+    preservePreviousData?: boolean;
+    initialState: TState;
+  }
+): Result<TState> & { refetch: () => void };
+
+export function useFetcher(
+  fn: Function,
+  fnDeps: any[],
+  options: {
+    preservePreviousData?: boolean;
+    initialState?: unknown;
+  } = {}
 ) {
-  const { preservePreviousResponse = true } = options;
+  const {
+    notifications: {
+      toasts: { addWarning }
+    }
+  } = useKibanaCore();
+  const { preservePreviousData = true } = options;
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
-  const [result, setResult] = useState<{
-    data?: GetReturn<TFetcher>;
-    status?: FETCH_STATUS;
-    error?: Error;
-  }>({});
+  const [result, setResult] = useState<Result<unknown>>({
+    data: options.initialState,
+    status: FETCH_STATUS.PENDING
+  });
   const [counter, setCounter] = useState(0);
 
   useEffect(() => {
     let didCancel = false;
 
     async function doFetch() {
-      const promise = fn();
+      const promise = fn(result);
+      // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
+      // This can happen if the data fetching is conditional (based on certain inputs).
+      // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
       if (!promise) {
         return;
       }
@@ -53,7 +80,7 @@ export function useFetcher<TFetcher extends Fetcher>(
       dispatchStatus({ id, isLoading: true });
 
       setResult(prevResult => ({
-        data: preservePreviousResponse ? prevResult.data : undefined, // preserve data from previous state while loading next state
+        data: preservePreviousData ? prevResult.data : undefined, // preserve data from previous state while loading next state
         status: FETCH_STATUS.LOADING,
         error: undefined
       }));
@@ -71,7 +98,7 @@ export function useFetcher<TFetcher extends Fetcher>(
       } catch (e) {
         const err = e as KFetchError;
         if (!didCancel) {
-          toastNotifications.addWarning({
+          addWarning({
             title: i18n.translate('xpack.apm.fetcher.error.title', {
               defaultMessage: `Error while fetching resource`
             }),
@@ -113,20 +140,19 @@ export function useFetcher<TFetcher extends Fetcher>(
   }, [
     counter,
     id,
-    preservePreviousResponse,
+    preservePreviousData,
     dispatchStatus,
     ...fnDeps
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    return {
       ...result,
-      refresh: () => {
+      refetch: () => {
         // this will invalidate the deps to `useEffect` and will result in a new request
         setCounter(count => count + 1);
       }
-    }),
-    [result]
-  );
+    };
+  }, [result]);
 }

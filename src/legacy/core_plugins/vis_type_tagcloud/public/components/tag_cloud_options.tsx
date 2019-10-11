@@ -23,8 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ValidatedDualRange } from 'ui/validated_range';
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
-import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
+import { SelectOption, SwitchOption } from '../../../kbn_vislib_vis_types/public/components';
 import { TagCloudVisParams } from '../types';
 
 function TagCloudOptions({ stateParams, setValue, vis }: VisOptionsProps<TagCloudVisParams>) {

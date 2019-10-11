@@ -95,11 +95,17 @@ export const combineQueries = (
   kqlQuery: string,
   kqlMode: string,
   start: number,
-  end: number
+  end: number,
+  isEventViewer?: boolean
 ): { filterQuery: string } | null => {
   let kuery: string;
-  if (isEmpty(dataProviders) && isEmpty(kqlQuery)) {
+  if (isEmpty(dataProviders) && isEmpty(kqlQuery) && !isEventViewer) {
     return null;
+  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery) && isEventViewer) {
+    kuery = `@timestamp >= ${start} and @timestamp <= ${end}`;
+    return {
+      filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
+    };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery)) {
     kuery = `(${kqlQuery}) and @timestamp >= ${start} and @timestamp <= ${end}`;
     return {
@@ -142,3 +148,9 @@ export const calculateBodyHeight = ({
   timelineFooterHeight = 0,
 }: CalculateBodyHeightParams): number =>
   flyoutHeight - (flyoutHeaderHeight + timelineHeaderHeight + timelineFooterHeight);
+
+/**
+ * The CSS class name of a "stateful event", which appears in both
+ * the `Timeline` and the `Events Viewer` widget
+ */
+export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';

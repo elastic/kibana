@@ -18,8 +18,6 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
       />
       <EuiSpacer />
       <EuiPanel
-        grow={true}
-        hasShadow={false}
         paddingSize="l"
       >
         <InjectIntl(InstructionSetUi)
@@ -74,10 +72,8 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
             grow={false}
           >
             <EuiButtonGroup
-              buttonSize="s"
               color="primary"
               idSelected="onPrem"
-              idToSelectedMap={Object {}}
               onChange={[Function]}
               options={
                 Array [
@@ -91,15 +87,12 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
                   },
                 ]
               }
-              type="single"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
       <EuiSpacer />
       <EuiPanel
-        grow={true}
-        hasShadow={false}
         paddingSize="l"
       >
         <InjectIntl(InstructionSetUi)
@@ -149,8 +142,6 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
       />
       <EuiSpacer />
       <EuiPanel
-        grow={true}
-        hasShadow={false}
         paddingSize="l"
       >
         <InjectIntl(InstructionSetUi)

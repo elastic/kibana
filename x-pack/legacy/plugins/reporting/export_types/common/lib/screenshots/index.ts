@@ -11,10 +11,9 @@ import { HeadlessChromiumDriverFactory } from '../../../../server/browsers/chrom
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import {
   ElementsPositionAndAttribute,
-  ScreenShotOpts,
-  TimeRangeOpts,
+  Screenshot,
   ScreenshotObservableOpts,
-  BrowserOpts,
+  TimeRange,
 } from './types';
 
 import { checkForToastMessage } from './check_for_toast';
@@ -27,6 +26,12 @@ import { getTimeRange } from './get_time_range';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getScreenshots } from './get_screenshots';
 
+// NOTE: Typescript does not throw an error if this interface has errors!
+interface ScreenshotResults {
+  timeRange: TimeRange;
+  screenshots: Screenshot[];
+}
+
 export function screenshotsObservableFactory(server: KbnServer) {
   const browserDriverFactory: HeadlessChromiumDriverFactory = server.plugins.reporting.browserDriverFactory; // prettier-ignore
   const config = server.config();
@@ -38,20 +43,14 @@ export function screenshotsObservableFactory(server: KbnServer) {
     conditionalHeaders,
     layout,
     browserTimezone,
-  }: ScreenshotObservableOpts): Rx.Observable<void> {
+  }: ScreenshotObservableOpts): Rx.Observable<ScreenshotResults> {
     const create$ = browserDriverFactory.create({
       viewport: layout.getBrowserViewport(),
       browserTimezone,
     });
 
     return create$.pipe(
-      mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
-        message$.subscribe((line: string) => {
-          logger.debug(line, ['browser']);
-        });
-        consoleMessage$.subscribe((line: string) => {
-          logger.debug(line, ['browserConsole']);
-        });
+      mergeMap(({ driver$, exit$ }) => {
         const screenshot$ = driver$.pipe(
           mergeMap(
             (browser: HeadlessBrowser) => openUrl(browser, url, conditionalHeaders, logger),
@@ -78,7 +77,7 @@ export function screenshotsObservableFactory(server: KbnServer) {
           ),
           mergeMap(
             (browser: HeadlessBrowser) => getNumberOfItems(browser, layout, logger),
-            (browser, itemsCount) => ({ browser, itemsCount })
+            (browser, itemsCount: number) => ({ browser, itemsCount })
           ),
           mergeMap(
             async ({ browser, itemsCount }) => {
@@ -91,24 +90,24 @@ export function screenshotsObservableFactory(server: KbnServer) {
           mergeMap(
             ({ browser, itemsCount }) =>
               waitForElementsToBeInDOM(browser, itemsCount, layout, logger),
-            ({ browser, itemsCount }) => ({ browser, itemsCount })
+            ({ browser }) => browser
           ),
           mergeMap(
-            ({ browser }) => {
+            browser => {
               // Waiting till _after_ elements have rendered before injecting our CSS
               // allows for them to be displayed properly in many cases
               return injectCustomCss(browser, layout, logger);
             },
-            ({ browser }) => ({ browser })
+            browser => browser
           ),
           mergeMap(
-            async ({ browser }) => {
+            async browser => {
               if (layout.positionElements) {
                 // position panel elements for print layout
                 return await layout.positionElements(browser, logger);
               }
             },
-            ({ browser }) => browser
+            browser => browser
           ),
           mergeMap(
             (browser: HeadlessBrowser) => {
@@ -117,21 +116,17 @@ export function screenshotsObservableFactory(server: KbnServer) {
             browser => browser
           ),
           mergeMap(
-            (browser: HeadlessBrowser) => getTimeRange(browser, layout, logger),
-            (browser, timeRange) => ({ browser, timeRange })
+            browser => getTimeRange(browser, layout, logger),
+            (browser, timeRange: TimeRange | null) => ({ browser, timeRange })
           ),
           mergeMap(
             ({ browser }) => getElementPositionAndAttributes(browser, layout),
-            (
-              { browser, timeRange }: BrowserOpts & TimeRangeOpts,
-              elementsPositionAndAttributes: ElementsPositionAndAttribute[]
-            ) => ({ browser, timeRange, elementsPositionAndAttributes })
+            ({ browser, timeRange }, elementsPositionAndAttributes: ElementsPositionAndAttribute[]) => {
+              return { browser, timeRange, elementsPositionAndAttributes };
+            } // prettier-ignore
           ),
           mergeMap(
-            ({
-              browser,
-              elementsPositionAndAttributes,
-            }: BrowserOpts & ScreenShotOpts & TimeRangeOpts) => {
+            ({ browser, elementsPositionAndAttributes }) => {
               return getScreenshots({ browser, elementsPositionAndAttributes, logger });
             },
             ({ timeRange }, screenshots) => ({ timeRange, screenshots })

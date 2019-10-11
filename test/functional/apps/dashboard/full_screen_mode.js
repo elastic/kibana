@@ -21,7 +21,6 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'common']);
 
@@ -69,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('exits when the text button is clicked on', async () => {
       const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
-      await browser.moveMouseTo(logoButton);
+      await logoButton.moveMouseTo();
       await PageObjects.dashboard.clickExitFullScreenTextButton();
 
       await retry.try(async () => {

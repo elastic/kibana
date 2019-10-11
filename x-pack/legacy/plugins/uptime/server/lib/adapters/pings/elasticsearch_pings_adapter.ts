@@ -5,10 +5,15 @@
  */
 
 import { get } from 'lodash';
-import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../common/graphql/types';
-import { formatEsBucketsForHistogram, getFilteredQueryAndStatusFilter } from '../../helper';
+import {
+  DocCount,
+  HistogramDataPoint,
+  HttpBody,
+  Ping,
+  PingResults,
+} from '../../../../common/graphql/types';
+import { formatEsBucketsForHistogram, parseFilterQuery, getFilterClause } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 import { getHistogramInterval } from '../../helper/get_histogram_interval';
@@ -83,9 +88,18 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
     const locations = get(aggs, 'locations', { buckets: [{ key: 'N/A', doc_count: 0 }] });
 
-    const pings: Ping[] = hits.map(({ _source }: any) => {
+    const pings: Ping[] = hits.map(({ _id, _source }: any) => {
       const timestamp = _source['@timestamp'];
-      return { timestamp, ..._source };
+
+      // Calculate here the length of the content string in bytes, this is easier than in client JS, where
+      // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
+      // client but this is cleaner.
+      const httpBody = get<HttpBody>(_source, 'http.response.body');
+      if (httpBody && httpBody.content) {
+        httpBody.content_bytes = Buffer.byteLength(httpBody.content);
+      }
+
+      return { id: _id, timestamp, ..._source };
     });
 
     const results: PingResults = {
@@ -159,12 +173,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     // @ts-ignore TODO fix destructuring implicit any
     return buckets.map(({ latest: { hits: { hits } } }) => {
       const timestamp = hits[0]._source[`@timestamp`];
-      const momentTs = moment(timestamp);
-      const millisFromNow = moment().diff(momentTs);
       return {
         ...hits[0]._source,
         timestamp,
-        millisFromNow,
       };
     });
   }
@@ -175,32 +186,34 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
    * @param dateRangeStart timestamp bounds
    * @param dateRangeEnd timestamp bounds
    * @param filters user-defined filters
+   * @param statusFilter special filter targeting the latest status of each monitor
    */
   public async getPingHistogram(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null,
-    monitorId?: string | null
+    monitorId?: string | null,
+    statusFilter?: string | null
   ): Promise<HistogramDataPoint[]> {
-    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
-      dateRangeStart,
-      dateRangeEnd,
-      filters
-    );
-
-    const combinedQuery = !monitorId
-      ? query
-      : {
-          bool: {
-            filter: [{ match: { 'monitor.id': monitorId } }, query],
-          },
-        };
+    const boolFilters = parseFilterQuery(filters);
+    const additionaFilters = [];
+    if (monitorId) {
+      additionaFilters.push({ match: { 'monitor.id': monitorId } });
+    }
+    if (boolFilters) {
+      additionaFilters.push(boolFilters);
+    }
+    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionaFilters);
 
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: combinedQuery,
+        query: {
+          bool: {
+            filter,
+          },
+        },
         size: 0,
         aggs: {
           timeseries: {

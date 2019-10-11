@@ -3,11 +3,16 @@
 exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
 <span
   class="dscField--noResults"
-  title="test.test.test"
+  title="Geo point field"
 >
-  <span
-    aria-label="Geo Point"
-    class="dscField__icon kuiIcon fa-globe"
+  <svg
+    aria-label="Geo point field"
+    class="euiIcon euiIcon--small euiIcon-isLoading"
+    focusable="false"
+    height="16"
+    viewBox="0 0 16 16"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg"
   />
   <span
     class="dscFieldName"
@@ -20,18 +25,17 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
 exports[`FieldName renders a number field by providing a field record, useShortDots is set to false 1`] = `
 <span
   class=""
-  title="test.test.test"
+  title="Number field"
 >
-  <span
+  <svg
     aria-label="Number field"
-    class="dscField__icon"
-  >
-    <strong
-      aria-hidden="true"
-    >
-      #
-    </strong>
-  </span>
+    class="euiIcon euiIcon--small euiIcon-isLoading"
+    focusable="false"
+    height="16"
+    viewBox="0 0 16 16"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg"
+  />
   <span
     class="dscFieldName"
   >
@@ -43,18 +47,17 @@ exports[`FieldName renders a number field by providing a field record, useShortD
 exports[`FieldName renders a string field by providing fieldType and fieldName 1`] = `
 <span
   class=""
-  title="test"
+  title="String field"
 >
-  <span
+  <svg
     aria-label="String field"
-    class="dscField__icon"
-  >
-    <strong
-      aria-hidden="true"
-    >
-      t
-    </strong>
-  </span>
+    class="euiIcon euiIcon--small euiIcon-isLoading"
+    focusable="false"
+    height="16"
+    viewBox="0 0 16 16"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg"
+  />
   <span
     class="dscFieldName"
   >

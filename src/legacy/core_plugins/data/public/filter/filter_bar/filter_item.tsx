@@ -163,7 +163,7 @@ class FilterItemUI extends Component<Props, State> {
       },
       {
         id: 1,
-        width: 400,
+        width: 420,
         content: (
           <div>
             <FilterEditor
@@ -171,7 +171,6 @@ class FilterItemUI extends Component<Props, State> {
               indexPatterns={this.props.indexPatterns}
               onSubmit={this.onSubmit}
               onCancel={this.closePopover}
-              uiSettings={this.props.uiSettings}
             />
           </div>
         ),

@@ -15,7 +15,6 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode, TimelineModel } from './model';
-import { TimelineResult } from '../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
 
@@ -50,7 +49,9 @@ export const applyDeltaToColumnWidth = actionCreator<{
 export const createTimeline = actionCreator<{
   id: string;
   columns: ColumnHeader[];
+  itemsPerPage?: number;
   show?: boolean;
+  sort?: Sort;
 }>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
@@ -77,7 +78,7 @@ export const updateTimeline = actionCreator<{
 
 export const addTimeline = actionCreator<{
   id: string;
-  timeline: TimelineResult;
+  timeline: TimelineModel;
 }>('ADD_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{

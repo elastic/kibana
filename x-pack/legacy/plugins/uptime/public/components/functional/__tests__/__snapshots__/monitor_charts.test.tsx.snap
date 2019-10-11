@@ -3,14 +3,9 @@
 exports[`MonitorCharts component renders the component without errors 1`] = `
 <Fragment>
   <EuiFlexGroup>
-    <EuiFlexItem
-      style={
-        Object {
-          "height": 400,
-        }
-      }
-    >
+    <EuiFlexItem>
       <DurationChart
+        loading={false}
         locationDurationLines={
           Array [
             Object {
@@ -70,10 +65,9 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <withApollo(Component)
-        absoluteEndDate={1322903730000}
-        absoluteStartDate={1322903730000}
-        dangerColor="#bd271e"
-        successColor="#017d73"
+        absoluteEndDate={20}
+        absoluteStartDate={20}
+        height="400px"
         variables={
           Object {
             "dateRangeEnd": "2011-12-03T10:15:30+01:00",

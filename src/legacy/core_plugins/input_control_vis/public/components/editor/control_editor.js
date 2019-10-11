@@ -35,30 +35,29 @@ import {
 } from '@elastic/eui';
 
 class ControlEditorUi extends Component {
-
-  changeLabel = (evt) => {
+  changeLabel = evt => {
     this.props.handleLabelChange(this.props.controlIndex, evt);
-  }
+  };
 
   removeControl = () => {
     this.props.handleRemoveControl(this.props.controlIndex);
-  }
+  };
 
   moveUpControl = () => {
     this.props.moveControl(this.props.controlIndex, -1);
-  }
+  };
 
   moveDownControl = () => {
     this.props.moveControl(this.props.controlIndex, 1);
-  }
+  };
 
-  changeIndexPattern = (evt) => {
+  changeIndexPattern = evt => {
     this.props.handleIndexPatternChange(this.props.controlIndex, evt);
-  }
+  };
 
-  changeFieldName = (evt) => {
+  changeFieldName = evt => {
     this.props.handleFieldNameChange(this.props.controlIndex, evt);
-  }
+  };
 
   renderEditor() {
     let controlEditor = null;
@@ -99,12 +98,14 @@ class ControlEditorUi extends Component {
       <EuiForm>
         <EuiFormRow
           id={labelId}
-          label={<FormattedMessage id="inputControl.editor.controlEditor.controlLabel" defaultMessage="Control Label"/>}
+          label={
+            <FormattedMessage
+              id="inputControl.editor.controlEditor.controlLabel"
+              defaultMessage="Control Label"
+            />
+          }
         >
-          <EuiFieldText
-            value={this.props.controlParams.label}
-            onChange={this.changeLabel}
-          />
+          <EuiFieldText value={this.props.controlParams.label} onChange={this.changeLabel} />
         </EuiFormRow>
 
         {controlEditor}
@@ -118,7 +119,7 @@ class ControlEditorUi extends Component {
         <EuiButtonIcon
           aria-label={this.props.intl.formatMessage({
             id: 'inputControl.editor.controlEditor.moveControlUpAriaLabel',
-            defaultMessage: 'Move control up'
+            defaultMessage: 'Move control up',
           })}
           color="primary"
           onClick={this.moveUpControl}
@@ -128,7 +129,7 @@ class ControlEditorUi extends Component {
         <EuiButtonIcon
           aria-label={this.props.intl.formatMessage({
             id: 'inputControl.editor.controlEditor.moveControlDownAriaLabel',
-            defaultMessage: 'Move control down'
+            defaultMessage: 'Move control down',
           })}
           color="primary"
           onClick={this.moveDownControl}
@@ -138,7 +139,7 @@ class ControlEditorUi extends Component {
         <EuiButtonIcon
           aria-label={this.props.intl.formatMessage({
             id: 'inputControl.editor.controlEditor.removeControlAriaLabel',
-            defaultMessage: 'Remove control'
+            defaultMessage: 'Remove control',
           })}
           color="danger"
           onClick={this.removeControl}
@@ -152,7 +153,6 @@ class ControlEditorUi extends Component {
   render() {
     return (
       <EuiPanel grow={false} className="icvControlEditor__panel">
-
         <EuiAccordion
           id="controlEditorAccordion"
           buttonContent={getTitle(this.props.controlParams, this.props.controlIndex)}
@@ -162,7 +162,6 @@ class ControlEditorUi extends Component {
           <EuiSpacer size="s" />
           {this.renderEditor()}
         </EuiAccordion>
-
       </EuiPanel>
     );
   }
@@ -179,10 +178,12 @@ ControlEditorUi.propTypes = {
   getIndexPattern: PropTypes.func.isRequired,
   handleCheckboxOptionChange: PropTypes.func.isRequired,
   handleNumberOptionChange: PropTypes.func.isRequired,
-  parentCandidates: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.string.isRequired,
-    text: PropTypes.string.isRequired,
-  })).isRequired,
+  parentCandidates: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string.isRequired,
+      text: PropTypes.string.isRequired,
+    })
+  ).isRequired,
   handleParentChange: PropTypes.func.isRequired,
 };
 

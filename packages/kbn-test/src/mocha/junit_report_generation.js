@@ -18,10 +18,9 @@
  */
 
 import { resolve, dirname, relative } from 'path';
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
 
-import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
@@ -136,15 +135,15 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       }
     });
 
-    const reportPath = resolve(rootDirectory, `target/junit/TEST-${reportName}.xml`);
-    const reportXML = builder.end({
-      pretty: true,
-      indent: '  ',
-      newline: '\n',
-      spacebeforeslash: '',
-    });
+    const reportPath = resolve(
+      rootDirectory,
+      'target/junit',
+      process.env.JOB || '.',
+      `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
+    );
 
-    mkdirp.sync(dirname(reportPath));
+    const reportXML = builder.end();
+    mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   });
 }

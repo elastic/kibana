@@ -26,23 +26,11 @@ export const getValues = (field: string, data: TimelineNonEcsData[]): string[] |
 };
 
 export const Details = styled.div`
-  margin: 10px 0 10px 10px;
+  margin: 5px 0 5px 10px;
 `;
-
 Details.displayName = 'Details';
 
 export const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
-
 TokensFlexItem.displayName = 'TokensFlexItem';
-
-export const Row = styled.div`
-  width: 100%;
-  overflow: hidden;
-  &:hover {
-    background-color: ${props => props.theme.eui.euiTableHoverColor};
-  }
-`;
-
-Row.displayName = 'Row';

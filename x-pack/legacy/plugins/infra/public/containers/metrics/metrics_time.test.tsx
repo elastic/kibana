@@ -22,8 +22,8 @@ describe('useMetricsTime hook', () => {
       const { act, getLastHookValue } = mountHook(() => useMetricsTime());
 
       const timeRange = {
-        from: 12345,
-        to: 123456,
+        from: 'now-15m',
+        to: 'now',
         interval: '>=2m',
       };
 
@@ -36,10 +36,6 @@ describe('useMetricsTime hook', () => {
   });
 
   describe('AutoReloading state', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
     it('has a default value', () => {
       const { getLastHookValue } = mountHook(() => useMetricsTime().isAutoReloading);
       expect(getLastHookValue()).toBe(false);
@@ -53,50 +49,6 @@ describe('useMetricsTime hook', () => {
       });
 
       expect(getLastHookValue().isAutoReloading).toBe(true);
-    });
-
-    it('sets up an interval when turned on', () => {
-      const { act } = mountHook(() => useMetricsTime());
-      const refreshInterval = 10000;
-
-      act(({ setAutoReload, setRefreshInterval }) => {
-        setRefreshInterval(refreshInterval);
-        setAutoReload(true);
-        jest.runOnlyPendingTimers();
-      });
-
-      expect(setInterval).toHaveBeenCalledTimes(1);
-      expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), refreshInterval);
-    });
-
-    it('updates the time range by RANGE each interval', () => {
-      const { act, getLastHookValue } = mountHook(() => useMetricsTime());
-      const from = 100;
-      const to = 300;
-      const RANGE = 200;
-
-      act(({ setAutoReload, setTimeRange }) => {
-        setAutoReload(true);
-
-        setTimeRange({
-          from,
-          to,
-          interval: '>=1m',
-        });
-      });
-
-      act(() => {
-        jest.advanceTimersByTime(6000);
-      });
-
-      const timeRange = getLastHookValue().timeRange;
-      expect(timeRange.from).toBeGreaterThan(from);
-      expect(timeRange.to).toBeGreaterThan(to);
-      const newRange = timeRange.to - timeRange.from;
-      // The following two assertions allow 5ms of leniency, rather than expect(newRange).toBe(RANGE),
-      // due to failures in CI that don't happen locally.
-      expect(newRange).toBeGreaterThanOrEqual(RANGE);
-      expect(newRange).toBeLessThanOrEqual(RANGE + 5);
     });
   });
 });

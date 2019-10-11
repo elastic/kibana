@@ -7,4 +7,4 @@
 import qs from 'querystring';
 import { UptimeUrlParams } from './url_params/get_supported_url_params';
 
-export const stringifyUrlParams = (params: UptimeUrlParams) => `?${qs.stringify(params)}`;
+export const stringifyUrlParams = (params: Partial<UptimeUrlParams>) => `?${qs.stringify(params)}`;

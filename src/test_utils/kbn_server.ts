@@ -19,7 +19,7 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 import {
-  createEsTestCluster,
+  createLegacyEsTestCluster,
   DEFAULT_SUPERUSER_PASS,
   esTestConfig,
   kbnTestConfig,
@@ -35,6 +35,7 @@ import supertest from 'supertest';
 import { CliArgs, Env } from '../core/server/config';
 import { LegacyObjectToConfigAdapter } from '../core/server/legacy';
 import { Root } from '../core/server/root';
+import KbnServer from '../legacy/server/kbn_server';
 
 type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
@@ -120,15 +121,18 @@ export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
  *  @param {Object} [settings={}] Any config overrides for this instance.
  *  @returns {Root}
  */
-export function createRootWithCorePlugins(settings = {}) {
-  return createRootWithSettings(defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS));
+export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+  return createRootWithSettings(
+    defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS),
+    cliArgs
+  );
 }
 
 /**
  * Returns `kbnServer` instance used in the "legacy" Kibana.
  * @param root
  */
-export function getKbnServer(root: Root) {
+export function getKbnServer(root: Root): KbnServer {
   return (root as any).server.legacy.kbnServer;
 }
 
@@ -201,7 +205,7 @@ export function createTestServers({
   log.info('starting elasticsearch');
   log.indent(4);
 
-  const es = createEsTestCluster(
+  const es = createLegacyEsTestCluster(
     defaultsDeep({}, get(settings, 'es', {}), {
       log,
       license,

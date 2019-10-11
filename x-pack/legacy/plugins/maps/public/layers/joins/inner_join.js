@@ -49,12 +49,21 @@ export class InnerJoin {
   }
 
   joinPropertiesToFeature(feature, propertiesMap, rightMetricFields) {
+    // delete feature properties added by previous join
     for (let j = 0; j < rightMetricFields.length; j++) {
-      const { propertyKey } = rightMetricFields[j];
-      delete feature.properties[propertyKey];
-      const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
-      delete feature.properties[stylePropertyName];
+      const { propertyKey: metricPropertyKey } = rightMetricFields[j];
+      delete feature.properties[metricPropertyKey];
+
+      // delete all dynamic properties for metric field
+      const stylePropertyPrefix = VectorStyle.getComputedFieldNamePrefix(metricPropertyKey);
+      Object.keys(feature.properties).forEach(featurePropertyKey => {
+        if (featurePropertyKey.length >= stylePropertyPrefix.length &&
+          featurePropertyKey.substring(0, stylePropertyPrefix.length) === stylePropertyPrefix) {
+          delete feature.properties[featurePropertyKey];
+        }
+      });
     }
+
     const joinKey = feature.properties[this._descriptor.leftField];
     const coercedKey = typeof joinKey === 'undefined' || joinKey === null  ? null : joinKey.toString();
     if (propertiesMap && coercedKey !== null && propertiesMap.has(coercedKey)) {

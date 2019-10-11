@@ -30,7 +30,7 @@ export interface HttpServiceBase
 |  Method | Description |
 |  --- | --- |
 |  [addLoadingCount(count$)](./kibana-plugin-public.httpservicebase.addloadingcount.md) |  |
-|  [getLoadingCount$()](./kibana-plugin-public.httpservicebase.getloadingcount$.md) |  |
+|  [getLoadingCount$()](./kibana-plugin-public.httpservicebase.getloadingcount_.md) |  |
 |  [intercept(interceptor)](./kibana-plugin-public.httpservicebase.intercept.md) |  |
 |  [removeAllInterceptors()](./kibana-plugin-public.httpservicebase.removeallinterceptors.md) |  |
 |  [stop()](./kibana-plugin-public.httpservicebase.stop.md) |  |

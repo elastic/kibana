@@ -39,7 +39,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     chartWidth: PropTypes.number.isRequired,
     filterActive: PropTypes.bool,
     maskAll: PropTypes.bool,
-    MlTimeBuckets: PropTypes.func.isRequired,
+    TimeBuckets: PropTypes.func.isRequired,
     swimlaneCellClick: PropTypes.func.isRequired,
     swimlaneData: PropTypes.shape({
       laneLabels: PropTypes.array.isRequired
@@ -67,6 +67,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       const { swimlaneType } = this.props;
 
       if (action === DRAG_SELECT_ACTION.NEW_SELECTION && elements.length > 0) {
+        element.classed(SCSS.mlDragselectDragging, false);
         const firstSelectedCell = d3.select(elements[0]).node().__clickData__;
 
         if (typeof firstSelectedCell !== 'undefined' && swimlaneType === firstSelectedCell.swimlaneType) {
@@ -85,23 +86,27 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
           selectedData.laneLabels = _.uniq(selectedData.laneLabels);
           selectedData.times = _.uniq(selectedData.times);
           if (_.isEqual(selectedData, previousSelectedData) === false) {
-            this.selectCell(elements, selectedData);
-            previousSelectedData = selectedData;
+            // If no cells containing anomalies have been selected,
+            // immediately clear the selection, otherwise trigger
+            // a reload with the updated selected cells.
+            if (selectedData.bucketScore === 0) {
+              elements.map(e => d3.select(e).classed('ds-selected', false));
+              this.selectCell([], selectedData);
+              previousSelectedData = null;
+            } else {
+              this.selectCell(elements, selectedData);
+              previousSelectedData = selectedData;
+            }
           }
         }
 
         this.cellMouseoverActive = true;
       } else if (action === DRAG_SELECT_ACTION.ELEMENT_SELECT) {
         element.classed(SCSS.mlDragselectDragging, true);
-        return;
       } else if (action === DRAG_SELECT_ACTION.DRAG_START) {
         this.cellMouseoverActive = false;
-        return;
+        mlChartTooltipService.hide(true);
       }
-
-      previousSelectedData = null;
-      element.classed(SCSS.mlDragselectDragging, false);
-      elements.map(e => d3.select(e).classed('ds-selected', false));
     });
 
     this.renderSwimlane();
@@ -235,13 +240,15 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       element.classed(SCSS.mlHideRangeSelection, true);
     }
 
-    const cellMouseoverActive = this.cellMouseoverActive;
+    // This getter allows us to fetch the current value in `cellMouseover()`.
+    // Otherwise it will just refer to the value when `cellMouseover()` was instantiated.
+    const getCellMouseoverActive = () => this.cellMouseoverActive;
 
     const {
       chartWidth,
       filterActive,
       maskAll,
-      MlTimeBuckets,
+      TimeBuckets,
       swimlaneCellClick,
       swimlaneData,
       swimlaneType,
@@ -278,7 +285,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .range([0, xAxisWidth]);
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = new MlTimeBuckets();
+    const timeBuckets = new TimeBuckets();
     timeBuckets.setInterval(`${stepSecs}s`);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
@@ -294,7 +301,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     }
 
     function cellMouseover(target, laneLabel, bucketScore, index, time) {
-      if (bucketScore === undefined || cellMouseoverActive === false) {
+      if (bucketScore === undefined || getCellMouseoverActive() === false) {
         return;
       }
 
@@ -347,8 +354,15 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .each(function () {
         if (swimlaneData.fieldName !== undefined) {
           d3.select(this)
-            .attr('tooltip-html-unsafe', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`)
-            .attr('tooltip-placement', 'right')
+            .on('mouseover', label => {
+              mlChartTooltipService.show(`${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`, this, {
+                x: laneLabelWidth,
+                y: 20
+              });
+            })
+            .on('mouseout', () => {
+              mlChartTooltipService.hide();
+            })
             .attr('aria-label', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`);
         }
       });
@@ -504,11 +518,15 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       return Math.max(maxBucketScore, +d3.select(cell).attr('data-bucket-score') || 0);
     }, 0);
 
+    const selectedCellTimes = cellsToSelect.map((e) => {
+      return d3.select(e).node().__clickData__.time;
+    });
+
     if (cellsToSelect.length > 1 || selectedMaxBucketScore > 0) {
-      this.highlightSelection(cellsToSelect, selectedLanes, selectedTimes);
+      this.highlightSelection(cellsToSelect, selectedLanes, selectedCellTimes);
     } else if (filterActive === true) {
-      if (selectedTimes) {
-        this.highlightOverall(selectedTimes);
+      if (selectedCellTimes.length > 0) {
+        this.highlightOverall(selectedCellTimes);
       }
       this.maskIrrelevantSwimlanes(maskAll);
     } else {

@@ -58,16 +58,25 @@ mlChartTooltipService.show = function (contents, target, offset = { x: 0, y: 0 }
   });
 };
 
-mlChartTooltipService.hide = function () {
+// When selecting multiple cells using dargSelect, we need to quickly
+// hide the tooltip with `noTransition`, otherwise, if the mouse pointer
+// enters the tooltip while dragging, it will cancel selecting multiple
+// swimlane cells which we'd like to avoid of course.
+mlChartTooltipService.hide = function (noTransition = false) {
   if (this.element === null) {
     return;
   }
 
   this.visible = false;
 
-  this.element.css({
-    opacity: '0',
-  });
+  if (noTransition) {
+    this.element.addClass('mlChartTooltip--noTransition');
+    this.element.css({ opacity: '0', display: 'none' });
+    this.element.removeClass('mlChartTooltip--noTransition');
+    return;
+  }
+
+  this.element.css({ opacity: '0' });
 
   // after the fade out transition has finished, set the display to
   // none so it doesn't block any mouse events underneath it.

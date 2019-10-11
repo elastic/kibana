@@ -3,109 +3,70 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { isKqlForRoute } from './helpers';
-import { hostsModel, networkModel } from '../../store';
+import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
+import { isKqlForRoute, getTitle } from './helpers';
 import { CONSTANTS } from './constants';
+import { HostsType } from '../../store/hosts/model';
 
-describe('isKqlForRoute', () => {
-  test('host page and host page kuery', () => {
-    const result = isKqlForRoute('/hosts', {
-      filterQuery: {
-        expression: 'host.name:"siem-kibana"',
-        kind: 'kuery',
-      },
-      queryLocation: CONSTANTS.hostsPage,
-      type: hostsModel.HostsType.page,
+describe('Helpers Url_State', () => {
+  describe('isKqlForRoute', () => {
+    test('host page and host page kuery', () => {
+      const result = isKqlForRoute(SiemPageName.hosts, undefined, CONSTANTS.hostsPage);
+      expect(result).toBeTruthy();
     });
-    expect(result).toBeTruthy();
+    test('host page and host details kuery', () => {
+      const result = isKqlForRoute(SiemPageName.hosts, undefined, CONSTANTS.hostsDetails);
+      expect(result).toBeFalsy();
+    });
+    test('host details and host details kuery', () => {
+      const result = isKqlForRoute(SiemPageName.hosts, 'siem-kibana', CONSTANTS.hostsDetails);
+      expect(result).toBeTruthy();
+    });
+    test('host details and host page kuery', () => {
+      const result = isKqlForRoute(SiemPageName.hosts, 'siem-kibana', CONSTANTS.hostsPage);
+      expect(result).toBeFalsy();
+    });
+    test('network page and network page kuery', () => {
+      const result = isKqlForRoute(SiemPageName.network, undefined, CONSTANTS.networkPage);
+      expect(result).toBeTruthy();
+    });
+    test('network page and network details kuery', () => {
+      const result = isKqlForRoute(SiemPageName.network, undefined, CONSTANTS.networkDetails);
+      expect(result).toBeFalsy();
+    });
+    test('network details and network details kuery', () => {
+      const result = isKqlForRoute(SiemPageName.network, '10.100.7.198', CONSTANTS.networkDetails);
+      expect(result).toBeTruthy();
+    });
+    test('network details and network page kuery', () => {
+      const result = isKqlForRoute(SiemPageName.network, '123.234.34', CONSTANTS.networkPage);
+      expect(result).toBeFalsy();
+    });
   });
-  test('host page and host details kuery', () => {
-    const result = isKqlForRoute('/hosts', {
-      filterQuery: {
-        expression: 'host.name:"siem-kibana"',
-        kind: 'kuery',
-      },
-      queryLocation: CONSTANTS.hostsDetails,
-      type: hostsModel.HostsType.details,
+  describe('getTitle', () => {
+    test('host page name', () => {
+      const result = getTitle('hosts', undefined, navTabs);
+      expect(result).toEqual('Hosts');
     });
-    expect(result).toBeFalsy();
-  });
-  test('works when there is a trailing slash', () => {
-    const result = isKqlForRoute('/hosts/', {
-      filterQuery: {
-        expression: 'host.name:"siem-kibana"',
-        kind: 'kuery',
-      },
-      queryLocation: CONSTANTS.hostsPage,
-      type: hostsModel.HostsType.page,
+    test('network page name', () => {
+      const result = getTitle('network', undefined, navTabs);
+      expect(result).toEqual('Network');
     });
-    expect(result).toBeTruthy();
-  });
-  test('host details and host details kuery', () => {
-    const result = isKqlForRoute('/hosts/siem-kibana', {
-      filterQuery: {
-        expression: 'host.name:"siem-kibana"',
-        kind: 'kuery',
-      },
-      queryLocation: CONSTANTS.hostsDetails,
-      type: hostsModel.HostsType.details,
+    test('overview page name', () => {
+      const result = getTitle('overview', undefined, navTabs);
+      expect(result).toEqual('Overview');
     });
-    expect(result).toBeTruthy();
-  });
-  test('host details and host page kuery', () => {
-    const result = isKqlForRoute('/hosts/siem-kibana', {
-      filterQuery: {
-        expression: 'host.name:"siem-kibana"',
-        kind: 'kuery',
-      },
-      queryLocation: CONSTANTS.hostsPage,
-      type: hostsModel.HostsType.page,
+    test('timelines page name', () => {
+      const result = getTitle('timelines', undefined, navTabs);
+      expect(result).toEqual('Timelines');
     });
-    expect(result).toBeFalsy();
-  });
-  test('network page and network page kuery', () => {
-    const result = isKqlForRoute('/network', {
-      filterQuery: {
-        expression: 'network.name:"siem-kibana"',
-        kind: 'kuery',
-      },
-      queryLocation: CONSTANTS.networkPage,
-      type: networkModel.NetworkType.page,
+    test('details page name', () => {
+      const result = getTitle('hosts', HostsType.details, navTabs);
+      expect(result).toEqual(HostsType.details);
     });
-    expect(result).toBeTruthy();
-  });
-  test('network page and network details kuery', () => {
-    const result = isKqlForRoute('/network', {
-      filterQuery: {
-        expression: 'network.name:"siem-kibana"',
-        kind: 'kuery',
-      },
-      queryLocation: CONSTANTS.networkDetails,
-      type: networkModel.NetworkType.details,
+    test('Not existing', () => {
+      const result = getTitle('IamHereButNotReally', undefined, navTabs);
+      expect(result).toEqual('');
     });
-    expect(result).toBeFalsy();
-  });
-  test('network details and network details kuery', () => {
-    const result = isKqlForRoute('/network/ip/10.100.7.198', {
-      filterQuery: {
-        expression: 'network.name:"siem-kibana"',
-        kind: 'kuery',
-      },
-      queryLocation: CONSTANTS.networkDetails,
-      type: networkModel.NetworkType.details,
-    });
-    expect(result).toBeTruthy();
-  });
-  test('network details and network page kuery', () => {
-    const result = isKqlForRoute('/network/ip/123.234.34', {
-      filterQuery: {
-        expression: 'network.name:"siem-kibana"',
-        kind: 'kuery',
-      },
-      queryLocation: CONSTANTS.networkPage,
-      type: networkModel.NetworkType.page,
-    });
-    expect(result).toBeFalsy();
   });
 });

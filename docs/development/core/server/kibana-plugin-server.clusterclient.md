@@ -6,23 +6,25 @@
 
 Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via `asScoped(...)`<!-- -->).
 
+See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->.
+
 <b>Signature:</b>
 
 ```typescript
-export declare class ClusterClient 
+export declare class ClusterClient implements IClusterClient 
 ```
 
 ## Constructors
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(config, log, getAuthHeaders)](./kibana-plugin-server.clusterclient.(constructor).md) |  | Constructs a new instance of the <code>ClusterClient</code> class |
+|  [(constructor)(config, log, getAuthHeaders)](./kibana-plugin-server.clusterclient._constructor_.md) |  | Constructs a new instance of the <code>ClusterClient</code> class |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [callAsInternalUser](./kibana-plugin-server.clusterclient.callasinternaluser.md) |  | <code>(endpoint: string, clientParams?: Record&lt;string, any&gt;, options?: CallAPIOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. |
+|  [callAsInternalUser](./kibana-plugin-server.clusterclient.callasinternaluser.md) |  | <code>APICaller</code> | Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. |
 
 ## Methods
 

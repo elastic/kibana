@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 
 import {
   MockedPluginInitializer,
@@ -72,34 +72,33 @@ beforeEach(() => {
     },
   ];
   mockSetupDeps = {
-    application: applicationServiceMock.createSetupContract(),
+    application: applicationServiceMock.createInternalSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
-    injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+    injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
   };
   mockSetupContext = {
-    ...omit(mockSetupDeps, 'application', 'injectedMetadata'),
+    ...mockSetupDeps,
+    application: expect.any(Object),
   };
   mockStartDeps = {
-    application: applicationServiceMock.createStartContract(),
+    application: applicationServiceMock.createInternalStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),
-    injectedMetadata: injectedMetadataServiceMock.createStartContract(),
+    injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     savedObjects: savedObjectsMock.createStartContract(),
   };
   mockStartContext = {
-    ...omit(mockStartDeps, 'injectedMetadata'),
-    application: {
-      capabilities: mockStartDeps.application.capabilities,
-    },
+    ...mockStartDeps,
+    application: expect.any(Object),
     chrome: omit(mockStartDeps.chrome, 'getComponent'),
   };
 

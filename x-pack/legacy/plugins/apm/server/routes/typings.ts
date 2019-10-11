@@ -13,7 +13,7 @@ import { PickByValue, Optional } from 'utility-types';
 export interface Params {
   query?: t.HasProps;
   path?: t.HasProps;
-  body?: t.Any;
+  body?: t.Any | t.HasProps;
 }
 
 type DecodeParams<TParams extends Params | undefined> = {
@@ -115,6 +115,7 @@ export type Client<TRouteState> = <
     : undefined
 >(
   options: Omit<KFetchOptions, 'query' | 'body' | 'pathname' | 'method'> & {
+    forceCache?: boolean;
     pathname: TPath;
   } & (TMethod extends 'GET' ? { method?: TMethod } : { method: TMethod }) &
     // Makes sure params can only be set when types were defined

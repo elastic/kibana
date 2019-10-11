@@ -24,7 +24,7 @@ export const stopAnalytics = async (d: DataFrameAnalyticsListRow) => {
     );
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.analyticsList.stopAnalyticsSuccessMessage', {
-        defaultMessage: 'Data frame analytics {analyticsId} stop request acknowledged.',
+        defaultMessage: 'Request to stop data frame analytics {analyticsId} acknowledged.',
         values: { analyticsId: d.config.id },
       })
     );

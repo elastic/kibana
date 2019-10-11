@@ -39,6 +39,33 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
         .expect(204, '');
     });
 
+    it(`shouldn't delete action from another space`, async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+
+      await supertest
+        .delete(`${getUrlPrefix(Spaces.other.id)}/api/action/${createdAction.id}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: `Saved object [action/${createdAction.id}] not found`,
+        });
+    });
+
     it(`should handle delete request appropriately when action doesn't exist`, async () => {
       await supertest
         .delete(`${getUrlPrefix(Spaces.space1.id)}/api/action/2`)

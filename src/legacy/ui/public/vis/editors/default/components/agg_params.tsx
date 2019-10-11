@@ -95,7 +95,7 @@ function DefaultEditorAggParams({
   const errors = getError(agg, aggIsTooLow);
 
   const editorConfig = useMemo(
-    () => editorConfigProviders.getConfigForAgg(aggTypes.byType[groupName], indexPattern, agg),
+    () => editorConfigProviders.getConfigForAgg((aggTypes as any)[groupName], indexPattern, agg),
     [groupName, agg.type]
   );
   const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
@@ -230,6 +230,7 @@ function DefaultEditorAggParams({
         <EuiFormRow>
           <EuiAccordion
             id="advancedAccordion"
+            data-test-subj={`advancedParams-${agg.id}`}
             buttonContent={i18n.translate(
               'common.ui.vis.editors.advancedToggle.advancedLinkLabel',
               {

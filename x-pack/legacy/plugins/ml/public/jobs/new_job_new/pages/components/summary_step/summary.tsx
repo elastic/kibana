@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
-import { WizardNav } from '../wizard_nav';
+import { PreviousButton } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
@@ -27,7 +27,7 @@ import { JobDetails } from './job_details';
 import { DetectorChart } from './detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
-import { convertToAdvancedJob } from '../../../common/job_creator/util/general';
+import { convertToAdvancedJob, resetJob } from '../../../common/job_creator/util/general';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
@@ -75,6 +75,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     setShowJsonFlyout(!showJsonFlyout);
   }
 
+  function clickResetJob() {
+    resetJob(jobCreator);
+  }
+
   const convertToAdvanced = () => {
     convertToAdvancedJob(jobCreator);
   };
@@ -93,22 +97,30 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           <EuiSpacer size="m" />
           <JobDetails />
 
-          {progress === 0 && <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.VALIDATION)} />}
           <EuiHorizontalRule />
           <EuiFlexGroup>
             {progress < 100 && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={start}
-                  isDisabled={creatingJob === true || isValid === false}
-                  data-test-subj="mlJobWizardButtonCreateJob"
-                >
-                  <FormattedMessage
-                    id="xpack.ml.newJob.wizard.summaryStep.createJobButton"
-                    defaultMessage="Create job"
+              <Fragment>
+                <EuiFlexItem grow={false}>
+                  <PreviousButton
+                    previous={() => setCurrentStep(WIZARD_STEPS.VALIDATION)}
+                    previousActive={creatingJob === false && isValid === true}
                   />
-                </EuiButton>
-              </EuiFlexItem>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={start}
+                    isDisabled={creatingJob === true || isValid === false}
+                    data-test-subj="mlJobWizardButtonCreateJob"
+                    fill
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.summaryStep.createJobButton"
+                      defaultMessage="Create job"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </Fragment>
             )}
             {creatingJob === false && (
               <Fragment>
@@ -135,18 +147,31 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
               </Fragment>
             )}
             {progress > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={viewResults} data-test-subj="mlJobWizardButtonViewResults">
-                  View results
-                </EuiButton>
-              </EuiFlexItem>
+              <Fragment>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={viewResults} data-test-subj="mlJobWizardButtonViewResults">
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.summaryStep.viewResultsButton"
+                      defaultMessage="View results"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </Fragment>
+            )}
+            {progress === 100 && (
+              <Fragment>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={clickResetJob} data-test-subj="mlJobWizardButtonResetJob">
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.summaryStep.resetJobButton"
+                      defaultMessage="Reset job"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <PostSaveOptions jobRunner={jobRunner} />
+              </Fragment>
             )}
           </EuiFlexGroup>
-          {progress === 100 && (
-            <Fragment>
-              <PostSaveOptions jobRunner={jobRunner} />
-            </Fragment>
-          )}
           {showJsonFlyout && (
             <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />
           )}

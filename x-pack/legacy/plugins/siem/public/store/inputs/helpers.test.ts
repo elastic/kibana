@@ -15,6 +15,11 @@ import {
   UpdateQueryParams,
   SetIsInspectedParams,
   setIsInspected,
+  removeGlobalLink,
+  addGlobalLink,
+  removeTimelineLink,
+  addTimelineLink,
+  deleteOneQuery,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
 
@@ -201,6 +206,96 @@ describe('Inputs', () => {
         loading: false,
         refetch,
         selectedInspectIndex: 0,
+      });
+    });
+  });
+
+  describe('#LinkTo', () => {
+    test('remove/empty global link to from inputs', () => {
+      const newState: InputsModel = removeGlobalLink(state);
+      expect(newState.global.linkTo).toEqual([]);
+    });
+    test('add global link Lock from inputs', () => {
+      const newState: InputsModel = addGlobalLink('timeline', state);
+      expect(newState.global.linkTo).toEqual(['timeline']);
+    });
+    test('remove/empty timeline link Lock from inputs', () => {
+      const newState: InputsModel = removeTimelineLink(state);
+      expect(newState.timeline.linkTo).toEqual([]);
+    });
+    test('add timeline link Lock from inputs', () => {
+      const newState: InputsModel = addTimelineLink('global', state);
+      expect(newState.timeline.linkTo).toEqual(['global']);
+    });
+  });
+
+  describe('deleteOneQuery', () => {
+    test('make sure that we only delete one query', () => {
+      const refetch = jest.fn();
+      const newQuery: UpdateQueryParams = {
+        inputId: 'global',
+        id: 'myQuery',
+        inspect: null,
+        loading: false,
+        refetch,
+        state,
+      };
+      let newState: InputsModel = upsertQuery(newQuery);
+      const deleteQuery: UpdateQueryParams = {
+        inputId: 'global',
+        id: 'deleteQuery',
+        inspect: null,
+        loading: false,
+        refetch,
+        state: newState,
+      };
+      newState = upsertQuery(deleteQuery);
+      expect(
+        deleteOneQuery({
+          inputId: 'global',
+          id: 'deleteQuery',
+          state: newState,
+        })
+      ).toEqual({
+        global: {
+          linkTo: ['timeline'],
+          policy: {
+            duration: 300000,
+            kind: 'manual',
+          },
+          query: [
+            {
+              id: 'myQuery',
+              inspect: null,
+              isInspected: false,
+              loading: false,
+              refetch,
+              selectedInspectIndex: 0,
+            },
+          ],
+          timerange: {
+            from: 0,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1,
+            toStr: 'now',
+          },
+        },
+        timeline: {
+          linkTo: ['global'],
+          policy: {
+            duration: 300000,
+            kind: 'manual',
+          },
+          query: [],
+          timerange: {
+            from: 0,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1,
+            toStr: 'now',
+          },
+        },
       });
     });
   });

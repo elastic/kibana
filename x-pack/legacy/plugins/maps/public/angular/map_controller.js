@@ -55,6 +55,8 @@ import {
 import { FilterStateStore } from '@kbn/es-query';
 import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 
+const { savedQueryService } = data.search.services;
+
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get(MAP_APP_PATH, []);
@@ -124,6 +126,76 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     globalState: globalState,
   });
 
+  /* Saved Queries */
+  $scope.showSaveQuery = capabilities.get().maps.saveQuery;
+
+  $scope.$watch(() => capabilities.get().maps.saveQuery, (newCapability) => {
+    $scope.showSaveQuery = newCapability;
+  });
+
+  $scope.onQuerySaved = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  $scope.onSavedQueryUpdated = savedQuery => {
+    $scope.savedQuery = { ...savedQuery };
+  };
+
+  $scope.onClearSavedQuery = () => {
+    delete $scope.savedQuery;
+    delete $state.savedQuery;
+    onQueryChange({
+      filters: [],
+      query: {
+        query: '',
+        language: localStorage.get('kibana.userQueryLanguage')
+      },
+    });
+  };
+
+  function updateStateFromSavedQuery(savedQuery) {
+    if (savedQuery.attributes.timefilter) {
+      if (savedQuery.attributes.timefilter.refreshInterval) {
+        $scope.onRefreshChange({
+          isPaused: savedQuery.attributes.timefilter.refreshInterval.pause,
+          refreshInterval: savedQuery.attributes.timefilter.refreshInterval.value
+        });
+      }
+      onQueryChange({
+        filters: savedQuery.attributes.filters || [],
+        query: savedQuery.attributes.query,
+        time: savedQuery.attributes.timefilter
+      });
+    } else {
+      onQueryChange({
+        filters: savedQuery.attributes.filters || [],
+        query: savedQuery.attributes.query,
+      });
+    }
+  }
+
+  $scope.$watch('savedQuery', (newSavedQuery) => {
+    if (!newSavedQuery) return;
+
+    $state.savedQuery = newSavedQuery.id;
+    updateStateFromSavedQuery(newSavedQuery);
+  });
+
+  $scope.$watch(() => $state.savedQuery, newSavedQueryId => {
+    if (!newSavedQueryId) {
+      $scope.savedQuery = undefined;
+      return;
+    }
+    if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+        $scope.$evalAsync(() => {
+          $scope.savedQuery = savedQuery;
+          updateStateFromSavedQuery(savedQuery);
+        });
+      });
+    }
+  });
+  /* End of Saved Queries */
   async function onQueryChange({ filters, query, time }) {
     if (filters) {
       await data.filter.filterManager.setFilters(filters); // Maps and merges filters

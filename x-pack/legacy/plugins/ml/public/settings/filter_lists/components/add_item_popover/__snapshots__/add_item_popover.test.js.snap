@@ -7,13 +7,11 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     button={
       <EuiButton
         color="primary"
-        fill={false}
         iconSide="right"
         iconType="arrowDown"
         isDisabled={false}
         onClick={[Function]}
         size="s"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Add item"
@@ -34,6 +32,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -72,13 +71,8 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         grow={false}
       >
         <EuiButton
-          color="primary"
           disabled={true}
-          fill={false}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Add"
@@ -99,13 +93,11 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     button={
       <EuiButton
         color="primary"
-        fill={false}
         iconSide="right"
         iconType="arrowDown"
         isDisabled={false}
         onClick={[Function]}
         size="s"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Add item"
@@ -126,6 +118,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -164,13 +157,8 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           disabled={true}
-          fill={false}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Add"
@@ -191,13 +179,11 @@ exports[`AddItemPopover renders the popover 1`] = `
     button={
       <EuiButton
         color="primary"
-        fill={false}
         iconSide="right"
         iconType="arrowDown"
         isDisabled={false}
         onClick={[Function]}
         size="s"
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Add item"
@@ -218,6 +204,7 @@ exports[`AddItemPopover renders the popover 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
         hasEmptyLabelSpace={false}
         label={
@@ -256,13 +243,8 @@ exports[`AddItemPopover renders the popover 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           disabled={true}
-          fill={false}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Add"

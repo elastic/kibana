@@ -24,20 +24,34 @@ export const npSetup = {
     chrome: {}
   },
   plugins: {
-    data: {
-      expressions: {
-        registerFunction: sinon.fake(),
-        registerRenderer: sinon.fake(),
-        registerType: sinon.fake(),
+    embeddable: {
+      registerEmbeddableFactory: sinon.fake(),
+    },
+    expressions: {
+      registerFunction: sinon.fake(),
+      registerRenderer: sinon.fake(),
+      registerType: sinon.fake(),
+      __LEGACY: {
+        renderers: {
+          register: () => undefined,
+          get: () => null,
+        },
       },
+    },
+    data: {
     },
     inspector: {
       registerView: () => undefined,
-      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+      __LEGACY: {
         views: {
           register: () => undefined,
         },
       },
+    },
+    uiActions: {
+      attachAction: sinon.fake(),
+      registerAction: sinon.fake(),
+      registerTrigger: sinon.fake(),
     },
   },
 };
@@ -47,13 +61,35 @@ export const npStart = {
     chrome: {}
   },
   plugins: {
-    data: {},
+    embeddable: {
+      getEmbeddableFactory: sinon.fake(),
+      getEmbeddableFactories: sinon.fake(),
+      registerEmbeddableFactory: sinon.fake(),
+    },
+    expressions: {
+      registerFunction: sinon.fake(),
+      registerRenderer: sinon.fake(),
+      registerType: sinon.fake(),
+    },
+    data: {
+      getSuggestions: sinon.fake(),
+    },
     inspector: {
       isAvailable: () => false,
       open: () => ({
         onClose: Promise.resolve(undefined),
         close: () => Promise.resolve(undefined),
       }),
+    },
+    uiActions: {
+      attachAction: sinon.fake(),
+      registerAction: sinon.fake(),
+      registerTrigger: sinon.fake(),
+      detachAction: sinon.fake(),
+      executeTriggerActions: sinon.fake(),
+      getTrigger: sinon.fake(),
+      getTriggerActions: sinon.fake(),
+      getTriggerCompatibleActions: sinon.fake(),
     },
   },
 };

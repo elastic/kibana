@@ -4,43 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
   EuiSpacer,
-  EuiEmptyPrompt,
+  EuiTitle,
 } from '@elastic/eui';
-import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
-import { ViewSwitcher } from './view_switcher';
-import { ChartView } from './chart';
-import { TableView } from './table';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
-export enum ViewMode {
-  chart = 'chart',
-  table = 'table',
-}
+import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
+import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { LogEntryRateBarChart } from './bar_chart';
 
 export const LogRateResults = ({
   isLoading,
   results,
+  setTimeRange,
+  timeRange,
 }: {
   isLoading: boolean;
   results: GetLogEntryRateSuccessResponsePayload['data'] | null;
+  setTimeRange: (timeRange: TimeRange) => void;
+  timeRange: TimeRange;
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.logRateSectionTitle', {
-    defaultMessage: 'Log entry anomalies',
+    defaultMessage: 'Log rate',
   });
 
   const loadingAriaLabel = i18n.translate(
     'xpack.infra.logs.analysis.logRateSectionLoadingAriaLabel',
     { defaultMessage: 'Loading log rate results' }
   );
-
-  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.chart);
 
   return (
     <>
@@ -67,26 +64,18 @@ export const LogRateResults = ({
           body={
             <p>
               {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataBody', {
-                defaultMessage:
-                  'Please allow a few minutes for our machine learning robots to begin collecting data. If you expect data to be here already, you may want to adjust your time range.',
+                defaultMessage: 'You may want to adjust your time range.',
               })}
             </p>
           }
         />
       ) : (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={true}>
-              <ViewSwitcher selectedView={viewMode} onChange={id => setViewMode(id as ViewMode)} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          {viewMode === ViewMode.chart ? (
-            <ChartView data={results} />
-          ) : (
-            <TableView data={results} />
-          )}
-        </>
+        <LogEntryRateBarChart
+          bucketDuration={results.bucketDuration}
+          histogramBuckets={results.histogramBuckets}
+          setTimeRange={setTimeRange}
+          timeRange={timeRange}
+        />
       )}
     </>
   );

@@ -173,6 +173,10 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
+#### Increase node.js heap size
+
+Kibana is a big project and for some commands it can happen that the process hits the default heap limit and crashes with an out-of-memory error. If you run into this problem, you can increase maximum heap size by setting the `--max_old_space_size` option on the command line. To set the limit for all commands, simply add the following line to your shell config: `export NODE_OPTIONS="--max_old_space_size=2048"`.
+
 ### Running Elasticsearch Locally
 
 There are a few options when it comes to running Elasticsearch locally:
@@ -305,12 +309,12 @@ Another tool we use for enforcing consistent coding style is EditorConfig, which
 Note that for VSCode, to enable "live" linting of TypeScript (and other) file types, you will need to modify your local settings, as shown below.  The default for the ESLint extension is to only lint JavaScript file types.
 
 ```json
-   "eslint.validate": [
-        "javascript",
-        "javascriptreact",
-        "typescript",
-        "typescriptreact",
-    ]
+"eslint.validate": [
+  "javascript",
+  "javascriptreact",
+  { "language": "typescript", "autoFix": true },
+  { "language": "typescriptreact", "autoFix": true }
+]
 ```
 
 ### Internationalization

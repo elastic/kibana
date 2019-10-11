@@ -18,7 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
@@ -46,7 +46,6 @@ interface Props {
   description: string;
   timeRestore: boolean;
   showCopyOnSave: boolean;
-  intl: InjectedIntl;
 }
 
 interface State {
@@ -54,7 +53,7 @@ interface State {
   timeRestore: boolean;
 }
 
-class DashboardSaveModalUi extends React.Component<Props, State> {
+export class DashboardSaveModal extends React.Component<Props, State> {
   state: State = {
     description: this.props.description,
     timeRestore: this.props.timeRestore,
@@ -152,5 +151,3 @@ class DashboardSaveModalUi extends React.Component<Props, State> {
     );
   }
 }
-
-export const DashboardSaveModal = injectI18n(DashboardSaveModalUi);

@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 
-import { IndexPatterns } from 'ui/index_patterns';
+import { IndexPatterns } from '../../index_patterns';
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { FilterManager } from './filter_manager';
@@ -35,14 +35,6 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
   return true;
 });
 
-jest.mock('ui/timefilter', () => {
-  return {
-    timefilter: {
-      setTime: jest.fn(),
-    },
-  };
-});
-
 describe('filter_state_manager', () => {
   let appStateStub: StubState;
   let globalStateStub: StubState;
@@ -53,7 +45,10 @@ describe('filter_state_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     const indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns as IndexPatterns, setupMock.uiSettings);
+    filterManager = new FilterManager(
+      (indexPatterns as unknown) as IndexPatterns,
+      setupMock.uiSettings
+    );
   });
 
   describe('app_state_undefined', () => {

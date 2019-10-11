@@ -55,10 +55,50 @@ describe('Inspect Button', () => {
       ).toBe(true);
     });
 
+    test('it does NOT render the Eui Empty Button when timeline is timeline and compact is true', () => {
+      const wrapper = mount(
+        <TestProviderWithoutDragAndDrop store={store}>
+          <InspectButton
+            compact={true}
+            queryId={newQuery.id}
+            inputId="timeline"
+            show={true}
+            title="My title"
+          />
+        </TestProviderWithoutDragAndDrop>
+      );
+      expect(
+        wrapper
+          .find('button[data-test-subj="inspect-empty-button"]')
+          .first()
+          .exists()
+      ).toBe(false);
+    });
+
     test('Eui Icon Button', () => {
       const wrapper = mount(
         <TestProviderWithoutDragAndDrop store={store}>
           <InspectButton queryId={newQuery.id} show={true} title="My title" />
+        </TestProviderWithoutDragAndDrop>
+      );
+      expect(
+        wrapper
+          .find('button[data-test-subj="inspect-icon-button"]')
+          .first()
+          .exists()
+      ).toBe(true);
+    });
+
+    test('renders the Icon Button when inputId does NOT equal global, but compact is true', () => {
+      const wrapper = mount(
+        <TestProviderWithoutDragAndDrop store={store}>
+          <InspectButton
+            compact={true}
+            inputId="timeline"
+            queryId={newQuery.id}
+            show={true}
+            title="My title"
+          />
         </TestProviderWithoutDragAndDrop>
       );
       expect(

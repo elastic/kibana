@@ -108,38 +108,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
   isOpen={true}
   onClose={[Function]}
   visTypesRegistry={
-    Array [
-      Object {
-        "hidden": false,
-        "name": "vis",
-        "requestHandler": "none",
-        "requiresSearch": false,
-        "responseHandler": "none",
-        "stage": "production",
-        "title": "Vis Type 1",
-        "visualization": [Function],
-      },
-      Object {
-        "hidden": false,
-        "name": "visExp",
-        "requestHandler": "none",
-        "requiresSearch": false,
-        "responseHandler": "none",
-        "stage": "experimental",
-        "title": "Experimental Vis",
-        "visualization": [Function],
-      },
-      Object {
-        "hidden": false,
-        "name": "visWithSearch",
-        "requestHandler": "none",
-        "requiresSearch": false,
-        "responseHandler": "none",
-        "stage": "production",
-        "title": "Vis with search",
-        "visualization": [Function],
-      },
-    ]
+    Object {
+      "all": [Function],
+      "get": [Function],
+      "getAliases": [Function],
+    }
   }
 >
   <EuiOverlayMask>
@@ -371,11 +344,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
         onClose={[Function]}
         role="menu"
       >
-        <EuiFocusTrap
-          clickOutsideDisables={false}
-          disabled={false}
-          returnFocus={true}
-        >
+        <EuiFocusTrap>
           <FocusLock
             as="div"
             autoFocus={true}
@@ -852,10 +821,8 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                     aria-label="Closes this modal window"
                     className="euiModal__closeIcon"
                     color="text"
-                    iconSize="m"
                     iconType="cross"
                     onClick={[Function]}
-                    type="button"
                   >
                     <button
                       aria-label="Closes this modal window"
@@ -896,38 +863,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                   <TypeSelection
                     onVisTypeSelected={[Function]}
                     visTypesRegistry={
-                      Array [
-                        Object {
-                          "hidden": false,
-                          "name": "vis",
-                          "requestHandler": "none",
-                          "requiresSearch": false,
-                          "responseHandler": "none",
-                          "stage": "production",
-                          "title": "Vis Type 1",
-                          "visualization": [Function],
-                        },
-                        Object {
-                          "hidden": false,
-                          "name": "visExp",
-                          "requestHandler": "none",
-                          "requiresSearch": false,
-                          "responseHandler": "none",
-                          "stage": "experimental",
-                          "title": "Experimental Vis",
-                          "visualization": [Function],
-                        },
-                        Object {
-                          "hidden": false,
-                          "name": "visWithSearch",
-                          "requestHandler": "none",
-                          "requiresSearch": false,
-                          "responseHandler": "none",
-                          "stage": "production",
-                          "title": "Vis with search",
-                          "visualization": [Function],
-                        },
-                      ]
+                      Object {
+                        "all": [Function],
+                        "get": [Function],
+                        "getAliases": [Function],
+                      }
                     }
                   >
                     <EuiModalHeader>
@@ -1447,38 +1387,11 @@ exports[`NewVisModal should render as expected 1`] = `
   isOpen={true}
   onClose={[Function]}
   visTypesRegistry={
-    Array [
-      Object {
-        "hidden": false,
-        "name": "vis",
-        "requestHandler": "none",
-        "requiresSearch": false,
-        "responseHandler": "none",
-        "stage": "production",
-        "title": "Vis Type 1",
-        "visualization": [Function],
-      },
-      Object {
-        "hidden": false,
-        "name": "visExp",
-        "requestHandler": "none",
-        "requiresSearch": false,
-        "responseHandler": "none",
-        "stage": "experimental",
-        "title": "Experimental Vis",
-        "visualization": [Function],
-      },
-      Object {
-        "hidden": false,
-        "name": "visWithSearch",
-        "requestHandler": "none",
-        "requiresSearch": false,
-        "responseHandler": "none",
-        "stage": "production",
-        "title": "Vis with search",
-        "visualization": [Function],
-      },
-    ]
+    Object {
+      "all": [Function],
+      "get": [Function],
+      "getAliases": [Function],
+    }
   }
 >
   <EuiOverlayMask>
@@ -1707,11 +1620,7 @@ exports[`NewVisModal should render as expected 1`] = `
         onClose={[Function]}
         role="menu"
       >
-        <EuiFocusTrap
-          clickOutsideDisables={false}
-          disabled={false}
-          returnFocus={true}
-        >
+        <EuiFocusTrap>
           <FocusLock
             as="div"
             autoFocus={true}
@@ -2182,10 +2091,8 @@ exports[`NewVisModal should render as expected 1`] = `
                     aria-label="Closes this modal window"
                     className="euiModal__closeIcon"
                     color="text"
-                    iconSize="m"
                     iconType="cross"
                     onClick={[Function]}
-                    type="button"
                   >
                     <button
                       aria-label="Closes this modal window"
@@ -2226,38 +2133,11 @@ exports[`NewVisModal should render as expected 1`] = `
                   <TypeSelection
                     onVisTypeSelected={[Function]}
                     visTypesRegistry={
-                      Array [
-                        Object {
-                          "hidden": false,
-                          "name": "vis",
-                          "requestHandler": "none",
-                          "requiresSearch": false,
-                          "responseHandler": "none",
-                          "stage": "production",
-                          "title": "Vis Type 1",
-                          "visualization": [Function],
-                        },
-                        Object {
-                          "hidden": false,
-                          "name": "visExp",
-                          "requestHandler": "none",
-                          "requiresSearch": false,
-                          "responseHandler": "none",
-                          "stage": "experimental",
-                          "title": "Experimental Vis",
-                          "visualization": [Function],
-                        },
-                        Object {
-                          "hidden": false,
-                          "name": "visWithSearch",
-                          "requestHandler": "none",
-                          "requiresSearch": false,
-                          "responseHandler": "none",
-                          "stage": "production",
-                          "title": "Vis with search",
-                          "visualization": [Function],
-                        },
-                      ]
+                      Object {
+                        "all": [Function],
+                        "get": [Function],
+                        "getAliases": [Function],
+                      }
                     }
                   >
                     <EuiModalHeader>

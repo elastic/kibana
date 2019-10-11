@@ -61,16 +61,26 @@ import {
   ToastInput,
   ToastsApi,
 } from './notifications';
-import { OverlayRef, OverlayStart } from './overlays';
+import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
+import {
+  IContextContainer,
+  IContextProvider,
+  ContextSetup,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+} from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
+
+export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
+
 export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -81,6 +91,7 @@ export {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
+  SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -102,7 +113,16 @@ export {
   HttpResponse,
   HttpHandler,
   HttpBody,
+  HttpInterceptController,
 } from './http';
+
+export {
+  OverlayStart,
+  OverlayBannerMount,
+  OverlayBannerUnmount,
+  OverlayBannersStart,
+  OverlayRef,
+} from './overlays';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -114,6 +134,8 @@ export {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link ApplicationSetup} */
+  application: ApplicationSetup;
   /** {@link ContextSetup} */
   context: ContextSetup;
   /** {@link FatalErrorsSetup} */
@@ -124,6 +146,15 @@ export interface CoreSetup {
   notifications: NotificationsSetup;
   /** {@link UiSettingsClient} */
   uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
 /**
@@ -137,7 +168,7 @@ export interface CoreSetup {
  */
 export interface CoreStart {
   /** {@link ApplicationStart} */
-  application: Pick<ApplicationStart, 'capabilities'>;
+  application: ApplicationStart;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
   /** {@link DocLinksStart} */
@@ -154,17 +185,44 @@ export interface CoreStart {
   overlays: OverlayStart;
   /** {@link UiSettingsClient} */
   uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
-/** @internal */
-export interface InternalCoreSetup extends CoreSetup {
-  application: ApplicationSetup;
+/**
+ * Setup interface exposed to the legacy platform via the `ui/new_platform` module.
+ *
+ * @remarks
+ * Some methods are not supported in the legacy platform and while present to make this type compatibile with
+ * {@link CoreSetup}, unsupported methods will throw exceptions when called.
+ *
+ * @public
+ * @deprecated
+ */
+export interface LegacyCoreSetup extends CoreSetup {
+  /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
 
-/** @internal */
-export interface InternalCoreStart extends CoreStart {
-  application: ApplicationStart;
+/**
+ * Start interface exposed to the legacy platform via the `ui/new_platform` module.
+ *
+ * @remarks
+ * Some methods are not supported in the legacy platform and while present to make this type compatibile with
+ * {@link CoreStart}, unsupported methods will throw exceptions when called.
+ *
+ * @public
+ * @deprecated
+ */
+export interface LegacyCoreStart extends CoreStart {
+  /** @deprecated */
   injectedMetadata: InjectedMetadataStart;
 }
 
@@ -185,7 +243,9 @@ export {
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
   IContextContainer,
-  IContextHandler,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
   IContextProvider,
   ContextSetup,
   DocLinksStart,
@@ -198,8 +258,6 @@ export {
   LegacyNavLink,
   NotificationsSetup,
   NotificationsStart,
-  OverlayRef,
-  OverlayStart,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,

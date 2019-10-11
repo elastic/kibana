@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash';
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { defaultHeaders, mockTimelineData } from '../../../../mock';
@@ -16,6 +18,7 @@ import { unknownColumnRenderer } from './unknown_column_renderer';
 import { getValues } from './helpers';
 
 describe('unknown_column_renderer', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockDatum: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;
   beforeEach(() => {
@@ -28,6 +31,7 @@ describe('unknown_column_renderer', () => {
       eventId: _id,
       values: getValues('@timestamp', mockDatum),
       field: defaultHeaders.find(h => h.id === '@timestamp')!,
+      timelineId: 'test',
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -43,8 +47,13 @@ describe('unknown_column_renderer', () => {
       eventId: _id,
       values: getValues('a made up column name', mockDatum),
       field: defaultHeaders.find(h => h.id === 'a made up column name')!,
+      timelineId: 'test',
     });
-    const wrapper = mount(<span>{emptyColumn}</span>);
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <span>{emptyColumn}</span>
+      </ThemeProvider>
+    );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
@@ -54,8 +63,13 @@ describe('unknown_column_renderer', () => {
       eventId: _id,
       values: getValues('@timestamp', mockDatum),
       field: defaultHeaders.find(h => h.id === '@timestamp')!,
+      timelineId: 'test',
     });
-    const wrapper = mount(<span>{emptyColumn}</span>);
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <span>{emptyColumn}</span>
+      </ThemeProvider>
+    );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });

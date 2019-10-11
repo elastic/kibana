@@ -20,6 +20,7 @@ export type MetricsExplorerOptionsMetric = MetricsExplorerMetric & {
 export enum MetricsExplorerChartType {
   line = 'line',
   area = 'area',
+  bar = 'bar',
 }
 
 export enum MetricsExplorerYAxisMode {
@@ -120,6 +121,11 @@ export const useMetricsExplorerOptions = () => {
   );
   const [isAutoReloading, setAutoReloading] = useState<boolean>(false);
   return {
+    defaultViewState: {
+      options: DEFAULT_OPTIONS,
+      chartOptions: DEFAULT_CHART_OPTIONS,
+      currentTimerange: DEFAULT_TIMERANGE,
+    },
     options,
     chartOptions,
     setChartOptions,

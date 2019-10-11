@@ -19,12 +19,14 @@
 
 import { IContextContainer } from './context';
 
-export type ContextContainerMock = jest.Mocked<IContextContainer<any, any, any>>;
+export type ContextContainerMock = jest.Mocked<IContextContainer<any>>;
 
 const createContextMock = () => {
   const contextMock: ContextContainerMock = {
     registerContext: jest.fn(),
-    createHandler: jest.fn(),
+    createHandler: jest.fn((id, handler) => (...args: any[]) =>
+      Promise.resolve(handler({}, ...args))
+    ),
   };
   contextMock.createHandler.mockImplementation((pluginId, handler) => (...args) =>
     handler({}, ...args)

@@ -4,19 +4,21 @@
 
 ## ScopedClusterClient class
 
-Serves the same purpose as "normal" `ClusterClient` but exposes additional `callAsCurrentUser` method that doesn't use credentials of the Kibana internal user (as `callAsInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API
+Serves the same purpose as "normal" `ClusterClient` but exposes additional `callAsCurrentUser` method that doesn't use credentials of the Kibana internal user (as `callAsInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.
+
+See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-export declare class ScopedClusterClient 
+export declare class ScopedClusterClient implements IScopedClusterClient 
 ```
 
 ## Constructors
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(internalAPICaller, scopedAPICaller, headers)](./kibana-plugin-server.scopedclusterclient.(constructor).md) |  | Constructs a new instance of the <code>ScopedClusterClient</code> class |
+|  [(constructor)(internalAPICaller, scopedAPICaller, headers)](./kibana-plugin-server.scopedclusterclient._constructor_.md) |  | Constructs a new instance of the <code>ScopedClusterClient</code> class |
 
 ## Methods
 

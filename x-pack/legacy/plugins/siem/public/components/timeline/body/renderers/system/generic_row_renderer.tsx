@@ -7,11 +7,10 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import * as i18n from './translations';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
-import { Row } from '../helpers';
 import { SystemGenericDetails } from './generic_details';
 import { SystemGenericFileDetails } from './generic_file_details';
+import * as i18n from './translations';
 
 export const createGenericSystemRowRenderer = ({
   actionName,
@@ -30,18 +29,19 @@ export const createGenericSystemRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children }) => (
-    <Row>
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <>
       {children}
       <RowRendererContainer>
         <SystemGenericDetails
           browserFields={browserFields}
           data={data}
-          contextId={actionName}
+          contextId={`${actionName}-${timelineId}`}
           text={text}
+          timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 
@@ -62,18 +62,19 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children }) => (
-    <Row>
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <>
       {children}
       <RowRendererContainer>
         <SystemGenericFileDetails
           browserFields={browserFields}
           data={data}
-          contextId={actionName}
+          contextId={`${actionName}-${timelineId}`}
           text={text}
+          timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 

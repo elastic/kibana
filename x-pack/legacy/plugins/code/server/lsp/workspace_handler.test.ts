@@ -6,7 +6,6 @@
 import fs from 'fs';
 import path from 'path';
 
-import mkdirp from 'mkdirp';
 import * as os from 'os';
 import rimraf from 'rimraf';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
@@ -48,7 +47,7 @@ function makeAFile(
   file = 'src/controllers/user.ts'
 ) {
   const fullPath = path.join(workspacePath, repo, '__randomString', revision, file);
-  mkdirp.sync(path.dirname(fullPath));
+  fs.mkdirSync(path.dirname(fullPath), { recursive: true });
   fs.writeFileSync(fullPath, '');
   const strInUrl = fullPath
     .split(path.sep)
@@ -103,8 +102,8 @@ test('should support spaces in workspace dir', async () => {
 });
 
 // FLAKY: https://github.com/elastic/kibana/issues/43655
-test.skip('should support case-insensitive workspace dir', async () => {
-  const workspaceCaseInsensitive = path.join(baseDir, 'WorkSpace');
+test('should support case-insensitive workspace dir', async () => {
+  const workspaceCaseInsensitive = path.join(baseDir, 'CamelCaseWorkSpace');
   // test only if it's case-insensitive
   const workspaceHandler = new WorkspaceHandler(
     gitOps,
@@ -114,7 +113,9 @@ test.skip('should support case-insensitive workspace dir', async () => {
     new ConsoleLoggerFactory()
   );
   const { repo, revision, file, uri } = makeAFile(workspaceCaseInsensitive);
-  if (fs.existsSync(workspaceCaseInsensitive.toLocaleLowerCase())) {
+  // normally this test won't run on linux since its filesystem are case sensitive
+  // So there is no 'CAMELCASEWORKSPACE' folder.
+  if (fs.existsSync(workspaceCaseInsensitive.toUpperCase())) {
     const converted = handleResponseUri(workspaceHandler, uri.toLocaleLowerCase());
     // workspace dir should  be stripped
     expect(converted).toBe(
@@ -137,8 +138,8 @@ test('should throw a error if url is invalid', async () => {
 });
 
 beforeAll(() => {
-  mkdirp.sync(workspaceDir);
-  mkdirp.sync(repoDir);
+  fs.mkdirSync(workspaceDir, { recursive: true });
+  fs.mkdirSync(repoDir, { recursive: true });
 });
 
 afterAll(() => {

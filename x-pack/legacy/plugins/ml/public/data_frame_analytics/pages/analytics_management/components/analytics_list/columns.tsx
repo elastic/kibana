@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -18,16 +17,18 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { DataFrameAnalyticsId } from '../../../../common';
+import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
-  DATA_FRAME_TASK_STATE,
+  getDataFrameAnalyticsProgress,
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
   DataFrameAnalyticsStats,
+  DATA_FRAME_TASK_STATE,
 } from './common';
 import { getActions } from './actions';
 
 enum TASK_STATE_COLOR {
+  analyzing = 'primary',
   failed = 'danger',
   reindexing = 'primary',
   started = 'primary',
@@ -55,6 +56,57 @@ export const getTaskStateBadge = (
       {state}
     </EuiBadge>
   );
+};
+
+export const progressColumn = {
+  name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
+    defaultMessage: 'Progress',
+  }),
+  sortable: (item: DataFrameAnalyticsListRow) => getDataFrameAnalyticsProgress(item.stats),
+  truncateText: true,
+  render(item: DataFrameAnalyticsListRow) {
+    const progress = getDataFrameAnalyticsProgress(item.stats);
+
+    if (progress === undefined) {
+      return null;
+    }
+
+    // For now all analytics jobs are batch jobs.
+    const isBatchTransform = true;
+
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        {isBatchTransform && (
+          <Fragment>
+            <EuiFlexItem style={{ width: '40px' }} grow={false}>
+              <EuiProgress value={progress} max={100} color="primary" size="m">
+                {progress}%
+              </EuiProgress>
+            </EuiFlexItem>
+            <EuiFlexItem style={{ width: '35px' }} grow={false}>
+              <EuiText size="xs">{`${progress}%`}</EuiText>
+            </EuiFlexItem>
+          </Fragment>
+        )}
+        {!isBatchTransform && (
+          <Fragment>
+            <EuiFlexItem style={{ width: '40px' }} grow={false}>
+              {item.stats.state === DATA_FRAME_TASK_STATE.STARTED && (
+                <EuiProgress color="primary" size="m" />
+              )}
+              {item.stats.state === DATA_FRAME_TASK_STATE.STOPPED && (
+                <EuiProgress value={0} max={100} color="primary" size="m" />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem style={{ width: '35px' }} grow={false}>
+              &nbsp;
+            </EuiFlexItem>
+          </Fragment>
+        )}
+      </EuiFlexGroup>
+    );
+  },
+  width: '100px',
 };
 
 export const getColumns = (
@@ -105,7 +157,6 @@ export const getColumns = (
       name: 'ID',
       sortable: true,
       truncateText: true,
-      width: isManagementTable === true ? '20%' : undefined,
     },
     // Description is not supported yet by API
     /*
@@ -125,7 +176,6 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
-      width: isManagementTable === true ? '25%' : undefined,
     },
     {
       field: DataFrameAnalyticsListColumn.configDestIndex,
@@ -134,7 +184,15 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
-      width: isManagementTable === true ? '20%' : undefined,
+    },
+    {
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.type', { defaultMessage: 'Type' }),
+      sortable: (item: DataFrameAnalyticsListRow) => getAnalysisType(item.config.analysis),
+      truncateText: true,
+      render(item: DataFrameAnalyticsListRow) {
+        return <EuiBadge color="hollow">{getAnalysisType(item.config.analysis)}</EuiBadge>;
+      },
+      width: '150px',
     },
     {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.status', { defaultMessage: 'Status' }),
@@ -159,56 +217,7 @@ export const getColumns = (
       width: '100px',
     },
     */
-    {
-      name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
-        defaultMessage: 'Progress',
-      }),
-      sortable: (item: DataFrameAnalyticsListRow) => idx(item, _ => _.stats.progress_percent) || 0,
-      truncateText: true,
-      render(item: DataFrameAnalyticsListRow) {
-        if (item.stats.progress_percent === undefined) {
-          return null;
-        }
-
-        const progress = Math.round(item.stats.progress_percent);
-
-        // For now all analytics jobs are batch jobs.
-        const isBatchTransform = true;
-
-        return (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            {isBatchTransform && (
-              <Fragment>
-                <EuiFlexItem style={{ width: '40px' }} grow={false}>
-                  <EuiProgress value={progress} max={100} color="primary" size="m">
-                    {progress}%
-                  </EuiProgress>
-                </EuiFlexItem>
-                <EuiFlexItem style={{ width: '35px' }} grow={false}>
-                  <EuiText size="xs">{`${progress}%`}</EuiText>
-                </EuiFlexItem>
-              </Fragment>
-            )}
-            {!isBatchTransform && (
-              <Fragment>
-                <EuiFlexItem style={{ width: '40px' }} grow={false}>
-                  {item.stats.state === DATA_FRAME_TASK_STATE.STARTED && (
-                    <EuiProgress color="primary" size="m" />
-                  )}
-                  {item.stats.state === DATA_FRAME_TASK_STATE.STOPPED && (
-                    <EuiProgress value={0} max={100} color="primary" size="m" />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem style={{ width: '35px' }} grow={false}>
-                  &nbsp;
-                </EuiFlexItem>
-              </Fragment>
-            )}
-          </EuiFlexGroup>
-        );
-      },
-      width: '100px',
-    },
+    progressColumn,
   ];
 
   if (isManagementTable === true) {
@@ -217,6 +226,7 @@ export const getColumns = (
         defaultMessage: 'Spaces',
       }),
       render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
+      width: '75px',
     });
   } else {
     columns.push({

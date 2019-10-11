@@ -6,7 +6,7 @@
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
-import { parseInterval } from 'ui/utils/parse_interval';
+import { parseInterval } from '../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, AggFieldPair } from '../../../../../common/types/fields';
 import { Job, Datafeed, Detector, BucketSpan } from './configs';
@@ -43,6 +43,7 @@ export class SingleMetricJobCreator extends JobCreator {
 
   public set bucketSpan(bucketSpan: BucketSpan) {
     this._job_config.analysis_config.bucket_span = bucketSpan;
+    this._setBucketSpanMs(bucketSpan);
     this._createDatafeedAggregations();
   }
 

@@ -63,13 +63,18 @@ export default function ({ getService, getPageObjects }) {
       it('should show the saved query management component when there are no saved queries', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         const descriptionText = await testSubjects.getVisibleText('saved-query-management-popover');
-        expect(descriptionText)
-          .to
-          .eql('SAVED QUERIES\nThere are no saved queries. Save query text and filters that you want to use again.\nSave');
+        expect(descriptionText).to.eql(
+          'SAVED QUERIES\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
+        );
       });
 
       it('should allow a query to be saved via the saved objects management component', async () => {
-        await savedQueryManagementComponent.saveNewQuery('OkResponse', '200 responses for .jpg over 24 hours', true, true);
+        await savedQueryManagementComponent.saveNewQuery(
+          'OkResponse',
+          '200 responses for .jpg over 24 hours',
+          true,
+          true
+        );
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
       });
 
@@ -101,7 +106,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('allows saving the currently loaded query as a new query', async () => {
-        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery('OkResponseCopy', '200 responses', false, false);
+        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
+          'OkResponseCopy',
+          '200 responses',
+          false,
+          false
+        );
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponseCopy');
       });
 
@@ -118,11 +128,6 @@ export default function ({ getService, getPageObjects }) {
       it('does not allow saving a query with leading or trailing whitespace in the name', async () => {
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse ');
       });
-      it('allows clearing the currently loaded saved query', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        expect(await queryBar.getQueryString()).to.eql('');
-      });
 
       it('resets any changes to a loaded query on reloading the same saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
@@ -130,6 +135,13 @@ export default function ({ getService, getPageObjects }) {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         expect(await queryBar.getQueryString()).to.eql('response:404');
       });
+
+      it('allows clearing the currently loaded saved query', async () =>   {
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        expect(await queryBar.getQueryString()).to.eql('');
+      });
+
     });
   });
 }

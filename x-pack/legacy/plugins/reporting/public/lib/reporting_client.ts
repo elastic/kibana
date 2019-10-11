@@ -27,10 +27,14 @@ class ReportingClient {
   };
 
   public createReportingJob = async (exportType: string, jobParams: any) => {
-    const query = {
-      jobParams: rison.encode(jobParams),
-    };
-    const resp = await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${exportType}`, query });
+    const jobParamsRison = rison.encode(jobParams);
+    const resp = await kfetch({
+      method: 'POST',
+      pathname: `${API_BASE_URL}/${exportType}`,
+      body: JSON.stringify({
+        jobParams: jobParamsRison,
+      }),
+    });
     jobCompletionNotifications.add(resp.job.id);
     return resp;
   };

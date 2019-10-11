@@ -6,13 +6,13 @@
 
 import * as kfetchModule from 'ui/kfetch';
 import { mockNow } from '../../utils/testHelpers';
-import { _clearCache, callApi } from '../rest/callApi';
+import { clearCache, callApi } from '../rest/callApi';
 import { SessionStorageMock } from './SessionStorageMock';
 
 jest.mock('ui/kfetch');
 
 describe('callApi', () => {
-  let kfetchSpy: jest.Mock;
+  let kfetchSpy: jest.SpyInstance;
 
   beforeEach(() => {
     kfetchSpy = jest.spyOn(kfetchModule, 'kfetch').mockResolvedValue({
@@ -24,7 +24,7 @@ describe('callApi', () => {
 
   afterEach(() => {
     kfetchSpy.mockClear();
-    _clearCache();
+    clearCache();
   });
 
   describe('apm_debug', () => {
@@ -63,7 +63,7 @@ describe('callApi', () => {
   });
 
   describe('cache', () => {
-    let nowSpy: jest.Mock;
+    let nowSpy: jest.SpyInstance;
     beforeEach(() => {
       nowSpy = mockNow('2019');
     });

@@ -24,12 +24,14 @@ export class WMSSource extends AbstractTMSSource {
   });
   static icon = 'grid';
 
-  static createDescriptor({ serviceUrl, layers, styles }) {
+  static createDescriptor({ serviceUrl, layers, styles, attributionText, attributionUrl }) {
     return {
       type: WMSSource.type,
-      serviceUrl: serviceUrl,
-      layers: layers,
-      styles: styles
+      serviceUrl,
+      layers,
+      styles,
+      attributionText,
+      attributionUrl
     };
   }
 
@@ -82,6 +84,18 @@ export class WMSSource extends AbstractTMSSource {
 
   async getDisplayName() {
     return this._descriptor.serviceUrl;
+  }
+
+  getAttributions() {
+    const { attributionText, attributionUrl } = this._descriptor;
+    const attributionComplete = !!attributionText && !!attributionUrl;
+
+    return attributionComplete
+      ? [{
+        url: attributionUrl,
+        label: attributionText
+      }]
+      : [];
   }
 
   getUrlTemplate() {

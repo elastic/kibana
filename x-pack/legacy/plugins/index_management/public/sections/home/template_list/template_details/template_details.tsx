@@ -8,6 +8,7 @@ import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiCallOut,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
@@ -30,10 +31,11 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
 } from '../../../../../common/constants';
 import { Template } from '../../../../../common/types';
-import { TemplateDeleteModal, SectionLoading, SectionError } from '../../../../components';
+import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
 import { loadIndexTemplate } from '../../../../services/api';
 import { decodePath } from '../../../../services/routing';
 import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
+import { SendRequestResponse } from '../../../../shared_imports';
 import { TabSummary, TabMappings, TabSettings, TabAliases } from './tabs';
 
 interface Props {
@@ -41,7 +43,7 @@ interface Props {
   onClose: () => void;
   editTemplate: (templateName: Template['name']) => void;
   cloneTemplate: (templateName: Template['name']) => void;
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
 }
 
 const SUMMARY_TAB_ID = 'summary';
@@ -101,33 +103,11 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
 }) => {
   const decodedTemplateName = decodePath(templateName);
   const { error, data: templateDetails, isLoading } = loadIndexTemplate(decodedTemplateName);
+  // TS complains if we use destructuring here. Fixed in 3.6.0 (https://github.com/microsoft/TypeScript/pull/31711).
+  const isManaged = templateDetails ? templateDetails.isManaged : undefined;
   const [templateToDelete, setTemplateToDelete] = useState<Array<Template['name']>>([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
-
-  const contextMenuItems = [
-    {
-      name: i18n.translate('xpack.idxMgmt.templateDetails.editButtonLabel', {
-        defaultMessage: 'Edit',
-      }),
-      icon: 'pencil',
-      onClick: () => editTemplate(decodedTemplateName),
-    },
-    {
-      name: i18n.translate('xpack.idxMgmt.templateDetails.cloneButtonLabel', {
-        defaultMessage: 'Clone',
-      }),
-      icon: 'copy',
-      onClick: () => cloneTemplate(decodedTemplateName),
-    },
-    {
-      name: i18n.translate('xpack.idxMgmt.templateDetails.deleteButtonLabel', {
-        defaultMessage: 'Delete',
-      }),
-      icon: 'trash',
-      onClick: () => setTemplateToDelete([decodedTemplateName]),
-    },
-  ];
 
   let content;
 
@@ -149,15 +129,37 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
             defaultMessage="Error loading template"
           />
         }
-        error={error}
+        error={error as Error}
         data-test-subj="sectionError"
       />
     );
   } else if (templateDetails) {
     const Content = tabToComponentMap[activeTab];
+    const managedTemplateCallout = isManaged ? (
+      <Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.templateDetails.managedTemplateInfoTitle"
+              defaultMessage="Editing a managed template is not permitted"
+            />
+          }
+          color="primary"
+          size="s"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.templateDetails.managedTemplateInfoDescription"
+            defaultMessage="Managed templates are critical for internal operations."
+          />
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </Fragment>
+    ) : null;
 
     content = (
       <Fragment>
+        {managedTemplateCallout}
+
         <EuiTabs>
           {TABS.map(tab => (
             <EuiTab
@@ -229,7 +231,6 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-
             {templateDetails && (
               <EuiFlexItem grow={false}>
                 {/* Manage templates context menu */}
@@ -267,7 +268,34 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                             defaultMessage: 'Template options',
                           }
                         ),
-                        items: contextMenuItems,
+                        items: [
+                          {
+                            name: i18n.translate('xpack.idxMgmt.templateDetails.editButtonLabel', {
+                              defaultMessage: 'Edit',
+                            }),
+                            icon: 'pencil',
+                            onClick: () => editTemplate(decodedTemplateName),
+                            disabled: isManaged,
+                          },
+                          {
+                            name: i18n.translate('xpack.idxMgmt.templateDetails.cloneButtonLabel', {
+                              defaultMessage: 'Clone',
+                            }),
+                            icon: 'copy',
+                            onClick: () => cloneTemplate(decodedTemplateName),
+                          },
+                          {
+                            name: i18n.translate(
+                              'xpack.idxMgmt.templateDetails.deleteButtonLabel',
+                              {
+                                defaultMessage: 'Delete',
+                              }
+                            ),
+                            icon: 'trash',
+                            onClick: () => setTemplateToDelete([decodedTemplateName]),
+                            disabled: isManaged,
+                          },
+                        ],
                       },
                     ]}
                   />

@@ -31,31 +31,40 @@ import {
   updateIsPtrIncluded,
   updateIpDetailsTableActivePage,
   updateNetworkPageTableActivePage,
-  updateTopNFlowDirection,
   updateTopNFlowLimit,
   updateTopNFlowSort,
-  updateTopNFlowTarget,
   updateTlsSort,
   updateUsersLimit,
   updateUsersSort,
+  setNetworkTablesActivePageToZero,
 } from './actions';
-import { helperUpdateTopNFlowDirection } from './helper';
 import { IpDetailsTableType, NetworkModel, NetworkTableType, NetworkType } from './model';
+import {
+  setNetworkQueriesActivePageToZero,
+  setNetworkPageQueriesActivePageToZero,
+  setNetworkDetailsQueriesActivePageToZero,
+} from './helpers';
 
 export type NetworkState = NetworkModel;
 
 export const initialNetworkState: NetworkState = {
   page: {
     queries: {
-      [NetworkTableType.topNFlow]: {
+      [NetworkTableType.topNFlowSource]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes,
+          field: NetworkTopNFlowFields.bytes_out,
           direction: Direction.desc,
         },
-        flowTarget: FlowTarget.source,
-        flowDirection: FlowDirection.uniDirectional,
+      },
+      [NetworkTableType.topNFlowDestination]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        topNFlowSort: {
+          field: NetworkTopNFlowFields.bytes_out,
+          direction: Direction.desc,
+        },
       },
       [NetworkTableType.dns]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -105,6 +114,17 @@ export const initialNetworkState: NetworkState = {
 };
 
 export const networkReducer = reducerWithInitialState(initialNetworkState)
+  .case(setNetworkTablesActivePageToZero, state => ({
+    ...state,
+    page: {
+      ...state.page,
+      queries: setNetworkPageQueriesActivePageToZero(state),
+    },
+    details: {
+      ...state.details,
+      queries: setNetworkDetailsQueriesActivePageToZero(state),
+    },
+  }))
   .case(updateIpDetailsTableActivePage, (state, { activePage, tableType }) => ({
     ...state,
     [NetworkType.details]: {
@@ -170,61 +190,28 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
-  .case(updateTopNFlowLimit, (state, { limit, networkType }) => ({
+  .case(updateTopNFlowLimit, (state, { limit, networkType, tableType }) => ({
     ...state,
     [networkType]: {
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [NetworkTableType.topNFlow]: {
-          ...state[NetworkType.page].queries.topNFlow,
+        [tableType]: {
+          ...state[NetworkType.page].queries[tableType],
           limit,
         },
       },
     },
   }))
-  .case(updateTopNFlowDirection, (state, { flowDirection, networkType }) => ({
+  .case(updateTopNFlowSort, (state, { topNFlowSort, networkType, tableType }) => ({
     ...state,
     [networkType]: {
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [NetworkTableType.topNFlow]: {
-          ...state[NetworkType.page].queries.topNFlow,
-          ...helperUpdateTopNFlowDirection(
-            state[NetworkType.page].queries.topNFlow.flowTarget,
-            flowDirection
-          ),
-        },
-      },
-    },
-  }))
-  .case(updateTopNFlowSort, (state, { topNFlowSort, networkType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      queries: {
-        ...state[networkType].queries,
-        [NetworkTableType.topNFlow]: {
-          ...state[NetworkType.page].queries.topNFlow,
+        [tableType]: {
+          ...state[NetworkType.page].queries[tableType],
           topNFlowSort,
-        },
-      },
-    },
-  }))
-  .case(updateTopNFlowTarget, (state, { flowTarget }) => ({
-    ...state,
-    [NetworkType.page]: {
-      ...state[NetworkType.page],
-      queries: {
-        ...state[NetworkType.page].queries,
-        [NetworkTableType.topNFlow]: {
-          ...state[NetworkType.page].queries.topNFlow,
-          flowTarget,
-          topNFlowSort: {
-            field: NetworkTopNFlowFields.bytes,
-            direction: Direction.desc,
-          },
         },
       },
     },
@@ -240,6 +227,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
     ...state,
     [networkType]: {
       ...state[networkType],
+      queries: setNetworkQueriesActivePageToZero(state, networkType),
       filterQueryDraft: filterQuery.kuery,
       filterQuery,
     },

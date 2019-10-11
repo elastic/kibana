@@ -14,11 +14,11 @@ import { SearchSource } from '../../../kibana_services';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ES_SEARCH, ES_GEO_FIELD_TYPE, ES_SIZE_LIMIT } from '../../../../common/constants';
+import { ES_SEARCH, ES_GEO_FIELD_TYPE, ES_SIZE_LIMIT, SORT_ORDER } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
-import { getTermsFields } from '../../../index_pattern_util';
+import { getSourceFields } from '../../../index_pattern_util';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
@@ -29,7 +29,7 @@ export class ESSearchSource extends AbstractESSource {
     defaultMessage: 'Documents'
   });
   static description = i18n.translate('xpack.maps.source.esSearchDescription', {
-    defaultMessage: 'Geospatial data from a Kibana index pattern'
+    defaultMessage: 'Vector data from a Kibana index pattern'
   });
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
@@ -56,9 +56,10 @@ export class ESSearchSource extends AbstractESSource {
       geoField: descriptor.geoField,
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
+      sortField: _.get(descriptor, 'sortField', ''),
+      sortOrder: _.get(descriptor, 'sortOrder', SORT_ORDER.DESC),
       useTopHits: _.get(descriptor, 'useTopHits', false),
       topHitsSplitField: descriptor.topHitsSplitField,
-      topHitsTimeField: descriptor.topHitsTimeField,
       topHitsSize: _.get(descriptor, 'topHitsSize', 1),
     }, inspectorAdapters);
   }
@@ -70,9 +71,10 @@ export class ESSearchSource extends AbstractESSource {
         onChange={onChange}
         filterByMapBounds={this._descriptor.filterByMapBounds}
         tooltipProperties={this._descriptor.tooltipProperties}
+        sortField={this._descriptor.sortField}
+        sortOrder={this._descriptor.sortOrder}
         useTopHits={this._descriptor.useTopHits}
         topHitsSplitField={this._descriptor.topHitsSplitField}
-        topHitsTimeField={this._descriptor.topHitsTimeField}
         topHitsSize={this._descriptor.topHitsSize}
       />
     );
@@ -135,14 +137,29 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
-  async _getTopHits(layerName, searchFilters) {
+  // Returns sort content for an Elasticsearch search body
+  _buildEsSort() {
+    const {
+      sortField,
+      sortOrder,
+    } = this._descriptor;
+    return [
+      {
+        [sortField]: {
+          order: sortOrder
+        }
+      }
+    ];
+  }
+
+  async _getTopHits(layerName, searchFilters, registerCancelCallback) {
     const {
       topHitsSplitField,
-      topHitsTimeField,
       topHitsSize,
     } = this._descriptor;
 
     const indexPattern = await this._getIndexPattern();
+    const geoField = await this._getGeoField();
 
     const scriptFields = {};
     searchFilters.fieldNames.forEach(fieldName => {
@@ -157,6 +174,22 @@ export class ESSearchSource extends AbstractESSource {
       }
     });
 
+    const topHits = {
+      size: topHitsSize,
+      script_fields: scriptFields,
+    };
+    if (this._hasSort()) {
+      topHits.sort = this._buildEsSort();
+    }
+    if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
+      topHits._source = false;
+      topHits.docvalue_fields = searchFilters.fieldNames;
+    } else {
+      topHits._source = {
+        includes: searchFilters.fieldNames
+      };
+    }
+
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       entitySplit: {
@@ -166,26 +199,13 @@ export class ESSearchSource extends AbstractESSource {
         },
         aggs: {
           entityHits: {
-            top_hits: {
-              sort: [
-                {
-                  [topHitsTimeField]: {
-                    order: 'desc'
-                  }
-                }
-              ],
-              _source: {
-                includes: searchFilters.fieldNames
-              },
-              size: topHitsSize,
-              script_fields: scriptFields,
-            }
+            top_hits: topHits
           }
         }
       }
     });
 
-    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document top hits request');
+    const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document top hits request');
 
     let hasTrimmedResults = false;
     const allHits = [];
@@ -193,7 +213,7 @@ export class ESSearchSource extends AbstractESSource {
     entityBuckets.forEach(entityBucket => {
       const total = _.get(entityBucket, 'entityHits.hits.total', 0);
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
-      // Reverse hits list so they are drawn from oldest to newest (per entity) so newest events are on top
+      // Reverse hits list so top documents by sort are drawn on top
       allHits.push(...hits.reverse());
       if (total > hits.length) {
         hasTrimmedResults = true;
@@ -209,19 +229,41 @@ export class ESSearchSource extends AbstractESSource {
     };
   }
 
-  async _getSearchHits(layerName, searchFilters) {
-    const searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT);
-    // Setting "fields" instead of "source: { includes: []}"
-    // because SearchSource automatically adds the following by default
-    // 1) all scripted fields
-    // 2) docvalue_fields value is added for each date field in an index - see getComputedFields
-    // By setting "fields", SearchSource removes all of defaults
-    searchSource.setField('fields', searchFilters.fieldNames);
+  // searchFilters.fieldNames contains geo field and any fields needed for styling features
+  // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
+  async _getSearchHits(layerName, searchFilters, registerCancelCallback) {
+    const geoField = await this._getGeoField();
 
-    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document request');
+    let searchSource;
+    if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
+      // Request geo_point and style fields in docvalue_fields insted of _source
+      // 1) Returns geo_point in a consistent format regardless of how geo_point is stored in source
+      // 2) Setting _source to false so we avoid pulling back unneeded fields.
+      const initialSearchContext = {
+        docvalue_fields: searchFilters.fieldNames
+      };
+      searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT, initialSearchContext);
+      searchSource.setField('source', false); // do not need anything from _source
+      searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
+    } else {
+      // geo_shape fields do not support docvalue_fields yet, so still have to be pulled from _source
+      searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT);
+      // Setting "fields" instead of "source: { includes: []}"
+      // because SearchSource automatically adds the following by default
+      // 1) all scripted fields
+      // 2) docvalue_fields value is added for each date field in an index - see getComputedFields
+      // By setting "fields", SearchSource removes all of defaults
+      searchSource.setField('fields', searchFilters.fieldNames);
+    }
+
+    if (this._hasSort()) {
+      searchSource.setField('sort', this._buildEsSort());
+    }
+
+    const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document request');
 
     return {
-      hits: resp.hits.hits,
+      hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
         areResultsTrimmed: resp.hits.total > resp.hits.hits.length
       }
@@ -229,18 +271,23 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   _isTopHits() {
-    const { useTopHits, topHitsSplitField, topHitsTimeField } = this._descriptor;
-    return !!(useTopHits && topHitsSplitField && topHitsTimeField);
+    const { useTopHits, topHitsSplitField } = this._descriptor;
+    return !!(useTopHits && topHitsSplitField);
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
+  _hasSort() {
+    const { sortField, sortOrder } = this._descriptor;
+    return !!sortField && !!sortOrder;
+  }
+
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const { hits, meta } = this._isTopHits()
-      ? await this._getTopHits(layerName, searchFilters)
-      : await this._getSearchHits(layerName, searchFilters);
+      ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
+      : await this._getSearchHits(layerName, searchFilters, registerCancelCallback);
 
     const indexPattern = await this._getIndexPattern();
     const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
-      return metaField !== '_id';
+      return !['_id', '_index'].includes(metaField);
     });
     const flattenHit = hit => {
       const properties = indexPattern.flattenHit(hit);
@@ -325,7 +372,8 @@ export class ESSearchSource extends AbstractESSource {
 
   async getLeftJoinFields() {
     const indexPattern = await this._getIndexPattern();
-    return getTermsFields(indexPattern.fields)
+    // Left fields are retrieved from _source.
+    return getSourceFields(indexPattern.fields)
       .map(field => {
         return { name: field.name, label: field.name };
       });
@@ -405,10 +453,21 @@ export class ESSearchSource extends AbstractESSource {
 
   getSyncMeta() {
     return {
+      sortField: this._descriptor.sortField,
+      sortOrder: this._descriptor.sortOrder,
       useTopHits: this._descriptor.useTopHits,
       topHitsSplitField: this._descriptor.topHitsSplitField,
-      topHitsTimeField: this._descriptor.topHitsTimeField,
       topHitsSize: this._descriptor.topHitsSize,
+    };
+  }
+
+  async getPreIndexedShape(properties) {
+    const geoField = await this._getGeoField();
+
+    return {
+      index: properties._index, // Can not use index pattern title because it may reference many indices
+      id: properties._id,
+      path: geoField.name,
     };
   }
 }

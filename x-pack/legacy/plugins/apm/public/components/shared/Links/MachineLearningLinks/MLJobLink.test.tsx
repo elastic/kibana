@@ -9,7 +9,7 @@ import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLJobLink } from './MLJobLink';
 import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
 
 describe('MLJobLink', () => {
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('MLJobLink', () => {
           prepend: (path: string) => `/basepath${path}`
         }
       }
-    } as unknown) as InternalCoreStart;
+    } as unknown) as LegacyCoreStart;
 
     spyOn(kibanaCore, 'useKibanaCore').and.returnValue(coreMock);
   });

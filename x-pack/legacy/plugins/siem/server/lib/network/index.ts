@@ -5,8 +5,7 @@
  */
 
 import {
-  FlowDirection,
-  FlowTarget,
+  FlowTargetNew,
   NetworkDnsSortField,
   NetworkTopNFlowData,
   NetworkTopNFlowSortField,
@@ -19,8 +18,7 @@ export * from './types';
 
 export interface NetworkTopNFlowRequestOptions extends RequestOptionsPaginated {
   networkTopNFlowSort: NetworkTopNFlowSortField;
-  flowTarget: FlowTarget;
-  flowDirection: FlowDirection;
+  flowTarget: FlowTargetNew;
 }
 
 export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
@@ -35,13 +33,13 @@ export class Network {
     req: FrameworkRequest,
     options: NetworkTopNFlowRequestOptions
   ): Promise<NetworkTopNFlowData> {
-    return await this.adapter.getNetworkTopNFlow(req, options);
+    return this.adapter.getNetworkTopNFlow(req, options);
   }
 
   public async getNetworkDns(
     req: FrameworkRequest,
     options: NetworkDnsRequestOptions
   ): Promise<NetworkTopNFlowData> {
-    return await this.adapter.getNetworkDns(req, options);
+    return this.adapter.getNetworkDns(req, options);
   }
 }

@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Feature,
-  FeatureKibanaPrivileges,
-} from '../../../../../../xpack_main/server/lib/feature_registry/feature_registry';
+import { Feature, FeatureKibanaPrivileges } from '../../../../../../../../plugins/features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeCatalogueBuilder extends BaseFeaturePrivilegeBuilder {

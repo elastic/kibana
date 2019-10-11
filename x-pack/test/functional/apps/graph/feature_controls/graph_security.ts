@@ -71,18 +71,25 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
 
-      it('shows save button', async () => {
+      it('landing page shows "Create new Workspace" button', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphSaveButton');
-      });
-
-      it('shows delete button', async () => {
-        await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphDeleteButton');
+        await testSubjects.existOrFail('workspaceLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('graphCreateWorkspacePromptButton');
       });
 
       it(`doesn't show read-only badge`, async () => {
         await globalNav.badgeMissingOrFail();
+      });
+
+      it('allows creating a new workspace', async () => {
+        await PageObjects.common.navigateToApp('graph');
+        await testSubjects.click('graphCreateWorkspacePromptButton');
+        const breadcrumb = await testSubjects.find('~graphCurrentWorkspaceBreadcrumb');
+        expect(await breadcrumb.getVisibleText()).to.equal('Unsaved workspace');
+      });
+
+      it('shows save button', async () => {
+        await testSubjects.existOrFail('graphSaveButton');
       });
     });
 
@@ -129,16 +136,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Graph', 'Management']);
       });
 
-      it(`doesn't show save button`, async () => {
+      it('does not show a "Create new Workspace" button', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphOpenButton');
-        await testSubjects.missingOrFail('graphSaveButton');
-      });
-
-      it(`doesn't show delete button`, async () => {
-        await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphOpenButton');
-        await testSubjects.missingOrFail('graphDeleteButton');
+        await testSubjects.existOrFail('workspaceLandingPage', { timeout: 10000 });
+        await testSubjects.missingOrFail('newItemButton');
       });
 
       it(`shows read-only badge`, async () => {

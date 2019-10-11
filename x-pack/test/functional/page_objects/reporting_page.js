@@ -157,7 +157,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       });
       // Close toast so it doesn't obscure the UI.
       if (isToastPresent) {
-        await testSubjects.click('completeReportSuccess toastCloseButton');
+        await testSubjects.click('completeReportSuccess > toastCloseButton');
       }
 
       return isToastPresent;

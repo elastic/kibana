@@ -13,14 +13,8 @@ import { getXpackConfigWithDeprecated } from '../telemetry/common/get_xpack_conf
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
-import {
-  xpackInfoRoute,
-  featuresRoute,
-  settingsRoute,
-} from './server/routes/api/v1';
+import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
 
-import { registerOssFeatures } from './server/lib/register_oss_features';
-import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
 import { has } from 'lodash';
 
 function movedToTelemetry(configPath) {
@@ -52,7 +46,11 @@ export const xpackMain = (kibana) => {
     },
 
     uiCapabilities(server) {
-      return uiCapabilitiesForFeatures(server.plugins.xpack_main);
+      const featuresPlugin = server.newPlatform.setup.plugins.features;
+      if (!featuresPlugin) {
+        throw new Error('New Platform XPack Features plugin is not available.');
+      }
+      return featuresPlugin.getFeaturesUICapabilities();
     },
 
     uiExports: {
@@ -81,16 +79,21 @@ export const xpackMain = (kibana) => {
     },
 
     init(server) {
+      const featuresPlugin = server.newPlatform.setup.plugins.features;
+      if (!featuresPlugin) {
+        throw new Error('New Platform XPack Features plugin is not available.');
+      }
+
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
-      setupXPackMain(server);
-      const { types: savedObjectTypes } = server.savedObjects;
-      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes, server.config().get('timelion.ui.enabled'));
+      featuresPlugin.registerLegacyAPI({
+        xpackInfo: setupXPackMain(server),
+        savedObjectTypes: server.savedObjects.types
+      });
 
       // register routes
       xpackInfoRoute(server);
       settingsRoute(server, this.kbnServer);
-      featuresRoute(server);
     },
     deprecations: () => [
       movedToTelemetry('telemetry.config'),

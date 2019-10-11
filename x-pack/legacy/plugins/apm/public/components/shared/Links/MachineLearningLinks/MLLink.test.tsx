@@ -10,7 +10,7 @@ import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLLink } from './MLLink';
 import * as savedObjects from '../../../../services/rest/savedObjects';
 import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
-import { InternalCoreStart } from 'src/core/public';
+import { LegacyCoreStart } from 'src/core/public';
 
 jest.mock('ui/kfetch');
 
@@ -20,7 +20,7 @@ const coreMock = ({
       prepend: (path: string) => `/basepath${path}`
     }
   }
-} as unknown) as InternalCoreStart;
+} as unknown) as LegacyCoreStart;
 
 jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 

@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
-import { ConcreteTaskInstance, RunContext, TaskInstance } from './task';
-import { SanitizedTaskDefinition, TaskDefinition, TaskDictionary } from './task';
+import { intervalFromNow } from './lib/intervals';
+import {
+  TaskDefinition,
+  TaskDictionary,
+  ConcreteTaskInstance,
+  RunContext,
+  TaskInstance,
+} from './task';
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
@@ -22,6 +29,12 @@ export interface TaskManagerOpts {
   callWithInternalUser: any;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
+}
+
+function generateTaskManagerUUID(logger: Logger): string {
+  const taskManagerUUID = uuid.v4();
+  logger.info(`Initialising Task Manager with UUID: ${taskManagerUUID}`);
+  return taskManagerUUID;
 }
 
 /*
@@ -40,9 +53,8 @@ export interface TaskManagerOpts {
 export class TaskManager {
   private isStarted = false;
   private maxWorkers: number;
-  private overrideNumWorkers: { [taskType: string]: number };
   private readonly pollerInterval: number;
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private definitions: TaskDictionary<TaskDefinition>;
   private store: TaskStore;
   private poller: TaskPoller;
   private logger: Logger;
@@ -60,7 +72,6 @@ export class TaskManager {
    */
   constructor(opts: TaskManagerOpts) {
     this.maxWorkers = opts.config.get('xpack.task_manager.max_workers');
-    this.overrideNumWorkers = opts.config.get('xpack.task_manager.override_num_workers');
     this.pollerInterval = opts.config.get('xpack.task_manager.poll_interval');
     this.definitions = {};
     this.logger = opts.logger;
@@ -74,7 +85,9 @@ export class TaskManager {
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
+      taskManagerId: generateTaskManagerUUID(this.logger),
     });
+
     const pool = new TaskPool({
       logger: this.logger,
       maxWorkers: this.maxWorkers,
@@ -90,9 +103,7 @@ export class TaskManager {
     const poller = new TaskPoller({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work(): Promise<void> {
-        return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
-      },
+      work: (): Promise<void> => fillPool(pool.run, () => this.claimAvailableTasks(), createRunner),
     });
 
     this.pool = pool;
@@ -124,6 +135,20 @@ export class TaskManager {
     startPoller();
   }
 
+  private async claimAvailableTasks() {
+    const { docs, claimedTasks } = await this.store.claimAvailableTasks({
+      size: this.pool.availableWorkers,
+      claimOwnershipUntil: intervalFromNow('30s')!,
+    });
+
+    if (docs.length !== claimedTasks) {
+      this.logger.warn(
+        `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) tasks were fetched`
+      );
+    }
+    return docs;
+  }
+
   private async waitUntilStarted() {
     if (!this.isStarted) {
       await new Promise(resolve => {
@@ -152,11 +177,7 @@ export class TaskManager {
     }
 
     try {
-      const sanitized = sanitizeTaskDefinitions(
-        taskDefinitions,
-        this.maxWorkers,
-        this.overrideNumWorkers
-      );
+      const sanitized = sanitizeTaskDefinitions(taskDefinitions);
 
       Object.assign(this.definitions, sanitized);
     } catch (e) {

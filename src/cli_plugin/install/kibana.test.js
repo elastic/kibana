@@ -27,7 +27,6 @@ import sinon from 'sinon';
 import Logger from '../lib/logger';
 import { join } from 'path';
 import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
 import fs from 'fs';
 import { existingInstall, assertVersion } from './kibana';
 
@@ -55,7 +54,7 @@ describe('kibana cli', function () {
 
         beforeEach(function () {
           rimraf.sync(testWorkingPath);
-          mkdirp.sync(testWorkingPath);
+          fs.mkdirSync(testWorkingPath, { recursive: true });
           sinon.stub(logger, 'log');
           sinon.stub(logger, 'error');
         });

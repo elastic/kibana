@@ -6,7 +6,7 @@
 
 import { ml } from '../../../../../services/ml_api_service';
 import {
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
   refreshAnalyticsList$,
   REFRESH_ANALYTICS_LIST_STATE,
 } from '../../../../common';
@@ -20,7 +20,7 @@ import {
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
-  data_frame_analytics: DataFrameAnalyticsOutlierConfig[];
+  data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
 interface GetDataFrameAnalyticsStatsResponseOk {

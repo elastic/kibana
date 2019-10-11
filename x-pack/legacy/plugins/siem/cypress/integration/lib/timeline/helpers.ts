@@ -11,7 +11,7 @@ import {
   SERVER_SIDE_EVENT_COUNT,
   TIMELINE_DATA_PROVIDERS,
   TIMELINE_TOGGLE_BUTTON,
-  TOGGLE_EXPAND_EVENT,
+  TOGGLE_TIMELINE_EXPAND_EVENT,
 } from './selectors';
 import { DEFAULT_TIMEOUT } from '../util/helpers';
 
@@ -44,8 +44,8 @@ export const assertAtLeastOneEventMatchesSearch = () =>
     .should('be.above', 0);
 
 /** Toggles open or closed the first event in the timeline */
-export const toggleFirstEventDetails = () => {
-  cy.get(TOGGLE_EXPAND_EVENT, { timeout: DEFAULT_TIMEOUT })
+export const toggleFirstTimelineEventDetails = () => {
+  cy.get(TOGGLE_TIMELINE_EXPAND_EVENT, { timeout: DEFAULT_TIMEOUT })
     .first()
     .click();
 };

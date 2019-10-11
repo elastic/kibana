@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromNullable, Option } from 'fp-ts/lib/Option';
+import { fromNullable, Option, map, filter } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 export function getRetryAfterIntervalFromHeaders(headers: Record<string, string>): Option<number> {
-  return fromNullable(headers['retry-after'])
-    .map(retryAfter => parseInt(retryAfter, 10))
-    .filter(retryAfter => !isNaN(retryAfter));
+  return pipe(
+    fromNullable(headers['retry-after']),
+    map(retryAfter => parseInt(retryAfter, 10)),
+    filter(retryAfter => !isNaN(retryAfter))
+  );
 }

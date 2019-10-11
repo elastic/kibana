@@ -12,7 +12,7 @@ import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
-import { Columns } from '../../../load_more_table';
+import { Columns } from '../../../paginated_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 import { Provider } from '../../../timeline/data_providers/provider';
@@ -47,7 +47,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                field: 'dns.question.etld_plus_one',
+                field: 'dns.question.registered_domain',
                 value: dnsName,
                 operator: IS_OPERATOR,
               },

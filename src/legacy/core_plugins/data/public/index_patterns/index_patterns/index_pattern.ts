@@ -20,23 +20,21 @@
 import _, { each, reject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
-// @ts-ignore
 import { fieldFormats } from 'ui/registry/field_formats';
 // @ts-ignore
 import { expandShorthand } from 'ui/utils/mapping_setup';
 import { toastNotifications } from 'ui/notify';
 import { findObjectByTitle } from 'ui/saved_objects';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { NotificationsSetup, SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectNotFound, DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 
 import { IndexPatternMissingIndices } from '../errors';
 import { Field, FieldList, FieldType } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { getRoutes } from '../utils';
 import { formatHitProvider } from './format_hit';
-// @ts-ignore
 import { flattenHitWrapper } from './flatten_hit';
-import { IndexPatternsApiClient } from './index_patterns_api_client';
+import { IIndexPatternsApiClient } from './index_patterns_api_client';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -72,6 +70,7 @@ export class IndexPattern implements StaticIndexPattern {
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
+  public notifications: NotificationsSetup;
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientContract;
@@ -108,8 +107,9 @@ export class IndexPattern implements StaticIndexPattern {
     id: string | undefined,
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
-    apiClient: IndexPatternsApiClient,
-    patternCache: any
+    apiClient: IIndexPatternsApiClient,
+    patternCache: any,
+    notifications: NotificationsSetup
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -117,11 +117,12 @@ export class IndexPattern implements StaticIndexPattern {
     // instead of storing config we rather store the getter only as np uiSettingsClient has circular references
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
+    this.notifications = notifications;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig('metaFields');
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable);
+    this.fields = new FieldList(this, [], this.shortDotsEnable, notifications);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
@@ -135,13 +136,13 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = fieldFormats.byId[mapping.id];
+    const FieldFormat = fieldFormats.getType(mapping.id);
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
 
   private initFields(input?: any) {
     const newValue = input || this.fields;
-    this.fields = new FieldList(this, newValue, this.shortDotsEnable);
+    this.fields = new FieldList(this, newValue, this.shortDotsEnable, this.notifications);
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -276,16 +277,21 @@ export class IndexPattern implements StaticIndexPattern {
     }
 
     this.fields.push(
-      new Field(this, {
-        name,
-        script,
-        fieldType,
-        scripted: true,
-        lang,
-        aggregatable: true,
-        filterable: true,
-        searchable: true,
-      })
+      new Field(
+        this,
+        {
+          name,
+          script,
+          fieldType,
+          scripted: true,
+          lang,
+          aggregatable: true,
+          filterable: true,
+          searchable: true,
+        },
+        false,
+        this.notifications
+      )
     );
 
     await this.save();
@@ -375,7 +381,8 @@ export class IndexPattern implements StaticIndexPattern {
           this.getConfig,
           this.savedObjectsClient,
           this.patternCache,
-          this.fieldsFetcher
+          this.fieldsFetcher,
+          this.notifications
         );
         await duplicatePattern.destroy();
       }
@@ -428,7 +435,8 @@ export class IndexPattern implements StaticIndexPattern {
             this.getConfig,
             this.savedObjectsClient,
             this.patternCache,
-            this.fieldsFetcher
+            this.fieldsFetcher,
+            this.notifications
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned

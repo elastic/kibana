@@ -17,16 +17,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { WmsClient } from './wms_client';
+import _ from 'lodash';
 
 const LAYERS_LABEL = i18n.translate('xpack.maps.source.wms.layersLabel', {
-  defaultMessage: 'Layers'
+  defaultMessage: 'Layers',
 });
 const STYLES_LABEL = i18n.translate('xpack.maps.source.wms.stylesLabel', {
-  defaultMessage: 'Styles'
+  defaultMessage: 'Styles',
 });
 
 export class WMSCreateSourceEditor extends Component {
-
   state = {
     serviceUrl: '',
     layers: '',
@@ -38,8 +38,9 @@ export class WMSCreateSourceEditor extends Component {
     styleOptions: [],
     selectedLayerOptions: [],
     selectedStyleOptions: [],
-  }
-
+    attributionText: '',
+    attributionUrl: '',
+  };
   componentDidMount() {
     this._isMounted = true;
   }
@@ -48,18 +49,21 @@ export class WMSCreateSourceEditor extends Component {
     this._isMounted = false;
   }
 
-  _previewIfPossible() {
-    const {
-      serviceUrl,
-      layers,
-      styles
-    } = this.state;
+  _previewIfPossible = _.debounce(() => {
+    const { serviceUrl, layers, styles, attributionText, attributionUrl } = this.state;
 
-    const sourceConfig = (serviceUrl && layers)
-      ? { serviceUrl, layers, styles }
-      : null;
+    const sourceConfig =
+      serviceUrl && layers
+        ? {
+          serviceUrl,
+          layers,
+          styles,
+          attributionText,
+          attributionUrl,
+        }
+        : null;
     this.props.onSourceConfigChange(sourceConfig);
-  }
+  }, 2000);
 
   _loadCapabilities = async () => {
     if (!this.state.serviceUrl) {
@@ -81,7 +85,7 @@ export class WMSCreateSourceEditor extends Component {
       if (this._isMounted) {
         this.setState({
           isLoadingCapabilities: false,
-          getCapabilitiesError: error.message
+          getCapabilitiesError: error.message,
         });
       }
       return;
@@ -94,47 +98,69 @@ export class WMSCreateSourceEditor extends Component {
     this.setState({
       isLoadingCapabilities: false,
       layerOptions: capabilities.layers,
-      styleOptions: capabilities.styles
+      styleOptions: capabilities.styles,
     });
-  }
+  };
 
-  _handleServiceUrlChange = (e) => {
-    this.setState({
-      serviceUrl: e.target.value,
-      hasAttemptedToLoadCapabilities: false,
-      layerOptions: [],
-      styleOptions: [],
-      selectedLayerOptions: [],
-      selectedStyleOptions: [],
-      layers: '',
-      styles: '',
-    }, this._previewIfPossible);
-  }
+  _handleServiceUrlChange = e => {
+    this.setState(
+      {
+        serviceUrl: e.target.value,
+        hasAttemptedToLoadCapabilities: false,
+        layerOptions: [],
+        styleOptions: [],
+        selectedLayerOptions: [],
+        selectedStyleOptions: [],
+        layers: '',
+        styles: '',
+      },
+      this._previewIfPossible
+    );
+  };
 
-  _handleLayersChange = (e) => {
+  _handleLayersChange = e => {
     this.setState({ layers: e.target.value }, this._previewIfPossible);
-  }
+  };
 
-  _handleLayerOptionsChange = (selectedOptions) => {
-    this.setState({
-      selectedLayerOptions: selectedOptions,
-      layers: selectedOptions.map(selectedOption => {
-        return selectedOption.value;
-      }).join(',')
-    }, this._previewIfPossible);
-  }
+  _handleLayerOptionsChange = selectedOptions => {
+    this.setState(
+      {
+        selectedLayerOptions: selectedOptions,
+        layers: selectedOptions
+          .map(selectedOption => {
+            return selectedOption.value;
+          })
+          .join(','),
+      },
+      this._previewIfPossible
+    );
+  };
 
-  _handleStylesChange = (e) => {
+  _handleStylesChange = e => {
     this.setState({ styles: e.target.value }, this._previewIfPossible);
-  }
+  };
 
-  _handleStyleOptionsChange = (selectedOptions) => {
-    this.setState({
-      selectedStyleOptions: selectedOptions,
-      styles: selectedOptions.map(selectedOption => {
-        return selectedOption.value;
-      }).join(',')
-    }, this._previewIfPossible);
+  _handleStyleOptionsChange = selectedOptions => {
+    this.setState(
+      {
+        selectedStyleOptions: selectedOptions,
+        styles: selectedOptions
+          .map(selectedOption => {
+            return selectedOption.value;
+          })
+          .join(','),
+      },
+      this._previewIfPossible
+    );
+  };
+
+  _handleWMSAttributionChange(attributionUpdate) {
+    const { attributionText, attributionUrl } = this.state;
+    this.setState(attributionUpdate, () => {
+      if (attributionText && attributionUrl) {
+        this._previewIfPossible();
+      }
+    });
   }
 
   _renderLayerAndStyleInputs() {
@@ -145,35 +171,33 @@ export class WMSCreateSourceEditor extends Component {
     if (this.state.getCapabilitiesError || this.state.layerOptions.length === 0) {
       return (
         <Fragment>
+          <EuiSpacer />
           <EuiCallOut
             title={i18n.translate('xpack.maps.source.wms.getCapabilitiesErrorCalloutTitle', {
-              defaultMessage: 'Unable to load service metadata'
+              defaultMessage: 'Unable to load service metadata',
             })}
             color="warning"
           >
             <p>{this.state.getCapabilitiesError}</p>
           </EuiCallOut>
+          <EuiSpacer />
 
           <EuiFormRow
             label={LAYERS_LABEL}
             helpText={i18n.translate('xpack.maps.source.wms.layersHelpText', {
-              defaultMessage: 'use comma separated list of layer names'
+              defaultMessage: 'Use comma separated list of layer names',
             })}
           >
-            <EuiFieldText
-              onChange={this._handleLayersChange}
-            />
+            <EuiFieldText onChange={this._handleLayersChange} />
           </EuiFormRow>
 
           <EuiFormRow
             label={STYLES_LABEL}
             helpText={i18n.translate('xpack.maps.source.wms.stylesHelpText', {
-              defaultMessage: 'use comma separated list of style names'
+              defaultMessage: 'Use comma separated list of style names',
             })}
           >
-            <EuiFieldText
-              onChange={this._handleStylesChange}
-            />
+            <EuiFieldText onChange={this._handleStylesChange} />
           </EuiFormRow>
         </Fragment>
       );
@@ -181,18 +205,14 @@ export class WMSCreateSourceEditor extends Component {
 
     return (
       <Fragment>
-        <EuiFormRow
-          label={LAYERS_LABEL}
-        >
+        <EuiFormRow label={LAYERS_LABEL}>
           <EuiComboBox
             options={this.state.layerOptions}
             selectedOptions={this.state.selectedLayerOptions}
             onChange={this._handleLayerOptionsChange}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={STYLES_LABEL}
-        >
+        <EuiFormRow label={STYLES_LABEL}>
           <EuiComboBox
             options={this.state.styleOptions}
             selectedOptions={this.state.selectedStyleOptions}
@@ -220,8 +240,49 @@ export class WMSCreateSourceEditor extends Component {
             defaultMessage="Load capabilities"
           />
         </EuiButton>
+      </Fragment>
+    );
+  }
 
-        <EuiSpacer size="m" />
+  _renderAttributionInputs() {
+    if (!this.state.layers) {
+      return;
+    }
+
+    const { attributionText, attributionUrl } = this.state;
+
+    return (
+      <Fragment>
+        <EuiFormRow
+          label="Attribution text"
+          isInvalid={attributionUrl !== '' && attributionText === ''}
+          error={[
+            i18n.translate('xpack.maps.source.wms.attributionText', {
+              defaultMessage: 'Attribution url must have accompanying text',
+            }),
+          ]}
+        >
+          <EuiFieldText
+            onChange={({ target }) =>
+              this._handleWMSAttributionChange({ attributionText: target.value })
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label="Attribution link"
+          isInvalid={attributionText !== '' && attributionUrl === ''}
+          error={[
+            i18n.translate('xpack.maps.source.wms.attributionLink', {
+              defaultMessage: 'Attribution text must have an accompanying link',
+            }),
+          ]}
+        >
+          <EuiFieldText
+            onChange={({ target }) =>
+              this._handleWMSAttributionChange({ attributionUrl: target.value })
+            }
+          />
+        </EuiFormRow>
       </Fragment>
     );
   }
@@ -231,19 +292,17 @@ export class WMSCreateSourceEditor extends Component {
       <EuiForm>
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.wms.urlLabel', {
-            defaultMessage: 'Url'
+            defaultMessage: 'Url',
           })}
         >
-          <EuiFieldText
-            value={this.state.serviceUrl}
-            onChange={this._handleServiceUrlChange}
-          />
+          <EuiFieldText value={this.state.serviceUrl} onChange={this._handleServiceUrlChange} />
         </EuiFormRow>
 
         {this._renderGetCapabilitiesButton()}
 
         {this._renderLayerAndStyleInputs()}
 
+        {this._renderAttributionInputs()}
       </EuiForm>
     );
   }

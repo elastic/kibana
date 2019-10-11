@@ -28,6 +28,7 @@ import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { savedObjectsMock } from './saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
+import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
@@ -42,11 +43,15 @@ export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 function createCoreSetupMock() {
   const mock: MockedKeys<CoreSetup> = {
+    application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
+    injectedMetadata: {
+      getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,
+    },
   };
 
   return mock;
@@ -63,6 +68,9 @@ function createCoreStartMock() {
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     savedObjects: savedObjectsMock.createStartContract(),
+    injectedMetadata: {
+      getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
+    },
   };
 
   return mock;

@@ -98,6 +98,14 @@ export const fileTree = handleActions<FileTreeState, FileTreePayload>(
           p => p !== action.payload!.path && p !== ''
         );
         const { tree, path, withParents } = action.payload!;
+        let sortedTree: FileTree | undefined = tree;
+        while (sortedTree && sortedTree.children && sortedTree.children.length > 0) {
+          sortedTree.children = sortedTree.children.sort(sortFileTree);
+          // each time the tree should only have one child that has children
+          sortedTree = sortedTree.children.find(
+            child => child.children && child.children.length > 0
+          );
+        }
         if (withParents || path === '/' || path === '') {
           draft.tree = mergeNode(draft.tree, tree);
         } else {

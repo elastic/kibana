@@ -34,9 +34,9 @@ interface ResolveConflictsPayload {
 }
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
-  const { http, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+  const { legacyRouter, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
-  http.route({
+  legacyRouter({
     method: 'POST',
     path: '/api/spaces/_copy_saved_objects',
     async handler(request: Legacy.Request, h: Legacy.ResponseToolkit) {
@@ -87,7 +87,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
     },
   });
 
-  http.route({
+  legacyRouter({
     method: 'POST',
     path: '/api/spaces/_resolve_copy_saved_objects_errors',
     async handler(request: Legacy.Request, h: Legacy.ResponseToolkit) {

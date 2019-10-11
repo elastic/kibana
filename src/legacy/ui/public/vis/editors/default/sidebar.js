@@ -24,7 +24,8 @@ import 'ui/directives/css_truncate';
 import { uiModules } from '../../../modules';
 import sidebarTemplate from './sidebar.html';
 import { move } from '../../../utils/collection';
-import { AggConfig } from '../../agg_config';
+import { AggGroupNames } from './agg_groups';
+import { getEnabledMetricAggsCount } from './components/agg_group_helper';
 
 uiModules.get('app/visualize').directive('visEditorSidebar', function () {
   return {
@@ -64,17 +65,12 @@ uiModules.get('app/visualize').directive('visEditorSidebar', function () {
       };
 
       $scope.addSchema = function (schema) {
-        const aggConfig = new AggConfig($scope.state.aggs, {
-          schema,
-          id: AggConfig.nextId($scope.state.aggs),
-        });
+        const aggConfig = $scope.state.aggs.createAggConfig({ schema });
         aggConfig.brandNew = true;
-
-        $scope.state.aggs.push(aggConfig);
       };
 
       $scope.removeAgg = function (agg) {
-        const aggs = $scope.state.aggs;
+        const aggs = $scope.state.aggs.aggs;
         const index = aggs.indexOf(agg);
 
         if (index === -1) {
@@ -82,6 +78,14 @@ uiModules.get('app/visualize').directive('visEditorSidebar', function () {
         }
 
         aggs.splice(index, 1);
+
+        if (agg.schema.group === AggGroupNames.Metrics) {
+          const metrics = $scope.state.aggs.bySchemaGroup(AggGroupNames.Metrics);
+
+          if (getEnabledMetricAggsCount(metrics) === 0) {
+            metrics.find(aggregation => aggregation.schema.name === 'metric').enabled = true;
+          }
+        }
       };
 
       $scope.onToggleEnableAgg = (agg, isEnable) => {
@@ -91,9 +95,9 @@ uiModules.get('app/visualize').directive('visEditorSidebar', function () {
       $scope.reorderAggs = (group) => {
         //the aggs have been reordered in [group] and we need
         //to apply that ordering to [vis.aggs]
-        const indexOffset = $scope.state.aggs.indexOf(group[0]);
+        const indexOffset = $scope.state.aggs.aggs.indexOf(group[0]);
         _.forEach(group, (agg, index) => {
-          move($scope.state.aggs, agg, indexOffset + index);
+          move($scope.state.aggs.aggs, agg, indexOffset + index);
         });
       };
     },

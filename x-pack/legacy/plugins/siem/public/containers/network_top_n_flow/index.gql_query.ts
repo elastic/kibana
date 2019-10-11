@@ -9,11 +9,10 @@ import gql from 'graphql-tag';
 export const networkTopNFlowQuery = gql`
   query GetNetworkTopNFlowQuery(
     $sourceId: ID!
-    $flowDirection: FlowDirection!
     $filterQuery: String
     $pagination: PaginationInputPaginated!
     $sort: NetworkTopNFlowSortField!
-    $flowTarget: FlowTarget!
+    $flowTarget: FlowTargetNew!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
     $inspect: Boolean!
@@ -22,7 +21,6 @@ export const networkTopNFlowQuery = gql`
       id
       NetworkTopNFlow(
         filterQuery: $filterQuery
-        flowDirection: $flowDirection
         flowTarget: $flowTarget
         pagination: $pagination
         sort: $sort
@@ -33,29 +31,50 @@ export const networkTopNFlowQuery = gql`
         edges {
           node {
             source {
-              count
-              ip
+              autonomous_system {
+                name
+                number
+              }
               domain
+              ip
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
+                }
+                flowTarget
+              }
+              flows
+              destination_ips
             }
             destination {
-              count
-              ip
+              autonomous_system {
+                name
+                number
+              }
               domain
-            }
-            client {
-              count
               ip
-              domain
-            }
-            server {
-              count
-              ip
-              domain
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
+                }
+                flowTarget
+              }
+              flows
+              source_ips
             }
             network {
-              bytes
-              direction
-              packets
+              bytes_in
+              bytes_out
             }
           }
           cursor {

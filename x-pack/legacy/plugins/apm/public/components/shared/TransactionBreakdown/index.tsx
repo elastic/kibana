@@ -4,45 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-  EuiPanel
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';
 import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
+import { trackEvent } from '../../../../../infra/public/hooks/use_track_metric';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 
-const NoTransactionsTitle = styled.span`
-  font-weight: bold;
-`;
+const emptyMessage = i18n.translate('xpack.apm.transactionBreakdown.noData', {
+  defaultMessage: 'No data within this time range.'
+});
 
 const TransactionBreakdown: React.FC<{
   initialIsOpen?: boolean;
 }> = ({ initialIsOpen }) => {
   const [showChart, setShowChart] = useState(!!initialIsOpen);
 
-  const {
-    data,
-    status,
-    receivedDataDuringLifetime
-  } = useTransactionBreakdown();
-
-  const loading = status === FETCH_STATUS.LOADING || status === undefined;
+  const { data, status } = useTransactionBreakdown();
 
   const { kpis, timeseries } = data;
 
-  const hasHits = kpis.length > 0;
-
-  if (!receivedDataDuringLifetime) {
-    return null;
-  }
+  const noHits = data.kpis.length === 0 && status === FETCH_STATUS.SUCCESS;
+  const showEmptyMessage = noHits && !showChart;
 
   return (
     <EuiPanel>
@@ -50,48 +35,24 @@ const TransactionBreakdown: React.FC<{
         <EuiFlexItem grow={false}>
           <TransactionBreakdownHeader
             showChart={showChart}
-            hideShowChartButton={!hasHits}
             onToggleClick={() => {
               setShowChart(!showChart);
+              if (showChart) {
+                trackEvent({ app: 'apm', name: 'hide_breakdown_chart' });
+              } else {
+                trackEvent({ app: 'apm', name: 'show_breakdown_chart' });
+              }
             }}
           />
         </EuiFlexItem>
-        {hasHits ? (
-          <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false}>
+          {showEmptyMessage ? (
+            <EuiText>{emptyMessage}</EuiText>
+          ) : (
             <TransactionBreakdownKpiList kpis={kpis} />
-          </EuiFlexItem>
-        ) : (
-          !loading && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiText>
-                      <NoTransactionsTitle>
-                        {i18n.translate(
-                          'xpack.apm.transactionBreakdown.noTransactionsTitle',
-                          {
-                            defaultMessage: 'No transactions were found.'
-                          }
-                        )}
-                      </NoTransactionsTitle>
-                      {' ' +
-                        i18n.translate(
-                          'xpack.apm.transactionBreakdown.noTransactionsTip',
-                          {
-                            defaultMessage:
-                              'Try another time range or reset the filter.'
-                          }
-                        )}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiSpacer size="m" />
-            </>
-          )
-        )}
-        {showChart && hasHits ? (
+          )}
+        </EuiFlexItem>
+        {showChart ? (
           <EuiFlexItem grow={false}>
             <TransactionBreakdownGraph timeseries={timeseries} />
           </EuiFlexItem>

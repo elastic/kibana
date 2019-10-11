@@ -8,4 +8,5 @@ import styled from 'styled-components';
 
 export const Label = styled.div`
   font-weight: bold;
+  margin-top: 2px;
 `;

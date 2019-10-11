@@ -15,7 +15,7 @@ To set up the correct index pattern,
 simply click *Load Kibana objects* at the bottom of the Setup Instructions.
 
 After you install an Elastic APM agent library in your application,
-the application automatically appears in the APM UI in {kib}.
+the application automatically appears in the APM app in {kib}.
 No further configuration is required.
 
 [role="screenshot"]

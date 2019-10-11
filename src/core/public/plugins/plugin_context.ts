@@ -76,11 +76,19 @@ export function createPluginSetupContext<
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreSetup {
   return {
-    context: omit(deps.context, 'setCurrentPlugin'),
+    application: {
+      register: app => deps.application.register(plugin.opaqueId, app),
+      registerMountContext: (contextName, provider) =>
+        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
+    },
+    context: deps.context,
     fatalErrors: deps.fatalErrors,
     http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
+    injectedMetadata: {
+      getInjectedVar: deps.injectedMetadata.getInjectedVar,
+    },
   };
 }
 
@@ -107,6 +115,10 @@ export function createPluginStartContext<
   return {
     application: {
       capabilities: deps.application.capabilities,
+      navigateToApp: deps.application.navigateToApp,
+      getUrlForApp: deps.application.getUrlForApp,
+      registerMountContext: (contextName, provider) =>
+        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
     docLinks: deps.docLinks,
     http: deps.http,
@@ -116,5 +128,8 @@ export function createPluginStartContext<
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
     savedObjects: deps.savedObjects,
+    injectedMetadata: {
+      getInjectedVar: deps.injectedMetadata.getInjectedVar,
+    },
   };
 }

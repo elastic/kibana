@@ -13,7 +13,7 @@ import { DocumentSearchClient } from './document_search_client';
 let docSearchClient: DocumentSearchClient;
 let esClient;
 
-// Setup the entire RepositorySearchClient.
+// Setup the entire DocumentSearchClient.
 function initSearchClient() {
   const log: Logger = (sinon.stub() as any) as Logger;
   esClient = initEsClient();

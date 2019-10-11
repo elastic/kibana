@@ -3160,7 +3160,7 @@
             "dns.question.name",
             "dns.question.type",
             "dns.question.class",
-            "dns.question.etld_plus_one",
+            "dns.question.registered_domain",
             "dns.answers.name",
             "dns.answers.type",
             "dns.answers.class",

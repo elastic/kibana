@@ -8,7 +8,17 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Reason } from './reason';
 
+jest.mock('ui/documentation_links', () => ({
+  ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+  DOC_LINK_VERSION: 'current'
+}));
+
 describe('Logs', () => {
+  it('should render a default message', () => {
+    const component = shallow(<Reason reason={{}}/>);
+    expect(component).toMatchSnapshot();
+  });
+
   it('should render with a no index pattern found reason', () => {
     const component = shallow(<Reason reason={{ indexPatternExists: false }}/>);
     expect(component).toMatchSnapshot();
