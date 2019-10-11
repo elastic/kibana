@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Provider } from 'react-redux';
@@ -45,14 +45,9 @@ export function GraphApp(props: GraphAppProps) {
         <Provider store={reduxStore}>
           <>
             <div className="gphGraph__bar">
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFlexItem>
-                  <SearchBar {...searchBarProps} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <FieldManager pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <SearchBar {...searchBarProps} />
+              <EuiSpacer size="s" />
+              <FieldManager pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
             </div>
             {!props.isInitialized && (
               <GuidancePanel

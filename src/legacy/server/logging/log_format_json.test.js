@@ -19,6 +19,8 @@
 
 import moment from 'moment';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 import {
   createListStream,
   createPromiseFromStreams,
@@ -95,6 +97,79 @@ describe('KbnLoggerJsonFormat', () => {
 
       expect(type).toBe('ops');
       expect(message).toBe('memory: 0.0B uptime: 0:00:00 load: [1.00 1.00 2.00] delay: 0.000');
+    });
+
+    describe('with metadata', () => {
+      it('logs an event with meta data', async () => {
+        const event = {
+          data: attachMetaData('message for event', {
+            prop1: 'value1',
+            prop2: 'value2',
+          }),
+          tags: ['tag1', 'tag2'],
+        };
+        const result = await createPromiseFromStreams([createListStream([event]), format]);
+        const { level, message, prop1, prop2, tags, } = JSON.parse(result);
+
+        expect(level).toBe(undefined);
+        expect(message).toBe('message for event');
+        expect(prop1).toBe('value1');
+        expect(prop2).toBe('value2');
+        expect(tags).toEqual(['tag1', 'tag2']);
+      });
+
+      it('meta data rewrites event fields', async () => {
+        const event = {
+          data: attachMetaData('message for event', {
+            tags: ['meta-data-tag'],
+            prop1: 'value1',
+            prop2: 'value2',
+          }),
+          tags: ['tag1', 'tag2'],
+        };
+        const result = await createPromiseFromStreams([createListStream([event]), format]);
+        const { level, message, prop1, prop2, tags, } = JSON.parse(result);
+
+        expect(level).toBe(undefined);
+        expect(message).toBe('message for event');
+        expect(prop1).toBe('value1');
+        expect(prop2).toBe('value2');
+        expect(tags).toEqual(['meta-data-tag']);
+      });
+
+      it('logs an event with empty meta data', async () => {
+        const event = {
+          data: attachMetaData('message for event'),
+          tags: ['tag1', 'tag2'],
+        };
+        const result = await createPromiseFromStreams([createListStream([event]), format]);
+        const { level, message, prop1, prop2, tags, } = JSON.parse(result);
+
+        expect(level).toBe(undefined);
+        expect(message).toBe('message for event');
+        expect(prop1).toBe(undefined);
+        expect(prop2).toBe(undefined);
+        expect(tags).toEqual(['tag1', 'tag2']);
+      });
+
+      it('does not log meta data for an error event', async () => {
+        const event = {
+          error: new Error('reason'),
+          data: attachMetaData('message for event', {
+            prop1: 'value1',
+            prop2: 'value2',
+          }),
+          tags: ['tag1', 'tag2'],
+        };
+        const result = await createPromiseFromStreams([createListStream([event]), format]);
+        const { level, message, prop1, prop2, tags, } = JSON.parse(result);
+
+        expect(level).toBe('error');
+        expect(message).toBe('reason');
+        expect(prop1).toBe(undefined);
+        expect(prop2).toBe(undefined);
+        expect(tags).toEqual(['tag1', 'tag2']);
+      });
     });
 
     describe('errors', () => {
