@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { SAVED_OBJ_REPO_REF } from '../../common/constants';
+import { SavedObjectsClientContract } from 'src/core/server';
+import { SAVED_OBJ_REPO } from '../../common/constants';
 
 export interface RepositoryReferenceHelper {
   /**
@@ -55,117 +55,49 @@ export interface RepositoryReferenceHelper {
  * @returns An helper instance.
  */
 export function getReferenceHelper(client: SavedObjectsClientContract): RepositoryReferenceHelper {
-  return new SharedObjectReferenceHelper(client);
+  return new DefaultReferenceHelper(client);
 }
 
-class SharedObjectReferenceHelper implements RepositoryReferenceHelper {
+class DefaultReferenceHelper implements RepositoryReferenceHelper {
   constructor(private readonly client: SavedObjectsClientContract) {}
 
-  /**
-   * TODO better way to access the current space
-   */
-  private namespace(): string {
-    // @ts-ignore
-    return this.client.spaceId;
-  }
-
   async createReference(uri: string): Promise<boolean> {
-    let obj: SavedObject<any> | undefined;
-    try {
-      obj = await this.client.get(SAVED_OBJ_REPO_REF, uri);
-    } catch (e) {
-      obj = undefined;
-    }
-    if (obj === undefined) {
-      await this.client.create(
-        SAVED_OBJ_REPO_REF,
-        {
-          uri,
-          namespaces: [this.namespace()],
-        },
-        {
-          id: uri,
-        }
-      );
-      return true;
-    } else {
-      const namespaces = new Set((obj.attributes as RepositoryReferences).namespaces);
-      if (namespaces.has(this.namespace())) {
-        throw new Error(`Reference to [${uri}] from [${this.namespace()}] already exists`);
-      }
-      namespaces.add(this.namespace());
-      await this.client.update(
-        SAVED_OBJ_REPO_REF,
+    await this.client.create(
+      SAVED_OBJ_REPO,
+      {
         uri,
-        {
-          uri,
-          namespaces: Array.from(namespaces),
-        },
-        {
-          version: obj.version,
-        }
-      );
-      return false;
-    }
+      },
+      {
+        id: uri,
+      }
+    );
+    return true;
   }
 
   async deleteReference(uri: string): Promise<boolean> {
-    const obj = await this.client.get(SAVED_OBJ_REPO_REF, uri);
-    const refs = obj.attributes as RepositoryReferences;
-    const namespaces = new Set(refs.namespaces);
-    namespaces.delete(this.namespace());
-    if (namespaces.size === 0) {
-      // TODO delete should also support versioning
-      await this.client.delete(SAVED_OBJ_REPO_REF, uri);
-      return true;
-    } else {
-      await this.client.update(
-        SAVED_OBJ_REPO_REF,
-        uri,
-        {
-          uri,
-          namespaces: Array.from(namespaces),
-        },
-        {
-          version: obj.version,
-        }
-      );
-      return false;
-    }
+    await this.client.delete(SAVED_OBJ_REPO, uri);
+    return true;
   }
 
   async ensureReference(uri: string): Promise<void> {
     if (!(await this.hasReference(uri))) {
-      throw new Error(`Space [${this.namespace()}] has no reference of [${uri}]`);
+      throw new Error(`Space has no reference of [${uri}]`);
     }
   }
 
   async hasReference(uri: string): Promise<boolean> {
     try {
-      const obj = await this.client.get(SAVED_OBJ_REPO_REF, uri);
-      const refs = obj.attributes as RepositoryReferences;
-      return refs.namespaces.indexOf(this.namespace()) >= 0;
+      await this.client.get(SAVED_OBJ_REPO, uri);
+      return true;
     } catch (e) {
-      // if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-      //   return false;
-      // }
       return false;
     }
   }
 
   async findReferences(): Promise<string[]> {
     const resp = await this.client.find({
-      type: SAVED_OBJ_REPO_REF,
-      fields: ['uri'],
-      searchFields: ['namespaces'],
-      search: this.namespace(),
-      defaultSearchOperator: 'AND',
+      type: SAVED_OBJ_REPO,
     });
     return resp.saved_objects.map(obj => obj.attributes.uri as string);
   }
-}
-
-interface RepositoryReferences {
-  uri: string;
-  namespaces: string[];
 }

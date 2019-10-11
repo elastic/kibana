@@ -60,12 +60,6 @@ export function repositoryRoute(
         await repoObjectClient.getRepository(repo.uri);
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
         log.info(msg);
-        try {
-          await refHelper.createReference(repo.uri);
-          return repo;
-        } catch (e) {
-          // repository already exists, response with 304
-        }
         return h.response(msg).code(304); // Not Modified
       } catch (error) {
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);

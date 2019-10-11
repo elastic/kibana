@@ -16,7 +16,7 @@ import {
 import { deepFreeze } from '../../../../src/core/utils';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { CodeConfigSchema } from './config';
-import { SAVED_OBJ_REPO_REF } from '../../../legacy/plugins/code/common/constants';
+import { SAVED_OBJ_REPO } from '../../../legacy/plugins/code/common/constants';
 
 /**
  * Describes public Code plugin contract returned at the `setup` stage.
@@ -58,7 +58,7 @@ export class CodePlugin {
           excludeFromBasePrivileges: true,
           api: ['code_user', 'code_admin'],
           savedObject: {
-            all: [SAVED_OBJ_REPO_REF],
+            all: [SAVED_OBJ_REPO],
             read: ['config'],
           },
           ui: ['show', 'user', 'admin'],
@@ -67,7 +67,7 @@ export class CodePlugin {
           api: ['code_user'],
           savedObject: {
             all: [],
-            read: ['config', SAVED_OBJ_REPO_REF],
+            read: ['config', SAVED_OBJ_REPO],
           },
           ui: ['show', 'user'],
         },

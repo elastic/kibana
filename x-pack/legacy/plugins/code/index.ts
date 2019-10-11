@@ -10,7 +10,7 @@ import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { CoreSetup } from 'src/core/server';
 
-import { APP_TITLE, SAVED_OBJ_REPO_REF } from './common/constants';
+import { APP_TITLE, SAVED_OBJ_REPO } from './common/constants';
 import { codePlugin } from './server';
 import { PluginSetupContract } from '../../../plugins/code/server';
 import { mappings } from './mappings';
@@ -45,8 +45,8 @@ export const code = (kibana: any) =>
       },
       hacks: ['plugins/code/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
-        [SAVED_OBJ_REPO_REF]: {
-          isNamespaceAgnostic: true,
+        [SAVED_OBJ_REPO]: {
+          isNamespaceAgnostic: false,
         },
       },
       mappings,

@@ -363,14 +363,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       it('user_1 can access APIs in space_1', async () => {
-        // the repo has to be imported in space1 first
-        await supertest
-          .post(`/s/${space1Id}/api/code/repo`)
-          .auth(codeAdminUsername, codeAdminUserPassword)
-          .set('kbn-xsrf', 'foo')
-          .send({ url: 'https://github.com/elastic/code-examples_empty-file.git' })
-          .expect(200);
-
         await executeRequests(username, password, space1Id, 'response');
       });
 

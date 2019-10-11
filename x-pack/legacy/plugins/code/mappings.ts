@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SAVED_OBJ_REPO_REF } from './common/constants';
+import { SAVED_OBJ_REPO } from './common/constants';
 
 export const mappings = {
-  [SAVED_OBJ_REPO_REF]: {
+  [SAVED_OBJ_REPO]: {
     properties: {
       uri: {
-        type: 'keyword',
-      },
-      namespaces: {
         type: 'keyword',
       },
     },
