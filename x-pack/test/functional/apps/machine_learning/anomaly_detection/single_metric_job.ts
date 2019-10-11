@@ -60,8 +60,7 @@ export default function({ getService }: FtrProviderContext) {
       job_id: expectedJobId,
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0',
-      model_bytes_memory_limit: '10485760',
-      // model_bytes_memory_limit: '15728640',
+      model_bytes_memory_limit: '15728640',
       total_by_field_count: '3',
       total_over_field_count: '0',
       total_partition_field_count: '2',
@@ -166,10 +165,10 @@ export default function({ getService }: FtrProviderContext) {
         await ml.jobWizardCommon.activateDedicatedIndexSwitch();
       });
 
-      // it('inputs the model memory limit', async () => {
-      //   await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
-      //   await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit);
-      // });
+      it('inputs the model memory limit', async () => {
+        await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
+        await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit);
+      });
 
       it('displays the validation step', async () => {
         await ml.jobWizardCommon.advanceToValidationSection();

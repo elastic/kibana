@@ -188,10 +188,10 @@ export default function({ getService }: FtrProviderContext) {
         await ml.jobWizardCommon.activateDedicatedIndexSwitch();
       });
 
-      // it('inputs the model memory limit', async () => {
-      //   await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
-      //   await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit);
-      // });
+      it('inputs the model memory limit', async () => {
+        await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
+        await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit);
+      });
 
       it('displays the validation step', async () => {
         await ml.jobWizardCommon.advanceToValidationSection();
