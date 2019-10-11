@@ -320,8 +320,7 @@ class EditJobFlyoutUI extends Component {
 
       flyout = (
         <EuiFlyout
-          // ownFocus
-          onClose={this.closeFlyout}
+          onClose={() => { this.closeFlyout(); }}
           size="m"
         >
           <EuiFlyoutHeader>
