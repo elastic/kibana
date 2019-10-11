@@ -18,13 +18,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFacetButton,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiFacetButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface Props {
@@ -54,7 +48,13 @@ export interface Props {
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value, filtersActive }: Props) {
+export function DiscoverFieldSearch({
+  showFilter,
+  onChange,
+  onShowFilter,
+  value,
+  filtersActive,
+}: Props) {
   if (typeof value !== 'string') {
     // at initial rendering value is undefined (angular related), this catches the warning
     // should be removed once all is react
