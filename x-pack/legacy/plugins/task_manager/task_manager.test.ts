@@ -25,6 +25,9 @@ describe('TaskManager', () => {
         poll_interval: 6000000,
       },
     },
+    server: {
+      uuid: 'some-uuid',
+    },
   };
   const config = {
     get: (path: string) => _.get(defaultConfig, path),
@@ -42,6 +45,29 @@ describe('TaskManager', () => {
   });
 
   afterEach(() => clock.restore());
+
+  test('throws if no valid UUID is available', async () => {
+    expect(() => {
+      const configWithoutServerUUID = {
+        xpack: {
+          task_manager: {
+            max_workers: 10,
+            index: 'foo',
+            max_attempts: 9,
+            poll_interval: 6000000,
+          },
+        },
+      };
+      new TaskManager({
+        ...taskManagerOpts,
+        config: {
+          get: (path: string) => _.get(configWithoutServerUUID, path),
+        },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"TaskManager is unable to start as Kibana has no valid UUID assigned to it."`
+    );
+  });
 
   test('allows and queues scheduling tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);

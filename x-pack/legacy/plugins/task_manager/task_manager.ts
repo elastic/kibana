@@ -74,8 +74,9 @@ export class TaskManager {
       this.logger.error(
         `TaskManager is unable to start as there the Kibana UUID is invalid (value of the "server.uuid" configuration is ${taskManagerId})`
       );
+      throw new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`);
     } else {
-      this.logger.info(`TaskManager is identified by the UUID: ${taskManagerId}`);
+      this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
     }
 
     /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
@@ -87,7 +88,7 @@ export class TaskManager {
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
-      taskManagerId,
+      taskManagerId: `kibana:${taskManagerId}`,
     });
 
     const pool = new TaskPool({
