@@ -1,4 +1,5 @@
-SIEM_license_button_ML_popup{
+{
+  SIEM_license_button_ML_popup{
   "formats": {
     "number": {
       "currency": {
