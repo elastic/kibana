@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { metadata } from 'ui/metadata';
 import { IndexPattern, INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
-import { Field } from '../../../../../../common/types/fields';
+import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useKibanaContext } from '../../../../../contexts/kibana';
@@ -97,7 +97,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         const options: Array<{ label: string }> = [];
 
         fields.forEach((field: Field) => {
-          if (NUMERICAL_FIELD_TYPES.has(field.type)) {
+          if (NUMERICAL_FIELD_TYPES.has(field.type) && field.id !== EVENT_RATE_FIELD_ID) {
             options.push({ label: field.id }); // TODO: field.id or field.name?
           }
         });
