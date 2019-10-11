@@ -1,0 +1,21 @@
+{
+  "console-recipe": {
+    "properties": {
+      "name": {
+        "type": "keyword"
+      },
+      "isScratchPad": {
+        "type": "boolean"
+      },
+      "lastUpdatedAt": {
+        "type": "long"
+      },
+      "createdAt": {
+        "type": "long"
+      },
+      "text": {
+        "type": "text"
+      }
+    }
+  }
+}
