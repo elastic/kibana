@@ -24,17 +24,18 @@ import { delay, concatMap } from 'rxjs/operators';
 const wreck = Wreck.defaults({
   baseUrl: 'http://localhost:9200',
 });
+const indexName = 'kibana_coverage';
 
-export default obs$ => {
+export default (obs$, log) => {
   obs$
     .pipe(concatMap(x => of(x).pipe(delay(50))))
     .subscribe(async payload => {
       const { path } = payload;
       try {
-        await wreck.post('kibana_coverage/_doc', { payload });
-        console.log(`\n### Posted coverage for\n\t${path}`);
+        await wreck.post(`${indexName}/_doc`, { payload });
+        log.debug(`Posted coverage for\n\t${path}`);
       } catch (e) {
-        console.error(`\n### Failed to post ${path}`);
+        log.warning(`Failed to post ${path}`);
       }
     });
 };

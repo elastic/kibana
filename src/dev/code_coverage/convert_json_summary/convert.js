@@ -23,9 +23,9 @@ import { map } from 'rxjs/operators';
 import moment from 'moment';
 import oboe from 'oboe';
 
-export default path => {
+export default (path, log) => {
   const jsonStream = oboe(createReadStream(path))
-    .on('done', () => console.log('\n### done'));
+    .on('done', () => log.debug(`Done streaming from \n\t${path}`));
 
   return fromEventPattern(_ => jsonStream.on('node', '!.*', _))
     .pipe(

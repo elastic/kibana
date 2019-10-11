@@ -16,10 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { resolve } from 'path';
 import convert from './convert';
 import send from './send';
 
 const kibanaRoot = resolve(__dirname, '../../../..');
-const path = resolve(kibanaRoot, './target/kibana-coverage/mocha/coverage-summary.json');
-send(convert(path));
+
+import { run, createFlagError } from '@kbn/dev-utils';
+
+export function runCodeCoverageConverterCli() {
+  run(
+    ({ flags, log }) => {
+      if (flags.path === '') {
+        throw createFlagError('please provide a single --path flag');
+      }
+      const coverageLocation = resolve(kibanaRoot, flags.path);
+      send(convert(coverageLocation, log), log);
+    },
+    {
+      description: `
+        Massage code coverage json-summary format into a format suitable to POSTing to an ES index.
+      `,
+      flags: {
+        string: ['path'],
+        help: `
+          --path             Required, path to the file to operate on
+        `
+      },
+    }
+  );
+}

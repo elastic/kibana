@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/code_coverage/convert_json_summary');
+require('../src/dev/code_coverage/convert_json_summary').runCodeCoverageConverterCli();
