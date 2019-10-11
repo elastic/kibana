@@ -71,7 +71,7 @@ export function MonitorListDrawerComponent({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <MonitorStatusList checks={summary.state.checks} />
-      {monitorDetails && (
+      {monitorDetails && monitorDetails.error && (
         <MostRecentError error={monitorDetails.error} monitorId={summary.monitor_id} />
       )}
     </ContainerDiv>

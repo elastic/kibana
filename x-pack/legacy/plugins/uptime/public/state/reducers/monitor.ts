@@ -15,11 +15,13 @@ import {
 export interface MonitorState {
   monitorDetailsList: MonitorDetailsState[];
   loading: boolean;
+  errors: any[];
 }
 
 const initialState: MonitorState = {
   monitorDetailsList: [],
   loading: false,
+  errors: [],
 };
 
 export function monitorReducer(state = initialState, action: MonitorActionTypes): MonitorState {
@@ -41,8 +43,10 @@ export function monitorReducer(state = initialState, action: MonitorActionTypes)
         loading: false,
       };
     case FETCH_MONITOR_DETAILS_FAIL:
+      const error = action.payload;
       return {
         ...state,
+        errors: [...state.errors, error],
       };
     default:
       return state;

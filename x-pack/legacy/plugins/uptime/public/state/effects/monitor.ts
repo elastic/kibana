@@ -21,7 +21,7 @@ function* monitorDetailsSaga(action: Action<any>) {
     const response = yield call(fetchMonitorDetails, { monitorId, basePath });
     yield put({ type: FETCH_MONITOR_DETAILS_SUCCESS, payload: response });
   } catch (error) {
-    yield put({ type: FETCH_MONITOR_DETAILS_FAIL, error });
+    yield put({ type: FETCH_MONITOR_DETAILS_FAIL, payload: error.message });
   }
 }
 

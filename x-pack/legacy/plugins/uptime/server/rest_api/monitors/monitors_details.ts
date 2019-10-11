@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import Joi from 'joi';
 import { UMServerLibs } from '../../lib/lib';
+import { MonitorDetails } from '../../../common/runtime_types/monitor/monitor_details';
 
 export const createGetMonitorDetailsRoute = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -14,12 +14,11 @@ export const createGetMonitorDetailsRoute = (libs: UMServerLibs) => ({
     validate: {
       query: Joi.object({
         monitorId: Joi.string(),
-        checkGroup: Joi.string(),
       }),
     },
     tags: ['access:uptime'],
   },
-  handler: async (request: any): Promise<any> => {
+  handler: async (request: any): Promise<MonitorDetails> => {
     const { monitorId } = request.query;
     return await libs.monitors.getMonitorDetails(request, monitorId);
   },
