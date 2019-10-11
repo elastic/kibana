@@ -9,7 +9,8 @@ import { checkPermission } from '../../../../../privilege/check_privilege';
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
-const ANALYTICS_DETAULT_MODEL_MEMORY_LIMIT = '50mb';
+const OUTLIER_DETECTION_DEFAULT_MODEL_MEMORY_LIMIT = '50mb';
+const REGRESSION_DEFAULT_MODEL_MEMORY_LIMIT = '100mb';
 
 export type EsIndexName = string;
 export type DependentVariable = string;
@@ -113,6 +114,11 @@ export const getInitialState = (): State => ({
 export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
+  const modelMemoryLimit =
+    formState.jobType === JOB_TYPES.REGRESSION
+      ? REGRESSION_DEFAULT_MODEL_MEMORY_LIMIT
+      : OUTLIER_DETECTION_DEFAULT_MODEL_MEMORY_LIMIT;
+
   const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
     source: {
       // If a Kibana index patterns includes commas, we need to split
@@ -131,7 +137,7 @@ export const getJobConfigFromFormState = (
     analysis: {
       outlier_detection: {},
     },
-    model_memory_limit: ANALYTICS_DETAULT_MODEL_MEMORY_LIMIT,
+    model_memory_limit: modelMemoryLimit,
   };
 
   if (formState.jobType === JOB_TYPES.REGRESSION) {
