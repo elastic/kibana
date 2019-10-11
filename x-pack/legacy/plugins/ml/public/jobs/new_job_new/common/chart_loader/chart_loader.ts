@@ -51,6 +51,11 @@ export class ChartLoader {
     intervalMs: number
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
+      const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
+      if (aggFieldPairNames.some(a => a.agg === '')) {
+        // no aggregation, this must be a detector function that has no ES equivalent
+        return {};
+      }
       const splitFieldName = splitField !== null ? splitField.name : null;
 
       const resp = await newJobLineChart(
@@ -60,7 +65,7 @@ export class ChartLoader {
         end,
         intervalMs,
         this._query,
-        aggFieldPairs.map(getAggFieldPairNames),
+        aggFieldPairNames,
         splitFieldName,
         splitFieldValue
       );
@@ -81,6 +86,11 @@ export class ChartLoader {
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
       const splitFieldName = splitField !== null ? splitField.name : '';
+      const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
+      if (aggFieldPairNames.some(a => a.agg === '')) {
+        // no aggregation, this must be a detector function that has no ES equivalent
+        return {};
+      }
 
       const resp = await newJobPopulationsChart(
         this._indexPatternTitle,
@@ -89,7 +99,7 @@ export class ChartLoader {
         end,
         intervalMs,
         this._query,
-        aggFieldPairs.map(getAggFieldPairNames),
+        aggFieldPairNames,
         splitFieldName
       );
       if (resp.error !== undefined) {
@@ -144,7 +154,7 @@ export function getAggFieldPairNames(af: AggFieldPair) {
       : { field: null, value: null };
 
   return {
-    agg: af.agg.dslName,
+    agg: af.agg.dslName || '',
     field: af.field.id,
     by,
   };

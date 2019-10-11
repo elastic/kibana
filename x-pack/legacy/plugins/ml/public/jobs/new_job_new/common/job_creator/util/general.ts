@@ -5,7 +5,7 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
-import { Job, Datafeed } from '../configs';
+import { Job, Datafeed, Detector } from '../configs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import {
   ML_JOB_AGGREGATION,
@@ -17,8 +17,8 @@ import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from 
 import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
-export function getRichDetectors(job: Job, datafeed: Datafeed) {
-  const detectors = getDetectors(job, datafeed);
+export function getRichDetectors(job: Job, datafeed: Datafeed, advanced: boolean = false) {
+  const detectors = advanced ? getDetectorsAdvanced(job, datafeed) : getDetectors(job, datafeed);
   return detectors.map(d => {
     return {
       agg: newJobCapsService.getAggById(d.function),
@@ -34,6 +34,10 @@ export function getRichDetectors(job: Job, datafeed: Datafeed) {
       excludeFrequent: d.exclude_frequent || null,
     };
   });
+}
+
+function getDetectorsAdvanced(job: Job, datafeed: Datafeed) {
+  return processFieldlessAggs(job.analysis_config.detectors);
 }
 
 function getDetectors(job: Job, datafeed: Datafeed) {
@@ -63,18 +67,9 @@ function getDetectors(job: Job, datafeed: Datafeed) {
     }
   } else {
     // all other detectors.
+    detectors = processFieldlessAggs(detectors);
     detectors = detectors.map(d => {
       switch (d.function) {
-        // if a count function is used, add EVENT_RATE_FIELD_ID as its field
-        case ML_JOB_AGGREGATION.COUNT:
-          return { ...d, field_name: EVENT_RATE_FIELD_ID };
-
-        case ML_JOB_AGGREGATION.HIGH_COUNT:
-          return { ...d, field_name: EVENT_RATE_FIELD_ID };
-
-        case ML_JOB_AGGREGATION.LOW_COUNT:
-          return { ...d, field_name: EVENT_RATE_FIELD_ID };
-
         // if sparse data functions were used, replace them with their non-sparse versions
         // the sparse data flag has already been determined and set, so this information is not being lost.
         case ML_JOB_AGGREGATION.NON_ZERO_COUNT:
@@ -101,6 +96,27 @@ function getDetectors(job: Job, datafeed: Datafeed) {
     });
   }
   return detectors;
+}
+
+// if a fieldless function is used, add EVENT_RATE_FIELD_ID as its field
+function processFieldlessAggs(detectors: Detector[]) {
+  return detectors.map(d => {
+    switch (d.function) {
+      case ML_JOB_AGGREGATION.COUNT:
+      case ML_JOB_AGGREGATION.HIGH_COUNT:
+      case ML_JOB_AGGREGATION.LOW_COUNT:
+      case ML_JOB_AGGREGATION.NON_ZERO_COUNT:
+      case ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT:
+      case ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT:
+      case ML_JOB_AGGREGATION.RARE:
+      case ML_JOB_AGGREGATION.FREQ_RARE:
+      case ML_JOB_AGGREGATION.TIME_OF_DAY:
+      case ML_JOB_AGGREGATION.TIME_OF_WEEK:
+        return { ...d, field_name: EVENT_RATE_FIELD_ID };
+      default:
+        return d;
+    }
+  });
 }
 
 // determine whether the job has been configured to run on sparse data
