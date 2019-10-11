@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import { SavedObject } from '../../../../../../../core/public';
+import { SavedObjectsClient } from '../../../../../../../core/public';
 
-export interface RecipeAttributes {
-  text: string;
-  [key: string]: any;
+import { CRUDObject } from './crud_object';
+import * as recipe from '../models/recipe';
+
+export interface Dependencies {
+  client: SavedObjectsClient;
 }
 
-export type Recipe = SavedObject<RecipeAttributes>;
+export const createAppDatabase = ({ client }: Dependencies) => ({
+  recipes: new CRUDObject<recipe.RecipeAttributes>(recipe.type, client),
+});
 
-export const type = 'recipe';
+export type AppDatabase = ReturnType<typeof createAppDatabase>;

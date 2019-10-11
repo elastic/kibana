@@ -17,10 +17,23 @@
  * under the License.
  */
 
-import { SavedObjectsClient } from '../../../../../../core/public';
+import { SavedObjectsClient, SavedObjectAttributes } from '../../../../../../../core/public';
 
-export class Database {
-  constructor(private readonly client: SavedObjectsClient) {}
+export class CRUDObject<A extends SavedObjectAttributes> {
+  constructor(private readonly type: string, private readonly client: SavedObjectsClient) {}
+
+  async get(id: string): Promise<A> {
+    const simpleObj = await this.client.get<A>(this.type, id);
+    return simpleObj.attributes;
+  }
+
+  async create(obj: A): Promise<void> {
+    await this.client.create(this.type, obj, {});
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.client.delete(this.type, id);
+  }
+
+  // TODO: Figure out get all.
 }
-
-export const createDatabase = ({ client }: { client: SavedObjectsClient }) => new Database(client);

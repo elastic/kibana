@@ -20,6 +20,7 @@
 import React, { createContext, useContext } from 'react';
 import { NotificationsSetup } from '../../../../../../../core/public';
 import { History, Storage, Settings } from '../../services';
+import { AppDatabase } from '../app_database';
 
 interface ContextValue {
   services: {
@@ -27,6 +28,7 @@ interface ContextValue {
     storage: Storage;
     settings: Settings;
     notifications: NotificationsSetup;
+    database: AppDatabase;
   };
   docLinkVersion: string;
   ResizeChecker: any;
