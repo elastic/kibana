@@ -51,11 +51,7 @@ export function useFetcher(
     initialState?: unknown;
   } = {}
 ) {
-  const {
-    notifications: {
-      toasts: { addWarning }
-    }
-  } = useKibanaCore();
+  const { notifications } = useKibanaCore();
   const { preservePreviousData = true } = options;
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
@@ -98,7 +94,7 @@ export function useFetcher(
       } catch (e) {
         const err = e as KFetchError;
         if (!didCancel) {
-          addWarning({
+          notifications.toasts.addWarning({
             title: i18n.translate('xpack.apm.fetcher.error.title', {
               defaultMessage: `Error while fetching resource`
             }),
