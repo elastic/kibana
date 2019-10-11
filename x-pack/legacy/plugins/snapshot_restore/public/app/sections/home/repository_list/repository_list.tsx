@@ -99,9 +99,19 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryList.emptyPromptTitle"
-              defaultMessage="You need a repository to store your snapshots"
+              defaultMessage="You don't have any repositories yet"
             />
           </h1>
+        }
+        body={
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryList.emptyPromptDescription"
+                defaultMessage="You need a repository to store your snapshots."
+              />
+            </p>
+          </Fragment>
         }
         actions={
           <EuiButton

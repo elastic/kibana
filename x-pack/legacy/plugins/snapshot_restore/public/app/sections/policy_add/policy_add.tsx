@@ -99,7 +99,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
           <h1 data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.snapshotRestore.addPolicyTitle"
-              defaultMessage="Create snapshot policy"
+              defaultMessage="Create policy"
             />
           </h1>
         </EuiTitle>
