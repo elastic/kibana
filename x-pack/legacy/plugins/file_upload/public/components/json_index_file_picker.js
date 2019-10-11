@@ -24,6 +24,7 @@ export class JsonIndexFilePicker extends Component {
     percentageProcessed: 0,
     featuresProcessed: 0,
     fileParseActive: false,
+    currentFileTracker: null,
   };
 
   async componentDidMount() {
@@ -52,7 +53,10 @@ export class JsonIndexFilePicker extends Component {
     }
     const file = fileArr[0];
 
-    this.setState({ fileParseActive: true }, () => this._parseFile(file));
+    this.setState({
+      fileParseActive: true,
+      currentFileTracker: Symbol()
+    }, () => this._parseFile(file));
   };
 
   _checkFileSize = ({ size }) => {
@@ -128,6 +132,7 @@ export class JsonIndexFilePicker extends Component {
   }, 150);
 
   async _parseFile(file) {
+    const { currentFileTracker } = this.state;
     const {
       setFileRef, setParsedFile, resetFileAndIndexSettings, onFileUpload,
       transformDetails, setIndexName
@@ -164,10 +169,14 @@ export class JsonIndexFilePicker extends Component {
     if (!this._isMounted) {
       return;
     }
+
+    // If another file is replacing this one, leave file parse active
+    const boolFileParseActive =
+      currentFileTracker !== this.state.currentFileTracker;
     this.setState({
       percentageProcessed: 0,
       featuresProcessed: 0,
-      fileParseActive: false
+      fileParseActive: boolFileParseActive
     });
     if (!parsedFileResult) {
       resetFileAndIndexSettings();
