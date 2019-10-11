@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 
-export function routes(router: IRouter) {
+export function managementRoutes(router: IRouter) {
   router.get(
     {
       path: '/endpoint/process-lineage',

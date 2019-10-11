@@ -26,6 +26,7 @@ import { AppMountContext, AppMountParameters } from 'kibana/public';
 import { Nav } from './components/nav';
 import { Home } from './components/home';
 import { Management } from './components/management';
+import { AlertList } from './components/alert_list';
 
 const EndpointRouter = ({ basename, context }: { basename: string; context: AppMountContext }) => (
   <Router basename={basename}>
@@ -35,6 +36,7 @@ const EndpointRouter = ({ basename, context }: { basename: string; context: AppM
       </EuiPageSideBar>
       <Route path="/" exact component={Home} />
       <Route path="/management" component={Management} />
+      <Route path="/alerts" render={props => <AlertList {...props} context={context} />} />
     </EuiPage>
   </Router>
 );

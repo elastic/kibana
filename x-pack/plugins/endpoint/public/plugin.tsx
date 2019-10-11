@@ -13,12 +13,6 @@ export class EndpointPlugin implements Plugin<EndpointPluginSetup, EndpointPlugi
       title: 'Endpoint',
       async mount(context, params) {
         const { renderApp } = await import('./application');
-        context.core.http.get('/endpoint/process-lineage', {
-          query: {
-            uniqueProcessID: 'hi',
-            endpointID: 'hi from mount',
-          },
-        });
         return renderApp(context, params);
       },
     });

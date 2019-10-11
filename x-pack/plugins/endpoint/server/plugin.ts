@@ -5,12 +5,14 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
-import { routes } from './routes/management';
+import { managementRoutes } from './routes/management';
+import { alertsRoutes } from './routes/alerts';
 
 export class EndpointPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
     const router = core.http.createRouter();
-    routes(router);
+    managementRoutes(router);
+    alertsRoutes(router);
   }
 
   public start() {}
