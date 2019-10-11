@@ -9,11 +9,11 @@ import { useReducer } from 'react';
 import {
   getDatafeedId,
   getJobId,
-  isHealthyJobStatus,
+  isJobStatusWithResults,
   JobStatus,
   JobType,
-  SetupStatus,
   jobTypeRT,
+  SetupStatus,
 } from '../../../../common/log_analysis';
 import { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload, JobDefinition } from './api/ml_get_module';
@@ -308,7 +308,7 @@ const getSetupStatus = (
       return 'skippedButReconfigurable';
     } else if (setupStatus === 'hiddenAfterSuccess') {
       return setupStatus;
-    } else if (setupStatus === 'skipped' || isHealthyJobStatus(jobStatus)) {
+    } else if (setupStatus === 'skipped' || isJobStatusWithResults(jobStatus)) {
       return 'skipped';
     }
 

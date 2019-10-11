@@ -9,6 +9,7 @@ import React from 'react';
 import { JobStatus, SetupStatus } from '../../../../common/log_analysis';
 import { JobConfigurationOutdatedCallout } from './job_configuration_outdated_callout';
 import { JobDefinitionOutdatedCallout } from './job_definition_outdated_callout';
+import { JobStoppedCallout } from './job_stopped_callout';
 
 export const LogAnalysisJobProblemIndicator: React.FC<{
   jobStatus: JobStatus;
@@ -17,7 +18,7 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
   onRecreateMlJobForUpdate: () => void;
 }> = ({ jobStatus, setupStatus, onRecreateMlJobForReconfiguration, onRecreateMlJobForUpdate }) => {
   if (jobStatus === 'stopped') {
-    return <div>restart</div>;
+    return <JobStoppedCallout />;
   } else if (setupStatus === 'skippedButUpdatable') {
     return <JobDefinitionOutdatedCallout onRecreateMlJob={onRecreateMlJobForUpdate} />;
   } else if (setupStatus === 'skippedButReconfigurable') {
