@@ -334,65 +334,6 @@ describe('Lens App', () => {
 
         expect(getButton(instance).disableButton).toEqual(false);
       });
-
-      it('saves the latest doc and then prevents more saving', async () => {
-        const args = makeDefaultArgs();
-        args.editorFrame = frame;
-        (args.docStorage.save as jest.Mock).mockResolvedValue({ id: '1234' });
-
-        const instance = mount(<App {...args} />);
-
-        expect(frame.mount).toHaveBeenCalledTimes(1);
-
-        const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ filterableIndexPatterns: [], doc: ({ id: undefined } as unknown) as Document });
-
-        instance.update();
-
-        expect(getButton(instance).disableButton).toEqual(false);
-
-        act(() => {
-          getButton(instance).run(instance.getDOMNode());
-        });
-
-        expect(args.docStorage.save).toHaveBeenCalledWith({ id: undefined });
-
-        await waitForPromises();
-
-        expect(args.redirectTo).toHaveBeenCalledWith('1234');
-
-        instance.setProps({ docId: '1234' });
-
-        expect(args.docStorage.load).not.toHaveBeenCalled();
-
-        expect(getButton(instance).disableButton).toEqual(true);
-      });
-
-      it('handles save failure by showing a warning, but still allows another save', async () => {
-        const args = makeDefaultArgs();
-        args.editorFrame = frame;
-        (args.docStorage.save as jest.Mock).mockRejectedValue({ message: 'failed' });
-
-        const instance = mount(<App {...args} />);
-
-        const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ filterableIndexPatterns: [], doc: ({ id: undefined } as unknown) as Document });
-
-        instance.update();
-
-        act(() => {
-          getButton(instance).run(instance.getDOMNode());
-        });
-
-        await waitForPromises();
-        await waitForPromises();
-
-        expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
-        expect(args.redirectTo).not.toHaveBeenCalled();
-        await waitForPromises();
-
-        expect(getButton(instance).disableButton).toEqual(false);
-      });
     });
   });
 
