@@ -289,6 +289,7 @@ export function App({
             onSave={props => {
               const doc = {
                 ...lastKnownDoc,
+                id: props.newCopyOnSave ? undefined : lastKnownDoc.id,
                 title: props.newTitle,
               };
 
@@ -319,7 +320,7 @@ export function App({
             }}
             onClose={() => setState(s => ({ ...s, isSaveModalVisible: false }))}
             title={lastKnownDoc.title || ''}
-            showCopyOnSave={false}
+            showCopyOnSave={true}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}
