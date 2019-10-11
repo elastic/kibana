@@ -17,7 +17,7 @@ export function SourceModal(props: SourcePickerProps) {
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.graph.sourceModal.title"
-            defaultMessage="Choose index pattern"
+            defaultMessage="Select a data source"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
