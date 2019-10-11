@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Git, { CloneOptions } from '@elastic/nodegit';
 import assert from 'assert';
-import fs from 'fs';
 import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
-
+import { prepareProjectByCloning as prepareProject } from '../test_utils';
 import { GitOperations } from '../git_operations';
 import { CommitIndexRequest, WorkerReservedProgress } from '../../model';
 import { CommitIndexer } from '../indexer/commit_indexer';
@@ -32,29 +30,6 @@ const esClient = {
     putAlias: emptyAsyncFunc,
   },
 };
-
-function prepareProject(url: string, p: string) {
-  const opts: CloneOptions = {
-    bare: 1,
-    fetchOpts: {
-      callbacks: {
-        certificateCheck: () => 0,
-      },
-    },
-  };
-
-  return new Promise(resolve => {
-    if (!fs.existsSync(p)) {
-      rimraf(p, error => {
-        Git.Clone.clone(url, p, opts).then(repo => {
-          resolve(repo);
-        });
-      });
-    } else {
-      resolve();
-    }
-  });
-}
 
 const repoUri = 'github.com/elastic/TypeScript-Node-Starter';
 

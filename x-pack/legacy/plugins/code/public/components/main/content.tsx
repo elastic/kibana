@@ -234,6 +234,7 @@ class CodeContent extends React.PureComponent<Props, State> {
       const rawButtonOptions: EuiButtonGroupOption[] = [
         {
           id: 'Raw',
+          className: 'eui-hideFor--m eui-hideFor--s eui-hideFor--xs',
           label: isText
             ? i18n.translate('xpack.code.mainPage.content.buttons.rawButtonLabel', {
                 defaultMessage: 'Raw',
