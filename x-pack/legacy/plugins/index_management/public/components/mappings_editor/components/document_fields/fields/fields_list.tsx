@@ -15,9 +15,9 @@ interface Props {
 
 export const FieldsList = React.memo(({ fields = [], treeDepth = 0 }: Props) => {
   return (
-    <ul>
+    <ul className="mappings-editor__fields-list">
       {fields.map(field => (
-        <li key={field.id}>
+        <li key={field.id} className="mappings-editor__fields-list-item">
           <FieldsListItem field={field} treeDepth={treeDepth} />
         </li>
       ))}

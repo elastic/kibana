@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBadge } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../../mappings_state';
 import { FieldsList } from './fields_list';
@@ -17,12 +17,6 @@ interface Props {
   field: NormalizedField;
   treeDepth?: number;
 }
-
-const inlineStyle = {
-  borderBottom: '1px solid #ddd',
-  display: 'flex',
-  flexDirection: 'column' as 'column',
-};
 
 export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   const dispatch = useDispatch();
@@ -49,12 +43,7 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   };
 
   const renderCreateField = () => {
-    if (status !== 'creatingField') {
-      return null;
-    }
-
-    // Root level (0) has does not have the "fieldToAddFieldTo" set
-    if (fieldToAddFieldTo !== id) {
+    if (status !== 'creatingField' || fieldToAddFieldTo !== id) {
       return null;
     }
 
@@ -71,29 +60,45 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
     }
 
     return (
-      <>
-        <EuiButton onClick={editField}>Edit</EuiButton>
-        {canHaveChildFields && (
-          <>
-            <EuiButton onClick={addField} disabled={isAddFieldBtnDisabled}>
-              Add field
-            </EuiButton>
-          </>
-        )}
-        <DeleteFieldProvider>
-          {deleteField => <EuiButton onClick={() => deleteField(field)}>Remove</EuiButton>}
-        </DeleteFieldProvider>
-      </>
+      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          {canHaveChildFields && (
+            <>
+              <EuiButtonEmpty onClick={addField} disabled={isAddFieldBtnDisabled}>
+                Add child
+              </EuiButtonEmpty>
+            </>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={editField}>Edit</EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DeleteFieldProvider>
+            {deleteField => (
+              <EuiButtonEmpty onClick={() => deleteField(field)}>Remove</EuiButtonEmpty>
+            )}
+          </DeleteFieldProvider>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
   return (
     <>
-      <div style={inlineStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', height: '82px' }}>
-          {source.name} | {source.type} {renderActionButtons()}
-        </div>
-        {status === 'idle' && canHaveChildFields && isAddFieldBtnDisabled && (
+      <div>
+        <EuiFlexGroup alignItems="center" className="mappings-editor__fields-list-item__field">
+          <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__name">
+            {source.name}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__type">
+            <EuiBadge color="hollow">{source.type}</EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem className="mappings-editor__fields-list-item__actions">
+            {renderActionButtons()}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {/* {status === 'idle' && canHaveChildFields && isAddFieldBtnDisabled && (
           <p style={{ fontSize: '12px', margin: '-10px 0 6px', color: '#777' }}>
             You have reached the maximum depth for the mappings editor. Switch to the{' '}
             <EuiButtonEmpty
@@ -103,13 +108,11 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
             </EuiButtonEmpty>
             to add more fields.
           </p>
-        )}
+        )} */}
       </div>
 
       {hasChildFields && (
-        <div style={{ paddingLeft: '20px' }}>
-          <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} />
-        </div>
+        <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} />
       )}
 
       {renderCreateField()}

@@ -33,13 +33,13 @@ export const DocumentFields = () => {
   };
 
   const renderAddFieldButton = () => {
-    if (status !== 'idle') {
-      return null;
-    }
+    const isDisabled = status !== 'idle';
     return (
       <>
         <EuiSpacer />
-        <EuiButton onClick={addField}>Add field</EuiButton>
+        <EuiButton onClick={addField} disabled={isDisabled}>
+          Add field
+        </EuiButton>
       </>
     );
   };

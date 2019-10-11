@@ -33,7 +33,7 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
   }, [form]);
 
   return (
-    <Form form={form} className="mappings-editor">
+    <Form form={form} className="mappings-editor__configuration">
       <FormRow title="Configuration" description="Global settings for the index mappings">
         <UseField
           path="dynamic"

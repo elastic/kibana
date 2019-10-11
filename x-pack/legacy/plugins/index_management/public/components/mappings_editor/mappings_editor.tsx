@@ -45,13 +45,14 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue }: Props) => 
         };
 
         return (
-          <>
+          <div className="mappings-editor">
             <ConfigurationForm defaultValue={configurationDefaultValue} />
             <DocumentFieldsHeaders />
+            <EuiSpacer />
             {renderEditor()}
-            <EuiSpacer size={'l'} />
-            <EditorToggleControls editor={editor} />
-          </>
+            {/* <EuiSpacer size={'l'} />
+            <EditorToggleControls editor={editor} /> */}
+          </div>
         );
       }}
     </MappingsState>
