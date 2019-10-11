@@ -175,15 +175,18 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   private shouldEnablePlugin(
     pluginName: PluginName,
-    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>
+    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
+    parents: PluginName[] = []
   ): boolean {
     const pluginInfo = pluginEnableStatuses.get(pluginName);
     return (
       pluginInfo !== undefined &&
       pluginInfo.isEnabled &&
-      pluginInfo.plugin.requiredPlugins.every(dependencyName =>
-        this.shouldEnablePlugin(dependencyName, pluginEnableStatuses)
-      )
+      pluginInfo.plugin.requiredPlugins
+        .filter(dep => !parents.includes(dep))
+        .every(dependencyName =>
+          this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
+        )
     );
   }
 }

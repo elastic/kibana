@@ -271,6 +271,50 @@ Array [
 `);
 });
 
+test('`discover` does not throw in case of cyclic plugin dependencies', async () => {
+  const firstPlugin = new PluginWrapper({
+    path: 'path-1',
+    manifest: {
+      id: 'first-plugin',
+      version: 'some-version',
+      configPath: 'path-1d',
+      kibanaVersion: '7.0.0',
+      requiredPlugins: ['second-plugin'],
+      optionalPlugins: [],
+      server: true,
+      ui: true,
+    },
+    opaqueId: Symbol(),
+    initializerContext: { logger } as any,
+  });
+  const secondPlugin = new PluginWrapper({
+    path: 'path-2',
+    manifest: {
+      id: 'second-plugin',
+      version: 'some-version',
+      configPath: 'path-2',
+      kibanaVersion: '7.0.0',
+      requiredPlugins: ['first-plugin'],
+      optionalPlugins: [],
+      server: true,
+      ui: true,
+    },
+    opaqueId: Symbol(),
+    initializerContext: { logger } as any,
+  });
+  mockDiscover.mockReturnValue({
+    error$: from([]),
+    plugin$: from([firstPlugin, secondPlugin]),
+  });
+
+  await expect(pluginsService.discover()).resolves.toBeUndefined();
+
+  expect(mockDiscover).toHaveBeenCalledTimes(1);
+  expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
+  expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
+  expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
+});
+
 test('`discover` properly invokes plugin discovery and ignores non-critical errors.', async () => {
   const firstPlugin = new PluginWrapper({
     path: 'path-1',
