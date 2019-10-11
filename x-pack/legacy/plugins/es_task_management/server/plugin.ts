@@ -7,7 +7,7 @@
 import { CoreSetup, PluginsSetup } from './legacy';
 import { API_BASE_PATH } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
-export class TasksPlugin {
+export class EsTasksPlugin {
   public setup(coreSetup: CoreSetup, pluginsSetup: PluginsSetup) {
     const {
       __LEGACY: {

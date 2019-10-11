@@ -6,13 +6,13 @@
 
 import { LICENSE_TYPE_BASIC } from '../../../common/constants';
 
-const ID = 'tasks';
+const ID = 'es_task_management';
 
 export const PLUGIN = {
   ID: ID as typeof ID,
   getI18nName: (i18n: any): string =>
     i18n.translate('xpack.tasks.appName', {
-      defaultMessage: 'Tasks',
+      defaultMessage: 'Task Management',
     }),
   MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as typeof LICENSE_TYPE_BASIC,
 };

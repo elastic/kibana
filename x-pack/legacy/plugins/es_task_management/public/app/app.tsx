@@ -31,7 +31,7 @@ export const App = () => {
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={true}>
             <h1 data-test-subj="appTitle">
-              <FormattedMessage id="xpack.tasks.home.tasksTitle" defaultMessage="Task management" />
+              <FormattedMessage id="xpack.tasks.home.tasksTitle" defaultMessage="Task Management" />
             </h1>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -43,7 +43,7 @@ export const App = () => {
             >
               <FormattedMessage
                 id="xpack.tasks.home.tasksDocLinkText"
-                defaultMessage="Task management docs"
+                defaultMessage="Task Management docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

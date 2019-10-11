@@ -11,7 +11,7 @@ import { PLUGIN } from './common/constants';
 import { plugin as initServerPlugin } from './server';
 import { createShim } from './server/legacy';
 
-export function tasks(kibana: any) {
+export function esTaskManagement(kibana: any) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     configPrefix: 'xpack.tasks',
@@ -19,7 +19,7 @@ export function tasks(kibana: any) {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/app/index.scss'),
-      managementSections: ['plugins/tasks'],
+      managementSections: ['plugins/es_task_management'],
     },
     config(Joi: any) {
       return Joi.object({

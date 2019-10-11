@@ -13,20 +13,27 @@ import { mountReactApp, unmountReactApp, BASE_PATH, REACT_ROOT_ID } from './app'
 
 import { documentationService } from './app/services/documentation';
 import { uiMetricService } from './app/services/ui_metric';
+import { httpService } from './app/services/http';
 
-export class TasksPlugin {
+export class EsTaskManagementPlugin {
   public start(core: Core, plugins: Plugins): void {
     const {
       __LEGACY: { management, uiMetric },
     } = plugins;
 
-    const { docLinks } = core;
+    const {
+      docLinks,
+      http,
+      __LEGACY: { i18n },
+    } = core;
 
     // Register Management section
     const esSection = management.getSection('elasticsearch');
     esSection.register(PLUGIN.ID, {
       visible: true,
-      display: 'Tasks',
+      display: i18n.translate('xpack.tasks.appName', {
+        defaultMessage: 'Task Management',
+      }),
       order: 11,
       url: `#${BASE_PATH}`,
     });
@@ -34,6 +41,7 @@ export class TasksPlugin {
     // Initialize services
     documentationService.init(docLinks);
     uiMetricService.init(uiMetric.createUiStatsReporter);
+    httpService.init(http);
 
     // Register Angular route
     routes.when(`${BASE_PATH}/:section?/:subsection?`, {

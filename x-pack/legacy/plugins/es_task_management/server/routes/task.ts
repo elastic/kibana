@@ -11,5 +11,5 @@ export const getAllHandler: RouterRouteHandler = async (_req, callWithRequest): 
 };
 
 export function registerTaskRoutes(router: Router) {
-  router.get('/', getAllHandler);
+  router.get('/tasks', getAllHandler);
 }

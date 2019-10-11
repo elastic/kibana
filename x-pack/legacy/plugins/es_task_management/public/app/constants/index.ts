@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createShim } from './legacy';
-import { TasksPlugin } from './plugin';
+export const BASE_PATH: string = '/management/elasticsearch/task_management';
 
-export const plugin = () => new TasksPlugin();
+export const REACT_ROOT_ID: string = 'esTaskManagementReactRoot';
 
-const { coreStart, pluginsStart } = createShim();
-plugin().start(coreStart, pluginsStart);
+export * from './ui_metric';

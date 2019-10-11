@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const UIM_APP_NAME: string = 'tasks';
+import { createShim } from './legacy';
+import { EsTaskManagementPlugin } from './plugin';
 
-export const UIM_TASKS_LIST_LOAD: string = 'tasks_list_load';
+export const plugin = () => new EsTaskManagementPlugin();
+
+const { coreStart, pluginsStart } = createShim();
+plugin().start(coreStart, pluginsStart);

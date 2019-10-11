@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TasksPlugin } from './plugin';
 
-export function plugin() {
-  return new TasksPlugin();
-}
+export { httpService } from './http';
+export * from './task_requests';

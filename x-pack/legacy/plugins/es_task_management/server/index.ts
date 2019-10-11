@@ -3,12 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EsTasksPlugin } from './plugin';
 
-export {
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestConfig,
-  UseRequestResponse,
-  sendRequest,
-  useRequest,
-} from '../../../../../src/plugins/es_ui_shared/public/request';
+export function plugin() {
+  return new EsTasksPlugin();
+}
