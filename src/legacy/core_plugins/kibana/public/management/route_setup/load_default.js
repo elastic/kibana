@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { banners } from 'ui/notify';
-import { NoDefaultIndexPattern } from 'ui/index_patterns';
+import { NoDefaultIndexPattern, NoDefinedIndexPatterns } from 'ui/index_patterns';
 import uiRoutes from 'ui/routes';
 import {
   EuiCallOut,
@@ -74,7 +74,12 @@ export default function (opts) {
       return indexPatterns.getIds()
         .then(function (patterns) {
           if (route.requireIndexPatternLength && !patterns.length) {
-            throw new NoDefaultIndexPattern();
+            throw new NoDefinedIndexPatterns();
+          }
+          if(route.requireIndexPatternLength && !route.requireDefaultIndex) {
+            // iIn this case e.g. Discover takes care of the defaultIndex logic
+            // Users with lack of permissions would see an error when a defaultIndex is persisted
+            return;
           }
 
           let defaultId = config.get('defaultIndex');
@@ -103,8 +108,8 @@ export default function (opts) {
 
       // failure
       function (err, kbnUrl) {
-        const hasDefault = !(err instanceof NoDefaultIndexPattern);
-        if (hasDefault || !whenMissingRedirectTo) throw err; // rethrow
+        const isKnowException = (err instanceof NoDefaultIndexPattern) || (err instanceof NoDefinedIndexPatterns);
+        if (!isKnowException || !whenMissingRedirectTo) throw err; // rethrow
 
         kbnUrl.change(whenMissingRedirectTo());
 
