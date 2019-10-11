@@ -59,11 +59,11 @@ describe('DiscoverFieldSearch', () => {
     expect(btn.prop('aria-label')).toEqual('Hide field filter settings');
   });
 
-  test('change showFilter value should change facet selection', () => {
+  test('change filtersActive should change facet selection', () => {
     const { comp } = mountComponent();
     let btn = findTestSubject(comp, 'toggleFieldFilterButton');
     expect(btn.hasClass('euiFacetButton--isSelected')).toBeFalsy();
-    comp.setProps({ showFilter: true });
+    comp.setProps({ filtersActive: 3 });
     btn = findTestSubject(comp, 'toggleFieldFilterButton');
     expect(btn.hasClass('euiFacetButton--isSelected')).toBe(true);
   });

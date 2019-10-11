@@ -91,7 +91,7 @@ export function DiscoverFieldSearch({
         data-test-subj="toggleFieldFilterButton"
         className="dscToggleFieldFilterButton"
         icon={<EuiIcon type="filter" />}
-        isSelected={showFilter}
+        isSelected={filtersActive > 0}
         quantity={filtersActive}
         onClick={() => onShowFilter()}
       >
