@@ -7,18 +7,44 @@
 import * as jsts from 'jsts';
 import rewind from 'geojson-rewind';
 
+const GeoJSONIO = (() => {
+  let geoJSONReader;
+  let geoJSONWriter;
+
+  const createNewGeoJSONReader = () => new jsts.io.GeoJSONReader();
+  const createNewGeoJSONWriter = () => new jsts.io.GeoJSONWriter();
+
+  return {
+    read: feature => {
+      if (!geoJSONReader) {
+        geoJSONReader = createNewGeoJSONReader();
+      }
+      return geoJSONReader.read(feature);
+    },
+    write: geometry => {
+      if (!geoJSONWriter) {
+        geoJSONWriter = createNewGeoJSONWriter();
+      }
+      return geoJSONWriter.write(geometry);
+    }
+  };
+})();
+
 export function geoJsonCleanAndValidate(feature) {
 
-  const reader = new jsts.io.GeoJSONReader();
-  const jstsGeometry = reader.read(feature);
+  const geometryReadResult = GeoJSONIO.read(feature);
 
-  // Pass features for cleaning
-  const cleanedGeometry = cleanGeometry(jstsGeometry);
+  const cleanedGeometry = cleanGeometry(geometryReadResult);
 
-  // Pass entire geoJson object for winding
+  // For now, return the feature unmodified
+  // TODO: Consider more robust UI feedback and general handling
+  // for features that fail cleaning and/or validation
+  if (!cleanedGeometry) {
+    return feature;
+  }
+
   // JSTS does not enforce winding order, wind in clockwise order
-  const correctlyWindedGeometry = cleanedGeometry
-    && rewind(cleanedGeometry, false);
+  const correctlyWindedGeometry = rewind(cleanedGeometry, false);
 
   return {
     ...feature,
@@ -27,12 +53,13 @@ export function geoJsonCleanAndValidate(feature) {
 }
 
 export function cleanGeometry({ geometry }) {
-  const writer = new jsts.io.GeoJSONWriter();
   if (!geometry) {
     return;
   }
-  const cleanedGeometry = (geometry.isSimple() || geometry.isValid())
-    ? writer.write(geometry)
-    : writer.write(geometry.buffer(0));
+  const geometryToWrite = (geometry.isSimple() || geometry.isValid())
+    ? geometry
+    : geometry.buffer(0);
+  const cleanedGeometry = GeoJSONIO.write(geometryToWrite);
+
   return cleanedGeometry;
 }
