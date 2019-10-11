@@ -173,6 +173,13 @@
     ],
     "fields": [
       {
+        "id": "@timestamp",
+        "name": "@timestamp",
+        "type": "date",
+        "aggregatable": true,
+        "aggIds": []
+      },
+      {
         "id": "airline",
         "name": "airline",
         "type": "keyword",
