@@ -22,15 +22,35 @@ import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { APMError } from '../../../../typings/es_schemas/ui/APMError';
 import { Span } from '../../../../typings/es_schemas/ui/Span';
 
+type Item = Transaction | APMError | Span;
+
 interface Props {
-  item: Transaction | APMError | Span;
+  item: Item;
   sections: SectionType[];
 }
 
+const filterSections = (sections: SectionType[], item: Item) =>
+  sections.filter(({ key, required, properties }) => {
+    if (required) {
+      return true;
+    }
+    const hasKey = has(item, key);
+    if (!hasKey) {
+      return false;
+    }
+
+    if (properties) {
+      let sectionData: Record<string, unknown> = get(item, key);
+      sectionData = pick(sectionData, properties);
+      if (isEmpty(sectionData)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
 export function MetadataTable({ item, sections }: Props) {
-  const filteredSections = sections.filter(
-    ({ key, required }) => required || has(item, key)
-  );
+  const filteredSections = filterSections(sections, item);
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="flexEnd">
@@ -46,9 +66,6 @@ export function MetadataTable({ item, sections }: Props) {
         let sectionData: Record<string, unknown> = get(item, section.key);
         if (section.properties) {
           sectionData = pick(sectionData, section.properties);
-          if (isEmpty(sectionData) && !section.required) {
-            return;
-          }
         }
         return (
           <div key={section.key}>
