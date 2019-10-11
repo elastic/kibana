@@ -2,22 +2,12 @@
 
 exports[`Commit component renders correctly for a commit 1`] = `
 <Commit
-  commit={
-    Object {
-      "author": "author",
-      "committer": "committer",
-      "id": "4ba67b8",
-      "message": "This is my commit message
-
-This is the description",
-      "parents": Array [
-        "9817575",
-      ],
-      "treeId": "96440ceb55e04a99d33c1c8ee021400a680fbf74",
-      "updated": 2222-11-11T00:00:00.000Z,
-    }
-  }
+  commitId="4ba67b8"
+  committer="committer"
   date="11/11/2222"
+  message="This is my commit message
+
+This is the description"
   repoUri="github.com/elastic/code"
   showRepoLink={false}
 >

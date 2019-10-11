@@ -16,13 +16,15 @@ interface Props {
   repoUri: string;
 }
 
-export const CommitGroup = (props: Props) => {
-  const commitList = props.commits.map(commit => (
+export const CommitGroup = ({ date, commits, repoUri }: Props) => {
+  const commitList = commits.map(({ id, committer, message }) => (
     <Commit
-      commit={commit}
-      key={commit.id}
-      date={props.date}
-      repoUri={props.repoUri}
+      key={id}
+      commitId={id}
+      committer={committer}
+      date={date}
+      message={message}
+      repoUri={repoUri}
       showRepoLink={false}
     />
   ));
@@ -40,7 +42,7 @@ export const CommitGroup = (props: Props) => {
                 <FormattedMessage
                   id="xpack.code.mainPage.history.commitsOnTitle"
                   defaultMessage="Commits on {date}"
-                  values={{ date: props.date }}
+                  values={{ date }}
                 />
               </EuiTextColor>
             </h4>

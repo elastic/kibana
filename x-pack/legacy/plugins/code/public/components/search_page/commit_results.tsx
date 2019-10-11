@@ -17,15 +17,17 @@ interface Props {
 
 export const CommitResults = ({ results }: Props) => (
   <>
-    {results.map(({ id, repoUri, message, date, committer }) => {
-      const commitInfo = { message, committer: committer.name, id };
-      const formattedDate = formatCommitDate(date);
-
-      return (
-        <div key={id} className="codeSearch__result">
-          <Commit date={formattedDate} commit={commitInfo} repoUri={repoUri} />
-        </div>
-      );
-    })}
+    {results.map(({ id, repoUri, message, date, committer }) => (
+      <div key={id} className="codeSearch__result">
+        <Commit
+          commitId={id}
+          committer={committer.name}
+          date={formatCommitDate(date)}
+          message={message}
+          repoUri={repoUri}
+          showRepoLink={true}
+        />
+      </div>
+    ))}
   </>
 );

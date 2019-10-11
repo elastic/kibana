@@ -9,25 +9,19 @@ import { mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 
 import { Commit } from './commit';
-import { CommitInfo } from '../../../model/commit';
 
 describe('Commit component', () => {
   test('renders correctly for a commit', () => {
-    const commitInfo: CommitInfo = {
-      updated: new Date(Date.UTC(2222, 10, 11)),
-      message: 'This is my commit message\n\nThis is the description',
-      author: 'author',
-      committer: 'committer',
-      id: '4ba67b8',
-      parents: ['9817575'],
-      treeId: '96440ceb55e04a99d33c1c8ee021400a680fbf74',
-    };
+    const message = 'This is my commit message\n\nThis is the description';
+
     const wrapper = mount(
       <Commit
-        showRepoLink={false}
-        commit={commitInfo}
+        commitId="4ba67b8"
+        message={message}
+        committer="committer"
         date="11/11/2222"
         repoUri="github.com/elastic/code"
+        showRepoLink={false}
       />
     );
 

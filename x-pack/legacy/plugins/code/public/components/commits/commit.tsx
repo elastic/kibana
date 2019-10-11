@@ -19,7 +19,6 @@ import {
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CommitInfo } from '../../../model/commit';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { parseCommitMessage } from '../../../common/commit_utils';
 import { PathTypes } from '../../common/types';
@@ -89,17 +88,18 @@ const CommitActions = ({ commitId, repoUri }: ActionProps) => {
 };
 
 interface Props {
-  commit: CommitInfo;
+  commitId: string;
+  committer: string;
   date: string;
+  message: string;
   repoUri: string;
-  showRepoLink: boolean;
+  showRepoLink?: boolean;
 }
 
 export const Commit = (props: Props) => {
-  const { date, commit, repoUri, showRepoLink } = props;
-  const { message, committer, id } = commit;
+  const { commitId, committer, date, message, repoUri, showRepoLink } = props;
   const { summary, body } = parseCommitMessage(message);
-  const commitId = id.substring(0, COMMIT_ID_LENGTH);
+  const id = commitId.substring(0, COMMIT_ID_LENGTH);
 
   return (
     <EuiPanel className="code-timeline__commit--root">
@@ -122,7 +122,7 @@ export const Commit = (props: Props) => {
             <p className="eui-textTruncate">{body}</p>
           </EuiText>
         </div>
-        <CommitActions repoUri={repoUri} commitId={commitId} />
+        <CommitActions repoUri={repoUri} commitId={id} />
       </EuiFlexGroup>
     </EuiPanel>
   );
