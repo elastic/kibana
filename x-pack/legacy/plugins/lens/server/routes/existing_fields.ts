@@ -13,8 +13,17 @@ import {
   SavedObjectAttributes,
   IScopedClusterClient,
 } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 import { LensServerOptions } from '../server_options';
-import { ExistingFields, BASE_API_URL } from '../../common';
+import { BASE_API_URL } from '../../common';
+import { FieldDescriptor } from '../../../../../../src/legacy/server/index_patterns/service';
+
+/**
+ * The number of docs to sample to determine field empty status.
+ */
+const SAMPLE_SIZE = 500;
+
+type Document = Record<string, unknown>;
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -24,22 +33,12 @@ interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   typeMeta: string;
 }
 
-interface IndexPatternField {
-  name: string;
-  type: string;
-  esTypes: string[];
-}
-
-/**
- * The number of docs to sample to determine field empty status.
- */
-const SAMPLE_SIZE = 500;
-
-/**
- * Compute the list of fields which have data for the specified time range.
- */
-export async function existingFieldsRoute(opts: LensServerOptions) {
-  opts.router.get(
+export async function existingFieldsRoute(
+  setup: CoreSetup,
+  { getScopedSavedObjectsClient }: LensServerOptions
+) {
+  const router = setup.http.createRouter();
+  router.get(
     {
       path: `${BASE_API_URL}/existing_fields/{id}`,
       validate: {
@@ -54,23 +53,36 @@ export async function existingFieldsRoute(opts: LensServerOptions) {
       },
     },
     async (context, req, res) => {
-      const savedObjectsClient = opts.getScopedSavedObjectsClient(req);
+      const requestClient = context.core.elasticsearch.dataClient;
+      const savedObjectsClient = getScopedSavedObjectsClient(req);
       const { fromDate, toDate, timeZone } = req.query;
 
       try {
-        const existingFields = await fetchExistingFields({
-          savedObjectsClient,
+        const indexPattern = await fetchIndexPattern(req.params.id, savedObjectsClient);
+
+        const results = await fetchIndexPatternStats({
+          client: requestClient,
           fromDate,
           toDate,
+          indexPattern,
           timeZone,
-          indexPatternId: req.params.id,
-          client: context.core.elasticsearch.dataClient,
         });
 
-        return res.ok({ body: existingFields });
+        return res.ok({
+          body: {
+            id: indexPattern.id,
+            existingFieldNames: existingFields(results.hits.hits, indexPattern.fields),
+          },
+        });
       } catch (e) {
+        if (e.status === 404) {
+          return res.notFound();
+        }
         if (e.isBoom) {
-          return res.internalError(e);
+          if (e.output.statusCode === 404) {
+            return res.notFound();
+          }
+          return res.internalError(e.output.message);
         } else {
           return res.internalError({
             body: Boom.internal(e.message || e.name),
@@ -81,31 +93,49 @@ export async function existingFieldsRoute(opts: LensServerOptions) {
   );
 }
 
-async function fetchExistingFields({
-  indexPatternId,
-  savedObjectsClient,
-  ...statsOptions
-}: {
-  indexPatternId: string;
-  savedObjectsClient: SavedObjectsClientContract;
-  client: IScopedClusterClient;
-  fromDate?: string;
-  toDate?: string;
-  timeZone?: string;
-}) {
-  const indexPattern = await fetchIndexPattern(indexPatternId, savedObjectsClient);
-  const stats = await fetchIndexPatternStats({
-    ...statsOptions,
-    indexPattern,
-  });
+function exists(obj: unknown, path: string[], i = 0): boolean {
+  if (obj == null) {
+    return false;
+  }
 
-  return getExistingFields(indexPattern, stats.hits.hits);
+  if (Array.isArray(obj)) {
+    return obj.some(child => exists(child, path, i));
+  }
+
+  if (typeof obj === 'object') {
+    return exists((obj as Record<string, unknown>)[path[i]], path, i + 1);
+  }
+
+  return path.length === i;
+}
+
+function existingFields(docs: Array<{ _source: Document }>, fields: FieldDescriptor[]): string[] {
+  const allFields = fields.map(field => ({
+    name: field.name,
+    parent: field.parent,
+    path: (field.parent || field.name).split('.'),
+  }));
+  const missingFields = new Set(allFields);
+
+  for (const doc of docs) {
+    if (missingFields.size === 0) {
+      break;
+    }
+
+    missingFields.forEach(field => {
+      if (exists(doc._source, field.path)) {
+        missingFields.delete(field);
+      }
+    });
+  }
+
+  return allFields.filter(field => !missingFields.has(field)).map(f => f.name);
 }
 
 async function fetchIndexPattern(id: string, savedObjectsClient: SavedObjectsClientContract) {
   const result = await savedObjectsClient.get<SavedIndexPatternAttributes>('index-pattern', id);
   const { attributes } = result;
-  const allFields = JSON.parse(attributes.fields) as IndexPatternField[];
+  const allFields = JSON.parse(attributes.fields) as FieldDescriptor[];
   const compatibleFields = allFields.filter(
     ({ type: fieldType, esTypes }) =>
       fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
@@ -161,62 +191,5 @@ async function fetchIndexPatternStats({
       ...body,
       size: SAMPLE_SIZE,
     },
-  })) as SearchResponse<object>;
-}
-
-function exists(obj: unknown, path: string[], i = 0): boolean {
-  if (obj == null) {
-    return false;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.some(child => exists(child, path, i));
-  }
-
-  if (typeof obj === 'object') {
-    return exists((obj as Record<string, unknown>)[path[i]], path, i + 1);
-  }
-
-  return path.length === i;
-}
-
-function normalizeFieldName(name: string) {
-  return name.replace(/\.keyword$/, '');
-}
-
-function getExistingFields(
-  indexPattern: { id: string; fields: IndexPatternField[] },
-  docs: Array<{ _source: object }>
-): ExistingFields {
-  if (!docs.length) {
-    return {
-      id: indexPattern.id,
-      existingFieldNames: [],
-    };
-  }
-
-  const fieldPaths = indexPattern.fields
-    .filter(f => !f.name.startsWith('_'))
-    .map(f => normalizeFieldName(f.name).split('.'));
-  const missingFieldPaths = new Set(fieldPaths);
-
-  for (const doc of docs) {
-    if (missingFieldPaths.size === 0) {
-      break;
-    }
-
-    for (const fieldName of missingFieldPaths) {
-      if (exists(doc._source, fieldName)) {
-        missingFieldPaths.delete(fieldName);
-      }
-    }
-  }
-
-  return {
-    id: indexPattern.id,
-    existingFieldNames: _.without(
-      fieldPaths.map(p => p.join('.')),
-      ...Array.from(missingFieldPaths).map(f => f.join('.'))
-    ),
-  };
+  })) as SearchResponse<Document>;
 }

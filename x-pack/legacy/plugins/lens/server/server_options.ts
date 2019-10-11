@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, IRouter } from 'src/core/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 
 export type ScopedSavedObjectsProvider = (request: unknown) => SavedObjectsClientContract;
 
 export interface LensServerOptions {
-  router: IRouter;
   getScopedSavedObjectsClient: ScopedSavedObjectsProvider;
 }

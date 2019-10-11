@@ -10,7 +10,7 @@ import { LegacyPluginInitializer } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath } from './common';
-import { LensServer } from './server';
+import { lensServerPlugin } from './server';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 

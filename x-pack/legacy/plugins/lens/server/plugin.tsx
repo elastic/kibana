@@ -10,12 +10,6 @@ import { setupRoutes } from './routes';
 import { registerLensUsageCollector } from './usage';
 
 export class LensServer implements Plugin<{}, {}, {}, {}> {
-  private getScopedSavedObjectsClient: ScopedSavedObjectsProvider;
-
-  constructor(getScopedSavedObjectsClient: ScopedSavedObjectsProvider) {
-    this.getScopedSavedObjectsClient = getScopedSavedObjectsClient;
-  }
-
   setup(
     core: CoreSetup,
     plugins: {
@@ -29,7 +23,7 @@ export class LensServer implements Plugin<{}, {}, {}, {}> {
       config: KibanaConfig;
     }
   ) {
-    setupRoutes(core);
+    setupRoutes(core, plugins.savedObjects);
     registerLensUsageCollector(core, plugins);
 
     return {};
