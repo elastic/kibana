@@ -14,7 +14,13 @@ import { SearchSource } from '../../../kibana_services';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ES_SEARCH, ES_GEO_FIELD_TYPE, ES_SIZE_LIMIT, SORT_ORDER } from '../../../../common/constants';
+import {
+  ES_SEARCH,
+  ES_GEO_FIELD_TYPE,
+  ES_SIZE_LIMIT,
+  FEATURE_ID_PROPERTY_NAME,
+  SORT_ORDER,
+} from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
@@ -359,7 +365,7 @@ export class ESSearchSource extends AbstractESSource {
 
   async filterAndFormatPropertiesToHtml(properties) {
     const indexPattern = await this._getIndexPattern();
-    const propertyValues = await this._loadTooltipProperties(properties._id, indexPattern);
+    const propertyValues = await this._loadTooltipProperties(properties[FEATURE_ID_PROPERTY_NAME], indexPattern);
 
     return this._descriptor.tooltipProperties.map(propertyName => {
       return new ESTooltipProperty(propertyName, propertyName, propertyValues[propertyName], indexPattern);

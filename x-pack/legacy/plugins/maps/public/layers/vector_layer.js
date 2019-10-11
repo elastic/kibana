@@ -544,10 +544,12 @@ export class VectorLayer extends AbstractLayer {
     for (let i = 0; i < featureCollection.features.length; i++) {
       const id = randomizedIds[i];
       const feature = featureCollection.features[i];
-      feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
-      feature.id = id;
+      feature.id = id; // Mapbox feature state id, must be integer
+      if (!feature.properties[FEATURE_ID_PROPERTY_NAME]) {
+        // Default FEATURE_ID_PROPERTY_NAME to Mapbox feature state id when no id is provided by the source
+        feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
+      }
     }
-
   }
 
   async syncData(syncContext) {
