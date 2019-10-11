@@ -51,8 +51,8 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
       alpha: 1,
       visible: true,
       applyGlobalQuery: true,
-      style: { type: 'TILE', properties: {} },
-      type: 'TILE',
+      style: null,
+      type: 'VECTOR_TILE',
     },
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
       return [
