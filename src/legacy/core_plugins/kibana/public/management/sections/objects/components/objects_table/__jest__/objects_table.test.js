@@ -332,7 +332,9 @@ describe('ObjectsTable', () => {
       expect(fetchExportObjects).toHaveBeenCalledWith(mockSelectedSavedObjects, true);
       expect(addWarningMock).toHaveBeenCalledWith({
         title:
-          'Your file is downloading in the background. Some references could not be exported. Please see export file for more information',
+          'Your file is downloading in the background. ' +
+          'Some related objects could not be found. ' +
+          'Please see the last line in the exported file for a list of missing objects.',
       });
     });
 
