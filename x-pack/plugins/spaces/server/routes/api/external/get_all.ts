@@ -6,7 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { Space } from '../../../../common/model/space';
-import { GetSpacePurpose } from '../../../../common/model/types';
 import { wrapError } from '../../../lib/errors';
 import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
@@ -19,10 +18,11 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space',
       validate: {
         query: schema.object({
-          purpose: schema.maybe(
-            schema.oneOf([schema.literal('any'), schema.literal('copySavedObjectsIntoSpace')], {
+          purpose: schema.oneOf(
+            [schema.literal('any'), schema.literal('copySavedObjectsIntoSpace')],
+            {
               defaultValue: 'any',
-            })
+            }
           ),
         }),
       },
@@ -30,7 +30,7 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside GET /api/spaces/space`);
 
-      const purpose = request.query.purpose as GetSpacePurpose;
+      const purpose = request.query.purpose;
 
       const spacesClient = await spacesService.scopedClient(request);
 

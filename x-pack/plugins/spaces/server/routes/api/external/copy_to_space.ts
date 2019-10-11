@@ -86,13 +86,6 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
     })
   );
 
-  const retrySchema = schema.arrayOf(
-    schema.object({
-      type: schema.string(),
-      id: schema.string(),
-      overwrite: schema.boolean({ defaultValue: false }),
-    })
-  );
   externalRouter.post(
     {
       path: '/api/spaces/_resolve_copy_saved_objects_errors',
@@ -101,25 +94,21 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       },
       validate: {
         body: schema.object({
-          retries: schema.object(
-            {},
-            {
-              allowUnknowns: true,
-              validate: retries => {
-                const invalidKey = Object.keys(retries).find(key => !SPACE_ID_REGEX.test(key));
-                if (invalidKey) {
-                  return `Invalid space id: ${invalidKey}`;
-                }
-
-                for (const retry of Object.values(retries)) {
-                  try {
-                    retrySchema.validate(retry);
-                  } catch (e) {
-                    return e;
-                  }
+          retries: schema.recordOf(
+            schema.string({
+              validate: spaceId => {
+                if (!SPACE_ID_REGEX.test(spaceId)) {
+                  return `Invalid space id: ${spaceId}`;
                 }
               },
-            }
+            }),
+            schema.arrayOf(
+              schema.object({
+                type: schema.string(),
+                id: schema.string(),
+                overwrite: schema.boolean({ defaultValue: false }),
+              })
+            )
           ),
           objects: schema.arrayOf(
             schema.object({

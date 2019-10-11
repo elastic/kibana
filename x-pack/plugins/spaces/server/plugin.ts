@@ -6,14 +6,14 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import {
   SavedObjectsLegacyService,
   CoreSetup,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
-} from 'src/core/server';
-import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
+} from '../../../../src/core/server';
 import { SecurityPlugin } from '../../../legacy/plugins/security';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';

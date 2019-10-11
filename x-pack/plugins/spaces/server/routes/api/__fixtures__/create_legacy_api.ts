@@ -72,9 +72,6 @@ export const createLegacyAPI = ({
         new Readable({
           objectMode: true,
           read() {
-            // if (Array.isArray(payload.objects)) {
-            //   payload.objects.forEach((o: any) => this.push(o));
-            // }
             this.push(null);
           },
         })

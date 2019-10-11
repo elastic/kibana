@@ -336,7 +336,7 @@ describe('copy to space', () => {
       expect(() =>
         resolveConflicts.routeValidation.body!.validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[retries]: Invalid space id: invalid-space-id!@#$%^&*()"`
+        `"[key(\\"invalid-space-id!@#$%^&*()\\")]: Invalid space id: invalid-space-id!@#$%^&*()"`
       );
     });
 
