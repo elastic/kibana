@@ -27,6 +27,7 @@ interface Pagination {
 interface Data extends Action {
   actionType: ActionType['name'];
 }
+type ActionTypeIndex = Record<string, ActionType>;
 
 export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
   match: {
@@ -38,6 +39,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     core: { http },
   } = useAppDependencies();
 
+  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex>({});
   const [data, setData] = useState<Data[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorCode, setErrorCode] = useState<number | null>(null);
@@ -47,22 +49,39 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
 
   useEffect(() => {
     (async () => {
+      const actionTypes = await loadActionTypes({ http });
+      const index: ActionTypeIndex = {};
+      for (const actionType of actionTypes) {
+        index[actionType.id] = actionType;
+      }
+      setActionTypesIndex(index);
+    })();
+  });
+
+  useEffect(() => {
+    const updatedData: Data[] = [];
+    for (const action of data) {
+      updatedData.push({
+        ...action,
+        actionType: actionTypesIndex[action.actionTypeId]
+          ? actionTypesIndex[action.actionTypeId].name
+          : action.actionTypeId,
+      });
+    }
+    setData(updatedData);
+  }, [actionTypesIndex]);
+
+  useEffect(() => {
+    (async () => {
       setIsLoading(true);
       setErrorCode(null);
       try {
-        const [actionsResponse, actionTypesResponse] = await Promise.all([
-          loadActions({ http, sort, page }),
-          loadActionTypes({ http }),
-        ]);
-        const actionTypesById: Record<string, ActionType> = {};
-        for (const actionType of actionTypesResponse) {
-          actionTypesById[actionType.id] = actionType;
-        }
+        const actionsResponse = await loadActions({ http, sort, page });
         const updatedData = actionsResponse.data.map(
           (action: Action): Data => ({
             ...action,
-            actionType: actionTypesById[action.actionTypeId]
-              ? actionTypesById[action.actionTypeId].name
+            actionType: actionTypesIndex[action.actionTypeId]
+              ? actionTypesIndex[action.actionTypeId].name
               : action.actionTypeId,
           })
         );
