@@ -24,7 +24,7 @@ import { mockCoreContext } from '../core_context.mock';
 // @ts-ignore Typescript doesn't know about the jest mock
 import { KibanaMigrator, mockKibanaMigratorInstance } from './migrations/kibana/kibana_migrator';
 import { of } from 'rxjs';
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
 import { ScopedSavedObjectsClientProvider } from '.';
@@ -43,7 +43,7 @@ describe('SavedObjectsService', () => {
           .fn()
           .mockImplementation(() =>
             i++ <= 2
-              ? Promise.reject(new elasticsearch.errors.NoConnections())
+              ? Promise.reject(new legacyElasticsearch.errors.NoConnections())
               : Promise.resolve('success')
           ),
       };

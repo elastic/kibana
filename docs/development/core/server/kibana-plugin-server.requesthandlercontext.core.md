@@ -12,8 +12,8 @@ core: {
             client: SavedObjectsClientContract;
         };
         elasticsearch: {
-            dataClient: ScopedClusterClient;
-            adminClient: ScopedClusterClient;
+            dataClient: IScopedClusterClient;
+            adminClient: IScopedClusterClient;
         };
     };
 ```

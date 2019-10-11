@@ -41,3 +41,4 @@ export const TYPE_NUMBER = '`number`';
 export const TYPE_STRING = '`string`';
 export const URL = 'URL';
 export const UTC = 'UTC';
+export const ZIP = 'ZIP';

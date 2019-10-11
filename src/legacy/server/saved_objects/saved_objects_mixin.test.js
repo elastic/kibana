@@ -103,11 +103,22 @@ describe('Saved Objects Mixin', () => {
           waitUntilReady: jest.fn(),
         },
       },
+      newPlatform: {
+        __internals: {
+          elasticsearch: {
+            adminClient$: {
+              pipe: jest.fn().mockImplementation(() => ({
+                toPromise: () =>
+                  Promise.resolve({ adminClient: { callAsInternalUser: mockCallCluster } }),
+              })),
+            },
+          },
+        },
+      },
     };
     mockKbnServer = {
       newPlatform: {
-        start: { core: { savedObjects: { migrator, clientProvider } } },
-        setup: { core: { savedObjects: { clientProvider } } },
+        __internals: { kibanaMigrator: migrator, savedObjectsClientProvider: clientProvider },
       },
       server: mockServer,
       ready: () => {},
@@ -224,15 +235,15 @@ describe('Saved Objects Mixin', () => {
   describe('Saved object service', () => {
     let service;
 
-    beforeEach(() => {
-      savedObjectsMixin(mockKbnServer, mockServer);
+    beforeEach(async () => {
+      await savedObjectsMixin(mockKbnServer, mockServer);
       const call = mockServer.decorate.mock.calls.filter(
         ([objName, methodName]) => objName === 'server' && methodName === 'savedObjects'
       );
       service = call[0][2];
     });
 
-    it('should return all but hidden types', () => {
+    it('should return all but hidden types', async () => {
       expect(service).toBeDefined();
       expect(service.types).toEqual(['config', 'testtype', 'doc1', 'doc2']);
     });

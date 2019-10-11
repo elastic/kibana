@@ -39,11 +39,11 @@ export const getKibanaFrameworkAdapter = (
   );
   const canSave = get(capabilities, 'uptime.save', false);
   const props: UptimeAppProps = {
+    autocomplete,
     basePath: basePath.get(),
     canSave,
     client: createApolloClient(`${basePath.get()}/api/uptime/graphql`, 'true'),
     darkMode: core.uiSettings.get('theme:darkMode'),
-    autocomplete,
     i18n,
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,

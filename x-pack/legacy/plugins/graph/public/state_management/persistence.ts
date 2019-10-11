@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
 import { GraphWorkspaceSavedObject, Workspace } from '../types';
 import { GraphStoreDependencies, GraphState } from '.';
-import { setDatasource, datasourceSelector, IndexpatternDatasource } from './datasource';
+import { datasourceSelector } from './datasource';
+import { setDatasource, IndexpatternDatasource } from './datasource';
 import { loadFields, selectedFieldsSelector } from './fields';
 import { updateSettings, settingsSelector } from './advanced_settings';
 import { loadTemplates, templatesSelector } from './url_templates';
@@ -81,7 +82,6 @@ export const loadingSaga = ({
     yield put(updateSettings(advancedSettings));
     yield put(loadTemplates(urlTemplates));
 
-    // workspace won't be null because it's created in the same call stack
     getWorkspace()!.runLayout();
   }
 

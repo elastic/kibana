@@ -114,8 +114,9 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
  * @public
  */
 export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any>
-  extends Omit<SavedObject<T>, 'attributes'> {
+  extends Omit<SavedObject<T>, 'attributes' | 'references'> {
   attributes: Partial<T>;
+  references: SavedObjectReference[] | undefined;
 }
 
 /**

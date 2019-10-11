@@ -41,10 +41,10 @@
 
 import { Observable } from 'rxjs';
 import {
-  ClusterClient,
+  IClusterClient,
   ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
-  ScopedClusterClient,
+  IScopedClusterClient,
 } from './elasticsearch';
 import {
   HttpServiceSetup,
@@ -69,16 +69,17 @@ export {
 } from './context';
 export { CoreId } from './core_context';
 export {
-  CallAPIOptions,
   ClusterClient,
+  IClusterClient,
   Headers,
   ScopedClusterClient,
+  IScopedClusterClient,
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
-  APICaller,
   FakeRequest,
 } from './elasticsearch';
+export * from './elasticsearch/api_types';
 export {
   AuthenticationHandler,
   AuthHeaders,
@@ -169,6 +170,7 @@ export {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
+  SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsClientContract,
@@ -197,8 +199,8 @@ export interface RequestHandlerContext {
       client: SavedObjectsClientContract;
     };
     elasticsearch: {
-      dataClient: ScopedClusterClient;
-      adminClient: ScopedClusterClient;
+      dataClient: IScopedClusterClient;
+      adminClient: IScopedClusterClient;
     };
   };
 }
@@ -213,12 +215,12 @@ export interface CoreSetup {
     createContextContainer: ContextSetup['createContextContainer'];
   };
   elasticsearch: {
-    adminClient$: Observable<ClusterClient>;
-    dataClient$: Observable<ClusterClient>;
+    adminClient$: Observable<IClusterClient>;
+    dataClient$: Observable<IClusterClient>;
     createClient: (
       type: string,
       clientConfig?: Partial<ElasticsearchClientConfig>
-    ) => ClusterClient;
+    ) => IClusterClient;
   };
   http: {
     createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];

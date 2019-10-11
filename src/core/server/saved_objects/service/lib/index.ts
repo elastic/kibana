@@ -26,5 +26,3 @@ export {
 } from './scoped_client_provider';
 
 export { SavedObjectsErrorHelpers } from './errors';
-
-export { IndexFieldCapabilitiesCache } from './cache_index_patterns';

@@ -26,7 +26,7 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
     value={true}
   />
   <SwitchOption
-    dataTestSubj="xAxisFilterLabelsCheckbox-ValueAxis-1"
+    data-test-subj="xAxisFilterLabelsCheckbox-ValueAxis-1"
     disabled={false}
     label="Filter labels"
     paramName="filter"

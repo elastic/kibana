@@ -22,57 +22,85 @@ import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
-import { setup as data } from '../../../data/public/legacy';
+import { VisResponseValue } from 'src/plugins/visualizations/public';
+import { start as data } from '../../../data/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
+import { ExpressionFunction, Render } from '../../types';
 
-export const visualization = () => ({
+interface Arguments {
+  index?: string | null;
+  metricsAtAllLevels?: boolean;
+  partialRows?: boolean;
+  type?: string;
+  schemas?: string;
+  visConfig?: string;
+  uiState?: string;
+}
+
+export type ExpressionFunctionVisualization = ExpressionFunction<
+  'visualization',
+  any,
+  Arguments,
+  Promise<Render<VisResponseValue>>
+>;
+
+export const visualization = (): ExpressionFunctionVisualization => ({
   name: 'visualization',
   type: 'render',
   help: i18n.translate('interpreter.functions.visualization.help', {
     defaultMessage: 'A simple visualization',
   }),
   args: {
+    // TODO: Below `help` keys should be internationalized once this function
+    // TODO: is moved to visualizations plugin.
     index: {
       types: ['string', 'null'],
       default: null,
+      help: 'Index',
     },
     metricsAtAllLevels: {
       types: ['boolean'],
       default: false,
+      help: 'Metrics levels',
     },
     partialRows: {
       types: ['boolean'],
       default: false,
+      help: 'Partial rows',
     },
     type: {
       types: ['string'],
       default: '',
+      help: 'Type',
     },
     schemas: {
       types: ['string'],
       default: '"{}"',
+      help: 'Schemas',
     },
     visConfig: {
       types: ['string'],
       default: '"{}"',
+      help: 'Visualization configuration',
     },
     uiState: {
       types: ['string'],
       default: '"{}"',
+      help: 'User interface state',
     },
   },
-  async fn(context: any, args: any, handlers: any) {
+  async fn(context, args, handlers) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private') as any;
     const { indexPatterns } = data.indexPatterns;
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
-    const visConfigParams = JSON.parse(args.visConfig);
-    const schemas = JSON.parse(args.schemas);
+    const visConfigParams = args.visConfig ? JSON.parse(args.visConfig) : {};
+    const schemas = args.schemas ? JSON.parse(args.schemas) : {};
     const visType = visualizations.types.get(args.type || 'histogram') as any;
     const indexPattern = args.index ? await indexPatterns.get(args.index) : null;
 
-    const uiStateParams = JSON.parse(args.uiState);
+    const uiStateParams = args.uiState ? JSON.parse(args.uiState) : {};
     const uiState = new PersistedState(uiStateParams);
 
     if (typeof visType.requestHandler === 'function') {
@@ -117,7 +145,7 @@ export const visualization = () => ({
       as: 'visualization',
       value: {
         visData: context,
-        visType: args.type,
+        visType: args.type || '',
         visConfig: visConfigParams,
       },
     };
