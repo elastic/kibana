@@ -1,5 +1,5 @@
 {
-  "data_frame.get_data_frame_transform": {
+  "transform.get_transform": {
     "url_params": {
       "from": 0,
       "size": 0,
@@ -9,8 +9,8 @@
       "GET"
     ],
     "patterns": [
-      "_data_frame/transforms/{transform_id}",
-      "_data_frame/transforms"
+      "_transform/{transform_id}",
+      "_transform"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform.html"
   }
