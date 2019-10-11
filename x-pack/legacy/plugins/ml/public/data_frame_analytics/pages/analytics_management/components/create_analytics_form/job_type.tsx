@@ -7,18 +7,16 @@
 import React, { Fragment, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { AnalyticsJobType, JOB_TYPES } from '../../hooks/use_create_analytics_form/state';
 
 interface Props {
   type: AnalyticsJobType;
+  setFormState: any; // TODO update type
 }
 
-export const JobType: FC<Props> = ({ type }) => {
-  const outlierText = i18n.translate('xpack.ml.dataframe.analytics.create.outlierDetectionText', {
-    defaultMessage: 'Outlier detection',
-  });
+export const JobType: FC<Props> = ({ type, setFormState }) => {
   const outlierHelpText = i18n.translate(
     'xpack.ml.dataframe.analytics.create.outlierDetectionHelpText',
     {
@@ -27,9 +25,6 @@ export const JobType: FC<Props> = ({ type }) => {
     }
   );
 
-  const regressionText = i18n.translate('xpack.ml.dataframe.analytics.create.regressionText', {
-    defaultMessage: 'Regression',
-  });
   const regressionHelpText = i18n.translate(
     'xpack.ml.dataframe.analytics.create.outlierRegressionHelpText',
     {
@@ -38,15 +33,31 @@ export const JobType: FC<Props> = ({ type }) => {
     }
   );
 
+  const helpText = {
+    outlier_detection: outlierHelpText,
+    regression: regressionHelpText,
+  };
+
   return (
     <Fragment>
       <EuiFormRow
         label={i18n.translate('xpack.ml.dataframe.analytics.create.jobTypeLabel', {
           defaultMessage: 'Job type',
         })}
-        helpText={type === JOB_TYPES.OUTLIER_DETECTION ? outlierHelpText : regressionHelpText}
+        helpText={type !== undefined ? helpText[type] : ''}
       >
-        <EuiText>{type === JOB_TYPES.OUTLIER_DETECTION ? outlierText : regressionText}</EuiText>
+        <EuiSelect
+          options={Object.values(JOB_TYPES).map(jobType => ({
+            value: jobType,
+            text: jobType.replace(/_/g, ' '),
+          }))}
+          value={type}
+          hasNoInitialSelection={true}
+          onChange={e => {
+            const value = e.target.value as AnalyticsJobType; // TODO: Is this the best way to type this?
+            setFormState({ jobType: value });
+          }}
+        />
       </EuiFormRow>
     </Fragment>
   );

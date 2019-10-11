@@ -118,16 +118,17 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     if (jobType === JOB_TYPES.REGRESSION && sourceIndexNameEmpty === false) {
       loadDependentFieldOptions();
     }
-  }, [sourceIndex]);
+  }, [sourceIndex, jobType]);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
       <Messages messages={requestMessages} />
       {!isJobCreated && (
         <Fragment>
-          <JobType type={jobType} />
+          <JobType type={jobType} setFormState={setFormState} />
           <EuiFormRow>
             <EuiSwitch
+              disabled={jobType === undefined}
               compressed={true}
               name="mlDataFrameAnalyticsEnableAdvancedEditor"
               label={i18n.translate(
