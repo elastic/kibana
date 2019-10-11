@@ -1,5 +1,5 @@
 {
-  "data_frame.preview_data_frame_transform": {
+  "data_frame_transform_deprecated.put_transform": {
     "data_autocomplete_rules": {
       "source": {
         "index": "SOURCE_INDEX_NAME",
@@ -7,12 +7,15 @@
           "__scope_link": "GLOBAL.query"
         }
       },
+      "dest": {
+        "index": "DEST_INDEX_NAME"
+      },
       "pivot": {
         "group_by": {
           "__template": {
-            "NAME": {},
-            "__scope_link": "GLOBAL.groupByAggs"
-          }
+            "NAME": {}
+          },
+          "__scope_link": "GLOBAL.groupByAggs"
         },
         "aggregations": {
           "__template": {

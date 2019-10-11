@@ -1,5 +1,5 @@
 {
-  "data_frame.update_data_frame_transform": {
+  "data_frame_transform_deprecated.update_transform": {
     "data_autocomplete_rules": {
       "description": "",
       "dest": {
