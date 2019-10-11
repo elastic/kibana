@@ -5,6 +5,7 @@
  */
 
 import { get, uniq } from 'lodash';
+import { mapValuesOfMap, groupIntoMap } from '../../../../../../../src/core/utils/map_utils';
 
 export class SecureSavedObjectsClientWrapper {
   constructor(options) {
@@ -103,6 +104,26 @@ export class SecureSavedObjectsClientWrapper {
     );
 
     return await this._baseClient.update(type, id, attributes, options);
+  }
+
+  async bulkUpdate(objects = []) {
+    const undefinedNamespace = Symbol('no-namespace');
+    await Promise.all(
+      Array.from(
+        mapValuesOfMap(
+          groupIntoMap(objects, o => o.namespace || undefinedNamespace),
+          objectsByNamespace => uniq(objectsByNamespace.map(o => o.type))
+        ).entries()
+      ).map(([namespace, types]) =>{
+        return this._ensureAuthorized(
+          types,
+          'bulk_update',
+          namespace === undefinedNamespace ? undefined : namespace,
+          { objects },
+        );
+      })
+    );
+    return await this._baseClient.bulkUpdate(objects);
   }
 
   async _checkPrivileges(actions, namespace) {

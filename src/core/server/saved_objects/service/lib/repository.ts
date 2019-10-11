@@ -737,10 +737,12 @@ export class SavedObjectsRepository {
       return { tag: 'Right' as 'Right', value: expectedResult };
     });
 
-    const esResponse = await this._writeToCluster('bulk', {
-      refresh: 'wait_for',
-      body: bulkUpdateParams,
-    });
+    const esResponse = bulkUpdateParams.length
+      ? await this._writeToCluster('bulk', {
+          refresh: 'wait_for',
+          body: bulkUpdateParams,
+        })
+      : {};
 
     return {
       saved_objects: expectedResults.map(expectedResult => {

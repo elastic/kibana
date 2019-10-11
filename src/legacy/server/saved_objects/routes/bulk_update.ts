@@ -56,17 +56,15 @@ export const createBulkUpdateRoute = (prereqs: Prerequisites) => {
             type: Joi.string().required(),
             id: Joi.string().required(),
             attributes: Joi.object().required(),
-            options: Joi.object({
-              version: Joi.string(),
-              namespace: Joi.string(),
-              references: Joi.array().items(
-                Joi.object().keys({
-                  name: Joi.string().required(),
-                  type: Joi.string().required(),
-                  id: Joi.string().required(),
-                })
-              ),
-            }).default({}),
+            version: Joi.string(),
+            namespace: Joi.string(),
+            references: Joi.array().items(
+              Joi.object().keys({
+                name: Joi.string().required(),
+                type: Joi.string().required(),
+                id: Joi.string().required(),
+              })
+            ),
           })
         ),
       },

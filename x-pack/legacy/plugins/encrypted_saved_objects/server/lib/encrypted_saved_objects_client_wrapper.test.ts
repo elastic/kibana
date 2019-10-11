@@ -424,10 +424,6 @@ describe('#bulkUpdate', () => {
   });
 
   it('uses `namespace` to encrypt attributes if it is specified', async () => {
-    const options = {
-      version: 'some-version',
-      namespace: 'some-namespace',
-    };
     const docs = [
       {
         id: 'some-id',
@@ -437,6 +433,8 @@ describe('#bulkUpdate', () => {
           attrSecret: 'secret',
           attrThree: 'three',
         },
+        version: 'some-version',
+        namespace: 'some-namespace',
       },
     ];
 
@@ -444,7 +442,7 @@ describe('#bulkUpdate', () => {
       saved_objects: docs.map(doc => ({ ...doc, references: undefined })),
     });
 
-    await expect(wrapper.bulkUpdate(docs.map(doc => ({ ...doc, options })))).resolves.toEqual({
+    await expect(wrapper.bulkUpdate(docs)).resolves.toEqual({
       saved_objects: [
         {
           id: 'some-id',
@@ -453,6 +451,9 @@ describe('#bulkUpdate', () => {
             attrOne: 'one',
             attrThree: 'three',
           },
+          version: 'some-version',
+          namespace: 'some-namespace',
+          references: undefined,
         },
       ],
     });
@@ -473,7 +474,9 @@ describe('#bulkUpdate', () => {
           attrSecret: '*secret*',
           attrThree: 'three',
         },
-        options,
+        version: 'some-version',
+        namespace: 'some-namespace',
+        references: undefined,
       },
     ]);
   });

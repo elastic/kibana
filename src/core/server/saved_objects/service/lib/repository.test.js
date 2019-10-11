@@ -2092,6 +2092,38 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
+    it('doesnt call Elasticsearch if there are no valid objects to update', async () => {
+      const objects = [
+        {
+          type: 'invalid-type',
+          id: 'invalid',
+          attributes: { title: 'invalid' }
+        },
+        {
+          type: 'invalid-type',
+          id: 'invalid 2',
+          attributes: { title: 'invalid' }
+        },
+      ];
+
+      const { saved_objects: [
+        invalidType,
+        invalidType2
+      ] } = await savedObjectsRepository.bulkUpdate(objects);
+
+      expect(callAdminCluster).not.toHaveBeenCalled();
+
+      expect(invalidType).toMatchObject({
+        ..._.pick(objects[0], 'id', 'type'),
+        error: SavedObjectsErrorHelpers.createGenericNotFoundError('invalid-type', 'invalid').output.payload,
+      });
+
+      expect(invalidType2).toMatchObject({
+        ..._.pick(objects[1], 'id', 'type'),
+        error: SavedObjectsErrorHelpers.createGenericNotFoundError('invalid-type', 'invalid 2').output.payload,
+      });
+    });
+
     it('accepts version', async () => {
       const objects = [
         generateSavedObject({

@@ -135,7 +135,6 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
         attributes: {
           title: 'An existing visualization',
         },
-        options: {},
       },
       {
         type: 'dashboard',
@@ -143,7 +142,6 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
         attributes: {
           title: 'An existing dashboard',
         },
-        options: {},
       },
     ]);
   });

@@ -9,7 +9,7 @@ import { Feature, FeatureKibanaPrivileges } from '../../../../../../../../plugin
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 const readOperations: string[] = ['bulk_get', 'get', 'find'];
-const writeOperations: string[] = ['create', 'bulk_create', 'update', 'delete'];
+const writeOperations: string[] = ['create', 'bulk_create', 'update', 'bulk_update', 'delete'];
 const allOperations: string[] = [...readOperations, ...writeOperations];
 
 export class FeaturePrivilegeSavedObjectBuilder extends BaseFeaturePrivilegeBuilder {

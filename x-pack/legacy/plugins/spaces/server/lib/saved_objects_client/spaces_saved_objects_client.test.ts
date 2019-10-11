@@ -388,10 +388,8 @@ const createMockResponse = () => ({
             id: 'id',
             type: 'foo',
             attributes: {},
-            options: {
-              references: [],
-              namespace: currentSpace.expectedNamespace,
-            },
+            references: [],
+            namespace: currentSpace.expectedNamespace,
           },
         ]);
       });
