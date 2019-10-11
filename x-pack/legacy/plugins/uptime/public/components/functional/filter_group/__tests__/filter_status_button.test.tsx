@@ -13,6 +13,7 @@ describe('FilterStatusButton', () => {
   beforeEach(() => {
     props = {
       content: 'Up',
+      dataTestSubj: 'foo',
       value: 'up',
       withNext: true,
     };
