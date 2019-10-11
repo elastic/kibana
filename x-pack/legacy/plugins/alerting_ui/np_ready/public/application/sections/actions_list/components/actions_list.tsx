@@ -6,12 +6,20 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiPageContent, EuiBasicTable, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPageContent,
+  EuiBasicTable,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldSearch,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PageError } from '../../../components/page_error';
 import { Action, ActionType, loadActions, loadActionTypes } from '../../../lib/api';
 import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
+import { AlertingActionsDropdown } from './create_menu_popover';
 
 interface ActionsListProps {
   api: any;
@@ -139,6 +147,19 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   } else {
     content = (
       <Fragment>
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem>
+            <EuiFieldSearch
+              fullWidth
+              placeholder="Search action"
+              aria-label="Use aria labels when no actual label is in use"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AlertingActionsDropdown actionTypes={actionTypesIndex}></AlertingActionsDropdown>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <EuiBasicTable
           loading={isLoading}
           items={data}
