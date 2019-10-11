@@ -34,6 +34,12 @@ interface NumberInputOptionProps<ParamName extends string> {
   setValue: (paramName: ParamName, value: number | '') => void;
 }
 
+/**
+ * Do not use this component anymore.
+ * Please, use NumberInputOption in 'required_number_input.tsx'.
+ * It is required for compatibility with TS 3.7.0
+ * This should be removed in the future
+ */
 function NumberInputOption<ParamName extends string>({
   disabled,
   error,
