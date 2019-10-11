@@ -156,10 +156,10 @@ export const spaces = (kibana: Record<string, any>) =>
       });
 
       server.expose('getSpaceId', (request: Legacy.Request) =>
-        spacesPlugin.spacesService.getSpaceId(KibanaRequest.from(request))
+        spacesPlugin.spacesService.getSpaceId(request)
       );
       server.expose('getActiveSpace', (request: Legacy.Request) =>
-        spacesPlugin.spacesService.getActiveSpace(KibanaRequest.from(request))
+        spacesPlugin.spacesService.getActiveSpace(request)
       );
       server.expose('spaceIdToNamespace', spacesPlugin.spacesService.spaceIdToNamespace);
       server.expose('namespaceToSpaceId', spacesPlugin.spacesService.namespaceToSpaceId);

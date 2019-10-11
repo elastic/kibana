@@ -6,6 +6,7 @@
 
 import { map, take } from 'rxjs/operators';
 import { Observable, Subscription, combineLatest } from 'rxjs';
+import { Legacy } from 'kibana';
 import { Logger, KibanaRequest, CoreSetup } from 'src/core/server';
 import { SecurityPlugin } from '../../../../legacy/plugins/security';
 import { OptionalPlugin } from '../../../../legacy/server/lib/optional_plugin';
@@ -17,20 +18,22 @@ import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
 import { Space } from '../../common/model/space';
 
-export interface SpacesServiceSetup {
-  scopedClient(request: KibanaRequest): Promise<SpacesClient>;
+type RequestFacade = KibanaRequest | Legacy.Request;
 
-  getSpaceId(request: KibanaRequest): string;
+export interface SpacesServiceSetup {
+  scopedClient(request: RequestFacade): Promise<SpacesClient>;
+
+  getSpaceId(request: RequestFacade): string;
 
   getBasePath(spaceId: string): string;
 
-  isInDefaultSpace(request: KibanaRequest): boolean;
+  isInDefaultSpace(request: RequestFacade): boolean;
 
   spaceIdToNamespace(spaceId: string): string | undefined;
 
   namespaceToSpaceId(namespace: string | undefined): string;
 
-  getActiveSpace(request: KibanaRequest): Promise<Space>;
+  getActiveSpace(request: RequestFacade): Promise<Space>;
 }
 
 interface SpacesServiceDeps {
@@ -53,7 +56,7 @@ export class SpacesService {
     config$,
     getSpacesAuditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
-    const getSpaceId = (request: KibanaRequest) => {
+    const getSpaceId = (request: RequestFacade) => {
       // Currently utilized by reporting
       const isFakeRequest = typeof (request as any).getBasePath === 'function';
 
@@ -66,7 +69,7 @@ export class SpacesService {
       return spaceId;
     };
 
-    const getScopedClient = async (request: KibanaRequest) => {
+    const getScopedClient = async (request: RequestFacade) => {
       return combineLatest(elasticsearch.adminClient$, config$)
         .pipe(
           map(([clusterClient, config]) => {
@@ -111,7 +114,7 @@ export class SpacesService {
         }
         return addSpaceIdToPath(http.basePath.serverBasePath, spaceId);
       },
-      isInDefaultSpace: (request: KibanaRequest) => {
+      isInDefaultSpace: (request: RequestFacade) => {
         const spaceId = getSpaceId(request);
 
         return spaceId === DEFAULT_SPACE_ID;
@@ -119,7 +122,7 @@ export class SpacesService {
       spaceIdToNamespace,
       namespaceToSpaceId,
       scopedClient: getScopedClient,
-      getActiveSpace: async (request: KibanaRequest) => {
+      getActiveSpace: async (request: RequestFacade) => {
         const spaceId = getSpaceId(request);
         const spacesClient = await getScopedClient(request);
         return spacesClient.get(spaceId);
