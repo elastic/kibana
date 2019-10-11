@@ -71,13 +71,12 @@ describe('Table Vis - Paginated table', function () {
     };
   };
 
-  const renderTable = function (table, cols, rows, perPage, sort, showBlankRows, linkToTop) {
+  const renderTable = function (table, cols, rows, perPage, sort, linkToTop) {
     $scope.table = table || { columns: [], rows: [] };
     $scope.cols = cols || [];
     $scope.rows = rows || [];
     $scope.perPage = perPage || defaultPerPage;
     $scope.sort = sort || {};
-    $scope.showBlankRows = showBlankRows;
     $scope.linkToTop = linkToTop;
 
     const template = `
@@ -87,8 +86,7 @@ describe('Table Vis - Paginated table', function () {
         rows="rows"
         per-page="perPage"
         sort="sort"
-        link-to-top="linkToTop"
-        show-blank-rows="showBlankRows">`;
+        link-to-top="linkToTop">`;
     $el = $compile(template)($scope);
 
     $scope.$digest();
@@ -120,8 +118,6 @@ describe('Table Vis - Paginated table', function () {
       renderTable(data, cols, rows);
       expect($el.children().length).to.be(1);
       const tableRows = $el.find('tbody tr');
-      // should pad rows
-      expect(tableRows.length).to.be(defaultPerPage);
       // should contain the row data
       expect(tableRows.eq(0).find('td').eq(0).text()).to.be(rows[0][0]);
       expect(tableRows.eq(0).find('td').eq(1).text()).to.be(rows[0][1]);
@@ -143,19 +139,19 @@ describe('Table Vis - Paginated table', function () {
       expect($el.find('paginate-controls button').length).to.be(pageCount + 2);
     });
 
-    it('should not show blank rows on last page when so specified', function () {
+    it('should not show blank rows on last page', function () {
       const rowCount = 7;
       const perPageCount = 10;
       const data = makeData(3, rowCount);
 
-      renderTable(data, data.columns, data.rows, perPageCount, null, false);
+      renderTable(data, data.columns, data.rows, perPageCount, null);
       const tableRows = $el.find('tbody tr');
       expect(tableRows.length).to.be(rowCount);
     });
 
     it('should not show link to top when not set', function () {
       const data = makeData(5, 5);
-      renderTable(data, data.columns, data.rows, 10, null, false);
+      renderTable(data, data.columns, data.rows, 10, null);
 
       const linkToTop = $el.find('[data-test-subj="paginateControlsLinkToTop"]');
       expect(linkToTop.length).to.be(0);
@@ -163,7 +159,7 @@ describe('Table Vis - Paginated table', function () {
 
     it('should show link to top when set', function () {
       const data = makeData(5, 5);
-      renderTable(data, data.columns, data.rows, 10, null, false, true);
+      renderTable(data, data.columns, data.rows, 10, null, true);
 
       const linkToTop = $el.find('[data-test-subj="paginateControlsLinkToTop"]');
       expect(linkToTop.length).to.be(1);
