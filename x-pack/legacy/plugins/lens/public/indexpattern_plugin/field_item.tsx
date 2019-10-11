@@ -456,7 +456,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                     </EuiText>
                   ) : (
                     <EuiToolTip content={formatted} delay="long">
-                      <EuiText size="s" className="eui-textTruncate">
+                      <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {formatted}
                       </EuiText>
                     </EuiToolTip>
