@@ -18,6 +18,8 @@
  */
 
 import { notificationServiceMock, overlayServiceMock } from '../../../../../../core/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { metricsPluginMock } from '../../../../../../plugins/metrics/public/mocks';
 
 jest.doMock('ui/new_platform', () => {
   return {
@@ -25,10 +27,16 @@ jest.doMock('ui/new_platform', () => {
       core: {
         notifications: notificationServiceMock.createSetupContract(),
       },
+      plugins: {
+        metrics: metricsPluginMock.createSetupContract(),
+      },
     },
     npStart: {
       core: {
         overlays: overlayServiceMock.createStartContract(),
+      },
+      plugins: {
+        metrics: metricsPluginMock.createStartContract(),
       },
     },
   };

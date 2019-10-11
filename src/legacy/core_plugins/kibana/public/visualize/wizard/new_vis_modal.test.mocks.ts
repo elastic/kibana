@@ -19,6 +19,8 @@
 
 export const settingsGet = jest.fn();
 
+jest.mock('ui/new_platform');
+
 jest.doMock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: settingsGet,
