@@ -9,7 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { PopulationJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
+import { PopulationJobCreator } from '../../../../../common/job_creator';
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { Field, AggFieldPair } from '../../../../../../../../common/types/fields';
@@ -23,10 +23,6 @@ export const PopulationDetectorsSummary: FC = () => {
   const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
     JobCreatorContext
   );
-
-  if (isPopulationJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as PopulationJobCreator;
 
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(

@@ -45,6 +45,7 @@ The following table describes the properties of the `options` object.
 |---|---|---|
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
+|actionGroups|An explicit list of groups the alert type may schedule actions for. Alert `actions` validation will use this array to ensure groups are valid.|string[]|
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 
@@ -260,6 +261,45 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to disable.|string|
 
+#### `POST /api/alert/{id}/_mute_all`: Mute all alert instances
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to mute all alert instances for.|string|
+
+#### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|alertId|The id of the alert you're trying to mute an instance for.|string|
+|alertInstanceId|The instance id of the alert instance you're trying to mute.|string|
+
+#### `POST /api/alert/{id}/_unmute_all`: Unmute all alert instances
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to unmute all alert instances for.|string|
+
+#### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|alertId|The id of the alert you're trying to unmute an instance for.|string|
+|alertInstanceId|The instance id of the alert instance you're trying to unmute.|string|
+
+#### `POST /api/alert/{id}/_update_api_key`: Update alert API key
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
 
 ## Alert instance factory
 
