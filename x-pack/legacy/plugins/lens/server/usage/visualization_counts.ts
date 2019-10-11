@@ -7,7 +7,7 @@
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import { SearchParams, SearchResponse } from 'elasticsearch';
-import { LensUsage } from './types';
+import { LensVisualizationUsage } from './types';
 
 type ClusterSearchType = (
   endpoint: 'search',
@@ -20,7 +20,7 @@ type ClusterSearchType = (
 export async function getVisualizationCounts(
   callCluster: ClusterSearchType,
   config: KibanaConfig
-): Promise<LensUsage> {
+): Promise<LensVisualizationUsage> {
   const scriptedMetric = {
     scripted_metric: {
       // Each cluster collects its own type data in a key-value Map that looks like:

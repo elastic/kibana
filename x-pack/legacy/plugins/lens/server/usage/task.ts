@@ -9,6 +9,7 @@ import { CoreSetup } from 'src/core/server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import { SearchParams, SearchResponse, DeleteDocumentByQueryResponse } from 'elasticsearch';
 import { RunContext } from '../../../task_manager';
+import { getVisualizationCounts } from './visualization_counts';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
 // into daily rolled-up documents, which will be used in reporting click stats
@@ -105,6 +106,8 @@ async function doWork(server: Server, callCluster: ClusterSearchType & ClusterDe
     size: 0,
   });
 
+  console.log(JSON.stringify(metrics));
+
   const byDateByType: Record<string, Record<string, number>> = {};
 
   metrics.aggregations.daily.buckets.forEach(bucket => {
@@ -140,21 +143,28 @@ function telemetryTaskRunner(server: Server) {
     const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 
     let lensTelemetryTask: Promise<unknown>;
+    let lensVisualizationTask: ReturnType<typeof getVisualizationCounts>;
 
     return {
       async run() {
         try {
           lensTelemetryTask = doWork(server, callCluster);
+
+          lensVisualizationTask = getVisualizationCounts(callCluster, server.config());
         } catch (err) {
           server.log(['warning'], `Error loading lens telemetry: ${err}`);
         }
 
-        return lensTelemetryTask
-          .then((lensTelemetry = {}) => {
+        return Promise.all([lensTelemetryTask, lensVisualizationTask])
+          .then(([lensTelemetry, lensVisualizations]) => {
             return {
               state: {
                 runs: state.runs || 1,
-                stats: lensTelemetry || prevState.stats || {},
+                stats: Object.assign(
+                  {},
+                  lensTelemetry || prevState.stats || {},
+                  lensVisualizations
+                ),
               },
               runAt: getNextMidnight(),
             };
