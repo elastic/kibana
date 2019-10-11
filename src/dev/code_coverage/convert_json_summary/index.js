@@ -20,10 +20,10 @@
 import { resolve } from 'path';
 import convert from './convert';
 import send from './send';
+import { run, createFlagError } from '@kbn/dev-utils';
 
 const kibanaRoot = resolve(__dirname, '../../../..');
-
-import { run, createFlagError } from '@kbn/dev-utils';
+const pipeLog = (f1, f2) => obj => f2(f1(obj), obj);
 
 export function runCodeCoverageConverterCli() {
   run(
@@ -31,17 +31,20 @@ export function runCodeCoverageConverterCli() {
       if (flags.path === '') {
         throw createFlagError('please provide a single --path flag');
       }
+
       const coverageLocation = resolve(kibanaRoot, flags.path);
-      send(convert(coverageLocation, log), log);
+      const convertF = convert.bind(null,  coverageLocation);
+      const convertAndSend = pipeLog(convertF, send);
+      convertAndSend(log);
     },
     {
       description: `
-        Massage code coverage json-summary format into a format suitable to POSTing to an ES index.
+        HTTP Post code coverage in json-summary format to an ES index.
       `,
       flags: {
         string: ['path'],
         help: `
-          --path             Required, path to the file to operate on
+          --path             Required, path to the file to extract coverage data
         `
       },
     }

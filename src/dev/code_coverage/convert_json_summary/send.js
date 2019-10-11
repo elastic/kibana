@@ -20,6 +20,8 @@
 import Wreck from '@hapi/wreck';
 import { of } from 'rxjs';
 import { delay, concatMap } from 'rxjs/operators';
+import { createFailError } from '@kbn/dev-utils';
+import chalk from 'chalk';
 
 const wreck = Wreck.defaults({
   baseUrl: 'http://localhost:9200',
@@ -27,15 +29,22 @@ const wreck = Wreck.defaults({
 const indexName = 'kibana_coverage';
 
 export default (obs$, log) => {
+  const ms = 50;
+  log.verbose(`Code coverage sender set to delay for ${ms} milliseconds\n`);
+
   obs$
-    .pipe(concatMap(x => of(x).pipe(delay(50))))
+    .pipe(concatMap(x => of(x).pipe(delay(ms)))) // Slow down the requests
     .subscribe(async payload => {
       const { path } = payload;
       try {
         await wreck.post(`${indexName}/_doc`, { payload });
         log.debug(`Posted coverage for\n\t${path}`);
       } catch (e) {
-        log.warning(`Failed to post ${path}`);
+        throw createFailError(
+          `${chalk.white.bgRed(
+            ' Failed attempting to post coverage for '
+          )} ${path}`
+        );
       }
     });
 };
