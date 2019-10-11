@@ -19,5 +19,5 @@
 
 import { npStart } from 'ui/new_platform';
 
-export const METRIC_TYPE = npStart.plugins.metrics.METRIC_TYPE;
+export { METRIC_TYPE } from '@kbn/analytics';
 export const trackUiMetric = npStart.plugins.metrics.reportUiStats.bind(null, 'visualize');
