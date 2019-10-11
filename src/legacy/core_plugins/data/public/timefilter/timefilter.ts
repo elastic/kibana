@@ -157,7 +157,7 @@ export class Timefilter {
   }
 
   public getActiveBounds(): TimeRangeBounds | undefined {
-    if (this.isTimeRangeSelectorEnabled) {
+    if (this.isTimeRangeSelectorEnabled()) {
       return this.getBounds();
     }
   }
