@@ -35,11 +35,7 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
   },
 
   isViable: indexPattern => {
-    if (indexPattern) {
-      return false;
-    }
-
-    return isDefaultTypeIndexPattern(indexPattern);
+    return indexPattern && isDefaultTypeIndexPattern(indexPattern);
   },
 };
 

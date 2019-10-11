@@ -312,10 +312,10 @@ export class SearchSource {
     val: SearchSourceFields[K],
     key: K
   ) {
+    val = typeof val === 'function' ? val(this) : val;
+
     const addToRoot = (rootKey: string, value: any) => {
-      if (rootKey && data[rootKey] == null) {
-        data[rootKey] = typeof value === 'function' ? value(this) : value;
-      }
+      data[rootKey] = value;
     };
 
     /**
@@ -330,12 +330,13 @@ export class SearchSource {
 
     switch (key) {
       case 'filter':
+        return addToRoot('filters', (data[key] || []).concat(val));
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
       case 'index':
       case 'type':
       case 'highlightAll':
-        return addToRoot(key, val);
+        return key && data[key] == null && addToRoot(key, val);
       case 'searchAfter':
         return addToBody('search_after', val);
       case 'source':

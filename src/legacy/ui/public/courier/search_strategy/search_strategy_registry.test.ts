@@ -98,6 +98,10 @@ describe('Search strategy registry', () => {
     it('returns undefined if there is no strategy with that ID', () => {
       expect(getSearchStrategyById('-1')).toBe(undefined);
     });
+
+    it('returns the noOp search strategy if passed that ID', () => {
+      expect(getSearchStrategyById('noOp')).toBe(noOpSearchStrategy);
+    });
   });
 
   describe('getSearchStrategyForSearchRequest', () => {
