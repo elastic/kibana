@@ -13,30 +13,22 @@ import url from 'url';
 import { npStart } from 'ui/new_platform';
 
 import { APP_TITLE } from '../../../common/constants';
-import { DocumentSearchResult, SearchOptions, SearchScope } from '../../../model';
+import { SearchScope } from '../../../model';
 import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
+import { SearchState } from '../../reducers/search';
 import { history } from '../../utils/url';
 import { ProjectItem } from '../admin_page/project_item';
 import { SearchBar } from '../search_bar';
 import { DocumentResults } from './document_results';
+import { CommitResults } from './commit_results';
 import { EmptyPlaceholder } from './empty_placeholder';
 import { Pagination } from './pagination';
 import { SideBar } from './side_bar';
 import { trackCodeUiMetric, METRIC_TYPE } from '../../services/ui_metric';
 import { CodeUIUsageMetrics } from '../../../model/usage_telemetry_metrics';
 
-interface Props {
-  searchOptions: SearchOptions;
-  query: string;
-  scope: SearchScope;
-  page?: number;
-  languages?: Set<string>;
-  repositories?: Set<string>;
-  isLoading: boolean;
-  error?: Error;
-  documentSearchResults?: DocumentSearchResult;
-  repositorySearchResults?: any;
+interface Props extends SearchState {
   changeSearchScope: (s: SearchScope) => void;
 }
 
@@ -136,6 +128,7 @@ class SearchPage extends React.PureComponent<Props, State> {
     const {
       query,
       scope,
+      commitSearchResults,
       documentSearchResults,
       languages,
       isLoading,
@@ -229,6 +222,38 @@ class SearchPage extends React.PureComponent<Props, State> {
             <EuiSpacer />
             <div className="codeContainer__search--results">
               <DocumentResults results={results!} query={this.props.query} />
+            </div>
+            <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
+          </div>
+        );
+      }
+    } else if (scope === SearchScope.COMMIT && commitSearchResults) {
+      const { stats, commits } = commitSearchResults!;
+      const { total, from, to, page, totalPage } = stats!;
+      languageStats = stats!.languageStats;
+      repoStats = stats!.repoStats;
+
+      if (commitSearchResults.total > 0) {
+        const statsComp = (
+          <EuiTitle size="m">
+            <h1>
+              <FormattedMessage
+                id="xpack.code.searchPage.showingResultsTitle"
+                defaultMessage="Showing {from} - {to} of {total} {total, plural,
+                  one {result}
+                  other {results}
+                }."
+                values={{ from: from + 1, to, total }}
+              />
+            </h1>
+          </EuiTitle>
+        );
+        mainComp = (
+          <div className="codeContainer__search--inner">
+            {statsComp}
+            <EuiSpacer />
+            <div className="codeContainer__search--results">
+              <CommitResults results={commits!} query={this.props.query} />
             </div>
             <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
           </div>
