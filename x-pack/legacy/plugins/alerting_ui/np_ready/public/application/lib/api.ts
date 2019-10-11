@@ -8,7 +8,7 @@ import { HttpServiceBase } from 'kibana/public';
 import { useRequestNp } from '../../../../public/shared_imports';
 import { BASE_ACTION_API_PATH } from '../constants';
 
-import { ActionType, Action } from '../../../../../actions/server';
+import { ActionType } from '../../../../../actions/server';
 
 export interface RequestData<T> {
   isLoading: boolean;
@@ -76,19 +76,31 @@ export function loadActionTypes(http: HttpServiceBase, pollIntervalMs?: number) 
   });
 }
 
+export interface Action {
+  id: string;
+  actionTypeId: string;
+  description: string;
+  config: Record<string, unknown>;
+}
+
 export interface LoadActionsOpts {
   http: HttpServiceBase;
   sort: { field: string; direction: 'asc' | 'desc' };
   page: { index: number; size: number };
 }
 
-export interface ActionsResponse extends Action {
-  id: string;
-  description: string;
-  actionTypeId: string;
+export interface LoadActionsResponse {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Action[];
 }
 
-export async function loadActions({ http, sort, page }: LoadActionsOpts) {
+export async function loadActions({
+  http,
+  sort,
+  page,
+}: LoadActionsOpts): Promise<LoadActionsResponse> {
   return http.get(`${BASE_ACTION_API_PATH}/_find`, {
     query: {
       sort_field: sort.field,

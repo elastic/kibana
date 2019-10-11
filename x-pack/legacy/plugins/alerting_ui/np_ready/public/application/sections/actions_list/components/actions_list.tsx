@@ -9,7 +9,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PageError } from '../../../components/page_error';
-import { loadActions } from '../../../lib/api';
+import { loadActions, Action } from '../../../lib/api';
 import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
 
@@ -35,22 +35,23 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     core: { http },
   } = useAppDependencies();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [data, setData] = useState<any[]>([]);
-  const [totalItemCount, setTotalItemCount] = useState(0);
+  const [data, setData] = useState<Action[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorCode, setErrorCode] = useState<number | null>(null);
+  const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [sort, setSort] = useState<Sorting>({ field: 'actionTypeId', direction: 'asc' });
 
   useEffect(() => {
     (async () => {
       setIsLoading(true);
+      setErrorCode(null);
       try {
         const response = await loadActions({ http, sort, page });
         setData(response.data);
         setTotalItemCount(response.total);
       } catch (e) {
-        setError(e);
+        setErrorCode(e.response.status);
       } finally {
         setIsLoading(false);
       }
@@ -92,10 +93,10 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
 
   let content;
 
-  if (error) {
+  if (errorCode) {
     content = (
       <EuiPageContent>
-        <PageError errorCode={error} />
+        <PageError errorCode={errorCode} />
       </EuiPageContent>
     );
   } else {
