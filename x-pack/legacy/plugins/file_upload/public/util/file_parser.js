@@ -17,7 +17,8 @@ const readSlice = (fileReader, file, start, stop) => {
   fileReader.readAsBinaryString(blob);
 };
 
-let previousFileReader;
+let prevFileReader;
+let prevPatternReader;
 export const fileHandler = (
   file, chunkHandler, cleanAndValidate, getFileParseActive,
   fileReader = new FileReader(), fileBuffer = FILE_BUFFER
@@ -34,14 +35,13 @@ export const fileHandler = (
   }
 
 
-  // Halt any previous file reading activity
-  if (previousFileReader) {
-    previousFileReader.abort();
+  // Halt any previous file reading & pattern checking activity
+  if (prevFileReader) {
+    prevFileReader.abort();
   }
-
-  let start;
-  let stop = fileBuffer;
-  previousFileReader = fileReader;
+  if (prevPatternReader) {
+    prevPatternReader.abortStream();
+  }
 
   // Set up feature tracking
   let featuresProcessed = 0;
@@ -51,13 +51,20 @@ export const fileHandler = (
     return cleanAndValidate(feature);
   };
 
+  let start;
+  let stop = fileBuffer;
+
+  prevFileReader = fileReader;
+
   const patternReader = new PatternReader();
   patternReader.onGeoJSONFeaturePatternDetect(onFeatureRead);
+  prevPatternReader = patternReader;
 
   const filePromise = new Promise((resolve, reject) => {
     fileReader.onloadend = ({ target: { readyState, result } }) => {
       if (readyState === FileReader.DONE) {
         if (!getFileParseActive() || !result) {
+          fileReader.abort();
           patternReader.abortStream();
           resolve(null);
           return;
@@ -88,7 +95,17 @@ export const fileHandler = (
         })));
     };
     patternReader.onStreamComplete(parsedGeojson => {
-      resolve(parsedGeojson);
+      if (!featuresProcessed) {
+        reject(
+          new Error(
+            i18n.translate('xpack.fileUpload.fileParser.noFeaturesDetected', {
+              defaultMessage: 'Error, no features detected',
+            })
+          )
+        );
+      } else {
+        resolve(parsedGeojson);
+      }
     });
   });
   readSlice(fileReader, file, start, stop);
