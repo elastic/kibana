@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
   EuiPageBody,
@@ -19,11 +19,17 @@ import {
 import { useCore } from './app_context';
 
 import { documentationService } from './services/documentation';
+import { breadcrumbService } from './services/navigation';
 
 export const App = () => {
   const {
     i18n: { FormattedMessage },
   } = useCore();
+
+  // Set breadcrumb
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs('home');
+  }, []);
 
   const renderPageHeader = () => (
     <>

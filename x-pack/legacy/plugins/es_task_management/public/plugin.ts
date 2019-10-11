@@ -14,6 +14,7 @@ import { mountReactApp, unmountReactApp, BASE_PATH, REACT_ROOT_ID } from './app'
 import { documentationService } from './app/services/documentation';
 import { uiMetricService } from './app/services/ui_metric';
 import { httpService } from './app/services/http';
+import { breadcrumbService } from './app/services/navigation';
 
 export class EsTaskManagementPlugin {
   public start(core: Core, plugins: Plugins): void {
@@ -24,6 +25,7 @@ export class EsTaskManagementPlugin {
     const {
       docLinks,
       http,
+      chrome,
       __LEGACY: { i18n },
     } = core;
 
@@ -42,6 +44,7 @@ export class EsTaskManagementPlugin {
     documentationService.init(docLinks);
     uiMetricService.init(uiMetric.createUiStatsReporter);
     httpService.init(http);
+    breadcrumbService.init(chrome, i18n, management.constants.BREADCRUMB);
 
     // Register Angular route
     routes.when(`${BASE_PATH}/:section?/:subsection?`, {
