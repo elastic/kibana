@@ -14,8 +14,6 @@ import {
 } from '../DiscoverTransactionLink';
 import mockTransaction from './mockTransaction.json';
 
-jest.mock('ui/kfetch');
-
 describe('DiscoverTransactionLink component', () => {
   it('should render with data', () => {
     const transaction: Transaction = mockTransaction;

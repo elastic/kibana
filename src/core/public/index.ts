@@ -110,6 +110,7 @@ export {
   HttpFetchQuery,
   HttpErrorResponse,
   HttpErrorRequest,
+  HttpFetchError,
   HttpInterceptor,
   HttpResponse,
   HttpHandler,
