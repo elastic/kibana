@@ -380,23 +380,25 @@ class EditJobFlyoutUI extends Component {
         <EuiOverlayMask>
           <EuiConfirmModal
             title={
-              <FormattedMessage id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle" defaultMessage="You have unsaved changes" />
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle"
+                defaultMessage="Save changes before leaving?"
+              />
             }
-            onCancel={() => this.setState({ isConfirmationModalVisible: false })}
-            onConfirm={() => this.closeFlyout(true)}
+            onCancel={() => this.closeFlyout(true)}
+            onConfirm={() => this.save()}
             cancelButtonText={
-              <FormattedMessage id="xpack.ml.jobsList.editJobFlyout.cancelButtonLabel" defaultMessage="Cancel" />
+              <FormattedMessage id="xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel" defaultMessage="Leave anyway" />
             }
             confirmButtonText={
-              <FormattedMessage id="xpack.ml.jobsList.editJobFlyout.confirmCloseLabel" defaultMessage="Close without saving" />
+              <FormattedMessage id="xpack.ml.jobsList.editJobFlyout.saveChangesButtonLabel" defaultMessage="Save changes" />
             }
-            buttonColor="danger"
             defaultFocusedButton="confirm"
           >
             <p>
               <FormattedMessage
                 id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogMessage"
-                defaultMessage="You've changed Custom URLs configuration."
+                defaultMessage="If you don't save, your changes will be lost."
               />
             </p>
           </EuiConfirmModal>
