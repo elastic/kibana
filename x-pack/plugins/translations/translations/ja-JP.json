@@ -5757,7 +5757,6 @@
     "xpack.maps.es_geo_utils.shapeFilter.geoPointRelationLabel": "次に含まれる：",
     "xpack.maps.es_geo_utils.unsupportedFieldTypeErrorMessage": "サポートされていないフィールドタイプ、期待値: {expectedTypes}、提供された値: {fieldType}",
     "xpack.maps.es_geo_utils.unsupportedGeometryTypeErrorMessage": "サポートされていないジオメトリタイプ、期待値: {expectedTypes}、提供された値: {geometryType}",
-    "xpack.maps.es_geo_utils.unsupportedGeoPointValueErrorMessage": "サポートされていない geo_point 値: {geoPointValue}",
     "xpack.maps.es_geo_utils.wkt.invalidWKTErrorMessage": "{wkt} を Geojson に変換できません。有効な WKT が必要です。",
     "xpack.maps.geometryFilterForm.geoFieldLabel": "フィルタリングされたフィールド",
     "xpack.maps.geometryFilterForm.geometryLabelLabel": "ジオメトリラベル",
