@@ -22,7 +22,7 @@ import {
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
-import { getNetworkTopNFlowColumns } from './columns';
+import { getNetworkTopNFlowColumns, getNetworkTopNFlowColumnsIpDetails } from './columns';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -125,25 +125,27 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     };
 
     let tableType: networkModel.TopNTableType;
-    let headerTitle: string;
+    const headerTitle: string =
+      flowTargeted === FlowTargetNew.source ? i18n.SOURCE_IP : i18n.DESTINATION_IP;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let updateTableActivePage: any;
+    let getNetworkTopNFlowColumnsF;
 
-    if (flowTargeted === FlowTargetNew.source) {
-      headerTitle = i18n.SOURCE_IP;
+    if (type === networkModel.NetworkType.page) {
       tableType =
-        type === networkModel.NetworkType.page
-          ? networkModel.NetworkTableType.topNFlowSource
-          : networkModel.IpDetailsTableType.topNFlowSource;
-      updateTableActivePage = updateIpDetailsTableActivePage;
-    } else {
-      headerTitle = i18n.DESTINATION_IP;
-      tableType =
-        type === networkModel.NetworkType.page
-          ? networkModel.NetworkTableType.topNFlowDestination
-          : networkModel.IpDetailsTableType.topNFlowDestination;
+        networkModel.NetworkTableType[
+          flowTargeted === FlowTargetNew.source ? 'topNFlowSource' : 'topNFlowDestination'
+        ];
       updateTableActivePage = updateNetworkPageTableActivePage;
+      getNetworkTopNFlowColumnsF = getNetworkTopNFlowColumns;
+    } else {
+      tableType =
+        networkModel.IpDetailsTableType[
+          flowTargeted === FlowTargetNew.source ? 'topNFlowSource' : 'topNFlowDestination'
+        ];
+      updateTableActivePage = updateIpDetailsTableActivePage;
+      getNetworkTopNFlowColumnsF = getNetworkTopNFlowColumnsIpDetails;
     }
 
     const field =
@@ -155,7 +157,7 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getNetworkTopNFlowColumns(
+        columns={getNetworkTopNFlowColumnsF(
           indexPattern,
           flowTargeted,
           type,

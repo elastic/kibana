@@ -38,6 +38,187 @@ export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>
 ];
 
+export type NetworkTopNFlowColumnsIpDetails = [
+  Columns<NetworkTopNFlowEdges>,
+  Columns<NetworkTopNFlowEdges>,
+  Columns<NetworkTopNFlowEdges>,
+  Columns<TopNFlowNetworkEcsField['bytes_in']>,
+  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<NetworkTopNFlowEdges>
+];
+
+export const getNetworkTopNFlowColumnsIpDetails = (
+  indexPattern: StaticIndexPattern,
+  flowTarget: FlowTargetNew,
+  type: networkModel.NetworkType,
+  tableId: string
+): NetworkTopNFlowColumnsIpDetails => [
+  {
+    name: i18n.IP_TITLE,
+    render: ({ node }) => {
+      const ipAttr = `${flowTarget}.ip`;
+      const ip: string | null = get(ipAttr, node);
+      const geoAttr = `${flowTarget}.location.geo.country_iso_code[0]`;
+      const geoAttrName = `${flowTarget}.geo.country_iso_code`;
+      const geo: string | null = get(geoAttr, node);
+      const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-ip-${ip}`);
+
+      if (ip != null) {
+        return (
+          <>
+            <DraggableWrapper
+              key={id}
+              dataProvider={{
+                and: [],
+                enabled: true,
+                id,
+                name: ip,
+                excluded: false,
+                kqlQuery: '',
+                queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
+              }}
+              render={(dataProvider, _, snapshot) =>
+                snapshot.isDragging ? (
+                  <DragEffects>
+                    <Provider dataProvider={dataProvider} />
+                  </DragEffects>
+                ) : (
+                  <IPDetailsLink ip={ip} />
+                )
+              }
+            />
+
+            {geo && (
+              <DraggableWrapper
+                key={`${id}-${geo}`}
+                dataProvider={{
+                  and: [],
+                  enabled: true,
+                  id: `${id}-${geo}`,
+                  name: geo,
+                  excluded: false,
+                  kqlQuery: '',
+                  queryMatch: { field: geoAttrName, value: geo, operator: IS_OPERATOR },
+                }}
+                render={(dataProvider, _, snapshot) =>
+                  snapshot.isDragging ? (
+                    <DragEffects>
+                      <Provider dataProvider={dataProvider} />
+                    </DragEffects>
+                  ) : (
+                    <>
+                      {' '}
+                      <CountryFlag countryCode={geo} /> {geo}
+                    </>
+                  )
+                }
+              />
+            )}
+          </>
+        );
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+    width: '20%',
+  },
+  {
+    name: i18n.DOMAIN,
+    render: ({ node }) => {
+      const domainAttr = `${flowTarget}.domain`;
+      const ipAttr = `${flowTarget}.ip`;
+      const domains: string[] = get(domainAttr, node);
+      const ip: string | null = get(ipAttr, node);
+
+      if (Array.isArray(domains) && domains.length > 0) {
+        const id = escapeDataProviderId(`${tableId}-table-${ip}`);
+        return getRowItemDraggables({
+          rowItems: domains,
+          attrName: domainAttr,
+          idPrefix: id,
+          displayCount: 1,
+        });
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+    width: '20%',
+  },
+  {
+    name: i18n.AUTONOMOUS_SYSTEM,
+    render: ({ node, cursor: { value: ipAddress } }) => {
+      const asAttr = `${flowTarget}.autonomous_system`;
+      const as: AutonomousSystemItem | null = get(asAttr, node);
+      if (as != null) {
+        const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-ip-${ipAddress}`);
+        return (
+          <>
+            {as.name &&
+              getRowItemDraggable({
+                rowItem: as.name,
+                attrName: `${flowTarget}.as.organization.name`,
+                idPrefix: `${id}-name`,
+              })}
+
+            {as.number && (
+              <>
+                {' '}
+                {getRowItemDraggable({
+                  rowItem: `${as.number}`,
+                  attrName: `${flowTarget}.as.number`,
+                  idPrefix: `${id}-number`,
+                })}
+              </>
+            )}
+          </>
+        );
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+    width: '20%',
+  },
+  {
+    align: 'right',
+    field: 'node.network.bytes_in',
+    name: i18n.BYTES_IN,
+    sortable: true,
+    render: bytes => {
+      if (bytes != null) {
+        return <PreferenceFormattedBytes value={bytes} />;
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+  },
+  {
+    align: 'right',
+    field: 'node.network.bytes_out',
+    name: i18n.BYTES_OUT,
+    sortable: true,
+    render: bytes => {
+      if (bytes != null) {
+        return <PreferenceFormattedBytes value={bytes} />;
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+  },
+  {
+    align: 'right',
+    field: `node.${flowTarget}.flows`,
+    name: i18n.FLOWS,
+    sortable: true,
+    render: flows => {
+      if (flows != null) {
+        return numeral(flows).format('0,000');
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+  },
+];
+
 export const getNetworkTopNFlowColumns = (
   indexPattern: StaticIndexPattern,
   flowTarget: FlowTargetNew,

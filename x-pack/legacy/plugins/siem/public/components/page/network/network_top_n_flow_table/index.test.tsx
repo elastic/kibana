@@ -34,7 +34,7 @@ describe('NetworkTopNFlow Table Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the default NetworkTopNFlow table', () => {
+    test('it renders the default NetworkTopNFlow table on the Network page', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkTopNFlowTable
@@ -53,6 +53,32 @@ describe('NetworkTopNFlow Table Component', () => {
             )}
             totalCount={mockData.NetworkTopNFlow.totalCount}
             type={networkModel.NetworkType.page}
+          />
+        </ReduxStoreProvider>
+      );
+
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
+    test('it renders the default NetworkTopNFlow table on the IP Details page', () => {
+      const wrapper = shallow(
+        <ReduxStoreProvider store={store}>
+          <NetworkTopNFlowTable
+            data={mockData.NetworkTopNFlow.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+            flowTargeted={FlowTargetNew.source}
+            id="topNFlowSource"
+            indexPattern={mockIndexPattern}
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.NetworkTopNFlow.pageInfo
+            )}
+            totalCount={mockData.NetworkTopNFlow.totalCount}
+            type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
       );
