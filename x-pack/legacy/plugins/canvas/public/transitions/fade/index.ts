@@ -6,10 +6,14 @@
 
 import './fade.css';
 
+import { TransitionStrings } from '../../../i18n';
+
+const { fade: strings } = TransitionStrings;
+
 export const fade = () => ({
   name: 'fade',
-  displayName: 'Fade',
-  help: 'Fade from one page to the next',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   enter: 'fadeIn',
   exit: 'fadeOut',
 });
