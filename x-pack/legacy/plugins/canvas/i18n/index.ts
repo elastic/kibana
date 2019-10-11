@@ -12,6 +12,7 @@ export * from './constants';
 export * from './errors';
 export * from './expression_types';
 export * from './shortcuts';
+export * from './tags';
 export * from './transitions';
 export * from './units';
 
