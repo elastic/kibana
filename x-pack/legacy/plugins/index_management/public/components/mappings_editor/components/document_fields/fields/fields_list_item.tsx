@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiIcon,
-  EuiBadge,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBadge, EuiButtonIcon } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../../mappings_state';
 import { FieldsList } from './fields_list';
@@ -43,6 +36,7 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   } = field;
   const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
   const indent = `${nestedDepth * 24}px`;
+  const indentChild = `${(nestedDepth + 1) * 24}px`;
 
   const addField = () => {
     dispatch({
@@ -68,7 +62,14 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
     }
 
     return (
-      <div style={{ paddingLeft: '20px' }}>
+      <div
+        style={{
+          position: 'relative',
+          marginTop: '-12px',
+          backgroundColor: '#eee',
+          padding: `12px 12px 12px ${indentChild}`,
+        }}
+      >
         <CreateField />
       </div>
     );
@@ -148,7 +149,6 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
       {hasChildFields && isExpanded && (
         <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} />
       )}
-
       {renderCreateField()}
     </>
   );

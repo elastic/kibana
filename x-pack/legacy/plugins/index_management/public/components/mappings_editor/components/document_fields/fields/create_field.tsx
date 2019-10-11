@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useForm, Form, SelectField, UseField, FieldConfig } from '../../../shared_imports';
 import { FIELD_TYPES_OPTIONS, PARAMETERS_DEFINITION } from '../../../constants';
@@ -47,30 +47,38 @@ export const CreateField = React.memo(() => {
   };
 
   return (
-    <Form form={form} style={{ padding: '20px 0' }} FormWrapper={formWrapper} onSubmit={submitForm}>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <NameParameter />
+    <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <NameParameter />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <UseField
+                path="type"
+                config={getFieldConfig('type')}
+                component={SelectField}
+                componentProps={{
+                  euiFieldProps: {
+                    options: FIELD_TYPES_OPTIONS,
+                  },
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <UseField
-            path="type"
-            config={getFieldConfig('type')}
-            component={SelectField}
-            componentProps={{
-              euiFieldProps: {
-                options: FIELD_TYPES_OPTIONS,
-              },
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton onClick={submitForm} type="submit">
-            Add
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton onClick={cancel}>Cancel</EuiButton>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton color="primary" fill onClick={submitForm} type="submit">
+                Add
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Form>

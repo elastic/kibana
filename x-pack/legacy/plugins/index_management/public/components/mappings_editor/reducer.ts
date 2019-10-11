@@ -158,7 +158,7 @@ export const reducer = (state: State, action: Action): State => {
         // Update parent field with new children
         state.fields.byId[fieldToAddFieldTo!] = {
           ...parentField,
-          childFields: [id, ...childFields],
+          childFields: [...childFields, id],
           hasChildFields: true,
           isExpanded: true,
         };
