@@ -25,6 +25,7 @@ import { SpacesClient } from '../../../lib/spaces_client';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { ObjectType } from '@kbn/config-schema';
 import { RouteSchemas } from 'src/core/server/http/router/route';
+import { spacesConfig } from '../../../lib/__fixtures__';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
@@ -47,7 +48,7 @@ describe('copy to space', () => {
       getSecurity: () =>
         createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
-      config$: Rx.of({ maxSpaces: 1000 }),
+      config$: Rx.of(spacesConfig),
     });
 
     spacesService.scopedClient = jest.fn((req: any) => {
@@ -57,7 +58,7 @@ describe('copy to space', () => {
           () => null,
           null,
           savedObjectsRepositoryMock,
-          { maxSpaces: 1000 },
+          spacesConfig,
           savedObjectsRepositoryMock,
           req
         )

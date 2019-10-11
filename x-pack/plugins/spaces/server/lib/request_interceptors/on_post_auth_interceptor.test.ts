@@ -28,6 +28,7 @@ import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_intercept
 import { Feature } from '../../../../features/server';
 import { OptionalPlugin } from '../../../../../legacy/server/lib/optional_plugin';
 import { SecurityPlugin } from '../../../../../legacy/plugins/security';
+import { spacesConfig } from '../__fixtures__';
 
 describe('onPostAuthInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
@@ -172,7 +173,7 @@ describe('onPostAuthInterceptor', () => {
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
       getSecurity: () => ({} as OptionalPlugin<SecurityPlugin>),
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
-      config$: Rx.of({ maxSpaces: 1000 }),
+      config$: Rx.of(spacesConfig),
     });
 
     spacesService.scopedClient = jest.fn().mockResolvedValue({

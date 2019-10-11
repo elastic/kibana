@@ -69,7 +69,7 @@ const createMockAuthorization = () => {
   };
 };
 
-const createMockConfig = (mockConfig: ConfigType = { maxSpaces: 1000 }) => {
+const createMockConfig = (mockConfig: ConfigType = { maxSpaces: 1000, enabled: true }) => {
   return ConfigSchema.validate(mockConfig);
 };
 
@@ -123,6 +123,7 @@ describe('#getAll', () => {
       const maxSpaces = 1234;
       const mockConfig = createMockConfig({
         maxSpaces: 1234,
+        enabled: true,
       });
 
       const client = new SpacesClient(
@@ -162,6 +163,7 @@ describe('#getAll', () => {
       const maxSpaces = 1234;
       const mockConfig = createMockConfig({
         maxSpaces: 1234,
+        enabled: true,
       });
       const request = Symbol() as any;
 
@@ -287,6 +289,7 @@ describe('#getAll', () => {
           const maxSpaces = 1234;
           const mockConfig = createMockConfig({
             maxSpaces: 1234,
+            enabled: true,
           });
           const mockInternalRepository = {
             find: jest.fn().mockReturnValue({
@@ -355,6 +358,7 @@ describe('#getAll', () => {
           const maxSpaces = 1234;
           const mockConfig = createMockConfig({
             maxSpaces: 1234,
+            enabled: true,
           });
           const request = Symbol() as any;
 
@@ -725,6 +729,7 @@ describe('#create', () => {
       };
       const mockConfig = createMockConfig({
         maxSpaces,
+        enabled: true,
       });
       const request = Symbol() as any;
 
@@ -766,6 +771,7 @@ describe('#create', () => {
       };
       const mockConfig = createMockConfig({
         maxSpaces,
+        enabled: true,
       });
       const request = Symbol() as any;
 
@@ -807,6 +813,7 @@ describe('#create', () => {
       };
       const mockConfig = createMockConfig({
         maxSpaces,
+        enabled: true,
       });
       const request = Symbol() as any;
 
@@ -850,6 +857,7 @@ describe('#create', () => {
       };
       const mockConfig = createMockConfig({
         maxSpaces,
+        enabled: true,
       });
       const request = Symbol() as any;
 
@@ -931,6 +939,7 @@ describe('#create', () => {
       };
       const mockConfig = createMockConfig({
         maxSpaces,
+        enabled: true,
       });
       const request = Symbol() as any;
 
@@ -983,6 +992,7 @@ describe('#create', () => {
       };
       const mockConfig = createMockConfig({
         maxSpaces,
+        enabled: true,
       });
       const request = Symbol() as any;
 

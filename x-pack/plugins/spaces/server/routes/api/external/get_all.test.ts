@@ -23,6 +23,7 @@ import { createOptionalPlugin } from '../../../../../../legacy/server/lib/option
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initGetAllSpacesApi } from './get_all';
+import { spacesConfig } from '../../../lib/__fixtures__';
 
 describe('GET /spaces/space', () => {
   const spacesSavedObjects = createSpaces();
@@ -45,7 +46,7 @@ describe('GET /spaces/space', () => {
       getSecurity: () =>
         createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
-      config$: Rx.of({ maxSpaces: 1000 }),
+      config$: Rx.of(spacesConfig),
     });
 
     spacesService.scopedClient = jest.fn((req: any) => {
@@ -55,7 +56,7 @@ describe('GET /spaces/space', () => {
           () => null,
           null,
           savedObjectsRepositoryMock,
-          { maxSpaces: 1000 },
+          spacesConfig,
           savedObjectsRepositoryMock,
           req
         )

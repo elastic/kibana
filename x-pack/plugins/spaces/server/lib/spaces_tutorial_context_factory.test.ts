@@ -14,6 +14,7 @@ import { elasticsearchServiceMock, coreMock } from '../../../../../src/core/serv
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { createOptionalPlugin } from '../../../../legacy/server/lib/optional_plugin';
 import { LegacyAPI } from '../plugin';
+import { spacesConfig } from './__fixtures__';
 
 const log = {
   log: jest.fn(),
@@ -57,7 +58,7 @@ describe('createSpacesTutorialContextFactory', () => {
       getSecurity: () =>
         createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
-      config$: Rx.of({ maxSpaces: 1000 }),
+      config$: Rx.of(spacesConfig),
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 

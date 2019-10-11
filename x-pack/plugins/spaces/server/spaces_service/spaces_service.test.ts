@@ -17,6 +17,7 @@ import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { LegacyAPI } from '../plugin';
 import { createOptionalPlugin } from '../../../../legacy/server/lib/optional_plugin';
+import { spacesConfig } from '../lib/__fixtures__';
 
 const mockLogger = {
   trace: jest.fn(),
@@ -77,7 +78,7 @@ const createService = async (serverBasePath: string = '') => {
   const spacesServiceSetup = await spacesService.setup({
     http: httpSetup,
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
-    config$: Rx.of({ maxSpaces: 10 }),
+    config$: Rx.of(spacesConfig),
     getSecurity: () => createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
     getSpacesAuditLogger: () => new SpacesAuditLogger({}),
   });

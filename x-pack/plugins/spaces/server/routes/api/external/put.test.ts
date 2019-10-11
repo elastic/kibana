@@ -26,6 +26,7 @@ import { SpacesClient } from '../../../lib/spaces_client';
 import { initPutSpacesApi } from './put';
 import { RouteSchemas } from 'src/core/server/http/router/route';
 import { ObjectType } from '@kbn/config-schema';
+import { spacesConfig } from '../../../lib/__fixtures__';
 
 describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
@@ -48,7 +49,7 @@ describe('PUT /api/spaces/space', () => {
       getSecurity: () =>
         createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
-      config$: Rx.of({ maxSpaces: 1000 }),
+      config$: Rx.of(spacesConfig),
     });
 
     spacesService.scopedClient = jest.fn((req: any) => {
@@ -58,7 +59,7 @@ describe('PUT /api/spaces/space', () => {
           () => null,
           null,
           savedObjectsRepositoryMock,
-          { maxSpaces: 1000 },
+          spacesConfig,
           savedObjectsRepositoryMock,
           req
         )

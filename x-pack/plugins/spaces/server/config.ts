@@ -9,6 +9,7 @@ import { PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
 
 export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
   maxSpaces: schema.number({ defaultValue: 1000 }),
 });
 
