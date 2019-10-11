@@ -29,7 +29,7 @@ export default function({ getService }: FtrProviderContext) {
           type: 'PERMANENT',
           metadata: {
             local: {},
-            userProvided: {},
+            user_provided: {},
           },
         })
         .expect(401);
@@ -46,11 +46,11 @@ export default function({ getService }: FtrProviderContext) {
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiRU5ST0xMTUVOVF9UT0tFTiIsInBvbGljeV9pZCI6InBvbGljeToxIiwiaWF0IjoxNTcwNzI1MDcyfQ.H41P_J2wsjfeZDOEAMYPj9TMRhCsUY3NZoLGZ9VQWpg'
         )
         .send({
-          sharedId: 'agent2_filebeat',
+          shared_id: 'agent2_filebeat',
           type: 'PERMANENT',
           metadata: {
             local: {},
-            userProvided: {},
+            user_provided: {},
           },
         })
         .expect(400);
@@ -69,7 +69,7 @@ export default function({ getService }: FtrProviderContext) {
           type: 'PERMANENT',
           metadata: {
             local: {},
-            userProvided: {},
+            user_provided: {},
           },
         })
         .expect(200);
