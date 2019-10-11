@@ -20,9 +20,23 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import { MetricAggParamEditor } from './metric_agg';
-import { AggParamEditorProps } from '..';
 import { AggConfig } from 'ui/agg_types';
+import { DEFAULT_OPTIONS, aggFilter, MetricAggParamEditor } from './metric_agg';
+import { AggParamEditorProps } from '..';
+
+jest.mock('./agg_utils', () => ({
+  useAvailableOptions: jest.fn((aggFilterArray, filteredMetrics, defaultOptions) => [
+    ...filteredMetrics.map(({ id, type }: { id: string; type: { name: string } }) => ({
+      text: type.name,
+      value: id,
+    })),
+    ...defaultOptions,
+  ]),
+  useFallbackMetric: jest.fn(),
+  useValidation: jest.fn(),
+}));
+
+import { useAvailableOptions, useFallbackMetric, useValidation } from './agg_utils';
 
 const agg = {
   id: '1',
@@ -57,51 +71,13 @@ const metricAggs = [
   },
 ] as AggConfig[];
 
-const incompatibleAggs = [
-  agg,
-  {
-    id: '2',
-    type: { name: 'top_hits' },
-    makeLabel() {
-      return 'top_hits';
-    },
-  },
-  {
-    id: '3',
-    type: { name: 'percentiles' },
-    makeLabel() {
-      return 'percentiles';
-    },
-  },
-  {
-    id: '4',
-    type: { name: 'percentile_ranks' },
-    makeLabel() {
-      return 'percentile_ranks';
-    },
-  },
-  {
-    id: '5',
-    type: { name: 'median' },
-    makeLabel() {
-      return 'median';
-    },
-  },
-  {
-    id: '6',
-    type: { name: 'std_dev' },
-    makeLabel() {
-      return 'std_dev';
-    },
-  },
-] as AggConfig[];
-
 describe('MetricAggParamEditor', () => {
   let defaultProps: Partial<AggParamEditorProps<string>>;
 
   beforeEach(() => {
     defaultProps = {
       agg,
+      showValidation: false,
       setValue: jest.fn(),
       setValidity: jest.fn(),
     };
@@ -115,122 +91,46 @@ describe('MetricAggParamEditor', () => {
     expect(comp).toMatchSnapshot();
   });
 
-  describe('available options', () => {
-    test('should include custom metric field into available options', () => {
-      const comp = shallow(
-        <MetricAggParamEditor {...(defaultProps as AggParamEditorProps<string>)} value="custom" />
-      );
+  test('should call custom hooks', () => {
+    shallow(
+      <MetricAggParamEditor {...(defaultProps as AggParamEditorProps<string>)} value="custom" />
+    );
 
-      expect(comp.find('EuiSelect').props()).toHaveProperty('options', [
-        { text: expect.any(String), value: 'custom', disabled: false },
-      ]);
-    });
-
-    test('should filter self aggregation from available options and always push cutom option into the end', () => {
-      const comp = shallow(
-        <MetricAggParamEditor
-          {...(defaultProps as AggParamEditorProps<string>)}
-          value="custom"
-          metricAggs={[agg]}
-        />
-      );
-
-      expect(comp.find('EuiSelect').props()).toHaveProperty('options', [
-        { text: expect.any(String), value: 'custom', disabled: false },
-      ]);
-    });
-
-    test(`should unshift an emty value into available options
-      if there is no selected value (the case when the selected metric agg was removed)`, () => {
-      const comp = shallow(
-        <MetricAggParamEditor
-          {...(defaultProps as AggParamEditorProps<string>)}
-          metricAggs={[agg]}
-        />
-      );
-
-      expect(comp.find('EuiSelect').props()).toHaveProperty('options', [
-        { text: '', value: 'EMPTY_VALUE', disabled: false },
-        { text: expect.any(String), value: 'custom', disabled: false },
-      ]);
-    });
-
-    test('should map available options into an appropriate format', () => {
-      const comp = shallow(
-        <MetricAggParamEditor
-          {...(defaultProps as AggParamEditorProps<string>)}
-          value="custom"
-          metricAggs={metricAggs}
-        />
-      );
-
-      expect(comp.find('EuiSelect').props()).toHaveProperty('options', [
-        { text: expect.any(String), value: '2', disabled: false },
-        { text: expect.any(String), value: '3', disabled: false },
-        { text: expect.any(String), value: '4', disabled: false },
-        { text: expect.any(String), value: 'custom', disabled: false },
-      ]);
-    });
-
-    test('should disable incompatible options for the metric', () => {
-      const comp = shallow(
-        <MetricAggParamEditor
-          {...(defaultProps as AggParamEditorProps<string>)}
-          value="custom"
-          metricAggs={incompatibleAggs}
-        />
-      );
-
-      expect(comp.find('EuiSelect').props()).toHaveProperty('options', [
-        { text: expect.any(String), value: '2', disabled: true },
-        { text: expect.any(String), value: '3', disabled: true },
-        { text: expect.any(String), value: '4', disabled: true },
-        { text: expect.any(String), value: '5', disabled: true },
-        { text: expect.any(String), value: '6', disabled: true },
-        { text: expect.any(String), value: 'custom', disabled: false },
-      ]);
-    });
+    expect(useFallbackMetric).toHaveBeenCalledWith(defaultProps.setValue, aggFilter, [], 'custom');
+    expect(useValidation).toHaveBeenCalledWith(defaultProps.setValidity, true);
+    expect(useAvailableOptions).toHaveBeenCalledWith(aggFilter, [], DEFAULT_OPTIONS);
   });
 
-  describe('validation', () => {
-    test('should be valid/invalid if value is set/unset', () => {
-      const comp = mount(
-        <MetricAggParamEditor {...(defaultProps as AggParamEditorProps<string>)} value="custom" />
-      );
+  test('should filter self aggregation from available options', () => {
+    const comp = shallow(
+      <MetricAggParamEditor
+        {...(defaultProps as AggParamEditorProps<string>)}
+        value="custom"
+        metricAggs={[agg]}
+      />
+    );
 
-      expect(defaultProps.setValidity).lastCalledWith(true);
-
-      comp.setProps({ value: undefined, showValidation: true });
-
-      expect(comp.children().props()).toHaveProperty('isInvalid', true);
-      expect(defaultProps.setValidity).lastCalledWith(false);
-    });
+    expect(comp.find('EuiSelect').props()).toHaveProperty('options', [...DEFAULT_OPTIONS]);
+    expect(useFallbackMetric).toHaveBeenCalledWith(
+      defaultProps.setValue,
+      aggFilter,
+      [agg],
+      'custom'
+    );
   });
 
-  describe('handle the case when any metric agg was removed', () => {
-    test('should erase the value if it is no longer available', () => {
-      mount(
-        <MetricAggParamEditor
-          {...(defaultProps as AggParamEditorProps<string>)}
-          value="7"
-          metricAggs={metricAggs}
-        />
-      );
+  test('should be valid/invalid if value is defined/undefined', () => {
+    const comp = mount(
+      <MetricAggParamEditor {...(defaultProps as AggParamEditorProps<string>)} value="custom" />
+    );
 
-      expect(defaultProps.setValue).toBeCalledWith();
-    });
+    expect(comp.children().props()).toHaveProperty('isInvalid', false);
+    expect(useValidation).lastCalledWith(defaultProps.setValidity, true);
 
-    test('should check if value is still available', () => {
-      mount(
-        <MetricAggParamEditor
-          {...(defaultProps as AggParamEditorProps<string>)}
-          value="2"
-          metricAggs={metricAggs}
-        />
-      );
+    comp.setProps({ value: undefined, showValidation: true });
 
-      expect(defaultProps.setValue).not.toBeCalled();
-    });
+    expect(comp.children().props()).toHaveProperty('isInvalid', true);
+    expect(useValidation).lastCalledWith(defaultProps.setValidity, false);
   });
 
   test('should set new value into the model on change', () => {

@@ -7,6 +7,7 @@ exports[`MetricAggParamEditor should be rendered with default set of props 1`] =
   display="row"
   fullWidth={true}
   hasEmptyLabelSpace={false}
+  isInvalid={false}
   label="Metric"
   labelType="label"
 >
@@ -15,19 +16,15 @@ exports[`MetricAggParamEditor should be rendered with default set of props 1`] =
     data-test-subj="visEditorSubAggMetric1"
     fullWidth={true}
     hasNoInitialSelection={false}
+    isInvalid={false}
     isLoading={false}
     onChange={[Function]}
     options={
       Array [
         Object {
-          "disabled": false,
+          "hidden": true,
           "text": "",
           "value": "EMPTY_VALUE",
-        },
-        Object {
-          "disabled": false,
-          "text": "Custom metric",
-          "value": "custom",
         },
       ]
     }
