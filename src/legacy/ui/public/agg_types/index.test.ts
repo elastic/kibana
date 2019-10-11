@@ -17,35 +17,30 @@
  * under the License.
  */
 
-import { isValidJson } from '../utils';
+import { aggTypes } from './index';
+
+import { isBucketAggType } from './buckets/_bucket_agg_type';
+import { isMetricAggType } from './metrics/metric_agg_type';
+
+const bucketAggs = aggTypes.buckets;
+const metricAggs = aggTypes.metrics;
 
 jest.mock('ui/new_platform');
 
-const input = {
-  valid: '{ "test": "json input" }',
-  invalid: 'strings are not json',
-};
-
-describe('AggType utils', () => {
-  describe('isValidJson', () => {
-    it('should return true when empty string', () => {
-      expect(isValidJson('')).toBe(true);
+describe('AggTypesComponent', () => {
+  describe('bucket aggs', () => {
+    it('all extend BucketAggType', () => {
+      bucketAggs.forEach(bucketAgg => {
+        expect(isBucketAggType(bucketAgg)).toBeTruthy();
+      });
     });
+  });
 
-    it('should return true when undefine', () => {
-      expect(isValidJson(undefined as any)).toBe(true);
-    });
-
-    it('should return false when invalid string', () => {
-      expect(isValidJson(input.invalid)).toBe(false);
-    });
-
-    it('should return true when valid string', () => {
-      expect(isValidJson(input.valid)).toBe(true);
-    });
-
-    it('should return false if a number', () => {
-      expect(isValidJson('0')).toBe(false);
+  describe('metric aggs', () => {
+    it('all extend MetricAggType', () => {
+      metricAggs.forEach(metricAgg => {
+        expect(isMetricAggType(metricAgg)).toBeTruthy();
+      });
     });
   });
 });

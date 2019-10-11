@@ -17,9 +17,35 @@
  * under the License.
  */
 
-import './_field';
-import './_optioned';
-import './_string';
-import './_json';
-describe('ParamTypes', function () {
+import { isValidJson } from './utils';
+
+jest.mock('ui/new_platform');
+
+const input = {
+  valid: '{ "test": "json input" }',
+  invalid: 'strings are not json',
+};
+
+describe('AggType utils', () => {
+  describe('isValidJson', () => {
+    it('should return true when empty string', () => {
+      expect(isValidJson('')).toBeTruthy();
+    });
+
+    it('should return true when undefine', () => {
+      expect(isValidJson(undefined as any)).toBeTruthy();
+    });
+
+    it('should return false when invalid string', () => {
+      expect(isValidJson(input.invalid)).toBeFalsy();
+    });
+
+    it('should return true when valid string', () => {
+      expect(isValidJson(input.valid)).toBeTruthy();
+    });
+
+    it('should return false if a number', () => {
+      expect(isValidJson('0')).toBeFalsy();
+    });
+  });
 });
