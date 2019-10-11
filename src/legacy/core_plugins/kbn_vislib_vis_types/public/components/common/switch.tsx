@@ -22,7 +22,7 @@ import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
 interface SwitchOptionProps<ParamName extends string> {
-  dataTestSubj?: string;
+  'data-test-subj'?: string;
   label?: string;
   tooltip?: string;
   disabled?: boolean;
@@ -32,7 +32,7 @@ interface SwitchOptionProps<ParamName extends string> {
 }
 
 function SwitchOption<ParamName extends string>({
-  dataTestSubj,
+  'data-test-subj': dataTestSubj,
   tooltip,
   label,
   disabled,
@@ -41,9 +41,10 @@ function SwitchOption<ParamName extends string>({
   setValue,
 }: SwitchOptionProps<ParamName>) {
   return (
-    <EuiFormRow fullWidth={true}>
+    <EuiFormRow fullWidth={true} compressed={true}>
       <EuiToolTip content={tooltip} delay="long" position="right">
         <EuiSwitch
+          compressed={true}
           label={label}
           checked={value}
           disabled={disabled}

@@ -20,18 +20,22 @@
 import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import {
-  InternalCoreSetup,
+  CoreSetup,
   KibanaRequest,
   RequestHandlerContext,
   APICaller,
+  CallAPIOptions,
 } from '../../../core/server';
 import { IndexPatternsService } from './service';
 
-export function registerRoutes(core: InternalCoreSetup) {
+export function registerRoutes(core: CoreSetup) {
   const getIndexPatternsService = async (request: KibanaRequest): Promise<IndexPatternsService> => {
     const client = await core.elasticsearch.dataClient$.pipe(first()).toPromise();
-    const callCluster: APICaller = (endpoint, params, options) =>
-      client.asScoped(request).callAsCurrentUser(endpoint, params, options);
+    const callCluster: APICaller = (
+      endpoint: string,
+      params?: Record<string, any>,
+      options?: CallAPIOptions
+    ) => client.asScoped(request).callAsCurrentUser(endpoint, params, options);
     return new Promise(resolve => resolve(new IndexPatternsService(callCluster)));
   };
 
@@ -45,10 +49,10 @@ export function registerRoutes(core: InternalCoreSetup) {
     return parsedFields;
   };
 
-  const router = core.http.createRouter('/api/index_patterns');
+  const router = core.http.createRouter();
   router.get(
     {
-      path: '/_fields_for_wildcard',
+      path: '/api/index_patterns/_fields_for_wildcard',
       validate: {
         query: schema.object({
           pattern: schema.string(),
@@ -89,7 +93,7 @@ export function registerRoutes(core: InternalCoreSetup) {
 
   router.get(
     {
-      path: '/_fields_for_time_pattern',
+      path: '/api/index_patterns/_fields_for_time_pattern',
       validate: {
         query: schema.object({
           pattern: schema.string(),

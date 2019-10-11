@@ -37,6 +37,7 @@
 .mapTocEntry-isDraggingOver {
   background-color: $euiColorEmptyShade;
   // Don't allow interaction events while layer is being re-ordered
+  // sass-lint:disable-block no-important
   pointer-events: none !important;
 }
 
@@ -50,12 +51,13 @@
   flex-grow: 1;
 }
 
-.mapLayTocActions__popoverAnchor, .mapLayTocActions__tooltipAnchor{
+.mapLayTocActions__popoverAnchor,
+.mapLayTocActions__tooltipAnchor {
   max-width: 100%;
 }
 
 .mapTocEntry-notVisible .mapTocEntry__layerName {
-  opacity: 0.5;
+  opacity: .5;
 }
 
 .mapTocEntry__grab:hover {
@@ -116,9 +118,11 @@
 }
 
 @keyframes mapTocEntryBecomeVisible {
+
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
