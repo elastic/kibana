@@ -8,8 +8,8 @@ import { IndexPatternPrivateState } from './types';
 
 export function fieldExists(
   existingFields: IndexPatternPrivateState['existingFields'],
-  indexPatternId: string,
+  indexPatternTitle: string,
   fieldName: string
 ) {
-  return existingFields[indexPatternId] && existingFields[indexPatternId][fieldName];
+  return existingFields[indexPatternTitle] && existingFields[indexPatternTitle][fieldName];
 }

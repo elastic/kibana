@@ -23,7 +23,7 @@ export class LensServer implements Plugin<{}, {}, {}, {}> {
       config: KibanaConfig;
     }
   ) {
-    setupRoutes(core, plugins.savedObjects);
+    setupRoutes(core);
     registerLensUsageCollector(core, plugins);
 
     return {};

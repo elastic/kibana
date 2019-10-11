@@ -89,20 +89,30 @@ export function IndexPatternDataPanel({
     setState(prevState => ({ ...prevState, showEmptyFields: !prevState.showEmptyFields }));
   }, [setState]);
 
-  const indexPatternIds = uniq(
+  const indexPatternList = uniq(
     Object.values(state.layers)
       .map(l => l.indexPatternId)
       .concat(currentIndexPatternId)
-  ).sort((a, b) => a.localeCompare(b));
+  )
+    .sort((a, b) => a.localeCompare(b))
+    .filter(id => !!indexPatterns[id])
+    .map(id => ({
+      title: indexPatterns[id].title,
+      timeFieldName: indexPatterns[id].timeFieldName,
+    }));
 
   useEffect(() => {
     syncExistingFields({
       dateRange,
-      indexPatternIds,
       setState,
+      indexPatterns: indexPatternList,
       fetchJson: core.http.get,
     });
-  }, [dateRange.fromDate, dateRange.toDate, indexPatternIds.join(',')]);
+  }, [
+    dateRange.fromDate,
+    dateRange.toDate,
+    indexPatternList.map(x => `${x.title}:${x.timeFieldName}`).join(','),
+  ]);
 
   return (
     <MemoizedDataPanel
@@ -229,7 +239,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     if (!showEmptyFields) {
       const indexField = currentIndexPattern && fieldByName[field.name];
       const exists =
-        indexField && fieldExists(existingFields, currentIndexPatternId, indexField.name);
+        indexField && fieldExists(existingFields, currentIndexPattern.title, indexField.name);
       if (localState.typeFilter.length > 0) {
         return exists && localState.typeFilter.includes(field.type as DataType);
       }
@@ -409,7 +419,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     highlight={localState.nameFilter.toLowerCase()}
                     exists={
                       overallField &&
-                      fieldExists(existingFields, currentIndexPatternId, overallField.name)
+                      fieldExists(existingFields, currentIndexPattern.title, overallField.name)
                     }
                     dateRange={dateRange}
                     query={query}

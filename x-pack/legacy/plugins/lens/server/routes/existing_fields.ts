@@ -8,15 +8,13 @@ import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
 import _ from 'lodash';
-import {
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
-  IScopedClusterClient,
-} from 'src/core/server';
+import { IScopedClusterClient } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
-import { LensServerOptions } from '../server_options';
 import { BASE_API_URL } from '../../common';
-import { FieldDescriptor } from '../../../../../../src/legacy/server/index_patterns/service';
+import {
+  FieldDescriptor,
+  IndexPatternsService,
+} from '../../../../../../src/legacy/server/index_patterns/service';
 
 /**
  * The number of docs to sample to determine field empty status.
@@ -25,53 +23,47 @@ const SAMPLE_SIZE = 500;
 
 type Document = Record<string, unknown>;
 
-interface SavedIndexPatternAttributes extends SavedObjectAttributes {
-  title: string;
-  timeFieldName: string | null;
-  fields: string;
-  fieldFormatMap: string;
-  typeMeta: string;
-}
-
-export async function existingFieldsRoute(
-  setup: CoreSetup,
-  { getScopedSavedObjectsClient }: LensServerOptions
-) {
+export async function existingFieldsRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
   router.get(
     {
-      path: `${BASE_API_URL}/existing_fields/{id}`,
+      path: `${BASE_API_URL}/existing_fields/{indexPatternTitle}`,
       validate: {
         params: schema.object({
-          id: schema.string(),
+          indexPatternTitle: schema.string(),
         }),
         query: schema.object({
           fromDate: schema.maybe(schema.string()),
           toDate: schema.maybe(schema.string()),
-          timeZone: schema.maybe(schema.string()),
+          timeFieldName: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, req, res) => {
+      const { indexPatternTitle } = req.params;
       const requestClient = context.core.elasticsearch.dataClient;
-      const savedObjectsClient = getScopedSavedObjectsClient(req);
-      const { fromDate, toDate, timeZone } = req.query;
+      const indexPatternsService = new IndexPatternsService(requestClient.callAsCurrentUser);
+      const { fromDate, toDate, timeFieldName } = req.query;
 
       try {
-        const indexPattern = await fetchIndexPattern(req.params.id, savedObjectsClient);
+        const fields = await indexPatternsService.getFieldsForWildcard({
+          pattern: indexPatternTitle,
+          // TODO: Pull this from kibana advanced settings
+          metaFields: ['_source', '_id', '_type', '_index', '_score'],
+        });
 
         const results = await fetchIndexPatternStats({
-          client: requestClient,
           fromDate,
           toDate,
-          indexPattern,
-          timeZone,
+          client: requestClient,
+          index: indexPatternTitle,
+          timeFieldName,
         });
 
         return res.ok({
           body: {
-            id: indexPattern.id,
-            existingFieldNames: existingFields(results.hits.hits, indexPattern.fields),
+            indexPatternTitle,
+            existingFieldNames: existingFields(results.hits.hits, fields),
           },
         });
       } catch (e) {
@@ -93,22 +85,6 @@ export async function existingFieldsRoute(
   );
 }
 
-function exists(obj: unknown, path: string[], i = 0): boolean {
-  if (obj == null) {
-    return false;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.some(child => exists(child, path, i));
-  }
-
-  if (typeof obj === 'object') {
-    return exists((obj as Record<string, unknown>)[path[i]], path, i + 1);
-  }
-
-  return path.length === i;
-}
-
 function existingFields(docs: Array<{ _source: Document }>, fields: FieldDescriptor[]): string[] {
   const allFields = fields.map(field => ({
     name: field.name,
@@ -123,7 +99,8 @@ function existingFields(docs: Array<{ _source: Document }>, fields: FieldDescrip
     }
 
     missingFields.forEach(field => {
-      if (exists(doc._source, field.path)) {
+      const match = _.get(doc._source, field.parent || field.name);
+      if (typeof match !== 'undefined') {
         missingFields.delete(field);
       }
     });
@@ -132,40 +109,21 @@ function existingFields(docs: Array<{ _source: Document }>, fields: FieldDescrip
   return allFields.filter(field => !missingFields.has(field)).map(f => f.name);
 }
 
-async function fetchIndexPattern(id: string, savedObjectsClient: SavedObjectsClientContract) {
-  const result = await savedObjectsClient.get<SavedIndexPatternAttributes>('index-pattern', id);
-  const { attributes } = result;
-  const allFields = JSON.parse(attributes.fields) as FieldDescriptor[];
-  const compatibleFields = allFields.filter(
-    ({ type: fieldType, esTypes }) =>
-      fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
-  );
-
-  return {
-    id,
-    title: attributes.title,
-    fields: compatibleFields,
-    timeFieldName: attributes.timeFieldName,
-    typeMeta: attributes.typeMeta && JSON.parse(attributes.typeMeta),
-    fieldFormatMap: attributes.fieldFormatMap && JSON.parse(attributes.fieldFormatMap),
-  };
-}
-
 async function fetchIndexPatternStats({
-  indexPattern,
-  fromDate,
-  toDate,
-  timeZone,
   client,
+  fromDate,
+  index,
+  toDate,
+  timeFieldName,
 }: {
-  indexPattern: Pick<SavedIndexPatternAttributes, 'title' | 'timeFieldName'>;
-  fromDate?: string;
-  toDate?: string;
-  timeZone?: string;
   client: IScopedClusterClient;
+  fromDate?: string;
+  index: string;
+  toDate?: string;
+  timeFieldName?: string;
 }) {
   const body =
-    !indexPattern.timeFieldName || !fromDate || !toDate
+    !timeFieldName || !fromDate || !toDate
       ? {}
       : {
           query: {
@@ -173,10 +131,9 @@ async function fetchIndexPatternStats({
               filter: [
                 {
                   range: {
-                    [indexPattern.timeFieldName]: {
+                    [timeFieldName]: {
                       gte: fromDate,
                       lte: toDate,
-                      time_zone: timeZone,
                     },
                   },
                 },
@@ -186,7 +143,7 @@ async function fetchIndexPatternStats({
         };
 
   return (await client.callAsCurrentUser('search', {
-    index: indexPattern.title,
+    index,
     body: {
       ...body,
       size: SAMPLE_SIZE,
