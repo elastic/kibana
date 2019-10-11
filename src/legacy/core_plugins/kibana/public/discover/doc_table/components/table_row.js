@@ -147,8 +147,8 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         $scope.columns.forEach(function (column) {
           const isFilterable =
             $scope.flattenedRow[column] !== undefined &&
-            mapping[column] &&
-            mapping[column].filterable &&
+            mapping(column) &&
+            mapping(column).filterable &&
             _.isFunction($scope.filter);
 
           newHtmls.push(
