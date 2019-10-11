@@ -492,19 +492,17 @@ describe('loader', () => {
     it('should call once for each index pattern', async () => {
       const setState = jest.fn();
       const fetchJson = jest.fn(async (url: string) => {
-        const indexPatternTitle = _.last(url.split('/'));
+        const id = _.last(url.split('/'));
         return {
-          indexPatternTitle,
-          existingFieldNames: ['field_1', 'field_2'].map(
-            fieldName => `${indexPatternTitle}_${fieldName}`
-          ),
+          id,
+          existingFieldNames: ['field_1', 'field_2'].map(fieldName => `${id}_${fieldName}`),
         };
       });
 
       await syncExistingFields({
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
         fetchJson,
-        indexPatterns: [{ title: 'a' }, { title: 'b' }, { title: 'c' }],
+        indexPatternIds: ['a', 'b', 'c'],
         setState,
       });
 

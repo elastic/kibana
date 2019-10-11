@@ -7,8 +7,9 @@
 import { CoreSetup } from 'src/core/server';
 import { existingFieldsRoute } from './existing_fields';
 import { initFieldsRoute } from './field_stats';
+import { LensServerOptions } from '../server_options';
 
-export function setupRoutes(setup: CoreSetup) {
-  existingFieldsRoute(setup);
+export function setupRoutes(setup: CoreSetup, opts: LensServerOptions) {
+  existingFieldsRoute(setup, opts);
   initFieldsRoute(setup);
 }

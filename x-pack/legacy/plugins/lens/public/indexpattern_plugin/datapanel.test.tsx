@@ -81,7 +81,7 @@ const initialState: IndexPatternPrivateState = {
   indexPatterns: {
     '1': {
       id: '1',
-      title: 'idx1',
+      title: 'my-fake-index-pattern',
       timeFieldName: 'timestamp',
       fields: [
         {
@@ -124,7 +124,7 @@ const initialState: IndexPatternPrivateState = {
     },
     '2': {
       id: '2',
-      title: 'idx2',
+      title: 'my-fake-restricted-pattern',
       timeFieldName: 'timestamp',
       fields: [
         {
@@ -177,7 +177,7 @@ const initialState: IndexPatternPrivateState = {
     },
     '3': {
       id: '3',
-      title: 'idx3',
+      title: 'my-compatible-pattern',
       timeFieldName: 'timestamp',
       fields: [
         {
@@ -269,12 +269,10 @@ describe('IndexPattern Data Panel', () => {
       const setState = jest.fn();
       core.http.get = jest.fn(async (url: string) => {
         const parts = url.split('/');
-        const indexPatternTitle = parts[parts.length - 1];
+        const id = parts[parts.length - 1];
         return {
-          indexPatternTitle,
-          existingFieldNames: ['field_1', 'field_2'].map(
-            fieldName => `${indexPatternTitle}_${fieldName}`
-          ),
+          id,
+          existingFieldNames: ['field_1', 'field_2'].map(fieldName => `${id}_${fieldName}`),
         };
       });
       const props = {
@@ -289,8 +287,8 @@ describe('IndexPattern Data Panel', () => {
           showEmptyFields: false,
           currentIndexPatternId: 'a',
           indexPatterns: {
-            a: { id: 'a', title: 'aaa', timeFieldName: 'atime', fields: [] },
-            b: { id: 'b', title: 'bbb', timeFieldName: 'btime', fields: [] },
+            a: { id: 'a', title: 'aaa', fields: [] },
+            b: { id: 'b', title: 'bbb', fields: [] },
           },
           layers: {
             1: {
@@ -331,9 +329,9 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a: {
+          a_field_1: true,
+          a_field_2: true,
         },
       });
     });
@@ -348,13 +346,13 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a: {
+          a_field_1: true,
+          a_field_2: true,
         },
-        bbb: {
-          bbb_field_1: true,
-          bbb_field_2: true,
+        b: {
+          b_field_1: true,
+          b_field_2: true,
         },
       });
     });
@@ -376,19 +374,17 @@ describe('IndexPattern Data Panel', () => {
       expect(setState).toHaveBeenCalledTimes(2);
       expect(core.http.get).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/aaa', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
-          timeFieldName: 'atime',
         },
       });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/aaa', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-02',
-          timeFieldName: 'atime',
         },
       });
 
@@ -397,9 +393,9 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a: {
+          a_field_1: true,
+          a_field_2: true,
         },
       });
     });
@@ -415,19 +411,17 @@ describe('IndexPattern Data Panel', () => {
 
       expect(setState).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/aaa', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
-          timeFieldName: 'atime',
         },
       });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/bbb', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/b', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
-          timeFieldName: 'btime',
         },
       });
 
@@ -436,13 +430,13 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a: {
+          a_field_1: true,
+          a_field_2: true,
         },
-        bbb: {
-          bbb_field_1: true,
-          bbb_field_2: true,
+        b: {
+          b_field_1: true,
+          b_field_2: true,
         },
       });
     });
@@ -579,7 +573,7 @@ describe('IndexPattern Data Panel', () => {
       const props = {
         ...emptyFieldsTestProps,
         existingFields: {
-          idx1: {
+          1: {
             bytes: true,
             memory: true,
           },

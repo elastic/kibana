@@ -104,7 +104,7 @@ export function FieldSelect({
                   ? selectedColumnOperationType
                   : undefined,
             },
-            exists: fieldExists(existingFields, currentIndexPattern.title, field),
+            exists: fieldExists(existingFields, currentIndexPattern.id, field),
             compatible: isCompatibleWithCurrentOperation(field),
           }))
           .filter(field => showEmptyFields || field.exists)

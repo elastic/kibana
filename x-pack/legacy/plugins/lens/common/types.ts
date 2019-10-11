@@ -5,7 +5,7 @@
  */
 
 export interface ExistingFields {
-  indexPatternTitle: string;
+  id: string;
   existingFieldNames: string[];
 }
 
