@@ -19,15 +19,15 @@ import React, { ReactText } from 'react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { InfraMetricData } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
-import { InfraMetricLayoutSection } from '../../../pages/metrics/layouts/types';
 import { createFormatter } from '../../../utils/formatters';
+import { InventoryDetailSection } from '../../../../common/inventory_models/types';
 
 interface Props {
-  section: InfraMetricLayoutSection;
+  section: InventoryDetailSection;
   metric: InfraMetricData;
 }
 
-const getFormatter = (section: InfraMetricLayoutSection, seriesId: string) => (val: ReactText) => {
+const getFormatter = (section: InventoryDetailSection, seriesId: string) => (val: ReactText) => {
   if (val == null) {
     return '';
   }

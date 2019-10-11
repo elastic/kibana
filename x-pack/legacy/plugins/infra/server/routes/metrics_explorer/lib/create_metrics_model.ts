@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricModel, InfraMetricModelMetricType } from '../../../lib/adapters/metrics';
+import { InfraMetricModelMetricType } from '../../../lib/adapters/metrics';
 import { MetricsExplorerAggregation, MetricsExplorerRequest } from '../types';
 import { InfraMetric } from '../../../graphql/types';
-export const createMetricModel = (options: MetricsExplorerRequest): InfraMetricModel => {
+import { TSVBMetricModel } from '../../../../common/inventory_models/types';
+export const createMetricModel = (options: MetricsExplorerRequest): TSVBMetricModel => {
   return {
     id: InfraMetric.custom,
     requires: [],
@@ -20,7 +21,7 @@ export const createMetricModel = (options: MetricsExplorerRequest): InfraMetricM
     series: options.metrics.map((metric, index) => {
       // If the metric is a rate then we need to add TSVB metrics for calculating the derivative
       if (metric.aggregation === MetricsExplorerAggregation.rate) {
-        const aggType = InfraMetricModelMetricType.max;
+        const aggType = 'max';
         return {
           id: `metric_${index}`,
           split_mode: 'everything',
@@ -33,12 +34,12 @@ export const createMetricModel = (options: MetricsExplorerRequest): InfraMetricM
             {
               id: `metric_deriv_${aggType}_${index}`,
               field: `metric_${aggType}_${index}`,
-              type: InfraMetricModelMetricType.derivative,
+              type: 'derivative',
               unit: '1s',
             },
             {
               id: `metric_posonly_deriv_${aggType}_${index}`,
-              type: InfraMetricModelMetricType.calculation,
+              type: 'calculation',
               variables: [
                 { id: 'var-rate', name: 'rate', field: `metric_deriv_${aggType}_${index}` },
               ],

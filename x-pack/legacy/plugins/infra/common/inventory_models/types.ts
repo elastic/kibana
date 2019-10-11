@@ -17,11 +17,13 @@ export const ItemTypeRT = rt.keyof({
   awsRDS: null,
 });
 
-export const VisTypeRT = rt.keyof({
+export const InventoryVisTypeRT = rt.keyof({
   line: null,
   area: null,
   bar: null,
 });
+
+export type InventoryVisType = rt.TypeOf<typeof InventoryVisTypeRT>;
 
 export const InventoryFormatterTypeRT = rt.keyof({
   abbreviatedNumber: null,
@@ -40,7 +42,7 @@ export const SeriesOverridesRT = rt.intersection([
     color: rt.string,
   }),
   rt.partial({
-    type: VisTypeRT,
+    type: InventoryVisTypeRT,
     name: rt.string,
     formatter: InventoryFormatterTypeRT,
     formatterTemplate: rt.string,
@@ -50,16 +52,18 @@ export const SeriesOverridesRT = rt.intersection([
 
 export const VisConfigRT = rt.partial({
   stacked: rt.boolean,
-  type: VisTypeRT,
+  type: InventoryVisTypeRT,
   formatter: InventoryFormatterTypeRT,
   formatterTemplate: rt.string,
   seriesOverrides: rt.record(rt.string, rt.union([rt.undefined, SeriesOverridesRT])),
 });
 
-export const SectionTypeRT = rt.keyof({
+export const InventorySectionTypeRT = rt.keyof({
   chart: null,
   gauges: null,
 });
+
+export type InventorySectionType = rt.TypeOf<typeof InventorySectionTypeRT>;
 
 export const SectionRT = rt.intersection([
   rt.type({
@@ -67,7 +71,7 @@ export const SectionRT = rt.intersection([
     label: rt.string,
     requires: rt.array(rt.string),
     visConfig: VisConfigRT,
-    type: SectionTypeRT,
+    type: InventorySectionTypeRT,
   }),
   rt.partial({
     linkToId: rt.string,
@@ -79,6 +83,8 @@ export const InventoryDetailLayoutRT = rt.type({
   label: rt.string,
   sections: rt.array(SectionRT),
 });
+
+export type InventoryDetailSection = rt.TypeOf<typeof SectionRT>;
 export type InventoryDetailLayout = rt.TypeOf<typeof InventoryDetailLayoutRT>;
 
 export type InventoryDetailLayoutCreator = (theme: EuiTheme) => InventoryDetailLayout[];
@@ -96,6 +102,8 @@ export const TSVBMetricTypeRT = rt.keyof({
   sum: null,
   cumulative_sum: null,
 });
+
+export type TSVBMetricType = rt.TypeOf<typeof TSVBMetricTypeRT>;
 
 export const TSVBMetricModelCountRT = rt.type({
   id: rt.string,

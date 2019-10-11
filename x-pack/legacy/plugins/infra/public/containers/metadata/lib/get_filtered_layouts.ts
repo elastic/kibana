@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { InfraMetadataFeature } from '../../../../common/http_api/metadata_api';
-import { InfraMetricLayout } from '../../../pages/metrics/layouts/types';
+import { InventoryDetailLayout } from '../../../../common/inventory_models/types';
 
 export const getFilteredLayouts = (
-  layouts: InfraMetricLayout[],
+  layouts: InventoryDetailLayout[],
   metadata: Array<InfraMetadataFeature | null> | undefined
-): InfraMetricLayout[] => {
+): InventoryDetailLayout[] => {
   if (!metadata) {
     return layouts;
   }
@@ -26,9 +26,9 @@ export const getFilteredLayouts = (
 };
 
 export const getFilteredLayout = (
-  layout: InfraMetricLayout,
+  layout: InventoryDetailLayout,
   metricMetadata: Array<string | null>
-): InfraMetricLayout => {
+): InventoryDetailLayout => {
   // A section is only displayed if at least one of its requirements is met
   // All others are filtered out.
   const filteredSections = layout.sections.filter(
