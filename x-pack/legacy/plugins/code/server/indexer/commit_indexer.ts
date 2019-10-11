@@ -101,7 +101,24 @@ export class CommitIndexer extends AbstractIndexer {
   private commits: Commit[] | null = null;
   protected async getIndexRequestCount(): Promise<number> {
     try {
-      this.commits = await this.gitOps.iterateCommits(this.repoUri, HEAD);
+      this.commits = (await this.gitOps.log(this.repoUri, HEAD, Number.MAX_SAFE_INTEGER)).map(c => {
+        const [message, ...body] = c.message.split('\n');
+        return {
+          author: {
+            name: c.author,
+            email: c.authorEmail,
+          },
+          committer: {
+            name: c.committer,
+            email: c.committer,
+          },
+          message,
+          parents: c.parents,
+          date: c.updated,
+          id: c.id,
+          body: body.join('\n'),
+        } as Commit;
+      });
       return this.commits.length;
     } catch (error) {
       if (this.isCancelled()) {

@@ -220,6 +220,17 @@ export class WebElementWrapper {
   }
 
   /**
+   * Check if webelement wrapper has a specific class.
+   *
+   * @return {Promise<boolean>}
+   */
+  public async elementHasClass(className: string): Promise<boolean> {
+    const classes: string = await this._webElement.getAttribute('class');
+
+    return classes.includes(className);
+  }
+
+  /**
    * Clear the value of this element. This command has no effect if the underlying DOM element
    * is neither a text INPUT element nor a TEXTAREA element.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear
