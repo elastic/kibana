@@ -244,9 +244,9 @@ export class PluginsSystem {
     }
 
     if (pluginsDependenciesGraph.size > 0) {
-      const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.entries()]);
+      const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.keys()]);
       throw new Error(
-        `Topological ordering of plugins did not complete, these edges could not be ordered: ${edgesLeft}`
+        `Topological ordering of plugins did not complete, cyclic dependency detected between: ${edgesLeft}`
       );
     }
 

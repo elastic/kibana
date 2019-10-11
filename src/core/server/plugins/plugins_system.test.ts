@@ -116,7 +116,7 @@ test('`setupPlugins` throws plugin has missing required dependency', async () =>
   pluginsSystem.addPlugin(createPlugin('some-id', { required: ['missing-dep'] }));
 
   await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["some-id",{}]]]`
+    `[Error: Topological ordering of plugins did not complete, cyclic dependency detected between: ["some-id"]]`
   );
 });
 
@@ -126,7 +126,7 @@ test('`setupPlugins` throws if plugins have circular required dependency', async
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { required: ['depends-on-1'] }));
 
   await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["depends-on-1",{}],["depends-on-2",{}]]]`
+    `[Error: Topological ordering of plugins did not complete, cyclic dependency detected between: ["depends-on-1","depends-on-2"]]`
   );
 });
 
@@ -136,7 +136,7 @@ test('`setupPlugins` throws if plugins have circular optional dependency', async
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { optional: ['depends-on-1'] }));
 
   await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these edges could not be ordered: [["depends-on-1",{}],["depends-on-2",{}]]]`
+    `[Error: Topological ordering of plugins did not complete, cyclic dependency detected between: ["depends-on-1","depends-on-2"]]`
   );
 });
 
@@ -147,13 +147,13 @@ test('`setupPlugins` ignores missing optional dependency', async () => {
   pluginsSystem.addPlugin(plugin);
 
   expect([...(await pluginsSystem.setupPlugins(setupDeps))]).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "some-id",
-    "test",
-  ],
-]
-`);
+    Array [
+      Array [
+        "some-id",
+        "test",
+      ],
+    ]
+  `);
 });
 
 test('correctly orders plugins and returns exposed values for "setup" and "start"', async () => {
@@ -221,29 +221,29 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   );
 
   expect([...(await pluginsSystem.setupPlugins(setupDeps))]).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "order-0",
-    "added-as-1",
-  ],
-  Array [
-    "order-1",
-    "added-as-3",
-  ],
-  Array [
-    "order-2",
-    "added-as-2",
-  ],
-  Array [
-    "order-3",
-    "added-as-4",
-  ],
-  Array [
-    "order-4",
-    "added-as-0",
-  ],
-]
-`);
+    Array [
+      Array [
+        "order-0",
+        "added-as-1",
+      ],
+      Array [
+        "order-1",
+        "added-as-3",
+      ],
+      Array [
+        "order-2",
+        "added-as-2",
+      ],
+      Array [
+        "order-3",
+        "added-as-4",
+      ],
+      Array [
+        "order-4",
+        "added-as-0",
+      ],
+    ]
+  `);
 
   for (const [plugin, deps] of plugins) {
     expect(mockCreatePluginSetupContext).toHaveBeenCalledWith(coreContext, setupDeps, plugin);
@@ -253,29 +253,29 @@ Array [
 
   const startDeps = {};
   expect([...(await pluginsSystem.startPlugins(startDeps))]).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "order-0",
-    "started-as-1",
-  ],
-  Array [
-    "order-1",
-    "started-as-3",
-  ],
-  Array [
-    "order-2",
-    "started-as-2",
-  ],
-  Array [
-    "order-3",
-    "started-as-4",
-  ],
-  Array [
-    "order-4",
-    "started-as-0",
-  ],
-]
-`);
+    Array [
+      Array [
+        "order-0",
+        "started-as-1",
+      ],
+      Array [
+        "order-1",
+        "started-as-3",
+      ],
+      Array [
+        "order-2",
+        "started-as-2",
+      ],
+      Array [
+        "order-3",
+        "started-as-4",
+      ],
+      Array [
+        "order-4",
+        "started-as-0",
+      ],
+    ]
+  `);
 
   for (const [plugin, deps] of plugins) {
     expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, startDeps, plugin);
@@ -296,17 +296,17 @@ test('`setupPlugins` only setups plugins that have server side', async () => {
   });
 
   expect([...(await pluginsSystem.setupPlugins(setupDeps))]).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "order-1",
-    "added-as-2",
-  ],
-  Array [
-    "order-0",
-    "added-as-0",
-  ],
-]
-`);
+    Array [
+      Array [
+        "order-1",
+        "added-as-2",
+      ],
+      Array [
+        "order-0",
+        "added-as-0",
+      ],
+    ]
+  `);
 
   expect(mockCreatePluginSetupContext).toHaveBeenCalledWith(
     coreContext,
@@ -327,11 +327,11 @@ Array [
 
 test('`uiPlugins` returns empty Maps before plugins are added', async () => {
   expect(pluginsSystem.uiPlugins()).toMatchInlineSnapshot(`
-Object {
-  "internal": Map {},
-  "public": Map {},
-}
-`);
+    Object {
+      "internal": Map {},
+      "public": Map {},
+    }
+  `);
 });
 
 test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
@@ -354,14 +354,14 @@ test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
   });
 
   expect([...pluginsSystem.uiPlugins().internal.keys()]).toMatchInlineSnapshot(`
-Array [
-  "order-0",
-  "order-1",
-  "order-2",
-  "order-3",
-  "order-4",
-]
-`);
+    Array [
+      "order-0",
+      "order-1",
+      "order-2",
+      "order-3",
+      "order-4",
+    ]
+  `);
 });
 
 test('can start without plugins', async () => {
@@ -386,15 +386,15 @@ test('`startPlugins` only starts plugins that were setup', async () => {
   await pluginsSystem.setupPlugins(setupDeps);
   const result = await pluginsSystem.startPlugins({});
   expect([...result]).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "order-1",
-    "started-as-2",
-  ],
-  Array [
-    "order-0",
-    "started-as-0",
-  ],
-]
-`);
+    Array [
+      Array [
+        "order-1",
+        "started-as-2",
+      ],
+      Array [
+        "order-0",
+        "started-as-0",
+      ],
+    ]
+  `);
 });
