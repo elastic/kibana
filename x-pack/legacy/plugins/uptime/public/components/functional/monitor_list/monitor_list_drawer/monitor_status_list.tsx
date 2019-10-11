@@ -21,23 +21,23 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
     colors: { success, danger },
   } = useContext(UptimeSettingsContext);
 
-  const upLocations: CheckMonitor[] = [];
-  const downLocations: CheckMonitor[] = [];
+  const upChecks: CheckMonitor[] = [];
+  const downChecks: CheckMonitor[] = [];
 
   checks.forEach((check: Check) => {
     if (check.monitor.status === 'up') {
-      upLocations.push(check.monitor);
+      upChecks.push(check.monitor);
     }
     if (check.monitor.status === 'down') {
-      downLocations.push(check.monitor);
+      downChecks.push(check.monitor);
     }
   });
-  const displayMonitorStatus = (locations: CheckMonitor[], color: string, titleTxt: string) => {
+  const displayMonitorStatus = (checksList: CheckMonitor[], color: string, titleTxt: string) => {
     return (
       <>
         <EuiHealth color={color}>
           {titleTxt} in{' '}
-          {locations.map((location, index) => (index ? ', ' : '') + (location.name || location.ip))}
+          {checksList.map((check, index) => (index ? ', ' : '') + (check.ip || check.name))}
         </EuiHealth>
         <EuiSpacer size="s" />
       </>
@@ -45,8 +45,8 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
   };
   return (
     <>
-      {downLocations.length > 0 && displayMonitorStatus(downLocations, danger, 'Down')}
-      {upLocations.length > 0 && displayMonitorStatus(upLocations, success, 'Up')}
+      {downChecks.length > 0 && displayMonitorStatus(downChecks, danger, 'Down')}
+      {upChecks.length > 0 && displayMonitorStatus(upChecks, success, 'Up')}
     </>
   );
 };

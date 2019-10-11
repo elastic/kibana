@@ -15,6 +15,7 @@ import { fetchMonitorDetails } from '../../../../state/actions/monitor';
 import { MostRecentError } from './most_recent_error';
 import { getMonitorDetails } from '../../../../state/selectors';
 import { MonitorStatusList } from './monitor_status_list';
+import { LocationLink } from './location_link';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -55,15 +56,19 @@ export function MonitorListDrawerComponent({
   }, []);
 
   const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
+  const location = get<string | null>(summary.state, 'observer.geo.name', null);
 
   return (
     <ContainerDiv>
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiLink href={monitorUrl} target="_blank">
             {monitorUrl}
             <EuiIcon size="s" type="popout" color="subbdued" />
           </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <LocationLink location={location} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton size="s">Actions</EuiButton>
