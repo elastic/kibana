@@ -105,6 +105,7 @@ export interface FieldMeta {
   canHaveChildFields: boolean;
   hasChildFields: boolean;
   childFields?: string[];
+  isExpanded: boolean;
 }
 
 export interface NormalizedFields {

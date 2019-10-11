@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBadge } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiIcon,
+  EuiBadge,
+  EuiButtonIcon,
+} from '@elastic/eui';
 
 import { useState, useDispatch } from '../../../mappings_state';
 import { FieldsList } from './fields_list';
@@ -25,8 +32,17 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
     fields: { byId },
   } = useState();
   const getField = (propId: string) => byId[propId];
-  const { id, source, childFields, hasChildFields, canHaveChildFields } = field;
+  const {
+    id,
+    source,
+    childFields,
+    hasChildFields,
+    canHaveChildFields,
+    nestedDepth,
+    isExpanded,
+  } = field;
   const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
+  const indent = `${nestedDepth * 24}px`;
 
   const addField = () => {
     dispatch({
@@ -40,6 +56,10 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
       type: 'documentField.editField',
       value: id,
     });
+  };
+
+  const toggleExpand = () => {
+    dispatch({ type: 'field.toggleExpand', value: { fieldId: id } });
   };
 
   const renderCreateField = () => {
@@ -86,8 +106,22 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
 
   return (
     <>
-      <div>
-        <EuiFlexGroup alignItems="center" className="mappings-editor__fields-list-item__field">
+      <div style={{ paddingLeft: indent }} className="mappings-editor__fields-list-item__field">
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          style={{ position: 'relative', height: '56px' }}
+        >
+          <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__toggle">
+            {hasChildFields && (
+              <EuiButtonIcon
+                color="text"
+                onClick={toggleExpand}
+                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                aria-label={`Expand field ${source.name}`}
+              />
+            )}
+          </EuiFlexItem>
           <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__name">
             {source.name}
           </EuiFlexItem>
@@ -111,7 +145,7 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
         )} */}
       </div>
 
-      {hasChildFields && (
+      {hasChildFields && isExpanded && (
         <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} />
       )}
 

@@ -53,6 +53,7 @@ export type Action =
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
   | { type: 'field.edit'; value: Field }
+  | { type: 'field.toggleExpand'; value: { fieldId: string; isExpanded?: boolean } }
   | { type: 'documentField.createField'; value?: string }
   | { type: 'documentField.editField'; value: string }
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
@@ -159,6 +160,7 @@ export const reducer = (state: State, action: Action): State => {
           ...parentField,
           childFields: [id, ...childFields],
           hasChildFields: true,
+          isExpanded: true,
         };
       }
 
@@ -252,6 +254,26 @@ export const reducer = (state: State, action: Action): State => {
           byId: {
             ...state.fields.byId,
             [fieldToEdit]: newField,
+          },
+        },
+      };
+    }
+    case 'field.toggleExpand': {
+      const updatedField: NormalizedField = {
+        ...state.fields.byId[action.value.fieldId],
+        isExpanded:
+          action.value.isExpanded === undefined
+            ? !state.fields.byId[action.value.fieldId].isExpanded
+            : action.value.isExpanded,
+      };
+
+      return {
+        ...state,
+        fields: {
+          ...state.fields,
+          byId: {
+            ...state.fields.byId,
+            [action.value.fieldId]: updatedField,
           },
         },
       };

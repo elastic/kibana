@@ -1,24 +1,41 @@
-
-// [1] We add a negative margin of 1px to make the border of the <li> overlap the border of the <ul>
-
 .mappings-editor {
   &__fields-list {
     // border-bottom: 1px solid #ddd;
-    margin-bottom: -1px; // [1]
+
+    + .mappings-editor__fields-list {
+      padding-left: 20px;
+    }
+
+    .mappings-editor__fields-list {
+      .mappings-editor__fields-list-item__toggle {
+        &::before {
+          border-bottom: 1px solid #333;
+          content: '';
+          left: -8px;
+          position: absolute;
+          top: 26px;
+          width: 8px;
+        }
+        &::after {
+          border-left: 1px solid #333;
+          content: '';
+          left: -8px;
+          position: absolute;
+          top: 18px;
+          height: 8px;
+        }
+      }
+    }
   }
   &__fields-list-item {
     // padding-bottom: 20px;
     // border-bottom: 1px solid #ddd;
 
-    // &:last-child {
-    //   border-bottom: 0;
-    // }
-
     &__field {
-      height: 56px;
-
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px dotted #ddd;
+      // height: 56px;
       margin: 12px 0;
+      // position: relative;
 
       // border-bottom: '1px solid #ddd',
       // display: 'flex',
@@ -38,8 +55,8 @@
     &__name {
       width: 120px;
     }
-    // &__type {
-    //   width: 80px;
-    // }
+    &__toggle {
+      width: 24px;
+    }
   }
 }

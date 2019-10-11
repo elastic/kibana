@@ -48,6 +48,7 @@ export const getFieldMeta = (field: Field): FieldMeta => {
     hasChildFields,
     childFieldsName,
     canHaveChildFields,
+    isExpanded: false,
   };
 };
 
