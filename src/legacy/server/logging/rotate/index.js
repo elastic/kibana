@@ -17,20 +17,23 @@
  * under the License.
  */
 
-import good from '@elastic/good';
-import loggingConfiguration from './configuration';
-import { logWithMetadata } from './log_with_metadata';
-import { setupLoggingRotate } from './rotate';
+export function setupLoggingRotate(config) {
+  // We just want to start the logging rotate service once
+  // and we choose to use the worker server type for it
+  if (process.env.kbnWorkerType !== 'server') {
+    return;
+  }
 
-export async function setupLogging(server, config) {
-  return await server.register({
-    plugin: good,
-    options: loggingConfiguration(config)
-  });
-}
+  // If log rotate is not enabled we skip
+  if (!config.get('logging.rotate.enable')) {
+    return;
+  }
 
-export async function loggingMixin(kbnServer, server, config) {
-  logWithMetadata.decorateServer(server);
-  setupLoggingRotate(config);
-  return await setupLogging(server, config);
+  // We don't want to run logging rotate server if
+  // we are not logging to a file
+  if (config.get('logging.rotate.enable') && config.get('logging.dest') === 'stdout') {
+    return;
+  }
+
+  // Enable Logging Rotate Service
 }
