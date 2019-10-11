@@ -20,15 +20,22 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <svg
-        className="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height={16}
-        style={null}
-        viewBox="0 0 16 16"
-        width={16}
-        xmlns="http://www.w3.org/2000/svg"
-      />
+      <a
+        className="euiLink euiLink--primary"
+        href="https://www.elastic.co"
+        rel=""
+        title="Powered by Elastic.co"
+      >
+        <svg
+          className="euiIcon euiIcon--large euiIcon-isLoading"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </a>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -77,15 +84,22 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <svg
-        className="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height={16}
-        style={null}
-        viewBox="0 0 16 16"
-        width={16}
-        xmlns="http://www.w3.org/2000/svg"
-      />
+      <a
+        className="euiLink euiLink--primary"
+        href="https://www.elastic.co"
+        rel=""
+        title="Powered by Elastic.co"
+      >
+        <svg
+          className="euiIcon euiIcon--large euiIcon-isLoading"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </a>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
@@ -134,15 +148,22 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <svg
-        className="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height={16}
-        style={null}
-        viewBox="0 0 16 16"
-        width={16}
-        xmlns="http://www.w3.org/2000/svg"
-      />
+      <a
+        className="euiLink euiLink--primary"
+        href="https://www.elastic.co"
+        rel=""
+        title="Powered by Elastic.co"
+      >
+        <svg
+          className="euiIcon euiIcon--large euiIcon-isLoading"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </a>
     </div>
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
