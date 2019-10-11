@@ -151,7 +151,6 @@ const ServiceNodeOverview = () => {
             initialPageSize={INITIAL_PAGE_SIZE}
             initialSortField={INITIAL_SORT_FIELD}
             initialSortDirection={INITIAL_SORT_DIRECTION}
-            hidePerPageOptions={false}
           />
         </EuiPanel>
       </EuiFlexItem>
