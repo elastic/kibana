@@ -39,7 +39,7 @@
     "xpack.upgradeAssistant": "legacy/plugins/upgrade_assistant",
     "xpack.uptime": "legacy/plugins/uptime",
     "xpack.watcher": "legacy/plugins/watcher",
-    "xpack.tasks": "legacy/plugins/tasks"
+    "xpack.tasks": "legacy/plugins/es_task_management"
   },
   "translations": [
     "plugins/translations/translations/zh-CN.json",

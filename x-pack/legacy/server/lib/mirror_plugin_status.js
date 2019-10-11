@@ -5,7 +5,7 @@
  */
 
 export function mirrorPluginStatus(upstreamPlugin, downstreamPlugin, ...statesToMirror) {
-  upstreamPlugin.status.setMaxListeners(20); // We need more than the default, which is 10
+  upstreamPlugin.status.setMaxListeners(30); // We need more than the default, which is 10
 
   function mirror(previousState, previousMsg, newState, newMsg) {
     if (newState) {

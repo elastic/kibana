@@ -14,20 +14,11 @@ import { createShim } from './server/legacy';
 export function esTaskManagement(kibana: any) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
-    configPrefix: 'xpack.tasks',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/app/index.scss'),
       managementSections: ['plugins/es_task_management'],
-    },
-    config(Joi: any) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-    isEnabled(config: any) {
-      return config.get('xpack.tasks.enabled');
     },
     init(server: Legacy.Server) {
       const { coreSetup, pluginsSetup } = createShim(server, PLUGIN.ID);
