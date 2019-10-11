@@ -66,7 +66,7 @@ export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = 
     SavedObjectsBaseOptions {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
-  /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
+  /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
   type: string;
   /** {@inheritdoc SavedObjectAttributes} */
   attributes: Partial<T>;

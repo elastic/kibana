@@ -33,13 +33,9 @@ interface SavedObject {
   options: SavedObjectsUpdateOptions;
 }
 
-interface UpdateRequest extends Hapi.Request {
+interface BulkUpdateRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
-  };
-  params: {
-    type: string;
-    id: string;
   };
   payload: SavedObject[];
 }
@@ -68,7 +64,7 @@ export const createBulkUpdateRoute = (prereqs: Prerequisites) => {
           })
         ),
       },
-      handler(request: UpdateRequest) {
+      handler(request: BulkUpdateRequest) {
         const { savedObjectsClient } = request.pre;
         return savedObjectsClient.bulkUpdate(request.payload);
       },
