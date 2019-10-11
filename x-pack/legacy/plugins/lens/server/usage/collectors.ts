@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { get } from 'lodash';
 import { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
@@ -43,9 +44,37 @@ export function registerLensUsageCollector(
     type: 'lens',
     fetch: async (callCluster: CallCluster): Promise<LensUsage> => {
       try {
-        const docs = await fetch(plugins.server);
+        const docs = await getLatestTaskState(plugins.server);
         // get the accumulated state from the recurring task
-        return get(docs, '[0].state.stats');
+        const state = get(docs, '[0].state');
+
+        const dates = Object.keys(state.byDate || {}).map(dateStr => parseInt(dateStr, 10));
+
+        const eventsLast30: Record<string, number> = {};
+        const eventsLast90: Record<string, number> = {};
+
+        const last30 = moment()
+          .subtract(30, 'days')
+          .unix();
+        const last90 = moment()
+          .subtract(90, 'days')
+          .unix();
+
+        dates.forEach(date => {
+          if (date > last30) {
+            addEvents(eventsLast30, state.byDate[date]);
+            addEvents(eventsLast90, state.byDate[date]);
+          } else if (date > last90) {
+            addEvents(eventsLast90, state.byDate[date]);
+          }
+        });
+
+        console.log(state);
+        return {
+          ...state.saved,
+          clicks_last_30_days: eventsLast30,
+          clicks_last_90_days: eventsLast90,
+        };
         // return getVisualizationCounts(callCluster, plugins.config);
       } catch (err) {
         return {
@@ -68,19 +97,24 @@ export function registerLensUsageCollector(
   plugins.usage.collectorSet.register(lensUsageCollector);
 }
 
-async function isTaskManagerReady(server: Server) {
-  const result = await fetch(server);
-  return result !== null;
+function addEvents(prevEvents: Record<string, number>, newEvents: Record<string, number>) {
+  Object.keys(newEvents).forEach(key => {
+    prevEvents[key] = prevEvents[key] || 0 + newEvents[key];
+  });
 }
 
-async function fetch(server: Server) {
+async function isTaskManagerReady(server: Server) {
+  return (await getLatestTaskState(server)) !== null;
+}
+
+async function getLatestTaskState(server: Server) {
   const taskManager = server.plugins.task_manager!;
 
-  let docs;
   try {
-    ({ docs } = await taskManager.fetch({
+    const result = await taskManager.fetch({
       query: { bool: { filter: { term: { _id: `task:Lens-lens_telemetry` } } } },
-    }));
+    });
+    return result.docs;
   } catch (err) {
     const errMessage = err && err.message ? err.message : err.toString();
     /*
@@ -88,12 +122,10 @@ async function fetch(server: Server) {
       task manager has to wait for all plugins to initialize first. It's fine to ignore it as next time around it will be
       initialized (or it will throw a different type of error)
     */
-    if (errMessage.includes('NotInitialized')) {
-      docs = null;
-    } else {
+    if (!errMessage.includes('NotInitialized')) {
       throw err;
     }
   }
 
-  return docs;
+  return null;
 }

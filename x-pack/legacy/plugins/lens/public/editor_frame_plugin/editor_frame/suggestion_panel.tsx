@@ -27,6 +27,7 @@ import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
+import { trackSuggestionEvent } from '../../lens_ui_telemetry';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -226,6 +227,7 @@ export function SuggestionPanel({
   }
 
   function rollbackToCurrentVisualization() {
+    trackSuggestionEvent('rollback');
     if (lastSelectedSuggestion !== -1) {
       setLastSelectedSuggestion(-1);
       dispatch({
@@ -310,6 +312,7 @@ export function SuggestionPanel({
                 if (lastSelectedSuggestion === index) {
                   rollbackToCurrentVisualization();
                 } else {
+                  trackSuggestionEvent(`${suggestion.visualizationId}-${suggestion.changeType}`);
                   setLastSelectedSuggestion(index);
                   switchToSuggestion(frame, dispatch, suggestion);
                 }

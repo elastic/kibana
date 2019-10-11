@@ -16,6 +16,7 @@ import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -84,12 +85,15 @@ export function InnerWorkspacePanel({
 
   function onDrop() {
     if (suggestionForDraggedField) {
+      trackUiEvent('workspace-drop-success');
       switchToSuggestion(
         framePublicAPI,
         dispatch,
         suggestionForDraggedField,
         'SWITCH_VISUALIZATION'
       );
+    } else {
+      trackUiEvent('workspace-drop-failure');
     }
   }
 

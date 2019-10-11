@@ -76,7 +76,11 @@ export async function initLensUsageRoute(
           },
         }));
 
-        await client.bulkCreate(clickEvents.concat(suggestionEvents));
+        const events = clickEvents.concat(suggestionEvents);
+
+        if (events.length > 0) {
+          await client.bulkCreate(events);
+        }
 
         return res.ok({ body: {} });
       } catch (e) {

@@ -4,14 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createContext, useContext } from 'react';
-
-export const LensTelemetryContext = createContext<{
-  trackClick: (name: string) => void;
-  trackSuggestionClick: (name: string, suggestionData: unknown) => void;
-}>({
-  trackClick: jest.fn(),
-  trackSuggestionClick: jest.fn(),
-});
-
-export const useLensTelemetry = () => useContext(LensTelemetryContext);
+export const trackClick = jest.fn();
+export const trackSuggestionClick = jest.fn();

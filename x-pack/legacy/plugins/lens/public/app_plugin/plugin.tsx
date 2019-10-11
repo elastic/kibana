@@ -25,7 +25,7 @@ import {
 } from '../datatable_visualization_plugin';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
-import { LensReportManager, LensTelemetryContext } from '../lens_ui_telemetry';
+import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -65,44 +65,39 @@ export class AppPlugin {
 
     this.instance = editorFrameStartInterface.createInstance({});
 
-    this.reporter = new LensReportManager({
-      storage: new Storage(localStorage),
-      basePath: core.http.basePath.get(),
-      http: core.http,
-    });
+    // Sets it in memory for future click tracking
+    setReportManager(
+      new LensReportManager({
+        storage: new Storage(localStorage),
+        basePath: core.http.basePath.get(),
+        http: core.http,
+      })
+    );
 
     const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
-      if (this.reporter) {
-        this.reporter.trackClick('loaded');
-      }
+      trackUiEvent('loaded');
       return (
-        <LensTelemetryContext.Provider
-          value={{
-            trackClick: name => this.reporter && this.reporter.trackClick(name),
-            trackSuggestionClick: name => this.reporter && this.reporter.trackSuggestionClick(name),
+        <App
+          core={core}
+          data={data}
+          dataShim={dataShim}
+          editorFrame={this.instance!}
+          store={new Storage(localStorage)}
+          docId={routeProps.match.params.id}
+          docStorage={store}
+          redirectTo={id => {
+            if (!id) {
+              routeProps.history.push('/');
+            } else {
+              routeProps.history.push(`/edit/${id}`);
+            }
           }}
-        >
-          <App
-            core={core}
-            data={data}
-            dataShim={dataShim}
-            editorFrame={this.instance!}
-            store={new Storage(localStorage)}
-            docId={routeProps.match.params.id}
-            docStorage={store}
-            redirectTo={id => {
-              if (!id) {
-                routeProps.history.push('/');
-              } else {
-                routeProps.history.push(`/edit/${id}`);
-              }
-            }}
-          />
-        </LensTelemetryContext.Provider>
+        />
       );
     };
 
     function NotFound() {
+      trackUiEvent('loaded-404');
       return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
     }
 

@@ -31,7 +31,6 @@ import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
-import { LensTelemetryContext, useLensTelemetry } from '../lens_ui_telemetry';
 
 export interface EditorFrameSetupPlugins {
   data: typeof dataSetup;
@@ -84,28 +83,24 @@ export class EditorFramePlugin {
 
           render(
             <I18nProvider>
-              <LensTelemetryContext>
-                <EditorFrame
-                  data-test-subj="lnsEditorFrame"
-                  onError={onError}
-                  datasourceMap={this.datasources}
-                  visualizationMap={this.visualizations}
-                  initialDatasourceId={
-                    getActiveDatasourceIdFromDoc(doc) || firstDatasourceId || null
-                  }
-                  initialVisualizationId={
-                    (doc && doc.visualizationType) || firstVisualizationId || null
-                  }
-                  core={core}
-                  ExpressionRenderer={plugins.expressions.ExpressionRenderer}
-                  doc={doc}
-                  dateRange={dateRange}
-                  query={query}
-                  filters={filters}
-                  savedQuery={savedQuery}
-                  onChange={onChange}
-                />
-              </LensTelemetryContext>
+              <EditorFrame
+                data-test-subj="lnsEditorFrame"
+                onError={onError}
+                datasourceMap={this.datasources}
+                visualizationMap={this.visualizations}
+                initialDatasourceId={getActiveDatasourceIdFromDoc(doc) || firstDatasourceId || null}
+                initialVisualizationId={
+                  (doc && doc.visualizationType) || firstVisualizationId || null
+                }
+                core={core}
+                ExpressionRenderer={plugins.expressions.ExpressionRenderer}
+                doc={doc}
+                dateRange={dateRange}
+                query={query}
+                filters={filters}
+                savedQuery={savedQuery}
+                onChange={onChange}
+              />
             </I18nProvider>,
             domElement
           );

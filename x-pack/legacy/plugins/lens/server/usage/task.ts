@@ -8,8 +8,9 @@ import { Server, SavedObjectsClient as SavedObjectsClientType } from 'src/legacy
 import { CoreSetup } from 'src/core/server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import { SearchParams, SearchResponse, DeleteDocumentByQueryResponse } from 'elasticsearch';
-import { RunContext } from '../../../task_manager';
+import { RunContext, ConcreteTaskInstance } from '../../../task_manager';
 import { getVisualizationCounts } from './visualization_counts';
+import { LensUsage } from './types';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
 // into daily rolled-up documents, which will be used in reporting click stats
@@ -64,7 +65,7 @@ function scheduleTasks(server: Server) {
         await taskManager.schedule({
           id: TASK_ID,
           taskType: TELEMETRY_TASK_TYPE,
-          state: { stats: {}, runs: 0 },
+          state: { byDate: {}, saved: {}, runs: 0 },
           params: {},
         });
       } catch (e) {
@@ -74,7 +75,13 @@ function scheduleTasks(server: Server) {
   });
 }
 
-async function doWork(server: Server, callCluster: ClusterSearchType & ClusterDeleteType) {
+// type LensTaskState = LensUsage | {};
+
+async function doWork(
+  prevState: any,
+  server: Server,
+  callCluster: ClusterSearchType & ClusterDeleteType
+) {
   const kibanaIndex = server.config().get<string>('kibana.index');
 
   const metrics = await callCluster('search', {
@@ -106,14 +113,12 @@ async function doWork(server: Server, callCluster: ClusterSearchType & ClusterDe
     size: 0,
   });
 
-  console.log(JSON.stringify(metrics));
-
-  const byDateByType: Record<string, Record<string, number>> = {};
+  const byDateByType: Record<string, Record<string, number>> = prevState.byDate || {};
 
   metrics.aggregations.daily.buckets.forEach(bucket => {
-    const byType: Record<string, number> = {};
+    const byType: Record<string, number> = byDateByType[bucket.key] || {};
     bucket.names.buckets.forEach(({ key, doc_count }) => {
-      byType[key] = doc_count;
+      byType[key] = doc_count + (byType[key] || 0);
     });
     byDateByType[bucket.key] = byType;
   });
@@ -148,7 +153,7 @@ function telemetryTaskRunner(server: Server) {
     return {
       async run() {
         try {
-          lensTelemetryTask = doWork(server, callCluster);
+          lensTelemetryTask = doWork(prevState, server, callCluster);
 
           lensVisualizationTask = getVisualizationCounts(callCluster, server.config());
         } catch (err) {
@@ -159,12 +164,9 @@ function telemetryTaskRunner(server: Server) {
           .then(([lensTelemetry, lensVisualizations]) => {
             return {
               state: {
-                runs: state.runs || 1,
-                stats: Object.assign(
-                  {},
-                  lensTelemetry || prevState.stats || {},
-                  lensVisualizations
-                ),
+                runs: (state.runs || 0) + 1,
+                byDate: lensTelemetry || {},
+                saved: lensVisualizations,
               },
               runAt: getNextMidnight(),
             };

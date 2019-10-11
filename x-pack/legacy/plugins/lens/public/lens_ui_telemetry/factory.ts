@@ -44,7 +44,7 @@ export class LensReportManager {
     }, 10000);
   }
 
-  public trackClick(name: string) {
+  public trackEvent(name: string) {
     this.clicks.push({
       name,
       date: new Date().toISOString(),
@@ -52,7 +52,7 @@ export class LensReportManager {
     this.write();
   }
 
-  public trackSuggestionClick(name: string) {
+  public trackSuggestionEvent(name: string) {
     this.suggestionClicks.push({
       name,
       date: new Date().toISOString(),
@@ -75,7 +75,7 @@ export class LensReportManager {
       await this.http.post(`${this.basePath}${BASE_API_URL}/telemetry`, {
         body: JSON.stringify({
           clicks: this.clicks,
-          suggestionClicks: this.clicks,
+          suggestionClicks: this.suggestionClicks,
         }),
       });
       this.clicks = [];
@@ -85,5 +85,23 @@ export class LensReportManager {
       // Maybe show an error
       console.log(e);
     }
+  }
+}
+
+let reportManager: LensReportManager;
+
+export function setReportManager(newManager: LensReportManager) {
+  reportManager = newManager;
+}
+
+export function trackUiEvent(name: string) {
+  if (reportManager) {
+    reportManager.trackEvent(name);
+  }
+}
+
+export function trackSuggestionEvent(name: string) {
+  if (reportManager) {
+    reportManager.trackSuggestionEvent(name);
   }
 }
