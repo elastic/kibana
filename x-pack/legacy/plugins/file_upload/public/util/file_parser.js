@@ -19,7 +19,7 @@ const readSlice = (fileReader, file, start, stop) => {
 
 let prevFileReader;
 let prevPatternReader;
-export const fileHandler = (
+export const fileHandler = async (
   file, chunkHandler, cleanAndValidate, getFileParseActive,
   fileReader = new FileReader(), fileBuffer = FILE_BUFFER
 ) => {
