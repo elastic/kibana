@@ -18,7 +18,6 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export function TableProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -26,27 +25,26 @@ export function TableProvider({ getService }: FtrProviderContext) {
   class Table {
     /**
      * Finds table and returns data in the nested array format
+     * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
      * @param dataTestSubj data-test-subj selector
      */
 
     public async getDataFromTestSubj(dataTestSubj: string): Promise<string[][]> {
       const table = await testSubjects.find(dataTestSubj);
-      return await this.getDataFromElement(table);
-    }
-
-    /**
-     * Converts the table data into nested array
-     * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-     * @param table
-     */
-    public async getDataFromElement(table: WebElementWrapper): Promise<string[][]> {
-      const rows = await table.findAllByTagName('tr');
-      return await Promise.all(
-        rows.map(async row => {
-          const cells = await row.findAllByTagName('td');
-          return await Promise.all(cells.map(async cell => await cell.getVisibleText()));
-        })
-      );
+      const $ = await table.parseDomContent();
+      return $('tr')
+        .toArray()
+        .map(row =>
+          $(row)
+            .find('td')
+            .toArray()
+            .map(cell =>
+              $(cell)
+                .text()
+                .replace(/&nbsp;/g, '')
+                .trim()
+            )
+        );
     }
   }
 

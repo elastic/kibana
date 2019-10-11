@@ -55,9 +55,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
       // check for the index pattern info flyout that covers the
       // create index pattern button on smaller screens
-      if (await testSubjects.exists('CreateIndexPatternPrompt')) {
-        await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');
-      }
+      await retry.waitFor('index pattern info flyout', async () => {
+        if (await testSubjects.exists('CreateIndexPatternPrompt')) {
+          await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');
+        } else return true;
+      });
     }
 
     async getAdvancedSettings(propertyName) {
@@ -283,6 +285,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickIndexPatternLogstash() {
       const indexLink = await find.byXPath(`//a[descendant::*[text()='logstash-*']]`);
       await indexLink.click();
+    }
+
+    async isIndexPatternListEmpty() {
+      const indexPatternList = await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable .euiButtonEmpty');
+      return indexPatternList.length > 0;
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
