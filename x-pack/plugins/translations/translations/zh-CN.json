@@ -5759,7 +5759,6 @@
     "xpack.maps.es_geo_utils.shapeFilter.geoPointRelationLabel": "传入",
     "xpack.maps.es_geo_utils.unsupportedFieldTypeErrorMessage": "字段类型不受支持，应为 {expectedTypes}，而提供的是 {fieldType}",
     "xpack.maps.es_geo_utils.unsupportedGeometryTypeErrorMessage": "几何类型不受支持，应为 {expectedTypes}，而提供的是 {geometryType}",
-    "xpack.maps.es_geo_utils.unsupportedGeoPointValueErrorMessage": "不受支持的 geo_point 值：{geoPointValue}",
     "xpack.maps.es_geo_utils.wkt.invalidWKTErrorMessage": "无法将 {wkt} 转换成 geojson。需要有效的 WKT。",
     "xpack.maps.geometryFilterForm.geoFieldLabel": "已筛选字段",
     "xpack.maps.geometryFilterForm.geometryLabelLabel": "几何标签",

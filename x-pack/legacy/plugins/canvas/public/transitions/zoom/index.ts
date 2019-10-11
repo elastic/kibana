@@ -6,10 +6,14 @@
 
 import './zoom.css';
 
+import { TransitionStrings } from '../../../i18n';
+
+const { zoom: strings } = TransitionStrings;
+
 export const zoom = () => ({
   name: 'zoom',
-  displayName: 'Zoom',
-  help: 'Zoom from one page to the next',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   enter: 'zoomIn',
   exit: 'zoomOut',
 });
