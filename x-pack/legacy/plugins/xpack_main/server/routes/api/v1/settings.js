@@ -32,9 +32,6 @@ export function settingsRoute(server, kbnServer) {
         }
         const uuid = await getClusterUuid(callCluster);
 
-        console.log(kbnServer.status);
-        console.log(kbnServer.version);
-
         const kibana = getKibanaInfoForStats({
           kbnServerStatus: kbnServer.status,
           kbnServerVersion: kbnServer.version,
