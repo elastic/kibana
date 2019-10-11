@@ -19,7 +19,7 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
-      await datePickerInput.type(Array(30).fill(browser.keys.BACK_SPACE));
+      await datePickerInput.clearValueWithKeyboard({ charByChar: true });
       await datePickerInput.type([time, browser.keys.RETURN]);
     },
 
@@ -31,6 +31,35 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
         }
       });
       return await testSubjects.find('waffleMap');
+    },
+
+    async goToMetricExplorer() {
+      return await testSubjects.click('infrastructureNavLink_/infrastructure/metrics-explorer');
+    },
+
+    async getSaveViewButton() {
+      return await testSubjects.find('openSaveViewModal');
+    },
+
+    async getLoadViewsButton() {
+      return await testSubjects.find('loadViews');
+    },
+
+    async openSaveViewsFlyout() {
+      return await testSubjects.click('loadViews');
+    },
+
+    async closeSavedViewFlyout() {
+      return await testSubjects.click('cancelSavedViewModal');
+    },
+
+    async openCreateSaveViewModal() {
+      return await testSubjects.click('openSaveViewModal');
+    },
+
+    async openEnterViewNameAndSave() {
+      await testSubjects.setValue('savedViewViweName', 'View1');
+      await testSubjects.click('createSavedViewButton');
     },
 
     async getNoMetricsIndicesPrompt() {

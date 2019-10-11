@@ -35,10 +35,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import chrome from 'ui/chrome';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../../lib';
 
-class RelationshipsUI extends Component {
+export class Relationships extends Component {
   static propTypes = {
     getRelationships: PropTypes.func.isRequired,
     savedObject: PropTypes.object.isRequired,
@@ -89,9 +90,12 @@ class RelationshipsUI extends Component {
 
     return (
       <EuiCallOut
-        title={(
-          <FormattedMessage id="kbn.management.objects.objectsTable.relationships.renderErrorMessage" defaultMessage="Error"/>
-        )}
+        title={
+          <FormattedMessage
+            id="kbn.management.objects.objectsTable.relationships.renderErrorMessage"
+            defaultMessage="Error"
+          />
+        }
         color="danger"
       >
         {error}
@@ -100,7 +104,7 @@ class RelationshipsUI extends Component {
   }
 
   renderRelationships() {
-    const { intl, goInspectObject, savedObject } = this.props;
+    const { goInspectObject, savedObject } = this.props;
     const { relationships, isLoading, error } = this.state;
 
     if (error) {
@@ -114,24 +118,19 @@ class RelationshipsUI extends Component {
     const columns = [
       {
         field: 'type',
-        name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.relationships.columnTypeName',
+        name: i18n.translate('kbn.management.objects.objectsTable.relationships.columnTypeName', {
           defaultMessage: 'Type',
         }),
         width: '50px',
         align: 'center',
-        description:
-          intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.relationships.columnTypeDescription',
-            defaultMessage: 'Type of the saved object',
-          }),
+        description: i18n.translate(
+          'kbn.management.objects.objectsTable.relationships.columnTypeDescription',
+          { defaultMessage: 'Type of the saved object' }
+        ),
         sortable: false,
         render: (type, object) => {
           return (
-            <EuiToolTip
-              position="top"
-              content={getSavedObjectLabel(type)}
-            >
+            <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
               <EuiIcon
                 aria-label={getSavedObjectLabel(type)}
                 type={object.meta.icon || 'apps'}
@@ -143,10 +142,10 @@ class RelationshipsUI extends Component {
       },
       {
         field: 'relationship',
-        name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.relationships.columnRelationshipName',
-          defaultMessage: 'Direct relationship',
-        }),
+        name: i18n.translate(
+          'kbn.management.objects.objectsTable.relationships.columnRelationshipName',
+          { defaultMessage: 'Direct relationship' }
+        ),
         dataType: 'string',
         sortable: false,
         width: '125px',
@@ -175,24 +174,20 @@ class RelationshipsUI extends Component {
       },
       {
         field: 'meta.title',
-        name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.relationships.columnTitleName',
+        name: i18n.translate('kbn.management.objects.objectsTable.relationships.columnTitleName', {
           defaultMessage: 'Title',
         }),
-        description:
-        intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.relationships.columnTitleDescription',
-          defaultMessage: 'Title of the saved object',
-        }),
+        description: i18n.translate(
+          'kbn.management.objects.objectsTable.relationships.columnTitleDescription',
+          { defaultMessage: 'Title of the saved object' }
+        ),
         dataType: 'string',
         sortable: false,
         render: (title, object) => {
           const { path } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
           if (!canGoInApp) {
-            return (
-              <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
-            );
+            return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
           }
           return (
             <EuiLink href={chrome.addBasePath(path)}>{title || getDefaultTitle(object)}</EuiLink>
@@ -200,21 +195,20 @@ class RelationshipsUI extends Component {
         },
       },
       {
-        name: intl.formatMessage({
-          id: 'kbn.management.objects.objectsTable.relationships.columnActionsName',
-          defaultMessage: 'Actions',
-        }),
+        name: i18n.translate(
+          'kbn.management.objects.objectsTable.relationships.columnActionsName',
+          { defaultMessage: 'Actions' }
+        ),
         actions: [
           {
-            name: intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionName',
-              defaultMessage: 'Inspect',
-            }),
-            description:
-              intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionDescription',
-                defaultMessage: 'Inspect this saved object',
-              }),
+            name: i18n.translate(
+              'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionName',
+              { defaultMessage: 'Inspect' }
+            ),
+            description: i18n.translate(
+              'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionDescription',
+              { defaultMessage: 'Inspect this saved object' }
+            ),
             type: 'icon',
             icon: 'inspect',
             onClick: object => goInspectObject(object),
@@ -240,37 +234,37 @@ class RelationshipsUI extends Component {
         {
           type: 'field_value_selection',
           field: 'relationship',
-          name: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.relationships.search.filters.relationship.name',
-            defaultMessage: 'Direct relationship',
-          }),
+          name: i18n.translate(
+            'kbn.management.objects.objectsTable.relationships.search.filters.relationship.name',
+            { defaultMessage: 'Direct relationship' }
+          ),
           multiSelect: 'or',
           options: [
             {
               value: 'parent',
               name: 'parent',
-              view: intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.relationships.search.filters.relationship.parentAsValue.view',
-                defaultMessage: 'Parent',
-              }),
+              view: i18n.translate(
+                'kbn.management.objects.objectsTable.relationships.search.filters.relationship.parentAsValue.view',
+                { defaultMessage: 'Parent' }
+              ),
             },
             {
               value: 'child',
               name: 'child',
-              view: intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.relationships.search.filters.relationship.childAsValue.view',
-                defaultMessage: 'Child',
-              }),
+              view: i18n.translate(
+                'kbn.management.objects.objectsTable.relationships.search.filters.relationship.childAsValue.view',
+                { defaultMessage: 'Child' }
+              ),
             },
           ],
         },
         {
           type: 'field_value_selection',
           field: 'type',
-          name: intl.formatMessage({
-            id: 'kbn.management.objects.objectsTable.relationships.search.filters.type.name',
-            defaultMessage: 'Type',
-          }),
+          name: i18n.translate(
+            'kbn.management.objects.objectsTable.relationships.search.filters.type.name',
+            { defaultMessage: 'Type' }
+          ),
           multiSelect: 'or',
           options: [...filterTypesMap.values()],
         },
@@ -281,14 +275,18 @@ class RelationshipsUI extends Component {
       <div>
         <EuiCallOut>
           <p>
-            {intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.relationships.relationshipsTitle',
-              defaultMessage: 'Here are the saved objects related to {title}. ' +
-                'Deleting this {type} affects its parent objects, but not its children.',
-            }, {
-              type: savedObject.type,
-              title: savedObject.meta.title || getDefaultTitle(savedObject)
-            })}
+            {i18n.translate(
+              'kbn.management.objects.objectsTable.relationships.relationshipsTitle',
+              {
+                defaultMessage:
+                  'Here are the saved objects related to {title}. ' +
+                  'Deleting this {type} affects its parent objects, but not its children.',
+                values: {
+                  type: savedObject.type,
+                  title: savedObject.meta.title || getDefaultTitle(savedObject),
+                },
+              }
+            )}
           </p>
         </EuiCallOut>
         <EuiSpacer />
@@ -328,5 +326,3 @@ class RelationshipsUI extends Component {
     );
   }
 }
-
-export const Relationships = injectI18n(RelationshipsUI);

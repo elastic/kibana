@@ -75,7 +75,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
         return;
       }
 
-      comboBoxElement.scrollIntoViewIfNecessary();
+      await comboBoxElement.scrollIntoViewIfNecessary();
       await this.setFilterValue(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
 
@@ -234,6 +234,12 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
         WAIT_FOR_EXISTS_TIME
       );
       return found.length > 0;
+    }
+
+    public async checkValidity(comboBoxElement: WebElementWrapper): Promise<boolean> {
+      const invalidClassName = 'euiComboBox-isInvalid';
+
+      return !(await comboBoxElement.elementHasClass(invalidClassName));
     }
 
     /**
