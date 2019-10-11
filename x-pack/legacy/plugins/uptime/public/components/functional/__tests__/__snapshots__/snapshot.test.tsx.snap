@@ -10,7 +10,7 @@ exports[`Snapshot component renders without errors 1`] = `
     <h2>
       <FormattedMessage
         defaultMessage="{down}/{total} monitors are down"
-        id="xpack.uptime.snapshot.endpointStatusTitle"
+        id="xpack.uptime.snapshot.downCountsMessage"
         values={
           Object {
             "down": 2,
