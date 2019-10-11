@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, FunctionComponent } from 'react';
 import { EuiSelectable, EuiLoadingContent, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { sortBy } from 'lodash';
@@ -37,12 +37,12 @@ export interface SavedQueryOption {
   append?: React.ReactNode;
   ref?: (optionIndex: number) => void;
 }
-interface SavedQueryPickerProps {
+interface Props {
   savedQueryService: SavedQueryService;
   onChange: (selectedOption: SavedQueryOption[], savedQueries: SavedQuery[]) => void;
 }
 
-export function SavedQueryPicker({ savedQueryService, onChange }: SavedQueryPickerProps) {
+export const SavedQueryPicker: FunctionComponent<Props> = ({ savedQueryService, onChange }) => {
   const [options, setOptions] = useState([] as SavedQueryOption[]);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [savedQueriesLoaded, setSavedQueriesLoaded] = useState(false);
@@ -58,7 +58,7 @@ export function SavedQueryPicker({ savedQueryService, onChange }: SavedQueryPick
       fetchQueries();
       getMappedSavedQueries();
     }
-  }, [options]); // I might need to be watching !savedQueriesLoaded here,
+  }, [options, !savedQueriesLoaded]); // I might need to be watching !savedQueriesLoaded here,
 
   /*
     Checked has to be a conditional depending on if a saved query is already selected as a filter.
@@ -80,30 +80,33 @@ export function SavedQueryPicker({ savedQueryService, onChange }: SavedQueryPick
       });
     setOptions(savedQueriesWithLabel);
   };
+
+  const noSavedQueriesText = i18n.translate(
+    'data.filter.filterEditor.savedQueryFilterPicker.noSavedQueriesText',
+    {
+      defaultMessage: 'There are no saved queries.',
+    }
+  );
+
+  const savedQueryFilterCopyUsageText = i18n.translate(
+    'data.filter.filterEditor.savedQueryFilterPicker.savedQueryFilterCopyUsageText',
+    {
+      defaultMessage:
+        'Filters create a copy of a saved query and not a reference to it. Changes to a saved query will not change the filter.',
+    }
+  );
   return (
     <Fragment>
       {!savedQueriesLoaded && <EuiLoadingContent lines={1} />}
-      {!options.length && (
+      {options.length === 0 && (
         <EuiText size="s" color="subdued" className="kbnSavedQueryFilterEditor__text">
-          <p>
-            {i18n.translate('data.filter.filterEditor.savedQueryFilterPicker.noSavedQueriesText', {
-              defaultMessage: 'There are no saved queries.',
-            })}
-          </p>
+          <p>{noSavedQueriesText}</p>
         </EuiText>
       )}
-      {savedQueriesLoaded && options.length && (
+      {savedQueriesLoaded && options.length > 0 && (
         <Fragment>
           <EuiText size="s" color="subdued" className="kbnSavedQueryFilterEditor__text">
-            <p>
-              {i18n.translate(
-                'data.filter.filterEditor.savedQueryFilterPicker.savedQueryFilterCopyUsageText',
-                {
-                  defaultMessage:
-                    'Filters create a copy of a saved query and not a reference to it. Changes to a saved query will not change the filter.',
-                }
-              )}
-            </p>
+            <p>{savedQueryFilterCopyUsageText}</p>
           </EuiText>
           <EuiSpacer />
           <EuiSelectable
@@ -122,4 +125,4 @@ export function SavedQueryPicker({ savedQueryService, onChange }: SavedQueryPick
       )}
     </Fragment>
   );
-}
+};
