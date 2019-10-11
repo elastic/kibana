@@ -90,6 +90,10 @@ function exists(obj: unknown, path: string[], i = 0): boolean {
     return false;
   }
 
+  if (path.length === i) {
+    return true;
+  }
+
   if (Array.isArray(obj)) {
     return obj.some(child => exists(child, path, i));
   }
@@ -101,7 +105,13 @@ function exists(obj: unknown, path: string[], i = 0): boolean {
   return path.length === i;
 }
 
-function existingFields(docs: Array<{ _source: Document }>, fields: FieldDescriptor[]): string[] {
+/**
+ * Exported for testing purposes only.
+ */
+export function existingFields(
+  docs: Array<{ _source: Document }>,
+  fields: FieldDescriptor[]
+): string[] {
   const allFields = fields.map(field => ({
     name: field.name,
     parent: field.parent,

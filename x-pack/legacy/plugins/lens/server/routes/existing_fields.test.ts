@@ -37,6 +37,30 @@ describe('existingFields', () => {
     expect(result).toEqual(['stuff.foo', 'stuff.baz']);
   });
 
+  it('should handle basic arrays', () => {
+    const result = existingFields([{ _source: { stuff: ['heyo', 'there'] } }], [field('stuff')]);
+
+    expect(result).toEqual(['stuff']);
+  });
+
+  it('should handle nested objects', () => {
+    const result = existingFields(
+      [{ _source: { geo: { coordinates: { lat: 40, lon: -77 } } } }],
+      [field('geo.coordinates')]
+    );
+
+    expect(result).toEqual(['geo.coordinates']);
+  });
+
+  it('should be false if it hits a positive leaf before the end of the path', () => {
+    const result = existingFields(
+      [{ _source: { geo: { coordinates: 32 } } }],
+      [field('geo.coordinates.lat')]
+    );
+
+    expect(result).toEqual([]);
+  });
+
   it('should prefer parent to name', () => {
     const result = existingFields(
       [{ _source: { stuff: [{ foo: 'bar' }, { baz: 0 }] } }],
