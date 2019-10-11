@@ -238,6 +238,10 @@ exports.Cluster = class Cluster {
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
+      env: {
+        ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
+        ...process.env,
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
