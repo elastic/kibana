@@ -92,7 +92,7 @@ describe('IndexPatternDimensionPanel', () => {
       currentIndexPatternId: '1',
       showEmptyFields: false,
       existingFields: {
-        1: {
+        'my-fake-index-pattern': {
           timestamp: true,
           bytes: true,
           memory: true,
@@ -215,7 +215,7 @@ describe('IndexPatternDimensionPanel', () => {
       state: {
         ...defaultProps.state,
         existingFields: {
-          1: {
+          'my-fake-index-pattern': {
             timestamp: true,
             source: true,
           },

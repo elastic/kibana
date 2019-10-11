@@ -217,21 +217,25 @@ async function loadIndexPatternRefs(
 }
 
 export async function syncExistingFields({
-  indexPatternIds,
+  indexPatterns,
   dateRange,
   fetchJson,
   setState,
 }: {
   dateRange: DateRange;
-  indexPatternIds: string[];
+  indexPatterns: Array<{ title: string; timeFieldName?: string | null }>;
   fetchJson: HttpServiceBase['get'];
   setState: SetState;
 }) {
   const emptinessInfo = await Promise.all(
-    indexPatternIds.map(
-      id =>
-        fetchJson(`/api/lens/existing_fields/${id}`, {
-          query: (dateRange as unknown) as Record<string, string>,
+    indexPatterns.map(
+      pattern =>
+        fetchJson(`/api/lens/existing_fields/${pattern.title}`, {
+          query: {
+            fromDate: dateRange.fromDate,
+            toDate: dateRange.toDate,
+            timeFieldName: pattern.timeFieldName!,
+          },
         }) as Promise<ExistingFields>
     )
   );
@@ -239,7 +243,7 @@ export async function syncExistingFields({
   setState(state => ({
     ...state,
     existingFields: emptinessInfo.reduce((acc, info) => {
-      acc[info.id] = booleanMap(info.existingFieldNames);
+      acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
       return acc;
     }, state.existingFields),
   }));
