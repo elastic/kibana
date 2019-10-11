@@ -134,18 +134,21 @@ uiRoutes
            *  @type {State}
            */
           const state = new State('_a', {});
+          const findIndexById = (id) => savedObjects.find(o => o.id === id);
+
           /**
            * returns the id of the default index, if none is configured
            * the value of the first available indexpattern/saved object is used
            */
           const getDefaultIndexId = () => {
-            if(config.get('defaultIndex')) {
-              return config.get('defaultIndex');
+            const defaultIndex = config.get('defaultIndex');
+            if(defaultIndex && findIndexById(defaultIndex)) {
+              return defaultIndex;
             }
             return !savedObjects.length ? '' : savedObjects[0].id;
           };
 
-          const exists = _.findIndex(savedObjects, o => o.id === state.index) > -1;
+          const exists = state.index && findIndexById(state.index);
           const id = exists ? state.index : getDefaultIndexId();
           state.destroy();
 
