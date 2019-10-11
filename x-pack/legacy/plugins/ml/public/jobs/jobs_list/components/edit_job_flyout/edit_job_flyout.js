@@ -21,6 +21,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabbedContent,
+  EuiOverlayMask,
+  EuiConfirmModal,
 } from '@elastic/eui';
 
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
@@ -35,6 +37,7 @@ import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class EditJobFlyoutUI extends Component {
+
   constructor(props) {
     super(props);
 
@@ -42,6 +45,7 @@ class EditJobFlyoutUI extends Component {
       job: {},
       hasDatafeed: false,
       isFlyoutVisible: false,
+      isConfirmationModalVisible: false,
       jobDescription: '',
       jobGroups: [],
       jobModelMemoryLimit: '',
@@ -73,8 +77,35 @@ class EditJobFlyoutUI extends Component {
     }
   }
 
-  closeFlyout = () => {
+  closeFlyout = (isConfirmed = false) => {
+    if (this.containsUnsavedCustomUrls() && !isConfirmed) {
+      this.setState({ isConfirmationModalVisible: true });
+      return;
+    }
+    this.setState({ isConfirmationModalVisible: false });
     this.setState({ isFlyoutVisible: false });
+  }
+
+  /**
+   * Checks if there are any unsaved changes for custom URLs.
+   * @returns {boolean}
+   */
+  containsUnsavedCustomUrls() {
+    const { job, jobCustomUrls } = this.state;
+
+    const initialCustomUrls = (job.custom_settings && job.custom_settings.custom_urls) ?
+      job.custom_settings.custom_urls : [];
+
+    if (initialCustomUrls.length !== jobCustomUrls.length) {
+      return true;
+    }
+    return initialCustomUrls.some((initJobCustomUrl, i) => {
+      const stateJob = jobCustomUrls[i];
+
+      return initJobCustomUrl.time_range !== stateJob.time_range ||
+        initJobCustomUrl.url_name !== stateJob.url_name ||
+        initJobCustomUrl.url_value !== stateJob.url_value;
+    });
   }
 
   showFlyout = (jobLite) => {
@@ -105,7 +136,7 @@ class EditJobFlyoutUI extends Component {
     const datafeedConfig = job.datafeed_config;
     const frequency = (datafeedConfig.frequency !== undefined) ? datafeedConfig.frequency : '';
     const customUrls = (job.custom_settings && job.custom_settings.custom_urls) ?
-      job.custom_settings.custom_urls : [];
+      [...job.custom_settings.custom_urls] : [];
 
     this.setState({
       job,
@@ -210,6 +241,7 @@ class EditJobFlyoutUI extends Component {
 
   render() {
     let flyout;
+    let confirmationModal;
 
     if (this.state.isFlyoutVisible) {
       const {
@@ -317,7 +349,7 @@ class EditJobFlyoutUI extends Component {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="cross"
-                  onClick={this.closeFlyout}
+                  onClick={() => { this.closeFlyout(); }}
                   flush="left"
                 >
                   <FormattedMessage
@@ -344,11 +376,41 @@ class EditJobFlyoutUI extends Component {
       );
     }
 
-    return (
+    if (this.state.isConfirmationModalVisible) {
+      confirmationModal = (
+        <EuiOverlayMask>
+          <EuiConfirmModal
+            title={
+              <FormattedMessage id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle" defaultMessage="You have unsaved changes" />
+            }
+            onCancel={() => this.setState({ isConfirmationModalVisible: false })}
+            onConfirm={() => this.closeFlyout(true)}
+            cancelButtonText={
+              <FormattedMessage id="xpack.ml.jobsList.editJobFlyout.cancelButtonLabel" defaultMessage="Cancel" />
+            }
+            confirmButtonText={
+              <FormattedMessage id="xpack.ml.jobsList.editJobFlyout.confirmCloseLabel" defaultMessage="Close without saving" />
+            }
+            buttonColor="danger"
+            defaultFocusedButton="confirm"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogMessage"
+                defaultMessage="You've changed Custom URLs configuration."
+              />
+            </p>
+          </EuiConfirmModal>
+        </EuiOverlayMask>
+      );
+    }
+
+    {return (
       <div>
         {flyout}
+        {confirmationModal}
       </div>
-    );
+    );}
 
   }
 }
