@@ -7,12 +7,13 @@ import React from 'react';
 import { idx } from '@kbn/elastic-idx';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { Summary } from './';
-import { TimestampSummaryItem } from './TimestampSummaryItem';
+import { TimestampTooltip } from '../TimestampTooltip';
 import { DurationSummaryItem } from './DurationSummaryItem';
 import { ErrorCountSummaryItem } from './ErrorCountSummaryItem';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { HttpInfoSummaryItem } from './HttpInfoSummaryItem';
 import { TransactionResultSummaryItem } from './TransactionResultSummaryItem';
+import { UserAgentSummaryItem } from './UserAgentSummaryItem';
 
 interface Props {
   transaction: Transaction;
@@ -28,7 +29,7 @@ const getTransactionResultSummaryItem = (transaction: Transaction) => {
     : idx(transaction, _ => _.url.full);
 
   if (url) {
-    const method = idx(transaction, _ => _.http.request.method) || '';
+    const method = idx(transaction, _ => _.http.request.method);
     const status = idx(transaction, _ => _.http.response.status_code);
 
     return <HttpInfoSummaryItem method={method} status={status} url={url} />;
@@ -47,14 +48,17 @@ const TransactionSummary = ({
   errorCount
 }: Props) => {
   const items = [
-    <TimestampSummaryItem time={transaction.timestamp.us / 1000} />,
+    <TimestampTooltip time={transaction.timestamp.us / 1000} />,
     <DurationSummaryItem
       duration={transaction.transaction.duration.us}
       totalDuration={totalDuration}
       parentType="trace"
     />,
     getTransactionResultSummaryItem(transaction),
-    errorCount ? <ErrorCountSummaryItem count={errorCount} /> : null
+    errorCount ? <ErrorCountSummaryItem count={errorCount} /> : null,
+    transaction.user_agent ? (
+      <UserAgentSummaryItem {...transaction.user_agent} />
+    ) : null
   ];
 
   return <Summary items={items}></Summary>;

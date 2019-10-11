@@ -386,34 +386,34 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.inputRef.focus();
   };
 
+  private initPersistedLog = () => {
+    const { uiSettings, store, appName } = this.services;
+    this.persistedLog = this.props.persistedLog
+      ? this.props.persistedLog
+      : getQueryLog(uiSettings, store, appName, this.props.query.language);
+  };
+
   public onMouseEnterSuggestion = (index: number) => {
     this.setState({ index });
   };
 
   public componentDidMount() {
-    const { uiSettings, store, appName } = this.services;
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
     }
 
-    this.persistedLog = this.props.persistedLog
-      ? this.props.persistedLog
-      : getQueryLog(uiSettings, store, appName, this.props.query.language);
-
+    this.initPersistedLog();
     this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
   public componentDidUpdate(prevProps: Props) {
-    const { uiSettings, store, appName } = this.services;
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
     }
 
-    this.persistedLog = this.props.persistedLog
-      ? this.props.persistedLog
-      : getQueryLog(uiSettings, store, appName, this.props.query.language);
+    this.initPersistedLog();
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
       this.fetchIndexPatterns().then(this.updateSuggestions);

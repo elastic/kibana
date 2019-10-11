@@ -73,7 +73,7 @@ import 'ui/capabilities/route_setup';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
-import { setup as data } from '../../../../data/public/legacy';
+import { start as data } from '../../../../data/public/legacy';
 import { npStart } from 'ui/new_platform';
 
 const { savedQueryService } = data.search.services;

@@ -96,7 +96,7 @@ test('successfully executes', async () => {
   expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
 
   expect(actionType.executor).toHaveBeenCalledWith({
-    id: '1',
+    actionId: '1',
     services: expect.anything(),
     config: {
       bar: true,

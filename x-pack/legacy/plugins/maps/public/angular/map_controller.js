@@ -53,7 +53,7 @@ import {
   MAP_APP_PATH
 } from '../../common/constants';
 import { FilterStateStore } from '@kbn/es-query';
-import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { start as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 const { savedQueryService } = data.search.services;
 
