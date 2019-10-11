@@ -68,11 +68,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       const savedQueryCount = await savedQueryService.getSavedQueryCount();
       setTotalCount(savedQueryCount);
 
-      const savedQueryItems = await savedQueryService.findSavedQueries(
-        undefined,
-        perPage,
-        activePage + 1
-      );
+      const savedQueryItems = await savedQueryService.findSavedQueries('', perPage, activePage + 1);
       const sortedSavedQueryItems = sortBy(savedQueryItems, 'attributes.title');
       setSavedQueries(sortedSavedQueryItems);
     };
