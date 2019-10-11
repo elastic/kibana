@@ -8,12 +8,7 @@ import { Logger } from './log';
 import { RepositoryService } from './repository_service';
 
 export class RepositoryServiceFactory {
-  public newInstance(
-    repoPath: string,
-    credsPath: string,
-    log: Logger,
-    enableGitCertCheck: boolean
-  ): RepositoryService {
-    return new RepositoryService(repoPath, credsPath, log, enableGitCertCheck);
+  public newInstance(repoPath: string, credsPath: string, log: Logger): RepositoryService {
+    return new RepositoryService(repoPath, credsPath, log);
   }
 }

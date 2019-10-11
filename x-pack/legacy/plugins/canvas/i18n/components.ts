@@ -300,6 +300,46 @@ export const ComponentStrings = {
         description: 'This tab contains the settings for how data is displayed in a Canvas element',
       }),
   },
+  Expression: {
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.expression.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getCloseButtonLabel: () =>
+      i18n.translate('xpack.canvas.expression.closeButtonLabel', {
+        defaultMessage: 'Close',
+      }),
+    getLearnLinkText: () =>
+      i18n.translate('xpack.canvas.expression.learnLinkText', {
+        defaultMessage: 'Learn expression syntax',
+      }),
+    getMaximizeButtonLabel: () =>
+      i18n.translate('xpack.canvas.expression.maximizeButtonLabel', {
+        defaultMessage: 'Maximize editor',
+      }),
+    getMinimizeButtonLabel: () =>
+      i18n.translate('xpack.canvas.expression.minimizeButtonLabel', {
+        defaultMessage: 'Minimize Editor',
+      }),
+    getRunButtonLabel: () =>
+      i18n.translate('xpack.canvas.expression.runButtonLabel', {
+        defaultMessage: 'Run',
+      }),
+    getRunTooltip: () =>
+      i18n.translate('xpack.canvas.expression.runTooltip', {
+        defaultMessage: 'Run the expression',
+      }),
+  },
+  ExpressionElementNotSelected: {
+    getCloseButtonLabel: () =>
+      i18n.translate('xpack.canvas.expressionElementNotSelected.closeButtonLabel', {
+        defaultMessage: 'Close',
+      }),
+    getSelectDescription: () =>
+      i18n.translate('xpack.canvas.expressionElementNotSelected.selectDescription', {
+        defaultMessage: 'Select an element to show expression input',
+      }),
+  },
   GroupSettings: {
     getSaveGroupDescription: () =>
       i18n.translate('xpack.canvas.groupSettings.saveGroupDescription', {
@@ -537,6 +577,32 @@ export const ComponentStrings = {
     getVerticalDistributionMenuItemLabel: () =>
       i18n.translate('xpack.canvas.sidebarHeader.verticalDistributionMenutItemLabel', {
         defaultMessage: 'Vertical',
+      }),
+  },
+  TextStylePicker: {
+    getAlignCenterOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignCenterOption', {
+        defaultMessage: 'Align center',
+      }),
+    getAlignLeftOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignLeftOption', {
+        defaultMessage: 'Align left',
+      }),
+    getAlignRightOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignRightOption', {
+        defaultMessage: 'Align right',
+      }),
+    getStyleBoldOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.styleBoldOption', {
+        defaultMessage: 'Bold',
+      }),
+    getStyleItalicOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.styleItalicOption', {
+        defaultMessage: 'Italic',
+      }),
+    getStyleUnderlineOption: () =>
+      i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
+        defaultMessage: 'Underline',
       }),
   },
   Toolbar: {

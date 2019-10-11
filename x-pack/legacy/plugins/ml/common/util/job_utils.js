@@ -5,7 +5,6 @@
  */
 
 
-
 import _ from 'lodash';
 import semver from 'semver';
 import numeral from '@elastic/numeral';
@@ -13,6 +12,7 @@ import numeral from '@elastic/numeral';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
+import { CREATED_BY_LABEL } from '../../public/jobs/new_job_new/common/job_creator/util/constants';
 
 // work out the default frequency based on the bucket_span in seconds
 export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
@@ -224,7 +224,7 @@ export function mlFunctionToESAggregation(functionName) {
 // Job name must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores;
 // it must also start and end with an alphanumeric character'
 export function isJobIdValid(jobId) {
-  return (jobId.match(/^[a-z0-9\-\_]+$/g) && !jobId.match(/^([_-].*)?(.*[_-])?$/g)) ? true : false;
+  return /^[a-z0-9\-\_]+$/g.test(jobId) && !/^([_-].*)?(.*[_-])?$/g.test(jobId);
 }
 
 // To get median data for jobs and charts we need to use Elasticsearch's
@@ -515,5 +515,16 @@ export function getLatestDataOrBucketTimestamp(latestDataTimestamp, latestBucket
     return Math.max(latestDataTimestamp, latestBucketTimestamp);
   } else {
     return (latestDataTimestamp !== undefined) ? latestDataTimestamp : latestBucketTimestamp;
+  }
+}
+
+/**
+ * If created_by is set in the job's custom_settings, remove it in case
+ * it was created by a job wizard as the rules cannot currently be edited
+ * in the job wizards and so would be lost in a clone.
+ */
+export function processCreatedBy(customSettings) {
+  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by)) {
+    delete customSettings.created_by;
   }
 }
