@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @public */
 export class HttpFetchError extends Error {
   constructor(
     message: string,
