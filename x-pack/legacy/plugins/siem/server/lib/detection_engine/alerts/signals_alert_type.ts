@@ -17,7 +17,7 @@ import { buildEventsReIndex } from './build_events_reindex';
 import { buildEventsScrollQuery } from './build_events_query';
 
 // bulk scroll class
-import { ScrollAndBulkIndex } from './utils';
+import { scrollAndBulkIndex } from './utils';
 
 export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
   return {
@@ -104,7 +104,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         // signals instead of the ReIndex() api
 
         if (process.env.USE_REINDEX_API === 'true') {
-          // eslint-disable-next-line
           const result = await services.callCluster('reindex', reIndex);
 
           // TODO: Error handling here and writing of any errors that come back from ES by
@@ -115,13 +114,17 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
           const noReIndexResult = await services.callCluster('search', noReIndex);
           logger.info(`Total docs to reindex: ${noReIndexResult.hits.total.value}`);
 
-          const ScrollAndBulk = new ScrollAndBulkIndex(services, params, logger);
-          const bulkIndexResult = await ScrollAndBulk.bulkIndex(noReIndexResult);
+          const bulkIndexResult = await scrollAndBulkIndex(
+            noReIndexResult,
+            params,
+            services,
+            logger
+          );
 
           if (bulkIndexResult) {
             logger.info('Finished SIEM signal job');
           } else {
-            logger.info('Error processing SIEM signal job');
+            logger.error('Error processing SIEM signal job');
           }
         }
       } catch (err) {
