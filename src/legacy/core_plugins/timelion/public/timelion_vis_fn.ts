@@ -69,13 +69,13 @@ export const getTimelionVisualizationConfig = (
 
     const visParams = { expression: args.expression, interval: args.interval };
 
-    const response = (await timelionRequestHandler({
+    const response = await timelionRequestHandler({
       timeRange: get(context, 'timeRange'),
       query: get(context, 'query'),
       filters: get(context, 'filters'),
       visParams,
       forceFetch: true,
-    })) as TimelionSuccessResponse;
+    });
 
     response.visType = 'timelion';
 
