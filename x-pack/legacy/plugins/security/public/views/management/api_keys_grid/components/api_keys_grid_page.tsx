@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -51,7 +52,7 @@ interface State {
   error: any;
 }
 
-const DATE_FORMAT = 'MMMM Do YYYY';
+const DATE_FORMAT = 'MMMM Do YYYY HH:mm:ss';
 
 class ApiKeysGridPageUI extends Component<Props, State> {
   constructor(props: Props) {
@@ -400,6 +401,21 @@ class ApiKeysGridPageUI extends Component<Props, State> {
           }
 
           return moment(expirationDateMs).format(DATE_FORMAT);
+        },
+      },
+      {
+        name: intl.formatMessage({
+          id: 'xpack.security.management.apiKeys.table.statusColumnName',
+          defaultMessage: 'Status',
+        }),
+        render: ({ expiration }: any) => {
+          const now = Date.now();
+
+          if (now > expiration) {
+            return <EuiBadge color="hollow">Expired</EuiBadge>;
+          }
+
+          return <EuiBadge color="secondary">Active</EuiBadge>;
         },
       },
       {
