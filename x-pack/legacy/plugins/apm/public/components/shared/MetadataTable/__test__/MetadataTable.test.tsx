@@ -17,7 +17,7 @@ import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 describe('MetadataTable', () => {
   afterEach(cleanup);
   describe('required sections', () => {
-    it('shows message if no data is available', () => {
+    it('shows "empty state message" if no data is available', () => {
       const sections = [
         {
           key: 'foo',
@@ -30,7 +30,7 @@ describe('MetadataTable', () => {
       );
       expectTextsInDocument(output, ['Foo', 'No data available']);
     });
-    it('shows message if property is not available', () => {
+    it('shows "empty state message" if property is not available', () => {
       const sections = [
         {
           key: 'foo',
@@ -50,7 +50,7 @@ describe('MetadataTable', () => {
     });
   });
   describe('not required sections', () => {
-    it('does not show section when any item is provided', () => {
+    it('does not show section when no items are provided', () => {
       const sections = [
         {
           key: 'foo',
