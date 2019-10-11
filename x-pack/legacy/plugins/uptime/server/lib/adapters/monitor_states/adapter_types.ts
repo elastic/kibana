@@ -21,6 +21,13 @@ export interface UMMonitorStatesAdapter {
     statusFilter?: string | null
   ): Promise<GetMonitorStatesResult>;
   statesIndexExists(request: any): Promise<StatesIndexStatus>;
+  getSnapshotCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string,
+    statusFilter?: string
+  ): Promise<any>;
 }
 
 export interface CursorPagination {

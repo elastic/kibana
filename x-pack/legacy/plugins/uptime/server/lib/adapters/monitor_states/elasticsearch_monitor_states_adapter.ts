@@ -6,9 +6,10 @@
 
 import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter, GetMonitorStatesResult, CursorPagination } from './adapter_types';
-import { StatesIndexStatus } from '../../../../common/graphql/types';
+import { StatesIndexStatus, SnapshotCount } from '../../../../common/graphql/types';
 import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
-import { fetchPage } from './search';
+import { fetchPage, MonitorGroups } from './search';
+import { MonitorGroupIterator } from './search/monitor_group_iterator';
 
 export interface QueryContext {
   database: any;
@@ -55,6 +56,55 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       nextPagePagination: jsonifyPagination(page.nextPagePagination),
       prevPagePagination: jsonifyPagination(page.prevPagePagination),
     };
+  }
+
+  public async getSnapshotCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string,
+    statusFilter?: string
+  ): Promise<SnapshotCount> {
+    const context: QueryContext = {
+      database: this.database,
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      pagination: CONTEXT_DEFAULTS.CURSOR_PAGINATION,
+      filterClause: filters && filters !== '' ? JSON.parse(filters) : null,
+      size: 30000,
+      statusFilter,
+    };
+    const iterator = new MonitorGroupIterator(context);
+    const items: MonitorGroups[] = [];
+    let res: MonitorGroups | null;
+    do {
+      res = await iterator.next();
+      if (res) {
+        items.push(res);
+      }
+    } while (res !== null);
+    return items
+      .map(({ groups }) =>
+        groups.reduce<'up' | 'down'>((acc, cur) => {
+          if (acc === 'down') {
+            return acc;
+          }
+          return cur.status === 'down' ? 'down' : 'up';
+        }, 'up')
+      )
+      .reduce(
+        (acc, cur) => {
+          if (cur === 'up') {
+            acc.up++;
+          } else {
+            acc.down++;
+          }
+          acc.total++;
+          return acc;
+        },
+        { up: 0, down: 0, mixed: 0, total: 0 }
+      );
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
