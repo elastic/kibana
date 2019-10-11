@@ -56,7 +56,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
       }
       setActionTypesIndex(index);
     })();
-  });
+  }, []);
 
   useEffect(() => {
     const updatedData: Data[] = [];
