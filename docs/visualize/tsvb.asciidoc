@@ -40,8 +40,6 @@ image:images/tsvb-markdown.png["Markdown visualization"]
 
 Table:: Display data from multiple time series by defining the field group to show in the rows, and the columns of data to display.
 
-Only the latest number in a data series will be shown. To define the series length, select _Panel options_, then enter the _Interval_.
-
 [role="screenshot"]
 image:images/tsvb-table.png["Table visualization"]
 
@@ -98,6 +96,8 @@ Change the data that you want to display and choose the style options for the pa
 . Select *Panel options*.
 
 . Under *Data*, specify how much of the data that you want to display in the visualization. 
++
+For table visualizations, only the latest number in a data series is shown. To define the series length, enter the *Interval*.
 
 . Under *Style*, specify how you want the visualization to look.
 
