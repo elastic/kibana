@@ -63,40 +63,23 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
 
-  const fetchSavedQueries = async () => {
-    const savedQueryItems = await savedQueryService.findSavedQueries(
-      undefined,
-      perPage,
-      activePage + 1
-    );
-    const sortedSavedQueryItems = sortBy(savedQueryItems, 'attributes.title');
-    setSavedQueries(sortedSavedQueryItems);
-  };
-
-  const fetchSavedQueryCount = async () => {
-    const savedQueryCount = await savedQueryService.getSavedQueryCount();
-    setTotalCount(savedQueryCount);
-  };
-
   useEffect(() => {
-    // Only fetch the total count on initial render.
     const fetchCountAndSavedQueries = async () => {
-      await fetchSavedQueryCount();
-      await fetchSavedQueries();
+      const savedQueryCount = await savedQueryService.getSavedQueryCount();
+      setTotalCount(savedQueryCount);
+
+      const savedQueryItems = await savedQueryService.findSavedQueries(
+        undefined,
+        perPage,
+        activePage + 1
+      );
+      const sortedSavedQueryItems = sortBy(savedQueryItems, 'attributes.title');
+      setSavedQueries(sortedSavedQueryItems);
     };
     if (isOpen) {
       fetchCountAndSavedQueries();
     }
-  }, [isOpen]);
-
-  useEffect(() => {
-    // We're being optimistic here with a large number of items shown per page (that makes deletion less obvious)
-    // and only fetch the new list of saved queries on a page change and not the count as well
-    const fetchNextSavedQueries = async () => {
-      await fetchSavedQueries();
-    };
-    fetchNextSavedQueries();
-  }, [activePage]);
+  }, [isOpen, activePage]);
 
   const goToPage = (pageNumber: number) => {
     setActivePage(pageNumber);
