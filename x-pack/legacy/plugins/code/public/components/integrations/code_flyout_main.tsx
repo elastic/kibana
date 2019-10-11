@@ -81,7 +81,7 @@ export const CodeFlyoutMain = (props: { repo: string; file: string; revision: st
           </EuiTab>
         </EuiTabs>
       </div>
-      <div className="codeFlyout-content">{content}</div>
+      <div className="codeFlyout--content">{content}</div>
     </Fragment>
   );
 };
