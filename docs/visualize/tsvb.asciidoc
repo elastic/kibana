@@ -96,6 +96,8 @@ Change the data that you want to display and choose the style options for the pa
 . Select *Panel options*.
 
 . Under *Data*, specify how much of the data that you want to display in the visualization. 
++
+For table visualizations, only the latest number in a data series is shown. To define the series length, enter the *Interval*.
 
 . Under *Style*, specify how you want the visualization to look.
 
