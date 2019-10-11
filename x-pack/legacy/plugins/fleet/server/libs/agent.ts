@@ -42,30 +42,29 @@ export class AgentLib {
     const verifyResponse = await this.tokens.verify(user, token);
 
     if (!verifyResponse.valid) {
-      throw new Error(`Enrollment token is not valid: ${verifyResponse.reason}`);
+      throw Boom.unauthorized(`Enrollment token is not valid: ${verifyResponse.reason}`);
     }
-    const policy = verifyResponse.token.policy;
+    const policyId = verifyResponse.token.policy_id;
 
     const existingAgent = sharedId
       ? await this.agentsRepository.getBySharedId(user, sharedId)
       : null;
 
     if (existingAgent && existingAgent.active === true) {
-      throw new Error('Impossible to enroll an already active agent');
+      throw Boom.badRequest('Impossible to enroll an already active agent');
     }
 
     const enrolledAt = new Date().toISOString();
 
     const parentId =
       type === 'EPHEMERAL_INSTANCE'
-        ? (await this._createParentForEphemeral(user, policy.id, policy.sharedId)).id
+        ? (await this._createParentForEphemeral(user, policyId)).id
         : undefined;
 
     const agentData: NewAgent = {
       shared_id: sharedId,
       active: true,
-      policy_id: policy.id,
-      policy_shared_id: policy.sharedId,
+      policy_id: policyId,
       type,
       enrolled_at: enrolledAt,
       parent_id: parentId,
@@ -85,7 +84,7 @@ export class AgentLib {
       agent = await this.agentsRepository.create(user, agentData);
     }
 
-    const accessToken = await this.tokens.generateAccessToken(agent.id, policy);
+    const accessToken = await this.tokens.generateAccessToken(agent.id, policyId);
     await this.agentsRepository.update(user, agent.id, {
       access_token: accessToken,
     });
@@ -217,12 +216,8 @@ export class AgentLib {
     return agent.actions.filter(a => !a.sent_at);
   }
 
-  private async _createParentForEphemeral(
-    user: FrameworkUser,
-    policyId: string,
-    policySharedId: string
-  ): Promise<Agent> {
-    const ephemeralParentId = `agents:ephemeral:${policySharedId}`;
+  private async _createParentForEphemeral(user: FrameworkUser, policyId: string): Promise<Agent> {
+    const ephemeralParentId = `agents:ephemeral:${policyId}`;
     const parentAgent = await this.agentsRepository.getById(user, 'ephemeralParentId');
 
     if (parentAgent) {
@@ -234,7 +229,6 @@ export class AgentLib {
       {
         type: 'EPHEMERAL',
         policy_id: policyId,
-        policy_shared_id: policySharedId,
         active: true,
       },
       {

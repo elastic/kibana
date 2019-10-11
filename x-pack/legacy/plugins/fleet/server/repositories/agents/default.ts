@@ -173,14 +173,14 @@ export class AgentsRepository implements AgentsRepositoryType {
     };
   }
 
-  public async findEphemeralByPolicySharedId(
+  public async findEphemeralByPolicyId(
     user: FrameworkUser,
-    policySharedId: string
+    policyId: string
   ): Promise<Agent | null> {
     const res = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
       type: 'agents',
-      search: policySharedId,
-      searchFields: ['policy_shared_id'],
+      search: policyId,
+      searchFields: ['policy_id'],
     });
     const agents = res.saved_objects
       .map(this._savedObjectToAgent)

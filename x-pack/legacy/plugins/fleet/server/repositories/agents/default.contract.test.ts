@@ -90,7 +90,6 @@ describe('AgentsRepository', () => {
         active: false,
         access_token: 'TOKEN_1',
         policy_id: 'policy_id_1',
-        policy_shared_id: 'shared_policy_id-1',
         type: 'EPHEMERAL',
         version: '1',
         local_metadata: {
@@ -107,7 +106,6 @@ describe('AgentsRepository', () => {
         active: false,
         access_token: 'TOKEN_1',
         policy_id: 'policy_id_1',
-        policy_shared_id: 'shared_policy_id-1',
         type: 'EPHEMERAL',
         version: '1',
         local_metadata: {
@@ -124,7 +122,6 @@ describe('AgentsRepository', () => {
           active: false,
           access_token: 'TOKEN_1',
           policy_id: 'policy_id_1',
-          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -150,7 +147,6 @@ describe('AgentsRepository', () => {
           active: false,
           access_token: 'TOKEN_1',
           policy_id: 'policy_id_1',
-          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -170,7 +166,6 @@ describe('AgentsRepository', () => {
           active: false,
           access_token: 'TOKEN_1',
           policy_id: 'policy_id_1',
-          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -198,7 +193,6 @@ describe('AgentsRepository', () => {
           active: false,
           access_token: 'TOKEN_1',
           policy_id: 'policy_id_1',
-          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -234,7 +228,6 @@ describe('AgentsRepository', () => {
           active: false,
           access_token: 'TOKEN_1',
           policy_id: 'policy_id_1',
-          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -255,7 +248,7 @@ describe('AgentsRepository', () => {
       expect(freshAgent).toBeNull();
     });
   });
-  describe('findEphemeralByPolicySharedId', () => {
+  describe('findEphemeralByPolicyId', () => {
     beforeAll(async () => {
       await loadFixtures([
         {
@@ -263,7 +256,6 @@ describe('AgentsRepository', () => {
           active: false,
           access_token: 'TOKEN_1',
           policy_id: 'policy_id_1',
-          policy_shared_id: 'shared_policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -279,7 +271,6 @@ describe('AgentsRepository', () => {
           active: false,
           access_token: 'TOKEN_1',
           policy_id: 'policy_id_1',
-          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -293,8 +284,8 @@ describe('AgentsRepository', () => {
       ]);
     });
 
-    it('should allow to find agent by policy shared id', async () => {
-      const agent = await adapter.findEphemeralByPolicySharedId(getUser(), 'shared_policy_id_1');
+    it('should allow to find agent by policy id', async () => {
+      const agent = await adapter.findEphemeralByPolicyId(getUser(), 'policy_id_1');
       expect(agent).toBeDefined();
       expect((agent as Agent).shared_id).toBe('agent1');
     });
@@ -310,7 +301,6 @@ describe('AgentsRepository', () => {
             active: false,
             access_token: 'TOKEN_1',
             policy_id: 'policy_id_1',
-            policy_shared_id: 'shared_policy_id_1',
             type: 'EPHEMERAL',
             version: '1',
             local_metadata: {
@@ -353,7 +343,6 @@ describe('AgentsRepository', () => {
           active: false,
           access_token: 'TOKEN_1',
           policy_id: 'policy_id_1',
-          policy_shared_id: 'shared_policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {
@@ -369,7 +358,6 @@ describe('AgentsRepository', () => {
           active: false,
           access_token: 'TOKEN_1',
           policy_id: 'policy_id_1',
-          policy_shared_id: 'shared_policy_id-1',
           type: 'EPHEMERAL',
           version: '1',
           local_metadata: {

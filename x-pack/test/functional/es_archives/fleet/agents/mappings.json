@@ -36,9 +36,6 @@
             "policy_id": {
               "type": "keyword"
             },
-            "policy_shared_id": {
-              "type": "keyword"
-            },
             "created_at": {
               "type": "date"
             },
@@ -79,9 +76,6 @@
               "type": "boolean"
             },
             "policy_id": {
-              "type": "keyword"
-            },
-            "policy_shared_id": {
               "type": "keyword"
             },
             "enrolled_at": {

@@ -20,32 +20,61 @@ export default function({ getService }: FtrProviderContext) {
       await esArchiver.unload('fleet/agents');
     });
 
-    it('should allow to enroll an agent', async () => {
+    it('should not allow to enroll an agent with a invalid enrollment', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/fleet/agents/enroll`)
+        .set('kbn-xsrf', 'xxx')
+        .set('kbn-fleet-enrollment-token', 'NotavalidJSONTOKEN')
+        .send({
+          type: 'PERMANENT',
+          metadata: {
+            local: {},
+            user_provided: {},
+          },
+        })
+        .expect(401);
+
+      expect(apiResponse.message).to.match(/Enrollment token is not valid/);
+    });
+
+    it('should not allow to enroll an agent with a shared id if it already exists ', async () => {
       const { body: apiResponse } = await supertest
         .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
           'kbn-fleet-enrollment-token',
-          // Token without expiration for test purpose
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiRU5ST0xNRU5UX1RPS0VOIiwicG9saWN5Ijp7ImlkIjoicG9saWN5OjEiLCJzaGFyZWRJZCI6InBvbGljeToxIn0sImlhdCI6MTU2ODY2MjMwOH0.KZ-LswnY7YXThEo9NRXP4QmJw-txg-dBXFhRKtwbs4s'
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiRU5ST0xMTUVOVF9UT0tFTiIsInBvbGljeV9pZCI6InBvbGljeToxIiwiaWF0IjoxNTcwNzI1MDcyfQ.H41P_J2wsjfeZDOEAMYPj9TMRhCsUY3NZoLGZ9VQWpg'
+        )
+        .send({
+          shared_id: 'agent2_filebeat',
+          type: 'PERMANENT',
+          metadata: {
+            local: {},
+            user_provided: {},
+          },
+        })
+        .expect(400);
+      expect(apiResponse.message).to.match(/Impossible to enroll an already active agent/);
+    });
+
+    it('should allow to enroll an agent with a valid enrollment token', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/fleet/agents/enroll`)
+        .set('kbn-xsrf', 'xxx')
+        .set(
+          'kbn-fleet-enrollment-token',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiRU5ST0xMTUVOVF9UT0tFTiIsInBvbGljeV9pZCI6InBvbGljeToxIiwiaWF0IjoxNTcwNzI1MDcyfQ.H41P_J2wsjfeZDOEAMYPj9TMRhCsUY3NZoLGZ9VQWpg'
         )
         .send({
           type: 'PERMANENT',
           metadata: {
             local: {},
-            userProvided: {},
+            user_provided: {},
           },
         })
         .expect(200);
       expect(apiResponse.success).to.eql(true);
-      expect(apiResponse.item).to.have.keys(
-        'id',
-        'active',
-        'access_token',
-        'type',
-        'policy_id',
-        'policy_shared_id'
-      );
+      expect(apiResponse.item).to.have.keys('id', 'active', 'access_token', 'type', 'policy_id');
     });
   });
 }

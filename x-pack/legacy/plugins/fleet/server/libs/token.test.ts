@@ -21,7 +21,7 @@ function generateJWTToken(): string {
       policy: {
         id: 'policyId',
       },
-      type: TokenType.ENROLMENT_TOKEN,
+      type: TokenType.ENROLLMENT_TOKEN,
     },
     'mockedEncryptionKey'
   );
@@ -44,11 +44,11 @@ describe('Token Lib', () => {
       const token = generateJWTToken();
       const tokenHash = hashJWTToken(token);
       tokenAdapter.create(getUser(), {
-        type: TokenType.ENROLMENT_TOKEN,
+        type: TokenType.ENROLLMENT_TOKEN,
         active: true,
         tokenHash,
         token,
-        policy: { id: 'policyId', sharedId: 'sharedId' },
+        policyId: 'policyId',
       });
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
@@ -64,11 +64,11 @@ describe('Token Lib', () => {
       const token = generateJWTToken();
       const tokenHash = hashJWTToken(token);
       tokenAdapter.create(getUser(), {
-        type: TokenType.ENROLMENT_TOKEN,
+        type: TokenType.ENROLLMENT_TOKEN,
         active: false,
         token,
         tokenHash,
-        policy: { id: 'policyId', sharedId: 'sharedId' },
+        policyId: 'policyId',
       });
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
@@ -110,9 +110,7 @@ describe('Token Lib', () => {
       const tokenAdapter = new MemoryTokensRepository();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const token = await tokens.generateEnrolmentToken(getUser(), {
-        id: 'policy_id',
-      });
+      const token = await tokens.generateEnrolmentToken(getUser(), 'policy_id');
 
       expect(token).toBeDefined();
     });
@@ -121,9 +119,7 @@ describe('Token Lib', () => {
       const tokenAdapter = new MemoryTokensRepository();
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
 
-      const token = await tokens.generateEnrolmentToken(getUser(), {
-        id: 'policy_id',
-      });
+      const token = await tokens.generateEnrolmentToken(getUser(), 'policy_id');
 
       const tokenHash = hashJWTToken(token);
       const persistedToken = await tokenAdapter.getByTokenHash(getUser(), tokenHash);
@@ -150,11 +146,10 @@ describe('Token Lib', () => {
       tokenAdapter.tokens['token:1'] = {
         id: 'token:1',
         policy_id: 'policy:1',
-        policy_shared_id: 'shared:1',
         active: true,
         tokenHash: 'asdasd',
         token: '{}',
-        type: TokenType.ENROLMENT_TOKEN,
+        type: TokenType.ENROLLMENT_TOKEN,
         created_at: '2019-09-12T12:48:42+0000',
         enrollment_rules: [],
       };
@@ -172,11 +167,10 @@ describe('Token Lib', () => {
       tokenAdapter.tokens['tokens-0'] = {
         id: 'tokens-0',
         policy_id: 'policy:1',
-        policy_shared_id: 'shared:1',
         active: true,
         token: '',
         tokenHash: 'asdasd',
-        type: TokenType.ENROLMENT_TOKEN,
+        type: TokenType.ENROLLMENT_TOKEN,
         created_at: '2019-09-12T12:48:42+0000',
         enrollment_rules: [],
       };

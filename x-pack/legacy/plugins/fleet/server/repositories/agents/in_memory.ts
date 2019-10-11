@@ -75,12 +75,12 @@ export class InMemoryAgentsRepository implements AgentsRepository {
     return { agents, total, page, perPage };
   }
 
-  public async findEphemeralByPolicySharedId(
+  public async findEphemeralByPolicyId(
     user: FrameworkUser,
-    policySharedId: string
+    policyId: string
   ): Promise<Agent | null> {
     const agent = Object.values(this.agents).find(
-      a => a.type === 'EPHEMERAL' && a.policy_shared_id === policySharedId
+      a => a.type === 'EPHEMERAL' && a.policy_id === policyId
     );
 
     return agent || null;

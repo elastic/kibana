@@ -56,7 +56,6 @@ export type AgentType = t.TypeOf<typeof RuntimeAgentType>;
 const newAgentProperties = {
   type: RuntimeAgentType,
   active: t.boolean,
-  policy_shared_id: t.string,
   policy_id: t.string,
 };
 
@@ -146,7 +145,7 @@ export interface AgentsRepository {
     kuery?: string
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }>;
 
-  findEphemeralByPolicySharedId(user: FrameworkUser, policySharedId: string): Promise<Agent | null>;
+  findEphemeralByPolicyId(user: FrameworkUser, policyId: string): Promise<Agent | null>;
 
   getByEphemeralAccessToken(user: FrameworkUser, token: any): Promise<Agent | null>;
 }

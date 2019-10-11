@@ -21,14 +21,14 @@ export class MemoryTokensRepository implements TokensRepositoryType {
       tokenHash,
       token,
       active,
-      policy,
+      policyId,
       expire_at,
     }: {
       type: TokenType;
       token: string;
       tokenHash: string;
       active: boolean;
-      policy: { id: string; sharedId: string };
+      policyId: string;
       expire_at?: string;
     }
   ): Promise<Token> {
@@ -41,8 +41,7 @@ export class MemoryTokensRepository implements TokensRepositoryType {
       token,
       tokenHash,
       expire_at,
-      policy_id: policy.id,
-      policy_shared_id: policy.sharedId,
+      policy_id: policyId,
       enrollment_rules: [],
     };
 
