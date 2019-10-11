@@ -5,12 +5,12 @@
  */
 
 import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { toastNotifications } from 'ui/notify';
 import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
 import { KFetchError } from '../../../../../../src/legacy/ui/public/kfetch/kfetch_error';
+import { useKibanaCore } from '../../../observability/public';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -31,7 +31,7 @@ export function useFetcher<TState>(
   options?: {
     preservePreviousData?: boolean;
   }
-): Result<TState> & { refresh: () => void };
+): Result<TState> & { refetch: () => void };
 
 // To avoid infinite rescursion when infering the type of `TState` `initialState` must be given if `prevResult` is consumed
 export function useFetcher<TState>(
@@ -41,7 +41,7 @@ export function useFetcher<TState>(
     preservePreviousData?: boolean;
     initialState: TState;
   }
-): Result<TState> & { refresh: () => void };
+): Result<TState> & { refetch: () => void };
 
 export function useFetcher(
   fn: Function,
@@ -51,6 +51,7 @@ export function useFetcher(
     initialState?: unknown;
   } = {}
 ) {
+  const { notifications } = useKibanaCore();
   const { preservePreviousData = true } = options;
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
@@ -93,7 +94,7 @@ export function useFetcher(
       } catch (e) {
         const err = e as KFetchError;
         if (!didCancel) {
-          toastNotifications.addWarning({
+          notifications.toasts.addWarning({
             title: i18n.translate('xpack.apm.fetcher.error.title', {
               defaultMessage: `Error while fetching resource`
             }),
@@ -141,14 +142,13 @@ export function useFetcher(
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    return {
       ...result,
-      refresh: () => {
+      refetch: () => {
         // this will invalidate the deps to `useEffect` and will result in a new request
         setCounter(count => count + 1);
       }
-    }),
-    [result]
-  );
+    };
+  }, [result]);
 }

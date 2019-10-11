@@ -23,7 +23,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
 import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
 import { GaugeOptions } from './components/options';
-import { getGaugeCollections, Alignments, GaugeColorModes, GaugeTypes } from './utils/collections';
+import { getGaugeCollections, Alignments, ColorModes, GaugeTypes } from './utils/collections';
 import { vislibVisController } from './controller';
 
 export default function GaugeVisType() {
@@ -49,7 +49,7 @@ export default function GaugeVisType() {
           backStyle: 'Full',
           orientation: 'vertical',
           colorSchema: ColorSchemas.GreenToRed,
-          gaugeColorMode: GaugeColorModes.LABELS,
+          gaugeColorMode: ColorModes.LABELS,
           colorsRange: [
             { from: 0, to: 50 },
             { from: 50, to: 75 },

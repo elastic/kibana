@@ -122,47 +122,8 @@
   background-color: lightOrDarkTheme($euiPageBackgroundColor, $euiColorLightestShade);
 }
 
-.visEditorSidebar__collapsible--margin {
-  margin-top: $euiSizeM;
-}
-
 .visEditorSidebar__collapsible--marginBottom {
   margin-bottom: $euiSizeM;
-}
-
-.visEditorSidebar__collapsibleTitle {
-  @include euiFontSizeS;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  white-space: nowrap;
-
-  + * {
-    margin-top: $euiSize;
-    display: block;
-  }
-
-  + .form-group {
-    margin-top: $euiSizeXS;
-  }
-
-  label {
-    margin-bottom: 0 !important; // For filters
-  }
-}
-
-.visEditorSidebar__collapsibleTitleLabel {
-  color: $euiColorPrimary;
-  display: flex;
-  align-items: center;
-  margin-right: $euiSizeXS;
-  line-height: $euiLineHeight;
-}
-
-.visEditorSidebar__collapsibleTitleText {
-  @include euiTextTruncate;
-  margin-left: $euiSizeS;
 }
 
 //
