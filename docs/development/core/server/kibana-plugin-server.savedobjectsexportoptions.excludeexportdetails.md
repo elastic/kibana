@@ -4,7 +4,7 @@
 
 ## SavedObjectsExportOptions.excludeExportDetails property
 
-flag to not add export details in the export response.
+flag to not append [export details](./kibana-plugin-server.savedobjectsexportresultdetails.md) to the end of the export stream.
 
 <b>Signature:</b>
 

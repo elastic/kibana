@@ -343,8 +343,8 @@ export class ObjectsTable extends Component {
           {
             defaultMessage:
               'Your file is downloading in the background. ' +
-              'Some references could not be exported. ' +
-              'Please see export file for more information',
+              'Some related objects could not be found. ' +
+              'Please see the last line in the exported file for a list of missing objects.',
           }
         ),
       });

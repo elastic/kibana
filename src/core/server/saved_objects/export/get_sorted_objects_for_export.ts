@@ -43,9 +43,9 @@ export interface SavedObjectsExportOptions {
   savedObjectsClient: SavedObjectsClientContract;
   /** the maximum number of objects to export. */
   exportSizeLimit: number;
-  /** flag to also include all related saved objects in the export response. */
+  /** flag to also include all related saved objects in the export stream. */
   includeReferencesDeep?: boolean;
-  /** flag to not add export details in the export response. */
+  /** flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream. */
   excludeExportDetails?: boolean;
   /** optional namespace to override the namespace used by the savedObjectsClient. */
   namespace?: string;
