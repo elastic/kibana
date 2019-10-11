@@ -325,7 +325,10 @@ export const ComponentStrings = {
       }),
     getDeleteElementTitle: (elementName: string) =>
       i18n.translate('xpack.canvas.elementTypes.deleteElementTitle', {
-        defaultMessage: `Delete element '${elementName}'?`,
+        defaultMessage: `Delete element '{elementName}'?`,
+        values: {
+          elementName,
+        },
       }),
     getDeleteElementDescription: () =>
       i18n.translate('xpack.canvas.elementTypes.deleteElementDescription', {
