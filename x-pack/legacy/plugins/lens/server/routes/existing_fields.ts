@@ -109,7 +109,13 @@ function exists(obj: unknown, path: string[], i = 0): boolean {
   return path.length === i;
 }
 
-function existingFields(docs: Array<{ _source: Document }>, fields: FieldDescriptor[]): string[] {
+/**
+ * Exported solely for testing purposes.
+ */
+export function existingFields(
+  docs: Array<{ _source: Document }>,
+  fields: FieldDescriptor[]
+): string[] {
   const allFields = fields.map(field => ({
     name: field.name,
     parent: field.parent,
