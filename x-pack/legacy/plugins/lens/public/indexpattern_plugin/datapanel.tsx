@@ -197,12 +197,13 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         scrollContainer.scrollTop + scrollContainer.clientHeight >
         scrollContainer.scrollHeight * 0.9;
       if (nearBottom) {
-        setPageSize(Math.min(pageSize * 1.5, allFields.length));
+        setPageSize(Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, allFields.length)));
       }
     }
   };
 
   useEffect(() => {
+    // Reset the scroll if we have made material changes to the field list
     if (scrollContainer) {
       scrollContainer.scrollTop = 0;
       setPageSize(PAGINATION_SIZE);
