@@ -82,13 +82,11 @@ export interface ActionsResponse extends Action {
   actionTypeId: string;
 }
 
-export function loadActions(http: HttpServiceBase, pollIntervalMs?: number) {
-  return useRequestNp(http, {
-    path: `${BASE_ACTION_API_PATH}/_find`,
-    method: 'get',
-    pollIntervalMs,
-    deserializer(response: { data?: any[]; error?: any }) {
-      return response;
+export async function loadActions(http: HttpServiceBase, sortField: string, sortOrder: string) {
+  return http.get(`${BASE_ACTION_API_PATH}/_find`, {
+    query: {
+      sort_field: sortField,
+      sort_order: sortOrder,
     },
   });
 }

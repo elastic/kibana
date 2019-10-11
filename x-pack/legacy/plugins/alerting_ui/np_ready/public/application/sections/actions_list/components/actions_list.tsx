@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,9 +27,25 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     core: { http },
   } = useAppDependencies();
 
-  const [sortField, setSortField] = useState('description');
+  const [sortField, setSortField] = useState('actionTypeId');
   const [sortDirection, setSortDirection] = useState('asc');
-  const { error, isLoading, data: result } = loadActions(http);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      try {
+        const response = await loadActions(http, sortField, sortDirection);
+        setData(response.data);
+      } catch (e) {
+        setError(e);
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, [sortField, sortDirection]);
 
   const actionsTableColumns = [
     {
@@ -40,7 +56,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
           defaultMessage: 'Description',
         }
       ),
-      sortable: true,
+      sortable: false,
       truncateText: true,
     },
     {
@@ -77,7 +93,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
       <Fragment>
         <EuiBasicTable
           loading={isLoading}
-          items={result ? result.data : []}
+          items={data}
           itemId="id"
           columns={actionsTableColumns}
           rowProps={() => ({
