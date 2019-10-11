@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WizardNav } from '../wizard_nav';
 import { JobIdInput } from './components/job_id';
 import { JobDescriptionInput } from './components/job_description';
@@ -55,13 +55,12 @@ export const JobDetailsStep: FC<Props> = ({
               <JobDescriptionInput />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer />
 
           <AdditionalSection
             additionalExpanded={additionalExpanded}
             setAdditionalExpanded={setAdditionalExpanded}
           />
-          <EuiSpacer />
+
           <AdvancedSection
             advancedExpanded={advancedExpanded}
             setAdvancedExpanded={setAdvancedExpanded}
