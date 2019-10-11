@@ -12,8 +12,10 @@ interface Props {
   setupModule: SetupHandler;
 }
 
+const fourWeeksInMs = 86400000 * 7 * 4;
+
 export const useAnalysisSetupState = ({ setupModule, cleanupAndSetupModule }: Props) => {
-  const [startTime, setStartTime] = useState<number | undefined>(undefined);
+  const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
 
   const setup = useCallback(() => {

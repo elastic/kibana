@@ -44,7 +44,7 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <FormattedMessage
               id="xpack.infra.analysisSetup.steps.setupProcess.loadingText"
-              defaultMessage="Creating ML jobs..."
+              defaultMessage="Creating ML job..."
             />
           </EuiFlexItem>
         </EuiFlexGroup>

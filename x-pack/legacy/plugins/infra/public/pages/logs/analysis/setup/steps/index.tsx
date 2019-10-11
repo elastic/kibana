@@ -58,7 +58,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
     },
     {
       title: i18n.translate('xpack.infra.analysisSetup.stepTwoTitle', {
-        defaultMessage: 'Create ML jobs',
+        defaultMessage: 'Create ML job',
       }),
       children: (
         <SetupProcess
