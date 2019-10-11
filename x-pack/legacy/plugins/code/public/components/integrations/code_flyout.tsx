@@ -21,7 +21,7 @@ export const CodeFlyout = (props: {
           onClose={props.onClose}
           size="l"
           aria-labelledby="flyoutTitle"
-          className="code-flyout"
+          className="codeFlyout"
         >
           <CodeFlyoutMain repo={props.repo} file={props.file} revision={props.revision} />
         </EuiFlyout>

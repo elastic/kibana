@@ -1,29 +1,21 @@
-.code-flyout {
-
-}
-
-.code-flyout .code-flyout-header {
-
-}
-
-.code-flyout .code-flyout-header .code-flyout-header-file {
+.codeFlyout .codeFlyout__header .codeFlyout__header--file {
   position: absolute;
   display: flex;
   align-items: center;
   z-index: 1;
 }
 
-.code-flyout .code-flyout-header .code-flyout-header-file .euiIcon {
+.codeFlyout .codeFlyout__header .codeFlyout__header--file .euiIcon {
   margin: 1rem
 }
 
-.code-flyout .code-flyout-header .euiTabs {
+.codeFlyout .codeFlyout__header .euiTabs {
   flex-direction: row-reverse;
   padding-right: 1rem;
   flex-grow: 1;
 }
 
-.code-flyout .code-flyout-content {
+.codeFlyout .codeFlyout-content {
   flex-grow: 1;
   display: flex;
   height: 100%;
@@ -32,5 +24,3 @@
 #codeViewer {
   flex-grow: 1;
 }
-
-
