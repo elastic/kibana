@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getSpaceSelectorUrl(serverBasePath: string = '') {
+export function getSpaceSelectorUrl(serverBasePath: string) {
   return `${serverBasePath}/spaces/space_selector`;
 }

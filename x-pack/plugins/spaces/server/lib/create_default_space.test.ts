@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { createDefaultSpace } from './create_default_space';
-import { SavedObjectsLegacyService, ClusterClient } from 'src/core/server';
+import { SavedObjectsLegacyService, IClusterClient } from 'src/core/server';
 
 interface MockServerSettings {
   defaultExists?: boolean;
@@ -74,7 +74,7 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
     savedObjects: (mockServer.savedObjects as unknown) as SavedObjectsLegacyService,
     esClient: ({
       callAsInternalUser: jest.fn(),
-    } as unknown) as jest.Mocked<ClusterClient>,
+    } as unknown) as jest.Mocked<IClusterClient>,
   };
 };
 

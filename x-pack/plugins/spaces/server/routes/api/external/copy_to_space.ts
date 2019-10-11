@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import _ from 'lodash';
+import { SavedObject } from 'src/core/server';
 import {
   copySavedObjectsToSpacesFactory,
   resolveCopySavedObjectsToSpacesConflictsFactory,
@@ -15,27 +16,10 @@ import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from '../../../lib/copy_to_s
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
-interface CopyPayload {
-  spaces: string[];
-  objects: Array<{ type: string; id: string }>;
-  includeReferences: boolean;
-  overwrite: boolean;
-}
+type SavedObjectIdentifier = Pick<SavedObject, 'id' | 'type'>;
 
-interface ResolveConflictsPayload {
-  objects: Array<{ type: string; id: string }>;
-  includeReferences: boolean;
-  retries: {
-    [spaceId: string]: Array<{
-      type: string;
-      id: string;
-      overwrite: boolean;
-    }>;
-  };
-}
-
-const areObjectsUnique = (objects: any[]) =>
-  _.uniq(objects, (o: any) => `${o.type}:${o.id}`).length === objects.length;
+const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
+  _.uniq(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, spacesService, getSavedObjects } = deps;
@@ -91,12 +75,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         savedObjectsClient,
         getSavedObjects()
       );
-      const {
-        spaces: destinationSpaceIds,
-        objects,
-        includeReferences,
-        overwrite,
-      } = request.body as CopyPayload;
+      const { spaces: destinationSpaceIds, objects, includeReferences, overwrite } = request.body;
       const sourceSpaceId = spacesService.getSpaceId(request);
       const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
         objects,
@@ -168,7 +147,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         savedObjectsClient,
         getSavedObjects()
       );
-      const { objects, includeReferences, retries } = request.body as ResolveConflictsPayload;
+      const { objects, includeReferences, retries } = request.body;
       const sourceSpaceId = spacesService.getSpaceId(request);
       const resolveConflictsResponse = await resolveCopySavedObjectsToSpacesConflicts(
         sourceSpaceId,

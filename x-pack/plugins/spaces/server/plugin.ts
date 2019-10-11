@@ -6,8 +6,13 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { SavedObjectsLegacyService, CoreSetup } from 'src/core/server';
-import { Logger, PluginInitializerContext } from 'src/core/server';
+import {
+  SavedObjectsLegacyService,
+  CoreSetup,
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+} from 'src/core/server';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import { SecurityPlugin } from '../../../legacy/plugins/security';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -137,7 +142,7 @@ export class Plugin {
       __legacyCompat: {
         registerLegacyAPI: (legacyAPI: LegacyAPI) => {
           this.legacyAPI = legacyAPI;
-          this.setupLegacyComponents(core, spacesService, plugins.features, plugins.licensing);
+          this.setupLegacyComponents(spacesService, plugins.features, plugins.licensing);
         },
         createDefaultSpace: async () => {
           const esClient = await core.elasticsearch.adminClient$.pipe(take(1)).toPromise();
@@ -153,7 +158,6 @@ export class Plugin {
   public stop() {}
 
   private setupLegacyComponents(
-    core: CoreSetup,
     spacesService: SpacesServiceSetup,
     featuresSetup: FeaturesPluginSetup,
     licensingSetup: LicensingPluginSetup
@@ -170,7 +174,7 @@ export class Plugin {
     );
     legacyAPI.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
       try {
-        const activeSpace = await spacesService.getActiveSpace(request);
+        const activeSpace = await spacesService.getActiveSpace(KibanaRequest.from(request));
         const features = featuresSetup.getFeatures();
         return toggleUICapabilities(features, uiCapabilities, activeSpace);
       } catch (e) {

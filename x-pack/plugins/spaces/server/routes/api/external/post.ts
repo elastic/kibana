@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
-import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
@@ -24,9 +22,9 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside POST /api/spaces/space`);
       const { SavedObjectsClient } = getSavedObjects();
-      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
+      const spacesClient = await spacesService.scopedClient(request);
 
-      const space = request.body as Space;
+      const space = request.body;
 
       try {
         log.debug(`Attempting to create space`);

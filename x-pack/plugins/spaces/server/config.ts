@@ -8,12 +8,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
 
-export const ConfigSchema = schema.object(
-  {
-    maxSpaces: schema.number({ defaultValue: 1000 }),
-  }, // This option should be removed as soon as we entirely migrate config from legacy Spaces plugin.
-  { allowUnknowns: true }
-);
+export const ConfigSchema = schema.object({
+  maxSpaces: schema.number({ defaultValue: 1000 }),
+});
 
 export function createConfig$(context: PluginInitializerContext) {
   return context.config.create<TypeOf<typeof ConfigSchema>>();

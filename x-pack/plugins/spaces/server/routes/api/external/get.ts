@@ -6,7 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../../../lib/errors';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
@@ -26,7 +25,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
       const spaceId = request.params.id;
 
       const { SavedObjectsClient } = getSavedObjects();
-      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
+      const spacesClient = await spacesService.scopedClient(request);
 
       try {
         const space = await spacesClient.get(spaceId);

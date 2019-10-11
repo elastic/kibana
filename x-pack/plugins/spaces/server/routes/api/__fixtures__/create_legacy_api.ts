@@ -12,7 +12,7 @@ import { Space } from '../../../../common/model/space';
 import { createSpaces } from '.';
 
 async function readStreamToCompletion(stream: Readable) {
-  return (createPromiseFromStreams([stream, createConcatStream([])]) as unknown) as any[];
+  return (await (createPromiseFromStreams([stream, createConcatStream([])]) as unknown)) as any[];
 }
 
 interface LegacyAPIOpts {

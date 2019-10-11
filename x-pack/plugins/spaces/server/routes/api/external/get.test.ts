@@ -24,7 +24,6 @@ import { createOptionalPlugin } from '../../../../../../legacy/server/lib/option
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 
-jest.setTimeout(30000);
 describe('GET space', () => {
   const spacesSavedObjects = createSpaces();
   const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));

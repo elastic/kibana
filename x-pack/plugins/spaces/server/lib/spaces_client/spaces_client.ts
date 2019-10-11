@@ -5,7 +5,6 @@
  */
 import Boom from 'boom';
 import { omit } from 'lodash';
-import { Legacy } from 'kibana';
 import { KibanaRequest } from 'src/core/server';
 import { AuthorizationService } from '../../../../../legacy/plugins/security/server/lib/authorization/service';
 import { isReservedSpace } from '../../../common/is_reserved_space';
@@ -13,8 +12,6 @@ import { Space } from '../../../common/model/space';
 import { SpacesAuditLogger } from '../audit_logger';
 import { ConfigType } from '../../config';
 import { GetSpacePurpose } from '../../../common/model/types';
-
-type SpacesClientRequestFacade = Legacy.Request | KibanaRequest;
 
 const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = ['any', 'copySavedObjectsIntoSpace'];
 
@@ -35,7 +32,7 @@ export class SpacesClient {
     private readonly callWithRequestSavedObjectRepository: any,
     private readonly config: ConfigType,
     private readonly internalSavedObjectRepository: any,
-    private readonly request: SpacesClientRequestFacade
+    private readonly request: KibanaRequest
   ) {}
 
   public async canEnumerateSpaces(): Promise<boolean> {

@@ -13,7 +13,7 @@ import { format } from 'url';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { modifyUrl } from '../utils/url';
 import { LegacyAPI } from '../../plugin';
-import { getSpaceIdFromPath } from '../../../common/lib/spaces_url_parser';
+import { getSpaceIdFromPath } from '../../../common';
 
 export interface OnRequestInterceptorDeps {
   getLegacyAPI(): LegacyAPI;

@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
@@ -27,9 +26,9 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { SavedObjectsClient } = getSavedObjects();
-      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
+      const spacesClient = await spacesService.scopedClient(request);
 
-      const space = request.body as Space;
+      const space = request.body;
       const id = request.params.id;
 
       let result: Space;

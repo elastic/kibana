@@ -7,6 +7,7 @@
 import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { Legacy } from 'kibana';
+import { KibanaRequest } from 'src/core/server';
 import { SpacesServiceSetup } from '../../../plugins/spaces/server/spaces_service/spaces_service';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 import { createOptionalPlugin } from '../../server/lib/optional_plugin';
@@ -20,13 +21,12 @@ import { SecurityPlugin } from '../security';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { initSpaceSelectorView, initEnterSpaceView } from './server/routes/views';
 
-export interface SpacesPlugin {
-  getSpaceId: SpacesServiceSetup['getSpaceId'];
-  getActiveSpace: SpacesServiceSetup['getActiveSpace'];
+export interface LegacySpacesPlugin {
+  getSpaceId: (request: Legacy.Request) => ReturnType<SpacesServiceSetup['getSpaceId']>;
+  getActiveSpace: (request: Legacy.Request) => ReturnType<SpacesServiceSetup['getActiveSpace']>;
   spaceIdToNamespace: SpacesServiceSetup['spaceIdToNamespace'];
   namespaceToSpaceId: SpacesServiceSetup['namespaceToSpaceId'];
   getBasePath: SpacesServiceSetup['getBasePath'];
-  getScopedSpacesClient: SpacesServiceSetup['scopedClient'];
 }
 
 export const spaces = (kibana: Record<string, any>) =>
@@ -35,13 +35,6 @@ export const spaces = (kibana: Record<string, any>) =>
     configPrefix: 'xpack.spaces',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-
-    config(Joi: any) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        maxSpaces: Joi.number().default(1000),
-      }).default();
-    },
 
     uiCapabilities() {
       return {
@@ -99,8 +92,9 @@ export const spaces = (kibana: Record<string, any>) =>
         if (!spacesPlugin) {
           throw new Error('New Platform XPack Spaces plugin is not available.');
         }
-        const spaceId = spacesPlugin.spacesService.getSpaceId(request);
-        const spacesClient = await spacesPlugin.spacesService.scopedClient(request);
+        const kibanaRequest = KibanaRequest.from(request);
+        const spaceId = spacesPlugin.spacesService.getSpaceId(kibanaRequest);
+        const spacesClient = await spacesPlugin.spacesService.scopedClient(kibanaRequest);
         try {
           vars.activeSpace = {
             valid: true,
@@ -161,11 +155,14 @@ export const spaces = (kibana: Record<string, any>) =>
         await createDefaultSpace();
       });
 
-      server.expose('getSpaceId', (request: any) => spacesPlugin.spacesService.getSpaceId(request));
-      server.expose('getActiveSpace', spacesPlugin.spacesService.getActiveSpace);
+      server.expose('getSpaceId', (request: Legacy.Request) =>
+        spacesPlugin.spacesService.getSpaceId(KibanaRequest.from(request))
+      );
+      server.expose('getActiveSpace', (request: Legacy.Request) =>
+        spacesPlugin.spacesService.getActiveSpace(KibanaRequest.from(request))
+      );
       server.expose('spaceIdToNamespace', spacesPlugin.spacesService.spaceIdToNamespace);
       server.expose('namespaceToSpaceId', spacesPlugin.spacesService.namespaceToSpaceId);
       server.expose('getBasePath', spacesPlugin.spacesService.getBasePath);
-      server.expose('getScopedSpacesClient', spacesPlugin.spacesService.scopedClient);
     },
   });

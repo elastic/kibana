@@ -5,11 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ClusterClient, SavedObjectsLegacyService } from 'src/core/server';
+import { SavedObjectsLegacyService, IClusterClient } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {
-  esClient: Pick<ClusterClient, 'callAsInternalUser'>;
+  esClient: Pick<IClusterClient, 'callAsInternalUser'>;
   savedObjects: SavedObjectsLegacyService;
 }
 

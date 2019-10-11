@@ -71,8 +71,10 @@ describe('copy to space', () => {
       spacesService,
     });
 
-    const [ctsRouteDefinition, ctsRouteHandler] = router.post.mock.calls[0];
-    const [resolveRouteDefinition, resolveRouteHandler] = router.post.mock.calls[1];
+    const [
+      [ctsRouteDefinition, ctsRouteHandler],
+      [resolveRouteDefinition, resolveRouteHandler],
+    ] = router.post.mock.calls;
 
     return {
       copyToSpace: {

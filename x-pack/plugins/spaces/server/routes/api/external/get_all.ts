@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 import { Space } from '../../../../common/model/space';
 import { GetSpacePurpose } from '../../../../common/model/types';
 import { wrapError } from '../../../lib/errors';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
@@ -33,7 +32,7 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
 
       const purpose = request.query.purpose as GetSpacePurpose;
 
-      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
+      const spacesClient = await spacesService.scopedClient(request);
 
       let spaces: Space[];
 

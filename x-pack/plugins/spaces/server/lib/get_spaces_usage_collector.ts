@@ -31,8 +31,9 @@ interface SpacesAggregationResponse {
 
 /**
  *
- * @param callCluster
- * @param server
+ * @param {CallCluster} callCluster
+ * @param {string} kibanaIndex
+ * @param {PluginsSetup['features']} features
  * @param {boolean} spacesAvailable
  * @return {UsageStats}
  */
