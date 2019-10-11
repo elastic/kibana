@@ -9,7 +9,7 @@ import { difference } from 'lodash';
 import chrome from 'ui/chrome';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlJobService } from 'plugins/ml/services/job_service';
-import { processCreatedBy } from '../../../../components/rule_editor/utils';
+import { processCreatedBy } from '../../../../../common/util/job_utils';
 
 export function saveJob(job, newJobData, finish) {
 

@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ACTION,
-  FILTER_TYPE,
-  APPLIES_TO,
-  OPERATOR
-} from '../../../common/constants/detector_rule';
+import { ACTION, APPLIES_TO, FILTER_TYPE, OPERATOR } from '../../../common/constants/detector_rule';
 
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { i18n } from '@kbn/i18n';
-import { CREATED_BY_LABEL } from '../../jobs/new_job_new/common/job_creator/util/constants';
+import { processCreatedBy } from '../../../common/util/job_utils';
 
 export function getNewConditionDefaults() {
   return {
@@ -121,17 +116,6 @@ export function deleteJobRule(job, detectorIndex, ruleIndex) {
         }
       })
     ));
-  }
-}
-
-/**
- * If created_by is set in the job's custom_settings, remove it in case
- * it was created by a job wizard as the rules cannot currently be edited
- * in the job wizards and so would be lost in a clone.
- */
-export function processCreatedBy(customSettings) {
-  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by)) {
-    delete customSettings.created_by;
   }
 }
 
