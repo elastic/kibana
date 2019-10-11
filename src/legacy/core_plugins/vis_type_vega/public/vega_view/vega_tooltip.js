@@ -68,7 +68,7 @@ export class TooltipHandler {
     // Sanitized HTML is created by the tooltip library,
     // with a large number of tests, hence suppressing eslint here.
     // eslint-disable-next-line no-unsanitized/property
-    el.innerHTML = createTooltipContent(value, _.escape);
+    el.innerHTML = createTooltipContent(value, _.escape, 2);
 
     // add to DOM to calculate tooltip size
     document.body.appendChild(el);

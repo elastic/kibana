@@ -39,10 +39,11 @@ import { Filter, buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
 // @ts-ignore
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
-import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
+import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
+import { IndexPattern, IndexPatternField } from './types';
 import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
 
 export interface FieldItemProps {

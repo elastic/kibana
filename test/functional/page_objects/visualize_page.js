@@ -494,6 +494,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
     }
 
+    async toggleAdvancedParams(aggId) {
+      const accordion = await testSubjects.find(`advancedParams-${aggId}`);
+      const accordionButton = await find.descendantDisplayedByCssSelector('button', accordion);
+      await accordionButton.click();
+    }
+
     async selectYAxisAggregation(agg, field, label, index = 1) {
       // index starts on the first "count" metric at 1
       // Each new metric or aggregation added to a visualization gets the next index.
@@ -596,6 +602,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleMissingBucket(agg = 2) {
       return await testSubjects.click(`visEditorAggAccordion${agg} > missingBucketSwitch`);
+    }
+
+    async toggleScaleMetrics() {
+      return await testSubjects.click('scaleMetricsSwitch');
     }
 
     async isApplyEnabled() {

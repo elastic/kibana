@@ -36,7 +36,7 @@ export function createLifecycle() {
     phaseEnd: [] as Listener[],
   };
 
-  const cleanup$ = new Rx.ReplaySubject(1);
+  const cleanup$ = new Rx.ReplaySubject<undefined>(1);
 
   return {
     cleanup$: cleanup$.asObservable(),

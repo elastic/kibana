@@ -29,3 +29,5 @@ export const ML_MEDIAN_PERCENTS: number;
 export const ML_DATA_PREVIEW_COUNT: number;
 
 export function isJobIdValid(jobId: string): boolean;
+
+export function processCreatedBy(customSettings: { created_by?: string }): void;
