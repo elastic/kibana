@@ -54,7 +54,7 @@ export function geoJsonCleanAndValidate(feature) {
 
 export function cleanGeometry({ geometry }) {
   if (!geometry) {
-    return;
+    return null;
   }
   const geometryToWrite = (geometry.isSimple() || geometry.isValid())
     ? geometry
