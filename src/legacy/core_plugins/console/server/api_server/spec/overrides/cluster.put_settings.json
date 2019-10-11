@@ -10,7 +10,6 @@
             "allocation.disk.threshold_enabled": { "__one_of": [false, true] },
             "allocation.disk.watermark.low": "85%",
             "allocation.disk.watermark.high": "90%",
-            "allocation.disk.include_relocations": { "__one_of": [true, false] },
             "allocation.disk.reroute_interval": "60s",
             "allocation.exclude": {
               "_ip": "",

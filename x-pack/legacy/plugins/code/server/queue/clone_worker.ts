@@ -68,8 +68,7 @@ export class CloneWorker extends AbstractGitWorker {
     const repoService = this.repoServiceFactory.newInstance(
       this.serverOptions.repoPath,
       this.serverOptions.credsPath,
-      this.log,
-      this.serverOptions.security.enableGitCertCheck
+      this.log
     );
     const repo = RepositoryUtils.buildRepository(url);
 
