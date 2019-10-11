@@ -16,6 +16,14 @@ import { useAppDependencies } from '../../../index';
 interface ActionsListProps {
   api: any;
 }
+interface Sorting {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+interface Pagination {
+  index: number;
+  size: number;
+}
 
 export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
   match: {
@@ -27,25 +35,27 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     core: { http },
   } = useAppDependencies();
 
-  const [sortField, setSortField] = useState('actionTypeId');
-  const [sortDirection, setSortDirection] = useState('asc');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState<any[]>([]);
+  const [totalItemCount, setTotalItemCount] = useState(0);
+  const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
+  const [sort, setSort] = useState<Sorting>({ field: 'actionTypeId', direction: 'asc' });
 
   useEffect(() => {
     (async () => {
       setIsLoading(true);
       try {
-        const response = await loadActions(http, sortField, sortDirection);
+        const response = await loadActions({ http, sort, page });
         setData(response.data);
+        setTotalItemCount(response.total);
       } catch (e) {
         setError(e);
       } finally {
         setIsLoading(false);
       }
     })();
-  }, [sortField, sortDirection]);
+  }, [sort, page]);
 
   const actionsTableColumns = [
     {
@@ -103,10 +113,21 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
             'data-test-subj': 'cell',
           })}
           data-test-subj="actionsTable"
-          sorting={{ sort: { field: sortField, direction: sortDirection } }}
-          onChange={({ sort }: { sort: { field: string; direction: 'asc' | 'desc' } }) => {
-            setSortField(sort.field);
-            setSortDirection(sort.direction);
+          sorting={{ sort }}
+          pagination={{
+            pageIndex: page.index,
+            pageSize: page.size,
+            totalItemCount,
+          }}
+          onChange={({
+            sort: changedSort,
+            page: changedPage,
+          }: {
+            sort: Sorting;
+            page: Pagination;
+          }) => {
+            setPage(changedPage);
+            setSort(changedSort);
           }}
         />
       </Fragment>

@@ -76,17 +76,25 @@ export function loadActionTypes(http: HttpServiceBase, pollIntervalMs?: number) 
   });
 }
 
+export interface LoadActionsOpts {
+  http: HttpServiceBase;
+  sort: { field: string; direction: 'asc' | 'desc' };
+  page: { index: number; size: number };
+}
+
 export interface ActionsResponse extends Action {
   id: string;
   description: string;
   actionTypeId: string;
 }
 
-export async function loadActions(http: HttpServiceBase, sortField: string, sortOrder: string) {
+export async function loadActions({ http, sort, page }: LoadActionsOpts) {
   return http.get(`${BASE_ACTION_API_PATH}/_find`, {
     query: {
-      sort_field: sortField,
-      sort_order: sortOrder,
+      sort_field: sort.field,
+      sort_order: sort.direction,
+      page: page.index + 1,
+      per_page: page.size,
     },
   });
 }
