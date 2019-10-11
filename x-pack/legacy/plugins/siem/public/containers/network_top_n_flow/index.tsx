@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
-  FlowTargetNew,
+  FlowTargetSourceDest,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowEdges,
   NetworkTopNFlowSortField,
@@ -41,7 +41,7 @@ export interface NetworkTopNFlowArgs {
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: NetworkTopNFlowArgs) => React.ReactNode;
-  flowTarget: FlowTargetNew;
+  flowTarget: FlowTargetSourceDest;
   ip?: string;
   type: networkModel.NetworkType;
 }
@@ -140,8 +140,11 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   }
 }
 
-const mapStateToProps = (state: State, { flowTarget, id = `${ID}-${flowTarget}` }: OwnProps) => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget);
+const mapStateToProps = (
+  state: State,
+  { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps
+) => {
+  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget, type);
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const { isInspected } = getQuery(state, id);
   return {

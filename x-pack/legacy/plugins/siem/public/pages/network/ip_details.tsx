@@ -27,7 +27,7 @@ import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { TlsQuery } from '../../containers/tls';
 import { UsersQuery } from '../../containers/users';
-import { FlowTarget, FlowTargetNew, LastEventIndexKey } from '../../graphql/types';
+import { FlowTarget, FlowTargetSourceDest, LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -140,7 +140,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         <NetworkTopNFlowQuery
                           endDate={to}
                           filterQuery={filterQuery}
-                          flowTarget={FlowTargetNew.source}
+                          flowTarget={FlowTargetSourceDest.source}
                           ip={ip}
                           skip={isInitializing}
                           sourceId="default"
@@ -161,7 +161,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             <NetworkTopNFlowTableManage
                               data={networkTopNFlow}
                               fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                              flowTargeted={FlowTargetNew.source}
+                              flowTargeted={FlowTargetSourceDest.source}
                               id={id}
                               indexPattern={indexPattern}
                               inspect={inspect}
@@ -185,7 +185,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       <EuiFlexItem>
                         <NetworkTopNFlowQuery
                           endDate={to}
-                          flowTarget={FlowTargetNew.destination}
+                          flowTarget={FlowTargetSourceDest.destination}
                           filterQuery={filterQuery}
                           ip={ip}
                           skip={isInitializing}
@@ -207,7 +207,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             <NetworkTopNFlowTableManage
                               data={networkTopNFlow}
                               fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                              flowTargeted={FlowTargetNew.destination}
+                              flowTargeted={FlowTargetSourceDest.destination}
                               id={id}
                               indexPattern={indexPattern}
                               inspect={inspect}

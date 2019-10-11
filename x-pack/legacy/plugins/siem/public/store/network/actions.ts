@@ -15,8 +15,6 @@ import {
 } from '../../graphql/types';
 import { KueryFilterQuery, networkModel, SerializedFilterQuery } from '../model';
 
-import { NetworkType } from './model';
-
 const actionCreator = actionCreatorFactory('x-pack/siem/local/network');
 
 export const updateNetworkPageTableActivePage = actionCreator<{
@@ -35,39 +33,39 @@ export const updateIpDetailsTableActivePage = actionCreator<{
 
 export const updateDnsLimit = actionCreator<{
   limit: number;
-  networkType: NetworkType;
+  networkType: networkModel.NetworkType;
 }>('UPDATE_DNS_LIMIT');
 
 export const updateDnsSort = actionCreator<{
   dnsSortField: NetworkDnsSortField;
-  networkType: NetworkType;
+  networkType: networkModel.NetworkType;
 }>('UPDATE_DNS_SORT');
 
 export const updateIsPtrIncluded = actionCreator<{
   isPtrIncluded: boolean;
-  networkType: NetworkType;
+  networkType: networkModel.NetworkType;
 }>('UPDATE_DNS_IS_PTR_INCLUDED');
 
 export const updateTopNFlowLimit = actionCreator<{
   limit: number;
-  networkType: NetworkType;
+  networkType: networkModel.NetworkType;
   tableType: networkModel.TopNTableType;
 }>('UPDATE_TOP_N_FLOW_LIMIT');
 
 export const updateTopNFlowSort = actionCreator<{
   topNFlowSort: NetworkTopNFlowSortField;
-  networkType: NetworkType;
+  networkType: networkModel.NetworkType;
   tableType: networkModel.NetworkTableType;
 }>('UPDATE_TOP_N_FLOW_SORT');
 
 export const setNetworkFilterQueryDraft = actionCreator<{
   filterQueryDraft: KueryFilterQuery;
-  networkType: NetworkType;
+  networkType: networkModel.NetworkType;
 }>('SET_NETWORK_FILTER_QUERY_DRAFT');
 
 export const applyNetworkFilterQuery = actionCreator<{
   filterQuery: SerializedFilterQuery;
-  networkType: NetworkType;
+  networkType: networkModel.NetworkType;
 }>('APPLY_NETWORK_FILTER_QUERY');
 
 // IP Details Actions

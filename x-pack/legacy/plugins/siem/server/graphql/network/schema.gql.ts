@@ -25,7 +25,7 @@ export const networkSchema = gql`
 
   type GeoItem {
     geo: GeoEcsFields
-    flowTarget: FlowTarget
+    flowTarget: FlowTargetSourceDest
   }
 
   type AutonomousSystemItem {
@@ -123,7 +123,7 @@ export const networkSchema = gql`
       id: String
       filterQuery: String
       ip: String
-      flowTarget: FlowTargetNew!
+      flowTarget: FlowTargetSourceDest!
       pagination: PaginationInputPaginated!
       sort: NetworkTopNFlowSortField!
       timerange: TimerangeInput!

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction, FlowTargetNew, NetworkTopNFlowFields } from '../../graphql/types';
+import { Direction, FlowTargetSourceDest, NetworkTopNFlowFields } from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
 
@@ -54,7 +54,7 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     '__typename',
   ],
   networkTopNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
-  flowTarget: FlowTargetNew.source,
+  flowTarget: FlowTargetSourceDest.source,
 };
 
 export const mockRequest = {
@@ -63,7 +63,7 @@ export const mockRequest = {
     operationName: 'GetNetworkTopNFlowQuery',
     variables: {
       filterQuery: '',
-      flowTarget: FlowTargetNew.source,
+      flowTarget: FlowTargetSourceDest.source,
       pagination: {
         activePage: 0,
         cursorStart: 0,
@@ -80,7 +80,7 @@ export const mockRequest = {
     $filterQuery: String
     $pagination: PaginationInputPaginated!
     $sort: NetworkTopNFlowSortField!
-    $flowTarget: FlowTargetNew!
+    $flowTarget: FlowTargetSourceDest!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
     $inspect: Boolean!
@@ -183,7 +183,7 @@ export const mockResponse = {
     top_n_flow_count: {
       value: 545,
     },
-    [FlowTargetNew.source]: {
+    [FlowTargetSourceDest.source]: {
       buckets: [
         {
           key: '1.1.1.1',
@@ -1532,7 +1532,7 @@ export const mockResponseIp = {
     top_n_flow_count: {
       value: 1,
     },
-    [FlowTargetNew.source]: {
+    [FlowTargetSourceDest.source]: {
       buckets: [
         {
           key: '1.1.1.1',

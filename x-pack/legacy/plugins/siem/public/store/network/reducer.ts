@@ -19,25 +19,25 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 import {
   applyNetworkFilterQuery,
   setNetworkFilterQueryDraft,
+  setNetworkTablesActivePageToZero,
   updateDnsLimit,
   updateDnsSort,
-  updateTlsLimit,
   updateIpDetailsFlowTarget,
-  updateIsPtrIncluded,
   updateIpDetailsTableActivePage,
+  updateIsPtrIncluded,
   updateNetworkPageTableActivePage,
+  updateTlsLimit,
+  updateTlsSort,
   updateTopNFlowLimit,
   updateTopNFlowSort,
-  updateTlsSort,
   updateUsersLimit,
   updateUsersSort,
-  setNetworkTablesActivePageToZero,
 } from './actions';
 import { IpDetailsTableType, NetworkModel, NetworkTableType, NetworkType } from './model';
 import {
-  setNetworkQueriesActivePageToZero,
-  setNetworkPageQueriesActivePageToZero,
   setNetworkDetailsQueriesActivePageToZero,
+  setNetworkPageQueriesActivePageToZero,
+  setNetworkQueriesActivePageToZero,
 } from './helpers';
 
 export type NetworkState = NetworkModel;
@@ -192,32 +192,72 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
-  .case(updateTopNFlowLimit, (state, { limit, networkType, tableType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      queries: {
-        ...state[networkType].queries,
-        [tableType]: {
-          ...state[NetworkType.page].queries[tableType],
-          limit,
+  .case(updateTopNFlowLimit, (state, { limit, networkType, tableType }) => {
+    if (networkType === NetworkType.page) {
+      return {
+        ...state,
+        [networkType]: {
+          ...state[networkType],
+          queries: {
+            ...state[networkType].queries,
+            [tableType]: {
+              ...state[NetworkType.page].queries[tableType],
+              limit,
+            },
+          },
+        },
+      };
+    }
+    return {
+      ...state,
+      [networkType]: {
+        ...state[networkType],
+        queries: {
+          ...state[networkType].queries,
+          [tableType]: {
+            ...state[NetworkType.details].queries[tableType],
+            limit,
+          },
         },
       },
-    },
-  }))
-  .case(updateTopNFlowSort, (state, { topNFlowSort, networkType, tableType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      queries: {
-        ...state[networkType].queries,
-        [tableType]: {
-          ...state[NetworkType.page].queries[tableType],
-          topNFlowSort,
+    };
+  })
+  .case(updateTopNFlowSort, (state, { topNFlowSort, networkType, tableType }) => {
+    if (
+      tableType === NetworkTableType.dns ||
+      (networkType === NetworkType.page &&
+        (tableType === NetworkTableType.topNFlowSource ||
+          tableType === NetworkTableType.topNFlowDestination))
+    ) {
+      return {
+        ...state,
+        [NetworkType.page]: {
+          ...state[NetworkType.page],
+          queries: {
+            ...state[NetworkType.page].queries,
+            [tableType]: {
+              ...state[NetworkType.page].queries[tableType],
+              topNFlowSort,
+            },
+          },
         },
-      },
-    },
-  }))
+      };
+    } else {
+      return {
+        ...state,
+        [NetworkType.details]: {
+          ...state[NetworkType.details],
+          queries: {
+            ...state[NetworkType.details].queries,
+            [tableType]: {
+              ...state[NetworkType.details].queries[tableType],
+              topNFlowSort,
+            },
+          },
+        },
+      };
+    }
+  })
   .case(setNetworkFilterQueryDraft, (state, { filterQueryDraft, networkType }) => ({
     ...state,
     [networkType]: {

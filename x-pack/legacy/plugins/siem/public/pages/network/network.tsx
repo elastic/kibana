@@ -28,7 +28,7 @@ import { NetworkFilter } from '../../containers/network';
 import { NetworkDnsQuery } from '../../containers/network_dns';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { FlowTargetNew, LastEventIndexKey } from '../../graphql/types';
+import { FlowTargetSourceDest, LastEventIndexKey } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -127,7 +127,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                       <EuiFlexItem>
                         <NetworkTopNFlowQuery
                           endDate={to}
-                          flowTarget={FlowTargetNew.source}
+                          flowTarget={FlowTargetSourceDest.source}
                           filterQuery={filterQuery}
                           skip={isInitializing}
                           sourceId="default"
@@ -148,7 +148,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                             <NetworkTopNFlowTableManage
                               data={networkTopNFlow}
                               fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                              flowTargeted={FlowTargetNew.source}
+                              flowTargeted={FlowTargetSourceDest.source}
                               id={id}
                               indexPattern={indexPattern}
                               inspect={inspect}
@@ -172,7 +172,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                       <EuiFlexItem>
                         <NetworkTopNFlowQuery
                           endDate={to}
-                          flowTarget={FlowTargetNew.destination}
+                          flowTarget={FlowTargetSourceDest.destination}
                           filterQuery={filterQuery}
                           skip={isInitializing}
                           sourceId="default"
@@ -193,7 +193,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                             <NetworkTopNFlowTableManage
                               data={networkTopNFlow}
                               fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                              flowTargeted={FlowTargetNew.destination}
+                              flowTargeted={FlowTargetSourceDest.destination}
                               id={id}
                               indexPattern={indexPattern}
                               inspect={inspect}
