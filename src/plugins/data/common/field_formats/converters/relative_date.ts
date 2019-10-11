@@ -17,29 +17,28 @@
  * under the License.
  */
 
-import { trunc } from 'lodash';
-import {
-  FieldFormat,
-  KBN_FIELD_TYPES,
-  TextContextTypeConvert,
-} from '../../../../../../plugins/data/common/';
+import moment from 'moment';
+import { FieldFormat, KBN_FIELD_TYPES, TextContextTypeConvert } from '../../index';
 
-const omission = '...';
+export class RelativeDateFormat extends FieldFormat {
+  static id = 'relative_date';
+  static title = 'Relative Date';
+  static fieldType = KBN_FIELD_TYPES.DATE;
 
-export class TruncateFormat extends FieldFormat {
-  static id = 'truncate';
-  static title = 'Truncated String';
-  static fieldType = KBN_FIELD_TYPES.STRING;
+  constructor(params: Record<string, any>) {
+    super(params);
+  }
 
   textConvert: TextContextTypeConvert = val => {
-    const length = this.param('fieldLength');
-    if (length > 0) {
-      return trunc(val, {
-        length: length + omission.length,
-        omission,
-      });
+    if (val === null || val === undefined) {
+      return '-';
     }
 
-    return val;
+    const date = moment(val);
+    if (date.isValid()) {
+      return date.fromNow();
+    } else {
+      return val;
+    }
   };
 }

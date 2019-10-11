@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { NumberFormat } from '../../../core_plugins/kibana/common/field_formats/types/number';
+import { NumberFormat } from '../../../../plugins/data/common/field_formats/converters/number';
 import { FieldFormatsService } from './field_formats_service';
 import { FieldFormat } from '../../../../plugins/data/common/field_formats';
 

@@ -17,36 +17,25 @@
  * under the License.
  */
 
-import {
-  FieldFormat,
-  asPrettyString,
-  KBN_FIELD_TYPES,
-  TextContextTypeConvert,
-} from '../../../../../../plugins/data/common';
+import { trunc } from 'lodash';
+import { FieldFormat, KBN_FIELD_TYPES, TextContextTypeConvert } from '../../index';
 
-export class BoolFormat extends FieldFormat {
-  static id = 'boolean';
-  static title = 'Boolean';
-  static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
+const omission = '...';
 
-  textConvert: TextContextTypeConvert = value => {
-    if (typeof value === 'string') {
-      value = value.trim().toLowerCase();
+export class TruncateFormat extends FieldFormat {
+  static id = 'truncate';
+  static title = 'Truncated String';
+  static fieldType = KBN_FIELD_TYPES.STRING;
+
+  textConvert: TextContextTypeConvert = val => {
+    const length = this.param('fieldLength');
+    if (length > 0) {
+      return trunc(val, {
+        length: length + omission.length,
+        omission,
+      });
     }
 
-    switch (value) {
-      case false:
-      case 0:
-      case 'false':
-      case 'no':
-        return 'false';
-      case true:
-      case 1:
-      case 'true':
-      case 'yes':
-        return 'true';
-      default:
-        return asPrettyString(value);
-    }
+    return val;
   };
 }

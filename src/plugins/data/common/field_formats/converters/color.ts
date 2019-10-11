@@ -18,12 +18,7 @@
  */
 
 import { findLast, cloneDeep, template, escape } from 'lodash';
-import {
-  asPrettyString,
-  FieldFormat,
-  KBN_FIELD_TYPES,
-  HtmlContextTypeConvert,
-} from '../../../../../../plugins/data/common/';
+import { asPrettyString, FieldFormat, KBN_FIELD_TYPES, HtmlContextTypeConvert } from '../../index';
 import { DEFAULT_COLOR } from './color_default';
 
 const convertTemplate = template('<span style="<%- style %>"><%- val %></span>');

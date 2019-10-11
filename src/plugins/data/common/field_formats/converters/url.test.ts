@@ -18,7 +18,7 @@
  */
 
 import { UrlFormat } from './url';
-import { TEXT_CONTEXT_TYPE, HTML_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+import { TEXT_CONTEXT_TYPE, HTML_CONTEXT_TYPE } from '../../index';
 
 describe('UrlFormat', () => {
   test('outputs a simple <a> tag by default', () => {

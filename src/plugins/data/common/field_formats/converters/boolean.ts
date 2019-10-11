@@ -17,32 +17,31 @@
  * under the License.
  */
 
-import moment from 'moment';
-import {
-  FieldFormat,
-  KBN_FIELD_TYPES,
-  TextContextTypeConvert,
-} from '../../../../../../plugins/data/common/';
+import { FieldFormat, asPrettyString, KBN_FIELD_TYPES, TextContextTypeConvert } from '../../index';
 
-export class RelativeDateFormat extends FieldFormat {
-  static id = 'relative_date';
-  static title = 'Relative Date';
-  static fieldType = KBN_FIELD_TYPES.DATE;
+export class BoolFormat extends FieldFormat {
+  static id = 'boolean';
+  static title = 'Boolean';
+  static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 
-  constructor(params: Record<string, any>) {
-    super(params);
-  }
-
-  textConvert: TextContextTypeConvert = val => {
-    if (val === null || val === undefined) {
-      return '-';
+  textConvert: TextContextTypeConvert = value => {
+    if (typeof value === 'string') {
+      value = value.trim().toLowerCase();
     }
 
-    const date = moment(val);
-    if (date.isValid()) {
-      return date.fromNow();
-    } else {
-      return val;
+    switch (value) {
+      case false:
+      case 0:
+      case 'false':
+      case 'no':
+        return 'false';
+      case true:
+      case 1:
+      case 'true':
+      case 'yes':
+        return 'true';
+      default:
+        return asPrettyString(value);
     }
   };
 }

@@ -25,7 +25,7 @@ import {
   KBN_FIELD_TYPES,
   TextContextTypeConvert,
   HtmlContextTypeConvert,
-} from '../../../../../../plugins/data/common/';
+} from '../../index';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];

@@ -18,7 +18,7 @@
  */
 
 import { getDefaultFormat } from '../get_default_format';
-import { NumberFormat } from '../../../../../core_plugins/kibana/common/field_formats/types/number';
+import { NumberFormat } from '../../../../../../plugins/data/common/field_formats/converters/number';
 
 const getConfig = () => {
   return '0,0.[000]';

@@ -18,14 +18,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { asPrettyString } from '../../../../../../plugins/data/common/field_formats';
-import {
-  FieldFormat,
-  KBN_FIELD_TYPES,
-  TextContextTypeConvert,
-} from '../../../../../../plugins/data/common/';
+import { asPrettyString } from '../index';
+import { FieldFormat, KBN_FIELD_TYPES, TextContextTypeConvert } from '../../index';
 // @ts-ignore
-import { shortenDottedString } from '../../utils/shorten_dotted_string';
+import { shortenDottedString } from '../../../../../legacy/core_plugins/kibana/common/utils/shorten_dotted_string';
 
 const TRANSFORM_OPTIONS = [
   {

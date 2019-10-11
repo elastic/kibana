@@ -19,11 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment, { unitOfTime, Duration } from 'moment';
-import {
-  FieldFormat,
-  KBN_FIELD_TYPES,
-  TextContextTypeConvert,
-} from '../../../../../../plugins/data/common/';
+import { FieldFormat, KBN_FIELD_TYPES, TextContextTypeConvert } from '../../index';
 
 const ratioToSeconds: Record<string, number> = {
   picoseconds: 0.000000000001,

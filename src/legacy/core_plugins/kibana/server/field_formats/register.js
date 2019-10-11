@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import { UrlFormat } from '../../common/field_formats/types/url';
-import { BytesFormat } from '../../common/field_formats/types/bytes';
-import { DateFormat } from '../../common/field_formats/types/date_server';
-import { DateNanosFormat } from '../../common/field_formats/types/date_nanos';
-import { RelativeDateFormat } from '../../common/field_formats/types/relative_date';
-import { DurationFormat } from '../../common/field_formats/types/duration';
-import { IpFormat } from '../../common/field_formats/types/ip';
-import { NumberFormat } from '../../common/field_formats/types/number';
-import { PercentFormat } from '../../common/field_formats/types/percent';
-import { StringFormat } from '../../common/field_formats/types/string';
-import { SourceFormat } from '../../common/field_formats/types/source';
-import { ColorFormat } from '../../common/field_formats/types/color';
-import { TruncateFormat } from '../../common/field_formats/types/truncate';
-import { BoolFormat } from '../../common/field_formats/types/boolean';
-import { StaticLookupFormat } from '../../common/field_formats/types/static_lookup';
+import { UrlFormat } from '../../../../../plugins/data/common/field_formats/converters/url';
+import { BytesFormat } from '../../../../../plugins/data/common/field_formats/converters/bytes';
+import { DateFormat } from '../../../../../plugins/data/common/field_formats/converters/date_server';
+import { DateNanosFormat } from '../../../../../plugins/data/common/field_formats/converters/date_nanos';
+import { RelativeDateFormat } from '../../../../../plugins/data/common/field_formats/converters/relative_date';
+import { DurationFormat } from '../../../../../plugins/data/common/field_formats/converters/duration';
+import { IpFormat } from '../../../../../plugins/data/common/field_formats/converters/ip';
+import { NumberFormat } from '../../../../../plugins/data/common/field_formats/converters/number';
+import { PercentFormat } from '../../../../../plugins/data/common/field_formats/converters/percent';
+import { StringFormat } from '../../../../../plugins/data/common/field_formats/converters/string';
+import { SourceFormat } from '../../../../../plugins/data/common/field_formats/converters/source';
+import { ColorFormat } from '../../../../../plugins/data/common/field_formats/converters/color';
+import { TruncateFormat } from '../../../../../plugins/data/common/field_formats/converters/truncate';
+import { BoolFormat } from '../../../../../plugins/data/common/field_formats/converters/boolean';
+import { StaticLookupFormat } from '../../../../../plugins/data/common/field_formats/converters/static_lookup';
 
 export function registerFieldFormats(server) {
   server.registerFieldFormat(UrlFormat);

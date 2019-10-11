@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import {
-  FieldFormat,
-  KBN_FIELD_TYPES,
-  TextContextTypeConvert,
-} from '../../../../../../plugins/data/common/';
+import { FieldFormat, KBN_FIELD_TYPES, TextContextTypeConvert } from '../../index';
 
 function convertLookupEntriesToMap(lookupEntries: any[]) {
   return lookupEntries.reduce(

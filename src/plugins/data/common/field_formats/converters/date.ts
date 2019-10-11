@@ -19,11 +19,7 @@
 
 import { memoize, noop } from 'lodash';
 import moment from 'moment';
-import {
-  FieldFormat,
-  KBN_FIELD_TYPES,
-  TextContextTypeConvert,
-} from '../../../../../../plugins/data/common/';
+import { FieldFormat, KBN_FIELD_TYPES, TextContextTypeConvert } from '../../index';
 
 export class DateFormat extends FieldFormat {
   static id = 'date';

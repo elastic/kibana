@@ -18,7 +18,7 @@
  */
 
 import { ColorFormat } from './color';
-import { HTML_CONTEXT_TYPE } from '../../../../../../plugins/data/common/';
+import { HTML_CONTEXT_TYPE } from '../../index';
 
 describe('Color Format', () => {
   describe('field is a number', () => {

@@ -19,15 +19,15 @@
 
 import { template, escape, keys } from 'lodash';
 // @ts-ignore
-import { noWhiteSpace } from '../../utils/no_white_space';
+import { noWhiteSpace } from '../../../../../legacy/core_plugins/kibana/common/utils/no_white_space';
 // @ts-ignore
-import { shortenDottedString } from '../../utils/shorten_dotted_string';
+import { shortenDottedString } from '../../../../../legacy/core_plugins/kibana/common/utils/shorten_dotted_string';
 import {
   FieldFormat,
   KBN_FIELD_TYPES,
   TextContextTypeConvert,
   HtmlContextTypeConvert,
-} from '../../../../../../plugins/data/common/';
+} from '../../index';
 
 const templateHtml = `
   <dl class="source truncate-by-height">
