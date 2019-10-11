@@ -13,6 +13,10 @@ import * as kibanaCore from '../../../../../../observability/public/context/kiba
 jest.mock('ui/index_patterns');
 jest.mock('ui/new_platform');
 
+jest.mock('../../../../../../code/public/components/code_block', () => ({
+  CodeBlock: () => null
+}));
+
 const coreMock = {
   chrome: {
     setBreadcrumbs: jest.fn()

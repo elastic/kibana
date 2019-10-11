@@ -10,7 +10,14 @@ import React from 'react';
 import { mockMoment } from '../../../../utils/testHelpers';
 import { DetailView } from './index';
 
+jest.mock('../../../../../../code/public/components/code_block', () => ({
+  CodeBlock: () => null
+}));
+
 describe('DetailView', () => {
+  beforeAll(() => {
+    document.queryCommandSupported = () => true;
+  });
   beforeEach(() => {
     // Avoid timezone issues
     mockMoment();

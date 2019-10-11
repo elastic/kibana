@@ -8,6 +8,10 @@ import { IStackframe } from '../../../../../typings/es_schemas/raw/fields/Stackf
 import { getGroupedStackframes } from '../index';
 import stacktracesMock from './stacktraces.json';
 
+jest.mock('../../../../../../code/public/components/code_block', () => ({
+  CodeBlock: () => null
+}));
+
 describe('Stacktrace/index', () => {
   describe('getGroupedStackframes', () => {
     it('should collapse the library frames into a set of grouped stackframes', () => {

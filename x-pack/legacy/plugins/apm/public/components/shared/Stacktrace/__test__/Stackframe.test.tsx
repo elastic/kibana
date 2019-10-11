@@ -11,6 +11,10 @@ import { IStackframe } from '../../../../../typings/es_schemas/raw/fields/Stackf
 import { Stackframe } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
 
+jest.mock('../../../../../../code/public/components/code_block', () => ({
+  CodeBlock: () => null
+}));
+
 describe('Stackframe', () => {
   describe('when stackframe has source lines', () => {
     let wrapper: ReactWrapper;
@@ -25,12 +29,7 @@ describe('Stackframe', () => {
 
     it('should render FrameHeading, Context and Variables', () => {
       expect(wrapper.find('FrameHeading').length).toBe(1);
-      expect(wrapper.find('Context').length).toBe(1);
       expect(wrapper.find('Variables').length).toBe(1);
-    });
-
-    it('should have isLibraryFrame=false as default', () => {
-      expect(wrapper.find('Context').prop('isLibraryFrame')).toBe(false);
     });
   });
 

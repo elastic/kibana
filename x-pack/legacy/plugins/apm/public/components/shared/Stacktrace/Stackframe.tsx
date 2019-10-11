@@ -7,6 +7,7 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
+import { CodeBlock } from '../../../../../code/public/components/code_block';
 import {
   IStackframe,
   IStackframeWithLineContext
@@ -17,8 +18,8 @@ import {
   fontSize
 } from '../../../style/variables';
 import { FrameHeading } from '../Stacktrace/FrameHeading';
-import { Context } from './Context';
 import { Variables } from './Variables';
+import { formatLinesForCodeblock } from './formatLinesForCodeblock';
 
 const CodeHeader = styled.div`
   border-bottom: 1px solid ${theme.euiColorLightShade};
@@ -54,16 +55,20 @@ export function Stackframe({
     );
   }
 
+  const { lines, highlightRanges, lineMapper } = formatLinesForCodeblock(
+    stackframe
+  );
+
   return (
     <Container isLibraryFrame={isLibraryFrame}>
       <CodeHeader>
         <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
       </CodeHeader>
-
-      <Context
-        stackframe={stackframe}
-        codeLanguage={codeLanguage}
-        isLibraryFrame={isLibraryFrame}
+      <CodeBlock
+        content={lines.map(({ context }) => context).join('\n')}
+        language={codeLanguage}
+        highlightRanges={highlightRanges}
+        lineNumber={lineMapper}
       />
 
       <Variables vars={stackframe.vars} />

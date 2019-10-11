@@ -11,6 +11,10 @@ import { Home } from '../Home';
 jest.mock('ui/index_patterns');
 jest.mock('ui/new_platform');
 
+jest.mock('../../../../../code/public/components/code_block', () => ({
+  CodeBlock: () => null
+}));
+
 describe('Home component', () => {
   it('should render services', () => {
     expect(shallow(<Home tab="services" />)).toMatchSnapshot();
