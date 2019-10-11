@@ -19,13 +19,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
   EuiFacetButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -46,13 +44,17 @@ export interface Props {
    * the input value of the user
    */
   value?: string;
+  /**
+   * the number of selected filters
+   */
+  filterActive?: number;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value }: Props) {
+export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value, filterActive }: Props) {
   if (typeof value !== 'string') {
     // at initial rendering value is undefined (angular related), this catches the warning
     // should be removed once all is react
@@ -70,7 +72,7 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value 
   });
 
   return (
-    <div>
+    <React.Fragment>
       <EuiFlexGroup responsive={false} gutterSize={'s'}>
         <EuiFlexItem>
           <EuiFieldSearch
@@ -94,9 +96,9 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value 
       >
         <FormattedMessage
           id="kbn.discover.fieldChooser.fieldFilterFacetButtonLabel"
-          defaultMessage="Field filter settings"
+          defaultMessage="Fields filtered"
         />
       </EuiFacetButton>
-    </div>
+    </React.Fragment>
   );
 }
