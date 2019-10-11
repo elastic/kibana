@@ -30,14 +30,20 @@ export interface FilterServiceDependencies {
 }
 
 export class FilterService {
+  filterManager!: FilterManager;
+
   public setup({ uiSettings }: FilterServiceDependencies) {
+    this.filterManager = new FilterManager(uiSettings);
+
     return {
-      filterManager: new FilterManager(uiSettings),
+      filterManager: this.filterManager,
     };
   }
 
   public start() {
-    // nothing to do here yet
+    return {
+      filterManager: this.filterManager,
+    };
   }
 
   public stop() {
@@ -47,3 +53,4 @@ export class FilterService {
 
 /** @public */
 export type FilterSetup = ReturnType<FilterService['setup']>;
+export type FilterStart = ReturnType<FilterService['start']>;

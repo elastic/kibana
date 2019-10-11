@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReactElement } from 'react';
 import { basicJobValidation } from '../../../../../common/util/job_utils';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
 import { JobCreatorType } from '../job_creator';
@@ -22,7 +23,7 @@ export interface ValidationSummary {
 
 export interface Validation {
   valid: boolean;
-  message?: string;
+  message?: string | ReactElement;
 }
 
 export interface BasicValidations {

@@ -58,7 +58,7 @@ import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { extractTimeFilter, changeTimeFilter } from '../../../data/public';
-import { data } from '../../../data/public/setup';
+import { start as data } from '../../../data/public/legacy';
 
 import {
   DashboardContainer,
