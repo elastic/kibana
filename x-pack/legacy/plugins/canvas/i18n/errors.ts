@@ -55,6 +55,15 @@ export const ErrorStrings = {
         defaultMessage: "Couldn't fetch Elasticsearch indices",
       }),
   },
+  RenderWithFn: {
+    getRenderErrorMessage: (functionName: string) =>
+      i18n.translate('xpack.canvas.error.RenderWithFn.renderErrorMessage', {
+        defaultMessage: "Rendering '{functionName}' failed",
+        values: {
+          functionName: functionName || 'function',
+        },
+      }),
+  },
   WorkpadFileUpload: {
     getAcceptJSONOnlyErrorMessage: () =>
       i18n.translate('xpack.canvas.error.workpadUpload.acceptJSONOnlyErrorMessage', {
