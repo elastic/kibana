@@ -28,28 +28,15 @@
     }
   }
   &__fields-list-item {
-    // padding-bottom: 20px;
-    // border-bottom: 1px solid #ddd;
-
     &__field {
       border-bottom: 1px dotted #ddd;
-      // height: 56px;
       margin: 12px 0;
-      // position: relative;
 
-      // border-bottom: '1px solid #ddd',
-      // display: 'flex',
-      // flexDirection: 'column' as 'column',
-
-      // > div {
-      //   display: flex;
-      //   align-items: center;
-      //   height: 82px;
-      // }
-    }
-
-    &:last-child {
-      padding-bottom: 0;
+      &:hover {
+        .mappings-editor__fields-list-item__actions {
+          opacity: 1;
+        }
+      }
     }
 
     &__name {
@@ -57,6 +44,10 @@
     }
     &__toggle {
       width: 24px;
+    }
+    &__actions {
+      opacity: 0;
+      transition: opacity 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
     }
   }
 }
