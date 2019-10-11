@@ -45,6 +45,7 @@ import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
+import { esTaskManagement } from './legacy/plugins/es_task_management';
 
 module.exports = function (kibana) {
   return [
@@ -89,5 +90,6 @@ module.exports = function (kibana) {
     snapshotRestore(kibana),
     actions(kibana),
     alerting(kibana),
+    esTaskManagement(kibana),
   ];
 };

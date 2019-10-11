@@ -1,0 +1,6 @@
+{
+  "id": "es_task_management",
+  "version": "kibana",
+  "server": true,
+  "ui": true
+}
