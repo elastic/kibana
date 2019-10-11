@@ -24,9 +24,9 @@ import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
 import { VisType } from 'ui/vis';
+import { npStart } from 'ui/new_platform';
 import { VisualizeConstants } from '../visualize_constants';
 
-import { trackUiMetric, METRIC_TYPE } from '../ui_metric';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisTypeAlias } from '../../../../visualizations/public/np_ready/public/types';
@@ -51,6 +51,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private readonly isLabsEnabled: boolean;
+  private readonly trackUiMetric = npStart.plugins.metrics.reportUiStats.bind(null, 'visualize');
 
   constructor(props: TypeSelectionProps) {
     super(props);
@@ -118,7 +119,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private redirectToVis(visType: VisType | VisTypeAlias, searchType?: string, searchId?: string) {
-    trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+    this.trackUiMetric(npStart.plugins.metrics.METRIC_TYPE.CLICK, visType.name);
 
     if ('aliasUrl' in visType) {
       window.location = chrome.addBasePath(visType.aliasUrl);
