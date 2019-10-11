@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import 'ace';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { isColorDark, hexToRgb } from '@elastic/eui';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -26,7 +27,7 @@ import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { addAppRedirectMessageToUrl, toastNotifications } from 'ui/notify';
 import { formatAngularHttpError } from 'ui/notify/lib';
-import { setup as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
+import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
@@ -109,13 +110,12 @@ app.directive('graphApp', function (reactDirective) {
     ['noIndexPatterns', { watchDepth: 'reference' }],
     ['reduxStore', { watchDepth: 'reference' }],
     ['pluginDataStart', { watchDepth: 'reference' }],
-  ]);
+  ], { restrict: 'A' });
 });
 
 app.directive('graphVisualization', function (reactDirective) {
-  return reactDirective(GraphVisualization);
+  return reactDirective(GraphVisualization, undefined, { restrict: 'A' });
 });
-
 
 if (uiRoutes.enable) {
   uiRoutes.enable();
@@ -332,6 +332,7 @@ app.controller('graphuiPlugin', function (
   const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
   $scope.spymode = 'request';
   $scope.colors = colorChoices;
+  $scope.isColorDark = (color) => isColorDark(...hexToRgb(color));
   $scope.nodeClick = function (n, $event) {
 
     //Selection logic - shift key+click helps selects multiple nodes
@@ -478,9 +479,7 @@ app.controller('graphuiPlugin', function (
     }),
     run: function () {
       canWipeWorkspace(function () {
-        $scope.$evalAsync(() => {
-          kbnUrl.change('/workspace/', {});
-        });
+        kbnUrl.change('/workspace/', {});
       });  },
     testId: 'graphNewButton',
   });

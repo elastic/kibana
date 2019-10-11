@@ -88,7 +88,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   };
 
   let content = (
-    <EuiPanel>
+    <EuiPanel data-test-subj="graphGuidancePanel">
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon type="graphApp" size="xxl" />
@@ -196,9 +196,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   return (
     <EuiFlexGroup justifyContent="center">
-      <EuiFlexItem className="gphGuidancePanel">
-        <EuiPanel paddingSize="none">{content}</EuiPanel>
-      </EuiFlexItem>
+      <EuiFlexItem className="gphGuidancePanel">{content}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }

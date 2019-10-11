@@ -179,6 +179,14 @@ export function getTpmSeries(
   });
 }
 
+function colorMatch(key: string) {
+  if (/ok|success/i.test(key)) {
+    return theme.euiColorVis0;
+  } else if (/error|fail/i.test(key)) {
+    return theme.euiColorVis2;
+  }
+}
+
 function getColorByKey(keys: string[]) {
   const assignedColors: StringMap<string> = {
     'HTTP 2xx': theme.euiColorVis0,
@@ -197,5 +205,6 @@ function getColorByKey(keys: string[]) {
     theme.euiColorVis8
   ]);
 
-  return (key: string) => assignedColors[key] || unassignedColors[key];
+  return (key: string) =>
+    colorMatch(key) || assignedColors[key] || unassignedColors[key];
 }

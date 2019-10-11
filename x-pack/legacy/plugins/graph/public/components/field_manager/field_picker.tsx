@@ -53,6 +53,7 @@ export function FieldPicker({
       panelPaddingSize="none"
       button={
         <EuiBadge
+          data-test-subj="graph-add-field-button"
           className={classNames('gphFieldPicker__button', {
             'gphFieldPicker__button--disabled': !hasFields,
           })}
@@ -80,6 +81,7 @@ export function FieldPicker({
               defaultMessage: 'Filter by',
             }),
             compressed: true,
+            'data-test-subj': 'graph-field-search',
           }}
           listProps={{
             className: 'gphFieldPicker__selectableList',
