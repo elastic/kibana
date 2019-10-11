@@ -6,7 +6,7 @@
 
 import { EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import querystring from 'querystring';
+import { parse } from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
 import url from 'url';
@@ -37,7 +37,7 @@ interface Props {
   error?: Error;
   documentSearchResults?: DocumentSearchResult;
   repositorySearchResults?: any;
-  onSearchScopeChanged: (s: SearchScope) => void;
+  changeSearchScope: (s: SearchScope) => void;
 }
 
 interface State {
@@ -66,6 +66,15 @@ class SearchPage extends React.PureComponent<Props, State> {
     npStart.core.chrome.setBreadcrumbs([{ text: APP_TITLE, href: '#/' }]);
   }
 
+  private handleSearchScopeChange = (scope: SearchScope) => {
+    history.push(url.format({ pathname: '/search', query: { ...this.currentQuery, scope } }));
+    this.props.changeSearchScope(scope);
+  };
+
+  private get currentQuery(): any {
+    return parse(history.location.search.replace('?', ''));
+  }
+
   public onLanguageFilterToggled = (lang: string) => {
     const { languages, repositories, query, page } = this.props;
     let tempLangs: Set<string> = new Set();
@@ -78,13 +87,12 @@ class SearchPage extends React.PureComponent<Props, State> {
       tempLangs = languages ? new Set(languages) : new Set();
       tempLangs.add(lang);
     }
-    const queries = querystring.parse(history.location.search.replace('?', ''));
     return () => {
       history.push(
         url.format({
           pathname: '/search',
           query: {
-            ...queries,
+            ...this.currentQuery,
             q: query,
             p: page,
             langs: Array.from(tempLangs).join(','),
@@ -107,13 +115,13 @@ class SearchPage extends React.PureComponent<Props, State> {
       tempRepos = repositories ? new Set(repositories) : new Set();
       tempRepos.add(repo);
     }
-    const queries = querystring.parse(history.location.search.replace('?', ''));
+
     return () => {
       history.push(
         url.format({
           pathname: '/search',
           query: {
-            ...queries,
+            ...this.currentQuery,
             q: query,
             p: 1,
             langs: languages ? Array.from(languages).join(',') : undefined,
@@ -233,7 +241,7 @@ class SearchPage extends React.PureComponent<Props, State> {
         <SearchBar
           searchOptions={this.props.searchOptions}
           query={this.props.query}
-          onSearchScopeChanged={this.props.onSearchScopeChanged}
+          onSearchScopeChanged={this.handleSearchScopeChange}
           enableSubmitWhenOptionsChanged={true}
           ref={(element: any) => (this.searchBar = element)}
         />
@@ -260,7 +268,7 @@ const mapStateToProps = (state: RootState) => ({
 });
 
 const mapDispatchToProps = {
-  onSearchScopeChanged: changeSearchScope,
+  changeSearchScope,
 };
 
 export const Search = connect(
