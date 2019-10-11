@@ -15,7 +15,7 @@ import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { i18n } from '@kbn/i18n';
-import { WIZARD_TYPE } from '../../jobs/new_job/simple/components/constants/general';
+import { CREATED_BY_LABEL } from '../../jobs/new_job_new/common/job_creator/util/constants';
 
 export function getNewConditionDefaults() {
   return {
@@ -130,7 +130,7 @@ export function deleteJobRule(job, detectorIndex, ruleIndex) {
  * in the job wizards and so would be lost in a clone.
  */
 export function processCreatedBy(customSettings) {
-  if (Object.values(WIZARD_TYPE).includes(customSettings.created_by)) {
+  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by)) {
     delete customSettings.created_by;
   }
 }
