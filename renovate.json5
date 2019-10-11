@@ -78,6 +78,7 @@
         reviewers: [
           'markov00',
         ],
+        masterIssueApproval: false,
       },
       {
         groupSlug: 'mocha',

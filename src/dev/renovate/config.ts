@@ -94,6 +94,7 @@ export const RENOVATE_CONFIG = {
         enabled: group.enabled === false ? false : undefined,
         allowedVersions: group.allowedVersions || undefined,
         reviewers: group.reviewers || undefined,
+        masterIssueApproval: group.autoOpenPr ? false : undefined,
       })),
 
       // internal/local packages
