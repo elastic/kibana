@@ -12,7 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-import { get, has, pick, isEmpty } from 'lodash';
+import { get, pick, isEmpty } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
