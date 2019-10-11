@@ -102,7 +102,9 @@ function validateParams(paramsObject: any): string | void {
 export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.email',
-    name: 'email',
+    name: i18n.translate('xpack.actions.builtin.email.name', {
+      defaultMessage: 'Email',
+    }),
     validate: {
       config: ConfigSchema,
       secrets: SecretsSchema,

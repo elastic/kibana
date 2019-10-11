@@ -6,11 +6,28 @@
 import { HttpServiceBase } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../constants';
 
+export interface ActionType {
+  id: string;
+  name: string;
+}
+
 export interface Action {
   id: string;
   actionTypeId: string;
   description: string;
   config: Record<string, unknown>;
+}
+
+export interface LoadActionTypesOpts {
+  http: HttpServiceBase;
+}
+
+export type LoadActionTypesResponse = ActionType[];
+
+export async function loadActionTypes({
+  http,
+}: LoadActionTypesOpts): Promise<LoadActionTypesResponse> {
+  return http.get(`${BASE_ACTION_API_PATH}/types`);
 }
 
 export interface LoadActionsOpts {

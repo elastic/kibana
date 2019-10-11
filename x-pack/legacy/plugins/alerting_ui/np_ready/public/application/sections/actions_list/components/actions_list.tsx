@@ -9,7 +9,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PageError } from '../../../components/page_error';
-import { loadActions, Action } from '../../../lib/api';
+import { Action, ActionType, loadActions, loadActionTypes } from '../../../lib/api';
 import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
 
@@ -24,6 +24,9 @@ interface Pagination {
   index: number;
   size: number;
 }
+interface Data extends Action {
+  actionType: ActionType['name'];
+}
 
 export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
   match: {
@@ -35,7 +38,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     core: { http },
   } = useAppDependencies();
 
-  const [data, setData] = useState<Action[]>([]);
+  const [data, setData] = useState<Data[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorCode, setErrorCode] = useState<number | null>(null);
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
@@ -47,9 +50,24 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
       setIsLoading(true);
       setErrorCode(null);
       try {
-        const response = await loadActions({ http, sort, page });
-        setData(response.data);
-        setTotalItemCount(response.total);
+        const [actionsResponse, actionTypesResponse] = await Promise.all([
+          loadActions({ http, sort, page }),
+          loadActionTypes({ http }),
+        ]);
+        const actionTypesById: Record<string, ActionType> = {};
+        for (const actionType of actionTypesResponse) {
+          actionTypesById[actionType.id] = actionType;
+        }
+        const updatedData = actionsResponse.data.map(
+          (action: Action): Data => ({
+            ...action,
+            actionType: actionTypesById[action.actionTypeId]
+              ? actionTypesById[action.actionTypeId].name
+              : action.actionTypeId,
+          })
+        );
+        setData(updatedData);
+        setTotalItemCount(actionsResponse.total);
       } catch (e) {
         setErrorCode(e.response.status);
       } finally {
@@ -71,14 +89,14 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
       truncateText: true,
     },
     {
-      field: 'actionTypeId',
+      field: 'actionType',
       name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.actionTypeIdHeader',
+        'xpack.alertingUI.sections.actionsList.actionsListTable.actionTypeHeader',
         {
           defaultMessage: 'Action Type',
         }
       ),
-      sortable: true,
+      sortable: false,
       truncateText: true,
     },
     {

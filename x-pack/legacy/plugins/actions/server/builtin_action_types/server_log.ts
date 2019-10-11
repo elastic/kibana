@@ -31,7 +31,9 @@ const ParamsSchema = schema.object({
 export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.server-log',
-    name: 'server-log',
+    name: i18n.translate('xpack.actions.builtin.serverLog.name', {
+      defaultMessage: 'Server Log',
+    }),
     validate: {
       params: ParamsSchema,
     },

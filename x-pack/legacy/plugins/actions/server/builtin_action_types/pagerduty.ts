@@ -89,7 +89,9 @@ function validateParams(paramsObject: any): string | void {
 export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.pagerduty',
-    name: 'pagerduty',
+    name: i18n.translate('xpack.actions.builtin.pagerduty.name', {
+      defaultMessage: 'PagerDuty',
+    }),
     validate: {
       config: ConfigSchema,
       secrets: SecretsSchema,
