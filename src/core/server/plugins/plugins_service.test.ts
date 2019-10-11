@@ -256,7 +256,7 @@ Array [
 `);
 });
 
-test('`discover` does not throw in case of cyclic plugin dependencies', async () => {
+test('`discover` does not throw in case of mutual plugin dependencies', async () => {
   const firstPlugin = createPlugin('first-plugin', {
     path: 'path-1',
     requiredPlugins: ['second-plugin'],
@@ -277,6 +277,43 @@ test('`discover` does not throw in case of cyclic plugin dependencies', async ()
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
+});
+
+test('`discover` does not throw in case of cyclic plugin dependencies', async () => {
+  const firstPlugin = createPlugin('first-plugin', {
+    path: 'path-1',
+    requiredPlugins: ['second-plugin'],
+  });
+  const secondPlugin = createPlugin('second-plugin', {
+    path: 'path-2',
+    requiredPlugins: ['third-plugin', 'last-plugin'],
+  });
+  const thirdPlugin = createPlugin('third-plugin', {
+    path: 'path-3',
+    requiredPlugins: ['last-plugin', 'first-plugin'],
+  });
+  const lastPlugin = createPlugin('last-plugin', {
+    path: 'path-4',
+    requiredPlugins: ['first-plugin'],
+  });
+  const missingDepsPlugin = createPlugin('missing-deps-plugin', {
+    path: 'path-5',
+    requiredPlugins: ['not-a-plugin'],
+  });
+
+  mockDiscover.mockReturnValue({
+    error$: from([]),
+    plugin$: from([firstPlugin, secondPlugin, thirdPlugin, lastPlugin, missingDepsPlugin]),
+  });
+
+  await expect(pluginsService.discover()).resolves.toBeUndefined();
+
+  expect(mockDiscover).toHaveBeenCalledTimes(1);
+  expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(4);
+  expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
+  expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
+  expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(thirdPlugin);
+  expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(lastPlugin);
 });
 
 test('`discover` properly invokes plugin discovery and ignores non-critical errors.', async () => {
