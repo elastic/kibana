@@ -10,6 +10,6 @@ export const registerRouter = (aRouter: any) => {
   router = aRouter;
 };
 
-export const goToActionTypesList = () => {
-  router.history.push({ pathname: `${BASE_PATH}actionTypes` });
+export const goToActionsList = () => {
+  router.history.push({ pathname: `${BASE_PATH}actions` });
 };
