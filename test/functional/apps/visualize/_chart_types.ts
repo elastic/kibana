@@ -23,14 +23,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'visualize', 'settings']);
+  const PageObjects = getPageObjects(['common', 'visualize']);
   let isOss = true;
 
   describe('chart types', function() {
     before(async function() {
       log.debug('navigateToApp visualize');
-      await PageObjects.settings.navigateTo();
-      isOss = await PageObjects.settings.isOss();
+      isOss = await PageObjects.common.isOss();
       await PageObjects.visualize.navigateToNewVisualization();
     });
 
