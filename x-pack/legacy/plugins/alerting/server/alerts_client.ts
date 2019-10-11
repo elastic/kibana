@@ -40,6 +40,7 @@ interface FindOptions {
     defaultSearchOperator?: 'AND' | 'OR';
     searchFields?: string[];
     sortField?: string;
+    sortOrder?: string;
     hasReference?: {
       type: string;
       id: string;

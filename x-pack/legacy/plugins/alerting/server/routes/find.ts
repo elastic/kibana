@@ -17,6 +17,7 @@ interface FindRequest extends WithoutQueryAndParams<Hapi.Request> {
     default_search_operator: 'AND' | 'OR';
     search_fields?: string[];
     sort_field?: string;
+    sort_order?: string;
     has_reference?: {
       type: string;
       id: string;
@@ -50,6 +51,7 @@ export const findAlertRoute = {
             .items(Joi.string())
             .single(),
           sort_field: Joi.string(),
+          sort_order: Joi.string(),
           has_reference: Joi.object()
             .keys({
               type: Joi.string().required(),
@@ -77,6 +79,7 @@ export const findAlertRoute = {
         defaultSearchOperator: query.default_search_operator,
         searchFields: query.search_fields,
         sortField: query.sort_field,
+        sortOrder: query.sort_order,
         hasReference: query.has_reference,
         fields: query.fields,
         filter: query.filter,

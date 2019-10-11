@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +27,8 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     core: { http },
   } = useAppDependencies();
 
+  const [sortField, setSortField] = useState('description');
+  const [sortDirection, setSortDirection] = useState('asc');
   const { error, isLoading, data: result } = loadActions(http);
 
   const actionsTableColumns = [
@@ -85,6 +87,11 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
             'data-test-subj': 'cell',
           })}
           data-test-subj="actionsTable"
+          sorting={{ sort: { field: sortField, direction: sortDirection } }}
+          onChange={({ sort }: { sort: { field: string; direction: 'asc' | 'desc' } }) => {
+            setSortField(sort.field);
+            setSortDirection(sort.direction);
+          }}
         />
       </Fragment>
     );
