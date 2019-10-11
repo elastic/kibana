@@ -1,5 +1,5 @@
 {
-  "data_frame.put_data_frame_transform": {
+  "transform.put_transform": {
     "url_params": {
       "defer_validation": "__flag__"
     },
@@ -7,7 +7,7 @@
       "PUT"
     ],
     "patterns": [
-      "_data_frame/transforms/{transform_id}"
+      "_transform/{transform_id}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html"
   }
