@@ -6,6 +6,7 @@
 
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiButton,
   EuiButtonIcon,
   EuiCheckbox,
@@ -15,16 +16,23 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
+  EuiPanel,
   EuiSpacer,
   EuiSwitch,
-  EuiTab,
-  EuiTabs,
+  EuiTabbedContent,
 } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { HeaderPage } from '../../../components/header_page';
 import { HeaderSection } from '../../../components/header_section';
+import {
+  UtilityBar,
+  UtilityBarAction,
+  UtilityBarGroup,
+  UtilityBarSection,
+  UtilityBarText,
+} from '../../../components/utility_bar';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import * as i18n from './translations';
 
@@ -115,34 +123,9 @@ const TableCardsTd = styled.td.attrs({
 `;
 TableCardsTd.displayName = 'TableCardsTd';
 
-export const RulesComponent = React.memo(() => {
+const AllRules = React.memo(() => {
   return (
     <>
-      <HeaderPage
-        backOptions={{ href: '#detection-engine', text: 'Back to detection engine' }}
-        subtitle="Last completed run: 23 minutes ago"
-        title={i18n.PAGE_TITLE}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-          <EuiFlexItem grow={false}>
-            <EuiButton href="#" iconType="importAction">
-              {'Import rule…'}
-            </EuiButton>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton fill href="#/detection-engine/rules/create-rule" iconType="plusInCircle">
-              {'Add new rule'}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </HeaderPage>
-
-      <EuiTabs>
-        <EuiTab>{'All rules'}</EuiTab>
-        <EuiTab>{'Activity monitor'}</EuiTab>
-      </EuiTabs>
-
       <EuiSpacer />
 
       <section>
@@ -154,31 +137,27 @@ export const RulesComponent = React.memo(() => {
           />
         </HeaderSection>
 
-        <EuiSpacer />
+        <UtilityBar border>
+          <UtilityBarSection>
+            <UtilityBarGroup>
+              <UtilityBarText>{'Showing: 39 rules'}</UtilityBarText>
+            </UtilityBarGroup>
 
-        <aside>
-          <div>
-            <div>
-              <p>{'Showing: 39 rules'}</p>
-            </div>
+            <UtilityBarGroup>
+              <UtilityBarText>{'Selected: 2 rules'}</UtilityBarText>
 
-            <div>
-              <p>{'Selected: 2 rules'}</p>
-
-              <button type="button">
+              <UtilityBarAction>
                 {'Batch actions'} <EuiIcon size="s" type="arrowDown" />
-              </button>
-            </div>
+              </UtilityBarAction>
+            </UtilityBarGroup>
 
-            <div>
-              <button type="button">
+            <UtilityBarGroup>
+              <UtilityBarAction>
                 <EuiIcon size="s" type="cross" /> {'Clear 7 filters'}
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        <EuiSpacer />
+              </UtilityBarAction>
+            </UtilityBarGroup>
+          </UtilityBarSection>
+        </UtilityBar>
 
         <TableCards>
           <TableCardsThead>
@@ -279,6 +258,134 @@ export const RulesComponent = React.memo(() => {
           </TableCardsTbody>
         </TableCards>
       </section>
+    </>
+  );
+});
+AllRules.displayName = 'AllRules';
+
+const ActivityMonitor = React.memo(() => {
+  const columns = [
+    {
+      field: 'checkbox',
+      name: 'Checkbox',
+      truncateText: true,
+    },
+    {
+      field: 'rule',
+      name: 'Rule',
+      truncateText: true,
+    },
+    {
+      field: 'ran',
+      name: 'Ran',
+      truncateText: true,
+    },
+    {
+      field: 'lookedBackTo',
+      name: 'Looked back to',
+      truncateText: true,
+    },
+    {
+      field: 'status',
+      name: 'Status',
+      truncateText: true,
+    },
+    {
+      field: 'response',
+      name: 'Response',
+      truncateText: true,
+    },
+    {
+      field: 'actions',
+      name: '',
+    },
+  ];
+
+  const items = [
+    {
+      checkbox: 'test',
+      rule: 'test',
+      ran: 'test',
+      lookedBackTo: 'test',
+      status: 'test',
+      response: 'test',
+      actions: 'test',
+    },
+  ];
+
+  return (
+    <>
+      <EuiSpacer />
+
+      <EuiPanel>
+        <HeaderSection title="Activity monitor" />
+
+        <UtilityBar border>
+          <UtilityBarSection>
+            <UtilityBarGroup>
+              <UtilityBarText>{'Showing: 39 activites'}</UtilityBarText>
+            </UtilityBarGroup>
+
+            <UtilityBarGroup>
+              <UtilityBarText>{'Selected: 2 activities'}</UtilityBarText>
+
+              <UtilityBarAction>
+                <EuiIcon size="s" type="stop" /> {'Stop selected'}
+              </UtilityBarAction>
+            </UtilityBarGroup>
+
+            <UtilityBarGroup>
+              <UtilityBarAction>
+                <EuiIcon size="s" type="cross" /> {'Clear 7 filters'}
+              </UtilityBarAction>
+            </UtilityBarGroup>
+          </UtilityBarSection>
+        </UtilityBar>
+
+        <EuiBasicTable items={items} columns={columns} />
+      </EuiPanel>
+    </>
+  );
+});
+AllRules.displayName = 'AllRules';
+
+export const RulesComponent = React.memo(() => {
+  return (
+    <>
+      <HeaderPage
+        backOptions={{ href: '#detection-engine', text: 'Back to detection engine' }}
+        subtitle="Last completed run: 23 minutes ago"
+        title={i18n.PAGE_TITLE}
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+          <EuiFlexItem grow={false}>
+            <EuiButton href="#" iconType="importAction">
+              {'Import rule…'}
+            </EuiButton>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton fill href="#/detection-engine/rules/create-rule" iconType="plusInCircle">
+              {'Add new rule'}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </HeaderPage>
+
+      <EuiTabbedContent
+        tabs={[
+          {
+            id: 'tabAllRules',
+            name: 'All rules',
+            content: <AllRules />,
+          },
+          {
+            id: 'tabActivityMonitor',
+            name: 'Activity monitor',
+            content: <ActivityMonitor />,
+          },
+        ]}
+      />
 
       <SpyRoute />
     </>

@@ -15,13 +15,20 @@ import {
   getAxisId,
   getSpecId,
 } from '@elastic/charts';
-import { EuiButton, EuiButtonGroup, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiIcon, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { StickyContainer } from 'react-sticky';
 
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { HeaderSection } from '../../components/header_section';
+import {
+  UtilityBar,
+  UtilityBarAction,
+  UtilityBarGroup,
+  UtilityBarSection,
+  UtilityBarText,
+} from '../../components/utility_bar';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { DetectionEngineKql } from './kql';
 import * as i18n from './translations';
@@ -86,10 +93,39 @@ export const DetectionEngineComponent = React.memo(() => {
               stackAccessors={['x']}
               splitSeriesAccessors={['a', 'b']}
               data={[
-                { x: 1551438000000, y: 2, a: 'a' },
-                { x: 1551438000000, y: 2, b: 'b' },
-                { x: 1551439000000, y: 7, a: 'a' },
-                { x: 1551440000000, y: 3, a: 'a' },
+                { x: 0, y: 2, a: 'a' },
+                { x: 0, y: 2, b: 'b' },
+                { x: 1, y: 7, a: 'a' },
+                { x: 2, y: 3, a: 'a' },
+                { x: 3, y: 2, a: 'a' },
+                { x: 4, y: 7, a: 'a' },
+                { x: 5, y: 3, a: 'a' },
+                { x: 6, y: 2, a: 'a' },
+                { x: 7, y: 7, a: 'a' },
+                { x: 8, y: 3, a: 'a' },
+                { x: 9, y: 2, a: 'a' },
+                { x: 10, y: 7, a: 'a' },
+                { x: 11, y: 3, a: 'a' },
+                { x: 12, y: 2, a: 'a' },
+                { x: 13, y: 7, a: 'a' },
+                { x: 14, y: 3, a: 'a' },
+                { x: 15, y: 2, a: 'a' },
+                { x: 16, y: 7, a: 'a' },
+                { x: 17, y: 3, a: 'a' },
+                { x: 18, y: 2, a: 'a' },
+                { x: 19, y: 7, a: 'a' },
+                { x: 20, y: 3, a: 'a' },
+                { x: 21, y: 2, a: 'a' },
+                { x: 22, y: 7, a: 'a' },
+                { x: 23, y: 3, a: 'a' },
+                { x: 24, y: 2, a: 'a' },
+                { x: 25, y: 7, a: 'a' },
+                { x: 26, y: 3, a: 'a' },
+                { x: 27, y: 2, a: 'a' },
+                { x: 28, y: 7, a: 'a' },
+                { x: 29, y: 3, a: 'a' },
+                { x: 30, y: 2, a: 'a' },
+                { x: 31, y: 7, a: 'a' },
               ]}
             />
           </Chart>
@@ -98,10 +134,7 @@ export const DetectionEngineComponent = React.memo(() => {
         <EuiSpacer />
 
         <EuiPanel>
-          <HeaderSection
-            subtitle={`${i18n.PANEL_SUBTITLE_SHOWING}: 7,712 signals`}
-            title="All signals"
-          >
+          <HeaderSection title="All signals">
             <EuiButtonGroup
               color="primary"
               legend="Signal types"
@@ -111,7 +144,50 @@ export const DetectionEngineComponent = React.memo(() => {
               options={toggleButtons}
             />
           </HeaderSection>
-          {'Datagrid here (talk to Chandler Prall about possibility of early access)...'}
+
+          <UtilityBar>
+            <UtilityBarSection>
+              <UtilityBarGroup>
+                <UtilityBarText>{`${i18n.PANEL_SUBTITLE_SHOWING}: 7,712 signals`}</UtilityBarText>
+              </UtilityBarGroup>
+
+              <UtilityBarGroup>
+                <UtilityBarText>{'Selected: 20 signals'}</UtilityBarText>
+
+                <UtilityBarAction>
+                  {'Batch actions'} <EuiIcon size="s" type="arrowDown" />
+                </UtilityBarAction>
+
+                <UtilityBarAction>
+                  <EuiIcon size="s" type="arrowDown" /> {'Select all signals on all pages'}
+                </UtilityBarAction>
+              </UtilityBarGroup>
+
+              <UtilityBarGroup>
+                <UtilityBarAction>
+                  <EuiIcon size="s" type="cross" /> {'Clear 7 filters'}
+                </UtilityBarAction>
+
+                <UtilityBarAction>
+                  <EuiIcon size="s" type="cross" /> {'Clear aggregation'}
+                </UtilityBarAction>
+              </UtilityBarGroup>
+            </UtilityBarSection>
+
+            <UtilityBarSection>
+              <UtilityBarGroup>
+                <UtilityBarAction>
+                  <EuiIcon size="s" type="cross" /> {'Customize columns'}
+                </UtilityBarAction>
+
+                <UtilityBarAction>
+                  <EuiIcon size="s" type="cross" /> {'Aggregate data'}
+                </UtilityBarAction>
+              </UtilityBarGroup>
+            </UtilityBarSection>
+          </UtilityBar>
+
+          {/* Datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
         </EuiPanel>
       </StickyContainer>
 
