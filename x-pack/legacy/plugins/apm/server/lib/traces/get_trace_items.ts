@@ -52,6 +52,6 @@ export async function getTraceItems(traceId: string, setup: Setup) {
 
   return {
     items: resp.hits.hits.map(hit => hit._source),
-    exceedsMax: resp.hits.total > maxTraceItems
+    exceedsMax: resp.hits.total.value > maxTraceItems
   };
 }
