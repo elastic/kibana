@@ -309,12 +309,12 @@ Another tool we use for enforcing consistent coding style is EditorConfig, which
 Note that for VSCode, to enable "live" linting of TypeScript (and other) file types, you will need to modify your local settings, as shown below.  The default for the ESLint extension is to only lint JavaScript file types.
 
 ```json
-   "eslint.validate": [
-        "javascript",
-        "javascriptreact",
-        "typescript",
-        "typescriptreact",
-    ]
+"eslint.validate": [
+  "javascript",
+  "javascriptreact",
+  { "language": "typescript", "autoFix": true },
+  { "language": "typescriptreact", "autoFix": true }
+]
 ```
 
 ### Internationalization
