@@ -288,12 +288,79 @@ describe('Lens App', () => {
     });
 
     describe('save button', () => {
+      interface SaveProps {
+        newCopyOnSave: boolean;
+        newTitle: string;
+      }
+
       function getButton(instance: ReactWrapper): TopNavMenuData {
         return (instance
           .find('[data-test-subj="lnsApp_topNav"]')
           .prop('config') as TopNavMenuData[]).find(
           button => button.testId === 'lnsApp_saveButton'
         )!;
+      }
+
+      function testSave(instance: ReactWrapper, saveProps: SaveProps) {
+        act(() => {
+          getButton(instance).run(instance.getDOMNode());
+        });
+
+        instance.update();
+
+        const handler = instance.findWhere(el => el.prop('onSave')).prop('onSave') as ((
+          p: unknown
+        ) => void);
+        handler(saveProps);
+      }
+
+      async function save({
+        initialDocId,
+        ...saveProps
+      }: SaveProps & {
+        initialDocId?: string;
+      }) {
+        const args = {
+          ...makeDefaultArgs(),
+          docId: initialDocId,
+        };
+        args.editorFrame = frame;
+        (args.docStorage.load as jest.Mock).mockResolvedValue({
+          id: '1234',
+          state: {
+            query: 'fake query',
+            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+          },
+        });
+        (args.docStorage.save as jest.Mock).mockImplementation(async ({ id }) => ({
+          id: id || 'aaa',
+        }));
+
+        const instance = mount(<App {...args} />);
+
+        await waitForPromises();
+
+        if (initialDocId) {
+          expect(args.docStorage.load).toHaveBeenCalledTimes(1);
+        } else {
+          expect(args.docStorage.load).not.toHaveBeenCalled();
+        }
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: initialDocId } as unknown) as Document,
+        });
+
+        instance.update();
+
+        expect(getButton(instance).disableButton).toEqual(false);
+
+        testSave(instance, saveProps);
+
+        await waitForPromises();
+
+        return { args, instance };
       }
 
       it('shows a disabled save button when the user does not have permissions', async () => {
@@ -331,6 +398,86 @@ describe('Lens App', () => {
         onChange({ filterableIndexPatterns: [], doc: ('will save this' as unknown) as Document });
 
         instance.update();
+
+        expect(getButton(instance).disableButton).toEqual(false);
+      });
+
+      it('saves new docs', async () => {
+        const { args, instance } = await save({
+          initialDocId: undefined,
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+        });
+
+        expect(args.docStorage.save).toHaveBeenCalledWith({
+          id: undefined,
+          title: 'hello there',
+        });
+
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+
+        instance.setProps({ docId: 'aaa' });
+
+        expect(args.docStorage.load).not.toHaveBeenCalled();
+      });
+
+      it('saves the latest doc as a copy', async () => {
+        const { args, instance } = await save({
+          initialDocId: '1234',
+          newCopyOnSave: true,
+          newTitle: 'hello there',
+        });
+
+        expect(args.docStorage.save).toHaveBeenCalledWith({
+          id: undefined,
+          title: 'hello there',
+        });
+
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+
+        instance.setProps({ docId: 'aaa' });
+
+        expect(args.docStorage.load).toHaveBeenCalledTimes(1);
+      });
+
+      it('saves existing docs', async () => {
+        const { args, instance } = await save({
+          initialDocId: '1234',
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+        });
+
+        expect(args.docStorage.save).toHaveBeenCalledWith({
+          id: '1234',
+          title: 'hello there',
+        });
+
+        expect(args.redirectTo).not.toHaveBeenCalled();
+
+        instance.setProps({ docId: '1234' });
+
+        expect(args.docStorage.load).toHaveBeenCalledTimes(1);
+      });
+
+      it('handles save failure by showing a warning, but still allows another save', async () => {
+        const args = makeDefaultArgs();
+        args.editorFrame = frame;
+        (args.docStorage.save as jest.Mock).mockRejectedValue({ message: 'failed' });
+
+        const instance = mount(<App {...args} />);
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+        onChange({ filterableIndexPatterns: [], doc: ({ id: undefined } as unknown) as Document });
+
+        instance.update();
+
+        testSave(instance, { newCopyOnSave: false, newTitle: 'hello there' });
+
+        await waitForPromises();
+
+        expect(args.core.notifications.toasts.addDanger).toHaveBeenCalled();
+        expect(args.redirectTo).not.toHaveBeenCalled();
+        await waitForPromises();
 
         expect(getButton(instance).disableButton).toEqual(false);
       });
