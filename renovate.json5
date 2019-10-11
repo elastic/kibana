@@ -624,6 +624,14 @@
         ],
       },
       {
+        groupSlug: 'vinyl-fs',
+        groupName: 'vinyl-fs related packages',
+        packageNames: [
+          'vinyl-fs',
+          '@types/vinyl-fs',
+        ],
+      },
+      {
         groupSlug: 'zen-observable',
         groupName: 'zen-observable related packages',
         packageNames: [
@@ -656,11 +664,27 @@
         ],
       },
       {
+        groupSlug: 'fancy-log',
+        groupName: 'fancy-log related packages',
+        packageNames: [
+          'fancy-log',
+          '@types/fancy-log',
+        ],
+      },
+      {
         groupSlug: 'file-saver',
         groupName: 'file-saver related packages',
         packageNames: [
           'file-saver',
           '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'getos',
+        groupName: 'getos related packages',
+        packageNames: [
+          'getos',
+          '@types/getos',
         ],
       },
       {
