@@ -25,7 +25,11 @@ export const UPGRADE_TITLE = i18n.translate('xpack.siem.components.mlPopup.upgra
 });
 
 export const UPGRADE_BUTTON = i18n.translate('xpack.siem.components.mlPopup.upgradeButtonLabel', {
-  defaultMessage: 'Subscription options',
+  defaultMessage: 'Subscription plans',
+});
+
+export const LICENSE_BUTTON = i18n.translate('xpack.siem.components.mlPopup.licenseButtonLabel', {
+  defaultMessage: 'Manage license',
 });
 
 export const FILTER_PLACEHOLDER = i18n.translate(
