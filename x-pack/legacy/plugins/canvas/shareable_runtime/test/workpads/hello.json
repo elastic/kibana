@@ -1,0 +1,88 @@
+{
+  "pages": [
+    {
+      "id": "page-7186b301-f8a7-4c65-8b89-38d68d31cfc4",
+      "style": { "background": "#777777" },
+      "transition": {},
+      "groups": [],
+      "elements": [
+        {
+          "id": "element-e48b0339-4829-44eb-9f0c-8787e693a085",
+          "position": {
+            "left": -1,
+            "top": 264.78145695364236,
+            "width": 1082,
+            "height": 205.37748344370857,
+            "angle": 0,
+            "parent": null
+          },
+          "expressionRenderable": {
+            "state": "ready",
+            "value": {
+              "type": "render",
+              "as": "markdown",
+              "value": {
+                "content": "# Hello, Canvas.",
+                "font": {
+                  "type": "style",
+                  "spec": {
+                    "fontFamily": "'Open Sans', Helvetica, Arial, sans-serif",
+                    "fontWeight": "normal",
+                    "fontStyle": "normal",
+                    "textDecoration": "none",
+                    "textAlign": "left",
+                    "fontSize": "14px",
+                    "lineHeight": "1"
+                  },
+                  "css": "font-family:'Open Sans', Helvetica, Arial, sans-serif;font-weight:normal;font-style:normal;text-decoration:none;text-align:left;font-size:14px;line-height:1"
+                }
+              },
+              "css": ".canvasRenderEl h1 {\n  font-size: 150px;\n  text-align: center;\n  color: #d3d3d3;\n}",
+              "containerStyle": { "type": "containerStyle", "overflow": "hidden" }
+            },
+            "error": null
+          }
+        }
+      ]
+    }
+  ],
+  "name": "My Canvas Workpad",
+  "id": "workpad-bde237d4-12d7-4c3b-9ce8-8646d999618e",
+  "width": 1080,
+  "height": 720,
+  "css": ".canvasPage {\n\n}",
+  "page": 0,
+  "colors": [
+    "#37988d",
+    "#c19628",
+    "#b83c6f",
+    "#3f9939",
+    "#1785b0",
+    "#ca5f35",
+    "#45bdb0",
+    "#f2bc33",
+    "#e74b8b",
+    "#4fbf48",
+    "#1ea6dc",
+    "#fd7643",
+    "#72cec3",
+    "#f5cc5d",
+    "#ec77a8",
+    "#7acf74",
+    "#4cbce4",
+    "#fd986f",
+    "#a1ded7",
+    "#f8dd91",
+    "#f2a4c5",
+    "#a6dfa2",
+    "#86d2ed",
+    "#fdba9f",
+    "#000000",
+    "#444444",
+    "#777777",
+    "#BBBBBB",
+    "#FFFFFF",
+    "rgba(255,255,255,0)"
+  ],
+  "isWriteable": true
+}

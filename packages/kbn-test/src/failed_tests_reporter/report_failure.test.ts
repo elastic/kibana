@@ -51,9 +51,11 @@ describe('createFailureIssue()', () => {
           Array [
             "Failing test: some.classname - test name",
             "A test failed on a tracked branch
+
       \`\`\`
       this is the failure text
       \`\`\`
+
       First failure: [Jenkins Build](https://build-url)
 
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"some.classname\\",\\"test.name\\":\\"test name\\",\\"test.failCount\\":1}} -->",
