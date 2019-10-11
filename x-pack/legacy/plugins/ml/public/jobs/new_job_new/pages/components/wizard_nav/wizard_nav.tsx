@@ -22,6 +22,7 @@ export const WizardNav: FC<StepsNavProps> = ({
   previousActive = true,
   next,
   nextActive = true,
+  children,
 }) => (
   <Fragment>
     <EuiHorizontalRule />
@@ -36,6 +37,7 @@ export const WizardNav: FC<StepsNavProps> = ({
           <NextButton next={next} nextActive={nextActive} />
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
       <EuiFlexItem />
     </EuiFlexGroup>
   </Fragment>

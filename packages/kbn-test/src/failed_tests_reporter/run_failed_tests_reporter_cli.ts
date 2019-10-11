@@ -61,7 +61,6 @@ export function runFailedTestsReporterCli() {
       }
 
       const githubApi = new GithubApi(log, process.env.GITHUB_TOKEN, dryRun);
-      const issues = await githubApi.getAllFailedTestIssues();
       const reportPaths = await globby(['target/junit/**/*.xml'], {
         cwd: REPO_ROOT,
         absolute: true,
@@ -69,7 +68,7 @@ export function runFailedTestsReporterCli() {
 
       for (const reportPath of reportPaths) {
         for (const failure of await getFailures(log, reportPath)) {
-          const existingIssue = issues.find(
+          const existingIssue = await githubApi.findFailedTestIssue(
             i =>
               getIssueMetadata(i.body, 'test.class') === failure.classname &&
               getIssueMetadata(i.body, 'test.name') === failure.name

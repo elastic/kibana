@@ -5,7 +5,6 @@
  */
 
 
-
 import _ from 'lodash';
 import semver from 'semver';
 import numeral from '@elastic/numeral';
@@ -13,6 +12,7 @@ import numeral from '@elastic/numeral';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
+import { CREATED_BY_LABEL } from '../../public/jobs/new_job_new/common/job_creator/util/constants';
 
 // work out the default frequency based on the bucket_span in seconds
 export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
@@ -438,6 +438,31 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   };
 }
 
+export function basicDatafeedValidation(datafeed) {
+  const messages = [];
+  const valid = true;
+
+  if (datafeed) {
+    // if (_.isEmpty(datafeed.query)) {
+    //   messages.push({ id: 'query_empty' });
+    //   valid = false;
+    // } else if (isValidJson(datafeed.query) === false) {
+    //   messages.push({ id: 'query_invalid' });
+    //   valid = false;
+    // } else {
+    //   messages.push({ id: 'query_valid' });
+    // }
+    messages.push({ id: 'query_delay_valid' });
+  }
+
+  return {
+    messages,
+    valid,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
 export function validateModelMemoryLimit(job, limits) {
   const messages = [];
   let valid = true;
@@ -515,5 +540,16 @@ export function getLatestDataOrBucketTimestamp(latestDataTimestamp, latestBucket
     return Math.max(latestDataTimestamp, latestBucketTimestamp);
   } else {
     return (latestDataTimestamp !== undefined) ? latestDataTimestamp : latestBucketTimestamp;
+  }
+}
+
+/**
+ * If created_by is set in the job's custom_settings, remove it in case
+ * it was created by a job wizard as the rules cannot currently be edited
+ * in the job wizards and so would be lost in a clone.
+ */
+export function processCreatedBy(customSettings) {
+  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by)) {
+    delete customSettings.created_by;
   }
 }

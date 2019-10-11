@@ -53,6 +53,15 @@ export interface AggFieldPair {
     field: SplitField;
     value: string | null;
   };
+  over?: {
+    field: SplitField;
+    value: string | null;
+  };
+  partition?: {
+    field: SplitField;
+    value: string | null;
+  };
+  excludeFrequent?: string;
 }
 
 export interface AggFieldNamePair {
@@ -62,4 +71,13 @@ export interface AggFieldNamePair {
     field: string | null;
     value: string | null;
   };
+  over?: {
+    field: string | null;
+    value: string | null;
+  };
+  partition?: {
+    field: string | null;
+    value: string | null;
+  };
+  excludeFrequent?: string;
 }
