@@ -17,14 +17,24 @@
  * under the License.
  */
 import { wrapInI18nContext } from 'ui/i18n';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
 import { TableHeader } from './table_header/table_header';
 const module = uiModules.get('app/discover');
 
-module.directive('kbnTableHeader', function (reactDirective, config) {
+module.directive('kbnTableHeader', function(reactDirective: any, config: any) {
   return reactDirective(
     wrapInI18nContext(TableHeader),
-    undefined,
+    [
+      ['columns', { watchDepth: 'collection' }],
+      ['hideTimeColumn', { watchDepth: 'value' }],
+      ['indexPattern', { watchDepth: 'reference' }],
+      ['isShortDots', { watchDepth: 'value' }],
+      ['onChangeSortOrder', { watchDepth: 'reference' }],
+      ['onMoveColumn', { watchDepth: 'reference' }],
+      ['onRemoveColumn', { watchDepth: 'reference' }],
+      ['sortOrder', { watchDepth: 'collection' }],
+    ],
     { restrict: 'A' },
     {
       hideTimeColumn: config.get('doc_table:hideTimeColumn'),
