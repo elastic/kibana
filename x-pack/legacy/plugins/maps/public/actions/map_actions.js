@@ -224,6 +224,11 @@ export function cleanTooltipStateForLayer(layerId, layerFeatures = []) {
       });
     });
 
+    if (tooltipState.features.length === nextTooltipFeatures.length) {
+      // no features got removed, nothing to update
+      return;
+    }
+
     if (nextTooltipFeatures.length === 0) {
       // all features removed from tooltip, close tooltip
       dispatch(setTooltipState(null));
