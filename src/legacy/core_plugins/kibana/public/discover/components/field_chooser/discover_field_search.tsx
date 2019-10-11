@@ -47,14 +47,14 @@ export interface Props {
   /**
    * the number of selected filters
    */
-  filterActive?: number;
+  filtersActive: number;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value, filterActive }: Props) {
+export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value, filtersActive }: Props) {
   if (typeof value !== 'string') {
     // at initial rendering value is undefined (angular related), this catches the warning
     // should be removed once all is react
@@ -91,7 +91,8 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value,
         data-test-subj="toggleFieldFilterButton"
         className="dscToggleFieldFilterButton"
         icon={<EuiIcon type="filter" />}
-        isSelected={false}
+        isSelected={showFilter}
+        quantity={filtersActive}
         onClick={() => onShowFilter()}
       >
         <FormattedMessage
