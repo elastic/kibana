@@ -27,8 +27,8 @@
 /x-pack/test/functional/apps/code/  @teams/code
 /x-pack/test/api_integration/apis/code/  @teams/code
 
-# Infrastructure and Logs UI
-/x-pack/legacy/plugins/infra/ @elastic/infra-logs-ui
+# Logs & Metrics UI
+/x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
 
 # Machine Learning
 /x-pack/legacy/plugins/ml/  @elastic/ml-ui
