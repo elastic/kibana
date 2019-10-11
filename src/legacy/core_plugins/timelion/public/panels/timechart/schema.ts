@@ -225,7 +225,6 @@ export function timechartFn(dependencies: TimelionStartDependencies) {
           }
 
           let i;
-          let j;
           const dataset = plot.getData();
           if (legendCaption) {
             legendCaption.text(
