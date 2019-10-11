@@ -91,6 +91,16 @@
 
   <div class="visualize" ng-if="!chrome.getVisible()"/>
 
+  <h1
+    class="euiScreenReaderOnly"
+    i18n-id="kbn.visualize.pageHeading"
+    i18n-default-message="{chartName} {chartType} visualization"
+    i18n-values="{
+      chartName: savedVis.title,
+      chartType: vis.type.title
+    }"
+  >
+  </h1>
   <visualization-editor
     ng-if="chrome.getVisible()"
     saved-obj="savedVis"
