@@ -15,7 +15,13 @@ export class PatternReader {
 
   onGeoJSONFeaturePatternDetect = featureDetectCallback => {
     this.oboeStream.node({
-      'features.*': feature => featureDetectCallback(feature)
+      'features.*': feature => featureDetectCallback(feature),
+      // Handle single feature files
+      '!.geometry': (geom, path, ancestors) => {
+        const feature = ancestors[0];
+        const { geometry } = featureDetectCallback(feature);
+        return geometry;
+      }
     });
   }
 
