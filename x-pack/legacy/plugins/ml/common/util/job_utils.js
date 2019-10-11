@@ -438,6 +438,31 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   };
 }
 
+export function basicDatafeedValidation(datafeed) {
+  const messages = [];
+  const valid = true;
+
+  if (datafeed) {
+    // if (_.isEmpty(datafeed.query)) {
+    //   messages.push({ id: 'query_empty' });
+    //   valid = false;
+    // } else if (isValidJson(datafeed.query) === false) {
+    //   messages.push({ id: 'query_invalid' });
+    //   valid = false;
+    // } else {
+    //   messages.push({ id: 'query_valid' });
+    // }
+    messages.push({ id: 'query_delay_valid' });
+  }
+
+  return {
+    messages,
+    valid,
+    contains: id =>  (messages.some(m => id === m.id)),
+    find: id => (messages.find(m => id === m.id)),
+  };
+}
+
 export function validateModelMemoryLimit(job, limits) {
   const messages = [];
   let valid = true;

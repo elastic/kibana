@@ -6,17 +6,29 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldText } from '@elastic/eui';
-import { JobCreatorContext } from '../../../../../job_creator_context';
+import { newJobDefaults } from '../../../../../new_job/utils/new_job_defaults';
+import { JobCreatorContext } from '../../job_creator_context';
 import { Description } from './description';
 
 export const ModelMemoryLimitInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator,
+    jobCreatorUpdate,
+    jobCreatorUpdated,
+    jobValidator,
+    jobValidatorUpdated,
+  } = useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.modelMemoryLimit);
   const [modelMemoryLimit, setModelMemoryLimit] = useState(
     jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit
   );
+
+  const { anomaly_detectors: anomalyDetectors } = newJobDefaults();
+  const { model_memory_limit: modelMemoryLimitDefault } = anomalyDetectors;
+
+  useEffect(() => {
+    setModelMemoryLimit(jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit);
+  }, [jobCreatorUpdated]);
 
   useEffect(() => {
     jobCreator.modelMemoryLimit = modelMemoryLimit === '' ? null : modelMemoryLimit;
@@ -31,6 +43,7 @@ export const ModelMemoryLimitInput: FC = () => {
     <Description validation={validation}>
       <EuiFieldText
         value={modelMemoryLimit}
+        placeholder={modelMemoryLimitDefault}
         onChange={e => setModelMemoryLimit(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputModelMemoryLimit"
