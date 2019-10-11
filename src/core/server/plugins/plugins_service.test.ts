@@ -23,7 +23,7 @@ import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 
-import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
+import { Config, ConfigPath, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -54,6 +54,47 @@ const logger = loggingServiceMock.create();
     virtual: true,
   });
 });
+
+const createPlugin = (
+  id: string,
+  {
+    path = id,
+    disabled = false,
+    version = 'some-version',
+    requiredPlugins = [],
+    optionalPlugins = [],
+    kibanaVersion = '7.0.0',
+    configPath = [path],
+    server = true,
+    ui = true,
+  }: {
+    path?: string;
+    disabled?: boolean;
+    version?: string;
+    requiredPlugins?: string[];
+    optionalPlugins?: string[];
+    kibanaVersion?: string;
+    configPath?: ConfigPath;
+    server?: boolean;
+    ui?: boolean;
+  }
+): PluginWrapper => {
+  return new PluginWrapper({
+    path,
+    manifest: {
+      id,
+      version,
+      configPath: `${configPath}${disabled ? '-disabled' : ''}`,
+      kibanaVersion,
+      requiredPlugins,
+      optionalPlugins,
+      server,
+      ui,
+    },
+    opaqueId: Symbol(id),
+    initializerContext: { logger } as any,
+  });
+};
 
 beforeEach(async () => {
   mockPackage.raw = {
@@ -128,35 +169,19 @@ test('`discover` throws if discovered plugins with conflicting names', async () 
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([
-      new PluginWrapper({
+      createPlugin('conflicting-id', {
         path: 'path-4',
-        manifest: {
-          id: 'conflicting-id',
-          version: 'some-version',
-          configPath: 'path',
-          kibanaVersion: '7.0.0',
-          requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
-          optionalPlugins: ['some-optional-plugin'],
-          server: true,
-          ui: true,
-        },
-        opaqueId: Symbol(),
-        initializerContext: { logger } as any,
+        version: 'some-version',
+        configPath: 'path',
+        requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
+        optionalPlugins: ['some-optional-plugin'],
       }),
-      new PluginWrapper({
-        path: 'path-5',
-        manifest: {
-          id: 'conflicting-id',
-          version: 'some-other-version',
-          configPath: ['plugin', 'path'],
-          kibanaVersion: '7.0.0',
-          requiredPlugins: ['some-required-plugin'],
-          optionalPlugins: [],
-          server: true,
-          ui: false,
-        },
-        opaqueId: Symbol(),
-        initializerContext: { logger } as any,
+      createPlugin('conflicting-id', {
+        path: 'path-4',
+        version: 'some-version',
+        configPath: 'path',
+        requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
+        optionalPlugins: ['some-optional-plugin'],
       }),
     ]),
   });
@@ -180,65 +205,25 @@ test('`discover` properly detects plugins that should be disabled.', async () =>
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([
-      new PluginWrapper({
+      createPlugin('explicitly-disabled-plugin', {
+        disabled: true,
         path: 'path-1',
-        manifest: {
-          id: 'explicitly-disabled-plugin',
-          version: 'some-version',
-          configPath: 'path-1-disabled',
-          kibanaVersion: '7.0.0',
-          requiredPlugins: [],
-          optionalPlugins: [],
-          server: true,
-          ui: true,
-        },
-        opaqueId: Symbol(),
-        initializerContext: { logger } as any,
+        configPath: 'path-1',
       }),
-      new PluginWrapper({
+      createPlugin('plugin-with-missing-required-deps', {
         path: 'path-2',
-        manifest: {
-          id: 'plugin-with-missing-required-deps',
-          version: 'some-version',
-          configPath: 'path-2',
-          kibanaVersion: '7.0.0',
-          requiredPlugins: ['missing-plugin'],
-          optionalPlugins: [],
-          server: true,
-          ui: true,
-        },
-        opaqueId: Symbol(),
-        initializerContext: { logger } as any,
+        configPath: 'path-2',
+        requiredPlugins: ['missing-plugin'],
       }),
-      new PluginWrapper({
+      createPlugin('plugin-with-disabled-transitive-dep', {
         path: 'path-3',
-        manifest: {
-          id: 'plugin-with-disabled-transitive-dep',
-          version: 'some-version',
-          configPath: 'path-3',
-          kibanaVersion: '7.0.0',
-          requiredPlugins: ['another-explicitly-disabled-plugin'],
-          optionalPlugins: [],
-          server: true,
-          ui: true,
-        },
-        opaqueId: Symbol(),
-        initializerContext: { logger } as any,
+        configPath: 'path-3',
+        requiredPlugins: ['another-explicitly-disabled-plugin'],
       }),
-      new PluginWrapper({
+      createPlugin('another-explicitly-disabled-plugin', {
+        disabled: true,
         path: 'path-4',
-        manifest: {
-          id: 'another-explicitly-disabled-plugin',
-          version: 'some-version',
-          configPath: 'path-4-disabled',
-          kibanaVersion: '7.0.0',
-          requiredPlugins: [],
-          optionalPlugins: [],
-          server: true,
-          ui: true,
-        },
-        opaqueId: Symbol(),
-        initializerContext: { logger } as any,
+        configPath: 'path-4-disabled',
       }),
     ]),
   });
@@ -272,36 +257,15 @@ Array [
 });
 
 test('`discover` does not throw in case of cyclic plugin dependencies', async () => {
-  const firstPlugin = new PluginWrapper({
+  const firstPlugin = createPlugin('first-plugin', {
     path: 'path-1',
-    manifest: {
-      id: 'first-plugin',
-      version: 'some-version',
-      configPath: 'path-1d',
-      kibanaVersion: '7.0.0',
-      requiredPlugins: ['second-plugin'],
-      optionalPlugins: [],
-      server: true,
-      ui: true,
-    },
-    opaqueId: Symbol(),
-    initializerContext: { logger } as any,
+    requiredPlugins: ['second-plugin'],
   });
-  const secondPlugin = new PluginWrapper({
+  const secondPlugin = createPlugin('second-plugin', {
     path: 'path-2',
-    manifest: {
-      id: 'second-plugin',
-      version: 'some-version',
-      configPath: 'path-2',
-      kibanaVersion: '7.0.0',
-      requiredPlugins: ['first-plugin'],
-      optionalPlugins: [],
-      server: true,
-      ui: true,
-    },
-    opaqueId: Symbol(),
-    initializerContext: { logger } as any,
+    requiredPlugins: ['first-plugin'],
   });
+
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([firstPlugin, secondPlugin]),
@@ -316,36 +280,16 @@ test('`discover` does not throw in case of cyclic plugin dependencies', async ()
 });
 
 test('`discover` properly invokes plugin discovery and ignores non-critical errors.', async () => {
-  const firstPlugin = new PluginWrapper({
+  const firstPlugin = createPlugin('some-id', {
     path: 'path-1',
-    manifest: {
-      id: 'some-id',
-      version: 'some-version',
-      configPath: 'path',
-      kibanaVersion: '7.0.0',
-      requiredPlugins: ['some-other-id'],
-      optionalPlugins: ['missing-optional-dep'],
-      server: true,
-      ui: true,
-    },
-    opaqueId: Symbol(),
-    initializerContext: { logger } as any,
+    configPath: 'path',
+    requiredPlugins: ['some-other-id'],
+    optionalPlugins: ['missing-optional-dep'],
   });
-
-  const secondPlugin = new PluginWrapper({
+  const secondPlugin = createPlugin('some-other-id', {
     path: 'path-2',
-    manifest: {
-      id: 'some-other-id',
-      version: 'some-other-version',
-      configPath: ['plugin', 'path'],
-      kibanaVersion: '7.0.0',
-      requiredPlugins: [],
-      optionalPlugins: [],
-      server: true,
-      ui: false,
-    },
-    opaqueId: Symbol(),
-    initializerContext: { logger } as any,
+    version: 'some-other-version',
+    configPath: ['plugin', 'path'],
   });
 
   mockDiscover.mockReturnValue({
@@ -404,20 +348,9 @@ test('`discover` registers plugin config schema in config service', async () => 
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([
-      new PluginWrapper({
+      createPlugin('some-id', {
         path: 'path-with-schema',
-        manifest: {
-          id: 'some-id',
-          version: 'some-version',
-          configPath: 'path',
-          kibanaVersion: '7.0.0',
-          requiredPlugins: [],
-          optionalPlugins: [],
-          server: true,
-          ui: true,
-        },
-        opaqueId: Symbol(),
-        initializerContext: { logger } as any,
+        configPath: 'path',
       }),
     ]),
   });
