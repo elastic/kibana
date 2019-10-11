@@ -12,6 +12,7 @@ import {
   expectTextsInDocument,
   expectTextsNotInDocument
 } from '../../../../utils/testHelpers';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 
 describe('MetadataTable', () => {
   afterEach(cleanup);
@@ -24,8 +25,9 @@ describe('MetadataTable', () => {
           required: true
         }
       ];
-      // @ts-ignore
-      const output = render(<MetadataTable item={{}} sections={sections} />);
+      const output = render(
+        <MetadataTable item={{} as Transaction} sections={sections} />
+      );
       expectTextsInDocument(output, ['Foo', 'No data available']);
     });
     it('shows message if property is not available', () => {
@@ -37,12 +39,12 @@ describe('MetadataTable', () => {
           properties: ['bar']
         }
       ];
-      const item = {
+      const item = ({
         foo: {
           foobar: 'bar'
         }
-      };
-      // @ts-ignore
+      } as unknown) as Transaction;
+
       const output = render(<MetadataTable item={item} sections={sections} />);
       expectTextsInDocument(output, ['Foo', 'No data available']);
     });
@@ -56,8 +58,9 @@ describe('MetadataTable', () => {
           required: false
         }
       ];
-      // @ts-ignore
-      const output = render(<MetadataTable item={{}} sections={sections} />);
+      const output = render(
+        <MetadataTable item={{} as Transaction} sections={sections} />
+      );
       expectTextsNotInDocument(output, ['Foo']);
     });
     it('does not show section if property is not available', () => {
@@ -69,12 +72,11 @@ describe('MetadataTable', () => {
           properties: ['bar']
         }
       ];
-      const item = {
+      const item = ({
         foo: {
           foobar: 'bar'
         }
-      };
-      // @ts-ignore
+      } as unknown) as Transaction;
       const output = render(<MetadataTable item={item} sections={sections} />);
       expectTextsNotInDocument(output, ['Foo']);
     });

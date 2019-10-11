@@ -30,24 +30,15 @@ interface Props {
 }
 
 const filterSections = (sections: SectionType[], item: Item) =>
-  sections.filter(({ key, required, properties }) => {
-    if (required) {
-      return true;
-    }
-    const hasKey = has(item, key);
-    if (!hasKey) {
-      return false;
-    }
-
-    if (properties) {
-      let sectionData: Record<string, unknown> = get(item, key);
-      sectionData = pick(sectionData, properties);
-      if (isEmpty(sectionData)) {
-        return false;
-      }
-    }
-    return true;
-  });
+  sections
+    .map(section => {
+      const data: Record<string, unknown> = get(item, section.key);
+      return {
+        ...section,
+        data: section.properties ? pick(data, section.properties) : data
+      };
+    })
+    .filter(({ required, data }) => required || !isEmpty(data));
 
 export function MetadataTable({ item, sections }: Props) {
   const filteredSections = filterSections(sections, item);
@@ -62,22 +53,16 @@ export function MetadataTable({ item, sections }: Props) {
           </ElasticDocsLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {filteredSections.map(section => {
-        let sectionData: Record<string, unknown> = get(item, section.key);
-        if (section.properties) {
-          sectionData = pick(sectionData, section.properties);
-        }
-        return (
-          <div key={section.key}>
-            <EuiTitle size="xs">
-              <h6>{section.label}</h6>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <Section propData={sectionData} propKey={section.key} />
-            <EuiSpacer size="xl" />
-          </div>
-        );
-      })}
+      {filteredSections.map(section => (
+        <div key={section.key}>
+          <EuiTitle size="xs">
+            <h6>{section.label}</h6>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <Section propData={section.data} propKey={section.key} />
+          <EuiSpacer size="xl" />
+        </div>
+      ))}
     </React.Fragment>
   );
 }
