@@ -2,7 +2,7 @@
 [[metrics-explorer]]
 == Metrics Explorer
 
-Metrics Explorer in the Infrastructure app in Kibana allows you to group and visualise multiple customisable metrics for one or more components in a graphical format.
+Metrics Explorer in the Metrics app in Kibana allows you to group and visualise multiple customisable metrics for one or more components in a graphical format.
 This can be a starting point for further investigations.
 You can also save your views and add them to {kibana-ref}/dashboard.html[dashboards].
 
