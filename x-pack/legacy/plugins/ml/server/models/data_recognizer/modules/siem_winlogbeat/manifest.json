@@ -1,0 +1,100 @@
+{
+  "id": "siem_winlogbeat",
+  "title": "SIEM Winlogbeat",
+  "description": "Detect unusual processes and network activity in Winlogbeat data (beta)",
+  "type": "Winlogbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "winlogbeat-*",
+  "query": {
+    "bool": {
+      "filter": [
+        {"term": {"agent.type": "winlogbeat"}}
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "rare_process_by_host_windows_ecs",
+      "file": "rare_process_by_host_windows_ecs.json"
+    },
+    {
+      "id": "windows_anomalous_network_activity_ecs",
+      "file": "windows_anomalous_network_activity_ecs.json"
+    },
+    {
+      "id": "windows_anomalous_path_activity_ecs",
+      "file": "windows_anomalous_path_activity_ecs.json"
+    },
+    {
+      "id": "windows_anomalous_process_all_hosts_ecs",
+      "file": "windows_anomalous_process_all_hosts_ecs.json"
+    },
+    {
+      "id": "windows_anomalous_process_creation",
+      "file": "windows_anomalous_process_creation.json"
+    },
+    {
+      "id": "windows_anomalous_script",
+      "file": "windows_anomalous_script.json"
+    },
+    {
+      "id": "windows_anomalous_service",
+      "file": "windows_anomalous_service.json"
+    },
+    {
+      "id": "windows_anomalous_user_name_ecs",
+      "file": "windows_anomalous_user_name_ecs.json"
+    },
+    {
+      "id": "windows_rare_user_runas_event",
+      "file": "windows_rare_user_runas_event.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-rare_process_by_host_windows_ecs",
+      "file": "datafeed_rare_process_by_host_windows_ecs.json",
+      "job_id": "rare_process_by_host_windows_ecs"
+    },
+    {
+      "id": "datafeed-windows_anomalous_network_activity_ecs",
+      "file": "datafeed_windows_anomalous_network_activity_ecs.json",
+      "job_id": "windows_anomalous_network_activity_ecs"
+    },
+    {
+      "id": "datafeed-windows_anomalous_path_activity_ecs",
+      "file": "datafeed_windows_anomalous_path_activity_ecs.json",
+      "job_id": "windows_anomalous_path_activity_ecs"
+    },
+    {
+      "id": "datafeed-windows_anomalous_process_all_hosts_ecs",
+      "file": "datafeed_windows_anomalous_process_all_hosts_ecs.json",
+      "job_id": "windows_anomalous_process_all_hosts_ecs"
+    },
+    {
+      "id": "datafeed-windows_anomalous_process_creation",
+      "file": "datafeed_windows_anomalous_process_creation.json",
+      "job_id": "windows_anomalous_process_creation"
+    },
+    {
+      "id": "datafeed-windows_anomalous_script",
+      "file": "datafeed_windows_anomalous_script.json",
+      "job_id": "windows_anomalous_script"
+    },
+    {
+      "id": "datafeed-windows_anomalous_service",
+      "file": "datafeed_windows_anomalous_service.json",
+      "job_id": "windows_anomalous_service"
+    },
+    {
+      "id": "datafeed-windows_anomalous_user_name_ecs",
+      "file": "datafeed_windows_anomalous_user_name_ecs.json",
+      "job_id": "windows_anomalous_user_name_ecs"
+    },
+    {
+      "id": "datafeed-windows_rare_user_runas_event",
+      "file": "datafeed_windows_rare_user_runas_event.json",
+      "job_id": "windows_rare_user_runas_event"
+    }
+  ]
+}

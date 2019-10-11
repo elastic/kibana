@@ -51,7 +51,10 @@ describe('body', () => {
       endDate: 0,
       filterQuery: { term: { 'host.name': 'host-1' } },
       hostName: 'host-1',
-      indexPattern: { fields: [], title: 'auditbeat-*,filebeat-*,packetbeat-*,winlogbeat-*' },
+      indexPattern: {
+        fields: [],
+        title: 'auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+      },
       kqlQueryExpression: 'host.name: "host-1"',
       skip: false,
       startDate: 0,

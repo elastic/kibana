@@ -70,7 +70,8 @@
     "core:acceptApiChanges": "node scripts/check_core_api_changes.js --accept",
     "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook",
     "spec_to_console": "node scripts/spec_to_console",
-    "backport-skip-ci": "backport --prDescription \"[skip-ci]\""
+    "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
+    "cover:report": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html"
   },
   "repository": {
     "type": "git",
@@ -256,11 +257,12 @@
     "vega-lib": "4.3.0",
     "vega-lite": "^2.6.0",
     "vega-schema-url-parser": "1.0.0",
-    "vega-tooltip": "^0.9.14",
+    "vega-tooltip": "^0.12.0",
     "vision": "^5.3.3",
     "webpack": "4.41.0",
     "webpack-merge": "4.2.2",
     "whatwg-fetch": "^3.0.0",
+    "wrapper-webpack-plugin": "^2.1.0",
     "yauzl": "2.10.0"
   },
   "devDependencies": {
@@ -355,6 +357,7 @@
     "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
     "babel-plugin-dynamic-import-node": "^2.3.0",
+    "babel-plugin-istanbul": "^5.2.0",
     "backport": "4.7.1",
     "chai": "3.5.0",
     "chance": "1.0.18",

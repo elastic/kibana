@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultIndexPattern } from '../../../default_index_pattern';
 import { Direction, FlowTargetSourceDest, NetworkTopNFlowFields } from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
 
 export const mockOptions: NetworkTopNFlowRequestOptions = {
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',
