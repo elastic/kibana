@@ -1,5 +1,5 @@
 {
-  "data_frame.delete_data_frame_transform": {
+  "data_frame_transform_deprecated.delete_transform": {
     "url_params": {
       "force": "__flag__"
     },

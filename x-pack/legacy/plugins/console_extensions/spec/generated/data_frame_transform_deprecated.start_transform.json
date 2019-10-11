@@ -1,5 +1,5 @@
 {
-  "data_frame.start_data_frame_transform": {
+  "data_frame_transform_deprecated.start_transform": {
     "url_params": {
       "timeout": ""
     },

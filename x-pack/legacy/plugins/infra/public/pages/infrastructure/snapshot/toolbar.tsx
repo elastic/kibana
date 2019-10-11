@@ -19,6 +19,9 @@ import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_option
 import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 import { WithSource } from '../../../containers/with_source';
+import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
+import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
+import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
 
 export const SnapshotToolbar = () => (
   <Toolbar>
@@ -111,6 +114,19 @@ export const SnapshotToolbar = () => (
                     onChangeCustomOptions={changeCustomOptions}
                     customOptions={customOptions}
                   />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true} />
+                <EuiFlexItem grow={false}>
+                  <WithWaffleViewState indexPattern={createDerivedIndexPattern('metrics')}>
+                    {({ defaultViewState, viewState, onViewChange }) => (
+                      <SavedViewsToolbarControls
+                        defaultViewState={defaultViewState}
+                        viewState={viewState}
+                        onViewChange={onViewChange}
+                        viewType={inventoryViewSavedObjectType}
+                      />
+                    )}
+                  </WithWaffleViewState>
                 </EuiFlexItem>
               </React.Fragment>
             )}
