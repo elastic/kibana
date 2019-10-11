@@ -65,6 +65,10 @@ exports.installArchive = async function installArchive(archive, options = {}) {
   await decompress(dest, installPath);
   log.info('extracted to %s', chalk.bold(installPath));
 
+  const tmpdir = path.resolve(installPath, 'ES_TMPDIR');
+  fs.mkdirSync(tmpdir, { recursive: true });
+  log.info('created %s', chalk.bold(tmpdir));
+
   if (license !== 'oss') {
     // starting in 6.3, security is disabled by default. Since we bootstrap
     // the keystore, we can enable security ourselves.
