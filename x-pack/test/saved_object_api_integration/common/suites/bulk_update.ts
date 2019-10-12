@@ -33,7 +33,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
   const createExpectNotFound = (type: string, id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
-    const [savedObject] = resp.body.saved_objects;
+    const [, savedObject] = resp.body.saved_objects;
     expect(savedObject.error).eql({
       statusCode: 404,
       error: 'Not Found',
@@ -55,22 +55,25 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
     DEFAULT_SPACE_ID
   );
 
-  const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
+  const createExpectRbacForbidden = (types: string[]) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_update ${type}`,
+      message: `Unable to bulk_update ${types.join()}`,
     });
   };
 
-  const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
+  const expectDoesntExistRbacForbidden = createExpectRbacForbidden(['globaltype', 'visualization']);
 
-  const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
+  const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden(['globaltype']);
 
-  const expectHiddenTypeRbacForbidden = createExpectRbacForbidden('hiddentype');
+  const expectHiddenTypeRbacForbidden = createExpectRbacForbidden(['globaltype', 'hiddentype']);
+  const expectHiddenTypeRbacForbiddenWithGlobalAllowed = createExpectRbacForbidden(['hiddentype']);
+
+  const expectSpaceAwareRbacForbidden = createExpectRbacForbidden(['globaltype', 'visualization']);
 
   const expectNotSpaceAwareResults = (resp: { [key: string]: any }) => {
-    const [savedObject] = resp.body.saved_objects;
+    const [, savedObject] = resp.body.saved_objects;
     // loose uuid validation
     expect(savedObject)
       .to.have.property('id')
@@ -92,10 +95,8 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
     });
   };
 
-  const expectSpaceAwareRbacForbidden = createExpectRbacForbidden('visualization');
-
   const expectSpaceAwareResults = (resp: { [key: string]: any }) => {
-    const [savedObject] = resp.body.saved_objects;
+    const [, savedObject] = resp.body.saved_objects;
     // loose uuid validation ignoring prefix
     expect(savedObject)
       .to.have.property('id')
@@ -123,6 +124,18 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
   ) => {
     const { user = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
 
+    // We add this type into all bulk updates
+    // to ensure that having additional items in the bulk
+    // update doesn't change the expected outcome overall
+    let updateCount = 0;
+    const generateNonSpaceAwareGlobalSavedObject = () => ({
+      type: 'globaltype',
+      id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
+      attributes: {
+        name: `Update #${++updateCount}`,
+      },
+    });
+
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
@@ -131,6 +144,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
           .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
           .auth(user.username, user.password)
           .send([
+            generateNonSpaceAwareGlobalSavedObject(),
             {
               type: 'visualization',
               id: `${getIdPrefix(otherSpaceId || spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
@@ -138,6 +152,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
                 title: 'My second favorite vis',
               },
             },
+            generateNonSpaceAwareGlobalSavedObject(),
           ])
           .expect(tests.spaceAware.statusCode)
           .then(tests.spaceAware.response);
@@ -148,6 +163,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
           .put(`${getUrlPrefix(otherSpaceId || spaceId)}/api/saved_objects/_bulk_update`)
           .auth(user.username, user.password)
           .send([
+            generateNonSpaceAwareGlobalSavedObject(),
             {
               type: 'globaltype',
               id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
@@ -155,6 +171,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
                 name: 'My second favorite',
               },
             },
+            generateNonSpaceAwareGlobalSavedObject(),
           ])
           .expect(tests.notSpaceAware.statusCode)
           .then(tests.notSpaceAware.response);
@@ -165,6 +182,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
           .put(`${getUrlPrefix(otherSpaceId || spaceId)}/api/saved_objects/_bulk_update`)
           .auth(user.username, user.password)
           .send([
+            generateNonSpaceAwareGlobalSavedObject(),
             {
               type: 'hiddentype',
               id: 'hiddentype_1',
@@ -172,6 +190,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
                 name: 'My favorite hidden type',
               },
             },
+            generateNonSpaceAwareGlobalSavedObject(),
           ])
           .expect(tests.hiddenType.statusCode)
           .then(tests.hiddenType.response);
@@ -183,6 +202,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
             .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
             .auth(user.username, user.password)
             .send([
+              generateNonSpaceAwareGlobalSavedObject(),
               {
                 type: 'visualization',
                 id: `${getIdPrefix(spaceId)}not an id`,
@@ -190,6 +210,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
                   title: 'My second favorite vis',
                 },
               },
+              generateNonSpaceAwareGlobalSavedObject(),
             ])
             .expect(tests.doesntExist.statusCode)
             .then(tests.doesntExist.response);
@@ -212,6 +233,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
     expectSpaceAwareRbacForbidden,
     expectSpaceAwareResults,
     expectHiddenTypeRbacForbidden,
+    expectHiddenTypeRbacForbiddenWithGlobalAllowed,
     bulkUpdateTest,
   };
 }
