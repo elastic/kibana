@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BasicValidations } from './job_validator';
-import { Job } from '../job_creator/configs';
+import { Job, Datafeed } from '../job_creator/configs';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
 import { ValidationResults, ValidationMessage } from '../../../../../common/util/job_utils';
@@ -15,7 +15,8 @@ import { ExistingJobsAndGroups } from '../../../../services/job_service';
 export function populateValidationMessages(
   validationResults: ValidationResults,
   basicValidations: BasicValidations,
-  jobConfig: Job
+  jobConfig: Job,
+  datafeedConfig: Datafeed
 ) {
   const limits = newJobLimits();
 
@@ -164,6 +165,40 @@ export function populateValidationMessages(
       defaultMessage: 'Datafeed query must be a valid elasticsearch query.',
     });
     basicValidations.query.message = msg;
+  }
+
+  if (validationResults.contains('query_delay_invalid')) {
+    basicValidations.queryDelay.valid = false;
+    const msg = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.queryDelayInvalidTimeIntervalFormatErrorMessage',
+      {
+        defaultMessage:
+          '{queryDelay} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
+        values: {
+          queryDelay: datafeedConfig.query_delay,
+          tenMinutes: '10m',
+          oneHour: '1h',
+        },
+      }
+    );
+    basicValidations.queryDelay.message = msg;
+  }
+
+  if (validationResults.contains('frequency_invalid')) {
+    basicValidations.frequency.valid = false;
+    const msg = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.frequencyInvalidTimeIntervalFormatErrorMessage',
+      {
+        defaultMessage:
+          '{frequency} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
+        values: {
+          frequency: datafeedConfig.frequency,
+          tenMinutes: '10m',
+          oneHour: '1h',
+        },
+      }
+    );
+    basicValidations.frequency.message = msg;
   }
 }
 

@@ -440,26 +440,35 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
 
 export function basicDatafeedValidation(datafeed) {
   const messages = [];
-  const valid = true;
+  let valid = true;
 
   if (datafeed) {
-    // if (_.isEmpty(datafeed.query)) {
-    //   messages.push({ id: 'query_empty' });
-    //   valid = false;
-    // } else if (isValidJson(datafeed.query) === false) {
-    //   messages.push({ id: 'query_invalid' });
-    //   valid = false;
-    // } else {
-    //   messages.push({ id: 'query_valid' });
-    // }
-    messages.push({ id: 'query_delay_valid' });
+    let queryDelayMessage = { id: 'query_delay_valid' };
+    if (datafeed.query_delay !== undefined) {
+      const queryDelay = parseInterval(datafeed.query_delay, false);
+      if (queryDelay === null || queryDelay.asMilliseconds() === 0) {
+        queryDelayMessage = { id: 'query_delay_invalid' };
+        valid = false;
+      }
+    }
+    messages.push(queryDelayMessage);
+
+    let frequencyMessage = { id: 'frequency_valid' };
+    if (datafeed.frequency !== undefined) {
+      const frequency = parseInterval(datafeed.frequency, false);
+      if (frequency === null || frequency.asMilliseconds() === 0) {
+        frequencyMessage = { id: 'frequency_invalid' };
+        valid = false;
+      }
+    }
+    messages.push(frequencyMessage);
   }
 
   return {
     messages,
     valid,
-    contains: id =>  (messages.some(m => id === m.id)),
-    find: id => (messages.find(m => id === m.id)),
+    contains: id => messages.some(m => id === m.id),
+    find: id => messages.find(m => id === m.id),
   };
 }
 
