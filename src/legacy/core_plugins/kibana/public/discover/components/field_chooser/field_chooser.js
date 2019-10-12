@@ -130,7 +130,7 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         if (filter.vals) {
           let count = 0;
           Object.keys(filter.vals).forEach((key) => {
-            if (key === 'missing') {
+            if (key === 'missing' || key === 'name') {
               return;
             }
             const value = filter.vals[key];
