@@ -22,6 +22,7 @@ import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
 import { FetchOpts, FetchResult, TaskStore } from './task_store';
+import { createTaskStoreUpdateBuffer } from './task_store_buffer';
 
 export interface TaskManagerOpts {
   logger: Logger;
@@ -96,7 +97,7 @@ export class TaskManager {
       new TaskManagerRunner({
         logger: this.logger,
         instance,
-        store,
+        store: createTaskStoreUpdateBuffer(store),
         definitions: this.definitions,
         beforeRun: this.middleware.beforeRun,
       });
