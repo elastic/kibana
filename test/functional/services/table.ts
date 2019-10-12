@@ -18,6 +18,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export function TableProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -31,7 +32,16 @@ export function TableProvider({ getService }: FtrProviderContext) {
 
     public async getDataFromTestSubj(dataTestSubj: string): Promise<string[][]> {
       const table = await testSubjects.find(dataTestSubj);
-      const $ = await table.parseDomContent();
+      return await this.getDataFromElement(table);
+    }
+
+    /**
+     * Converts the table data into nested array
+     * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
+     * @param element table
+     */
+    public async getDataFromElement(element: WebElementWrapper): Promise<string[][]> {
+      const $ = await element.parseDomContent();
       return $('tr')
         .toArray()
         .map(row =>

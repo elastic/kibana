@@ -35,10 +35,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      if (!(await PageObjects.settings.isIndexPatternListEmpty())) {
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.removeIndexPattern();
-      }
+      await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     it('should allow setting advanced settings', async function () {

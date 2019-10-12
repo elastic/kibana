@@ -288,8 +288,16 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async isIndexPatternListEmpty() {
-      const indexPatternList = await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable .euiButtonEmpty');
-      return indexPatternList.length > 0;
+      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
+      const indexPatternList = await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable a');
+      return indexPatternList.length === 0;
+    }
+
+    async removeLogstashIndexPatternIfExist() {
+      if (!(await PageObjects.settings.isIndexPatternListEmpty())) {
+        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.removeIndexPattern();
+      }
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
