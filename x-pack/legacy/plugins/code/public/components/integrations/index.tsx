@@ -31,11 +31,11 @@ export const Integrations = () => {
     setVisible(false);
   };
 
-  const showFlyout = (repoUri: string, filePath: string, rev: string = 'master') => {
+  const showFlyout = (repo: string, file: string, revision: string = 'master') => {
     setflyoutFile({
-      repo: 'github.com/Microsoft/TypeScript-Node-Starter',
-      file: 'src/app.ts',
-      revision: 'master',
+      repo,
+      file,
+      revision,
     });
     setVisible(true);
   };

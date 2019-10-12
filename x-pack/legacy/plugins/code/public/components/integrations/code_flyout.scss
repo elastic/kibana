@@ -6,12 +6,12 @@
 }
 
 .codeFlyout .codeFlyout__header .codeFlyout__header--file .euiIcon {
-  margin: 1rem
+  margin: $euiSizeS
 }
 
 .codeFlyout .codeFlyout__header .euiTabs {
   flex-direction: row-reverse;
-  padding-right: 1rem;
+  padding-right: $euiSizeS;
   flex-grow: 1;
 }
 

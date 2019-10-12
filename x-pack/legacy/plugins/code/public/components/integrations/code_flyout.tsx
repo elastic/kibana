@@ -16,16 +16,14 @@ export const CodeFlyout = (props: {
 }) => {
   if (props.open) {
     return (
-      props.open && (
-        <EuiFlyout
-          onClose={props.onClose}
-          size="l"
-          aria-labelledby="flyoutTitle"
-          className="codeFlyout"
-        >
-          <CodeFlyoutMain repo={props.repo} file={props.file} revision={props.revision} />
-        </EuiFlyout>
-      )
+      <EuiFlyout
+        onClose={props.onClose}
+        size="l"
+        aria-labelledby="flyoutTitle"
+        className="codeFlyout"
+      >
+        <CodeFlyoutMain repo={props.repo} file={props.file} revision={props.revision} />
+      </EuiFlyout>
     );
   } else return <div />;
 };

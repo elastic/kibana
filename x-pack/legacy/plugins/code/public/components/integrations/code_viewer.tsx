@@ -39,12 +39,14 @@ export class CodeViewer extends Component<Props, State> {
   public blameWidgets: any;
   private lineDecorations: string[] | null = null;
   private resizeChecker?: ResizeChecker;
+  private viewerRef: React.RefObject<HTMLDivElement>;
 
   constructor(props: Props, context: any) {
     super(props, context);
     this.state = {
       loading: true,
     };
+    this.viewerRef = React.createRef();
   }
 
   public componentDidMount(): void {
@@ -113,7 +115,7 @@ export class CodeViewer extends Component<Props, State> {
   }
 
   private loadFile(code: string, language: string = 'text') {
-    const container = document.getElementById('codeViewer') as HTMLElement;
+    const container = this.viewerRef.current!;
     this.ed = monaco.editor.create(container, {
       value: code,
       language,
@@ -164,7 +166,7 @@ export class CodeViewer extends Component<Props, State> {
     return (
       <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
         {this.state.loading && this.renderFileLoadingIndicator()}
-        <div tabIndex={0} className="codeContainer__root" id="codeViewer" />
+        <div tabIndex={0} className="codeContainer__monaco" ref={this.viewerRef} />
       </EuiFlexGroup>
     );
   }
