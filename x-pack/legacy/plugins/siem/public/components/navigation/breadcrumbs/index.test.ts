@@ -24,6 +24,12 @@ jest.mock('ui/chrome', () => ({
   }),
 }));
 
+jest.mock('../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+
 const getMockObject = (
   pageName: string,
   pathName: string,

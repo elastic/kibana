@@ -8,6 +8,10 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { HookWrapper } from '../../mock';
+import { SiemPageName } from '../../pages/home/home_navigations';
+import { RouteSpyState } from '../../utils/route/types';
+
+import { CONSTANTS } from './constants';
 import {
   getMockPropsObj,
   mockHistory,
@@ -18,9 +22,6 @@ import {
 } from './test_dependencies';
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
-import { CONSTANTS } from './constants';
-import { RouteSpyState } from '../../utils/route/types';
-import { SiemPageName } from '../../pages/home/home_navigations';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -34,6 +35,12 @@ const mockRouteSpy: RouteSpyState = {
 };
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
+}));
+
+jest.mock('../search_bar', () => ({
+  siemFilterManager: {
+    setFilters: jest.fn(),
+  },
 }));
 
 describe('UrlStateContainer', () => {
@@ -104,14 +111,6 @@ describe('UrlStateContainer', () => {
       });
 
       describe('kqlQuery action is called with correct data on component mount', () => {
-        const serializedFilterQuery = {
-          kuery: {
-            expression: 'host.name:"siem-es"',
-            kind: 'kuery',
-          },
-          serializedQuery:
-            '{"bool":{"should":[{"match_phrase":{"host.name":"siem-es"}}],"minimum_should_match":1}}',
-        };
         test.each(testCases.slice(0, 4))(
           ' %o',
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
@@ -120,8 +119,9 @@ describe('UrlStateContainer', () => {
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
             // @ts-ignore property mock does not exists
             expect(mockSetFilterQuery.mock.calls[0][0]).toEqual({
-              filterQuery: serializedFilterQuery,
-              [`${namespaceLower}Type`]: type,
+              id: 'global',
+              language: 'kuery',
+              query: 'host.name:"siem-es"',
             });
           }
         );
@@ -168,7 +168,7 @@ describe('UrlStateContainer', () => {
               pathname: examplePath,
               search: [CONSTANTS.overviewPage, CONSTANTS.timelinePage].includes(page)
                 ? '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))'
-                : `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${page})&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+                : `?_g=()&kqlQuery=(appQuery:(language:kuery,query:'host.name:%22siem-es%22'),filters:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
               state: '',
             });
           }

@@ -92,7 +92,7 @@ export const convertToBuildEsQuery = ({
         getEsQueryConfig(npSetup.core.uiSettings)
       )
     );
-  } catch {
+  } catch (exp) {
     return '';
   }
 };

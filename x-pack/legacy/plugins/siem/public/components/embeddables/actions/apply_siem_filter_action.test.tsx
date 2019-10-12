@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { Filter } from '@kbn/es-query';
 import { get } from 'lodash/fp';
 
 import { ApplySiemFilterAction, ActionContext } from './apply_siem_filter_action';
@@ -14,7 +14,20 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { Filter } from '@kbn/es-query';
+
+import { siemFilterManager } from '../../search_bar';
+
+interface MockSiemFilterManager {
+  addFilters: (filters: Filter[]) => void;
+}
+const mockSiemFilterManager: MockSiemFilterManager = siemFilterManager as MockSiemFilterManager;
+jest.mock('../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+const mockAddFilters = jest.fn();
+mockSiemFilterManager.addFilters = mockAddFilters;
 
 // Using type narrowing to remove all the any's -- https://github.com/elastic/kibana/pull/43965/files#r318796100
 const isEmbeddable = (
@@ -36,12 +49,6 @@ const isPartialFilterAction = (embeddable: unknown): embeddable is PartialAction
 };
 
 describe('ApplySiemFilterAction', () => {
-  let applyFilterQueryFromKueryExpression: (expression: string) => void;
-
-  beforeEach(() => {
-    applyFilterQueryFromKueryExpression = jest.fn(expression => {});
-  });
-
   test('it has APPLY_SIEM_FILTER_ACTION_ID type and id', () => {
     const action = new ApplySiemFilterAction();
     expect(action.id).toBe('APPLY_SIEM_FILTER_ACTION_ID');
@@ -150,10 +157,14 @@ describe('ApplySiemFilterAction', () => {
           filters,
         });
 
-        expect(
-          (applyFilterQueryFromKueryExpression as jest.Mock<(expression: string) => void>).mock
-            .calls[0][0]
-        ).toBe('host.name: "zeek-newyork-sha-aa8df15"');
+        expect(mockAddFilters.mock.calls[0][0]).toEqual([
+          {
+            meta: { alias: '', disabled: false, negate: false },
+            query: {
+              match: { 'host.name': { query: 'zeek-newyork-sha-aa8df15', type: 'phrase' } },
+            },
+          },
+        ]);
       } else {
         throw new Error('Invalid embeddable in unit test');
       }

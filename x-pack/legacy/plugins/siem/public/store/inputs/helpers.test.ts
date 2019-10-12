@@ -263,7 +263,7 @@ describe('Inputs', () => {
             duration: 300000,
             kind: 'manual',
           },
-          query: [
+          queries: [
             {
               id: 'myQuery',
               inspect: null,
@@ -280,6 +280,8 @@ describe('Inputs', () => {
             to: 1,
             toStr: 'now',
           },
+          query: { query: '', language: 'kuery' },
+          filters: [],
         },
         timeline: {
           linkTo: ['global'],
@@ -287,7 +289,7 @@ describe('Inputs', () => {
             duration: 300000,
             kind: 'manual',
           },
-          query: [],
+          queries: [],
           timerange: {
             from: 0,
             fromStr: 'now-24h',
@@ -295,6 +297,8 @@ describe('Inputs', () => {
             to: 1,
             toStr: 'now',
           },
+          query: { query: '', language: 'kuery' },
+          filters: [],
         },
       });
     });

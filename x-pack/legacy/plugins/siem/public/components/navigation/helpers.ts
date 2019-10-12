@@ -6,9 +6,10 @@
 
 import { Location } from 'history';
 
+import { isEmpty } from 'lodash/fp';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { CONSTANTS } from '../url_state/constants';
-import { UrlSateQuery, URL_STATE_KEYS, KeyUrlState, Timeline } from '../url_state/types';
+import { UrlSateQuery, URL_STATE_KEYS, KeyUrlState, Timeline, KqlQuery } from '../url_state/types';
 import {
   replaceQueryStringInLocation,
   replaceStateKeyInQueryString,
@@ -22,12 +23,28 @@ export const getSearch = (tab: SearchNavTab, urlState: TabNavigationProps): stri
   if (tab && tab.urlKey != null && URL_STATE_KEYS[tab.urlKey] != null) {
     return URL_STATE_KEYS[tab.urlKey].reduce<Location>(
       (myLocation: Location, urlKey: KeyUrlState) => {
-        let urlStateToReplace: UrlInputsModel | UrlSateQuery | Timeline =
-          urlState[CONSTANTS.timeline];
+        let urlStateToReplace: UrlInputsModel | UrlSateQuery | Timeline | string = '';
+
         if (urlKey === CONSTANTS.kqlQuery) {
-          urlStateToReplace = urlState.kqlQuery;
+          const kqlQuery = urlState.kqlQuery as KqlQuery;
+          if (
+            kqlQuery.appQuery != null &&
+            kqlQuery.appQuery.query === '' &&
+            isEmpty(kqlQuery.filters)
+          ) {
+            urlStateToReplace = '';
+          } else {
+            urlStateToReplace = urlState.kqlQuery;
+          }
         } else if (urlKey === CONSTANTS.timerange) {
           urlStateToReplace = urlState[CONSTANTS.timerange];
+        } else if (urlKey === CONSTANTS.timeline) {
+          const timeline = urlState[CONSTANTS.timeline];
+          if (timeline.id === '') {
+            urlStateToReplace = '';
+          } else {
+            urlStateToReplace = timeline;
+          }
         }
         return replaceQueryStringInLocation(
           myLocation,

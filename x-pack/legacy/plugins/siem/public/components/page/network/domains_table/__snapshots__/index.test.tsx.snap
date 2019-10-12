@@ -1,73 +1,71 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
-<Connect(HostsTableComponent)
+exports[`Domains Table Component Rendering it renders the default Domains table 1`] = `
+<Connect(DomainsTableComponent)
   data={
     Array [
       Object {
         "cursor": Object {
-          "value": "98966fa2013c396155c460d35c0902be",
+          "value": "samsungtv-kitchen.iot.sr.local.example.com",
         },
         "node": Object {
-          "_id": "cPsuhGcB0WOhS6qyTKC0",
-          "host": Object {
-            "name": Array [
-              "elrond.elstc.co",
-            ],
-            "os": Object {
-              "name": Array [
-                "Ubuntu",
-              ],
-              "version": Array [
-                "18.04.1 LTS (Bionic Beaver)",
-              ],
-            },
+          "destination": Object {
+            "domainName": "samsungtv-kitchen.iot.sr.local.example.com",
+            "firstSeen": null,
+            "lastSeen": null,
+            "uniqueIpCount": 96,
           },
+          "network": Object {
+            "bytes": 1054651765,
+            "direction": Array [],
+            "packets": 707990,
+          },
+          "source": null,
         },
       },
       Object {
         "cursor": Object {
-          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+          "value": "row.exmaple.com",
         },
         "node": Object {
-          "_id": "KwQDiWcB0WOhS6qyXmrW",
-          "cloud": Object {
-            "instance": Object {
-              "id": Array [
-                "423232333829362673777",
-              ],
-            },
-            "machine": Object {
-              "type": Array [
-                "custom-4-16384",
-              ],
-            },
-            "provider": Array [
-              "gce",
-            ],
-            "region": Array [
-              "us-east-1",
-            ],
+          "destination": Object {
+            "domainName": ".row.exmaple.com",
+            "firstSeen": null,
+            "lastSeen": null,
+            "uniqueIpCount": 6,
           },
-          "host": Object {
-            "name": Array [
-              "siem-kibana",
-            ],
-            "os": Object {
-              "name": Array [
-                "Debian GNU/Linux",
-              ],
-              "version": Array [
-                "9 (stretch)",
-              ],
-            },
+          "network": Object {
+            "bytes": 0,
+            "direction": Array [],
+            "packets": 0,
           },
+          "source": null,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "10.10.10.10",
+        },
+        "node": Object {
+          "destination": Object {
+            "domainName": "10.10.10.10",
+            "firstSeen": null,
+            "lastSeen": null,
+            "uniqueIpCount": 1,
+          },
+          "network": Object {
+            "bytes": 0,
+            "direction": Array [],
+            "packets": 0,
+          },
+          "source": null,
         },
       },
     ]
   }
   fakeTotalCount={50}
-  id="hostsQuery"
+  flowTarget="source"
+  id="domains"
   indexPattern={
     Object {
       "fields": Array [
@@ -159,11 +157,12 @@ exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
       "title": "filebeat-*,auditbeat-*,packetbeat-*",
     }
   }
+  ip="10.10.10.10"
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
   showMorePagesIndicator={true}
-  totalCount={4}
-  type="page"
+  totalCount={1}
+  type="details"
 />
 `;

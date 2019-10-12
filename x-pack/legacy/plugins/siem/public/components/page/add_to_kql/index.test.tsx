@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { escapeQueryValue } from '../../../lib/keury';
 import {
   apolloClientObservable,
   mockGlobalState,
@@ -16,8 +16,20 @@ import {
   mockIndexPattern,
 } from '../../../mock';
 import { createStore, State } from '../../../store';
-
+import { siemFilterManager } from '../../search_bar';
 import { AddToKql } from '.';
+
+interface MockSiemFilterManager {
+  addFilters: (filters: Filter[]) => void;
+}
+const mockSiemFilterManager: MockSiemFilterManager = siemFilterManager as MockSiemFilterManager;
+jest.mock('../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+const mockAddFilters = jest.fn();
+mockSiemFilterManager.addFilters = mockAddFilters;
 
 describe('AddToKql Component', () => {
   const state: State = mockGlobalState;
@@ -40,15 +52,15 @@ describe('AddToKql Component', () => {
               disabled: false,
               type: 'phrase',
               key: 'host.name',
-              value: escapeQueryValue('siem-kibana') as string,
+              value: 'siem-kibana',
               params: {
-                query: escapeQueryValue('siem-kibana'),
+                query: 'siem-kibana',
               },
             },
             query: {
               match: {
                 'host.name': {
-                  query: escapeQueryValue('siem-kibana'),
+                  query: 'siem-kibana',
                   type: 'phrase',
                 },
               },
@@ -76,15 +88,15 @@ describe('AddToKql Component', () => {
               disabled: false,
               type: 'phrase',
               key: 'host.name',
-              value: escapeQueryValue('siem-kibana') as string,
+              value: 'siem-kibana',
               params: {
-                query: escapeQueryValue('siem-kibana'),
+                query: 'siem-kibana',
               },
             },
             query: {
               match: {
                 'host.name': {
-                  query: escapeQueryValue('siem-kibana'),
+                  query: 'siem-kibana',
                   type: 'phrase',
                 },
               },
@@ -101,7 +113,7 @@ describe('AddToKql Component', () => {
     expect(wrapper.find('[data-test-subj="hover-actions-container"] svg').first()).toBeTruthy();
   });
 
-  test('Functionality with hosts state', async () => {
+  test('Functionality with inputs state', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <AddToKql
@@ -114,15 +126,15 @@ describe('AddToKql Component', () => {
               disabled: false,
               type: 'phrase',
               key: 'host.name',
-              value: escapeQueryValue('siem-kibana') as string,
+              value: 'siem-kibana',
               params: {
-                query: escapeQueryValue('siem-kibana'),
+                query: 'siem-kibana',
               },
             },
             query: {
               match: {
                 'host.name': {
-                  query: escapeQueryValue('siem-kibana'),
+                  query: 'siem-kibana',
                   type: 'phrase',
                 },
               },
@@ -141,122 +153,25 @@ describe('AddToKql Component', () => {
       .simulate('click');
     wrapper.update();
 
-    expect(store.getState().hosts.page).toEqual({
-      queries: {
-        authentications: {
-          activePage: 0,
-          limit: 10,
+    expect(mockAddFilters.mock.calls[0][0]).toEqual({
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'host.name',
+        negate: false,
+        params: {
+          query: 'siem-kibana',
         },
-        allHosts: {
-          activePage: 0,
-          limit: 10,
-          direction: 'desc',
-          sortField: 'lastSeen',
-        },
-        events: {
-          activePage: 0,
-          limit: 10,
-        },
-        uncommonProcesses: {
-          activePage: 0,
-          limit: 10,
-        },
-        anomalies: null,
+        type: 'phrase',
+        value: 'siem-kibana',
       },
-      filterQuery: {
-        kuery: {
-          kind: 'kuery',
-          expression: 'host.name: "siem-kibana"',
-        },
-        serializedQuery:
-          '{"bool":{"should":[{"match_phrase":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
-      },
-      filterQueryDraft: {
-        kind: 'kuery',
-        expression: 'host.name: "siem-kibana"',
-      },
-    });
-  });
-
-  test('Functionality with network state', async () => {
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <AddToKql
-          id="global"
-          indexPattern={mockIndexPattern}
-          filter={{
-            meta: {
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: 'host.name',
-              value: escapeQueryValue('siem-kibana') as string,
-              params: {
-                query: escapeQueryValue('siem-kibana'),
-              },
-            },
-            query: {
-              match: {
-                'host.name': {
-                  query: escapeQueryValue('siem-kibana'),
-                  type: 'phrase',
-                },
-              },
-            },
-          }}
-        >
-          <>{'siem-kibana'}</>
-        </AddToKql>
-      </TestProviders>
-    );
-
-    wrapper
-      .simulate('mouseenter')
-      .find('[data-test-subj="hover-actions-container"] .euiToolTipAnchor svg')
-      .first()
-      .simulate('click');
-    wrapper.update();
-
-    expect(store.getState().network.page).toEqual({
-      queries: {
-        topNFlowDestination: {
-          activePage: 0,
-          limit: 10,
-          topNFlowSort: {
-            field: 'bytes_out',
-            direction: 'desc',
+      query: {
+        match: {
+          'host.name': {
+            query: 'siem-kibana',
+            type: 'phrase',
           },
         },
-        topNFlowSource: {
-          activePage: 0,
-          limit: 10,
-          topNFlowSort: {
-            field: 'bytes_out',
-            direction: 'desc',
-          },
-        },
-        dns: {
-          activePage: 0,
-          limit: 10,
-          dnsSortField: {
-            field: 'queryCount',
-            direction: 'desc',
-          },
-          isPtrIncluded: false,
-        },
-      },
-      filterQuery: {
-        kuery: {
-          kind: 'kuery',
-          expression: 'host.name: "siem-kibana"',
-        },
-        serializedQuery:
-          '{"bool":{"should":[{"match_phrase":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
-      },
-      filterQueryDraft: {
-        kind: 'kuery',
-        expression: 'host.name: "siem-kibana"',
       },
     });
   });

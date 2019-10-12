@@ -10,6 +10,12 @@ import * as React from 'react';
 import { EmbeddedMap } from './embedded_map';
 import { SetQuery } from './types';
 
+jest.mock('../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+
 jest.mock('ui/new_platform', () => ({
   npStart: {
     core: {

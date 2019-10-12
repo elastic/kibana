@@ -98,9 +98,9 @@ export const useUrlStateHooks = ({
         const queryState: KqlQuery | Timeline = decodeRisonUrlState(newUrlStateString);
         if (
           urlKey === CONSTANTS.kqlQuery &&
-          (urlState[urlKey] as KqlQuery).appQuery != null &&
-          (urlState[urlKey] as KqlQuery).appQuery.query === '' &&
-          isEmpty((urlState[urlKey] as KqlQuery).filters)
+          (queryState as KqlQuery).appQuery != null &&
+          (queryState as KqlQuery).appQuery.query === '' &&
+          isEmpty((queryState as KqlQuery).filters)
         ) {
           myLocation = replaceStateInLocation('', urlKey, myLocation);
         } else if (urlKey === CONSTANTS.timeline && (queryState as Timeline).id === '') {
@@ -109,6 +109,15 @@ export const useUrlStateHooks = ({
         if (isInitializing) {
           urlStateToUpdate = [...urlStateToUpdate, { urlKey, newUrlStateString }];
         }
+      } else if (
+        urlKey === CONSTANTS.kqlQuery &&
+        (urlState[urlKey] as KqlQuery).appQuery != null &&
+        (urlState[urlKey] as KqlQuery).appQuery.query === '' &&
+        isEmpty((urlState[urlKey] as KqlQuery).filters)
+      ) {
+        myLocation = replaceStateInLocation('', urlKey, myLocation);
+      } else if (urlKey === CONSTANTS.timeline && (urlState[urlKey] as Timeline).id === '') {
+        myLocation = replaceStateInLocation('', urlKey, myLocation);
       } else {
         myLocation = replaceStateInLocation(urlState[urlKey], urlKey, myLocation);
       }

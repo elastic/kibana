@@ -97,7 +97,7 @@ describe('SIEM Navigation', () => {
       search: '',
       tabName: 'authentications',
       kqlQuery: {
-        query: { query: '', language: 'kuery' },
+        appQuery: { query: '', language: 'kuery' },
         filters: [],
       },
       timeline: {
@@ -172,7 +172,7 @@ describe('SIEM Navigation', () => {
       search: '',
       tabName: undefined,
       kqlQuery: {
-        query: { query: '', language: 'kuery' },
+        appQuery: { query: '', language: 'kuery' },
         filters: [],
       },
       timeline: {
