@@ -181,7 +181,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     }
 
     async createWorkspace() {
-      await testSubjects.click('graphCreateWorkspacePromptButton');
+      await testSubjects.click('graphCreateGraphPromptButton');
     }
 
     async newGraph() {
@@ -227,7 +227,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     async goToListingPage() {
       await retry.try(async () => {
         await testSubjects.click('breadcrumb graphHomeBreadcrumb first');
-        await testSubjects.existOrFail('workspaceLandingPage', { timeout: 3000 });
+        await testSubjects.existOrFail('graphLandingPage', { timeout: 3000 });
       });
     }
 
