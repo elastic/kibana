@@ -15,7 +15,6 @@ import {
   SavedObjectAttributes,
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
-  SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 import {
   ConcreteTaskInstance,
