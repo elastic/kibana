@@ -15,7 +15,8 @@ NUMBER=${1:-100}
 # Example: ./post_x_signals.sh
 # Example: ./post_x_signals.sh 200
 for i in $(seq 1 $NUMBER);
-do curl -s -k \
+do {
+  curl -s -k \
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
@@ -33,4 +34,7 @@ do curl -s -k \
     \"kql\": \"user.name: root or user.name: admin\"
   }" \
   | jq .;
+} &
 done
+
+wait
