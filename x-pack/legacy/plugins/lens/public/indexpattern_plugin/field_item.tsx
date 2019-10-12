@@ -447,7 +447,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
                 <EuiFlexItem grow={true} className="eui-textTruncate">
                   {formatted === '' ? (
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <em>
                         {i18n.translate('xpack.lens.indexPattern.fieldPanelEmptyStringValue', {
                           defaultMessage: 'Empty string',
@@ -483,7 +483,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           <>
             <EuiFlexGroup alignItems="stretch" gutterSize="xs">
               <EuiFlexItem grow={true} className="eui-textTruncate">
-                <EuiText size="s" className="eui-textTruncate" color="subdued">
+                <EuiText size="xs" className="eui-textTruncate" color="subdued">
                   {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
                     defaultMessage: 'Other',
                   })}

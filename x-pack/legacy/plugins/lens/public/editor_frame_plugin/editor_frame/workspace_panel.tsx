@@ -14,7 +14,6 @@ import {
   EuiImage,
   EuiText,
   EuiBetaBadge,
-  EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
