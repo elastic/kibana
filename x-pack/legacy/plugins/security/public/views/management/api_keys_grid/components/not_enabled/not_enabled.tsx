@@ -22,7 +22,7 @@ export const NotEnabled: React.FunctionComponent = () => (
   >
     <FormattedMessage
       id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorDescription"
-      defaultMessage="Please contact your administrator and refer to the {link} to enable API keys."
+      defaultMessage="Contact your system administrator and refer to the {link} to enable API keys."
       values={{
         link: (
           <EuiLink href={documentationLinks.getApiKeyServiceSettingsDocUrl()} target="_blank">

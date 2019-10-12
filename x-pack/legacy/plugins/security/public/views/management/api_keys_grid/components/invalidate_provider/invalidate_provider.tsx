@@ -27,7 +27,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, ch
 
   const invalidateApiKeyPrompt: InvalidateApiKeys = (keys, onSuccess = () => undefined) => {
     if (!keys || !keys.length) {
-      throw new Error('No API key IDs specified for deletion');
+      throw new Error('No API key IDs specified for invalidation');
     }
     setIsModalOpen(true);
     setApiKeys(keys);
@@ -129,7 +129,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, ch
               : i18n.translate(
                   'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleTitle',
                   {
-                    defaultMessage: 'Invalidate {count} api keys?',
+                    defaultMessage: 'Invalidate {count} API keys?',
                     values: { count: apiKeys.length },
                   }
                 )
@@ -155,7 +155,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, ch
               <p>
                 {i18n.translate(
                   'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleListDescription',
-                  { defaultMessage: 'You are about to invalidate these apiKeys:' }
+                  { defaultMessage: 'You are about to invalidate these API keys:' }
                 )}
               </p>
               <ul>

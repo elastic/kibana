@@ -24,7 +24,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
@@ -36,10 +36,6 @@ import { PermissionDenied } from './permission_denied';
 import { EmptyPrompt } from './empty_prompt';
 import { NotEnabled } from './not_enabled';
 import { InvalidateProvider } from './invalidate_provider';
-
-interface Props {
-  intl: InjectedIntl;
-}
 
 interface State {
   isLoadingApp: boolean;
@@ -54,7 +50,7 @@ interface State {
 
 const DATE_FORMAT = 'MMMM Do YYYY HH:mm:ss';
 
-class ApiKeysGridPageUI extends Component<Props, State> {
+export class ApiKeysGridPage extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -89,7 +85,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
             {isAdmin ? (
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                defaultMessage="View and invalidate API keys. An API key sends requests on a user's behalf."
+                defaultMessage="View and invalidate API keys. An API key sends requests on behalf of a user."
               />
             ) : (
               <FormattedMessage
@@ -136,7 +132,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
         <SectionLoading>
           <FormattedMessage
             id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
-            defaultMessage="Loading API keys"
+            defaultMessage="Loading API keys…"
           />
         </SectionLoading>
       );
@@ -175,7 +171,6 @@ class ApiKeysGridPageUI extends Component<Props, State> {
   };
 
   private renderTable = () => {
-    const { intl } = this.props;
     const { apiKeys, selectedItems, isLoadingTable, isAdmin } = this.state;
 
     const sorting = {
@@ -314,7 +309,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
           <EuiInMemoryTable
             items={apiKeys}
             itemId="id"
-            columns={this.getColumnConfig(intl)}
+            columns={this.getColumnConfig()}
             search={search}
             sorting={sorting}
             selection={selection}
@@ -334,14 +329,13 @@ class ApiKeysGridPageUI extends Component<Props, State> {
     );
   };
 
-  private getColumnConfig = (intl: InjectedIntl) => {
+  private getColumnConfig = () => {
     const { isAdmin } = this.state;
 
     let config = [
       {
         field: 'name',
-        name: intl.formatMessage({
-          id: 'xpack.security.management.apiKeys.table.nameColumnName',
+        name: i18n.translate('xpack.security.management.apiKeys.table.nameColumnName', {
           defaultMessage: 'Name',
         }),
         sortable: true,
@@ -352,16 +346,14 @@ class ApiKeysGridPageUI extends Component<Props, State> {
       config = config.concat([
         {
           field: 'username',
-          name: intl.formatMessage({
-            id: 'xpack.security.management.apiKeys.table.userNameColumnName',
+          name: i18n.translate('xpack.security.management.apiKeys.table.userNameColumnName', {
             defaultMessage: 'User',
           }),
           sortable: true,
         },
         {
           field: 'realm',
-          name: intl.formatMessage({
-            id: 'xpack.security.management.apiKeys.table.realmColumnName',
+          name: i18n.translate('xpack.security.management.apiKeys.table.realmColumnName', {
             defaultMessage: 'Realm',
           }),
           sortable: true,
@@ -372,8 +364,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
     config = config.concat([
       {
         field: 'creation',
-        name: intl.formatMessage({
-          id: 'xpack.security.management.apiKeys.table.creationDateColumnName',
+        name: i18n.translate('xpack.security.management.apiKeys.table.creationDateColumnName', {
           defaultMessage: 'Created',
         }),
         sortable: true,
@@ -382,8 +373,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
       },
       {
         field: 'expiration',
-        name: intl.formatMessage({
-          id: 'xpack.security.management.apiKeys.table.expirationDateColumnName',
+        name: i18n.translate('xpack.security.management.apiKeys.table.expirationDateColumnName', {
           defaultMessage: 'Expires',
         }),
         sortable: true,
@@ -392,10 +382,12 @@ class ApiKeysGridPageUI extends Component<Props, State> {
           if (expirationDateMs === undefined) {
             return (
               <EuiText color="subdued">
-                {intl.formatMessage({
-                  id: 'xpack.security.management.apiKeys.table.expirationDateNeverMessage',
-                  defaultMessage: 'Never',
-                })}
+                {i18n.translate(
+                  'xpack.security.management.apiKeys.table.expirationDateNeverMessage',
+                  {
+                    defaultMessage: 'Never',
+                  }
+                )}
               </EuiText>
             );
           }
@@ -404,8 +396,7 @@ class ApiKeysGridPageUI extends Component<Props, State> {
         },
       },
       {
-        name: intl.formatMessage({
-          id: 'xpack.security.management.apiKeys.table.statusColumnName',
+        name: i18n.translate('xpack.security.management.apiKeys.table.statusColumnName', {
           defaultMessage: 'Status',
         }),
         render: ({ expiration }: any) => {
@@ -484,12 +475,12 @@ class ApiKeysGridPageUI extends Component<Props, State> {
         this.setState({ permissionDenied: true, isLoadingApp: false });
       } else {
         toastNotifications.addDanger(
-          this.props.intl.formatMessage(
+          this.props.i18n.translate(
+            'xpack.security.management.apiKeys.table.fetchingApiKeysErrorMessage',
             {
-              id: 'xpack.security.management.apiKeys.table.fetchingApiKeysErrorMessage',
               defaultMessage: 'Error checking privileges: {message}',
-            },
-            { message: _.get(e, 'body.message', '') }
+              values: { message: _.get(e, 'body.message', '') },
+            }
           )
         );
       }
@@ -518,5 +509,3 @@ class ApiKeysGridPageUI extends Component<Props, State> {
     this.setState({ isLoadingApp: false, isLoadingTable: false });
   };
 }
-
-export const ApiKeysGridPage = injectI18n(ApiKeysGridPageUI);
