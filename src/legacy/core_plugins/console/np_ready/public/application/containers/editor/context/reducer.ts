@@ -33,7 +33,8 @@ import { DevToolsSettings } from '../../../../services';
 export type Action =
   | { type: 'initialContentLoaded'; value: true }
   | { type: 'setInitializationErrors'; value: string[] }
-  | { type: 'recipes.update'; value: { [id: string]: RecipeAttributes } }
+  | { type: 'recipes.update'; value: RecipeAttributes }
+  | { type: 'recipes.setAll'; value: { [id: string]: RecipeAttributes } }
   | { type: 'recipe.saving'; value: boolean }
   | { type: 'recipe.clearSaveErrors'; value: undefined }
   | { type: 'recipe.setSaveErrors'; value: string[] }
@@ -89,8 +90,11 @@ export const reducer: Reducer<ContextValue, Action> = (state, action) => {
     case 'recipes.update':
       nextState.recipes = {
         ...(nextState.recipes || {}),
-        ...action.value,
+        [action.value.id]: action.value,
       };
+      break;
+    case 'recipes.setAll':
+      nextState.recipes = action.value;
       break;
     case 'recipe.setCurrentRecipe':
       nextState.currentRecipe = action.value;

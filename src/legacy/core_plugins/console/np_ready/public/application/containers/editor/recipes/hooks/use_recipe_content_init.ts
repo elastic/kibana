@@ -41,9 +41,9 @@ export function useRecipeContentInit({ database }: Dependencies) {
           createdAt: Date.now(),
           text: '',
         });
-        dispatch({ type: 'recipes.update', value: { [scratchPad.id]: scratchPad } });
+        dispatch({ type: 'recipes.update', value: scratchPad });
       } else {
-        dispatch({ type: 'recipes.update', value: recipes });
+        dispatch({ type: 'recipes.setAll', value: recipes });
       }
       dispatch({ type: 'initialContentLoaded', value: true });
     } catch (e) {

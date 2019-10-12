@@ -28,7 +28,7 @@ interface Dependencies {
 
 const AUTO_SAVE_DELAY_MS = 500;
 export function useRecipeSave({ database }: Dependencies) {
-  const { recipeSaveErrors, recipes } = useEditorReadContext();
+  const { recipeSaveErrors } = useEditorReadContext();
   const dispatch = useEditorActionContext();
 
   const save = debounce(async (recipe: RecipeAttributes) => {
@@ -39,10 +39,7 @@ export function useRecipeSave({ database }: Dependencies) {
       // Update local (primary source of truth after init)
       dispatch({
         type: 'recipes.update',
-        value: {
-          ...recipes,
-          [recipe.id]: recipe,
-        },
+        value: recipe,
       });
       dispatch({ type: 'recipe.saving', value: true });
       // Update remote
