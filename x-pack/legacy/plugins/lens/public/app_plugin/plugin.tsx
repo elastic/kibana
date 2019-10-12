@@ -97,7 +97,7 @@ export class AppPlugin {
     };
 
     function NotFound() {
-      trackUiEvent('loaded-404');
+      trackUiEvent('loaded_404');
       return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
     }
 

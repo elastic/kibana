@@ -52,6 +52,7 @@ export function InnerWorkspacePanel({
   core,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
+  const [isEmpty, setIsEmpty] = useState(true);
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
     ? '/plugins/lens/assets/lens_app_graphic_dark_2x.png'
@@ -85,15 +86,13 @@ export function InnerWorkspacePanel({
 
   function onDrop() {
     if (suggestionForDraggedField) {
-      trackUiEvent('workspace-drop-success');
+      trackUiEvent(isEmpty ? 'workspace_drop_on_empty' : 'workspace_drop_non_empty');
       switchToSuggestion(
         framePublicAPI,
         dispatch,
         suggestionForDraggedField,
         'SWITCH_VISUALIZATION'
       );
-    } else {
-      trackUiEvent('workspace-drop-failure');
     }
   }
 
@@ -129,13 +128,19 @@ export function InnerWorkspacePanel({
       : null;
     const expression = useMemo(() => {
       try {
-        return buildExpression({
+        const tempExpression = buildExpression({
           visualization: activeVisualization,
           visualizationState,
           datasourceMap,
           datasourceStates,
           framePublicAPI,
         });
+        if (tempExpression) {
+          setIsEmpty(false);
+        } else {
+          setIsEmpty(true);
+        }
+        return tempExpression;
       } catch (e) {
         setExpressionError(e.toString());
       }

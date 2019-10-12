@@ -100,7 +100,7 @@ async function doWork(
         daily: {
           date_histogram: {
             field: 'updated_at',
-            calendar_interval: '1d',
+            fixed_interval: '30d',
           },
           aggs: {
             names: {

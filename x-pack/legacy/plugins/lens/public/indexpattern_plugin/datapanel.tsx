@@ -34,6 +34,7 @@ import {
   IndexPatternField,
   IndexPatternRef,
 } from './types';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
   changeIndexPattern: (
@@ -358,6 +359,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   defaultMessage: 'Clear name and type filters',
                 }),
                 onClick: () => {
+                  trackUiEvent('indexpattern_filters_cleared');
                   setLocalState(s => ({
                     ...s,
                     nameFilter: '',
@@ -427,14 +429,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     key={type}
                     icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
                     data-test-subj={`typeFilter-${type}`}
-                    onClick={() =>
+                    onClick={() => {
+                      trackUiEvent('indexpattern_type_filter_toggled');
                       setLocalState(s => ({
                         ...s,
                         typeFilter: localState.typeFilter.includes(type)
                           ? localState.typeFilter.filter(t => t !== type)
                           : [...localState.typeFilter, type],
-                      }))
-                    }
+                      }));
+                    }}
                   >
                     <LensFieldIcon type={type} /> {fieldTypeNames[type]}
                   </EuiContextMenuItem>
@@ -445,6 +448,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   compressed
                   checked={!showEmptyFields}
                   onChange={() => {
+                    trackUiEvent('indexpattern_existence_toggled');
                     onToggleEmptyFields();
                   }}
                   label={i18n.translate('xpack.lens.indexPatterns.toggleEmptyFieldsSwitch', {

@@ -77,7 +77,7 @@ export function ChartSwitch(props: Props) {
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
-    trackUiEvent(`chart-switch-${selection.subVisualizationId || selection.visualizationId}`);
+    trackUiEvent(`chart_switch`);
 
     switchToSuggestion(
       props.framePublicAPI,

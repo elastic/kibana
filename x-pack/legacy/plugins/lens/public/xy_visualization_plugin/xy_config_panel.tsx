@@ -27,6 +27,7 @@ import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
@@ -149,6 +150,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                   setState(updateLayer(state, { ...layer, seriesType }, index))
                 }
                 removeLayer={() => {
+                  trackUiEvent('xy_layer_removed');
                   frame.removeLayers([layer.layerId]);
                   setState({ ...state, layers: state.layers.filter(l => l !== layer) });
                 }}
@@ -258,6 +260,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           defaultMessage: 'Add layer',
         })}
         onClick={() => {
+          trackUiEvent('xy_layer_added');
           const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
           setState({
             ...state,

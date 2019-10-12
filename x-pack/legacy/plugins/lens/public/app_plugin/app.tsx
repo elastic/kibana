@@ -218,6 +218,16 @@ export function App({
               screenTitle={'lens'}
               onQuerySubmit={payload => {
                 const { dateRange, query } = payload;
+
+                if (
+                  dateRange.from !== state.dateRange.fromDate ||
+                  dateRange.to !== state.dateRange.toDate
+                ) {
+                  trackUiEvent('app_date_change');
+                } else {
+                  trackUiEvent('app_query_change');
+                }
+
                 setState(s => ({
                   ...s,
                   dateRange: {
@@ -226,8 +236,6 @@ export function App({
                   },
                   query: query || s.query,
                 }));
-
-                trackUiEvent('date_or_query_change');
               }}
               appName={'lens'}
               indexPatterns={state.indexPatternsForTopNav}

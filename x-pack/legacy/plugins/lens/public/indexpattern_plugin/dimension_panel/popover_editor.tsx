@@ -34,6 +34,7 @@ import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternField } from '../types';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 const operationPanels = getOperationDisplay();
 
@@ -162,10 +163,12 @@ export function PopoverEditor(props: PopoverEditorProps) {
               } else {
                 setInvalidOperationType(operationType);
               }
+              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
               return;
             }
             if (!compatibleWithCurrentField) {
               setInvalidOperationType(operationType);
+              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
               return;
             }
             if (incompatibleSelectedOperationType) {
@@ -182,6 +185,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
               indexPattern: currentIndexPattern,
               field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
             });
+            trackUiEvent(
+              `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
+            );
             setState(
               changeColumn({
                 state,
