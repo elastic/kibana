@@ -8,7 +8,7 @@ import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { ApiKeyCore } from '../../../../../../common/model/api_key';
+import { ApiKeyToInvalidate } from '../../../../../../common/model/api_key';
 import { ApiKeysApi } from '../../../../../lib/api_keys_api';
 
 interface Props {
@@ -16,12 +16,15 @@ interface Props {
   children: (invalidateApiKeys: InvalidateApiKeys) => React.ReactElement;
 }
 
-export type InvalidateApiKeys = (apiKeys: ApiKeyCore[], onSuccess?: OnSuccessCallback) => void;
+export type InvalidateApiKeys = (
+  apiKeys: ApiKeyToInvalidate[],
+  onSuccess?: OnSuccessCallback
+) => void;
 
-type OnSuccessCallback = (apiKeysInvalidated: ApiKeyCore[]) => void;
+type OnSuccessCallback = (apiKeysInvalidated: ApiKeyToInvalidate[]) => void;
 
 export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, children }) => {
-  const [apiKeys, setApiKeys] = useState<ApiKeyCore[]>([]);
+  const [apiKeys, setApiKeys] = useState<ApiKeyToInvalidate[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
 

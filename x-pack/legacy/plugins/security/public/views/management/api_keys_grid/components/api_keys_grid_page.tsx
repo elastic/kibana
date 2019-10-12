@@ -12,7 +12,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore EuiInMemoryTable typings not yet available
   EuiInMemoryTable,
   EuiPageContent,
   EuiPageContentBody,
@@ -30,7 +29,7 @@ import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SectionLoading } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/section_loading';
-import { ApiKey, ApiKeyCore } from '../../../../../common/model/api_key';
+import { ApiKey, ApiKeyToInvalidate } from '../../../../../common/model/api_key';
 import { ApiKeysApi } from '../../../../lib/api_keys_api';
 import { PermissionDenied } from './permission_denied';
 import { EmptyPrompt } from './empty_prompt';
@@ -118,7 +117,7 @@ export class ApiKeysGridPage extends Component<Props, State> {
     );
   }
 
-  private onApiKeysInvalidated = (apiKeysInvalidated: ApiKeyCore[]): void => {
+  private onApiKeysInvalidated = (apiKeysInvalidated: ApiKeyToInvalidate[]): void => {
     if (apiKeysInvalidated.length) {
       this.reloadApiKeys();
     }
@@ -305,7 +304,6 @@ export class ApiKeysGridPage extends Component<Props, State> {
         )}
 
         {
-          // @ts-ignore missing rowProps typedef
           <EuiInMemoryTable
             items={apiKeys}
             itemId="id"
@@ -314,10 +312,8 @@ export class ApiKeysGridPage extends Component<Props, State> {
             sorting={sorting}
             selection={selection}
             pagination={pagination}
-            responsive={false}
             loading={isLoadingTable}
             isSelectable={true}
-            // @ts-ignore missing rowProps typedef
             rowProps={() => {
               return {
                 'data-test-subj': 'apiKeyRow',
@@ -497,7 +493,7 @@ export class ApiKeysGridPage extends Component<Props, State> {
     this.loadApiKeys();
   };
 
-  private loadApiKeys = async (isReload = false) => {
+  private loadApiKeys = async () => {
     try {
       const { isAdmin } = this.state;
       const { apiKeys } = await ApiKeysApi.getApiKeys(isAdmin);

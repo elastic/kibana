@@ -5,7 +5,7 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { ApiKey, ApiKeyCore } from '../../common/model/api_key';
+import { ApiKey, ApiKeyToInvalidate } from '../../common/model/api_key';
 import { API_BASE_PATH } from '../../common/constants';
 
 interface CheckPrivilegesResponse {
@@ -14,7 +14,7 @@ interface CheckPrivilegesResponse {
 }
 
 interface InvalidateApiKeysResponse {
-  itemsInvalidated: ApiKeyCore[];
+  itemsInvalidated: ApiKeyToInvalidate[];
   errors: any[];
 }
 
@@ -38,7 +38,7 @@ export class ApiKeysApi {
   }
 
   public static async invalidateApiKeys(
-    apiKeys: ApiKeyCore[],
+    apiKeys: ApiKeyToInvalidate[],
     isAdmin: boolean = false
   ): Promise<InvalidateApiKeysResponse> {
     const pathname = `${apiKeysUrl}/invalidate`;

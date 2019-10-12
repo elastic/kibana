@@ -14,7 +14,7 @@ export interface ApiKey {
   invalidated: boolean;
 }
 
-export interface ApiKeyCore {
+export interface ApiKeyToInvalidate {
   id: string;
   name: string;
 }
