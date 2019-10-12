@@ -7483,7 +7483,6 @@
     "xpack.ml.newJob.wizard.summaryStep.viewResultsButton": "查看结果",
     "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel": "结束日期",
     "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.startDateLabel": "开始日期",
-    "xpack.ml.newJob.wizard.validateJob.bucketSpanInvalidTimeIntervalFormatErrorMessage": "{bucketSpan} 不是有效的时间间隔格式，例如，{tenMinutes}、{oneHour}。它还需要大于零。",
     "xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage": "必须设置存储桶跨度",
     "xpack.ml.newJob.wizard.validateJob.duplicatedDetectorsErrorMessage": "找到重复的检测工具。",
     "xpack.ml.newJob.wizard.validateJob.groupNameAlreadyExists": "组 ID 已存在。组 ID 不能与现有作业或组相同。",
