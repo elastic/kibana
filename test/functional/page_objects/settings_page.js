@@ -294,9 +294,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async removeLogstashIndexPatternIfExist() {
-      if (!(await PageObjects.settings.isIndexPatternListEmpty())) {
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.removeIndexPattern();
+      if (!(await this.isIndexPatternListEmpty())) {
+        await this.clickIndexPatternLogstash();
+        await this.removeIndexPattern();
       }
     }
 
