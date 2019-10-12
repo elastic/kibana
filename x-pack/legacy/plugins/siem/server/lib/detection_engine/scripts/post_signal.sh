@@ -18,7 +18,6 @@ SIGNALS=(${@:-./signals/root_or_admin_1.json})
 for SIGNAL in "${SIGNALS[@]}"
 do {
   [ -e "$SIGNAL" ] || continue
-  echo "Posting $SIGNAL signal..."
   curl -s -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
