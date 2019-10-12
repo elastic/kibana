@@ -6,11 +6,12 @@
 
 import Joi from 'joi';
 import { wrapError } from '../../../../../../../../plugins/security/server';
+import { API_BASE_PATH } from  '../../../../../common/constants';
 
 export function initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseFn) {
   server.route({
     method: 'GET',
-    path: '/api/security/api_key',
+    path: `${API_BASE_PATH}/api_key`,
     async handler(request) {
       try {
         const { isAdmin } = request.query;

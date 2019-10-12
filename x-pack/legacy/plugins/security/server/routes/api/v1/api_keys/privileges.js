@@ -5,11 +5,12 @@
  */
 
 import { wrapError } from '../../../../../../../../plugins/security/server';
+import { API_BASE_PATH } from  '../../../../../common/constants';
 
 export function initCheckPrivilegesApi(server, callWithRequest, routePreCheckLicenseFn) {
   server.route({
     method: 'GET',
-    path: '/api/security/api_key/privileges',
+    path: `${API_BASE_PATH}/api_key/privileges`,
     async handler(request) {
       try {
         const result = await Promise.all([

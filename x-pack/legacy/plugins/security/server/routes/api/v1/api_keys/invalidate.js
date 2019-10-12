@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import { wrapError } from '../../../../../../../../plugins/security/server';
+import { API_BASE_PATH } from  '../../../../../common/constants';
 
 export function initInvalidateApiKeysApi(server, callWithRequest, routePreCheckLicenseFn) {
   server.route({
     method: 'POST',
-    path: '/api/security/api_key/invalidate',
+    path: `${API_BASE_PATH}/api_key/invalidate`,
     async handler(request) {
       try {
         const { apiKeys, isAdmin } = request.payload;
@@ -53,7 +55,16 @@ export function initInvalidateApiKeysApi(server, callWithRequest, routePreCheckL
       }
     },
     config: {
-      pre: [routePreCheckLicenseFn]
+      pre: [routePreCheckLicenseFn],
+      validate: {
+        payload: Joi.object({
+          apiKeys: Joi.array().items(Joi.object({
+            id: Joi.string().required(),
+            name: Joi.string().required(),
+          })).required(),
+          isAdmin: Joi.bool(),
+        })
+      },
     }
   });
 }

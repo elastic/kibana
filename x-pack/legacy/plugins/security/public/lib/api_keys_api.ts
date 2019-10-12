@@ -6,6 +6,7 @@
 
 import { kfetch } from 'ui/kfetch';
 import { ApiKey, ApiKeyCore } from '../../common/model/api_key';
+import { API_BASE_PATH } from '../../common/constants';
 
 interface CheckPrivilegesResponse {
   areApiKeysEnabled: boolean;
@@ -21,7 +22,7 @@ interface GetApiKeysResponse {
   apiKeys: ApiKey[];
 }
 
-const apiKeysUrl = '/api/security/api_key';
+const apiKeysUrl = `${API_BASE_PATH}/api_key`;
 
 export class ApiKeysApi {
   public static async checkPrivileges(): Promise<CheckPrivilegesResponse> {

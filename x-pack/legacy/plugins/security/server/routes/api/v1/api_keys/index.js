@@ -10,7 +10,7 @@ import { initCheckPrivilegesApi } from './privileges';
 import { initGetApiKeysApi } from './get';
 import { initInvalidateApiKeysApi } from './invalidate';
 
-export function initExternalApiKeysApi(server) {
+export function initApiKeysApi(server) {
   const callWithRequest = getClient(server).callWithRequest;
   const routePreCheckLicenseFn = routePreCheckLicense(server);
 
