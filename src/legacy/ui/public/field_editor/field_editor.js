@@ -718,9 +718,9 @@ export class FieldEditorComponent extends PureComponent {
     const index = indexPattern.fields.findIndex(f => f.name === field.name);
 
     if (index > -1) {
-      indexPattern.fields.splice(index, 1, field);
+      indexPattern.fields.update(field);
     } else {
-      indexPattern.fields.push(field);
+      indexPattern.fields.add(field);
     }
 
     if (!fieldFormatId) {

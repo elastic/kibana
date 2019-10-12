@@ -37,6 +37,14 @@ export class FieldList extends Array<Field> implements FieldListInterface {
   private indexPattern: IndexPattern;
   private shortDotsEnable: boolean;
   private notifications: NotificationsSetup;
+  private setByName = (field: Field) => this.byName.set(field.name, field);
+  private setByGroup = (field: Field) => {
+    if (typeof this.groups.get(field.type) === 'undefined') {
+      this.groups.set(field.type, new Map());
+    }
+    this.groups.get(field.type)!.set(field.name, field);
+  };
+  private removeByGroup = (field: FieldType) => this.groups.get(field.type)!.delete(field.name);
   constructor(
     indexPattern: IndexPattern,
     specs: FieldSpec[] = [],
@@ -55,21 +63,23 @@ export class FieldList extends Array<Field> implements FieldListInterface {
   add = (field: FieldSpec) => {
     const newField = new Field(this.indexPattern, field, this.shortDotsEnable, this.notifications);
     this.push(newField);
-    this.byName.set(newField.name, newField);
-
-    // add to group, for speed
-    if (typeof this.groups.get(field.type) === 'undefined') {
-      this.groups.set(field.type, new Map());
-    }
-    (this.groups.get(field.type) as FieldMap).set(newField.name, newField);
+    this.setByName(newField);
+    this.setByGroup(newField);
   };
 
   remove = (field: FieldType) => {
-    // maybe this just needs to take name
-    (this.groups.get(field.type) as FieldMap).delete(field.name);
+    this.removeByGroup(field);
     this.byName.delete(field.name);
 
     const fieldIndex = findIndex(this, { name: field.name });
     this.splice(fieldIndex, 1);
+  };
+
+  update = (field: Field) => {
+    const index = this.findIndex(f => f.name === field.name);
+    this.splice(index, 1, field);
+    this.setByName(field);
+    this.removeByGroup(field);
+    this.setByGroup(field);
   };
 }
