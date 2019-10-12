@@ -18,9 +18,9 @@
  */
 
 import { useEffect } from 'react';
-import { AppDatabase } from '../../../app_database';
-import { useEditorActionContext } from '../context';
-import { scratchPadName } from '../../../models/recipe';
+import { AppDatabase } from '../../../../app_database';
+import { useEditorActionContext } from '../../context';
+import { scratchPadName } from '../../../../models/recipe';
 
 interface Dependencies {
   database: AppDatabase;

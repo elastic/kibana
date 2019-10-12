@@ -40,7 +40,7 @@ import mappings from '../../../../../../../public/quarantined/src/mappings';
 
 import { useEditorActionContext, useEditorReadContext } from '../../context';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { useRecipeSave, useRecipeContentInit } from '../../hooks';
+import { useRecipeSave, useRecipeContentInit } from '../../recipes';
 
 const abs: CSSProperties = {
   position: 'absolute',

@@ -18,9 +18,9 @@
  */
 
 import { debounce } from 'lodash';
-import { AppDatabase } from '../../../app_database';
-import { RecipeAttributes } from '../../../models/recipe';
-import { useEditorActionContext, useEditorReadContext } from '../context';
+import { AppDatabase } from '../../../../app_database';
+import { RecipeAttributes } from '../../../../models/recipe';
+import { useEditorActionContext, useEditorReadContext } from '../../context';
 
 interface Dependencies {
   database: AppDatabase;

@@ -87,7 +87,10 @@ export const reducer: Reducer<ContextValue, Action> = (state, action) => {
       nextState.initializationErrors = action.value;
       break;
     case 'recipes.update':
-      nextState.recipes = action.value;
+      nextState.recipes = {
+        ...(nextState.recipes || {}),
+        ...action.value,
+      };
       break;
     case 'recipe.setCurrentRecipe':
       nextState.currentRecipe = action.value;
