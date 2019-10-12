@@ -77,10 +77,8 @@ export class DeleteWorker extends AbstractWorker {
       const repoService = this.repoServiceFactory.newInstance(
         this.serverOptions.repoPath,
         this.serverOptions.credsPath,
-        this.log,
-        this.serverOptions.security.enableGitCertCheck
+        this.log
       );
-      this.gitOps.cleanRepo(uri);
       await this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
       // 4. Delete the document index and alias where the repository document and all status reside,
