@@ -69,32 +69,89 @@ export class ApiKeysGridPage extends Component<Props, State> {
   }
 
   public render() {
-    const { permissionDenied, areApiKeysEnabled, isAdmin, isLoadingApp } = this.state;
+    const {
+      permissionDenied,
+      isLoadingApp,
+      isLoadingTable,
+      areApiKeysEnabled,
+      isAdmin,
+      error,
+      apiKeys,
+    } = this.state;
 
     if (permissionDenied) {
       return <PermissionDenied />;
     }
 
-    const description =
-      isLoadingApp || !areApiKeysEnabled ? (
-        undefined
-      ) : (
-        <EuiText color="subdued" size="s">
-          <p>
-            {isAdmin ? (
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                defaultMessage="View and invalidate API keys. An API key sends requests on behalf of a user."
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
-                defaultMessage="View and invalidate your API keys. An API key sends requests on your behalf."
-              />
-            )}
-          </p>
-        </EuiText>
+    if (isLoadingApp) {
+      return (
+        <EuiPageContent>
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
+              defaultMessage="Loading API keys…"
+            />
+          </SectionLoading>
+        </EuiPageContent>
       );
+    }
+
+    if (error) {
+      const {
+        body: { error: errorTitle, message, statusCode },
+      } = error;
+
+      return (
+        <EuiPageContent>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.security.management.apiKeys.table.loadingApiKeysErrorTitle"
+                defaultMessage="Error loading API keys"
+              />
+            }
+            color="danger"
+            iconType="alert"
+          >
+            {statusCode}: {errorTitle} - {message}
+          </EuiCallOut>
+        </EuiPageContent>
+      );
+    }
+
+    if (!areApiKeysEnabled) {
+      return (
+        <EuiPageContent>
+          <NotEnabled />
+        </EuiPageContent>
+      );
+    }
+
+    if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
+      return (
+        <EuiPageContent>
+          <EmptyPrompt isAdmin={isAdmin} />
+        </EuiPageContent>
+      );
+    }
+
+    const description = (
+      <EuiText color="subdued" size="s">
+        <p>
+          {isAdmin ? (
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
+              defaultMessage="View and invalidate API keys. An API key sends requests on behalf of a user."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
+              defaultMessage="View and invalidate your API keys. An API key sends requests on your behalf."
+            />
+          )}
+        </p>
+      </EuiText>
+    );
 
     return (
       <EuiPageContent>
@@ -112,65 +169,22 @@ export class ApiKeysGridPage extends Component<Props, State> {
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
 
-        <EuiPageContentBody>{this.renderContent()}</EuiPageContentBody>
+        <EuiPageContentBody>{this.renderTable()}</EuiPageContentBody>
       </EuiPageContent>
     );
   }
 
-  private onApiKeysInvalidated = (apiKeysInvalidated: ApiKeyToInvalidate[]): void => {
-    if (apiKeysInvalidated.length) {
-      this.reloadApiKeys();
-    }
-  };
-
-  private renderContent = () => {
-    const { isLoadingApp, isLoadingTable, areApiKeysEnabled, isAdmin, error, apiKeys } = this.state;
-
-    if (isLoadingApp) {
-      return (
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
-            defaultMessage="Loading API keys…"
-          />
-        </SectionLoading>
-      );
-    }
-
-    if (error) {
-      const {
-        body: { error: errorTitle, message, statusCode },
-      } = error;
-
-      return (
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.security.management.apiKeys.table.loadingApiKeysErrorTitle"
-              defaultMessage="Error loading API keys"
-            />
-          }
-          color="danger"
-          iconType="alert"
-        >
-          {statusCode}: {errorTitle} - {message}
-        </EuiCallOut>
-      );
-    }
-
-    if (!areApiKeysEnabled) {
-      return <NotEnabled />;
-    }
-
-    if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
-      return <EmptyPrompt isAdmin={isAdmin} />;
-    }
-
-    return this.renderTable();
-  };
-
   private renderTable = () => {
     const { apiKeys, selectedItems, isLoadingTable, isAdmin } = this.state;
+
+    const message = isLoadingTable ? (
+      <FormattedMessage
+        id="xpack.security.management.apiKeys.table.apiKeysTableLoadingMessage"
+        defaultMessage="Loading API keys…"
+      />
+    ) : (
+      undefined
+    );
 
     const sorting = {
       sort: {
@@ -313,6 +327,7 @@ export class ApiKeysGridPage extends Component<Props, State> {
             selection={selection}
             pagination={pagination}
             loading={isLoadingTable}
+            message={message}
             isSelectable={true}
             rowProps={() => {
               return {
@@ -453,6 +468,12 @@ export class ApiKeysGridPage extends Component<Props, State> {
     ]);
 
     return config;
+  };
+
+  private onApiKeysInvalidated = (apiKeysInvalidated: ApiKeyToInvalidate[]): void => {
+    if (apiKeysInvalidated.length) {
+      this.reloadApiKeys();
+    }
   };
 
   private async checkPrivileges() {
