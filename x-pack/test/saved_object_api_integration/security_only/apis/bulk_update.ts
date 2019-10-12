@@ -22,6 +22,7 @@ export default function({ getService }: FtrProviderContext) {
       expectSpaceAwareResults,
       expectSpaceNotFound,
       expectHiddenTypeRbacForbidden,
+      expectHiddenTypeRbacForbiddenWithGlobalAllowed,
       bulkUpdateTest,
     } = bulkUpdateTestSuiteFactory(esArchiver, supertest);
 
@@ -104,7 +105,7 @@ export default function({ getService }: FtrProviderContext) {
         },
         hiddenType: {
           statusCode: 403,
-          response: expectHiddenTypeRbacForbidden,
+          response: expectHiddenTypeRbacForbiddenWithGlobalAllowed,
         },
         doesntExist: {
           statusCode: 200,
@@ -148,7 +149,7 @@ export default function({ getService }: FtrProviderContext) {
         },
         hiddenType: {
           statusCode: 403,
-          response: expectHiddenTypeRbacForbidden,
+          response: expectHiddenTypeRbacForbiddenWithGlobalAllowed,
         },
         doesntExist: {
           statusCode: 200,
