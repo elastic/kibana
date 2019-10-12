@@ -137,20 +137,9 @@ export function populateValidationMessages(
     basicValidations.bucketSpan.message = msg;
   } else if (validationResults.contains('bucket_span_invalid')) {
     basicValidations.bucketSpan.valid = false;
-    const msg = i18n.translate(
-      'xpack.ml.newJob.wizard.validateJob.bucketSpanInvalidTimeIntervalFormatErrorMessage',
-      {
-        defaultMessage:
-          '{bucketSpan} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
-        values: {
-          bucketSpan: jobConfig.analysis_config.bucket_span,
-          tenMinutes: '10m',
-          oneHour: '1h',
-        },
-      }
+    basicValidations.bucketSpan.message = invalidTimeFormatMessage(
+      jobConfig.analysis_config.bucket_span
     );
-
-    basicValidations.bucketSpan.message = msg;
   }
 
   if (validationResults.contains('query_empty')) {
@@ -169,36 +158,12 @@ export function populateValidationMessages(
 
   if (validationResults.contains('query_delay_invalid')) {
     basicValidations.queryDelay.valid = false;
-    const msg = i18n.translate(
-      'xpack.ml.newJob.wizard.validateJob.queryDelayInvalidTimeIntervalFormatErrorMessage',
-      {
-        defaultMessage:
-          '{queryDelay} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
-        values: {
-          queryDelay: datafeedConfig.query_delay,
-          tenMinutes: '10m',
-          oneHour: '1h',
-        },
-      }
-    );
-    basicValidations.queryDelay.message = msg;
+    basicValidations.queryDelay.message = invalidTimeFormatMessage(datafeedConfig.query_delay);
   }
 
   if (validationResults.contains('frequency_invalid')) {
     basicValidations.frequency.valid = false;
-    const msg = i18n.translate(
-      'xpack.ml.newJob.wizard.validateJob.frequencyInvalidTimeIntervalFormatErrorMessage',
-      {
-        defaultMessage:
-          '{frequency} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
-        values: {
-          frequency: datafeedConfig.frequency,
-          tenMinutes: '10m',
-          oneHour: '1h',
-        },
-      }
-    );
-    basicValidations.frequency.message = msg;
+    basicValidations.frequency.message = invalidTimeFormatMessage(datafeedConfig.frequency);
   }
 }
 
@@ -230,4 +195,19 @@ export function checkForExistingJobAndGroupIds(
     contains: (id: string) => messages.some(m => id === m.id),
     find: (id: string) => messages.find(m => id === m.id),
   };
+}
+
+function invalidTimeFormatMessage(value: string | undefined) {
+  return i18n.translate(
+    'xpack.ml.newJob.wizard.validateJob.frequencyInvalidTimeIntervalFormatErrorMessage',
+    {
+      defaultMessage:
+        '{value} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
+      values: {
+        value,
+        tenMinutes: '10m',
+        oneHour: '1h',
+      },
+    }
+  );
 }
