@@ -6,7 +6,7 @@
 
 import * as kfetchModule from 'ui/kfetch';
 import { mockNow } from '../../utils/testHelpers';
-import { _clearCache, callApi } from '../rest/callApi';
+import { clearCache, callApi } from '../rest/callApi';
 import { SessionStorageMock } from './SessionStorageMock';
 
 jest.mock('ui/kfetch');
@@ -24,7 +24,7 @@ describe('callApi', () => {
 
   afterEach(() => {
     kfetchSpy.mockClear();
-    _clearCache();
+    clearCache();
   });
 
   describe('apm_debug', () => {

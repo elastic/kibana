@@ -396,6 +396,12 @@
                 "defaultValue": null
               },
               {
+                "name": "pagination",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
                 "name": "filters",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -2600,6 +2606,22 @@
         "description": "The primary object returned for monitor states.",
         "fields": [
           {
+            "name": "prevPagePagination",
+            "description": "Used to go to the next page of results",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nextPagePagination",
+            "description": "Used to go to the previous page of results",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "summaries",
             "description": "The objects representing the state of a series of heartbeat monitors.",
             "args": [],
@@ -4147,6 +4169,32 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "CursorDirection",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          { "name": "AFTER", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "BEFORE", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "SortOrder",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          { "name": "ASC", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "DESC", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
         "possibleTypes": null
       }
     ],

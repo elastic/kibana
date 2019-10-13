@@ -29,8 +29,8 @@ const name = 'datatable';
  * A Utility function that Typescript can use to determine if an object is a Datatable.
  * @param datatable
  */
-export const isDatatable = (datatable: any): datatable is Datatable =>
-  !!datatable && datatable.type === 'datatable';
+export const isDatatable = (datatable: unknown): datatable is Datatable =>
+  !!datatable && typeof datatable === 'object' && (datatable as any).type === 'datatable';
 
 /**
  * This type represents the `type` of any `DatatableColumn` in a `Datatable`.
@@ -38,7 +38,7 @@ export const isDatatable = (datatable: any): datatable is Datatable =>
 export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
 
 /**
- * This type represents a `DatatableRow` in a `Datatable`.
+ * This type represents a row in a `Datatable`.
  */
 export type DatatableRow = Record<string, any>;
 
@@ -95,64 +95,48 @@ export const datatable = (): ExpressionType<typeof name, Datatable, SerializedDa
     const { columns, rows } = table;
     return {
       ...table,
-      rows: rows.map((row: any) => {
+      rows: rows.map(row => {
         return zipObject(map(columns, 'name'), row);
       }),
     };
   },
   from: {
-    null: () => {
-      return {
-        type: name,
-        rows: [],
-        columns: [],
-      };
-    },
-    pointseries: (context: PointSeries) => {
-      return {
-        type: name,
-        rows: context.rows,
-        columns: map(context.columns, (val, colName) => {
-          return { name: colName!, type: val.type };
-        }),
-      };
-    },
+    null: () => ({
+      type: name,
+      rows: [],
+      columns: [],
+    }),
+    pointseries: (value: PointSeries) => ({
+      type: name,
+      rows: value.rows,
+      columns: map(value.columns, (val, colName) => {
+        return { name: colName!, type: val.type };
+      }),
+    }),
   },
   to: {
-    render: (table): Render<RenderedDatatable> => {
-      return {
-        type: 'render',
-        as: 'table',
-        value: {
-          datatable: table,
-          paginate: true,
-          perPage: 10,
-          showHeader: true,
-        },
-      };
-    },
-    pointseries: (table): PointSeries => {
-      // datatable columns are an array that looks like [{ name: "one", type: "string" }, { name: "two", type: "string" }]
-      // rows look like [{ one: 1, two: 2}, { one: 3, two: 4}, ...]
+    render: (table): Render<RenderedDatatable> => ({
+      type: 'render',
+      as: 'table',
+      value: {
+        datatable: table,
+        paginate: true,
+        perPage: 10,
+        showHeader: true,
+      },
+    }),
+    pointseries: (table: Datatable): PointSeries => {
       const validFields = ['x', 'y', 'color', 'size', 'text'];
       const columns = table.columns.filter(column => validFields.includes(column.name));
       const rows = table.rows.map(row => pick(row, validFields));
-
       return {
         type: 'pointseries',
-        columns: columns.reduce((acc: Record<string, any>, column) => {
-          /* pointseries columns are an object that looks like this
-           * {
-           *   x: { type: "string", expression: "x", role: "dimension" },
-           *   y: { type: "string", expression: "y", role: "dimension" }
-           * }
-           */
+        columns: columns.reduce<Record<string, PointSeries['columns']>>((acc, column) => {
           acc[column.name] = {
             type: column.type,
             expression: column.name,
             role: 'dimension',
           };
-
           return acc;
         }, {}),
         rows,

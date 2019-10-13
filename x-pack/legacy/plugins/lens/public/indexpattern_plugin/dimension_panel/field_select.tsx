@@ -13,10 +13,11 @@ import {
   // @ts-ignore
   EuiHighlight,
 } from '@elastic/eui';
-import { OperationType, IndexPattern, IndexPatternField } from '../indexpattern';
-import { FieldIcon } from '../field_icon';
+import { OperationType } from '../indexpattern';
+import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
 import { OperationFieldSupportMatrix } from './dimension_panel';
+import { IndexPattern, IndexPatternField } from '../types';
 
 export type FieldChoice =
   | { type: 'field'; field: string; operationType?: OperationType }
@@ -172,7 +173,9 @@ export function FieldSelect({
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={null}>
-              <FieldIcon type={((option.value as unknown) as { dataType: DataType }).dataType} />
+              <LensFieldIcon
+                type={((option.value as unknown) as { dataType: DataType }).dataType}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
