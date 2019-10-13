@@ -1,0 +1,43 @@
+<html>
+  <body>
+    <strong>
+      <%= elasticStackMachineLearningAlertLabel %>
+    </strong>
+    <br />
+    <br />
+
+    <strong>
+      <%= jobLabel %>
+    </strong>: {{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0._source.job_id}}
+    <br />
+
+    <strong>
+      <%= timeLabel %>
+    </strong>: {{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.timestamp_iso8601.0}}
+    <br />
+
+    <strong>
+      <%= anomalyScoreLabel %>
+    </strong>: {{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.score.0}}
+    <br />
+    <br />
+
+    <a href="<%= serverAddress %>#/explorer/?_g=(ml:(jobIds:!('{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0._source.job_id}}')),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.start.0}}',mode:absolute,to:'{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.end.0}}'))&_a=(filters:!(),mlAnomaliesTable:(intervalValue:auto,thresholdValue:0),mlExplorerSwimlane:(selectedLane:Overall,selectedTime:{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.timestamp_epoch.0}},selectedType:overall),query:(query_string:(analyze_wildcard:!t,query:'*')))">
+      <%= openInAnomalyExplorerLinkText %>
+    </a>
+    <br />
+    <br />
+
+    <%= influencersSection %>
+
+    <strong>
+      <%= topRecordsLabel %>
+    </strong>
+    <br />
+    {{#ctx.payload.aggregations.record_results.top_record_hits.hits.hits}}
+      {{_source.function}}({{_source.field_name}}) {{_source.by_field_value}} {{_source.over_field_value}} {{_source.partition_field_value}} [{{fields.score.0}}]
+      <br />
+    {{/ctx.payload.aggregations.record_results.top_record_hits.hits.hits}}
+
+  </body>
+</html>
