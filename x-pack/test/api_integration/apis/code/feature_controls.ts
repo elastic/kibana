@@ -37,12 +37,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       url: `/api/code/repo/github.com/elastic/code-examples_empty-file`,
       expectForbidden: expect404,
       expectResponse: expect200,
+      isRepoApi: true,
     },
     {
       // Get the status of one repository.
       url: `/api/code/repo/status/github.com/elastic/code-examples_empty-file`,
       expectForbidden: expect404,
       expectResponse: expect200,
+      isRepoApi: true,
     },
     {
       // Get all language server installation status.
@@ -103,9 +105,13 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     username: string,
     password: string,
     spaceId: string,
-    expectation: 'forbidden' | 'response'
+    expectation: 'forbidden' | 'response',
+    skipRepoApi: boolean = false
   ) {
     for (const endpoint of endpoints) {
+      if (skipRepoApi && endpoint.isRepoApi === true) {
+        continue;
+      }
       const result = await executeRequest(endpoint.url, username, password, spaceId);
       if (expectation === 'forbidden') {
         endpoint.expectForbidden(result);
@@ -339,6 +345,12 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
               feature: {
                 code: ['read'],
               },
+              spaces: ['default'],
+            },
+            {
+              feature: {
+                code: ['read'],
+              },
               spaces: [space1Id],
             },
             {
@@ -362,8 +374,12 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         await security.user.delete(username);
       });
 
-      it('user_1 can access APIs in space_1', async () => {
-        await executeRequests(username, password, space1Id, 'response');
+      it('user_1 can access all APIs in default space', async () => {
+        await executeRequests(username, password, '', 'response');
+      });
+
+      it('user_1 can access code admin APIs in space_1', async () => {
+        await executeRequests(username, password, space1Id, 'response', true);
       });
 
       it(`user_1 cannot access APIs in space_2`, async () => {
