@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
+import Boom from 'boom';
 import { SAVED_OBJ_REPO } from '../../common/constants';
 
 export interface RepositoryReferenceHelper {
@@ -81,7 +82,7 @@ class DefaultReferenceHelper implements RepositoryReferenceHelper {
 
   async ensureReference(uri: string): Promise<void> {
     if (!(await this.hasReference(uri))) {
-      throw new Error(`Space has no reference of [${uri}]`);
+      throw Boom.notFound(`Space has no reference of [${uri}]`);
     }
   }
 
@@ -90,7 +91,10 @@ class DefaultReferenceHelper implements RepositoryReferenceHelper {
       await this.client.get(SAVED_OBJ_REPO, uri);
       return true;
     } catch (e) {
-      return false;
+      if (Boom.isBoom(e) && e.output.statusCode === 404) {
+        return false;
+      }
+      throw e;
     }
   }
 
