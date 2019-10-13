@@ -131,15 +131,15 @@ export default function({ getService, getPageObjects, ...rest }: FtrProviderCont
       } as KibanaConfig);
 
       expect(results).to.have.keys([
-        'visualization_types_overall',
-        'visualization_types_last_30_days',
-        'visualization_types_last_90_days',
+        'saved_overall',
+        'saved_30_days',
+        'saved_90_days',
         'saved_total',
         'saved_last_30_days',
         'saved_last_90_days',
       ]);
 
-      expect(results.visualization_types_overall).to.eql({
+      expect(results.saved_overall).to.eql({
         lnsMetric: 1,
         bar_stacked: 1,
       });

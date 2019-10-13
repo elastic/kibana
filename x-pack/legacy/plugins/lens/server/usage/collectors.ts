@@ -7,9 +7,8 @@
 import moment from 'moment';
 import { get } from 'lodash';
 import { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
-import { LensUsage } from './types';
+import { LensUsage, LensTelemetryState } from './types';
 
 export function registerLensUsageCollector(
   core: CoreSetup,
@@ -42,16 +41,21 @@ export function registerLensUsageCollector(
 
   const lensUsageCollector = plugins.usage.collectorSet.makeUsageCollector({
     type: 'lens',
-    fetch: async (callCluster: CallCluster): Promise<LensUsage> => {
+    fetch: async (): Promise<LensUsage> => {
       try {
         const docs = await getLatestTaskState(plugins.server);
         // get the accumulated state from the recurring task
-        const state = get(docs, '[0].state');
+        const state: LensTelemetryState = get(docs, '[0].state');
 
         const dates = Object.keys(state.byDate || {}).map(dateStr => parseInt(dateStr, 10));
+        const suggestionDates = Object.keys(state.suggestionsByDate || {}).map(dateStr =>
+          parseInt(dateStr, 10)
+        );
 
         const eventsLast30: Record<string, number> = {};
         const eventsLast90: Record<string, number> = {};
+        const suggestionsLast30: Record<string, number> = {};
+        const suggestionsLast90: Record<string, number> = {};
 
         const last30 = moment()
           .subtract(30, 'days')
@@ -69,26 +73,35 @@ export function registerLensUsageCollector(
           }
         });
 
-        console.log(state);
+        suggestionDates.forEach(date => {
+          if (date > last30) {
+            addEvents(suggestionsLast30, state.suggestionsByDate[date]);
+            addEvents(suggestionsLast90, state.suggestionsByDate[date]);
+          } else if (date > last90) {
+            addEvents(suggestionsLast90, state.suggestionsByDate[date]);
+          }
+        });
+
         return {
           ...state.saved,
-          clicks_last_30_days: eventsLast30,
-          clicks_last_90_days: eventsLast90,
+          events_30_days: eventsLast30,
+          events_90_days: eventsLast90,
+          suggestions_last_30_days: suggestionsLast30,
+          suggestions_last_90_days: suggestionsLast90,
         };
-        // return getVisualizationCounts(callCluster, plugins.config);
       } catch (err) {
         return {
           saved_total: 0,
           saved_last_30_days: 0,
           saved_last_90_days: 0,
-          visualization_types_overall: {},
-          visualization_types_last_30_days: {},
-          visualization_types_last_90_days: {},
+          saved_overall: {},
+          saved_30_days: {},
+          saved_90_days: {},
 
-          clicks_last_30_days: {},
-          clicks_last_90_days: {},
-          suggestion_clicks_last_30_days: {},
-          suggestion_clicks_last_90_days: {},
+          events_30_days: {},
+          events_90_days: {},
+          suggestion_events_30_days: {},
+          suggestion_events_90_days: {},
         };
       }
     },

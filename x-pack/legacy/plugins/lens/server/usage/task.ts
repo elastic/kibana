@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server, SavedObjectsClient as SavedObjectsClientType } from 'src/legacy/server/kbn_server';
+import moment from 'moment';
+import { Server } from 'src/legacy/server/kbn_server';
 import { CoreSetup } from 'src/core/server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import { SearchParams, SearchResponse, DeleteDocumentByQueryResponse } from 'elasticsearch';
@@ -65,7 +66,7 @@ function scheduleTasks(server: Server) {
         await taskManager.schedule({
           id: TASK_ID,
           taskType: TELEMETRY_TASK_TYPE,
-          state: { byDate: {}, saved: {}, runs: 0 },
+          state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
           params: {},
         });
       } catch (e) {
@@ -77,7 +78,7 @@ function scheduleTasks(server: Server) {
 
 // type LensTaskState = LensUsage | {};
 
-async function doWork(
+export async function doWork(
   prevState: any,
   server: Server,
   callCluster: ClusterSearchType & ClusterDeleteType
@@ -100,11 +101,25 @@ async function doWork(
         daily: {
           date_histogram: {
             field: 'updated_at',
-            fixed_interval: '30d',
+            calendar_interval: '1d',
           },
           aggs: {
-            names: {
-              terms: { field: 'lens-ui-telemetry.name', size: 100 },
+            groups: {
+              filters: {
+                filters: {
+                  suggestionEvent: {
+                    bool: { filter: { term: { 'lens-ui-telemetry.type': 'suggestion' } } },
+                  },
+                  regularEvents: {
+                    bool: { must_not: { term: { 'lens-ui-telemetry.type': 'suggestion' } } },
+                  },
+                },
+              },
+              aggs: {
+                names: {
+                  terms: { field: 'lens-ui-telemetry.name', size: 100 },
+                },
+              },
             },
           },
         },
@@ -114,13 +129,39 @@ async function doWork(
   });
 
   const byDateByType: Record<string, Record<string, number>> = prevState.byDate || {};
+  const suggestionsByDate: Record<string, Record<string, number>> =
+    prevState.suggestionsByDate || {};
 
-  metrics.aggregations.daily.buckets.forEach(bucket => {
-    const byType: Record<string, number> = byDateByType[bucket.key] || {};
-    bucket.names.buckets.forEach(({ key, doc_count }) => {
-      byType[key] = doc_count + (byType[key] || 0);
+  Object.keys(byDateByType).forEach(key => {
+    // Unix time
+    if (moment(key, 'x').isBefore(moment().subtract(30, 'days'))) {
+      // Remove this key
+      delete byDateByType[key];
+      return;
+    }
+  });
+
+  Object.keys(suggestionsByDate).forEach(key => {
+    // Unix time
+    if (moment(key, 'x').isBefore(moment().subtract(30, 'days'))) {
+      // Remove this key
+      delete suggestionsByDate[key];
+      return;
+    }
+  });
+
+  metrics.aggregations.daily.buckets.forEach(daily => {
+    const byType: Record<string, number> = byDateByType[daily.key] || {};
+    daily.groups.buckets.regularEvents.names.buckets.forEach(({ key, doc_count }) => {
+      byType[key] = doc_count + (byType[daily.key] || 0);
     });
-    byDateByType[bucket.key] = byType;
+    byDateByType[daily.key] = byType;
+
+    const suggestionsByType: Record<string, number> = suggestionsByDate[daily.key] || {};
+    daily.groups.buckets.suggestionEvent.names.buckets.forEach(({ key, doc_count }) => {
+      suggestionsByType[key] = doc_count + (byType[daily.key] || 0);
+    });
+    suggestionsByDate[daily.key] = suggestionsByType;
   });
 
   if (metrics.hits.total > 0) {
@@ -137,7 +178,10 @@ async function doWork(
     });
   }
 
-  return byDateByType;
+  return {
+    byDate: byDateByType,
+    suggestionsByDate,
+  };
 }
 
 function telemetryTaskRunner(server: Server) {
@@ -162,10 +206,17 @@ function telemetryTaskRunner(server: Server) {
 
         return Promise.all([lensTelemetryTask, lensVisualizationTask])
           .then(([lensTelemetry, lensVisualizations]) => {
+            console.log({
+              runs: (state.runs || 0) + 1,
+              byDate: (lensTelemetry && lensTelemetry.byDate) || {},
+              suggestionsByDate: (lensTelemetry && lensTelemetry.suggestionsByDate) || {},
+              saved: lensVisualizations,
+            });
             return {
               state: {
                 runs: (state.runs || 0) + 1,
-                byDate: lensTelemetry || {},
+                byDate: (lensTelemetry && lensTelemetry.byDate) || {},
+                suggestionsByDate: (lensTelemetry && lensTelemetry.suggestionsByDate) || {},
                 saved: lensVisualizations,
               },
               runAt: getNextMidnight(),

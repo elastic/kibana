@@ -106,7 +106,10 @@ function LayerSettings({
               iconType: t.icon || 'empty',
             }))}
           idSelected={layer.seriesType}
-          onChange={seriesType => setSeriesType(seriesType as SeriesType)}
+          onChange={seriesType => {
+            trackUiEvent('xy_change_layer_display');
+            setSeriesType(seriesType as SeriesType);
+          }}
           isIconOnly
           buttonSize="compressed"
         />
