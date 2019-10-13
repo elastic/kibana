@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CANVAS, JSON, KIBANA, PDF, POST, URL } from './constants';
+import { CANVAS, HTML, JSON, KIBANA, PDF, POST, URL, ZIP } from './constants';
 
 export const ComponentStrings = {
   AddEmbeddableFlyout: {
@@ -463,6 +463,144 @@ export const ComponentStrings = {
         defaultMessage: 'Delete',
       }),
   },
+  ShareWebsiteFlyout: {
+    getRuntimeStepTitle: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.downloadRuntimeTitle', {
+        defaultMessage: 'Download runtime',
+      }),
+    getSnippentsStepTitle: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.addSnippetsTitle', {
+        defaultMessage: 'Add snippets to website',
+      }),
+    getStepsDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.description', {
+        defaultMessage:
+          'Follow these steps to share a static version of this workpad on an external website. It will be a visual snapshot of the current workpad, and will not have access to live data.',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.flyoutTitle', {
+        defaultMessage: 'Share on a website',
+      }),
+    getUnsupportedRendererWarning: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.unsupportedRendererWarning', {
+        defaultMessage:
+          'This workpad contains render functions that are not supported by the {CANVAS} Shareable Workpad Runtime. These elements will not be rendered:',
+        values: {
+          CANVAS,
+        },
+      }),
+    getWorkpadStepTitle: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.downloadWorkpadTitle', {
+        defaultMessage: 'Download workpad',
+      }),
+  },
+  ShareWebsiteRuntimeStep: {
+    getDownloadLabel: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.runtimeStep.downloadLabel', {
+        defaultMessage: 'Download runtime',
+      }),
+    getStepDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.runtimeStep.description', {
+        defaultMessage:
+          'In order to render a Shareable Workpad, you also need to include the {CANVAS} Shareable Workpad Runtime. You can skip this step if the runtime is already included on your website.',
+        values: {
+          CANVAS,
+        },
+      }),
+  },
+  ShareWebsiteSnippetsStep: {
+    getAutoplayParameterDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.autoplayParameterDescription', {
+        defaultMessage: 'Should the runtime automatically move through the pages of the workpad?',
+      }),
+    getCallRuntimeLabel: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.callRuntimeLabel', {
+        defaultMessage: 'Call Runtime',
+      }),
+    getHeightParameterDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.heightParameterDescription', {
+        defaultMessage: 'The height of the Workpad. Defaults to the Workpad height.',
+      }),
+    getIncludeRuntimeLabel: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.includeRuntimeLabel', {
+        defaultMessage: 'Include Runtime',
+      }),
+    getIntervalParameterDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.intervalParameterDescription', {
+        defaultMessage:
+          'The interval upon which the pages will advance in time format, (e.g. {twoSeconds}, {oneMinute})',
+        values: {
+          twoSeconds: '2s',
+          oneMinute: '1m',
+        },
+      }),
+    getPageParameterDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.pageParameterDescription', {
+        defaultMessage: 'The page to display. Defaults to the page specified by the Workpad.',
+      }),
+    getParametersDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.parametersDescription', {
+        defaultMessage:
+          'There are a number of inline parameters to configure the Shareable Workpad.',
+      }),
+    getParametersTitle: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.parametersLabel', {
+        defaultMessage: 'Parameters',
+      }),
+    getPlaceholderLabel: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.placeholderLabel', {
+        defaultMessage: 'Placeholder',
+      }),
+    getRequiredLabel: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.requiredLabel', {
+        defaultMessage: 'required',
+      }),
+    getShareableParameterDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.shareableParameterDescription', {
+        defaultMessage: 'The type of shareable. In this case, a {CANVAS} Workpad.',
+        values: {
+          CANVAS,
+        },
+      }),
+    getSnippetsStepDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.description', {
+        defaultMessage:
+          'The Workpad is placed within the {HTML} of the site by using an {HTML} placeholder. Parameters for the runtime are included inline. See the full list of parameters below. You can include more than one workpad on the page.',
+        values: {
+          HTML,
+        },
+      }),
+    getToolbarParameterDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.toolbarParameterDescription', {
+        defaultMessage: 'Should the toolbar be hidden?',
+      }),
+    getUrlParameterDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.urlParameterDescription', {
+        defaultMessage: 'The {URL} of the Shareable Workpad {JSON} file.',
+        values: {
+          URL,
+          JSON,
+        },
+      }),
+    getWidthParameterDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.widthParameterDescription', {
+        defaultMessage: 'The width of the Workpad. Defaults to the Workpad width.',
+      }),
+  },
+  ShareWebsiteWorkpadStep: {
+    getDownloadLabel: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.workpadStep.downloadLabel', {
+        defaultMessage: 'Download workpad',
+      }),
+    getStepDescription: () =>
+      i18n.translate('xpack.canvas.shareWebsiteFlyout.workpadStep.description', {
+        defaultMessage:
+          'The workpad will be exported as a single {JSON} file for sharing in another site.',
+        values: {
+          JSON,
+        },
+      }),
+  },
   SidebarContent: {
     getGroupedElementSidebarTitle: () =>
       i18n.translate('xpack.canvas.sidebarContent.groupedElementSidebarTitle', {
@@ -816,6 +954,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.copyReportingConfigMessage', {
         defaultMessage: 'Copied reporting configuration to clipboard',
       }),
+    getCopyShareConfigMessage: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.copyShareConfigMessage', {
+        defaultMessage: 'Copied share markup to clipboard',
+      }),
     getExportPDFErrorTitle: (workpadName: string) =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.exportPDFErrorMessage', {
         defaultMessage: "Failed to create {PDF} for '{workpadName}'",
@@ -881,6 +1023,15 @@ export const ComponentStrings = {
           PDF,
         },
       }),
+    getShareableZipErrorTitle: (workpadName: string) =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareWebsiteErrorTitle', {
+        defaultMessage:
+          "Failed to create {ZIP} file for '{workpadName}'. The workpad may be too large. You'll need to download the files separately.",
+        values: {
+          ZIP,
+          workpadName,
+        },
+      }),
     getShareDownloadJSONTitle: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareDownloadJSONTitle', {
         defaultMessage: 'Download as {JSON}',
@@ -894,6 +1045,10 @@ export const ComponentStrings = {
         values: {
           PDF,
         },
+      }),
+    getShareWebsiteTitle: () =>
+      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareWebsiteTitle', {
+        defaultMessage: 'Share on a website',
       }),
     getShareWorkpadMessage: () =>
       i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareWorkpadMessage', {
