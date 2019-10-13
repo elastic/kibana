@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Location } from 'history';
-
+import { Filter } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
+import { Location } from 'history';
+import { Query } from 'src/plugins/data/common';
+
 import { UrlInputsModel } from '../../store/inputs/model';
 import { CONSTANTS } from '../url_state/constants';
-import { UrlSateQuery, URL_STATE_KEYS, KeyUrlState, Timeline, KqlQuery } from '../url_state/types';
+import { URL_STATE_KEYS, KeyUrlState, Timeline } from '../url_state/types';
 import {
   replaceQueryStringInLocation,
   replaceStateKeyInQueryString,
@@ -23,22 +25,23 @@ export const getSearch = (tab: SearchNavTab, urlState: TabNavigationProps): stri
   if (tab && tab.urlKey != null && URL_STATE_KEYS[tab.urlKey] != null) {
     return URL_STATE_KEYS[tab.urlKey].reduce<Location>(
       (myLocation: Location, urlKey: KeyUrlState) => {
-        let urlStateToReplace: UrlInputsModel | UrlSateQuery | Timeline | string = '';
+        let urlStateToReplace: UrlInputsModel | Query | Filter[] | Timeline | string = '';
 
-        if (urlKey === CONSTANTS.kqlQuery) {
-          const kqlQuery = urlState.kqlQuery as KqlQuery;
-          if (
-            kqlQuery.appQuery != null &&
-            kqlQuery.appQuery.query === '' &&
-            isEmpty(kqlQuery.filters)
-          ) {
+        if (urlKey === CONSTANTS.appQuery && urlState.query != null) {
+          if (urlState.query.query === '') {
             urlStateToReplace = '';
           } else {
-            urlStateToReplace = urlState.kqlQuery;
+            urlStateToReplace = urlState.query;
+          }
+        } else if (urlKey === CONSTANTS.filters && urlState.filters != null) {
+          if (isEmpty(urlState.filters)) {
+            urlStateToReplace = '';
+          } else {
+            urlStateToReplace = urlState.filters;
           }
         } else if (urlKey === CONSTANTS.timerange) {
           urlStateToReplace = urlState[CONSTANTS.timerange];
-        } else if (urlKey === CONSTANTS.timeline) {
+        } else if (urlKey === CONSTANTS.timeline && urlState[CONSTANTS.timeline] != null) {
           const timeline = urlState[CONSTANTS.timeline];
           if (timeline.id === '') {
             urlStateToReplace = '';

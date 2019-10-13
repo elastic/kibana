@@ -76,7 +76,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?_g=()&kqlQuery=(appQuery:(language:kuery,query:'host.name:%22siem-es%22'),filters:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))",
+          "?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))",
         state: '',
       });
     });
@@ -94,7 +94,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       );
       const newUrlState = {
         ...mockProps.urlState,
-        [CONSTANTS.kqlQuery]: getFilterQuery(),
+        [CONSTANTS.appQuery]: getFilterQuery(),
       };
       wrapper.setProps({
         hookProps: { ...mockProps, urlState: newUrlState, isInitializing: false },
@@ -107,7 +107,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?_g=()&kqlQuery=(appQuery:(language:kuery,query:'host.name:%22siem-es%22'),filters:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))",
+          "?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))",
         state: '',
       });
     });
@@ -206,7 +206,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           expect(
             mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0].search
           ).toEqual(
-            "?_g=()&kqlQuery=(appQuery:(language:kuery,query:'host.name:%22siem-es%22'),filters:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
+            "?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
           );
         });
       });

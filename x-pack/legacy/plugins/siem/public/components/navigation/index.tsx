@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
 import React, { useEffect } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
+import { Query } from 'src/plugins/data/common';
 
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
@@ -18,16 +20,17 @@ import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { TabNavigationProps } from './tab_navigation/types';
 import { SiemNavigationComponentProps } from './types';
-import { UrlSateQuery } from '../url_state/types';
 
 export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyState>(
   ({
+    query,
     detailName,
     display,
-    kqlQuery,
+    filters,
     navTabs,
     pageName,
     pathName,
+    savedQuery,
     search,
     showBorder,
     tabName,
@@ -37,26 +40,30 @@ export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyS
     useEffect(() => {
       if (pathName) {
         setBreadcrumbs({
+          query,
           detailName,
-          kqlQuery,
+          filters,
           navTabs,
           pageName,
           pathName,
+          savedQuery,
           search,
           tabName,
           timerange,
           timeline,
         });
       }
-    }, [pathName, search, kqlQuery, navTabs, timerange, timeline]);
+    }, [query, pathName, search, filters, navTabs, savedQuery, timerange, timeline]);
 
     return (
       <TabNavigation
+        query={query}
         display={display}
-        kqlQuery={kqlQuery}
+        filters={filters}
         navTabs={navTabs}
         pageName={pageName}
         pathName={pathName}
+        savedQuery={savedQuery}
         showBorder={showBorder}
         tabName={tabName}
         timeline={timeline}
@@ -68,7 +75,9 @@ export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyS
     return (
       prevProps.pathName === nextProps.pathName &&
       prevProps.search === nextProps.search &&
-      isEqual(prevProps.kqlQuery, nextProps.kqlQuery) &&
+      prevProps.savedQuery === nextProps.savedQuery &&
+      isEqual(prevProps.query, nextProps.query) &&
+      isEqual(prevProps.filters, nextProps.filters) &&
       isEqual(prevProps.navTabs, nextProps.navTabs) &&
       isEqual(prevProps.timerange, nextProps.timerange) &&
       isEqual(prevProps.timeline, nextProps.timeline)
@@ -97,19 +106,23 @@ const makeMapStateToProps = () => {
       { id: '', isOpen: false }
     );
 
-    let kqlQuery: UrlSateQuery = {
-      appQuery: getGlobalQuerySelector(state),
-      filters: getGlobalFiltersQuerySelector(state),
+    let searchAttr: {
+      [CONSTANTS.appQuery]?: Query;
+      [CONSTANTS.filters]?: Filter[];
+      [CONSTANTS.savedQuery]?: string;
+    } = {
+      [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
+      [CONSTANTS.filters]: getGlobalFiltersQuerySelector(state),
     };
     const savedQuery = getGlobalSavedQuerySelector(state);
     if (savedQuery != null && savedQuery.id !== '') {
-      kqlQuery = {
-        savedQueryId: savedQuery.id,
+      searchAttr = {
+        [CONSTANTS.savedQuery]: savedQuery.id,
       };
     }
 
     return {
-      [CONSTANTS.kqlQuery]: kqlQuery,
+      ...searchAttr,
       [CONSTANTS.timerange]: {
         global: {
           [CONSTANTS.timerange]: globalTimerange,

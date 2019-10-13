@@ -49,10 +49,8 @@ describe('SIEM Navigation', () => {
         linkTo: ['global'],
       },
     },
-    [CONSTANTS.kqlQuery]: {
-      appQuery: { query: '', language: 'kuery' },
-      filters: [],
-    },
+    [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
+    [CONSTANTS.filters]: [],
     [CONSTANTS.timeline]: {
       id: '',
       isOpen: false,
@@ -96,10 +94,9 @@ describe('SIEM Navigation', () => {
       pathName: '/hosts',
       search: '',
       tabName: 'authentications',
-      kqlQuery: {
-        appQuery: { query: '', language: 'kuery' },
-        filters: [],
-      },
+      query: { query: '', language: 'kuery' },
+      filters: [],
+      savedQuery: undefined,
       timeline: {
         id: '',
         isOpen: false,
@@ -171,10 +168,9 @@ describe('SIEM Navigation', () => {
       pathName: '/network',
       search: '',
       tabName: undefined,
-      kqlQuery: {
-        appQuery: { query: '', language: 'kuery' },
-        filters: [],
-      },
+      query: { query: '', language: 'kuery' },
+      filters: [],
+      savedQuery: undefined,
       timeline: {
         id: '',
         isOpen: false,

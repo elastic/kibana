@@ -110,7 +110,7 @@ describe('UrlStateContainer', () => {
         );
       });
 
-      describe('kqlQuery action is called with correct data on component mount', () => {
+      describe('appQuery action is called with correct data on component mount', () => {
         test.each(testCases.slice(0, 4))(
           ' %o',
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
@@ -126,28 +126,10 @@ describe('UrlStateContainer', () => {
           }
         );
       });
-
-      describe('kqlQuery action is not called called when the queryLocation does not match the router location', () => {
-        test.each(testCases)(
-          '%o',
-          (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
-            mockProps = getMockPropsObj({
-              page,
-              examplePath,
-              namespaceLower,
-              pageName,
-              detailName,
-            }).oppositeQueryLocationSearch.undefinedQuery;
-            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
-            // @ts-ignore property mock does not exists
-            expect(mockSetFilterQuery.mock.calls.length).toEqual(0);
-          }
-        );
-      });
     });
 
     describe('Redux updates URL state', () => {
-      describe('kqlQuery url state is set from redux data on component mount', () => {
+      describe('appQuery url state is set from redux data on component mount', () => {
         test.each(testCases)(
           '%o',
           (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
@@ -168,7 +150,7 @@ describe('UrlStateContainer', () => {
               pathname: examplePath,
               search: [CONSTANTS.overviewPage, CONSTANTS.timelinePage].includes(page)
                 ? '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))'
-                : `?_g=()&kqlQuery=(appQuery:(language:kuery,query:'host.name:%22siem-es%22'),filters:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+                : `?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
               state: '',
             });
           }

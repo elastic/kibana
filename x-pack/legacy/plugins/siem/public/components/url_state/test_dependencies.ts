@@ -5,24 +5,24 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { hostsModel, networkModel } from '../../store';
-import { UrlStateContainerPropTypes, LocationTypes, UrlSateQuery } from './types';
-import { CONSTANTS } from './constants';
+import { Query } from 'src/plugins/data/common';
+
 import { DispatchUpdateTimeline } from '../open_timeline/types';
 import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
+import { hostsModel, networkModel } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { HostsTableType } from '../../store/hosts/model';
+
+import { CONSTANTS } from './constants';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
+import { UrlStateContainerPropTypes, LocationTypes } from './types';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
-export const getFilterQuery = (): UrlSateQuery => ({
-  appQuery: {
-    query: 'host.name:"siem-es"',
-    language: 'kuery',
-  },
-  filters: [],
+export const getFilterQuery = (): Query => ({
+  query: 'host.name:"siem-es"',
+  language: 'kuery',
 });
 
 export const mockSetFilterQuery: jest.Mock = (inputsActions.setFilterQuery as unknown) as jest.Mock;
@@ -110,10 +110,8 @@ export const defaultProps: UrlStateContainerPropTypes = {
         linkTo: ['global'],
       },
     },
-    [CONSTANTS.kqlQuery]: {
-      appQuery: { query: '', language: 'kuery' },
-      filters: [],
-    },
+    [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
+    [CONSTANTS.filters]: [],
     [CONSTANTS.timeline]: {
       id: '',
       isOpen: false,
@@ -134,17 +132,14 @@ export const defaultProps: UrlStateContainerPropTypes = {
 export const getMockProps = (
   location = defaultLocation,
   kqlQueryKey = CONSTANTS.networkPage,
-  kqlQueryValue: UrlSateQuery | null,
+  kqlQueryValue: Query | null,
   pageName: string,
   detailName: string | undefined
 ): UrlStateContainerPropTypes => ({
   ...defaultProps,
   urlState: {
     ...defaultProps.urlState,
-    [CONSTANTS.kqlQuery]: kqlQueryValue || {
-      appQuery: { query: '', language: 'kuery' },
-      filters: [],
-    },
+    [CONSTANTS.appQuery]: kqlQueryValue || { query: '', language: 'kuery' },
   },
   history: {
     ...mockHistory,
@@ -202,7 +197,7 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&kqlQuery=(appQuery:(language:kuery,query:'host.name:%22siem-es%22'),filters:!())&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
@@ -214,7 +209,7 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&kqlQuery=(appQuery:(language:kuery,query:'host.name:%22siem-es%22'),filters:!())&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
@@ -256,9 +251,7 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${
-          namespaceLower === 'hosts' ? 'network' : 'hosts'
-        }.page)&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?_g=()&query=(query:'host.name:%22siem-es%22',language:kuery)&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,

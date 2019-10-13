@@ -18,14 +18,28 @@ import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
-  CONSTANTS.kqlQuery,
+  CONSTANTS.appQuery,
+  CONSTANTS.filters,
+  CONSTANTS.savedQuery,
   CONSTANTS.timerange,
   CONSTANTS.timeline,
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  host: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timeline],
-  network: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timeline],
+  host: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
+  network: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
   timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
   overview: [CONSTANTS.timeline, CONSTANTS.timerange],
 };
@@ -39,24 +53,15 @@ export type LocationTypes =
   | CONSTANTS.timelinePage
   | CONSTANTS.unknown;
 
-export interface KqlQuery {
-  appQuery: Query;
-  filters: Filter[];
-}
-
-export interface SavedQuery {
-  savedQueryId: string;
-}
-
-export type UrlSateQuery = KqlQuery | SavedQuery;
-
 export interface Timeline {
   id: string;
   isOpen: boolean;
 }
 
 export interface UrlState {
-  [CONSTANTS.kqlQuery]: UrlSateQuery;
+  [CONSTANTS.appQuery]?: Query;
+  [CONSTANTS.filters]?: Filter[];
+  [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: Timeline;
 }

@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
+import { SavedQuery } from 'src/legacy/core_plugins/data/public';
+import { Query } from 'src/plugins/data/common';
 
 import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
@@ -20,13 +23,7 @@ import { savedQueryService, siemFilterManager } from '../search_bar';
 import { CONSTANTS } from './constants';
 import { decodeRisonUrlState } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
-import {
-  DispatchSetInitialStateFromUrl,
-  SetInitialStateFromUrl,
-  UrlSateQuery,
-  KqlQuery,
-  SavedQuery,
-} from './types';
+import { DispatchSetInitialStateFromUrl, SetInitialStateFromUrl } from './types';
 import { queryTimelineById } from '../open_timeline/helpers';
 
 export const dispatchSetInitialStateFromUrl = (
@@ -114,31 +111,37 @@ export const dispatchSetInitialStateFromUrl = (
         }
       }
     }
-    if (urlKey === CONSTANTS.kqlQuery && indexPattern != null) {
-      const kqlQueryStateData: UrlSateQuery = decodeRisonUrlState(newUrlStateString);
-      if ((kqlQueryStateData as SavedQuery).savedQueryId != null) {
-        savedQueryService
-          .getSavedQuery((kqlQueryStateData as SavedQuery).savedQueryId)
-          .then(savedQueryData => {
-            siemFilterManager.setFilters(savedQueryData.attributes.filters || []);
-            dispatch(
-              inputsActions.setFilterQuery({
-                id: 'global',
-                ...savedQueryData.attributes.query,
-              })
-            );
-            dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
-          });
-      } else if ((kqlQueryStateData as KqlQuery).appQuery != null) {
-        const kqlQuery = kqlQueryStateData as KqlQuery;
-        siemFilterManager.setFilters(kqlQuery.filters || []);
+    if (urlKey === CONSTANTS.appQuery && indexPattern != null) {
+      const appQuery: Query = decodeRisonUrlState(newUrlStateString);
+      if (appQuery != null) {
         dispatch(
           inputsActions.setFilterQuery({
             id: 'global',
-            query: kqlQuery.appQuery.query,
-            language: kqlQuery.appQuery.language,
+            query: appQuery.query,
+            language: appQuery.language,
           })
         );
+      }
+    }
+
+    if (urlKey === CONSTANTS.filters) {
+      const filters: Filter[] = decodeRisonUrlState(newUrlStateString);
+      siemFilterManager.setFilters(filters || []);
+    }
+
+    if (urlKey === CONSTANTS.savedQuery) {
+      const savedQueryId: string = decodeRisonUrlState(newUrlStateString);
+      if (savedQueryId !== '') {
+        savedQueryService.getSavedQuery(savedQueryId).then((savedQueryData: SavedQuery) => {
+          siemFilterManager.setFilters(savedQueryData.attributes.filters || []);
+          dispatch(
+            inputsActions.setFilterQuery({
+              id: 'global',
+              ...savedQueryData.attributes.query,
+            })
+          );
+          dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
+        });
       }
     }
 

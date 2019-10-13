@@ -70,10 +70,8 @@ const getMockObject = (
   pathName,
   search: '',
   tabName: HostsTableType.authentications,
-  kqlQuery: {
-    appQuery: { query: '', language: 'kuery' },
-    filters: [],
-  },
+  query: { query: '', language: 'kuery' },
+  filters: [],
   timeline: {
     id: '',
     isOpen: false,

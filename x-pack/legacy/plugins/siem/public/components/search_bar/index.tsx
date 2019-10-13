@@ -226,7 +226,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     }, []);
 
     return (
-      <SearchBarContainer>
+      <SearchBarContainer data-test-subj={`${id}DatePicker`}>
         <SearchBar
           appName="siem"
           isLoading={isLoading}

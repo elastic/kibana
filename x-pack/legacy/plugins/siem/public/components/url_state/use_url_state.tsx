@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { Filter } from '@kbn/es-query';
 import { Location } from 'history';
 import { isEqual, difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
+import { Query } from 'src/plugins/data/common';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { useApolloClient } from '../../utils/apollo_context';
@@ -26,9 +27,7 @@ import {
   PreviousLocationUrlState,
   URL_STATE_KEYS,
   KeyUrlState,
-  KqlQuery,
   ALL_URL_STATE_KEYS,
-  UrlSateQuery,
   UrlStateToRedux,
   Timeline,
 } from './types';
@@ -60,7 +59,7 @@ export const useUrlStateHooks = ({
   const prevProps = usePrevious({ pathName, urlState });
 
   const replaceStateInLocation = (
-    urlStateToReplace: UrlInputsModel | UrlSateQuery | Timeline | string,
+    urlStateToReplace: UrlInputsModel | Query | Filter[] | Timeline | string,
     urlStateKey: string,
     latestLocation: Location = {
       hash: '',
@@ -95,31 +94,41 @@ export const useUrlStateHooks = ({
         urlKey
       );
       if (newUrlStateString) {
-        const queryState: KqlQuery | Timeline = decodeRisonUrlState(newUrlStateString);
+        const queryState: Query | Timeline | Filter[] = decodeRisonUrlState(newUrlStateString);
         if (
-          urlKey === CONSTANTS.kqlQuery &&
-          (queryState as KqlQuery).appQuery != null &&
-          (queryState as KqlQuery).appQuery.query === '' &&
-          isEmpty((queryState as KqlQuery).filters)
+          urlKey === CONSTANTS.appQuery &&
+          queryState != null &&
+          (queryState as Query).query === ''
         ) {
           myLocation = replaceStateInLocation('', urlKey, myLocation);
-        } else if (urlKey === CONSTANTS.timeline && (queryState as Timeline).id === '') {
+        } else if (urlKey === CONSTANTS.filters && isEmpty(queryState)) {
+          myLocation = replaceStateInLocation('', urlKey, myLocation);
+        } else if (
+          urlKey === CONSTANTS.timeline &&
+          queryState != null &&
+          (queryState as Timeline).id === ''
+        ) {
           myLocation = replaceStateInLocation('', urlKey, myLocation);
         }
         if (isInitializing) {
           urlStateToUpdate = [...urlStateToUpdate, { urlKey, newUrlStateString }];
         }
       } else if (
-        urlKey === CONSTANTS.kqlQuery &&
-        (urlState[urlKey] as KqlQuery).appQuery != null &&
-        (urlState[urlKey] as KqlQuery).appQuery.query === '' &&
-        isEmpty((urlState[urlKey] as KqlQuery).filters)
+        urlKey === CONSTANTS.appQuery &&
+        urlState[urlKey] != null &&
+        (urlState[urlKey] as Query).query === ''
       ) {
         myLocation = replaceStateInLocation('', urlKey, myLocation);
-      } else if (urlKey === CONSTANTS.timeline && (urlState[urlKey] as Timeline).id === '') {
+      } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
+        myLocation = replaceStateInLocation('', urlKey, myLocation);
+      } else if (
+        urlKey === CONSTANTS.timeline &&
+        urlState[urlKey] != null &&
+        (urlState[urlKey] as Timeline).id === ''
+      ) {
         myLocation = replaceStateInLocation('', urlKey, myLocation);
       } else {
-        myLocation = replaceStateInLocation(urlState[urlKey], urlKey, myLocation);
+        myLocation = replaceStateInLocation(urlState[urlKey] || '', urlKey, myLocation);
       }
     });
     difference(ALL_URL_STATE_KEYS, URL_STATE_KEYS[type]).forEach((urlKey: KeyUrlState) => {
@@ -153,16 +162,21 @@ export const useUrlStateHooks = ({
       let newLocation: Location = location;
       URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
         if (
-          urlKey === CONSTANTS.kqlQuery &&
-          (urlState[urlKey] as KqlQuery).appQuery != null &&
-          (urlState[urlKey] as KqlQuery).appQuery.query === '' &&
-          isEmpty((urlState[urlKey] as KqlQuery).filters)
+          urlKey === CONSTANTS.appQuery &&
+          urlState[urlKey] != null &&
+          (urlState[urlKey] as Query).query === ''
         ) {
           newLocation = replaceStateInLocation('', urlKey, newLocation);
-        } else if (urlKey === CONSTANTS.timeline && (urlState[urlKey] as Timeline).id === '') {
+        } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
+          newLocation = replaceStateInLocation('', urlKey, newLocation);
+        } else if (
+          urlKey === CONSTANTS.timeline &&
+          urlState[urlKey] != null &&
+          (urlState[urlKey] as Timeline).id === ''
+        ) {
           newLocation = replaceStateInLocation('', urlKey, newLocation);
         } else {
-          newLocation = replaceStateInLocation(urlState[urlKey], urlKey, newLocation);
+          newLocation = replaceStateInLocation(urlState[urlKey] || '', urlKey, newLocation);
         }
       });
     } else if (pathName !== prevProps.pathName) {

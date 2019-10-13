@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { compose, Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import { Query } from 'src/plugins/data/common';
 
 import { inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
@@ -15,7 +17,7 @@ import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 
 import { CONSTANTS } from './constants';
-import { UrlStateContainerPropTypes, UrlStateProps, UrlSateQuery } from './types';
+import { UrlStateContainerPropTypes, UrlStateProps } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { dispatchUpdateTimeline } from '../open_timeline/helpers';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
@@ -50,19 +52,24 @@ const makeMapStateToProps = () => {
       { id: '', isOpen: false }
     );
 
-    let kqlQuery: UrlSateQuery = {
-      appQuery: getGlobalQuerySelector(state),
-      filters: getGlobalFiltersQuerySelector(state),
+    let searchAttr: {
+      [CONSTANTS.appQuery]?: Query;
+      [CONSTANTS.filters]?: Filter[];
+      [CONSTANTS.savedQuery]?: string;
+    } = {
+      [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
+      [CONSTANTS.filters]: getGlobalFiltersQuerySelector(state),
     };
     const savedQuery = getGlobalSavedQuerySelector(state);
     if (savedQuery != null && savedQuery.id !== '') {
-      kqlQuery = {
-        savedQueryId: savedQuery.id,
+      searchAttr = {
+        [CONSTANTS.savedQuery]: savedQuery.id,
       };
     }
 
     return {
       urlState: {
+        ...searchAttr,
         [CONSTANTS.timerange]: {
           global: {
             [CONSTANTS.timerange]: globalTimerange,
@@ -73,7 +80,6 @@ const makeMapStateToProps = () => {
             linkTo: timelineLinkTo,
           },
         },
-        [CONSTANTS.kqlQuery]: kqlQuery,
         [CONSTANTS.timeline]: timeline,
       },
     };
