@@ -75,6 +75,7 @@ import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
 import { npStart } from 'ui/new_platform';
+import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 
 const { savedQueryService } = data.search.services;
 
@@ -123,7 +124,7 @@ uiRoutes
     resolve: {
       ip: function (Promise, indexPatterns, config, Private) {
         const State = Private(StateProvider);
-        return indexPatterns.getCache().then((savedObjects)=> {
+        return indexPatterns.getCache().then((indexPatterns)=> {
           /**
            *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
            *  the load order of AppState conflicts with the load order of many other things
@@ -134,29 +135,14 @@ uiRoutes
            *  @type {State}
            */
           const state = new State('_a', {});
-          const findIndexById = (id) => savedObjects.find(o => o.id === id);
-
-          /**
-           * returns the id of the default index, if none is configured
-           * the value of the first available indexpattern/saved object is used
-           */
-          const getDefaultIndexId = () => {
-            const defaultIndex = config.get('defaultIndex');
-            if(defaultIndex && findIndexById(defaultIndex)) {
-              return defaultIndex;
-            }
-            return !savedObjects.length ? '' : savedObjects[0].id;
-          };
-
-          const exists = state.index && findIndexById(state.index);
-          const id = exists ? state.index : getDefaultIndexId();
+          const id = getIndexPatternId(state.index, indexPatterns, config.get('defaultIndex'));
           state.destroy();
 
           return Promise.props({
-            list: savedObjects,
+            list: indexPatterns,
             loaded: indexPatterns.get(id),
             stateVal: state.index,
-            stateValFound: !!state.index && exists
+            stateValFound: !!state.index && id === state.index
           });
         });
       },
