@@ -25,6 +25,7 @@ import {
   DEFAULT_TO,
 } from './common/constants';
 import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
+import { defaultIndexPattern } from './default_index_pattern';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
@@ -98,7 +99,7 @@ export function siem(kibana: any) {
           name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
             defaultMessage: 'Elasticsearch indices',
           }),
-          value: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          value: defaultIndexPattern,
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
             defaultMessage:
               '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
