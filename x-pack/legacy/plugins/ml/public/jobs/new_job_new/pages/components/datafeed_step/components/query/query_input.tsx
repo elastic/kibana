@@ -19,6 +19,15 @@ export const QueryInput: FC<{ setIsValidQuery(v: boolean): void }> = ({ setIsVal
   const [queryString, setQueryString] = useState(JSON.stringify(jobCreator.query, null, 2));
 
   useEffect(() => {
+    const validJson = isValidJson(queryString);
+    setIsValidQuery(validJson);
+    if (validJson) {
+      jobCreator.query = JSON.parse(queryString);
+      jobCreatorUpdate();
+    }
+  }, [queryString]);
+
+  useEffect(() => {
     if (isValidJson(queryString)) {
       // the query object may have changed outside of this component,
       // compare the current query with the local queryString by reformatting both
@@ -30,15 +39,6 @@ export const QueryInput: FC<{ setIsValidQuery(v: boolean): void }> = ({ setIsVal
       }
     }
   }, [jobCreatorUpdated]);
-
-  useEffect(() => {
-    const validJson = isValidJson(queryString);
-    setIsValidQuery(validJson);
-    if (validJson) {
-      jobCreator.query = JSON.parse(queryString);
-      jobCreatorUpdate();
-    }
-  }, [queryString]);
 
   useEffect(() => {
     const validJson = isValidJson(queryString);

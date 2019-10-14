@@ -22,6 +22,7 @@ import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
 import { JOB_TYPE } from '../../../common/job_creator/util/constants';
 import { isSingleMetricJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './job_details';
@@ -156,7 +157,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                     datafeedEditorMode={EDITOR_MODE.READONLY}
                   />
                 </EuiFlexItem>
-                {jobCreator.type !== JOB_TYPE.ADVANCED && (
+                {jobCreator.type === JOB_TYPE.ADVANCED ? (
+                  <EuiFlexItem grow={false}>
+                    <DatafeedPreviewFlyout isDisabled={false} />
+                  </EuiFlexItem>
+                ) : (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty onClick={convertToAdvanced}>
                       <FormattedMessage
