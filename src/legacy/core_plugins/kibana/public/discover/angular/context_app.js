@@ -18,24 +18,22 @@
  */
 
 import _ from 'lodash';
-
-import { callAfterBindingsWorkaround } from 'ui/compat';
-import { uiModules } from 'ui/modules';
-import contextAppTemplate from './app.html';
-import './components/action_bar';
-import { getFirstSortableField } from './api/utils/sorting';
+import { callAfterBindingsWorkaround, uiModules, timefilter } from './dependencies';
+import contextAppTemplate from './context_app.html';
+import '../context/components/action_bar';
+import { getFirstSortableField } from '../context/api/utils/sorting';
 import {
   createInitialQueryParametersState,
   QueryParameterActionsProvider,
   QUERY_PARAMETER_KEYS,
-} from './query_parameters';
+} from '../context/query_parameters';
 import {
   createInitialLoadingStatusState,
   FAILURE_REASONS,
   LOADING_STATUS,
   QueryActionsProvider,
-} from './query';
-import { timefilter } from 'ui/timefilter';
+} from '../context/query';
+
 
 // load directives
 import '../../../../data/public/legacy';

@@ -16,14 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import uiRoutes from 'ui/routes';
-import { IndexPatterns } from 'ui/index_patterns';
-import { timefilter } from 'ui/timefilter';
+import { uiRoutes, uiModules, wrapInI18nContext, timefilter, IndexPatterns } from './dependencies';
 // @ts-ignore
-import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
-// @ts-ignore
-import html from './index.html';
-import './doc_directive';
+import { getRootBreadcrumbs } from '../breadcrumbs';
+import html from './doc.html';
+import { Doc } from '../doc/doc';
+
+uiModules.get('apps/discover').directive('discoverDoc', function(reactDirective: any) {
+  return reactDirective(
+    wrapInI18nContext(Doc),
+    [
+      ['id', { watchDepth: 'value' }],
+      ['index', { watchDepth: 'value' }],
+      ['indexPatternId', { watchDepth: 'reference' }],
+      ['indexPatternService', { watchDepth: 'reference' }],
+      ['esClient', { watchDepth: 'reference' }],
+    ],
+    { restrict: 'E' }
+  );
+});
 
 uiRoutes
   // the old, pre 8.0 route, no longer used, keep it to stay compatible

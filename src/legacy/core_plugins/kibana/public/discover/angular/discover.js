@@ -33,11 +33,13 @@ import { getSortForSearchSource } from '../doc_table/lib/get_sort_for_search_sou
 import * as columnActions from '../doc_table/actions/columns';
 import * as filterActions from '../doc_table/actions/filter';
 
-import 'ui/directives/listen';
-import 'ui/visualize';
-import 'ui/fixed_scroll';
-import 'ui/index_patterns';
-import 'ui/state_management/app_state';
+import indexTemplate from './discover.html';
+import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
+import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
+import '../components/fetch_error';
+import { getPainlessError } from './get_painless_error';
+
+import { npStart } from 'ui/new_platform';
 import { timefilter } from 'ui/timefilter';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
@@ -49,32 +51,26 @@ import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import indexTemplate from '../index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getFilterGenerator } from 'ui/filter_manager';
-
 import { getDocLink } from 'ui/documentation_links';
-import '../components/fetch_error';
-import { getPainlessError } from './get_painless_error';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { Inspector } from 'ui/inspector';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
-import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
-import 'ui/capabilities/route_setup';
-import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
+
 
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
-import { npStart } from 'ui/new_platform';
+
 
 const { savedQueryService } = data.search.services;
 

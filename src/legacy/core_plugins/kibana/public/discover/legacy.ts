@@ -16,25 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { npSetup, npStart } from 'ui/new_platform';
+import { PluginInitializerContext } from 'kibana/public';
+import { plugin } from './index';
 
-import { i18n } from '@kbn/i18n';
-
-export function getRootBreadcrumbs() {
-  return [
-    {
-      text: i18n.translate('kbn.discover.rootBreadcrumb', {
-        defaultMessage: 'Discover'
-      }),
-      href: '#/discover'
-    }
-  ];
-}
-
-export function getSavedSearchBreadcrumbs($route) {
-  return [
-    ...getRootBreadcrumbs(),
-    {
-      text: $route.current.locals.savedSearch.id,
-    }
-  ];
-}
+const pluginInstance = plugin({} as PluginInitializerContext);
+export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);

@@ -18,16 +18,12 @@
  */
 
 import _ from 'lodash';
-
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import uiRoutes from 'ui/routes';
-import { i18n } from '@kbn/i18n';
-
-import './app';
-import contextAppRouteTemplate from './index.html';
-import { getRootBreadcrumbs } from '../breadcrumbs';
+import { FilterBarQueryFilterProvider, uiRoutes, i18n, subscribeWithScope } from './dependencies';
 import { npStart } from 'ui/new_platform';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+
+import './context_app';
+import contextAppRouteTemplate from './context.html';
+import { getRootBreadcrumbs } from '../breadcrumbs';
 
 const k7Breadcrumbs = $route => {
   const { indexPattern } = $route.current.locals;
@@ -47,12 +43,11 @@ const k7Breadcrumbs = $route => {
   ];
 };
 
-
 uiRoutes
   // deprecated route, kept for compatibility
   // should be removed in the future
   .when('/context/:indexPatternId/:type/:id*', {
-    redirectTo: '/context/:indexPatternId/:id'
+    redirectTo: '/context/:indexPatternId/:id',
   })
   .when('/context/:indexPatternId/:id*', {
     controller: ContextAppRouteController,
