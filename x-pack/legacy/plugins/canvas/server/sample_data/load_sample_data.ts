@@ -9,7 +9,7 @@ import { CANVAS as label } from '../../i18n';
 import { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects } from './index';
 
 // @ts-ignore: Untyped in Kibana
-export function loadSampleData(server) {
+export function loadSampleData(addSavedObjectsToSampleDataset, addAppLinksToSampleDataset) {
   const now = new Date();
   const nowTimestamp = now.toISOString();
 
@@ -26,28 +26,22 @@ export function loadSampleData(server) {
     });
   }
 
-  server.addSavedObjectsToSampleDataset(
-    'ecommerce',
-    updateCanvasWorkpadTimestamps(ecommerceSavedObjects)
-  );
-  server.addAppLinksToSampleDataset('ecommerce', {
+  addSavedObjectsToSampleDataset('ecommerce', updateCanvasWorkpadTimestamps(ecommerceSavedObjects));
+  addAppLinksToSampleDataset('ecommerce', {
     path: '/app/canvas#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e',
     icon: 'canvasApp',
     label,
   });
 
-  server.addSavedObjectsToSampleDataset(
-    'flights',
-    updateCanvasWorkpadTimestamps(flightsSavedObjects)
-  );
-  server.addAppLinksToSampleDataset('flights', {
+  addSavedObjectsToSampleDataset('flights', updateCanvasWorkpadTimestamps(flightsSavedObjects));
+  addAppLinksToSampleDataset('flights', {
     path: '/app/canvas#/workpad/workpad-a474e74b-aedc-47c3-894a-db77e62c41e0',
     icon: 'canvasApp',
     label,
   });
 
-  server.addSavedObjectsToSampleDataset('logs', updateCanvasWorkpadTimestamps(webLogsSavedObjects));
-  server.addAppLinksToSampleDataset('logs', {
+  addSavedObjectsToSampleDataset('logs', updateCanvasWorkpadTimestamps(webLogsSavedObjects));
+  addAppLinksToSampleDataset('logs', {
     path: '/app/canvas#/workpad/workpad-5563cc40-5760-4afe-bf33-9da72fac53b7',
     icon: 'canvasApp',
     label,
