@@ -12,7 +12,7 @@ import { registries } from 'plugins/interpreter/registries';
 import { getFunctionHelp, getFunctionErrors } from '../../canvas_plugin_src/strings';
 
 interface Arguments {
-  type?: string;
+  type: string;
 }
 
 export function to(): ExpressionFunction<'to', any, Arguments, any> {

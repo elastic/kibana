@@ -18,8 +18,8 @@ import { Filter } from '../../types';
 import { getFunctionHelp } from '../../canvas_plugin_src/strings';
 
 interface Arguments {
-  group?: string[];
-  ungrouped?: boolean;
+  group: string[];
+  ungrouped: boolean;
 }
 
 function getFiltersByGroup(allFilters: string[], groups = [], ungrouped = false): string[] {

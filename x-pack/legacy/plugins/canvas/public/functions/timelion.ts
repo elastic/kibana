@@ -8,16 +8,17 @@ import { flatten } from 'lodash';
 import chrome from 'ui/chrome';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { fetch } from '../../common/lib/fetch';
+// @ts-ignore untyped local
 import { buildBoolArray } from '../../server/lib/build_bool_array';
 import { Datatable, Filter } from '../../types';
 import { getFunctionHelp } from '../../canvas_plugin_src/strings';
 
 interface Arguments {
-  query?: string;
-  interval?: string;
-  from?: string;
-  to?: string;
-  timezone?: string;
+  query: string;
+  interval: string;
+  from: string;
+  to: string;
+  timezone: string;
 }
 
 export function timelion(): ExpressionFunction<'timelion', Filter, Arguments, Datatable> {
@@ -43,17 +44,17 @@ export function timelion(): ExpressionFunction<'timelion', Filter, Arguments, Da
         default: 'auto',
       },
       from: {
-        type: ['string'],
+        types: ['string'],
         help: argHelp.from,
         default: 'now-1y',
       },
       to: {
-        type: ['string'],
+        types: ['string'],
         help: argHelp.to,
         default: 'now',
       },
       timezone: {
-        type: ['string'],
+        types: ['string'],
         help: argHelp.timezone,
         default: 'UTC',
       },
