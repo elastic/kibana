@@ -27,7 +27,6 @@ import chrome from 'ui/chrome';
 import { fieldFormats } from 'ui/registry/field_formats';
 // @ts-ignore
 import { expandShorthand } from 'ui/utils/mapping_setup';
-import { toastNotifications } from 'ui/notify';
 import { findObjectByTitle } from 'ui/saved_objects';
 import { NotificationsSetup, SavedObjectsClientContract } from 'src/core/public';
 import { SavedObjectNotFound, DuplicateField } from '../../../../../../plugins/kibana_utils/public';
@@ -218,7 +217,7 @@ export class IndexPattern implements StaticIndexPattern {
       // This has all been removed as of 8.0.
       const $injector = await chrome.dangerouslyGetActiveInjector();
       const kbnUrl = $injector.get('kbnUrl') as any; // `any` because KbnUrl interface doesn't have `getRouteHref`
-      toastNotifications.addWarning({
+      this.notifications.toasts.addWarning({
         title: warningTitle,
         text: (
           <div>
@@ -550,7 +549,7 @@ export class IndexPattern implements StaticIndexPattern {
                     'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
                 } // eslint-disable-line max-len
               );
-              toastNotifications.addDanger(message);
+              this.notifications.toasts.addDanger(message);
               throw err;
             }
 
@@ -589,11 +588,11 @@ export class IndexPattern implements StaticIndexPattern {
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
         if (err instanceof IndexPatternMissingIndices) {
-          toastNotifications.addDanger((err as any).message);
+          this.notifications.toasts.addDanger((err as any).message);
           return [];
         }
 
-        toastNotifications.addError(err, {
+        this.notifications.toasts.addError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields',
           }),
