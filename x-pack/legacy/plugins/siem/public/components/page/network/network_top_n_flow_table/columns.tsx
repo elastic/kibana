@@ -237,7 +237,7 @@ export const getNFlowColumnsCurated = (
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
-): NetworkTopNFlowColumns => {
+): NetworkTopNFlowColumns | NetworkTopNFlowColumnsIpDetails => {
   const columns = getNetworkTopNFlowColumns(indexPattern, flowTarget, type, tableId);
 
   // Columns to exclude from host details pages
