@@ -3,6 +3,7 @@
     "common.ui": "src/legacy/ui",
     "data": "src/legacy/core_plugins/data",
     "expressions": "src/legacy/core_plugins/expressions",
+    "expressions_np": "src/plugins/expressions",
     "kibana_react": "src/legacy/core_plugins/kibana_react",
     "server": "src/legacy/server",
     "console": "src/legacy/core_plugins/console",
