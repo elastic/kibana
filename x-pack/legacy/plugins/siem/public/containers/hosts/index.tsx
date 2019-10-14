@@ -63,7 +63,7 @@ class HostsComponentQuery extends QueryTemplatePaginated<
   HostsProps,
   GetHostsTableQuery.Query,
   GetHostsTableQuery.Variables
-  > {
+> {
   private memoizedHosts: (
     variables: string,
     data: GetHostsTableQuery.Source | undefined

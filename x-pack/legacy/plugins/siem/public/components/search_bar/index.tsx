@@ -161,6 +161,10 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
       }
     };
 
+    const onSaved = (newSavedQuery: SavedQuery) => {
+      setSavedQuery({ id, savedQuery: newSavedQuery });
+    };
+
     const onSavedQueryUpdated = (savedQueryUpdated: SavedQuery) => {
       siemFilterManager.setFilters(savedQueryUpdated.attributes.filters || []);
 
@@ -235,6 +239,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}
           onRefresh={onRefresh}
+          onSaved={onSaved}
           onSavedQueryUpdated={onSavedQueryUpdated}
           savedQuery={savedQuery}
           showFilterBar={true}
