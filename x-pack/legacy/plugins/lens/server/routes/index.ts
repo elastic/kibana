@@ -5,10 +5,10 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { initStatsRoute } from './index_stats';
+import { existingFieldsRoute } from './existing_fields';
 import { initFieldsRoute } from './field_stats';
 
 export function setupRoutes(setup: CoreSetup) {
-  initStatsRoute(setup);
+  existingFieldsRoute(setup);
   initFieldsRoute(setup);
 }
