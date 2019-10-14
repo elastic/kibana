@@ -19,7 +19,7 @@
 
 import './core.css';
 
-import { CoreId } from '../server';
+import { CoreId, PackageInfo, EnvironmentMode } from '../server';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -55,6 +55,10 @@ interface Params {
 /** @internal */
 export interface CoreContext {
   coreId: CoreId;
+  env: {
+    mode: Readonly<EnvironmentMode>;
+    packageInfo: Readonly<PackageInfo>;
+  };
 }
 
 /** @internal */
@@ -130,7 +134,8 @@ export class CoreSystem {
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
 
-    this.coreContext = { coreId: Symbol('core') };
+    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+
     this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
 
