@@ -173,19 +173,21 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           savedQueryUpdated.attributes.timefilter.to.includes('now')
         : false;
 
-      updateReduxTime({
-        end: savedQueryUpdated.attributes.timefilter
-          ? savedQueryUpdated.attributes.timefilter.to
-          : toStr,
-        id,
-        isInvalid: false,
-        isQuickSelection,
-        kql: undefined,
-        start: savedQueryUpdated.attributes.timefilter
-          ? savedQueryUpdated.attributes.timefilter.from
-          : fromStr,
-        timelineId,
-      });
+      if (savedQueryUpdated.attributes.timefilter) {
+        updateReduxTime({
+          end: savedQueryUpdated.attributes.timefilter
+            ? savedQueryUpdated.attributes.timefilter.to
+            : toStr,
+          id,
+          isInvalid: false,
+          isQuickSelection,
+          kql: undefined,
+          start: savedQueryUpdated.attributes.timefilter
+            ? savedQueryUpdated.attributes.timefilter.from
+            : fromStr,
+          timelineId,
+        });
+      }
 
       setFilterQuery({
         id,
