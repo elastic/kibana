@@ -12,7 +12,7 @@ import { LicenseFeature } from './license_feature';
  * @public
  * Results from remote request fetching a raw license.
  */
-export interface RawLicense {
+export interface IRawLicense {
   /**
    * UID for license.
    */
@@ -38,7 +38,7 @@ export interface RawLicense {
  * @public
  * Result from remote request fetching raw featureset.
  */
-export interface RawFeature {
+export interface IRawFeature {
   available: boolean;
   enabled: boolean;
 }
@@ -47,12 +47,12 @@ export interface RawFeature {
  * @public
  * Results from remote request fetching raw featuresets.
  */
-export interface RawFeatures {
-  [key: string]: RawFeature;
+export interface IRawFeatures {
+  [key: string]: IRawFeature;
 }
 
 /** @public */
-export interface ObjectifiedLicense {
+export interface IObjectifiedLicense {
   license: {
     uid: string;
     type: LicenseType;
@@ -130,7 +130,7 @@ export interface ILicense {
   reasonUnavailable?: string | Error;
 
   /**
-   * A concretely-defined hash of the serialized license.
+   * A concretely-defined hash or stringified version of the serialized license.
    */
   signature: string;
 
@@ -156,7 +156,7 @@ export interface ILicense {
   /**
    * Receive a serialized plain object of the license.
    */
-  toObject(): ObjectifiedLicense;
+  toObject(): IObjectifiedLicense;
 
   /**
    * A specific API for interacting with the specific features of the license.

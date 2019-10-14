@@ -6,10 +6,20 @@
 
 import { License } from './license';
 
+/**
+ * @public
+ * Check if 2 potential license instances have changes between them
+ */
 export function hasLicenseInfoChanged(
   currentLicense: License | undefined,
   newLicense: License | undefined
 ) {
+  // If we have 2 valid license instances, let's check:
+  // 1. That if they both contain an error that the message has changed
+  // 2. Check if the type has changed
+  // 3. Check if the status has changed
+  // 4. Check if the expiration date has changed
+  // 5. Check is the availability of the license has changed.
   if (currentLicense && newLicense) {
     if (
       (currentLicense.error && !newLicense.error) ||
@@ -29,5 +39,7 @@ export function hasLicenseInfoChanged(
     );
   }
 
+  // If we have made it here, one or both of the licenses are undefined.
+  // If they match (both undefined), nothing has changed, otherwise it did.
   return currentLicense !== newLicense;
 }

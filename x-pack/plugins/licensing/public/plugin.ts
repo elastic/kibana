@@ -12,7 +12,7 @@ import {
   Plugin as CorePlugin,
   PluginInitializerContext,
 } from 'src/core/public';
-import { LicensingPluginSetup, ObjectifiedLicense } from '../common/types';
+import { LicensingPluginSetup, IObjectifiedLicense } from '../common/types';
 import {
   API_ROUTE,
   LICENSING_SESSION,
@@ -23,20 +23,47 @@ import {
 import { License } from '../common/license';
 import { hasLicenseInfoChanged } from '../common/has_license_info_changed';
 
+/**
+ * Generate the signature for a serialized/stringified license.
+ */
 function sign(serialized: string) {
   return sign.signature;
 }
 sign.signature = '';
 
+/**
+ * @public
+ * A plugin for fetching, refreshing, and receiving information about the license for the
+ * current Kibana instance.
+ */
 export class Plugin implements CorePlugin<LicensingPluginSetup> {
+  /**
+   * Used as a flag to halt all other plugin observables.
+   */
   private stop$ = new Subject();
+
+  /**
+   * A function to execute once the plugin's HTTP interceptor needs to stop listening.
+   */
   private removeInterceptor!: () => void;
-  public pollingFrequency = DEFAULT_POLLING_FREQUENCY;
+
+  /**
+   * Used to trigger manual fetches of the license information from the server.
+   */
   private refresher$ = new BehaviorSubject(true);
+
+  /**
+   * Used to determine how frequently to poll the server for license updates.
+   * Must be overridden prior to plugin setup to be utilized.
+   */
+  public pollingFrequency = DEFAULT_POLLING_FREQUENCY;
 
   constructor(context: PluginInitializerContext) {}
 
-  private getSession(): ObjectifiedLicense | null {
+  /**
+   * Fetch the objectified license and signature from session storage.
+   */
+  private getSession(): IObjectifiedLicense | null {
     const raw = sessionStorage.getItem(LICENSING_SESSION);
     const signature = sessionStorage.getItem(LICENSING_SESSION_SIGNATURE);
     const json = raw && JSON.parse(raw);
@@ -48,6 +75,9 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
     return json;
   }
 
+  /**
+   * Store the given license and signature in session storage.
+   */
   private setSession = (license: License) => {
     sessionStorage.setItem(LICENSING_SESSION, JSON.stringify(license.toObject()));
 
@@ -56,11 +86,18 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
     }
   };
 
+  /**
+   * Clear license and signature information from session storage.
+   */
   private clearSession() {
     sessionStorage.removeItem(LICENSING_SESSION);
     sessionStorage.removeItem(LICENSING_SESSION_SIGNATURE);
   }
 
+  /**
+   * Initialize the plugin for consumption.
+   * @param core
+   */
   public setup(core: CoreSetup) {
     const session = this.getSession();
     const initial$ = of(
@@ -119,6 +156,9 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
 
   public async start(core: CoreStart) {}
 
+  /**
+   * Halt the plugin's operations and observables.
+   */
   public stop() {
     this.stop$.next();
     this.stop$.complete();

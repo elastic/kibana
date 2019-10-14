@@ -42,19 +42,54 @@ declare module 'src/core/server' {
 
 type LicensingConfigType = TypeOf<typeof schema>;
 
+/**
+ * Generate the signature for a serialized/stringified license.
+ */
 function sign(serialized: string) {
   return createHash('md5')
     .update(serialized)
     .digest('hex');
 }
 
+/**
+ * @public
+ * A plugin for fetching, refreshing, and receiving information about the license for the
+ * current Kibana instance.
+ */
 export class Plugin implements CorePlugin<LicensingPluginSetup> {
+  /**
+   * Used as a flag to halt all other plugin observables.
+   */
   private stop$ = new Subject();
+
+  /**
+   * Used to trigger manual fetches of the license information from the server.
+   */
   private refresher$ = new BehaviorSubject(true);
+
+  /**
+   * Logger instance bound to `licensing` context.
+   */
   private readonly logger: Logger;
+
+  /**
+   * An observable of licensing configuration data.
+   */
   private readonly config$: Observable<LicensingConfig>;
+
+  /**
+   * The `this.config$` subscription for tracking changes to configuration.
+   */
   private configSubscription: Subscription;
+
+  /**
+   * The latest configuration data to come from `this.config$`.
+   */
   private currentConfig!: LicensingConfig;
+
+  /**
+   * Instance of the elasticsearch API.
+   */
   private elasticsearch!: CoreSetup['elasticsearch'];
 
   constructor(private readonly context: PluginInitializerContext) {
@@ -73,6 +108,10 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
     });
   }
 
+  /**
+   * Initialize the plugin for consumption.
+   * @param core
+   */
   public async setup(core: CoreSetup) {
     this.elasticsearch = core.elasticsearch;
 
@@ -144,6 +183,9 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
 
   public async start(core: CoreStart) {}
 
+  /**
+   * Halt the plugin's operations and observables.
+   */
   public stop() {
     this.stop$.next();
     this.stop$.complete();

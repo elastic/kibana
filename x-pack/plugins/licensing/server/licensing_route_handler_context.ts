@@ -9,6 +9,11 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ILicense } from '../common/types';
 
+/**
+ * Create a route handler context for access to Kibana license information.
+ * @param license$ An observable of a License instance.
+ * @public
+ */
 export function createRouteHandlerContext(
   license$: Observable<ILicense>
 ): IContextProvider<RequestHandler<any, any, any>, 'licensing'> {

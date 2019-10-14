@@ -8,6 +8,9 @@ import { PluginInitializerContext } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { schema } from './schema';
 
+/**
+ * Container class for server licensing plugin configuration.
+ */
 export class LicensingConfig {
   public isEnabled: boolean;
   public clusterSource: string;
