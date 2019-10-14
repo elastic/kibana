@@ -18,6 +18,7 @@ import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { integrationsManagerConfigStore } from '../config';
+import { ImageRequestParams } from '../types';
 
 export { ArchiveEntry } from './extract';
 
@@ -38,6 +39,12 @@ export async function fetchList(params?: SearchParams): Promise<RegistryList> {
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
   const { registryUrl } = integrationsManagerConfigStore.getConfig();
   return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
+}
+
+export async function fetchImage(params: ImageRequestParams): Promise<NodeJS.ReadableStream> {
+  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  const { pkgkey, imgPath } = params;
+  return getResponseStream(`${registryUrl}/package/${pkgkey}/img/${imgPath}`);
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {

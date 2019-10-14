@@ -8,6 +8,9 @@ import { ServerRoute } from '../common/types';
 import * as CommonRoutes from '../common/routes';
 import * as Integrations from './integrations/handlers';
 
+export const API_ROOT = `/api/${PLUGIN.ID}`;
+export const API_IMG_PATTERN = `${API_ROOT}/package/{pkgkey}/img/{imgPath*}`;
+
 // Manager public API paths
 export const routes: ServerRoute[] = [
   {
@@ -21,6 +24,12 @@ export const routes: ServerRoute[] = [
     path: CommonRoutes.API_LIST_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
     handler: Integrations.handleGetList,
+  },
+  {
+    method: 'GET',
+    path: API_IMG_PATTERN,
+    options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
+    handler: Integrations.handleGetImage,
   },
   {
     method: 'GET',
