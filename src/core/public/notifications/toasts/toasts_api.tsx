@@ -42,7 +42,7 @@ export type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
 export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
 
 /**
- * Options available for {@link IToast} APIs.
+ * Options available for {@link IToasts} APIs.
  * @public
  */
 export interface ErrorToastOptions {

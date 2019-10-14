@@ -44,7 +44,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DocLinksStart](./kibana-plugin-public.doclinksstart.md) |  |
-|  [ErrorToastOptions](./kibana-plugin-public.errortoastoptions.md) | Options available for  APIs. |
+|  [ErrorToastOptions](./kibana-plugin-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-public.itoasts.md) APIs. |
 |  [FatalErrorInfo](./kibana-plugin-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpErrorRequest](./kibana-plugin-public.httperrorrequest.md) |  |

@@ -4,7 +4,7 @@
 
 ## ErrorToastOptions interface
 
-Options available for  APIs.
+Options available for [IToasts](./kibana-plugin-public.itoasts.md) APIs.
 
 <b>Signature:</b>
 
