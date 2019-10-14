@@ -15,6 +15,7 @@ export const createListAgentsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
   path: '/api/fleet/agents',
   config: {
+    tags: ['access:fleet-read'],
     validate: {
       query: {
         page: Joi.number().default(1),

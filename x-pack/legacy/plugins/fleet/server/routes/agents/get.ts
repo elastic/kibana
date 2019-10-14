@@ -14,6 +14,7 @@ export const createGETAgentsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
   path: '/api/fleet/agents/{agentId}',
   config: {
+    tags: ['access:fleet-read'],
     validate: {},
   },
   handler: async (
