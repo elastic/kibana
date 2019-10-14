@@ -6,6 +6,7 @@
 
 import { generatePath } from 'react-router-dom';
 import { PLUGIN } from '../../common/constants';
+import { API_ROOT } from '../../common/routes';
 import { patterns } from '../routes';
 import { useCore } from '.';
 import { DetailViewPanelName } from '..';
@@ -31,6 +32,7 @@ function appRoot(path: string) {
 export function useLinks() {
   return {
     toAssets: (path: string) => addBasePath(`/plugins/${PLUGIN.ID}/assets/${path}`),
+    toImage: (path: string) => addBasePath(`${API_ROOT}${path}`),
     toListView: () => appRoot(patterns.LIST_VIEW),
     toDetailView: ({ name, version, panel }: DetailParams) => {
       // panel is optional, but `generatePath` won't accept `path: undefined`
