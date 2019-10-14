@@ -11,6 +11,8 @@ export * from './components';
 export * from './constants';
 export * from './errors';
 export * from './expression_types';
+export * from './elements';
+export { getFunctionErrors, getFunctionHelp } from './functions';
 export * from './shortcuts';
 export * from './transitions';
 export * from './units';

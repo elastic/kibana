@@ -5,7 +5,7 @@
  */
 
 import { ElementFactory } from '../../types';
-import { getElementStrings } from '../functions/index';
+import { getElementStrings } from './element_strings';
 
 /**
  * This function takes a set of Canvas Element specification factories, runs them,

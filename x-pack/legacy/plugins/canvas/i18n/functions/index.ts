@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from '../elements';
 export * from './function_help';
 export * from './function_errors';
 export * from './ui';
