@@ -61,9 +61,9 @@ data to UI frameworks and provides methods for the direct translation.
 
 Here is the public API exposed by this engine:
 
-- `addMessages(messages: Map<string, string>, [locale: string])` - provides a way to register
+- `addTranslation(newTranslation: Translation, [locale: string])` - provides a way to register
 translations with the engine
-- `getMessages()` - returns messages for the current language
+- `getTranslation()` - returns messages for the current language
 - `setLocale(locale: string)` - tells the engine which language to use by given
 language key
 - `getLocale()` - returns the current locale
@@ -78,6 +78,7 @@ For the detailed explanation, see the section below
 translate message by id. `description` is optional context comment that will be extracted
 by i18n tools and added as a comment next to translation message at `defaultMessages.json`.
 - `init(messages: Map<string, string>)` - initializes the engine
+- `load(translationsUrl: string)` - loads JSON with translations from the specified URL and initializes i18n engine with them.
 
 #### I18n engine internals
 
