@@ -55,7 +55,9 @@ export const code = (kibana: any) =>
           enabled: Joi.boolean().default(false),
         }).default(),
         enabled: Joi.boolean().default(true),
-      }).default();
+      })
+        .default()
+        .unknown(true);
     },
     async init(server: ServerFacade) {
       const initializerContext = server.newPlatform.setup.plugins.code as PluginSetupContract;
