@@ -58,6 +58,7 @@ test('transformDataToMetricsChart should transform an ES result into a chart obj
   expect(chart).toMatchInlineSnapshot(`
 Object {
   "key": "test_chart_key",
+  "noHits": false,
   "series": Array [
     Object {
       "color": "red",
@@ -124,7 +125,6 @@ Object {
     },
   ],
   "title": "Test Chart Title",
-  "noHits": false,
   "yUnit": "number",
 }
 `);
