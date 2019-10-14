@@ -12,6 +12,7 @@ import { help as all } from './all';
 import { help as alterColumn } from './alterColumn';
 import { help as any } from './any';
 import { help as asFn } from './as';
+import { help as asset } from '../../../i18n/functions/asset';
 import { help as axisConfig } from './axisConfig';
 import { help as caseFn } from './case';
 import { help as clear } from './clear';
@@ -30,6 +31,7 @@ import { help as esdocs } from './esdocs';
 import { help as essql } from './essql';
 import { help as exactly } from './exactly';
 import { help as filterrows } from './filterrows';
+import { help as filters } from '../../../i18n/functions/filters';
 import { help as formatdate } from './formatdate';
 import { help as formatnumber } from './formatnumber';
 import { help as getCell } from './getCell';
@@ -72,6 +74,8 @@ import { help as table } from './table';
 import { help as tail } from './tail';
 import { help as timefilter } from './timefilter';
 import { help as timefilterControl } from './timefilterControl';
+import { help as timelion } from '../../../i18n/functions/timelion';
+import { help as to } from '../../../i18n/functions/to';
 import { help as urlparam } from './urlparam';
 
 /**
@@ -160,6 +164,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   alterColumn,
   any,
   as: asFn,
+  asset,
   axisConfig,
   case: caseFn,
   clear,
@@ -178,6 +183,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   essql,
   exactly,
   filterrows,
+  filters,
   formatdate,
   formatnumber,
   getCell,
@@ -220,5 +226,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   tail,
   timefilter,
   timefilterControl,
+  timelion,
+  to,
   urlparam,
 });

@@ -8,7 +8,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
-
+import { clientFunctions } from '../public/functions';
 /**
  * Utility type for converting a union of types into an intersection.
  *
@@ -17,7 +17,7 @@ import { functions as serverFunctions } from '../canvas_plugin_src/functions/ser
  * another in `FunctionError` and `FunctionStrings`.
  */
 // prettier-ignore
-export type UnionToIntersection<U> = 
+export type UnionToIntersection<U> =
   (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
 
 /**
@@ -87,8 +87,8 @@ type ValuesOfUnion<T> = T extends any ? valueof<T> : never;
  * in Kibana and Canvas.
  */
 // prettier-ignore
-export type ExpressionFunctionFactory<Name extends string, Context, Arguments, Return> = 
-() => ExpressionFunction<Name, Context, Arguments, Return>;
+export type ExpressionFunctionFactory<Name extends string, Context, Arguments, Return> =
+  () => ExpressionFunction<Name, Context, Arguments, Return>;
 
 /**
  * `FunctionFactory` exists as a name shim between the `ExpressionFunction` type and
@@ -97,17 +97,18 @@ export type ExpressionFunctionFactory<Name extends string, Context, Arguments, R
  * with a shorter name).
  */
 // prettier-ignore
-export type FunctionFactory<FnFactory> = 
+export type FunctionFactory<FnFactory> =
   FnFactory extends ExpressionFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
-    ExpressionFunction<Name, Context, Arguments, Return> :
-    never;
+  ExpressionFunction<Name, Context, Arguments, Return> :
+  never;
 
 // A type containing all of the raw Function definitions in Canvas.
 // prettier-ignore
-type Functions = 
+type Functions =
   typeof commonFunctions[number] &
   typeof serverFunctions[number] &
-  typeof browserFunctions[number];
+  typeof browserFunctions[number] &
+  typeof clientFunctions[number];
 
 /**
  * A union type of all Canvas Functions.
