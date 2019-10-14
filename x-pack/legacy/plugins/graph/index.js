@@ -36,9 +36,7 @@ export function graph(kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         canEditDrillDownUrls: Joi.boolean().default(true),
-        savePolicy: Joi.string()
-          .valid(['config', 'configAndDataWithConsent', 'configAndData', 'none'])
-          .default('configAndData'),
+        savePolicy: Joi.string().valid(['config', 'configAndDataWithConsent', 'configAndData', 'none']).default('configAndData'),
       }).default();
     },
 
@@ -47,7 +45,7 @@ export function graph(kibana) {
         const config = server.config();
         return {
           graphSavePolicy: config.get('xpack.graph.savePolicy'),
-          canEditDrillDownUrls: config.get('xpack.graph.canEditDrillDownUrls'),
+          canEditDrillDownUrls: config.get('xpack.graph.canEditDrillDownUrls')
         };
       });
 
@@ -74,8 +72,8 @@ export function graph(kibana) {
               read: ['index-pattern', 'graph-workspace'],
             },
             ui: [],
-          },
-        },
+          }
+        }
       });
 
       initServer(server);
