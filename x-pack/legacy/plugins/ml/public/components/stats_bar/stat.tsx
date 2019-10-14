@@ -18,7 +18,7 @@ interface StatProps {
 export const Stat: FC<StatProps> = ({ stat }) => {
   return (
     <span className="stat">
-      <span>{stat.label}</span>: <span className="stat-value">{stat.value}</span>
+      <span>{stat.label}</span>: <strong>{stat.value}</strong>
     </span>
   );
 };

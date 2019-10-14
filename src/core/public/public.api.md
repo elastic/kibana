@@ -9,6 +9,7 @@ import { MouseEventHandler } from 'react';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { ShallowPromise } from '@kbn/utility-types';
 import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 
 // @public
@@ -31,7 +32,7 @@ export interface AppBase {
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
+    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
 }
 
 // @public (undocumented)
@@ -44,7 +45,7 @@ export interface ApplicationStart {
         path?: string;
         state?: any;
     }): void;
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountContext, T>): void;
+    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
 }
 
 // @public
@@ -58,6 +59,9 @@ export interface AppMountContext {
         notifications: NotificationsStart;
         overlays: OverlayStart;
         uiSettings: UiSettingsClientContract;
+        injectedMetadata: {
+            getInjectedVar: (name: string, defaultValue?: any) => unknown;
+        };
     };
 }
 
@@ -213,7 +217,7 @@ export interface ChromeStart {
 
 // @public
 export interface ContextSetup {
-    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+    createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
 }
 
 // @internal (undocumented)
@@ -234,6 +238,10 @@ export interface CoreSetup {
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     http: HttpSetup;
+    // @deprecated
+    injectedMetadata: {
+        getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    };
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
@@ -252,6 +260,10 @@ export interface CoreStart {
     http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
+    // @deprecated
+    injectedMetadata: {
+        getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    };
     // (undocumented)
     notifications: NotificationsStart;
     // (undocumented)
@@ -389,6 +401,15 @@ export interface FatalErrorsSetup {
     get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
+// @public
+export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
+
+// @public
+export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => any;
+
+// @public
+export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
+
 // @public (undocumented)
 export type HttpBody = BodyInit | null | any;
 
@@ -404,14 +425,23 @@ export interface HttpErrorRequest {
 export interface HttpErrorResponse {
     // (undocumented)
     body?: HttpBody;
-    // Warning: (ae-forgotten-export) The symbol "HttpFetchError" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     error: Error | HttpFetchError;
     // (undocumented)
     request?: Request;
     // (undocumented)
     response?: Response;
+}
+
+// @public (undocumented)
+export class HttpFetchError extends Error {
+    constructor(message: string, request: Request, response?: Response | undefined, body?: any);
+    // (undocumented)
+    readonly body?: any;
+    // (undocumented)
+    readonly request: Request;
+    // (undocumented)
+    readonly response?: Response | undefined;
 }
 
 // @public (undocumented)
@@ -551,16 +581,13 @@ export interface I18nStart {
 }
 
 // @public
-export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
-    createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
-    registerContext<TContextName extends keyof TContext>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<TContext, TContextName, THandlerParameters>): this;
+export interface IContextContainer<THandler extends HandlerFunction<any>> {
+    createHandler(pluginOpaqueId: PluginOpaqueId, handler: THandler): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
+    registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
 }
 
 // @public
-export type IContextHandler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (context: TContext, ...rest: THandlerParameters) => TReturn;
-
-// @public
-export type IContextProvider<TContext extends Record<string, any>, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
+export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public @deprecated
 export interface LegacyCoreSetup extends CoreSetup {
@@ -698,14 +725,17 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
     version?: string;
 }
 
-// @public (undocumented)
-export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+// @public
+export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
 
 // @public
 export interface SavedObjectAttributes {
     // (undocumented)
-    [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
+    [key: string]: SavedObjectAttribute;
 }
+
+// @public
+export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
 
 // @public
 export interface SavedObjectReference {
@@ -752,7 +782,7 @@ export class SavedObjectsClient {
     }[]) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "type" | "defaultSearchOperator" | "searchFields" | "sortField" | "hasReference" | "page" | "perPage" | "fields">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
@@ -774,6 +804,8 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
+    // (undocumented)
+    filter?: string;
     // (undocumented)
     hasReference?: {
         type: string;

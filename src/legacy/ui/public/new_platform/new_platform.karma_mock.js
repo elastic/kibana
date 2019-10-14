@@ -31,6 +31,12 @@ export const npSetup = {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
+      __LEGACY: {
+        renderers: {
+          register: () => undefined,
+          get: () => null,
+        },
+      },
     },
     data: {
     },
@@ -65,7 +71,9 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    data: {},
+    data: {
+      getSuggestions: sinon.fake(),
+    },
     inspector: {
       isAvailable: () => false,
       open: () => ({

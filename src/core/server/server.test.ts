@@ -38,6 +38,7 @@ const logger = loggingServiceMock.create();
 
 beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
+  mockPluginsService.discover.mockResolvedValue(new Map());
 });
 
 afterEach(() => {

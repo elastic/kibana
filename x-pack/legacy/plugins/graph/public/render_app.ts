@@ -25,8 +25,8 @@ import { PersistedState } from 'ui/persisted_state';
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
 import { PromiseServiceCreator } from 'ui/promises/promises';
-import { initAngularModule } from './app';
 // @ts-ignore
+import { initAngularModule } from './app';
 
 const mainTemplate = (basePath: string) => `<div style="height: 100%">
   <!-- This base tag is key to making this work -->
@@ -100,6 +100,7 @@ export const renderApp = (
     config: core.uiSettings,
     toastNotifications: core.notifications.toasts,
     indexPatterns: data.indexPatterns.indexPatterns,
+    data,
     fatalError,
     xpackInfo,
     addBasePath,

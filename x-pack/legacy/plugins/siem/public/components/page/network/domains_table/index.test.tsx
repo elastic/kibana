@@ -112,7 +112,7 @@ describe('Domains Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('Domain nameClick to sort in ascending order');
+      ).toEqual('DomainClick to sort in ascending order');
       expect(
         wrapper
           .find('.euiTable thead tr th button')

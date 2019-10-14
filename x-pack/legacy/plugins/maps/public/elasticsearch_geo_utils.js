@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse } from 'wellknown';
-import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
 import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
@@ -91,62 +90,29 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
   };
 }
 
-function pointGeometryFactory(lat, lon) {
-  return {
-    type: GEO_JSON_TYPE.POINT,
-    coordinates: [lon, lat]
-  };
-}
-
+// Parse geo_point docvalue_field
+// Either
+// 1) Array of latLon strings
+// 2) latLon string
 export function geoPointToGeometry(value, accumulator) {
   if (!value) {
     return;
   }
 
-  if (typeof value === 'string') {
-
-    const commaSplit = value.split(',');
-    let point;
-    if (commaSplit.length === 1) {
-      const geohash = decodeGeoHash(value);
-      point = pointGeometryFactory(geohash.latitude[2], geohash.longitude[2]);
-    } else {
-      const lat = parseFloat(commaSplit[0]);
-      const lon = parseFloat(commaSplit[1]);
-      point = pointGeometryFactory(lat, lon);
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      geoPointToGeometry(value[i], accumulator);
     }
-    accumulator.push(point);
     return;
   }
 
-  if (typeof value === 'object' && _.has(value, 'lat') && _.has(value, 'lon')) {
-    accumulator.push(pointGeometryFactory(value.lat, value.lon));
-    return;
-  }
-
-  if (!Array.isArray(value)) {
-    const errorMessage = i18n.translate('xpack.maps.es_geo_utils.unsupportedGeoPointValueErrorMessage', {
-      defaultMessage: `Unsupported geo_point value: {geoPointValue}`,
-      values: {
-        geoPointValue: value
-      }
-    });
-    throw new Error(errorMessage);
-  }
-
-  if (value.length === 2
-      && typeof value[0] === 'number'
-      && typeof value[1] === 'number') {
-    const lat = value[LAT_INDEX];
-    const lon = value[LON_INDEX];
-    accumulator.push(pointGeometryFactory(lat, lon));
-    return;
-  }
-
-  // Geo-point expressed as an array of values
-  for (let i = 0; i < value.length; i++) {
-    geoPointToGeometry(value[i], accumulator);
-  }
+  const commaSplit = value.split(',');
+  const lat = parseFloat(commaSplit[0]);
+  const lon = parseFloat(commaSplit[1]);
+  accumulator.push({
+    type: GEO_JSON_TYPE.POINT,
+    coordinates: [lon, lat]
+  });
 }
 
 export function convertESShapeToGeojsonGeometry(value) {
@@ -297,6 +263,7 @@ export function createSpatialFilterWithGeometry(options) {
 }
 
 function createGeometryFilterWithMeta({
+  preIndexedShape,
   geometry,
   geometryLabel,
   indexPatternId,
@@ -320,14 +287,21 @@ function createGeometryFilterWithMeta({
   };
 
   if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
+    const shapeQuery = {
+      relation
+    };
+
+    if (preIndexedShape) {
+      shapeQuery.indexed_shape = preIndexedShape;
+    } else {
+      shapeQuery.shape = geometry;
+    }
+
     return {
       meta,
       geo_shape: {
         ignore_unmapped: true,
-        [geoFieldName]: {
-          shape: geometry,
-          relation
-        }
+        [geoFieldName]: shapeQuery
       }
     };
   }

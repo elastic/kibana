@@ -78,7 +78,7 @@ export default () => Joi.object({
   server: Joi.object({
     uuid: Joi.string().guid().default(),
     name: Joi.string().default(os.hostname()),
-    defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
+    defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
     customResponseHeaders: Joi.object().unknown(true).default({}),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),
@@ -167,7 +167,7 @@ export default () => Joi.object({
     watchPort: Joi.number().default(5602),
     watchHost: Joi.string().hostname().default('localhost'),
     watchPrebuild: Joi.boolean().default(false),
-    watchProxyTimeout: Joi.number().default(5 * 60000),
+    watchProxyTimeout: Joi.number().default(10 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
     sourceMaps: Joi.when('$prod', {
       is: true,
@@ -178,7 +178,7 @@ export default () => Joi.object({
           Joi.string().required(),
           Joi.boolean()
         )
-        .default('#cheap-source-map'),
+        .default(!!process.env.CODE_COVERAGE ? 'true' : '#cheap-source-map'),
     }),
     workers: Joi.number().min(1),
     profile: Joi.boolean().default(false)
