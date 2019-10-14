@@ -6,12 +6,12 @@
 
 import Joi from 'joi';
 import { wrapError } from '../../../../../../../../plugins/security/server';
-import { API_BASE_PATH } from  '../../../../../common/constants';
+import { INTERNAL_API_BASE_PATH } from  '../../../../../common/constants';
 
 export function initInvalidateApiKeysApi(server, callWithRequest, routePreCheckLicenseFn) {
   server.route({
     method: 'POST',
-    path: `${API_BASE_PATH}/api_key/invalidate`,
+    path: `${INTERNAL_API_BASE_PATH}/api_key/invalidate`,
     async handler(request) {
       try {
         const { apiKeys, isAdmin } = request.payload;
@@ -62,7 +62,7 @@ export function initInvalidateApiKeysApi(server, callWithRequest, routePreCheckL
             id: Joi.string().required(),
             name: Joi.string().required(),
           })).required(),
-          isAdmin: Joi.bool(),
+          isAdmin: Joi.bool().required(),
         })
       },
     }
