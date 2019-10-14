@@ -60,6 +60,20 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
+
+const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
+const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
+
+const getMockProps = () => ({
+  networkPagePath: '',
+  to,
+  from,
+  isInitializing: false,
+  setQuery: jest.fn(),
+  capabilitiesFetched: true,
+  hasMlUserPermissions: true,
+});
+
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */
 const originalError = console.error;
@@ -81,7 +95,7 @@ describe('rendering - rendering', () => {
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
           <Router history={mockHistory}>
-            <Network />
+            <Network {...getMockProps()} />
           </Router>
         </MockedProvider>
       </TestProviders>
@@ -98,7 +112,7 @@ describe('rendering - rendering', () => {
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
           <Router history={mockHistory}>
-            <Network />
+            <Network {...getMockProps()} />
           </Router>
         </MockedProvider>
       </TestProviders>

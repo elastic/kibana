@@ -58,37 +58,6 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
     }
   });
 
-  server.route({
-    method: 'POST',
-    path: '/api/security/v1/saml',
-    config: {
-      auth: false,
-      validate: {
-        payload: Joi.object({
-          SAMLResponse: Joi.string().required(),
-          RelayState: Joi.string().allow('')
-        })
-      }
-    },
-    async handler(request, h) {
-      try {
-        // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-        const authenticationResult = await login(KibanaRequest.from(request), {
-          provider: 'saml',
-          value: { samlResponse: request.payload.SAMLResponse }
-        });
-
-        if (authenticationResult.redirected()) {
-          return h.redirect(authenticationResult.redirectURL);
-        }
-
-        return Boom.unauthorized(authenticationResult.error);
-      } catch (err) {
-        return wrapError(err);
-      }
-    }
-  });
-
   /**
    * The route should be configured as a redirect URI in OP when OpenID Connect implicit flow
    * is used, so that we can extract authentication response from URL fragment and send it to

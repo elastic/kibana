@@ -12,7 +12,6 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ManagedTable, ITableColumn } from '../../shared/ManagedTable';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { callApmApi } from '../../../services/rest/callApmApi';
 import {
   asDynamicBytes,
   asInteger,
@@ -46,24 +45,27 @@ const ServiceNodeOverview = () => {
     [serviceName]
   );
 
-  const { data: items } = useFetcher(() => {
-    if (!serviceName || !start || !end) {
-      return;
-    }
-    return callApmApi({
-      pathname: '/api/apm/services/{serviceName}/serviceNodes',
-      params: {
-        path: {
-          serviceName
-        },
-        query: {
-          start,
-          end,
-          uiFilters: JSON.stringify(uiFilters)
-        }
+  const { data: items = [] } = useFetcher(
+    callApmApi => {
+      if (!serviceName || !start || !end) {
+        return undefined;
       }
-    });
-  }, [serviceName, start, end, uiFilters]);
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/serviceNodes',
+        params: {
+          path: {
+            serviceName
+          },
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
+      });
+    },
+    [serviceName, start, end, uiFilters]
+  );
 
   if (!serviceName) {
     return null;
@@ -134,7 +136,7 @@ const ServiceNodeOverview = () => {
             noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
               defaultMessage: 'No JVMs were found'
             })}
-            items={items || []}
+            items={items}
             columns={columns}
             initialPageSize={INITIAL_PAGE_SIZE}
             initialSortField={INITIAL_SORT_FIELD}

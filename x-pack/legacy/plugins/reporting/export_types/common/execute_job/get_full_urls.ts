@@ -11,6 +11,7 @@ import {
   UrlWithParsedQuery,
 } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
+import { validateUrls } from '../../../common/validate_urls';
 import { KbnServer } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
@@ -43,6 +44,8 @@ export async function getFullUrls({
       `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
     );
   }
+
+  validateUrls(relativeUrls);
 
   const urls = relativeUrls.map(relativeUrl => {
     const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
