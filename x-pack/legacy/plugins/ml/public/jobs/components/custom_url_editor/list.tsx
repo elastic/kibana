@@ -38,7 +38,7 @@ function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {
   return interval !== null;
 }
 
-interface CustomUrlListProps {
+export interface CustomUrlListProps {
   job: Job;
   customUrls: KibanaUrlConfig[];
   setCustomUrls: (customUrls: KibanaUrlConfig[]) => {};
@@ -183,13 +183,15 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
                 onBlur={() => {
                   setExpandedUrlIndex(null);
                 }}
+                data-test-subj={`mlJobEditCustomUrlTextarea_${index}`}
               />
             ) : (
               <EuiFieldText
                 fullWidth={true}
                 value={customUrl.url_value}
-                onChange={e => onUrlValueChange(e, index)}
+                readOnly={true}
                 onFocus={() => setExpandedUrlIndex(index)}
+                data-test-subj={`mlJobEditCustomUrlInput_${index}`}
               />
             )}
           </EuiFormRow>
