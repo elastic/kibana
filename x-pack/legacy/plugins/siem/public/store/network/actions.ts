@@ -22,15 +22,14 @@ export const updateNetworkPageTableActivePage = actionCreator<{
   tableType: networkModel.NetworkTableType;
 }>('UPDATE_NETWORK_PAGE_TABLE_ACTIVE_PAGE');
 
-export const setNetworkTablesActivePageToZero = actionCreator(
-  'SET_NETWORK_TABLES_ACTIVE_PAGE_TO_ZERO'
-);
-
 export const updateIpDetailsTableActivePage = actionCreator<{
   activePage: number;
   tableType: networkModel.IpDetailsTableType;
 }>('UPDATE_NETWORK_DETAILS_TABLE_ACTIVE_PAGE');
 
+export const setNetworkTablesActivePageToZero = actionCreator(
+  'SET_NETWORK_TABLES_ACTIVE_PAGE_TO_ZERO'
+);
 export const updateDnsLimit = actionCreator<{
   limit: number;
   networkType: networkModel.NetworkType;
@@ -55,7 +54,7 @@ export const updateTopNFlowLimit = actionCreator<{
 export const updateTopNFlowSort = actionCreator<{
   topNFlowSort: NetworkTopNFlowSortField;
   networkType: networkModel.NetworkType;
-  tableType: networkModel.NetworkTableType;
+  tableType: networkModel.TopNTableType;
 }>('UPDATE_TOP_N_FLOW_SORT');
 
 export const setNetworkFilterQueryDraft = actionCreator<{

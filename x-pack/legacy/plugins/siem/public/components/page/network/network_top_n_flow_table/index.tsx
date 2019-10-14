@@ -132,15 +132,15 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     let updateTableActivePage: any;
     if (type === networkModel.NetworkType.page) {
       tableType =
-        networkModel.NetworkTableType[
-          flowTargeted === FlowTargetSourceDest.source ? 'topNFlowSource' : 'topNFlowDestination'
-        ];
+        flowTargeted === FlowTargetSourceDest.source
+          ? networkModel.NetworkTableType.topNFlowSource
+          : networkModel.NetworkTableType.topNFlowDestination;
       updateTableActivePage = updateNetworkPageTableActivePage;
     } else {
       tableType =
-        networkModel.IpDetailsTableType[
-          flowTargeted === FlowTargetSourceDest.source ? 'topNFlowSource' : 'topNFlowDestination'
-        ];
+        flowTargeted === FlowTargetSourceDest.source
+          ? networkModel.IpDetailsTableType.topNFlowSource
+          : networkModel.IpDetailsTableType.topNFlowDestination;
       updateTableActivePage = updateIpDetailsTableActivePage;
     }
 

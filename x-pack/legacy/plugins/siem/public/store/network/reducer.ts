@@ -193,7 +193,11 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
     },
   }))
   .case(updateTopNFlowLimit, (state, { limit, networkType, tableType }) => {
-    if (networkType === NetworkType.page) {
+    if (
+      networkType === NetworkType.page &&
+      (tableType === NetworkTableType.topNFlowSource ||
+        tableType === NetworkTableType.topNFlowDestination)
+    ) {
       return {
         ...state,
         [networkType]: {
@@ -201,48 +205,55 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
           queries: {
             ...state[networkType].queries,
             [tableType]: {
-              ...state[NetworkType.page].queries[tableType],
+              ...state[networkType].queries[tableType],
+              limit,
+            },
+          },
+        },
+      };
+    } else if (
+      tableType === IpDetailsTableType.topNFlowDestination ||
+      tableType === IpDetailsTableType.topNFlowSource
+    ) {
+      return {
+        ...state,
+        [NetworkType.details]: {
+          ...state[NetworkType.details],
+          queries: {
+            ...state[NetworkType.details].queries,
+            [tableType]: {
+              ...state[NetworkType.details].queries[tableType],
               limit,
             },
           },
         },
       };
     }
-    return {
-      ...state,
-      [networkType]: {
-        ...state[networkType],
-        queries: {
-          ...state[networkType].queries,
-          [tableType]: {
-            ...state[NetworkType.details].queries[tableType],
-            limit,
-          },
-        },
-      },
-    };
+    return state;
   })
   .case(updateTopNFlowSort, (state, { topNFlowSort, networkType, tableType }) => {
     if (
-      tableType === NetworkTableType.dns ||
-      (networkType === NetworkType.page &&
-        (tableType === NetworkTableType.topNFlowSource ||
-          tableType === NetworkTableType.topNFlowDestination))
+      networkType === NetworkType.page &&
+      (tableType === NetworkTableType.topNFlowSource ||
+        tableType === NetworkTableType.topNFlowDestination)
     ) {
       return {
         ...state,
-        [NetworkType.page]: {
-          ...state[NetworkType.page],
+        [networkType]: {
+          ...state[networkType],
           queries: {
-            ...state[NetworkType.page].queries,
+            ...state[networkType].queries,
             [tableType]: {
-              ...state[NetworkType.page].queries[tableType],
+              ...state[networkType].queries[tableType],
               topNFlowSort,
             },
           },
         },
       };
-    } else {
+    } else if (
+      tableType === IpDetailsTableType.topNFlowDestination ||
+      tableType === IpDetailsTableType.topNFlowSource
+    ) {
       return {
         ...state,
         [NetworkType.details]: {
@@ -257,6 +268,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         },
       };
     }
+    return state;
   })
   .case(setNetworkFilterQueryDraft, (state, { filterQueryDraft, networkType }) => ({
     ...state,

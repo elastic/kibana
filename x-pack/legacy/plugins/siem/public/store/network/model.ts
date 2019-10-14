@@ -31,8 +31,8 @@ export type TopNTableType =
   | IpDetailsTableType.topNFlowSource;
 
 export enum IpDetailsTableType {
-  topNFlowSource = 'topNFlowSource',
-  topNFlowDestination = 'topNFlowDestination',
+  topNFlowSource = 'topNFlowSourceIp',
+  topNFlowDestination = 'topNFlowDestinationIp',
   tls = 'tls',
   users = 'users',
 }
