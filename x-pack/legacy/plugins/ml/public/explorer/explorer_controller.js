@@ -39,7 +39,7 @@ import { subscribeAppStateToObservable } from '../util/app_state_utils';
 
 import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
 
-const template = `<ml-chart-tooltip /><ml-explorer-react-wrapper class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`;
+const template = `<ml-explorer-react-wrapper class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`;
 
 uiRoutes
   .when('/explorer/?', {

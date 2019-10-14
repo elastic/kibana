@@ -33,6 +33,7 @@ import {
   ExplorerNoJobsFound,
   ExplorerNoResultsFound,
 } from './components';
+import { ChartTooltip } from '../components/chart_tooltip';
 import { ExplorerSwimlane } from './explorer_swimlane';
 import { KqlFilterBar } from '../components/kql_filter_bar';
 import { formatHumanReadableDateTime } from '../util/date_utils';
@@ -1145,6 +1146,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
+          <ChartTooltip />
           <div className="results-container">
 
             {noInfluencersConfigured === false &&
