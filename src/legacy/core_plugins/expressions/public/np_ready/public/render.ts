@@ -76,9 +76,9 @@ export class ExpressionRenderHandler {
 
     const promise = this.render$.pipe(first()).toPromise();
 
-    getRenderersRegistry()
-      .get(data.as)
-      .render(this.element, data.value, this.handlers);
+    const renderer = getRenderersRegistry().get(data.as);
+    if (!renderer) throw new Error(`Renderer not found [as = ${data.as}].`);
+    renderer.render(this.element, data.value, this.handlers);
 
     return promise;
   };
