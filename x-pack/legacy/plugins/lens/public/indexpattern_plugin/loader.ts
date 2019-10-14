@@ -22,6 +22,7 @@ import {
 } from './types';
 import { updateLayerIndexPattern } from './state_helpers';
 import { DateRange, ExistingFields } from '../../common/types';
+import { BASE_API_URL } from '../../common';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -228,16 +229,20 @@ export async function syncExistingFields({
   setState: SetState;
 }) {
   const emptinessInfo = await Promise.all(
-    indexPatterns.map(
-      pattern =>
-        fetchJson(`/api/lens/existing_fields/${pattern.title}`, {
-          query: {
-            fromDate: dateRange.fromDate,
-            toDate: dateRange.toDate,
-            timeFieldName: pattern.timeFieldName!,
-          },
-        }) as Promise<ExistingFields>
-    )
+    indexPatterns.map(pattern => {
+      const query: Record<string, string> = {
+        fromDate: dateRange.fromDate,
+        toDate: dateRange.toDate,
+      };
+
+      if (pattern.timeFieldName) {
+        query.timeFieldName = pattern.timeFieldName;
+      }
+
+      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.title}`, {
+        query,
+      }) as Promise<ExistingFields>;
+    })
   );
 
   setState(state => ({

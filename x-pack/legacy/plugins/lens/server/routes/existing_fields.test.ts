@@ -28,7 +28,7 @@ describe('existingFields', () => {
     expect(result).toEqual(['foo', 'baz']);
   });
 
-  it('should handle nested fields', () => {
+  it('should handle arrays of objects', () => {
     const result = existingFields(
       [{ _source: { stuff: [{ foo: 'bar' }, { baz: 0 }] } }],
       [field('stuff.foo'), field('stuff.bar'), field('stuff.baz')]
@@ -43,7 +43,7 @@ describe('existingFields', () => {
     expect(result).toEqual(['stuff']);
   });
 
-  it('should handle nested objects', () => {
+  it('should handle deep object structures', () => {
     const result = existingFields(
       [{ _source: { geo: { coordinates: { lat: 40, lon: -77 } } } }],
       [field('geo.coordinates')]
