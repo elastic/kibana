@@ -108,3 +108,6 @@ export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 
 /** @public */
 export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType };
+
+/** @public */
+export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';
