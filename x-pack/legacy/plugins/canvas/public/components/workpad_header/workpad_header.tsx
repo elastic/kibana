@@ -195,7 +195,7 @@ export class WorkpadHeader extends React.PureComponent<Props, State> {
                   <AssetManager />
                 </EuiFlexItem>
                 {/*
-                Disabling embeddables until we figure out filters
+                TODO: elastic/kibana#44822 Disabling pending filters work
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty onClick={this._showEmbeddablePanel}>
                     {strings.getEmbedObjectButtonLabel()}
