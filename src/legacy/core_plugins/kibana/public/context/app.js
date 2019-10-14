@@ -54,7 +54,6 @@ module.directive('contextApp', function ContextApp() {
     controllerAs: 'contextApp',
     restrict: 'E',
     scope: {
-      anchorType: '=',
       anchorId: '=',
       columns: '=',
       indexPattern: '=',
@@ -109,7 +108,6 @@ function ContextAppController($scope, config, Private) {
       const { queryParameters } = this.state;
       if (
         (newQueryParameters.indexPatternId !== queryParameters.indexPatternId)
-        || (newQueryParameters.anchorType !== queryParameters.anchorType)
         || (newQueryParameters.anchorId !== queryParameters.anchorId)
         || (!_.isEqual(newQueryParameters.sort, queryParameters.sort))
       ) {
