@@ -11,7 +11,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { CountryFlagAndName } from '../../../source_destination/country_flag';
 import {
-  FlowTargetNew,
+  FlowTargetSourceDest,
   NetworkTopCountriesEdges,
   TopNFlowNetworkEcsField,
 } from '../../../../graphql/types';
@@ -36,7 +36,7 @@ export type NetworkTopCountriesColumns = [
 
 export const getNetworkTopCountriesColumns = (
   indexPattern: StaticIndexPattern,
-  flowTarget: FlowTargetNew,
+  flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopCountriesColumns => [

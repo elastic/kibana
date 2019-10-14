@@ -42,8 +42,20 @@ export const setNetworkDetailsQueriesActivePageToZero = (
   state: NetworkModel
 ): IpOverviewQueries => ({
   ...state.details.queries,
-  [IpDetailsTableType.domains]: {
-    ...state.details.queries[IpDetailsTableType.domains],
+  [IpDetailsTableType.topCountriesSource]: {
+    ...state.details.queries[IpDetailsTableType.topCountriesSource],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
+  [IpDetailsTableType.topCountriesDestination]: {
+    ...state.details.queries[IpDetailsTableType.topCountriesDestination],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
+  [IpDetailsTableType.topNFlowSource]: {
+    ...state.details.queries[IpDetailsTableType.topNFlowSource],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
+  [IpDetailsTableType.topNFlowDestination]: {
+    ...state.details.queries[IpDetailsTableType.topNFlowDestination],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
   [IpDetailsTableType.tls]: {

@@ -7,9 +7,8 @@
 import { get, getOr } from 'lodash/fp';
 
 import {
-  FlowTargetNew,
+  FlowTargetSourceDest,
   AutonomousSystemItem,
-  FlowTarget,
   GeoItem,
   NetworkDnsData,
   NetworkDnsEdges,
@@ -175,10 +174,10 @@ const getTopCountriesEdges = (
 };
 
 const getFlowTargetFromString = (flowAsString: string) =>
-  flowAsString === 'source' ? FlowTarget.source : FlowTarget.destination;
+  flowAsString === 'source' ? FlowTargetSourceDest.source : FlowTargetSourceDest.destination;
 
 const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
-  result.location.top_geo.hits.hits.length > 0
+  result.location.top_geo.hits.hits.length > 0 && result.location.top_geo.hits.hits[0]._source
     ? {
         geo: getOr(
           '',
@@ -215,7 +214,7 @@ const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null 
 
 const formatTopNFlowEdges = (
   buckets: NetworkTopNFlowBuckets[],
-  flowTarget: FlowTargetNew
+  flowTarget: FlowTargetSourceDest
 ): NetworkTopNFlowEdges[] =>
   buckets.map((bucket: NetworkTopNFlowBuckets) => ({
     node: {
@@ -245,7 +244,7 @@ const formatTopNFlowEdges = (
 
 const formatTopCountriesEdges = (
   buckets: NetworkTopCountriesBuckets[],
-  flowTarget: FlowTargetNew
+  flowTarget: FlowTargetSourceDest
 ): NetworkTopCountriesEdges[] =>
   buckets.map((bucket: NetworkTopCountriesBuckets) => ({
     node: {

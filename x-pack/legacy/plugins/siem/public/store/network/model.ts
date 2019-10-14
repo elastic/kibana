@@ -5,15 +5,13 @@
  */
 
 import {
-  DomainsSortField,
-  FlowDirection,
   FlowTarget,
   NetworkDnsSortField,
   NetworkTopNFlowSortField,
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
-import { KueryFilterQuery, networkModel, SerializedFilterQuery } from '../model';
+import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export enum NetworkType {
   page = 'page',
@@ -22,23 +20,30 @@ export enum NetworkType {
 
 export enum NetworkTableType {
   dns = 'dns',
-  topNFlowSource = 'topNFlowSource',
-  topNFlowDestination = 'topNFlowDestination',
-  topCountriesSource = 'topCountriesSource',
   topCountriesDestination = 'topCountriesDestination',
+  topCountriesSource = 'topCountriesSource',
+  topNFlowDestination = 'topNFlowDestination',
+  topNFlowSource = 'topNFlowSource',
 }
 
 export type TopNTableType =
-  | networkModel.NetworkTableType.topNFlowDestination
-  | networkModel.NetworkTableType.topNFlowSource;
+  | IpDetailsTableType.topNFlowDestination
+  | IpDetailsTableType.topNFlowSource
+  | NetworkTableType.topNFlowDestination
+  | NetworkTableType.topNFlowSource;
 
 export type TopCountriesTableType =
-  | networkModel.NetworkTableType.topCountriesSource
-  | networkModel.NetworkTableType.topCountriesDestination;
+  | IpDetailsTableType.topCountriesDestination
+  | IpDetailsTableType.topCountriesSource
+  | NetworkTableType.topCountriesDestination
+  | NetworkTableType.topCountriesSource;
 
 export enum IpDetailsTableType {
-  domains = 'domains',
   tls = 'tls',
+  topCountriesDestination = 'topCountriesDestinationIp',
+  topCountriesSource = 'topCountriesSourceIp',
+  topNFlowDestination = 'topNFlowDestinationIp',
+  topNFlowSource = 'topNFlowSourceIp',
   users = 'users',
 }
 
@@ -76,10 +81,6 @@ export interface NetworkPageModel {
 }
 
 // IP Details Models
-export interface DomainsQuery extends BasicQueryPaginated {
-  flowDirection: FlowDirection;
-  domainsSortField: DomainsSortField;
-}
 
 export interface TlsQuery extends BasicQueryPaginated {
   tlsSortField: TlsSortField;
@@ -90,8 +91,11 @@ export interface UsersQuery extends BasicQueryPaginated {
 }
 
 export interface IpOverviewQueries {
-  [IpDetailsTableType.domains]: DomainsQuery;
   [IpDetailsTableType.tls]: TlsQuery;
+  [IpDetailsTableType.topCountriesDestination]: TopCountriesQuery;
+  [IpDetailsTableType.topCountriesSource]: TopCountriesQuery;
+  [IpDetailsTableType.topNFlowDestination]: TopNFlowQuery;
+  [IpDetailsTableType.topNFlowSource]: TopNFlowQuery;
   [IpDetailsTableType.users]: UsersQuery;
 }
 

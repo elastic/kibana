@@ -6,7 +6,7 @@
 
 import {
   Direction,
-  FlowTargetNew,
+  FlowTargetSourceDest,
   NetworkTopNFlowSortField,
   NetworkTopNFlowFields,
 } from '../../graphql/types';
@@ -14,7 +14,7 @@ import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_q
 
 import { NetworkTopCountriesRequestOptions } from './index';
 
-const getCountAgg = (flowTarget: FlowTargetNew) => ({
+const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
   top_countries_count: {
     cardinality: {
       field: `${flowTarget}.geo.country_iso_code`,
@@ -32,6 +32,7 @@ export const buildTopCountriesQuery = ({
     fields: { timestamp },
   },
   timerange: { from, to },
+  ip,
 }: NetworkTopCountriesRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -48,9 +49,21 @@ export const buildTopCountriesQuery = ({
         ...getFlowTargetAggs(networkTopCountriesSort, flowTarget, querySize),
       },
       query: {
-        bool: {
-          filter,
-        },
+        bool: ip
+          ? {
+              filter,
+              should: [
+                {
+                  term: {
+                    [`${getOppositeField(flowTarget)}.ip`]: ip,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            }
+          : {
+              filter,
+            },
       },
     },
     size: 0,
@@ -61,7 +74,7 @@ export const buildTopCountriesQuery = ({
 
 const getFlowTargetAggs = (
   networkTopCountriesSortField: NetworkTopNFlowSortField,
-  flowTarget: FlowTargetNew,
+  flowTarget: FlowTargetSourceDest,
   querySize: number
 ) => ({
   [flowTarget]: {
@@ -102,12 +115,12 @@ const getFlowTargetAggs = (
   },
 });
 
-export const getOppositeField = (flowTarget: FlowTargetNew): FlowTargetNew => {
+export const getOppositeField = (flowTarget: FlowTargetSourceDest): FlowTargetSourceDest => {
   switch (flowTarget) {
-    case FlowTargetNew.source:
-      return FlowTargetNew.destination;
-    case FlowTargetNew.destination:
-      return FlowTargetNew.source;
+    case FlowTargetSourceDest.source:
+      return FlowTargetSourceDest.destination;
+    case FlowTargetSourceDest.destination:
+      return FlowTargetSourceDest.source;
   }
   assertUnreachable(flowTarget);
 };

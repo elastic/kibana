@@ -21,11 +21,13 @@ import styled, { css } from 'styled-components';
 
 import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
-import { DomainsColumns } from '../page/network/domains_table/columns';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
+import {
+  NetworkTopNFlowColumns,
+  NetworkTopNFlowColumnsIpDetails,
+} from '../page/network/network_top_n_flow_table/columns';
 import { NetworkTopCountriesColumns } from '../page/network/network_top_countries_table/columns';
-import { NetworkTopNFlowColumns } from '../page/network/network_top_n_flow_table/columns';
 import { TlsColumns } from '../page/network/tls_table/columns';
 import { UncommonProcessTableColumns } from '../page/hosts/uncommon_process_table';
 import { UsersColumns } from '../page/network/users_table/columns';
@@ -64,13 +66,12 @@ declare type HostsTableColumnsTest = [
 
 declare type BasicTableColumns =
   | AuthTableColumns
-  | DomainsColumns
-  | DomainsColumns
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
   | NetworkTopCountriesColumns
   | NetworkTopNFlowColumns
+  | NetworkTopNFlowColumnsIpDetails
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;

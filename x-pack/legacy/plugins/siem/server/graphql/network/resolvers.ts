@@ -44,6 +44,7 @@ export const createNetworkResolvers = (
         ...createOptionsPaginated(source, args, info),
         flowTarget: args.flowTarget,
         networkTopCountriesSort: args.sort,
+        ip: args.ip,
       };
       return libs.network.getNetworkTopCountries(req, options);
     },
@@ -52,6 +53,7 @@ export const createNetworkResolvers = (
         ...createOptionsPaginated(source, args, info),
         flowTarget: args.flowTarget,
         networkTopNFlowSort: args.sort,
+        ip: args.ip,
       };
       return libs.network.getNetworkTopNFlow(req, options);
     },

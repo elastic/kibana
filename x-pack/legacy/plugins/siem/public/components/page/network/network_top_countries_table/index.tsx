@@ -5,7 +5,7 @@
  */
 import { EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
@@ -14,7 +14,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { networkActions } from '../../../../store/actions';
 import {
   Direction,
-  FlowTargetNew,
+  FlowTargetSourceDest,
   NetworkTopCountriesEdges,
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
@@ -28,9 +28,10 @@ import * as i18n from './translations';
 interface OwnProps {
   data: NetworkTopCountriesEdges[];
   fakeTotalCount: number;
-  flowTargeted: FlowTargetNew;
+  flowTargeted: FlowTargetSourceDest;
   id: string;
   indexPattern: StaticIndexPattern;
+  ip?: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -46,7 +47,12 @@ interface NetworkTopCountriesTableReduxProps {
 }
 
 interface NetworkTopCountriesTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
+  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
+  updateIpDetailsTableActivePage: ActionCreator<{
+    activePage: number;
+    tableType: networkModel.IpDetailsTableType;
+  }>;
+  updateNetworkPageTableActivePage: ActionCreator<{
     activePage: number;
     tableType: networkModel.NetworkTableType;
   }>;
@@ -87,18 +93,24 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     flowTargeted,
     id,
     indexPattern,
+    ip,
     isInspect,
     limit,
     loading,
     loadPage,
+    setIpDetailsTablesActivePageToZero,
     showMorePagesIndicator,
     topCountriesSort,
     totalCount,
     type,
+    updateIpDetailsTableActivePage,
     updateTopCountriesLimit,
     updateTopCountriesSort,
-    updateTableActivePage,
+    updateNetworkPageTableActivePage,
   }) => {
+    useEffect(() => {
+      setIpDetailsTablesActivePageToZero(null);
+    }, [ip]);
     const onChange = (criteria: Criteria, tableType: networkModel.TopCountriesTableType) => {
       if (criteria.sort != null) {
         const splitField = criteria.sort.field.split('.');
@@ -120,14 +132,25 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     };
 
     let tableType: networkModel.TopCountriesTableType;
-    let headerTitle: string;
+    const headerTitle: string =
+      flowTargeted === FlowTargetSourceDest.source
+        ? i18n.SOURCE_COUNTRIES
+        : i18n.DESTINATION_COUNTRIES;
 
-    if (flowTargeted === FlowTargetNew.source) {
-      headerTitle = i18n.SOURCE_COUNTRIES;
-      tableType = networkModel.NetworkTableType.topCountriesSource;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let updateTableActivePage: any;
+    if (type === networkModel.NetworkType.page) {
+      tableType =
+        flowTargeted === FlowTargetSourceDest.source
+          ? networkModel.NetworkTableType.topCountriesSource
+          : networkModel.NetworkTableType.topCountriesDestination;
+      updateTableActivePage = updateNetworkPageTableActivePage;
     } else {
-      headerTitle = i18n.DESTINATION_COUNTRIES;
-      tableType = networkModel.NetworkTableType.topCountriesDestination;
+      tableType =
+        flowTargeted === FlowTargetSourceDest.source
+          ? networkModel.IpDetailsTableType.topCountriesSource
+          : networkModel.IpDetailsTableType.topCountriesDestination;
+      updateTableActivePage = updateIpDetailsTableActivePage;
     }
 
     const field =
@@ -135,6 +158,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
       topCountriesSort.field === NetworkTopNFlowFields.bytes_in
         ? `node.network.${topCountriesSort.field}`
         : `node.${flowTargeted}.${topCountriesSort.field}`;
+
     return (
       <PaginatedTable
         activePage={activePage}
@@ -181,9 +205,11 @@ const mapStateToProps = (state: State, ownProps: OwnProps) =>
 export const NetworkTopCountriesTable = connect(
   mapStateToProps,
   {
+    setIpDetailsTablesActivePageToZero: networkActions.setIpDetailsTablesActivePageToZero,
     updateTopCountriesLimit: networkActions.updateTopCountriesLimit,
     updateTopCountriesSort: networkActions.updateTopCountriesSort,
-    updateTableActivePage: networkActions.updateNetworkPageTableActivePage,
+    updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,
+    updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
   }
 )(NetworkTopCountriesTableComponent);
 
