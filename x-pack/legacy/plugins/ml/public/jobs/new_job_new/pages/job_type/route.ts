@@ -6,8 +6,7 @@
 
 import uiRoutes from 'ui/routes';
 
-// @ts-ignore
-import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { checkMlNodesAvailable } from '../../../../ml_nodes_check';
 // @ts-ignore
 import { checkLicenseExpired } from '../../../../license/check_license';
 import { checkCreateJobsPrivilege } from '../../../../privilege/check_privilege';

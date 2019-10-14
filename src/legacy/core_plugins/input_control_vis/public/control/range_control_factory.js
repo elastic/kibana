@@ -26,7 +26,7 @@ import {
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
-import { setup as data } from '../../../../core_plugins/data/public/legacy';
+import { start as data } from '../../../../core_plugins/data/public/legacy';
 
 const minMaxAgg = (field) => {
   const aggBody = {};

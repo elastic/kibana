@@ -10,8 +10,6 @@ import React from 'react';
 import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 
-jest.mock('ui/kfetch');
-
 describe('DiscoverErrorLink without kuery', () => {
   let wrapper: ShallowWrapper;
   beforeEach(() => {
