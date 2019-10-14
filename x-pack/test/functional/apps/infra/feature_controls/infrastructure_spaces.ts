@@ -45,14 +45,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('empty_kibana');
       });
 
-      it('shows Infrastructure navlink', async () => {
+      it('shows Metrics navlink', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.contain('Infrastructure');
+        expect(navLinks).to.contain('Metrics');
       });
 
       it(`landing page shows Wafflemap`, async () => {
@@ -98,14 +98,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('empty_kibana');
       });
 
-      it(`doesn't show infrastructure navlink`, async () => {
+      it(`doesn't show metrics navlink`, async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).not.to.contain('Infrastructure');
+        expect(navLinks).not.to.contain('Metrics');
       });
 
       it(`infrastructure root renders not found page`, async () => {

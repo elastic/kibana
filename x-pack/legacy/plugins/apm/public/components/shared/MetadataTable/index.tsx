@@ -12,7 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-import { get, has, pick } from 'lodash';
+import { get, pick, isEmpty } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
@@ -22,15 +22,26 @@ import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { APMError } from '../../../../typings/es_schemas/ui/APMError';
 import { Span } from '../../../../typings/es_schemas/ui/Span';
 
+type Item = Transaction | APMError | Span;
+
 interface Props {
-  item: Transaction | APMError | Span;
+  item: Item;
   sections: SectionType[];
 }
 
+const filterSections = (sections: SectionType[], item: Item) =>
+  sections
+    .map(section => {
+      const data: Record<string, unknown> = get(item, section.key);
+      return {
+        ...section,
+        data: section.properties ? pick(data, section.properties) : data
+      };
+    })
+    .filter(({ required, data }) => required || !isEmpty(data));
+
 export function MetadataTable({ item, sections }: Props) {
-  const filteredSections = sections.filter(
-    ({ key, required }) => required || has(item, key)
-  );
+  const filteredSections = filterSections(sections, item);
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="flexEnd">
@@ -42,45 +53,39 @@ export function MetadataTable({ item, sections }: Props) {
           </ElasticDocsLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {filteredSections.map(section => {
-        let sectionData: Record<string, unknown> = get(item, section.key);
-        if (section.properties) {
-          sectionData = pick(item, section.properties);
-        }
-        return (
-          <div key={section.key}>
-            <EuiTitle size="xs">
-              <h6>{section.label}</h6>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <Section propData={sectionData} propKey={section.key} />
-            <EuiSpacer size="xl" />
-          </div>
-        );
-      })}
+      {filteredSections.map(section => (
+        <div key={section.key}>
+          <EuiTitle size="xs">
+            <h6>{section.label}</h6>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <Section propData={section.data} propKey={section.key} />
+          <EuiSpacer size="xl" />
+        </div>
+      ))}
     </React.Fragment>
   );
 }
 
 function Section({
-  propData,
+  propData = {},
   propKey
 }: {
   propData?: Record<string, unknown>;
   propKey?: string;
 }) {
+  if (isEmpty(propData)) {
+    return (
+      <EuiText size="s">
+        {i18n.translate(
+          'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
+          { defaultMessage: 'No data available' }
+        )}
+      </EuiText>
+    );
+  }
+
   return (
-    <React.Fragment>
-      {propData ? (
-        <DottedKeyValueTable data={propData} parentKey={propKey} maxDepth={5} />
-      ) : (
-        <EuiText size="s">
-          {i18n.translate(
-            'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
-            { defaultMessage: 'No data available' }
-          )}
-        </EuiText>
-      )}
-    </React.Fragment>
+    <DottedKeyValueTable data={propData} parentKey={propKey} maxDepth={5} />
   );
 }
