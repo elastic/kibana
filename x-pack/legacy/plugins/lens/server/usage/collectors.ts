@@ -91,9 +91,9 @@ export function registerLensUsageCollector(
         };
       } catch (err) {
         return {
-          saved_total: 0,
-          saved_last_30_days: 0,
-          saved_last_90_days: 0,
+          saved_overall_total: 0,
+          saved_30_days_total: 0,
+          saved_90_days_total: 0,
           saved_overall: {},
           saved_30_days: {},
           saved_90_days: {},

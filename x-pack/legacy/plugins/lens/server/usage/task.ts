@@ -229,9 +229,8 @@ export function telemetryTaskRunner(server: Server) {
 
 function getNextMidnight() {
   const nextMidnight = new Date();
-  // nextMidnight.setHours(0, 0, 0, 0);
-  nextMidnight.setHours(nextMidnight.getHours(), nextMidnight.getMinutes() + 1, 0, 0);
-  // nextMidnight.setDate(nextMidnight.getDate() + 1);
-  // return nextMidnight;
+  nextMidnight.setHours(0, 0, 0, 0);
+  nextMidnight.setDate(nextMidnight.getDate() + 1);
+  return nextMidnight;
   return nextMidnight;
 }

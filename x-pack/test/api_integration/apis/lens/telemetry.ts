@@ -194,16 +194,16 @@ export default ({ getService }: FtrProviderContext) => {
         'saved_overall',
         'saved_30_days',
         'saved_90_days',
-        'saved_total',
-        'saved_last_30_days',
-        'saved_last_90_days',
+        'saved_overall_total',
+        'saved_30_days_total',
+        'saved_90_days_total',
       ]);
 
       expect(results.saved_overall).to.eql({
         lnsMetric: 1,
         bar_stacked: 1,
       });
-      expect(results.saved_total).to.eql(2);
+      expect(results.saved_overall_total).to.eql(2);
     });
   });
 };

@@ -85,8 +85,8 @@ export async function getVisualizationCounts(
     saved_overall: buckets.overall.byType.value.types,
     saved_30_days: buckets.last30.byType.value.types,
     saved_90_days: buckets.last90.byType.value.types,
-    saved_total: buckets.overall.doc_count,
-    saved_last_30_days: buckets.last30.doc_count,
-    saved_last_90_days: buckets.last90.doc_count,
+    saved_overall_total: buckets.overall.doc_count,
+    saved_30_days_total: buckets.last30.doc_count,
+    saved_90_days_total: buckets.last90.doc_count,
   };
 }

@@ -15,9 +15,9 @@ export interface LensVisualizationUsage {
   saved_overall: Record<string, number>;
   saved_30_days: Record<string, number>;
   saved_90_days: Record<string, number>;
-  saved_total: number;
-  saved_last_30_days: number;
-  saved_last_90_days: number;
+  saved_overall_total: number;
+  saved_30_days_total: number;
+  saved_90_days_total: number;
 }
 
 export interface LensClickUsage {
