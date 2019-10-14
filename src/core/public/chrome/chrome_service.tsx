@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import * as Url from 'url';
 
 import { i18n } from '@kbn/i18n';
-import { IconType } from '@elastic/eui';
+import { IconType, Breadcrumb } from '@elastic/eui';
 
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
@@ -59,11 +59,8 @@ export interface ChromeBrand {
 }
 
 /** @public */
-export interface ChromeBreadcrumb {
-  text: string;
-  href?: string;
-  'data-test-subj'?: string;
-  onClick?: MouseEventHandler<HTMLButtonElement>;
+export interface ChromeBreadcrumb extends Breadcrumb {
+  'data-test'?: string;
 }
 
 /** @public */
