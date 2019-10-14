@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiFlexItem } from '@elastic/eui';
 
-import { FlowTargetNew } from '../../../graphql/types';
+import { FlowTargetSourceDest } from '../../../graphql/types';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 
 import { IPsQueryTabBody } from './ips_query_tab_body';
@@ -70,11 +70,11 @@ export const NetworkRoutes = ({
         render={() => (
           <ConditionalFlexGroup direction="column">
             <EuiFlexItem>
-              <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetNew.source} />
+              <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
             </EuiFlexItem>
 
             <EuiFlexItem>
-              <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetNew.destination} />
+              <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
             </EuiFlexItem>
           </ConditionalFlexGroup>
         )}
