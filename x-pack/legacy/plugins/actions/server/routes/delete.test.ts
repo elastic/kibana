@@ -5,10 +5,10 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { deleteRoute } from './delete';
+import { deleteActionRoute } from './delete';
 
 const { server, actionsClient } = createMockServer();
-deleteRoute(server);
+server.route(deleteActionRoute);
 
 beforeEach(() => {
   jest.resetAllMocks();

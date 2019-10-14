@@ -2842,7 +2842,19 @@ Object {
     "units": "ms",
     "uuidField": "kibana_stats.kibana.uuid",
   },
-  "kibana_requests": KibanaMetric {
+  "kibana_requests_disconnects": KibanaMetric {
+    "app": "kibana",
+    "derivative": false,
+    "description": "Total number of client disconnects to the Kibana instance.",
+    "field": "kibana_stats.requests.disconnects",
+    "format": "0.[00]",
+    "label": "Client Disconnects",
+    "metricAgg": "max",
+    "timestampField": "kibana_stats.timestamp",
+    "units": "",
+    "uuidField": "kibana_stats.kibana.uuid",
+  },
+  "kibana_requests_total": KibanaMetric {
     "app": "kibana",
     "derivative": false,
     "description": "Total number of client requests received by the Kibana instance.",

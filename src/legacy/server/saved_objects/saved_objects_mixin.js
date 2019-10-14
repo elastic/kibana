@@ -20,6 +20,7 @@
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
+import { first } from 'rxjs/operators';
 import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
 import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
@@ -57,8 +58,8 @@ function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
   );
 }
 
-export function savedObjectsMixin(kbnServer, server) {
-  const migrator = kbnServer.newPlatform.start.core.savedObjects.migrator;
+export async function savedObjectsMixin(kbnServer, server) {
+  const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
@@ -103,6 +104,15 @@ export function savedObjectsMixin(kbnServer, server) {
 
   const serializer = new SavedObjectsSerializer(schema);
 
+  if (cacheIndexPatterns.getIndexPatternsService() == null) {
+    const adminClient = await server.newPlatform.__internals.elasticsearch.adminClient$
+      .pipe(first())
+      .toPromise();
+    cacheIndexPatterns.setIndexPatternsService(
+      server.indexPatternsServiceFactory({ callCluster: adminClient.callAsInternalUser })
+    );
+  }
+
   const createRepository = (callCluster, extraTypes = []) => {
     if (typeof callCluster !== 'function') {
       throw new TypeError('Repository requires a "callCluster" function to be provided.');
@@ -116,11 +126,6 @@ export function savedObjectsMixin(kbnServer, server) {
     const combinedTypes = visibleTypes.concat(extraTypes);
     const allowedTypes = [...new Set(combinedTypes)];
 
-    if (cacheIndexPatterns.getIndexPatternsService() == null) {
-      cacheIndexPatterns.setIndexPatternsService(
-        server.indexPatternsServiceFactory({ callCluster })
-      );
-    }
     const config = server.config();
 
     return new SavedObjectsRepository({

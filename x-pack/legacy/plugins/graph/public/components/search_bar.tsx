@@ -18,6 +18,7 @@ import {
   IndexPattern,
 } from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
+
 import {
   GraphState,
   datasourceSelector,
@@ -31,6 +32,7 @@ export interface OuterSearchBarProps {
   isLoading: boolean;
   initialQuery?: string;
   onQuerySubmit: (query: string) => void;
+
   confirmWipeWorkspace: (onConfirm: () => void) => void;
   indexPatternProvider: IndexPatternProvider;
 }
@@ -102,13 +104,13 @@ export function SearchBarComponent(props: SearchBarProps) {
             bubbleSubmitEvent
             indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}
             placeholder={i18n.translate('xpack.graph.bar.searchFieldPlaceholder', {
-              defaultMessage: 'Search your data and add to your graph',
+              defaultMessage: 'Search your data and add to graph',
             })}
             query={query}
             prepend={
               <EuiToolTip
                 content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
-                  defaultMessage: 'Click here to pick another data source',
+                  defaultMessage: 'Select a data source to begin graphing relationships.',
                 })}
               >
                 <EuiButtonEmpty
@@ -129,7 +131,7 @@ export function SearchBarComponent(props: SearchBarProps) {
                     : // This branch will be shown if the user exits the
                       // initial picker modal
                       i18n.translate('xpack.graph.bar.pickSourceLabel', {
-                        defaultMessage: 'Click here to pick a data source',
+                        defaultMessage: 'Select a data source',
                       })}
                 </EuiButtonEmpty>
               </EuiToolTip>
@@ -138,8 +140,13 @@ export function SearchBarComponent(props: SearchBarProps) {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill type="submit" disabled={isLoading || !currentIndexPattern}>
-            {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Explore' })}
+          <EuiButton
+            fill
+            type="submit"
+            disabled={isLoading || !currentIndexPattern}
+            data-test-subj="graph-explore-button"
+          >
+            {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Graph' })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

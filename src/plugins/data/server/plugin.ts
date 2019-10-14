@@ -19,19 +19,27 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 import { IndexPatternsService } from './index_patterns';
+import { ISearchSetup } from './search';
+import { SearchService } from './search/search_service';
 
-export class DataServerPlugin implements Plugin {
+export interface DataPluginSetup {
+  search: ISearchSetup;
+}
+export class DataServerPlugin implements Plugin<DataPluginSetup> {
+  private readonly searchService: SearchService;
   private readonly indexPatterns = new IndexPatternsService();
-
-  constructor(initializerContext: PluginInitializerContext) {}
-
+  constructor(initializerContext: PluginInitializerContext) {
+    this.searchService = new SearchService(initializerContext);
+  }
   public setup(core: CoreSetup) {
     this.indexPatterns.setup({
       http: core.http,
       elasticsearch: core.elasticsearch,
     });
+    return {
+      search: this.searchService.setup(core),
+    };
   }
-
   public start(core: CoreStart) {}
   public stop() {}
 }

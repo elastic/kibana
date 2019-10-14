@@ -30,3 +30,7 @@ export {
   FieldDescriptor,
   shouldReadFieldFromDocValues,
 } from './index_patterns';
+
+export * from './search';
+
+export { IRequestTypesMap, IResponseTypesMap } from './search';

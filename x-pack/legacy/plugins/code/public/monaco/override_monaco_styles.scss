@@ -1,4 +1,4 @@
-.codeContainer__root {
+.codeContainer__monaco {
   .monaco-editor .cursors-layer > .cursor {
     display: none !important;
   }
@@ -9,6 +9,7 @@
 
   .monaco-editor.mac .margin-view-overlays .line-numbers {
     cursor: pointer;
+    color: $euiColorMediumShade;
     background-color: $euiColorLightestShade;
   }
 
