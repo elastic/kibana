@@ -15,8 +15,8 @@ export class TokenLib {
       case 'valid-enrollment-token': {
         return {
           valid: true,
-          type: TokenType.ENROLMENT_TOKEN,
-          token: { policy: { id: 'policyId', sharedId: 'configSharedId' } },
+          type: TokenType.ENROLLMENT_TOKEN,
+          token: { policy_id: 'policyId' },
         };
       }
       default: {

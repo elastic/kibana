@@ -22,12 +22,13 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
         allowUnknown: true,
       }),
       payload: {
+        shared_id: Joi.string().optional(),
         type: Joi.string()
           .allow('PERMANENT', 'EPHEMERAL_INSTANCE', 'TEMPORARY')
           .required(),
         metadata: Joi.object({
           local: Joi.object(),
-          userProvided: Joi.object(),
+          user_provided: Joi.object(),
         }).required(),
       },
     },
@@ -35,9 +36,9 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
   handler: async (
     request: FrameworkRequest<{
       payload: {
-        sharedId?: string;
+        shared_id?: string;
         type: 'PERMANENT' | 'EPHEMERAL_INSTANCE';
-        metadata: { local: any; userProvided: any };
+        metadata: { local: any; user_provided: any };
       };
       headers: {
         'kbn-fleet-enrollment-token': string;
@@ -45,14 +46,17 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
     }>
   ): Promise<ReturnTypeCreate<Agent>> => {
     const enrollmentToken = request.headers['kbn-fleet-enrollment-token'];
-    const { sharedId, type, metadata } = request.payload;
+    const { shared_id: sharedId, type, metadata } = request.payload;
     const agent = await libs.agents.enroll(
       {
         kind: 'internal',
       },
       enrollmentToken,
       type,
-      metadata,
+      metadata && {
+        local: metadata.local,
+        userProvided: metadata.user_provided,
+      },
       sharedId
     );
 

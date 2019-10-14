@@ -31,9 +31,6 @@ export const mappings = {
       local_metadata: {
         type: 'text',
       },
-      policy_shared_id: {
-        type: 'keyword',
-      },
       policy_id: {
         type: 'keyword',
       },
@@ -70,9 +67,6 @@ export const mappings = {
         type: 'keyword',
       },
       policy_id: {
-        type: 'keyword',
-      },
-      policy_shared_id: {
         type: 'keyword',
       },
       created_at: {

@@ -41,7 +41,6 @@ NOTE: You cannot access the APIs via the Console in {kib}.
 * <<logstash-configuration-management-api>>
 * <<url-shortening-api>>
 * <<upgrade-assistant-api>>
-* <<fleet-api>>
 --
 
 include::{kib-repo-dir}/api/features.asciidoc[]
@@ -52,4 +51,3 @@ include::{kib-repo-dir}/api/dashboard-import.asciidoc[]
 include::{kib-repo-dir}/api/logstash-configuration-management.asciidoc[]
 include::{kib-repo-dir}/api/url-shortening.asciidoc[]
 include::{kib-repo-dir}/api/upgrade-assistant.asciidoc[]
-include::{kib-repo-dir}/api/fleet.asciidoc[]
