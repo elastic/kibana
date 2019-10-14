@@ -53,7 +53,7 @@ import {
   MAP_APP_PATH
 } from '../../common/constants';
 import { FilterStateStore } from '@kbn/es-query';
-import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { start as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 const { savedQueryService } = data.search.services;
 
@@ -514,12 +514,12 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return doSave(saveOptions).then(({ id, error }) => {
+        return doSave(saveOptions).then((response) => {
           // If the save wasn't successful, put the original values back.
-          if (!id || error) {
+          if (!response.id || response.error) {
             savedMap.title = currentTitle;
           }
-          return { id, error };
+          return response;
         });
       };
 
