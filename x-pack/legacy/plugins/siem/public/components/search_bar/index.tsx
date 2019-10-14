@@ -117,6 +117,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     }
 
     const onQuerySubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
+      let isStateUpdated = false;
       const isQuickSelection =
         payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now');
       if (
@@ -126,6 +127,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           (start !== formatDate(payload.dateRange.from) ||
             end !== formatDate(payload.dateRange.to)))
       ) {
+        isStateUpdated = true;
         updateReduxTime({
           end: payload.dateRange.to,
           id,
@@ -138,10 +140,28 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
       }
 
       if (payload.query != null && !isEqual(payload.query, filterQuery)) {
+        isStateUpdated = true;
         setFilterQuery({
           id,
           ...payload.query,
         });
+      }
+
+      if (!isStateUpdated) {
+        // That mean we are doing a refresh!
+        if (isQuickSelection) {
+          updateReduxTime({
+            end: payload.dateRange.to,
+            id,
+            isInvalid: false,
+            isQuickSelection,
+            kql: undefined,
+            start: payload.dateRange.from,
+            timelineId,
+          });
+        } else {
+          queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
+        }
       }
     };
 
