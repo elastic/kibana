@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SnapshotCount } from '../../../common/graphql/types';
+
 export const FETCH_SNAPSHOT_COUNT = 'FETCH_SNAPSHOT_COUNT';
 
 interface GetSnapshotPayload {
@@ -15,8 +17,10 @@ interface GetSnapshotPayload {
 
 interface GetSnapshotCountAction {
   type: typeof FETCH_SNAPSHOT_COUNT;
-  payload: GetSnapshotPayload;
+  payload: SnapshotCount;
 }
+
+export type SnapshotActionTypes = GetSnapshotCountAction;
 
 export const fetchSnapshotCount = (
   dateRangeStart: string,
