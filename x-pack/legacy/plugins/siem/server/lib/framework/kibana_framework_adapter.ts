@@ -90,19 +90,21 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
       plugin: graphqlHapi,
     });
 
-    this.server.register<HapiGraphiQLPluginOptions>({
-      options: {
-        graphiqlOptions: {
-          endpointURL: routePath,
-          passHeader: `'kbn-version': '${this.version}'`,
+    if (process.env.NODE_ENV !== 'production') {
+      this.server.register<HapiGraphiQLPluginOptions>({
+        options: {
+          graphiqlOptions: {
+            endpointURL: routePath,
+            passHeader: `'kbn-version': '${this.version}'`,
+          },
+          path: `${routePath}/graphiql`,
+          route: {
+            tags: ['access:siem'],
+          },
         },
-        path: `${routePath}/graphiql`,
-        route: {
-          tags: ['access:siem'],
-        },
-      },
-      plugin: graphiqlHapi,
-    });
+        plugin: graphiqlHapi,
+      });
+    }
   }
 
   public getIndexPatternsService(
