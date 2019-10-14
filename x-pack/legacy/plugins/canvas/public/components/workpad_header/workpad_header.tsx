@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   EuiButton,
-  EuiButtonEmpty,
   EuiOverlayMask,
   EuiModal,
   EuiModalFooter,
