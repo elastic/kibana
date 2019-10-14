@@ -39,7 +39,7 @@ A spatial filter narrows search results to documents that either intersect with,
 You can create spatial filters in two ways:
 
 * Click the tool icon image:maps/images/tools_icon.png[], and then draw a polygon or bounding box on the map to define the spatial filter.
-* Click *Filter by geometry* in a tooltip, and then use the feature's geometry for the spatial filter.
+* Click *Filter by geometry* in a <<maps-vector-tooltip-locking, locked tooltip>>, and then use the feature's geometry for the spatial filter.
 +
 [role="screenshot"]
 image::maps/images/create_spatial_filter.png[]
@@ -55,7 +55,7 @@ Spatial filters have the following properties:
 ==== Phrase filters
 
 A phrase filter narrows search results to documents that contain the specified text.
-You can create a phrase filter by clicking the plus icon image:maps/images/gs_plus_icon.png[] in a feature tooltip.
+You can create a phrase filter by clicking the plus icon image:maps/images/gs_plus_icon.png[] in a <<maps-vector-tooltip-locking, locked tooltip>>.
 
 [role="screenshot"]
 image::maps/images/create_phrase_filter.png[]
