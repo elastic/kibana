@@ -254,7 +254,7 @@
     "vega-lib": "4.3.0",
     "vega-lite": "^2.6.0",
     "vega-schema-url-parser": "1.0.0",
-    "vega-tooltip": "^0.19.1",
+    "vega-tooltip": "^0.12.0",
     "vision": "^5.3.3",
     "webpack": "4.41.0",
     "webpack-merge": "4.2.2",

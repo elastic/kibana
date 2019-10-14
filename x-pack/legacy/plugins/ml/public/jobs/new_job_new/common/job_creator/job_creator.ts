@@ -245,6 +245,70 @@ export class JobCreator {
     }
   }
 
+  public set summaryCountFieldName(fieldName: string | null) {
+    if (fieldName !== null) {
+      this._job_config.analysis_config.summary_count_field_name = fieldName;
+    } else {
+      delete this._job_config.analysis_config.summary_count_field_name;
+    }
+  }
+
+  public get summaryCountFieldName(): string | null {
+    return this._job_config.analysis_config.summary_count_field_name || null;
+  }
+
+  public set categorizationFieldName(fieldName: string | null) {
+    if (fieldName !== null) {
+      this._job_config.analysis_config.categorization_field_name = fieldName;
+    } else {
+      delete this._job_config.analysis_config.categorization_field_name;
+    }
+  }
+
+  public get categorizationFieldName(): string | null {
+    return this._job_config.analysis_config.categorization_field_name || null;
+  }
+
+  public addCategorizationFilter(filter: string) {
+    if (this._job_config.analysis_config.categorization_filters === undefined) {
+      this._job_config.analysis_config.categorization_filters = [];
+    }
+
+    const filters = this._job_config.analysis_config.categorization_filters;
+    if (filters.includes(filter) === false) {
+      filters.push(filter);
+    }
+  }
+
+  public removeCategorizationFilter(filter: string) {
+    const filters = this._job_config.analysis_config.categorization_filters;
+    if (filters !== undefined) {
+      const idx = filters.indexOf(filter);
+      if (idx !== -1) {
+        filters.splice(idx, 1);
+      }
+      if (filters.length === 0) {
+        this.removeCategorizationFilters();
+      }
+    }
+  }
+
+  public removeCategorizationFilters() {
+    delete this._job_config.analysis_config.categorization_filters;
+  }
+
+  public get categorizationFilters(): string[] | null {
+    return this._job_config.analysis_config.categorization_filters || null;
+  }
+
+  public get timeFieldName(): string {
+    return this._job_config.data_description.time_field;
+  }
+
+  public set timeFieldName(fieldName: string) {
+    this._job_config.data_description.time_field = fieldName;
+  }
+
   public get sparseData(): boolean {
     return this._sparseData;
   }
@@ -311,6 +375,42 @@ export class JobCreator {
 
   public set query(query: object) {
     this._datafeed_config.query = query;
+  }
+
+  public get queryDelay(): string | null {
+    return this._datafeed_config.query_delay || null;
+  }
+
+  public set queryDelay(queryDelay: string | null) {
+    if (queryDelay !== null) {
+      this._datafeed_config.query_delay = queryDelay;
+    } else {
+      delete this._datafeed_config.query_delay;
+    }
+  }
+
+  public get frequency(): string | null {
+    return this._datafeed_config.frequency || null;
+  }
+
+  public set frequency(frequency: string | null) {
+    if (frequency !== null) {
+      this._datafeed_config.frequency = frequency;
+    } else {
+      delete this._datafeed_config.frequency;
+    }
+  }
+
+  public get scrollSize(): number | null {
+    return this._datafeed_config.scroll_size || null;
+  }
+
+  public set scrollSize(scrollSize: number | null) {
+    if (scrollSize !== null) {
+      this._datafeed_config.scroll_size = scrollSize;
+    } else {
+      delete this._datafeed_config.scroll_size;
+    }
   }
 
   public get subscribers(): ProgressSubscriber[] {
