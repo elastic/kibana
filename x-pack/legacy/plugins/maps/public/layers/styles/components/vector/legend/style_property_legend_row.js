@@ -106,8 +106,6 @@ export class StylePropertyLegendRow extends Component {
       return;
     }
 
-    console.log(this.props.options);
-
     // have to load label and then check for changes since field name stays constant while label may change
     const label = await this.props.getFieldLabel(this.props.options.field.name);
     if (this._prevLabel === label) {
