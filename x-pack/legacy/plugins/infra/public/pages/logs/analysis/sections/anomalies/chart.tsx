@@ -19,6 +19,7 @@ import {
   getAnnotationId,
   RectAnnotation,
 } from '@elastic/charts';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
@@ -75,7 +76,7 @@ export const AnomaliesChart: React.FunctionComponent<{
         <Axis
           id={getAxisId('values')}
           position="left"
-          tickFormat={value => Number(value).toFixed(0)}
+          tickFormat={value => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
         />
         <BarSeries
           id={logEntryRateSpecId}
