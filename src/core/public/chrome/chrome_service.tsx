@@ -33,11 +33,11 @@ import { HttpStart } from '../http';
 import { ChromeNavLinks, NavLinksService } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { NavControlsService, ChromeNavControls } from './nav_controls';
-import { DocTitleService, DocTitle } from './doc_title';
+import { DocTitleService, ChromeDocTitle } from './doc_title';
 import { LoadingIndicator, HeaderWrapper as Header } from './ui';
 import { DocLinksStart } from '../doc_links';
 
-export { ChromeNavControls, ChromeRecentlyAccessed };
+export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -269,8 +269,8 @@ export interface ChromeStart {
   navControls: ChromeNavControls;
   /** {@inheritdoc ChromeRecentlyAccessed} */
   recentlyAccessed: ChromeRecentlyAccessed;
-  /** {@inheritdoc DocTitle} */
-  docTitle: DocTitle;
+  /** {@inheritdoc ChromeDocTitle} */
+  docTitle: ChromeDocTitle;
 
   /**
    * Sets the current app's title

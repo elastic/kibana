@@ -26,7 +26,7 @@ interface StartDeps {
 }
 
 /**
- * {@link DocTitle | APIs} for accessing and updating the document title.
+ * {@link ChromeDocTitle | APIs} for accessing and updating the document title.
  *
  * @example
  * How to change the title of the document
@@ -42,7 +42,7 @@ interface StartDeps {
  *
  * @public
  * */
-export interface DocTitle {
+export interface ChromeDocTitle {
   /**
    * Gets an observable of the current document title.
    */
@@ -62,10 +62,10 @@ export interface DocTitle {
    * chrome.docTitle.change({ parts: ['My application'], excludeBase: true })
    * ```
    *
-   * @param newTitle The new title to set, either a string, string array or {@link DocTitleEntry}
+   * @param newTitle The new title to set, either a string, string array or {@link ChromeDocTitleEntry}
    * @param [apply=true] If false, will not actually apply the new title until #apply() is called.
    */
-  change: (newTitle: DocTitleInput, apply?: boolean) => void;
+  change: (newTitle: ChromeDocTitleChange, apply?: boolean) => void;
   /**
    * Resets the document title to it's initial value.
    * (meaning the one present in the title meta at application load.)
@@ -91,21 +91,21 @@ export interface DocTitle {
 }
 
 /** @public */
-export interface DocTitleEntry {
+export interface ChromeDocTitleEntry {
   parts: string[];
   excludeBase?: boolean;
 }
 
 /**
- * Composed type for the {@link DocTitle#change} possible inputs.
+ * Composed type for the {@link ChromeDocTitle#change} possible inputs.
  *
  * @public
  */
-export type DocTitleInput = string | string[] | DocTitleEntry;
+export type ChromeDocTitleChange = string | string[] | ChromeDocTitleEntry;
 
-const defaultTitle: DocTitleEntry = { parts: [], excludeBase: false };
+const defaultTitle: ChromeDocTitleEntry = { parts: [], excludeBase: false };
 
-const inputToEntry = (input: DocTitleInput): DocTitleEntry => {
+const inputToEntry = (input: ChromeDocTitleChange): ChromeDocTitleEntry => {
   if (isString(input)) {
     return {
       parts: [input],
@@ -129,14 +129,14 @@ export class DocTitleService {
   private readonly title$ = new BehaviorSubject<string>('');
   private readonly stop$ = new ReplaySubject(1);
 
-  public start({ document }: StartDeps): DocTitle {
+  public start({ document }: StartDeps): ChromeDocTitle {
     this.document = document;
     this.baseTitle = document.title;
     this.title$.next(this.baseTitle);
 
     return {
       get$: () => this.title$.pipe(takeUntil(this.stop$)),
-      change: (title: DocTitleInput, apply = true) => {
+      change: (title: ChromeDocTitleChange, apply = true) => {
         this.current = inputToEntry(title);
         if (apply) {
           this.applyTitle();
@@ -169,7 +169,7 @@ export class DocTitleService {
     this.title$.next(rendered);
   }
 
-  private render(title: DocTitleEntry) {
+  private render(title: ChromeDocTitleEntry) {
     const parts = [...title.parts];
     if (!title.excludeBase) {
       parts.push(this.baseTitle);
