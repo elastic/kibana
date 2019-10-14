@@ -33,7 +33,7 @@ export function SourcePicker({
       }}
       showFilter={false}
       noItemsMessage={i18n.translate('xpack.graph.sourceModal.notFoundLabel', {
-        defaultMessage: 'No matching indices found.',
+        defaultMessage: 'No data sources found.',
       })}
       savedObjectMetaData={[
         {

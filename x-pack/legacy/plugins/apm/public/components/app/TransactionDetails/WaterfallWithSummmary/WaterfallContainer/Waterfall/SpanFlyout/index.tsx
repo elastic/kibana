@@ -24,7 +24,7 @@ import styled from 'styled-components';
 import { idx } from '@kbn/elastic-idx';
 import { px, units } from '../../../../../../../style/variables';
 import { Summary } from '../../../../../../shared/Summary';
-import { TimestampSummaryItem } from '../../../../../../shared/Summary/TimestampSummaryItem';
+import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';
 import { DurationSummaryItem } from '../../../../../../shared/Summary/DurationSummaryItem';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
@@ -143,7 +143,7 @@ export function SpanFlyout({
           <EuiSpacer size="m" />
           <Summary
             items={[
-              <TimestampSummaryItem time={span.timestamp.us / 1000} />,
+              <TimestampTooltip time={span.timestamp.us / 1000} />,
               <DurationSummaryItem
                 duration={span.span.duration.us}
                 totalDuration={totalDuration}
