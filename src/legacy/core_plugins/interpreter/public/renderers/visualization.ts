@@ -30,14 +30,14 @@ export const visualization = () => ({
     const { visData, visConfig, params } = config;
     const visType = config.visType || visConfig.type;
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    const $timeout = $injector.get('$timeout') as any;
+    const $rootScope = $injector.get('$rootScope') as any;
     const Private = $injector.get('Private') as any;
     const Vis = Private(VisProvider);
 
     if (handlers.vis) {
       // special case in visualize, we need to render first (without executing the expression), for maps to work
-      if (visConfig && ['tile_map', 'region_map'].includes(visConfig.type)) {
-        $timeout(() => {
+      if (visConfig) {
+        $rootScope.$apply(() => {
           handlers.vis.setCurrentState({ type: visType, params: visConfig });
         });
       }
@@ -49,13 +49,12 @@ export const visualization = () => ({
       handlers.vis.eventsSubject = handlers.eventsSubject;
     }
 
-    const visParams = { ...handlers.vis.params, ...visConfig };
     const uiState = handlers.uiState || handlers.vis.getUiState();
 
     handlers.onDestroy(() => visualizationLoader.destroy());
 
     await visualizationLoader
-      .render(domNode, handlers.vis, visData, visParams, uiState, params)
+      .render(domNode, handlers.vis, visData, handlers.vis.params, uiState, params)
       .then(() => {
         if (handlers.done) handlers.done();
       });
