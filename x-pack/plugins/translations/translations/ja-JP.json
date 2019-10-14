@@ -5242,8 +5242,6 @@
     "xpack.infra.logs.analysis.logRateSectionNoDataBody": "時間範囲を調整する必要があるかもしれません。",
     "xpack.infra.logs.analysis.logRateSectionNoDataTitle": "表示するデータがありません。",
     "xpack.infra.logs.analysis.logRateSectionTitle": "ログレート",
-    "xpack.infra.logs.analysis.logRateSectionXaxisTitle": "時間",
-    "xpack.infra.logs.analysis.logRateSectionYaxisTitle": "15 分ごとのログエントリー",
     "xpack.infra.logs.analysisPage.loadingMessage": "分析ジョブのステータスを確認中…",
     "xpack.infra.logs.analysisPage.unavailable.mlAppButton": "機械学習を開く",
     "xpack.infra.logs.analysisPage.unavailable.mlAppLink": "機械学習アプリ",

@@ -140,10 +140,8 @@ export const AnalysisResultsContent = ({
                       {!isLoading && logEntryRate ? (
                         <EuiText size="s">
                           <FormattedMessage
-                            id={'xpack.infra.logs.analysis.logRateResultsToolbarText'}
-                            defaultMessage={
-                              'Analyzed {numberOfLogs} log entries from {startTime} to {endTime}'
-                            }
+                            id="xpack.infra.logs.analysis.logRateResultsToolbarText"
+                            defaultMessage="Analyzed {numberOfLogs} log entries from {startTime} to {endTime}"
                             values={{
                               numberOfLogs: (
                                 <EuiBadge color="primary">
