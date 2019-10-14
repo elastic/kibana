@@ -144,7 +144,6 @@ export const DetectionEngineComponent = React.memo(() => {
               options={toggleButtons}
             />
           </HeaderSection>
-
           <UtilityBar>
             <UtilityBarSection>
               <UtilityBarGroup>
@@ -154,40 +153,34 @@ export const DetectionEngineComponent = React.memo(() => {
               <UtilityBarGroup>
                 <UtilityBarText>{'Selected: 20 signals'}</UtilityBarText>
 
-                <UtilityBarAction>
-                  {'Batch actions'} <EuiIcon size="s" type="arrowDown" />
+                <UtilityBarAction popoverContent={<p>{'Batch actions context menu here.'}</p>}>
+                  {'Batch actions'}
                 </UtilityBarAction>
 
-                <UtilityBarAction>
-                  <EuiIcon size="s" type="arrowDown" /> {'Select all signals on all pages'}
+                <UtilityBarAction iconType="listAdd">
+                  {'Select all signals on all pages'}
                 </UtilityBarAction>
               </UtilityBarGroup>
 
               <UtilityBarGroup>
-                <UtilityBarAction>
-                  <EuiIcon size="s" type="cross" /> {'Clear 7 filters'}
-                </UtilityBarAction>
+                <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
 
-                <UtilityBarAction>
-                  <EuiIcon size="s" type="cross" /> {'Clear aggregation'}
-                </UtilityBarAction>
+                <UtilityBarAction iconType="cross">{'Clear aggregation'}</UtilityBarAction>
               </UtilityBarGroup>
             </UtilityBarSection>
 
             <UtilityBarSection>
               <UtilityBarGroup>
-                <UtilityBarAction>
-                  <EuiIcon size="s" type="cross" /> {'Customize columns'}
+                <UtilityBarAction popoverContent={<p>{'Customize columns context menu here.'}</p>}>
+                  {'Customize columns'}
                 </UtilityBarAction>
 
-                <UtilityBarAction>
-                  <EuiIcon size="s" type="cross" /> {'Aggregate data'}
-                </UtilityBarAction>
+                <UtilityBarAction iconType="indexMapping">{'Aggregate data'}</UtilityBarAction>
               </UtilityBarGroup>
             </UtilityBarSection>
           </UtilityBar>
 
-          {/* Datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
+          {/* Open signals datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
         </EuiPanel>
       </StickyContainer>
 

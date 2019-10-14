@@ -23,6 +23,8 @@ const Link = styled(EuiLink).attrs({
 
     .euiIcon {
       margin-right: ${theme.eui.euiSizeXS};
+      position: relative;
+      top: -1px;
     }
   `}
 `;

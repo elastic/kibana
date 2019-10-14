@@ -107,17 +107,31 @@ export const BarText = styled.p.attrs({
 `;
 BarText.displayName = 'BarText';
 
-export interface BarActionLinkProps {
+export interface BarActionProps {
+  children: React.ReactNode;
   href?: string;
   onClick?: Function;
 }
 
-export const BarActionLink = styled(EuiLink).attrs({
+export const BarAction = styled(EuiLink).attrs({
   className: 'siemUtilityBar__action',
-})<BarActionLinkProps>`
+})<BarActionProps>`
   ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
+
+    .euiIcon {
+      position: relative;
+      top: -1px;
+
+      &:first-child {
+        margin-right: ${theme.eui.euiSizeXS};
+      }
+
+      &:last-child {
+        margin-left: ${theme.eui.euiSizeXS};
+      }
+    }
   `}
 `;
-BarActionLink.displayName = 'BarActionLink';
+BarAction.displayName = 'BarAction';
