@@ -63,6 +63,16 @@ export class AppRoutes extends Component<RouterProps, RouterState> {
             />
           )}
 
+          {!this.props.libs.framework.capabilities.read && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/no_access" />
+                ) : null
+              }
+            />
+          )}
+
           {/* Ensure security is eanabled for elastic and kibana */}
           {/* TODO: Disabled for now as we don't have this info set up on backend yet */}
           {/* {!get(this.props.libs.framework.info, 'security.enabled', true) && (

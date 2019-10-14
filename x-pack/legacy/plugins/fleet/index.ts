@@ -65,13 +65,14 @@ export function fleet(kibana: any) {
         id: 'fleet',
         name: 'Fleet',
         app: ['fleet', 'kibana'],
+        excludeFromBasePrivileges: true,
         privileges: {
           all: {
             savedObject: {
               all: ['agents', 'events', 'tokens'],
               read: [],
             },
-            ui: [],
+            ui: ['read', 'write'],
             api: ['fleet-read', 'fleet-all'],
           },
           read: {
@@ -79,7 +80,7 @@ export function fleet(kibana: any) {
               all: [],
               read: ['agents', 'events', 'tokens'],
             },
-            ui: [],
+            ui: ['read'],
             api: ['fleet-read'],
           },
         },

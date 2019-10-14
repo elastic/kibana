@@ -151,12 +151,16 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
         </h2>
       }
       actions={
-        <EuiButton fill iconType="plusInCircle">
-          <FormattedMessage
-            id="xpack.fleet.agentList.addButton"
-            defaultMessage="Install new agent"
-          />
-        </EuiButton>
+        libs.framework.capabilities.write ? (
+          <EuiButton fill iconType="plusInCircle">
+            <FormattedMessage
+              id="xpack.fleet.agentList.addButton"
+              defaultMessage="Install new agent"
+            />
+          </EuiButton>
+        ) : (
+          <div />
+        )
       }
     />
   );
@@ -184,14 +188,16 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
           <EuiFlexItem grow={4}>
             <SearchBar libs={libs} value={search} onChange={setSearch} fieldPrefix="agents" />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButton fill iconType="plusInCircle">
-              <FormattedMessage
-                id="xpack.fleet.agentList.addButton"
-                defaultMessage="Install new agent"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {libs.framework.capabilities.write && (
+            <EuiFlexItem>
+              <EuiButton fill iconType="plusInCircle">
+                <FormattedMessage
+                  id="xpack.fleet.agentList.addButton"
+                  defaultMessage="Install new agent"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
