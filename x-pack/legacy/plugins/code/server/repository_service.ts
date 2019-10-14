@@ -84,8 +84,8 @@ export class RepositoryService {
   public async remove(uri: string): Promise<DeleteWorkerResult> {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
     try {
-      if (localPath.includes('../')) {
-        throw new Error('Repository path should not contain "../".');
+      if (localPath.split(path.sep).includes('..')) {
+        throw new Error('Repository path should not contain "..".');
       }
       // For now, just `rm -rf`
       await del([localPath], { force: true });

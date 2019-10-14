@@ -14,7 +14,7 @@ export function validateGitUrl(
   hostWhitelist?: string[],
   protocolWhitelist?: string[]
 ): boolean {
-  if (url.includes('../')) {
+  if (url.split('/').includes('..')) {
     throw new Error(
       i18n.translate('xpack.code.gitUrlUtil.urlContainInvalidContent', {
         defaultMessage: 'Git url contains invalid content.',

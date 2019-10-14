@@ -44,10 +44,10 @@ export class DeleteWorker extends AbstractWorker {
     try {
       // 1. Check if the uri exsits
       await this.objectClient.getRepository(uri);
-      // 2. Double check if the uri contains "../" which could result in
+      // 2. Double check if the uri contains ".." which could result in
       // deleting incorrect files in the file systems.
-      if (uri.includes('../')) {
-        throw new Error('Repository URI should not contain "../".');
+      if (uri.split('/').includes('..')) {
+        throw new Error('Repository URI should not contain "..".');
       }
     } catch (error) {
       this.log.error(`Invalid repository uri ${uri}. Skip delete job.`);
