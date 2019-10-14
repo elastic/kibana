@@ -49,8 +49,8 @@ interface State {
 
 const DATE_FORMAT = 'MMMM Do YYYY HH:mm:ss';
 
-export class ApiKeysGridPage extends Component<Props, State> {
-  constructor(props: Props) {
+export class ApiKeysGridPage extends Component<any, State> {
+  constructor(props: any) {
     super(props);
     this.state = {
       isLoadingApp: true,
