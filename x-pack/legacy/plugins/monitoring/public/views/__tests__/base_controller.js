@@ -28,7 +28,9 @@ describe('MonitoringViewBaseController', function () {
     titleService = spy();
     executorService = {
       register: spy(),
-      start: spy()
+      start: spy(),
+      cancel: spy(),
+      run: spy()
     };
     configService = {
       get: spy()
