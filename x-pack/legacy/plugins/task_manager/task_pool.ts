@@ -8,7 +8,7 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
-
+import { zip } from 'lodash';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 
@@ -72,10 +72,14 @@ export class TaskPool {
     }
   }
 
-  private async attemptToRun(tasks: TaskRunner[]) {
-    for (const task of tasks) {
-      if (this.availableWorkers > 0) {
-        if (await task.markTaskAsRunning()) {
+  private async attemptToRun(tasks: TaskRunner[]): Promise<boolean> {
+    const tasksToRun = tasks.splice(0, this.availableWorkers);
+    if (tasksToRun.length) {
+      zipMultiTypedArrays(
+        tasksToRun,
+        await Promise.all(tasksToRun.map(task => task.markTaskAsRunning()))
+      ).forEach(([task, hasTaskBeenMarkAsRunning]) => {
+        if (hasTaskBeenMarkAsRunning) {
           this.running.add(task);
           task
             .run()
@@ -86,11 +90,14 @@ export class TaskPool {
         } else {
           this.logger.warn(`Failed to mark Task ${task} as running`);
         }
-      } else {
-        return false;
-      }
+      });
     }
-
+    if (tasks.length) {
+      if (this.availableWorkers) {
+        return this.attemptToRun(tasks);
+      }
+      return false;
+    }
     return true;
   }
 
@@ -112,4 +119,11 @@ export class TaskPool {
       this.logger.error(`Failed to cancel task ${task}: ${err}`);
     }
   }
+}
+
+// sadly the type signature on lodash doesn't allow zipping across types
+// but we can still use their implementation and implement the signature
+// ourselves
+function zipMultiTypedArrays<T, S>(left: T[], right: S[]): Array<[T, S]> {
+  return zip<any>(left, right) as Array<[T, S]>;
 }
