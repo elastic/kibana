@@ -390,6 +390,24 @@ export const ComponentStrings = {
         },
       }),
   },
+  FunctionFormContextError: {
+    getContextErrorMessage: (errorMessage: string) =>
+      i18n.translate('xpack.canvas.functionForm.contextError', {
+        defaultMessage: 'ERROR: {errorMessage}',
+        values: {
+          errorMessage,
+        },
+      }),
+  },
+  FunctionFormFunctionUnknown: {
+    getUnknownArgumentTypeErrorMessage: (expressionType: string) =>
+      i18n.translate('xpack.canvas.functionForm.contextError', {
+        defaultMessage: 'Unknown expression type "{expressionType}"',
+        values: {
+          expressionType,
+        },
+      }),
+  },
   GroupSettings: {
     getSaveGroupDescription: () =>
       i18n.translate('xpack.canvas.groupSettings.saveGroupDescription', {
