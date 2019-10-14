@@ -15,6 +15,7 @@ import {
   getCreateSingleMetricJobBreadcrumbs,
   getCreateMultiMetricJobBreadcrumbs,
   getCreatePopulationJobBreadcrumbs,
+  getAdvancedJobConfigurationBreadcrumbs,
 } from '../../../breadcrumbs';
 
 import { Route } from '../../../../../common/types/kibana';
@@ -40,6 +41,10 @@ const routes: Route[] = [
   {
     id: JOB_TYPE.POPULATION,
     k7Breadcrumbs: getCreatePopulationJobBreadcrumbs,
+  },
+  {
+    id: JOB_TYPE.ADVANCED,
+    k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
   },
 ];
 

@@ -13,22 +13,19 @@ import { JOB_TYPE } from '../../../common/job_creator/util/constants';
 import { SingleMetricView } from './components/single_metric_view';
 import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
+import { AdvancedView } from './components/advanced_view';
+import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const { jobCreator, jobCreatorUpdated, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
-  const [jobType, setJobType] = useState(jobCreator.type);
-
-  useEffect(() => {
-    // this shouldn't really change, but just in case we need to...
-    setJobType(jobCreator.type);
-  }, [jobCreatorUpdated]);
+  const jobType = jobCreator.type;
 
   useEffect(() => {
     const active =
       jobCreator.detectors.length > 0 &&
+      (jobCreator.type !== JOB_TYPE.ADVANCED ||
+        (jobCreator.type === JOB_TYPE.ADVANCED && jobValidator.modelMemoryLimit.valid)) &&
       jobValidator.bucketSpan.valid &&
       jobValidator.duplicateDetectors.valid &&
       jobValidator.validating === false;
@@ -48,11 +45,26 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           {jobType === JOB_TYPE.POPULATION && (
             <PopulationView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
+          {jobType === JOB_TYPE.ADVANCED && <AdvancedView setCanProceed={setNextActive} />}
           <WizardNav
-            previous={() => setCurrentStep(WIZARD_STEPS.TIME_RANGE)}
+            previous={() =>
+              setCurrentStep(
+                jobCreator.type === JOB_TYPE.ADVANCED
+                  ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
+                  : WIZARD_STEPS.TIME_RANGE
+              )
+            }
             next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             nextActive={nextActive}
-          />
+          >
+            {jobType === JOB_TYPE.ADVANCED && (
+              <JsonEditorFlyout
+                isDisabled={false}
+                jobEditorMode={EDITOR_MODE.EDITABLE}
+                datafeedEditorMode={EDITOR_MODE.HIDDEN}
+              />
+            )}
+          </WizardNav>
         </Fragment>
       )}
     </Fragment>
