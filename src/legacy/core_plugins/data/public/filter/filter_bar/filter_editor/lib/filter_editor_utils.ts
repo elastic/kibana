@@ -74,10 +74,15 @@ export function getFilterParams(filter: Filter) {
     case 'phrases':
       return (filter as PhrasesFilter).meta.params;
     case 'range':
-      return {
-        from: (filter as RangeFilter).meta.params.gte,
-        to: (filter as RangeFilter).meta.params.lt,
-      };
+      return filter.meta.negate
+        ? {
+            from: (filter as RangeFilter).meta.params.gt,
+            to: (filter as RangeFilter).meta.params.lt,
+          }
+        : {
+            from: (filter as RangeFilter).meta.params.gte,
+            to: (filter as RangeFilter).meta.params.lte,
+          };
   }
 }
 
@@ -155,7 +160,15 @@ function buildBaseFilter(
     case 'phrases':
       return buildPhrasesFilter(field, params, indexPattern);
     case 'range':
-      const newParams = { gte: params.from, lt: params.to };
+      const newParams = operator.negate
+        ? {
+            gt: params.from,
+            lt: params.to,
+          }
+        : {
+            gte: params.from,
+            lte: params.to,
+          };
       return buildRangeFilter(field, newParams, indexPattern);
     case 'exists':
       return buildExistsFilter(field, indexPattern);
