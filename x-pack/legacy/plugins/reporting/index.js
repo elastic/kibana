@@ -92,6 +92,21 @@ export const reporting = (kibana) => {
           timeout: Joi.number().integer().default(120000),
         }).default(),
         capture: Joi.object({
+          networkPolicy: Joi.object({
+            enabled: Joi.boolean().default(true),
+            rules: Joi.array().items(Joi.object({
+              allow: Joi.boolean().required(),
+              protocol: Joi.string(),
+              host: Joi.string(),
+            })).default([
+              { allow: true, protocol: 'http:' },
+              { allow: true, protocol: 'https:' },
+              { allow: true, protocol: 'ws:' },
+              { allow: true, protocol: 'wss:' },
+              { allow: true, protocol: 'data:' },
+              { allow: false }, // Default action is to deny!
+            ]),
+          }).default(),
           zoom: Joi.number().integer().default(2),
           viewport: Joi.object({
             width: Joi.number().integer().default(1950),
