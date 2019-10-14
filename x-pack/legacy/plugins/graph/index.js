@@ -26,7 +26,7 @@ export function graph(kibana) {
         main: 'plugins/graph/index',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: ['plugins/graph/hacks/toggle_app_link_in_nav'],
+      hacks: ['plugins/graph/hacks/toggle_app_link_in_nav', 'plugins/graph/index'],
       home: ['plugins/graph/register_feature'],
       mappings,
       migrations,

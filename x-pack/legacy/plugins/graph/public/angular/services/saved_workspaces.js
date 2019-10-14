@@ -6,7 +6,6 @@
 
 import _ from 'lodash';
 
-import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
@@ -87,9 +86,5 @@ export function SavedWorkspacesProvider(kbnUrl, Private, Promise) {
       });
   };
 }
-// This is the only thing that gets injected into controllers
-uiModules.get('app/graph').service('savedGraphWorkspaces',  function (Private) {
-  return Private(SavedWorkspacesProvider);
-});
 
 SavedObjectRegistryProvider.register(SavedWorkspacesProvider);

@@ -6,7 +6,7 @@
 
 import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
 import { syncBreadcrumbSaga, updateMetaData } from './meta_data';
-import { Chrome } from 'ui/chrome';
+import { ChromeStart } from 'kibana/public';
 
 describe('breadcrumb sync saga', () => {
   let env: MockedGraphEnvironment;
@@ -19,17 +19,17 @@ describe('breadcrumb sync saga', () => {
           breadcrumbs: {
             set: jest.fn(),
           },
-        } as unknown) as Chrome,
+        } as unknown) as ChromeStart,
       },
     });
   });
 
   it('syncs breadcrumb initially', () => {
-    expect(env.mockedDeps.chrome.breadcrumbs.set).toHaveBeenCalled();
+    expect(env.mockedDeps.chrome.setBreadcrumbs).toHaveBeenCalled();
   });
 
   it('syncs breadcrumb with each change to meta data', () => {
     env.store.dispatch(updateMetaData({}));
-    expect(env.mockedDeps.chrome.breadcrumbs.set).toHaveBeenCalledTimes(2);
+    expect(env.mockedDeps.chrome.setBreadcrumbs).toHaveBeenCalledTimes(2);
   });
 });

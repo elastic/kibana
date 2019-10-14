@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// inner angular imports
+// these are necessary to bootstrap the local angular.
+// They can stay even after NP cutover
 import angular from 'angular';
-import { AppMountContext } from 'kibana/public';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { DataSetup } from 'src/legacy/core_plugins/data/public';
-import { AngularHttpError } from 'ui/notify/lib/format_angular_http_error';
+import 'ui/angular-bootstrap';
+import 'ace';
+import 'ui/kbn_top_nav';
 import { configureAppAngularModule } from 'ui/legacy_compat';
-
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
@@ -26,56 +28,68 @@ import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_to
 // @ts-ignore
 import { PromiseServiceCreator } from 'ui/promises/promises';
 // @ts-ignore
-import { initAngularModule } from './app';
+import { KbnUrlProvider } from 'ui/url';
 
-const mainTemplate = (basePath: string) => `<div style="height: 100%">
-  <!-- This base tag is key to making this work -->
-  <base href="${basePath}" />
-  <div ng-view style="height: 100%; display:flex; justify-content: center;"></div>
-</div>
-`;
+// type imports
+import { IPrivate } from 'ui/private';
+import { DataStart } from 'src/legacy/core_plugins/data/public';
+import { AppMountContext } from 'kibana/public';
+import { AngularHttpError } from 'ui/notify/lib/format_angular_http_error';
+// @ts-ignore
+import { initGraphApp } from './app';
+import { Plugin as DataPlugin } from '../../../../../src/plugins/data/public';
 
-const moduleName = 'app/graph';
-
+/**
+ * These are dependencies of the Graph app besides the base dependencies
+ * provided by the application service. Some of those still rely on non-shimmed
+ * plugins in LP-world, but if they are migrated only the import path in the plugin
+ * itself changes
+ */
 export interface GraphDependencies {
   element: HTMLElement;
   appBasePath: string;
-  data: DataSetup;
+  data: DataStart;
+  npData: ReturnType<DataPlugin['start']>;
   fatalError: (error: AngularHttpError | Error | string, location?: string) => void;
   xpackInfo: { get(path: string): unknown };
   addBasePath: (url: string) => string;
   getBasePath: () => string;
-  KbnUrlProvider: any;
+  Storage: any;
 }
 
+/**
+ * Dependencies of the Graph app which rely on the global angular instance.
+ * These dependencies have to be migrated to their NP counterparts.
+ */
 export interface LegacyAngularInjectedDependencies {
   /**
    * angular $http service
    */
   $http: any;
   /**
-   * src/legacy/ui/public/modals/confirm_modal.js
+   * Instance of `src/legacy/ui/public/modals/confirm_modal.js`
    */
   confirmModal: any;
   /**
-   * Private(SavedObjectRegistryProvider)
+   * Instance of SavedObjectRegistryProvider
    */
   savedObjectRegistry: any;
   kbnBaseUrl: any;
   /**
-   * Private(SavedWorkspacesProvider)
+   * Instance of SavedWorkspacesProvider
    */
-
-  savedWorkspacesClient: any;
   savedGraphWorkspaces: any;
   /**
    * Private(SavedObjectsClientProvider)
    */
-
   savedObjectsClient: any;
-
-  // These are static values currently fetched from ui/chrome
+  /**
+   * Injected variable
+   */
   canEditDrillDownUrls: string;
+  /**
+   * Injected variable
+   */
   graphSavePolicy: string;
 }
 
@@ -85,11 +99,12 @@ export const renderApp = (
     element,
     appBasePath,
     data,
+    npData,
     fatalError,
     xpackInfo,
     addBasePath,
     getBasePath,
-    KbnUrlProvider,
+    Storage,
   }: GraphDependencies,
   angularDeps: LegacyAngularInjectedDependencies
 ) => {
@@ -100,69 +115,34 @@ export const renderApp = (
     config: core.uiSettings,
     toastNotifications: core.notifications.toasts,
     indexPatterns: data.indexPatterns.indexPatterns,
-    data,
+    npData,
     fatalError,
     xpackInfo,
     addBasePath,
     getBasePath,
     KbnUrlProvider,
+    Storage,
     ...angularDeps,
   };
-  angular
-    .module('graphI18n', [])
-    .provider('i18n', I18nProvider)
-    .filter('i18n', i18nFilter)
-    .directive('i18nId', i18nDirective);
-  angular.module('graphPrivate', []).provider('Private', PrivateProvider);
-  angular.module('graphPromise', []).service('Promise', PromiseServiceCreator);
-  angular
-    .module('graphGlobalStateDeps', ['graphPrivate'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', () => {
-      return {
-        $get: () => ({
-          get: core.uiSettings.get.bind(core.uiSettings),
-        }),
-      };
-    })
-    .service('kbnUrl', (Private: any) => Private(KbnUrlProvider));
-  angular
-    .module('graphUrlStuff', ['graphPrivate', 'graphPromise'])
-    .factory('PersistedState', ($injector: any) => {
-      const Private = $injector.get('Private');
-      const Events = Private(EventsProvider);
 
-      // Extend PersistedState to override the EmitterClass class with
-      // our Angular friendly version.
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: any) {
-          super(value, path, Events);
-        }
-      };
-    });
-  angular
-    .module('graphTopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper);
-  // global state is only here because of legacy reasons, it's not actually used.
-  // But it is helpful as a reference for Discover
-  angular
-    .module('graphGlobalState', ['graphPrivate', 'graphGlobalStateDeps', 'graphPromise'])
-    .service('globalState', function(Private: any) {
-      return Private(GlobalStateProvider);
-    });
-  const graphAngularModule = angular.module(moduleName, [
-    'ngSanitize',
-    'ngRoute',
-    'react',
-    'graphI18n',
-    'graphPrivate',
-    'graphUrlStuff',
-    'graphTopNav',
-    'graphGlobalState',
-  ]);
+  const graphAngularModule = createLocalAngularModule(core);
   configureAppAngularModule(graphAngularModule);
-  initAngularModule(graphAngularModule, deps);
+  initGraphApp(graphAngularModule, deps);
+  const $injector = mountGraphApp(appBasePath, element);
+  return () => $injector.get('$rootScope').$destroy();
+};
+
+const mainTemplate = (basePath: string) => `<div style="height: 100%">
+  <base href="${basePath}" />
+  <div ng-view style="height: 100%; display:flex; justify-content: center;"></div>
+</div>
+`;
+
+const moduleName = 'app/graph';
+
+const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.bootstrap', 'ui.ace'];
+
+function mountGraphApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
   mountpoint.setAttribute('style', 'height: 100%');
   // eslint-disable-next-line
@@ -173,5 +153,89 @@ export const renderApp = (
   // initialize global state handler
   $injector.get('globalState');
   element.appendChild(mountpoint);
-  return () => $injector.get('$rootScope').$destroy();
-};
+  return $injector;
+}
+
+function createLocalAngularModule(core: AppMountContext['core']) {
+  createLocalI18nModule();
+  createLocalPrivateModule();
+  createLocalPromiseModule();
+  createLocalConfigModule(core);
+  createLocalKbnUrlModule();
+  createLocalPersistedStateModule();
+  createLocalTopNavModule();
+  createLocalGlobalStateModule();
+
+  const graphAngularModule = angular.module(moduleName, [
+    ...thirdPartyAngularDependencies,
+    'graphI18n',
+    'graphPrivate',
+    'graphPersistedState',
+    'graphTopNav',
+    'graphGlobalState',
+  ]);
+  return graphAngularModule;
+}
+
+function createLocalGlobalStateModule() {
+  angular
+    .module('graphGlobalState', ['graphPrivate', 'graphConfig', 'graphKbnUrl', 'graphPromise'])
+    .service('globalState', function(Private: any) {
+      return Private(GlobalStateProvider);
+    });
+}
+
+function createLocalPersistedStateModule() {
+  angular
+    .module('graphPersistedState', ['graphPrivate', 'graphPromise'])
+    .factory('PersistedState', (Private: IPrivate) => {
+      const Events = Private(EventsProvider);
+      return class AngularPersistedState extends PersistedState {
+        constructor(value: any, path: any) {
+          super(value, path, Events);
+        }
+      };
+    });
+}
+
+function createLocalKbnUrlModule() {
+  angular
+    .module('graphKbnUrl', ['graphPrivate'])
+    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
+}
+
+function createLocalConfigModule(core: AppMountContext['core']) {
+  angular
+    .module('graphConfig', ['graphPrivate'])
+    .provider('stateManagementConfig', StateManagementConfigProvider)
+    .provider('config', () => {
+      return {
+        $get: () => ({
+          get: core.uiSettings.get.bind(core.uiSettings),
+        }),
+      };
+    });
+}
+
+function createLocalPromiseModule() {
+  angular.module('graphPromise', []).service('Promise', PromiseServiceCreator);
+}
+
+function createLocalPrivateModule() {
+  angular.module('graphPrivate', []).provider('Private', PrivateProvider);
+}
+
+function createLocalTopNavModule() {
+  angular
+    .module('graphTopNav', ['react'])
+    .directive('kbnTopNav', createTopNavDirective)
+    .directive('kbnTopNavHelper', createTopNavHelper);
+}
+
+function createLocalI18nModule() {
+  angular
+    .module('graphI18n', [])
+    .provider('i18n', I18nProvider)
+    .filter('i18n', i18nFilter)
+    .directive('i18nId', i18nDirective);
+}

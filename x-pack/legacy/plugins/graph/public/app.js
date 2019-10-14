@@ -27,7 +27,6 @@ import { Settings } from './components/settings';
 import { GraphVisualization } from './components/graph_visualization';
 
 import gws from './angular/graph_client_workspace.js';
-import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
 import { urlTemplateRegex } from  './helpers/url_template';
@@ -41,9 +40,7 @@ import {
   hasFieldsSelector
 } from './state_management';
 
-import './angular/directives/graph_inspect';
-
-export function initAngularModule(angularModule, deps) {
+export function initGraphApp(angularModule, deps) {
   const {
     xpackInfo,
     fatalError,
@@ -52,17 +49,17 @@ export function initAngularModule(angularModule, deps) {
     toastNotifications,
     savedObjectsClient, //Private(SavedObjectsClientProvider)
     indexPatterns, //data.indexPatterns.indexPatterns
-    savedWorkspacesClient, //Private(SavedWorkspacesProvider)
     kbnBaseUrl,
     addBasePath,
     getBasePath,
-    data,
+    npData,
     config, //uiSettings?
     savedObjectRegistry, //Private(SavedObjectRegistryProvider)
     capabilities,
     coreStart, //coreStart
     confirmModal,
     $http, //$http
+    Storage,
     KbnUrlProvider,
     canEditDrillDownUrls,
     graphSavePolicy,
@@ -160,7 +157,7 @@ export function initAngularModule(angularModule, deps) {
         badge: getReadonlyBadge,
         resolve: {
           savedWorkspace: function ($route) {
-            return $route.current.params.id && savedGraphWorkspaces.get($route.current.params.id)
+            return $route.current.params.id ? savedGraphWorkspaces.get($route.current.params.id)
               .catch(
                 function () {
                   toastNotifications.addDanger(
@@ -169,7 +166,7 @@ export function initAngularModule(angularModule, deps) {
                     })
                   );
                 }
-              );
+              ) : savedGraphWorkspaces.get();
 
           },
           //Copied from example found in wizard.js ( Kibana TODO - can't
@@ -183,9 +180,6 @@ export function initAngularModule(angularModule, deps) {
           GetIndexPatternProvider: function () {
             return indexPatterns;
           },
-          SavedWorkspacesProvider: function () {
-            return savedWorkspacesClient;
-          }
         }
       })
       .otherwise({
@@ -320,7 +314,7 @@ export function initAngularModule(angularModule, deps) {
     });
 
     // register things on scope passed down to react components
-    $scope.pluginDataStart = data;
+    $scope.pluginDataStart = npData;
     $scope.store = new Storage(window.localStorage);
     $scope.coreStart = coreStart;
     $scope.loading = false;
