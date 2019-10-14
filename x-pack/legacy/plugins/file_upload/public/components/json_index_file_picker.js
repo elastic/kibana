@@ -146,9 +146,13 @@ export class JsonIndexFilePicker extends Component {
     }
     // Parse file
 
-    const parsedFileResult = await parseFile(
-      file, transformDetails, onFileUpload, this.setFileProgress, this.getFileParseActive
-    ).catch(err => {
+    const parsedFileResult = await parseFile({
+      file,
+      transformDetails,
+      onFileUpload,
+      setFileProgress: this.setFileProgress,
+      getFileParseActive: this.getFileParseActive
+    }).catch(err => {
       if (this._isMounted) {
         this.setState({
           fileParseActive: false,
@@ -171,8 +175,7 @@ export class JsonIndexFilePicker extends Component {
     }
 
     // If another file is replacing this one, leave file parse active
-    const boolFileParseActive =
-      currentFileTracker !== this.state.currentFileTracker;
+    const boolFileParseActive = currentFileTracker !== this.state.currentFileTracker;
     this.setState({
       percentageProcessed: 0,
       featuresProcessed: 0,

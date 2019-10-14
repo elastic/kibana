@@ -19,10 +19,10 @@ const readSlice = (fileReader, file, start, stop) => {
 
 let prevFileReader;
 let prevPatternReader;
-export const fileHandler = async (
-  file, chunkHandler, cleanAndValidate, getFileParseActive,
-  fileReader = new FileReader(), fileBuffer = FILE_BUFFER
-) => {
+export const fileHandler = async ({
+  file, setFileProgress, cleanAndValidate, getFileParseActive,
+  fileReader = new FileReader()
+}) => {
 
   if (!file) {
     return Promise.reject(
@@ -52,15 +52,29 @@ export const fileHandler = async (
   };
 
   let start;
-  let stop = fileBuffer;
+  let stop = FILE_BUFFER;
 
   prevFileReader = fileReader;
 
-  const patternReader = new PatternReader();
-  patternReader.onGeoJSONFeaturePatternDetect(onFeatureRead);
-  prevPatternReader = patternReader;
-
   const filePromise = new Promise((resolve, reject) => {
+    const onStreamComplete = parsedGeojson => {
+      if (!featuresProcessed) {
+        reject(
+          new Error(
+            i18n.translate('xpack.fileUpload.fileParser.noFeaturesDetected', {
+              defaultMessage: 'Error, no features detected',
+            })
+          )
+        );
+      } else {
+        resolve(parsedGeojson);
+      }
+    };
+    const patternReader = new PatternReader(
+      { onFeatureDetect: onFeatureRead, onStreamComplete }
+    );
+    prevPatternReader = patternReader;
+
     fileReader.onloadend = ({ target: { readyState, result } }) => {
       if (readyState === FileReader.DONE) {
         if (!getFileParseActive() || !result) {
@@ -69,7 +83,7 @@ export const fileHandler = async (
           resolve(null);
           return;
         }
-        chunkHandler({
+        setFileProgress({
           featuresProcessed,
           bytesProcessed: stop || file.size,
           totalBytes: file.size
@@ -80,7 +94,7 @@ export const fileHandler = async (
         }
 
         start = stop;
-        const newStop = stop + fileBuffer;
+        const newStop = stop + FILE_BUFFER;
         // Check EOF
         stop = newStop > file.size ? undefined : newStop;
         readSlice(fileReader, file, start, stop);
@@ -94,19 +108,6 @@ export const fileHandler = async (
           defaultMessage: 'Error reading file',
         })));
     };
-    patternReader.onStreamComplete(parsedGeojson => {
-      if (!featuresProcessed) {
-        reject(
-          new Error(
-            i18n.translate('xpack.fileUpload.fileParser.noFeaturesDetected', {
-              defaultMessage: 'Error, no features detected',
-            })
-          )
-        );
-      } else {
-        resolve(parsedGeojson);
-      }
-    });
   });
   readSlice(fileReader, file, start, stop);
   return filePromise;
@@ -119,9 +120,13 @@ export function jsonPreview(json, previewFunction) {
   }
 }
 
-export async function parseFile(
-  file, transformDetails, previewCallback = null, onChunkParse, getFileParseActive
-) {
+export async function parseFile({
+  file,
+  transformDetails,
+  onFileUpload: previewCallback = null,
+  setFileProgress,
+  getFileParseActive
+}) {
   let cleanAndValidate;
   if (typeof transformDetails === 'object') {
     cleanAndValidate = transformDetails.cleanAndValidate;
@@ -141,9 +146,12 @@ export async function parseFile(
     }
   }
 
-  const parsedJson = await fileHandler(
-    file, onChunkParse, cleanAndValidate, getFileParseActive
-  );
+  const parsedJson = await fileHandler({
+    file,
+    setFileProgress,
+    cleanAndValidate,
+    getFileParseActive
+  });
   jsonPreview(parsedJson, previewCallback);
   return parsedJson;
 }

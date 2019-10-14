@@ -9,12 +9,14 @@ const oboe = require('oboe');
 
 export class PatternReader {
 
-  constructor() {
-    this.oboeStream = oboe();
+  constructor({ onFeatureDetect, onStreamComplete }) {
+    this._oboeStream = oboe();
+    this._onGeoJSONFeaturePatternDetect(onFeatureDetect);
+    this._onStreamComplete(onStreamComplete);
   }
 
-  onGeoJSONFeaturePatternDetect = featureDetectCallback => {
-    this.oboeStream.node({
+  _onGeoJSONFeaturePatternDetect = featureDetectCallback => {
+    this._oboeStream.node({
       'features.*': feature => featureDetectCallback(feature),
       // Handle single feature files
       '!.geometry': (geom, path, ancestors) => {
@@ -25,12 +27,16 @@ export class PatternReader {
     });
   }
 
-  writeDataToPatternStream = data => this.oboeStream.emit('data', data);
+  _onStreamComplete(streamCompleteCallback) {
+    this._oboeStream.done(streamCompleteCallback);
+  }
 
-  abortStream = () => this.oboeStream.abort();
+  writeDataToPatternStream(data) {
+    this._oboeStream.emit('data', data);
+  }
 
-  onStreamComplete =
-    streamCompleteCallback => this.oboeStream.done(
-      finalParsedJson => streamCompleteCallback(finalParsedJson)
-    );
+  abortStream() {
+    this._oboeStream.abort();
+  }
+
 }

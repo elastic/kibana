@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fileHandler, FILE_BUFFER } from './file_parser';
+import { fileHandler } from './file_parser';
 jest.mock('./pattern_reader', () => ({}));
 
 const cleanAndValidate = jest.fn(a => a);
-const chunkHandler = jest.fn(a => a);
+const setFileProgress = jest.fn(a => a);
 
 const getFileReader = () => {
   const fileReader = {
@@ -27,8 +27,6 @@ const getPatternReader = () => {
     abortStream: jest.fn(),
   };
   require('./pattern_reader').PatternReader = function () {
-    this.onGeoJSONFeaturePatternDetect = () => {};
-    this.onStreamComplete = () => {};
     this.writeDataToPatternStream = () => patternReader.writeDataToPatternStream();
     this.abortStream = () => patternReader.abortStream();
   };
@@ -77,9 +75,13 @@ describe('parse file', () => {
     // Cancel file parse
     const getFileParseActive = getFileParseActiveFactory(false);
 
-    const fileHandlerResult = await fileHandler(
-      fileRef, chunkHandler, cleanAndValidate, getFileParseActive, cancelledActionFileReader
-    );
+    const fileHandlerResult = await fileHandler({
+      file: fileRef,
+      setFileProgress,
+      cleanAndValidate,
+      getFileParseActive,
+      fileReader: cancelledActionFileReader
+    });
 
     expect(fileHandlerResult).toBeNull();
     expect(cancelledActionFileReader.abort.mock.calls.length).toEqual(1);
@@ -96,10 +98,13 @@ describe('parse file', () => {
     fileReaderWithErrorCall.readAsBinaryString =
       () => fileReaderWithErrorCall.onerror();
     const getFileParseActive = getFileParseActiveFactory();
-    expect(fileHandler(
-      fileRef, chunkHandler, cleanAndValidate, getFileParseActive,
-      fileReaderWithErrorCall, FILE_BUFFER
-    )).rejects.toThrow();
+    expect(fileHandler({
+      file: fileRef,
+      setFileProgress,
+      cleanAndValidate,
+      getFileParseActive,
+      fileReader: fileReaderWithErrorCall
+    })).rejects.toThrow();
 
     expect(fileReaderWithErrorCall.abort.mock.calls.length).toEqual(1);
     expect(patternReaderWithErrorCall.abortStream.mock.calls.length).toEqual(1);
@@ -112,9 +117,13 @@ describe('parse file', () => {
     const fileReaderForValidFile = getFileReader();
     const patternReaderForValidFile = getPatternReader();
     const getFileParseActive = getFileParseActiveFactory();
-    fileHandler(
-      fileRef, chunkHandler, cleanAndValidate, getFileParseActive, fileReaderForValidFile
-    );
+    fileHandler({
+      file: fileRef,
+      setFileProgress,
+      cleanAndValidate,
+      getFileParseActive,
+      fileReader: fileReaderForValidFile
+    });
 
     expect(fileReaderForValidFile.readAsBinaryString.mock.calls.length).toEqual(2);
     expect(patternReaderForValidFile.writeDataToPatternStream.mock.calls.length).toEqual(2);

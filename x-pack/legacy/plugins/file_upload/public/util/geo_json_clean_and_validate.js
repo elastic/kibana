@@ -7,32 +7,12 @@
 import * as jsts from 'jsts';
 import rewind from 'geojson-rewind';
 
-const GeoJSONIO = (() => {
-  let geoJSONReader;
-  let geoJSONWriter;
-
-  const createNewGeoJSONReader = () => new jsts.io.GeoJSONReader();
-  const createNewGeoJSONWriter = () => new jsts.io.GeoJSONWriter();
-
-  return {
-    read: feature => {
-      if (!geoJSONReader) {
-        geoJSONReader = createNewGeoJSONReader();
-      }
-      return geoJSONReader.read(feature);
-    },
-    write: geometry => {
-      if (!geoJSONWriter) {
-        geoJSONWriter = createNewGeoJSONWriter();
-      }
-      return geoJSONWriter.write(geometry);
-    }
-  };
-})();
+const geoJSONReader = new jsts.io.GeoJSONReader();
+const geoJSONWriter = new jsts.io.GeoJSONWriter();
 
 export function geoJsonCleanAndValidate(feature) {
 
-  const geometryReadResult = GeoJSONIO.read(feature);
+  const geometryReadResult = geoJSONReader.read(feature);
 
   const cleanedGeometry = cleanGeometry(geometryReadResult);
 
@@ -59,7 +39,7 @@ export function cleanGeometry({ geometry }) {
   const geometryToWrite = (geometry.isSimple() || geometry.isValid())
     ? geometry
     : geometry.buffer(0);
-  const cleanedGeometry = GeoJSONIO.write(geometryToWrite);
+  const cleanedGeometry = geoJSONWriter.write(geometryToWrite);
 
   return cleanedGeometry;
 }
