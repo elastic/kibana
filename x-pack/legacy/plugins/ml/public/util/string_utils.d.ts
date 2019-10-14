@@ -11,3 +11,5 @@ export function replaceStringTokens(
   valuesByTokenName: {},
   encodeForURI: boolean
 ): string;
+
+export function detectorToString(dtr: any): string;

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   getAnomalyScoreSeries,
   getResponseTimeSeries,
@@ -87,9 +88,9 @@ describe('chartSelectors', () => {
       ],
       overallAvgDuration: 200
     };
-
     const transactionType = 'MyTransactionType';
-    it('should produce correct series', () => {
+
+    it('produces correct series', () => {
       expect(getTpmSeries(apmTimeseries, transactionType)).toEqual([
         {
           color: '#00b3a4',
@@ -114,26 +115,119 @@ describe('chartSelectors', () => {
         }
       ]);
     });
-  });
 
-  describe('empty getTpmSeries', () => {
-    const apmTimeseries = {
-      responseTimes: {
-        avg: [{ x: 0, y: 1 }, { x: 100, y: 1 }],
-        p95: [{ x: 0, y: 1 }, { x: 100, y: 1 }],
-        p99: [{ x: 0, y: 1 }, { x: 100, y: 1 }]
-      },
-      tpmBuckets: [],
-      overallAvgDuration: 200
-    };
+    describe('with success buckets', () => {
+      it('uses a success color', () => {
+        const key = 'it was a success';
+        expect(
+          getTpmSeries({
+            ...apmTimeseries,
+            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
+          })[0].color
+        ).toEqual(theme.euiColorVis0);
+      });
+    });
 
-    const transactionType = 'MyTransactionType';
-    it('should produce an empty series', () => {
-      const series = getTpmSeries(apmTimeseries, transactionType);
+    describe('with SUCESS buckets', () => {
+      it('uses a success color', () => {
+        const key = 'it was a Success';
+        expect(
+          getTpmSeries({
+            ...apmTimeseries,
+            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
+          })[0].color
+        ).toEqual(theme.euiColorVis0);
+      });
+    });
 
-      expect(series[0].data.length).toBe(11);
-      expect(series[0].data[0].x).toBe(0);
-      expect(series[0].data[10].x).toBe(100);
+    describe('with ok buckets', () => {
+      it('uses a success color', () => {
+        const key = 'it was ok';
+        expect(
+          getTpmSeries({
+            ...apmTimeseries,
+            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
+          })[0].color
+        ).toEqual(theme.euiColorVis0);
+      });
+    });
+
+    describe('with OK buckets', () => {
+      it('uses a success color', () => {
+        const key = 'it was OK';
+        expect(
+          getTpmSeries({
+            ...apmTimeseries,
+            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
+          })[0].color
+        ).toEqual(theme.euiColorVis0);
+      });
+    });
+
+    describe('with fail buckets', () => {
+      it('uses a failure color', () => {
+        const key = 'it failed';
+        expect(
+          getTpmSeries({
+            ...apmTimeseries,
+            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
+          })[0].color
+        ).toEqual(theme.euiColorVis2);
+      });
+    });
+
+    describe('with FAIL buckets', () => {
+      it('uses a failure color', () => {
+        const key = 'it FAILED';
+        expect(
+          getTpmSeries({
+            ...apmTimeseries,
+            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
+          })[0].color
+        ).toEqual(theme.euiColorVis2);
+      });
+    });
+
+    describe('with error buckets', () => {
+      it('uses a failure color', () => {
+        const key = 'Quizás fuera un error';
+        expect(
+          getTpmSeries({
+            ...apmTimeseries,
+            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
+          })[0].color
+        ).toEqual(theme.euiColorVis2);
+      });
+    });
+
+    describe('with ERROR buckets', () => {
+      it('uses a failure color', () => {
+        const key = 'Quizás fuera un ErroR';
+        expect(
+          getTpmSeries({
+            ...apmTimeseries,
+            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }]
+          })[0].color
+        ).toEqual(theme.euiColorVis2);
+      });
+    });
+
+    describe('when empty', () => {
+      it('produces an empty series', () => {
+        const responseTimes = {
+          avg: [{ x: 0, y: 1 }, { x: 100, y: 1 }],
+          p95: [{ x: 0, y: 1 }, { x: 100, y: 1 }],
+          p99: [{ x: 0, y: 1 }, { x: 100, y: 1 }]
+        };
+        const series = getTpmSeries(
+          { ...apmTimeseries, responseTimes, tpmBuckets: [] },
+          transactionType
+        );
+
+        expect(series[0].data.length).toBe(11);
+        expect(series[0].data[0].x).toBe(0);
+        expect(series[0].data[10].x).toBe(100);
+      });
     });
   });
 });

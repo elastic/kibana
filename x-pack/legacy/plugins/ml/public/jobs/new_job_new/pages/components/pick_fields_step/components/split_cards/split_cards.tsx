@@ -15,7 +15,6 @@ interface Props {
   fieldValues: string[];
   splitField: SplitField;
   numberOfDetectors: number;
-  children: JSX.Element;
   jobType: JOB_TYPE;
   animate?: boolean;
 }
@@ -90,7 +89,7 @@ export const SplitCards: FC<Props> = memo(
     return (
       <EuiFlexGroup>
         <EuiFlexItem data-test-subj="mlDataSplit">
-          {(fieldValues.length === 0 || numberOfDetectors === 0) && <Fragment>{children}</Fragment>}
+          {(fieldValues.length === 0 || numberOfDetectors === 0) && <>{children}</>}
           {fieldValues.length > 0 && numberOfDetectors > 0 && splitField !== null && (
             <Fragment>
               {jobType === JOB_TYPE.MULTI_METRIC && (
@@ -122,7 +121,7 @@ export const SplitCards: FC<Props> = memo(
                   {fieldValues[0]}
                 </div>
                 <EuiHorizontalRule margin="s" />
-                {children}
+                <>{children}</>
               </EuiPanel>
             </Fragment>
           )}

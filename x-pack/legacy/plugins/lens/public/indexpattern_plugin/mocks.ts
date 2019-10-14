@@ -5,7 +5,7 @@
  */
 
 import { DragContextState } from '../drag_drop';
-import { IndexPattern } from './indexpattern';
+import { IndexPattern } from './types';
 
 export const createMockedIndexPattern = (): IndexPattern => ({
   id: '1',
