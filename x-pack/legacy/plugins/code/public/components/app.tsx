@@ -7,6 +7,7 @@
 import React from 'react';
 import { HashRouter as Router, Redirect, Switch } from 'react-router-dom';
 
+import chrome from 'ui/chrome';
 import { connect } from 'react-redux';
 import { RootState } from '../reducers';
 import { Admin } from './admin_page/admin';
@@ -17,6 +18,7 @@ import { NotFound } from './main/not_found';
 import { Route } from './route';
 import * as ROUTES from './routes';
 import { Search } from './search_page/search';
+import { Integrations } from './integrations';
 
 const RooComponent = (props: { setupOk?: boolean }) => {
   if (props.setupOk) {
@@ -33,6 +35,8 @@ const Root = connect(mapStateToProps)(RooComponent);
 
 const Empty = () => null;
 
+const integrationsEnabled = chrome.getInjected('codeIntegrationsEnabled');
+
 export const App = () => {
   return (
     <Router>
@@ -45,6 +49,9 @@ export const App = () => {
         <Route path={ROUTES.SEARCH} component={Search} />
         <Route path={ROUTES.REPO} render={Empty} exact={true} />
         <Route path={ROUTES.SETUP} component={SetupGuide} exact={true} />
+        {integrationsEnabled && (
+          <Route path={ROUTES.INTEGRATIONS} component={Integrations} exact={true} />
+        )}
         <Route path="*" component={NotFound} />
       </Switch>
     </Router>

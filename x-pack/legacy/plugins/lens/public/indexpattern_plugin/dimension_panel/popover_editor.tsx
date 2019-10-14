@@ -17,17 +17,11 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiLink,
-  EuiButtonIcon,
-  EuiTextColor,
+  EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import {
-  IndexPatternColumn,
-  OperationType,
-  IndexPattern,
-  IndexPatternField,
-} from '../indexpattern';
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionPanelProps, OperationFieldSupportMatrix } from './dimension_panel';
 import {
   operationDefinitionMap,
@@ -39,6 +33,7 @@ import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
+import { IndexPattern, IndexPatternField } from '../types';
 
 const operationPanels = getOperationDisplay();
 
@@ -225,7 +220,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
           </EuiLink>
         ) : (
           <>
-            <EuiButtonIcon
+            <EuiButtonEmpty
               iconType="plusInCircleFilled"
               data-test-subj="indexPattern-configure-dimension"
               aria-label={i18n.translate('xpack.lens.configure.addConfig', {
@@ -235,13 +230,13 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 defaultMessage: 'Add a configuration',
               })}
               onClick={() => setPopoverOpen(!isPopoverOpen)}
-            />{' '}
-            <EuiTextColor color="subdued">
+              size="xs"
+            >
               <FormattedMessage
                 id="xpack.lens.configure.emptyConfig"
                 defaultMessage="Drop a field here"
               />
-            </EuiTextColor>
+            </EuiButtonEmpty>
           </>
         )
       }
@@ -259,6 +254,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
           <EuiFlexItem>
             <FieldSelect
               currentIndexPattern={currentIndexPattern}
+              existingFields={state.existingFields}
               showEmptyFields={state.showEmptyFields}
               fieldMap={fieldMap}
               operationFieldSupportMatrix={operationFieldSupportMatrix}

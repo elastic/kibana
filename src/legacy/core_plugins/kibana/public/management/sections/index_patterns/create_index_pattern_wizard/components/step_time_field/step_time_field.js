@@ -36,9 +36,9 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export class StepTimeFieldComponent extends Component {
+export class StepTimeField extends Component {
   static propTypes = {
     indexPattern: PropTypes.string.isRequired,
     indexPatternsService: PropTypes.object.isRequired,
@@ -238,5 +238,3 @@ export class StepTimeFieldComponent extends Component {
     );
   }
 }
-
-export const StepTimeField = injectI18n(StepTimeFieldComponent);

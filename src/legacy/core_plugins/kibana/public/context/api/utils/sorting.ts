@@ -39,7 +39,7 @@ export function getFirstSortableField(indexPattern: IndexPattern, fieldNames: st
     fieldName =>
       META_FIELD_NAMES.includes(fieldName) ||
       // @ts-ignore
-      (indexPattern.fields.byName[fieldName] || { sortable: false }).sortable
+      (indexPattern.fields.getByName(fieldName) || { sortable: false }).sortable
   );
   return sortableFields[0];
 }

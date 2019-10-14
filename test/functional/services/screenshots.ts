@@ -18,19 +18,16 @@
  */
 
 import { resolve, dirname } from 'path';
-import { writeFile, readFileSync } from 'fs';
-import Bluebird, { fromNode as fcb, promisify } from 'bluebird';
-import mkdirp from 'mkdirp';
+import { writeFile, readFileSync, mkdir } from 'fs';
+import { promisify } from 'util';
+
 import del from 'del';
 import { comparePngs } from './lib/compare_pngs';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
-type WriteFileAsync = (path: string | number | Buffer | URL, data: any) => Bluebird<void>;
-type MkDirAsync = (dirName: string) => Bluebird<mkdirp.Made>;
-
-const mkdirAsync = promisify(mkdirp) as MkDirAsync;
-const writeFileAsync = promisify(writeFile) as WriteFileAsync;
+const mkdirAsync = promisify(mkdir);
+const writeFileAsync = promisify(writeFile);
 
 export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -65,7 +62,7 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
         await writeFileAsync(baselinePath, readFileSync(sessionPath));
         return 0;
       } else {
-        await mkdirAsync(FAILURE_DIRECTORY);
+        await mkdirAsync(FAILURE_DIRECTORY, { recursive: true });
         return await comparePngs(sessionPath, baselinePath, failurePath, SESSION_DIRECTORY, log);
       }
     }
@@ -82,8 +79,8 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
       try {
         log.info(`Taking screenshot "${path}"`);
         const screenshot = await (el ? el.takeScreenshot() : browser.takeScreenshot());
-        await fcb(cb => mkdirp(dirname(path), cb));
-        await fcb(cb => writeFile(path, screenshot, 'base64', cb));
+        await mkdirAsync(dirname(path), { recursive: true });
+        await writeFileAsync(path, screenshot, 'base64');
       } catch (err) {
         log.error('SCREENSHOT FAILED');
         log.error(err);
