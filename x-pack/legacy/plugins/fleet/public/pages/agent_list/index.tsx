@@ -28,6 +28,7 @@ import { AgentHealth } from '../../components/agent_health';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { usePagination } from '../../hooks/use_pagination';
 import { SearchBar } from '../../components/search_bar';
+import { AgentEnrollmentFlyout } from './components/agent_enrollment';
 
 interface RouterProps {
   libs: FrontendLibs;
@@ -42,8 +43,10 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
 
   // Table and search states
   const [search, setSearch] = useState('');
-
   const { pagination, pageSizeOptions, setPagination } = usePagination();
+
+  // Agent enrollment flyout state
+  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
 
   // Fetch agents method
   const fetchAgents = async () => {
@@ -151,7 +154,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
         </h2>
       }
       actions={
-        <EuiButton fill iconType="plusInCircle">
+        <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
           <FormattedMessage
             id="xpack.fleet.agentList.addButton"
             defaultMessage="Install new agent"
@@ -164,6 +167,10 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
   return (
     <EuiPageBody>
       <EuiPageContent>
+        {isEnrollmentFlyoutOpen ? (
+          <AgentEnrollmentFlyout libs={libs} onClose={() => setIsEnrollmentFlyoutOpen(false)} />
+        ) : null}
+
         <EuiTitle size="l">
           <h1>
             <FormattedMessage id="xpack.fleet.agentList.pageTitle" defaultMessage="Elastic Fleet" />
@@ -185,7 +192,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
             <SearchBar libs={libs} value={search} onChange={setSearch} fieldPrefix="agents" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiButton fill iconType="plusInCircle">
+            <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
                 id="xpack.fleet.agentList.addButton"
                 defaultMessage="Install new agent"
