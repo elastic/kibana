@@ -44,7 +44,7 @@ import { RequestHandlerParams } from '../../../../ui/public/visualize/loader/emb
 import { tabifyAggResponse } from '../../../../ui/public/agg_response/tabify/tabify';
 import { KibanaContext, KibanaDatatable } from '../../common';
 import { ExpressionFunction, KibanaDatatableColumn } from '../../types';
-import { setup as data } from '../../../data/public/legacy';
+import { start as data } from '../../../data/public/legacy';
 
 const name = 'esaggs';
 

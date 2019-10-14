@@ -49,7 +49,7 @@ export function setBreadcrumbs(options: SetBreadcrumbOptions) {
       },
       {
         text: options.metaData.title,
-        'data-test-subj': 'graphCurrentWorkspaceBreadcrumb',
+        'data-test-subj': 'graphCurrentGraphBreadcrumb',
       },
     ]);
   } else {

@@ -7,6 +7,12 @@ import { transactionSampleRateRt } from './index';
 import { isRight } from 'fp-ts/lib/Either';
 
 describe('transactionSampleRateRt', () => {
+  it('does not accept empty values', () => {
+    expect(isRight(transactionSampleRateRt.decode(undefined))).toBe(false);
+    expect(isRight(transactionSampleRateRt.decode(null))).toBe(false);
+    expect(isRight(transactionSampleRateRt.decode(''))).toBe(false);
+  });
+
   it('accepts both strings and numbers as values', () => {
     expect(isRight(transactionSampleRateRt.decode('0.5'))).toBe(true);
     expect(isRight(transactionSampleRateRt.decode(0.5))).toBe(true);

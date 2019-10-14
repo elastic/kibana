@@ -179,9 +179,9 @@ export function cloneJob(jobId) {
         }
       } else {
         // otherwise use the currentJob
-        mlJobService.currentJob = job;
+        mlJobService.tempJobCloningObjects.job = job;
       }
-      window.location.href = `#/jobs/new_job`;
+      window.location.href = '#/jobs/new_job';
     })
     .catch((error) => {
       mlMessageBarService.notify.error(error);

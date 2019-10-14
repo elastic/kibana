@@ -5,9 +5,18 @@
  */
 
 import React from 'react';
+import chrome from 'ui/chrome';
 
 import styled from 'styled-components';
-import { EuiButton, EuiPopoverTitle, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiText,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as i18n from './translations';
 
@@ -38,14 +47,27 @@ export const UpgradeContents = React.memo(() => {
         />
       </EuiText>
       <EuiSpacer />
-      <EuiButton
-        href="https://www.elastic.co/subscriptions"
-        iconType="popout"
-        iconSide="right"
-        target="_blank"
-      >
-        {i18n.UPGRADE_BUTTON}
-      </EuiButton>
+      <EuiFlexGroup gutterSize="s" wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            href="https://www.elastic.co/subscriptions"
+            iconType="popout"
+            iconSide="right"
+            target="_blank"
+          >
+            {i18n.UPGRADE_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            href={`${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`}
+            iconType="gear"
+            target="_blank"
+          >
+            {i18n.LICENSE_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </PopoverContentsDiv>
   );
 });
