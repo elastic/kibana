@@ -12,7 +12,6 @@ import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 import { Breadcrumb } from 'ui/chrome';
 
-import { ActionCreator } from 'typescript-fsa';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -22,12 +21,11 @@ import { FlowTargetSelectConnected } from '../../components/page/network/flow_ta
 import { IpOverview } from '../../components/page/network/ip_overview';
 import { UsersTable } from '../../components/page/network/users_table';
 import { TlsTable } from '../../components/page/network/tls_table';
-import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { TlsQuery } from '../../containers/tls';
 import { UsersQuery } from '../../containers/users';
-import { FlowTarget, FlowTargetSourceDest, LastEventIndexKey } from '../../graphql/types';
+import { FlowTargetSourceDest, LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -37,245 +35,105 @@ import { NetworkEmptyPage } from './network_empty_page';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { NetworkTopNFlowTable } from '../../components/page/network/network_top_n_flow_table';
 import * as i18n from './translations';
+import { IPDetailsComponentProps } from './types';
 import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
-import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_network_table';
 import { networkToCriteria } from '../../components/ml/criteria/network_to_criteria';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { ConditionalFlexGroup } from './network';
+import { ConditionalFlexGroup } from '../../pages/network/navigation/conditional_flex_group';
 
 const TlsTableManage = manageQuery(TlsTable);
 const UsersTableManage = manageQuery(UsersTable);
 const IpOverviewManage = manageQuery(IpOverview);
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 
-interface IPDetailsComponentReduxProps {
-  filterQuery: string;
-  flowTarget: FlowTarget;
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
-}
-
-export type IPDetailsComponentProps = IPDetailsComponentReduxProps & { detailName: string };
-
 export const IPDetailsComponent = pure<IPDetailsComponentProps>(
-  ({ detailName, filterQuery, flowTarget, setAbsoluteRangeDatePicker }) => (
+  ({
+    detailName,
+    filterQuery,
+    flowTarget,
+    setAbsoluteRangeDatePicker,
+    to,
+    from,
+    setQuery,
+    isInitializing,
+  }) => (
     <>
       <WithSource sourceId="default" data-test-subj="ip-details-page">
         {({ indicesExist, indexPattern }) => {
           const ip = decodeIpv6(detailName);
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <StickyContainer>
-              <GlobalTime>
-                {({ to, from, setQuery, isInitializing }) => (
-                  <>
-                    <FiltersGlobal>
-                      <NetworkKql
-                        indexPattern={indexPattern}
-                        setQuery={setQuery}
-                        type={networkModel.NetworkType.details}
-                      />
-                    </FiltersGlobal>
+              <>
+                <FiltersGlobal>
+                  <NetworkKql
+                    indexPattern={indexPattern}
+                    setQuery={setQuery}
+                    type={networkModel.NetworkType.details}
+                  />
+                </FiltersGlobal>
 
-                    <HeaderPage
-                      data-test-subj="ip-details-headline"
-                      subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
-                      title={ip}
-                      draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
-                    >
-                      <FlowTargetSelectConnected />
-                    </HeaderPage>
+                <HeaderPage
+                  data-test-subj="ip-details-headline"
+                  subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
+                  title={ip}
+                  draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
+                >
+                  <FlowTargetSelectConnected />
+                </HeaderPage>
 
-                    <IpOverviewQuery
-                      skip={isInitializing}
-                      sourceId="default"
-                      filterQuery={filterQuery}
-                      type={networkModel.NetworkType.details}
-                      ip={ip}
-                    >
-                      {({ id, inspect, ipOverviewData, loading, refetch }) => (
-                        <AnomalyTableProvider
-                          criteriaFields={networkToCriteria(detailName, flowTarget)}
-                          startDate={from}
-                          endDate={to}
-                          skip={isInitializing}
-                        >
-                          {({ isLoadingAnomaliesData, anomaliesData }) => (
-                            <IpOverviewManage
-                              id={id}
-                              inspect={inspect}
-                              ip={ip}
-                              data={ipOverviewData}
-                              anomaliesData={anomaliesData}
-                              loading={loading}
-                              isLoadingAnomaliesData={isLoadingAnomaliesData}
-                              type={networkModel.NetworkType.details}
-                              flowTarget={flowTarget}
-                              refetch={refetch}
-                              setQuery={setQuery}
-                              startDate={from}
-                              endDate={to}
-                              narrowDateRange={(score, interval) => {
-                                const fromTo = scoreIntervalToDateTime(score, interval);
-                                setAbsoluteRangeDatePicker({
-                                  id: 'global',
-                                  from: fromTo.from,
-                                  to: fromTo.to,
-                                });
-                              }}
-                            />
-                          )}
-                        </AnomalyTableProvider>
-                      )}
-                    </IpOverviewQuery>
-
-                    <EuiHorizontalRule />
-
-                    <ConditionalFlexGroup direction="column">
-                      <EuiFlexItem>
-                        <NetworkTopNFlowQuery
-                          endDate={to}
-                          filterQuery={filterQuery}
-                          flowTarget={FlowTargetSourceDest.source}
-                          ip={ip}
-                          skip={isInitializing}
-                          sourceId="default"
-                          startDate={from}
-                          type={networkModel.NetworkType.details}
-                        >
-                          {({
-                            id,
-                            inspect,
-                            isInspected,
-                            loading,
-                            loadPage,
-                            networkTopNFlow,
-                            pageInfo,
-                            refetch,
-                            totalCount,
-                          }) => (
-                            <NetworkTopNFlowTableManage
-                              data={networkTopNFlow}
-                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                              flowTargeted={FlowTargetSourceDest.source}
-                              id={id}
-                              indexPattern={indexPattern}
-                              inspect={inspect}
-                              isInspect={isInspected}
-                              loading={loading}
-                              loadPage={loadPage}
-                              refetch={refetch}
-                              setQuery={setQuery}
-                              showMorePagesIndicator={getOr(
-                                false,
-                                'showMorePagesIndicator',
-                                pageInfo
-                              )}
-                              totalCount={totalCount}
-                              type={networkModel.NetworkType.details}
-                            />
-                          )}
-                        </NetworkTopNFlowQuery>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem>
-                        <NetworkTopNFlowQuery
-                          endDate={to}
-                          flowTarget={FlowTargetSourceDest.destination}
-                          filterQuery={filterQuery}
-                          ip={ip}
-                          skip={isInitializing}
-                          sourceId="default"
-                          startDate={from}
-                          type={networkModel.NetworkType.details}
-                        >
-                          {({
-                            id,
-                            inspect,
-                            isInspected,
-                            loading,
-                            loadPage,
-                            networkTopNFlow,
-                            pageInfo,
-                            refetch,
-                            totalCount,
-                          }) => (
-                            <NetworkTopNFlowTableManage
-                              data={networkTopNFlow}
-                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                              flowTargeted={FlowTargetSourceDest.destination}
-                              id={id}
-                              indexPattern={indexPattern}
-                              inspect={inspect}
-                              isInspect={isInspected}
-                              loading={loading}
-                              loadPage={loadPage}
-                              refetch={refetch}
-                              setQuery={setQuery}
-                              showMorePagesIndicator={getOr(
-                                false,
-                                'showMorePagesIndicator',
-                                pageInfo
-                              )}
-                              totalCount={totalCount}
-                              type={networkModel.NetworkType.details}
-                            />
-                          )}
-                        </NetworkTopNFlowQuery>
-                      </EuiFlexItem>
-                    </ConditionalFlexGroup>
-
-                    <EuiSpacer />
-
-                    <UsersQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      flowTarget={flowTarget}
-                      ip={ip}
-                      skip={isInitializing}
-                      sourceId="default"
+                <IpOverviewQuery
+                  skip={isInitializing}
+                  sourceId="default"
+                  filterQuery={filterQuery}
+                  type={networkModel.NetworkType.details}
+                  ip={ip}
+                >
+                  {({ id, inspect, ipOverviewData, loading, refetch }) => (
+                    <AnomalyTableProvider
+                      criteriaFields={networkToCriteria(detailName, flowTarget)}
                       startDate={from}
-                      type={networkModel.NetworkType.details}
+                      endDate={to}
+                      skip={isInitializing}
                     >
-                      {({
-                        id,
-                        inspect,
-                        isInspected,
-                        users,
-                        totalCount,
-                        pageInfo,
-                        loading,
-                        loadPage,
-                        refetch,
-                      }) => (
-                        <UsersTableManage
-                          data={users}
+                      {({ isLoadingAnomaliesData, anomaliesData }) => (
+                        <IpOverviewManage
                           id={id}
                           inspect={inspect}
-                          isInspect={isInspected}
+                          ip={ip}
+                          data={ipOverviewData}
+                          anomaliesData={anomaliesData}
+                          loading={loading}
+                          isLoadingAnomaliesData={isLoadingAnomaliesData}
+                          type={networkModel.NetworkType.details}
                           flowTarget={flowTarget}
-                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                          loading={loading}
-                          loadPage={loadPage}
-                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
                           refetch={refetch}
                           setQuery={setQuery}
-                          totalCount={totalCount}
-                          type={networkModel.NetworkType.details}
+                          startDate={from}
+                          endDate={to}
+                          narrowDateRange={(score, interval) => {
+                            const fromTo = scoreIntervalToDateTime(score, interval);
+                            setAbsoluteRangeDatePicker({
+                              id: 'global',
+                              from: fromTo.from,
+                              to: fromTo.to,
+                            });
+                          }}
                         />
                       )}
-                    </UsersQuery>
+                    </AnomalyTableProvider>
+                  )}
+                </IpOverviewQuery>
 
-                    <EuiSpacer />
+                <EuiHorizontalRule />
 
-                    <TlsQuery
+                <ConditionalFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <NetworkTopNFlowQuery
                       endDate={to}
                       filterQuery={filterQuery}
-                      flowTarget={flowTarget}
+                      flowTarget={FlowTargetSourceDest.source}
                       ip={ip}
                       skip={isInitializing}
                       sourceId="default"
@@ -286,51 +144,176 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         id,
                         inspect,
                         isInspected,
-                        tls,
-                        totalCount,
-                        pageInfo,
                         loading,
                         loadPage,
+                        networkTopNFlow,
+                        pageInfo,
                         refetch,
+                        totalCount,
                       }) => (
-                        <TlsTableManage
-                          data={tls}
+                        <NetworkTopNFlowTableManage
+                          data={networkTopNFlow}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                          flowTargeted={FlowTargetSourceDest.source}
                           id={id}
+                          indexPattern={indexPattern}
                           inspect={inspect}
                           isInspect={isInspected}
-                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           loading={loading}
                           loadPage={loadPage}
-                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
                           refetch={refetch}
                           setQuery={setQuery}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
                           totalCount={totalCount}
                           type={networkModel.NetworkType.details}
                         />
                       )}
-                    </TlsQuery>
+                    </NetworkTopNFlowQuery>
+                  </EuiFlexItem>
 
-                    <EuiSpacer />
-
-                    <AnomaliesNetworkTable
-                      startDate={from}
+                  <EuiFlexItem>
+                    <NetworkTopNFlowQuery
                       endDate={to}
-                      skip={isInitializing}
+                      flowTarget={FlowTargetSourceDest.destination}
+                      filterQuery={filterQuery}
                       ip={ip}
+                      skip={isInitializing}
+                      sourceId="default"
+                      startDate={from}
                       type={networkModel.NetworkType.details}
+                    >
+                      {({
+                        id,
+                        inspect,
+                        isInspected,
+                        loading,
+                        loadPage,
+                        networkTopNFlow,
+                        pageInfo,
+                        refetch,
+                        totalCount,
+                      }) => (
+                        <NetworkTopNFlowTableManage
+                          data={networkTopNFlow}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                          flowTargeted={FlowTargetSourceDest.destination}
+                          id={id}
+                          indexPattern={indexPattern}
+                          inspect={inspect}
+                          isInspect={isInspected}
+                          loading={loading}
+                          loadPage={loadPage}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                          totalCount={totalCount}
+                          type={networkModel.NetworkType.details}
+                        />
+                      )}
+                    </NetworkTopNFlowQuery>
+                  </EuiFlexItem>
+                </ConditionalFlexGroup>
+
+                <EuiSpacer />
+
+                <UsersQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  flowTarget={flowTarget}
+                  ip={ip}
+                  skip={isInitializing}
+                  sourceId="default"
+                  startDate={from}
+                  type={networkModel.NetworkType.details}
+                >
+                  {({
+                    id,
+                    inspect,
+                    isInspected,
+                    users,
+                    totalCount,
+                    pageInfo,
+                    loading,
+                    loadPage,
+                    refetch,
+                  }) => (
+                    <UsersTableManage
+                      data={users}
+                      id={id}
+                      inspect={inspect}
+                      isInspect={isInspected}
                       flowTarget={flowTarget}
-                      narrowDateRange={(score, interval) => {
-                        const fromTo = scoreIntervalToDateTime(score, interval);
-                        setAbsoluteRangeDatePicker({
-                          id: 'global',
-                          from: fromTo.from,
-                          to: fromTo.to,
-                        });
-                      }}
+                      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                      loading={loading}
+                      loadPage={loadPage}
+                      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      totalCount={totalCount}
+                      type={networkModel.NetworkType.details}
                     />
-                  </>
-                )}
-              </GlobalTime>
+                  )}
+                </UsersQuery>
+
+                <EuiSpacer />
+
+                <TlsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  flowTarget={flowTarget}
+                  ip={ip}
+                  skip={isInitializing}
+                  sourceId="default"
+                  startDate={from}
+                  type={networkModel.NetworkType.details}
+                >
+                  {({
+                    id,
+                    inspect,
+                    isInspected,
+                    tls,
+                    totalCount,
+                    pageInfo,
+                    loading,
+                    loadPage,
+                    refetch,
+                  }) => (
+                    <TlsTableManage
+                      data={tls}
+                      id={id}
+                      inspect={inspect}
+                      isInspect={isInspected}
+                      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                      loading={loading}
+                      loadPage={loadPage}
+                      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      totalCount={totalCount}
+                      type={networkModel.NetworkType.details}
+                    />
+                  )}
+                </TlsQuery>
+
+                <EuiSpacer />
+
+                <AnomaliesNetworkTable
+                  startDate={from}
+                  endDate={to}
+                  skip={isInitializing}
+                  ip={ip}
+                  type={networkModel.NetworkType.details}
+                  flowTarget={flowTarget}
+                  narrowDateRange={(score, interval) => {
+                    const fromTo = scoreIntervalToDateTime(score, interval);
+                    setAbsoluteRangeDatePicker({
+                      id: 'global',
+                      from: fromTo.from,
+                      to: fromTo.to,
+                    });
+                  }}
+                />
+              </>
             </StickyContainer>
           ) : (
             <>
