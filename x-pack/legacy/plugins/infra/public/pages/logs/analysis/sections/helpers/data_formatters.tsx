@@ -174,27 +174,31 @@ export const getTotalNumberOfLogsForPartition = (
 export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayload['data']) => {
   return results.histogramBuckets.reduce<Record<MLSeverityScoreCategories, RectAnnotationDatum[]>>(
     (annotatedBucketsBySeverity, bucket) => {
-      const maxAnomalyScoresByPartition = bucket.partitions.reduce<Record<string, number>>(
-        (bucketMaxAnomalyScoresByPartition, partition) => {
-          if (partition.maximumAnomalyScore < ML_SEVERITY_SCORES.warning) {
-            return bucketMaxAnomalyScoresByPartition;
-          }
-          return {
-            ...bucketMaxAnomalyScoresByPartition,
-            [partition.partitionId ? partition.partitionId : 'unknown']: parseInt(
-              Number(partition.maximumAnomalyScore).toFixed(0),
-              10
-            ),
-          };
-        },
-        {}
-      );
+      const maxAnomalyScoresByPartition = bucket.partitions.reduce<
+        Array<{ partitionId: string; maximumAnomalyScore: number }>
+      >((bucketMaxAnomalyScoresByPartition, partition) => {
+        if (partition.maximumAnomalyScore < ML_SEVERITY_SCORES.warning) {
+          return bucketMaxAnomalyScoresByPartition;
+        }
+        return [
+          ...bucketMaxAnomalyScoresByPartition,
+          {
+            partitionId: partition.partitionId ? partition.partitionId : 'unknown',
+            maximumAnomalyScore: parseInt(Number(partition.maximumAnomalyScore).toFixed(0), 10),
+          },
+        ];
+      }, []);
 
-      if (Object.keys(maxAnomalyScoresByPartition).length === 0) {
+      if (maxAnomalyScoresByPartition.length === 0) {
         return annotatedBucketsBySeverity;
       }
       const severityCategory = getSeverityCategoryForScore(
-        Math.max(...Object.values(maxAnomalyScoresByPartition))
+        Math.max(
+          ...maxAnomalyScoresByPartition.map(partitionScore => partitionScore.maximumAnomalyScore)
+        )
+      );
+      const sortedMaxAnomalyScoresByPartition = maxAnomalyScoresByPartition.sort(
+        (a, b) => b.maximumAnomalyScore - a.maximumAnomalyScore
       );
       return {
         ...annotatedBucketsBySeverity,
@@ -206,7 +210,7 @@ export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayl
               x1: bucket.startTime + results.bucketDuration,
             },
             details: JSON.stringify({
-              anomalyScoresByPartition: maxAnomalyScoresByPartition,
+              anomalyScoresByPartition: sortedMaxAnomalyScoresByPartition,
             }),
           },
         ],
