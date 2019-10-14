@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 
 const TEST_INDEX_PATTERN = 'date-nanos';
-const TEST_ANCHOR_TYPE = '_doc';
 const TEST_DEFAULT_CONTEXT_SIZE = 1;
 const TEST_STEP_SIZE = 3;
 
@@ -45,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('displays predessors - anchor - successors in right order ', async function () {
-      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, 'AU_x3-TaGFA8no6Qj999Z');
+      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qj999Z');
       const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [
         'Sep 18, 2019 @ 06:50:13.000000000-2',
@@ -56,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('displays correctly when predecessors and successors are loaded', async function () {
-      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, 'AU_x3-TaGFA8no6Qjisd');
+      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();
       const actualRowsText = await docTable.getRowsText();
