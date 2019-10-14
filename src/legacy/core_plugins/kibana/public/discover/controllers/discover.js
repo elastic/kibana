@@ -124,7 +124,7 @@ uiRoutes
     resolve: {
       ip: function (Promise, indexPatterns, config, Private) {
         const State = Private(StateProvider);
-        return indexPatterns.getCache().then((indexPatterns)=> {
+        return indexPatterns.getCache().then((indexPatternList)=> {
           /**
            *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
            *  the load order of AppState conflicts with the load order of many other things
@@ -135,11 +135,11 @@ uiRoutes
            *  @type {State}
            */
           const state = new State('_a', {});
-          const id = getIndexPatternId(state.index, indexPatterns, config.get('defaultIndex'));
+          const id = getIndexPatternId(state.index, indexPatternList, config.get('defaultIndex'));
           state.destroy();
 
           return Promise.props({
-            list: indexPatterns,
+            list: indexPatternList,
             loaded: indexPatterns.get(id),
             stateVal: state.index,
             stateValFound: !!state.index && id === state.index
