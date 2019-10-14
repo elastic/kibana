@@ -30,5 +30,6 @@ app.directive('discoverFieldSearch', function(reactDirective: any) {
     ['showFilter', { watchDepth: 'value' }],
     ['value', { watchDepth: 'value' }],
     ['filtersActive', { watchDepth: 'value' }],
+    ['types', { watchDepth: 'value'}],
   ]);
 });

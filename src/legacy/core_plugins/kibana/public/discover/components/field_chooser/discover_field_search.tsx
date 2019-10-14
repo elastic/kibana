@@ -18,7 +18,20 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFacetButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import {
+  EuiFacetButton,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiPanel,
+  EuiTitle,
+  EuiSelect,
+  EuiSwitch,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface Props {
@@ -42,6 +55,8 @@ export interface Props {
    * the number of selected filters
    */
   filtersActive: number;
+
+  types: string[];
 }
 
 /**
@@ -54,6 +69,7 @@ export function DiscoverFieldSearch({
   onShowFilter,
   value,
   filtersActive,
+  types,
 }: Props) {
   if (typeof value !== 'string') {
     // at initial rendering value is undefined (angular related), this catches the warning
@@ -70,6 +86,62 @@ export function DiscoverFieldSearch({
   const searchPlaceholder = i18n.translate('kbn.discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search fields',
   });
+  const buttonContent = (
+    <EuiFacetButton
+      aria-label={filterBtnAriaLabel}
+      data-test-subj="toggleFieldFilterButton"
+      className="dscToggleFieldFilterButton"
+      icon={<EuiIcon type="filter" />}
+      isSelected={filtersActive > 0}
+      quantity={filtersActive}
+      onClick={() => onShowFilter()}
+    >
+      <FormattedMessage
+        id="kbn.discover.fieldChooser.fieldFilterFacetButtonLabel"
+        defaultMessage="Fields filtered"
+      />
+    </EuiFacetButton>
+  );
+
+  const typeOptions = types ? types.map(type => {
+    return { value: type, text: type };
+  }) : [{ value: undefined, text: 'any'}];
+
+  const options = [
+    { value: undefined, text: 'any' },
+    { value: true, text: 'yes' },
+    { value: false, text: 'no' },
+  ];
+
+  const aggregatableSelect = (
+    <EuiSelect
+      id="aggregatableSelect"
+      options={options}
+      value={options[0].value}
+      onChange={() => {}}
+      aria-label="Use aria labels when no actual label is in use"
+    />
+  );
+
+  const searchableSelect = (
+    <EuiSelect
+      id="searchableSelect"
+      options={options}
+      value={options[0].value}
+      onChange={() => {}}
+      aria-label="Use aria labels when no actual label is in use"
+    />
+  );
+
+  const typeSelect = (
+    <EuiSelect
+      id="typeSelect"
+      options={typeOptions}
+      value={typeOptions[0].value}
+      onChange={() => {}}
+      aria-label="Use aria labels when no actual label is in use"
+    />
+  );
 
   return (
     <React.Fragment>
@@ -86,20 +158,44 @@ export function DiscoverFieldSearch({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFacetButton
-        aria-label={filterBtnAriaLabel}
-        data-test-subj="toggleFieldFilterButton"
-        className="dscToggleFieldFilterButton"
-        icon={<EuiIcon type="filter" />}
-        isSelected={filtersActive > 0}
-        quantity={filtersActive}
-        onClick={() => onShowFilter()}
-      >
-        <FormattedMessage
-          id="kbn.discover.fieldChooser.fieldFilterFacetButtonLabel"
-          defaultMessage="Fields filtered"
-        />
-      </EuiFacetButton>
+      <div className="lnsInnerIndexPatternDataPanel__filtersWrapper">
+        <EuiPopover
+          id="dataPanelTypeFilter"
+          panelClassName="euiFilterGroup__popoverPanel"
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+          display="block"
+          isOpen={true}
+          closePopover={() => {}}
+          button={buttonContent}
+        >
+          <EuiPopoverTitle>
+            {i18n.translate('xpack.lens.indexPatterns.filterByTypeLabel', {
+              defaultMessage: 'Filter by type',
+            })}
+          </EuiPopoverTitle>
+          <EuiPanel paddingSize="s">
+            <EuiTitle size="xxs">
+              <h4>aggregatable</h4>
+            </EuiTitle>
+            {aggregatableSelect}
+            <EuiTitle size="xxs">
+              <h4>searchable</h4>
+            </EuiTitle>
+            {searchableSelect}
+            <EuiTitle size="xxs">
+              <h4>type</h4>
+            </EuiTitle>
+            {typeSelect}
+            <EuiSpacer size="s" />
+            <EuiSwitch
+              label="Hide missing fields"
+              checked={true}
+              onChange={()=> {}}
+            />
+          </EuiPanel>
+        </EuiPopover>
+      </div>
     </React.Fragment>
   );
 }
