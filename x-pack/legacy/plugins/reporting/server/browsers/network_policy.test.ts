@@ -11,16 +11,9 @@ describe('Network Policy', () => {
     expect(allowRequest('https://kibana.com/cool/route/bro', [])).toEqual(true);
   });
 
-  it('allows requests when no rules match', () => {
-    const url = 'https://kibana.com/cool/route/bro';
-    const rules = [{ allow: true }];
-
-    expect(allowRequest(url, rules)).toEqual(true);
-  });
-
   it('denies requests when no rules match', () => {
-    const url = 'https://kibana.com/cool/route/bro';
-    const rules = [{ allow: false }];
+    const url = 'https://not-kibana.com/cool/route/bro';
+    const rules = [{ allow: true, host: 'kibana.com' }];
 
     expect(allowRequest(url, rules)).toEqual(false);
   });

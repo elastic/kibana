@@ -45,5 +45,5 @@ export const allowRequest = (url: string, rules: FirewallRule[]) => {
     return isRuleMatch ? rule.allow : undefined;
   }, undefined);
 
-  return typeof allowed === 'undefined' || allowed;
+  return typeof allowed !== 'undefined' ? allowed : false;
 };
