@@ -4,34 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import styled, { css } from 'styled-components';
 
-interface AsideProps {
-  border?: boolean;
-}
+import { Bar, BarProps } from './styles';
 
-const Aside = styled.aside.attrs({
-  className: 'siemUtilityBar',
-})<AsideProps>`
-  ${({ border, theme }) => css`
-    ${border &&
-      css`
-        border-bottom: ${theme.eui.euiBorderThin};
-        padding-bottom: ${theme.eui.paddingSizes.s};
-      `}
-  `}
-`;
-Aside.displayName = 'Aside';
-
-export interface UtilityBarProps extends AsideProps {
+export interface UtilityBarProps extends BarProps {
   children: React.ReactNode;
 }
 
 export const UtilityBar = React.memo<UtilityBarProps>(({ border, children }) => (
-  <Aside border={border}>
-    <EuiFlexGroup justifyContent="spaceBetween">{children}</EuiFlexGroup>
-  </Aside>
+  <Bar border={border}>{children}</Bar>
 ));
 UtilityBar.displayName = 'UtilityBar';

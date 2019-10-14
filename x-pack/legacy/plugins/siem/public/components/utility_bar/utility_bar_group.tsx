@@ -5,38 +5,14 @@
  */
 
 import React from 'react';
-import styled, { css } from 'styled-components';
 
-const Group = styled.div.attrs({
-  className: 'siemUtilityBar__group',
-})`
-  ${({ theme }) => css`
-    border-right: ${theme.eui.euiBorderThin};
-    padding-right: ${theme.eui.paddingSizes.m};
-
-    &:last-child {
-      border-right: none;
-      padding-right: 0;
-    }
-
-    &,
-    & > * {
-      display: inline-block;
-      margin-right: ${theme.eui.paddingSizes.m};
-
-      &:last-child {
-        margin-right: 0;
-      }
-    }
-  `}
-`;
-Group.displayName = 'Group';
+import { BarGroup } from './styles';
 
 export interface UtilityBarGroupProps {
   children: React.ReactNode;
 }
 
 export const UtilityBarGroup = React.memo<UtilityBarGroupProps>(({ children }) => (
-  <Group>{children}</Group>
+  <BarGroup>{children}</BarGroup>
 ));
 UtilityBarGroup.displayName = 'UtilityBarGroup';

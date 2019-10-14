@@ -4,24 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled, { css } from 'styled-components';
 
-const Section = styled(EuiFlexItem).attrs({
-  className: 'siemUtilityBar__section',
-})`
-  ${({ theme }) => css`
-    display: block;
-  `}
-`;
-Section.displayName = 'Section';
+import { BarSection } from './styles';
 
 export interface UtilityBarSectionProps {
   children: React.ReactNode;
 }
 
 export const UtilityBarSection = React.memo<UtilityBarSectionProps>(({ children }) => (
-  <Section grow={false}>{children}</Section>
+  <BarSection>{children}</BarSection>
 ));
 UtilityBarSection.displayName = 'UtilityBarSection';

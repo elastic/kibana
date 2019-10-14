@@ -4,32 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import styled, { css } from 'styled-components';
 
-interface LinkProps {
-  href?: string;
-  onClick?: Function;
-}
+import { BarActionLink, BarActionLinkProps } from './styles';
 
-const Link = styled(EuiLink).attrs({
-  className: 'siemUtilityBar__action',
-})<LinkProps>`
-  ${({ theme }) => css`
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-  `}
-`;
-Link.displayName = 'Link';
-
-export interface UtilityBarActionProps extends LinkProps {
+export interface UtilityBarActionProps extends BarActionLinkProps {
   children: React.ReactNode;
 }
 
 export const UtilityBarAction = React.memo<UtilityBarActionProps>(({ children, href, onClick }) => (
-  <Link href={href} onClick={onClick}>
+  <BarActionLink href={href} onClick={onClick}>
     {children}
-  </Link>
+  </BarActionLink>
 ));
 UtilityBarAction.displayName = 'UtilityBarAction';

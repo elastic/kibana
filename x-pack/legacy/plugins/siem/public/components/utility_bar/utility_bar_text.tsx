@@ -5,24 +5,14 @@
  */
 
 import React from 'react';
-import styled, { css } from 'styled-components';
 
-const Text = styled.p.attrs({
-  className: 'siemUtilityBar__text',
-})`
-  ${({ theme }) => css`
-    color: ${theme.eui.textColors.subdued};
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-  `}
-`;
-Text.displayName = 'Text';
+import { BarText } from './styles';
 
 export interface UtilityBarTextProps {
   children: string;
 }
 
 export const UtilityBarText = React.memo<UtilityBarTextProps>(({ children }) => (
-  <Text>{children}</Text>
+  <BarText>{children}</BarText>
 ));
 UtilityBarText.displayName = 'UtilityBarText';
