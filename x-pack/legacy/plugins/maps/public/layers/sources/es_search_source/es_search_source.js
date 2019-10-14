@@ -470,4 +470,9 @@ export class ESSearchSource extends AbstractESSource {
       path: geoField.name,
     };
   }
+
+  _getRawFieldName = (fieldName) => {
+    // fieldName is rawFieldName for documents source since the source uses raw documents instead of aggregated metrics
+    return fieldName;
+  }
 }

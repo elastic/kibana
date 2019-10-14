@@ -74,15 +74,19 @@ export class StylePropertyLegendRow extends Component {
 
   state = {
     label: '',
+    hasLoadedFieldFormatter: false,
   }
 
   componentDidMount() {
     this._isMounted = true;
     this._prevLabel = undefined;
+    this._fieldValueFormatter = undefined;
     this._loadLabel();
+    this._loadFieldFormatter();
   }
 
   componentDidUpdate() {
+    // label could change so it needs to be loaded on update
     this._loadLabel();
   }
 
@@ -90,10 +94,19 @@ export class StylePropertyLegendRow extends Component {
     this._isMounted = false;
   }
 
+  _loadFieldFormatter = async () => {
+    this._fieldValueFormatter = await this.props.getFieldFormatter(this.props.options.field);
+    if (this._isMounted) {
+      this.setState({ hasLoadedFieldFormatter: true });
+    }
+  }
+
   _loadLabel = async () => {
     if (this._isStatic()) {
       return;
     }
+
+    console.log(this.props.options);
 
     // have to load label and then check for changes since field name stays constant while label may change
     const label = await this.props.getFieldLabel(this.props.options.field.name);
@@ -112,6 +125,14 @@ export class StylePropertyLegendRow extends Component {
         !this.props.options.field || !this.props.options.field.name;
   }
 
+  _formatValue = value => {
+    if (!this._fieldValueFormatter) {
+      return value;
+    }
+
+    return this._fieldValueFormatter(value);
+  }
+
   render() {
     const { name, options, range } = this.props;
     if (this._isStatic()) {
@@ -127,11 +148,21 @@ export class StylePropertyLegendRow extends Component {
       header = renderHeaderWithIcons(getSymbolSizeIcons());
     }
 
+    const min = _.get(range, 'min', '');
+    const minLabel = this.state.hasLoadedFieldFormatter && min !== ''
+      ? this._formatValue(min)
+      : min;
+
+    const max = _.get(range, 'max', '');
+    const maxLabel = this.state.hasLoadedFieldFormatter && max !== ''
+      ? this._formatValue(max)
+      : max;
+
     return (
       <StyleLegendRow
         header={header}
-        minLabel={_.get(range, 'min', '')}
-        maxLabel={_.get(range, 'max', '')}
+        minLabel={minLabel}
+        maxLabel={maxLabel}
         propertyLabel={getVectorStyleLabel(name)}
         fieldLabel={this.state.label}
       />
@@ -145,4 +176,5 @@ StylePropertyLegendRow.propTypes = {
   options: PropTypes.oneOfType(styleOptionShapes).isRequired,
   range: rangeShape,
   getFieldLabel: PropTypes.func.isRequired,
+  getFieldFormatter: PropTypes.func.isRequired,
 };
