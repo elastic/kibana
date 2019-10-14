@@ -12,6 +12,7 @@
         on-show-filter="toggleShowFilter"
         show-filter="showFilter"
         value="filter.vals.name"
+        filters-active="filtersActive"
       >
       </discover-field-search>
       <div data-test-subj="discoverFieldFilter" class="dscFieldFilter" ng-show="showFilter">
@@ -41,7 +42,7 @@
             class="form-control">
           </select>
         </div>
-        <div class="form-group"  ng-show="showFilter">
+        <div class="form-group" ng-show="showFilter">
           <label
             for="discoverFieldChooserFilterType"
             i18n-id="kbn.discover.fieldChooser.filter.typeLabel"
