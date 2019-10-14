@@ -86,8 +86,8 @@ export function registerLensUsageCollector(
           ...state.saved,
           events_30_days: eventsLast30,
           events_90_days: eventsLast90,
-          suggestions_last_30_days: suggestionsLast30,
-          suggestions_last_90_days: suggestionsLast90,
+          suggestion_events_30_days: suggestionsLast30,
+          suggestion_events_90_days: suggestionsLast90,
         };
       } catch (err) {
         return {

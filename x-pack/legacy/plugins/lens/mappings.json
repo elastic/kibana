@@ -26,6 +26,9 @@
       },
       "date": {
         "type": "date"
+      },
+      "count": {
+        "type": "integer"
       }
     }
   }

@@ -26,7 +26,6 @@ export async function initLensUsageRoute(
   plugins: {
     savedObjects: SavedObjectsLegacyService;
     config: KibanaConfig;
-    // server: Server;
   }
 ) {
   const router = setup.http.createRouter();
@@ -36,17 +35,10 @@ export async function initLensUsageRoute(
       validate: {
         params: schema.object({}),
         body: schema.object({
-          clicks: schema.arrayOf(
-            schema.object({
-              name: schema.string(),
-              date: schema.string(),
-            })
-          ),
-          suggestionClicks: schema.arrayOf(
-            schema.object({
-              name: schema.string(),
-              date: schema.string(),
-            })
+          clicks: schema.mapOf(schema.string(), schema.mapOf(schema.string(), schema.number())),
+          suggestionClicks: schema.mapOf(
+            schema.string(),
+            schema.mapOf(schema.string(), schema.number())
           ),
         }),
       },
@@ -59,27 +51,40 @@ export async function initLensUsageRoute(
       try {
         const client = getSavedObjectsClient(plugins.savedObjects, dataClient.callAsCurrentUser);
 
-        const clickEvents = clicks.map(event => ({
-          type: 'lens-ui-telemetry',
-          attributes: {
-            name: event.name,
-            type: 'click',
-            date: event.date,
-          },
-        }));
-        const suggestionEvents = suggestionClicks.map(event => ({
-          type: 'lens-ui-telemetry',
-          attributes: {
-            name: event.name,
-            type: 'suggestion',
-            date: event.date,
-          },
-        }));
+        const allEvents: Array<{
+          type: 'lens-ui-telemetry';
+          attributes: {};
+        }> = [];
 
-        const events = clickEvents.concat(suggestionEvents);
+        clicks.forEach((subMap, date) => {
+          subMap.forEach((count, key) => {
+            allEvents.push({
+              type: 'lens-ui-telemetry',
+              attributes: {
+                name: key,
+                date,
+                count,
+                type: 'regular',
+              },
+            });
+          });
+        });
+        suggestionClicks.forEach((subMap, date) => {
+          subMap.forEach((count, key) => {
+            allEvents.push({
+              type: 'lens-ui-telemetry',
+              attributes: {
+                name: key,
+                date,
+                count,
+                type: 'suggestion',
+              },
+            });
+          });
+        });
 
-        if (events.length > 0) {
-          await client.bulkCreate(events);
+        if (allEvents.length) {
+          await client.bulkCreate(allEvents);
         }
 
         return res.ok({ body: {} });
