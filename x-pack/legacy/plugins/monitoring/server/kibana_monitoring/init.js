@@ -15,11 +15,11 @@ import { BulkUploader } from './bulk_uploader';
  * @param {Object} kbnServer manager of Kibana services - see `src/legacy/server/kbn_server` in Kibana core
  * @param {Object} server HapiJS server instance
  */
-export function initBulkUploader(kbnServer, server) {
-  const config = server.config();
+export function initBulkUploader({ config, ...params }) {
   const interval = config.get('xpack.monitoring.kibana.collection.interval');
-  return new BulkUploader(server, {
-    kbnServer,
-    interval
+  return new BulkUploader({
+    interval,
+    config,
+    ...params,
   });
 }
