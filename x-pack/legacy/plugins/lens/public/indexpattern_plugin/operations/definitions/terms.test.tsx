@@ -28,6 +28,7 @@ describe('terms', () => {
     state = {
       indexPatternRefs: [],
       indexPatterns: {},
+      existingFields: {},
       currentIndexPatternId: '1',
       showEmptyFields: false,
       layers: {
