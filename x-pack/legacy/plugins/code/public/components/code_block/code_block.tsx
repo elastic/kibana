@@ -17,7 +17,7 @@ export interface Position {
 }
 
 export interface Props {
-  content: string;
+  lines: string[];
   language: string;
   highlightRanges: IRange[];
   onClick: (event: Position) => void;
@@ -25,8 +25,9 @@ export interface Props {
   /**
    * Returns the line number to display for a given line.
    * @param lineIndex The index of the given line (0-indexed)
+   * @param lines The array of lines
    */
-  lineNumber: (lineIndex: number) => string;
+  lineNumber: (lineIndex: number, lines: string[]) => string;
 }
 
 export class CodeBlock extends React.PureComponent<Props> {
@@ -44,10 +45,10 @@ export class CodeBlock extends React.PureComponent<Props> {
   private currentHighlightDecorations: string[] = [];
 
   public async componentDidMount() {
-    const { content, highlightRanges, language, onClick } = this.props;
+    const { highlightRanges, language, onClick } = this.props;
 
     if (this.el.current) {
-      await this.tryLoadFile(content, language);
+      await this.tryLoadFile(this.text, language);
       this.ed!.onMouseDown((e: editor.IEditorMouseEvent) => {
         if (
           onClick &&
@@ -85,18 +86,18 @@ export class CodeBlock extends React.PureComponent<Props> {
     }
   }
 
-  private async tryLoadFile(code: string, language: string) {
+  private async tryLoadFile(text: string, language: string) {
     try {
-      await monaco.editor.colorize(code, language, {});
-      this.loadFile(code, language);
+      await monaco.editor.colorize(text, language, {});
+      this.loadFile(text, language);
     } catch (e) {
-      this.loadFile(code);
+      this.loadFile(text);
     }
   }
 
-  private loadFile(code: string, language: string = 'text') {
+  private loadFile(text: string, language: string = 'text') {
     this.ed = monaco.editor.create(this.el.current!, {
-      value: code,
+      value: text,
       language,
       lineNumbers: this.lineNumber,
       readOnly: true,
@@ -122,13 +123,14 @@ export class CodeBlock extends React.PureComponent<Props> {
   }
 
   public componentDidUpdate(prevProps: Readonly<Props>) {
-    const { content, highlightRanges } = this.props;
+    const { highlightRanges } = this.props;
+    const prevText = prevProps.lines.join('\n');
 
-    if (prevProps.content !== content || prevProps.highlightRanges !== highlightRanges) {
+    if (prevText !== this.text || prevProps.highlightRanges !== highlightRanges) {
       if (this.ed) {
         const model = this.ed.getModel();
         if (model) {
-          model.setValue(content);
+          model.setValue(this.text);
 
           if (highlightRanges.length) {
             const decorations = highlightRanges!.map((range: IRange) => {
@@ -156,14 +158,15 @@ export class CodeBlock extends React.PureComponent<Props> {
   }
 
   public render() {
-    const height = this.lines.length * 18;
+    const height = this.props.lines.length * 18;
 
     return <div ref={this.el} className="codeContainer__monaco" style={{ height }} />;
   }
 
-  private lineNumber = (lineIndex: number) => this.props.lineNumber(lineIndex - 1);
+  private lineNumber = (lineIndex: number) =>
+    this.props.lineNumber(lineIndex - 1, this.props.lines);
 
-  private get lines(): string[] {
-    return this.props.content.split('\n');
+  private get text(): string {
+    return this.props.lines.join('\n');
   }
 }
