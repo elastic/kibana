@@ -232,5 +232,4 @@ function getNextMidnight() {
   nextMidnight.setHours(0, 0, 0, 0);
   nextMidnight.setDate(nextMidnight.getDate() + 1);
   return nextMidnight;
-  return nextMidnight;
 }

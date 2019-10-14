@@ -25,7 +25,12 @@ import {
 } from '../datatable_visualization_plugin';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
-import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
+import {
+  LensReportManager,
+  setReportManager,
+  stopReportManager,
+  trackUiEvent,
+} from '../lens_ui_telemetry';
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -66,6 +71,8 @@ export class AppPlugin {
     this.instance = editorFrameStartInterface.createInstance({});
 
     // Sets it in memory for future click tracking
+    // If there was any previous manager set, clear it
+    stopReportManager();
     setReportManager(
       new LensReportManager({
         storage: new Storage(localStorage),
@@ -119,9 +126,7 @@ export class AppPlugin {
       this.instance.unmount();
     }
 
-    if (this.reporter) {
-      this.reporter.stop();
-    }
+    stopReportManager();
 
     // TODO this will be handled by the plugin platform itself
     indexPatternDatasourceStop();
