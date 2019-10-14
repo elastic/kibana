@@ -17,5 +17,16 @@
  * under the License.
  */
 
-
-export { EMSClient } from '../../../../core_plugins/tile_map/common/ems_client';
+export function createInitialQueryParametersState(defaultStepSize, tieBreakerField) {
+  return {
+    anchorId: null,
+    columns: [],
+    defaultStepSize,
+    filters: [],
+    indexPatternId: null,
+    predecessorCount: 0,
+    successorCount: 0,
+    sort: [],
+    tieBreakerField,
+  };
+}
