@@ -286,7 +286,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       const indexLink = await find.byXPath(`//a[descendant::*[text()='logstash-*']]`);
       await indexLink.click();
     }
-    
+
     async isIndexPatternListEmpty() {
       await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
       const indexPatternList = await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable a');
