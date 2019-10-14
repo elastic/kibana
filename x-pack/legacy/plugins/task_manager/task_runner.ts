@@ -30,7 +30,7 @@ const defaultBackoffPerFailure = 5 * 60 * 1000;
 export interface TaskRunner {
   isExpired: boolean;
   cancel: CancelFunction;
-  claimOwnership: () => Promise<boolean>;
+  markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<RunResult>;
   toString?: () => string;
 }
@@ -152,12 +152,25 @@ export class TaskManagerRunner implements TaskRunner {
    *
    * @returns {Promise<boolean>}
    */
-  public async claimOwnership(): Promise<boolean> {
+  public async markTaskAsRunning(): Promise<boolean> {
     const VERSION_CONFLICT_STATUS = 409;
     const attempts = this.instance.attempts + 1;
     const now = new Date();
 
+    const ownershipClaimedUntil = this.instance.retryAt;
+
     try {
+      const { id } = this.instance;
+
+      const timeUntilClaimExpires = howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
+      if (timeUntilClaimExpires < 0) {
+        this.logger.debug(
+          `[Task Runner] Task ${id} started after ownership expired (${Math.abs(
+            timeUntilClaimExpires
+          )}ms after expiry)`
+        );
+      }
+
       this.instance = await this.store.update({
         ...this.instance,
         status: 'running',
@@ -173,6 +186,17 @@ export class TaskManagerRunner implements TaskRunner {
               addDuration: this.definition.timeout,
             }),
       });
+
+      const timeUntilClaimExpiresAfterUpdate = howManyMsUntilOwnershipClaimExpires(
+        ownershipClaimedUntil
+      );
+      if (timeUntilClaimExpiresAfterUpdate < 0) {
+        this.logger.debug(
+          `[Task Runner] Task ${id} ran after ownership expired (${Math.abs(
+            timeUntilClaimExpiresAfterUpdate
+          )}ms after expiry)`
+        );
+      }
 
       return true;
     } catch (error) {
@@ -246,6 +270,7 @@ export class TaskManagerRunner implements TaskRunner {
       status,
       startedAt: null,
       retryAt: null,
+      ownerId: null,
       attempts: result.error ? this.instance.attempts : 0,
     });
 
@@ -322,4 +347,8 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
     params: instance.params || {},
     state: instance.state || {},
   };
+}
+
+function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
+  return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
 }
