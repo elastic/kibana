@@ -149,11 +149,11 @@ export function FieldEditor({
             id: 'root',
             items: [
               {
-                name: i18n.translate('xpack.graph.fieldManager.displaySettingsLabel', {
-                  defaultMessage: 'Edit display settings',
+                name: i18n.translate('xpack.graph.fieldManager.settingsLabel', {
+                  defaultMessage: 'Edit settings',
                 }),
                 icon: <EuiIcon type="pencil" size="m" />,
-                panel: 'displaySettings',
+                panel: 'settings',
               },
               {
                 name: isDisabled
@@ -195,8 +195,8 @@ export function FieldEditor({
             ],
           },
           {
-            id: 'displaySettings',
-            title: i18n.translate('xpack.graph.fieldManager.displayFormTitle', {
+            id: 'settings',
+            title: i18n.translate('xpack.graph.fieldManager.settingsFormTitle', {
               defaultMessage: 'Edit',
             }),
             width: 380,
