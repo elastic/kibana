@@ -22,6 +22,9 @@ import { BucketAggType } from './_bucket_agg_type';
 import { createFilterIpRange } from './create_filter/ip_range';
 import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
 import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
+import { fieldFormats } from '../../registry/field_formats';
+import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
+import { ipRange } from '../../utils/ip_range';
 import { i18n } from '@kbn/i18n';
 
 export const ipRangeBucketAgg = new BucketAggType({
@@ -30,11 +33,18 @@ export const ipRangeBucketAgg = new BucketAggType({
     defaultMessage: 'IPv4 Range',
   }),
   createFilter: createFilterIpRange,
-  getKey: function (bucket, key) {
-    if (key) return key;
-    const from = _.get(bucket, 'from', '-Infinity');
-    const to = _.get(bucket, 'to', 'Infinity');
-    return `${from} to ${to}`;
+  getKey: function (bucket, key, agg) {
+    if (agg.params.ipRangeType === 'mask') {
+      return { type: 'mask', mask: key };
+    }
+    return { type: 'range', from: bucket.from, to: bucket.to };
+  },
+  getFormat: function (agg) {
+    const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('ip'));
+    const IpRangeFormat = FieldFormat.from(function (range) {
+      return ipRange.toString(range, formatter);
+    });
+    return new IpRangeFormat();
   },
   makeLabel: function (aggConfig) {
     return i18n.translate('common.ui.aggTypes.buckets.ipRangeLabel', {

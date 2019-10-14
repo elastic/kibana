@@ -22,13 +22,12 @@ import { buildRangeFilter } from '@kbn/es-query';
 
 export function createFilterIpRange(aggConfig, key) {
   let range;
-  if (aggConfig.params.ipRangeType === 'mask') {
-    range = new CidrMask(key).getRange();
+  if (key.type === 'mask') {
+    range = new CidrMask(key.mask).getRange();
   } else {
-    const [from, to] = key.split(/\s+to\s+/);
     range = {
-      from: from === '-Infinity' ? -Infinity : from,
-      to: to === 'Infinity' ? Infinity : to
+      from: key.from ? key.from : -Infinity,
+      to: key.to ? key.to : Infinity
     };
   }
 

@@ -20,6 +20,7 @@ import { set } from 'lodash';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
+import { aggTypes } from '../..';
 import AggParamWriterProvider from '../agg_param_writer';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import chrome from '../../../chrome';
@@ -38,6 +39,15 @@ describe('date_range params', function () {
     timeField = indexPattern.timeFieldName;
     paramWriter = new AggParamWriter({ aggType: 'date_range' });
   }));
+
+  describe('getKey', () => {
+    const dateRange = aggTypes.buckets.find(agg => agg.name === 'date_range');
+    it('should return object', () => {
+      const bucket = { from: 'from-date', to: 'to-date', key: 'from-dateto-date' };
+      expect(dateRange.getKey(bucket)).to.equal({ from: 'from-date', to: 'to-date' });
+    });
+  });
+
   describe('time_zone', () => {
     beforeEach(() => {
       sinon.stub(config, 'get');

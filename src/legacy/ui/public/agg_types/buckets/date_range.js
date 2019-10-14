@@ -24,6 +24,7 @@ import { BucketAggType } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { fieldFormats } from '../../registry/field_formats';
 import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_ranges';
+import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -36,12 +37,15 @@ export const dateRangeBucketAgg = new BucketAggType({
     defaultMessage: 'Date Range',
   }),
   createFilter: createFilterDateRange,
-  getKey: function (bucket, key, agg) {
-    const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
-    return dateRange.toString(bucket, formatter);
+  getKey: function ({ from, to }) {
+    return { from, to };
   },
-  getFormat: function () {
-    return fieldFormats.getDefaultInstance('string');
+  getFormat: function (agg) {
+    const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
+    const DateRangeFormat = FieldFormat.from(function (range) {
+      return dateRange.toString(range, formatter);
+    });
+    return new DateRangeFormat();
   },
   makeLabel: function (aggConfig) {
     return aggConfig.getFieldDisplayName() + ' date ranges';

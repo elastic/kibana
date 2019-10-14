@@ -17,14 +17,13 @@
  * under the License.
  */
 
-export const dateRange = {
-  toString: function ({ from, to }, format) {
-    if (!from) {
-      return 'Before ' + format(to);
-    } else if (!to) {
-      return 'After ' + format(from);
-    } else {
-      return format(from) + ' to ' + format(to);
+export const ipRange = {
+  toString: function (range, format) {
+    if (range.type === 'mask') {
+      return format(range.mask);
     }
+    const from = range.from ? format(range.from) : '-Infinity';
+    const to = range.to ? format(range.to) : 'Infinity';
+    return `${from} to ${to}`;
   },
 };

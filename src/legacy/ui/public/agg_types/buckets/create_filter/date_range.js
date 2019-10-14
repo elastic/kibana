@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import chrome from '../../../chrome';
-import { dateRange } from '../../../utils/date_range';
 import { buildRangeFilter } from '@kbn/es-query';
+import moment from 'moment';
 
-const config = chrome.getUiSettingsClient();
-
-export function createFilterDateRange(agg, key) {
-  const range = dateRange.parse(key, config.get('dateFormat'));
-
+export function createFilterDateRange(agg, { from, to }) {
   const filter = {};
-  if (range.from) filter.gte = range.from.toISOString();
-  if (range.to) filter.lt = range.to.toISOString();
-  if (range.to && range.from) filter.format = 'strict_date_optional_time';
+  if (from) filter.gte = moment(from).toISOString();
+  if (to) filter.lt = moment(to).toISOString();
+  if (to && from) filter.format = 'strict_date_optional_time';
 
   return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
 }
