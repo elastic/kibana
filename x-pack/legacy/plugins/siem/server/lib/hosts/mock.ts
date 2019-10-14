@@ -5,6 +5,7 @@
  */
 
 import { Direction, HostsFields } from '../../graphql/types';
+import { defaultIndexPattern } from '../../../default_index_pattern';
 
 import {
   HostOverviewRequestOptions,
@@ -13,7 +14,7 @@ import {
 } from '.';
 
 export const mockGetHostsOptions: HostsRequestOptions = {
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',
@@ -298,7 +299,7 @@ export const mockGetHostOverviewOptions: HostOverviewRequestOptions = {
     },
   },
   timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   fields: [
     '_id',
     'host.architecture',
@@ -504,7 +505,7 @@ export const mockGetHostOverviewResult = {
 };
 
 export const mockGetHostLastFirstSeenOptions: HostLastFirstSeenRequestOptions = {
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',

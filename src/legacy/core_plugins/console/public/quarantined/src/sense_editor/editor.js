@@ -624,26 +624,35 @@ export default function SenseEditor($el) {
         // pageY is relative to page, so subtract the offset
         // from pageY to get the new top value
         const offsetFromPage = editor.$el.offset().top;
-        let startRow = CURRENT_REQ_RANGE.start.row;
+        const startRow = CURRENT_REQ_RANGE.start.row;
         const startColumn = CURRENT_REQ_RANGE.start.column;
         const session = editor.session;
         const firstLine = session.getLine(startRow);
-
-        if (firstLine.length > session.getWrapLimit() - 5) {
-          // overlap first row
-          if (startRow > 0) {
-            startRow--;
-          }
-          else {
-            startRow++;
-          }
-        }
-
-
-        const topOfReq = editor.renderer.textToScreenCoordinates(startRow, startColumn).pageY - offsetFromPage;
+        const maxLineLength = session.getWrapLimit() - 5;
+        const isWrapping = firstLine.length > maxLineLength;
+        const getScreenCoords = (row) => editor.renderer.textToScreenCoordinates(row, startColumn).pageY - offsetFromPage;
+        const topOfReq = getScreenCoords(startRow);
 
         if (topOfReq >= 0) {
-          return set(topOfReq);
+          let offset = 0;
+          if (isWrapping) {
+            // Try get the line height of the text area in pixels.
+            const textArea = editor.$el.find('textArea');
+            const hasRoomOnNextLine = session.getLine(startRow + 1).length < maxLineLength;
+            if (textArea && hasRoomOnNextLine) {
+              // Line height + the number of wraps we have on a line.
+              offset += (session.getRowLength(startRow) * textArea.height());
+            } else {
+              if (startRow > 0) {
+                set(getScreenCoords(startRow - 1, startColumn));
+                return;
+              }
+              set(getScreenCoords(startRow + 1, startColumn));
+              return;
+            }
+          }
+          set(topOfReq + offset);
+          return;
         }
 
         const bottomOfReq = editor.renderer.textToScreenCoordinates(
@@ -652,7 +661,8 @@ export default function SenseEditor($el) {
         ).pageY - offsetFromPage;
 
         if (bottomOfReq >= 0) {
-          return set(0);
+          set(0);
+          return;
         }
       }
 
