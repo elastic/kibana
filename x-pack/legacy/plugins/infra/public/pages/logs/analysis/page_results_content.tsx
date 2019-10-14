@@ -5,8 +5,18 @@
  */
 
 import datemath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPage,
+  EuiPanel,
+  EuiSuperDatePicker,
+  EuiBadge,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
@@ -125,7 +135,36 @@ export const AnalysisResultsContent = ({
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
                 <EuiPanel paddingSize="l">
-                  <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      {!isLoading && logEntryRate ? (
+                        <EuiText size="s">
+                          <FormattedMessage
+                            id={'xpack.infra.logs.analysis.logRateResultsToolbarText'}
+                            defaultMessage={
+                              'Analyzed {numberOfLogs} log entries from {startTime} to {endTime}'
+                            }
+                            values={{
+                              numberOfLogs: (
+                                <EuiBadge color="primary">
+                                  {numeral(logEntryRate.totalNumberOfLogs).format('0.00a')}
+                                </EuiBadge>
+                              ),
+                              startTime: (
+                                <b>
+                                  {moment(queryTimeRange.startTime).format('MMMM D, YYYY h:mm A')}
+                                </b>
+                              ),
+                              endTime: (
+                                <b>
+                                  {moment(queryTimeRange.endTime).format('MMMM D, YYYY h:mm A')}
+                                </b>
+                              ),
+                            }}
+                          />
+                        </EuiText>
+                      ) : null}
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiSuperDatePicker
                         start={selectedTimeRange.startTime}
