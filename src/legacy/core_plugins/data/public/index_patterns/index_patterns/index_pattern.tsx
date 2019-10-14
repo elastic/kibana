@@ -32,7 +32,7 @@ import { NotificationsSetup, SavedObjectsClientContract } from 'src/core/public'
 import { SavedObjectNotFound, DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 
 import { IndexPatternMissingIndices } from '../errors';
-import { Field, FieldList, FieldType } from '../fields';
+import { Field, FieldList, FieldType, FieldListInterface } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { getRoutes } from '../utils';
 import { formatHitProvider } from './format_hit';
@@ -68,7 +68,7 @@ export class IndexPattern implements StaticIndexPattern {
   public type?: string;
   public fieldFormatMap: any;
   public typeMeta: any;
-  public fields: FieldList;
+  public fields: FieldListInterface;
   public timeFieldName: string | undefined;
   public intervalName: string | undefined | null;
   public formatHit: any;
@@ -257,15 +257,17 @@ export class IndexPattern implements StaticIndexPattern {
     // Date value returned in "_source" could be in any number of formats
     // Use a docvalue for each date field to ensure standardized formats when working with date fields
     // indexPattern.flattenHit will override "_source" values when the same field is also defined in "fields"
-    const docvalueFields = reject(this.fields.byType.date, 'scripted').map((dateField: any) => {
-      return {
-        field: dateField.name,
-        format:
-          dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
-            ? 'strict_date_time'
-            : 'date_time',
-      };
-    });
+    const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map(
+      (dateField: any) => {
+        return {
+          field: dateField.name,
+          format:
+            dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
+              ? 'strict_date_time'
+              : 'date_time',
+        };
+      }
+    );
 
     each(this.getScriptedFields(), function(field) {
       scriptFields[field.name] = {
@@ -334,7 +336,7 @@ export class IndexPattern implements StaticIndexPattern {
       throw new DuplicateField(name);
     }
 
-    this.fields.push(
+    this.fields.add(
       new Field(
         this,
         {
@@ -355,21 +357,13 @@ export class IndexPattern implements StaticIndexPattern {
     await this.save();
   }
 
-  removeScriptedField(name: string) {
-    const fieldIndex = _.findIndex(this.fields, {
-      name,
-      scripted: true,
-    });
-
-    if (fieldIndex > -1) {
-      this.fields.splice(fieldIndex, 1);
-      delete this.fieldFormatMap[name];
-      return this.save();
-    }
+  removeScriptedField(field: FieldType) {
+    this.fields.remove(field);
+    return this.save();
   }
 
   async popularizeField(fieldName: string, unit = 1) {
-    const field = this.fields.byName[fieldName];
+    const field = this.fields.getByName(fieldName);
     if (!field) {
       return;
     }
@@ -426,13 +420,13 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   getTimeField() {
-    if (!this.timeFieldName || !this.fields || !this.fields.byName) return;
-    return this.fields.byName[this.timeFieldName];
+    if (!this.timeFieldName || !this.fields || !this.fields.getByName) return;
+    return this.fields.getByName(this.timeFieldName);
   }
 
   getFieldByName(name: string): Field | void {
-    if (!this.fields || !this.fields.byName) return;
-    return this.fields.byName[name];
+    if (!this.fields || !this.fields.getByName) return;
+    return this.fields.getByName(name);
   }
 
   isWildcard() {

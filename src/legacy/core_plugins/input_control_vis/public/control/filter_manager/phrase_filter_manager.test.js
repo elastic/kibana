@@ -35,8 +35,9 @@ describe('PhraseFilterManager', function () {
     const indexPatternMock = {
       id: indexPatternId,
       fields: {
-        byName: {
-          field1: fieldMock
+        getByName: name => {
+          const fields = { field1: fieldMock };
+          return fields[name];
         }
       }
     };
