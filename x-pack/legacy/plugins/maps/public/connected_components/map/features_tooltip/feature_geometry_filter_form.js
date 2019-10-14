@@ -8,11 +8,9 @@ import React, { Component, Fragment } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { createSpatialFilterWithGeometry } from '../../elasticsearch_geo_utils';
-import {
-  GEO_JSON_TYPE,
-} from '../../../common/constants';
-import { GeometryFilterForm } from '../../components/geometry_filter_form';
+import { createSpatialFilterWithGeometry } from '../../../elasticsearch_geo_utils';
+import { GEO_JSON_TYPE } from '../../../../common/constants';
+import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 
 export class FeatureGeometryFilterForm extends Component {
 
