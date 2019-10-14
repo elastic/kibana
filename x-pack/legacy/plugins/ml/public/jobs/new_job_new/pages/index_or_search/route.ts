@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-// @ts-ignore
-import { preConfiguredJobRedirect } from 'plugins/ml/jobs/new_job/wizard/preconfigured_job_redirect';
 import uiRoutes from 'ui/routes';
+import { checkMlNodesAvailable } from '../../../../ml_nodes_check';
+import { preConfiguredJobRedirect } from './preconfigured_job_redirect';
 // @ts-ignore
 import { checkLicenseExpired, checkBasicLicense } from '../../../../license/check_license';
 import { loadIndexPatterns } from '../../../../util/index_utils';

@@ -5,8 +5,9 @@
  */
 
 import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
-import { AdvancedSettings } from '../types';
-import { datasourceSelector, datasourceSaga, requestDatasource } from './datasource';
+import { AdvancedSettings, WorkspaceField } from '../types';
+import { datasourceSelector, requestDatasource } from './datasource';
+import { datasourceSaga } from './datasource.sagas';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
@@ -52,6 +53,19 @@ describe('datasource saga', () => {
     dispatchRequest();
     await waitForPromise();
     expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith('test-pattern', newSettings);
+  });
+
+  it('should not carry over diversity field into new workspace', async () => {
+    const newSettings = {
+      timeoutMillis: 123,
+      sampleDiversityField: { name: 'field1' } as WorkspaceField,
+    } as AdvancedSettings;
+    env.store.dispatch(updateSettings(newSettings));
+    dispatchRequest();
+    await waitForPromise();
+    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith('test-pattern', {
+      timeoutMillis: 123,
+    });
   });
 
   it('should error with a toast and abort if index pattern is not found', async () => {
