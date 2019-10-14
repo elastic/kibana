@@ -18,6 +18,7 @@ interface Arguments {
 export function to(): ExpressionFunction<'to', any, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().to;
   const errors = getFunctionErrors().to;
+
   return {
     name: 'to',
     aliases: [],
@@ -26,7 +27,7 @@ export function to(): ExpressionFunction<'to', any, Arguments, any> {
       type: {
         types: ['string'],
         help: argHelp.type,
-        aliases: ['_', 'type'],
+        aliases: ['_'],
         multi: true,
       },
     },

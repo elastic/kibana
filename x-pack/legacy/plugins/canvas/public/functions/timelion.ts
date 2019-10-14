@@ -21,7 +21,7 @@ interface Arguments {
   timezone: string;
 }
 
-export function timelion(): ExpressionFunction<'timelion', Filter, Arguments, Datatable> {
+export function timelion(): ExpressionFunction<'timelion', Filter, Arguments, Promise<Datatable>> {
   const { help, args: argHelp } = getFunctionHelp().timelion;
 
   return {
@@ -59,7 +59,7 @@ export function timelion(): ExpressionFunction<'timelion', Filter, Arguments, Da
         default: 'UTC',
       },
     },
-    fn: (context, args) => {
+    fn: (context, args): Promise<Datatable> => {
       // Timelion requires a time range. Use the time range from the timefilter element in the
       // workpad, if it exists. Otherwise fall back on the function args.
       const timeFilter = context.and.find(and => and.type === 'time');
@@ -92,9 +92,8 @@ export function timelion(): ExpressionFunction<'timelion', Filter, Arguments, Da
         data: body,
       }).then(resp => {
         const seriesList = resp.data.sheet[0].list;
-
         const rows = flatten(
-          seriesList.map(series =>
+          seriesList.map((series: { data: any[]; label: string }) =>
             series.data.map(row => ({ '@timestamp': row[0], value: row[1], label: series.label }))
           )
         );

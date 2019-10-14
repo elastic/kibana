@@ -22,7 +22,7 @@ interface Arguments {
   ungrouped: boolean;
 }
 
-function getFiltersByGroup(allFilters: string[], groups = [], ungrouped = false): string[] {
+function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = false): string[] {
   if (!groups || groups.length === 0) {
     if (!ungrouped) {
       return allFilters;
