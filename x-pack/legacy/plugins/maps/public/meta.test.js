@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EMSClient } from '@elastic/ems-client';
 import {
   getEMSClient
 } from './meta';
 
+jest.mock('@elastic/ems-client');
 
 jest.mock('ui/chrome',
   () => ({
@@ -19,6 +21,8 @@ jest.mock('ui/chrome',
         return false;
       } else if (key === 'isEmsEnabled') {
         return true;
+      } else if (key === 'emsManifestServiceUrl') {
+        return 'https://ems-manifest';
       }
     },
     getUiSettingsClient: () => {
@@ -30,16 +34,6 @@ jest.mock('ui/chrome',
     },
   })
 );
-
-jest.mock('ui/vis/map/ems_client', () => {
-  const module =  require('ui/vis/__tests__/map/ems_client_util.js');
-  function EMSClient() {
-    return module.getEMSClient();
-  }
-  return {
-    EMSClient: EMSClient
-  };
-});
 
 jest.mock('./kibana_services', () => {
   return {
@@ -53,20 +47,10 @@ jest.mock('./kibana_services', () => {
 
 describe('default use without proxy', () => {
 
-  it('should return absolute urls', async () => {
+  it('should construct EMSClient with absolute manifest url', async () => {
+    getEMSClient();
+    const mockEmsClientCall = EMSClient.mock.calls[0];
+    expect(mockEmsClientCall[0].manifestServiceUrl.startsWith('https://ems-manifest')).toBe(true);
 
-    const emsClient = getEMSClient();
-    const tmsServices = await emsClient.getTMSServices();
-
-    const rasterUrl = await tmsServices[0].getUrlTemplate();
-    expect(rasterUrl.startsWith('https://raster-style.foobar')).toBe(true);
-
-    const fileLayers = await emsClient.getFileLayers();
-    const file1Url = fileLayers[0].getDefaultFormatUrl();
-
-    expect(file1Url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
-
-    const file2Url = fileLayers[1].getDefaultFormatUrl();
-    expect(file2Url.startsWith('https://vector-staging.maps.elastic.co/files')).toBe(true);
   });
 });

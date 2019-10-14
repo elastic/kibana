@@ -40,6 +40,7 @@ import { ossTelemetry } from './legacy/plugins/oss_telemetry';
 import { fileUpload } from './legacy/plugins/file_upload';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { snapshotRestore } from './legacy/plugins/snapshot_restore';
+import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
@@ -73,6 +74,7 @@ module.exports = function (kibana) {
     infra(kibana),
     taskManager(kibana),
     rollup(kibana),
+    transform(kibana),
     siem(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),

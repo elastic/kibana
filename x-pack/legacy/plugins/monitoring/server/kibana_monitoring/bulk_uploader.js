@@ -38,7 +38,7 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor(server, { kbnServer, interval }) {
+  constructor({ config, log, interval, xpackMainPlugin, elasticsearchPlugin, kbnServerStatus, kbnServerVersion }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -46,20 +46,28 @@ export class BulkUploader {
     this._timer = null;
     this._interval = interval;
     this._lastFetchUsageTime = null;
+<<<<<<< HEAD
     this._usageInterval = TELEMETRY_COLLECTION_INTERVAL;
+=======
+    this._usageInterval = xpackMainPlugin.telemetryCollectionInterval;
+>>>>>>> fd1b6b8f9506b3e0fd746bc477708a7765fb35db
 
     this._log = {
-      debug: message => server.log(['debug', ...LOGGING_TAGS], message),
-      info: message => server.log(['info', ...LOGGING_TAGS], message),
-      warn: message => server.log(['warning', ...LOGGING_TAGS], message)
+      debug: message => log(['debug', ...LOGGING_TAGS], message),
+      info: message => log(['info', ...LOGGING_TAGS], message),
+      warn: message => log(['warning', ...LOGGING_TAGS], message)
     };
 
-    this._cluster = server.plugins.elasticsearch.createCluster('admin', {
+    this._cluster = elasticsearchPlugin.createCluster('admin', {
       plugins: [monitoringBulk],
     });
 
-    this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
-    this._getKibanaInfoForStats = () => getKibanaInfoForStats(server, kbnServer);
+    this._callClusterWithInternalUser = callClusterFactory({ plugins: { elasticsearch: elasticsearchPlugin } }).getCallClusterInternal();
+    this._getKibanaInfoForStats = () => getKibanaInfoForStats({
+      kbnServerStatus,
+      kbnServerVersion,
+      config
+    });
   }
 
   /*

@@ -8,7 +8,7 @@ import { DetailSymbolInformation } from '@elastic/lsp-extension';
 import { IRange } from 'monaco-editor';
 
 import { DiffKind } from '../common/git_diff';
-import { Repository, SourceHit } from '../model';
+import { Repository } from '../model';
 import { RepositoryUri } from './repository';
 
 export interface Document {

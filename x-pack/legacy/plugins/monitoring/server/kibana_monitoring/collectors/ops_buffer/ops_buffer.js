@@ -13,11 +13,11 @@ import { CloudDetector } from '../../../cloud';
  * @param {Object} server HapiJS server instance
  * @return {Object} the revealed `push` and `flush` modules
  */
-export function opsBuffer(server) {
+export function opsBuffer({ config, log, getOSInfo }) {
   // determine the cloud service in the background
   const cloudDetector = new CloudDetector();
 
-  if(server.config().get('xpack.monitoring.tests.cloud_detector.enabled')) {
+  if(config.get('xpack.monitoring.tests.cloud_detector.enabled')) {
     cloudDetector.detectCloudService();
   }
 
@@ -26,7 +26,7 @@ export function opsBuffer(server) {
   return {
     push(event) {
       eventRoller.addEvent(event);
-      server.log(['debug', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG], 'Received Kibana Ops event data');
+      log(['debug', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG], 'Received Kibana Ops event data');
     },
 
     hasEvents() {
@@ -44,7 +44,7 @@ export function opsBuffer(server) {
       if (eventRollup && eventRollup.os) {
         eventRollup.os = {
           ...eventRollup.os,
-          ...(await server.getOSInfo())
+          ...(await getOSInfo())
         };
       }
 
