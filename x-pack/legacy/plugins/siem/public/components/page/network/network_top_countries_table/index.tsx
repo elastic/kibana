@@ -200,7 +200,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
 NetworkTopCountriesTableComponent.displayName = 'NetworkTopCountriesTableComponent';
 
 const mapStateToProps = (state: State, ownProps: OwnProps) =>
-  networkSelectors.topCountriesSelector(ownProps.flowTargeted);
+  networkSelectors.topCountriesSelector(ownProps.flowTargeted, ownProps.type);
 
 export const NetworkTopCountriesTable = connect(
   mapStateToProps,

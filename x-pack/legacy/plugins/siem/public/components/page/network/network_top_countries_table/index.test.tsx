@@ -59,6 +59,31 @@ describe('NetworkTopCountries Table Component', () => {
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });
+    test('it renders the IP Details NetworkTopCountries table', () => {
+      const wrapper = shallow(
+        <ReduxStoreProvider store={store}>
+          <NetworkTopCountriesTable
+            data={mockData.NetworkTopCountries.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
+            flowTargeted={FlowTargetSourceDest.source}
+            id="topCountriesSource"
+            indexPattern={mockIndexPattern}
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.NetworkTopCountries.pageInfo
+            )}
+            totalCount={mockData.NetworkTopCountries.totalCount}
+            type={networkModel.NetworkType.details}
+          />
+        </ReduxStoreProvider>
+      );
+
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
   });
 
   describe('Sorting on Table', () => {

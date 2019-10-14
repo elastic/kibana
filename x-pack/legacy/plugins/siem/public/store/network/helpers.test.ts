@@ -141,8 +141,7 @@ describe('Network redux store', () => {
           dnsSortField: { field: 'uniqueDomains', direction: 'desc' },
           isPtrIncluded: false,
         },
-
-        topCountriesDestination: {
+        [NetworkTableType.topCountriesDestination]: {
           activePage: 0,
           limit: 10,
           topCountriesSort: {
@@ -150,7 +149,7 @@ describe('Network redux store', () => {
             field: 'bytes_out',
           },
         },
-        topCountriesSource: {
+        [NetworkTableType.topCountriesSource]: {
           activePage: 0,
           limit: 10,
           topCountriesSort: {
@@ -172,6 +171,22 @@ describe('Network redux store', () => {
           activePage: 0,
           limit: 10,
           topNFlowSort: { field: 'bytes_out', direction: 'desc' },
+        },
+        [IpDetailsTableType.topCountriesDestination]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: {
+            direction: 'desc',
+            field: 'bytes_out',
+          },
+        },
+        [IpDetailsTableType.topCountriesSource]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: {
+            direction: 'desc',
+            field: 'bytes_out',
+          },
         },
         [IpDetailsTableType.tls]: {
           activePage: 0,
