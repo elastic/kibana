@@ -49,7 +49,7 @@ import {
   SavedObjectsServiceSetup,
 } from 'src/core/server/saved_objects/saved_objects_service';
 import { KibanaMigrator } from '../saved_objects/migrations';
-import { ScopedSavedObjectsClientProvider } from '../saved_objects';
+import { ISavedObjectsClientProvider } from '../saved_objects';
 import { httpServiceMock } from '../http/http_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
@@ -105,7 +105,7 @@ beforeEach(() => {
         },
       },
       savedObjects: {
-        clientProvider: {} as ScopedSavedObjectsClientProvider,
+        clientProvider: {} as ISavedObjectsClientProvider,
       },
     },
     plugins: { 'plugin-id': 'plugin-value' },
@@ -118,7 +118,7 @@ beforeEach(() => {
       },
       savedObjects: {
         migrator: {} as KibanaMigrator,
-        clientProvider: {} as ScopedSavedObjectsClientProvider,
+        clientProvider: {} as ISavedObjectsClientProvider,
       },
       plugins: { contracts: new Map() },
     },

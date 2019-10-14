@@ -162,6 +162,8 @@ export class Server {
         const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
         return {
           savedObjects: {
+            // Note: the client provider doesn't support new ES clients
+            // emitted from adminClient$
             client: coreSetup.savedObjects.clientProvider.getClient(req),
           },
           elasticsearch: {

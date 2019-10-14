@@ -27,7 +27,7 @@ import { of } from 'rxjs';
 import * as legacyElasticsearch from 'elasticsearch';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
-import { ScopedSavedObjectsClientProvider } from '.';
+import { SavedObjectsClientProvider } from '.';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -70,7 +70,7 @@ describe('SavedObjectsService', () => {
       } as unknown) as SavedObjectsSetupDeps;
 
       const savedObjectsSetup = await soService.setup(coreSetup);
-      expect(savedObjectsSetup.clientProvider).toBeInstanceOf(ScopedSavedObjectsClientProvider);
+      expect(savedObjectsSetup.clientProvider).toBeInstanceOf(SavedObjectsClientProvider);
     });
   });
 

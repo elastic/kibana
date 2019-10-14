@@ -24,7 +24,8 @@ import {
   SavedObjectsSchema,
   SavedObjectsRepository,
   SavedObjectsSerializer,
-  ScopedSavedObjectsClientProvider,
+  SavedObjectsClientProvider,
+  ISavedObjectsClientProvider,
 } from './';
 import { getRootPropertiesObjects } from './mappings';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
@@ -41,7 +42,7 @@ import { Logger } from '..';
  * @public
  */
 export interface SavedObjectsServiceSetup {
-  clientProvider: Pick<ScopedSavedObjectsClientProvider, keyof ScopedSavedObjectsClientProvider>;
+  clientProvider: ISavedObjectsClientProvider;
 }
 
 /**
@@ -49,7 +50,7 @@ export interface SavedObjectsServiceSetup {
  */
 export interface SavedObjectsServiceStart {
   migrator: IKibanaMigrator;
-  clientProvider: Pick<ScopedSavedObjectsClientProvider, keyof ScopedSavedObjectsClientProvider>;
+  clientProvider: ISavedObjectsClientProvider;
 }
 
 /** @internal */
@@ -66,9 +67,7 @@ export class SavedObjectsService
   implements CoreService<SavedObjectsServiceSetup, SavedObjectsServiceStart> {
   private migrator: KibanaMigrator | undefined;
   private logger: Logger;
-  private clientProvider:
-    | ScopedSavedObjectsClientProvider<KibanaRequest<unknown, unknown, unknown>>
-    | undefined;
+  private clientProvider: ISavedObjectsClientProvider<KibanaRequest> | undefined;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
@@ -115,7 +114,7 @@ export class SavedObjectsService
     const serializer = new SavedObjectsSerializer(schema);
     const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
 
-    this.clientProvider = new ScopedSavedObjectsClientProvider<KibanaRequest>({
+    this.clientProvider = new SavedObjectsClientProvider<KibanaRequest>({
       defaultClientFactory({ request }) {
         const repository = new SavedObjectsRepository({
           index: kibanaConfig.index,

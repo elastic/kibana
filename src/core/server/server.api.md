@@ -1409,14 +1409,14 @@ export interface SavedObjectsImportUnsupportedTypeError {
 
 // @internal @deprecated (undocumented)
 export interface SavedObjectsLegacyService<Request = any> {
-    // Warning: (ae-forgotten-export) The symbol "ScopedSavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<Request>['addClientWrapperFactory'];
+    addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider<Request>['addClientWrapperFactory'];
     // (undocumented)
     getSavedObjectsRepository(...rest: any[]): any;
     // (undocumented)
-    getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+    getScopedSavedObjectsClient: SavedObjectsClientProvider<Request>['getClient'];
     // (undocumented)
     importExport: {
         objectLimit: number;
