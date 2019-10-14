@@ -81,6 +81,11 @@ declare module 'elasticsearch' {
     value: number | null;
   }
 
+  interface TotalValue {
+    value: number;
+    relation: string;
+  }
+
   type AggregationResultMap<AggregationOption> = IndexAsString<
     {
       [AggregationName in keyof AggregationOption]: {
@@ -101,9 +106,7 @@ declare module 'elasticsearch' {
         >;
         top_hits: {
           hits: {
-            total: {
-              value: number;
-            };
+            total: TotalValue;
             max_score: number | null;
             hits: Array<{
               _source: AggregationOption[AggregationName] extends {
@@ -149,11 +152,6 @@ declare module 'elasticsearch' {
       }[AggregationType & keyof AggregationOption[AggregationName]];
     }
   >;
-
-  interface TotalValue {
-    value: number;
-    relation: string;
-  }
 
   export type BaseAggregationSearchResponse<HitType, SearchParams> = Pick<
     SearchResponse<HitType>,
