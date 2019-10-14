@@ -21,21 +21,21 @@ import { isArray } from 'lodash';
 import { uiModules } from '../modules';
 import { npStart } from '../new_platform';
 
-const npDocTitle = npStart.core.chrome.docTitle;
+const npDocTitle = () => npStart.core.chrome.docTitle;
 
 function change(title, complete) {
-  npDocTitle.change({
+  npDocTitle().change({
     parts: isArray(title) ? title : [title],
     excludeBase: complete,
   });
 }
 
 function reset() {
-  npDocTitle.reset(false);
+  npDocTitle().reset(false);
 }
 
 function update() {
-  npDocTitle.apply();
+  npDocTitle().apply();
 }
 
 export const docTitle = {
