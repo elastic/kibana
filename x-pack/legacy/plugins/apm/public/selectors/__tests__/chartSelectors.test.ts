@@ -10,6 +10,11 @@ import {
   getResponseTimeSeries,
   getTpmSeries
 } from '../chartSelectors';
+import {
+  successColor,
+  warningColor,
+  errorColor
+} from '../../utils/httpStatusCodeToColor';
 
 describe('chartSelectors', () => {
   describe('getAnomalyScoreSeries', () => {
@@ -93,21 +98,21 @@ describe('chartSelectors', () => {
     it('produces correct series', () => {
       expect(getTpmSeries(apmTimeseries, transactionType)).toEqual([
         {
-          color: theme.euiColorSecondary,
+          color: successColor,
           data: [{ x: 0, y: 5 }, { x: 0, y: 2 }],
           legendValue: '3.5 tpm',
           title: 'HTTP 2xx',
           type: 'linemark'
         },
         {
-          color: theme.euiColorWarning,
+          color: warningColor,
           data: [{ x: 0, y: 1 }],
           legendValue: '1.0 tpm',
           title: 'HTTP 4xx',
           type: 'linemark'
         },
         {
-          color: theme.euiColorDanger,
+          color: errorColor,
           data: [{ x: 0, y: 0 }],
           legendValue: '0.0 tpm',
           title: 'HTTP 5xx',

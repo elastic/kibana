@@ -7,19 +7,19 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { StringMap } from '../../typings/common';
 
-const {
-  euiColorDarkShade,
-  euiColorSecondary,
-  euiColorWarning,
-  euiColorDanger
-} = theme;
+const { euiColorDarkShade, euiColorWarning } = theme;
+
+export const errorColor = '#c23c2b';
+export const neutralColor = euiColorDarkShade;
+export const successColor = '#327a42';
+export const warningColor = euiColorWarning;
 
 const httpStatusCodeColors: StringMap<string> = {
-  1: euiColorDarkShade,
-  2: euiColorSecondary,
-  3: euiColorDarkShade,
-  4: euiColorWarning,
-  5: euiColorDanger
+  1: neutralColor,
+  2: successColor,
+  3: neutralColor,
+  4: warningColor,
+  5: errorColor
 };
 
 function getStatusColor(status: number) {
