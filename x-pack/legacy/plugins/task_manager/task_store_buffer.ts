@@ -11,6 +11,7 @@ import { Updatable } from './task_runner';
 import { BulkUpdateTaskFailureResult } from './task_store';
 import { ConcreteTaskInstance } from './task';
 import { Result, either } from './lib/result_type';
+import { Logger } from './types';
 
 export interface BatchUpdatable extends Updatable {
   bulkUpdate(
@@ -18,7 +19,7 @@ export interface BatchUpdatable extends Updatable {
   ): Promise<Array<Result<ConcreteTaskInstance, BulkUpdateTaskFailureResult>>>;
 }
 
-export function createTaskStoreUpdateBuffer(store: BatchUpdatable): Updatable {
+export function createTaskStoreUpdateBuffer(store: BatchUpdatable, logger: Logger): Updatable {
   const flushBuffer = new Subject<any>();
   const storeUpdateBuffer = new Subject<{
     task: ConcreteTaskInstance;
@@ -49,6 +50,11 @@ export function createTaskStoreUpdateBuffer(store: BatchUpdatable): Updatable {
           });
         })
         .catch(ex => {
+          logger.error(
+            `Failed to perform a bulk update of the following tasks: ${tasks
+              .map(({ task }) => task.id)
+              .join()}`
+          );
           tasks.forEach(({ onFailure }) => onFailure(ex));
         });
     });

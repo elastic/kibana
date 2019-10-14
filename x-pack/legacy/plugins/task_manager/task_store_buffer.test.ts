@@ -8,6 +8,7 @@ import { createTaskStoreUpdateBuffer, BatchUpdatable } from './task_store_buffer
 import { ConcreteTaskInstance } from './task';
 import { asOk, asErr } from './lib/result_type';
 import { BulkUpdateTaskFailureResult } from './task_store';
+import { mockLogger } from './test_utils';
 
 const createTask = (function(): () => ConcreteTaskInstance {
   let counter = 0;
@@ -50,7 +51,7 @@ describe('Task Store Buffer', () => {
         remove: jest.fn(),
       };
 
-      const buffer = createTaskStoreUpdateBuffer(mockStore);
+      const buffer = createTaskStoreUpdateBuffer(mockStore, mockLogger());
 
       expect(buffer.maxAttempts).toEqual(mockStore.maxAttempts);
 
@@ -68,7 +69,7 @@ describe('Task Store Buffer', () => {
         remove: jest.fn(),
       };
 
-      const buffer = createTaskStoreUpdateBuffer(mockStore);
+      const buffer = createTaskStoreUpdateBuffer(mockStore, mockLogger());
 
       const task1 = createTask();
       const task2 = createTask();
@@ -90,7 +91,7 @@ describe('Task Store Buffer', () => {
         remove: jest.fn(),
       };
 
-      const buffer = createTaskStoreUpdateBuffer(mockStore);
+      const buffer = createTaskStoreUpdateBuffer(mockStore, mockLogger());
 
       const task1 = createTask();
       const task2 = createTask();
@@ -137,7 +138,7 @@ describe('Task Store Buffer', () => {
         remove: jest.fn(),
       };
 
-      const buffer = createTaskStoreUpdateBuffer(mockStore);
+      const buffer = createTaskStoreUpdateBuffer(mockStore, mockLogger());
 
       const task1 = createTask();
       const task2 = createTask();
@@ -163,7 +164,8 @@ describe('Task Store Buffer', () => {
         remove: jest.fn(),
       };
 
-      const buffer = createTaskStoreUpdateBuffer(mockStore);
+      const logger = mockLogger();
+      const buffer = createTaskStoreUpdateBuffer(mockStore, logger);
 
       const task1 = createTask();
       const task2 = createTask();
@@ -181,6 +183,10 @@ describe('Task Store Buffer', () => {
         ),
       ]).then(() => {
         expect(mockStore.bulkUpdate).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledTimes(1);
+        expect(logger.error.mock.calls[0][0]).toMatchInlineSnapshot(
+          `"Failed to perform a bulk update of the following tasks: task 12,task 13,task 14"`
+        );
         done();
       });
     });

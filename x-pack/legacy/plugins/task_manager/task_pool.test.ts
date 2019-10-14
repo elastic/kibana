@@ -181,7 +181,9 @@ describe('TaskPool', () => {
     // Allow the task to cancel...
     await cancelled;
 
-    sinon.assert.calledWithMatch(logger.error, /Failed to cancel task "shooooo!"/);
+    expect(logger.error.mock.calls[0][0]).toMatchInlineSnapshot(
+      `"Failed to cancel task \\"shooooo!\\": Error: Dern!"`
+    );
   });
 
   function mockRun() {

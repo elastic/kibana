@@ -73,7 +73,9 @@ describe('TaskPoller', () => {
     await doneWorking;
 
     expect(count).toEqual(2);
-    sinon.assert.calledWithMatch(logger.error, /Dang it/i);
+    expect(logger.error.mock.calls[0][0]).toMatchInlineSnapshot(
+      `"Failed to poll for work: Error: Dang it!"`
+    );
   });
 
   test('is stoppable', async () => {

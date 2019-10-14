@@ -97,7 +97,7 @@ export class TaskManager {
       new TaskManagerRunner({
         logger: this.logger,
         instance,
-        store: createTaskStoreUpdateBuffer(store),
+        store: createTaskStoreUpdateBuffer(store, this.logger),
         definitions: this.definitions,
         beforeRun: this.middleware.beforeRun,
       });

@@ -202,7 +202,7 @@ describe('TaskManagerRunner', () => {
     await promise;
 
     expect(wasCancelled).toBeTruthy();
-    sinon.assert.neverCalledWithMatch(logger.warn, /not cancellable/);
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   test('warns if cancel is called on a non-cancellable task', async () => {
@@ -220,7 +220,10 @@ describe('TaskManagerRunner', () => {
     await runner.cancel();
     await promise;
 
-    sinon.assert.calledWithMatch(logger.warn, /not cancellable/);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
+      `"The task bar \\"foo\\" is not cancellable."`
+    );
   });
 
   test('sets startedAt, status, attempts and retryAt when claiming a task', async () => {
@@ -655,9 +658,10 @@ describe('TaskManagerRunner', () => {
     await runner.run();
 
     if (shouldBeValid) {
-      sinon.assert.notCalled(logger.warn);
+      expect(logger.warn).not.toHaveBeenCalled();
     } else {
-      sinon.assert.calledWith(logger.warn, sinon.match(/invalid task result/i));
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn.mock.calls[0][0]).toMatch(/invalid task result/i);
     }
   }
 
