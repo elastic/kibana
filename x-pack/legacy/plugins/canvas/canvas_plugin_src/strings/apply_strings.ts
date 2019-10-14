@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory, CanvasWorkpad } from '../../types';
+import { ElementFactory, CanvasTemplate } from '../../types';
 import { getElementStrings } from './index';
 
 import { TagStrings } from '../../i18n';
@@ -51,17 +51,13 @@ export const applyElementStrings = (elements: ElementFactory[]) => {
   });
 };
 
-type Template = CanvasWorkpad & {
-  tags: string[];
-};
-
 /**
- * This function takes a set of Canvas Element specification factories, runs them,
- * replaces relevant strings (if available) and returns a new factory.  We do this
+ * This function takes a set of Canvas  templates
+ * replaces tag strings with the translated versions. We do this
  * so the specifications themselves have no dependency on i18n, for clarity for both
  * our and external plugin developers.
  */
-export const applyTemplateStrings = (templates: Template[]) => {
+export const applyTemplateStrings = (templates: CanvasTemplate[]) => {
   return templates.map(template => {
     // Set translated tags
     if (template.tags) {

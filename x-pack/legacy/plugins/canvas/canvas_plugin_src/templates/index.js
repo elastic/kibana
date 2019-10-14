@@ -12,10 +12,10 @@ const statusTemplate = require('./status_report.json');
 const summaryTemplate = require('./summary_report.json');
 
 // Registry expects a function that returns a spec object
-export const templateSpecs = [
+export const templateSpecs = applyTemplateStrings([
   darkTemplate,
   lightTemplate,
   pitchTemplate,
   statusTemplate,
   summaryTemplate,
-].map(template => () => template);
+]);
