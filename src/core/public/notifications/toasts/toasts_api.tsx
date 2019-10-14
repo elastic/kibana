@@ -98,7 +98,7 @@ export class ToastsApi implements IToasts {
     this.overlays = overlays;
   }
 
-  /** Current array of toast messages to show to user. */
+  /** Observable of the toast messages to show to the user. */
   public get$() {
     return this.toasts$.asObservable();
   }
