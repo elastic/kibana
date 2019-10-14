@@ -27,9 +27,14 @@ export const updateIpDetailsTableActivePage = actionCreator<{
   tableType: networkModel.IpDetailsTableType;
 }>('UPDATE_NETWORK_DETAILS_TABLE_ACTIVE_PAGE');
 
+export const setIpDetailsTablesActivePageToZero = actionCreator(
+  'SET_IP_DETAILS_TABLES_ACTIVE_PAGE_TO_ZERO'
+);
+
 export const setNetworkTablesActivePageToZero = actionCreator(
   'SET_NETWORK_TABLES_ACTIVE_PAGE_TO_ZERO'
 );
+
 export const updateDnsLimit = actionCreator<{
   limit: number;
   networkType: networkModel.NetworkType;

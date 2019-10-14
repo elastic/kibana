@@ -93,17 +93,17 @@ describe('Network redux store', () => {
   describe('#setNetworkQueriesActivePageToZero', () => {
     test('set activePage to zero for all queries in hosts page  ', () => {
       expect(setNetworkQueriesActivePageToZero(mockNetworkState, NetworkType.page)).toEqual({
-        topNFlowSource: {
+        [NetworkTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
           topNFlowSort: { field: 'bytes_out', direction: 'desc' },
         },
-        topNFlowDestination: {
+        [NetworkTableType.topNFlowDestination]: {
           activePage: 0,
           limit: 10,
           topNFlowSort: { field: 'bytes_out', direction: 'desc' },
         },
-        dns: {
+        [NetworkTableType.dns]: {
           activePage: 0,
           limit: 10,
           dnsSortField: { field: 'uniqueDomains', direction: 'desc' },
@@ -114,18 +114,26 @@ describe('Network redux store', () => {
 
     test('set activePage to zero for all queries in host details  ', () => {
       expect(setNetworkQueriesActivePageToZero(mockNetworkState, NetworkType.details)).toEqual({
-        topNFlowSource: {
+        [IpDetailsTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
           topNFlowSort: { field: 'bytes_out', direction: 'desc' },
         },
-        topNFlowDestination: {
+        [IpDetailsTableType.topNFlowDestination]: {
           activePage: 0,
           limit: 10,
           topNFlowSort: { field: 'bytes_out', direction: 'desc' },
         },
-        tls: { activePage: 0, limit: 10, tlsSortField: { field: '_id', direction: 'desc' } },
-        users: { activePage: 0, limit: 10, usersSortField: { field: 'name', direction: 'asc' } },
+        [IpDetailsTableType.tls]: {
+          activePage: 0,
+          limit: 10,
+          tlsSortField: { field: '_id', direction: 'desc' },
+        },
+        [IpDetailsTableType.users]: {
+          activePage: 0,
+          limit: 10,
+          usersSortField: { field: 'name', direction: 'asc' },
+        },
       });
     });
   });

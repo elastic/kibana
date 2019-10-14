@@ -18,6 +18,7 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
   applyNetworkFilterQuery,
+  setIpDetailsTablesActivePageToZero,
   setNetworkFilterQueryDraft,
   setNetworkTablesActivePageToZero,
   updateDnsLimit,
@@ -122,6 +123,13 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state.page,
       queries: setNetworkPageQueriesActivePageToZero(state),
     },
+    details: {
+      ...state.details,
+      queries: setNetworkDetailsQueriesActivePageToZero(state),
+    },
+  }))
+  .case(setIpDetailsTablesActivePageToZero, state => ({
+    ...state,
     details: {
       ...state.details,
       queries: setNetworkDetailsQueriesActivePageToZero(state),

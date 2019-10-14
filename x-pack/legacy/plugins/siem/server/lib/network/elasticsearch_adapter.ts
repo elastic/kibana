@@ -116,7 +116,7 @@ const getFlowTargetFromString = (flowAsString: string) =>
   flowAsString === 'source' ? FlowTargetSourceDest.source : FlowTargetSourceDest.destination;
 
 const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
-  result.location.top_geo.hits.hits.length > 0
+  result.location.top_geo.hits.hits.length > 0 && result.location.top_geo.hits.hits[0]._source
     ? {
         geo: getOr(
           '',

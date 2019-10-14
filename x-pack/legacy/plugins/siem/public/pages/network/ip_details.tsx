@@ -200,6 +200,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           id={id}
                           indexPattern={indexPattern}
                           inspect={inspect}
+                          ip={ip}
                           isInspect={isInspected}
                           loading={loading}
                           loadPage={loadPage}
