@@ -6,11 +6,7 @@
 
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunction,
-  ArgumentType,
-} from '../../../../../../src/legacy/core_plugins/interpreter/public';
-
+import { ExpressionFunction, ArgumentType } from 'src/plugins/expressions/common';
 import chartAreaSVG from '../assets/chart_area.svg';
 import chartAreaStackedSVG from '../assets/chart_area_stacked.svg';
 import chartBarSVG from '../assets/chart_bar.svg';

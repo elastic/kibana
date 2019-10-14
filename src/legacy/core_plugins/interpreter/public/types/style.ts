@@ -18,9 +18,9 @@
  */
 
 /* eslint-disable */
-export * from '../../../../../plugins/expressions/public/types/style';
+export * from '../../../../../plugins/expressions/common/types/style';
 export {
   FontLabel as FontFamily,
   FontValue,
-} from '../../../../../plugins/expressions/public/fonts';
+} from '../../../../../plugins/expressions/common/fonts';
 /* eslint-enable */

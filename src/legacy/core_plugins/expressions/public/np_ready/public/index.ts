@@ -20,9 +20,7 @@
 import { PluginInitializerContext } from '../../../../../../core/public';
 import { ExpressionsPublicPlugin } from './plugin';
 
-export * from './plugin';
-export { ExpressionRenderer, ExpressionRendererProps } from './expression_renderer';
-export { IInterpreterRenderFunction } from './types';
+export * from '../../../../../../plugins/expressions/public';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ExpressionsPublicPlugin(initializerContext);

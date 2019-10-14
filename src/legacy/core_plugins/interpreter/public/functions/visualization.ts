@@ -25,7 +25,7 @@ import { PersistedState } from 'ui/persisted_state';
 import { VisResponseValue } from 'src/plugins/visualizations/public';
 import { start as data } from '../../../data/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
-import { ExpressionFunction, Render } from '../../types';
+import { ExpressionFunction, Render } from '../../../../../plugins/expressions/public';
 
 interface Arguments {
   index?: string | null;

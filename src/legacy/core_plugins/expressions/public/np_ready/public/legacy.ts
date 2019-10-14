@@ -24,10 +24,16 @@ import { plugin } from '.';
 
 const expressionsPlugin = plugin({} as any);
 
+/**
+ * Moved to the New Platform. Use `src/plugins/expressions` instead.
+ */
 export const setup = expressionsPlugin.setup(npSetup.core, {
   inspector: npSetup.plugins.inspector,
 });
 
+/**
+ * Moved to the New Platform. Use `src/plugins/expressions` instead.
+ */
 export const start = expressionsPlugin.start(npStart.core, {
   inspector: npStart.plugins.inspector,
 });

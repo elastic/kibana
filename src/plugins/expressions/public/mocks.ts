@@ -47,7 +47,12 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = undefined;
+  const startContract: Start = {
+    ExpressionRenderer: jest.fn((() => null) as any),
+    execute: jest.fn(),
+    loader: jest.fn(),
+    render: jest.fn(),
+  };
   return startContract;
 };
 

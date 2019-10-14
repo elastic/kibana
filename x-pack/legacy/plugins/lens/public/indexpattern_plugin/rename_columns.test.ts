@@ -5,7 +5,7 @@
  */
 
 import { renameColumns } from './rename_columns';
-import { KibanaDatatable } from 'src/legacy/core_plugins/interpreter/common';
+import { KibanaDatatable } from '../../../../../../src/plugins/expressions/public';
 
 describe('rename_columns', () => {
   it('should rename columns of a given datatable', () => {

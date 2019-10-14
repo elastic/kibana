@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common/types';
 import { Render, ContainerStyle } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 // @ts-ignore unconverted local file

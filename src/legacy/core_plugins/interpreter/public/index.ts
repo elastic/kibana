@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from '../types';
+export * from '../../../../plugins/expressions/public';

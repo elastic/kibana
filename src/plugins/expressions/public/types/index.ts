@@ -22,37 +22,8 @@ import { ExpressionInterpret } from '../interpreter_provider';
 import { TimeRange } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
 import { Query } from '../../../data/public';
-import { ExpressionAST } from '../../../expressions/public';
 
-export { ArgumentType } from './arguments';
-export {
-  TypeToString,
-  KnownTypeToString,
-  TypeString,
-  UnmappedTypeStrings,
-  UnwrapPromise,
-  SerializedFieldFormat,
-} from './common';
-
-export { ExpressionFunction, AnyExpressionFunction, FunctionHandlers } from './functions';
-export { ExpressionType, AnyExpressionType } from './types';
-
-export * from './style';
-
-export type ExpressionArgAST = string | boolean | number | ExpressionAST;
-
-export interface ExpressionFunctionAST {
-  type: 'function';
-  function: string;
-  arguments: {
-    [key: string]: ExpressionArgAST[];
-  };
-}
-
-export interface ExpressionAST {
-  type: 'expression';
-  chain: ExpressionFunctionAST[];
-}
+export * from '../../common/types';
 
 export type ExpressionInterpretWithHandlers = (
   ast: Parameters<ExpressionInterpret>[0],

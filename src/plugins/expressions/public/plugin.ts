@@ -26,7 +26,7 @@ import {
 } from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
-import { setCoreStart } from './services';
+import { setCoreStart, setInspector, setInterpreter, setRenderersRegistry } from './services';
 import { clog as clogFunction } from './functions/clog';
 import { font as fontFunction } from './functions/font';
 import { kibana as kibanaFunction } from './functions/kibana';
@@ -47,9 +47,13 @@ import {
   style as styleType,
   kibanaContext as kibanaContextType,
   kibanaDatatable as kibanaDatatableType,
-} from './expression_types';
+} from '../common/expression_types';
 import { interpreterProvider } from './interpreter_provider';
 import { createHandlers } from './create_handlers';
+import { execute, TExecute } from './execute';
+import { createRenderer, ExpressionRenderer as TExpressionRenderer } from './expression_renderer';
+import { loader } from './loader';
+import { render } from './render';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -62,7 +66,7 @@ export interface ExpressionsStartDeps {
 export interface ExpressionsSetup {
   registerFunction: (fn: AnyExpressionFunction | (() => AnyExpressionFunction)) => void;
   registerRenderer: (renderer: any) => void;
-  registerType: (type: () => AnyExpressionType) => void;
+  registerType: (type: AnyExpressionType | (() => AnyExpressionType)) => void;
   __LEGACY: {
     functions: FunctionsRegistry;
     renderers: RenderFunctionsRegistry;
@@ -71,7 +75,12 @@ export interface ExpressionsSetup {
   };
 }
 
-export type ExpressionsStart = void;
+export interface ExpressionsStart {
+  execute: TExecute;
+  render: typeof render;
+  loader: typeof loader;
+  ExpressionRenderer: TExpressionRenderer;
+}
 
 export class ExpressionsPublicPlugin
   implements
@@ -89,26 +98,34 @@ export class ExpressionsPublicPlugin
       functions.register(fn);
     };
 
+    const registerRenderer: ExpressionsSetup['registerRenderer'] = renderer => {
+      renderers.register(renderer);
+    };
+
+    const registerType: ExpressionsSetup['registerType'] = type => {
+      registerType(type);
+    };
+
     registerFunction(clogFunction);
     registerFunction(fontFunction);
     registerFunction(kibanaFunction);
     registerFunction(kibanaContextFunction);
 
-    types.register(booleanType);
-    types.register(datatableType);
-    types.register(errorType);
-    types.register(filterType);
-    types.register(imageType);
-    types.register(nullType);
-    types.register(numberType);
-    types.register(pointseries);
-    types.register(rangeType);
-    types.register(renderType);
-    types.register(shapeType);
-    types.register(stringType);
-    types.register(styleType);
-    types.register(kibanaContextType);
-    types.register(kibanaDatatableType);
+    registerType(booleanType);
+    registerType(datatableType);
+    registerType(errorType);
+    registerType(filterType);
+    registerType(imageType);
+    registerType(nullType);
+    registerType(numberType);
+    registerType(pointseries);
+    registerType(rangeType);
+    registerType(renderType);
+    registerType(shapeType);
+    registerType(stringType);
+    registerType(styleType);
+    registerType(kibanaContextType);
+    registerType(kibanaDatatableType);
 
     // TODO: Refactor this function.
     const getExecutor = () => {
@@ -124,14 +141,15 @@ export class ExpressionsPublicPlugin
       return executor;
     };
 
+    setInterpreter(getExecutor().interpreter);
+    setRenderersRegistry(renderers);
+
     const setup: ExpressionsSetup = {
       registerFunction,
-      registerRenderer: (renderer: any) => {
-        renderers.register(renderer);
-      },
-      registerType: type => {
-        types.register(type);
-      },
+      registerRenderer,
+      registerType,
+
+      // TODO: Delete `__LEGACY` in 8.x
       __LEGACY: {
         functions,
         renderers,
@@ -145,6 +163,16 @@ export class ExpressionsPublicPlugin
 
   public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
+    setInspector(inspector);
+
+    const ExpressionRenderer = createRenderer(loader);
+
+    return {
+      execute,
+      render,
+      loader,
+      ExpressionRenderer,
+    };
   }
 
   public stop() {}

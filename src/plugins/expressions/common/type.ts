@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import { AnyExpressionType } from './types';
-import { ExpressionValue } from './types/types';
+import { get, identity } from 'lodash';
+import { AnyExpressionType, ExpressionValue } from './types';
 
 export function getType(node: any) {
   if (node == null) return 'null';
@@ -28,6 +27,22 @@ export function getType(node: any) {
     return node.type;
   }
   return typeof node;
+}
+
+export function serializeProvider(types: any) {
+  return {
+    serialize: provider('serialize'),
+    deserialize: provider('deserialize'),
+  };
+
+  function provider(key: any) {
+    return (context: any) => {
+      const type = getType(context);
+      const typeDef = types[type];
+      const fn: any = get(typeDef, key) || identity;
+      return fn(context);
+    };
+  }
 }
 
 export class Type {

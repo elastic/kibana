@@ -19,13 +19,12 @@ import {
   Position,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+import { IInterpreterRenderFunction, ExpressionFunction } from 'src/plugins/expressions/public';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
-import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';

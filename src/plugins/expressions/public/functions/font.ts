@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { openSans, FontLabel as FontFamily } from '../fonts';
+import { openSans, FontLabel as FontFamily } from '../../common/fonts';
 import { ExpressionFunction } from '../types';
 import { CSSStyle, FontStyle, FontWeight, Style, TextAlignment, TextDecoration } from '../types';
 
