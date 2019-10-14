@@ -610,10 +610,16 @@ At this point, your legacy server-side plugin logic is no longer coupled to lega
 
 With both shims converted, you are now ready to complete your migration to the new platform.
 
-Many plugins will copy and paste all of their plugin code into a new plugin directory and then delete their legacy shims.
+Many plugins will copy and paste all of their plugin code into a new plugin directory in either `src/plugins` for OSS or `x-pack/plugins` for commerical code and then delete their legacy shims. It's at this point that you'll want to make sure to create your `kibana.json` file if it does not already exist.
 
 With the previous steps resolved, this final step should be easy, but the exact process may vary plugin by plugin, so when you're at this point talk to the platform team to figure out the exact changes you need.
 
+Other plugins may want to move subsystems over individually. For instance, you can move routes over to the New Platform in groups rather than all at once. Other examples that could be broken up:
+- Configuration schema ([see example](./MIGRATION_EXAMPLES.md#declaring-config-schema))
+- HTTP route registration
+- Polling mechanisms (eg. job worker)
+
+In general, we recommend moving all at once by ensuring you're not depending on any legacy code before you move over.
 
 ## Browser-side plan of action
 
@@ -856,6 +862,11 @@ With all of your services converted, you are now ready to complete your migratio
 Many plugins at this point will copy over their plugin definition class & the code from their various service/uiExport entry files directly into the new plugin directory. The `legacy.ts` shim file can then simply be deleted.
 
 With the previous steps resolved, this final step should be easy, but the exact process may vary plugin by plugin, so when you're at this point talk to the platform team to figure out the exact changes you need.
+
+Other plugins may want to move subsystems over individually. Examples of pieces that could be broken up:
+- Registration logic (eg. viz types, embeddables, chrome nav controls)
+- Application mounting
+- Polling mechanisms (eg. job worker)
 
 #### Bonus: Tips for complex migration scenarios
 
@@ -1112,7 +1123,7 @@ _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-pl
 
 #### UI Exports
 
-The legacy platform uses a set of "uiExports" to inject modules from one plugin into other plugins. This mechansim is not necessary in the New Platform because all plugins are excuted on the page at once (though only one application) is rendered at a time.
+The legacy platform uses a set of "uiExports" to inject modules from one plugin into other plugins. This mechansim is not necessary in the New Platform because all plugins are executed on the page at once (though only one application) is rendered at a time.
 
 This table shows where these uiExports have moved to in the New Platform. In most cases, if a uiExport you need is not yet available in the New Platform, you may leave in your legacy plugin for the time being and continue to migrate the rest of your app to the New Platform.
 

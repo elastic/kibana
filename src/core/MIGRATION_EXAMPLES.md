@@ -26,22 +26,21 @@ new kibana.Plugin({
 });
 
 // New Platform equivalent
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-// This object should be exported from your server-side plugin's index.ts file.
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     defaultAppId: schema.string({ defaultValue: true }),
     index: schema.string({ defaultValue: '.kibana' }),
     disableWelcomeScreen: schema.boolean({ defaultValue: false }),
-    autocompleteTerminateAfter: schema.number({ min: 1, defaultValue: 100000 }),
+    autocompleteTerminateAfter: schema.duration({ min: 1, defaultValue: 100000 }),
   })
 };
 
 // @kbn/config-schema is written in TypeScript, so you can use your schema
-// definition to give you a type to use in your plugin code
-type MyPluginConfig = typeof config.schema
+// definition to create a type to use in your plugin code.
+export type MyPluginConfig = TypeOf<typeof config.schema>;
 ```
 
 ### Using New Platform config from a Legacy plugin
@@ -72,8 +71,8 @@ the New Platform, we could create a NP plugin with the same name in
 
 ```ts
 // src/plugins/timelion/server/index.ts
-import { schema } from '@kbn/config-schema';
-import { PluginInitializerContext } from '../../core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext } from 'src/core/server';
 import { TimelionPlugin } from './plugin';
 
 export const config = {
@@ -84,7 +83,7 @@ export const config = {
 
 export const plugin = (initContext: PluginInitializerContext) => new TimelionPlugin(initContext);
 
-export type TimelionConfig = typeof config.schema;
+export type TimelionConfig = TypeOf<typeof config.schema>;
 export { TimelionSetup } from './plugin';
 ```
 
@@ -98,16 +97,21 @@ export class TimelionPlugin implements Plugin<TimelionSetup> {
 
   public setup(core: CoreSetup) {
     return {
-      config$: this.initContext.config.create<TimelionConfig>(),
+      __legacy: {
+        config$: this.initContext.config.create<TimelionConfig>(),
+      },
     };
   }
 
-  public setup() {}
   public start() {}
+  public stop() {}
 }
 
 export interface TimelionSetup {
-  config$: Observable<TimelionConfig>;
+  /** @deprecated */
+  __legacy: {
+    config$: Observable<TimelionConfig>;
+  };
 }
 ```
 
@@ -128,9 +132,12 @@ new kibana.Plugin({
 ## HTTP Routes
 
 In the legacy platform, plugins have direct access to the Hapi `server` object
-which gives full access to all of Hapi's API. In the New Platform, plugins
-have access to the [HttpServiceSetup]() interface, which is exposed via the
-[CoreSetup] object injected into the `setup` method of server-side plugins.
+which gives full access to all of Hapi's API. In the New Platform, plugins have
+access to the
+[HttpServiceSetup](/docs/development/core/server/kibana-plugin-server.httpservicesetup.md)
+interface, which is exposed via the
+[CoreSetup](/docs/development/core/server/kibana-plugin-server.coresetup.md)
+object injected into the `setup` method of server-side plugins.
 
 This interface has a different API with slightly different behaviors.
 - All input (body, query parameters, and URL parameters) must be validated using
@@ -138,7 +145,9 @@ This interface has a different API with slightly different behaviors.
   values will be empty objects.
 - All exceptions thrown by handlers result in 500 errors. If you need a specific
   HTTP error code, catch any exceptions in your handler and construct the
-  appropriate response using the provided response factory.
+  appropriate response using the provided response factory. While you can
+  continue using the `boom` module internally in your plugin, the framework does
+  not have native support for converting Boom exceptions into HTTP responses.
 
 ### Route Registration
 
@@ -158,7 +167,7 @@ new kibana.Plugin({
           }),
         }
       },
-      async handler(req, h) {
+      handler(req, h) {
         return { message: `Received field1: ${req.payload.field1}` };
       }
     });
@@ -181,7 +190,7 @@ class Plugin {
           }),
         }
       },
-      async (context, req, res) => {
+      (context, req, res) => {
         return res.ok({
           body: {
             message: `Received field1: ${req.body.field1}`
@@ -198,8 +207,10 @@ class Plugin {
 Services in the Legacy Platform were typically available via methods on either
 `server.plugins.*`, `server.*`, or `req.*`. In the New Platform, all services
 are available via the `context` argument to the route handler. The type of this
-argument is the [RequestHandlerContext](). The APIs available here will include
-all Core services and any services registered by plugins this plugin depends on.
+argument is the
+[RequestHandlerContext](/docs/development/core/server/kibana-plugin-server.requesthandlercontext.md).
+The APIs available here will include all Core services and any services
+registered by plugins this plugin depends on.
 
 ```ts
 new kibana.Plugin({
@@ -241,15 +252,16 @@ In the Legacy Platform, the `ui/chrome` import contained APIs for a very wide
 range of features. In the New Platform, some of these APIs have changed or moved
 elsewhere.
 
-| Legacy Platform                                       | New Platform                   | Notes                                                                                                                                          |
-|-------------------------------------------------------|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| `chrome.addBasePath`                                  | `core.http.basePath.prepend`   |                                                                                                                                                |
-| `chrome.breadcrumbs.set`                              | `core.chrome.setBreadcrumbs`   |                                                                                                                                                |
-| `chrome.getUiSettingsClient`                          | `core.uiSettings`              |                                                                                                                                                |
-| `chrome.helpExtension.set`                            | `core.chrome.setHelpExtension` |                                                                                                                                                |
-| `chrome.setVisible`                                   | `core.chrome.setVisible`       |                                                                                                                                                |
-| `chrome.getInjected`                                  | --                             | Not yet available, [comming soon]()                                                                                           |
-| `chrome.setRootTemplate` / `chrome.setRootController` | --                             | Use application mounting via `core.application.register` (not currently avaiable to legacy plugins).                                           |
+| Legacy Platform                                       | New Platform                                                                                                                        | Notes                                                                                                                                                                            |
+|-------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `chrome.addBasePath`                                  | [`core.http.basePath.prepend`](/docs/development/core/public/kibana-plugin-public.httpservicebase.basepath.md)                      |                                                                                                                                                                                  |
+| `chrome.breadcrumbs.set`                              | [`core.chrome.setBreadcrumbs`](/docs/development/core/public/kibana-plugin-public.chromestart.setbreadcrumbs.md)                    |                                                                                                                                                                                  |
+| `chrome.getUiSettingsClient`                          | [`core.uiSettings`](/docs/development/core/public/kibana-plugin-public.uisettingsclient.md)                                         |                                                                                                                                                                                  |
+| `chrome.helpExtension.set`                            | [`core.chrome.setHelpExtension`](/docs/development/core/public/kibana-plugin-public.chromestart.sethelpextension.md)                |                                                                                                                                                                                  |
+| `chrome.setVisible`                                   | [`core.chrome.setIsVisible`](/docs/development/core/public/kibana-plugin-public.chromestart.setisvisible.md)                        |                                                                                                                                                                                  |
+| `chrome.getInjected`                                  | [`core.injectedMetadata.getInjected`](/docs/development/core/public/kibana-plugin-public.coresetup.injectedmetadata.md) (temporary) | A temporary API is available to read injected vars provided by legacy plugins. This will be removed after [#41990](https://github.com/elastic/kibana/issues/41990) is completed. |
+| `chrome.setRootTemplate` / `chrome.setRootController` | --                                                                                                                                  | Use application mounting via `core.application.register` (not currently avaiable to legacy plugins).                                                                             |
 
-In most cases, the most convenient way to access these APIs will be via the [AppMountContext]()
-object passed to your application when your app is mounted on the page. However, as of now, legacy applications cannot register apps with the New Platform. This [may change]().
+In most cases, the most convenient way to access these APIs will be via the
+[AppMountContext](/docs/development/core/public/kibana-plugin-public.appmountcontext.md)
+object passed to your application when your app is mounted on the page.
