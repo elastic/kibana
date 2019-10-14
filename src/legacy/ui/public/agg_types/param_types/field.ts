@@ -25,7 +25,7 @@ import { FieldParamEditor } from '../../vis/editors/default/controls/field';
 import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
-import { Field } from '../../index_patterns';
+import { Field, FieldListInterface } from '../../index_patterns';
 
 const filterByType = propFilter('type');
 
@@ -79,7 +79,7 @@ export class FieldParamType extends BaseParamType {
       if (!aggConfig) {
         throw new Error('aggConfig was not provided to FieldParamType deserialize function');
       }
-      const field = aggConfig.getIndexPattern().fields.byName[fieldName];
+      const field = aggConfig.getIndexPattern().fields.getByName(fieldName);
 
       if (!field) {
         throw new SavedObjectNotFound('index-pattern-field', fieldName);
@@ -111,7 +111,7 @@ export class FieldParamType extends BaseParamType {
   /**
    * filter the fields to the available ones
    */
-  getAvailableFields = (fields: Field[]) => {
+  getAvailableFields = (fields: FieldListInterface) => {
     const filteredFields = fields.filter((field: Field) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
