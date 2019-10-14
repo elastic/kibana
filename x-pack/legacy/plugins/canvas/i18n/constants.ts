@@ -5,6 +5,7 @@
  */
 
 export const BASE64 = '`base64`';
+export const BOLD_MD_TOKEN = '**';
 export const BOOLEAN_FALSE = '`false`';
 export const BOOLEAN_TRUE = '`true`';
 export const CANVAS = 'Canvas';
