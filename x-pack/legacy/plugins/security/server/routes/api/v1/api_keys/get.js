@@ -37,8 +37,8 @@ export function initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseF
       pre: [routePreCheckLicenseFn],
       validate: {
         query: Joi.object().keys({
-          isAdmin: Joi.bool(),
-        }),
+          isAdmin: Joi.bool().required(),
+        }).required(),
       },
     }
   });

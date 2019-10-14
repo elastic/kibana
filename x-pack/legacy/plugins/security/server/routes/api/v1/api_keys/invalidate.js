@@ -62,7 +62,7 @@ export function initInvalidateApiKeysApi(server, callWithRequest, routePreCheckL
             id: Joi.string().required(),
             name: Joi.string().required(),
           })).required(),
-          isAdmin: Joi.bool(),
+          isAdmin: Joi.bool().required(),
         })
       },
     }
