@@ -12,3 +12,17 @@ export const STATUS_CODE = i18n.translate(
     defaultMessage: 'Status Code:',
   }
 );
+
+export const NETWORK_ERROR = i18n.translate(
+  'xpack.siem.components.ml.api.errors.networkErrorFailureTitle',
+  {
+    defaultMessage: 'Network Error:',
+  }
+);
+
+export const INDEX_PATTERN_FETCH_FAILURE = i18n.translate(
+  'xpack.siem.components.mlPopup.hooks.errors.indexPatternFetchFailureTitle',
+  {
+    defaultMessage: 'Index pattern fetch failure',
+  }
+);

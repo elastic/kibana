@@ -12,26 +12,103 @@ export interface Group {
   calendarIds: string[];
 }
 
+export interface CheckRecognizerProps {
+  indexPatternName: string;
+  headers?: Record<string, string | undefined>;
+  signal: AbortSignal;
+}
+
+export interface RecognizerModule {
+  id: string;
+  title: string;
+  query: Record<string, object>;
+  description: string;
+  logo: {
+    icon: string;
+  };
+}
+
+export interface GetModulesProps {
+  moduleId?: string;
+  headers?: Record<string, string | undefined>;
+  signal: AbortSignal;
+}
+
+export interface Module {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  logoFile: string;
+  defaultIndexPattern: string;
+  query: Record<string, string>;
+  jobs: ModuleJob[];
+  datafeeds: ModuleDatafeed[];
+}
+
+/**
+ * Representation of an ML Job as returned from `the ml/modules/get_module` API
+ */
+export interface ModuleJob {
+  id: string;
+  config: {
+    groups: string[];
+    description: string;
+    analysis_config: {
+      bucket_span: string;
+      summary_count_field_name: string;
+      detectors: Detector[];
+      influencers: [];
+    };
+    analysis_limits: {
+      model_memory_limit: string;
+    };
+    data_description: {
+      time_field: string;
+      time_format: string;
+    };
+    model_plot_config: {
+      enabled: boolean;
+    };
+    custom_settings: {
+      created_by: string;
+      custom_urls: CustomURL[];
+    };
+  };
+}
+
+export interface ModuleDatafeed {
+  id: string;
+  config: {
+    job_id: string;
+    indexes: string[];
+    query: Record<string, string>;
+  };
+}
+
 export interface MlSetupArgs {
   configTemplate: string;
   indexPatternName: string;
-  groups: string[];
+  jobIdErrorFilter?: string[];
+  groups?: string[];
   prefix?: string;
-  headers: Record<string, string | undefined>;
+  headers?: Record<string, string | undefined>;
 }
 
-export interface ConfigTemplate {
+export interface MLModule {
   name: string;
-  defaultIndexPattern: string;
-  jobs: string[];
 }
 
-export interface Job {
+/**
+ * Representation of an ML Job as returned from the `ml/jobs/jobs_summary` API
+ */
+export interface JobSummary {
   datafeedId: string;
   datafeedIndices: string[];
   datafeedState: string;
   description: string;
   earliestTimestampMs?: number;
+  latestResultsTimestampMs?: number;
   groups: string[];
   hasDatafeed: boolean;
   id: string;
@@ -41,6 +118,28 @@ export interface Job {
   memory_status: string;
   nodeName?: string;
   processed_record_count: number;
+}
+
+export interface Detector {
+  detector_description: string;
+  function: string;
+}
+
+export interface CustomURL {
+  url_name: string;
+  url_value: string;
+}
+
+/**
+ * Representation of an ML Job as used by the SIEM App -- a composition of ModuleJob and JobSummary
+ * that includes necessary metadata like moduleName, defaultIndexPattern, etc.
+ */
+export interface SiemJob extends JobSummary {
+  moduleId: string;
+  defaultIndexPattern: string;
+  isCompatible: boolean;
+  isInstalled: boolean;
+  isElasticJob: boolean;
 }
 
 export interface SetupMlResponseJob {
@@ -65,6 +164,7 @@ export interface SetupMlResponse {
 export interface StartDatafeedResponse {
   [key: string]: {
     started: boolean;
+    error?: string;
   };
 }
 
@@ -95,4 +195,11 @@ export interface IndexPatternResponse {
   per_page: number;
   saved_objects: IndexPatternSavedObject[];
   total: number;
+}
+
+export interface JobsFilters {
+  filterQuery: string;
+  showCustomJobs: boolean;
+  showElasticJobs: boolean;
+  selectedGroups: string[];
 }
