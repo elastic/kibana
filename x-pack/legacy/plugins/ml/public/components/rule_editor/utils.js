@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ACTION,
-  FILTER_TYPE,
-  APPLIES_TO,
-  OPERATOR
-} from '../../../common/constants/detector_rule';
+import { ACTION, APPLIES_TO, FILTER_TYPE, OPERATOR } from '../../../common/constants/detector_rule';
 
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { i18n } from '@kbn/i18n';
+import { processCreatedBy } from '../../../common/util/job_utils';
 
 export function getNewConditionDefaults() {
   return {
@@ -123,6 +119,7 @@ export function deleteJobRule(job, detectorIndex, ruleIndex) {
   }
 }
 
+
 export function updateJobRules(job, detectorIndex, rules) {
   // Pass just the detector with the edited rule to the updateJob endpoint.
   const jobId = job.job_id;
@@ -135,12 +132,10 @@ export function updateJobRules(job, detectorIndex, rules) {
     ]
   };
 
-  // If created_by is set in the job's custom_settings, remove it as the rules
-  // cannot currently be edited in the job wizards and so would be lost in a clone.
   let customSettings = {};
   if (job.custom_settings !== undefined) {
     customSettings = { ...job.custom_settings };
-    delete customSettings.created_by;
+    processCreatedBy(customSettings);
     jobData.custom_settings = customSettings;
   }
 

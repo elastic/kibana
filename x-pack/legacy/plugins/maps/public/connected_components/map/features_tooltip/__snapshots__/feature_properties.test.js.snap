@@ -1,0 +1,110 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FeatureProperties should not show filter button 1`] = `
+<table
+  className="mapFeatureTooltip_table"
+>
+  <tbody>
+    <tr
+      key="prop1"
+    >
+      <td
+        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+      >
+        prop1
+      </td>
+      <td
+        className="eui-textOverflowWrap"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "foobar1",
+          }
+        }
+      />
+    </tr>
+    <tr
+      key="prop2"
+    >
+      <td
+        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+      >
+        prop2
+      </td>
+      <td
+        className="eui-textOverflowWrap"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "foobar2",
+          }
+        }
+      />
+    </tr>
+  </tbody>
+</table>
+`;
+
+exports[`FeatureProperties should show error message if unable to load tooltip content 1`] = `
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  size="s"
+  title="Unable to load tooltip content"
+>
+  <p>
+    Simulated load properties error
+  </p>
+</EuiCallOut>
+`;
+
+exports[`FeatureProperties should show only filter button for filterable properties 1`] = `
+<table
+  className="mapFeatureTooltip_table"
+>
+  <tbody>
+    <tr
+      key="prop1"
+    >
+      <td
+        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+      >
+        prop1
+      </td>
+      <td
+        className="eui-textOverflowWrap"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "foobar1",
+          }
+        }
+      />
+      <td>
+        <EuiButtonIcon
+          aria-label="Filter on property"
+          className="mapFeatureTooltip__filterButton"
+          data-test-subj="mapTooltipCreateFilterButton"
+          iconType="plusInCircle"
+          onClick={[Function]}
+          title="Filter on property"
+        />
+      </td>
+    </tr>
+    <tr
+      key="prop2"
+    >
+      <td
+        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+      >
+        prop2
+      </td>
+      <td
+        className="eui-textOverflowWrap"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "foobar2",
+          }
+        }
+      />
+    </tr>
+  </tbody>
+</table>
+`;
