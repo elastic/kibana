@@ -73,7 +73,7 @@ export class WorkpadConfig extends PureComponent {
 
         <EuiSpacer size="m" />
 
-        <EuiFormRow label="Name" display="rowCompressed">
+        <EuiFormRow label={strings.getNameLabel()} display="rowCompressed">
           <EuiFieldText compressed value={name} onChange={e => setName(e.target.value)} />
         </EuiFormRow>
 
