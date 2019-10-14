@@ -10,6 +10,7 @@ import moment from 'moment';
 import { getESClient } from './es_client';
 import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
 import { PromiseReturnType } from '../../../typings/common';
+import { getApmIndices } from './get_apm_indices';
 
 function decodeUiFilters(server: Server, uiFiltersEncoded?: string) {
   if (!uiFiltersEncoded) {
@@ -37,6 +38,7 @@ export async function setupRequest(req: Legacy.Request) {
     end: moment.utc(query.end).valueOf(),
     uiFiltersES: await decodeUiFilters(server, query.uiFilters),
     client: getESClient(req),
-    config
+    config,
+    indices: await getApmIndices(server)
   };
 }

@@ -16,10 +16,13 @@ export async function markAppliedByAgent({
   body: AgentConfiguration;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const {
+    client,
+    indices: { apm_oss }
+  } = setup;
 
   const params = {
-    index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
+    index: apm_oss.apmAgentConfigurationIndex,
     id, // by specifying the `id` elasticsearch will do an "upsert"
     body: {
       ...body,

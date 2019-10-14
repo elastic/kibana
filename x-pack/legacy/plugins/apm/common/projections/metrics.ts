@@ -34,7 +34,12 @@ export function getMetricsProjection({
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  const { start, end, uiFiltersES, config } = setup;
+  const {
+    start,
+    end,
+    uiFiltersES,
+    indices: { apm_oss }
+  } = setup;
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -45,7 +50,7 @@ export function getMetricsProjection({
   ];
 
   return {
-    index: config.get<string>('apm_oss.metricsIndices'),
+    index: apm_oss.metricsIndices,
     body: {
       query: {
         bool: {

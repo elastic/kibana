@@ -6,15 +6,15 @@
 
 import { InternalCoreSetup } from 'src/core/server';
 import { CallCluster } from '../../../../../../../../src/legacy/core_plugins/elasticsearch';
+import { getApmIndices } from '../../helpers/get_apm_indices';
 
 export async function createApmAgentConfigurationIndex(
   core: InternalCoreSetup
 ) {
   try {
     const { server } = core.http;
-    const index = server
-      .config()
-      .get<string>('apm_oss.apmAgentConfigurationIndex');
+    const { apm_oss } = await getApmIndices(server);
+    const index = apm_oss.apmAgentConfigurationIndex;
     const { callWithInternalUser } = server.plugins.elasticsearch.getCluster(
       'admin'
     );

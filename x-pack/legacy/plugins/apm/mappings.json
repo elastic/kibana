@@ -41,5 +41,34 @@
         }
       }
     }
+  },
+  "apm-ui-indices": {
+    "properties": {
+      "apm_oss": {
+        "properties": {
+          "sourcemapIndices": {
+            "type": "text"
+          },
+          "errorIndices": {
+            "type": "text"
+          },
+          "onboardingIndices": {
+            "type": "text"
+          },
+          "spanIndices": {
+            "type": "text"
+          },
+          "transactionIndices": {
+            "type": "text"
+          },
+          "metricsIndices": {
+            "type": "text"
+          },
+          "apmAgentConfigurationIndex": {
+            "type": "text"
+          }
+        }
+      }
+    }
   }
 }

@@ -17,14 +17,17 @@ import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 export async function getTraceItems(traceId: string, setup: Setup) {
-  const { start, end, client, config } = setup;
+  const {
+    start,
+    end,
+    client,
+    config,
+    indices: { apm_oss }
+  } = setup;
   const maxTraceItems = config.get<number>('xpack.apm.ui.maxTraceItems');
 
   const params = {
-    index: [
-      config.get<string>('apm_oss.spanIndices'),
-      config.get<string>('apm_oss.transactionIndices')
-    ],
+    index: [apm_oss.spanIndices, apm_oss.transactionIndices],
     body: {
       size: maxTraceItems,
       query: {

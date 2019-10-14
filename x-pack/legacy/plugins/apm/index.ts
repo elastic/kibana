@@ -44,7 +44,7 @@ export const apm: LegacyPluginInitializer = kibana => {
           // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
           apmIndexPatternTitle: config.get('apm_oss.indexPattern'),
           apmServiceMapEnabled: config.get('xpack.apm.serviceMapEnabled'),
-          apmTransactionIndices: config.get('apm_oss.transactionIndices')
+          apmTransactionIndices: config.get('apm_oss.transactionIndices') // TODO address this!
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],

@@ -30,7 +30,13 @@ export function timeseriesFetcher({
   transactionName: string | undefined;
   setup: Setup;
 }) {
-  const { start, end, uiFiltersES, client, config } = setup;
+  const {
+    start,
+    end,
+    uiFiltersES,
+    client,
+    indices: { apm_oss }
+  } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
@@ -50,7 +56,7 @@ export function timeseriesFetcher({
   }
 
   const params = {
-    index: config.get<string>('apm_oss.transactionIndices'),
+    index: apm_oss.transactionIndices,
     body: {
       size: 0,
       query: { bool: { filter } },

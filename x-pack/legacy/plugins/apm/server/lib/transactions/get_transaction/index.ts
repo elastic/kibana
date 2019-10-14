@@ -19,10 +19,16 @@ export async function getTransaction(
   traceId: string,
   setup: Setup
 ) {
-  const { start, end, uiFiltersES, client, config } = setup;
+  const {
+    start,
+    end,
+    uiFiltersES,
+    client,
+    indices: { apm_oss }
+  } = setup;
 
   const params = {
-    index: config.get<string>('apm_oss.transactionIndices'),
+    index: apm_oss.transactionIndices,
     body: {
       size: 1,
       query: {

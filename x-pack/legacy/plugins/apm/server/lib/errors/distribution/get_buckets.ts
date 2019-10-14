@@ -25,7 +25,13 @@ export async function getBuckets({
   bucketSize: number;
   setup: Setup;
 }) {
-  const { start, end, uiFiltersES, client, config } = setup;
+  const {
+    start,
+    end,
+    uiFiltersES,
+    client,
+    indices: { apm_oss }
+  } = setup;
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'error' } },
     { term: { [SERVICE_NAME]: serviceName } },
@@ -38,7 +44,7 @@ export async function getBuckets({
   }
 
   const params = {
-    index: config.get<string>('apm_oss.errorIndices'),
+    index: apm_oss.errorIndices,
     body: {
       size: 0,
       query: {

@@ -16,7 +16,12 @@ import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_valu
 import { ESFilter } from '../../../typings/elasticsearch';
 
 export async function getEnvironments(setup: Setup, serviceName?: string) {
-  const { start, end, client, config } = setup;
+  const {
+    start,
+    end,
+    client,
+    indices: { apm_oss }
+  } = setup;
 
   const filter: ESFilter[] = [
     { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } },
@@ -31,9 +36,9 @@ export async function getEnvironments(setup: Setup, serviceName?: string) {
 
   const params = {
     index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
+      apm_oss.metricsIndices,
+      apm_oss.errorIndices,
+      apm_oss.transactionIndices
     ],
     body: {
       size: 0,

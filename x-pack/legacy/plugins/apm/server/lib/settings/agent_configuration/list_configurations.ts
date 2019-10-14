@@ -12,10 +12,13 @@ export type AgentConfigurationListAPIResponse = PromiseReturnType<
   typeof listConfigurations
 >;
 export async function listConfigurations({ setup }: { setup: Setup }) {
-  const { client, config } = setup;
+  const {
+    client,
+    indices: { apm_oss }
+  } = setup;
 
   const params = {
-    index: config.get<string>('apm_oss.apmAgentConfigurationIndex')
+    index: apm_oss.apmAgentConfigurationIndex
   };
 
   const resp = await client.search<AgentConfiguration>(params);
