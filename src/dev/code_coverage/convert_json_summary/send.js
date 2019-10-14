@@ -17,34 +17,34 @@
  * under the License.
  */
 
-import Wreck from '@hapi/wreck';
-import { of } from 'rxjs';
-import { delay, concatMap } from 'rxjs/operators';
+const { Client } = require('@elastic/elasticsearch');
+// import { of } from 'rxjs';
+// import { delay, concatMap } from 'rxjs/operators';
 import { createFailError } from '@kbn/dev-utils';
 import chalk from 'chalk';
 
-const wreck = Wreck.defaults({
-  baseUrl: 'http://localhost:9200',
-});
-const indexName = 'kibana_coverage';
+const index = 'kibana_coverage';
+const client = new Client({ node: 'http://localhost:9200' });
 
 export default (obs$, log) => {
-  const ms = 50;
-  log.verbose(`Code coverage sender set to delay for ${ms} milliseconds\n`);
+  // const ms = 50;
+  // log.verbose(`Code coverage sender set to delay for ${ms} milliseconds\n`);
 
   obs$
-    .pipe(concatMap(x => of(x).pipe(delay(ms)))) // Slow down the requests
-    .subscribe(async payload => {
-      const { path } = payload;
+  // .pipe(concatMap(x => of(x).pipe(delay(ms)))) // Slow down the requests
+    .subscribe(async body => {
+      const { path } = body;
       try {
-        await wreck.post(`${indexName}/_doc`, { payload });
+        await client.index({ index, body });
         log.debug(`Posted coverage for\n\t${path}`);
       } catch (e) {
-        throw createFailError(
-          `${chalk.white.bgRed(
-            ' Failed attempting to post coverage for '
-          )} ${path}`
-        );
+        const msg = 'Failed attempting to post coverage for ';
+        const err = `
+${chalk.red.bgWhiteBright(msg + path)}, \nPartial orig err stack: \n[\n\t${partial(e.stack)}\n]`;
+        throw createFailError(err);
       }
     });
 };
+function partial(x) {
+  return x.split('\n').splice(0, 2).join('\n');
+}
