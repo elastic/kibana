@@ -33,7 +33,11 @@ export function MLJobEditor({
       wrapEnabled={true}
       showPrintMargin={false}
       editorProps={{ $blockScrolling: true }}
-      setOptions={{ useWorker: syntaxChecking }}
+      setOptions={{
+        useWorker: syntaxChecking,
+        tabSize: 2,
+        useSoftTabs: true
+      }}
       onChange={onChange}
     />
   );
