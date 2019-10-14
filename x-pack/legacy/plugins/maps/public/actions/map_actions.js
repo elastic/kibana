@@ -231,10 +231,9 @@ export function cleanTooltipStateForLayer(layerId, layerFeatures = []) {
     if (nextTooltipFeatures.length === 0) {
       // all features removed from tooltip, close tooltip
       dispatch(setTooltipState(null));
-      return;
+    } else {
+      dispatch(setTooltipState({ ...tooltipState, features: nextTooltipFeatures }));
     }
-
-    dispatch(setTooltipState({ ...tooltipState, features: nextTooltipFeatures }));
   };
 }
 
