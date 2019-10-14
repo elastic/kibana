@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { CombinedJob } from '../jobs/new_job_new/common/job_creator/configs';
 
 export interface ExistingJobsAndGroups {
@@ -33,7 +34,7 @@ declare interface JobService {
   ): Promise<any>;
   createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
   getJobAndGroupIds(): ExistingJobsAndGroups;
-  searchPreview(job: CombinedJob): Promise<any>;
+  searchPreview(job: CombinedJob): Promise<SearchResponse<any>>;
 }
 
 export const mlJobService: JobService;

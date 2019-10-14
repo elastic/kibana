@@ -139,15 +139,16 @@ const Contents: FC<{
         <h5>{title}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {loading === true && (
+      {loading === true ? (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
             <EuiSpacer size="xxl" />
             <EuiLoadingSpinner size="l" />
           </EuiFlexItem>
         </EuiFlexGroup>
+      ) : (
+        <MLJobEditor value={value} height={EDITOR_HEIGHT} readOnly={true} />
       )}
-      {loading === false && <MLJobEditor value={value} height={EDITOR_HEIGHT} readOnly={true} />}
     </EuiFlexItem>
   );
 };
