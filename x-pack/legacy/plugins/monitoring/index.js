@@ -17,7 +17,7 @@ import { initInfraSource } from './server/lib/logs/init_infra_source';
  * @return {Object} Monitoring UI Kibana plugin object
  */
 export const monitoring = (kibana) => new kibana.Plugin({
-  require: ['kibana', 'elasticsearch', 'xpack_main'],
+  require: ['kibana', 'elasticsearch', 'xpack_main', 'alerting'],
   id: 'monitoring',
   configPrefix: 'xpack.monitoring',
   publicDir: resolve(__dirname, 'public'),
@@ -74,7 +74,7 @@ export const monitoring = (kibana) => new kibana.Plugin({
     const plugins = {
       xpack_main: server.plugins.xpack_main,
       elasticsearch: server.plugins.elasticsearch,
-      infra: server.plugins.infra,
+      alerting: server.plugins.alerting,
     };
 
     new Plugin().setup(serverFacade, plugins);

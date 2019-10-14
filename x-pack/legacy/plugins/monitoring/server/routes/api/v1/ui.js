@@ -8,9 +8,7 @@
 export {
   checkAccessRoute
 } from './check_access';
-export {
-  clusterAlertsRoute
-} from './alerts/';
+export * from './alerts/';
 export {
   beatsDetailRoute,
   beatsListingRoute,

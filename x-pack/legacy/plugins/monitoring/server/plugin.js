@@ -18,6 +18,7 @@ import {
   getOpsStatsCollector,
   getSettingsCollector,
 } from './kibana_monitoring/collectors';
+import { getLicenseExpiration } from './alerts/types/license_expiration';
 
 export class Plugin {
   setup(core, plugins) {
@@ -135,5 +136,26 @@ export class Plugin {
         showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled') // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
       };
     });
+
+    // this is not ready right away but we need to register
+    // alerts right away
+    async function getMonitoringCluster() {
+      const configs = config.get('xpack.monitoring.elasticsearch');
+      if (configs.hosts) {
+        const monitoringCluster = plugins.elasticsearch.getCluster('monitoring');
+        const { username, password } = configs;
+        const fakeRequest = {
+          headers: {
+            authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`
+          }
+        };
+        return {
+          callCluster: (...args) => monitoringCluster.callWithRequest(fakeRequest, ...args)
+        };
+      }
+      return null;
+    }
+
+    plugins.alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster));
   }
 }

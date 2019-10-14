@@ -222,3 +222,6 @@ export const REPORTING_SYSTEM_ID = 'reporting';
  * @type {Number}
  */
 export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
+
+export const ALERT_TYPE_LICENSE_EXPIRATION = 'monitoring_alert_type_license_expiration';
+export const ALERT_ACTION_TYPE_EMAIL = '.email'; // built in
