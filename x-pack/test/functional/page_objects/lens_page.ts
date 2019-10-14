@@ -127,7 +127,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async save() {
       await testSubjects.click('lnsApp_saveButton');
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await testSubjects.waitForHidden('confirmSaveSavedObjectButton');
+      retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+        testSubjects
+          .missingOrFail('confirmSaveSavedObjectButton')
+          .then(() => true)
+          .catch(() => false)
+      );
     },
 
     setTitle(title: string) {
