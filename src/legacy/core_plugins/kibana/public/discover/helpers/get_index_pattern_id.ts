@@ -19,7 +19,10 @@
 
 import { IndexPattern } from '../../../../data/public/index_patterns';
 
-export function findIndexPatternById(indexPatterns: IndexPattern[], id): IndexPattern | undefined {
+export function findIndexPatternById(
+  indexPatterns: IndexPattern[],
+  id: string
+): IndexPattern | undefined {
   if (!Array.isArray(indexPatterns) || !id) {
     return;
   }
@@ -37,7 +40,7 @@ export function getFallbackIndexPatternId(
   if (defaultIndex && findIndexPatternById(indexPatterns, defaultIndex)) {
     return defaultIndex;
   }
-  return !indexPatterns || !indexPatterns.length ? '' : indexPatterns[0].id;
+  return !indexPatterns || !indexPatterns.length || !indexPatterns[0].id ? '' : indexPatterns[0].id;
 }
 
 /**
