@@ -62,7 +62,7 @@ export const applyTemplateStrings = (templates: CanvasTemplate[]) => {
     // Set translated tags
     if (template.tags) {
       template.tags = template.tags.map(tag => {
-        if (tag in TagStrings) {
+        if (TagStrings[tag]) {
           return TagStrings[tag]();
         }
 
