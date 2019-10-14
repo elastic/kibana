@@ -6,7 +6,6 @@
 
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
-import { callApmApi } from '../services/rest/callApmApi';
 
 export function useAvgDurationByCountry() {
   const {
@@ -14,22 +13,25 @@ export function useAvgDurationByCountry() {
     uiFilters
   } = useUrlParams();
 
-  const { data = [], error, status } = useFetcher(() => {
-    if (serviceName && start && end) {
-      return callApmApi({
-        pathname:
-          '/api/apm/services/{serviceName}/transaction_groups/avg_duration_by_country',
-        params: {
-          path: { serviceName },
-          query: {
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters)
+  const { data = [], error, status } = useFetcher(
+    callApmApi => {
+      if (serviceName && start && end) {
+        return callApmApi({
+          pathname:
+            '/api/apm/services/{serviceName}/transaction_groups/avg_duration_by_country',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters)
+            }
           }
-        }
-      });
-    }
-  }, [serviceName, start, end, uiFilters]);
+        });
+      }
+    },
+    [serviceName, start, end, uiFilters]
+  );
 
   return {
     data,
