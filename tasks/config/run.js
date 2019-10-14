@@ -295,7 +295,7 @@ module.exports = function (grunt) {
 
     verifyDependencyVersions:
       gruntTaskWithGithubChecks('Verify dependency versions', 'verifyDependencyVersions'),
-    test_jest: gruntTaskWithGithubChecks('Jest tests', 'test:jest'),
+    test_jest: gruntTaskWithGithubChecks('Jest tests', !!process.env.CODE_COVERAGE ?  'node scripts/jest --coverage' : 'test:jest'),
     test_jest_integration:
       gruntTaskWithGithubChecks('Jest integration tests', 'test:jest_integration'),
     test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),

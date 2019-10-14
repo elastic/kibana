@@ -40,4 +40,9 @@ module.exports = function (grunt) {
     'run:test_browser_ci',
     'run:apiIntegrationTests',
   ]);
+
+  grunt.registerTask('jenkins:unit_coverage', [
+    'run:mochaCoverage',
+    'run:test_jest',
+  ]);
 };

@@ -8,4 +8,13 @@ fi
 
 export TEST_BROWSER_HEADLESS=1
 
-"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;
+export CODE_COVERAGE=1
+
+if [[ -z "$CODE_COVERAGE" ]] ; then
+  "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;
+else
+  echo "Running code coverage"
+  "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit_coverage --dev;
+fi
+
+
