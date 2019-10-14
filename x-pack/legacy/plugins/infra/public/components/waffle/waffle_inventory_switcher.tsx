@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover, EuiContextMenu, EuiButton } from '@elastic/eui';
+import { EuiPopover, EuiContextMenu, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState, useMemo } from 'react';
@@ -80,24 +80,26 @@ export const WaffleInventorySwitcher = (props: Props) => {
   }, [props.nodeType]);
 
   return (
-    <EuiPopover
-      id="contextMenu"
-      button={
-        <EuiButton iconType="arrowDown" iconSide="right" onClick={openPopover}>
-          <FormattedMessage
-            id="xpack.infra.waffle.inventoryButtonLabel"
-            defaultMessage="View: {selectedText}"
-            values={{ selectedText }}
-          />
-        </EuiButton>
-      }
-      isOpen={isOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      withTitle
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
+    <EuiFilterGroup>
+      <EuiPopover
+        id="contextMenu"
+        button={
+          <EuiFilterButton iconType="arrowDown" onClick={openPopover}>
+            <FormattedMessage
+              id="xpack.infra.waffle.inventoryButtonLabel"
+              defaultMessage="View: {selectedText}"
+              values={{ selectedText }}
+            />
+          </EuiFilterButton>
+        }
+        isOpen={isOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        withTitle
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
+    </EuiFilterGroup>
   );
 };

@@ -7,6 +7,7 @@
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { Action } from 'typescript-fsa';
+import { EuiFlexItem } from '@elastic/eui';
 import {
   InfraNodeType,
   InfraSnapshotMetricInput,
@@ -19,6 +20,9 @@ import { ToolbarWrapper } from './toolbar_wrapper';
 
 import { waffleOptionsSelectors } from '../../../store';
 import { InfraGroupByOptions } from '../../../lib/lib';
+import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
+import { SavedViewsToolbarControls } from '../../saved_views/toolbar_control';
+import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
 
 export interface ToolbarProps {
   createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => StaticIndexPattern;
@@ -31,18 +35,39 @@ export interface ToolbarProps {
   nodeType: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
 }
 
-const withProps = (Element: (props: ToolbarProps) => JSX.Element) => {
-  return <ToolbarWrapper>{props => <Element {...props} />}</ToolbarWrapper>;
+const wrapToolbarItems = (ToolbarItems: (props: ToolbarProps) => JSX.Element) => {
+  return (
+    <ToolbarWrapper>
+      {props => (
+        <>
+          <ToolbarItems {...props} />
+          <EuiFlexItem grow={true} />
+          <EuiFlexItem grow={false}>
+            <WithWaffleViewState indexPattern={props.createDerivedIndexPattern('metrics')}>
+              {({ defaultViewState, viewState, onViewChange }) => (
+                <SavedViewsToolbarControls
+                  defaultViewState={defaultViewState}
+                  viewState={viewState}
+                  onViewChange={onViewChange}
+                  viewType={inventoryViewSavedObjectType}
+                />
+              )}
+            </WithWaffleViewState>
+          </EuiFlexItem>
+        </>
+      )}
+    </ToolbarWrapper>
+  );
 };
 
-export const Toolbar = (props: ToolbarProps) => {
+export const Toolbar = (props: { nodeType: InfraNodeType }) => {
   switch (props.nodeType) {
     case InfraNodeType.host:
-      return withProps(HostToolbarItems);
+      return wrapToolbarItems(HostToolbarItems);
     case InfraNodeType.pod:
-      return withProps(PodToolbarItems);
+      return wrapToolbarItems(PodToolbarItems);
     case InfraNodeType.container:
-      return withProps(ContainerToolbarItems);
+      return wrapToolbarItems(ContainerToolbarItems);
     default:
       return null;
   }

@@ -120,11 +120,26 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         filter.vals[name] = value;
       };
 
+      $scope.filtersActive = 0;
+
       // set the initial values to the defaults
       filter.reset();
 
       $scope.$watchCollection('filter.vals', function () {
         filter.active = filter.getActive();
+        if (filter.vals) {
+          let count = 0;
+          Object.keys(filter.vals).forEach((key) => {
+            if (key === 'missing' || key === 'name') {
+              return;
+            }
+            const value = filter.vals[key];
+            if ((value && value !== 'any') || value === false) {
+              count++;
+            }
+          });
+          $scope.filtersActive = count;
+        }
       });
 
       $scope.$watchMulti([

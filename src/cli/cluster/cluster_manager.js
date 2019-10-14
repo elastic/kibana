@@ -124,6 +124,8 @@ export default class ClusterManager {
               resolve(path, 'target'),
               resolve(path, 'scripts'),
               resolve(path, 'docs'),
+              resolve(path, 'src/legacy/server/sass/__tmp__'),
+              resolve(path, 'legacy/plugins/reporting/.chromium'),
               resolve(path, 'legacy/plugins/siem/cypress'),
               resolve(path, 'legacy/plugins/apm/cypress'),
               resolve(path, 'x-pack/legacy/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
