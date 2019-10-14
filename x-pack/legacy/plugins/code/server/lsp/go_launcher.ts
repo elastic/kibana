@@ -94,19 +94,33 @@ export class GoServerLauncher extends AbstractLauncher {
     if (!goToolchain) {
       throw new Error('Cannot find go toolchain in bundle installation');
     }
-    // Construct $GOROOT from the bundled go toolchain.
+
     const goRoot = goToolchain;
     const goHome = path.resolve(goToolchain, 'bin');
-    // Always prefer the bundled git.
-    const platform = getOsPlatform();
-    const git = paths(platform);
-    const gitPath = path.dirname(git.binPath);
-    // Construct $GOPATH under 'kibana/data/code'.
     const goPath = this.options.goPath;
     if (!fs.existsSync(goPath)) {
       fs.mkdirSync(goPath);
     }
     const goCache = path.resolve(goPath, '.cache');
+
+    const langserverRelatedEnv: { [name: string]: string } = {
+      GOROOT: goRoot,
+      GOPATH: goPath,
+      GOCACHE: goCache,
+      CGO_ENABLED: '0',
+    };
+
+    // Always prefer the bundled git.
+    const platform = getOsPlatform();
+    const git = paths(platform);
+    const gitPath = path.dirname(git.binPath);
+    if (platform !== 'win32') {
+      langserverRelatedEnv.PREFIX = git.nativeDir;
+      if (platform === 'linux') {
+        langserverRelatedEnv.GIT_SSL_CAINFO = path.join(git.nativeDir, 'ssl/cacert.pem');
+      }
+    }
+
     const params: string[] = ['-port=' + port.toString()];
     const golsp = path.resolve(this.installationPath, launchersFound[0]);
     const env = Object.create(process.env);
@@ -118,10 +132,7 @@ export class GoServerLauncher extends AbstractLauncher {
         ...env,
         CLIENT_HOST: '127.0.0.1',
         CLIENT_PORT: port.toString(),
-        GOROOT: goRoot,
-        GOPATH: goPath,
-        GOCACHE: goCache,
-        CGO_ENABLED: '0',
+        ...langserverRelatedEnv,
       },
     });
     p.stdout.on('data', data => {
