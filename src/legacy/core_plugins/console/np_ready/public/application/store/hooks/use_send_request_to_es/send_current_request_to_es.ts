@@ -26,6 +26,7 @@ import * as es from '../../../../../../public/quarantined/src/es';
 
 export interface EsRequestArgs {
   callback: (esPath: any, esMethod: any, esData: any) => void;
+  failureCallback: (e: string) => void;
   input?: any;
   output?: any;
   isPolling: boolean;
@@ -35,6 +36,7 @@ export interface EsRequestArgs {
 let CURRENT_REQ_ID = 0;
 export function sendCurrentRequestToES({
   callback,
+  failureCallback,
   input,
   output,
   isPolling,
@@ -172,6 +174,7 @@ export function sendCurrentRequestToES({
               }
             }
             finishChain();
+            failureCallback(value);
           }
         }
       );

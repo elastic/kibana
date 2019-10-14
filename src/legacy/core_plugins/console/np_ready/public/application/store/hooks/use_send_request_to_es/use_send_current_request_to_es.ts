@@ -36,7 +36,7 @@ export const useSendCurrentRequestToES = () => {
         esPath: string;
         esMethod: string;
         esData: object;
-      }>(resolve =>
+      }>((resolve, reject) =>
         _sendCurrentRequestToES({
           isPolling: settings.polling,
           isUsingTripleQuotes: settings.tripleQuotes,
@@ -44,6 +44,7 @@ export const useSendCurrentRequestToES = () => {
           output: registry.getOutputEditor(),
           callback: (esPath: string, esMethod: string, esData: object) =>
             resolve({ esPath, esMethod, esData }),
+          failureCallback: reject,
         })
       );
       history.addToHistory(result.esPath, result.esMethod, result.esData);
