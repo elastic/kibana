@@ -10,6 +10,7 @@ import { SavedObjectsClientContract } from 'kibana/public';
 import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
+import { pluginsMock } from 'ui/new_platform/__mocks__/helpers';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 
 jest.mock('./loader');
@@ -144,6 +145,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as Storage,
       core: coreMock.createStart(),
       savedObjectsClient: {} as SavedObjectsClientContract,
+      data: pluginsMock.createStart().data,
     });
 
     persistedState = {

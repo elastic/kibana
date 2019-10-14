@@ -11,8 +11,8 @@ import { checkBasicLicense } from '../../license/check_license';
 import { checkGetJobsPrivilege } from '../../privilege/check_privilege';
 // @ts-ignore
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../util/index_utils';
-// @ts-ignore
-import { checkMlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
+
+import { checkMlNodesAvailable } from '../../ml_nodes_check';
 import { getDataVisualizerBreadcrumbs } from './breadcrumbs';
 
 const template = `<ml-nav-menu name="datavisualizer" /><ml-data-visualizer />`;
