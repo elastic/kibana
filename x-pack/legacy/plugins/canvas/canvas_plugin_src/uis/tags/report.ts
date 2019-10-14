@@ -8,6 +8,6 @@ import { TagFactory } from '../../../public/lib/tag';
 import { TagStrings as strings } from '../../../i18n';
 
 export const report: TagFactory = () => ({
-  name: strings.getReportLabel(),
+  name: strings.report(),
   color: '#DB1374',
 });

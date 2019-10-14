@@ -8,6 +8,6 @@ import { TagFactory } from '../../../public/lib/tag';
 import { TagStrings as strings } from '../../../i18n';
 
 export const filter: TagFactory = () => ({
-  name: strings.getFilterLabel(),
+  name: strings.filter(),
   color: '#3185FC',
 });

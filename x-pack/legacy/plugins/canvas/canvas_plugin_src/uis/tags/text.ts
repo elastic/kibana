@@ -8,6 +8,6 @@ import { TagFactory } from '../../../public/lib/tag';
 import { TagStrings as strings } from '../../../i18n';
 
 export const text: TagFactory = () => ({
-  name: strings.getTextLabel(),
+  name: strings.text(),
   color: '#D3DAE6',
 });

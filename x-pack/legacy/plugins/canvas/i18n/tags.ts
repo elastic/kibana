@@ -6,33 +6,33 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TagStrings = {
-  getChartLabel: () =>
-    i18n.translate('xpack.canvas.tags.chartLabel', {
+export const TagStrings: { [key: string]: () => string } = {
+  chart: () =>
+    i18n.translate('xpack.canvas.tags.chartTag', {
       defaultMessage: 'chart',
     }),
-  getFilterLabel: () =>
-    i18n.translate('xpack.canvas.tags.filterLabel', {
+  filter: () =>
+    i18n.translate('xpack.canvas.tags.filterTag', {
       defaultMessage: 'filter',
     }),
-  getGraphicLabel: () =>
-    i18n.translate('xpack.canvas.tags.graphicLabel', {
+  graphic: () =>
+    i18n.translate('xpack.canvas.tags.graphicTag', {
       defaultMessage: 'graphic',
     }),
-  getPresentationLabel: () =>
-    i18n.translate('xpack.canvas.tags.presentationLabel', {
+  presentation: () =>
+    i18n.translate('xpack.canvas.tags.presentationTag', {
       defaultMessage: 'presentation',
     }),
-  getProportionLabel: () =>
-    i18n.translate('xpack.canvas.tags.proportionLabel', {
+  proportion: () =>
+    i18n.translate('xpack.canvas.tags.proportionTag', {
       defaultMessage: 'proportion',
     }),
-  getReportLabel: () =>
-    i18n.translate('xpack.canvas.tags.reportLabel', {
+  report: () =>
+    i18n.translate('xpack.canvas.tags.reportTag', {
       defaultMessage: 'report',
     }),
-  getTextLabel: () =>
-    i18n.translate('xpack.canvas.tags.textLabel', {
+  text: () =>
+    i18n.translate('xpack.canvas.tags.textTag', {
       defaultMessage: 'text',
     }),
 };

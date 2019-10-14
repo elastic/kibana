@@ -9,6 +9,6 @@ import { TagFactory } from '../../../public/lib/tag';
 import { TagStrings as strings } from '../../../i18n';
 
 export const proportion: TagFactory = () => ({
-  name: strings.getProportionLabel(),
+  name: strings.proportion(),
   color: '#490092',
 });

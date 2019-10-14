@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { applyTemplateStrings } from '../strings';
 
 const darkTemplate = require('./theme_dark.json');
 const lightTemplate = require('./theme_light.json');
