@@ -7,10 +7,10 @@
 export const URL_TYPE = {
   KIBANA_DASHBOARD: 'KIBANA_DASHBOARD',
   KIBANA_DISCOVER: 'KIBANA_DISCOVER',
-  OTHER: 'OTHER'
+  OTHER: 'OTHER',
 };
 
 export const TIME_RANGE_TYPE = {
   AUTO: 'auto',
-  INTERVAL: 'interval'
+  INTERVAL: 'interval',
 };

@@ -7,8 +7,6 @@
 import { DEFAULT_TIMELINE_WIDTH } from '../components/timeline/body/helpers';
 import {
   Direction,
-  DomainsFields,
-  FlowDirection,
   FlowTarget,
   HostsFields,
   NetworkDnsFields,
@@ -16,7 +14,7 @@ import {
   TlsFields,
   UsersFields,
 } from '../graphql/types';
-import { State } from '../store';
+import { networkModel, State } from '../store';
 
 import { defaultHeaders } from './header';
 import {
@@ -71,17 +69,17 @@ export const mockGlobalState: State = {
   network: {
     page: {
       queries: {
-        topNFlowSource: {
+        [networkModel.NetworkTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
           topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
         },
-        topNFlowDestination: {
+        [networkModel.NetworkTableType.topNFlowDestination]: {
           activePage: 0,
           limit: 10,
           topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
         },
-        dns: {
+        [networkModel.NetworkTableType.dns]: {
           activePage: 0,
           limit: 10,
           dnsSortField: { field: NetworkDnsFields.queryCount, direction: Direction.desc },
@@ -96,18 +94,22 @@ export const mockGlobalState: State = {
       filterQueryDraft: null,
       flowTarget: FlowTarget.source,
       queries: {
-        domains: {
+        [networkModel.IpDetailsTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
-          flowDirection: FlowDirection.uniDirectional,
-          domainsSortField: { field: DomainsFields.bytes, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
         },
-        tls: {
+        [networkModel.IpDetailsTableType.topNFlowDestination]: {
+          activePage: 0,
+          limit: 10,
+          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+        },
+        [networkModel.IpDetailsTableType.tls]: {
           activePage: 0,
           limit: 10,
           tlsSortField: { field: TlsFields._id, direction: Direction.desc },
         },
-        users: {
+        [networkModel.IpDetailsTableType.users]: {
           activePage: 0,
           limit: 10,
           usersSortField: { field: UsersFields.name, direction: Direction.asc },
