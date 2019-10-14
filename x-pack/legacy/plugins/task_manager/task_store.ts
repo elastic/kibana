@@ -72,6 +72,11 @@ export interface ClaimOwnershipResult {
   docs: ConcreteTaskInstance[];
 }
 
+export interface BulkUpdateTaskFailureResult {
+  error: NonNullable<SavedObject['error']>;
+  task: ConcreteTaskInstance;
+}
+
 export interface UpdateByQueryResult {
   updated: number;
   version_conflicts: number;
@@ -405,7 +410,7 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[]
-  ): Promise<Array<Result<ConcreteTaskInstance, { task: ConcreteTaskInstance; error: any }>>> {
+  ): Promise<Array<Result<ConcreteTaskInstance, BulkUpdateTaskFailureResult>>> {
     return (await this.savedObjectsRepository.bulkUpdate(
       docs.map(doc => ({
         id: doc.id,

@@ -7,6 +7,7 @@
 import { createTaskStoreUpdateBuffer, BatchUpdatable } from './task_store_buffer';
 import { ConcreteTaskInstance } from './task';
 import { asOk, asErr } from './lib/result_type';
+import { BulkUpdateTaskFailureResult } from './task_store';
 
 const createTask = (function(): () => ConcreteTaskInstance {
   let counter = 0;
@@ -32,10 +33,10 @@ function incrementAttempts(task: ConcreteTaskInstance): ConcreteTaskInstance {
   };
 }
 
-function errorAttempts(task: ConcreteTaskInstance): { task: ConcreteTaskInstance; error: string } {
+function errorAttempts(task: ConcreteTaskInstance): BulkUpdateTaskFailureResult {
   return {
     task: incrementAttempts(task),
-    error: 'Oh no, something went terribly wrong',
+    error: { message: 'Oh no, something went terribly wrong', statusCode: 500 },
   };
 }
 
