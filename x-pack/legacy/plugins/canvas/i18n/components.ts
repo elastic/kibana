@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CANVAS, HTML, JSON, KIBANA, PDF, POST, URL, ZIP } from './constants';
+import { BOLD_MD_TOKEN, CANVAS, HTML, JSON, KIBANA, PDF, POST, URL, ZIP } from './constants';
 
 export const ComponentStrings = {
   AddEmbeddableFlyout: {
@@ -286,6 +286,24 @@ export const ComponentStrings = {
         description: 'The label for the total number of elements in a workpad',
       }),
   },
+  ElementControls: {
+    getEditTooltip: () =>
+      i18n.translate('xpack.canvas.elementControls.editToolTip', {
+        defaultMessage: 'Edit',
+      }),
+    getEditAriaLabel: () =>
+      i18n.translate('xpack.canvas.elementControls.editAriaLabel', {
+        defaultMessage: 'Edit element',
+      }),
+    getDeleteTooltip: () =>
+      i18n.translate('xpack.canvas.elementControls.deleteToolTip', {
+        defaultMessage: 'Delete',
+      }),
+    getDeleteAriaLabel: () =>
+      i18n.translate('xpack.canvas.elementControls.deleteAriaLabel', {
+        defaultMessage: 'Delete element',
+      }),
+  },
   ElementSettings: {
     getDataTabLabel: () =>
       i18n.translate('xpack.canvas.elementSettings.dataTabLabel', {
@@ -298,6 +316,63 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.elementSettings.displayTabLabel', {
         defaultMessage: 'Display',
         description: 'This tab contains the settings for how data is displayed in a Canvas element',
+      }),
+  },
+  ElementTypes: {
+    getEditElementTitle: () =>
+      i18n.translate('xpack.canvas.elementTypes.editElementTitle', {
+        defaultMessage: 'Edit element',
+      }),
+    getDeleteElementTitle: (elementName: string) =>
+      i18n.translate('xpack.canvas.elementTypes.deleteElementTitle', {
+        defaultMessage: `Delete element '{elementName}'?`,
+        values: {
+          elementName,
+        },
+      }),
+    getDeleteElementDescription: () =>
+      i18n.translate('xpack.canvas.elementTypes.deleteElementDescription', {
+        defaultMessage: 'Are you sure you want to delete this element?',
+      }),
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.elementTypes.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getDeleteButtonLabel: () =>
+      i18n.translate('xpack.canvas.elementTypes.deleteButtonLabel', {
+        defaultMessage: 'Delete',
+      }),
+    getAddNewElementTitle: () =>
+      i18n.translate('xpack.canvas.elementTypes.addNewElementTitle', {
+        defaultMessage: 'Add new elements',
+      }),
+    getAddNewElementDescription: () =>
+      i18n.translate('xpack.canvas.elementTypes.addNewElementDescription', {
+        defaultMessage: 'Group and save workpad elements to create new elements',
+      }),
+    getFindElementPlaceholder: () =>
+      i18n.translate('xpack.canvas.elementTypes.findElementPlaceholder', {
+        defaultMessage: 'Find element',
+      }),
+    getElementsTitle: () =>
+      i18n.translate('xpack.canvas.elementTypes.elementsTitle', {
+        defaultMessage: 'Elements',
+        description: 'Title for the "Elements" tab when adding a new element',
+      }),
+    getMyElementsTitle: () =>
+      i18n.translate('xpack.canvas.elementTypes.myElementsTitle', {
+        defaultMessage: 'My elements',
+        description: 'Title for the "My elements" tab when adding a new element',
+      }),
+  },
+  Error: {
+    getDescription: () =>
+      i18n.translate('xpack.canvas.errorComponent.description', {
+        defaultMessage: 'Expression failed with the message:',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.errorComponent.title', {
+        defaultMessage: 'Whoops! Expression failed',
       }),
   },
   Expression: {
@@ -338,6 +413,56 @@ export const ComponentStrings = {
     getSelectDescription: () =>
       i18n.translate('xpack.canvas.expressionElementNotSelected.selectDescription', {
         defaultMessage: 'Select an element to show expression input',
+      }),
+  },
+  ExpressionInput: {
+    getArgReferenceAliasesDetail: (aliases: string) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceAliasesDetail', {
+        defaultMessage: '{BOLD_MD_TOKEN}Aliases{BOLD_MD_TOKEN}: {aliases}',
+        values: {
+          BOLD_MD_TOKEN,
+          aliases,
+        },
+      }),
+    getArgReferenceDefaultDetail: (defaultVal: string) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceDefaultDetail', {
+        defaultMessage: '{BOLD_MD_TOKEN}Default{BOLD_MD_TOKEN}: {defaultVal}',
+        values: {
+          BOLD_MD_TOKEN,
+          defaultVal,
+        },
+      }),
+    getArgReferenceRequiredDetail: (required: string) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceRequiredDetail', {
+        defaultMessage: '{BOLD_MD_TOKEN}Required{BOLD_MD_TOKEN}: {required}',
+        values: {
+          BOLD_MD_TOKEN,
+          required,
+        },
+      }),
+    getArgReferenceTypesDetail: (types: string) =>
+      i18n.translate('xpack.canvas.expressionInput.argReferenceTypesDetail', {
+        defaultMessage: '{BOLD_MD_TOKEN}Types{BOLD_MD_TOKEN}: {types}',
+        values: {
+          BOLD_MD_TOKEN,
+          types,
+        },
+      }),
+    getFunctionReferenceAcceptsDetail: (acceptTypes: string) =>
+      i18n.translate('xpack.canvas.expressionInput.functionReferenceAccepts', {
+        defaultMessage: '{BOLD_MD_TOKEN}Accepts{BOLD_MD_TOKEN}: {acceptTypes}',
+        values: {
+          BOLD_MD_TOKEN,
+          acceptTypes,
+        },
+      }),
+    getFunctionReferenceReturnsDetail: (returnType: string) =>
+      i18n.translate('xpack.canvas.expressionInput.functionReferenceReturns', {
+        defaultMessage: '{BOLD_MD_TOKEN}Returns{BOLD_MD_TOKEN}: {returnType}',
+        values: {
+          BOLD_MD_TOKEN,
+          returnType,
+        },
       }),
   },
   GroupSettings: {
@@ -387,6 +512,15 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
         defaultMessage: 'Keyboard Shortcuts',
+      }),
+  },
+  Link: {
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.link.errorMessage', {
+        defaultMessage: 'LINK ERROR: {message}',
+        values: {
+          message,
+        },
       }),
   },
   MultiElementSettings: {
@@ -797,6 +931,10 @@ export const ComponentStrings = {
     getGlobalCSSTooltip: () =>
       i18n.translate('xpack.canvas.workpadConfig.globalCSSTooltip', {
         defaultMessage: `Apply styles to all pages in this workpad`,
+      }),
+    getNameLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.nameLabel', {
+        defaultMessage: 'Name',
       }),
     getPageHeightLabel: () =>
       i18n.translate('xpack.canvas.workpadConfig.heightLabel', {
