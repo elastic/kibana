@@ -18,7 +18,8 @@
  */
 
 import { get } from 'lodash';
-import { DiscoveredPlugin, PluginName, EnvironmentMode, PackageInfo } from '../../server';
+import { DiscoveredPlugin, PluginName } from '../../server';
+import { EnvironmentMode, PackageInfo } from '../../server/types';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from '../../utils/';
 import { Capabilities } from '..';

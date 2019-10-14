@@ -67,7 +67,7 @@ import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './u
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-export { PackageInfo, EnvironmentMode } from '../server';
+export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
   IContextContainer,
   IContextProvider,

@@ -19,7 +19,8 @@
 
 import { omit } from 'lodash';
 
-import { DiscoveredPlugin, PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server';
+import { DiscoveredPlugin } from '../../server';
+import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';

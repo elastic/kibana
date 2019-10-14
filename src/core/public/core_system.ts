@@ -19,7 +19,8 @@
 
 import './core.css';
 
-import { CoreId, PackageInfo, EnvironmentMode } from '../server';
+import { CoreId } from '../server';
+import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
