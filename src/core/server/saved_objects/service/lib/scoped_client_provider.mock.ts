@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { SavedObjectsClientProvider } from './scoped_client_provider';
+import { ISavedObjectsClientProvider } from './scoped_client_provider';
 
-const create = (): jest.Mocked<PublicMethodsOf<SavedObjectsClientProvider>> => ({
+const create = (): jest.Mocked<ISavedObjectsClientProvider> => ({
   addClientWrapperFactory: jest.fn(),
   getClient: jest.fn(),
   setClientFactory: jest.fn(),
 });
 
-export const scopedSavedObjectsClientProviderMock = {
+export const savedObjectsClientProviderMock = {
   create,
 };

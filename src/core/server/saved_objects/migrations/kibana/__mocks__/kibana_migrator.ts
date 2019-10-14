@@ -23,5 +23,4 @@ export const mockKibanaMigratorInstance = mockKibanaMigrator.create();
 
 const mockConstructor = jest.fn().mockImplementation(() => mockKibanaMigratorInstance);
 
-// eslint-disable-next-line import/no-default-export
 export const KibanaMigrator = mockConstructor;

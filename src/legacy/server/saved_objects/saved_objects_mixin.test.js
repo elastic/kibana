@@ -21,7 +21,7 @@ import { savedObjectsMixin } from './saved_objects_mixin';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { mockKibanaMigrator } from '../../../core/server/saved_objects/migrations/kibana/kibana_migrator.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ScopedSavedObjectsClientProviderMock } from '../../../core/server/saved_objects/service/lib/scoped_client_provider.mock';
+import { savedObjectsClientProviderMock } from '../../../core/server/saved_objects/service/lib/scoped_client_provider.mock';
 
 const savedObjectMappings = [
   {
@@ -77,7 +77,7 @@ describe('Saved Objects Mixin', () => {
   });
 
   beforeEach(() => {
-    const clientProvider = ScopedSavedObjectsClientProviderMock.create();
+    const clientProvider = savedObjectsClientProviderMock.create();
     mockServer = {
       log: jest.fn(),
       route: jest.fn(),

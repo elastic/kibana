@@ -433,10 +433,19 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError('options.fields must be an array');
     }
 
-    const kueryNode =
-      filter && filter !== ''
-        ? validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings)
-        : null;
+    let kueryNode;
+    try {
+      kueryNode =
+        filter && filter !== ''
+          ? validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings)
+          : null;
+    } catch (e) {
+      if (e.name === 'KQLSyntaxError') {
+        throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
+      } else {
+        throw e;
+      }
+    }
 
     const esOptions = {
       index: this.getIndicesForTypes(allowedTypes),

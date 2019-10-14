@@ -126,7 +126,7 @@ export async function savedObjectsMixin(kbnServer, server) {
     });
   };
 
-  const provider = kbnServer.newPlatform.__internals.scopedSavedObjectsClientProvider;
+  const provider = kbnServer.newPlatform.__internals.savedObjectsClientProvider;
 
   const service = {
     types: visibleTypes,
