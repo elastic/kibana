@@ -12,9 +12,13 @@ import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../.
 import { useStringifiedValue } from '../hooks';
 
 export const FrequencyInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator,
+    jobCreatorUpdate,
+    jobCreatorUpdated,
+    jobValidator,
+    jobValidatorUpdated,
+  } = useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.frequency);
   const { value: frequency, setValue: setFrequency } = useStringifiedValue(jobCreator.frequency);
 
@@ -30,7 +34,7 @@ export const FrequencyInput: FC = () => {
 
     const df = createDefaultFrequency();
     setDefaultFrequency(df);
-  }, [jobCreatorUpdate]);
+  }, [jobCreatorUpdated]);
 
   useEffect(() => {
     setValidation(jobValidator.frequency);

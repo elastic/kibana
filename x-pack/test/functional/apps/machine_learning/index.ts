@@ -9,8 +9,8 @@ export default function({ loadTestFile }: FtrProviderContext) {
   describe('machine learning', function() {
     this.tags('ciGroup3');
 
-    // loadTestFile(require.resolve('./feature_controls'));
-    // loadTestFile(require.resolve('./pages'));
-    // loadTestFile(require.resolve('./anomaly_detection'));
+    loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./pages'));
+    loadTestFile(require.resolve('./anomaly_detection'));
   });
 }
