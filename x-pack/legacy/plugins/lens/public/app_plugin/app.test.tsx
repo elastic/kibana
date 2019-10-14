@@ -302,7 +302,7 @@ describe('Lens App', () => {
           ...args.core.application,
           capabilities: {
             ...args.core.application.capabilities,
-            lens: { save: false, saveQuery: false, show: true },
+            visualize: { save: false, saveQuery: false, show: true },
           },
         };
         args.editorFrame = frame;
