@@ -11,7 +11,7 @@ import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../common/constants/aggregation_types';
-import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
+import { EVENT_RATE_FIELD_ID, AggFieldPair } from '../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
 import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../';
 import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
@@ -203,4 +203,8 @@ export function resetJob(jobCreator: JobCreatorType) {
 export function advancedStartDatafeed(jobCreator: JobCreatorType) {
   stashCombinedJob(jobCreator, false, true, false);
   window.location.href = '#/jobs';
+}
+
+export function aggFieldPairsCanBeCharted(afs: AggFieldPair[]) {
+  return afs.some(a => a.agg.dslName === null) === false;
 }

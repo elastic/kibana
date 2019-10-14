@@ -52,12 +52,12 @@ const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIEL
 class NewJobCapsService {
   private _fields: Field[];
   private _aggs: Aggregation[];
-  private _includeCountAgg: boolean;
+  private _includeEventRateField: boolean;
 
-  constructor(includeCountAgg = true) {
+  constructor(includeEventRateField = true) {
     this._fields = [];
     this._aggs = [];
-    this._includeCountAgg = includeCountAgg;
+    this._includeEventRateField = includeEventRateField;
   }
 
   public get fields(): Field[] {
@@ -84,8 +84,8 @@ class NewJobCapsService {
       const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
       const { fields, aggs } = createObjects(resp, indexPattern.title);
 
-      if (this._includeCountAgg === true) {
-        processFieldlessAggs(aggs, fields);
+      if (this._includeEventRateField === true) {
+        addEventRateField(aggs, fields);
       }
 
       this._fields = fields;
@@ -178,7 +178,7 @@ function mix(field: Field, agg: Aggregation) {
   field.aggs.push(agg);
 }
 
-function processFieldlessAggs(aggs: Aggregation[], fields: Field[]) {
+function addEventRateField(aggs: Aggregation[], fields: Field[]) {
   const eventRateField: Field = {
     id: EVENT_RATE_FIELD_ID,
     name: 'Event rate',

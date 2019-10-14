@@ -12,6 +12,7 @@ import { Field, SplitField, AggFieldPair } from '../../../../../common/types/fie
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
+import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
 
 type DetectorIndex = number;
 export interface LineChartPoint {
@@ -51,12 +52,13 @@ export class ChartLoader {
     intervalMs: number
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
-      const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
-      if (aggFieldPairNames.some(a => a.agg === '')) {
-        // no aggregation, this must be a detector function that has no ES equivalent
+      if (aggFieldPairsCanBeCharted(aggFieldPairs) === false) {
+        // no elasticsearch aggregation, this must contain ML only functions
         return {};
       }
+
       const splitFieldName = splitField !== null ? splitField.name : null;
+      const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
 
       const resp = await newJobLineChart(
         this._indexPatternTitle,
@@ -85,12 +87,13 @@ export class ChartLoader {
     intervalMs: number
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
-      const splitFieldName = splitField !== null ? splitField.name : '';
-      const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
-      if (aggFieldPairNames.some(a => a.agg === '')) {
-        // no aggregation, this must be a detector function that has no ES equivalent
+      if (aggFieldPairsCanBeCharted(aggFieldPairs) === false) {
+        // no elasticsearch aggregation, this must contain ML only functions
         return {};
       }
+
+      const splitFieldName = splitField !== null ? splitField.name : '';
+      const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
 
       const resp = await newJobPopulationsChart(
         this._indexPatternTitle,
