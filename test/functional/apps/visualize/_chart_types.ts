@@ -18,18 +18,22 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+// eslint-disable-next-line import/no-default-export
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize']);
+  let isOss = true;
 
-  describe('chart types', function () {
-    before(function () {
+  describe('chart types', function() {
+    before(async function() {
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new');
+      isOss = await PageObjects.common.isOss();
+      await PageObjects.visualize.navigateToNewVisualization();
     });
 
-    it('should show the correct chart types', async function () {
+    it('should show the correct chart types', async function() {
       const expectedChartTypes = [
         'Area',
         'Controls',
@@ -50,6 +54,11 @@ export default function ({ getService, getPageObjects }) {
         'Vega',
         'Vertical Bar',
       ];
+      if (!isOss) {
+        expectedChartTypes.push('Maps');
+        expectedChartTypes.sort();
+      }
+      log.debug('oss= ' + isOss);
 
       // find all the chart types and make sure there all there
       const chartTypes = await PageObjects.visualize.getChartTypes();
