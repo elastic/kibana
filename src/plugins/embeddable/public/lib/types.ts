@@ -49,7 +49,8 @@ export interface SavedObjectMetaData<T> {
   name: string;
   getIconForSavedObject(savedObject: any): any;
   getTooltipForSavedObject?(savedObject: any): any;
-  showSavedObject?(savedObject: any): any;
+  showSavedObject?(savedObject: any): boolean;
+  includeFields?: string[];
 }
 
 export type GetEmbeddableFactory = (id: string) => EmbeddableFactory | undefined;

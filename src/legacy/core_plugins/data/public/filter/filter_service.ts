@@ -20,7 +20,6 @@
 import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPatterns } from '../index_patterns';
 import { FilterManager } from './filter_manager';
-import { TimefilterContract } from '../timefilter';
 
 /**
  * Filter Service
@@ -30,18 +29,17 @@ import { TimefilterContract } from '../timefilter';
 export interface FilterServiceDependencies {
   indexPatterns: IndexPatterns;
   uiSettings: UiSettingsClientContract;
-  timefilter: TimefilterContract;
 }
 
 export class FilterService {
-  public setup({ indexPatterns, uiSettings, timefilter }: FilterServiceDependencies) {
-    return {
-      filterManager: new FilterManager(indexPatterns, uiSettings, timefilter),
-    };
+  public setup() {
+    // Filter service requires index patterns, which are only available in `start`
   }
 
-  public start() {
-    // nothing to do here yet
+  public start({ indexPatterns, uiSettings }: FilterServiceDependencies) {
+    return {
+      filterManager: new FilterManager(indexPatterns, uiSettings),
+    };
   }
 
   public stop() {
@@ -50,4 +48,4 @@ export class FilterService {
 }
 
 /** @public */
-export type FilterSetup = ReturnType<FilterService['setup']>;
+export type FilterStart = ReturnType<FilterService['start']>;

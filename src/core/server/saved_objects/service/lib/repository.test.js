@@ -22,7 +22,7 @@ import { delay } from 'bluebird';
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
 import { getRootPropertiesObjects } from '../../mappings/lib/get_root_properties_objects';
@@ -1744,6 +1744,68 @@ describe('SavedObjectsRepository', () => {
       );
     });
 
+    it('does not pass references if omitted', async () => {
+      await savedObjectsRepository.update(
+        type,
+        id,
+        { title: 'Testing' }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).not.toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: [],
+            })
+          }
+        })
+      );
+    });
+
+    it('passes references if they are provided', async () => {
+      await savedObjectsRepository.update(
+        type,
+        id,
+        { title: 'Testing' },
+        { references: ['foo'] }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: ['foo'],
+            })
+          }
+        })
+      );
+    });
+
+    it('passes empty references array if empty references array is provided', async () => {
+      await savedObjectsRepository.update(
+        type,
+        id,
+        { title: 'Testing' },
+        { references: [] }
+      );
+
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: {
+            doc: expect.objectContaining({
+              references: [],
+            })
+          }
+        })
+      );
+    });
+
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
       await savedObjectsRepository.update(
         'index-pattern',
@@ -2086,7 +2148,7 @@ describe('SavedObjectsRepository', () => {
     it('can throw es errors and have them decorated as SavedObjectsClient errors', async () => {
       expect.assertions(4);
 
-      const es401 = new elasticsearch.errors[401]();
+      const es401 = new legacyElasticsearch.errors[401]();
       expect(SavedObjectsErrorHelpers.isNotAuthorizedError(es401)).toBe(false);
       onBeforeWrite.mockImplementation(() => {
         throw es401;

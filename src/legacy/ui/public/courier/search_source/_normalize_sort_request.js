@@ -39,7 +39,7 @@ function normalize(sortable, indexPattern, defaultSortOptions) {
   const normalized = {};
   let sortField = _.keys(sortable)[0];
   let sortValue = sortable[sortField];
-  const indexField = indexPattern.fields.byName[sortField];
+  const indexField = indexPattern.fields.getByName(sortField);
 
   if (indexField && indexField.scripted && indexField.sortable) {
     let direction;

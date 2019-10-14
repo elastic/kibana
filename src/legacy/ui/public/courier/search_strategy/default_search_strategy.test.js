@@ -41,7 +41,6 @@ describe('defaultSearchStrategy', function () {
           msearch: msearchMock,
           search: searchMock,
         },
-        serializeFetchParams: () => Promise.resolve('pretend this is a valid request body'),
       };
     });
 

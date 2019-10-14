@@ -1104,14 +1104,17 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
     version?: string;
 }
 
-// @public (undocumented)
-export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+// @public
+export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
 
 // @public
 export interface SavedObjectAttributes {
     // (undocumented)
-    [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
+    [key: string]: SavedObjectAttribute;
 }
+
+// @public
+export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
 
 // @public
 export interface SavedObjectReference {
@@ -1511,9 +1514,11 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
 // Warning: (ae-forgotten-export) The symbol "Omit" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes'> {
+export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes' | 'references'> {
     // (undocumented)
     attributes: Partial<T>;
+    // (undocumented)
+    references: SavedObjectReference[] | undefined;
 }
 
 // @public

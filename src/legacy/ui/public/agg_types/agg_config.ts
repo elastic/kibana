@@ -194,6 +194,10 @@ export class AggConfig {
     });
   }
 
+  getParam(key: string): any {
+    return _.get(this.params, key);
+  }
+
   write(aggs?: AggConfigs) {
     return writeParams(this.type.params, this, aggs);
   }
@@ -203,7 +207,9 @@ export class AggConfig {
   }
 
   createFilter(key: string, params = {}) {
-    if (!this.isFilterable()) {
+    const createFilter = this.type.createFilter;
+
+    if (!createFilter) {
       throw new TypeError(`The "${this.type.title}" aggregation does not support filtering.`);
     }
 
@@ -217,7 +223,7 @@ export class AggConfig {
       throw new TypeError(message);
     }
 
-    return this.type.createFilter(this, key, params);
+    return createFilter(this, key, params);
   }
 
   /**

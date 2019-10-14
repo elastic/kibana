@@ -6,15 +6,12 @@
 
 import chromeMock from 'ui/chrome';
 import { Storage } from 'ui/storage';
-import {
-  getIndexPatternDatasource,
-  IndexPatternPersistedState,
-  IndexPatternPrivateState,
-  IndexPatternColumn,
-  uniqueLabels,
-} from './indexpattern';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
+import { pluginsMock } from 'ui/new_platform/__mocks__/helpers';
+import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -126,6 +123,19 @@ const expectedIndexPatterns = {
   },
 };
 
+function stateFromPersistedState(
+  persistedState: IndexPatternPersistedState
+): IndexPatternPrivateState {
+  return {
+    currentIndexPatternId: persistedState.currentIndexPatternId,
+    layers: persistedState.layers,
+    indexPatterns: expectedIndexPatterns,
+    indexPatternRefs: [],
+    existingFields: {},
+    showEmptyFields: true,
+  };
+}
+
 describe('IndexPattern Data Source', () => {
   let persistedState: IndexPatternPersistedState;
   let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
@@ -135,6 +145,8 @@ describe('IndexPattern Data Source', () => {
       chrome: chromeMock,
       storage: {} as Storage,
       core: coreMock.createStart(),
+      savedObjectsClient: {} as SavedObjectsClientContract,
+      data: pluginsMock.createStart().data,
     });
 
     persistedState = {
@@ -205,30 +217,9 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
-  describe('#initialize', () => {
-    it('should load a default state', async () => {
-      const state = await indexPatternDatasource.initialize();
-      expect(state).toEqual({
-        currentIndexPatternId: '1',
-        indexPatterns: expectedIndexPatterns,
-        layers: {},
-        showEmptyFields: false,
-      });
-    });
-
-    it('should initialize from saved state', async () => {
-      const state = await indexPatternDatasource.initialize(persistedState);
-      expect(state).toEqual({
-        ...persistedState,
-        indexPatterns: expectedIndexPatterns,
-        showEmptyFields: false,
-      });
-    });
-  });
-
   describe('#getPersistedState', () => {
     it('should persist from saved state', async () => {
-      const state = await indexPatternDatasource.initialize(persistedState);
+      const state = stateFromPersistedState(persistedState);
 
       expect(indexPatternDatasource.getPersistableState(state)).toEqual(persistedState);
     });
@@ -272,7 +263,9 @@ describe('IndexPattern Data Source', () => {
           },
         },
       };
-      const state = await indexPatternDatasource.initialize(queryPersistedState);
+
+      const state = stateFromPersistedState(queryPersistedState);
+
       expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
                 "esaggs
                       index=\\"1\\"
@@ -287,6 +280,8 @@ describe('IndexPattern Data Source', () => {
   describe('#insertLayer', () => {
     it('should insert an empty layer into the previous state', () => {
       const state = {
+        indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -320,6 +315,8 @@ describe('IndexPattern Data Source', () => {
   describe('#removeLayer', () => {
     it('should remove a layer', () => {
       const state = {
+        indexPatternRefs: [],
+        existingFields: {},
         showEmptyFields: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
@@ -353,6 +350,8 @@ describe('IndexPattern Data Source', () => {
     it('should list the current layers', () => {
       expect(
         indexPatternDatasource.getLayers({
+          indexPatternRefs: [],
+          existingFields: {},
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
@@ -377,6 +376,8 @@ describe('IndexPattern Data Source', () => {
     it('should return the title of the index patterns', () => {
       expect(
         indexPatternDatasource.getMetaData({
+          indexPatternRefs: [],
+          existingFields: {},
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
@@ -412,7 +413,7 @@ describe('IndexPattern Data Source', () => {
     let publicAPI: DatasourcePublicAPI;
 
     beforeEach(async () => {
-      const initialState = await indexPatternDatasource.initialize(persistedState);
+      const initialState = stateFromPersistedState(persistedState);
       publicAPI = indexPatternDatasource.getPublicAPI(initialState, () => {}, 'first');
     });
 

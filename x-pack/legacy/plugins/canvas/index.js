@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import init from './init';
+import { init } from './init';
 import { mappings } from './server/mappings';
 import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
 import { migrations } from './migrations';

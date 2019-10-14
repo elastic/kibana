@@ -26,3 +26,18 @@ export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.network.emptyActi
 export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.network.emptyActionSecondary', {
   defaultMessage: 'Go to documentation',
 });
+
+export const NAVIGATION_IPS_TITLE = i18n.translate('xpack.siem.netowork.navigation.ipsTitle', {
+  defaultMessage: 'IPs',
+});
+
+export const NAVIGATION_DNS_TITLE = i18n.translate('xpack.siem.netowork.navigation.dnsTitle', {
+  defaultMessage: 'DNS',
+});
+
+export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
+  'xpack.siem.netowork.navigation.anomaliesTitle',
+  {
+    defaultMessage: 'Anomalies',
+  }
+);
