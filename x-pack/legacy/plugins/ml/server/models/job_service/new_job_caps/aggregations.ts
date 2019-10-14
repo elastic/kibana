@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash';
 import { Aggregation, METRIC_AGG_TYPE } from '../../../../common/types/fields';
 import {
   ML_JOB_AGGREGATION,
@@ -12,19 +11,19 @@ import {
   ES_AGGREGATION,
 } from '../../../../common/constants/aggregation_types';
 
-const basicMlOnlyAggregation: Omit<Aggregation, 'id' | 'title'> = {
-  kibanaName: null,
-  dslName: null,
-  type: METRIC_AGG_TYPE,
-  mlModelPlotAgg: {
-    max: KIBANA_AGGREGATION.MAX,
-    min: KIBANA_AGGREGATION.MIN,
-  },
-  fields: [],
-};
-
-function getBasicMlOnlyAggregation() {
-  return cloneDeep(basicMlOnlyAggregation);
+// aggregation object missing id and title and has null for kibana and dsl aggregation names.
+// this is used as the basis for the ML only aggregations
+function getBasicMlOnlyAggregation(): Omit<Aggregation, 'id' | 'title'> {
+  return {
+    kibanaName: null,
+    dslName: null,
+    type: METRIC_AGG_TYPE,
+    mlModelPlotAgg: {
+      max: KIBANA_AGGREGATION.MAX,
+      min: KIBANA_AGGREGATION.MIN,
+    },
+    fields: [],
+  };
 }
 
 export const mlOnlyAggregations: Aggregation[] = [
