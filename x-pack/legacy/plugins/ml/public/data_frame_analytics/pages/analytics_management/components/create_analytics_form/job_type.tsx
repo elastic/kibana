@@ -21,7 +21,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
     'xpack.ml.dataframe.analytics.create.outlierDetectionHelpText',
     {
       defaultMessage:
-        'Outlier detection jobs require a source index that is mapped as a table-like data structure and will only analyze numeric and boolean fields. Please use the advanced editor to apply custom options such as the model memory limit and analysis type. You cannot switch back to this form from the advanced editor.',
+        'Outlier detection jobs require a source index that is mapped as a table-like data structure and will only analyze numeric and boolean fields. Please use the advanced editor to apply custom options such as the model memory limit and analysis type.',
     }
   );
 
@@ -29,7 +29,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
     'xpack.ml.dataframe.analytics.create.outlierRegressionHelpText',
     {
       defaultMessage:
-        'Regression jobs will only analyze numeric fields. Please use the advanced editor to apply custom options such as the model memory limit and prediction field name. You cannot switch from the advanced editor.',
+        'Regression jobs will only analyze numeric fields. Please use the advanced editor to apply custom options such as the model memory limit and prediction field name.',
     }
   );
 

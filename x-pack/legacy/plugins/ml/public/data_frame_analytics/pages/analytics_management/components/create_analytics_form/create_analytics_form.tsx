@@ -92,13 +92,13 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
       if (indexPattern !== undefined) {
         await newJobCapsService.initializeFromIndexPattern(indexPattern);
-        // get fields and filter for numeric fields
+        // Get fields and filter for numeric
         const { fields } = newJobCapsService;
         const options: Array<{ label: string }> = [];
 
         fields.forEach((field: Field) => {
           if (NUMERICAL_FIELD_TYPES.has(field.type) && field.id !== EVENT_RATE_FIELD_ID) {
-            options.push({ label: field.id }); // TODO: field.id or field.name?
+            options.push({ label: field.id });
           }
         });
 
@@ -126,7 +126,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       {!isJobCreated && (
         <Fragment>
           <JobType type={jobType} setFormState={setFormState} />
-          <EuiFormRow>
+          <EuiFormRow
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.enableAdvancedEditorHelpText',
+              {
+                defaultMessage: 'You cannot switch back to this form from the advanced editor.',
+              }
+            )}
+          >
             <EuiSwitch
               disabled={jobType === undefined}
               compressed={true}
