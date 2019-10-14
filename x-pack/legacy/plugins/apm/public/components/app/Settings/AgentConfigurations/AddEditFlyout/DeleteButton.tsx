@@ -8,10 +8,11 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { useCallApmApi } from '../../../../../hooks/useCallApmApi';
 import { Config } from '../index';
-import { callApmApi } from '../../../../../services/rest/callApmApi';
 import { getOptionLabel } from '../../../../../../common/agent_configuration_constants';
 import { useKibanaCore } from '../../../../../../../observability/public';
+import { APMClient } from '../../../../../services/rest/createCallApmApi';
 
 interface Props {
   onDeleted: () => void;
@@ -24,6 +25,8 @@ export function DeleteButton({ onDeleted, selectedConfig }: Props) {
     notifications: { toasts }
   } = useKibanaCore();
 
+  const callApmApi = useCallApmApi();
+
   return (
     <EuiButtonEmpty
       color="danger"
@@ -31,7 +34,7 @@ export function DeleteButton({ onDeleted, selectedConfig }: Props) {
       iconSide="right"
       onClick={async () => {
         setIsDeleting(true);
-        await deleteConfig(selectedConfig, toasts);
+        await deleteConfig(callApmApi, selectedConfig, toasts);
         setIsDeleting(false);
         onDeleted();
       }}
@@ -45,6 +48,7 @@ export function DeleteButton({ onDeleted, selectedConfig }: Props) {
 }
 
 async function deleteConfig(
+  callApmApi: APMClient,
   selectedConfig: Config,
   toasts: NotificationsStart['toasts']
 ) {
