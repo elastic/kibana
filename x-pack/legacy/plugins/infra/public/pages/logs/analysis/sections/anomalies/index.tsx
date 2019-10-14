@@ -152,7 +152,7 @@ export const AnomaliesResults = ({
                 description={i18n.translate(
                   'xpack.infra.logs.analysis.overallAnomaliesTopAnomalyScoreDescription',
                   {
-                    defaultMessage: 'Top anomaly score',
+                    defaultMessage: 'Max anomaly score',
                   }
                 )}
                 reverse
@@ -168,23 +168,20 @@ export const AnomaliesResults = ({
 };
 
 interface ParsedAnnotationDetails {
-  overallAnomalyScore: number;
   anomalyScoresByPartition: Record<string, number>;
 }
 
 const overallAnomalyScoreLabel = i18n.translate(
-  'xpack.infra.logs.analysis.overallAnomalyChartOverallScoreLabel',
+  'xpack.infra.logs.analysis.overallAnomalyChartMaxScoresLabel',
   {
-    defaultMessage: 'Overall anomaly score',
+    defaultMessage: 'Max anomaly scores:',
   }
 );
 const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ details }) => {
   const parsedDetails: ParsedAnnotationDetails = JSON.parse(details);
   return (
     <div>
-      <span>
-        {`${overallAnomalyScoreLabel}: `} <b>{parsedDetails.overallAnomalyScore}</b>
-      </span>
+      <span>{overallAnomalyScoreLabel}</span>
       <ul>
         {Object.entries(parsedDetails.anomalyScoresByPartition).map((entry, index) => {
           return (

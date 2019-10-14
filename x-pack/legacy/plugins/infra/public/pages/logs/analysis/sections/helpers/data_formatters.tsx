@@ -133,7 +133,7 @@ export const getAnnotationsForPartition = (
             details: i18n.translate(
               'xpack.infra.logs.analysis.partitionMaxAnomalyScoreAnnotationLabel',
               {
-                defaultMessage: 'Anomaly score: {maxAnomalyScore}',
+                defaultMessage: 'Max anomaly score: {maxAnomalyScore}',
                 values: {
                   maxAnomalyScore: Number(partitionResults.maximumAnomalyScore).toFixed(0),
                 },
@@ -189,20 +189,13 @@ export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayl
         },
         {}
       );
-      const sumPartitionMaxAnomalyScores = Object.entries(maxAnomalyScoresByPartition).reduce(
-        (sumMaxAnomalyScore, entry) => {
-          return (sumMaxAnomalyScore += entry[1]);
-        },
-        0
-      );
 
-      if (
-        sumPartitionMaxAnomalyScores === 0 ||
-        sumPartitionMaxAnomalyScores < ML_SEVERITY_SCORES.warning
-      ) {
+      if (Object.keys(maxAnomalyScoresByPartition).length === 0) {
         return annotatedBucketsBySeverity;
       }
-      const severityCategory = getSeverityCategoryForScore(sumPartitionMaxAnomalyScores);
+      const severityCategory = getSeverityCategoryForScore(
+        Math.max(...Object.values(maxAnomalyScoresByPartition))
+      );
       return {
         ...annotatedBucketsBySeverity,
         [severityCategory]: [
@@ -213,7 +206,6 @@ export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayl
               x1: bucket.startTime + results.bucketDuration,
             },
             details: JSON.stringify({
-              overallAnomalyScore: parseInt(Number(sumPartitionMaxAnomalyScores).toFixed(0), 10),
               anomalyScoresByPartition: maxAnomalyScoresByPartition,
             }),
           },

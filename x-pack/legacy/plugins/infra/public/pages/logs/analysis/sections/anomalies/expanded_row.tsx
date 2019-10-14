@@ -77,7 +77,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           description={i18n.translate(
             'xpack.infra.logs.analysis.anomaliesExpandedRowTopAnomalyScoreDescription',
             {
-              defaultMessage: 'Top anomaly score',
+              defaultMessage: 'Max anomaly score',
             }
           )}
           reverse

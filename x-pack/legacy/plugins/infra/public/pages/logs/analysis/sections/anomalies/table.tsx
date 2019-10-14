@@ -110,7 +110,7 @@ export const AnomaliesTable: React.FunctionComponent<{
     },
     {
       field: 'topAnomalyScore',
-      name: 'Top anomaly score',
+      name: 'Max anomaly score',
       sortable: true,
       truncateText: true,
     },
