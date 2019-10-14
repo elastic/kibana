@@ -130,6 +130,13 @@
     ],
     "fields": [
       {
+        "id": "@timestamp",
+        "name": "@timestamp",
+        "type": "date",
+        "aggregatable": true,
+        "aggIds": []
+      },
+      {
         "id": "CPUUtilization",
         "name": "CPUUtilization",
         "type": "double",

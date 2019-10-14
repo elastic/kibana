@@ -44,7 +44,7 @@ import { ml } from 'plugins/ml/services/ml_api_service';
 import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
 
 uiRoutes
-  .when('/jobs/new_job/advanced', {
+  .when('/jobs/new_job/advanced_old', {
     template,
     k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
     resolve: {
@@ -57,7 +57,7 @@ uiRoutes
       loadNewJobDefaults,
     }
   })
-  .when('/jobs/new_job/advanced/:jobId', {
+  .when('/jobs/new_job/advanced_old/:jobId', {
     template,
     k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
     resolve: {
