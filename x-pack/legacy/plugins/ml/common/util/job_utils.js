@@ -380,15 +380,15 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
       messages.push({ id: 'bucket_span_empty' });
       valid = false;
     } else {
-      const bucketSpan = parseInterval(job.analysis_config.bucket_span, false);
-      if (bucketSpan === null || bucketSpan.asMilliseconds() === 0) {
-        messages.push({ id: 'bucket_span_invalid' });
-        valid = false;
-      } else {
+      if (isValidTimeFormat(job.analysis_config.bucket_span)) {
         messages.push({
           id: 'bucket_span_valid',
           bucketSpan: job.analysis_config.bucket_span
         });
+
+      } else {
+        messages.push({ id: 'bucket_span_invalid' });
+        valid = false;
       }
     }
 
@@ -444,22 +444,16 @@ export function basicDatafeedValidation(datafeed) {
 
   if (datafeed) {
     let queryDelayMessage = { id: 'query_delay_valid' };
-    if (datafeed.query_delay !== undefined) {
-      const queryDelay = parseInterval(datafeed.query_delay, false);
-      if (queryDelay === null || queryDelay.asMilliseconds() === 0) {
-        queryDelayMessage = { id: 'query_delay_invalid' };
-        valid = false;
-      }
+    if (isValidTimeFormat(datafeed.query_delay) === false) {
+      queryDelayMessage = { id: 'query_delay_invalid' };
+      valid = false;
     }
     messages.push(queryDelayMessage);
 
     let frequencyMessage = { id: 'frequency_valid' };
-    if (datafeed.frequency !== undefined) {
-      const frequency = parseInterval(datafeed.frequency, false);
-      if (frequency === null || frequency.asMilliseconds() === 0) {
-        frequencyMessage = { id: 'frequency_invalid' };
-        valid = false;
-      }
+    if (isValidTimeFormat(datafeed.frequency) === false) {
+      frequencyMessage = { id: 'frequency_invalid' };
+      valid = false;
     }
     messages.push(frequencyMessage);
   }
@@ -539,6 +533,14 @@ export function validateGroupNames(job) {
     contains: id =>  (messages.some(m => id === m.id)),
     find: id => (messages.find(m => id === m.id)),
   };
+}
+
+function isValidTimeFormat(value) {
+  if (value === undefined) {
+    return true;
+  }
+  const interval = parseInterval(value, false);
+  return (interval !== null && interval.asMilliseconds() !== 0);
 }
 
 // Returns the latest of the last source data and last processed bucket timestamp,
