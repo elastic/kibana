@@ -6,6 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { AnomaliesChart } from './chart';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
@@ -62,7 +63,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <EuiStat
-          title={totalNumberOfLogs}
+          title={numeral(totalNumberOfLogs).format('0.00a')}
           description={i18n.translate(
             'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogsDescription',
             {

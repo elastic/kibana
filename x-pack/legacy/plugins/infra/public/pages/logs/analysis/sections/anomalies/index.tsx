@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiStat,
 } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
@@ -137,7 +138,7 @@ export const AnomaliesResults = ({
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <EuiStat
-                title={results.totalNumberOfLogs}
+                title={numeral(results.totalNumberOfLogs).format('0.00a')}
                 description={i18n.translate(
                   'xpack.infra.logs.analysis.overallAnomaliesNumberOfLogsDescription',
                   {
