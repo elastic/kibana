@@ -5,6 +5,9 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
+import { IndexPattern } from 'ui/index_patterns';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import { Job, Datafeed, Detector } from '../configs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import {
@@ -15,6 +18,7 @@ import { EVENT_RATE_FIELD_ID, AggFieldPair } from '../../../../../../common/type
 import { mlJobService } from '../../../../../services/job_service';
 import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../';
 import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
+import { ml } from '../../../../../services/ml_api_service';
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
 export function getRichDetectors(job: Job, datafeed: Datafeed, advanced: boolean = false) {
@@ -207,4 +211,26 @@ export function advancedStartDatafeed(jobCreator: JobCreatorType) {
 
 export function aggFieldPairsCanBeCharted(afs: AggFieldPair[]) {
   return afs.some(a => a.agg.dslName === null) === false;
+}
+
+export async function autoSetJobCreatorTimeRange(
+  jobCreator: JobCreatorType,
+  indexPattern: IndexPattern,
+  query: object
+) {
+  try {
+    const { start, end } = await ml.getTimeFieldRange({
+      index: indexPattern.title,
+      timeFieldName: jobCreator.timeFieldName,
+      query,
+    });
+    jobCreator.setTimeRange(start.epoch, end.epoch);
+  } catch (error) {
+    toastNotifications.addDanger({
+      title: i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
+        defaultMessage: `Error retrieving beginning and end times of index`,
+      }),
+      text: error,
+    });
+  }
 }

@@ -23,6 +23,7 @@ import { getTimeFilterRange } from '../../../../components/full_time_range_selec
 import { TimeBuckets } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { expandCombinedJobConfig } from '../../common/job_creator/configs';
+import { autoSetJobCreatorTimeRange } from '../../common/job_creator/util/general';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -95,6 +96,16 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;
+    }
+
+    if (jobCreator.type === JOB_TYPE.ADVANCED) {
+      // for advanced jobs, load the full time range start and end times
+      // so they can be used for job validation and bucket span estimation
+      autoSetJobCreatorTimeRange(
+        jobCreator,
+        kibanaContext.currentIndexPattern,
+        kibanaContext.combinedQuery
+      );
     }
   }
 
