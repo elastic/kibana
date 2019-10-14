@@ -157,8 +157,6 @@ export const OverviewPage = ({
             <SnapshotHistogram
               absoluteStartDate={absoluteDateRangeStart}
               absoluteEndDate={absoluteDateRangeEnd}
-              successColor={colors.success}
-              dangerColor={colors.danger}
               variables={sharedProps}
               height="120px"
             />
