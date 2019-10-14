@@ -26,43 +26,43 @@ import { shortenDottedString } from '../../../../../legacy/core_plugins/kibana/c
 const TRANSFORM_OPTIONS = [
   {
     kind: false,
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.none', {
+    text: i18n.translate('dataNP.common.fieldFormats.string.transformOptions.none', {
       defaultMessage: '- None -',
     }),
   },
   {
     kind: 'lower',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.lower', {
+    text: i18n.translate('dataNP.common.fieldFormats.string.transformOptions.lower', {
       defaultMessage: 'Lower Case',
     }),
   },
   {
     kind: 'upper',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.upper', {
+    text: i18n.translate('dataNP.common.fieldFormats.string.transformOptions.upper', {
       defaultMessage: 'Upper Case',
     }),
   },
   {
     kind: 'title',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.title', {
+    text: i18n.translate('dataNP.common.fieldFormats.string.transformOptions.title', {
       defaultMessage: 'Title Case',
     }),
   },
   {
     kind: 'short',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.short', {
+    text: i18n.translate('dataNP.common.fieldFormats.string.transformOptions.short', {
       defaultMessage: 'Short Dots',
     }),
   },
   {
     kind: 'base64',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.base64', {
+    text: i18n.translate('dataNP.common.fieldFormats.string.transformOptions.base64', {
       defaultMessage: 'Base64 Decode',
     }),
   },
   {
     kind: 'urlparam',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.url', {
+    text: i18n.translate('dataNP.common.fieldFormats.string.transformOptions.url', {
       defaultMessage: 'URL Param Decode',
     }),
   },
