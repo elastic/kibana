@@ -10,7 +10,6 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 
-import { GlobalTime } from '../../../containers/global_time';
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
 import { LastEventTime } from '../../../components/last_event_time';
@@ -42,7 +41,16 @@ import { DomainsQueryTable } from './domains_query_table';
 const IpOverviewManage = manageQuery(IpOverview);
 
 export const IPDetailsComponent = pure<IPDetailsComponentProps>(
-  ({ detailName, filterQuery, flowTarget, setAbsoluteRangeDatePicker }) => {
+  ({
+    detailName,
+    filterQuery,
+    flowTarget,
+    setAbsoluteRangeDatePicker,
+    to,
+    from,
+    setQuery,
+    isInitializing,
+  }) => {
     const narrowDateRange = useCallback(
       (score, interval) => {
         const fromTo = scoreIntervalToDateTime(score, interval);
@@ -63,116 +71,112 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
 
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
-                <GlobalTime>
-                  {({ to, from, setQuery, isInitializing }) => (
-                    <>
-                      <FiltersGlobal>
-                        <NetworkKql
-                          indexPattern={indexPattern}
-                          setQuery={setQuery}
-                          type={networkModel.NetworkType.details}
-                        />
-                      </FiltersGlobal>
+                <>
+                  <FiltersGlobal>
+                    <NetworkKql
+                      indexPattern={indexPattern}
+                      setQuery={setQuery}
+                      type={networkModel.NetworkType.details}
+                    />
+                  </FiltersGlobal>
 
-                      <HeaderPage
-                        data-test-subj="ip-details-headline"
-                        subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
-                        title={ip}
-                        draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
-                      >
-                        <FlowTargetSelectConnected />
-                      </HeaderPage>
+                  <HeaderPage
+                    data-test-subj="ip-details-headline"
+                    subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
+                    title={ip}
+                    draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
+                  >
+                    <FlowTargetSelectConnected />
+                  </HeaderPage>
 
-                      <IpOverviewQuery
+                  <IpOverviewQuery
+                    skip={isInitializing}
+                    sourceId="default"
+                    filterQuery={filterQuery}
+                    type={networkModel.NetworkType.details}
+                    ip={ip}
+                  >
+                    {({ id, inspect, ipOverviewData, loading, refetch }) => (
+                      <AnomalyTableProvider
+                        criteriaFields={networkToCriteria(detailName, flowTarget)}
+                        startDate={from}
+                        endDate={to}
                         skip={isInitializing}
-                        sourceId="default"
-                        filterQuery={filterQuery}
-                        type={networkModel.NetworkType.details}
-                        ip={ip}
                       >
-                        {({ id, inspect, ipOverviewData, loading, refetch }) => (
-                          <AnomalyTableProvider
-                            criteriaFields={networkToCriteria(detailName, flowTarget)}
+                        {({ isLoadingAnomaliesData, anomaliesData }) => (
+                          <IpOverviewManage
+                            id={id}
+                            inspect={inspect}
+                            ip={ip}
+                            data={ipOverviewData}
+                            anomaliesData={anomaliesData}
+                            loading={loading}
+                            isLoadingAnomaliesData={isLoadingAnomaliesData}
+                            type={networkModel.NetworkType.details}
+                            flowTarget={flowTarget}
+                            refetch={refetch}
+                            setQuery={setQuery}
                             startDate={from}
                             endDate={to}
-                            skip={isInitializing}
-                          >
-                            {({ isLoadingAnomaliesData, anomaliesData }) => (
-                              <IpOverviewManage
-                                id={id}
-                                inspect={inspect}
-                                ip={ip}
-                                data={ipOverviewData}
-                                anomaliesData={anomaliesData}
-                                loading={loading}
-                                isLoadingAnomaliesData={isLoadingAnomaliesData}
-                                type={networkModel.NetworkType.details}
-                                flowTarget={flowTarget}
-                                refetch={refetch}
-                                setQuery={setQuery}
-                                startDate={from}
-                                endDate={to}
-                                narrowDateRange={narrowDateRange}
-                              />
-                            )}
-                          </AnomalyTableProvider>
+                            narrowDateRange={narrowDateRange}
+                          />
                         )}
-                      </IpOverviewQuery>
+                      </AnomalyTableProvider>
+                    )}
+                  </IpOverviewQuery>
 
-                      <EuiHorizontalRule />
+                  <EuiHorizontalRule />
 
-                      <DomainsQueryTable
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        flowTarget={flowTarget}
-                        ip={ip}
-                        skip={isInitializing}
-                        startDate={from}
-                        indexPattern={indexPattern}
-                        type={networkModel.NetworkType.details}
-                        setQuery={setQuery}
-                      />
+                  <DomainsQueryTable
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    flowTarget={flowTarget}
+                    ip={ip}
+                    skip={isInitializing}
+                    startDate={from}
+                    indexPattern={indexPattern}
+                    type={networkModel.NetworkType.details}
+                    setQuery={setQuery}
+                  />
 
-                      <EuiSpacer />
+                  <EuiSpacer />
 
-                      <UsersQueryTable
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        flowTarget={flowTarget}
-                        ip={ip}
-                        skip={isInitializing}
-                        startDate={from}
-                        setQuery={setQuery}
-                        type={networkModel.NetworkType.details}
-                      />
+                  <UsersQueryTable
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    flowTarget={flowTarget}
+                    ip={ip}
+                    skip={isInitializing}
+                    startDate={from}
+                    setQuery={setQuery}
+                    type={networkModel.NetworkType.details}
+                  />
 
-                      <EuiSpacer />
+                  <EuiSpacer />
 
-                      <TlsQueryTable
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        flowTarget={flowTarget}
-                        ip={ip}
-                        setQuery={setQuery}
-                        skip={isInitializing}
-                        startDate={from}
-                        type={networkModel.NetworkType.details}
-                      />
+                  <TlsQueryTable
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    flowTarget={flowTarget}
+                    ip={ip}
+                    setQuery={setQuery}
+                    skip={isInitializing}
+                    startDate={from}
+                    type={networkModel.NetworkType.details}
+                  />
 
-                      <EuiSpacer />
+                  <EuiSpacer />
 
-                      <AnomaliesNetworkTable
-                        startDate={from}
-                        endDate={to}
-                        skip={isInitializing}
-                        ip={ip}
-                        type={networkModel.NetworkType.details}
-                        flowTarget={flowTarget}
-                        narrowDateRange={narrowDateRange}
-                      />
-                    </>
-                  )}
-                </GlobalTime>
+                  <AnomaliesNetworkTable
+                    startDate={from}
+                    endDate={to}
+                    skip={isInitializing}
+                    ip={ip}
+                    type={networkModel.NetworkType.details}
+                    flowTarget={flowTarget}
+                    narrowDateRange={narrowDateRange}
+                  />
+                </>
               </StickyContainer>
             ) : (
               <>

@@ -18,6 +18,8 @@
  */
 
 import moment from 'moment';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 
 import {
   createListStream,
@@ -61,5 +63,26 @@ describe('KbnLoggerStringFormat', () => {
 
     expect(String(result))
       .toContain(moment(time).format('HH:mm:ss.SSS'));
+  });
+  describe('with metadata', () => {
+    it('does not log meta data', async () => {
+      const format = new KbnLoggerStringFormat({});
+      const event = {
+        data: attachMetaData('message for event', {
+          prop1: 'value1',
+        }),
+        tags: ['tag1', 'tag2'],
+      };
+
+      const result = await createPromiseFromStreams([createListStream([event]), format]);
+
+      const resultString = String(result);
+      expect(resultString).toContain('tag1');
+      expect(resultString).toContain('tag2');
+      expect(resultString).toContain('message for event');
+
+      expect(resultString).not.toContain('value1');
+      expect(resultString).not.toContain('prop1');
+    });
   });
 });

@@ -5,6 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
+import { defaultIndexPattern } from '../../../default_index_pattern';
 import { RequestDetailsOptions } from './types';
 
 export const mockResponseSearchTimelineDetails = {
@@ -184,7 +185,7 @@ export const mockResponseSearchTimelineDetails = {
 export const mockOptions: RequestDetailsOptions = {
   indexName: 'auditbeat-8.0.0-2019.03.29-000003',
   eventId: 'TUfUymkBCQofM5eXGBYL',
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
 };
 
 export const mockRequest = {

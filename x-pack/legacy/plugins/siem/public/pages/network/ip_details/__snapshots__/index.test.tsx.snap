@@ -5,7 +5,7 @@ exports[`Ip Details it matches the snapshot 1`] = `
   detailName="123.456.78.90"
   filterQuery="coolQueryhuh?"
   flowTarget="source"
-  from={0}
+  from={1521862432253}
   history={
     Object {
       "action": "POP",
@@ -48,6 +48,6 @@ exports[`Ip Details it matches the snapshot 1`] = `
   }
   setAbsoluteRangeDatePicker={[MockFunction]}
   setQuery={[MockFunction]}
-  to={0}
+  to={1521830963132}
 />
 `;

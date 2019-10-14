@@ -34,6 +34,7 @@
       'renovate:major',
     ],
   },
+  separateMajorMinor: false,
   masterIssue: true,
   masterIssueApproval: true,
   rangeStrategy: 'bump',
@@ -77,6 +78,7 @@
         reviewers: [
           'markov00',
         ],
+        masterIssueApproval: false,
       },
       {
         groupSlug: 'mocha',
@@ -624,6 +626,14 @@
         ],
       },
       {
+        groupSlug: 'archiver',
+        groupName: 'archiver related packages',
+        packageNames: [
+          'archiver',
+          '@types/archiver',
+        ],
+      },
+      {
         groupSlug: 'base64-js',
         groupName: 'base64-js related packages',
         packageNames: [
@@ -645,6 +655,14 @@
         packageNames: [
           'color',
           '@types/color',
+        ],
+      },
+      {
+        groupSlug: 'cytoscape',
+        groupName: 'cytoscape related packages',
+        packageNames: [
+          'cytoscape',
+          '@types/cytoscape',
         ],
       },
       {
@@ -800,6 +818,22 @@
         ],
       },
       {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
+        ],
+      },
+      {
+        groupSlug: 'xml-crypto',
+        groupName: 'xml-crypto related packages',
+        packageNames: [
+          'xml-crypto',
+          '@types/xml-crypto',
+        ],
+      },
+      {
         groupSlug: 'intl-relativeformat',
         groupName: 'intl-relativeformat related packages',
         packageNames: [
@@ -901,6 +935,14 @@
         packageNames: [
           'write-pkg',
           '@types/write-pkg',
+        ],
+      },
+      {
+        groupSlug: 'parse-link-header',
+        groupName: 'parse-link-header related packages',
+        packageNames: [
+          'parse-link-header',
+          '@types/parse-link-header',
         ],
       },
       {

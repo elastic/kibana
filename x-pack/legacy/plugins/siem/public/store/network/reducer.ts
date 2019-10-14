@@ -106,7 +106,6 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.asc,
         },
       },
-      [IpDetailsTableType.anomalies]: null,
     },
     filterQuery: null,
     filterQueryDraft: null,

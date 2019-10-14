@@ -12,6 +12,7 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 import { FlowTarget } from '../../../graphql/types';
 import { InputsModelId } from '../../../store/inputs/constants';
+import { GlobalTimeArgs } from '../../../containers/global_time';
 
 export const type = NetworkType.details;
 
@@ -31,7 +32,8 @@ interface IPDetailsComponentDispatchProps {
 }
 
 export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
-  IPDetailsComponentDispatchProps & { detailName: string };
+  IPDetailsComponentDispatchProps &
+  GlobalTimeArgs & { detailName: string };
 
 interface OwnProps {
   type: NetworkType;
