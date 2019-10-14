@@ -11,6 +11,7 @@ import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { I18nContext } from 'ui/i18n';
 import { Provider as UnstatedProvider, Subscribe } from 'unstated';
+import { EuiCallOut } from '@elastic/eui';
 import { BASE_PATH } from '../common/constants';
 import { Background } from './components/layouts/background';
 import { BreadcrumbProvider } from './components/navigation/breadcrumb';
@@ -37,6 +38,16 @@ async function startApp(libs: FrontendLibs) {
                         defaultMessage: 'Management',
                       })}
                     />
+                    <EuiCallOut
+                      title="Beats Central Management has been deprecated"
+                      color="warning"
+                      iconType="help"
+                    >
+                      <p>
+                        Beats central management is now deprecated. We’re working on a comprehensive
+                        solution to replace this feature.
+                      </p>
+                    </EuiCallOut>
                     <AppRouter libs={libs} beatsContainer={beats} tagsContainer={tags} />
                   </Background>
                 )}
