@@ -31,6 +31,7 @@ import { help as esdocs } from './specs/esdocs';
 import { help as essql } from './specs/essql';
 import { help as exactly } from './specs/exactly';
 import { help as filterrows } from './specs/filterrows';
+import { help as filters } from './specs/filters';
 import { help as formatdate } from './specs/formatdate';
 import { help as formatnumber } from './specs/formatnumber';
 import { help as getCell } from './specs/getCell';
@@ -73,6 +74,8 @@ import { help as table } from './specs/table';
 import { help as tail } from './specs/tail';
 import { help as timefilter } from './specs/timefilter';
 import { help as timefilterControl } from './specs/timefilterControl';
+import { help as timelion } from './specs/timelion';
+import { help as to } from './specs/to';
 import { help as urlparam } from './specs/urlparam';
 
 /**
@@ -180,6 +183,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   essql,
   exactly,
   filterrows,
+  filters,
   formatdate,
   formatnumber,
   getCell,
@@ -222,5 +226,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   tail,
   timefilter,
   timefilterControl,
+  timelion,
+  to,
   urlparam,
 });

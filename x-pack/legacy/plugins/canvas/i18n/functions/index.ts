@@ -5,5 +5,6 @@
  */
 
 export * from '../elements';
-export * from './specs';
+export * from './function_help';
+export * from './function_errors';
 export * from './ui';

@@ -6,8 +6,7 @@
 
 import { asset } from './asset';
 import { filters } from './filters';
-// import { timelion } from './timelion';
-// import { to } from './to';
+import { timelion } from './timelion';
+import { to } from './to';
 
-export type PublicFunctions = typeof clientFunctions[number];
-export const clientFunctions = [asset, filters /* timelion, to*/];
+export const clientFunctions = [asset, filters, timelion, to];

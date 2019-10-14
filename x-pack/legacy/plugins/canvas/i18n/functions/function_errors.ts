@@ -11,16 +11,17 @@ import { errors as compare } from './specs/compare';
 import { errors as containerStyle } from './specs/containerStyle';
 import { errors as csv } from './specs/csv';
 import { errors as date } from './specs/date';
+import { errors as demodata } from './specs/demodata';
 import { errors as getCell } from './specs/getCell';
-import { errors as joinRows } from './specs/join_rows';
 import { errors as image } from './specs/image';
+import { errors as joinRows } from './specs/join_rows';
 import { errors as math } from './specs/math';
 import { errors as ply } from './specs/ply';
+import { errors as pointseries } from './specs/pointseries';
 import { errors as progress } from './specs/progress';
 import { errors as revealImage } from './specs/revealImage';
 import { errors as timefilter } from './specs/timefilter';
-import { errors as demodata } from './specs/demodata';
-import { errors as pointseries } from './specs/pointseries';
+import { errors as to } from './specs/to';
 
 export const getFunctionErrors = () => ({
   alterColumn,
@@ -30,14 +31,15 @@ export const getFunctionErrors = () => ({
   containerStyle,
   csv,
   date,
+  demodata,
   getCell,
   image,
   joinRows,
   math,
   ply,
+  pointseries,
   progress,
   revealImage,
   timefilter,
-  demodata,
-  pointseries,
+  to,
 });
