@@ -181,11 +181,10 @@ export abstract class Container<
           resolve(this.children[id] as TEmbeddable);
         }
 
-        // If a panel is removed before the embeddable was loaded there is a chance this will
-        // never resolve.
+        // If we hit this, the panel was removed before the embeddable finished loading.
         if (this.input.panels[id] === undefined) {
           subscription.unsubscribe();
-          reject(new PanelNotFoundError());
+          resolve(undefined);
         }
       });
     });

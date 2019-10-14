@@ -35,7 +35,6 @@ export class Breadcrumb extends React.PureComponent<Props> {
       const breadcrumb = {
         text: p,
         href,
-        className: 'codeNoMinWidth',
         ['data-test-subj']: `codeFileBreadcrumb-${p}`,
         onClick: () => {
           // track breadcrumb click count
@@ -47,6 +46,13 @@ export class Breadcrumb extends React.PureComponent<Props> {
       }
       breadcrumbs.push(breadcrumb);
     });
-    return <EuiBreadcrumbs max={Number.MAX_VALUE} breadcrumbs={breadcrumbs} />;
+    return (
+      <EuiBreadcrumbs
+        max={3}
+        showMaxPopover
+        breadcrumbs={breadcrumbs}
+        className="codeBreadcrumbs"
+      />
+    );
   }
 }

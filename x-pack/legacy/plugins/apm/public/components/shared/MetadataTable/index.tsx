@@ -12,26 +12,19 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-import { get, has } from 'lodash';
+import { get, has, pick } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { APMError } from '../../../../typings/es_schemas/ui/APMError';
-import { StringMap } from '../../../../typings/common';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
-
-type MetadataItem = Transaction | APMError;
+import { Section as SectionType } from './sections';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { APMError } from '../../../../typings/es_schemas/ui/APMError';
+import { Span } from '../../../../typings/es_schemas/ui/Span';
 
 interface Props {
-  item: MetadataItem;
-  sections: MetadataSection[];
-}
-
-export interface MetadataSection {
-  key: string;
-  label: string;
-  required?: boolean;
+  item: Transaction | APMError | Span;
+  sections: SectionType[];
 }
 
 export function MetadataTable({ item, sections }: Props) {
@@ -49,16 +42,22 @@ export function MetadataTable({ item, sections }: Props) {
           </ElasticDocsLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {filteredSections.map(section => (
-        <div key={section.key}>
-          <EuiTitle size="xs">
-            <h6>{section.label}</h6>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <Section propData={get(item, section.key)} propKey={section.key} />
-          <EuiSpacer size="xl" />
-        </div>
-      ))}
+      {filteredSections.map(section => {
+        let sectionData: Record<string, unknown> = get(item, section.key);
+        if (section.properties) {
+          sectionData = pick(item, section.properties);
+        }
+        return (
+          <div key={section.key}>
+            <EuiTitle size="xs">
+              <h6>{section.label}</h6>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <Section propData={sectionData} propKey={section.key} />
+            <EuiSpacer size="xl" />
+          </div>
+        );
+      })}
     </React.Fragment>
   );
 }
@@ -67,7 +66,7 @@ function Section({
   propData,
   propKey
 }: {
-  propData?: StringMap;
+  propData?: Record<string, unknown>;
   propKey?: string;
 }) {
   return (
