@@ -3,6 +3,9 @@
 === Vector tooltips
 
 Vector tooltips display attributes for features at your mouse's location.
+
+Features from Elasticsearch sources use <<index-patterns, Kibana index pattern>> <<managing-fields, field formatters>> to format values. You can use field formatters to round numbers, provide units, or even display images.
+
 When more than one feature exist at a location,
 attributes for the top feature are displayed along with the number of features at that location.
 
