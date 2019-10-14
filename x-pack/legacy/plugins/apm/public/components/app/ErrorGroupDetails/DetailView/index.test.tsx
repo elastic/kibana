@@ -10,8 +10,6 @@ import React from 'react';
 import { mockMoment } from '../../../../utils/testHelpers';
 import { DetailView } from './index';
 
-jest.mock('ui/kfetch');
-
 describe('DetailView', () => {
   beforeEach(() => {
     // Avoid timezone issues

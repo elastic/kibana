@@ -27,8 +27,6 @@ export function FieldPicker({
   setOpen,
 }: FieldPickerProps) {
   const allFields = Object.values(fieldMap);
-  const unselectedFields = allFields.filter(field => !field.selected);
-  const hasSelectedFields = unselectedFields.length < allFields.length;
 
   const hasFields = allFields.length > 0;
 
@@ -43,13 +41,9 @@ export function FieldPicker({
     }
   }, [fieldMap]);
 
-  const badgeDescription = hasSelectedFields
-    ? i18n.translate('xpack.graph.bar.pickMoreFieldsLabel', {
-        defaultMessage: 'Add more fields',
-      })
-    : i18n.translate('xpack.graph.bar.pickFieldsLabel', {
-        defaultMessage: 'Add fields',
-      });
+  const badgeDescription = i18n.translate('xpack.graph.bar.pickFieldsLabel', {
+    defaultMessage: 'Add fields',
+  });
 
   return (
     <EuiPopover
@@ -84,7 +78,7 @@ export function FieldPicker({
         <EuiSelectable
           searchProps={{
             placeholder: i18n.translate('xpack.graph.fieldManager.fieldSearchPlaceholder', {
-              defaultMessage: 'Filter fields',
+              defaultMessage: 'Filter by',
             }),
             compressed: true,
             'data-test-subj': 'graph-field-search',
