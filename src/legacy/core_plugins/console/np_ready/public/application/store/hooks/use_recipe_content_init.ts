@@ -31,6 +31,10 @@ export function useRecipeContentInit({ database }: Dependencies) {
   const dispatch = useEditorActionContext();
 
   const init = async () => {
+    if (!database) {
+      // May be null in test cases.
+      return;
+    }
     try {
       const recipes = await database.recipes.findAll();
       if (!recipes) {

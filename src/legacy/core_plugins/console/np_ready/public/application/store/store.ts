@@ -36,7 +36,7 @@ export interface Store {
   recipeSaveErrors: string[];
 }
 
-const initialValue: Store = {
+const defaultInitialValue: Store = {
   ready: false,
   requestInFlight: false,
   lastRequestErrorMessage: null,
@@ -50,8 +50,8 @@ const initialValue: Store = {
   recipeSaveErrors: [],
 };
 
-export const useStore = (settings: DevToolsSettings) => {
-  const [state, dispatch] = useReducer(reducer, initialValue, value => ({
+export const useStore = (settings: DevToolsSettings, initalValue?: Store) => {
+  const [state, dispatch] = useReducer(reducer, initalValue || defaultInitialValue, value => ({
     ...value,
     settings,
   }));

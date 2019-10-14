@@ -92,21 +92,11 @@ function _Editor() {
   const { sendCurrentRequestToES } = useSendCurrentRequestToES();
 
   useEffect(() => {
-    if (ready) {
-      const scratchPad = find(recipes, recipe => recipe.isScratchPad)!;
-      dispatch({ type: 'recipe.setCurrentRecipe', value: scratchPad });
-      editorInstanceRef.current.update(scratchPad.text || DEFAULT_INPUT_VALUE);
-      const unsubscribe = editorInstanceRef.current.getSession().on('change', function onChange() {
-        save({ ...currentRecipe, text: editorInstanceRef.current.getSession().getValue() });
-      });
-      return () => unsubscribe();
-    }
-  }, [ready]);
-
-  useEffect(() => {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
     editorInstanceRef.current = initializeInput($editor, $actions);
+
+    editorInstanceRef.current.setReadOnly(true);
 
     dispatch({
       type: 'setInputEditor',
@@ -136,17 +126,25 @@ function _Editor() {
   }, [settings]);
 
   useEffect(() => {
-    registerCommands({
-      input: editorInstanceRef.current,
-      sendCurrentRequestToES,
-      openDocumentation,
-    });
-  }, []);
+    if (ready) {
+      const scratchPad = find(recipes, recipe => recipe.isScratchPad)!;
+      dispatch({ type: 'recipe.setCurrentRecipe', value: scratchPad });
+      editorInstanceRef.current.update(scratchPad.text || DEFAULT_INPUT_VALUE);
+      const unsubscribe = editorInstanceRef.current.getSession().on('change', function onChange() {
+        save({ ...currentRecipe, text: editorInstanceRef.current.getSession().getValue() });
+      });
 
-  // TODO: Review loader
-  if (!ready) {
-    return <EuiText>Loading...</EuiText>;
-  }
+      registerCommands({
+        input: editorInstanceRef.current,
+        sendCurrentRequestToES,
+        openDocumentation,
+      });
+
+      editorInstanceRef.current.setReadOnly(false);
+
+      return () => unsubscribe();
+    }
+  }, [ready]);
 
   return (
     <div style={abs} className="conApp">

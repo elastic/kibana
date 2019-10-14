@@ -26,11 +26,12 @@ const EditorActionContext = createContext<Dispatch<Action>>(null as any);
 
 export interface EditorContextArgs {
   children: any;
+  initialValue?: Store;
   settings: DevToolsSettings;
 }
 
-export function EditorContextProvider({ children, settings }: EditorContextArgs) {
-  const { state, dispatch } = useStore(settings);
+export function EditorContextProvider({ children, settings, initialValue }: EditorContextArgs) {
+  const { state, dispatch } = useStore(settings, initialValue);
   return (
     <EditorReadContext.Provider value={state}>
       <EditorActionContext.Provider value={dispatch}>{children}</EditorActionContext.Provider>

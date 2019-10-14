@@ -29,6 +29,7 @@ import { Editor } from './editor';
 jest.mock('../../../../components/editor_example.tsx', () => {});
 jest.mock('../../../../../../../public/quarantined/src/mappings.js', () => ({
   retrieveAutoCompleteInfo: () => {},
+  clearSubscriptions: () => {},
 }));
 jest.mock('../../../../../../../public/quarantined/src/input.js', () => {
   return {
@@ -38,7 +39,8 @@ jest.mock('../../../../../../../public/quarantined/src/input.js', () => {
       },
       focus: () => {},
       update: () => {},
-      getSession: () => ({ on: () => {}, setUseWrapMode: () => {} }),
+      getSession: () => ({ on: () => () => {}, setUseWrapMode: () => {} }),
+      setReadOnly: () => {},
       commands: {
         addCommand: () => {},
       },
@@ -47,13 +49,23 @@ jest.mock('../../../../../../../public/quarantined/src/input.js', () => {
 });
 
 import * as sendRequestModule from '../../../../store/hooks/use_send_request_to_es/send_current_request_to_es';
+import * as editorRegistryModule from '../../../../store/editor_registry';
 import * as consoleMenuActions from '../console_menu_actions';
+import { Store } from '../../../../store';
 
 describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
   let mockedAppContextValue: any;
   let editor: ReactWrapper;
+  let editorRegistrySandbox: sinon.SinonSandbox;
 
   beforeEach(() => {
+    editorRegistrySandbox = sinon.createSandbox();
+    editorRegistrySandbox
+      .stub(editorRegistryModule.instance, 'getInputEditor')
+      .callsFake(() => true);
+    editorRegistrySandbox
+      .stub(editorRegistryModule.instance, 'getOutputEditor')
+      .callsFake(() => true);
     document.queryCommandSupported = sinon.fake(() => true);
     mockedAppContextValue = {
       services: {
@@ -61,22 +73,37 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
           getSavedEditorState: () => null,
           updateCurrentState: () => {},
         },
+        database: null,
+        notifications: null,
       },
       // eslint-disable-next-line
       ResizeChecker: function() {
-        return { on: () => {} };
+        return { on: () => {}, destroy: () => {} };
       },
       docLinkVersion: 'NA',
     };
     editor = mount(
       <I18nProvider>
         <AppContextProvider value={mockedAppContextValue}>
-          <EditorContextProvider settings={{} as any}>
+          <EditorContextProvider
+            initialValue={
+              {
+                recipes: { test: { isScratchPad: true } } as any,
+                // Don't wait for the network request.
+                initialContentLoaded: true,
+              } as Store
+            }
+            settings={{} as any}
+          >
             <Editor />
           </EditorContextProvider>
         </AppContextProvider>
       </I18nProvider>
     );
+  });
+
+  afterEach(() => {
+    editorRegistrySandbox.restore();
   });
 
   it('calls send current request to ES', () => {
