@@ -283,7 +283,7 @@ export enum UsersFields {
   count = 'count',
 }
 
-export enum FlowTargetNew {
+export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
 }
@@ -1543,7 +1543,7 @@ export interface AutonomousSystemItem {
 export interface GeoItem {
   geo?: Maybe<GeoEcsFields>;
 
-  flowTarget?: Maybe<FlowTarget>;
+  flowTarget?: Maybe<FlowTargetSourceDest>;
 }
 
 export interface TopNFlowItemDestination {
@@ -2138,7 +2138,9 @@ export interface NetworkTopNFlowSourceArgs {
 
   filterQuery?: Maybe<string>;
 
-  flowTarget: FlowTargetNew;
+  ip?: Maybe<string>;
+
+  flowTarget: FlowTargetSourceDest;
 
   pagination: PaginationInputPaginated;
 
@@ -2901,7 +2903,9 @@ export namespace SourceResolvers {
 
     filterQuery?: Maybe<string>;
 
-    flowTarget: FlowTargetNew;
+    ip?: Maybe<string>;
+
+    flowTarget: FlowTargetSourceDest;
 
     pagination: PaginationInputPaginated;
 
@@ -6637,7 +6641,7 @@ export namespace GeoItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = GeoItem> {
     geo?: GeoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
 
-    flowTarget?: FlowTargetResolver<Maybe<FlowTarget>, TypeParent, TContext>;
+    flowTarget?: FlowTargetResolver<Maybe<FlowTargetSourceDest>, TypeParent, TContext>;
   }
 
   export type GeoResolver<
@@ -6646,7 +6650,7 @@ export namespace GeoItemResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type FlowTargetResolver<
-    R = Maybe<FlowTarget>,
+    R = Maybe<FlowTargetSourceDest>,
     Parent = GeoItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

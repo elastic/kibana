@@ -1569,12 +1569,18 @@
                 "defaultValue": null
               },
               {
+                "name": "ip",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
                 "name": "flowTarget",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "ENUM", "name": "FlowTargetNew", "ofType": null }
+                  "ofType": { "kind": "ENUM", "name": "FlowTargetSourceDest", "ofType": null }
                 },
                 "defaultValue": null
               },
@@ -7442,7 +7448,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "FlowTargetNew",
+        "name": "FlowTargetSourceDest",
         "description": "",
         "fields": null,
         "inputFields": null,
@@ -7777,7 +7783,7 @@
             "name": "flowTarget",
             "description": "",
             "args": [],
-            "type": { "kind": "ENUM", "name": "FlowTarget", "ofType": null },
+            "type": { "kind": "ENUM", "name": "FlowTargetSourceDest", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

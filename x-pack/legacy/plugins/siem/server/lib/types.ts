@@ -62,6 +62,25 @@ export interface SiemContext {
   req: FrameworkRequest;
 }
 
+export interface SignalHit {
+  signal: {
+    rule_revision: number;
+    rule_id: number;
+    rule_type: string;
+    parent: {
+      id: string;
+      type: string;
+      depth: number;
+    };
+    name: string;
+    severity: number;
+    description: string;
+    time_detected: number;
+    index_patterns: string[];
+    references: string[];
+  };
+}
+
 export interface TotalValue {
   value: number;
   relation: string;

@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  DomainsData,
-  DomainsSortField,
-  FlowDirection,
-  FlowTarget,
-  IpOverviewData,
-  UsersData,
-  UsersSortField,
-} from '../../graphql/types';
+import { FlowTarget, IpOverviewData, UsersData, UsersSortField } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions, RequestOptionsPaginated } from '../framework';
 
 import { IpDetailsAdapter } from './types';

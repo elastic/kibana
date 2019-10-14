@@ -5,15 +5,13 @@
  */
 
 import {
-  DomainsSortField,
-  FlowDirection,
   FlowTarget,
   NetworkDnsSortField,
   NetworkTopNFlowSortField,
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
-import { KueryFilterQuery, networkModel, SerializedFilterQuery } from '../model';
+import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export enum NetworkType {
   page = 'page',
@@ -28,11 +26,14 @@ export enum NetworkTableType {
 }
 
 export type TopNTableType =
-  | networkModel.NetworkTableType.topNFlowDestination
-  | networkModel.NetworkTableType.topNFlowSource;
+  | NetworkTableType.topNFlowDestination
+  | NetworkTableType.topNFlowSource
+  | IpDetailsTableType.topNFlowDestination
+  | IpDetailsTableType.topNFlowSource;
 
 export enum IpDetailsTableType {
-  domains = 'domains',
+  topNFlowSource = 'topNFlowSourceIp',
+  topNFlowDestination = 'topNFlowDestinationIp',
   tls = 'tls',
   users = 'users',
 }
@@ -70,17 +71,14 @@ export interface NetworkPageModel {
 }
 
 // IP Details Models
-export interface DomainsQuery extends BasicQueryPaginated {
-  flowDirection: FlowDirection;
-  domainsSortField: DomainsSortField;
-}
 
 export interface UsersQuery extends BasicQueryPaginated {
   usersSortField: UsersSortField;
 }
 
 export interface IpOverviewQueries {
-  [IpDetailsTableType.domains]: DomainsQuery;
+  [IpDetailsTableType.topNFlowSource]: TopNFlowQuery;
+  [IpDetailsTableType.topNFlowDestination]: TopNFlowQuery;
   [IpDetailsTableType.tls]: TlsQuery;
   [IpDetailsTableType.users]: UsersQuery;
 }

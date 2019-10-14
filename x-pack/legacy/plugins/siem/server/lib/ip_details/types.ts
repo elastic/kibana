@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsData, IpOverviewData, NetworkDirectionEcs, UsersData } from '../../graphql/types';
+import { IpOverviewData, UsersData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { Hit, ShardsResponse, TotalValue } from '../types';
 
 export interface IpDetailsAdapter {
   getIpDetails(request: FrameworkRequest, options: RequestBasicOptions): Promise<IpOverviewData>;
-  getDomains(request: FrameworkRequest, options: RequestBasicOptions): Promise<DomainsData>;
   getUsers(request: FrameworkRequest, options: RequestBasicOptions): Promise<UsersData>;
 }
 
@@ -79,39 +78,6 @@ export interface IpOverviewHit {
   };
   took: number;
   timeout: number;
-}
-
-export interface DirectionBuckets {
-  key: NetworkDirectionEcs;
-  doc_count?: number;
-}
-
-export interface DomainsBuckets {
-  key: string;
-  timestamp?: {
-    value: number;
-    value_as_string: string;
-  };
-  uniqueIpCount: {
-    value: number;
-  };
-  bytes: {
-    value: number;
-  };
-  packets: {
-    value: number;
-  };
-  direction: {
-    buckets: DirectionBuckets[];
-  };
-  firstSeen?: {
-    value: number;
-    value_as_string: string;
-  };
-  lastSeen?: {
-    value: number;
-    value_as_string: string;
-  };
 }
 
 // Users Table
