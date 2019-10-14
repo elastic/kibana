@@ -82,7 +82,7 @@ pipeline {
       steps {
         dir("${BASE_DIR}"){
           sh 'yarn kbn bootstrap'
-          sh 'nohup yarn start --no-base-path --csp.strict=false --optimize.watch=false &'
+          sh 'nohup yarn start --no-base-path --csp.strict=false --optimize.watch=false >${WORKSPACE}/kibana.log 2>&1 &'
         }
       }
     }
