@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobSummary, Module, ModuleJob, RecognizerModule, SiemJob } from '../types';
+import {
+  AugmentedSiemJobFields,
+  JobSummary,
+  Module,
+  ModuleJob,
+  RecognizerModule,
+  SiemJob,
+} from '../types';
 import { mlModules } from '../ml_modules';
 
 /**
@@ -49,7 +56,7 @@ export const getAugmentedFields = (
   jobId: string,
   moduleJobs: SiemJob[],
   compatibleModuleIds: string[]
-) => {
+): AugmentedSiemJobFields => {
   const moduleJob = moduleJobs.find(mj => mj.id === jobId);
   return moduleJob !== undefined
     ? {
@@ -58,7 +65,12 @@ export const getAugmentedFields = (
         isCompatible: compatibleModuleIds.includes(moduleJob.moduleId),
         isElasticJob: true,
       }
-    : {};
+    : {
+        moduleId: '',
+        defaultIndexPattern: '',
+        isCompatible: false,
+        isElasticJob: false,
+      };
 };
 
 /**
@@ -90,17 +102,14 @@ export const getInstalledJobs = (
   jobSummaryData: JobSummary[],
   moduleJobs: SiemJob[],
   compatibleModuleIds: string[]
-) =>
+): SiemJob[] =>
   jobSummaryData
     .filter(({ groups }) => groups.includes('siem'))
-    .map(
-      jobSummary =>
-        ({
-          ...jobSummary,
-          ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds),
-          isInstalled: true,
-        } as SiemJob)
-    );
+    .map<SiemJob>(jobSummary => ({
+      ...jobSummary,
+      ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds),
+      isInstalled: true,
+    }));
 
 /**
  * Combines installed jobs + moduleSiemJobs that don't overlap and sorts by name asc

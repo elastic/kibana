@@ -136,7 +136,7 @@ export const useAnomaliesTableData = ({
     endDate,
     skip,
     userPermissions,
-    siemJobIds.join(),
+    siemJobIds.sort().join(),
   ]);
 
   return [loading, tableData];

@@ -99,10 +99,6 @@ export interface MlSetupArgs {
   headers?: Record<string, string | undefined>;
 }
 
-export interface MLModule {
-  name: string;
-}
-
 /**
  * Representation of an ML Job as returned from the `ml/jobs/jobs_summary` API
  */
@@ -145,6 +141,13 @@ export interface SiemJob extends JobSummary {
   defaultIndexPattern: string;
   isCompatible: boolean;
   isInstalled: boolean;
+  isElasticJob: boolean;
+}
+
+export interface AugmentedSiemJobFields {
+  moduleId: string;
+  defaultIndexPattern: string;
+  isCompatible: boolean;
   isElasticJob: boolean;
 }
 
@@ -194,13 +197,6 @@ export interface IndexPatternSavedObject {
   type: string;
   updated_at: string;
   version: string;
-}
-
-export interface IndexPatternResponse {
-  page: number;
-  per_page: number;
-  saved_objects: IndexPatternSavedObject[];
-  total: number;
 }
 
 export interface JobsFilters {

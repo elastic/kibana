@@ -18,7 +18,7 @@ import {
   mockJobsSummaryResponse,
 } from '../__mocks__/api';
 
-// TODO: Expand test cases
+// TODO: Expand test coverage
 
 describe('useSiemJobsHelpers', () => {
   describe('moduleToSiemJob', () => {
