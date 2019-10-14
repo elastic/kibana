@@ -32,7 +32,7 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
     <EuiFlyout size="s" onClose={closeModal}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 data-test-subj="mlDataFrameAnalyticsFlyoutHeaderTitle">
             {i18n.translate('xpack.ml.dataframe.analytics.create.modalHeaderTitle', {
               defaultMessage: 'Create analytics job',
             })}

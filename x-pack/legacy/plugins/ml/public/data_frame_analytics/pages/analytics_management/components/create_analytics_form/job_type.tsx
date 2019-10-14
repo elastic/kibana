@@ -54,7 +54,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
           value={type}
           hasNoInitialSelection={true}
           onChange={e => {
-            const value = e.target.value as AnalyticsJobType; // TODO: Is this the best way to type this?
+            const value = e.target.value as AnalyticsJobType;
             setFormState({ jobType: value });
           }}
         />

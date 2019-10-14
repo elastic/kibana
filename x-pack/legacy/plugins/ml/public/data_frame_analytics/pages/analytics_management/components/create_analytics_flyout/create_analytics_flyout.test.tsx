@@ -40,6 +40,9 @@ describe('Data Frame Analytics: <CreateAnalyticsFlyout />', () => {
     const props = getLastHookValue();
     const wrapper = mount(<CreateAnalyticsFlyout {...props} />);
 
-    expect(wrapper.find('EuiModalHeaderTitle').text()).toBe('Create analytics job');
+    expect(wrapper.find('[data-test-subj="mlDataFrameAnalyticsFlyoutHeaderTitle"]').text()).toBe(
+      // '.foo[data-index="5"]'
+      'Create analytics job'
+    );
   });
 });
