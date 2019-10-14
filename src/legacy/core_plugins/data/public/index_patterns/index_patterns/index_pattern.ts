@@ -23,9 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { fieldFormats } from 'ui/registry/field_formats';
 // @ts-ignore
 import { expandShorthand } from 'ui/utils/mapping_setup';
-import { toastNotifications } from 'ui/notify';
 import { findObjectByTitle } from 'ui/saved_objects';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { NotificationsSetup, SavedObjectsClientContract } from 'src/core/public';
 import { SavedObjectNotFound, DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 
 import { IndexPatternMissingIndices } from '../errors';
@@ -70,6 +69,7 @@ export class IndexPattern implements StaticIndexPattern {
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
+  public notifications: NotificationsSetup;
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientContract;
@@ -107,7 +107,8 @@ export class IndexPattern implements StaticIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: any
+    patternCache: any,
+    notifications: NotificationsSetup
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -115,11 +116,12 @@ export class IndexPattern implements StaticIndexPattern {
     // instead of storing config we rather store the getter only as np uiSettingsClient has circular references
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
+    this.notifications = notifications;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig('metaFields');
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable);
+    this.fields = new FieldList(this, [], this.shortDotsEnable, notifications);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
@@ -139,7 +141,7 @@ export class IndexPattern implements StaticIndexPattern {
 
   private initFields(input?: any) {
     const newValue = input || this.fields;
-    this.fields = new FieldList(this, newValue, this.shortDotsEnable);
+    this.fields = new FieldList(this, newValue, this.shortDotsEnable, this.notifications);
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -274,16 +276,21 @@ export class IndexPattern implements StaticIndexPattern {
     }
 
     this.fields.push(
-      new Field(this, {
-        name,
-        script,
-        fieldType,
-        scripted: true,
-        lang,
-        aggregatable: true,
-        filterable: true,
-        searchable: true,
-      })
+      new Field(
+        this,
+        {
+          name,
+          script,
+          fieldType,
+          scripted: true,
+          lang,
+          aggregatable: true,
+          filterable: true,
+          searchable: true,
+        },
+        false,
+        this.notifications
+      )
     );
 
     await this.save();
@@ -373,7 +380,8 @@ export class IndexPattern implements StaticIndexPattern {
           this.getConfig,
           this.savedObjectsClient,
           this.patternCache,
-          this.fieldsFetcher
+          this.fieldsFetcher,
+          this.notifications
         );
         await duplicatePattern.destroy();
       }
@@ -426,7 +434,8 @@ export class IndexPattern implements StaticIndexPattern {
             this.getConfig,
             this.savedObjectsClient,
             this.patternCache,
-            this.fieldsFetcher
+            this.fieldsFetcher,
+            this.notifications
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -458,7 +467,7 @@ export class IndexPattern implements StaticIndexPattern {
                     'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
                 } // eslint-disable-line max-len
               );
-              toastNotifications.addDanger(message);
+              this.notifications.toasts.addDanger(message);
               throw err;
             }
 
@@ -497,11 +506,11 @@ export class IndexPattern implements StaticIndexPattern {
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
         if (err instanceof IndexPatternMissingIndices) {
-          toastNotifications.addDanger((err as any).message);
+          this.notifications.toasts.addDanger((err as any).message);
           return [];
         }
 
-        toastNotifications.addError(err, {
+        this.notifications.toasts.addError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields',
           }),
