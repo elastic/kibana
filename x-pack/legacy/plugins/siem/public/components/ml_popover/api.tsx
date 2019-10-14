@@ -53,12 +53,13 @@ export const checkRecognizer = async ({
   await throwIfNotOk(response);
   return response.json();
 };
+
 /**
  * Returns ML Module for given moduleId. Returns all modules if no moduleId specified
  *
  * @param moduleId id of the module to retrieve
- * @param headers
- * @param signal
+ * @param headers optional headers to add optional headers to add
+ * @param signal to cancel request
  */
 export const getModules = async ({
   moduleId = '',
@@ -80,7 +81,6 @@ export const getModules = async ({
   });
   await throwIfNotOk(response);
   return response.json();
-  // TODO Check for error scenario
 };
 
 /**
@@ -91,7 +91,7 @@ export const getModules = async ({
  * @param jobIdErrorFilter - if provided, filters all errors except for given jobIds
  * @param groups - list of groups to add to jobs being installed
  * @param prefix - prefix to be added to job name
- * @param headers
+ * @param headers optional headers to add
  */
 export const setupMlJob = async ({
   configTemplate,
@@ -131,7 +131,7 @@ export const setupMlJob = async ({
  *
  * @param datafeedIds
  * @param start
- * @param headers
+ * @param headers optional headers to add
  */
 export const startDatafeeds = async ({
   datafeedIds,
@@ -168,7 +168,7 @@ export const startDatafeeds = async ({
  * Stops the given dataFeedIds and sets the corresponding Job's jobState to closed
  *
  * @param datafeedIds
- * @param headers
+ * @param headers optional headers to add
  */
 export const stopDatafeeds = async ({
   datafeedIds,

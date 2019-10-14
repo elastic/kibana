@@ -7,6 +7,7 @@
 import {
   Group,
   JobSummary,
+  Module,
   RecognizerModule,
   SetupMlResponse,
   SiemJob,
@@ -104,6 +105,236 @@ export const mockJobsSummaryResponse: JobSummary[] = [
     datafeedIndices: ['auditbeat-*'],
     datafeedState: 'stopped',
     isSingleMetricViewerJob: true,
+  },
+];
+
+export const mockGetModuleResponse: Module[] = [
+  {
+    id: 'siem_auditbeat',
+    title: 'SIEM Auditbeat',
+    description:
+      'Detect suspicious network activity and unusual processes in Auditbeat data (beta)',
+    type: 'Auditbeat data',
+    logoFile: 'logo.json',
+    defaultIndexPattern: 'auditbeat-*',
+    query: { bool: { filter: [{ term: { 'agent.type': 'auditbeat' } }] } },
+    jobs: [
+      {
+        id: 'rare_process_by_host_linux_ecs',
+        config: {
+          job_type: 'anomaly_detector',
+          description: 'SIEM Auditbeat: Detect unusually rare processes on Linux (beta)',
+          groups: ['siem', 'auditbeat', 'process'],
+          analysis_config: {
+            bucket_span: '15m',
+            detectors: [
+              {
+                detector_description: 'rare process executions on Linux',
+                function: 'rare',
+                by_field_name: 'process.name',
+                partition_field_name: 'host.name',
+              },
+            ],
+            influencers: ['host.name', 'process.name', 'user.name'],
+          },
+          analysis_limits: { model_memory_limit: '256mb' },
+          data_description: { time_field: '@timestamp' },
+          custom_settings: {
+            created_by: 'ml-module-siem-auditbeat',
+            custom_urls: [
+              {
+                url_name: 'Host Details by process name',
+                url_value:
+                  "siem#/ml-hosts/$host.name$?_g=()&kqlQuery=(filterQuery:(expression:'process.name%20:%20%22$process.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+              {
+                url_name: 'Host Details by user name',
+                url_value:
+                  "siem#/ml-hosts/$host.name$?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+              {
+                url_name: 'Hosts Overview by process name',
+                url_value:
+                  "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'process.name%20:%20%22$process.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+              {
+                url_name: 'Hosts Overview by user name',
+                url_value:
+                  "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+            ],
+          },
+        },
+      },
+    ],
+    datafeeds: [
+      {
+        id: 'datafeed-rare_process_by_host_linux_ecs',
+        config: {
+          job_id: 'rare_process_by_host_linux_ecs',
+          indexes: ['INDEX_PATTERN_NAME'],
+          query: {
+            bool: {
+              filter: [
+                { terms: { 'event.action': ['process_started', 'executed'] } },
+                { term: { 'agent.type': 'auditbeat' } },
+              ],
+            },
+          },
+        },
+      },
+    ],
+    kibana: {},
+  },
+  {
+    id: 'siem_winlogbeat',
+    title: 'SIEM Winlogbeat',
+    description: 'Detect unusual processes and network activity in Winlogbeat data (beta)',
+    type: 'Winlogbeat data',
+    logoFile: 'logo.json',
+    defaultIndexPattern: 'winlogbeat-*',
+    query: { bool: { filter: [{ term: { 'agent.type': 'winlogbeat' } }] } },
+    jobs: [
+      {
+        id: 'windows_anomalous_network_activity_ecs',
+        config: {
+          job_type: 'anomaly_detector',
+          description:
+            'SIEM Winlogbeat: Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity (beta)',
+          groups: ['siem', 'winlogbeat', 'network'],
+          analysis_config: {
+            bucket_span: '15m',
+            detectors: [
+              {
+                detector_description: 'rare by "process.name"',
+                function: 'rare',
+                by_field_name: 'process.name',
+              },
+            ],
+            influencers: ['host.name', 'process.name', 'user.name', 'destination.ip'],
+          },
+          analysis_limits: { model_memory_limit: '64mb' },
+          data_description: { time_field: '@timestamp' },
+          custom_settings: {
+            created_by: 'ml-module-siem-winlogbeat',
+            custom_urls: [
+              {
+                url_name: 'Host Details by process name',
+                url_value:
+                  "siem#/ml-hosts/$host.name$?_g=()&kqlQuery=(filterQuery:(expression:'process.name%20:%20%22$process.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+              {
+                url_name: 'Host Details by user name',
+                url_value:
+                  "siem#/ml-hosts/$host.name$?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+              {
+                url_name: 'Hosts Overview by process name',
+                url_value:
+                  "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'process.name%20:%20%22$process.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+              {
+                url_name: 'Hosts Overview by user name',
+                url_value:
+                  "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+            ],
+          },
+        },
+      },
+      {
+        id: 'windows_anomalous_path_activity_ecs',
+        config: {
+          job_type: 'anomaly_detector',
+          groups: ['siem', 'winlogbeat', 'process'],
+          description:
+            'SIEM Winlogbeat:  Looks for activity in unusual paths that may indicate execution of malware or persistence mechanisms. Windows payloads often execute from user profile paths (beta)',
+          analysis_config: {
+            bucket_span: '15m',
+            detectors: [
+              {
+                detector_description: 'rare by "process.working_directory"',
+                function: 'rare',
+                by_field_name: 'process.working_directory',
+              },
+            ],
+            influencers: ['host.name', 'process.name', 'user.name'],
+          },
+          analysis_limits: { model_memory_limit: '256mb' },
+          data_description: { time_field: '@timestamp' },
+          custom_settings: {
+            created_by: 'ml-module-siem-winlogbeat',
+            custom_urls: [
+              {
+                url_name: 'Host Details by process name',
+                url_value:
+                  "siem#/ml-hosts/$host.name$?_g=()&kqlQuery=(filterQuery:(expression:'process.name%20:%20%22$process.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+              {
+                url_name: 'Host Details by user name',
+                url_value:
+                  "siem#/ml-hosts/$host.name$?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+              {
+                url_name: 'Hosts Overview by process name',
+                url_value:
+                  "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'process.name%20:%20%22$process.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+              {
+                url_name: 'Hosts Overview by user name',
+                url_value:
+                  "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+              },
+            ],
+          },
+        },
+      },
+    ],
+    datafeeds: [
+      {
+        id: 'datafeed-windows_anomalous_path_activity_ecs',
+        config: {
+          job_id: 'windows_anomalous_path_activity_ecs',
+          indices: ['INDEX_PATTERN_NAME'],
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.action': 'Process Create (rule: ProcessCreate)' } },
+                { term: { 'agent.type': 'winlogbeat' } },
+              ],
+            },
+          },
+        },
+      },
+      {
+        id: 'datafeed-windows_anomalous_network_activity_ecs',
+        config: {
+          job_id: 'windows_anomalous_network_activity_ecs',
+          indices: ['INDEX_PATTERN_NAME'],
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.action': 'Network connection detected (rule: NetworkConnect)' } },
+                { term: { 'agent.type': 'winlogbeat' } },
+              ],
+              must_not: [
+                {
+                  bool: {
+                    should: [
+                      { term: { 'destination.ip': '127.0.0.1' } },
+                      { term: { 'destination.ip': '127.0.0.53' } },
+                      { term: { 'destination.ip': '::1' } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    ],
+    kibana: {},
   },
 ];
 

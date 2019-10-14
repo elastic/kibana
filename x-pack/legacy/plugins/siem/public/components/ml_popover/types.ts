@@ -41,9 +41,10 @@ export interface Module {
   type: string;
   logoFile: string;
   defaultIndexPattern: string;
-  query: Record<string, string>;
+  query: Record<string, object>;
   jobs: ModuleJob[];
   datafeeds: ModuleDatafeed[];
+  kibana: object;
 }
 
 /**
@@ -56,24 +57,25 @@ export interface ModuleJob {
     description: string;
     analysis_config: {
       bucket_span: string;
-      summary_count_field_name: string;
+      summary_count_field_name?: string;
       detectors: Detector[];
-      influencers: [];
+      influencers: string[];
     };
     analysis_limits: {
       model_memory_limit: string;
     };
     data_description: {
       time_field: string;
-      time_format: string;
+      time_format?: string;
     };
-    model_plot_config: {
+    model_plot_config?: {
       enabled: boolean;
     };
     custom_settings: {
       created_by: string;
       custom_urls: CustomURL[];
     };
+    job_type: string;
   };
 }
 
@@ -81,8 +83,10 @@ export interface ModuleDatafeed {
   id: string;
   config: {
     job_id: string;
-    indexes: string[];
-    query: Record<string, string>;
+    // TODO: Speak to ML team about this one
+    indexes?: string[];
+    indices?: string[];
+    query: Record<string, object>;
   };
 }
 
@@ -123,6 +127,8 @@ export interface JobSummary {
 export interface Detector {
   detector_description: string;
   function: string;
+  by_field_name: string;
+  partition_field_name?: string;
 }
 
 export interface CustomURL {

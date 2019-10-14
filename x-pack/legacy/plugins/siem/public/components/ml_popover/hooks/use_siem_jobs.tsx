@@ -7,7 +7,7 @@
 import { useContext, useEffect, useState } from 'react';
 
 import { checkRecognizer, getJobsSummary, getModules } from '../api';
-import { Module, ModuleJob, SiemJob } from '../types';
+import { SiemJob } from '../types';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
 import { useStateToaster } from '../../toasters';
@@ -16,52 +16,9 @@ import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting'
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 
 import * as i18n from './translations';
-import { mlModules } from '../ml_modules';
+import { createSiemJobs } from './use_siem_jobs_helpers';
 
 type Return = [boolean, SiemJob[]];
-
-/**
- * Helper function for converting from ModuleJob -> SiemJob
- * @param module
- * @param moduleJob
- * @param isCompatible
- */
-const moduleToSiemJob = (module: Module, moduleJob: ModuleJob, isCompatible: boolean): SiemJob => {
-  return {
-    datafeedId: '',
-    datafeedIndices: [],
-    datafeedState: '',
-    hasDatafeed: false,
-    isSingleMetricViewerJob: false,
-    jobState: '',
-    memory_status: '',
-    processed_record_count: 0,
-    id: moduleJob.id,
-    description: moduleJob.config.description,
-    groups: [...moduleJob.config.groups].sort(),
-    defaultIndexPattern: module.defaultIndexPattern,
-    moduleId: module.id,
-    isCompatible,
-    isInstalled: false,
-    isElasticJob: true,
-  };
-};
-
-const getAugmentedFields = (
-  jobId: string,
-  moduleJobs: SiemJob[],
-  compatibleModuleIds: string[]
-) => {
-  const moduleJob = moduleJobs.find(mj => mj.id === jobId);
-  return moduleJob !== undefined
-    ? {
-        moduleId: moduleJob.moduleId,
-        defaultIndexPattern: moduleJob.defaultIndexPattern,
-        isCompatible: compatibleModuleIds.includes(moduleJob.moduleId),
-        isElasticJob: true,
-      }
-    : {};
-};
 
 /**
  * Compiles a collection of SiemJobs, which are a list of all jobs relevant to the SIEM App. This
@@ -94,37 +51,7 @@ export const useSiemJobs = (refetchData: boolean): Return => {
             checkRecognizer({ indexPatternName: siemDefaultIndex, signal: abortCtrl.signal }),
           ]);
 
-          // Create lookup of compatible modules
-          const compatibleModuleIds = compatibleModules.map(module => module.id);
-
-          // Process modulesData: Filter to SIEM specific modules, and unpack jobs from modules
-          const moduleJobs = modulesData
-            .filter(module => mlModules.includes(module.id))
-            .map(module => [
-              ...module.jobs.map(moduleJob =>
-                moduleToSiemJob(module, moduleJob, compatibleModuleIds.includes(module.id))
-              ),
-            ])
-            .flat();
-
-          // Process jobSummaryData: Filter to SIEM jobs, and augment with moduleId/defaultIndexPattern/isCompatible
-          const installedJobs = jobSummaryData
-            .filter(({ groups }) => groups.includes('siem'))
-            .map(
-              jobSummary =>
-                ({
-                  ...jobSummary,
-                  ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds),
-                  isInstalled: true,
-                } as SiemJob)
-            );
-          const installedJobsIds = installedJobs.map(installedJob => installedJob.id);
-
-          // Combine installed jobs + moduleJobs that don't overlap, and sort by name asc
-          const compositeSiemJobs: SiemJob[] = [
-            ...installedJobs,
-            ...moduleJobs.filter(mj => !installedJobsIds.includes(mj.id)),
-          ].sort((a, b) => a.id.localeCompare(b.id));
+          const compositeSiemJobs = createSiemJobs(jobSummaryData, modulesData, compatibleModules);
 
           if (isSubscribed) {
             setSiemJobs(compositeSiemJobs);
