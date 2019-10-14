@@ -73,7 +73,6 @@ export default function({ getService, getPageObjects, ...rest }: FtrProviderCont
     it('should allow creation of lens visualizations', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.toggleExistenceFilter();
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({

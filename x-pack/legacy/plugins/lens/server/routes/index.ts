@@ -6,7 +6,7 @@
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
-import { initStatsRoute } from './index_stats';
+import { existingFieldsRoute } from './existing_fields';
 import { initFieldsRoute } from './field_stats';
 import { initLensUsageRoute } from './telemetry';
 
@@ -17,7 +17,7 @@ export function setupRoutes(
     config: KibanaConfig;
   }
 ) {
-  initStatsRoute(setup);
+  existingFieldsRoute(setup);
   initFieldsRoute(setup);
   initLensUsageRoute(setup, plugins);
 }
