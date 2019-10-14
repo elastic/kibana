@@ -15,7 +15,7 @@ export const JobDefinitionOutdatedCallout: React.FC<{
   <EuiCallOut color="warning" iconType="alert" title={jobDefinitionOutdatedTitle}>
     <FormattedMessage
       id="xpack.infra.logs.analysis.jobDefinitionOutdatedCalloutMessage"
-      defaultMessage="A newer version of the ML job is available. Recreate the job to deploy the newest version. This removes previously detected anomalies."
+      defaultMessage="A newer version of the ML job is available. Recreate the job to deploy the newer version. This removes previously detected anomalies."
       tagName="p"
     />
     <EuiButton color="warning" onClick={onRecreateMlJob}>

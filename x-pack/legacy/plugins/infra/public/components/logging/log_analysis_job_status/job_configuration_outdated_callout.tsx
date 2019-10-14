@@ -15,7 +15,7 @@ export const JobConfigurationOutdatedCallout: React.FC<{
   <EuiCallOut color="warning" iconType="alert" title={jobConfigurationOutdatedTitle}>
     <FormattedMessage
       id="xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutMessage"
-      defaultMessage="The job was created based on a different source configuration. Recreate the job to apply the current configuration. This removes previously detected anomalies."
+      defaultMessage="The ML job was created using a different source configuration. Recreate the job to apply the current configuration. This removes previously detected anomalies."
       tagName="p"
     />
     <EuiButton color="warning" onClick={onRecreateMlJob}>
