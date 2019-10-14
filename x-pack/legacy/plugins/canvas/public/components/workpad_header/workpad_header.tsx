@@ -194,11 +194,14 @@ export class WorkpadHeader extends React.PureComponent<Props, State> {
                 <EuiFlexItem grow={false}>
                   <AssetManager />
                 </EuiFlexItem>
+                {/*
+                Disabling embeddables until we figure out filters
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty onClick={this._showEmbeddablePanel}>
                     {strings.getEmbedObjectButtonLabel()}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+                */}
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
