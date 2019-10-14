@@ -17,7 +17,7 @@ Before you upgrade {kib}:
 * If you are using custom plugins, check that a compatible version is
   available. 
 * Shut down all {kib} nodes. Running more than one {kib} version against the 
-  same Elasticseach index is unsupported. If you upgrade while {kib} nodes are 
+  same Elasticseach index is unsupported. If you upgrade while older {kib} nodes are 
   running, the upgrade fails.
 
 To identify the changes you need to make to upgrade, and to enable you to 
