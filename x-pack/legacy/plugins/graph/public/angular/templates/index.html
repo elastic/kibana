@@ -17,10 +17,10 @@
     is-loading="loading"
     is-initialized="workspaceInitialized || savedWorkspace.id"
     initial-query="initialQuery"
-    on-fill-workspace="fillWorkspace"
     plugin-data-start="pluginDataStart"
     core-start="coreStart"
     store="store"
+    no-index-patterns="noIndexPatterns"
   ></div>
 
   <div class="gphGraph__container" id="GraphSvgContainer" ng-if="workspaceInitialized || savedWorkspace.id">
@@ -107,7 +107,6 @@
 
       <div>
         <div class="gphSidebar__header">
-          <span class="kuiIcon fa-shopping-cart"></span>
           {{ ::'xpack.graph.sidebar.selectionsTitle' | i18n: { defaultMessage: 'Selections' } }}
         </div>
 
@@ -150,7 +149,7 @@
             ng-if="workspace.selectedNodes.length === 0"
             class="help-block"
             i18n-id="xpack.graph.sidebar.selections.noSelectionsHelpText"
-            i18n-default-message="No selections. Click on vertices to add"
+            i18n-default-message="No selections. Click on vertices to add."
           ></p>
 
           <div ng-repeat="n in workspace.selectedNodes" class="gphSelectionList__field" ng-class="{'gphSelectionList__field--selected': isSelectedSelected(n)}"
@@ -273,7 +272,7 @@
               <div
                 class="help-block"
                 i18n-id="xpack.graph.sidebar.displayLabelHelpText"
-                i18n-default-message="Change the label for this vertex"
+                i18n-default-message="Change the label for this vertex."
               ></div>
             </div>
           </div>

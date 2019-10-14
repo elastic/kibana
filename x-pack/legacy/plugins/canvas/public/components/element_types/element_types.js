@@ -19,7 +19,10 @@ import { ConfirmModal } from '../confirm_modal/confirm_modal';
 import { CustomElementModal } from '../custom_element_modal';
 import { getTagsFilter } from '../../lib/get_tags_filter';
 import { extractSearch } from '../../lib/extract_search';
+import { ComponentStrings } from '../../../i18n';
 import { ElementGrid } from './element_grid';
+
+const { ElementTypes: strings } = ComponentStrings;
 
 const tagType = 'badge';
 export class ElementTypes extends Component {
@@ -81,7 +84,7 @@ export class ElementTypes extends Component {
     return (
       <EuiOverlayMask>
         <CustomElementModal
-          title="Edit element"
+          title={strings.getEditElementTitle()}
           name={elementToEdit.displayName}
           description={elementToEdit.help}
           image={elementToEdit.image}
@@ -102,9 +105,10 @@ export class ElementTypes extends Component {
     return (
       <ConfirmModal
         isOpen
-        title={`Delete element '${elementToDelete.displayName}'?`}
-        message="Are you sure you want to delete this element?"
-        confirmButtonText="Delete"
+        title={strings.getDeleteElementTitle(elementToDelete.displayName)}
+        message={strings.getDeleteElementDescription()}
+        confirmButtonText={strings.getDeleteButtonLabel()}
+        cancelButtonText={strings.getCancelButtonLabel()}
         onConfirm={this._handleDelete}
         onCancel={this._hideDeleteModal}
       />
@@ -129,8 +133,8 @@ export class ElementTypes extends Component {
     let customElementContent = (
       <EuiEmptyPrompt
         iconType="vector"
-        title={<h2>Add new elements</h2>}
-        body={<p>Group and save workpad elements to create new elements</p>}
+        title={<h2>{strings.getAddNewElementTitle()}</h2>}
+        body={<p>{strings.getAddNewElementDescription()}</p>}
         titleSize="s"
       />
     );
@@ -159,14 +163,14 @@ export class ElementTypes extends Component {
     const tabs = [
       {
         id: 'elements',
-        name: 'Elements',
+        name: strings.getElementsTitle(),
         content: (
           <div className="canvasElements__filter">
             <EuiSpacer />
             <EuiSearchBar
               defaultQuery={search}
               box={{
-                placeholder: 'Find element',
+                placeholder: strings.getFindElementPlaceholder(),
                 incremental: true,
               }}
               filters={filters}
@@ -184,14 +188,14 @@ export class ElementTypes extends Component {
       },
       {
         id: 'customElements',
-        name: 'My elements',
+        name: strings.getMyElementsTitle(),
         content: (
           <Fragment>
             <EuiSpacer />
             <EuiSearchBar
               defaultQuery={search}
               box={{
-                placeholder: 'Find element',
+                placeholder: strings.getFindElementPlaceholder(),
                 incremental: true,
               }}
               onChange={onSearch}
