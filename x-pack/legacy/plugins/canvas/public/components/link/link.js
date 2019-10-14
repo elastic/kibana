@@ -8,6 +8,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink } from '@elastic/eui';
 
+import { ComponentStrings } from '../../../i18n';
+
+const { Link: strings } = ComponentStrings;
+
 const isModifiedEvent = ev => !!(ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey);
 
 export class Link extends React.PureComponent {
@@ -53,7 +57,7 @@ export class Link extends React.PureComponent {
       return <EuiLink {...props}>{children}</EuiLink>;
     } catch (e) {
       console.error(e);
-      return <div>LINK ERROR: {e.message}</div>;
+      return <div>{strings.getErrorMessage(e.message)}</div>;
     }
   }
 }
