@@ -19,20 +19,25 @@ export interface Position {
 export interface Props {
   lines: string[];
   language: string;
+  /**
+   * Returns whether to highlight the given line.
+   * @param lineIndex The index of the line (0-based)
+   */
+  highlightLine: (lineIndex: number) => boolean;
   highlightRanges: IRange[];
   onClick: (event: Position) => void;
   folding: boolean;
   /**
    * Returns the line number to display for a given line.
-   * @param lineIndex The index of the given line (0-indexed)
-   * @param lines The array of lines
+   * @param lineIndex The index of the line (0-based)
    */
-  lineNumber: (lineIndex: number, lines: string[]) => string;
+  lineNumber: (lineIndex: number) => string;
 }
 
 export class CodeBlock extends React.PureComponent<Props> {
   static defaultProps = {
     folding: false,
+    highlightLine: () => {},
     highlightRanges: [],
     language: 'text',
     lineNumber: String,
@@ -42,10 +47,10 @@ export class CodeBlock extends React.PureComponent<Props> {
   private el = createRef<HTMLDivElement>();
   private ed?: editor.IStandaloneCodeEditor;
   private resizeChecker?: ResizeChecker;
-  private currentHighlightDecorations: string[] = [];
+  private currentDecorations: string[] = [];
 
   public async componentDidMount() {
-    const { highlightRanges, language, onClick } = this.props;
+    const { language, onClick } = this.props;
 
     if (this.el.current) {
       await this.tryLoadFile(this.text, language);
@@ -66,17 +71,8 @@ export class CodeBlock extends React.PureComponent<Props> {
       });
       registerEditor(this.ed!);
 
-      if (highlightRanges.length) {
-        const decorations = highlightRanges.map((range: IRange) => {
-          return {
-            range,
-            options: {
-              inlineClassName: 'codeSearch__highlight',
-            },
-          };
-        });
-        this.currentHighlightDecorations = this.ed!.deltaDecorations([], decorations);
-      }
+      this.setDecorations();
+
       this.resizeChecker = new ResizeChecker(this.el.current!);
       this.resizeChecker.on('resize', () => {
         setTimeout(() => {
@@ -131,21 +127,7 @@ export class CodeBlock extends React.PureComponent<Props> {
         const model = this.ed.getModel();
         if (model) {
           model.setValue(this.text);
-
-          if (highlightRanges.length) {
-            const decorations = highlightRanges!.map((range: IRange) => {
-              return {
-                range,
-                options: {
-                  inlineClassName: 'codeSearch__highlight',
-                },
-              };
-            });
-            this.currentHighlightDecorations = this.ed.deltaDecorations(
-              this.currentHighlightDecorations,
-              decorations
-            );
-          }
+          this.setDecorations();
         }
       }
     }
@@ -163,10 +145,40 @@ export class CodeBlock extends React.PureComponent<Props> {
     return <div ref={this.el} className="codeContainer__monaco" style={{ height }} />;
   }
 
-  private lineNumber = (lineIndex: number) =>
-    this.props.lineNumber(lineIndex - 1, this.props.lines);
+  private lineNumber = (lineIndex: number) => this.props.lineNumber(lineIndex - 1);
 
   private get text(): string {
     return this.props.lines.join('\n');
+  }
+
+  private setDecorations() {
+    const decorations = this.decorations;
+    if (decorations.length) {
+      this.currentDecorations = this.ed!.deltaDecorations(this.currentDecorations, decorations);
+    }
+  }
+
+  private get decorations(): editor.IModelDeltaDecoration[] {
+    const { lines, highlightRanges, highlightLine } = this.props;
+
+    const rangeHighlights = highlightRanges.map(range => ({
+      range,
+      options: {
+        inlineClassName: 'codeSearch__highlight',
+      },
+    }));
+
+    const lineHighlights = lines
+      .map((line, lineIndex) => ({
+        range: new monaco.Range(lineIndex + 1, 0, lineIndex + 1, 0),
+        options: {
+          isWholeLine: true,
+          className: `code-monaco-highlight-line code-line-number-${lineIndex}`,
+          linesDecorationsClassName: 'code-mark-line-number',
+        },
+      }))
+      .filter((decorations, lineIndex) => highlightLine(lineIndex));
+
+    return [...rangeHighlights, ...lineHighlights];
   }
 }
