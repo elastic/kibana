@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import archiver from 'archiver';
 
 import {
