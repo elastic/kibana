@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultIndexPattern } from '../../../../default_index_pattern';
+
 // TODO: See build_events_reindex.ts for all the spots to make things "configurable"
 // here but this is intended to replace the build_events_reindex.ts
 export const buildEventsQuery = () => {
   return {
     allowNoIndices: true,
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    index: defaultIndexPattern,
     ignoreUnavailable: true,
     body: {
       query: {

@@ -5,7 +5,15 @@
  */
 
 import React, { ReactNode } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiLink,
+  EuiCallOut,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -29,6 +37,7 @@ export interface GuidancePanelProps {
   hasDatasource: boolean;
   hasFields: boolean;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
+  noIndexPatterns: boolean;
 }
 
 function ListItem({
@@ -67,98 +76,127 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
     onIndexPatternSelected,
     hasDatasource,
     hasFields,
+    noIndexPatterns,
   } = props;
 
   const kibana = useKibana<IDataPluginServices>();
-  const { overlays, savedObjects, uiSettings } = kibana.services;
-  if (!overlays) return null;
+  const { overlays, savedObjects, uiSettings, chrome, application } = kibana.services;
+  if (!overlays || !chrome || !application) return null;
 
   const onOpenDatasourcePicker = () => {
     openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected);
   };
 
+  let content = (
+    <EuiPanel data-test-subj="graphGuidancePanel">
+      <EuiFlexGroup direction="column" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="graphApp" size="xxl" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <h1>
+              {i18n.translate('xpack.graph.guidancePanel.title', {
+                defaultMessage: 'Three steps to your graph',
+              })}
+            </h1>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ul className="gphGuidancePanel__list">
+            <ListItem state={hasDatasource ? 'done' : 'active'}>
+              <EuiLink onClick={onOpenDatasourcePicker}>
+                {i18n.translate(
+                  'xpack.graph.guidancePanel.datasourceItem.indexPatternButtonLabel',
+                  {
+                    defaultMessage: 'Select a data source.',
+                  }
+                )}
+              </EuiLink>
+            </ListItem>
+            <ListItem state={hasFields ? 'done' : hasDatasource ? 'active' : 'disabled'}>
+              <EuiLink onClick={onOpenFieldPicker}>
+                {i18n.translate('xpack.graph.guidancePanel.fieldsItem.fieldsButtonLabel', {
+                  defaultMessage: 'Add fields.',
+                })}
+              </EuiLink>
+            </ListItem>
+            <ListItem state={hasFields ? 'active' : 'disabled'}>
+              <FormattedMessage
+                id="xpack.graph.guidancePanel.nodesItem.description"
+                defaultMessage="Enter a query in the search bar to start exploring. Don't know where to start? {topTerms}."
+                values={{
+                  topTerms: (
+                    <EuiLink onClick={onFillWorkspace}>
+                      {i18n.translate('xpack.graph.guidancePanel.nodesItem.topTermsButtonLabel', {
+                        defaultMessage: 'Graph the top terms',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </ListItem>
+          </ul>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+
+  if (noIndexPatterns) {
+    const managementUrl = chrome.navLinks.get('kibana:management')!.url;
+    const indexPatternUrl = `${managementUrl}/kibana/index_patterns`;
+    const sampleDataUrl = `${application.getUrlForApp(
+      'kibana'
+    )}#/home/tutorial_directory/sampleData`;
+    content = (
+      <EuiPanel paddingSize="none">
+        <EuiCallOut
+          color="warning"
+          iconType="help"
+          title={i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
+            defaultMessage: 'No data source',
+          })}
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.graph.noDataSourceNotificationMessageText"
+              defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create an index pattern for your Elasticsearch indices."
+              values={{
+                managementIndexPatternsLink: (
+                  <a href={indexPatternUrl}>
+                    <FormattedMessage
+                      id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
+                      defaultMessage="Management &gt; Index Patterns"
+                    />
+                  </a>
+                ),
+              }}
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.graph.listing.noDataSource.newToKibanaDescription"
+              defaultMessage="New to Kibana? You can also use our {sampleDataInstallLink}."
+              values={{
+                sampleDataInstallLink: (
+                  <EuiLink href={sampleDataUrl}>
+                    <FormattedMessage
+                      id="xpack.graph.listing.noDataSource.sampleDataInstallLinkText"
+                      defaultMessage="sample data"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
+  }
+
   return (
     <EuiFlexGroup justifyContent="center">
-      <EuiFlexItem className="gphGuidancePanel">
-        <EuiPanel data-test-subj="graphGuidancePanel">
-          <EuiFlexGroup direction="column" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="graphApp" size="xxl" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h1
-                  aria-label={i18n.translate('xpack.graph.guidancePanel.ariaLabel', {
-                    defaultMessage: "Let's get started building your first graph!",
-                  })}
-                >
-                  {i18n.translate('xpack.graph.guidancePanel.title', {
-                    defaultMessage: "Let's get started!",
-                  })}
-                </h1>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ul className="gphGuidancePanel__list">
-                <ListItem state={hasDatasource ? 'done' : 'active'}>
-                  <FormattedMessage
-                    id="xpack.graph.guidancePanel.datasourceItem.description"
-                    defaultMessage="Choose an {indexpattern}"
-                    values={{
-                      indexpattern: (
-                        <EuiLink onClick={onOpenDatasourcePicker}>
-                          {i18n.translate(
-                            'xpack.graph.guidancePanel.datasourceItem.indexPatternButtonLabel',
-                            {
-                              defaultMessage: 'index pattern',
-                            }
-                          )}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </ListItem>
-                <ListItem state={hasFields ? 'done' : hasDatasource ? 'active' : 'disabled'}>
-                  <FormattedMessage
-                    id="xpack.graph.guidancePanel.fieldsItem.description"
-                    defaultMessage="{fields} to explore"
-                    values={{
-                      fields: (
-                        <EuiLink onClick={onOpenFieldPicker}>
-                          {i18n.translate(
-                            'xpack.graph.guidancePanel.fieldsItem.fieldsButtonLabel',
-                            {
-                              defaultMessage: 'Select fields',
-                            }
-                          )}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </ListItem>
-                <ListItem state={hasFields ? 'active' : 'disabled'}>
-                  <FormattedMessage
-                    id="xpack.graph.guidancePanel.nodesItem.description"
-                    defaultMessage="Search for something in the search bar above to begin exploration. If you don't know where to start, you can also {topTerms}"
-                    values={{
-                      topTerms: (
-                        <EuiLink onClick={onFillWorkspace}>
-                          {i18n.translate(
-                            'xpack.graph.guidancePanel.nodesItem.topTermsButtonLabel',
-                            {
-                              defaultMessage: 'show correlations of the top terms',
-                            }
-                          )}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </ListItem>
-              </ul>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
+      <EuiFlexItem className="gphGuidancePanel">{content}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }
