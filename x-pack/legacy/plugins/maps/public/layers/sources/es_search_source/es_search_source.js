@@ -83,7 +83,7 @@ export class ESSearchSource extends AbstractESSource {
   async getNumberFields() {
     try {
       const indexPattern = await this._getIndexPattern();
-      return indexPattern.fields.byType.number.map(field => {
+      return indexPattern.fields.getByType('number').map(field => {
         return { name: field.name, label: field.name };
       });
     } catch (error) {
@@ -159,10 +159,11 @@ export class ESSearchSource extends AbstractESSource {
     } = this._descriptor;
 
     const indexPattern = await this._getIndexPattern();
+    const geoField = await this._getGeoField();
 
     const scriptFields = {};
     searchFilters.fieldNames.forEach(fieldName => {
-      const field = indexPattern.fields.byName[fieldName];
+      const field = indexPattern.fields.getByName(fieldName);
       if (field && field.scripted) {
         scriptFields[field.name] = {
           script: {
@@ -173,8 +174,24 @@ export class ESSearchSource extends AbstractESSource {
       }
     });
 
+    const topHits = {
+      size: topHitsSize,
+      script_fields: scriptFields,
+    };
+    if (this._hasSort()) {
+      topHits.sort = this._buildEsSort();
+    }
+    if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
+      topHits._source = false;
+      topHits.docvalue_fields = searchFilters.fieldNames;
+    } else {
+      topHits._source = {
+        includes: searchFilters.fieldNames
+      };
+    }
+
     const searchSource = await this._makeSearchSource(searchFilters, 0);
-    const aggs = {
+    searchSource.setField('aggs', {
       entitySplit: {
         terms: {
           field: topHitsSplitField,
@@ -182,21 +199,11 @@ export class ESSearchSource extends AbstractESSource {
         },
         aggs: {
           entityHits: {
-            top_hits: {
-              _source: {
-                includes: searchFilters.fieldNames
-              },
-              size: topHitsSize,
-              script_fields: scriptFields,
-            }
+            top_hits: topHits
           }
         }
       }
-    };
-    if (this._hasSort()) {
-      aggs.entitySplit.aggs.entityHits.top_hits.sort = this._buildEsSort();
-    }
-    searchSource.setField('aggs', aggs);
+    });
 
     const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document top hits request');
 
@@ -222,14 +229,32 @@ export class ESSearchSource extends AbstractESSource {
     };
   }
 
+  // searchFilters.fieldNames contains geo field and any fields needed for styling features
+  // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
   async _getSearchHits(layerName, searchFilters, registerCancelCallback) {
-    const searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT);
-    // Setting "fields" instead of "source: { includes: []}"
-    // because SearchSource automatically adds the following by default
-    // 1) all scripted fields
-    // 2) docvalue_fields value is added for each date field in an index - see getComputedFields
-    // By setting "fields", SearchSource removes all of defaults
-    searchSource.setField('fields', searchFilters.fieldNames);
+    const geoField = await this._getGeoField();
+
+    let searchSource;
+    if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
+      // Request geo_point and style fields in docvalue_fields insted of _source
+      // 1) Returns geo_point in a consistent format regardless of how geo_point is stored in source
+      // 2) Setting _source to false so we avoid pulling back unneeded fields.
+      const initialSearchContext = {
+        docvalue_fields: searchFilters.fieldNames
+      };
+      searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT, initialSearchContext);
+      searchSource.setField('source', false); // do not need anything from _source
+      searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
+    } else {
+      // geo_shape fields do not support docvalue_fields yet, so still have to be pulled from _source
+      searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT);
+      // Setting "fields" instead of "source: { includes: []}"
+      // because SearchSource automatically adds the following by default
+      // 1) all scripted fields
+      // 2) docvalue_fields value is added for each date field in an index - see getComputedFields
+      // By setting "fields", SearchSource removes all of defaults
+      searchSource.setField('fields', searchFilters.fieldNames);
+    }
 
     if (this._hasSort()) {
       searchSource.setField('sort', this._buildEsSort());

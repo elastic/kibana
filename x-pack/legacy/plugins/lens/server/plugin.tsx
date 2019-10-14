@@ -10,8 +10,6 @@ import { setupRoutes } from './routes';
 import { registerLensUsageCollector } from './usage';
 
 export class LensServer implements Plugin<{}, {}, {}, {}> {
-  constructor() {}
-
   setup(
     core: CoreSetup,
     plugins: {

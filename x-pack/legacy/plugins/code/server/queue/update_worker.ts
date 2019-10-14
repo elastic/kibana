@@ -43,8 +43,7 @@ export class UpdateWorker extends AbstractGitWorker {
     const repoService = this.repoServiceFactory.newInstance(
       this.serverOptions.repoPath,
       this.serverOptions.credsPath,
-      this.log,
-      this.serverOptions.security.enableGitCertCheck
+      this.log
     );
 
     // Try to cancel any existing update job for this repository.

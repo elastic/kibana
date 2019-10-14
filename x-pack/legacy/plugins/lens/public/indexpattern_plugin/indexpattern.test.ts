@@ -10,6 +10,7 @@ import { SavedObjectsClientContract } from 'kibana/public';
 import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
+import { pluginsMock } from 'ui/new_platform/__mocks__/helpers';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 
 jest.mock('./loader');
@@ -130,6 +131,7 @@ function stateFromPersistedState(
     layers: persistedState.layers,
     indexPatterns: expectedIndexPatterns,
     indexPatternRefs: [],
+    existingFields: {},
     showEmptyFields: true,
   };
 }
@@ -144,6 +146,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as Storage,
       core: coreMock.createStart(),
       savedObjectsClient: {} as SavedObjectsClientContract,
+      data: pluginsMock.createStart().data,
     });
 
     persistedState = {
@@ -278,6 +281,7 @@ describe('IndexPattern Data Source', () => {
     it('should insert an empty layer into the previous state', () => {
       const state = {
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -312,6 +316,7 @@ describe('IndexPattern Data Source', () => {
     it('should remove a layer', () => {
       const state = {
         indexPatternRefs: [],
+        existingFields: {},
         showEmptyFields: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
@@ -346,6 +351,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.getLayers({
           indexPatternRefs: [],
+          existingFields: {},
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
@@ -371,6 +377,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.getMetaData({
           indexPatternRefs: [],
+          existingFields: {},
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
