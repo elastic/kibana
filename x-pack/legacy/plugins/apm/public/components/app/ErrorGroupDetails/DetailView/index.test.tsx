@@ -10,7 +10,7 @@ import React from 'react';
 import { mockMoment } from '../../../../utils/testHelpers';
 import { DetailView } from './index';
 
-jest.mock('../../../../../../code/public/components/code_block', () => ({
+jest.mock('../../../../../../code/public', () => ({
   CodeBlock: () => null
 }));
 

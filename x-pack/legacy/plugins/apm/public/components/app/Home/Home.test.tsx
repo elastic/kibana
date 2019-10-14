@@ -11,7 +11,7 @@ import { Home } from '../Home';
 jest.mock('ui/index_patterns');
 jest.mock('ui/new_platform');
 
-jest.mock('../../../../../code/public/components/code_block', () => ({
+jest.mock('../../../../../code/public', () => ({
   CodeBlock: () => null
 }));
 

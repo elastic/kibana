@@ -7,7 +7,7 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
-import { CodeBlock } from '../../../../../code/public/components/code_block';
+import { CodeBlock } from '../../../../../code/public';
 import {
   IStackframe,
   IStackframeWithLineContext
