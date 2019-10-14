@@ -6,13 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
+import { APMClient } from '../../../../../services/rest/createCallApmApi';
 import { trackEvent } from '../../../../../../../infra/public/hooks/use_track_metric';
 import { isRumAgentName } from '../../../../../../common/agent_name';
 import {
   getOptionLabel,
   omitAllOption
 } from '../../../../../../common/agent_configuration_constants';
-import { callApmApi } from '../../../../../services/rest/callApmApi';
 
 interface Settings {
   transaction_sample_rate: number;
@@ -21,6 +21,7 @@ interface Settings {
 }
 
 export async function saveConfig({
+  callApmApi,
   serviceName,
   environment,
   sampleRate,
@@ -30,6 +31,7 @@ export async function saveConfig({
   agentName,
   toasts
 }: {
+  callApmApi: APMClient;
   serviceName: string;
   environment: string;
   sampleRate: string;

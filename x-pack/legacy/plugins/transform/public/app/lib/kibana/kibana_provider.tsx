@@ -8,7 +8,7 @@ import React, { useEffect, useState, FC } from 'react';
 
 import { npStart } from 'ui/new_platform';
 
-import { setup as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { start as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 import { useAppDependencies } from '../../app_dependencies';
 
