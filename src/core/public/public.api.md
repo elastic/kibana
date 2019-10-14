@@ -4,8 +4,8 @@
 
 ```ts
 
+import { Breadcrumb } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
-import { MouseEventHandler } from 'react';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -103,16 +103,7 @@ export interface ChromeBrand {
 }
 
 // @public (undocumented)
-export interface ChromeBreadcrumb {
-    // (undocumented)
-    'data-test-subj'?: string;
-    // (undocumented)
-    href?: string;
-    // (undocumented)
-    onClick?: MouseEventHandler<HTMLButtonElement>;
-    // (undocumented)
-    text: string;
-}
+export type ChromeBreadcrumb = Breadcrumb;
 
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;

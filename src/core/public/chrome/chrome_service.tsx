@@ -23,7 +23,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import * as Url from 'url';
 
 import { i18n } from '@kbn/i18n';
-import { IconType, Breadcrumb } from '@elastic/eui';
+import { IconType, Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
 
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
@@ -59,9 +59,7 @@ export interface ChromeBrand {
 }
 
 /** @public */
-export interface ChromeBreadcrumb extends Breadcrumb {
-  'data-test'?: string;
-}
+export type ChromeBreadcrumb = EuiBreadcrumb;
 
 /** @public */
 export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
