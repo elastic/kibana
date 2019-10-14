@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { CoreSetup } from 'src/core/server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import {
   SearchParams,
+  DeleteDocumentByQueryParams,
   SearchResponse,
   DeleteDocumentByQueryResponse,
   AggregationSearchResponse,
 } from 'elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { RunContext } from '../../../task_manager';
-import { LensTelemetryState } from './types';
 import { getVisualizationCounts } from './visualization_counts';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
@@ -35,7 +34,7 @@ type ClusterSearchType = (
 ) => Promise<SearchResponse<unknown>>;
 type ClusterDeleteType = (
   endpoint: 'deleteByQuery',
-  params: SearchParams,
+  params: DeleteDocumentByQueryParams,
   options?: CallClusterOptions
 ) => Promise<DeleteDocumentByQueryResponse>;
 
@@ -84,21 +83,19 @@ function scheduleTasks(server: Server) {
   });
 }
 
-export async function doWork(
-  prevState: LensTelemetryState,
-  server: Server,
+export async function getDailyEvents(
+  kibanaIndex: string,
   callCluster: ClusterSearchType & ClusterDeleteType
 ): Promise<{
   byDate: Record<string, Record<string, number>>;
   suggestionsByDate: Record<string, Record<string, number>>;
 }> {
-  const kibanaIndex = server.config().get<string>('kibana.index');
-
   const aggs = {
     daily: {
       date_histogram: {
-        field: 'lens-ui-telemetry.events.date',
+        field: 'lens-ui-telemetry.date',
         calendar_interval: '1d',
+        min_doc_count: 1,
       },
       aggs: {
         groups: {
@@ -123,6 +120,9 @@ export async function doWork(
           aggs: {
             names: {
               terms: { field: 'lens-ui-telemetry.name', size: 100 },
+              aggs: {
+                sums: { sum: { field: 'lens-ui-telemetry.count' } },
+              },
             },
           },
         },
@@ -152,55 +152,38 @@ export async function doWork(
     size: 0,
   });
 
-  const byDateByType: Record<string, Record<string, number>> = prevState.byDate || {};
-  const suggestionsByDate: Record<string, Record<string, number>> =
-    prevState.suggestionsByDate || {};
+  const byDateByType: Record<string, Record<string, number>> = {};
+  const suggestionsByDate: Record<string, Record<string, number>> = {};
 
-  Object.keys(byDateByType).forEach(key => {
-    // Unix time
-    if (moment(key, 'x').isBefore(moment().subtract(30, 'days'))) {
-      delete byDateByType[key];
-      return;
-    }
-  });
-
-  Object.keys(suggestionsByDate).forEach(key => {
-    // Unix time
-    if (moment(key, 'x').isBefore(moment().subtract(30, 'days'))) {
-      delete suggestionsByDate[key];
-      return;
-    }
-  });
-
-  // TODO: These metrics are counting total matching docs, but each doc might
-  // represent multiple events
   metrics.aggregations!.daily.buckets.forEach(daily => {
     const byType: Record<string, number> = byDateByType[daily.key] || {};
     daily.groups.buckets.regularEvents.names.buckets.forEach(bucket => {
-      byType[bucket.key] = bucket.doc_count + (byType[daily.key] || 0);
+      byType[bucket.key] = bucket.sums.value || 0 + (byType[daily.key] || 0);
     });
     byDateByType[daily.key] = byType;
 
     const suggestionsByType: Record<string, number> = suggestionsByDate[daily.key] || {};
     daily.groups.buckets.suggestionEvents.names.buckets.forEach(bucket => {
-      suggestionsByType[bucket.key] = bucket.doc_count + (byType[daily.key] || 0);
+      suggestionsByType[bucket.key] = bucket.sums.value || 0 + (suggestionsByType[daily.key] || 0);
     });
     suggestionsByDate[daily.key] = suggestionsByType;
   });
 
-  if (metrics.hits.total > 0) {
-    // After aggregating the lens telemetry, we delete the originals which are not needed
-    await callCluster('deleteByQuery', {
-      index: kibanaIndex,
-      body: {
-        query: {
-          bool: {
-            filter: [{ term: { type: 'lens-ui-telemetry' } }],
-          },
+  // Always delete old date because we don't report it
+  await callCluster('deleteByQuery', {
+    index: kibanaIndex,
+    waitForCompletion: true,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            { term: { type: 'lens-ui-telemetry' } },
+            { range: { 'lens-ui-telemetry.date': { lt: 'now-90d/d' } } },
+          ],
         },
       },
-    });
-  }
+    },
+  });
 
   return {
     byDate: byDateByType,
@@ -211,24 +194,16 @@ export async function doWork(
 export function telemetryTaskRunner(server: Server) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const prevState = state as LensTelemetryState;
-
     const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 
     return {
       async run() {
-        let lensTelemetryTask;
-        let lensVisualizationTask;
+        const kibanaIndex = server.config().get<string>('kibana.index');
 
-        try {
-          lensTelemetryTask = doWork(prevState, server, callCluster);
-
-          lensVisualizationTask = getVisualizationCounts(callCluster, server.config());
-        } catch (err) {
-          server.log(['warning'], `Error loading lens telemetry: ${err}`);
-        }
-
-        return Promise.all([lensTelemetryTask, lensVisualizationTask])
+        return Promise.all([
+          getDailyEvents(kibanaIndex, callCluster),
+          getVisualizationCounts(callCluster, server.config()),
+        ])
           .then(([lensTelemetry, lensVisualizations]) => {
             return {
               state: {

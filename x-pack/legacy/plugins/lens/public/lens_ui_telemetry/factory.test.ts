@@ -18,8 +18,7 @@ import { HttpServiceBase } from 'kibana/public';
 jest.useFakeTimers();
 
 const createMockStorage = () => ({
-  // store: createMockWebStorage(),
-  get: jest.fn(),
+  get: jest.fn().mockReturnValue({ events: {}, suggestionEvents: {} }),
   set: jest.fn(),
   remove: jest.fn(),
   clear: jest.fn(),
@@ -28,10 +27,16 @@ const createMockStorage = () => ({
 describe('Lens UI telemetry', () => {
   let storage: jest.Mocked<Storage>;
   let http: jest.Mocked<HttpServiceBase>;
+  let dateSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    dateSpy = jest
+      .spyOn(Date, 'now')
+      .mockImplementation(() => new Date(Date.UTC(2019, 9, 23)).valueOf());
+
     storage = createMockStorage();
     http = coreMock.createSetup().http;
+    http.post.mockClear();
     const fakeManager = new LensReportManager({
       http,
       storage,
@@ -42,57 +47,47 @@ describe('Lens UI telemetry', () => {
 
   afterEach(() => {
     stopReportManager();
+    dateSpy.mockRestore();
   });
 
   it('should write immediately and track local state', () => {
     trackUiEvent('loaded');
 
     expect(storage.set).toHaveBeenCalledWith('lens-ui-telemetry', {
-      clicks: [
-        {
-          name: 'loaded',
-          date: expect.any(String),
-        },
-      ],
-      suggestionClicks: [],
+      events: expect.any(Object),
+      suggestionEvents: {},
     });
 
     trackSuggestionEvent('reload');
 
     expect(storage.set).toHaveBeenLastCalledWith('lens-ui-telemetry', {
-      clicks: [
-        {
-          name: 'loaded',
-          date: expect.any(String),
-        },
-      ],
-      suggestionClicks: [
-        {
-          name: 'reload',
-          date: expect.any(String),
-        },
-      ],
+      events: expect.any(Object),
+      suggestionEvents: expect.any(Object),
     });
   });
 
-  it('should post the results after waiting 10 seconds, if there is data', () => {
-    jest.runTimersToTime(10000);
+  it('should post the results after waiting 10 seconds, if there is data', async () => {
+    jest.runOnlyPendingTimers();
+
+    http.post.mockResolvedValue({});
 
     expect(http.post).not.toHaveBeenCalled();
+    expect(storage.set).toHaveBeenCalledTimes(0);
 
     trackUiEvent('load');
+    expect(storage.set).toHaveBeenCalledTimes(1);
 
-    jest.runTimersToTime(10000);
+    jest.runOnlyPendingTimers();
 
     expect(http.post).toHaveBeenCalledWith(`/basepath/api/lens/telemetry`, {
-      // The contents of the body are not checked here because they depend on time
-      body: expect.any(String),
-    });
-
-    expect(storage.set).toHaveBeenCalledTimes(2);
-    expect(storage.set).toHaveBeenLastCalledWith('lens-ui-telemetry', {
-      clicks: [],
-      suggestionClicks: [],
+      body: JSON.stringify({
+        events: {
+          '2019-10-23': {
+            load: 1,
+          },
+        },
+        suggestionEvents: {},
+      }),
     });
   });
 
@@ -102,7 +97,7 @@ describe('Lens UI telemetry', () => {
     trackUiEvent('load');
     expect(storage.set).toHaveBeenCalledTimes(1);
 
-    jest.advanceTimersByTime(10000);
+    jest.runOnlyPendingTimers();
 
     expect(http.post).toHaveBeenCalled();
     expect(storage.set).toHaveBeenCalledTimes(1);

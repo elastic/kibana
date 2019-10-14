@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import expect from '@kbn/expect';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { Client, SearchParams } from 'elasticsearch';
 
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// const TEST_START_TIME = '2015-09-19T06:31:44.000';
-// const TEST_END_TIME = '2015-09-23T18:31:44.000';
+import { getDailyEvents } from '../../../../legacy/plugins/lens/server/usage/task';
+import { getVisualizationCounts } from '../../../../legacy/plugins/lens/server/usage/visualization_counts';
+
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
@@ -19,16 +23,44 @@ const COMMON_HEADERS = {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es: Client = getService('es');
+  const callCluster: CallCluster = (((path: 'search', searchParams: SearchParams) => {
+    return es[path].call(es, searchParams);
+  }) as unknown) as CallCluster;
+
+  async function assertExpectedSavedObjects(num: number) {
+    // Make sure that new/deleted docs are available to search
+    await es.indices.refresh({
+      index: '.kibana',
+    });
+
+    const { count } = await es.count({
+      index: '.kibana',
+      q: 'type:lens-ui-telemetry',
+    });
+
+    expect(count).to.be(num);
+  }
 
   describe('lens telemetry', () => {
-    afterEach(() => {
-      es.deleteByQuery({
+    beforeEach(async () => {
+      await es.deleteByQuery({
         index: '.kibana',
         q: 'type:lens-ui-telemetry',
+        waitForCompletion: true,
+        refresh: 'wait_for',
       });
     });
 
-    it('should do nothing on empty post', () => {
+    afterEach(async () => {
+      await es.deleteByQuery({
+        index: '.kibana',
+        q: 'type:lens-ui-telemetry',
+        waitForCompletion: true,
+        refresh: 'wait_for',
+      });
+    });
+
+    it('should do nothing on empty post', async () => {
       await supertest
         .post('/api/lens/telemetry')
         .set(COMMON_HEADERS)
@@ -38,12 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      const { count } = await es.count({
-        index: '.kibana',
-        q: 'type:lens-ui-telemetry',
-      });
-
-      expect(count).to.be(0);
+      await assertExpectedSavedObjects(0);
     });
 
     it('should write a document per results', async () => {
@@ -52,28 +79,131 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_HEADERS)
         .send({
           events: {
-            '2019-10-13': {
-              loaded: 5,
-              dragged: 2,
-            },
-            '2019-10-14': {
-              loaded: 1,
-            },
+            '2019-10-13': { loaded: 5, dragged: 2 },
+            '2019-10-14': { loaded: 1 },
           },
           suggestionEvents: {
-            '2019-11-01': {
-              switched: 2,
-            },
+            '2019-10-13': { switched: 2 },
           },
         })
         .expect(200);
 
-      const { count } = await es.count({
+      await assertExpectedSavedObjects(4);
+    });
+
+    it('should delete older telemetry documents while running', async () => {
+      const olderDate = moment()
+        .subtract(100, 'days')
+        .valueOf();
+      await es.index({
         index: '.kibana',
-        q: 'type:lens-ui-telemetry',
+        type: '_doc',
+        body: {
+          type: 'lens-ui-telemetry',
+          'lens-ui-telemetry': {
+            date: olderDate,
+            name: 'load',
+            type: 'regular',
+            count: 5,
+          },
+        },
+        refresh: 'wait_for',
       });
 
-      expect(count).to.be(4);
+      const result = await getDailyEvents('.kibana', callCluster);
+
+      expect(result).to.eql({
+        byDate: {},
+        suggestionsByDate: {},
+      });
+
+      await assertExpectedSavedObjects(0);
+    });
+
+    it('should aggregate the individual events into daily totals by type', async () => {
+      // Dates are set to midnight in the aggregation, so let's make this easier for the test
+      const date1 = moment()
+        .utc()
+        .subtract(10, 'days')
+        .startOf('day')
+        .valueOf();
+      const date2 = moment()
+        .utc()
+        .subtract(20, 'days')
+        .startOf('day')
+        .valueOf();
+
+      function getEvent(name: string, date: number, type = 'regular') {
+        return {
+          type: 'lens-ui-telemetry',
+          'lens-ui-telemetry': {
+            date,
+            name,
+            type,
+            count: 5,
+          },
+        };
+      }
+
+      await es.bulk({
+        refresh: 'wait_for',
+        body: [
+          { index: { _index: '.kibana' } },
+          getEvent('load', date1),
+          { index: { _index: '.kibana' } },
+          getEvent('load', date1),
+          { index: { _index: '.kibana' } },
+          getEvent('load', date2),
+          { index: { _index: '.kibana' } },
+          getEvent('revert', date1, 'suggestion'),
+        ],
+      });
+
+      const result = await getDailyEvents('.kibana', callCluster);
+
+      expect(result).to.eql({
+        byDate: {
+          [date1]: {
+            load: 10,
+          },
+          [date2]: {
+            load: 5,
+          },
+        },
+        suggestionsByDate: {
+          [date1]: {
+            revert: 5,
+          },
+          [date2]: {},
+        },
+      });
+
+      await assertExpectedSavedObjects(4);
+    });
+
+    it('should collect telemetry on saved visualization types with a painless script', async () => {
+      const results = await getVisualizationCounts(callCluster, {
+        // Fake KibanaConfig service
+        get(key: string) {
+          return '.kibana';
+        },
+        has: () => false,
+      } as KibanaConfig);
+
+      expect(results).to.have.keys([
+        'saved_overall',
+        'saved_30_days',
+        'saved_90_days',
+        'saved_total',
+        'saved_last_30_days',
+        'saved_last_90_days',
+      ]);
+
+      expect(results.saved_overall).to.eql({
+        lnsMetric: 1,
+        bar_stacked: 1,
+      });
+      expect(results.saved_total).to.eql(2);
     });
   });
 };

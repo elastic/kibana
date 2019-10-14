@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { KibanaConfig, Server } from 'src/legacy/server/kbn_server';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { BASE_API_URL } from '../../common';
@@ -33,10 +33,9 @@ export async function initLensUsageRoute(
     {
       path: `${BASE_API_URL}/telemetry`,
       validate: {
-        params: schema.object({}),
         body: schema.object({
-          clicks: schema.mapOf(schema.string(), schema.mapOf(schema.string(), schema.number())),
-          suggestionClicks: schema.mapOf(
+          events: schema.mapOf(schema.string(), schema.mapOf(schema.string(), schema.number())),
+          suggestionEvents: schema.mapOf(
             schema.string(),
             schema.mapOf(schema.string(), schema.number())
           ),
@@ -46,7 +45,7 @@ export async function initLensUsageRoute(
     async (context, req, res) => {
       const { dataClient } = context.core.elasticsearch;
 
-      const { clicks, suggestionClicks } = req.body;
+      const { events, suggestionEvents } = req.body;
 
       try {
         const client = getSavedObjectsClient(plugins.savedObjects, dataClient.callAsCurrentUser);
@@ -56,7 +55,7 @@ export async function initLensUsageRoute(
           attributes: {};
         }> = [];
 
-        clicks.forEach((subMap, date) => {
+        events.forEach((subMap, date) => {
           subMap.forEach((count, key) => {
             allEvents.push({
               type: 'lens-ui-telemetry',
@@ -69,7 +68,7 @@ export async function initLensUsageRoute(
             });
           });
         });
-        suggestionClicks.forEach((subMap, date) => {
+        suggestionEvents.forEach((subMap, date) => {
           subMap.forEach((count, key) => {
             allEvents.push({
               type: 'lens-ui-telemetry',

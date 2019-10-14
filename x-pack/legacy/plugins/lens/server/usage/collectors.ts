@@ -65,7 +65,7 @@ export function registerLensUsageCollector(
           .unix();
 
         dates.forEach(date => {
-          if (date > last30) {
+          if (date >= last30) {
             addEvents(eventsLast30, state.byDate[date]);
             addEvents(eventsLast90, state.byDate[date]);
           } else if (date > last90) {
@@ -74,7 +74,7 @@ export function registerLensUsageCollector(
         });
 
         suggestionDates.forEach(date => {
-          if (date > last30) {
+          if (date >= last30) {
             addEvents(suggestionsLast30, state.suggestionsByDate[date]);
             addEvents(suggestionsLast90, state.suggestionsByDate[date]);
           } else if (date > last90) {

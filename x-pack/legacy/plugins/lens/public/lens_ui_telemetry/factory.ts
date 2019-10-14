@@ -37,8 +37,8 @@ export function trackSuggestionEvent(name: string) {
 }
 
 export class LensReportManager {
-  private clicks: Record<string, LensClickEvent>;
-  private suggestionClicks: Record<string, LensClickEvent>;
+  private events: Record<string, Record<string, number>> = {};
+  private suggestionEvents: Record<string, Record<string, number>> = {};
 
   private storage: Storage;
   private http: HttpServiceBase;
@@ -58,9 +58,7 @@ export class LensReportManager {
     this.http = http;
     this.basePath = basePath;
 
-    const unsent = this.storage.get(STORAGE_KEY);
-    this.clicks = unsent && unsent.clicks ? unsent.clicks : {};
-    this.suggestionClicks = unsent && unsent.suggestionClicks ? unsent.suggestionClicks : {};
+    this.validateStorage();
 
     this.timer = setInterval(() => {
       this.postToServer();
@@ -68,30 +66,38 @@ export class LensReportManager {
   }
 
   public trackEvent(name: string) {
-    this.trackTo(this.clicks, name);
+    this.trackTo(this.events, name);
   }
 
   public trackSuggestionEvent(name: string) {
-    this.trackTo(this.suggestionClicks, name);
+    this.trackTo(this.suggestionEvents, name);
   }
 
   public stop() {
     if (this.timer) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
+    }
+  }
+
+  private validateStorage() {
+    const data = this.storage.get(STORAGE_KEY);
+    if (data && typeof data.events === 'object' && typeof data.suggestionEvents === 'object') {
+      this.events = data.events;
+      this.suggestionEvents = data.suggestionEvents;
     }
   }
 
   private async postToServer() {
-    if (Object.keys(this.clicks).length || Object.keys(this.suggestionClicks).length) {
+    if (Object.keys(this.events).length || Object.keys(this.suggestionEvents).length) {
       try {
         await this.http.post(`${this.basePath}${BASE_API_URL}/telemetry`, {
           body: JSON.stringify({
-            clicks: this.clicks,
-            suggestionClicks: this.suggestionClicks,
+            events: this.events,
+            suggestionEvents: this.suggestionEvents,
           }),
         });
-        this.clicks = {};
-        this.suggestionClicks = {};
+        this.events = {};
+        this.suggestionEvents = {};
         this.write();
       } catch (e) {
         // Silent error because events will be reported during the next timer
@@ -100,7 +106,9 @@ export class LensReportManager {
   }
 
   private trackTo(target: Record<string, Record<string, number>>, name: string) {
-    const date = moment().format('YYYY-MM-DD');
+    const date = moment()
+      .utc()
+      .format('YYYY-MM-DD');
     if (!target[date]) {
       target[date] = {
         [name]: 1,
@@ -115,6 +123,6 @@ export class LensReportManager {
   }
 
   private write() {
-    this.storage.set(STORAGE_KEY, { clicks: this.clicks, suggestionClicks: this.suggestionClicks });
+    this.storage.set(STORAGE_KEY, { events: this.events, suggestionEvents: this.suggestionEvents });
   }
 }
