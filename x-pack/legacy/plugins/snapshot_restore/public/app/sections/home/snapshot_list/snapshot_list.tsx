@@ -173,7 +173,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           </h1>
         }
         body={
-          <Fragment>
+          <>
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesDescription"
@@ -193,7 +193,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
                 />
               </EuiButton>
             </p>
-          </Fragment>
+          </>
         }
         data-test-subj="emptyPrompt"
       />

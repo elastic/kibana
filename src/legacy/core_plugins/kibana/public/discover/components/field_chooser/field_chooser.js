@@ -281,7 +281,7 @@ app.directive('discFieldChooser', function ($location, config, $route) {
 
         const fieldSpecs = indexPattern.fields.slice(0);
         const fieldNamesInDocs = _.keys(fieldCounts);
-        const fieldNamesInIndexPattern = _.keys(indexPattern.fields.byName);
+        const fieldNamesInIndexPattern = _.map(indexPattern.fields, 'name');
 
         _.difference(fieldNamesInDocs, fieldNamesInIndexPattern)
           .forEach(function (unknownFieldName) {
@@ -295,7 +295,7 @@ app.directive('discFieldChooser', function ($location, config, $route) {
 
         if (prevFields) {
           fields.forEach(function (field) {
-            field.details = _.get(prevFields, ['byName', field.name, 'details']);
+            field.details = (prevFields.getByName(field.name) || {}).details;
           });
         }
 

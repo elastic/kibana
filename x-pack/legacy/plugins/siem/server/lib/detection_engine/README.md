@@ -24,6 +24,13 @@ export KBN_URLBASE=http://${user}:${password}@localhost:5601
 
 source your .zhsrc/.bashrc or open a new terminal to ensure you get the new values set.
 
+Optional env var when set to true will utilize `reindex` api for reindexing
+instead of the scroll and bulk index combination.
+
+```
+export USE_REINDEX_API=true
+```
+
 Add these lines to your `kibana.dev.yml` to turn on the feature toggles of alerting and actions:
 ```
 # Feature flag to turn on alerting
