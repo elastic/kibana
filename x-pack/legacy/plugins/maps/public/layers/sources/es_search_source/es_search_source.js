@@ -163,6 +163,13 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
+  async _getFieldsExcludingTimeFields(fieldNames) {
+    const timeFieldNames = _.map(await this.getTimeFields(), 'name');
+    return fieldNames.filter(field => {
+      return !timeFieldNames.includes(field);
+    });
+  }
+
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
     const {
       topHitsSplitField,
@@ -192,6 +199,8 @@ export class ESSearchSource extends AbstractESSource {
       docvalue_fields: [],
     };
 
+    const fieldNames = await this._getFieldsExcludingTimeFields(searchFilters.fieldNames);
+
     timeFields.forEach(field => {
       topHits.docvalue_fields.push({
         field: field.name,
@@ -203,7 +212,7 @@ export class ESSearchSource extends AbstractESSource {
     }
     if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
       topHits._source = false;
-      topHits.docvalue_fields.push(...searchFilters.fieldNames);
+      topHits.docvalue_fields.push(...fieldNames);
     } else {
       topHits._source = {
         includes: searchFilters.fieldNames
@@ -257,6 +266,7 @@ export class ESSearchSource extends AbstractESSource {
     };
     const geoField = await this._getGeoField();
     const timeFields = await this.getTimeFields();
+    const fieldNames = await this._getFieldsExcludingTimeFields(searchFilters.fieldNames);
     timeFields.forEach(field => {
       initialSearchContext.docvalue_fields.push({
         field: field.name,
@@ -269,7 +279,7 @@ export class ESSearchSource extends AbstractESSource {
       // Request geo_point and style fields in docvalue_fields insted of _source
       // 1) Returns geo_point in a consistent format regardless of how geo_point is stored in source
       // 2) Setting _source to false so we avoid pulling back unneeded fields.
-      initialSearchContext.docvalue_fields.push(...searchFilters.fieldNames);
+      initialSearchContext.docvalue_fields.push(...fieldNames);
       searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT, initialSearchContext);
       searchSource.setField('source', false); // do not need anything from _source
       searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields

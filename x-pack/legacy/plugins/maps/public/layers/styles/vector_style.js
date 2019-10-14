@@ -394,7 +394,7 @@ export class VectorStyle extends AbstractStyle {
 
       for (let j = 0; j < styleFields.length; j++) {
         const { supportsFeatureState, isScaled, name, range, computedName } = styleFields[j];
-        //Date fields pulled from doc_values is an array of epoch_millis and a date string
+        //Date fields pulled from doc_values is an array
         const value = Array.isArray(feature.properties[name])
           ? parseFloat(feature.properties[name][0])
           : parseFloat(feature.properties[name]);
