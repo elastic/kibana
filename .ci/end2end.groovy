@@ -76,9 +76,13 @@ pipeline {
     }
     stage('Start Kibana') {
       options { skipDefaultCheckout() }
+      environment {
+        JENKINS_NODE_COOKIE = 'dontKillMe'
+      }
       steps {
         dir("${BASE_DIR}"){
-          sh 'yarn start --no-base-path --csp.strict=false'
+          sh 'yarn kbn bootstrap'
+          sh 'nohup yarn start --no-base-path --csp.strict=false &'
         }
       }
     }
