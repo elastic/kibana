@@ -18,6 +18,7 @@ import {
   EMS_TILES_VECTOR_TILE_PATH,
   GIS_API_PATH, EMS_SPRITES_PATH
 } from '../common/constants';
+import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
 
@@ -32,7 +33,7 @@ export function initRoutes(server, licenseUid) {
 
   let emsClient;
   if (mapConfig.includeElasticMapsService) {
-    emsClient = new server.plugins.tile_map.EMSClient({
+    emsClient = new EMSClient({
       language: i18n.getLocale(),
       kbnVersion: serverConfig.get('pkg.version'),
       manifestServiceUrl: mapConfig.manifestServiceUrl,

@@ -10,8 +10,6 @@ import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction
 import configureStore from '../../../../../store/config/configureStore';
 import { getDiscoverQuery } from '../DiscoverTransactionLink';
 
-jest.mock('ui/kfetch');
-
 function getMockTransaction() {
   return {
     transaction: {
