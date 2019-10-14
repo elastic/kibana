@@ -18,7 +18,7 @@ Before you upgrade {kib}:
   available. 
 * Shut down all {kib} nodes. Running more than one {kib} version against the 
   same Elasticseach index is unsupported. If you upgrade while older {kib} nodes are 
-  running, the upgrade fails.
+  running, the upgrade can fail.
 
 To identify the changes you need to make to upgrade, and to enable you to 
 perform an Elasticsearch rolling upgrade with no downtime, you must upgrade to 
