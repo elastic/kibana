@@ -29,31 +29,25 @@ pipeline {
     stage('Checkout Kibana') {
       options { skipDefaultCheckout() }
       steps {
-        deleteDir()
         dir("${BASE_DIR}"){
           checkout scm
         }
-        stash allowEmpty: false, name: 'source', useDefaultExcludes: false
       }
     }
     stage('Checkout APM-ITS') {
       options { skipDefaultCheckout() }
       steps {
-        deleteDir()
         dir("${APM_ITS}"){
           git changelog: false,
               credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba',
               poll: false,
               url: "git@github.com:elastic/${APM_ITS}.git"
         }
-        stash allowEmpty: false, name: APM_ITS, useDefaultExcludes: false
       }
     }
     stage('Start ES - APM Server') {
       options { skipDefaultCheckout() }
       steps {
-        deleteDir()
-        unstash APM_ITS
         dir("${APM_ITS}"){
           sh './scripts/compose.py start master --no-kibana'
         }
@@ -62,13 +56,9 @@ pipeline {
     stage('Ingest data') {
       options { skipDefaultCheckout() }
       steps {
-        unstash 'source'
         dir("${BASE_DIR}/x-pack/legacy/plugins/apm/cypress/ingest-data"){
           sh '''
-            # Download static data
             curl https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output events.json
-
-            # Ingest into ES
             node replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json
           '''
         }
