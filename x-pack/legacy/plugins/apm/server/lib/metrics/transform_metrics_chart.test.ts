@@ -124,7 +124,7 @@ Object {
     },
   ],
   "title": "Test Chart Title",
-  "totalHits": 5000,
+  "noHits": false,
   "yUnit": "number",
 }
 `);

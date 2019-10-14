@@ -81,7 +81,7 @@ declare module 'elasticsearch' {
     value: number | null;
   }
 
-  interface TotalValue {
+  interface HitsTotal {
     value: number;
     relation: string;
   }
@@ -106,7 +106,7 @@ declare module 'elasticsearch' {
         >;
         top_hits: {
           hits: {
-            total: TotalValue;
+            total: HitsTotal;
             max_score: number | null;
             hits: Array<{
               _source: AggregationOption[AggregationName] extends {
@@ -167,7 +167,7 @@ declare module 'elasticsearch' {
     SearchResponse<HitType>['hits'],
     Exclude<keyof SearchResponse<HitType>['hits'], 'total'>
   > & {
-    total: TotalValue;
+    total: HitsTotal;
   };
 
   export type AggregationSearchResponse<HitType, SearchParams> = Pick<

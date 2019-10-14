@@ -44,7 +44,8 @@ export async function getTraceItems(traceId: string, setup: Setup) {
         { _score: { order: 'asc' } },
         { [TRANSACTION_DURATION]: { order: 'desc' } },
         { [SPAN_DURATION]: { order: 'desc' } }
-      ]
+      ],
+      track_total_hits: true
     }
   };
 
