@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggControlProps } from './agg_control_props';
 
@@ -46,12 +46,8 @@ function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps<boolean>)
   ];
 
   return (
-    <EuiFormRow compressed fullWidth={true} className="visEditorSidebar__aggParamFormRow">
-      <>
-        {/*
-          We have to put it into React.Fragment to avoid errors:
-          EuiFormRow will try to put "compressed" as attribute into a EuiButtonGroup div
-        */}
+    <>
+      <EuiFormRow compressed fullWidth={true}>
         <EuiButtonGroup
           data-test-subj="visEditorSplitBy"
           legend={i18n.translate('common.ui.vis.defaultEditor.controls.splitByLegend', {
@@ -62,8 +58,9 @@ function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps<boolean>)
           idSelected={idSelected}
           onChange={optionId => setValue(aggParams, PARAMS.NAME, optionId === PARAMS.ROWS)}
         />
-      </>
-    </EuiFormRow>
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </>
   );
 }
 

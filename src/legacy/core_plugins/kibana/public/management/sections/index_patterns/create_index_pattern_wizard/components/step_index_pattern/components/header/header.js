@@ -30,9 +30,10 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const HeaderComponent = ({
+export const Header = ({
   isInputInvalid,
   errors,
   characterList,
@@ -40,7 +41,6 @@ export const HeaderComponent = ({
   onQueryChanged,
   goToNextStep,
   isNextStepDisabled,
-  intl,
   ...rest
 }) => (
   <div {...rest}>
@@ -52,17 +52,17 @@ export const HeaderComponent = ({
         />
       </h2>
     </EuiTitle>
-    <EuiSpacer size="m"/>
+    <EuiSpacer size="m" />
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiForm
-          isInvalid={isInputInvalid}
-        >
+        <EuiForm isInvalid={isInputInvalid}>
           <EuiFormRow
-            label={<FormattedMessage
-              id="kbn.management.createIndexPattern.step.indexPatternLabel"
-              defaultMessage="Index pattern"
-            />}
+            label={
+              <FormattedMessage
+                id="kbn.management.createIndexPattern.step.indexPatternLabel"
+                defaultMessage="Index pattern"
+              />
+            }
             isInvalid={isInputInvalid}
             error={errors}
             helpText={
@@ -86,10 +86,12 @@ export const HeaderComponent = ({
           >
             <EuiFieldText
               name="indexPattern"
-              placeholder={intl.formatMessage({
-                id: 'kbn.management.createIndexPattern.step.indexPatternPlaceholder',
-                defaultMessage: 'index-name-*'
-              })}
+              placeholder={i18n.translate(
+                'kbn.management.createIndexPattern.step.indexPatternPlaceholder',
+                {
+                  defaultMessage: 'index-name-*',
+                }
+              )}
               value={query}
               isInvalid={isInputInvalid}
               onChange={onQueryChanged}
@@ -114,5 +116,3 @@ export const HeaderComponent = ({
     </EuiFlexGroup>
   </div>
 );
-
-export const Header = injectI18n(HeaderComponent);

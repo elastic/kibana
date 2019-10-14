@@ -46,7 +46,10 @@ The first instance that triggers saved object migrations will run the entire pro
 [[upgrade-migrations-rolling-back]]
 ==== Rolling back to a previous version of {kib}
 
-When rolling {kib} back to a previous version, point the `.kibana` alias to the appropriate {kib} index. When you have the previous version running again, delete the more recent `.kibana_N` index or indices so that future upgrades are based on the current {kib} index.
+When rolling {kib} back to a previous version, point the `.kibana` alias to 
+the appropriate {kib} index. When you have the previous version running again, 
+delete the more recent `.kibana_N` index or indices so that future upgrades are 
+based on the current {kib} index. You must restart {kib} to re-trigger the migration.
 
 WARNING: Rolling back to a previous {kib} version can result in saved object data loss if you had successfully upgraded and made changes to saved objects before rolling back.
 

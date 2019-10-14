@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import crypto from 'crypto';
 import * as _ from 'lodash';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 
-import { XPackMainPlugin } from '../../xpack_main/xpack_main';
-import { GitOperations } from './git_operations';
 import { RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { Esqueue } from './lib/esqueue';
 import { Logger } from './log';
@@ -56,11 +53,11 @@ import { initWorkers } from './init_workers';
 import { ClusterNodeAdapter } from './distributed/cluster/cluster_node_adapter';
 import { NodeRepositoriesService } from './distributed/cluster/node_repositories_service';
 import { initCodeUsageCollector } from './usage_collector';
+import { PluginSetupContract } from '../../../../plugins/code/server/index';
 
 export class CodePlugin {
   private isCodeNode = false;
 
-  private gitOps: GitOperations | null = null;
   private queue: Esqueue | null = null;
   private log: Logger;
   private serverOptions: ServerOptions;
@@ -70,50 +67,15 @@ export class CodePlugin {
   private codeServices: CodeServices | null = null;
   private nodeService: NodeRepositoriesService | null = null;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initContext: PluginSetupContract) {
     this.log = {} as Logger;
     this.serverOptions = {} as ServerOptions;
   }
 
-  // TODO: options is not a valid param for the setup() api
-  // of the new platform. Will need to pass through the configs
-  // correctly in the new platform.
-  public setup(core: CoreSetup, options: any) {
+  public setup(core: CoreSetup) {
     const { server } = core.http as any;
-
-    this.log = new Logger(server);
-    this.serverOptions = new ServerOptions(options, server.config());
-
-    const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
-    xpackMainPlugin.registerFeature({
-      id: 'code',
-      name: i18n.translate('xpack.code.featureRegistry.codeFeatureName', {
-        defaultMessage: 'Code',
-      }),
-      icon: 'codeApp',
-      navLinkId: 'code',
-      app: ['code', 'kibana'],
-      catalogue: [], // TODO add catalogue here
-      privileges: {
-        all: {
-          excludeFromBasePrivileges: true,
-          api: ['code_user', 'code_admin'],
-          savedObject: {
-            all: [],
-            read: ['config'],
-          },
-          ui: ['show', 'user', 'admin'],
-        },
-        read: {
-          api: ['code_user'],
-          savedObject: {
-            all: [],
-            read: ['config'],
-          },
-          ui: ['show', 'user'],
-        },
-      },
-    });
+    this.serverOptions = new ServerOptions(this.initContext.legacy.config, server.config());
+    this.log = new Logger(this.initContext.legacy.logger, this.serverOptions.verbose);
   }
 
   // TODO: CodeStart will not have the register route api.
@@ -165,18 +127,17 @@ export class CodePlugin {
 
     const codeServices = new CodeServices(clusterNodeAdapter);
 
-    this.queue = initQueue(server, this.log, esClient);
+    this.queue = initQueue(this.serverOptions, this.log, esClient);
 
     const { gitOps, lspService } = initLocalService(
       server,
-      this.log,
+      this.initContext.legacy.logger,
       this.serverOptions,
       codeServices,
       esClient,
       repoConfigController
     );
     this.lspService = lspService;
-    this.gitOps = gitOps;
     const { indexScheduler, updateScheduler, cloneWorker } = initWorkers(
       server,
       this.log,
@@ -213,18 +174,17 @@ export class CodePlugin {
       this.log
     );
 
-    this.queue = initQueue(server, this.log, esClient);
+    this.queue = initQueue(this.serverOptions, this.log, esClient);
 
     const { gitOps, lspService } = initLocalService(
       server,
-      this.log,
+      this.initContext.legacy.logger,
       this.serverOptions,
       codeServices,
       esClient,
       repoConfigController
     );
     this.lspService = lspService;
-    this.gitOps = gitOps;
     const { indexScheduler, updateScheduler } = initWorkers(
       server,
       this.log,
@@ -251,7 +211,6 @@ export class CodePlugin {
 
   public async stop() {
     if (this.isCodeNode) {
-      if (this.gitOps) await this.gitOps.cleanAllRepo();
       if (this.indexScheduler) this.indexScheduler.stop();
       if (this.updateScheduler) this.updateScheduler.stop();
       if (this.queue) this.queue.destroy();
@@ -293,7 +252,8 @@ export class CodePlugin {
       codeServices,
       repoIndexInitializerFactory,
       repoConfigController,
-      this.serverOptions
+      this.serverOptions,
+      this.log
     );
     repositorySearchRoute(codeServerRouter, this.log);
     if (this.serverOptions.enableCommitIndexing) {
@@ -304,8 +264,8 @@ export class CodePlugin {
     fileRoute(codeServerRouter, codeServices);
     workspaceRoute(codeServerRouter, this.serverOptions, codeServices);
     symbolByQnameRoute(codeServerRouter, this.log);
-    installRoute(codeServerRouter, codeServices);
-    lspRoute(codeServerRouter, codeServices, this.serverOptions);
+    installRoute(codeServerRouter, codeServices, this.serverOptions);
+    lspRoute(codeServerRouter, codeServices, this.serverOptions, this.log);
     setupRoute(codeServerRouter, codeServices);
     statusRoute(codeServerRouter, codeServices);
   }
@@ -342,7 +302,7 @@ export class CodePlugin {
 
   private initDevMode(server: any) {
     // @ts-ignore
-    const devMode: boolean = server.config().get('env.dev');
+    const devMode: boolean = this.serverOptions.devMode;
     server.injectUiAppVars('code', () => ({
       enableLangserversDeveloping: devMode,
     }));

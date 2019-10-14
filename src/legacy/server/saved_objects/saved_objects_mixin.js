@@ -20,13 +20,14 @@
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
-import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
+import { first } from 'rxjs/operators';
 import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
 import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
+  SavedObjectsCacheIndexPatterns,
   getSortedObjectsForExport,
   importSavedObjects,
   resolveImportErrors,
@@ -57,13 +58,14 @@ function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
   );
 }
 
-export function savedObjectsMixin(kbnServer, server) {
-  const migrator = new KibanaMigrator({ kbnServer });
+export async function savedObjectsMixin(kbnServer, server) {
+  const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
   const importableAndExportableTypes = getImportableAndExportableTypes({ kbnServer, visibleTypes });
+  const cacheIndexPatterns = new SavedObjectsCacheIndexPatterns();
 
   server.decorate('server', 'kibanaMigrator', migrator);
   server.decorate(
@@ -102,6 +104,15 @@ export function savedObjectsMixin(kbnServer, server) {
 
   const serializer = new SavedObjectsSerializer(schema);
 
+  if (cacheIndexPatterns.getIndexPatternsService() == null) {
+    const adminClient = await server.newPlatform.__internals.elasticsearch.adminClient$
+      .pipe(first())
+      .toPromise();
+    cacheIndexPatterns.setIndexPatternsService(
+      server.indexPatternsServiceFactory({ callCluster: adminClient.callAsInternalUser })
+    );
+  }
+
   const createRepository = (callCluster, extraTypes = []) => {
     if (typeof callCluster !== 'function') {
       throw new TypeError('Repository requires a "callCluster" function to be provided.');
@@ -114,11 +125,13 @@ export function savedObjectsMixin(kbnServer, server) {
     });
     const combinedTypes = visibleTypes.concat(extraTypes);
     const allowedTypes = [...new Set(combinedTypes)];
+
     const config = server.config();
 
     return new SavedObjectsRepository({
       index: config.get('kibana.index'),
       config,
+      cacheIndexPatterns,
       migrator,
       mappings,
       schema,

@@ -13,10 +13,10 @@ import 'ace';
 import 'ui/angular_ui_select';
 import 'ui/directives/input_focus';
 
-import { parseInterval } from 'ui/utils/parse_interval';
 import { timefilter } from 'ui/timefilter';
-
 import uiRoutes from 'ui/routes';
+
+import { parseInterval } from '../../../../common/util/parse_interval';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import template from './new_job.html';
@@ -44,7 +44,7 @@ import { ml } from 'plugins/ml/services/ml_api_service';
 import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
 
 uiRoutes
-  .when('/jobs/new_job/advanced', {
+  .when('/jobs/new_job/advanced_old', {
     template,
     k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
     resolve: {
@@ -57,7 +57,7 @@ uiRoutes
       loadNewJobDefaults,
     }
   })
-  .when('/jobs/new_job/advanced/:jobId', {
+  .when('/jobs/new_job/advanced_old/:jobId', {
     template,
     k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
     resolve: {

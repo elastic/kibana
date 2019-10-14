@@ -22,23 +22,24 @@ describe('ML - data recognizer', () => {
     'nginx_ecs',
     'sample_data_ecommerce',
     'sample_data_weblogs',
-    'siem_auditbeat_ecs',
-    'siem_winlogbeat_ecs',
+    'siem_auditbeat',
+    'siem_auditbeat_auth',
+    'siem_packetbeat',
+    'siem_winlogbeat',
+    'siem_winlogbeat_auth',
   ];
 
   // check all module IDs are the same as the list above
-  it('listModules - check all module IDs', async (done) => {
+  it('listModules - check all module IDs', async () => {
     const modules = await dr.listModules();
     const ids = modules.map(m => m.id);
     expect(ids.join()).to.equal(moduleIds.join());
-    done();
   });
 
 
-  it('getModule - load a single module', async (done) => {
+  it('getModule - load a single module', async () => {
     const module = await dr.getModule(moduleIds[0]);
     expect(module.id).to.equal(moduleIds[0]);
-    done();
   });
 
 });

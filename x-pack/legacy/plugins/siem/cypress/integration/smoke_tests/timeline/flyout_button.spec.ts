@@ -41,7 +41,7 @@ describe('timeline flyout button', () => {
     cy.get(TIMELINE_NOT_READY_TO_DROP_BUTTON).should(
       'have.css',
       'background',
-      'rgba(125, 226, 209, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
+      'rgba(1, 125, 115, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
     );
   });
 });

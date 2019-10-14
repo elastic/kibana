@@ -18,7 +18,6 @@
  */
 
 import angular from 'angular';
-import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
@@ -50,7 +49,7 @@ module.factory('SavedDashboard', function (Private) {
 
       // default values that will get assigned if the doc is new
       defaults: {
-        title: i18n.translate('kbn.dashboard.savedDashboard.newDashboardTitle', { defaultMessage: 'New Dashboard' }),
+        title: '',
         hits: 0,
         description: '',
         panelsJSON: '[]',

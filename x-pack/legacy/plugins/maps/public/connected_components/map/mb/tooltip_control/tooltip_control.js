@@ -11,10 +11,10 @@ import {
   LAT_INDEX,
   LON_INDEX,
 } from '../../../../../common/constants';
-import { FeatureTooltip } from '../../feature_tooltip';
+import { FeaturesTooltip } from '../../features_tooltip/features_tooltip';
 import { EuiPopover, EuiText } from '@elastic/eui';
 
-const TOOLTIP_TYPE = {
+export const TOOLTIP_TYPE = {
   HOVER: 'HOVER',
   LOCKED: 'LOCKED'
 };
@@ -251,6 +251,7 @@ export class TooltipControl extends React.Component {
     if (!tooltipLayer) {
       return null;
     }
+
     const targetFeature = tooltipLayer.getFeatureById(featureId);
     if (!targetFeature) {
       return null;
@@ -264,11 +265,26 @@ export class TooltipControl extends React.Component {
     if (!tooltipLayer) {
       return [];
     }
+
     const targetFeature = tooltipLayer.getFeatureById(featureId);
     if (!targetFeature) {
       return [];
     }
     return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
+  };
+
+  _loadPreIndexedShape = async ({ layerId, featureId }) => {
+    const tooltipLayer = this._findLayerById(layerId);
+    if (!tooltipLayer) {
+      return null;
+    }
+
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
   };
 
   _findLayerById = (layerId) => {
@@ -277,14 +293,48 @@ export class TooltipControl extends React.Component {
     });
   };
 
+  _getLayerName = async (layerId) => {
+    const layer = this._findLayerById(layerId);
+    if (!layer) {
+      return null;
+    }
+
+    return layer.getDisplayName();
+  }
+
+  _renderTooltipContent = () => {
+    const publicProps = {
+      addFilters: this.props.addFilters,
+      closeTooltip: this.props.clearTooltipState,
+      features: this.props.tooltipState.features,
+      isLocked: this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED,
+      loadFeatureProperties: this._loadFeatureProperties,
+      loadFeatureGeometry: this._loadFeatureGeometry,
+      getLayerName: this._getLayerName,
+    };
+
+    if (this.props.renderTooltipContent) {
+      return this.props.renderTooltipContent(publicProps);
+    }
+
+    return (
+      <EuiText size="xs" style={{ maxWidth: '425px' }}>
+        <FeaturesTooltip
+          {...publicProps}
+          findLayerById={this._findLayerById}
+          geoFields={this.props.geoFields}
+          loadPreIndexedShape={this._loadPreIndexedShape}
+        />
+      </EuiText>
+    );
+  }
+
   render() {
     if (!this.props.tooltipState) {
       return null;
     }
 
     const tooltipAnchor = <div style={{ height: '26px', width: '26px', background: 'transparent' }}/>;
-    const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
-
     return (
       <EuiPopover
         id="mapTooltip"
@@ -298,20 +348,7 @@ export class TooltipControl extends React.Component {
           transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`
         }}
       >
-        <EuiText size="xs">
-          <FeatureTooltip
-            features={this.props.tooltipState.features}
-            anchorLocation={this.props.tooltipState.location}
-            loadFeatureProperties={this._loadFeatureProperties}
-            findLayerById={this._findLayerById}
-            closeTooltip={this.props.clearTooltipState}
-            showFilterButtons={!!this.props.addFilters && isLocked}
-            isLocked={isLocked}
-            addFilters={this.props.addFilters}
-            geoFields={this.props.geoFields}
-            loadFeatureGeometry={this._loadFeatureGeometry}
-          />
-        </EuiText>
+        {this._renderTooltipContent()}
       </EuiPopover>
     );
   }

@@ -23,8 +23,9 @@ A Kibana alert detects a condition and executes one or more actions when that co
 
 ## Usage
 
-1. Develop and register an alert type (see alert types -> example).
-2. Create an alert using the RESTful API (see alerts -> create).
+1. Enable the alerting plugin in the `kibana.yml` by setting `xpack.alerting.enabled: true`.
+2. Develop and register an alert type (see alert types -> example).
+3. Create an alert using the RESTful API (see alerts -> create).
 
 ## Limitations
 
@@ -36,7 +37,7 @@ When security is enabled, users who create alerts will need the `manage_api_key`
 
 ### Methods
 
-**server.plugins.alerting.registerType(options)**
+**server.plugins.alerting.setup.registerType(options)**
 
 The following table describes the properties of the `options` object.
 
@@ -44,6 +45,7 @@ The following table describes the properties of the `options` object.
 |---|---|---|
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
+|actionGroups|An explicit list of groups the alert type may schedule actions for. Alert `actions` validation will use this array to ensure groups are valid.|string[]|
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 
@@ -70,7 +72,7 @@ This example receives server and threshold as parameters. It will read the CPU u
 ```
 import { schema } from '@kbn/config-schema';
 ...
-server.plugins.alerting.registerType({
+server.plugins.alerting.setup.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
@@ -80,6 +82,7 @@ server.plugins.alerting.registerType({
 		}),
 	},
 	async executor({
+    alertId,
 		startedAt,
 		previousStartedAt,
 		services,
@@ -128,7 +131,7 @@ server.plugins.alerting.registerType({
 This example only receives threshold as a parameter. It will read the CPU usage of all the servers and schedule individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
 
 ```
-server.plugins.alerting.registerType({
+server.plugins.alerting.setup.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
@@ -137,6 +140,7 @@ server.plugins.alerting.registerType({
 		}),
 	},
 	async executor({
+    alertId,
 		startedAt,
 		previousStartedAt,
 		services,
@@ -257,6 +261,45 @@ Params:
 |---|---|---|
 |id|The id of the alert you're trying to disable.|string|
 
+#### `POST /api/alert/{id}/_mute_all`: Mute all alert instances
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to mute all alert instances for.|string|
+
+#### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`: Mute alert instance
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|alertId|The id of the alert you're trying to mute an instance for.|string|
+|alertInstanceId|The instance id of the alert instance you're trying to mute.|string|
+
+#### `POST /api/alert/{id}/_unmute_all`: Unmute all alert instances
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to unmute all alert instances for.|string|
+
+#### `POST /api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`: Unmute an alert instance
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|alertId|The id of the alert you're trying to unmute an instance for.|string|
+|alertInstanceId|The instance id of the alert instance you're trying to unmute.|string|
+
+#### `POST /api/alert/{id}/_update_api_key`: Update alert API key
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
 
 ## Alert instance factory
 

@@ -18,36 +18,24 @@
  */
 
 import Url from 'url';
+import { KbnClient } from '@kbn/dev-utils';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-// @ts-ignore not ts yet
-import { KibanaServerStatus } from './status';
-// @ts-ignore not ts yet
-import { KibanaServerUiSettings } from './ui_settings';
-// @ts-ignore not ts yet
-import { KibanaServerVersion } from './version';
-import { KibanaServerSavedObjects } from './saved_objects';
 
 export function KibanaServerProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
-
   const url = Url.format(config.get('servers.kibana'));
+  const defaults = config.get('uiSettings.defaults');
 
-  return new (class KibanaServer {
-    public readonly status = new KibanaServerStatus(url);
-    public readonly version = new KibanaServerVersion(this.status);
-    public readonly savedObjects = new KibanaServerSavedObjects(url, log);
-    public readonly uiSettings = new KibanaServerUiSettings(
-      url,
-      log,
-      config.get('uiSettings.defaults'),
-      lifecycle
-    );
+  const kbn = new KbnClient(log, [url], defaults);
 
-    public resolveUrl(path = '/') {
-      return Url.resolve(url, path);
-    }
-  })();
+  if (defaults) {
+    lifecycle.on('beforeTests', async () => {
+      await kbn.uiSettings.update(defaults);
+    });
+  }
+
+  return kbn;
 }

@@ -8,6 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../strings';
+
+const { Select: strings } = ArgumentStrings;
 
 const SelectArgInput = ({ typeInstance, onValueChange, argValue, argId }) => {
   const choices = typeInstance.options.choices.map(({ value, name }) => ({ value, text: name }));
@@ -43,7 +46,7 @@ SelectArgInput.propTypes = {
 
 export const select = () => ({
   name: 'select',
-  displayName: 'Select',
-  help: 'Select from multiple options in a drop down',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(SelectArgInput),
 });

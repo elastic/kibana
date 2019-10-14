@@ -18,7 +18,9 @@ import {
   EuiButtonGroup,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiIconTip,
 } from '@elastic/eui';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import {
   Chart,
   Axis,
@@ -33,15 +35,16 @@ import {
   niceTimeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { toElasticsearchQuery } from '@kbn/es-query';
+import { Filter, buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
 // @ts-ignore
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
-import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
+import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
-import { FieldIcon, getColorForDataType } from './field_icon';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
+import { IndexPattern, IndexPatternField } from './types';
+import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -51,6 +54,7 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
+  filters: Filter[];
 }
 
 interface State {
@@ -70,7 +74,7 @@ function wrapOnDot(str?: string) {
 }
 
 export function FieldItem(props: FieldItemProps) {
-  const { core, field, indexPattern, highlight, exists, query, dateRange } = props;
+  const { core, field, indexPattern, highlight, exists, query, dateRange, filters } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -111,7 +115,7 @@ export function FieldItem(props: FieldItemProps) {
     core.http
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
         body: JSON.stringify({
-          query: toElasticsearchQuery(query, indexPattern),
+          dslQuery: buildEsQuery(indexPattern, query, filters, getEsQueryConfig(core.uiSettings)),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           timeFieldName: indexPattern.timeFieldName,
@@ -144,6 +148,7 @@ export function FieldItem(props: FieldItemProps) {
   return (
     <EuiPopover
       id="lnsFieldListPanel__field"
+      className="lnsFieldItem__popoverAnchor"
       display="block"
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
@@ -157,7 +162,7 @@ export function FieldItem(props: FieldItemProps) {
         >
           <EuiKeyboardAccessible>
             <div
-              className="lnsFieldItem__info"
+              className={`lnsFieldItem__info ${infoIsOpen ? 'lnsFieldItem__info-isOpen' : ''}`}
               data-test-subj={`lnsFieldListPanelField-${field.name}`}
               onClick={() => {
                 togglePopover();
@@ -167,20 +172,29 @@ export function FieldItem(props: FieldItemProps) {
                   togglePopover();
                 }
               }}
-              title={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
-                defaultMessage: 'Click or Enter for more information about {fieldName}',
-                values: { fieldName: field.name },
-              })}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
-                defaultMessage: 'Click or Enter for more information about {fieldName}',
+              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
+                defaultMessage:
+                  'Click or press Enter for information about {fieldName}. Or, drag field into visualization.',
                 values: { fieldName: field.name },
               })}
             >
-              <FieldIcon type={field.type as DataType} />
+              <LensFieldIcon type={field.type as DataType} />
 
               <span className="lnsFieldItem__name" title={field.name}>
                 {wrappableHighlightableFieldName}
               </span>
+
+              <EuiIconTip
+                anchorClassName="lnsFieldItem__infoIcon"
+                content={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
+                  defaultMessage:
+                    'Click for information about {fieldName}. Or, drag field into visualization.',
+                  values: { fieldName: field.name },
+                })}
+                type="iInCircle"
+                color="subdued"
+                size="s"
+              />
             </div>
           </EuiKeyboardAccessible>
         </DragDrop>
@@ -197,6 +211,9 @@ export function FieldItem(props: FieldItemProps) {
 
 function FieldItemPopoverContents(props: State & FieldItemProps) {
   const { histogram, topValues, indexPattern, field, dateRange, core, sampledValues } = props;
+
+  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+  const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
 
   if (props.isLoading) {
     return <EuiLoadingSpinner />;
@@ -260,7 +277,8 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
     title = (
       <EuiButtonGroup
-        buttonSize="s"
+        className="lnsFieldItem__popoverButtonGroup"
+        buttonSize="compressed"
         isFullWidth
         legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
           defaultMessage: 'Toggle either the',
@@ -268,7 +286,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         options={[
           {
             label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
-              defaultMessage: 'Top Values',
+              defaultMessage: 'Top values',
             }),
             id: 'topValues',
           },
@@ -297,7 +315,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     title = (
       <>
         {i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
-          defaultMessage: 'Top Values',
+          defaultMessage: 'Top values',
         })}
       </>
     );
@@ -345,11 +363,11 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         defaultMessage: 'Count',
       })
     );
-    const expectedColor = getColorForDataType(field.type);
     const colors: DataSeriesColorsValues = {
       colorValues: [],
       specId,
     };
+    const expectedColor = getColorForDataType(field.type);
 
     const seriesColors = new Map([[colors, expectedColor]]);
 
@@ -358,7 +376,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: 300 - 32 }}>
           <Settings
             tooltip={{ type: TooltipType.None }}
-            theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
+            theme={chartTheme}
             xDomain={
               fromDate && toDate
                 ? {
@@ -396,11 +414,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     } else if (showingHistogram || !topValues || !topValues.buckets.length) {
       return wrapInPopover(
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: '100%' }}>
-          <Settings
-            rotation={90}
-            tooltip={{ type: TooltipType.None }}
-            theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
-          />
+          <Settings rotation={90} tooltip={{ type: TooltipType.None }} theme={chartTheme} />
 
           <Axis
             id={getAxisId('key')}
@@ -433,7 +447,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
                 <EuiFlexItem grow={true} className="eui-textTruncate">
                   {formatted === '' ? (
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <em>
                         {i18n.translate('xpack.lens.indexPattern.fieldPanelEmptyStringValue', {
                           defaultMessage: 'Empty string',
@@ -442,7 +456,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                     </EuiText>
                   ) : (
                     <EuiToolTip content={formatted} delay="long">
-                      <EuiText size="s" className="eui-textTruncate">
+                      <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {formatted}
                       </EuiText>
                     </EuiToolTip>
@@ -469,7 +483,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           <>
             <EuiFlexGroup alignItems="stretch" gutterSize="xs">
               <EuiFlexItem grow={true} className="eui-textTruncate">
-                <EuiText size="s" className="eui-textTruncate" color="subdued">
+                <EuiText size="xs" className="eui-textTruncate" color="subdued">
                   {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
                     defaultMessage: 'Other',
                   })}
