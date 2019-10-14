@@ -27,7 +27,7 @@ export { runTests, startServers } from './functional_tests/tasks';
 export { OPTIMIZE_BUNDLE_DIR, KIBANA_ROOT } from './functional_tests/lib/paths';
 
 // @ts-ignore not typed yet
-export { esTestConfig, createEsTestCluster } from './es';
+export { esTestConfig, createLegacyEsTestCluster } from './legacy_es';
 
 // @ts-ignore not typed yet
 export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';
@@ -47,3 +47,5 @@ export {
   setupJUnitReportGeneration,
   escapeCdata,
 } from './mocha';
+
+export { runFailedTestsReporterCli } from './failed_tests_reporter';
