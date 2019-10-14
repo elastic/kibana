@@ -83,7 +83,7 @@ declare module 'elasticsearch' {
 
   interface HitsTotal {
     value: number;
-    relation: string;
+    relation: 'eq' | 'gte';
   }
 
   type AggregationResultMap<AggregationOption> = IndexAsString<
@@ -153,7 +153,10 @@ declare module 'elasticsearch' {
     }
   >;
 
-  export type BaseAggregationSearchResponse<HitType, SearchParams> = Pick<
+  export type AggregationSearchResponseWithTotalHitsAsInt<
+    HitType,
+    SearchParams
+  > = Pick<
     SearchResponse<HitType>,
     Exclude<keyof SearchResponse<HitType>, 'aggregations'>
   > &
@@ -170,9 +173,15 @@ declare module 'elasticsearch' {
     total: HitsTotal;
   };
 
-  export type AggregationSearchResponse<HitType, SearchParams> = Pick<
-    BaseAggregationSearchResponse<HitType, SearchParams>,
-    Exclude<keyof BaseAggregationSearchResponse<HitType, SearchParams>, 'hits'>
+  export type AggregationSearchResponseWithTotalHitsAsObject<
+    HitType,
+    SearchParams
+  > = Pick<
+    AggregationSearchResponseWithTotalHitsAsInt<HitType, SearchParams>,
+    Exclude<
+      keyof AggregationSearchResponseWithTotalHitsAsInt<HitType, SearchParams>,
+      'hits'
+    >
   > & { hits: Hits<HitType> };
 
   export interface ESFilter {

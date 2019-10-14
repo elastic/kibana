@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { AggregationSearchResponse, AggregatedValue } from 'elasticsearch';
+import {
+  AggregationSearchResponseWithTotalHitsAsObject,
+  AggregatedValue
+} from 'elasticsearch';
 import { idx } from '@kbn/elastic-idx';
 import { ChartBase } from './types';
 
@@ -46,7 +49,7 @@ interface AggregatedParams {
 }
 
 export function transformDataToMetricsChart<Params extends AggregatedParams>(
-  result: AggregationSearchResponse<unknown, Params>,
+  result: AggregationSearchResponseWithTotalHitsAsObject<unknown, Params>,
   chartBase: ChartBase
 ) {
   const { aggregations, hits } = result;

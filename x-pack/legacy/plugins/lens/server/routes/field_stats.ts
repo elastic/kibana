@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
-import { BaseAggregationSearchResponse } from 'elasticsearch';
+import { AggregationSearchResponseWithTotalHitsAsInt } from 'elasticsearch';
 import { CoreSetup } from 'src/core/server';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 
@@ -69,9 +69,6 @@ export async function initFieldsRoute(setup: CoreSetup) {
               query,
               aggs,
             },
-            // The hits total changed in 7.0 from number to object, unless this flag is set
-            // this is a workaround for elasticsearch response types that are from 6.x
-            restTotalHitsAsInt: true,
             size: 0,
           });
 
@@ -135,10 +132,9 @@ export async function getNumberHistogram(
     },
   };
 
-  const minMaxResult = (await aggSearchWithBody(searchBody)) as BaseAggregationSearchResponse<
-    unknown,
-    { body: { aggs: typeof searchBody } }
-  >;
+  const minMaxResult = (await aggSearchWithBody(
+    searchBody
+  )) as AggregationSearchResponseWithTotalHitsAsInt<unknown, { body: { aggs: typeof searchBody } }>;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
@@ -179,7 +175,9 @@ export async function getNumberHistogram(
       },
     },
   };
-  const histogramResult = (await aggSearchWithBody(histogramBody)) as BaseAggregationSearchResponse<
+  const histogramResult = (await aggSearchWithBody(
+    histogramBody
+  )) as AggregationSearchResponseWithTotalHitsAsInt<
     unknown,
     { body: { aggs: typeof histogramBody } }
   >;
@@ -213,7 +211,9 @@ export async function getStringSamples(
       },
     },
   };
-  const topValuesResult = (await aggSearchWithBody(topValuesBody)) as BaseAggregationSearchResponse<
+  const topValuesResult = (await aggSearchWithBody(
+    topValuesBody
+  )) as AggregationSearchResponseWithTotalHitsAsInt<
     unknown,
     { body: { aggs: typeof topValuesBody } }
   >;
@@ -260,7 +260,9 @@ export async function getDateHistogram(
   const histogramBody = {
     histo: { date_histogram: { field: field.name, fixed_interval: fixedInterval } },
   };
-  const results = (await aggSearchWithBody(histogramBody)) as BaseAggregationSearchResponse<
+  const results = (await aggSearchWithBody(
+    histogramBody
+  )) as AggregationSearchResponseWithTotalHitsAsInt<
     unknown,
     { body: { aggs: typeof histogramBody } }
   >;

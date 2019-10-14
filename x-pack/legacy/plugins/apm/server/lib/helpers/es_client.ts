@@ -10,7 +10,7 @@ import {
   IndexDocumentParams,
   IndicesDeleteParams,
   IndicesCreateParams,
-  AggregationSearchResponse
+  AggregationSearchResponseWithTotalHitsAsObject
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set } from 'lodash';
@@ -92,7 +92,7 @@ export function getESClient(req: Legacy.Request) {
     search: async <Hits = unknown, U extends SearchParams = {}>(
       params: U,
       apmOptions?: APMOptions
-    ): Promise<AggregationSearchResponse<Hits, U>> => {
+    ): Promise<AggregationSearchResponseWithTotalHitsAsObject<Hits, U>> => {
       const nextParams = await getParamsForSearchRequest(
         req,
         params,
@@ -114,7 +114,9 @@ export function getESClient(req: Legacy.Request) {
         req,
         'search',
         nextParams
-      ) as unknown) as Promise<AggregationSearchResponse<Hits, U>>;
+      ) as unknown) as Promise<
+        AggregationSearchResponseWithTotalHitsAsObject<Hits, U>
+      >;
     },
     index: <Body>(params: IndexDocumentParams<Body>) => {
       return cluster.callWithRequest(req, 'index', params);
