@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { HttpStatusBadge } from '../index';
 import {
   successColor,
