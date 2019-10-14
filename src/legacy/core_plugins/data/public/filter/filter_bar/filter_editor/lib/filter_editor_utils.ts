@@ -87,9 +87,6 @@ export function getFilterParams(filter: Filter) {
       };
     case 'savedQuery':
       return (filter as SavedQueryFilter).meta.params;
-    // return {
-    //   savedQuery: (filter as SavedQueryFilter).meta.params.savedQuery,
-    // };
   }
 }
 
