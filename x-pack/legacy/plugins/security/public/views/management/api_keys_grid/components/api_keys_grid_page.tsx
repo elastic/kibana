@@ -188,7 +188,7 @@ export class ApiKeysGridPage extends Component<any, State> {
 
     const sorting = {
       sort: {
-        field: 'name',
+        field: 'expiration',
         direction: 'asc',
       },
     };
