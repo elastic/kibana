@@ -70,6 +70,8 @@ function renderHeaderWithIcons(icons) {
   );
 }
 
+const EMPTY_VALUE = '';
+
 export class StylePropertyLegendRow extends Component {
 
   state = {
@@ -124,7 +126,7 @@ export class StylePropertyLegendRow extends Component {
   }
 
   _formatValue = value => {
-    if (!this._fieldValueFormatter) {
+    if (!this.state.hasLoadedFieldFormatter || !this._fieldValueFormatter || value === EMPTY_VALUE) {
       return value;
     }
 
@@ -146,21 +148,11 @@ export class StylePropertyLegendRow extends Component {
       header = renderHeaderWithIcons(getSymbolSizeIcons());
     }
 
-    const min = _.get(range, 'min', '');
-    const minLabel = this.state.hasLoadedFieldFormatter && min !== ''
-      ? this._formatValue(min)
-      : min;
-
-    const max = _.get(range, 'max', '');
-    const maxLabel = this.state.hasLoadedFieldFormatter && max !== ''
-      ? this._formatValue(max)
-      : max;
-
     return (
       <StyleLegendRow
         header={header}
-        minLabel={minLabel}
-        maxLabel={maxLabel}
+        minLabel={this._formatValue(_.get(range, 'min', EMPTY_VALUE))}
+        maxLabel={this._formatValue(_.get(range, 'max', EMPTY_VALUE))}
         propertyLabel={getVectorStyleLabel(name)}
         fieldLabel={this.state.label}
       />

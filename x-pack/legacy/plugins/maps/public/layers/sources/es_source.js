@@ -323,6 +323,11 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    return indexPattern.fields.byName[rawFieldName].format.getConverterFor('text');
+    const fieldFromIndexPattern = indexPattern.fields.byName[rawFieldName];
+    if (!fieldFromIndexPattern) {
+      return null;
+    }
+
+    return fieldFromIndexPattern.format.getConverterFor('text');
   }
 }
