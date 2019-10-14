@@ -9,10 +9,15 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./put_signal_index.sh
+# Example: ./delete_all_alert_tasks.sh
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html
 curl -s -k \
   -H "Content-Type: application/json" \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -d @../signals_mapping.json \
-  -X PUT ${ELASTICSEARCH_URL}/${SIGNALS_INDEX} \
+  -X POST ${ELASTICSEARCH_URL}/${TASK_MANAGER_INDEX}*/_delete_by_query \
+  --data '{
+    "query": {
+      "term" : { "task.scope" : "alerting" } 
+    }
+  }' \
   | jq .
