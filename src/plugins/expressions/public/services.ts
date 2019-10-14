@@ -17,6 +17,19 @@
  * under the License.
  */
 
-import { createKibanaUtilsCore } from '../../kibana_utils/public';
+import { createKibanaUtilsCore, createGetterSetter } from '../../kibana_utils/public';
+import { ExpressionInterpreter } from './types';
+import { Start as IInspector } from '../../inspector/public';
+import { ExpressionsSetup } from './plugin';
 
 export const { getCoreStart, setCoreStart, savedObjects } = createKibanaUtilsCore();
+
+export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
+
+export const [getInterpreter, setInterpreter] = createGetterSetter<ExpressionInterpreter>(
+  'Interpreter'
+);
+
+export const [getRenderersRegistry, setRenderersRegistry] = createGetterSetter<
+  ExpressionsSetup['__LEGACY']['renderers']
+>('Renderers registry');

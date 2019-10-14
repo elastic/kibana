@@ -33,7 +33,7 @@ import {
   Start as InspectorStart,
   Setup as InspectorSetup,
 } from '../../../../../../plugins/inspector/public';
-import { IInterpreter } from './types';
+import { ExpressionInterpreter } from './types';
 import { setInterpreter, setInspector, setRenderersRegistry } from './services';
 import { createRenderer } from './expression_renderer';
 import { loader } from './loader';
@@ -62,7 +62,7 @@ export class ExpressionsPublicPlugin
     // eslint-disable-next-line
     const { getInterpreter } = require('../../../../interpreter/public/interpreter');
     getInterpreter()
-      .then(({ interpreter }: { interpreter: IInterpreter }) => {
+      .then(({ interpreter }: { interpreter: ExpressionInterpreter }) => {
         setInterpreter(interpreter);
       })
       .catch((e: Error) => {

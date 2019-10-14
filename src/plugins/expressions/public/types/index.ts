@@ -17,8 +17,12 @@
  * under the License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { ExpressionInterpret } from '../interpreter_provider';
-import { FunctionHandlers } from './functions';
+import { TimeRange } from '../../../data/public';
+import { Adapters } from '../../../inspector/public';
+import { Query } from '../../../data/public';
+import { ExpressionAST } from '../../../expressions/public';
 
 export { ArgumentType } from './arguments';
 export {
@@ -53,7 +57,7 @@ export interface ExpressionAST {
 export type ExpressionInterpretWithHandlers = (
   ast: Parameters<ExpressionInterpret>[0],
   context: Parameters<ExpressionInterpret>[1],
-  handlers: FunctionHandlers
+  handlers: IInterpreterHandlers
 ) => ReturnType<ExpressionInterpret>;
 
 export interface ExpressionInterpreter {
@@ -62,4 +66,56 @@ export interface ExpressionInterpreter {
 
 export interface ExpressionExecutor {
   interpreter: ExpressionInterpreter;
+}
+
+export type RenderId = number;
+export type Data = any;
+export type event = any;
+export type Context = object;
+
+export interface SearchContext {
+  type: 'kibana_context';
+  filters?: Filter[];
+  query?: Query;
+  timeRange?: TimeRange;
+}
+
+export type IGetInitialContext = () => SearchContext | Context;
+
+export interface IExpressionLoaderParams {
+  searchContext?: SearchContext;
+  context?: Context;
+  variables?: Record<string, any>;
+  disableCaching?: boolean;
+  customFunctions?: [];
+  customRenderers?: [];
+}
+
+export interface IInterpreterHandlers {
+  getInitialContext: IGetInitialContext;
+  inspectorAdapters?: Adapters;
+}
+
+export interface IInterpreterResult {
+  type: string;
+  as?: string;
+  value?: unknown;
+  error?: unknown;
+}
+
+export interface IInterpreterRenderHandlers {
+  done: () => void;
+  onDestroy: (fn: () => void) => void;
+  reload: () => void;
+  update: (params: any) => void;
+  event: (event: event) => void;
+}
+
+export interface IInterpreterRenderFunction<T = unknown> {
+  name: string;
+  displayName: string;
+  help: string;
+  validate: () => void;
+  reuseDomNode: boolean;
+  render: (domNode: Element, data: T, handlers: IInterpreterRenderHandlers) => void | Promise<void>;
 }
