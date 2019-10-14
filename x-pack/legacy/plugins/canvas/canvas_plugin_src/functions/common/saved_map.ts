@@ -14,7 +14,7 @@ import {
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n/functions';
 
 interface Arguments {
   id: string;

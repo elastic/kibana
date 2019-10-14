@@ -9,4 +9,5 @@ import { location } from './location';
 import { markdown } from './markdown';
 import { urlparam } from './urlparam';
 
+export type BrowserFunctions = typeof functions[number];
 export const functions = [location, markdown, urlparam, ...commonFunctions];

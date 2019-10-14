@@ -6,7 +6,7 @@
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Render } from '../../../types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n/functions';
 
 interface Arguments {
   column: string;

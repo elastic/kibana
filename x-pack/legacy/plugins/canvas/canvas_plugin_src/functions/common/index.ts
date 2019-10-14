@@ -62,6 +62,8 @@ import { timefilterControl } from './timefilterControl';
 import { switchFn } from './switch';
 import { caseFn } from './case';
 
+export type CommonFunctions = typeof functions[number];
+
 export const functions = [
   all,
   alterColumn,

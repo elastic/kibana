@@ -7,7 +7,7 @@
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { palettes } from '../../../common/lib/palettes';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n/functions';
 
 interface Arguments {
   color: string[];

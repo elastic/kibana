@@ -10,4 +10,5 @@ import { esdocs } from './esdocs';
 import { pointseries } from './pointseries';
 import { essql } from './essql';
 
+export type ServerFunctions = typeof functions[number];
 export const functions = [demodata, esdocs, escount, essql, pointseries];

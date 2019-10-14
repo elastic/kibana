@@ -5,9 +5,19 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
-import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
-import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
+import {
+  functions as commonFunctions,
+  CommonFunctions,
+} from '../canvas_plugin_src/functions/common';
+import {
+  functions as browserFunctions,
+  BrowserFunctions,
+} from '../canvas_plugin_src/functions/browser';
+import {
+  functions as serverFunctions,
+  ServerFunctions,
+} from '../canvas_plugin_src/functions/server';
+import { clientFunctions, PublicFunctions } from '../public/functions';
 
 /**
  * Utility type for converting a union of types into an intersection.
@@ -102,12 +112,8 @@ export type FunctionFactory<FnFactory> =
     ExpressionFunction<Name, Context, Arguments, Return> :
     never;
 
-// A type containing all of the raw Function definitions in Canvas.
-// prettier-ignore
-type Functions = 
-  typeof commonFunctions[number] &
-  typeof serverFunctions[number] &
-  typeof browserFunctions[number];
+// If I uncomment PublicFunctions, all of the other items vanish.
+type Functions = CommonFunctions & ServerFunctions & BrowserFunctions; // & PublicFunctions;
 
 /**
  * A union type of all Canvas Functions.

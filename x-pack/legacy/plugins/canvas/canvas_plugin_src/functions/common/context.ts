@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n/functions';
 
 export function context(): ExpressionFunction<'context', any, {}, any> {
   const { help } = getFunctionHelp().context;
