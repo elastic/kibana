@@ -34,6 +34,7 @@ declare interface Ml {
     getDataFrameAnalytics(analyticsId?: string): Promise<any>;
     getDataFrameAnalyticsStats(analyticsId?: string): Promise<any>;
     createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any>;
+    evaluateDataFrameAnalyticsRegression(evaluateConfig: any): Promise<any>;
     deleteDataFrameAnalytics(analyticsId: string): Promise<any>;
     startDataFrameAnalytics(analyticsId: string): Promise<any>;
     stopDataFrameAnalytics(
