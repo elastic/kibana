@@ -73,7 +73,8 @@ export const serviceNodeMetadataRoute = createRoute(() => ({
     path: t.type({
       serviceName: t.string,
       serviceNodeName: t.string
-    })
+    }),
+    query: t.intersection([uiFiltersRt, rangeRt])
   },
   handler: async (req, { path }) => {
     const setup = await setupRequest(req);

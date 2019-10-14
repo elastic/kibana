@@ -38,7 +38,7 @@ const Truncate = styled.span`
 `;
 
 export function ServiceNodeMetrics() {
-  const { urlParams } = useUrlParams();
+  const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, serviceNodeName } = urlParams;
 
   const { agentName } = useAgentName();
@@ -47,17 +47,22 @@ export function ServiceNodeMetrics() {
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     callApmApi => {
-      if (serviceName && serviceNodeName) {
+      if (serviceName && serviceNodeName && start && end) {
         return callApmApi({
           pathname:
             '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
           params: {
-            path: { serviceName, serviceNodeName }
+            path: { serviceName, serviceNodeName },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters)
+            }
           }
         });
       }
     },
-    [serviceName, serviceNodeName]
+    [end, serviceName, serviceNodeName, start, uiFilters]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

@@ -7,6 +7,8 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
+import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -89,13 +91,27 @@ const ServiceNodeOverview = () => {
       field: 'name',
       sortable: true,
       render: (name: string) => {
+        const { displayedName, tooltip } =
+          name === SERVICE_NODE_NAME_MISSING
+            ? {
+                displayedName: UNIDENTIFIED_SERVICE_NODES_LABEL,
+                tooltip: i18n.translate(
+                  'xpack.apm.jvmsTable.explainServiceNodeNameMissing',
+                  {
+                    defaultMessage:
+                      'These metrics come from agents that do not have the `service.node.name` field set. This field is needed to uniquely identify a JVM. For more information, see the APM Server and Java Agent documentation.'
+                  }
+                )
+              }
+            : { displayedName: name, tooltip: name };
+
         return (
-          <EuiToolTip content={name}>
+          <EuiToolTip content={tooltip}>
             <ServiceNodeMetricOverviewLink
               serviceName={serviceName}
               serviceNodeName={name}
             >
-              <ServiceNodeName>{name}</ServiceNodeName>
+              <ServiceNodeName>{displayedName}</ServiceNodeName>
             </ServiceNodeMetricOverviewLink>
           </EuiToolTip>
         );

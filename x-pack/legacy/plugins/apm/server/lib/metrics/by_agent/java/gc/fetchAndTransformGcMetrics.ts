@@ -131,11 +131,11 @@ export async function fetchAndTransformGcMetrics({
       // derivative/value will be undefined for the first hit and if the `max` value is null
       const y =
         'value' in bucket && bucket.value.value !== null
-          ? bucket.value.value
+          ? round(bucket.value.value * (60 / bucketSize), 1)
           : null;
 
       return {
-        y: y !== null ? round(y * (60 / bucketSize), 1) : null,
+        y,
         x: bucket.key
       };
     });
