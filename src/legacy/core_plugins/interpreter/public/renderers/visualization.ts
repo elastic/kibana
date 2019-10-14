@@ -49,12 +49,13 @@ export const visualization = () => ({
       handlers.vis.eventsSubject = handlers.eventsSubject;
     }
 
+    const visParams = { ...handlers.vis.params, ...visConfig };
     const uiState = handlers.uiState || handlers.vis.getUiState();
 
     handlers.onDestroy(() => visualizationLoader.destroy());
 
     await visualizationLoader
-      .render(domNode, handlers.vis, visData, handlers.vis.params, uiState, params)
+      .render(domNode, handlers.vis, visData, visParams, uiState, params)
       .then(() => {
         if (handlers.done) handlers.done();
       });
