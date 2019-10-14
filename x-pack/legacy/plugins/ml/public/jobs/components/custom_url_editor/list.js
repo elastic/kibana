@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-/*
- * React component for listing the custom URLs added to a job,
- * with buttons for testing and deleting each custom URL.
- */
-
 import PropTypes from 'prop-types';
 import React, {
   Component
@@ -22,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiToolTip,
+  EuiTextArea,
 } from '@elastic/eui';
 
 import { toastNotifications } from 'ui/notify';
@@ -44,6 +39,10 @@ function isValidTimeRange(timeRange) {
   return (interval !== null);
 }
 
+/*
+ * React component for listing the custom URLs added to a job,
+ * with buttons for testing and deleting each custom URL.
+ */
 export const CustomUrlList = injectI18n(class CustomUrlList extends Component {
   static propTypes = {
     job: PropTypes.object.isRequired,
@@ -53,6 +52,9 @@ export const CustomUrlList = injectI18n(class CustomUrlList extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      expandedUrlIndex: null,
+    };
   }
 
   onLabelChange = (e, index) => {
@@ -124,8 +126,8 @@ export const CustomUrlList = injectI18n(class CustomUrlList extends Component {
   render() {
     const customUrls = this.props.customUrls;
     const { intl } = this.props;
+    const { expandedUrlIndex } = this.state;
 
-    // TODO - swap URL input to a textarea on focus / blur.
     const customUrlRows = customUrls.map((customUrl, index) => {
 
       // Validate the label.
@@ -170,15 +172,24 @@ export const CustomUrlList = injectI18n(class CustomUrlList extends Component {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
+              fullWidth={true}
               label={<FormattedMessage
                 id="xpack.ml.customUrlEditorList.urlLabel"
                 defaultMessage="URL"
               />}
             >
-              <EuiFieldText
-                value={customUrl.url_value}
-                onChange={(e) => this.onUrlValueChange(e, index)}
-              />
+              {index === expandedUrlIndex ?
+                <EuiTextArea
+                  value={customUrl.url_value}
+                  onChange={(e) => this.onUrlValueChange(e, index)}
+                  onBlur={() => this.setState({ expandedUrlIndex: null })}
+                />  :
+                <EuiFieldText
+                  fullWidth={true}
+                  value={customUrl.url_value}
+                  onChange={(e) => this.onUrlValueChange(e, index)}
+                  onFocus={() => this.setState({ expandedUrlIndex: index })}
+                />}
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
