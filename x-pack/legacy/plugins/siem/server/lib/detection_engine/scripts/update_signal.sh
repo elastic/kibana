@@ -9,15 +9,17 @@
 set -e
 ./check_env_variables.sh
 
-# Uses a default if no argument is specified
-SIGNAL=${1:-./signals/root_or_admin_1.json}
+# TODO: Since we only have GUID's at the moment, you have to use ./find_signals.sh and then copy and paste that
+# into the temp_update_1.json as your ID in order to run this script.
 
-# Example: ./post_signal.sh
-# Example: ./post_signal.sh ./signals/root_or_admin_1.json
+# Uses a default if no argument is specified
+SIGNAL=${1:-./signals/temp_update_1.json}
+
+# Example: ./update_signal.sh {id} ./signals/root_or_admin_1.json
 curl -s -k \
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X POST ${KIBANA_URL}/api/siem/signals \
+ -X PUT ${KIBANA_URL}/api/siem/signals \
  -d @${SIGNAL} \
  | jq .
