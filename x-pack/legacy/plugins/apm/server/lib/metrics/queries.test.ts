@@ -13,6 +13,7 @@ import {
   SearchParamsMock,
   inspectSearchParams
 } from '../../../public/utils/testHelpers';
+import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 
 describe('metrics queries', () => {
   let mock: SearchParamsMock;
@@ -65,6 +66,10 @@ describe('metrics queries', () => {
 
   describe('without a service node name', () => {
     createTests();
+  });
+
+  describe('with service_node_name_missing', () => {
+    createTests(SERVICE_NODE_NAME_MISSING);
   });
 
   describe('with a service node name', () => {

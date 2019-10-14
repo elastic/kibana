@@ -62,7 +62,7 @@ export function ServiceNodeMetrics() {
         });
       }
     },
-    [end, serviceName, serviceNodeName, start, uiFilters]
+    [serviceName, serviceNodeName, start, end, uiFilters]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

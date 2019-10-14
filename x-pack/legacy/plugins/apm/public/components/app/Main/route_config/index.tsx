@@ -136,10 +136,10 @@ export const routes: BreadcrumbRoute[] = [
     path: '/services/:serviceName/nodes/:serviceNodeName/metrics',
     component: () => <ServiceNodeMetrics />,
     breadcrumb: ({ location }) => {
-      let { serviceNodeName } = resolveUrlParams(location, {});
+      const { serviceNodeName } = resolveUrlParams(location, {});
 
       if (serviceNodeName === SERVICE_NODE_NAME_MISSING) {
-        serviceNodeName = UNIDENTIFIED_SERVICE_NODES_LABEL;
+        return UNIDENTIFIED_SERVICE_NODES_LABEL;
       }
 
       return serviceNodeName || '';

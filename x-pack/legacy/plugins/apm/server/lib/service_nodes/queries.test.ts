@@ -15,6 +15,7 @@ import {
   inspectSearchParams
 } from '../../../public/utils/testHelpers';
 import { getServiceNodeMetadata } from '../services/get_service_node_metadata';
+import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 
 describe('service node queries', () => {
   let mock: SearchParamsMock;
@@ -37,6 +38,18 @@ describe('service node queries', () => {
         setup,
         serviceName: 'foo',
         serviceNodeName: 'bar'
+      })
+    );
+
+    expect(mock.params).toMatchSnapshot();
+  });
+
+  it('fetches metadata for unidentified service nodes', async () => {
+    mock = await inspectSearchParams(setup =>
+      getServiceNodeMetadata({
+        setup,
+        serviceName: 'foo',
+        serviceNodeName: SERVICE_NODE_NAME_MISSING
       })
     );
 

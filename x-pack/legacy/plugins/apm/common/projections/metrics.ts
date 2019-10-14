@@ -13,6 +13,18 @@ import {
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 import { SERVICE_NODE_NAME_MISSING } from '../service_nodes';
 
+function getServiceNodeNameFilters(serviceNodeName?: string) {
+  if (!serviceNodeName) {
+    return [];
+  }
+
+  if (serviceNodeName === SERVICE_NODE_NAME_MISSING) {
+    return [{ bool: { must_not: [{ exists: { field: SERVICE_NODE_NAME } }] } }];
+  }
+
+  return [{ term: { [SERVICE_NODE_NAME]: serviceNodeName } }];
+}
+
 export function getMetricsProjection({
   setup,
   serviceName,
@@ -28,32 +40,16 @@ export function getMetricsProjection({
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: 'metric' } },
     { range: rangeFilter(start, end) },
+    ...getServiceNodeNameFilters(serviceNodeName),
     ...uiFiltersES
   ];
-
-  let mustNot = {};
-
-  if (serviceNodeName && serviceNodeName === SERVICE_NODE_NAME_MISSING) {
-    mustNot = {
-      must_not: [
-        {
-          exists: { field: SERVICE_NODE_NAME }
-        }
-      ]
-    };
-  } else if (serviceNodeName) {
-    filter.push({
-      term: { [SERVICE_NODE_NAME]: serviceNodeName }
-    });
-  }
 
   return {
     index: config.get<string>('apm_oss.metricsIndices'),
     body: {
       query: {
         bool: {
-          filter,
-          ...mustNot
+          filter
         }
       }
     }
