@@ -151,6 +151,20 @@ export function populateValidationMessages(
 
     basicValidations.bucketSpan.message = msg;
   }
+
+  if (validationResults.contains('query_empty')) {
+    basicValidations.query.valid = false;
+    const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.queryCannotBeEmpty', {
+      defaultMessage: 'Datafeed query cannot be empty.',
+    });
+    basicValidations.query.message = msg;
+  } else if (validationResults.contains('query_invalid')) {
+    basicValidations.query.valid = false;
+    const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.queryIsInvalidEsQuery', {
+      defaultMessage: 'Datafeed query must be a valid elasticsearch query.',
+    });
+    basicValidations.query.message = msg;
+  }
 }
 
 export function checkForExistingJobAndGroupIds(

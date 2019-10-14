@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import expect from '@kbn/expect';
+import { Client, SearchParams } from 'elasticsearch';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getVisualizationCounts } from '../../../../legacy/plugins/lens/server/usage/visualization_counts';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function({ getService, getPageObjects, ...rest }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -79,6 +83,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         dimension:
           '[data-test-subj="lnsXY_xDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
         operation: 'date_histogram',
+        field: '@timestamp',
       });
 
       await PageObjects.lens.configureDimension({
@@ -86,6 +91,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
           '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
         operation: 'avg',
         field: 'bytes',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension:
+          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="indexPattern-configure-dimension"]',
+        operation: 'terms',
+        field: 'ip',
       });
 
       await PageObjects.lens.setTitle('Afancilenstest');
@@ -102,10 +114,36 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
-      await PageObjects.lens.assertExpectedText(
-        '.echLegendItem__title',
-        legendText => !!legendText && legendText.includes('Average of bytes')
-      );
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(3);
+    });
+
+    it('should collect telemetry on saved visualization types with a painless script', async () => {
+      const es: Client = getService('es');
+      const callCluster = (path: 'search', searchParams: SearchParams) =>
+        es[path].call(es, searchParams);
+
+      const results = await getVisualizationCounts(callCluster, {
+        // Fake KibanaConfig service
+        get(key: string) {
+          return '.kibana';
+        },
+        has: () => false,
+      } as KibanaConfig);
+
+      expect(results).to.have.keys([
+        'visualization_types_overall',
+        'visualization_types_last_30_days',
+        'visualization_types_last_90_days',
+        'saved_total',
+        'saved_last_30_days',
+        'saved_last_90_days',
+      ]);
+
+      expect(results.visualization_types_overall).to.eql({
+        lnsMetric: 1,
+        bar_stacked: 1,
+      });
+      expect(results.saved_total).to.eql(2);
     });
   });
 }

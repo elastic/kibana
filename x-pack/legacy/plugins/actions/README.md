@@ -19,9 +19,10 @@ action types.
 
 ## Usage
 
-1. Develop and register an action type (see action types -> example).
-2. Create an action by using the RESTful API (see actions -> create action).
-3. Use alerts to execute actions or execute manually (see firing actions).
+1. Enable the actions plugin in the `kibana.yml` by setting `xpack.actions.enabled: true`.
+2. Develop and register an action type (see action types -> example).
+3. Create an action by using the RESTful API (see actions -> create action).
+4. Use alerts to execute actions or execute manually (see firing actions).
 
 ## Kibana Actions Configuration
 Implemented under the [Actions Config](./server/actions_config.ts).
@@ -50,7 +51,7 @@ This module provides a Utilities for interacting with the configuration.
 
 ### Methods
 
-**server.plugins.actions.registerType(options)**
+**server.plugins.actions.setup.registerType(options)**
 
 The following table describes the properties of the `options` object.
 
@@ -73,6 +74,7 @@ This is the primary function for an action type. Whenever the action needs to ex
 
 |Property|Description|
 |---|---|
+|actionId|The action saved object id that the action type is executing for.|
 |config|The decrypted configuration given to an action. This comes from the action saved object that is partially or fully encrypted within the data store. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.|
 |params|Parameters for the execution. These will be given at execution time by either an alert or manually provided when calling the plugin provided execute function.|
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, but will change in a future PR.|

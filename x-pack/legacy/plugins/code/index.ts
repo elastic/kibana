@@ -7,14 +7,12 @@
 import { RequestQuery, ResponseToolkit, RouteOptions, ServerRoute } from 'hapi';
 import JoiNamespace from 'joi';
 import { Legacy } from 'kibana';
-import moment from 'moment';
 import { resolve } from 'path';
+import { CoreSetup } from 'src/core/server';
 
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { APP_TITLE } from './common/constants';
 import { codePlugin } from './server';
-import { DEFAULT_WATERMARK_LOW_PERCENTAGE } from './server/disk_watermark';
-import { LanguageServers, LanguageServersDeveloping } from './server/lsp/language_servers';
+import { PluginSetupContract } from '../../../plugins/code/server';
 
 export type RequestFacade = Legacy.Request;
 export type RequestQueryFacade = RequestQuery;
@@ -25,7 +23,7 @@ export type ServerRouteFacade = ServerRoute;
 
 export const code = (kibana: any) =>
   new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch'],
     id: 'code',
     configPrefix: 'xpack.code',
     publicDir: resolve(__dirname, 'public'),
@@ -41,23 +39,15 @@ export const code = (kibana: any) =>
         const config = server.config();
         return {
           codeUiEnabled: config.get('xpack.code.ui.enabled'),
+          codeIntegrationsEnabled: config.get('xpack.code.integrations.enabled'),
         };
       },
       hacks: ['plugins/code/hacks/toggle_app_link_in_nav'],
     },
     config(Joi: typeof JoiNamespace) {
-      const langSwitches: any = {};
-      LanguageServers.forEach(lang => {
-        langSwitches[lang.name] = Joi.object({
-          enabled: Joi.boolean().default(true),
-        });
-      });
-      LanguageServersDeveloping.forEach(lang => {
-        langSwitches[lang.name] = Joi.object({
-          enabled: Joi.boolean().default(false),
-        });
-      });
       return Joi.object({
+        // Still keep this config item here for the injectDefaultVars
+        // in line 40 here.
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
         }).default(),
@@ -126,22 +116,27 @@ export const code = (kibana: any) =>
               })
             )
             .default([]),
+        integrations: Joi.object({
+          enabled: Joi.boolean().default(false),
         }).default(),
-      }).default();
+        enabled: Joi.boolean().default(true),
+      })
+        .default()
+        .unknown(true);
     },
-    init(server: ServerFacade, options: any) {
-      if (!options.ui.enabled) {
+    async init(server: ServerFacade) {
+      const initializerContext = server.newPlatform.setup.plugins.code as PluginSetupContract;
+      if (!initializerContext.legacy.config.ui.enabled) {
         return;
       }
 
-      const initializerContext = {} as PluginInitializerContext;
       const coreSetup = ({
         http: { server },
       } as any) as CoreSetup;
 
       // Set up with the new platform plugin lifecycle API.
       const plugin = codePlugin(initializerContext);
-      plugin.setup(coreSetup, options);
+      plugin.setup(coreSetup);
 
       // @ts-ignore
       const kbnServer = this.kbnServer;

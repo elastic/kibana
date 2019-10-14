@@ -124,7 +124,7 @@ export default function(kibana: any) {
       }
 
       const config = server.config();
-      const legacyEsConfig = await server.newPlatform.setup.core.elasticsearch.legacy.config$
+      const legacyEsConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
         .pipe(first())
         .toPromise();
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);

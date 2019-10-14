@@ -1,8 +1,8 @@
 [role="xpack"]
 [[infra-ui]]
-== Using the Infrastructure app
+== Using the Metrics app
 
-Use the Infrastructure app in {kib} to monitor your infrastructure and identify problems in real time.
+Use the Metrics app in {kib} to monitor your infrastructure and identify problems in real time.
 You can explore metrics for hosts, containers, and services.
 You can also drill down to view more detailed metrics, or seamlessly switch to view the corresponding logs, application traces, and uptime information.
 
@@ -49,7 +49,7 @@ For example, enter `host.hostname : "host1"` to see only the information for `ho
 [[infra-date]]
 === Specify the time and date
 
-Click the time selector image:infrastructure/images/infra-time-selector.png[time selector icon] to choose the timeframe for the metrics.
+Click the time filter image:infrastructure/images/infra-time-selector.png[time filter icon] to choose the timeframe for the metrics.
 The values shown are the values for the last minute at the specified time and date.
 
 [float]
@@ -62,7 +62,7 @@ Select *Auto-refresh* to keep up-to-date metrics information coming in, or *Stop
 [[infra-configure-source]]
 === Configure the data to use for your metrics
 
-The default source configuration for metrics is specified in the {kibana-ref}/infrastructure-ui-settings-kb.html[Infrastructure app settings] in the {kibana-ref}/settings.html[Kibana configuration file].
+The default source configuration for metrics is specified in the {kibana-ref}/infrastructure-ui-settings-kb.html[Metrics app settings] in the {kibana-ref}/settings.html[Kibana configuration file].
 The default configuration uses the `metricbeat-*` index pattern to query the data.
 The default configuration also defines field settings for things like timestamps and container names.
 

@@ -57,7 +57,8 @@ import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { data } from '../../../data/public/setup';
+import { extractTimeFilter, changeTimeFilter } from '../../../data/public';
+import { start as data } from '../../../data/public/legacy';
 
 import {
   DashboardContainer,
@@ -331,7 +332,8 @@ export class DashboardAppController {
       getDashboardTitle(
         dashboardStateManager.getTitle(),
         dashboardStateManager.getViewMode(),
-        dashboardStateManager.getIsDirty(timefilter)
+        dashboardStateManager.getIsDirty(timefilter),
+        dashboardStateManager.isNew()
       );
 
     // Push breadcrumbs to new header navigation
@@ -422,7 +424,21 @@ export class DashboardAppController {
     };
 
     $scope.onApplyFilters = filters => {
-      queryFilter.addFiltersAndChangeTimeFilter(filters);
+      // All filters originated from one visualization.
+      const indexPatternId = filters[0].meta.index;
+      const indexPattern = _.find(
+        $scope.indexPatterns,
+        (p: IndexPattern) => p.id === indexPatternId
+      );
+      if (indexPattern && indexPattern.timeFieldName) {
+        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+          indexPattern.timeFieldName,
+          filters
+        );
+        queryFilter.addFilters(restOfFilters);
+        if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
+      }
+
       $scope.appState.$newFilters = [];
     };
 

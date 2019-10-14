@@ -27,6 +27,10 @@ interface ExistsOptions {
   allowHidden?: boolean;
 }
 
+interface ClearOptions {
+  withKeyboard: boolean;
+}
+
 export function TestSubjectsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
@@ -66,6 +70,27 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       return await (allowHidden
         ? this.waitForHidden(selector, timeout)
         : find.waitForDeletedByCssSelector(testSubjSelector(selector), timeout));
+    }
+
+    async stringExistsInCodeBlockOrFail(codeBlockSelector: string, stringToFind: string) {
+      await retry.try(async () => {
+        const responseCodeBlock = await this.find(codeBlockSelector);
+        const spans = await find.allDescendantDisplayedByTagName('span', responseCodeBlock);
+        const foundInSpans = await Promise.all(
+          spans.map(async span => {
+            const text = await span.getVisibleText();
+            if (text === stringToFind) {
+              log.debug(`"${text}" matched "${stringToFind}"!`);
+              return true;
+            } else {
+              log.debug(`"${text}" did not match "${stringToFind}"`);
+            }
+          })
+        );
+        if (!foundInSpans.find(foundInSpan => foundInSpan)) {
+          throw new Error(`"${stringToFind}" was not found. Trying again...`);
+        }
+      });
     }
 
     public async append(selector: string, text: string): Promise<void> {
@@ -151,7 +176,11 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async setValue(selector: string, text: string): Promise<void> {
+    public async setValue(
+      selector: string,
+      text: string,
+      options: ClearOptions = { withKeyboard: false }
+    ): Promise<void> {
       return await retry.try(async () => {
         log.debug(`TestSubjects.setValue(${selector}, ${text})`);
         await this.click(selector);
@@ -159,7 +188,11 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
         const input = await find.activeElement();
-        await input.clearValue();
+        if (options.withKeyboard === true) {
+          await input.clearValueWithKeyboard();
+        } else {
+          await input.clearValue();
+        }
         await input.type(text);
       });
     }

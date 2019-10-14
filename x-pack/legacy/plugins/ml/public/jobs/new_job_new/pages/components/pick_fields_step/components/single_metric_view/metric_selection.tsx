@@ -6,10 +6,7 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import {
-  SingleMetricJobCreator,
-  isSingleMetricJobCreator,
-} from '../../../../../common/job_creator';
+import { SingleMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
@@ -32,10 +29,6 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
     chartLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-
-  if (isSingleMetricJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as SingleMetricJobCreator;
 
   const { fields } = newJobCapsService;

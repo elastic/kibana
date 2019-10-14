@@ -14,6 +14,8 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiLoadingSpinner,
+  EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -26,10 +28,11 @@ import {
 } from '../../../../components';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
+import { SendRequestResponse } from '../../../../../shared_imports';
 
 interface Props {
   policies: SlmPolicy[];
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
   openPolicyDetailsUrl: (name: SlmPolicy['name']) => string;
   onPolicyDeleted: (policiesDeleted: Array<SlmPolicy['name']>) => void;
   onPolicyExecuted: () => void;
@@ -93,8 +96,40 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.snapshotRestore.policyList.table.snapshotNameColumnTitle', {
         defaultMessage: 'Snapshot name',
       }),
-      truncateText: true,
       sortable: true,
+      render: (
+        snapshotName: SlmPolicy['snapshotName'],
+        { lastFailure, lastSuccess }: SlmPolicy
+      ) => {
+        // Alert user if last snapshot failed
+        if (lastSuccess && lastFailure && lastFailure.time > lastSuccess.time) {
+          return (
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              className="snapshotRestorePolicyTableSnapshotFailureContainer"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'xpack.snapshotRestore.policyList.table.lastSnapshotFailedTooltip',
+                    {
+                      defaultMessage: 'Last snapshot failed',
+                    }
+                  )}
+                >
+                  <EuiIcon type="alert" color="danger" />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <EuiText size="s">{snapshotName}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+        return snapshotName;
+      },
     },
     {
       field: 'repository',
@@ -111,6 +146,24 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
+    },
+    {
+      field: 'retention',
+      name: i18n.translate('xpack.snapshotRestore.policyList.table.retentionColumnTitle', {
+        defaultMessage: 'Retention',
+      }),
+      render: (retention: SlmPolicy['retention']) =>
+        retention ? (
+          <EuiIcon
+            type="check"
+            aria-label={i18n.translate(
+              'xpack.snapshotRestore.policyList.table.retentionColumnAriaLabel',
+              {
+                defaultMessage: 'Retention configured',
+              }
+            )}
+          />
+        ) : null,
     },
     {
       field: 'nextExecutionMillis',
@@ -179,7 +232,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                       aria-label={i18n.translate(
                         'xpack.snapshotRestore.policyList.table.actionEditAriaLabel',
                         {
-                          defaultMessage: 'Edit poicy `{name}`',
+                          defaultMessage: `Edit policy '{name}'`,
                           values: { name },
                         }
                       )}

@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { SearchService, SearchSetup } from './search';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { SearchService, SearchStart, createSearchBar, StatetfulSearchBarProps } from './search';
 import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterSetup } from './filter';
+import { FilterService, FilterStart } from './filter';
 import { TimefilterService, TimefilterSetup } from './timefilter';
-import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
-import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin';
+import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
+import {
+  LegacyDependenciesPluginSetup,
+  LegacyDependenciesPluginStart,
+} from './shim/legacy_dependencies_plugin';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
 /**
  * Interface for any dependencies on other plugins' `setup` contracts.
@@ -34,17 +38,36 @@ export interface DataPluginSetupDependencies {
   __LEGACY: LegacyDependenciesPluginSetup;
 }
 
+export interface DataPluginStartDependencies {
+  data: DataPublicPluginStart;
+  __LEGACY: LegacyDependenciesPluginStart;
+}
+
 /**
  * Interface for this plugin's returned `setup` contract.
  *
  * @public
  */
 export interface DataSetup {
-  indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
   query: QuerySetup;
-  search: SearchSetup;
   timefilter: TimefilterSetup;
+  indexPatterns: IndexPatternsSetup;
+}
+
+/**
+ * Interface for this plugin's returned `start` contract.
+ *
+ * @public
+ */
+export interface DataStart {
+  query: QuerySetup;
+  timefilter: TimefilterSetup;
+  indexPatterns: IndexPatternsStart;
+  filter: FilterStart;
+  search: SearchStart;
+  ui: {
+    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
+  };
 }
 
 /**
@@ -58,7 +81,9 @@ export interface DataSetup {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependencies> {
+export class DataPlugin
+  implements
+    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
   // Exposed services, sorted alphabetically
   private readonly filter: FilterService = new FilterService();
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
@@ -69,36 +94,52 @@ export class DataPlugin implements Plugin<DataSetup, {}, DataPluginSetupDependen
   private setupApi!: DataSetup;
 
   public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
-    const { uiSettings, http } = core;
-    const savedObjectsClient = __LEGACY.savedObjectsClient;
-
-    const indexPatternsService = this.indexPatterns.setup({
-      uiSettings,
-      savedObjectsClient,
-      http,
-    });
+    const { uiSettings } = core;
 
     const timefilterService = this.timefilter.setup({
       uiSettings,
+      store: __LEGACY.storage,
     });
     this.setupApi = {
-      indexPatterns: indexPatternsService,
-      filter: this.filter.setup({
-        uiSettings,
-        indexPatterns: indexPatternsService.indexPatterns,
-        timefilter: timefilterService.timefilter,
-      }),
+      indexPatterns: this.indexPatterns.setup(),
       query: this.query.setup(),
-      search: this.search.setup(savedObjectsClient),
       timefilter: timefilterService,
     };
 
     return this.setupApi;
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { __LEGACY, data }: DataPluginStartDependencies): DataStart {
+    const { uiSettings, http, notifications, savedObjects } = core;
+
+    const indexPatternsService = this.indexPatterns.start({
+      uiSettings,
+      savedObjectsClient: savedObjects.client,
+      http,
+      notifications,
+    });
+
+    const filterService = this.filter.start({
+      uiSettings,
+      indexPatterns: indexPatternsService.indexPatterns,
+    });
+
+    const SearchBar = createSearchBar({
+      core,
+      data,
+      store: __LEGACY.storage,
+      timefilter: this.setupApi.timefilter,
+      filterManager: filterService.filterManager,
+    });
+
     return {
       ...this.setupApi!,
+      indexPatterns: indexPatternsService,
+      filter: filterService,
+      search: this.search.start(savedObjects.client),
+      ui: {
+        SearchBar,
+      },
     };
   }
 

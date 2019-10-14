@@ -23,7 +23,7 @@ import { I18nContext } from 'ui/i18n';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { controlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
-import { setup as data } from '../../../core_plugins/data/public/legacy';
+import { start as data } from '../../../core_plugins/data/public/legacy';
 
 class VisController {
   constructor(el, vis) {

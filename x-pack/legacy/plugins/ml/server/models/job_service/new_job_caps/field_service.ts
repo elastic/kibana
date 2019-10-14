@@ -13,7 +13,7 @@ import {
   NewJobCaps,
   METRIC_AGG_TYPE,
 } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations } from './aggregations';
@@ -170,14 +170,16 @@ async function combineFieldsAndAggs(
   };
 }
 
-// remove fields that have no aggs associated to them
+// remove fields that have no aggs associated to them, unless they are date fields
 function filterFields(fields: Field[]): Field[] {
-  return fields.filter(f => f.aggs && f.aggs.length);
+  return fields.filter(
+    f => f.aggs && (f.aggs.length > 0 || (f.aggs.length === 0 && f.type === ES_FIELD_TYPES.DATE))
+  );
 }
 
 // remove aggs that have no fields associated to them
 function filterAggs(aggs: Aggregation[]): Aggregation[] {
-  return aggs.filter(a => a.fields && a.fields.length);
+  return aggs.filter(a => a.fields && a.fields.length > 0);
 }
 
 // returns a mix function that is used to cross-reference aggs and fields.
