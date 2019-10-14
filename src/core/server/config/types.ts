@@ -17,6 +17,9 @@
  * under the License.
  */
 
+/**
+ * @public
+ */
 export interface PackageInfo {
   version: string;
   branch: string;
@@ -25,6 +28,9 @@ export interface PackageInfo {
   dist: boolean;
 }
 
+/**
+ * @public
+ */
 export interface EnvironmentMode {
   name: 'development' | 'production';
   dev: boolean;
