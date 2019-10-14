@@ -81,14 +81,12 @@ class DefaultReferenceHelper implements RepositoryReferenceHelper {
   }
 
   async ensureReference(uri: string): Promise<void> {
-    if (!(await this.hasReference(uri))) {
-      throw Boom.notFound(`Space has no reference of [${uri}]`);
-    }
+    await this.client.get(SAVED_OBJ_REPO, uri);
   }
 
   async hasReference(uri: string): Promise<boolean> {
     try {
-      await this.client.get(SAVED_OBJ_REPO, uri);
+      await this.ensureReference(uri);
       return true;
     } catch (e) {
       if (Boom.isBoom(e) && e.output.statusCode === 404) {
