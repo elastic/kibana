@@ -5,13 +5,10 @@
  */
 
 import React, { PureComponent } from 'react';
+import { Page } from '../../components/page';
 
 export class LandingPage extends PureComponent {
   render() {
-    return (
-      <div>
-        <h1>Landing page</h1>
-      </div>
-    );
+    return <Page>Content here</Page>;
   }
 }

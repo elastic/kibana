@@ -6,20 +6,22 @@
 
 import React, { PureComponent } from 'react';
 import { EndgameAppContext } from '../../common/app_context';
+import { Page } from '../../components/page';
 
 export class EndpointsPage extends PureComponent {
   static contextType = EndgameAppContext;
 
   state = { results: [] };
 
+  context!: React.ContextType<typeof EndgameAppContext>;
+
   render() {
     return (
-      <div>
-        <h1>Endpoints page</h1>
+      <Page title="Endpoints">
         <code>
           <pre>{JSON.stringify(this.state.results, null, 4)}</pre>
         </code>
-      </div>
+      </Page>
     );
   }
 
