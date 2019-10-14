@@ -18,7 +18,7 @@
  */
 
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
-import { EuiToolTip, EuiText } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 
