@@ -18,14 +18,13 @@
  */
 
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 
 import $ from 'jquery';
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useAppContext } from '../../../../context';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
 
@@ -38,9 +37,14 @@ import { initializeInput } from '../../../../../../../public/quarantined/src/inp
 // @ts-ignore
 import mappings from '../../../../../../../public/quarantined/src/mappings';
 
-import { useEditorActionContext, useEditorReadContext } from '../../context';
+import { useAppContext } from '../../../../contexts/app';
+import { useEditorActionContext, useEditorReadContext } from '../../../../contexts/editor';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { useRecipeSave, useRecipeContentInit } from '../../recipes';
+import {
+  useRecipeSave,
+  useRecipeContentInit,
+  useSendCurrentRequestToES,
+} from '../../../../store/hooks';
 
 const abs: CSSProperties = {
   position: 'absolute',
@@ -59,7 +63,7 @@ const DEFAULT_INPUT_VALUE = `GET _search
 
 function _Editor() {
   const {
-    services: { history, notifications, database },
+    services: { notifications, database },
     ResizeChecker,
     docLinkVersion,
   } = useAppContext();
@@ -85,17 +89,7 @@ function _Editor() {
     window.open(documentation, '_blank');
   };
 
-  const sendCurrentRequestToES = () => {
-    dispatch({
-      type: 'sendRequestToEs',
-      value: {
-        isUsingTripleQuotes: settings.tripleQuotes,
-        isPolling: settings.polling,
-        callback: (esPath: any, esMethod: any, esData: any) =>
-          history.addToHistory(esPath, esMethod, esData),
-      },
-    });
-  };
+  const { sendCurrentRequestToES } = useSendCurrentRequestToES();
 
   useEffect(() => {
     if (ready) {
@@ -148,6 +142,11 @@ function _Editor() {
       openDocumentation,
     });
   }, []);
+
+  // TODO: Review loader
+  if (!ready) {
+    return <EuiText>Loading...</EuiText>;
+  }
 
   return (
     <div style={abs} className="conApp">

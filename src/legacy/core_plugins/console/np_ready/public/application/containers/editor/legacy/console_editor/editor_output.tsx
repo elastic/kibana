@@ -21,8 +21,8 @@ import $ from 'jquery';
 
 // @ts-ignore
 import { initializeOutput } from '../../../../../../../public/quarantined/src/output';
-import { useAppContext } from '../../../../context';
-import { useEditorActionContext, useEditorReadContext } from '../../context';
+import { useAppContext } from '../../../../contexts/app';
+import { useEditorActionContext, useEditorReadContext } from '../../../../contexts/editor';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 

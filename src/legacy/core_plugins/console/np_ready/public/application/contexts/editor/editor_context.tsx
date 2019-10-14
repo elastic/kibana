@@ -17,23 +17,11 @@
  * under the License.
  */
 
-import React, { createContext, Dispatch, useContext, useReducer } from 'react';
-import { Action, reducer } from './reducer';
-import { DevToolsSettings } from '../../../../services';
-import { RecipeAttributes } from '../../../models/recipe';
+import React, { createContext, Dispatch, useContext } from 'react';
+import { useStore, Store, Action } from '../../store';
+import { DevToolsSettings } from '../../../services';
 
-export interface ContextValue {
-  ready: boolean;
-  initialContentLoaded: boolean;
-  savingRecipe: boolean;
-  settings: DevToolsSettings;
-  currentRecipe: RecipeAttributes;
-  recipes: { [id: string]: RecipeAttributes };
-  initializationErrors: string[];
-  recipeSaveErrors: string[];
-}
-
-const EditorReadContext = createContext<ContextValue>(null as any);
+const EditorReadContext = createContext<Store>(null as any);
 const EditorActionContext = createContext<Dispatch<Action>>(null as any);
 
 export interface EditorContextArgs {
@@ -41,22 +29,8 @@ export interface EditorContextArgs {
   settings: DevToolsSettings;
 }
 
-const initialValue: ContextValue = {
-  ready: false,
-  initialContentLoaded: false,
-  settings: null as any,
-  savingRecipe: false,
-  currentRecipe: null as any,
-  recipes: {},
-  recipeSaveErrors: [],
-  initializationErrors: [],
-};
-
 export function EditorContextProvider({ children, settings }: EditorContextArgs) {
-  const [state, dispatch] = useReducer(reducer, initialValue, value => ({
-    ...value,
-    settings,
-  }));
+  const { state, dispatch } = useStore(settings);
   return (
     <EditorReadContext.Provider value={state}>
       <EditorActionContext.Provider value={dispatch}>{children}</EditorActionContext.Provider>

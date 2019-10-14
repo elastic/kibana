@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { Editor, EditorOutput, ConsoleHistory, autoIndent, getDocumentation } from './legacy';
+export { useStore, Store } from './store';
+export { Action } from './reducer';

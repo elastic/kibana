@@ -20,8 +20,8 @@
 import React from 'react';
 import { NotificationsStart, SavedObjectsClientContract } from '../../../../../../core/public';
 import { createAppDatabase } from './app_database';
-import { AppContextProvider } from './context';
-import { EditorContextProvider } from './containers/editor/context';
+import { AppContextProvider } from './contexts/app';
+import { EditorContextProvider } from './contexts/editor';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
 

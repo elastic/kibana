@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { Editor, EditorOutput, ConsoleHistory, autoIndent, getDocumentation } from './legacy';
+export { useSendCurrentRequestToES } from './use_send_current_request_to_es';

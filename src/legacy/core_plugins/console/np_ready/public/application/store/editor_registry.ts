@@ -17,4 +17,27 @@
  * under the License.
  */
 
-export { Editor, EditorOutput, ConsoleHistory, autoIndent, getDocumentation } from './legacy';
+export class EditorRegistry {
+  inputEditor: any;
+  outputEditor: any;
+
+  setInputEditor(inputEditor: any) {
+    this.inputEditor = inputEditor;
+  }
+
+  setOutputEditor(outputEditor: any) {
+    this.outputEditor = outputEditor;
+  }
+
+  getInputEditor() {
+    return this.inputEditor;
+  }
+
+  getOutputEditor() {
+    return this.outputEditor;
+  }
+}
+
+// Create a single instance of this and use as private state.
+// Do not use this outside of this directory!
+export const instance = new EditorRegistry();

@@ -18,22 +18,15 @@
  */
 
 import { Reducer } from 'react';
-
 import { instance as registry } from './editor_registry';
-import { ContextValue } from './editor_context';
-import { RecipeAttributes } from '../../../models/recipe';
-
-import { restoreRequestFromHistory } from '../legacy/console_history/restore_request_from_history';
-import {
-  sendCurrentRequestToES,
-  EsRequestArgs,
-} from '../legacy/console_editor/send_current_request_to_es';
-import { DevToolsSettings } from '../../../../services';
+import { Store } from './store';
+import { RecipeAttributes } from '../models/recipe';
+import { DevToolsSettings } from '../../services';
 
 export type Action =
   | { type: 'initialContentLoaded'; value: true }
   | { type: 'setInitializationErrors'; value: string[] }
-  | { type: 'recipes.update'; value: RecipeAttributes }
+  | { type: 'recipes.updateOne'; value: RecipeAttributes }
   | { type: 'recipes.setAll'; value: { [id: string]: RecipeAttributes } }
   | { type: 'recipe.saving'; value: boolean }
   | { type: 'recipe.clearSaveErrors'; value: undefined }
@@ -41,18 +34,19 @@ export type Action =
   | { type: 'recipe.setCurrentRecipe'; value: RecipeAttributes }
   | { type: 'setInputEditor'; value: any }
   | { type: 'setOutputEditor'; value: any }
-  | { type: 'restoreRequest'; value: any }
   | { type: 'updateSettings'; value: DevToolsSettings }
-  | { type: 'sendRequestToEs'; value: EsRequestArgs }
-  | { type: 'updateRequestHistory'; value: any };
+  | { type: 'request.start'; value: undefined }
+  | { type: 'request.failed'; value: string }
+  | { type: 'request.success'; value: undefined }
+  | { type: 'requestRestore.failure'; value: string };
 
-const determineIfReady = (state: ContextValue) => {
+const determineIfReady = (state: Store) => {
   return Boolean(
     registry.getInputEditor() && registry.getOutputEditor() && state.initialContentLoaded
   );
 };
 
-export const reducer: Reducer<ContextValue, Action> = (state, action) => {
+export const reducer: Reducer<Store, Action> = (state, action) => {
   const nextState = { ...state };
 
   switch (action.type) {
@@ -68,26 +62,26 @@ export const reducer: Reducer<ContextValue, Action> = (state, action) => {
       registry.setOutputEditor(action.value);
       nextState.ready = determineIfReady(nextState);
       break;
-    case 'restoreRequest':
-      restoreRequestFromHistory(registry.getInputEditor(), action.value);
-      break;
     case 'updateSettings':
       nextState.settings = action.value;
       break;
-    case 'sendRequestToEs':
-      const { callback, isPolling, isUsingTripleQuotes } = action.value;
-      sendCurrentRequestToES({
-        input: registry.getInputEditor(),
-        output: registry.getOutputEditor(),
-        callback,
-        isUsingTripleQuotes,
-        isPolling,
-      });
+    case 'requestRestore.failure':
+      nextState.restoreFromHistoryErrorMessage = action.value;
+      break;
+    case 'request.start':
+      nextState.requestInFlight = true;
+      break;
+    case 'request.failed':
+      nextState.requestInFlight = false;
+      nextState.lastRequestErrorMessage = action.value;
+      break;
+    case 'request.success':
+      nextState.requestInFlight = false;
       break;
     case 'setInitializationErrors':
       nextState.initializationErrors = action.value;
       break;
-    case 'recipes.update':
+    case 'recipes.updateOne':
       nextState.recipes = {
         ...(nextState.recipes || {}),
         [action.value.id]: action.value,
@@ -109,7 +103,7 @@ export const reducer: Reducer<ContextValue, Action> = (state, action) => {
       nextState.recipeSaveErrors = [];
       break;
     default:
-      throw new Error(`Unknown action ${action.type}`);
+      throw new Error(`Unknown action: ${action}`);
   }
 
   return nextState;

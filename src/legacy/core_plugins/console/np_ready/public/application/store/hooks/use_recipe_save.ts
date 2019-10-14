@@ -18,9 +18,9 @@
  */
 
 import { debounce } from 'lodash';
-import { AppDatabase } from '../../../../app_database';
-import { RecipeAttributes } from '../../../../models/recipe';
-import { useEditorActionContext, useEditorReadContext } from '../../context';
+import { AppDatabase } from '../../app_database';
+import { RecipeAttributes } from '../../models/recipe';
+import { useEditorActionContext, useEditorReadContext } from '../../contexts/editor';
 
 interface Dependencies {
   database: AppDatabase;
@@ -38,7 +38,7 @@ export function useRecipeSave({ database }: Dependencies) {
     try {
       // Update local (primary source of truth after init)
       dispatch({
-        type: 'recipes.update',
+        type: 'recipes.updateOne',
         value: recipe,
       });
       dispatch({ type: 'recipe.saving', value: true });

@@ -22,9 +22,9 @@ import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 
 // @ts-ignore
 import mappings from '../../../../public/quarantined/src/mappings';
-import { useAppContext } from '../context';
+import { useAppContext } from '../contexts/app';
+import { useEditorActionContext } from '../contexts/editor';
 import { DevToolsSettings } from '../../services';
-import { useEditorActionContext } from './editor/context';
 
 const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
   return Object.keys(newSettings.autocomplete).filter(key => {

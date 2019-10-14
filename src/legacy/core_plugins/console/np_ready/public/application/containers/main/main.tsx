@@ -29,11 +29,11 @@ import { useAppMigrations } from '../../app_database/migrations';
 
 import { TopNavMenu, WelcomePanel, HelpPanel, PanelsContainer, Panel } from '../../components';
 
-import { useAppContext } from '../../context';
+import { useAppContext } from '../../contexts/app';
 import { StorageKeys } from '../../../services';
 
 import { getTopNavConfig } from './get_top_nav';
-import { useEditorReadContext } from '../editor';
+import { useEditorReadContext } from '../../contexts/editor';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
@@ -71,10 +71,12 @@ export function Main() {
 
   const { done: migrationsDone, error: migrationError } = useAppMigrations({ database, history });
 
+  // TODO: Review error message
   if (migrationError) {
     return <EuiText size="s">Migrating Failed: {migrationError}</EuiText>;
   }
 
+  // TODO: Review loader
   if (!migrationsDone) {
     return <EuiText size="s">Migrating...</EuiText>;
   }

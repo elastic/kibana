@@ -17,5 +17,20 @@
  * under the License.
  */
 
-export { useRecipeSave } from './use_recipe_save';
-export { useRecipeContentInit } from './use_recipe_content_init';
+import { instance as registry } from '../../editor_registry';
+import { useEditorActionContext } from '../../../contexts/editor';
+import { restoreRequestFromHistory } from './restore_request_from_history';
+
+export const useRestoreFromRequestHistory = () => {
+  const dispatch = useEditorActionContext();
+
+  const restoreFromHistory = (req: any) => {
+    try {
+      restoreRequestFromHistory(registry.getInputEditor(), req);
+    } catch (e) {
+      dispatch({ type: 'requestRestore.failure', value: e.message });
+    }
+  };
+
+  return { restoreFromHistory };
+};

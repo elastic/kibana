@@ -32,9 +32,10 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { useAppContext } from '../../../../context';
+import { useAppContext } from '../../../../contexts/app';
+import { useEditorReadContext } from '../../../../contexts/editor';
+import { useRestoreFromRequestHistory } from '../../../../store/hooks';
 import { HistoryViewer } from './history_viewer';
-import { useEditorActionContext, useEditorReadContext } from '../../context';
 
 interface Props {
   close: () => void;
@@ -48,7 +49,8 @@ export function ConsoleHistory({ close }: Props) {
     ResizeChecker,
   } = useAppContext();
 
-  const dispatch = useEditorActionContext();
+  const { restoreFromHistory } = useRestoreFromRequestHistory();
+
   const { settings: readOnlySettings } = useEditorReadContext();
 
   const [requests, setPastRequests] = useState<any[]>(history.getHistory());
@@ -104,7 +106,7 @@ export function ConsoleHistory({ close }: Props) {
   };
 
   const restore = (req: any = selectedReq.current) => {
-    dispatch({ type: 'restoreRequest', value: req });
+    restoreFromHistory(req);
   };
 
   useEffect(() => {

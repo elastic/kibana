@@ -18,9 +18,9 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { NotificationsStart } from '../../../../../../../core/public';
-import { History, Storage, Settings } from '../../services';
-import { AppDatabase } from '../app_database';
+import { NotificationsStart } from '../../../../../../../../core/public';
+import { History, Storage, Settings } from '../../../services';
+import { AppDatabase } from '../../app_database';
 
 interface ContextValue {
   services: {

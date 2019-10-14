@@ -17,26 +17,4 @@
  * under the License.
  */
 
-export class EditorRegistry {
-  inputEditor: any;
-  outputEditor: any;
-
-  setInputEditor(inputEditor: any) {
-    this.inputEditor = inputEditor;
-  }
-
-  setOutputEditor(outputEditor: any) {
-    this.outputEditor = outputEditor;
-  }
-
-  getInputEditor() {
-    return this.inputEditor;
-  }
-
-  getOutputEditor() {
-    return this.outputEditor;
-  }
-}
-
-// Create a single instance of this and use as private state.
-export const instance = new EditorRegistry();
+export { useRestoreFromRequestHistory } from './use_restore_request_from_history';

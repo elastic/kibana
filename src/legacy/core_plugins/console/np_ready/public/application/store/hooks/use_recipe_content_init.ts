@@ -18,9 +18,9 @@
  */
 
 import { useEffect } from 'react';
-import { AppDatabase } from '../../../../app_database';
-import { useEditorActionContext } from '../../context';
-import { scratchPadName } from '../../../../models/recipe';
+import { AppDatabase } from '../../app_database';
+import { useEditorActionContext } from '../../contexts/editor';
+import { scratchPadName } from '../../models/recipe';
 
 interface Dependencies {
   database: AppDatabase;
@@ -41,7 +41,7 @@ export function useRecipeContentInit({ database }: Dependencies) {
           createdAt: Date.now(),
           text: '',
         });
-        dispatch({ type: 'recipes.update', value: scratchPad });
+        dispatch({ type: 'recipes.updateOne', value: scratchPad });
       } else {
         dispatch({ type: 'recipes.setAll', value: recipes });
       }
