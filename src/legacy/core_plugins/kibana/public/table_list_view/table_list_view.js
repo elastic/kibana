@@ -189,7 +189,7 @@ class TableListViewUi extends React.Component {
           title={
             <FormattedMessage
               id="kbn.table_list_view.listing.deleteSelectedConfirmModal.title"
-              defaultMessage="Delete {itemCount} selected {entityName}?"
+              defaultMessage="Delete {itemCount} {entityName}?"
               values={{
                 itemCount: this.state.selectedIds.length,
                 entityName: (this.state.selectedIds.length === 1) ? this.props.entityName : this.props.entityNamePlural
@@ -398,7 +398,7 @@ class TableListViewUi extends React.Component {
           >
             <FormattedMessage
               id="kbn.table_list_view.listing.createNewItemButtonLabel"
-              defaultMessage="Create new {entityName}"
+              defaultMessage="Create {entityName}"
               values={{ entityName: this.props.entityName }}
             />
           </EuiButton>

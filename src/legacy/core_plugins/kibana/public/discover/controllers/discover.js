@@ -72,7 +72,8 @@ import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/buil
 import 'ui/capabilities/route_setup';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 
-import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
+import { start as data } from '../../../../data/public/legacy';
 import { npStart } from 'ui/new_platform';
 
 const { savedQueryService } = data.search.services;
@@ -276,12 +277,12 @@ function discoverController(
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return saveDataSource(saveOptions).then(({ id, error }) => {
+          return saveDataSource(saveOptions).then((response) => {
             // If the save wasn't successful, put the original values back.
-            if (!id || error) {
+            if (!response.id || response.error) {
               savedSearch.title = currentTitle;
             }
-            return { id, error };
+            return response;
           });
         };
 
@@ -426,7 +427,10 @@ function discoverController(
   };
 
   $scope.applyFilters = filters => {
-    queryFilter.addFiltersAndChangeTimeFilter(filters);
+    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
+    queryFilter.addFilters(restOfFilters);
+    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
+
     $scope.state.$newFilters = [];
   };
 
@@ -949,6 +953,8 @@ function discoverController(
 
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
+    $state.save();
+
     queryFilter.setFilters(savedQuery.attributes.filters || []);
 
     if (savedQuery.attributes.timefilter) {
