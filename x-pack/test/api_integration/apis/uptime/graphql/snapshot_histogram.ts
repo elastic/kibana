@@ -5,11 +5,14 @@
  */
 
 import { snapshotHistogramQueryString } from '../../../../../legacy/plugins/uptime/public/queries/snapshot_histogram_query';
-import { expectFixtureEql } from './expect_fixture_eql';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
   describe('snapshotHistogram', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('will fetch histogram data for all monitors', async () => {
@@ -17,8 +20,8 @@ export default function({ getService }: FtrProviderContext) {
         operationName: 'SnapshotHistogram',
         query: snapshotHistogramQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeStart: '2019-09-11T03:31:04.380Z',
+          dateRangeEnd: '2019-09-11T03:40:34.410Z',
         },
       };
 
@@ -36,9 +39,8 @@ export default function({ getService }: FtrProviderContext) {
         operationName: 'SnapshotHistogram',
         query: snapshotHistogramQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
-          monitorId: 'auto-http-0XDD2D4E60FD4A61C3',
+          dateRangeStart: '2019-09-11T03:31:04.380Z',
+          dateRangeEnd: '2019-09-11T03:40:34.410Z',
         },
       };
 
@@ -56,8 +58,8 @@ export default function({ getService }: FtrProviderContext) {
         operationName: 'SnapshotHistogram',
         query: snapshotHistogramQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeStart: '2019-09-11T03:31:04.380Z',
+          dateRangeEnd: '2019-09-11T03:40:34.410Z',
           filters:
             '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}',
         },

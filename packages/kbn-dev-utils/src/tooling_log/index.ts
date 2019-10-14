@@ -20,3 +20,4 @@
 export { ToolingLog } from './tooling_log';
 export { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
 export { pickLevelFromFlags, LogLevel } from './log_levels';
+export { ToolingLogCollectingWriter } from './tooling_log_collecting_writer';

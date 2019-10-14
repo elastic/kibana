@@ -8,6 +8,17 @@ import clusterDataFixture from './fixtures/cluster_data';
 import { handleResponse } from '../handle_response';
 
 const { nodeStats, clusterStats, shardStats, timeOptions } = clusterDataFixture;
+const pageOfNodes = [
+  {
+    uuid: '_x_V2YzPQU-a9KRRBxUxZQ',
+    name: 'hello01'
+  },
+  {
+    uuid: 'DAiX7fFjS3Wii7g2HYKrOg',
+    name: 'hello02'
+  }
+];
+
 describe('map response of nodes data', () => {
   it('should handle empty parameters', () => {
     const result = handleResponse();
@@ -19,6 +30,7 @@ describe('map response of nodes data', () => {
       nodeStats,
       undefined,
       shardStats,
+      pageOfNodes,
       timeOptions
     );
     expect(result).toMatchSnapshot();
@@ -29,6 +41,18 @@ describe('map response of nodes data', () => {
       nodeStats,
       clusterStats,
       undefined,
+      pageOfNodes,
+      timeOptions
+    );
+    expect(result).toMatchSnapshot();
+  });
+
+  it('should handle empty pageOfNodes', () => {
+    const result = handleResponse(
+      nodeStats,
+      clusterStats,
+      shardStats,
+      [],
       timeOptions
     );
     expect(result).toMatchSnapshot();
@@ -39,6 +63,7 @@ describe('map response of nodes data', () => {
       nodeStats,
       clusterStats,
       shardStats,
+      pageOfNodes,
       undefined
     );
 
@@ -50,6 +75,7 @@ describe('map response of nodes data', () => {
       nodeStats,
       clusterStats,
       shardStats,
+      pageOfNodes,
       timeOptions
     );
     expect(result).toMatchSnapshot();

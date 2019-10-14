@@ -14,3 +14,5 @@ export enum ML_JOB_FIELD_TYPES {
   TEXT = 'text',
   UNKNOWN = 'unknown',
 }
+
+export const MLCATEGORY = 'mlcategory';

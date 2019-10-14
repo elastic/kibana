@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import moment from 'moment';
 import { noop, random, get, find, identity } from 'lodash';
-import { ClientMock } from './fixtures/elasticsearch';
+import { ClientMock } from './fixtures/legacy_elasticsearch';
 import { QueueMock } from './fixtures/queue';
 import { formatJobObject, getUpdatedDocPath, Worker } from '../worker';
 import { constants } from '../constants';
