@@ -169,6 +169,9 @@ describe('AddToKql Component', () => {
           },
           isPtrIncluded: false,
         },
+        tls: {
+          activePage: 0,
+        },
       },
       filterQuery: {
         kuery: {

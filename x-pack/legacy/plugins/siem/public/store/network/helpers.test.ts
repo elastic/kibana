@@ -113,7 +113,7 @@ describe('Network redux store', () => {
           isPtrIncluded: false,
         },
         tls: {
-          activePage: 2,
+          activePage: 0,
           limit: 10,
           tlsSortField: {
             direction: 'desc',
