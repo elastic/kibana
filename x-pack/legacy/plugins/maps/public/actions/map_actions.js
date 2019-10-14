@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import {
@@ -483,7 +482,8 @@ export function updateSourceDataRequest(layerId, newData) {
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
   return async (dispatch) => {
     dispatch(unregisterCancelCallback(requestToken));
-    dispatch(cleanTooltipStateForLayer(layerId, _.get(data, 'features')));
+    const features = data ? data.features : [];
+    dispatch(cleanTooltipStateForLayer(layerId, features));
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
       layerId,
