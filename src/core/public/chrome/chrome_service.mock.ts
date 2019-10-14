@@ -43,6 +43,15 @@ const createStartContractMock = () => {
       get: jest.fn(),
       get$: jest.fn(),
     },
+    docTitle: {
+      get$: jest.fn(),
+      change: jest.fn(),
+      reset: jest.fn(),
+      apply: jest.fn(),
+      __legacy: {
+        setBaseTitle: jest.fn(),
+      },
+    },
     navControls: {
       registerLeft: jest.fn(),
       registerRight: jest.fn(),

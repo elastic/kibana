@@ -20,7 +20,8 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { setBaseTitle, docTitle } from '../doc_title';
+import { docTitle } from '../doc_title';
+import { npStart } from '../../new_platform';
 
 describe('docTitle Service', function () {
   let initialDocTitle;
@@ -30,11 +31,11 @@ describe('docTitle Service', function () {
   beforeEach(function () {
     initialDocTitle = document.title;
     document.title = MAIN_TITLE;
-    setBaseTitle(MAIN_TITLE);
+    npStart.core.chrome.docTitle.__legacy.setBaseTitle(MAIN_TITLE);
   });
   afterEach(function () {
     document.title = initialDocTitle;
-    setBaseTitle(initialDocTitle);
+    npStart.core.chrome.docTitle.__legacy.setBaseTitle(initialDocTitle);
   });
 
   beforeEach(ngMock.module('kibana', function ($provide) {

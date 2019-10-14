@@ -17,43 +17,28 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isArray } from 'lodash';
 import { uiModules } from '../modules';
+import { npStart } from '../new_platform';
 
-let baseTitle = document.title;
-
-// for karma test
-export function setBaseTitle(str) {
-  baseTitle = str;
-}
-
-let lastChange;
-
-function render() {
-  lastChange = lastChange || [];
-
-  const parts = [lastChange[0]];
-
-  if (!lastChange[1]) parts.push(baseTitle);
-
-  return _(parts).flattenDeep().compact().join(' - ');
-}
+const npDocTitle = npStart.core.chrome.docTitle;
 
 function change(title, complete) {
-  lastChange = [title, complete];
-  update();
+  npDocTitle.change({
+    parts: isArray(title) ? title : [title],
+    excludeBase: complete,
+  });
 }
 
 function reset() {
-  lastChange = null;
+  npDocTitle.reset(false);
 }
 
 function update() {
-  document.title = render();
+  npDocTitle.apply();
 }
 
 export const docTitle = {
-  render,
   change,
   reset,
   update,
