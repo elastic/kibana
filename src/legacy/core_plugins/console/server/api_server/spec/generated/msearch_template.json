@@ -9,8 +9,7 @@
       ],
       "typed_keys": "__flag__",
       "max_concurrent_searches": "",
-      "rest_total_hits_as_int": "__flag__",
-      "ccs_minimize_roundtrips": "__flag__"
+      "rest_total_hits_as_int": "__flag__"
     },
     "methods": [
       "GET",
@@ -18,7 +17,8 @@
     ],
     "patterns": [
       "_msearch/template",
-      "{indices}/_msearch/template"
+      "{indices}/_msearch/template",
+      "{indices}/{type}/_msearch/template"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
   }

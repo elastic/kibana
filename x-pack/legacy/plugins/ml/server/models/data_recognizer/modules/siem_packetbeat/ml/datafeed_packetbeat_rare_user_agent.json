@@ -1,0 +1,17 @@
+{
+  "job_id": "JOB_ID",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "query": {
+    "bool": {
+      "filter": [
+        {"term": {"event.dataset": "dns"}},
+        {"term": {"agent.type": "packetbeat"}}
+      ],
+      "must_not": [
+          {"wildcard": {"user_agent.original": {"value": "Mozilla*"}}}
+        ]
+    }
+  }
+}

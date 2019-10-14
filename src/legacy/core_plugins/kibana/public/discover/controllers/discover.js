@@ -274,12 +274,12 @@ function discoverController(
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return saveDataSource(saveOptions).then(({ id, error }) => {
+          return saveDataSource(saveOptions).then((response) => {
             // If the save wasn't successful, put the original values back.
-            if (!id || error) {
+            if (!response.id || response.error) {
               savedSearch.title = currentTitle;
             }
-            return { id, error };
+            return response;
           });
         };
 
@@ -947,6 +947,8 @@ function discoverController(
 
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
+    $state.save();
+
     queryFilter.setFilters(savedQuery.attributes.filters || []);
 
     if (savedQuery.attributes.timefilter) {
