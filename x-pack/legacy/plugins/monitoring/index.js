@@ -28,6 +28,7 @@ export const monitoring = (kibana) => new kibana.Plugin({
       'xpack.monitoring.max_bucket_size',
       'xpack.monitoring.min_interval_seconds',
       'kibana.index',
+      'pkg.version',
       'xpack.monitoring.show_license_expiration',
       'xpack.monitoring.ui.container.elasticsearch.enabled',
       'xpack.monitoring.ui.container.logstash.enabled',
@@ -43,7 +44,7 @@ export const monitoring = (kibana) => new kibana.Plugin({
       'xpack.monitoring.cluster_alerts.email_notifications.enabled',
       'xpack.monitoring.cluster_alerts.email_notifications.email_address',
       'xpack.monitoring.ccs.enabled',
-      'xpack.monitoring.elasticsearch.logFetchCount'
+      'xpack.monitoring.elasticsearch.logFetchCount',
     ];
 
     const serverConfig = server.config();
