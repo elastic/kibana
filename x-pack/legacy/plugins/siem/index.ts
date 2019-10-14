@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
+import KbnServer from '../../../../src/legacy/server/kbn_server';
 import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -24,6 +25,7 @@ import {
   DEFAULT_TO,
 } from './common/constants';
 import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
+import { defaultIndexPattern } from './default_index_pattern';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
@@ -97,7 +99,7 @@ export function siem(kibana: any) {
           name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
             defaultMessage: 'Elasticsearch indices',
           }),
-          value: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          value: defaultIndexPattern,
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
             defaultMessage:
               '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
@@ -122,8 +124,11 @@ export function siem(kibana: any) {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
+      const newPlatform = ((server as unknown) as KbnServer).newPlatform;
       if (server.plugins.alerting != null) {
-        server.plugins.alerting.registerType(signalsAlertType);
+        server.plugins.alerting.setup.registerType(
+          signalsAlertType({ logger: newPlatform.coreContext.logger.get('plugins', APP_ID) })
+        );
       }
       server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
       initServerWithKibana(server);

@@ -41,12 +41,12 @@ describe('hitsToGeoJson', () => {
     const hits = [
       {
         _source: {
-          [geoFieldName]: { lat: 20, lon: 100 }
+          [geoFieldName]: '20,100'
         }
       },
       {
         _source: {
-          [geoFieldName]: { lat: 30, lon: 110 }
+          [geoFieldName]: '30,110'
         }
       },
     ];
@@ -68,7 +68,7 @@ describe('hitsToGeoJson', () => {
     const hits = [
       {
         _source: {
-          [geoFieldName]: { lat: 20, lon: 100 }
+          [geoFieldName]: '20,100'
         }
       },
       {
@@ -84,7 +84,7 @@ describe('hitsToGeoJson', () => {
     const hits = [
       {
         _source: {
-          [geoFieldName]: { lat: 20, lon: 100 },
+          [geoFieldName]: '20,100',
           myField: 8,
         },
         fields: {
@@ -103,8 +103,8 @@ describe('hitsToGeoJson', () => {
       {
         _source: {
           [geoFieldName]: [
-            { lat: 20, lon: 100 },
-            { lat: 30, lon: 110 }
+            '20,100',
+            '30,110'
           ],
           myField: 8,
         }
@@ -138,10 +138,13 @@ describe('hitsToGeoJson', () => {
   describe('dot in geoFieldName', () => {
     const indexPatternMock = {
       fields: {
-        byName: {
-          ['my.location']: {
-            type: 'geo_point'
-          }
+        getByName: name => {
+          const fields = {
+            ['my.location']: {
+              type: 'geo_point'
+            }
+          };
+          return fields[name];
         }
       }
     };
@@ -152,7 +155,7 @@ describe('hitsToGeoJson', () => {
         {
           _source: {
             my: {
-              location: { lat: 20, lon: 100 },
+              location: '20,100',
             }
           }
         }
@@ -172,7 +175,7 @@ describe('hitsToGeoJson', () => {
       const hits = [
         {
           _source: {
-            ['my.location']: { lat: 20, lon: 100 },
+            ['my.location']: '20,100',
           }
         }
       ];
@@ -193,7 +196,7 @@ describe('geoPointToGeometry', () => {
   const lat = 41.12;
   const lon = -71.34;
 
-  it('Should convert value stored as geo-point string', () => {
+  it('Should convert single docvalue_field', () => {
     const value = `${lat},${lon}`;
     const points = [];
     geoPointToGeometry(value, points);
@@ -202,35 +205,11 @@ describe('geoPointToGeometry', () => {
     expect(points[0].coordinates).toEqual([lon, lat]);
   });
 
-  it('Should convert value stored as geo-point array', () => {
-    const value = [lon, lat];
-    const points = [];
-    geoPointToGeometry(value, points);
-    expect(points.length).toBe(1);
-    expect(points[0].type).toBe('Point');
-    expect(points[0].coordinates).toEqual([lon, lat]);
-  });
-
-  it('Should convert value stored as geo-point object', () => {
-    const value = {
-      lat,
-      lon,
-    };
-    const points = [];
-    geoPointToGeometry(value, points);
-    expect(points.length).toBe(1);
-    expect(points[0].type).toBe('Point');
-    expect(points[0].coordinates).toEqual([lon, lat]);
-  });
-
-  it('Should convert array of values', () => {
+  it('Should convert multiple docvalue_fields', () => {
     const lat2 = 30;
     const lon2 = -60;
     const value = [
-      {
-        'lat': lat,
-        'lon': lon
-      },
+      `${lat},${lon}`,
       `${lat2},${lon2}`
     ];
     const points = [];
@@ -239,15 +218,6 @@ describe('geoPointToGeometry', () => {
     expect(points[0].coordinates).toEqual([lon, lat]);
     expect(points[1].coordinates).toEqual([lon2, lat2]);
   });
-
-  it('Should handle point as geohash string', () => {
-    const geohashValue = 'drm3btev3e86';
-    const points = [];
-    geoPointToGeometry(geohashValue, points);
-    expect(points.length).toBe(1);
-    expect(points[0].coordinates).toEqual([-71.34000012651086, 41.12000000663102]);
-  });
-
 });
 
 describe('geoShapeToGeometry', () => {

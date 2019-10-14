@@ -26,6 +26,7 @@ export function TableProvider({ getService }: FtrProviderContext) {
   class Table {
     /**
      * Finds table and returns data in the nested array format
+     * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
      * @param dataTestSubj data-test-subj selector
      */
 
@@ -37,16 +38,23 @@ export function TableProvider({ getService }: FtrProviderContext) {
     /**
      * Converts the table data into nested array
      * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-     * @param table
+     * @param element table
      */
-    public async getDataFromElement(table: WebElementWrapper): Promise<string[][]> {
-      const rows = await table.findAllByTagName('tr');
-      return await Promise.all(
-        rows.map(async row => {
-          const cells = await row.findAllByTagName('td');
-          return await Promise.all(cells.map(async cell => await cell.getVisibleText()));
-        })
-      );
+    public async getDataFromElement(element: WebElementWrapper): Promise<string[][]> {
+      const $ = await element.parseDomContent();
+      return $('tr')
+        .toArray()
+        .map(row =>
+          $(row)
+            .find('td')
+            .toArray()
+            .map(cell =>
+              $(cell)
+                .text()
+                .replace(/&nbsp;/g, '')
+                .trim()
+            )
+        );
     }
   }
 

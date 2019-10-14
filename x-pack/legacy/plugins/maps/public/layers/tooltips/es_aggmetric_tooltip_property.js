@@ -24,7 +24,7 @@ export class ESAggMetricTooltipProperty extends ESTooltipProperty {
     if (this._metricField.type === 'count') {
       return this._rawValue;
     }
-    const indexPatternField = this._indexPattern.fields.byName[this._metricField.field];
+    const indexPatternField = this._indexPattern.fields.getByName(this._metricField.field);
     if (!indexPatternField) {
       return this._rawValue;
     }

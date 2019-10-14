@@ -15,6 +15,21 @@ import { PromiseWithCancel } from '../../common/cancel_promise';
 import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
 
 /**
+ * Given a timezone, this function will calculate the offset in milliseconds
+ * from UTC time.
+ *
+ * @param {string} timezone
+ */
+const getOffsetInMS = (timezone) => {
+  if (timezone === 'Browser') {
+    return 0;
+  }
+  const offsetInMinutes = moment.tz(timezone).utcOffset();
+  const offsetInMS = offsetInMinutes * 1 * 60 * 1000;
+  return offsetInMS;
+};
+
+/**
  * Class to manage common instantiation behaviors in a view controller
  *
  * This is expected to be extended, and behavior enabled using super();
@@ -76,6 +91,7 @@ export class MonitoringViewBaseController {
     const titleService = $injector.get('title');
     const $executor = $injector.get('$executor');
     const $window = $injector.get('$window');
+    const config = $injector.get('config');
 
     titleService($scope.cluster, title);
 
@@ -152,11 +168,15 @@ export class MonitoringViewBaseController {
     this.onBrush = ({ xaxis }) => {
       removePopstateHandler();
       const { to, from } = xaxis;
+      const timezone = config.get('dateFormat:tz');
+      const offset = getOffsetInMS(timezone);
       timefilter.setTime({
-        from: moment(from),
-        to: moment(to),
+        from: moment(from - offset),
+        to: moment(to - offset),
         mode: 'absolute'
       });
+      $executor.cancel();
+      $executor.run();
       ++zoomInLevel;
       clearTimeout(deferTimer);
       /*

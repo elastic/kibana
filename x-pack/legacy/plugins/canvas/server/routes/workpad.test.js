@@ -43,24 +43,23 @@ describe(`${CANVAS_TYPE} API`, () => {
 
   // Setup mock server
   const mockServer = new Hapi.Server({ debug: false, port: 0 });
-  mockServer.plugins = {
-    elasticsearch: {
-      getCluster: () => ({
-        errors: {
-          // formatResponse will fail without objects here
-          '400': Error,
-          '401': Error,
-          '403': Error,
-          '404': Error,
-        },
-      }),
-    },
+  const mockEs = {
+    getCluster: () => ({
+      errors: {
+        // formatResponse will fail without objects here
+        '400': Error,
+        '401': Error,
+        '403': Error,
+        '404': Error,
+      },
+    }),
   };
+
   mockServer.ext('onRequest', (req, h) => {
     req.getSavedObjectsClient = () => savedObjectsClient;
     return h.continue;
   });
-  workpad(mockServer);
+  workpad(mockServer.route.bind(mockServer), mockEs);
 
   describe(`GET ${routePrefix}/{id}`, () => {
     test('returns successful response', async () => {
