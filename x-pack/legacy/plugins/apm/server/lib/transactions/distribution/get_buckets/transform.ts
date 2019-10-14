@@ -39,7 +39,7 @@ export function bucketTransformer(response: DistributionBucketResponse) {
   ).map(getBucket);
 
   return {
-    totalHits: response.hits.total,
+    totalHits: response.hits.total.value,
     buckets
   };
 }

@@ -8,7 +8,7 @@ import { ChartType, YUnit } from '../../../typings/timeseries';
 
 test('transformDataToMetricsChart should transform an ES result into a chart object', () => {
   const response = {
-    hits: { total: 5000 },
+    hits: { total: { value: 5000 } },
     aggregations: {
       a: { value: 1000 },
       b: { value: 1000 },
