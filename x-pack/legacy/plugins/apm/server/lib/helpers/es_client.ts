@@ -110,9 +110,11 @@ export function getESClient(req: Legacy.Request) {
         console.log(JSON.stringify(nextParams.body, null, 4));
       }
 
-      return cluster.callWithRequest(req, 'search', nextParams) as Promise<
-        AggregationSearchResponse<Hits, U>
-      >;
+      return (cluster.callWithRequest(
+        req,
+        'search',
+        nextParams
+      ) as unknown) as Promise<AggregationSearchResponse<Hits, U>>;
     },
     index: <Body>(params: IndexDocumentParams<Body>) => {
       return cluster.callWithRequest(req, 'index', params);

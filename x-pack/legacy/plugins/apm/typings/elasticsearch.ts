@@ -155,18 +155,27 @@ declare module 'elasticsearch' {
     relation: string;
   }
 
-  export type AggregationSearchResponse<HitType, SearchParams> = Pick<
+  export type BaseAggregationSearchResponse<HitType, SearchParams> = Pick<
     SearchResponse<HitType>,
-    Exclude<keyof SearchResponse<HitType>, 'aggregations' | 'hits'>
-  > & {
-    hits: Omit<SearchResponse<HitType>['hits'], 'total'> & {
-      total: TotalValue;
-    };
-  } & (SearchParams extends { body: Required<AggregationOptionMap> }
+    Exclude<keyof SearchResponse<HitType>, 'aggregations'>
+  > &
+    (SearchParams extends { body: Required<AggregationOptionMap> }
       ? {
           aggregations?: AggregationResultMap<SearchParams['body']['aggs']>;
         }
       : {});
+
+  type Hits<HitType> = Pick<
+    SearchResponse<HitType>['hits'],
+    Exclude<keyof SearchResponse<HitType>['hits'], 'total'>
+  > & {
+    total: TotalValue;
+  };
+
+  export type AggregationSearchResponse<HitType, SearchParams> = Pick<
+    BaseAggregationSearchResponse<HitType, SearchParams>,
+    Exclude<keyof BaseAggregationSearchResponse<HitType, SearchParams>, 'hits'>
+  > & { hits: Hits<HitType> };
 
   export interface ESFilter {
     [key: string]: {
