@@ -19,5 +19,8 @@ export const metricSet = [
     keys: ['kibana_max_response_times', 'kibana_average_response_times'],
     name: 'kibana_response_times'
   },
-  'kibana_requests'
+  {
+    keys: ['kibana_requests_total', 'kibana_requests_disconnects'],
+    name: 'kibana_requests'
+  }
 ];
