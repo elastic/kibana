@@ -22,7 +22,7 @@ import { AnyExpressionType } from './types';
 import { ExpressionValue } from './types/types';
 
 export function getType(node: any) {
-  if (!node) return 'null';
+  if (node == null) return 'null';
   if (typeof node === 'object') {
     if (!node.type) throw new Error('Objects must have a type property');
     return node.type;

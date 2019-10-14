@@ -33,7 +33,7 @@ jest.mock('ui/timefilter', () => ({
 }));
 
 jest.mock('../../../../core_plugins/data/public/legacy', () => ({
-  setup: {
+  start: {
     indexPatterns: {
       indexPatterns: {
         get: () => ({
