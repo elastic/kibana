@@ -130,7 +130,11 @@ export default function({ getService }: FtrProviderContext) {
         expectGraphQLResponse(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password);
-        expectGraphIQLResponse(graphQLIResult);
+        if (process.env.NODE_ENV !== 'production') {
+          expectGraphIQLResponse(graphQLIResult);
+        } else {
+          expectGraphIQL404(graphQLIResult);
+        }
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -225,7 +229,11 @@ export default function({ getService }: FtrProviderContext) {
         expectGraphQLResponse(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password, space1Id);
-        expectGraphIQLResponse(graphQLIResult);
+        if (process.env.NODE_ENV !== 'production') {
+          expectGraphIQLResponse(graphQLIResult);
+        } else {
+          expectGraphIQL404(graphQLIResult);
+        }
       });
 
       it(`user_1 can't access APIs in space_2`, async () => {
