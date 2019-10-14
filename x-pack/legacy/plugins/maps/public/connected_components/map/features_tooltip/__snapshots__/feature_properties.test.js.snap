@@ -14,7 +14,7 @@ exports[`FeatureProperties should not show filter button 1`] = `
         prop1
       </td>
       <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+        className="eui-textOverflowWrap"
         dangerouslySetInnerHTML={
           Object {
             "__html": "foobar1",
@@ -31,7 +31,7 @@ exports[`FeatureProperties should not show filter button 1`] = `
         prop2
       </td>
       <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+        className="eui-textOverflowWrap"
         dangerouslySetInnerHTML={
           Object {
             "__html": "foobar2",
@@ -70,7 +70,7 @@ exports[`FeatureProperties should show only filter button for filterable propert
         prop1
       </td>
       <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+        className="eui-textOverflowWrap"
         dangerouslySetInnerHTML={
           Object {
             "__html": "foobar1",
@@ -97,7 +97,7 @@ exports[`FeatureProperties should show only filter button for filterable propert
         prop2
       </td>
       <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyValue"
+        className="eui-textOverflowWrap"
         dangerouslySetInnerHTML={
           Object {
             "__html": "foobar2",
