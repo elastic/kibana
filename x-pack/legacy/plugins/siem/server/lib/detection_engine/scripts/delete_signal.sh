@@ -9,10 +9,8 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./put_signal_index.sh
+# Example: ./delete_signal.sh ${id}
 curl -s -k \
-  -H "Content-Type: application/json" \
-  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -d @../signals_mapping.json \
-  -X PUT ${ELASTICSEARCH_URL}/${SIGNALS_INDEX} \
-  | jq .
+ -H 'kbn-xsrf: 123' \
+ -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
+ -X DELETE ${KIBANA_URL}/api/siem/signals/$1 | jq .

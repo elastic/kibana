@@ -17,6 +17,7 @@ export ELASTICSEARCH_URL=https://${ip}:9200
 export KIBANA_URL=http://localhost:5601
 export SIGNALS_INDEX=.siem-signals-${your user id}
 export TASK_MANAGER_INDEX=.kibana-task-manager-${your user id}
+export KIBANA_INDEX=.kibana-${your user id}
 
 # This is for the kbn-action and kbn-alert tool
 export KBN_URLBASE=http://${user}:${password}@localhost:5601
@@ -69,17 +70,18 @@ server    log   [11:39:05.561] [info][siem] Detected feature flags for actions a
 Open a terminal and go into the scripts folder `cd kibana/x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts` and run:
 
 ```
-./delete_signal_index.sh
-./put_signal_index.sh
+./hard_reset.sh
 ./post_signal.sh
 ```
 
 which will:
 
+* Delete any existing actions you have
+* Delete any existing alerts you have
+* Delete any existing alert tasks you have
 * Delete any existing signal mapping you might have had.
 * Add the latest signal index and its mappings
 * Posts a sample signal which checks for root or admin every 5 minutes
-
 
 Now you can run
 
