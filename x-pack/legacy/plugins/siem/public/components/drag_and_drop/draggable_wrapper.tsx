@@ -170,12 +170,12 @@ const DraggableWrapperComponent = React.memo<Props>(
   ({ dataProvider, registerProvider, render, truncate, unRegisterProvider }) => {
     const usePortal = useDraggablePortalContext();
 
-    useEffect(() => {
-      registerProvider!({ provider: dataProvider });
-      return () => {
-        unRegisterProvider!({ id: dataProvider.id });
-      };
-    }, []);
+    // useEffect(() => {
+    //   registerProvider!({ provider: dataProvider });
+    //   return () => {
+    //     unRegisterProvider!({ id: dataProvider.id });
+    //   };
+    // }, []);
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">

@@ -150,7 +150,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
         }
       }
 
-      updateSearch(updateSearchBar);
+      window.setTimeout(() => updateSearch(updateSearchBar), 0);
     };
 
     const onRefresh = (payload: { dateRange: TimeRange }) => {
