@@ -18,27 +18,30 @@
  */
 
 import chrome from 'ui/chrome';
-import { Plugin } from 'kibana/public';
+import { CoreSetup, Plugin } from 'kibana/public';
 import { initTimelionLegacyModule } from './timelion_legacy_module';
+import { Panel } from '../panels/panel';
 
 /** @internal */
-export interface LegacyDependenciesPluginStart {
+export interface LegacyDependenciesPluginSetup {
   $rootScope: any;
   $compile: any;
 }
 
 export class LegacyDependenciesPlugin
-  implements Plugin<void, Promise<LegacyDependenciesPluginStart>> {
-  public setup() {
-    initTimelionLegacyModule();
-  }
+  implements Plugin<Promise<LegacyDependenciesPluginSetup>, void> {
+  public async setup(core: CoreSetup, timelionPanels: Map<string, Panel>) {
+    initTimelionLegacyModule(timelionPanels);
 
-  public async start() {
     const $injector = await chrome.dangerouslyGetActiveInjector();
 
     return {
       $rootScope: $injector.get('$rootScope'),
       $compile: $injector.get('$compile'),
-    } as LegacyDependenciesPluginStart;
+    } as LegacyDependenciesPluginSetup;
+  }
+
+  public start() {
+    // nothing to do here yet
   }
 }
