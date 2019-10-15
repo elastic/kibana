@@ -7,9 +7,4 @@
 
 
 import './jobs_list';
-import './new_job/advanced';
-import './new_job/simple/single_metric';
-import './new_job/simple/multi_metric';
-import './new_job/simple/population';
-import 'plugins/ml/components/validate_job';
 import './new_job_new';
