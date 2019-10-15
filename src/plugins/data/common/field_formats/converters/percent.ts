@@ -50,8 +50,8 @@ export class PercentFormat extends FieldFormat {
     };
   }
 
-  afterConvert(val: number) {
-    return this.param('fractional') ? val : val / 100;
+  afterConvert(val: number | string) {
+    return this.param('fractional') ? Number(val) : Number(val) / 100;
   }
 
   textConvert: TextContextTypeConvert = val => {
