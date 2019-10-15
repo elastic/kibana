@@ -261,7 +261,7 @@ export class ESPewPewSource extends AbstractESSource {
 
   async _getGeoField() {
     const indexPattern = await this._getIndexPattern();
-    const geoField = indexPattern.fields.byName[this._descriptor.destGeoField];
+    const geoField = indexPattern.fields.getByName(this._descriptor.destGeoField);
     if (!geoField) {
       throw new Error(i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
         defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,

@@ -20,17 +20,18 @@
 import { PluginOpaqueId } from '../../server';
 import { MockContextConstructor } from './context_service.test.mocks';
 import { ContextService } from './context_service';
+import { coreMock } from '../mocks';
 
 const pluginDependencies = new Map<PluginOpaqueId, PluginOpaqueId[]>();
 
 describe('ContextService', () => {
   describe('#setup()', () => {
     test('createContextContainer returns a new container configured with pluginDependencies', () => {
-      const coreId = Symbol();
-      const service = new ContextService({ coreId });
+      const context = coreMock.createCoreContext();
+      const service = new ContextService(context);
       const setup = service.setup({ pluginDependencies });
       expect(setup.createContextContainer()).toBeDefined();
-      expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, coreId);
+      expect(MockContextConstructor).toHaveBeenCalledWith(pluginDependencies, context.coreId);
     });
   });
 });

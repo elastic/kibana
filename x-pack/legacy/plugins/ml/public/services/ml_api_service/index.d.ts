@@ -9,6 +9,7 @@ import { AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
 import { MlSummaryJobs } from '../../../common/types/jobs';
+import { MlServerDefaults, MlServerLimits } from '../../jobs/new_job_new/utils/new_job_defaults';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -24,6 +25,16 @@ export interface GetTimeFieldRangeResponse {
   end: { epoch: number; string: string };
 }
 
+export interface MlInfoResponse {
+  defaults: MlServerDefaults;
+  limits: MlServerLimits;
+  native_code: {
+    build_hash: string;
+    version: string;
+  };
+  upgrade_mode: boolean;
+}
+
 declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
@@ -34,6 +45,7 @@ declare interface Ml {
     getDataFrameAnalytics(analyticsId?: string): Promise<any>;
     getDataFrameAnalyticsStats(analyticsId?: string): Promise<any>;
     createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any>;
+    evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any>;
     deleteDataFrameAnalytics(analyticsId: string): Promise<any>;
     startDataFrameAnalytics(analyticsId: string): Promise<any>;
     stopDataFrameAnalytics(
@@ -117,6 +129,9 @@ declare interface Ml {
   estimateBucketSpan(
     data: object
   ): Promise<{ name: string; ms: number; error?: boolean; message?: { msg: string } | string }>;
+
+  mlNodeCount(): Promise<{ count: number }>;
+  mlInfo(): Promise<MlInfoResponse>;
 }
 
 declare const ml: Ml;

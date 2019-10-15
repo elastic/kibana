@@ -303,7 +303,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  getLegendDetails(getFieldLabel) {
+  getLegendDetails(getFieldLabel, getFieldFormatter) {
     const styles = this.getProperties();
     const styleProperties = Object.keys(styles).map(styleName => {
       const { type, options } = styles[styleName];
@@ -319,6 +319,7 @@ export class VectorStyle extends AbstractStyle {
       <VectorStyleLegend
         styleProperties={styleProperties}
         getFieldLabel={getFieldLabel}
+        getFieldFormatter={getFieldFormatter}
       />
     );
   }

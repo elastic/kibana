@@ -18,7 +18,7 @@
  */
 import { Filter, FILTERS, isQueryStringFilter } from '@kbn/es-query';
 
-export const mapQueryString = async (filter: Filter) => {
+export const mapQueryString = (filter: Filter) => {
   if (isQueryStringFilter(filter)) {
     return {
       type: FILTERS.QUERY_STRING,

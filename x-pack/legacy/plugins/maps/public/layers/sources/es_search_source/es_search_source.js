@@ -14,7 +14,13 @@ import { SearchSource } from '../../../kibana_services';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ES_SEARCH, ES_GEO_FIELD_TYPE, ES_SIZE_LIMIT, SORT_ORDER } from '../../../../common/constants';
+import {
+  ES_SEARCH,
+  ES_GEO_FIELD_TYPE,
+  ES_SIZE_LIMIT,
+  FEATURE_ID_PROPERTY_NAME,
+  SORT_ORDER,
+} from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
@@ -83,7 +89,7 @@ export class ESSearchSource extends AbstractESSource {
   async getNumberFields() {
     try {
       const indexPattern = await this._getIndexPattern();
-      return indexPattern.fields.byType.number.map(field => {
+      return indexPattern.fields.getByType('number').map(field => {
         return { name: field.name, label: field.name };
       });
     } catch (error) {
@@ -182,7 +188,7 @@ export class ESSearchSource extends AbstractESSource {
 
     const scriptFields = {};
     searchFilters.fieldNames.forEach(fieldName => {
-      const field = indexPattern.fields.byName[fieldName];
+      const field = indexPattern.fields.getByName(fieldName);
       if (field && field.scripted) {
         scriptFields[field.name] = {
           script: {
@@ -397,7 +403,7 @@ export class ESSearchSource extends AbstractESSource {
 
   async filterAndFormatPropertiesToHtml(properties) {
     const indexPattern = await this._getIndexPattern();
-    const propertyValues = await this._loadTooltipProperties(properties._id, indexPattern);
+    const propertyValues = await this._loadTooltipProperties(properties[FEATURE_ID_PROPERTY_NAME], indexPattern);
 
     return this._descriptor.tooltipProperties.map(propertyName => {
       return new ESTooltipProperty(propertyName, propertyName, propertyValues[propertyName], indexPattern);
@@ -504,8 +510,13 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       index: properties._index, // Can not use index pattern title because it may reference many indices
-      id: properties._id,
+      id: properties[FEATURE_ID_PROPERTY_NAME],
       path: geoField.name,
     };
+  }
+
+  _getRawFieldName(fieldName) {
+    // fieldName is rawFieldName for documents source since the source uses raw documents instead of aggregated metrics
+    return fieldName;
   }
 }
