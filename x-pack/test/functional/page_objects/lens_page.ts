@@ -137,7 +137,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     getTitle() {
-      return testSubjects.getAttribute('lns_ChartTitle', 'value');
+      return testSubjects.getVisibleText('lns_ChartTitle');
     },
   });
 }
