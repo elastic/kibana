@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { ActionCreator } from 'typescript-fsa';
+import { Query } from 'src/plugins/data/common';
 
 import { InputsModelId } from '../../../store/inputs/constants';
 import { HostComponentProps } from '../../../components/link_to/redirect_to_hosts';
@@ -18,7 +20,8 @@ import {
 } from '../navigation/types';
 
 interface HostDetailsComponentReduxProps {
-  filterQueryExpression: string;
+  query: Query;
+  filters: Filter[];
 }
 
 interface HostBodyComponentDispatchProps {
