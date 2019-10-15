@@ -61,3 +61,12 @@ export async function loadActions({
     },
   });
 }
+
+export interface DeleteActionsOpts {
+  ids: string[];
+  http: HttpServiceBase;
+}
+
+export async function deleteActions({ ids, http }: DeleteActionsOpts): Promise<void> {
+  await Promise.all(ids.map(id => http.delete(`${BASE_ACTION_API_PATH}/${id}`)));
+}

@@ -6,10 +6,12 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiPageContent, EuiBasicTable, EuiSpacer, EuiSearchBar } from '@elastic/eui';
+import { EuiPageContent, EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
+import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { PageError } from '../../../components/page_error';
-import { Action, ActionType, loadActions, loadActionTypes } from '../../../lib/api';
+import { Action, ActionType, deleteActions, loadActions, loadActionTypes } from '../../../lib/api';
 import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
 import { AlertingActionsDropdown } from './create_menu_popover';
@@ -44,6 +46,8 @@ function setActionTypeAttributeToActions(
   });
 }
 
+const canDelete = capabilities.get().actions.delete;
+
 export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
   match: {
     params: { api },
@@ -56,12 +60,27 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex>({});
   const [data, setData] = useState<Data[]>([]);
+  const [selectedItems, setSelectedItems] = useState<Data[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorCode, setErrorCode] = useState<number | null>(null);
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [sort, setSort] = useState<Sorting>({ field: 'actionTypeId', direction: 'asc' });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
+
+  async function loadTable() {
+    setIsLoading(true);
+    setErrorCode(null);
+    try {
+      const actionsResponse = await loadActions({ http, sort, page, searchText });
+      setData(setActionTypeAttributeToActions(actionTypesIndex, actionsResponse.data));
+      setTotalItemCount(actionsResponse.total);
+    } catch (e) {
+      setErrorCode(e.response.status);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -79,19 +98,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   }, [actionTypesIndex]);
 
   useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      setErrorCode(null);
-      try {
-        const actionsResponse = await loadActions({ http, sort, page, searchText });
-        setData(setActionTypeAttributeToActions(actionTypesIndex, actionsResponse.data));
-        setTotalItemCount(actionsResponse.total);
-      } catch (e) {
-        setErrorCode(e.response.status);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
+    loadTable();
   }, [sort, page, searchText]);
 
   const actionsTableColumns = [
@@ -127,6 +134,12 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     },
   ];
 
+  const deleteSelectedItems = async () => {
+    setIsLoading(true);
+    await deleteActions({ http, ids: selectedItems.map(item => item.id) });
+    await loadTable();
+  };
+
   let content;
 
   if (errorCode) {
@@ -141,7 +154,30 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
         <EuiSearchBar
           onChange={({ query }: { query: { text: string } }) => setSearchText(query.text)}
           toolsRight={[
-            <AlertingActionsDropdown actionTypes={actionTypesIndex}></AlertingActionsDropdown>,
+            <EuiButton
+              key="delete"
+              iconType="trash"
+              color="danger"
+              isDisabled={selectedItems.length === 0 || !canDelete}
+              onClick={deleteSelectedItems}
+              title={
+                canDelete
+                  ? undefined
+                  : i18n.translate(
+                      'xpack.alertingUI.sections.actionsList.actionsListTable.deleteButtonTitle',
+                      { defaultMessage: 'Unable to delete saved objects' }
+                    )
+              }
+            >
+              <FormattedMessage
+                id="xpack.alertingUI.sections.actionsList.actionsListTable.deleteButtonLabel"
+                defaultMessage="Delete"
+              />
+            </EuiButton>,
+            <AlertingActionsDropdown
+              key="create-action"
+              actionTypes={actionTypesIndex}
+            ></AlertingActionsDropdown>,
           ]}
         ></EuiSearchBar>
 
@@ -174,6 +210,11 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
           }) => {
             setPage(changedPage);
             setSort(changedSort);
+          }}
+          selection={{
+            onSelectionChange(updatedSelectedItemsList: Data[]) {
+              setSelectedItems(updatedSelectedItemsList);
+            },
           }}
         />
       </Fragment>
