@@ -23,4 +23,4 @@ popd
 ## Might help to avoid FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
 export NODE_OPTIONS="--max-old-space-size=4096"
 nohup node scripts/kibana > kibana.log 2>&1 &
-wait-on http://localhost:5601 && echo 'Kibana is up and running'
+wait-on http://localhost:5601/status && echo 'Kibana is up and running'
