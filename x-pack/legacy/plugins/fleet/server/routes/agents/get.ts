@@ -13,7 +13,7 @@ import { Agent } from '../../../common/types/domain_data';
 export const createGETAgentsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
   path: '/api/fleet/agents/{agentId}',
-  config: {
+  options: {
     tags: ['access:fleet-read'],
     validate: {},
   },

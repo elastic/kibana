@@ -14,8 +14,10 @@ import { FleetServerLib } from '../../libs/types';
 
 export const createDeleteAgentsRoute = (libs: FleetServerLib) => ({
   method: 'DELETE',
-  config: {},
   path: '/api/fleet/agents/{id}',
+  options: {
+    tags: ['access:fleet-all'],
+  },
   handler: async (
     request: FrameworkRequest<{ params: { id: string } }>,
     h: FrameworkResponseToolkit

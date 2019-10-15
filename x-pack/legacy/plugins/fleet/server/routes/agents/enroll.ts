@@ -13,9 +13,8 @@ import { Agent } from '../../../common/types/domain_data';
 export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
   method: 'POST',
   path: '/api/fleet/agents/enroll',
-  config: {
+  options: {
     auth: false,
-    tags: ['access:fleet-all'],
     validate: {
       headers: Joi.object({
         'kbn-fleet-enrollment-token': Joi.string().required(),

@@ -14,7 +14,7 @@ import { DEFAULT_AGENTS_PAGE_SIZE } from '../../../common/constants';
 export const createListAgentsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
   path: '/api/fleet/agents',
-  config: {
+  options: {
     tags: ['access:fleet-read'],
     validate: {
       query: {
