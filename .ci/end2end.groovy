@@ -79,7 +79,7 @@ pipeline {
       post {
         always {
           dir("${BASE_DIR}/${CYPRESS_DIR}"){
-            archiveArtifacts(allowEmptyArchive: false, artifacts: '**/*')
+            archiveArtifacts(allowEmptyArchive: false, artifacts: 'screenshots/**,videos/**')
             junit(allowEmptyResults: true, testResults: '*e2e-tests.xml')
           }
         }
