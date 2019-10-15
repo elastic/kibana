@@ -10,12 +10,14 @@ experimental[] Retrieves all {kib} features. Features are used by spaces and sec
 
 `GET /api/features`
 
+[float]
 [[features-api-get-codes]]
 === Response code
 
 `200`::
   Indicates a successful call.
 
+[float]
 [[features-api-get-example]]
 === Example
 

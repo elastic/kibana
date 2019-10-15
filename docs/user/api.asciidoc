@@ -29,8 +29,6 @@ entirely.
 If a label is missing from an API, it is considered `experimental`.
 ////
 
-NOTE: The {kib} Console enables you to interact only with the {es} REST API, not the {kib} REST API. For more information about the {es} REST API, refer to the <<console-kibana, Console>> documentation. 
-
 --
 
 include::{kib-repo-dir}/api/using-api.asciidoc[]
@@ -38,7 +36,7 @@ include::{kib-repo-dir}/api/features.asciidoc[]
 include::{kib-repo-dir}/api/spaces-management.asciidoc[]
 include::{kib-repo-dir}/api/role-management.asciidoc[]
 include::{kib-repo-dir}/api/saved-objects.asciidoc[]
-include::{kib-repo-dir}/api/dashboard-import.asciidoc[]
+include::{kib-repo-dir}/api/dashboard-api.asciidoc[]
 include::{kib-repo-dir}/api/logstash-configuration-management.asciidoc[]
 include::{kib-repo-dir}/api/url-shortening.asciidoc[]
 include::{kib-repo-dir}/api/upgrade-assistant.asciidoc[]

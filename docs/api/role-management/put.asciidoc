@@ -4,7 +4,7 @@
 <titleabbrev>Create or update role</titleabbrev>
 ++++
 
-Creates a new {kib} role, or updates the attributes of an existing role. {kib} roles are stored in the
+Create a new {kib} role, or update the attributes of an existing role. {kib} roles are stored in the
 {es} native realm.
 
 experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
