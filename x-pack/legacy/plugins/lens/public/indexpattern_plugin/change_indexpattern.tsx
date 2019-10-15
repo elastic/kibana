@@ -11,10 +11,10 @@ import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selec
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
-export interface ChangeIndexPatternTriggerProps extends EuiButtonEmptyProps {
+export type ChangeIndexPatternTriggerProps = EuiButtonEmptyProps & {
   label: string;
   title?: string;
-}
+};
 
 export function ChangeIndexPattern({
   indexPatternRefs,

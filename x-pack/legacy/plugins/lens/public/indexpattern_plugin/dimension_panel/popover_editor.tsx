@@ -294,17 +294,23 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     ('field' in choice &&
                       operationFieldSupportMatrix.operationByField[choice.field]) ||
                     [];
-
+                  let operation;
+                  if (compatibleOperations.length > 0) {
+                    operation =
+                      incompatibleSelectedOperationType &&
+                      compatibleOperations.includes(incompatibleSelectedOperationType)
+                        ? incompatibleSelectedOperationType
+                        : compatibleOperations[0];
+                  } else if ('field' in choice) {
+                    operation = choice.operationType;
+                  }
                   column = buildColumn({
                     columns: props.state.layers[props.layerId].columns,
                     field: 'field' in choice ? fieldMap[choice.field] : undefined,
                     indexPattern: currentIndexPattern,
                     layerId: props.layerId,
                     suggestedPriority: props.suggestedPriority,
-                    op:
-                      incompatibleSelectedOperationType ||
-                      ('field' in choice ? choice.operationType : undefined) ||
-                      compatibleOperations[0],
+                    op: operation as OperationType,
                     asDocumentOperation: choice.type === 'document',
                   });
                 }
