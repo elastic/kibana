@@ -12,7 +12,7 @@ import { metadata } from 'ui/metadata';
 const STACK_VERSION = metadata.branch;
 
 // union type constisting of valid guide sections that we link to
-type DocsSection = '/apm/get-started' | '/x-pack';
+type DocsSection = '/apm/get-started' | '/x-pack' | '/apm/server';
 
 interface Props extends EuiLinkAnchorProps {
   section: DocsSection;

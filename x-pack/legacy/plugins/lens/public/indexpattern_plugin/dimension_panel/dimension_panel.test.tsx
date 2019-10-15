@@ -574,6 +574,40 @@ describe('IndexPatternDimensionPanel', () => {
       ).not.toContain('Incompatible');
     });
 
+    it('should select compatible operation if field not compatible with selected operation', () => {
+      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
+
+      openPopover();
+
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+
+      const comboBox = wrapper.find(EuiComboBox);
+      const options = comboBox.prop('options');
+
+      //options[1][2] is a `source` field of type `string` which doesn't support `avg` operation
+      act(() => {
+        comboBox.prop('onChange')!([options![1].options![2]]);
+      });
+
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col2: expect.objectContaining({
+                sourceField: 'source',
+                operationType: 'terms',
+                // Other parts of this don't matter for this test
+              }),
+            },
+            columnOrder: ['col1', 'col2'],
+          },
+        },
+      });
+    });
+
     it('should indicate document compatibility with selected field operation', () => {
       const initialState: IndexPatternPrivateState = {
         ...state,
