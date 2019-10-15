@@ -5,7 +5,9 @@ Object {
   "filters": Array [
     Object {
       "meta": Object {
+        "alias": null,
         "disabled": false,
+        "negate": false,
       },
       "query": Object {
         "match": Object {},

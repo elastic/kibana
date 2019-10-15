@@ -12,8 +12,6 @@ import * as savedObjects from '../../../../services/rest/savedObjects';
 import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
 import { LegacyCoreStart } from 'src/core/public';
 
-jest.mock('ui/kfetch');
-
 const coreMock = ({
   http: {
     basePath: {
