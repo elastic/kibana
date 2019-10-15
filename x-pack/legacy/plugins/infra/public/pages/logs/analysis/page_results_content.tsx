@@ -35,8 +35,6 @@ import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { FirstUseCallout } from './first_use';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
-import { AnomaliesResults } from './sections/anomalies';
-import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
