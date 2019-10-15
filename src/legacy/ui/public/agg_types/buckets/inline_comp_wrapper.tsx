@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/agg_types/agg_config';
+import React, { ComponentType } from 'react';
+import { AggParamEditorProps } from 'ui/vis/editors/default';
 
-export function isStringType(type: AggConfig): boolean;
-export function isType(type: string): (agg: AggConfig) => boolean;
+export const wrapWithInlineComp = <T extends unknown>(
+  WrapComponent: ComponentType<AggParamEditorProps<T>>
+) => (props: AggParamEditorProps<T>) => (
+  <div className={`visEditorAggParam--half visEditorAggParam--half-${props.aggParam.name}`}>
+    <WrapComponent {...props} />
+  </div>
+);

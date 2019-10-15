@@ -17,32 +17,38 @@
  * under the License.
  */
 
-import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { IBucketAggConfig } from './_bucket_agg_type';
 import { BucketAggType } from './_bucket_agg_type';
-import { createFilterRange } from './create_filter/range';
 import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
 import { RangeKey } from './range_key';
-import { RangesParamEditor } from '../../vis/editors/default/controls/ranges';
-import { i18n } from '@kbn/i18n';
+import { RangesEditor } from './range_editor';
+
+// @ts-ignore
+import { createFilterRange } from './create_filter/range';
+import { BUCKET_TYPES } from './bucket_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 const keyCaches = new WeakMap();
 const formats = new WeakMap();
 
+const rangeTitle = i18n.translate('common.ui.aggTypes.buckets.rangeTitle', {
+  defaultMessage: 'Range',
+});
+
 export const rangeBucketAgg = new BucketAggType({
-  name: 'range',
-  title: i18n.translate('common.ui.aggTypes.buckets.rangeTitle', {
-    defaultMessage: 'Range',
-  }),
+  name: BUCKET_TYPES.RANGE,
+  title: rangeTitle,
   createFilter: createFilterRange,
-  makeLabel: function (aggConfig) {
+  makeLabel(aggConfig) {
     return i18n.translate('common.ui.aggTypes.buckets.rangesLabel', {
       defaultMessage: '{fieldName} ranges',
       values: {
-        fieldName: aggConfig.getFieldDisplayName()
-      }
+        fieldName: aggConfig.getFieldDisplayName(),
+      },
     });
   },
-  getKey: function (bucket, key, agg) {
+  getKey(bucket, key, agg) {
     let keys = keyCaches.get(agg);
 
     if (!keys) {
@@ -60,11 +66,11 @@ export const rangeBucketAgg = new BucketAggType({
 
     return key;
   },
-  getFormat: function (agg) {
-    let format = formats.get(agg);
-    if (format) return format;
+  getFormat(agg) {
+    let aggFormat = formats.get(agg);
+    if (aggFormat) return aggFormat;
 
-    const RangeFormat = FieldFormat.from(function (range) {
+    const RangeFormat = FieldFormat.from((range: any) => {
       const format = agg.fieldOwnFormatter();
       const gte = '\u2265';
       const lt = '\u003c';
@@ -79,28 +85,25 @@ export const rangeBucketAgg = new BucketAggType({
       });
     });
 
-    format = new RangeFormat();
+    aggFormat = new RangeFormat();
 
-    formats.set(agg, format);
-    return format;
+    formats.set(agg, aggFormat);
+    return aggFormat;
   },
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: ['number']
+      filterFieldTypes: [KBN_FIELD_TYPES.NUMBER],
     },
     {
       name: 'ranges',
-      default: [
-        { from: 0, to: 1000 },
-        { from: 1000, to: 2000 }
-      ],
-      editorComponent: ({ value, setValue }) => <RangesParamEditor value={value} setValue={setValue}/>,
-      write: function (aggConfig, output) {
+      default: [{ from: 0, to: 1000 }, { from: 1000, to: 2000 }],
+      editorComponent: RangesEditor,
+      write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
         output.params.ranges = aggConfig.params.ranges;
         output.params.keyed = true;
-      }
-    }
-  ]
+      },
+    },
+  ],
 });

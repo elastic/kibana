@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { uiRegistry } from 'ui/registry/_registry';
+import React from 'react';
+import { AggParamEditorProps } from 'ui/vis/editors/default';
+import { RangesParamEditor } from '../../vis/editors/default/controls/ranges';
 
-export default uiRegistry({
-  name: 'timelionPanels',
-  index: ['name'],
-  order: ['name']
-});
+export const RangesEditor = (props: AggParamEditorProps<any>) => (
+  <RangesParamEditor value={props.value} setValue={props.setValue} />
+);

@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import moment from 'moment';
 import { buildRangeFilter } from '@kbn/es-query';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
-export function createFilterDateHistogram(agg, key) {
-  const start = moment(key);
-  const interval = agg.buckets.getInterval();
-
-  return buildRangeFilter(agg.params.field, {
-    gte: start.toISOString(),
-    lt: start.add(interval).toISOString(),
-    format: 'strict_date_optional_time'
-  }, agg.getIndexPattern());
-}
+export const createFilterRange = (aggConfig: IBucketAggConfig, params: any) => {
+  return buildRangeFilter(
+    aggConfig.params.field,
+    params,
+    aggConfig.getIndexPattern(),
+    aggConfig.fieldFormatter()(params)
+  );
+};

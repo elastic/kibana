@@ -17,20 +17,15 @@
  * under the License.
  */
 
-import { CidrMask } from '../../../utils/cidr_mask';
-import { buildRangeFilter } from '@kbn/es-query';
-
-export function createFilterIpRange(aggConfig, key) {
-  let range;
-  if (aggConfig.params.ipRangeType === 'mask') {
-    range = new CidrMask(key).getRange();
-  } else {
-    const [from, to] = key.split(/\s+to\s+/);
-    range = {
-      from: from === '-Infinity' ? -Infinity : from,
-      to: to === 'Infinity' ? Infinity : to
-    };
-  }
-
-  return buildRangeFilter(aggConfig.params.field, { gte: range.from, lte: range.to }, aggConfig.getIndexPattern());
+export enum BUCKET_TYPES {
+  FILTER = 'filter',
+  HISTOGRAM = 'histogram',
+  IP_RANGE = 'ip_range',
+  DATE_RANGE = 'date_range',
+  RANGE = 'range',
+  TERMS = 'terms',
+  SIGNIFICANT_TERMS = 'significant_terms',
+  GEOHASH_GRID = 'geohash_grid',
+  GEOTILE_GRID = 'geotile_grid',
+  DATE_HISTOGRAM = 'date_histogram',
 }

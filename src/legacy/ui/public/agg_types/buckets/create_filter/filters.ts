@@ -17,24 +17,17 @@
  * under the License.
  */
 
-const id = Symbol('id');
+import { get } from 'lodash';
+import { buildQueryFilter } from '@kbn/es-query';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
-class RangeKey {
-  constructor(bucket) {
-    this.gte = bucket.from == null ? -Infinity : bucket.from;
-    this.lt = bucket.to == null ? +Infinity : bucket.to;
+export const createFilterFilters = (aggConfig: IBucketAggConfig, key: string) => {
+  // have the aggConfig write agg dsl params
+  const dslFilters: any = get(aggConfig.toDsl(), 'filters.filters');
+  const filter = dslFilters[key];
+  const indexPattern = aggConfig.getIndexPattern();
 
-    this[id] = RangeKey.idBucket(bucket);
+  if (filter && indexPattern && indexPattern.id) {
+    return buildQueryFilter(filter.query, indexPattern.id, key);
   }
-
-
-  static idBucket(bucket) {
-    return `from:${bucket.from},to:${bucket.to}`;
-  }
-
-  toString() {
-    return this[id];
-  }
-}
-
-export { RangeKey };
+};

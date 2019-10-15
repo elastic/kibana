@@ -17,15 +17,20 @@
  * under the License.
  */
 
-import { buildQueryFilter } from '@kbn/es-query';
-import _ from 'lodash';
+import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
+import { npSetup } from 'ui/new_platform';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
-export function createFilterFilters(aggConfig, key) {
-  // have the aggConfig write agg dsl params
-  const dslFilters = _.get(aggConfig.toDsl(), 'filters.filters');
-  const filter = dslFilters[key];
+// @ts-ignore
+import { dateRange } from '../../../utils/date_range';
 
-  if (filter) {
-    return buildQueryFilter(filter.query, aggConfig.getIndexPattern().id, key);
-  }
-}
+export const createFilterDateRange = (agg: IBucketAggConfig, rangeString: string) => {
+  const range = dateRange.parse(rangeString, npSetup.core.uiSettings.get('dateFormat'));
+
+  const filter: RangeFilterParams = {};
+  if (range.from) filter.gte = range.from.toISOString();
+  if (range.to) filter.lt = range.to.toISOString();
+  if (range.to && range.from) filter.format = 'strict_date_optional_time';
+
+  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
+};

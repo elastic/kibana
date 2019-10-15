@@ -17,6 +17,7 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
+import { IBucketAggConfig } from './_bucket_agg_type';
 
 export const intervalOptions = [
   {
@@ -24,58 +25,58 @@ export const intervalOptions = [
       defaultMessage: 'Auto',
     }),
     val: 'auto',
-    enabled: function (agg) {
+    enabled(agg: IBucketAggConfig) {
       // not only do we need a time field, but the selected field needs
       // to be the time field. (see #3028)
       return agg.fieldIsTimeField();
-    }
+    },
   },
   {
     display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.millisecondDisplayName', {
       defaultMessage: 'Millisecond',
     }),
-    val: 'ms'
+    val: 'ms',
   },
   {
     display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.secondDisplayName', {
       defaultMessage: 'Second',
     }),
-    val: 's'
+    val: 's',
   },
   {
     display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.minuteDisplayName', {
       defaultMessage: 'Minute',
     }),
-    val: 'm'
+    val: 'm',
   },
   {
     display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.hourlyDisplayName', {
       defaultMessage: 'Hourly',
     }),
-    val: 'h'
+    val: 'h',
   },
   {
     display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.dailyDisplayName', {
       defaultMessage: 'Daily',
     }),
-    val: 'd'
+    val: 'd',
   },
   {
     display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.weeklyDisplayName', {
       defaultMessage: 'Weekly',
     }),
-    val: 'w'
+    val: 'w',
   },
   {
     display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.monthlyDisplayName', {
       defaultMessage: 'Monthly',
     }),
-    val: 'M'
+    val: 'M',
   },
   {
     display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.yearlyDisplayName', {
       defaultMessage: 'Yearly',
     }),
-    val: 'y'
-  }
+    val: 'y',
+  },
 ];
