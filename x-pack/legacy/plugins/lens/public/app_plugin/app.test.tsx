@@ -88,7 +88,7 @@ describe('Lens App', () => {
           ...core.application,
           capabilities: {
             ...core.application.capabilities,
-            lens: { save: true, saveQuery: true, show: true },
+            visualize: { save: true, saveQuery: true, show: true },
           },
         },
       },
@@ -302,7 +302,7 @@ describe('Lens App', () => {
           ...args.core.application,
           capabilities: {
             ...args.core.application.capabilities,
-            lens: { save: false, saveQuery: false, show: true },
+            visualize: { save: false, saveQuery: false, show: true },
           },
         };
         args.editorFrame = frame;
@@ -520,7 +520,7 @@ describe('Lens App', () => {
         ...args.core.application,
         capabilities: {
           ...args.core.application.capabilities,
-          lens: { save: false, saveQuery: false, show: true },
+          visualize: { save: false, saveQuery: false, show: true },
         },
       };
 
