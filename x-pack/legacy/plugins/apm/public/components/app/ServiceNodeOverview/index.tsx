@@ -99,7 +99,7 @@ const ServiceNodeOverview = () => {
                   'xpack.apm.jvmsTable.explainServiceNodeNameMissing',
                   {
                     defaultMessage:
-                      'These metrics come from agents that do not have the `service.node.name` field set. This field is needed to uniquely identify a JVM. For more information, see the APM Server and Java Agent documentation.'
+                      'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.'
                   }
                 )
               }

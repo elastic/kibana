@@ -13,11 +13,14 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiStat,
-  EuiToolTip
+  EuiToolTip,
+  EuiCallOut
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useAgentName } from '../../../hooks/useAgentName';
@@ -26,6 +29,7 @@ import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { MetricsChart } from '../../shared/charts/MetricsChart';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
 import { truncate, px, unit } from '../../../style/variables';
+import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
 const INITIAL_DATA = {
   host: '',
@@ -67,6 +71,8 @@ export function ServiceNodeMetrics() {
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
+  const isAggregatedData = serviceNodeName === SERVICE_NODE_NAME_MISSING;
+
   return (
     <div>
       <ApmHeader>
@@ -79,39 +85,71 @@ export function ServiceNodeMetrics() {
         </EuiFlexGroup>
       </ApmHeader>
       <EuiHorizontalRule margin="m" />
-      <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            titleSize="s"
-            isLoading={isLoading}
-            description={i18n.translate('xpack.apm.serviceNodeMetrics.host', {
-              defaultMessage: 'Host'
-            })}
-            title={
-              <EuiToolTip content={host}>
-                <Truncate>{host}</Truncate>
-              </EuiToolTip>
+      {isAggregatedData ? (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningTitle',
+            {
+              defaultMessage: 'Could not identify JVMs'
             }
-          ></EuiStat>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            titleSize="s"
-            isLoading={isLoading}
-            description={i18n.translate(
-              'xpack.apm.serviceNodeMetrics.containerId',
-              {
-                defaultMessage: 'Container ID'
+          )}
+          iconType="help"
+          color="warning"
+        >
+          <FormattedMessage
+            id="xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningText"
+            defaultMessage="We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue. For more information on upgrading, see the {link}. As an alternative, you can use the Kibana Query bar to filter by hostname, container ID or other fields."
+            values={{
+              link: (
+                <ElasticDocsLink
+                  target="_blank"
+                  section="/apm/server"
+                  path="/upgrading.html"
+                >
+                  {i18n.translate(
+                    'xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningDocumentationLink',
+                    { defaultMessage: 'documentation of APM Server' }
+                  )}
+                </ElasticDocsLink>
+              )
+            }}
+          ></FormattedMessage>
+        </EuiCallOut>
+      ) : (
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              titleSize="s"
+              isLoading={isLoading}
+              description={i18n.translate('xpack.apm.serviceNodeMetrics.host', {
+                defaultMessage: 'Host'
+              })}
+              title={
+                <EuiToolTip content={host}>
+                  <Truncate>{host}</Truncate>
+                </EuiToolTip>
               }
-            )}
-            title={
-              <EuiToolTip content={containerId}>
-                <Truncate>{containerId}</Truncate>
-              </EuiToolTip>
-            }
-          ></EuiStat>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            ></EuiStat>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              titleSize="s"
+              isLoading={isLoading}
+              description={i18n.translate(
+                'xpack.apm.serviceNodeMetrics.containerId',
+                {
+                  defaultMessage: 'Container ID'
+                }
+              )}
+              title={
+                <EuiToolTip content={containerId}>
+                  <Truncate>{containerId}</Truncate>
+                </EuiToolTip>
+              }
+            ></EuiStat>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiHorizontalRule margin="m" />
       {agentName && serviceNodeName && (
         <ChartsSyncContextProvider>
