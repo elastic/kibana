@@ -9,5 +9,6 @@
 ```typescript
 env: {
         mode: EnvironmentMode;
+        packageInfo: Readonly<PackageInfo>;
     };
 ```
