@@ -62,7 +62,7 @@ export const tlsSelector = (networkType: NetworkType) => {
 
   return createSelector(
     selectNetworkDetails,
-    network => network.queries[NetworkTableType.tls]
+    network => network.queries[IpDetailsTableType.tls]
   );
 };
 
