@@ -38,7 +38,7 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor({ config, log, interval, xpackMainPlugin, elasticsearchPlugin, kbnServerStatus, kbnServerVersion }) {
+  constructor({ config, log, interval, elasticsearchPlugin, kbnServerStatus, kbnServerVersion }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
@@ -46,11 +46,7 @@ export class BulkUploader {
     this._timer = null;
     this._interval = interval;
     this._lastFetchUsageTime = null;
-<<<<<<< HEAD
     this._usageInterval = TELEMETRY_COLLECTION_INTERVAL;
-=======
-    this._usageInterval = xpackMainPlugin.telemetryCollectionInterval;
->>>>>>> fd1b6b8f9506b3e0fd746bc477708a7765fb35db
 
     this._log = {
       debug: message => log(['debug', ...LOGGING_TAGS], message),

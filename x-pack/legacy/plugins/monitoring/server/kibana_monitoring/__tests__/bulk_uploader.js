@@ -49,20 +49,9 @@ describe('BulkUploader', () => {
 
       server = {
         log: sinon.spy(),
-<<<<<<< HEAD
-        plugins: {
-          elasticsearch: {
-            createCluster: () => cluster,
-            getCluster: () => cluster,
-          },
-=======
-        xpackMainPlugin: {
-          telemetryCollectionInterval: 3000,
-        },
         elasticsearchPlugin: {
           createCluster: () => cluster,
           getCluster: () => cluster,
->>>>>>> fd1b6b8f9506b3e0fd746bc477708a7765fb35db
         },
         usage: {},
       };
