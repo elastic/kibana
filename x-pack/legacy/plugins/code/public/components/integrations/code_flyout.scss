@@ -5,8 +5,12 @@
   z-index: 1;
 }
 
+.codeFlyout__fileLink {
+  font-weight: $euiFontWeightBold;
+}
+
 .codeFlyout__icon {
-  margin: $euiSizeS
+  margin: $euiSizeS;
 }
 
 .codeFlyout__tabs {

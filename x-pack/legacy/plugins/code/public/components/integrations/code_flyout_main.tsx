@@ -61,8 +61,11 @@ export const CodeFlyoutMain = (props: { repo: string; file: string; revision: st
         <div className="codeFlyout__fileHeader">
           <EuiIcon className="codeFlyout__icon" type="codeApp" size="m" />
           <EuiText size="s">
-            <EuiLink href={`/app/code#/${props.repo}/blob/${props.revision}/${props.file}`}>
-              <b> {props.file} </b>
+            <EuiLink
+              className="codeFlyout__fileLink"
+              href={`/app/code#/${props.repo}/blob/${props.revision}/${props.file}`}
+            >
+              {props.file}
             </EuiLink>
           </EuiText>
         </div>
