@@ -39,6 +39,11 @@ export default function(kibana: any) {
         const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
         return res.ok({ body: `Pong in legacy via new platform: ${response}` });
       });
+
+      router.get({ path: '/api/np-context-in-legacy', validate: false }, (context, req, res) => {
+        const contexts = Object.keys(context);
+        return res.ok({ body: { contexts } });
+      });
     },
   });
 }
