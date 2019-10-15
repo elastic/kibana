@@ -20,9 +20,9 @@ const Popover = React.memo<UtilityBarActionProps>(({ children, popoverContent })
   return (
     <EuiPopover
       button={
-        <BarAction onClick={() => setPopoverState(!popoverState)}>
-          {children}
+        <BarAction iconSide="right" onClick={() => setPopoverState(!popoverState)}>
           <EuiIcon size="s" type="arrowDown" />
+          {children}
         </BarAction>
       }
       isOpen={popoverState}
@@ -35,7 +35,6 @@ const Popover = React.memo<UtilityBarActionProps>(({ children, popoverContent })
 Popover.displayName = 'Popover';
 
 export interface UtilityBarActionProps extends BarActionProps {
-  iconSide?: 'left' | 'right';
   iconType?: IconType;
   popoverContent?: PopoverProps['popoverContent'];
 }
@@ -46,10 +45,9 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
       return <Popover popoverContent={popoverContent}>{children}</Popover>;
     } else {
       return (
-        <BarAction href={href} onClick={onClick}>
-          {iconType && iconSide === 'left' && <EuiIcon size="s" type={iconType} />}
-          {children}
-          {iconType && iconSide === 'right' && <EuiIcon size="s" type={iconType} />}
+        <BarAction href={href} iconSide={iconSide} onClick={onClick}>
+          {iconType && <EuiIcon size="s" type={iconType} />}
+          <span>{children}</span>
         </BarAction>
       );
     }

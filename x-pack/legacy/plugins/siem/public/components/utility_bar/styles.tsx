@@ -68,7 +68,6 @@ export const BarGroup = styled.div.attrs({
       align-items: flex-start;
       border-right: ${theme.eui.euiBorderThin};
       display: flex;
-      // flex-wrap: wrap;
       margin-right: ${theme.eui.paddingSizes.m};
       padding-right: ${theme.eui.paddingSizes.m};
 
@@ -84,9 +83,7 @@ export const BarGroup = styled.div.attrs({
     }
 
     & > * {
-      display: inline-block;
       margin-right: ${theme.eui.euiSize};
-      white-space: nowrap;
 
       &:last-child {
         margin-right: 0;
@@ -101,8 +98,10 @@ export const BarText = styled.p.attrs({
 })`
   ${({ theme }) => css`
     color: ${theme.eui.textColors.subdued};
+    display: inline-block;
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
+    white-space: nowrap;
   `}
 `;
 BarText.displayName = 'BarText';
@@ -110,28 +109,34 @@ BarText.displayName = 'BarText';
 export interface BarActionProps {
   children: React.ReactNode;
   href?: string;
+  iconSide?: 'left' | 'right';
   onClick?: Function;
 }
 
 export const BarAction = styled(EuiLink).attrs({
   className: 'siemUtilityBar__action',
 })<BarActionProps>`
-  ${({ theme }) => css`
+  ${({ iconSide, theme }) => css`
+    align-items: center;
+    display: inline-flex;
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
 
-    .euiIcon {
-      position: relative;
-      top: -1px;
+    ${iconSide === 'left' &&
+      css`
+        .euiIcon {
+          margin-right: ${theme.eui.euiSizeXS};
+        }
+      `}
 
-      &:first-child {
-        margin-right: ${theme.eui.euiSizeXS};
-      }
+    ${iconSide === 'right' &&
+      css`
+        flex-direction: row-reverse;
 
-      &:last-child {
-        margin-left: ${theme.eui.euiSizeXS};
-      }
-    }
+        .euiIcon {
+          margin-left: ${theme.eui.euiSizeXS};
+        }
+      `}
   `}
 `;
 BarAction.displayName = 'BarAction';
