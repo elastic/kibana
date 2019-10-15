@@ -54,17 +54,7 @@ export class FormatEditorSamplesComponent extends PureComponent {
           id: 'common.ui.fieldEditor.samples.outputHeader',
           defaultMessage: 'Output',
         }),
-        render: output => {
-          return (
-            <div
-              /*
-               * Justification for dangerouslySetInnerHTML:
-               * Sample output may contain HTML tags, like URL image/audio format.
-               */
-              dangerouslySetInnerHTML={{ __html: output }} //eslint-disable-line react/no-danger
-            />
-          );
-        },
+        render: output => (<div>{output}</div>)
       },
     ];
 
