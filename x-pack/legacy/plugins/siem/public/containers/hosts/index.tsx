@@ -26,8 +26,6 @@ import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_te
 import { HostsTableQuery } from './hosts_table.gql_query';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 
-export { HostsFilter } from './filter';
-
 const ID = 'hostsQuery';
 
 export interface HostsArgs {
