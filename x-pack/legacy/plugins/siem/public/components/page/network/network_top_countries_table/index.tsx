@@ -5,7 +5,7 @@
  */
 import { EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
@@ -93,12 +93,10 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     flowTargeted,
     id,
     indexPattern,
-    ip,
     isInspect,
     limit,
     loading,
     loadPage,
-    setIpDetailsTablesActivePageToZero,
     showMorePagesIndicator,
     topCountriesSort,
     totalCount,
@@ -108,11 +106,6 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     updateTopCountriesSort,
     updateNetworkPageTableActivePage,
   }) => {
-    useEffect(() => {
-      if (ip && activePage !== 0) {
-        setIpDetailsTablesActivePageToZero(null);
-      }
-    }, [ip]);
     const onChange = (criteria: Criteria, tableType: networkModel.TopCountriesTableType) => {
       if (criteria.sort != null) {
         const splitField = criteria.sort.field.split('.');
@@ -207,7 +200,6 @@ const mapStateToProps = (state: State, ownProps: OwnProps) =>
 export const NetworkTopCountriesTable = connect(
   mapStateToProps,
   {
-    setIpDetailsTablesActivePageToZero: networkActions.setIpDetailsTablesActivePageToZero,
     updateTopCountriesLimit: networkActions.updateTopCountriesLimit,
     updateTopCountriesSort: networkActions.updateTopCountriesSort,
     updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,

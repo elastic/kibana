@@ -32,15 +32,18 @@ export const FLOWS = i18n.translate('xpack.siem.networkTopCountriesTable.flows',
 });
 
 export const DESTINATION_COUNTRIES = i18n.translate(
-  'xpack.siem.networkTopCountriesTable.destinationIps',
+  'xpack.siem.networkTopCountriesTable.destinationCountries',
   {
     defaultMessage: 'Top Destination Countries',
   }
 );
 
-export const SOURCE_COUNTRIES = i18n.translate('xpack.siem.networkTopCountriesTable.sourceIps', {
-  defaultMessage: 'Top Source Countries',
-});
+export const SOURCE_COUNTRIES = i18n.translate(
+  'xpack.siem.networkTopCountriesTable.sourceCountries',
+  {
+    defaultMessage: 'Top Source Countries',
+  }
+);
 
 export const DESTINATION_IPS = i18n.translate(
   'xpack.siem.networkTopCountriesTable.destinationIps',
