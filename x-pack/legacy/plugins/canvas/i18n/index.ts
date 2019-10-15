@@ -11,8 +11,11 @@ export * from './components';
 export * from './constants';
 export * from './errors';
 export * from './expression_types';
+export * from './elements';
+export * from './functions';
 export * from './shortcuts';
 export * from './transitions';
+export * from './ui';
 export * from './units';
 
 export const getAppDescription = () =>
