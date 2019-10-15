@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { mountHook } from '../../../../../../../../../test_utils/enzyme_helpers';
 
-import { CreateAnalyticsModal } from './create_analytics_modal';
+import { CreateAnalyticsFlyout } from './create_analytics_flyout';
 
 import { KibanaContext } from '../../../../../contexts/kibana';
 import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
@@ -34,12 +34,14 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
-describe('Data Frame Analytics: <CreateAnalyticsModal />', () => {
+describe('Data Frame Analytics: <CreateAnalyticsFlyout />', () => {
   test('Minimal initialization', () => {
     const { getLastHookValue } = getMountedHook();
     const props = getLastHookValue();
-    const wrapper = mount(<CreateAnalyticsModal {...props} />);
+    const wrapper = mount(<CreateAnalyticsFlyout {...props} />);
 
-    expect(wrapper.find('EuiModalHeaderTitle').text()).toBe('Create analytics job');
+    expect(wrapper.find('[data-test-subj="mlDataFrameAnalyticsFlyoutHeaderTitle"]').text()).toBe(
+      'Create analytics job'
+    );
   });
 });
