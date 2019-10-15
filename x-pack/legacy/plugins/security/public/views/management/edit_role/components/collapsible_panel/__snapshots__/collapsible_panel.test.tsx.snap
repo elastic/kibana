@@ -26,9 +26,7 @@ exports[`it renders without blowing up 1`] = `
       grow={false}
     >
       <EuiLink
-        color="primary"
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="hide"

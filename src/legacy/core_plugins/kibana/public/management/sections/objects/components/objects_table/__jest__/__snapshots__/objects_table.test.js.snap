@@ -99,6 +99,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
       describedByIds={Array []}
       display="row"
       fullWidth={false}
+      hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
