@@ -14,11 +14,13 @@ export default function ({ getService, getPageObjects }) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement', 'settings', 'discover']);
+  const PageObjects = getPageObjects(['common', 'settings']);
 
   describe('hybrid index pattern', function () {
-    const rollupJobName = 'rollup-to-be-' + Math.floor(Math.random() * 10000);
-    const indexName = 'rollup-to-be';
+    const rollupJobName = `hybrid-index-pattern-test-rollup-job-` + Math.floor(Math.random() * 10000);
+    const rollupTargetIndexName = `rollup-target-data`;
+    const regularIndexPrefix = `regular-index`;
+    const rollupSourceIndexPrefix = `rollup-source-data`;
     const now = new Date();
     const pastDates = [
       datemath.parse('now-1d', { forceNow: now }),
@@ -30,12 +32,12 @@ export default function ({ getService, getPageObjects }) {
       //Create data for rollup job to recognize.
       //Index past data to be used in the test.
       await pastDates.map(async (day) => {
-        await es.index(mockIndices(day));
+        await es.index(mockIndices(day, rollupSourceIndexPrefix));
       });
 
       await retry.waitForWithTimeout('waiting for 3 records to be loaded into elasticsearch.', 10000, async () => {
         const response = await es.indices.get({
-          index: 'to-be*',
+          index: `rollup-source-data*`,
           allow_no_indices: false
         });
         return Object.keys(response).length === 3;
@@ -47,8 +49,8 @@ export default function ({ getService, getPageObjects }) {
           path: `/_rollup/job/${rollupJobName}`,
           method: 'PUT',
           body: {
-            'index_pattern': 'to-be*',
-            'rollup_index': indexName,
+            'index_pattern': 'rollup-source-data*',
+            'rollup_index': rollupTargetIndexName,
             'cron': '*/10 * * * * ?',
             'groups': {
               'date_histogram': {
@@ -65,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
 
 
       await pastDates.map(async (day) => {
-        await es.index(mockRolledUpData(rollupJobName, day));
+        await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
       });
 
       //Add data for today, 1,2 and 3 days into the future.
@@ -78,29 +80,26 @@ export default function ({ getService, getPageObjects }) {
 
       //Index live data to be used in the test.
       await futureDates.map(async (day) => {
-        await es.index(mockIndices(day, 'live-data'));
+        await es.index(mockIndices(day, regularIndexPrefix));
       });
 
       await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.createIndexPattern('live*,' + indexName, '@timestamp', false);
+      await PageObjects.settings.createIndexPattern('regular-index*,' + rollupTargetIndexName, '@timestamp', false);
 
-      await PageObjects.common.navigateToApp('discover');
-      const hits = await PageObjects.discover.getHitCount();
 
-      //Number of hits should be at least 7. Due to CI being slow, the legacy data may not be there.
-      //3 for rolled up data, 3 for legacy data that was rolled up, and 4 for the live data.
-      expect(Number.parseInt(hits)).to.equal(7);
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      expect(await PageObjects.settings.isIndexPatternListEmpty()).to.be(false);
     });
 
     after(async () => {
       // Delete the rollup job.
-      es.transport.request({
+      await es.transport.request({
         path: `/_rollup/job/${rollupJobName}`,
         method: 'DELETE',
       });
       await es.indices.delete({ index: 'rollup*' });
-      await es.indices.delete({ index: 'live*' });
-      await es.indices.delete({ index: 'live*,rollup-to-be*' });
+      await es.indices.delete({ index: 'regular-index*' });
+      await es.indices.delete({ index: 'hybrid*' });
       await esArchiver.load('empty_kibana');
     });
   });

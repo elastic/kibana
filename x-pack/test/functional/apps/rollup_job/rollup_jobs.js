@@ -12,7 +12,8 @@ import { mockIndices } from './hybrid_index_helper';
 export default function ({ getService, getPageObjects }) {
 
   const es = getService('es');
-  const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement', 'settings', 'discover']);
+  const esArchiver = getService('esArchiver');
+  const PageObjects = getPageObjects(['rollup', 'common']);
 
   describe('rollup job', function () {
     const rollupJobName = 'rollup-to-be-' + Math.floor(Math.random() * 10000);
@@ -30,25 +31,15 @@ export default function ({ getService, getPageObjects }) {
       const interval = '1000ms';
 
       pastDates.map(async (day) => {
-        await es.index(mockIndices(day));
+        await es.index(mockIndices(day, 'to-be'));
       });
 
       await PageObjects.common.navigateToApp('rollupJob');
       await PageObjects.rollup.createNewRollUpJob(rollupJobName, indexPattern, indexName,
         interval, ' ', true, { time: '*/10 * * * * ?', cron: true });
 
-      await PageObjects.common.navigateToApp('indexManagement');
-
-      await PageObjects.indexManagement.toggleRollupIndices();
-
-      const indices = await PageObjects.indexManagement.getIndexList();
-
-      //If the index exists then the rollup job has successfully' +
-      //been created and is waiting to or has triggered.
-
-      //If the index exists then the rollup job has successfully been created and is waiting to or has triggered.
-      const filteredIndices = indices.filter(i => i.indexName === indexName);
-      expect(filteredIndices.length).to.be.greaterThan(0);
+      const jobList = await PageObjects.rollup.getJobList();
+      expect(jobList.length).to.be(1);
 
       //Stop the running rollup job.
       await es.transport.request({
@@ -67,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
       await es.indices.delete({ index: 'rollup*' });
       await es.indices.delete({ index: 'to-be*' });
       await es.indices.delete({ index: 'live*' });
-      await es.indices.delete({ index: 'live*,rollup-to-be*' });
+      await esArchiver.load('empty_kibana');
     });
   });
 }
