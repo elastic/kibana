@@ -56,7 +56,7 @@ test('local adapter should work', async () => {
   expect(result).toBe(`hello tester`);
 });
 
-test('multi-node adapter should register routes', async () => {
+test.skip('multi-node adapter should register routes', async () => {
   const services = new CodeServices(new CodeNodeAdapter(router, log));
   services.registerHandler(TestDefinition, testServiceHandler);
   const prefix = DEFAULT_SERVICE_OPTION.routePrefix;
@@ -72,7 +72,7 @@ test('multi-node adapter should register routes', async () => {
   expect(data.result).toBe(`hello tester`);
 });
 
-test('non-code-node could send request to code-node', async () => {
+test.skip('non-code-node could send request to code-node', async () => {
   const codeNode = new CodeServices(new CodeNodeAdapter(router, log));
   const codeNodeUrl = 'http://localhost:5601';
   const nonCodeNodeAdapter = new NonCodeNodeAdapter(codeNodeUrl, log);

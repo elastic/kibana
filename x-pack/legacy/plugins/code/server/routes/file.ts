@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { DEFAULT_TREE_CHILDREN_LIMIT } from '../git_operations';
 import { CodeServerRouter } from '../security';
@@ -211,7 +209,14 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         return res.notFound({ body: `repo ${uri} not found` });
       }
       const endpoint = await codeServices.locate(req, uri);
-      return await gitService.history(endpoint, { uri: repoUri, path, revision, count, after });
+      const history = await gitService.history(endpoint, {
+        uri: repoUri,
+        path,
+        revision,
+        count,
+        after,
+      });
+      return res.ok({ body: history });
     } catch (e) {
       if (e.isBoom) {
         return res.customError({
@@ -304,11 +309,12 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       const endpoint = await codeServices.locate(req, uri);
 
       try {
-        return await gitService.blame(endpoint, {
+        const blames = await gitService.blame(endpoint, {
           uri: repoUri,
           revision: decodeRevisionString(decodeURIComponent(revision)),
           path,
         });
+        return res.ok({ body: blames });
       } catch (e) {
         if (e.isBoom) {
           return res.customError({

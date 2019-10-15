@@ -88,7 +88,7 @@ export class CodeNodeAdapter implements ServiceHandlerAdapter {
           };
           try {
             const data = await serviceMethodMap[method](endpoint, params);
-            return { data };
+            return res.ok({ body: data });
           } catch (e) {
             if (!Boom.isBoom(e)) {
               throw Boom.boomify(e, { statusCode: 500 });
