@@ -6,56 +6,66 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { HttpStatusBadge } from '../index';
+import {
+  successColor,
+  neutralColor,
+  warningColor,
+  errorColor
+} from '../../../../../utils/httpStatusCodeToColor';
 
 describe('HttpStatusBadge', () => {
   describe('render', () => {
     describe('with status code 100', () => {
-      it('renders with the dark shade color', () => {
+      it('renders with neutral color', () => {
         const wrapper = mount(<HttpStatusBadge status={100} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          theme.euiColorDarkShade
+          neutralColor
         );
       });
     });
+
     describe('with status code 200', () => {
-      it('renders with Secondary color', () => {
+      it('renders with success color', () => {
         const wrapper = mount(<HttpStatusBadge status={200} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          theme.euiColorSecondary
+          successColor
         );
       });
     });
+
     describe('with status code 301', () => {
-      it('renders with dark shade color', () => {
+      it('renders with neutral color', () => {
         const wrapper = mount(<HttpStatusBadge status={301} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          theme.euiColorDarkShade
+          neutralColor
         );
       });
     });
+
     describe('with status code 404', () => {
-      it('renders with Warning color', () => {
+      it('renders with warning color', () => {
         const wrapper = mount(<HttpStatusBadge status={404} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          theme.euiColorWarning
+          warningColor
         );
       });
     });
+
     describe('with status code 502', () => {
-      it('renders with Danger color', () => {
+      it('renders with error color', () => {
         const wrapper = mount(<HttpStatusBadge status={502} />);
 
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          theme.euiColorDanger
+          errorColor
         );
       });
     });
+
     describe('with other status code', () => {
       it('renders with default color', () => {
         const wrapper = mount(<HttpStatusBadge status={700} />);

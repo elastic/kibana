@@ -27,13 +27,13 @@ export const ModelMemoryLimitInput: FC = () => {
   const { model_memory_limit: modelMemoryLimitDefault } = anomalyDetectors;
 
   useEffect(() => {
-    setModelMemoryLimit(jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit);
-  }, [jobCreatorUpdated]);
-
-  useEffect(() => {
     jobCreator.modelMemoryLimit = modelMemoryLimit === '' ? null : modelMemoryLimit;
     jobCreatorUpdate();
   }, [modelMemoryLimit]);
+
+  useEffect(() => {
+    setModelMemoryLimit(jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit);
+  }, [jobCreatorUpdated]);
 
   useEffect(() => {
     setValidation(jobValidator.modelMemoryLimit);

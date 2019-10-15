@@ -273,7 +273,7 @@ export class AbstractESSource extends AbstractVectorSource {
 
   async _getGeoField() {
     const indexPattern = await this._getIndexPattern();
-    const geoField = indexPattern.fields.byName[this._descriptor.geoField];
+    const geoField = indexPattern.fields.getByName(this._descriptor.geoField);
     if (!geoField) {
       throw new Error(i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
         defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
