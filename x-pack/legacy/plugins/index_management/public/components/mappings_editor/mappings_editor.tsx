@@ -14,7 +14,6 @@ import {
   DocumentFieldsHeaders,
   DocumentFields,
   DocumentFieldsJsonEditor,
-  EditorToggleControls,
 } from './components';
 import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
 

@@ -29,7 +29,14 @@ export const DocumentFields = () => {
     if (status !== 'creatingField' || fieldToAddFieldTo !== undefined) {
       return null;
     }
-    return <CreateField />;
+
+    return (
+      <div className="mappings-editor__create-field-wrapper">
+        <div className="mappings-editor__create-field-content">
+          <CreateField />
+        </div>
+      </div>
+    );
   };
 
   const renderAddFieldButton = () => {

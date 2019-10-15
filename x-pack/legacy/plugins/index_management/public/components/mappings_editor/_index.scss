@@ -1,53 +1,72 @@
 .mappings-editor {
-  &__fields-list {
-    // border-bottom: 1px solid #ddd;
-
-    + .mappings-editor__fields-list {
-      padding-left: 20px;
-    }
-
-    .mappings-editor__fields-list {
-      .mappings-editor__fields-list-item__toggle {
-        &::before {
-          border-bottom: 1px solid #333;
-          content: '';
-          left: -8px;
-          position: absolute;
-          top: 27px;
-          width: 8px;
-        }
-        &::after {
-          border-left: 1px solid #333;
-          content: '';
-          left: -8px;
-          position: absolute;
-          top: 19px;
-          height: 8px;
-        }
-      }
-    }
-  }
   &__fields-list-item {
     &__field {
-      border-bottom: 1px dotted #ddd;
-      margin: 12px 0;
+      border-bottom: $euiBorderThin;
 
       &:hover {
+        background-color: $euiColorLightestShade;
         .mappings-editor__fields-list-item__actions {
           opacity: 1;
         }
       }
     }
 
-    &__name {
-      width: 120px;
+    &__content {
+      height: $euiSizeXL * 2;
+      position: relative;
     }
+
     &__toggle {
-      width: 24px;
+      padding-left: $euiSizeXS;
+      width: $euiSizeL;
     }
+
     &__actions {
       opacity: 0;
-      transition: opacity 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+      transition: opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
     }
   }
+
+  &__create-field-wrapper {
+    background-color: $euiColorLightShade;
+    padding: $euiSizeM;
+  }
+
+  &__create-field-content {
+    position: relative;
+
+    form {
+      padding-left: $euiSizeXL;
+    }
+  }
+}
+
+.mappings-editor__fields-list {
+  .mappings-editor__fields-list .mappings-editor__fields-list-item__content,
+  .mappings-editor__create-field-content {
+      &::before {
+        border-bottom: 1px solid #333;
+        content: '';
+        left: $euiSize;
+        position: absolute;
+        top: 50%;
+        width: $euiSizeS;
+      }
+      &::after {
+        border-left: 1px solid #333;
+        content: '';
+        left: $euiSize;
+        position: absolute;
+        top: calc(50% - #{$euiSizeS});
+        height: $euiSizeS;
+      }
+    }
+    .mappings-editor__fields-list .mappings-editor__fields-list-item__content--toggle {
+      &::before{
+        content: none;
+      }
+      &::after {
+        content: none;
+      }
+    }
 }

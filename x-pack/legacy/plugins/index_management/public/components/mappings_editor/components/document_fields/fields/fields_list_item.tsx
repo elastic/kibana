@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBadge, EuiButtonIcon } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../../mappings_state';
@@ -17,6 +18,8 @@ interface Props {
   field: NormalizedField;
   treeDepth?: number;
 }
+
+const INDENT_SIZE = 32;
 
 export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   const dispatch = useDispatch();
@@ -35,8 +38,8 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
     isExpanded,
   } = field;
   const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
-  const indent = `${nestedDepth * 24}px`;
-  const indentChild = `${(nestedDepth + 1) * 24}px`;
+  const indent = `${nestedDepth * INDENT_SIZE}px`;
+  const indentChild = `${(nestedDepth + 1) * INDENT_SIZE}px`;
 
   const addField = () => {
     dispatch({
@@ -63,14 +66,14 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
 
     return (
       <div
+        className="mappings-editor__create-field-wrapper"
         style={{
-          position: 'relative',
-          marginTop: '-12px',
-          backgroundColor: '#eee',
-          padding: `12px 12px 12px ${indentChild}`,
+          paddingLeft: `${indentChild}`,
         }}
       >
-        <CreateField />
+        <div className="mappings-editor__create-field-content">
+          <CreateField />
+        </div>
       </div>
     );
   };
@@ -108,47 +111,41 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   return (
     <>
       <div style={{ paddingLeft: indent }} className="mappings-editor__fields-list-item__field">
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          style={{ position: 'relative', height: '56px' }}
-        >
-          <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__toggle">
-            {hasChildFields && (
-              <EuiButtonIcon
-                color="text"
-                onClick={toggleExpand}
-                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                aria-label={`Expand field ${source.name}`}
-              />
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__name">
-            {source.name}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__type">
-            <EuiBadge color="hollow">{source.type}</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem className="mappings-editor__fields-list-item__actions">
-            {renderActionButtons()}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {/* {status === 'idle' && canHaveChildFields && isAddFieldBtnDisabled && (
-          <p style={{ fontSize: '12px', margin: '-10px 0 6px', color: '#777' }}>
-            You have reached the maximum depth for the mappings editor. Switch to the{' '}
-            <EuiButtonEmpty
-              onClick={() => dispatch({ type: 'documentField.changeEditor', value: 'json' })}
-            >
-              JSON editor
-            </EuiButtonEmpty>
-            to add more fields.
-          </p>
-        )} */}
+        <div className="mappings-editor__fields-list-item__wrapper">
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            className={classNames('mappings-editor__fields-list-item__content', {
+              'mappings-editor__fields-list-item__content--toggle': hasChildFields,
+            })}
+          >
+            <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__toggle">
+              {hasChildFields && (
+                <EuiButtonIcon
+                  color="text"
+                  onClick={toggleExpand}
+                  iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                  aria-label={`Expand field ${source.name}`}
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__name">
+              {source.name}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__type">
+              <EuiBadge color="hollow">{source.type}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem className="mappings-editor__fields-list-item__actions">
+              {renderActionButtons()}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </div>
 
       {hasChildFields && isExpanded && (
         <FieldsList fields={childFields!.map(getField)} treeDepth={treeDepth + 1} />
       )}
+
       {renderCreateField()}
     </>
   );
