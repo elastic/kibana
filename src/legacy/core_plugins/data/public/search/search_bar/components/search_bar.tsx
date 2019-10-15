@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { compact } from 'lodash';
 import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
@@ -195,7 +196,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private shouldRenderFilterBar() {
-    return this.props.showFilterBar && this.props.filters && this.props.indexPatterns;
+    return (
+      this.props.showFilterBar &&
+      this.props.filters &&
+      this.props.indexPatterns &&
+      compact(this.props.indexPatterns).length > 0
+    );
   }
 
   public setFilterBarHeight = () => {

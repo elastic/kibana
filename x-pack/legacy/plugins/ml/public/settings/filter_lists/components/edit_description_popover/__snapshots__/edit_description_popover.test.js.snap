@@ -34,6 +34,7 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
           describedByIds={Array []}
           display="row"
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
             <FormattedMessage
@@ -93,6 +94,7 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
           describedByIds={Array []}
           display="row"
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
             <FormattedMessage
@@ -152,6 +154,7 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
           describedByIds={Array []}
           display="row"
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
             <FormattedMessage

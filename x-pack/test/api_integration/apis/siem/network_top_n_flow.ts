@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { networkTopNFlowQuery } from '../../../../legacy/plugins/siem/public/containers/network_top_n_flow/index.gql_query';
 import {
   Direction,
-  FlowTargetNew,
+  FlowTargetSourceDest,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowFields,
 } from '../../../../legacy/plugins/siem/public/graphql/types';
@@ -38,7 +38,7 @@ export default function({ getService }: FtrProviderContext) {
                 to: TO,
                 from: FROM,
               },
-              flowTarget: FlowTargetNew.source,
+              flowTarget: FlowTargetSourceDest.source,
               sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
               pagination: {
                 activePage: 0,
@@ -75,7 +75,7 @@ export default function({ getService }: FtrProviderContext) {
                 to: TO,
                 from: FROM,
               },
-              flowTarget: FlowTargetNew.source,
+              flowTarget: FlowTargetSourceDest.source,
               sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.asc },
               pagination: {
                 activePage: 0,
@@ -113,7 +113,7 @@ export default function({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
-              flowTarget: FlowTargetNew.destination,
+              flowTarget: FlowTargetSourceDest.destination,
               pagination: {
                 activePage: 0,
                 cursorStart: 0,
@@ -147,7 +147,7 @@ export default function({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               sort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
-              flowTarget: FlowTargetNew.source,
+              flowTarget: FlowTargetSourceDest.source,
               pagination: {
                 activePage: 1,
                 cursorStart: 10,

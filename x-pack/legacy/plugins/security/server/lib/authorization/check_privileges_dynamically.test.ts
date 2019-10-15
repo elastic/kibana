@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesPlugin } from '../../../../spaces';
+import { LegacySpacesPlugin } from '../../../../spaces';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 
@@ -23,7 +23,7 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
     getBasePath: jest.fn(),
     getScopedSpacesClient: jest.fn(),
     getActiveSpace: jest.fn(),
-  } as OptionalPlugin<SpacesPlugin>;
+  } as OptionalPlugin<LegacySpacesPlugin>;
   const request = Symbol();
   const privilegeOrPrivileges = ['foo', 'bar'];
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
@@ -45,7 +45,7 @@ test(`checkPrivileges.globally when spaces is disabled`, async () => {
   const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
   const mockSpaces = {
     isEnabled: false,
-  } as OptionalPlugin<SpacesPlugin>;
+  } as OptionalPlugin<LegacySpacesPlugin>;
   const request = Symbol();
   const privilegeOrPrivileges = ['foo', 'bar'];
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
