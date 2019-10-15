@@ -32,8 +32,9 @@ export default (path, log) => {
       map((...xs) => {
         const [name] = xs[0][1];
         const [stats] = xs[0];
+
         return {
-          'path': name.includes('kibana') ? name.replace(/.*kibana\//, '') : name,
+          'folderPath': name.includes('kibana') ? name.replace(/(?:.*)(kibana.*$)/gm, '$1') : name,
           '@timestamp': moment().format(),
           ...stats,
         };
