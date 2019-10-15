@@ -7,6 +7,8 @@
 import { CanvasTemplate } from '../../types';
 import { getTemplateStrings } from './template_strings';
 
+import { TagStrings } from '../../i18n';
+
 /**
  * This function takes a set of Canvas Element specification factories, runs them,
  * replaces relevant strings (if available) and returns a new factory.  We do this
@@ -31,6 +33,16 @@ export const applyTemplateStrings = (templates: CanvasTemplate[]) => {
       if (name) {
         template.name = name;
       }
+    }
+
+    if (template.tags) {
+      template.tags = template.tags.map(tag => {
+        if (TagStrings[tag]) {
+          return TagStrings[tag]();
+        }
+
+        return tag;
+      });
     }
 
     return () => template;
