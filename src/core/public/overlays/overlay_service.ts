@@ -25,6 +25,10 @@ import { I18nStart } from '../i18n';
 import { OverlayBannersStart, OverlayBannersService } from './banners';
 import { UiSettingsClientContract } from '../ui_settings';
 
+/**
+ * Returned by {@link OverlayStart} methods for closing a mounted overlay.
+ * @public
+ */
 export interface OverlayRef {
   /**
    * A Promise that will resolve once this overlay is closed.

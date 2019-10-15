@@ -22,6 +22,8 @@ export interface SecurityOptions {
   gitHostWhitelist: string[];
   gitProtocolWhitelist: string[];
   enableGitCertCheck: boolean;
+  enableJavaSecurityManager: boolean;
+  extraJavaRepositoryWhitelist: string[];
 }
 
 export interface DiskOptions {
@@ -30,6 +32,8 @@ export interface DiskOptions {
 }
 
 export class ServerOptions {
+  public readonly devMode: boolean = this.config.get('env.dev');
+
   public readonly workspacePath = resolve(this.config.get('path.data'), 'code/workspace');
 
   public readonly repoPath = resolve(this.config.get('path.data'), 'code/repos');
@@ -76,7 +80,12 @@ export class ServerOptions {
 
   public readonly clusterEnabled: boolean = this.options.clustering.enabled;
 
+  public readonly verbose: boolean = this.options.verbose;
+
   public readonly codeNodes: CodeNode[] = this.options.clustering.codeNodes;
+
+  public readonly queueIndex: string = this.options.queueIndex;
+  public readonly queueTimeoutMs: number = this.options.queueTimeoutMs;
 
   constructor(private options: any, private config: any) {}
 

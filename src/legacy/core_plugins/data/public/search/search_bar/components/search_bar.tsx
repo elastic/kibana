@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { compact } from 'lodash';
 import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
@@ -66,14 +67,17 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
-  showSaveQuery?: boolean;
-
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
+  // Show when user has privileges to save
+  showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
   onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
+  // User has modified the saved query, your app should persist the update
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
+  // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
 }
 
@@ -192,7 +196,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private shouldRenderFilterBar() {
-    return this.props.showFilterBar && this.props.filters && this.props.indexPatterns;
+    return (
+      this.props.showFilterBar &&
+      this.props.filters &&
+      this.props.indexPatterns &&
+      compact(this.props.indexPatterns).length > 0
+    );
   }
 
   public setFilterBarHeight = () => {

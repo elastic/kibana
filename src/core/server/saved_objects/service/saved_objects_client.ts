@@ -28,8 +28,6 @@ import {
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-
 /**
  *
  * @public
@@ -114,8 +112,9 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
  * @public
  */
 export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any>
-  extends Omit<SavedObject<T>, 'attributes'> {
+  extends Omit<SavedObject<T>, 'attributes' | 'references'> {
   attributes: Partial<T>;
+  references: SavedObjectReference[] | undefined;
 }
 
 /**

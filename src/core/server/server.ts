@@ -22,7 +22,7 @@ import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService, HttpServiceSetup } from './http';
+import { HttpService, InternalHttpServiceSetup } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -72,7 +72,11 @@ export class Server {
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const pluginDependencies = await this.plugins.discover();
-    const contextServiceSetup = this.context.setup({ pluginDependencies });
+    const contextServiceSetup = this.context.setup({
+      // We inject a fake "legacy plugin" with no dependencies so that legacy plugins can register context providers
+      // that will only be available to other legacy plugins and will not leak into New Platform plugins.
+      pluginDependencies: new Map([...pluginDependencies, [this.legacy.legacyId, []]]),
+    });
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -136,7 +140,7 @@ export class Server {
     await this.http.stop();
   }
 
-  private registerDefaultRoute(httpSetup: HttpServiceSetup) {
+  private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
     const router = httpSetup.createRouter('/core');
     router.get({ path: '/', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })

@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup } from './plugin';
+import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -27,12 +27,13 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export type DataSetup = DataSetup;
+export { DataSetup, DataStart };
 
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,
@@ -46,6 +47,8 @@ export {
   FilterManager,
   FilterStateManager,
   uniqFilters,
+  extractTimeFilter,
+  changeTimeFilter,
   onlyDisabledFiltersChanged,
 } from './filter/filter_manager';
 export {

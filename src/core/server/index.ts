@@ -39,45 +39,49 @@
  * @packageDocumentation
  */
 
-import { Observable } from 'rxjs';
 import {
-  ClusterClient,
-  ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
-  ScopedClusterClient,
+  InternalElasticsearchServiceSetup,
+  IScopedClusterClient,
 } from './elasticsearch';
-import {
-  HttpServiceSetup,
-  HttpServiceStart,
-  IRouter,
-  RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
-} from './http';
+import { InternalHttpServiceSetup, HttpServiceSetup } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
 
 export { bootstrap } from './bootstrap';
-export { ConfigPath, ConfigService } from './config';
-export { IContextContainer, IContextProvider, IContextHandler } from './context';
+export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
+export {
+  IContextContainer,
+  IContextProvider,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+} from './context';
 export { CoreId } from './core_context';
 export {
-  CallAPIOptions,
   ClusterClient,
+  IClusterClient,
   Headers,
   ScopedClusterClient,
+  IScopedClusterClient,
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
+  ElasticsearchServiceSetup,
   APICaller,
   FakeRequest,
 } from './elasticsearch';
+export * from './elasticsearch/api_types';
 export {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  AuthResult,
+  AuthResultType,
+  Authenticated,
   BasePath,
   IBasePath,
   CustomHttpResponseOptions,
@@ -85,12 +89,14 @@ export {
   GetAuthState,
   HttpResponseOptions,
   HttpResponsePayload,
-  HttpServerSetup,
+  HttpServiceSetup,
+  HttpServiceStart,
   ErrorHttpResponseOptions,
   IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  IKibanaResponse,
   LifecycleResponseFactory,
   KnownHeaders,
   LegacyRequest,
@@ -102,8 +108,6 @@ export {
   RequestHandler,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
-  RequestHandlerParams,
-  RequestHandlerReturn,
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
@@ -164,6 +168,7 @@ export {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
+  SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsClientContract,
@@ -180,8 +185,8 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
 export interface RequestHandlerContext {
   core: {
     elasticsearch: {
-      dataClient: ScopedClusterClient;
-      adminClient: ScopedClusterClient;
+      dataClient: IScopedClusterClient;
+      adminClient: IScopedClusterClient;
     };
   };
 }
@@ -192,30 +197,12 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CoreSetup {
-  context: {
-    createContextContainer: ContextSetup['createContextContainer'];
-  };
-  elasticsearch: {
-    adminClient$: Observable<ClusterClient>;
-    dataClient$: Observable<ClusterClient>;
-    createClient: (
-      type: string,
-      clientConfig?: Partial<ElasticsearchClientConfig>
-    ) => ClusterClient;
-  };
-  http: {
-    createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
-    registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-    registerAuth: HttpServiceSetup['registerAuth'];
-    registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    basePath: HttpServiceSetup['basePath'];
-    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-      name: T,
-      provider: RequestHandlerContextProvider<RequestHandlerContext>
-    ) => RequestHandlerContextContainer<RequestHandlerContext>;
-    createRouter: () => IRouter;
-  };
+  /** {@link ContextSetup} */
+  context: ContextSetup;
+  /** {@link ElasticsearchServiceSetup} */
+  elasticsearch: ElasticsearchServiceSetup;
+  /** {@link HttpServiceSetup} */
+  http: HttpServiceSetup;
 }
 
 /**
@@ -228,8 +215,8 @@ export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty
 /** @internal */
 export interface InternalCoreSetup {
   context: ContextSetup;
-  http: HttpServiceSetup;
-  elasticsearch: ElasticsearchServiceSetup;
+  http: InternalHttpServiceSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
 }
 
 /**
@@ -239,12 +226,4 @@ export interface InternalCoreStart {
   savedObjects: SavedObjectsServiceStart;
 }
 
-export {
-  ContextSetup,
-  HttpServiceSetup,
-  HttpServiceStart,
-  ElasticsearchServiceSetup,
-  PluginsServiceSetup,
-  PluginsServiceStart,
-  PluginOpaqueId,
-};
+export { ContextSetup, PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId };

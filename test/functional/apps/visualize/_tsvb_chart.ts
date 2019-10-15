@@ -59,10 +59,20 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('157');
       });
+
+      it('should populate fields for basic functions', async () => {
+        const { visualBuilder } = PageObjects;
+
+        await visualBuilder.selectAggType('Average');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
+
+        expect(isFieldForAggregationValid).to.be(true);
+      });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/46677
-    describe.skip('gauge', () => {
+    describe('gauge', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickGauge();

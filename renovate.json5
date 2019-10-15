@@ -34,6 +34,7 @@
       'renovate:major',
     ],
   },
+  separateMajorMinor: false,
   masterIssue: true,
   masterIssueApproval: true,
   rangeStrategy: 'bump',
@@ -66,6 +67,18 @@
         packagePatterns: [
           '(\\b|_)jest(\\b|_)',
         ],
+      },
+      {
+        groupSlug: '@elastic/charts',
+        groupName: '@elastic/charts related packages',
+        packageNames: [
+          '@elastic/charts',
+          '@types/elastic__charts',
+        ],
+        reviewers: [
+          'markov00',
+        ],
+        masterIssueApproval: false,
       },
       {
         groupSlug: 'mocha',
@@ -246,6 +259,18 @@
         groupName: 'storybook related packages',
         packagePatterns: [
           '(\\b|_)storybook(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'typescript',
+        groupName: 'typescript related packages',
+        packagePatterns: [
+          '(\\b|_)ts(\\b|_)',
+          '(\\b|_)typescript(\\b|_)',
+        ],
+        packageNames: [
+          'tslib',
+          '@types/tslib',
         ],
       },
       {
@@ -465,14 +490,6 @@
         ],
       },
       {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
-        ],
-      },
-      {
         groupSlug: 'mustache',
         groupName: 'mustache related packages',
         packageNames: [
@@ -593,11 +610,27 @@
         ],
       },
       {
+        groupSlug: 'vinyl-fs',
+        groupName: 'vinyl-fs related packages',
+        packageNames: [
+          'vinyl-fs',
+          '@types/vinyl-fs',
+        ],
+      },
+      {
         groupSlug: 'zen-observable',
         groupName: 'zen-observable related packages',
         packageNames: [
           'zen-observable',
           '@types/zen-observable',
+        ],
+      },
+      {
+        groupSlug: 'archiver',
+        groupName: 'archiver related packages',
+        packageNames: [
+          'archiver',
+          '@types/archiver',
         ],
       },
       {
@@ -625,11 +658,35 @@
         ],
       },
       {
+        groupSlug: 'cytoscape',
+        groupName: 'cytoscape related packages',
+        packageNames: [
+          'cytoscape',
+          '@types/cytoscape',
+        ],
+      },
+      {
+        groupSlug: 'fancy-log',
+        groupName: 'fancy-log related packages',
+        packageNames: [
+          'fancy-log',
+          '@types/fancy-log',
+        ],
+      },
+      {
         groupSlug: 'file-saver',
         groupName: 'file-saver related packages',
         packageNames: [
           'file-saver',
           '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'getos',
+        groupName: 'getos related packages',
+        packageNames: [
+          'getos',
+          '@types/getos',
         ],
       },
       {
@@ -761,6 +818,22 @@
         ],
       },
       {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
+        ],
+      },
+      {
+        groupSlug: 'xml-crypto',
+        groupName: 'xml-crypto related packages',
+        packageNames: [
+          'xml-crypto',
+          '@types/xml-crypto',
+        ],
+      },
+      {
         groupSlug: 'intl-relativeformat',
         groupName: 'intl-relativeformat related packages',
         packageNames: [
@@ -862,6 +935,14 @@
         packageNames: [
           'write-pkg',
           '@types/write-pkg',
+        ],
+      },
+      {
+        groupSlug: 'parse-link-header',
+        groupName: 'parse-link-header related packages',
+        packageNames: [
+          'parse-link-header',
+          '@types/parse-link-header',
         ],
       },
       {

@@ -11,7 +11,7 @@ import {
   LAT_INDEX,
   LON_INDEX,
 } from '../../../../../common/constants';
-import { FeatureTooltip } from '../../feature_tooltip';
+import { FeaturesTooltip } from '../../features_tooltip/features_tooltip';
 import { EuiPopover, EuiText } from '@elastic/eui';
 
 export const TOOLTIP_TYPE = {
@@ -251,6 +251,7 @@ export class TooltipControl extends React.Component {
     if (!tooltipLayer) {
       return null;
     }
+
     const targetFeature = tooltipLayer.getFeatureById(featureId);
     if (!targetFeature) {
       return null;
@@ -264,11 +265,26 @@ export class TooltipControl extends React.Component {
     if (!tooltipLayer) {
       return [];
     }
+
     const targetFeature = tooltipLayer.getFeatureById(featureId);
     if (!targetFeature) {
       return [];
     }
     return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
+  };
+
+  _loadPreIndexedShape = async ({ layerId, featureId }) => {
+    const tooltipLayer = this._findLayerById(layerId);
+    if (!tooltipLayer) {
+      return null;
+    }
+
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
   };
 
   _findLayerById = (layerId) => {
@@ -302,12 +318,12 @@ export class TooltipControl extends React.Component {
     }
 
     return (
-      <EuiText size="xs">
-        <FeatureTooltip
+      <EuiText size="xs" style={{ maxWidth: '425px' }}>
+        <FeaturesTooltip
           {...publicProps}
-          anchorLocation={this.props.tooltipState.location}
           findLayerById={this._findLayerById}
           geoFields={this.props.geoFields}
+          loadPreIndexedShape={this._loadPreIndexedShape}
         />
       </EuiText>
     );

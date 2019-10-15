@@ -19,16 +19,16 @@
 
 import { Filter } from '@kbn/es-query';
 import { mapAndFlattenFilters } from './map_and_flatten_filters';
-import { StubIndexPatterns } from '../test_helpers/stub_index_pattern';
-import { IndexPatterns } from '../../../index_patterns';
 
 describe('filter manager utilities', () => {
   describe('mapAndFlattenFilters()', () => {
-    let mockIndexPatterns: unknown;
     let filters: unknown;
 
+    function getDisplayName(filter: Filter) {
+      return typeof filter.meta.value === 'function' ? filter.meta.value() : filter.meta.value;
+    }
+
     beforeEach(() => {
-      mockIndexPatterns = new StubIndexPatterns();
       filters = [
         null,
         [
@@ -44,11 +44,8 @@ describe('filter manager utilities', () => {
       ];
     });
 
-    test('should map and flatten the filters', async () => {
-      const results = await mapAndFlattenFilters(
-        mockIndexPatterns as IndexPatterns,
-        filters as Filter[]
-      );
+    test('should map and flatten the filters', () => {
+      const results = mapAndFlattenFilters(filters as Filter[]);
 
       expect(results).toHaveLength(5);
       expect(results[0]).toHaveProperty('meta');
@@ -63,9 +60,11 @@ describe('filter manager utilities', () => {
       expect(results[2].meta).toHaveProperty('key', 'query');
       expect(results[2].meta).toHaveProperty('value', 'foo:bar');
       expect(results[3].meta).toHaveProperty('key', 'bytes');
-      expect(results[3].meta).toHaveProperty('value', '1024 to 2048');
+      expect(results[3].meta).toHaveProperty('value');
+      expect(getDisplayName(results[3])).toBe('1024 to 2048');
       expect(results[4].meta).toHaveProperty('key', '_type');
-      expect(results[4].meta).toHaveProperty('value', 'apache');
+      expect(results[4].meta).toHaveProperty('value');
+      expect(getDisplayName(results[4])).toBe('apache');
     });
   });
 });

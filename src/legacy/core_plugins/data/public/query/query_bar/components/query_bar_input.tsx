@@ -19,12 +19,12 @@
 
 import { Component } from 'react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiFieldText, EuiOutsideClickDetector, PopoverAnchorPosition } from '@elastic/eui';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
-import { PersistedLog } from 'ui/persisted_log';
 
 import {
   AutocompleteSuggestion,
@@ -35,11 +35,11 @@ import {
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
-import { Query } from '../index';
+import { Query, getQueryLog } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
-import { getQueryLog } from '../lib/get_query_log';
+import { PersistedLog } from '../../persisted_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { IDataPluginServices } from '../../../types';
 
@@ -134,8 +134,8 @@ export class QueryBarInputUI extends Component<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
+    const autocompleteProvider = this.services.data.autocomplete.getProvider(language);
 
-    const autocompleteProvider = this.services.autocomplete.getProvider(language);
     if (
       !autocompleteProvider ||
       !Array.isArray(this.state.indexPatterns) ||
@@ -386,6 +386,13 @@ export class QueryBarInputUI extends Component<Props, State> {
     this.inputRef.focus();
   };
 
+  private initPersistedLog = () => {
+    const { uiSettings, store, appName } = this.services;
+    this.persistedLog = this.props.persistedLog
+      ? this.props.persistedLog
+      : getQueryLog(uiSettings, store, appName, this.props.query.language);
+  };
+
   public onMouseEnterSuggestion = (index: number) => {
     this.setState({ index });
   };
@@ -396,10 +403,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       this.onChange({ ...this.props.query, query: parsedQuery });
     }
 
-    this.persistedLog = this.props.persistedLog
-      ? this.props.persistedLog
-      : getQueryLog(this.services.uiSettings, this.services.appName, this.props.query.language);
-
+    this.initPersistedLog();
     this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
@@ -409,9 +413,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       this.onChange({ ...this.props.query, query: parsedQuery });
     }
 
-    this.persistedLog = this.props.persistedLog
-      ? this.props.persistedLog
-      : getQueryLog(this.services.uiSettings, this.services.appName, this.props.query.language);
+    this.initPersistedLog();
 
     if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
       this.fetchIndexPatterns().then(this.updateSuggestions);
@@ -438,23 +440,30 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 
   public render() {
+    const isSuggestionsVisible = this.state.isSuggestionsVisible && {
+      'aria-controls': 'kbnTypeahead__items',
+      'aria-owns': 'kbnTypeahead__items',
+    };
+    const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
+
     return (
       <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
         <div
+          {...ariaCombobox}
           style={{ position: 'relative' }}
-          role="combobox"
+          aria-label={i18n.translate('data.query.queryBar.comboboxAriaLabel', {
+            defaultMessage: 'Search and filter the {pageType} page',
+            values: { pageType: this.services.appName },
+          })}
           aria-haspopup="true"
           aria-expanded={this.state.isSuggestionsVisible}
-          aria-owns="kbnTypeahead__items"
-          aria-controls="kbnTypeahead__items"
         >
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
               <EuiFieldText
                 placeholder={
                   this.props.placeholder ||
-                  this.props.intl.formatMessage({
-                    id: 'data.query.queryBar.searchInputPlaceholder',
+                  i18n.translate('data.query.queryBar.searchInputPlaceholder', {
                     defaultMessage: 'Search',
                   })
                 }
@@ -472,26 +481,17 @@ export class QueryBarInputUI extends Component<Props, State> {
                 }}
                 autoComplete="off"
                 spellCheck={false}
-                aria-label={
-                  this.props.screenTitle
-                    ? this.props.intl.formatMessage(
-                        {
-                          id: 'data.query.queryBar.searchInputAriaLabel',
-                          defaultMessage:
-                            'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
-                        },
-                        {
-                          previouslyTranslatedPageTitle: this.props.screenTitle,
-                          pageType: this.services.appName,
-                        }
-                      )
-                    : undefined
-                }
+                aria-label={i18n.translate('data.query.queryBar.searchInputAriaLabel', {
+                  defaultMessage: 'Start typing to search and filter the {pageType} page',
+                  values: { pageType: this.services.appName },
+                })}
                 type="text"
                 aria-autocomplete="list"
-                aria-controls="kbnTypeahead__items"
+                aria-controls={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}
                 aria-activedescendant={
-                  this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
+                  this.state.isSuggestionsVisible && typeof this.state.index === 'number'
+                    ? `suggestion-${this.state.index}`
+                    : undefined
                 }
                 role="textbox"
                 prepend={this.props.prepend}
