@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { IndexPatternColumn } from './indexpattern';
 import { buildColumn, operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState } from './types';
+import { OriginalColumn } from './rename_columns';
 
 function getExpressionForLayer(
   indexPattern: IndexPattern,
@@ -34,42 +35,44 @@ function getExpressionForLayer(
       (currentIdMap, [colId], index) => {
         return {
           ...currentIdMap,
-          [`col-${index}-${colId}`]: colId,
+          [`col-${index}-${colId}`]: {
+            ...columns[colId],
+            id: colId,
+          },
         };
       },
-      {} as Record<string, string>
+      {} as Record<string, OriginalColumn>
     );
 
     const filterRatios = columnEntries.filter(
       ([colId, col]) => col.operationType === 'filter_ratio'
     );
 
-    if (filterRatios.length) {
-      const countColumn = buildColumn({
-        op: 'count',
-        columns,
-        suggestedPriority: 2,
-        layerId,
-        indexPattern,
-      });
-      aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
-
-      return `esaggs
-        index="${indexPattern.id}"
-        metricsAtAllLevels=false
-        partialRows=false
-        includeFormatHints=true
-        aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(
-        idMap
-      )}' | ${filterRatios.map(([id]) => `lens_calculate_filter_ratio id=${id}`).join(' | ')}`;
-    }
-
-    return `esaggs
+    const expression = `esaggs
       index="${indexPattern.id}"
       metricsAtAllLevels=false
       partialRows=false
       includeFormatHints=true
-      aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
+      aggConfigs={lens_auto_date aggConfigs='${JSON.stringify(
+        aggs
+      )}'} | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
+
+    if (!filterRatios.length) {
+      return expression;
+    }
+
+    const countColumn = buildColumn({
+      op: 'count',
+      columns,
+      suggestedPriority: 2,
+      layerId,
+      indexPattern,
+    });
+    aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
+
+    return `${expression} | ${filterRatios
+      .map(([id]) => `lens_calculate_filter_ratio id=${id}`)
+      .join(' | ')}`;
   }
 
   return null;
