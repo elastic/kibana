@@ -58,7 +58,7 @@ class EndgameApp extends PureComponent<{
                 <Route path={path} exact component={component} key={id} />
               ))}
               <Route path="*">
-                <EuiCallOut title="Proceed with caution!" color="warning" iconType="help">
+                <EuiCallOut title="Route not found (404)" color="warning" iconType="help">
                   <p>That page does not exists</p>
                 </EuiCallOut>
               </Route>

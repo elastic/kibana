@@ -8,8 +8,10 @@ import React, { PureComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Page } from '../../components/page';
 import { EndpointsCardShowcase } from '../endpoints/enpoints_card';
+import { AlertsCardShowcase } from '../alerts/alerts_card';
 
-const cards = [EndpointsCardShowcase];
+// FIXME: this should probably also be driven via data stored in `route_paths`??
+const cards = [EndpointsCardShowcase, AlertsCardShowcase];
 
 export class LandingPage extends PureComponent {
   render() {

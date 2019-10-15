@@ -15,6 +15,10 @@ const ShowEndpoints = toAsyncComponent(
   async () => ((await import('../application/endpoints')).EndpointsPage as unknown) as PureComponent
 );
 
+const ShowAlerts = toAsyncComponent(
+  async () => ((await import('../application/alerts')).AlertsPage as unknown) as PureComponent
+);
+
 export const routePaths = [
   {
     name: 'Home',
@@ -27,6 +31,12 @@ export const routePaths = [
     id: 'endpoints',
     path: '/endpoints',
     component: ShowEndpoints,
+  },
+  {
+    name: 'Alerts',
+    id: 'alerts',
+    path: '/alerts',
+    component: ShowAlerts,
   },
 ];
 
