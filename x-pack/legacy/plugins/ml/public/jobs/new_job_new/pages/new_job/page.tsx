@@ -7,9 +7,11 @@
 import React, { FC, useEffect, Fragment } from 'react';
 
 import { EuiPage, EuiPageBody, EuiPageContentBody } from '@elastic/eui';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
-import { jobCreatorFactory } from '../../common/job_creator';
+import { jobCreatorFactory, isAdvancedJobCreator } from '../../common/job_creator';
 import {
   JOB_TYPE,
   DEFAULT_MODEL_MEMORY_LIMIT,
@@ -23,7 +25,6 @@ import { getTimeFilterRange } from '../../../../components/full_time_range_selec
 import { TimeBuckets } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { expandCombinedJobConfig } from '../../common/job_creator/configs';
-import { autoSetJobCreatorTimeRange } from '../../common/job_creator/util/general';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -98,14 +99,19 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.createdBy = null;
     }
 
-    if (jobCreator.type === JOB_TYPE.ADVANCED) {
+    if (isAdvancedJobCreator(jobCreator)) {
       // for advanced jobs, load the full time range start and end times
       // so they can be used for job validation and bucket span estimation
-      autoSetJobCreatorTimeRange(
-        jobCreator,
-        kibanaContext.currentIndexPattern,
-        kibanaContext.combinedQuery
-      );
+      try {
+        jobCreator.autoSetTimeRange();
+      } catch (error) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
+            defaultMessage: `Error retrieving beginning and end times of index`,
+          }),
+          text: error,
+        });
+      }
     }
   }
 
