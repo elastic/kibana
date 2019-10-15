@@ -614,13 +614,18 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <a
-                  className="euiLink euiLink--primary c0"
+                <EuiLink
+                  className="c0"
                   href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                  rel="noreferrer"
                 >
-                  a0ce2
-                </a>
+                  <a
+                    className="euiLink euiLink--primary c0"
+                    href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                    rel="noreferrer"
+                  >
+                    a0ce2
+                  </a>
+                </EuiLink>
               </div>
             </td>
             <td
@@ -643,15 +648,22 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
-                    <a
-                      className="euiLink euiLink--primary c2"
+                    <EuiLink
+                      className="c2"
                       href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                       onBlur={[Function]}
                       onFocus={[Function]}
-                      rel="noreferrer"
                     >
-                      About to blow up!
-                    </a>
+                      <a
+                        className="euiLink euiLink--primary c2"
+                        href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        rel="noreferrer"
+                      >
+                        About to blow up!
+                      </a>
+                    </EuiLink>
                   </span>
                   <br />
                   <span
@@ -721,13 +733,18 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <a
-                  className="euiLink euiLink--primary c0"
+                <EuiLink
+                  className="c0"
                   href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                  rel="noreferrer"
                 >
-                  f3ac9
-                </a>
+                  <a
+                    className="euiLink euiLink--primary c0"
+                    href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                    rel="noreferrer"
+                  >
+                    f3ac9
+                  </a>
+                </EuiLink>
               </div>
             </td>
             <td
@@ -750,15 +767,22 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
-                    <a
-                      className="euiLink euiLink--primary c2"
+                    <EuiLink
+                      className="c2"
                       href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                       onBlur={[Function]}
                       onFocus={[Function]}
-                      rel="noreferrer"
                     >
-                      AssertionError: 
-                    </a>
+                      <a
+                        className="euiLink euiLink--primary c2"
+                        href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        rel="noreferrer"
+                      >
+                        AssertionError: 
+                      </a>
+                    </EuiLink>
                   </span>
                   <br />
                   <span
@@ -828,13 +852,18 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <a
-                  className="euiLink euiLink--primary c0"
+                <EuiLink
+                  className="c0"
                   href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                  rel="noreferrer"
                 >
-                  e9086
-                </a>
+                  <a
+                    className="euiLink euiLink--primary c0"
+                    href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                    rel="noreferrer"
+                  >
+                    e9086
+                  </a>
+                </EuiLink>
               </div>
             </td>
             <td
@@ -857,15 +886,22 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
-                    <a
-                      className="euiLink euiLink--primary c2"
+                    <EuiLink
+                      className="c2"
                       href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                       onBlur={[Function]}
                       onFocus={[Function]}
-                      rel="noreferrer"
                     >
-                      AssertionError: Bad luck!
-                    </a>
+                      <a
+                        className="euiLink euiLink--primary c2"
+                        href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        rel="noreferrer"
+                      >
+                        AssertionError: Bad luck!
+                      </a>
+                    </EuiLink>
                   </span>
                   <br />
                   <span
@@ -935,13 +971,18 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <a
-                  className="euiLink euiLink--primary c0"
+                <EuiLink
+                  className="c0"
                   href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                  rel="noreferrer"
                 >
-                  8673d
-                </a>
+                  <a
+                    className="euiLink euiLink--primary c0"
+                    href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                    rel="noreferrer"
+                  >
+                    8673d
+                  </a>
+                </EuiLink>
               </div>
             </td>
             <td
@@ -964,15 +1005,22 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
-                    <a
-                      className="euiLink euiLink--primary c2"
+                    <EuiLink
+                      className="c2"
                       href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                       onBlur={[Function]}
                       onFocus={[Function]}
-                      rel="noreferrer"
                     >
-                      Customer with ID 8517 not found
-                    </a>
+                      <a
+                        className="euiLink euiLink--primary c2"
+                        href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        rel="noreferrer"
+                      >
+                        Customer with ID 8517 not found
+                      </a>
+                    </EuiLink>
                   </span>
                   <br />
                   <span
