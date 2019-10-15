@@ -50,6 +50,11 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
       return 'YY';
     case 'history:limit':
       return 10;
+    case 'timepicker:timeDefaults':
+      return {
+        from: 'now-15m',
+        to: 'now',
+      };
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
