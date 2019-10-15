@@ -22,6 +22,8 @@ import { appStart, appSetup, appStop } from './app_plugin';
 import { PLUGIN_ID } from '../common';
 import { addHelpMenuToAppChrome } from './help_menu_util';
 
+export { Embeddable as LensEmbeddable } from './editor_frame_plugin/embeddable/embeddable';
+
 // TODO: Convert this to the "new platform" way of doing UI
 function Root($scope: IScope, $element: JQLite) {
   const el = $element[0];

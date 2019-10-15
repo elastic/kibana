@@ -26,6 +26,7 @@ interface Arguments {
   filters?: string | null;
   timeRange?: string | null;
   savedSearchId?: string | null;
+  indexPattern?: string;
 }
 
 export type ExpressionFunctionKibanaContext = ExpressionFunction<
@@ -109,6 +110,7 @@ export const kibanaContext = (): ExpressionFunctionKibanaContext => ({
       query: queries,
       filters,
       timeRange,
+      indexPattern: context.indexPattern,
     };
   },
 });

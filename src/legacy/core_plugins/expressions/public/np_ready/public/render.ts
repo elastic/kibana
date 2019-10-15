@@ -67,7 +67,7 @@ export class ExpressionRenderHandler {
 
   render = async (data: Data) => {
     if (data.type !== 'render' || !data.as) {
-      throw new Error('invalid data provided to expression renderer');
+      throw new Error('invalid data provided to expression renderer:\n' + JSON.stringify(data));
     }
 
     if (!getRenderersRegistry().get(data.as)) {

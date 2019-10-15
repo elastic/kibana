@@ -107,6 +107,7 @@ export default class ClusterManager {
         ...config.get('plugins.scanDirs'),
         resolve(REPO_ROOT, 'src/plugins'),
         resolve(REPO_ROOT, 'x-pack/plugins'),
+        resolve(REPO_ROOT, 'test/plugin_functional/plugins'),
       ];
       const extraPaths = [
         ...pluginPaths,

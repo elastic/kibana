@@ -156,6 +156,13 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     });
     const title = this.props.embeddable.getTitle();
     const headerId = this.generateId();
+    const dataSource = this.props.embeddable.getDataSource();
+    let color = this.props.embeddable.getOutput().color;
+
+    if (!color && dataSource) {
+      color = dataSource.getOutput().color;
+    }
+    const style = color ? { border: `2px solid ${color}` } : {};
     return (
       <EuiPanel
         className={classes}
@@ -163,6 +170,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         paddingSize="none"
         role="figure"
         aria-labelledby={headerId}
+        style={style}
       >
         <PanelHeader
           getActionContextMenuPanel={this.getActionContextMenuPanel}

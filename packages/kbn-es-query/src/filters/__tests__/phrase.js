@@ -91,5 +91,6 @@ describe('Filter Manager', function () {
 });
 
 function getField(indexPattern, name) {
+  if (typeof indexPattern === 'string') { return name; }
   return indexPattern.fields.find(field => field.name === name);
 }

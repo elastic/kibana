@@ -169,6 +169,11 @@ export function SearchSourceProvider(Promise, Private, config) {
     }
 
     setField = (field, value) => {
+      console.log('search source, setting ' + field + ' to ', value);
+      if (field === 'index') {
+        console.log('search source, setting ' + field + ' to ', value);
+        //return;
+      }
       if (!FIELDS.includes(field)) {
         throw new Error(`Can't set field '${field}' on SearchSource. Acceptable fields are: ${FIELDS.join(', ')}.`);
       }
@@ -188,12 +193,12 @@ export function SearchSourceProvider(Promise, Private, config) {
           return this;
         }
 
-        if (!isIndexPattern(value)) {
+        if (typeof value !== 'string' && !isIndexPattern(value)) {
           throw new TypeError('expected indexPattern to be an IndexPattern duck.');
         }
 
         fields[field] = value;
-        if (!fields.source) {
+        if (typeof value !== 'string' && !fields.source) {
           // imply source filtering based on the index pattern, but allow overriding
           // it by simply setting another field for "source". When index is changed
           fields.source = function () {
@@ -551,14 +556,16 @@ export function SearchSourceProvider(Promise, Private, config) {
           // This is down here to prevent the circular dependency
           flatData.body = flatData.body || {};
 
-          const computedFields = flatData.index.getComputedFields();
+          if (typeof flatData.index !== 'string') {
+            const computedFields = flatData.index.getComputedFields();
 
-          flatData.body.stored_fields = computedFields.storedFields;
-          flatData.body.script_fields = flatData.body.script_fields || {};
-          _.extend(flatData.body.script_fields, computedFields.scriptFields);
+            flatData.body.stored_fields = computedFields.storedFields;
+            flatData.body.script_fields = flatData.body.script_fields || {};
+            _.extend(flatData.body.script_fields, computedFields.scriptFields);
 
-          const defaultDocValueFields = computedFields.docvalueFields ? computedFields.docvalueFields : [];
-          flatData.body.docvalue_fields = flatData.body.docvalue_fields || defaultDocValueFields;
+            const defaultDocValueFields = computedFields.docvalueFields ? computedFields.docvalueFields : [];
+            flatData.body.docvalue_fields = flatData.body.docvalue_fields || defaultDocValueFields;
+          }
 
           if (flatData.body._source) {
             // exclude source fields for this index pattern specified by the user

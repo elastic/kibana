@@ -33,6 +33,7 @@ export function registerSearchRoute(router: IRouter): void {
       },
     },
     async (context, request, res) => {
+      console.log(`request.headers.referer`, request.headers.referer);
       const searchRequest = request.body;
       const strategy = request.params.strategy;
       try {

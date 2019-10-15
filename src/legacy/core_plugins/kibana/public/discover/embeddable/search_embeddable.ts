@@ -112,6 +112,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
+  private prevIndexPattern?: IndexPattern | string;
 
   constructor(
     {
@@ -325,6 +326,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
   private pushContainerStateParamsToScope(searchScope: SearchScope) {
     const isFetchRequired =
+      !_.isEqual(this.prevIndexPattern, this.input.indexPattern) ||
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !_.isEqual(this.prevQuery, this.input.query) ||
       !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
@@ -340,11 +342,17 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
 
+      if (!_.isEqual(this.prevIndexPattern, this.input.indexPattern)) {
+        this.filtersSearchSource.setField('index', this.input.indexPattern);
+        this.savedSearch.searchSource.setField('index', this.input.indexPattern);
+      }
+
       this.fetch();
 
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
+      this.prevIndexPattern = this.input.indexPattern;
     }
   }
 }

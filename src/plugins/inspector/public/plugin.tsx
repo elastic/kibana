@@ -60,6 +60,12 @@ export interface Start {
   open: (adapters: Adapters, options?: InspectorOptions) => InspectorSession;
 }
 
+declare module 'kibana/public' {
+  interface AppMountContext {
+    inspector?: Start;
+  }
+}
+
 export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   views: InspectorViewRegistry | undefined;
 
@@ -70,6 +76,39 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
 
     this.views.register(getDataViewDescription(core.uiSettings));
     this.views.register(getRequestsViewDescription());
+
+    core.application.registerMountContext<'inspector'>('inspector', context => {
+      const isAvailable: Start['isAvailable'] = adapters =>
+        this.views!.getVisible(adapters).length > 0;
+
+      const closeButtonLabel = i18n.translate('inspector.closeButton', {
+        defaultMessage: 'Close Inspector',
+      });
+
+      const open: Start['open'] = (adapters, options = {}) => {
+        const views = this.views!.getVisible(adapters);
+
+        // Don't open inspector if there are no views available for the passed adapters
+        if (!views || views.length === 0) {
+          throw new Error(`Tried to open an inspector without views being available.
+          Make sure to call Inspector.isAvailable() with the same adapters before to check
+          if an inspector can be shown.`);
+        }
+
+        return context.core!.overlays.openFlyout(
+          <InspectorPanel views={views} adapters={adapters} title={options.title} />,
+          {
+            'data-test-subj': 'inspectorPanel',
+            closeButtonAriaLabel: closeButtonLabel,
+          }
+        );
+      };
+
+      return {
+        isAvailable,
+        open,
+      };
+    });
 
     return {
       registerView: this.views!.register.bind(this.views),

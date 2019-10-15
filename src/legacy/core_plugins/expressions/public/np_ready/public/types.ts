@@ -35,6 +35,7 @@ export interface SearchContext {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  indexPattern?: string;
 }
 
 export type IGetInitialContext = () => SearchContext | Context;

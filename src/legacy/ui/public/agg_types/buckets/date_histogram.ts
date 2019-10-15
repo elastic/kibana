@@ -179,7 +179,8 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
           // below, since it would throw an exception. So in the cases we still have an interval of 0ms
           // here we simply skip the rest of the method and never write an interval into the DSL, since
           // this DSL will anyway not be used before we're passing this code with an actual interval.
-          return;
+          //return;
+          interval.expression = '1w';
         }
         output.params = {
           ...output.params,

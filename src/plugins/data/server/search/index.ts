@@ -27,3 +27,5 @@ export { IRequestTypesMap, IResponseTypesMap } from './i_search';
 export { TStrategyTypes } from './strategy_types';
 
 export { TSearchStrategyProvider } from './i_search_strategy';
+
+export * from './es_search';

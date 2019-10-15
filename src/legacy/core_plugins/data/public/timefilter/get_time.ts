@@ -52,9 +52,12 @@ export function getTime(
     return;
   }
 
-  const timefield: Field | undefined = indexPattern.fields.find(
-    field => field.name === indexPattern.timeFieldName
-  );
+  let timefield: Field | undefined;
+  if (typeof indexPattern === 'string') {
+    timefield = { name: 'timestamp' };
+  } else {
+    timefield = indexPattern.fields.find(field => field.name === indexPattern.timeFieldName);
+  }
 
   if (!timefield) {
     return;

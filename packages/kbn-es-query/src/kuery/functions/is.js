@@ -79,7 +79,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
   const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
   const isAllFieldsQuery =
     (fieldNameArg.type === 'wildcard' && fieldName === '*')
-    || (fields && indexPattern && fields.length === indexPattern.fields.length);
+    || (fields && indexPattern && typeof indexPattern !== 'string' && fields.length === indexPattern.fields.length);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
   if (isMatchAllQuery) {

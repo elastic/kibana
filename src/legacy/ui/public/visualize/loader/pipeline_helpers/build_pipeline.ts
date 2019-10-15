@@ -509,7 +509,7 @@ export const buildPipeline = async (
   // request handler
   if (vis.type.requestHandler === 'courier') {
     pipeline += `esaggs
-    ${prepareString('index', indexPattern.id)}
+    ${prepareString('index', indexPattern.id || indexPattern)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false}
     ${prepareJson('aggConfigs', visState.aggs)} | `;

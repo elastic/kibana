@@ -174,7 +174,8 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       isLayoutInvalid,
     });
 
-    this.subscription = this.props.container.getInput$().subscribe(input => {
+    this.subscription = this.props.container.getInput$().subscribe(() => {
+      const input = this.props.container.getInput();
       if (this.mounted) {
         this.setState({
           panels: input.panels,

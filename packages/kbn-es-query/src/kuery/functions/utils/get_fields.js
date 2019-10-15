@@ -23,12 +23,19 @@ import * as wildcard from '../../node_types/wildcard';
 export function getFields(node, indexPattern) {
   if (node.type === 'literal') {
     const fieldName = literal.toElasticsearchQuery(node);
+    if (typeof indexPattern === 'string') {
+      return [ { name: fieldName }];
+    }
     const field = indexPattern.fields.find(field => field.name === fieldName);
     if (!field) {
       return [];
     }
     return [field];
   } else if (node.type === 'wildcard') {
+    if (typeof indexPattern === 'string') {
+      return [];
+    }
+
     const fields = indexPattern.fields.filter(field => wildcard.test(node, field.name));
     return fields;
   }

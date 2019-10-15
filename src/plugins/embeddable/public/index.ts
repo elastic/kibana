@@ -1,4 +1,4 @@
-/*
+  /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -63,3 +63,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { EmbeddablePublicPlugin as Plugin };
 export * from './plugin';
+
+export { IEmbeddableSetupContract, IEmbeddableStart } from './plugin';

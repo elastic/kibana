@@ -79,17 +79,22 @@ export class FieldParamType extends BaseParamType {
       if (!aggConfig) {
         throw new Error('aggConfig was not provided to FieldParamType deserialize function');
       }
-      const field = aggConfig.getIndexPattern().fields.getByName(fieldName);
+      const field =
+        typeof aggConfig.getIndexPattern() === 'string'
+          ? { name: fieldName }
+          : aggConfig.getIndexPattern().fields.getByName(fieldName);
 
       if (!field) {
-        throw new SavedObjectNotFound('index-pattern-field', fieldName);
+        return { name: fieldName };
+        //        throw new SavedObjectNotFound('index-pattern-field', fieldName);
       }
 
+      const fields =
+        typeof aggConfig.getIndexPattern() === 'string' ? [] : aggConfig.getIndexPattern().fields;
       // @ts-ignore
-      const validField = this.getAvailableFields(aggConfig.getIndexPattern().fields).find(
-        (f: any) => f.name === fieldName
-      );
+      const validField = this.getAvailableFields(fields).find((f: any) => f.name === fieldName);
       if (!validField) {
+        return { name: fieldName };
         toastNotifications.addDanger(
           i18n.translate(
             'common.ui.aggTypes.paramTypes.field.invalidSavedFieldParameterErrorMessage',

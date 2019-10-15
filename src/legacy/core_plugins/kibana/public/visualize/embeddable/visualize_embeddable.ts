@@ -184,8 +184,19 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       };
     }
 
+    let dirty = false;
+    if (this.input.indexPattern) {
+      this.savedVisualization.vis.indexPattern = this.input.indexPattern;
+      this.savedVisualization.searchSource.setField('index', this.input.indexPattern);
+      const flat = this.savedVisualization.searchSource._flatten();
+      console.log('flast', flat);
+      dirty = true;
+    }
+
     if (this.handler && !_.isEmpty(updatedParams)) {
       this.handler.update(updatedParams);
+      this.handler.reload();
+    } else if (this.handler && dirty) {
       this.handler.reload();
     }
   }

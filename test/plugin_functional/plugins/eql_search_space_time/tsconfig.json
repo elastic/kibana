@@ -1,0 +1,15 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./target",
+    "skipLibCheck": true
+  },
+  "include": [
+    "index.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../../typings/**/*", "../kbn_tp_eql_search_explorer/public/create_lens_visualization_action.tsx", "../kbn_tp_eql_search_explorer/public/create_lens_visualization_modal.tsx"
+  ],
+  "exclude": []
+}

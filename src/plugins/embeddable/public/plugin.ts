@@ -22,12 +22,23 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { EmbeddableFactoryRegistry } from './types';
 import { createApi, EmbeddableApi } from './api';
 import { bootstrap } from './bootstrap';
+import { EmbeddableFactory } from './lib';
+
+declare module 'kibana/public' {
+  interface AppMountContext {
+    embeddable?: EmbeddableApi;
+  }
+}
 
 export interface IEmbeddableSetupDependencies {
   uiActions: IUiActionsSetup;
 }
 
-export class EmbeddablePublicPlugin implements Plugin<any, any> {
+export type IEmbeddableSetupContract = EmbeddableApi;
+
+export type IEmbeddableStart = EmbeddableApi;
+
+export class EmbeddablePublicPlugin implements Plugin<IEmbeddableSetupContract, IEmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private api!: EmbeddableApi;
 
@@ -39,11 +50,13 @@ export class EmbeddablePublicPlugin implements Plugin<any, any> {
     }));
     bootstrap(uiActions);
 
-    const { registerEmbeddableFactory } = this.api;
+    core.application.registerMountContext<'embeddable'>('embeddable', () => {
+      return this.api;
+    });
 
-    return {
-      registerEmbeddableFactory,
-    };
+    //  const { registerEmbeddableFactory } = this.api;
+
+    return this.api;
   }
 
   public start(core: CoreStart) {

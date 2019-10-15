@@ -28,6 +28,7 @@ export interface KibanaContext {
   query?: Query | Query[];
   filters?: Filter[];
   timeRange?: TimeRange;
+  indexPattern?: string;
 }
 
 export const kibanaContext = () => ({

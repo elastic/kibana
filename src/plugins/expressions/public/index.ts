@@ -27,3 +27,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { ExpressionsPublicPlugin as Plugin };
 
 export * from '../common';
+
+export { ExpressionsSetupContract } from './expressions/expressions_service';
+export { ExpressionsStartContract } from './expressions/expressions_service';

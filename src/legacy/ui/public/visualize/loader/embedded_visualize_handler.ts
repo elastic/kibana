@@ -478,6 +478,10 @@ export class EmbeddedVisualizeHandler {
     this.abortController = new AbortController();
     this.dataLoaderParams.abortSignal = this.abortController.signal;
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
+    // const index = this.dataLoaderParams.searchSource.getField('index');
+    // if (typeof index === 'string') {
+    //   this.dataLoaderParams.aggs.indexPattern = index;
+    // }
     this.dataLoaderParams.forceFetch = forceFetch;
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
 
@@ -527,11 +531,11 @@ export class EmbeddedVisualizeHandler {
     this.vis.showRequestError =
       error.type && ['NO_OP_SEARCH_STRATEGY', 'UNSUPPORTED_QUERY'].includes(error.type);
 
-    toastNotifications.addDanger({
+    throw error;
+    toastNotifications.addError(error, {
       title: i18n.translate('common.ui.visualize.dataLoaderError', {
         defaultMessage: 'Error in visualization',
       }),
-      text: error.message,
     });
   };
 

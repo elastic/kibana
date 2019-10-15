@@ -33,10 +33,13 @@ export interface LensEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
   query?: Query;
   filters?: Filter[];
+  expression: string;
+  indexPattern?: string;
 }
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: StaticIndexPattern[];
+  indexPattern?: string;
 }
 
 export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput> {
@@ -52,6 +55,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     query?: Query;
     filters?: Filter[];
     lastReloadRequestTime?: number;
+    indexPattern?: string;
   } = {};
 
   constructor(
@@ -88,13 +92,17 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     if (
       !_.isEqual(containerState.timeRange, this.currentContext.timeRange) ||
       !_.isEqual(containerState.query, this.currentContext.query) ||
-      !_.isEqual(cleanedFilters, this.currentContext.filters)
+      !_.isEqual(cleanedFilters, this.currentContext.filters) ||
+      !_.isEqual(containerState.indexPattern, this.currentContext.indexPattern) ||
+      !_.isEqual(containerState.expression, this.currentContext.expression)
     ) {
       this.currentContext = {
         timeRange: containerState.timeRange,
         query: containerState.query,
         lastReloadRequestTime: this.currentContext.lastReloadRequestTime,
         filters: cleanedFilters,
+        indexPattern: containerState.indexPattern,
+        expression: containerState.expression,
       };
 
       if (this.domNode) {
@@ -113,7 +121,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
-        expression={this.savedVis.expression}
+        expression={this.input.expression}
         context={this.currentContext}
       />,
       domNode

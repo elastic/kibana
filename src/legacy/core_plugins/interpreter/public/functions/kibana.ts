@@ -58,6 +58,7 @@ export const kibana = (): ExpressionFunctionKibana => ({
       query: initialContext.query,
       filters: initialContext.filters,
       timeRange,
+      indexPattern: initialContext.indexPattern,
     };
   },
 });

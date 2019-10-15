@@ -1,0 +1,10 @@
+{
+  "id": "eqlSearchSpaceTime",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["eql_search_space_time"],
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "uiActions", "embeddable", "expressions"],
+  "optionalPlugins": []
+}

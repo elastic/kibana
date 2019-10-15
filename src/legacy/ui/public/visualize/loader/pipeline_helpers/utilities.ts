@@ -56,7 +56,7 @@ const getFieldFormat = (id: string | undefined, params: object = {}) => {
 };
 
 export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
-  const format: SerializedFieldFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
+  const format: SerializedFieldFormat = agg.params.field  && agg.params.field.format ? agg.params.field.format.toJSON() : {};
   const formats: Record<string, () => SerializedFieldFormat> = {
     date_range: () => ({ id: 'string' }),
     percentile_ranks: () => ({ id: 'percent' }),

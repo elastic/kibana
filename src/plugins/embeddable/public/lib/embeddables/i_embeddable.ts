@@ -28,6 +28,7 @@ export interface EmbeddableInput {
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
+  queryEmitterId?: string;
 }
 
 export interface EmbeddableOutput {
@@ -71,6 +72,8 @@ export interface IEmbeddable<
    * know the shape if this returns true
    */
   getIsContainer(): this is IContainer;
+
+  getDataSource(): IEmbeddable | undefined;
 
   /**
    * Get the input used to instantiate this embeddable. The input is a serialized representation of

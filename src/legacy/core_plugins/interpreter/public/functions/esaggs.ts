@@ -106,7 +106,20 @@ const handleCourierRequest = async ({
 
   if (timeRange) {
     timeFilterSearchSource.setField('filter', () => {
-      return getTime(searchSource.getField('index'), timeRange);
+      const index = searchSource.getField('index');
+      let useTimeName;
+      if (typeof index === 'string') {
+        const dateHisto = aggs.aggs.find(agg => agg.type.dslName === 'date_histogram');
+        if (dateHisto) {
+          useTimeName = dateHisto.params.field.name;
+        }
+      }
+      const timeAgg = getTime(searchSource.getField('index'), timeRange);
+      if (useTimeName) {
+        timeAgg.range[useTimeName] = timeAgg.range.timestamp;
+        delete timeAgg.range.timestamp;
+        return timeAgg;
+      }
     });
   }
 
@@ -253,12 +266,19 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
-    const indexPattern = await indexPatterns.get(args.index);
+    console.log('context is ', context);
+    let indexPattern;
+    const indexPatternString = context && context.indexPattern ? context.indexPattern : args.index;
+    try {
+      indexPattern = await indexPatterns.get(indexPatternString);
+    } catch (e) {
+      indexPattern = indexPatternString;
+    }
     const aggs = new AggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
     const searchSource = new SearchSourceClass();
-    searchSource.setField('index', indexPattern);
+    searchSource.setField('index', indexPattern.id ? indexPattern : indexPatternString);
     searchSource.setField('size', 0);
 
     const response = await handleCourierRequest({

@@ -21,7 +21,7 @@
 // this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
 // change.
 export function filterMatchesIndex(filter, indexPattern) {
-  if (!filter.meta || !indexPattern) {
+  if (!filter.meta || !indexPattern || typeof indexPattern === 'string') {
     return true;
   }
   return indexPattern.fields.some(field => field.name === filter.meta.key);

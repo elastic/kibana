@@ -51,6 +51,7 @@ function showErrorDialog({
   error,
   openModal,
 }: Pick<ErrorToastProps, 'error' | 'title' | 'openModal'>) {
+  console.error(error);
   const modal = openModal(
     <React.Fragment>
       <EuiModalHeader>

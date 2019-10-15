@@ -364,7 +364,7 @@ export class AggConfig {
       : `${this.type.makeLabel(this)}`;
   }
 
-  getIndexPattern() {
+  getIndexPattern(): IndexPattern | string {
     return this.aggConfigs.indexPattern;
   }
 
@@ -428,16 +428,20 @@ export class AggConfig {
     const fieldParam =
       this.type && (this.type.params.find((p: any) => p.type === 'field') as FieldParamType);
     // @ts-ignore
-    const availableFields = fieldParam
-      ? fieldParam.getAvailableFields(this.getIndexPattern().fields)
-      : [];
+    const availableFields =
+      fieldParam && typeof this.getIndexPattern() !== 'string'
+        ? fieldParam.getAvailableFields(this.getIndexPattern().fields)
+        : [];
     // clear out the previous params except for a few special ones
+    const field =
+      availableFields.find((field: any) => field.name === this.getField()) || this.getField();
+
     this.setParams({
       // split row/columns is "outside" of the agg, so don't reset it
       row: this.params.row,
 
       // almost every agg has fields, so we try to persist that when type changes
-      field: availableFields.find((field: any) => field.name === this.getField()),
+      field: field || type ? type.dslName : undefined,
     });
   }
 

@@ -23,6 +23,7 @@ export interface ExpressionWrapperProps {
     query?: Query;
     filters?: Filter[];
     lastReloadRequestTime?: number;
+    indexPattern?: string;
   };
 }
 

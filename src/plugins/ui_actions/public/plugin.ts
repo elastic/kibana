@@ -21,13 +21,15 @@ import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core
 import { IUiActionsApi, IActionRegistry, ITriggerRegistry } from './types';
 import { createApi } from './api';
 
-export interface IUiActionsSetup {
-  attachAction: IUiActionsApi['attachAction'];
-  registerAction: IUiActionsApi['registerAction'];
-  registerTrigger: IUiActionsApi['registerTrigger'];
-}
+export type IUiActionsSetup = IUiActionsApi;
 
 export type IUiActionsStart = IUiActionsApi;
+
+declare module 'kibana/public' {
+  interface AppMountContext {
+    uiActions?: IUiActionsApi;
+  }
+}
 
 export class UiActionsPlugin implements Plugin<IUiActionsSetup, IUiActionsStart> {
   private readonly triggers: ITriggerRegistry = new Map();
@@ -39,11 +41,10 @@ export class UiActionsPlugin implements Plugin<IUiActionsSetup, IUiActionsStart>
   }
 
   public setup(core: CoreSetup): IUiActionsSetup {
-    return {
-      registerTrigger: this.api.registerTrigger,
-      registerAction: this.api.registerAction,
-      attachAction: this.api.attachAction,
-    };
+    core.application.registerMountContext<'uiActions'>('uiActions', () => {
+      return this.api;
+    });
+    return this.api;
   }
 
   public start(core: CoreStart): IUiActionsStart {

@@ -85,7 +85,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
       (indexPattern: IndexPattern | null): indexPattern is IndexPattern => Boolean(indexPattern)
     );
 
-    return new Embeddable(
+    const embeddable = new Embeddable(
       this.expressionRenderer,
       {
         savedVis,
@@ -93,9 +93,14 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
         editable: this.isEditable(),
         indexPatterns,
       },
-      input,
+      { expression: savedVis.expression, ...input },
       parent
     );
+
+    if (!input.expression) {
+      embeddable.updateInput({ expression: savedVis.expression });
+    }
+    return embeddable;
   }
 
   async create(input: EmbeddableInput) {

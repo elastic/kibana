@@ -21,7 +21,7 @@
 export function buildExistsFilter(field, indexPattern) {
   return {
     meta: {
-      index: indexPattern.id
+      index: typeof indexPattern === 'string' ? indexPattern : indexPattern.id
     },
     exists: {
       field: field.name
