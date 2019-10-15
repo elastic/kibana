@@ -80,7 +80,7 @@ export class AbstractVectorSource extends AbstractSource {
     return null;
   }
 
-  async getTimeFields() {
+  async getDateFields() {
     return [];
   }
 
