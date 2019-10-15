@@ -118,7 +118,7 @@ export async function fetchAndTransformGcMetrics({
   if (!aggregations) {
     return {
       ...chartBase,
-      totalHits: 0,
+      noHits: true,
       series: []
     };
   }
@@ -156,7 +156,7 @@ export async function fetchAndTransformGcMetrics({
 
   return {
     ...chartBase,
-    totalHits: response.hits.total,
+    noHits: response.hits.total.value === 0,
     series
   };
 }
