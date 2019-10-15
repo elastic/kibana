@@ -79,11 +79,12 @@ export interface ModuleJob {
   };
 }
 
+// TODO: Speak to ML team about why the get_module API will sometimes return indexes and other times indices
+// See mockGetModuleResponse for examples
 export interface ModuleDatafeed {
   id: string;
   config: {
     job_id: string;
-    // TODO: Speak to ML team about this one
     indexes?: string[];
     indices?: string[];
     query: Record<string, object>;
