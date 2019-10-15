@@ -17,47 +17,56 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { BucketAggType } from './_bucket_agg_type';
 import { i18n } from '@kbn/i18n';
+import { noop } from 'lodash';
+import { METRIC_TYPES } from 'ui/agg_types/metrics/metric_agg_types';
+import { AggConfigOptions } from 'ui/agg_types/agg_config';
+
+import { BucketAggType } from './_bucket_agg_type';
+import { BUCKET_TYPES } from './bucket_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+
+const geotileGridTitle = i18n.translate('common.ui.aggTypes.buckets.geotileGridTitle', {
+  defaultMessage: 'Geotile',
+});
 
 export const geoTileBucketAgg = new BucketAggType({
-  name: 'geotile_grid',
-  title: i18n.translate('common.ui.aggTypes.buckets.geotileGridTitle', {
-    defaultMessage: 'Geotile',
-  }),
+  name: BUCKET_TYPES.GEOTILE_GRID,
+  title: geotileGridTitle,
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'geo_point'
+      filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
     },
     {
       name: 'useGeocentroid',
       default: true,
-      write: _.noop
+      write: noop,
     },
     {
       name: 'precision',
       default: 0,
-    }
+    },
   ],
-  getRequestAggs: function (agg) {
+  getRequestAggs(agg) {
     const aggs = [];
-    const params = agg.params;
+    const useGeocentroid = agg.getParam('useGeocentroid');
 
     aggs.push(agg);
 
-    if (params.useGeocentroid) {
-      aggs.push(agg.aggConfigs.createAggConfig({
-        type: 'geo_centroid',
+    if (useGeocentroid) {
+      const aggConfig: AggConfigOptions = {
+        type: METRIC_TYPES.GEO_CENTROID,
         enabled: true,
         params: {
-          field: agg.getField()
-        }
-      }, { addToAggConfigs: false }));
+          field: agg.getField(),
+        },
+      };
+
+      aggs.push(agg.aggConfigs.createAggConfig(aggConfig, { addToAggConfigs: false }));
     }
 
     return aggs;
-  }
+  },
 });

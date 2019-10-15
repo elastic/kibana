@@ -16,16 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
+import { BucketAggType } from './_bucket_agg_type';
+import { BUCKET_TYPES } from './bucket_agg_types';
 
-import { buildRangeFilter } from '@kbn/es-query';
+const filterTitle = i18n.translate('common.ui.aggTypes.buckets.filterTitle', {
+  defaultMessage: 'Filter',
+});
 
-export function createFilterHistogram(aggConfig, key) {
-  const value = parseInt(key, 10);
-
-  return buildRangeFilter(
-    aggConfig.params.field,
-    { gte: value, lt: value + aggConfig.params.interval },
-    aggConfig.getIndexPattern(),
-    aggConfig.fieldFormatter()(key)
-  );
-}
+export const filterBucketAgg = new BucketAggType({
+  name: BUCKET_TYPES.FILTER,
+  title: filterTitle,
+  params: [
+    {
+      name: 'geo_bounding_box',
+    },
+  ],
+});

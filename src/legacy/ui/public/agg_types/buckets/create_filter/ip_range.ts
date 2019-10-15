@@ -17,17 +17,27 @@
  * under the License.
  */
 
-import { BucketAggType } from './_bucket_agg_type';
-import { i18n } from '@kbn/i18n';
+import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
+import { CidrMask } from '../../../utils/cidr_mask';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
-export const filterBucketAgg = new BucketAggType({
-  name: 'filter',
-  title: i18n.translate('common.ui.aggTypes.buckets.filterTitle', {
-    defaultMessage: 'Filter',
-  }),
-  params: [
-    {
-      name: 'geo_bounding_box'
-    }
-  ]
-});
+export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: string) => {
+  let range: RangeFilterParams;
+
+  if (aggConfig.params.ipRangeType === 'mask') {
+    range = new CidrMask(key).getRange();
+  } else {
+    const [from, to] = key.split(/\s+to\s+/);
+
+    range = {
+      from: from === '-Infinity' ? -Infinity : from,
+      to: to === 'Infinity' ? Infinity : to,
+    };
+  }
+
+  return buildRangeFilter(
+    aggConfig.params.field,
+    { gte: range.from, lte: range.to },
+    aggConfig.getIndexPattern()
+  );
+};

@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/agg_types/agg_config';
+import React from 'react';
+import { AggParamEditorProps } from 'ui/vis/editors/default';
+import { RangesParamEditor } from '../../vis/editors/default/controls/ranges';
 
-export function isStringType(type: AggConfig): boolean;
-export function isType(type: string): (agg: AggConfig) => boolean;
+export const RangesEditor = (props: AggParamEditorProps<any>) => (
+  <RangesParamEditor value={props.value} setValue={props.setValue} />
+);

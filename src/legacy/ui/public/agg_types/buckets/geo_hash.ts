@@ -17,16 +17,21 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import chrome from '../../chrome';
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { AutoPrecisionParamEditor } from '../../vis/editors/default/controls/auto_precision';
 import { UseGeocentroidParamEditor } from '../../vis/editors/default/controls/use_geocentroid';
 import { IsFilteredByCollarParamEditor } from '../../vis/editors/default/controls/is_filtered_by_collar';
 import { PrecisionParamEditor } from '../../vis/editors/default/controls/precision';
 import { geohashColumns } from '../../utils/decode_geo_hash';
-import { geoContains, scaleBounds } from '../../utils/geo_utils';
-import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../vis/editors/default/agg_groups';
+import { AggConfig } from '../agg_config';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+
+// @ts-ignore
+import { geoContains, scaleBounds } from '../../utils/geo_utils';
+import { BUCKET_TYPES } from './bucket_agg_types';
 
 const config = chrome.getUiSettingsClient();
 
@@ -36,14 +41,15 @@ const maxPrecision = parseInt(config.get('visualization:tileMap:maxPrecision'), 
  * Map Leaflet zoom levels to geohash precision levels.
  * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
  */
-const zoomPrecision = {};
+const zoomPrecision: any = {};
 const minGeohashPixels = 16;
+
 for (let zoom = 0; zoom <= 21; zoom += 1) {
   const worldPixels = 256 * Math.pow(2, zoom);
   zoomPrecision[zoom] = 1;
   for (let precision = 2; precision <= maxPrecision; precision += 1) {
     const columns = geohashColumns(precision);
-    if ((worldPixels / columns) >= minGeohashPixels) {
+    if (worldPixels / columns >= minGeohashPixels) {
       zoomPrecision[zoom] = precision;
     } else {
       break;
@@ -51,11 +57,10 @@ for (let zoom = 0; zoom <= 21; zoom += 1) {
   }
 }
 
-function getPrecision(precision) {
+function getPrecision(val: string) {
+  let precision = parseInt(val, 10);
 
-  precision = parseInt(precision, 10);
-
-  if (isNaN(precision)) {
+  if (Number.isNaN(precision)) {
     precision = defaultPrecision;
   }
 
@@ -66,20 +71,29 @@ function getPrecision(precision) {
   return precision;
 }
 
-function isOutsideCollar(bounds, collar) {
-  return bounds && collar && !geoContains(collar, bounds);
+const isOutsideCollar = (bounds: unknown, collar: MapCollar) =>
+  bounds && collar && !geoContains(collar, bounds);
+
+const geohashGridTitle = i18n.translate('common.ui.aggTypes.buckets.geohashGridTitle', {
+  defaultMessage: 'Geohash',
+});
+
+interface MapCollar {
+  zoom: unknown;
 }
 
-export const geoHashBucketAgg = new BucketAggType({
-  name: 'geohash_grid',
-  title: i18n.translate('common.ui.aggTypes.buckets.geohashGridTitle', {
-    defaultMessage: 'Geohash',
-  }),
+export interface IBucketGeoHashGridAggConfig extends IBucketAggConfig {
+  lastMapCollar: MapCollar;
+}
+
+export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
+  name: BUCKET_TYPES.GEOHASH_GRID,
+  title: geohashGridTitle,
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'geo_point'
+      filterFieldTypes: KBN_FIELD_TYPES.GEO_POINT,
     },
     {
       name: 'autoPrecision',
@@ -92,12 +106,13 @@ export const geoHashBucketAgg = new BucketAggType({
       editorComponent: PrecisionParamEditor,
       default: defaultPrecision,
       deserialize: getPrecision,
-      write: function (aggConfig, output) {
+      write(aggConfig, output) {
         const currZoom = aggConfig.params.mapZoom;
         const autoPrecisionVal = zoomPrecision[currZoom];
-        output.params.precision = aggConfig.params.autoPrecision ?
-          autoPrecisionVal : getPrecision(aggConfig.params.precision);
-      }
+        output.params.precision = aggConfig.params.autoPrecision
+          ? autoPrecisionVal
+          : getPrecision(aggConfig.params.precision);
+      },
     },
     {
       name: 'useGeocentroid',
@@ -125,17 +140,21 @@ export const geoHashBucketAgg = new BucketAggType({
       name: 'mapBounds',
       default: null,
       write: () => {},
-    }
+    },
   ],
-  getRequestAggs: function (agg) {
-    const aggs = [];
+  getRequestAggs(agg) {
+    const aggs: AggConfig[] = [];
     const params = agg.params;
 
     if (params.isFilteredByCollar && agg.getField()) {
       const { mapBounds, mapZoom } = params;
       if (mapBounds) {
         let mapCollar;
-        if (!agg.lastMapCollar || agg.lastMapCollar.zoom !== mapZoom || isOutsideCollar(mapBounds, agg.lastMapCollar)) {
+        if (
+          !agg.lastMapCollar ||
+          agg.lastMapCollar.zoom !== mapZoom ||
+          isOutsideCollar(mapBounds, agg.lastMapCollar)
+        ) {
           mapCollar = scaleBounds(mapBounds);
           mapCollar.zoom = mapZoom;
           agg.lastMapCollar = mapCollar;
@@ -146,35 +165,45 @@ export const geoHashBucketAgg = new BucketAggType({
           ignore_unmapped: true,
           [agg.getField().name]: {
             top_left: mapCollar.top_left,
-            bottom_right: mapCollar.bottom_right
-          }
-        };
-        aggs.push(agg.aggConfigs.createAggConfig({
-          type: 'filter',
-          id: 'filter_agg',
-          enabled: true,
-          params: {
-            geo_bounding_box: boundingBox
+            bottom_right: mapCollar.bottom_right,
           },
-          schema: {
-            group: AggGroupNames.Buckets
-          }
-        },  { addToAggConfigs: false }));
+        };
+        aggs.push(
+          agg.aggConfigs.createAggConfig(
+            {
+              type: 'filter',
+              id: 'filter_agg',
+              enabled: true,
+              params: {
+                geo_bounding_box: boundingBox,
+              },
+              schema: {
+                group: AggGroupNames.Buckets,
+              },
+            } as any,
+            { addToAggConfigs: false }
+          )
+        );
       }
     }
 
     aggs.push(agg);
 
     if (params.useGeocentroid) {
-      aggs.push(agg.aggConfigs.createAggConfig({
-        type: 'geo_centroid',
-        enabled: true,
-        params: {
-          field: agg.getField()
-        }
-      }, { addToAggConfigs: false }));
+      aggs.push(
+        agg.aggConfigs.createAggConfig(
+          {
+            type: 'geo_centroid',
+            enabled: true,
+            params: {
+              field: agg.getField(),
+            },
+          },
+          { addToAggConfigs: false }
+        )
+      );
     }
 
-    return aggs;
-  }
+    return aggs as IBucketGeoHashGridAggConfig[];
+  },
 });

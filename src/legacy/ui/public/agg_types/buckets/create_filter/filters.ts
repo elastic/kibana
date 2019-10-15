@@ -17,20 +17,17 @@
  * under the License.
  */
 
-import { CidrMask } from '../../../utils/cidr_mask';
-import { buildRangeFilter } from '@kbn/es-query';
+import { get } from 'lodash';
+import { buildQueryFilter } from '@kbn/es-query';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
-export function createFilterIpRange(aggConfig, key) {
-  let range;
-  if (aggConfig.params.ipRangeType === 'mask') {
-    range = new CidrMask(key).getRange();
-  } else {
-    const [from, to] = key.split(/\s+to\s+/);
-    range = {
-      from: from === '-Infinity' ? -Infinity : from,
-      to: to === 'Infinity' ? Infinity : to
-    };
+export const createFilterFilters = (aggConfig: IBucketAggConfig, key: string) => {
+  // have the aggConfig write agg dsl params
+  const dslFilters: any = get(aggConfig.toDsl(), 'filters.filters');
+  const filter = dslFilters[key];
+  const indexPattern = aggConfig.getIndexPattern();
+
+  if (filter && indexPattern && indexPattern.id) {
+    return buildQueryFilter(filter.query, indexPattern.id, key);
   }
-
-  return buildRangeFilter(aggConfig.params.field, { gte: range.from, lte: range.to }, aggConfig.getIndexPattern());
-}
+};
