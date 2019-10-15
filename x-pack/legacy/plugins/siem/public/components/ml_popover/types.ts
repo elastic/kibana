@@ -94,7 +94,7 @@ export interface MlSetupArgs {
   configTemplate: string;
   indexPatternName: string;
   jobIdErrorFilter?: string[];
-  groups?: string[];
+  groups: string[];
   prefix?: string;
   headers?: Record<string, string | undefined>;
 }
