@@ -130,11 +130,6 @@ export interface ILicense {
   reasonUnavailable?: string | Error;
 
   /**
-   * A concretely-defined hash or stringified version of the serialized license.
-   */
-  signature: string;
-
-  /**
    * Determine if the provided license types match against the license type.
    * @param candidateLicenses license types to intersect against the license.
    */

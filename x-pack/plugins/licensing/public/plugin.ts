@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject, Subject, defer, merge, of, timer } from 'rxjs';
-import { filter, map, pairwise, repeatWhen, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, Subject, merge, of } from 'rxjs';
+import { filter, map, pairwise, switchMap, takeUntil, tap } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -18,18 +18,9 @@ import {
   LICENSING_SESSION,
   LICENSING_SESSION_SIGNATURE,
   SIGNATURE_HEADER,
-  DEFAULT_POLLING_FREQUENCY,
 } from '../common/constants';
 import { License } from '../common/license';
 import { hasLicenseInfoChanged } from '../common/has_license_info_changed';
-
-/**
- * Generate the signature for a serialized/stringified license.
- */
-function sign(serialized: string) {
-  return sign.signature;
-}
-sign.signature = '';
 
 /**
  * @public
@@ -52,37 +43,27 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
    */
   private refresher$ = new BehaviorSubject(true);
 
-  /**
-   * Used to determine how frequently to poll the server for license updates.
-   * Must be overridden prior to plugin setup to be utilized.
-   */
-  public pollingFrequency = DEFAULT_POLLING_FREQUENCY;
-
   constructor(context: PluginInitializerContext) {}
 
   /**
    * Fetch the objectified license and signature from session storage.
    */
-  private getSession(): IObjectifiedLicense | null {
+  private getSession(): { objectified?: IObjectifiedLicense; signature: string } {
     const raw = sessionStorage.getItem(LICENSING_SESSION);
-    const signature = sessionStorage.getItem(LICENSING_SESSION_SIGNATURE);
-    const json = raw && JSON.parse(raw);
+    const signature = sessionStorage.getItem(LICENSING_SESSION_SIGNATURE) || '';
+    const objectified = raw && JSON.parse(raw);
 
-    if (signature) {
-      sign.signature = signature;
-    }
-
-    return json;
+    return { objectified, signature };
   }
 
   /**
    * Store the given license and signature in session storage.
    */
-  private setSession = (license: License) => {
+  private setSession = (license: License, signature: string) => {
     sessionStorage.setItem(LICENSING_SESSION, JSON.stringify(license.toObject()));
 
-    if (license.signature) {
-      sessionStorage.setItem(LICENSING_SESSION_SIGNATURE, license.signature);
+    if (signature) {
+      sessionStorage.setItem(LICENSING_SESSION_SIGNATURE, signature);
     }
   };
 
@@ -101,7 +82,9 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
   public setup(core: CoreSetup) {
     const session = this.getSession();
     const initial$ = of(
-      session ? License.fromObjectified(session, { sign }) : new License({ sign, features: {} })
+      session.objectified
+        ? License.fromObjectified(session.objectified)
+        : new License({ features: {} })
     );
     const setup = {
       refresh: () => this.refresher$.next(true),
@@ -110,11 +93,11 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
 
     this.removeInterceptor = core.http.intercept({
       response: httpResponse => {
-        const signature =
+        const signatureHeader =
           (httpResponse.response && httpResponse.response.headers.get(SIGNATURE_HEADER)) || '';
 
-        if (signature !== sign.signature) {
-          sign.signature = signature;
+        if (signatureHeader !== session.signature) {
+          session.signature = signatureHeader;
 
           if (httpResponse.request && !httpResponse.request.url.includes(API_ROUTE)) {
             setup.refresh();
@@ -124,20 +107,21 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
     });
 
     // The license fetches occur in a defer/repeatWhen pair to avoid race conditions between refreshes and timers
-    const licenseFetches$ = defer(async () => {
-      try {
-        const response = await core.http.get(API_ROUTE);
-        const rawLicense = response && response.license;
-        const features = (response && response.features) || {};
+    const licenseFetches$ = this.refresher$.pipe(
+      takeUntil(this.stop$),
+      switchMap(async () => {
+        try {
+          const response = await core.http.get(API_ROUTE);
+          const rawLicense = response && response.license;
+          const features = (response && response.features) || {};
 
-        return new License({ sign, license: rawLicense, features });
-      } catch (err) {
-        // Prevent reusing stale license if the fetch operation fails
-        this.clearSession();
-        return new License({ sign, features: {}, error: err });
-      }
-    }).pipe(
-      repeatWhen(complete$ => complete$.pipe(switchMap(() => timer(0, this.pollingFrequency))))
+          return new License({ license: rawLicense, features });
+        } catch (err) {
+          // Prevent reusing stale license if the fetch operation fails
+          this.clearSession();
+          return new License({ features: {}, error: err });
+        }
+      })
     );
     const updates$ = merge(initial$, licenseFetches$).pipe(
       takeUntil(this.stop$),
@@ -148,7 +132,9 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
 
     setup.license$ = merge(initial$, updates$).pipe(
       takeUntil(this.stop$),
-      tap(this.setSession)
+      tap(license => {
+        this.setSession(license, session.signature);
+      })
     );
 
     return setup;

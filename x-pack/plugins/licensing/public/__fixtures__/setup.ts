@@ -8,7 +8,6 @@ import { take, skip } from 'rxjs/operators';
 import { CoreSetup } from '../../../../../src/core/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { licenseMerge } from '../../common/license_merge';
-import { SIGNATURE_HEADER } from '../../common/constants';
 import { Plugin } from '../plugin';
 
 export function setupOnly(pluginInitializerContext: any = {}) {
@@ -43,15 +42,16 @@ export async function setup(xpackInfo = {}, pluginInitializerContext: any = {}, 
 // NOTE: Since we don't have a real interceptor here due to mocks,
 // we fake the process and necessary objects.
 export function mockHttpInterception(
-  coreSetup: MockedKeys<CoreSetup>
+  coreSetup: MockedKeys<CoreSetup>,
+  next?: (path: string, headers: Map<string, string>) => void
 ): Promise<jest.Mock<any, any>> {
   return new Promise(resolve => {
     coreSetup.http.intercept.mockImplementation(interceptor => {
       coreSetup.http.get.mockImplementation(path => {
-        const headers = new Map();
+        const headers = new Map<string, string>();
 
-        if (path.includes('fake')) {
-          headers.set(SIGNATURE_HEADER, 'fake-signature');
+        if (next) {
+          next(path, headers);
         }
 
         (interceptor.response as (_: any) => void)({

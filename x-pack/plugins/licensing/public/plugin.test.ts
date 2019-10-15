@@ -5,11 +5,15 @@
  */
 
 import { Observable } from 'rxjs';
-import { bufferCount, first, take, skip } from 'rxjs/operators';
+import { take, skip } from 'rxjs/operators';
 import { ILicense } from '../common/types';
 import { License } from '../common/license';
-import { licenseMerge } from '../common/license_merge';
-import { API_ROUTE, LICENSING_SESSION, LICENSING_SESSION_SIGNATURE } from '../common/constants';
+import {
+  API_ROUTE,
+  LICENSING_SESSION,
+  LICENSING_SESSION_SIGNATURE,
+  SIGNATURE_HEADER,
+} from '../common/constants';
 import { delay } from '../common/delay';
 import { Plugin } from './plugin';
 import { mockHttpInterception, setup, setupOnly } from './__fixtures__/setup';
@@ -28,33 +32,17 @@ describe('licensing plugin', () => {
     expect(license).toBeInstanceOf(License);
   });
 
-  test('intercepted HTTP request changes license signature', async () => {
-    const { coreSetup, plugin: _plugin } = await setupOnly();
-
-    plugin = _plugin;
-    mockHttpInterception(coreSetup);
-
-    const { license$ } = await plugin.setup(coreSetup);
-
-    license = await license$
-      .pipe(
-        skip(1),
-        take(1)
-      )
-      .toPromise();
-
-    expect(license.signature).toBe('');
-
-    await coreSetup.http.get('/api/fake');
-
-    expect(license.signature).toBe('fake-signature');
-  });
-
   test('intercepted HTTP request causes a refresh if the signature changes', async () => {
     const { coreSetup, plugin: _plugin } = await setupOnly();
 
     plugin = _plugin;
-    mockHttpInterception(coreSetup);
+    mockHttpInterception(coreSetup, (path, headers) => {
+      // Here we emulate that the server returned a new signature header,
+      // which should trigger the plugin to refresh().
+      if (path.includes('/fake')) {
+        headers.set(SIGNATURE_HEADER, 'fake-signature');
+      }
+    });
 
     const licensingSetup = await plugin.setup(coreSetup);
 
@@ -101,34 +89,6 @@ describe('licensing plugin', () => {
       .toPromise();
 
     expect(finalLicense).toBeInstanceOf(License);
-  });
-
-  test('observable receives updated licenses', async () => {
-    const { coreSetup, plugin: _plugin } = await setupOnly();
-    const types = ['basic', 'gold', 'platinum'];
-
-    plugin = _plugin;
-    plugin.pollingFrequency = 100;
-    coreSetup.http.get.mockImplementation(() =>
-      Promise.resolve(
-        licenseMerge({
-          license: {
-            type: types.shift(),
-          },
-        })
-      )
-    );
-
-    const { license$ } = await plugin.setup(coreSetup);
-    const [second, third, fourth] = await license$
-      .pipe(
-        skip(1),
-        bufferCount(3),
-        take(1)
-      )
-      .toPromise();
-
-    expect([second.type, third.type, fourth.type]).toEqual(['basic', 'gold', 'platinum']);
   });
 });
 
@@ -179,19 +139,41 @@ describe('licensing plugin | session storage', () => {
     );
     ({ plugin, license$ } = await setup());
 
-    const initial = await license$.pipe(first()).toPromise();
+    const initial = await license$.pipe(take(1)).toPromise();
 
     expect(initial.uid).toBe('alpha');
     expect(initial.getFeature('fake').isAvailable).toBe(true);
   });
 
   test('loads signature session', async () => {
-    sessionStorage.setItem(LICENSING_SESSION_SIGNATURE, 'fake-signature');
-    ({ plugin, license$ } = await setup());
+    const FAKE_SIGNATURE = 'fake-signature';
 
-    const initial = await license$.pipe(first()).toPromise();
+    sessionStorage.setItem(LICENSING_SESSION_SIGNATURE, FAKE_SIGNATURE);
 
-    expect(initial.signature).toBe('fake-signature');
+    const { coreSetup, plugin: _plugin } = await setupOnly();
+
+    plugin = _plugin;
+    mockHttpInterception(coreSetup, (path, headers) => {
+      // Here we set the header signature during interception to be the same value as what
+      // we stored in sessionStorage. Below when we make requests to the fake API,
+      // if these values match, the plugin's refresh() method should not be called.
+      headers.set(SIGNATURE_HEADER, FAKE_SIGNATURE);
+    });
+
+    const licensingSetup = await plugin.setup(coreSetup);
+
+    await licensingSetup.license$
+      .pipe(
+        skip(1),
+        take(1)
+      )
+      .toPromise();
+
+    const refresh = jest.spyOn(licensingSetup, 'refresh');
+
+    await coreSetup.http.get('/api/fake');
+
+    expect(refresh).toHaveBeenCalledTimes(0);
   });
 
   test('session is cleared when request fails', async () => {

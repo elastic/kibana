@@ -115,8 +115,9 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
   public async setup(core: CoreSetup) {
     this.elasticsearch = core.elasticsearch;
 
+    let signature = '';
     const { clusterSource, pollingFrequency } = this.currentConfig;
-    const initial$ = of(new License({ sign, features: {}, clusterSource }));
+    const initial$ = of(new License({ features: {}, clusterSource }));
     const setup = {
       refresh: () => this.refresher$.next(true),
       license$: initial$,
@@ -140,7 +141,6 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
         const features = (response && response.features) || {};
 
         return new License({
-          sign,
           license: rawLicense,
           features,
           clusterSource: config.clusterSource,
@@ -151,7 +151,6 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
         );
 
         return new License({
-          sign,
           features: {},
           error: err,
           clusterSource: config.clusterSource,
@@ -167,12 +166,13 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
     setup.license$ = merge(initial$, updates$).pipe(
       takeUntil(this.stop$),
       tap(license => {
+        signature = sign(JSON.stringify(license.toObject()));
         this.logger.info(
           `Imported license information from Elasticsearch for the [${this.currentConfig.clusterSource}] cluster: ` +
             `type: ${license.type} | status: ${license.status} | expiry date: ${moment(
               license.expiryDateInMillis,
               'x'
-            ).format()}`
+            ).format()} | signature: ${signature}`
         );
       })
     );

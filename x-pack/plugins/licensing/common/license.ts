@@ -22,7 +22,6 @@ function toLicenseType(minimumLicenseRequired: LICENSE_TYPE | string) {
 }
 
 interface LicenseArgs {
-  sign(serialized: string): string;
   license?: IRawLicense;
   features?: IRawFeatures;
   error?: Error;
@@ -33,11 +32,6 @@ interface LicenseArgs {
  * @public
  */
 export class License implements ILicense {
-  /**
-   * A function to generate the signature for a serialized license.
-   */
-  private readonly sign: (serialized: string) => string;
-
   /**
    * Determine if the license is defined/contains data.
    */
@@ -52,11 +46,6 @@ export class License implements ILicense {
    * The raw feature information.
    */
   private readonly features: IRawFeatures;
-
-  /**
-   * A cached copy of the serialized and signed license.
-   */
-  private _signature!: string;
 
   /**
    * A cached copy of the objectified license.
@@ -85,7 +74,7 @@ export class License implements ILicense {
    */
   static fromObjectified(
     objectified: IObjectifiedLicense,
-    { sign, error, clusterSource }: LicenseArgs
+    { error, clusterSource }: LicenseArgs = {}
   ) {
     const license = {
       uid: objectified.license.uid,
@@ -105,7 +94,6 @@ export class License implements ILicense {
     );
 
     return new License({
-      sign,
       error,
       clusterSource,
       license,
@@ -113,8 +101,7 @@ export class License implements ILicense {
     });
   }
 
-  constructor({ sign, license, features, error, clusterSource }: LicenseArgs) {
-    this.sign = sign;
+  constructor({ license, features, error, clusterSource }: LicenseArgs) {
     this.hasLicense = Boolean(license);
     this.license = license || {};
     this.features = features || {};
@@ -192,19 +179,6 @@ export class License implements ILicense {
     }
 
     return this.error;
-  }
-
-  /**
-   * A hash or stringified version of the serialized license.
-   */
-  public get signature() {
-    if (this._signature) {
-      return this._signature;
-    }
-
-    this._signature = this.sign(JSON.stringify(this.toObject()));
-
-    return this._signature;
   }
 
   /**
