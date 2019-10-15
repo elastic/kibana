@@ -1,0 +1,16 @@
+{
+  "enrich.put_policy": {
+    "data_autocomplete_rules": {
+      "geo_match": {
+        "indices": "",
+        "match_field": "",
+        "enrich_fields": []
+      },
+      "match": {
+        "indices": "",
+        "match_field": "",
+        "enrich_fields": []
+      }
+    }
+  }
+}
