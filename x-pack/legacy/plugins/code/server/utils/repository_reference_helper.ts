@@ -63,16 +63,23 @@ class DefaultReferenceHelper implements RepositoryReferenceHelper {
   constructor(private readonly client: SavedObjectsClientContract) {}
 
   async createReference(uri: string): Promise<boolean> {
-    await this.client.create(
-      SAVED_OBJ_REPO,
-      {
-        uri,
-      },
-      {
-        id: uri,
+    try {
+      await this.client.create(
+        SAVED_OBJ_REPO,
+        {
+          uri,
+        },
+        {
+          id: uri,
+        }
+      );
+      return true;
+    } catch (e) {
+      if (Boom.isBoom(e) && e.output.statusCode === 409) {
+        return false;
       }
-    );
-    return true;
+      throw e;
+    }
   }
 
   async deleteReference(uri: string): Promise<boolean> {

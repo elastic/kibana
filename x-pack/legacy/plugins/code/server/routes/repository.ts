@@ -54,7 +54,6 @@ export function repositoryRoute(
       const repo = RepositoryUtils.buildRepository(repoUrl);
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
 
-      const refHelper = getReferenceHelper(req.getSavedObjectsClient());
       try {
         // Check if the repository already exists
         await repoObjectClient.getRepository(repo.uri);
@@ -64,6 +63,10 @@ export function repositoryRoute(
       } catch (error) {
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
+          // create the reference first, and make the creation idempotent, to avoid potential dangling repositories
+          // which have no references from any space, in case the writes to ES may fail independently
+          await getReferenceHelper(req.getSavedObjectsClient()).createReference(repo.uri);
+
           // Create the index for the repository
           const initializer = (await repoIndexInitializerFactory.create(
             repo.uri,
@@ -88,11 +91,6 @@ export function repositoryRoute(
           if (endpoint) {
             await repositoryService.clone(endpoint, payload);
           }
-          try {
-            await refHelper.createReference(repo.uri);
-          } catch (e) {
-            // repository already exists, response normally
-          }
           return repo;
         } catch (error2) {
           const msg = `Issue repository clone request for ${repoUrl} error`;
@@ -113,13 +111,9 @@ export function repositoryRoute(
       const repoUri: string = req.params.uri as string;
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
-        const noMoreRef = await getReferenceHelper(req.getSavedObjectsClient()).deleteReference(
-          repoUri
-        );
-        if (!noMoreRef) {
-          // not the last reference
-          return {};
-        }
+        // make sure the repo belongs to the current space
+        getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
+
         // Check if the repository already exists. If not, an error will be thrown.
         await repoObjectClient.getRepository(repoUri);
 
@@ -143,6 +137,9 @@ export function repositoryRoute(
         };
         const endpoint = await codeServices.locate(req, repoUri);
         await repositoryService.delete(endpoint, payload);
+
+        // delete the reference last to avoid dangling repositories
+        await getReferenceHelper(req.getSavedObjectsClient()).deleteReference(repoUri);
         return {};
       } catch (error) {
         const msg = `Issue repository delete request for ${repoUri} error`;
