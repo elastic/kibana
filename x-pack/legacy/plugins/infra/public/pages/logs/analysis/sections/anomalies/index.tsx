@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
+import euiStyled from '../../../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
@@ -181,8 +182,10 @@ const overallAnomalyScoreLabel = i18n.translate(
 const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ details }) => {
   const parsedDetails: ParsedAnnotationDetails = JSON.parse(details);
   return (
-    <div>
-      <span>{overallAnomalyScoreLabel}</span>
+    <TooltipWrapper>
+      <span>
+        <b>{overallAnomalyScoreLabel}</b>
+      </span>
       <ul>
         {parsedDetails.anomalyScoresByPartition.map(
           ({ partitionId, maximumAnomalyScore }, index) => {
@@ -199,7 +202,7 @@ const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ detai
           }
         )}
       </ul>
-    </div>
+    </TooltipWrapper>
   );
 };
 
@@ -210,3 +213,7 @@ const renderAnnotationTooltip = (details?: string) => {
   }
   return <AnnotationTooltip details={details} />;
 };
+
+const TooltipWrapper = euiStyled('div')`
+  white-space: nowrap;
+`;
