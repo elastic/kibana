@@ -64,7 +64,7 @@ export function BucketNestingEditor({
       <>
         <EuiHorizontalRule margin="m" />
         <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.nestingControl', {
+          label={i18n.translate('xpack.lens.indexPattern.groupingControlLabel', {
             defaultMessage: 'Grouping',
           })}
         >
@@ -74,13 +74,12 @@ export function BucketNestingEditor({
               data-test-subj="indexPattern-nesting-topLevel"
               label={
                 column.operationType === 'terms'
-                  ? i18n.translate('xpack.lens.indexPattern.nestingOverallTerms', {
+                  ? i18n.translate('xpack.lens.indexPattern.groupingOverallTerms', {
                       defaultMessage: 'Overall top {field}',
                       values: { field: fieldName },
                     })
-                  : i18n.translate('xpack.lens.indexPattern.nestingOverallDateHistogram', {
-                      defaultMessage: '{target} for each date',
-                      values: { target: target.fieldName },
+                  : i18n.translate('xpack.lens.indexPattern.groupingOverallDateHistogram', {
+                      defaultMessage: 'Dates overall',
                     })
               }
               checked={!prevColumn}
@@ -91,11 +90,11 @@ export function BucketNestingEditor({
               data-test-subj="indexPattern-nesting-bottomLevel"
               label={
                 column.operationType === 'terms'
-                  ? i18n.translate('xpack.lens.indexPattern.nestingOverallTerms', {
+                  ? i18n.translate('xpack.lens.indexPattern.groupingSecondTerms', {
                       defaultMessage: 'Top values for each {target}',
                       values: { target: target.fieldName },
                     })
-                  : i18n.translate('xpack.lens.indexPattern.nestingOverallDateHistogram', {
+                  : i18n.translate('xpack.lens.indexPattern.groupingSecondDateHistogram', {
                       defaultMessage: 'Dates for each {target}',
                       values: { target: target.fieldName },
                     })
