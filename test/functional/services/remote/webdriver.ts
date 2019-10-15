@@ -121,45 +121,49 @@ async function attemptToCreateCommand(
         // Firefox 65+ supports logging console output to stdout
         firefoxOptions.set('moz:firefoxOptions', {
           prefs: { 'devtools.console.stdout.content': true },
+          log: { level: 'trace' },
         });
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
           firefoxOptions.headless();
         }
-        const { input, chunk$, cleanup } = await createStdoutSocket();
-        lifecycle.on('cleanup', cleanup);
+        // const { input, chunk$, cleanup } = await createStdoutSocket();
+        // lifecycle.on('cleanup', cleanup);
 
         const session = await new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(
-            new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
-          )
+          .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).setStdio('inherit'))
           .build();
-
-        const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
 
         return {
           session,
-          consoleLog$: chunk$.pipe(
-            map(chunk => chunk.toString('utf8')),
-            mergeMap(msg => {
-              const match = msg.match(CONSOLE_LINE_RE);
-              if (!match) {
-                log.debug('Firefox stdout: ' + msg);
-                return [];
-              }
-
-              const [, level, message] = match;
-              return [
-                {
-                  level,
-                  message: message.trim(),
-                },
-              ];
-            })
-          ),
+          consoleLog$: Rx.EMPTY,
         };
+
+        // const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
+
+        // return {
+        //   session,
+        //   consoleLog$: chunk$.pipe(
+        //     map(chunk => chunk.toString('utf8')),
+        //     mergeMap(msg => {
+        //       const match = msg.match(CONSOLE_LINE_RE);
+        //       if (!match) {
+        //         log.debug('Firefox stdout: ' + msg);
+        //         return [];
+        //       }
+
+        //       const [, level, message] = match;
+        //       return [
+        //         {
+        //           level,
+        //           message: message.trim(),
+        //         },
+        //       ];
+        //     })
+        //   ),
+        // };
       }
 
       case 'ie': {
