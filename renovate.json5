@@ -34,6 +34,7 @@
       'renovate:major',
     ],
   },
+  separateMajorMinor: false,
   masterIssue: true,
   masterIssueApproval: true,
   rangeStrategy: 'bump',
@@ -77,6 +78,7 @@
         reviewers: [
           'markov00',
         ],
+        masterIssueApproval: false,
       },
       {
         groupSlug: 'mocha',
@@ -621,6 +623,14 @@
         packageNames: [
           'zen-observable',
           '@types/zen-observable',
+        ],
+      },
+      {
+        groupSlug: 'archiver',
+        groupName: 'archiver related packages',
+        packageNames: [
+          'archiver',
+          '@types/archiver',
         ],
       },
       {

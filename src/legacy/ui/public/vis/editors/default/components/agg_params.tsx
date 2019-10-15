@@ -230,6 +230,7 @@ function DefaultEditorAggParams({
         <EuiFormRow>
           <EuiAccordion
             id="advancedAccordion"
+            data-test-subj={`advancedParams-${agg.id}`}
             buttonContent={i18n.translate(
               'common.ui.vis.editors.advancedToggle.advancedLinkLabel',
               {

@@ -63,13 +63,8 @@ export default function({ getService }: FtrProviderContext) {
         })
         .expect(400, {
           error: 'Bad Request',
-          message:
-            'child "imageUrl" fails because ["imageUrl" with value "invalidImage" fails to match the Image URL should start with \'data:image\' pattern]',
+          message: "[request body.imageUrl]: must start with 'data:image'",
           statusCode: 400,
-          validation: {
-            keys: ['imageUrl'],
-            source: 'payload',
-          },
         });
     });
   });

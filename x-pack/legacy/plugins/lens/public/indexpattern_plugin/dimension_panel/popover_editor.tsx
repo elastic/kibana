@@ -21,12 +21,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import {
-  IndexPatternColumn,
-  OperationType,
-  IndexPattern,
-  IndexPatternField,
-} from '../indexpattern';
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionPanelProps, OperationFieldSupportMatrix } from './dimension_panel';
 import {
   operationDefinitionMap,
@@ -38,6 +33,7 @@ import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
+import { IndexPattern, IndexPatternField } from '../types';
 
 const operationPanels = getOperationDisplay();
 
@@ -258,6 +254,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
           <EuiFlexItem>
             <FieldSelect
               currentIndexPattern={currentIndexPattern}
+              existingFields={state.existingFields}
               showEmptyFields={state.showEmptyFields}
               fieldMap={fieldMap}
               operationFieldSupportMatrix={operationFieldSupportMatrix}
@@ -291,17 +288,23 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     ('field' in choice &&
                       operationFieldSupportMatrix.operationByField[choice.field]) ||
                     [];
-
+                  let operation;
+                  if (compatibleOperations.length > 0) {
+                    operation =
+                      incompatibleSelectedOperationType &&
+                      compatibleOperations.includes(incompatibleSelectedOperationType)
+                        ? incompatibleSelectedOperationType
+                        : compatibleOperations[0];
+                  } else if ('field' in choice) {
+                    operation = choice.operationType;
+                  }
                   column = buildColumn({
                     columns: props.state.layers[props.layerId].columns,
                     field: 'field' in choice ? fieldMap[choice.field] : undefined,
                     indexPattern: currentIndexPattern,
                     layerId: props.layerId,
                     suggestedPriority: props.suggestedPriority,
-                    op:
-                      incompatibleSelectedOperationType ||
-                      ('field' in choice ? choice.operationType : undefined) ||
-                      compatibleOperations[0],
+                    op: operation as OperationType,
                     asDocumentOperation: choice.type === 'document',
                   });
                 }
