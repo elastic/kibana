@@ -22,7 +22,9 @@ import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
 import { assign, has } from 'lodash';
-import { FieldFormat, KBN_FIELD_TYPES, TextContextTypeConvert } from '../../index';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert } from '../types';
 
 const numeralInst = numeral();
 

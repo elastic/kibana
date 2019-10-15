@@ -19,7 +19,9 @@
 
 import moment, { Moment } from 'moment';
 import { memoize, noop } from 'lodash';
-import { FieldFormat, KBN_FIELD_TYPES, TextContextTypeConvert } from '../../index';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert } from '../types';
 
 /**
  * Analyse the given moment.js format pattern for the fractional sec part (S,SS,SSS...)

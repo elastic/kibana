@@ -22,12 +22,9 @@ import { template, escape, keys } from 'lodash';
 import { noWhiteSpace } from '../../../../../legacy/core_plugins/kibana/common/utils/no_white_space';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../legacy/core_plugins/kibana/common/utils/shorten_dotted_string';
-import {
-  FieldFormat,
-  KBN_FIELD_TYPES,
-  TextContextTypeConvert,
-  HtmlContextTypeConvert,
-} from '../../index';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
 
 const templateHtml = `
   <dl class="source truncate-by-height">

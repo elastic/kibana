@@ -19,13 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { escape, memoize } from 'lodash';
-import {
-  getHighlightHtml,
-  FieldFormat,
-  KBN_FIELD_TYPES,
-  TextContextTypeConvert,
-  HtmlContextTypeConvert,
-} from '../../index';
+import { getHighlightHtml } from '../utils';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
@@ -201,3 +198,5 @@ export class UrlFormat extends FieldFormat {
     }
   };
 }
+
+// console.log(UrlFormat);

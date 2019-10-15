@@ -31,7 +31,7 @@ import {
   DefaultFormatEditor
 } from '../default';
 
-import { DEFAULT_COLOR } from '../../../../../../../../plugins/data/common/field_formats/converters/color_default';
+import { DEFAULT_COLOR } from '../../../../../../../../plugins/data/common/';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
