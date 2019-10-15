@@ -10,6 +10,7 @@ import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
 import { MlSummaryJobs } from '../../../common/types/jobs';
 import { MlServerDefaults, MlServerLimits } from '../../jobs/new_job_new/utils/new_job_defaults';
+import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -23,6 +24,26 @@ export interface GetTimeFieldRangeResponse {
   success: boolean;
   start: { epoch: number; string: string };
   end: { epoch: number; string: string };
+}
+
+export interface BucketSpanEstimatorData {
+  aggTypes: Array<ES_AGGREGATION | null>;
+  duration: {
+    start: number;
+    end: number;
+  };
+  fields: Array<string | null>;
+  index: string;
+  query: any;
+  splitField: string | undefined;
+  timeField: string | undefined;
+}
+
+export interface BucketSpanEstimatorResponse {
+  name: string;
+  ms: number;
+  error?: boolean;
+  message?: { msg: string } | string;
 }
 
 export interface MlInfoResponse {
@@ -126,9 +147,7 @@ declare interface Ml {
     ): Promise<{ progress: number; isRunning: boolean; isJobClosed: boolean }>;
   };
 
-  estimateBucketSpan(
-    data: object
-  ): Promise<{ name: string; ms: number; error?: boolean; message?: { msg: string } | string }>;
+  estimateBucketSpan(data: BucketSpanEstimatorData): Promise<BucketSpanEstimatorResponse>;
 
   mlNodeCount(): Promise<{ count: number }>;
   mlInfo(): Promise<MlInfoResponse>;
