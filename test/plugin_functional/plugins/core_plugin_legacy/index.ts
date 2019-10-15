@@ -24,6 +24,13 @@ export default function(kibana: any) {
   return new kibana.Plugin({
     id: 'core_plugin_legacy',
     require: ['kibana'],
+    uiExports: {
+      app: {
+        title: 'Core Legacy Compat',
+        description: 'This is a sample plugin to test core to legacy compatibility',
+        main: 'plugins/core_plugin_legacy/index',
+      },
+    },
     init(server: KbnServer) {
       const { http } = server.newPlatform.setup.core;
       const router = http.createRouter();

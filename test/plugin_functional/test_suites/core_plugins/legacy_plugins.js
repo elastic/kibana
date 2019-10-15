@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('application service compatibility layer', function describeIndexTests() {
       it('can render legacy apps', async () => {
-        await PageObjects.common.navigateToApp('core_legacy_compat');
+        await PageObjects.common.navigateToApp('core_plugin_legacy');
         expect(await testSubjects.exists('coreLegacyCompatH1')).to.be(true);
       });
     });
