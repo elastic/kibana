@@ -66,7 +66,7 @@ const getTotalNumberOfLogEntries = (
 ) => {
   return logEntryRateBuckets.reduce((sumNumberOfLogEntries, bucket) => {
     const sumPartitions = bucket.partitions.reduce((partitionsTotal, partition) => {
-      return (partitionsTotal += partition.numberOfLogs);
+      return (partitionsTotal += partition.numberOfLogEntries);
     }, 0);
     return (sumNumberOfLogEntries += sumPartitions);
   }, 0);
