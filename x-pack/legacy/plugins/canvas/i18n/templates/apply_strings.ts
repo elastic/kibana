@@ -10,8 +10,8 @@ import { getTemplateStrings } from './template_strings';
 import { TagStrings } from '../../i18n';
 
 /**
- * This function takes a set of Canvas Element specification factories, runs them,
- * replaces relevant strings (if available) and returns a new factory.  We do this
+ * This function takes a set of Canvas  templates
+ * replaces tag strings with the translated versions. We do this
  * so the specifications themselves have no dependency on i18n, for clarity for both
  * our and external plugin developers.
  */
