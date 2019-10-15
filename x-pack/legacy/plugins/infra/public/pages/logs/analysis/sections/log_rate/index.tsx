@@ -33,7 +33,7 @@ export const LogRateResults = ({
   timeRange: TimeRange;
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.logRateSectionTitle', {
-    defaultMessage: 'Logs entries',
+    defaultMessage: 'Log entries',
   });
 
   const loadingAriaLabel = i18n.translate(
