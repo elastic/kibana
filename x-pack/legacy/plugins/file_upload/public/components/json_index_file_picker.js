@@ -192,7 +192,7 @@ export class JsonIndexFilePicker extends Component {
       this.setState({
         fileUploadError: (
           <FormattedMessage
-            id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
+            id="xpack.fileUpload.jsonIndexFilePicker.fileParseError"
             defaultMessage="File parse error(s) detected: {error}"
             values={{ error }}
           />
