@@ -9,7 +9,7 @@
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { i18n } from '@kbn/i18n';
-import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
+// import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
 const msgs = mlMessageBarService;
@@ -26,7 +26,7 @@ class PostSaveService {
       realtimeJob: null,
       watch: null
     };
-    mlCreateWatchService.status = this.status;
+    // mlCreateWatchService.status = this.status;
 
     this.externalCreateWatch;
   }
@@ -63,11 +63,11 @@ class PostSaveService {
         this.startRealtimeJob(jobId, i18n)
           .then(() => {
             if (createWatch) {
-              mlCreateWatchService.createNewWatch(jobId)
-                .catch(() => {})
-                .then(() => {
-                  resolve();
-                });
+              // mlCreateWatchService.createNewWatch(jobId)
+              //   .catch(() => {})
+              //   .then(() => {
+              //     resolve();
+              //   });
             } else {
               resolve();
             }

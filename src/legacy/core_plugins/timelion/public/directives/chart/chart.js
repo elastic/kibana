@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import panelRegistryProvider from '../../lib/panel_registry';
+
 import { i18n } from '@kbn/i18n';
 
-export function Chart(Private) {
+export function Chart(timelionPanels) {
   return {
     restrict: 'A',
     scope: {
@@ -29,8 +29,6 @@ export function Chart(Private) {
       rerenderTrigger: '=',
     },
     link: function ($scope, $elem) {
-
-      const panelRegistry = Private(panelRegistryProvider);
       let panelScope = $scope.$new(true);
 
       function render() {
@@ -42,7 +40,7 @@ export function Chart(Private) {
           type: 'timechart'
         };
 
-        const panelSchema = panelRegistry.byName[$scope.seriesList.render.type];
+        const panelSchema = timelionPanels.get($scope.seriesList.render.type);
 
         if (!panelSchema) {
           $elem.text(

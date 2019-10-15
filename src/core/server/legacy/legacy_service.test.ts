@@ -39,7 +39,7 @@ import { ContextSetup } from '../context';
 import { contextServiceMock } from '../context/context_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
-import { ElasticsearchServiceSetup } from '../elasticsearch';
+import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { HttpServiceStart, BasePathProxyServer } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
@@ -56,7 +56,7 @@ let config$: BehaviorSubject<Config>;
 let setupDeps: {
   core: {
     context: ContextSetup;
-    elasticsearch: ElasticsearchServiceSetup;
+    elasticsearch: InternalElasticsearchServiceSetup;
     http: any;
     plugins: PluginsServiceSetup;
   };
