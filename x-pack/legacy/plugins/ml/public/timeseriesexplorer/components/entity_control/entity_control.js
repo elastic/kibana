@@ -6,12 +6,13 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiComboBox,
   EuiFlexItem,
   EuiFormRow,
+  EuiToolTip,
 } from '@elastic/eui';
 
 function getEntityControlOptions(entity) {
@@ -73,22 +74,41 @@ export const EntityControl = injectI18n(
       const { entity, intl } = this.props;
       const { selectedOptions } = this.state;
       const options = getEntityControlOptions(entity);
+      const forceSelection = !selectedOptions;
+
+      const control = (<EuiComboBox
+        inputRef={input => {
+          if (input && forceSelection) {
+            input.focus();
+          }
+        }}
+        style={{ minWidth: '300px' }}
+        placeholder={intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.enterValuePlaceholder',
+          defaultMessage: 'Enter value'
+        })}
+        singleSelection={{ asPlainText: true }}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={this.onChange}
+        isClearable={false}
+      />);
 
       return (
         <EuiFlexItem grow={false}>
           <EuiFormRow label={entity.fieldName}>
-            <EuiComboBox
-              style={{ minWidth: '300px' }}
-              placeholder={intl.formatMessage({
-                id: 'xpack.ml.timeSeriesExplorer.enterValuePlaceholder',
-                defaultMessage: 'Enter value'
-              })}
-              singleSelection={{ asPlainText: true }}
-              options={options}
-              selectedOptions={selectedOptions}
-              onChange={this.onChange}
-              isClearable={false}
-            />
+            {forceSelection ?
+              <EuiToolTip
+                position="right"
+                content={
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.selectMetricMessage"
+                    defaultMessage="Select {fieldName}"
+                    values={{ fieldName: entity.fieldName }}
+                  />
+                }
+              >{control}
+              </EuiToolTip> : control}
           </EuiFormRow>
         </EuiFlexItem>
       );

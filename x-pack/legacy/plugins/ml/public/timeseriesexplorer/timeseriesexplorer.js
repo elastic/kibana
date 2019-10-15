@@ -988,6 +988,8 @@ export class TimeSeriesExplorer extends React.Component {
       zoomToFocusLoaded,
     } = this.state;
 
+    const isMetricSelected = entities.length > 0 && entities.some(entity => !!entity.fieldValue);
+
     const chartProps = {
       modelPlotEnabled,
       contextChartData,
@@ -1104,7 +1106,7 @@ export class TimeSeriesExplorer extends React.Component {
           <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
-        {(jobs.length > 0 && loading === false && hasResults === true) && (
+        {(isMetricSelected && jobs.length > 0 && loading === false && hasResults === true) && (
           <EuiText className="results-container">
             <span className="panel-title">
               {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
