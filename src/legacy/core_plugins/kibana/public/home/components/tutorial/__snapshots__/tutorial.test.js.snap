@@ -5,6 +5,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
   restrictWidth={1200}
 >
   <EuiPageBody
+    component="main"
     restrictWidth={false}
   >
     <div>
@@ -53,6 +54,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
   restrictWidth={1200}
 >
   <EuiPageBody
+    component="main"
     restrictWidth={false}
   >
     <div>
@@ -128,6 +130,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
   restrictWidth={1200}
 >
   <EuiPageBody
+    component="main"
     restrictWidth={false}
   >
     <div>
