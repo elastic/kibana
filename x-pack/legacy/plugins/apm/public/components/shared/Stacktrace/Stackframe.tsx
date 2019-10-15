@@ -55,7 +55,7 @@ export function Stackframe({
     );
   }
 
-  const { lines, highlightRanges, lineMapper } = formatLinesForCodeblock(
+  const { lines, highlightLine, lineMapper } = formatLinesForCodeblock(
     stackframe
   );
 
@@ -65,9 +65,9 @@ export function Stackframe({
         <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
       </CodeHeader>
       <CodeBlock
-        content={lines.map(({ context }) => context).join('\n')}
+        lines={lines.map(({ context }) => context)}
         language={codeLanguage}
-        highlightRanges={highlightRanges}
+        highlightLine={highlightLine}
         lineNumber={lineMapper}
       />
 

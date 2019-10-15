@@ -123,22 +123,17 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
         </div>
       </styled.div>
       <CodeBlock
-        content="    })
-
-    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())
-    req.body.lines.forEach(function (line) {
-      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())"
-        highlightRanges={
+        highlightLine={[Function]}
+        lineNumber={[Function]}
+        lines={
           Array [
-            Object {
-              "endColumn": 1.7976931348623157e+308,
-              "endLineNumber": 3,
-              "startColumn": 0,
-              "startLineNumber": 3,
-            },
+            "    })",
+            "",
+            "    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())",
+            "    req.body.lines.forEach(function (line) {",
+            "      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())",
           ]
         }
-        lineNumber={[Function]}
       />
       <Variables />
     </div>

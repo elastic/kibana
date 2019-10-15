@@ -22,14 +22,7 @@ const formatLinesForCodeblock = (stackframe: IStackframeWithLineContext) => {
   }));
 
   return {
-    highlightRanges: [
-      {
-        startLineNumber: pre.length + 1,
-        endLineNumber: pre.length + 1,
-        startColumn: 0,
-        endColumn: Number.MAX_VALUE
-      }
-    ],
+    highlightLine: (i: number) => i === pre.length,
     lineMapper: (i: number) => lines[i].lineNumber,
     lines
   };

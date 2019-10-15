@@ -61,14 +61,16 @@ export class LibraryStackFrames extends React.Component<Props, State> {
         <div>
           {isVisible && (
             <Fragment>
-              <EuiSpacer size="m" />
               {stackframes.map((stackframe, i) => (
-                <Stackframe
-                  key={i}
-                  isLibraryFrame
-                  codeLanguage={codeLanguage}
-                  stackframe={stackframe}
-                />
+                <>
+                  <EuiSpacer size="m" />
+                  <Stackframe
+                    key={i}
+                    isLibraryFrame
+                    codeLanguage={codeLanguage}
+                    stackframe={stackframe}
+                  />
+                </>
               ))}
             </Fragment>
           )}
