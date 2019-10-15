@@ -8,6 +8,7 @@ import chrome from 'ui/chrome';
 import {
   CheckRecognizerProps,
   CloseJobsResponse,
+  ErrorResponse,
   GetModulesProps,
   JobSummary,
   MlSetupArgs,
@@ -176,7 +177,7 @@ export const stopDatafeeds = async ({
 }: {
   datafeedIds: string[];
   headers?: Record<string, string>;
-}): Promise<[StopDatafeedResponse, CloseJobsResponse]> => {
+}): Promise<[StopDatafeedResponse | ErrorResponse, CloseJobsResponse]> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const stopDatafeedsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/stop_datafeeds`, {
     method: 'POST',

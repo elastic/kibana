@@ -178,6 +178,12 @@ export interface StartDatafeedResponse {
   };
 }
 
+export interface ErrorResponse {
+  statusCode?: number;
+  error?: string;
+  message?: string;
+}
+
 export interface StopDatafeedResponse {
   [key: string]: {
     stopped: boolean;

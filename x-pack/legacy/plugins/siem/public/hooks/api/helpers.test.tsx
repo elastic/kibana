@@ -16,7 +16,7 @@ describe('helpers', () => {
 
     test('returns titles when index patterns are provided', () => {
       const indexPatternTitles = getIndexPatternTitles(mockIndexPatternSavedObjects);
-      expect(indexPatternTitles.length).toEqual(2);
+      expect(indexPatternTitles).toEqual(['filebeat-*', 'auditbeat-*']);
     });
   });
 

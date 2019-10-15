@@ -92,7 +92,7 @@ export const MlPopover = React.memo(() => {
   const [{ refreshToggle }, dispatch] = useReducer(mlPopoverReducer, initialState);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [filterProperties, setFilterProperties] = useState<JobsFilters>(defaultFilterProps);
+  const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
   const [isLoadingSiemJobs, siemJobs] = useSiemJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
   const capabilities = useContext(MlCapabilitiesContext);
