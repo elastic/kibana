@@ -60,7 +60,14 @@ const getMockHistory = (ip: string) => ({
   listen: jest.fn(),
 });
 
+const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
+const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
+
 const getMockProps = (ip: string) => ({
+  to,
+  from,
+  isInitializing: false,
+  setQuery: jest.fn(),
   filterQuery: 'coolQueryhuh?',
   flowTarget: FlowTarget.source,
   history: getMockHistory(ip),
