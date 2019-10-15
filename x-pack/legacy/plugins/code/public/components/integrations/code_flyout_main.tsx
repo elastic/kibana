@@ -70,8 +70,8 @@ export const CodeFlyoutMain = (props: { repo: string; file: string; revision: st
           </EuiText>
         </div>
         <EuiTabs className="codeFlyout__tabs">
-          <EuiTab onClick={() => setSelectedTab(Tab.blame)} isSelected={selectedTab === Tab.blame}>
-            Blame
+          <EuiTab onClick={() => setSelectedTab(Tab.code)} isSelected={selectedTab === Tab.code}>
+            Code
           </EuiTab>
           <EuiTab
             onClick={() => setSelectedTab(Tab.history)}
@@ -79,8 +79,8 @@ export const CodeFlyoutMain = (props: { repo: string; file: string; revision: st
           >
             History
           </EuiTab>
-          <EuiTab onClick={() => setSelectedTab(Tab.code)} isSelected={selectedTab === Tab.code}>
-            Code
+          <EuiTab onClick={() => setSelectedTab(Tab.blame)} isSelected={selectedTab === Tab.blame}>
+            Blame
           </EuiTab>
         </EuiTabs>
       </div>

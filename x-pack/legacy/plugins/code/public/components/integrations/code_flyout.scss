@@ -14,7 +14,7 @@
 }
 
 .codeFlyout__tabs {
-  flex-direction: row-reverse;
+  justify-content: flex-end;
   padding-right: $euiSizeS;
   flex-grow: 1;
 }
