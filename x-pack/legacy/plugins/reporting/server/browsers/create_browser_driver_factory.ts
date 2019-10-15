@@ -23,6 +23,7 @@ export async function createBrowserDriverFactory(
   const BROWSER_TYPE: BrowserType = CAPTURE_CONFIG.browser.type;
   const BROWSER_AUTO_DOWNLOAD = CAPTURE_CONFIG.browser.autoDownload;
   const BROWSER_CONFIG = CAPTURE_CONFIG.browser[BROWSER_TYPE];
+  const NETWORK_POLICY = CAPTURE_CONFIG.networkPolicy;
   const REPORTING_TIMEOUT = config.get('xpack.reporting.queue.timeout');
 
   if (BROWSER_CONFIG.disableSandbox) {
@@ -35,7 +36,13 @@ export async function createBrowserDriverFactory(
   try {
     const browser = BROWSERS_BY_TYPE[BROWSER_TYPE]; // NOTE: unecessary indirection: this is always a Chromium browser object, as of PhantomJS removal
     const { binaryPath } = await installBrowser(logger, browser, DATA_DIR);
-    return browser.createDriverFactory(binaryPath, logger, BROWSER_CONFIG, REPORTING_TIMEOUT);
+    return browser.createDriverFactory(
+      binaryPath,
+      logger,
+      BROWSER_CONFIG,
+      REPORTING_TIMEOUT,
+      NETWORK_POLICY
+    );
   } catch (error) {
     if (error.cause && ['EACCES', 'EEXIST'].includes(error.cause.code)) {
       logger.error(
