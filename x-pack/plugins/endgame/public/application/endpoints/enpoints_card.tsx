@@ -14,7 +14,7 @@ class EndpointsCard extends Component<RouteComponentProps> {
     return (
       <EuiCard
         layout="horizontal"
-        title="Endpoints"
+        title="Endpoint Management"
         description="View and manage the endpoints"
         onClick={() => this.props.history.push(routePathsById.endpoints.path)}
       />
