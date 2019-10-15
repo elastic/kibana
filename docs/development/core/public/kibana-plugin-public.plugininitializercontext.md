@@ -16,5 +16,6 @@ export interface PluginInitializerContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [env](./kibana-plugin-public.plugininitializercontext.env.md) | <code>{</code><br/><code>        mode: Readonly&lt;EnvironmentMode&gt;;</code><br/><code>        packageInfo: Readonly&lt;PackageInfo&gt;;</code><br/><code>    }</code> |  |
 |  [opaqueId](./kibana-plugin-public.plugininitializercontext.opaqueid.md) | <code>PluginOpaqueId</code> | A symbol used to identify this plugin in the system. Needed when registering handlers or context providers. |
 
