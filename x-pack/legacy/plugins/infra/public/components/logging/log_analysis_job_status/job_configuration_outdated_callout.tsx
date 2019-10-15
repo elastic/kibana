@@ -4,27 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiCallOut, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+
+import { RecreateJobCallout } from './recreate_job_callout';
 
 export const JobConfigurationOutdatedCallout: React.FC<{
   onRecreateMlJob: () => void;
 }> = ({ onRecreateMlJob }) => (
-  <EuiCallOut color="warning" iconType="alert" title={jobConfigurationOutdatedTitle}>
+  <RecreateJobCallout title={jobConfigurationOutdatedTitle} onRecreateMlJob={onRecreateMlJob}>
     <FormattedMessage
       id="xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutMessage"
       defaultMessage="The ML job was created using a different source configuration. Recreate the job to apply the current configuration. This removes previously detected anomalies."
-      tagName="p"
     />
-    <EuiButton color="warning" onClick={onRecreateMlJob}>
-      <FormattedMessage
-        id="xpack.infra.logs.analysis.recreateJobButtonLabel"
-        defaultMessage="Recreate ML job"
-      />
-    </EuiButton>
-  </EuiCallOut>
+  </RecreateJobCallout>
 );
 
 const jobConfigurationOutdatedTitle = i18n.translate(
