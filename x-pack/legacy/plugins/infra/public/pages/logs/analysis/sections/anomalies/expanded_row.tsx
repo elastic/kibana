@@ -46,7 +46,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   const totalNumberOfLogEntries = useMemo(
     () =>
       results && results.histogramBuckets
-        ? getTotalNumberOfLogsForPartition(results, partitionId)
+        ? getTotalNumberOfLogEntriesForPartition(results, partitionId)
         : undefined,
     [results, partitionId]
   );
