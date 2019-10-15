@@ -161,6 +161,8 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
           </EuiFlexItem>
         </EuiFlexGroup>
 
+        <EuiSpacer size="s" />
+
         <EuiBasicTable
           loading={isLoading}
           items={data}
@@ -206,9 +208,9 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
 
 export const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
-    <EuiPageContent>
+    <Fragment>
       <EuiSpacer size="s" />
       <ActionsContext.Provider value={{}}>{children}</ActionsContext.Provider>
-    </EuiPageContent>
+    </Fragment>
   );
 };
