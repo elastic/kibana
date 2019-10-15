@@ -257,6 +257,10 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
       settings,
       config,
       {
+        env: {
+          mode: this.coreContext.env.mode,
+          packageInfo: this.coreContext.env.packageInfo,
+        },
         handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
         setupDeps: {
           core: coreSetup,
