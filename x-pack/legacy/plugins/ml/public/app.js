@@ -10,6 +10,7 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/courier';
+import 'ui/autoload/all';
 
 import 'plugins/ml/access_denied';
 import 'plugins/ml/jobs';
