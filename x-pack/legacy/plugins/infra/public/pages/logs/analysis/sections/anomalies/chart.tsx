@@ -136,7 +136,7 @@ const renderAnnotations = (
   return Object.entries(annotations).map((entry, index) => {
     return (
       <RectAnnotation
-        key={`${index}:${chartId}:${entry[0]}`}
+        key={`${chartId}:${entry[0]}`}
         dataValues={entry[1]}
         annotationId={severityConfigs[entry[0]].annotationId}
         style={severityConfigs[entry[0]].style}
