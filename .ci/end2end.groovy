@@ -52,10 +52,16 @@ pipeline {
       options { skipDefaultCheckout() }
       environment {
         JENKINS_NODE_COOKIE = 'dontKillMe'
+        CYPRESS_DIR = 'x-pack/legacy/plugins/apm/cypress'
       }
       steps {
         dir("${BASE_DIR}"){
-          sh script: 'x-pack/legacy/plugins/apm/cypress/ci/run.sh'
+          sh script: "${CYPRESS_DIR}/ci/run.sh"
+        }
+      }
+      post {
+        always {
+          archiveArtifacts(allowEmptyArchive: true, artifacts: '${BASE_DIR}/${CYPRESS_DIR}/ingest-data.log,${BASE_DIR}/kibana.log')
         }
       }
     }
