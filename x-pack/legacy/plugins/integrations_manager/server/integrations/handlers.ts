@@ -67,18 +67,14 @@ export async function handleGetInfo(req: PackageRequest, extra: Extra) {
 
 export async function handleRequestInstall(req: InstallIntegrationRequest, extra: Extra) {
   const { pkgkey, asset } = req.params;
-  if (!asset) throw new Error('Unhandled empty/default asset case');
-
   const savedObjectsClient = getClient(req);
   const callCluster = getClusterAccessor(extra.context.esClient, req);
-  const object = await installIntegration({
+  return await installIntegration({
     savedObjectsClient,
     pkgkey,
     asset,
     callCluster,
   });
-
-  return object;
 }
 
 export async function handleRequestDelete(req: DeleteIntegrationRequest, extra: Extra) {
