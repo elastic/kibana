@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +16,7 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../../../common/eui_styled_components';
@@ -96,9 +98,21 @@ export const AnomaliesResults: React.FunctionComponent<{
 
   return (
     <>
-      <EuiTitle size="s" aria-label={title}>
-        <h2>{title}</h2>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiTitle size="s" aria-label={title}>
+            <h2>{title}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton fill>
+            <FormattedMessage
+              id="xpack.infra.logs.analysis.analyzeInMlButtonLabel"
+              defaultMessage="Analyze in ML"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <LogAnalysisJobProblemIndicator
         jobStatus={jobStatus}
