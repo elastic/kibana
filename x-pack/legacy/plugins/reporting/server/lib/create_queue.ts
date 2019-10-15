@@ -24,7 +24,6 @@ function createQueueFn(server: KbnServer): Esqueue {
     dateSeparator: '.',
     client: server.plugins.elasticsearch.getCluster('admin'),
     logger: createTaggedLogger(server, [PLUGIN_ID, 'esqueue', 'queue-worker']),
-    size: 1,
   };
 
   const queue: Esqueue = new Esqueue(index, queueOptions);

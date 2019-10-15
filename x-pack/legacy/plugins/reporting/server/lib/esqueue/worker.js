@@ -421,7 +421,7 @@ export class Worker extends events.EventEmitter {
         { priority: { order: 'asc' } },
         { created_at: { order: 'asc' } }
       ],
-      size: this.checkSize
+      size: constants.ESQUEUE_WORKER_CHECK_SIZE,
     };
 
     return this._client.callWithInternalUser('search', {
