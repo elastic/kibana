@@ -213,6 +213,17 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       return await this.filterElementIsDisplayed(allElements);
     }
 
+    public async allDescendantDisplayedByTagName(
+      tagName: string,
+      parentElement: WebElementWrapper
+    ): Promise<WebElementWrapper[]> {
+      log.debug(`Find.allDescendantDisplayedByTagName('${tagName}')`);
+      const allElements = await wrapAll(
+        await parentElement._webElement.findElements(By.tagName(tagName))
+      );
+      return await this.filterElementIsDisplayed(allElements);
+    }
+
     public async displayedByLinkText(
       linkText: string,
       timeout: number = defaultFindTimeout

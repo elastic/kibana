@@ -25,12 +25,12 @@ export function infra(kibana: any) {
     uiExports: {
       app: {
         description: i18n.translate('xpack.infra.infrastructureDescription', {
-          defaultMessage: 'Explore your infrastructure',
+          defaultMessage: 'Explore your metrics',
         }),
         icon: 'plugins/infra/images/infra_mono_white.svg',
         main: 'plugins/infra/app',
         title: i18n.translate('xpack.infra.infrastructureTitle', {
-          defaultMessage: 'Infrastructure',
+          defaultMessage: 'Metrics',
         }),
         listed: false,
         url: `/app/${APP_ID}#/infrastructure`,
@@ -40,14 +40,14 @@ export function infra(kibana: any) {
       links: [
         {
           description: i18n.translate('xpack.infra.linkInfrastructureDescription', {
-            defaultMessage: 'Explore your infrastructure',
+            defaultMessage: 'Explore your metrics',
           }),
           icon: 'plugins/infra/images/infra_mono_white.svg',
           euiIconType: 'infraApp',
           id: 'infra:home',
           order: 8000,
           title: i18n.translate('xpack.infra.linkInfrastructureTitle', {
-            defaultMessage: 'Infrastructure',
+            defaultMessage: 'Metrics',
           }),
           url: `/app/${APP_ID}#/infrastructure`,
         },

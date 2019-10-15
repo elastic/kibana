@@ -10,6 +10,13 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       "auditbeatPackage": 2003,
       "auditbeatProcess": 1200,
       "auditbeatUser": 1979,
+      "endgameDns": 39123,
+      "endgameFile": 39456,
+      "endgameImageLoad": 39789,
+      "endgameNetwork": 39101112,
+      "endgameProcess": 39131415,
+      "endgameRegistry": 39161718,
+      "endgameSecurity": 39202122,
       "filebeatSystemModule": 568,
       "winlogbeat": 296999,
     }

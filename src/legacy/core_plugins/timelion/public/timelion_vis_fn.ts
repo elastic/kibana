@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction, KibanaContext, Render } from 'src/plugins/expressions/public';
-import { getTimelionRequestHandler, TimelionSuccessResponse } from './vis/timelion_request_handler';
+import { getTimelionRequestHandler } from './vis/timelion_request_handler';
 import { TimelionVisualizationDependencies } from './plugin';
 
 const name = 'timelion_vis';
@@ -69,13 +69,13 @@ export const getTimelionVisualizationConfig = (
 
     const visParams = { expression: args.expression, interval: args.interval };
 
-    const response = (await timelionRequestHandler({
+    const response = await timelionRequestHandler({
       timeRange: get(context, 'timeRange'),
       query: get(context, 'query'),
       filters: get(context, 'filters'),
       visParams,
       forceFetch: true,
-    })) as TimelionSuccessResponse;
+    });
 
     response.visType = 'timelion';
 

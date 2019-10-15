@@ -175,6 +175,8 @@ export class MonitoringViewBaseController {
         to: moment(to - offset),
         mode: 'absolute'
       });
+      $executor.cancel();
+      $executor.run();
       ++zoomInLevel;
       clearTimeout(deferTimer);
       /*
