@@ -411,7 +411,10 @@ export const ExplorerChartDistribution = injectI18n(class ExplorerChartDistribut
 
       if (_.has(marker, 'entity')) {
         tooltipData.push({
-          name: '',
+          name: intl.formatMessage({
+            id: 'xpack.ml.explorer.distributionChart.entityLabel',
+            defaultMessage: 'entity'
+          }),
           value: marker.entity,
           seriesKey
         });
