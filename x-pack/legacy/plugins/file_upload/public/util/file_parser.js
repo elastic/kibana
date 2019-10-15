@@ -60,7 +60,7 @@ export const fileHandler = async ({
   prevFileReader = fileReader;
 
   const filePromise = new Promise((resolve, reject) => {
-    const onStreamComplete = parsedGeojson => {
+    const onStreamComplete = fileResults => {
       if (!featuresProcessed) {
         reject(
           new Error(
@@ -70,7 +70,7 @@ export const fileHandler = async ({
           )
         );
       } else {
-        resolve(parsedGeojson);
+        resolve(fileResults);
       }
     };
     const patternReader = new PatternReader({ onFeatureDetect: onFeatureRead, onStreamComplete });
@@ -147,12 +147,12 @@ export async function parseFile({
     }
   }
 
-  const parsedJson = await fileHandler({
+  const fileResults = await fileHandler({
     file,
     setFileProgress,
     cleanAndValidate,
     getFileParseActive
   });
-  jsonPreview(parsedJson, previewCallback);
-  return parsedJson;
+  jsonPreview(fileResults.parsedGeojson, previewCallback);
+  return fileResults;
 }

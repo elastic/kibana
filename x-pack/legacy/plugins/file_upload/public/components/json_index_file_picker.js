@@ -146,7 +146,7 @@ export class JsonIndexFilePicker extends Component {
     }
     // Parse file
 
-    const parsedFileResult = await parseFile({
+    const { errors, parsedGeojson } = await parseFile({
       file,
       transformDetails,
       onFileUpload,
@@ -180,14 +180,28 @@ export class JsonIndexFilePicker extends Component {
       featuresProcessed: 0,
       fileParseActive: currentFileTracker !== this.state.currentFileTracker
     });
-    if (!parsedFileResult) {
+    if (!parsedGeojson) {
       resetFileAndIndexSettings();
       return;
     }
 
+    if (errors.length) {
+      // Set only the first error for now (since there's only one).
+      // TODO: Add handling in case of further errors
+      const error = errors[0];
+      this.setState({
+        fileUploadError: (
+          <FormattedMessage
+            id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
+            defaultMessage="File parse error(s) detected: {error}"
+            values={{ error }}
+          />
+        )
+      });
+    }
     setIndexName(defaultIndexName);
     setFileRef(file);
-    setParsedFile(parsedFileResult);
+    setParsedFile(parsedGeojson);
   }
 
 
