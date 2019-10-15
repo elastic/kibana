@@ -32,14 +32,14 @@ export interface FilterServiceDependencies {
 }
 
 export class FilterService {
-  public setup({ indexPatterns, uiSettings }: FilterServiceDependencies) {
+  public setup() {
+    // Filter service requires index patterns, which are only available in `start`
+  }
+
+  public start({ indexPatterns, uiSettings }: FilterServiceDependencies) {
     return {
       filterManager: new FilterManager(indexPatterns, uiSettings),
     };
-  }
-
-  public start() {
-    // nothing to do here yet
   }
 
   public stop() {
@@ -48,4 +48,4 @@ export class FilterService {
 }
 
 /** @public */
-export type FilterSetup = ReturnType<FilterService['setup']>;
+export type FilterStart = ReturnType<FilterService['start']>;

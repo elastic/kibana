@@ -25,7 +25,6 @@ import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { MetricsChart } from '../../shared/charts/MetricsChart';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
-import { callApmApi } from '../../../services/rest/callApmApi';
 import { truncate, px, unit } from '../../../style/variables';
 
 const INITIAL_DATA = {
@@ -46,23 +45,22 @@ export function ServiceNodeMetrics() {
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
 
-  const {
-    data: { host, containerId } = INITIAL_DATA,
-    status
-  } = useFetcher(() => {
-    if (serviceName && serviceNodeName) {
-      return callApmApi({
-        pathname:
-          '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
-        params: {
-          path: { serviceName, serviceNodeName }
-        }
-      });
-    }
-  }, [serviceName, serviceNodeName]);
+  const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
+    callApmApi => {
+      if (serviceName && serviceNodeName) {
+        return callApmApi({
+          pathname:
+            '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+          params: {
+            path: { serviceName, serviceNodeName }
+          }
+        });
+      }
+    },
+    [serviceName, serviceNodeName]
+  );
 
-  const isLoading =
-    status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
     <div>

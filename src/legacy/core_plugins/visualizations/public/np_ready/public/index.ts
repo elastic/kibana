@@ -33,8 +33,7 @@ import { PluginInitializerContext } from 'src/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
 
 /** @public */
-export type VisualizationsSetup = VisualizationsSetup;
-export type VisualizationsStart = VisualizationsStart;
+export { VisualizationsSetup, VisualizationsStart };
 
 /** @public types */
 export { VisTypeAlias, VisType } from './types';

@@ -23,6 +23,7 @@ import {
   EuiKeyboardAccessible,
   EuiForm,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -148,27 +149,43 @@ export function FieldEditor({
             id: 'root',
             items: [
               {
-                name: i18n.translate('xpack.graph.fieldManager.displaySettingsLabel', {
-                  defaultMessage: 'Edit display settings',
+                name: i18n.translate('xpack.graph.fieldManager.settingsLabel', {
+                  defaultMessage: 'Edit settings',
                 }),
                 icon: <EuiIcon type="pencil" size="m" />,
-                panel: 'displaySettings',
+                panel: 'settings',
               },
               {
                 name: isDisabled
                   ? i18n.translate('xpack.graph.fieldManager.enableFieldLabel', {
-                      defaultMessage: 'Enable',
+                      defaultMessage: 'Enable field',
                     })
                   : i18n.translate('xpack.graph.fieldManager.disableFieldLabel', {
-                      defaultMessage: 'Temporarily disable',
+                      defaultMessage: 'Disable field',
                     }),
                 icon: <EuiIcon type={isDisabled ? 'eye' : 'eyeClosed'} size="m" />,
                 onClick: toggleDisabledState,
+                toolTipContent: isDisabled
+                  ? i18n.translate('xpack.graph.fieldManager.enableFieldTooltipContent', {
+                      defaultMessage:
+                        'Turn on discovery of vertices for this field. You can also Shift+click the field to enable it.',
+                    })
+                  : i18n.translate('xpack.graph.fieldManager.disableFieldTooltipContent', {
+                      defaultMessage:
+                        'Turn off discovery of vertices for this field. You can also Shift+click the field to disable it.',
+                    }),
               },
               {
                 name: i18n.translate('xpack.graph.fieldManager.deleteFieldLabel', {
-                  defaultMessage: 'Delete field',
+                  defaultMessage: 'Deselect field',
                 }),
+                toolTipContent: i18n.translate(
+                  'xpack.graph.fieldManager.deleteFieldTooltipContent',
+                  {
+                    defaultMessage:
+                      'No new vertices for this field will be discovered.  Existing vertices remain in the graph.',
+                  }
+                ),
                 icon: <EuiIcon type="trash" size="m" />,
                 onClick: () => {
                   deselectField(initialField.name);
@@ -178,11 +195,11 @@ export function FieldEditor({
             ],
           },
           {
-            id: 'displaySettings',
-            title: i18n.translate('xpack.graph.fieldManager.displayFormTitle', {
+            id: 'settings',
+            title: i18n.translate('xpack.graph.fieldManager.settingsFormTitle', {
               defaultMessage: 'Edit',
             }),
-            width: 280,
+            width: 380,
             content: (
               <EuiForm className="gphFieldEditor__displayForm">
                 {/* This is a workaround to prevent the field combo box from being focussed when opening the panel. */}
@@ -278,9 +295,23 @@ export function FieldEditor({
 
                 <EuiFormRow
                   display="columnCompressed"
-                  label={i18n.translate('xpack.graph.fieldManager.maxHopsLabel', {
-                    defaultMessage: 'Max hops',
-                  })}
+                  label={
+                    <>
+                      {i18n.translate('xpack.graph.fieldManager.maxTermsPerHopLabel', {
+                        defaultMessage: 'Terms per hop',
+                      })}{' '}
+                      <EuiIconTip
+                        content={i18n.translate(
+                          'xpack.graph.fieldManager.maxTermsPerHopDescription',
+                          {
+                            defaultMessage:
+                              'Controls the maximum number of terms to return for each search step.',
+                          }
+                        )}
+                        position="right"
+                      />
+                    </>
+                  }
                 >
                   <EuiFieldNumber
                     step={1}
@@ -318,7 +349,7 @@ export function FieldEditor({
                       onClick={updateField}
                     >
                       {i18n.translate('xpack.graph.fieldManager.updateLabel', {
-                        defaultMessage: 'Update',
+                        defaultMessage: 'Save changes',
                       })}
                     </EuiButton>
                   </EuiFlexItem>

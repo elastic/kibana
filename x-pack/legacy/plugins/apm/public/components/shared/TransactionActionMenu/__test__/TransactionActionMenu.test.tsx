@@ -14,8 +14,7 @@ import * as apmIndexPatternHooks from '../../../../hooks/useAPMIndexPattern';
 import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
 import { ISavedObject } from '../../../../services/rest/savedObjects';
 import { LegacyCoreStart } from 'src/core/public';
-
-jest.mock('ui/kfetch');
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
@@ -37,9 +36,10 @@ describe('TransactionActionMenu component', () => {
       }
     } as unknown) as LegacyCoreStart;
 
-    jest
-      .spyOn(apmIndexPatternHooks, 'useAPMIndexPattern')
-      .mockReturnValue({ id: 'foo' } as ISavedObject);
+    jest.spyOn(apmIndexPatternHooks, 'useAPMIndexPattern').mockReturnValue({
+      apmIndexPattern: { id: 'foo' } as ISavedObject,
+      status: FETCH_STATUS.SUCCESS
+    });
     jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
   });
 
