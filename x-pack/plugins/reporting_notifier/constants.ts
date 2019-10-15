@@ -10,8 +10,8 @@ export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
 export const JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG = {
   jobCompletionNotifier: {
     interval: 10000,
-    intervalErrorMultiplier: 5
-  } // prettier-ignore
+    intervalErrorMultiplier: 5,
+  },
 };
 
 export const API_BASE_URL = '/api/reporting/jobs';
