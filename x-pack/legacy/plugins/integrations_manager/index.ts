@@ -8,7 +8,6 @@ import { resolve } from 'path';
 import JoiNamespace from 'joi';
 import { BehaviorSubject } from 'rxjs';
 import { LegacyPluginInitializer, LegacyPluginOptions } from 'src/legacy/types';
-import KbnServer from 'src/legacy/server/kbn_server';
 import { Feature } from '../../../plugins/features/server/feature';
 import { PLUGIN } from './common/constants';
 import manifest from './kibana.json';
@@ -81,11 +80,6 @@ const pluginOptions: LegacyPluginOptions = {
   init(server: any) {
     server.plugins.xpack_main.registerFeature(feature);
 
-    // convert hapi instance to KbnServer
-    // `kbnServer.server` is the same hapi instance
-    // `kbnServer.newPlatform` has important values
-    const kbnServer = (server as unknown) as KbnServer;
-
     const getConfig$ = () =>
       new BehaviorSubject(server.config().get(PLUGIN.CONFIG_PREFIX)).asObservable();
 
@@ -96,7 +90,10 @@ const pluginOptions: LegacyPluginOptions = {
       },
     };
 
-    const coreSetup: CoreSetup = kbnServer.newPlatform.setup.core;
+    const coreSetup: CoreSetup = {
+      elasticsearch: server.newPlatform.setup.core.elasticsearch,
+      hapiServer: server.newPlatform.__internals.hapiServer,
+    };
 
     new ServerPlugin(initializerContext).setup(coreSetup);
   },

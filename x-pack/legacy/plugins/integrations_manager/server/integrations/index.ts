@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ClusterClient, ScopedClusterClient } from 'src/core/server/';
+import { IClusterClient, ScopedClusterClient } from 'src/core/server/';
 import { AssetType, Installable, Installation, Request } from '../../common/types';
 
 export * from './get';
@@ -23,7 +23,7 @@ export const SAVED_OBJECT_TYPES = new Set<AssetType>([
   'visualization',
 ]);
 
-export function getClusterAccessor(esClient: ClusterClient, req: Request) {
+export function getClusterAccessor(esClient: IClusterClient, req: Request) {
   return esClient.asScoped(req).callAsCurrentUser;
 }
 
