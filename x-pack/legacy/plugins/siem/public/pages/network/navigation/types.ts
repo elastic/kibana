@@ -30,7 +30,6 @@ export type IPsQueryTabBodyProps = QueryTabBodyProps &
 
 export type TlsQueryTabBodyProps = QueryTabBodyProps &
   GlobalTimeArgs & {
-    indexPattern: StaticIndexPattern;
     flowTarget: FlowTargetSourceDest;
     ip?: string;
   };

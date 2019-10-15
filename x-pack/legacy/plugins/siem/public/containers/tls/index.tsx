@@ -12,11 +12,11 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
-  FlowTarget,
   PageInfoPaginated,
   TlsEdges,
   TlsSortField,
   GetTlsQuery,
+  FlowTargetSourceDest,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
@@ -40,7 +40,7 @@ export interface TlsArgs {
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: TlsArgs) => React.ReactNode;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
   ip: string;
   type: networkModel.NetworkType;
 }

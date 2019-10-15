@@ -12,7 +12,7 @@ import { TlsAdapter } from './types';
 export * from './elasticsearch_adapter';
 
 export interface TlsRequestOptions extends RequestOptionsPaginated {
-  ip: string;
+  ip?: string;
   tlsSortField: TlsSortField;
   flowTarget: FlowTarget;
 }

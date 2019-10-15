@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
+import { TlsData } from '../../../public/graphql/types';
 
 export interface TlsAdapter {
-  getTls(request: FrameworkRequest, options: RequestBasicOptions): Promise<DomainsData>;
+  getTls(request: FrameworkRequest, options: RequestBasicOptions): Promise<TlsData>;
 }
 
 export interface TlsBuckets {

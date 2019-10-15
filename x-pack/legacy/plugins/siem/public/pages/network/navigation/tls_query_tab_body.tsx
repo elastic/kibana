@@ -5,7 +5,6 @@
  */
 import React from 'react';
 import { getOr } from 'lodash/fp';
-import { FlowTarget } from '../../../graphql/types';
 import { manageQuery } from '../../../components/page/manage_query';
 import { networkModel } from '../../../store';
 import { TlsQuery } from '../../../containers/tls';
@@ -22,13 +21,11 @@ export const TlsQueryTabBody = ({
   setQuery,
   isInitializing,
   from,
-  type,
-  indexPattern,
 }: TlsQueryTabBodyProps) => (
   <TlsQuery
     endDate={to}
     filterQuery={filterQuery}
-    flowTarget={FlowTarget.source}
+    flowTarget={flowTarget}
     ip={ip}
     skip={isInitializing}
     sourceId="default"

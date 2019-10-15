@@ -85,7 +85,7 @@ export const mockGlobalState: State = {
           dnsSortField: { field: NetworkDnsFields.queryCount, direction: Direction.desc },
           isPtrIncluded: false,
         },
-        tls: {
+        [networkModel.NetworkTableType.tls]: {
           activePage: 0,
           limit: 10,
           tlsSortField: { field: TlsFields._id, direction: Direction.desc },

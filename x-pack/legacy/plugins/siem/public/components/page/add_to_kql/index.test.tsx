@@ -171,6 +171,11 @@ describe('AddToKql Component', () => {
         },
         tls: {
           activePage: 0,
+          limit: 10,
+          tlsSortField: {
+            direction: 'desc',
+            field: '_id',
+          },
         },
       },
       filterQuery: {

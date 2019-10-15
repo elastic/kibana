@@ -239,16 +239,16 @@ export enum HostsFields {
   lastSeen = 'lastSeen',
 }
 
+export enum UsersFields {
+  name = 'name',
+  count = 'count',
+}
+
 export enum FlowTarget {
   client = 'client',
   destination = 'destination',
   server = 'server',
   source = 'source',
-}
-
-export enum UsersFields {
-  name = 'name',
-  count = 'count',
 }
 
 export enum FlowTargetSourceDest {
@@ -2000,7 +2000,6 @@ export interface IpOverviewSourceArgs {
 
   defaultIndex: string[];
 }
-
 export interface UsersSourceArgs {
   filterQuery?: Maybe<string>;
 
@@ -4931,7 +4930,7 @@ export namespace GetTlsQuery {
   export type Variables = {
     sourceId: string;
     filterQuery?: Maybe<string>;
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetSourceDest;
     ip: string;
     pagination: PaginationInputPaginated;
     sort: TlsSortField;

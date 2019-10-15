@@ -70,8 +70,6 @@ export interface NetworkPageModel {
   queries: NetworkQueries;
 }
 
-// IP Details Models
-
 export interface UsersQuery extends BasicQueryPaginated {
   usersSortField: UsersSortField;
 }
