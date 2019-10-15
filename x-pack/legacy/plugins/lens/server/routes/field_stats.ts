@@ -69,6 +69,9 @@ export async function initFieldsRoute(setup: CoreSetup) {
               query,
               aggs,
             },
+            // The hits total changed in 7.0 from number to object, unless this flag is set
+            // this is a workaround for elasticsearch response types that are from 6.x
+            restTotalHitsAsInt: true,
             size: 0,
           });
 
