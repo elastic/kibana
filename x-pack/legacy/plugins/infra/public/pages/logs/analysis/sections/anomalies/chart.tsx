@@ -36,7 +36,7 @@ export const AnomaliesChart: React.FunctionComponent<{
   annotations: Record<MLSeverityScoreCategories, RectAnnotationDatum[]>;
   renderAnnotationTooltip?: (details?: string) => JSX.Element;
 }> = ({ chartId, series, annotations, setTimeRange, timeRange, renderAnnotationTooltip }) => {
-  const [dateFormat] = useKibanaUiSetting('dateFormat');
+  const [dateFormat] = useKibanaUiSetting('dateFormat', 'Y-MM-DD HH:mm:ss.SSS');
   const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
 
   const chartDateFormatter = useMemo(
@@ -48,8 +48,7 @@ export const AnomaliesChart: React.FunctionComponent<{
 
   const tooltipProps = useMemo(
     () => ({
-      headerFormatter: (tooltipData: TooltipValue) =>
-        moment(tooltipData.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+      headerFormatter: (tooltipData: TooltipValue) => moment(tooltipData.value).format(dateFormat),
     }),
     [dateFormat]
   );
