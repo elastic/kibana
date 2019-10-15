@@ -10,7 +10,7 @@ export const toggleSelectedGroup = (
   group: string,
   selectedGroups: string[],
   setSelectedGroups: Dispatch<SetStateAction<string[]>>
-) => {
+): void => {
   const selectedGroupIndex = selectedGroups.indexOf(group);
   const updatedSelectedGroups = [...selectedGroups];
   if (selectedGroupIndex >= 0) {
