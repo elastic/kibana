@@ -113,7 +113,7 @@ export const createSignal = async ({
   if (signalUpdating == null) {
     // TODO: Right now we are using the .server-log as the default action as each alert has to have
     // at least one action or it will not be able to do in-memory persistence. When adding in actions
-    // such as email, slack, etc... this should be the default action if not action is specified to
+    // such as email, slack, etc... this should be the default action if no action is specified to
     // create signals
     const actionResults = await actionsClient.create({
       action: {
