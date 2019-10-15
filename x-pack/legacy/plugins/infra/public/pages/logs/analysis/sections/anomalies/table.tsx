@@ -100,11 +100,8 @@ export const AnomaliesTable: React.FunctionComponent<{
   const toggleExpandedItems = useCallback(
     item => {
       if (itemIdToExpandedRowMap[item.id]) {
-        const newItemIdToExpandedRowMap = {
-          ...itemIdToExpandedRowMap,
-        };
-        delete newItemIdToExpandedRowMap[item.id];
-        setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
+        const { [item.id]: toggledItem, ...remainingExpandedRowMap } = itemIdToExpandedRowMap;
+        setItemIdToExpandedRowMap(remainingExpandedRowMap);
       } else {
         const newItemIdToExpandedRowMap = {
           ...itemIdToExpandedRowMap,

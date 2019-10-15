@@ -190,9 +190,7 @@ const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ detai
         {parsedDetails.anomalyScoresByPartition.map(
           ({ partitionId, maximumAnomalyScore }, index) => {
             return (
-              <li
-                key={`${index}-overall-anomaly-chart-${partitionId}-partition-score-${maximumAnomalyScore}`}
-              >
+              <li key={`overall-anomaly-chart-${partitionId}`}>
                 <span>
                   {`${partitionId}: `}
                   <b>{maximumAnomalyScore}</b>
