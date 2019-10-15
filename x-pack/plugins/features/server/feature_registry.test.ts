@@ -494,8 +494,6 @@ describe('FeatureRegistry', () => {
     featureRegistry.getAll();
     expect(() => {
       featureRegistry.register(feature2);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Features are locked, can't register new features. Attempt to register test-feature-2 failed."`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`"Features are locked, can't register new features"`);
   });
 });
