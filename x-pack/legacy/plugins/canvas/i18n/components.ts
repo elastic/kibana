@@ -401,7 +401,7 @@ export const ComponentStrings = {
   },
   FunctionFormFunctionUnknown: {
     getUnknownArgumentTypeErrorMessage: (expressionType: string) =>
-      i18n.translate('xpack.canvas.functionForm.contextError', {
+      i18n.translate('xpack.canvas.functionForm.functionUnknown.unknownArgumentTypeError', {
         defaultMessage: 'Unknown expression type "{expressionType}"',
         values: {
           expressionType,
