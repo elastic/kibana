@@ -47,11 +47,11 @@ export async function getTransactionDistribution({
   );
 
   if (distributionMax == null) {
-    return { totalHits: 0, buckets: [], bucketSize: 0 };
+    return { noHits: true, buckets: [], bucketSize: 0 };
   }
 
   const bucketSize = getBucketSize(distributionMax, setup);
-  const { buckets, totalHits } = await getBuckets(
+  const { buckets, noHits } = await getBuckets(
     serviceName,
     transactionName,
     transactionType,
@@ -63,7 +63,7 @@ export async function getTransactionDistribution({
   );
 
   return {
-    totalHits,
+    noHits,
     buckets,
     bucketSize
   };

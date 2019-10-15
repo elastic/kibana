@@ -37,7 +37,7 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
               <EuiLink
                 href={`#${tab.path}`}
                 data-test-subj={`infrastructureNavLink_${tab.path}`}
-                onClick={e => {
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                   e.preventDefault();
                   history.push(tab.path);
                 }}

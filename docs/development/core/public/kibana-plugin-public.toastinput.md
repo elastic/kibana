@@ -4,6 +4,7 @@
 
 ## ToastInput type
 
+Inputs for [IToasts](./kibana-plugin-public.itoasts.md) APIs.
 
 <b>Signature:</b>
 

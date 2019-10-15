@@ -114,7 +114,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
         i18n.translate(
           'xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionSuccessMessage',
           {
-            defaultMessage: 'Updated retention schedule',
+            defaultMessage: 'Retention schedule updated',
           }
         )
       );
@@ -194,7 +194,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                           <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
                             <FormattedMessage
                               id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionHelpTextDocLinkText"
-                              defaultMessage="Learn more"
+                              defaultMessage="Learn more."
                             />
                           </EuiLink>
                         ),
@@ -279,10 +279,17 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
             </EuiButtonEmpty>
 
             <EuiButton onClick={updateRetentionSetting} fill isLoading={isSaving}>
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionSaveButtonLabel"
-                defaultMessage="Save"
-              />
+              {isEditing ? (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionEditButtonLabel"
+                  defaultMessage="Save changes"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionSaveButtonLabel"
+                  defaultMessage="Schedule"
+                />
+              )}
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>

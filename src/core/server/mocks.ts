@@ -40,7 +40,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   return mock;
 }
 
-function pluginInitializerContextMock<T>(config: T) {
+function pluginInitializerContextMock<T>(config: T = {} as T) {
   const mock: PluginInitializerContext<T> = {
     opaqueId: Symbol(),
     logger: loggingServiceMock.create(),
@@ -49,6 +49,13 @@ function pluginInitializerContextMock<T>(config: T) {
         dev: true,
         name: 'development',
         prod: false,
+      },
+      packageInfo: {
+        version: 'version',
+        branch: 'branch',
+        buildNum: 100,
+        buildSha: 'buildSha',
+        dist: false,
       },
     },
     config: pluginInitializerContextConfigMock<T>(config),
