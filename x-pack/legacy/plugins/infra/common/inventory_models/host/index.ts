@@ -5,7 +5,6 @@
  */
 
 import { layout } from './layout';
-import { toolbar } from './toolbar';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 
@@ -13,6 +12,5 @@ export const host: InventoryModel = {
   id: 'host',
   requiredModules: ['system'],
   layout,
-  toolbar,
   metrics,
 };

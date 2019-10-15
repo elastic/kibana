@@ -5,13 +5,11 @@
  */
 
 import { layout } from './layout';
-import { toolbar } from './toolbar';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 export const pod: InventoryModel = {
   id: 'pod',
   requiredModules: ['kubernetes'],
   layout,
-  toolbar,
   metrics,
 };

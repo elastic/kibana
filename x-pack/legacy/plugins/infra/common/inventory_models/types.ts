@@ -272,24 +272,6 @@ export const SnapshotModelRT = rt.record(
 );
 export type SnapshotModel = rt.TypeOf<typeof SnapshotModelRT>;
 
-export const InventoryToolbarMericRT = rt.type({
-  type: rt.literal('metric'),
-  options: rt.array(rt.type({ text: rt.string, value: rt.string })),
-});
-
-export const InventoryToolbarGroupByRT = rt.type({
-  type: rt.literal('groupBy'),
-  options: rt.array(rt.type({ text: rt.string, value: rt.string })),
-});
-
-export const InventoryToolbarItemRT = rt.union([
-  InventoryToolbarMericRT,
-  InventoryToolbarGroupByRT,
-]);
-
-export const InventoryToolbarRT = rt.array(InventoryToolbarItemRT);
-export type InventoryToolbar = rt.TypeOf<typeof InventoryToolbarRT>;
-
 export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
   snapshot?: { [name: string]: SnapshotModel };
@@ -299,6 +281,5 @@ export interface InventoryModel {
   id: string;
   requiredModules: string[];
   layout: InventoryDetailLayoutCreator;
-  toolbar: InventoryToolbar;
   metrics: InventoryMetrics;
 }
