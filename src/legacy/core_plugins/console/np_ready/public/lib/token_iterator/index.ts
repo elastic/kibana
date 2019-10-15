@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { TokenIteratorImpl } from './token_iterator';
+export { TokenIterator } from './token_iterator';

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { TokenIteratorImpl } from './token_iterator';
-import { Position, Token, TokensProvider } from '../../interfaces';
+import { TokenIterator } from './token_iterator';
+import { Position, Token, TokensProvider } from '../../types';
 
 const mockTokensProviderFactory = (tokenMtx: Token[][]): TokensProvider => {
   return {
@@ -51,7 +51,7 @@ describe('Token Iterator', () => {
   ]);
 
   it('iterates forwards', () => {
-    const it = new TokenIteratorImpl(tokensProvider, { lineNumber: 1, column: 1 });
+    const it = new TokenIterator(tokensProvider, { lineNumber: 1, column: 1 });
     expect(it.getCurrentToken()).toEqual({
       position: { column: 1, lineNumber: 1 },
       type: 'method',
@@ -70,7 +70,7 @@ describe('Token Iterator', () => {
   });
 
   it('iterates backwards', () => {
-    const it = new TokenIteratorImpl(tokensProvider, { lineNumber: 1, column: 8 });
+    const it = new TokenIterator(tokensProvider, { lineNumber: 1, column: 8 });
     expect(it.getCurrentToken()).toEqual({
       position: { lineNumber: 1, column: 6 },
       type: 'url.part',
@@ -89,7 +89,7 @@ describe('Token Iterator', () => {
   });
 
   it('iterates forwards and backwards', () => {
-    const it = new TokenIteratorImpl(tokensProvider, { lineNumber: 1, column: 8 });
+    const it = new TokenIterator(tokensProvider, { lineNumber: 1, column: 8 });
     expect(it.getCurrentToken()).toEqual({
       position: { lineNumber: 1, column: 6 },
       type: 'url.part',
@@ -109,7 +109,7 @@ describe('Token Iterator', () => {
 
   describe('iterating across lines', () => {
     it('iterates forwards over lines', () => {
-      const it = new TokenIteratorImpl(tokensProvider, { lineNumber: 1, column: 1 });
+      const it = new TokenIterator(tokensProvider, { lineNumber: 1, column: 1 });
       expect(it.getCurrentToken()).toEqual({
         position: { lineNumber: 1, column: 1 },
         type: 'method',
@@ -140,7 +140,7 @@ describe('Token Iterator', () => {
     });
 
     it('iterates backwards over lines', () => {
-      const it = new TokenIteratorImpl(tokensProvider, { lineNumber: 4, column: 1 });
+      const it = new TokenIterator(tokensProvider, { lineNumber: 4, column: 1 });
       expect(it.getCurrentToken()).toEqual({
         position: { lineNumber: 4, column: 1 },
         type: 'whitespace',
@@ -172,7 +172,7 @@ describe('Token Iterator', () => {
 
   describe('detecting current position', () => {
     it('knows what is at the current position #1', () => {
-      const it = new TokenIteratorImpl(tokensProvider, { lineNumber: 1, column: 6 });
+      const it = new TokenIterator(tokensProvider, { lineNumber: 1, column: 6 });
       expect(it.getCurrentPosition()).toEqual({ lineNumber: 1, column: 5 });
       expect(it.getCurrentToken()).toEqual({
         position: { lineNumber: 1, column: 5 },

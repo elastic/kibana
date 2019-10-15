@@ -18,7 +18,7 @@
  */
 
 import { Editor as IAceEditor, Range as AceRange } from 'brace';
-import { CoreEditor, Position, Range, Token, TokensProvider } from '../../interfaces';
+import { CoreEditor, Position, Range, Token, TokensProvider } from '../../types';
 import { AceTokensProvider } from '../../lib/ace_token_provider';
 
 export class LegacyEditor implements CoreEditor {

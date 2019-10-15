@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { IEditSession, TokenInfo } from 'brace';
-import { TokensProvider, Token, Position } from '../../interfaces';
+import { IEditSession, TokenInfo as BraceTokenInfo } from 'brace';
+import { TokensProvider, Token, Position } from '../../types';
 
 // Brace's token information types are not accurate.
-interface ActualTokenInfo extends TokenInfo {
+interface TokenInfo extends BraceTokenInfo {
   type: string;
 }
 
-const toToken = (lineNumber: number, column: number, token: ActualTokenInfo): Token => ({
+const toToken = (lineNumber: number, column: number, token: TokenInfo): Token => ({
   type: token.type,
   value: token.value,
   position: {
@@ -34,7 +34,7 @@ const toToken = (lineNumber: number, column: number, token: ActualTokenInfo): To
   },
 });
 
-const toTokens = (lineNumber: number, tokens: ActualTokenInfo[]): Token[] => {
+const toTokens = (lineNumber: number, tokens: TokenInfo[]): Token[] => {
   let acc = '';
   return tokens.map(token => {
     const column = acc.length + 1;
@@ -46,7 +46,7 @@ const toTokens = (lineNumber: number, tokens: ActualTokenInfo[]): Token[] => {
 const extractTokenFromAceTokenRow = (
   lineNumber: number,
   column: number,
-  aceTokens: ActualTokenInfo[]
+  aceTokens: TokenInfo[]
 ) => {
   let acc = '';
   for (const token of aceTokens) {
@@ -71,7 +71,7 @@ export class AceTokensProvider implements TokensProvider {
       return null;
     }
 
-    const tokens: ActualTokenInfo[] = this.session.getTokens(lineNumber - 1) as any;
+    const tokens: TokenInfo[] = this.session.getTokens(lineNumber - 1) as any;
     if (!tokens || !tokens.length) {
       // We are inside of the document but have no tokens for this line. Return an empty
       // array to represent this empty line.
@@ -82,7 +82,7 @@ export class AceTokensProvider implements TokensProvider {
   }
 
   getTokenAt(pos: Position): Token | null {
-    const tokens: ActualTokenInfo[] = this.session.getTokens(pos.lineNumber - 1) as any;
+    const tokens: TokenInfo[] = this.session.getTokens(pos.lineNumber - 1) as any;
     if (tokens) {
       return extractTokenFromAceTokenRow(pos.lineNumber, pos.column, tokens);
     }

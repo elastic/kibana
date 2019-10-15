@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import ace, { Editor as AceEditor, IEditSession } from 'brace';
+import ace, { Editor as AceEditor, IEditSession, Position as AcePosition } from 'brace';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -36,7 +36,7 @@ import { populateContext } from './autocomplete/engine';
 import { URL_PATH_END_MARKER } from './autocomplete/components';
 import { createTokenIterator } from '../../../np_ready/public/application/factories';
 
-import { Position, Token, Range } from '../../../np_ready/public/interfaces';
+import { Position, Token, Range } from '../../../np_ready/public/types';
 import { LegacyEditor } from '../../../np_ready/public/application/models';
 
 let LAST_EVALUATED_TOKEN: any = null;
@@ -297,8 +297,16 @@ function getCurrentMethodAndTokenPaths(
   }
   return ret;
 }
-export function getEndpointFromPosition(editor: LegacyEditor, pos: Position, parser: any) {
-  const context = { ...getCurrentMethodAndTokenPaths(editor, pos, parser, true) };
+export function getEndpointFromPosition(aceEditor: AceEditor, pos: AcePosition, parser: any) {
+  const editor = new LegacyEditor(aceEditor);
+  const context = {
+    ...getCurrentMethodAndTokenPaths(
+      editor,
+      { column: pos.column + 1, lineNumber: pos.row + 1 },
+      parser,
+      true
+    ),
+  };
   const components = getTopLevelUrlCompleteComponents(context.method);
   populateContext(context.urlTokenPath, context, editor, true, components);
   return context.endpoint;

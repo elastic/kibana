@@ -20,7 +20,7 @@
 import { Token } from './token';
 import { Position } from './core_editor';
 
-export interface TokenIterator {
+export interface ITokenIterator {
   /**
    * Report the token under the iterator's cursor.
    */

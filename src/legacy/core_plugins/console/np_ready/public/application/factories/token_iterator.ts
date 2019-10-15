@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreEditor, Position } from '../../interfaces';
-import { TokenIteratorImpl } from '../../lib/token_iterator';
+import { CoreEditor, Position } from '../../types';
+import { TokenIterator } from '../../lib/token_iterator';
 
 interface Dependencies {
   position: Position;
@@ -26,5 +26,5 @@ interface Dependencies {
 
 export function createTokenIterator({ editor, position }: Dependencies) {
   const provider = editor.getTokenProvider();
-  return new TokenIteratorImpl(provider, position);
+  return new TokenIterator(provider, position);
 }

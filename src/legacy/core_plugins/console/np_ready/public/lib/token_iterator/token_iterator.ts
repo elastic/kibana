@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TokenIterator, Position, Token, TokensProvider } from '../../interfaces';
+import { ITokenIterator, Position, Token, TokensProvider } from '../../types';
 
 function isColumnInTokenRange(column: number, token: Token) {
   if (column < token.position.column) {
@@ -26,7 +26,7 @@ function isColumnInTokenRange(column: number, token: Token) {
   return column <= token.position.column + token.value.length;
 }
 
-export class TokenIteratorImpl implements TokenIterator {
+export class TokenIterator implements ITokenIterator {
   private currentTokenIdx = -1;
   private currentPosition: Position = { lineNumber: -1, column: -1 };
   private tokensLineCache: Token[];
@@ -66,7 +66,7 @@ export class TokenIteratorImpl implements TokenIterator {
     // Check current row
     if (nextToken) {
       this.updatePosition({
-        tokenIdx: this.currentTokenIdx + direction,
+        tokenIdx: nextIdx,
         position: nextToken.position,
       });
       return nextToken;

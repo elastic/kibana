@@ -23,10 +23,10 @@ import '../../../../public/quarantined/tests/src/setup_mocks';
 import { Editor } from 'brace';
 import $ from 'jquery';
 // @ts-ignore
-import { initializeInput } from '../../../../public/quarantined/src/input.ts';
+import { initializeEditor } from '../../../../public/quarantined/src/input.ts';
 
 import { AceTokensProvider } from '.';
-import { Position, Token, TokensProvider } from '../../interfaces';
+import { Position, Token, TokensProvider } from '../../types';
 
 interface RunTestArgs {
   input: string;
@@ -44,9 +44,8 @@ describe('Ace (legacy) token provider', () => {
         <div id="ConCopyAsCurl" />
       </div>`;
 
-    aceEditor = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'));
+    aceEditor = initializeEditor($('#ConAppEditor'), $('#ConAppEditorActions'));
 
-    aceEditor = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'));
     aceEditor.$el.show();
     aceEditor.autocomplete._test.removeChangeListener();
     tokenProvider = new AceTokensProvider(aceEditor.session);

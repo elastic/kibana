@@ -37,7 +37,7 @@ export interface TokensProvider {
    * The token "at" the position is considered to the token directly preceding
    * the indicated cursor position.
    *
-   * Returns null if there is not a token that meets this criteria of if the position is outside
+   * Returns null if there is not a token that meets this criteria or if the position is outside
    * of the document range.
    */
   getTokenAt(pos: Position): Token | null;
