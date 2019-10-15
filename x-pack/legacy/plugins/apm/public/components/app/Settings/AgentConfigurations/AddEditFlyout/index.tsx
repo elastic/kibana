@@ -23,8 +23,8 @@ import { idx } from '@kbn/elastic-idx';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
+import { useCallApmApi } from '../../../../../hooks/useCallApmApi';
 import { transactionSampleRateRt } from '../../../../../../common/runtime_types/transaction_sample_rate_rt';
-import { callApmApi } from '../../../../../services/rest/callApmApi';
 import { Config } from '../index';
 import { SettingsSection } from './SettingsSection';
 import { ServiceSection } from './ServiceSection';
@@ -60,6 +60,8 @@ export function AddEditFlyout({
   } = useKibanaCore();
   const [isSaving, setIsSaving] = useState(false);
 
+  const callApmApiFromHook = useCallApmApi();
+
   // config conditions (service)
   const [serviceName, setServiceName] = useState<string>(
     selectedConfig ? selectedConfig.service.name || ALL_OPTION_VALUE : ''
@@ -69,9 +71,9 @@ export function AddEditFlyout({
   );
 
   const { data: { agentName } = { agentName: undefined } } = useFetcher(
-    () => {
+    callApmApi => {
       if (serviceName === ALL_OPTION_VALUE) {
-        return { agentName: undefined };
+        return Promise.resolve({ agentName: undefined });
       }
 
       if (serviceName) {
@@ -127,6 +129,7 @@ export function AddEditFlyout({
     setIsSaving(true);
 
     await saveConfig({
+      callApmApi: callApmApiFromHook,
       serviceName,
       environment,
       sampleRate,

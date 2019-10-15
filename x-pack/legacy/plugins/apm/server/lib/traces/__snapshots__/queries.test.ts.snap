@@ -54,6 +54,7 @@ Object {
         },
       },
     ],
+    "track_total_hits": true,
   },
   "index": Array [
     "myIndex",
