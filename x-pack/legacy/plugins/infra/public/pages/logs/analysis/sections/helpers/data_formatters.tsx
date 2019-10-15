@@ -152,21 +152,21 @@ export const getAnnotationsForPartition = (
   );
 };
 
-export const getTotalNumberOfLogsForPartition = (
+export const getTotalNumberOfLogEntriesForPartition = (
   results: GetLogEntryRateSuccessResponsePayload['data'],
   partitionId: string
 ) => {
-  return results.histogramBuckets.reduce<number>((sumPartitionNumberOfLogs, bucket) => {
+  return results.histogramBuckets.reduce<number>((sumPartitionNumberOfLogEntries, bucket) => {
     const partitionResults = bucket.partitions.find(partition => {
       return (
         partition.partitionId === partitionId ||
         (partition.partitionId === '' && partitionId === 'unknown')
       );
     });
-    if (!partitionResults || !partitionResults.numberOfLogs) {
-      return sumPartitionNumberOfLogs;
+    if (!partitionResults || !partitionResults.numberOfLogEntries) {
+      return sumPartitionNumberOfLogEntries;
     } else {
-      return (sumPartitionNumberOfLogs += partitionResults.numberOfLogs);
+      return (sumPartitionNumberOfLogEntries += partitionResults.numberOfLogEntries);
     }
   }, 0);
 };

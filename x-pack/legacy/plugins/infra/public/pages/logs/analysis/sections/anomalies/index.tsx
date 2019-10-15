@@ -139,9 +139,9 @@ export const AnomaliesResults = ({
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <EuiStat
-                title={numeral(results.totalNumberOfLogs).format('0.00a')}
+                title={numeral(results.totalNumberOfLogEntries).format('0.00a')}
                 description={i18n.translate(
-                  'xpack.infra.logs.analysis.overallAnomaliesNumberOfLogsDescription',
+                  'xpack.infra.logs.analysis.overallAnomaliesNumberOfLogEntriesDescription',
                   {
                     defaultMessage: 'Number of log entries',
                   }

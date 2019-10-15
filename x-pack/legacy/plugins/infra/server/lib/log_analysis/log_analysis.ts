@@ -92,7 +92,7 @@ export class InfraLogAnalysis {
           }>;
           averageActualLogEntryRate: number;
           maximumAnomalyScore: number;
-          numberOfLogs: number;
+          numberOfLogEntries: number;
           partitionId: string;
         }>;
         startTime: number;
@@ -114,7 +114,7 @@ export class InfraLogAnalysis {
           timestampPartitionBucket.filter_model_plot.average_actual.value || 0,
         maximumAnomalyScore:
           timestampPartitionBucket.filter_records.maximum_record_score.value || 0,
-        numberOfLogs: timestampPartitionBucket.filter_model_plot.sum_actual.value || 0,
+        numberOfLogEntries: timestampPartitionBucket.filter_model_plot.sum_actual.value || 0,
         partitionId: timestampPartitionBucket.key.partition,
       };
       if (

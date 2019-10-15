@@ -53,7 +53,7 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
           data: {
             bucketDuration: payload.data.bucketDuration,
             histogramBuckets: logEntryRateBuckets,
-            totalNumberOfLogs: getTotalNumberOfLogs(logEntryRateBuckets),
+            totalNumberOfLogEntries: getTotalNumberOfLogEntries(logEntryRateBuckets),
           },
         })
       );
@@ -61,13 +61,13 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
   });
 };
 
-const getTotalNumberOfLogs = (
+const getTotalNumberOfLogEntries = (
   logEntryRateBuckets: GetLogEntryRateSuccessResponsePayload['data']['histogramBuckets']
 ) => {
-  return logEntryRateBuckets.reduce((sumNumberOfLogs, bucket) => {
+  return logEntryRateBuckets.reduce((sumNumberOfLogEntries, bucket) => {
     const sumPartitions = bucket.partitions.reduce((partitionsTotal, partition) => {
       return (partitionsTotal += partition.numberOfLogs);
     }, 0);
-    return (sumNumberOfLogs += sumPartitions);
+    return (sumNumberOfLogEntries += sumPartitions);
   }, 0);
 };

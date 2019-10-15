@@ -146,7 +146,7 @@ export const AnalysisResultsContent = ({
                               numberOfLogs: (
                                 <EuiBadge color="primary">
                                   <EuiText size="s" color="ghost">
-                                    {numeral(logEntryRate.totalNumberOfLogs).format('0.00a')}
+                                    {numeral(logEntryRate.totalNumberOfLogEntries).format('0.00a')}
                                   </EuiText>
                                 </EuiBadge>
                               ),

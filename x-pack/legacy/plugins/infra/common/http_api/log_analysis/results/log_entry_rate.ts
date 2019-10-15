@@ -42,7 +42,7 @@ export const logEntryRatePartitionRT = rt.type({
   anomalies: rt.array(logEntryRateAnomaly),
   averageActualLogEntryRate: rt.number,
   maximumAnomalyScore: rt.number,
-  numberOfLogs: rt.number,
+  numberOfLogEntries: rt.number,
   partitionId: rt.string,
 });
 
@@ -55,7 +55,7 @@ export const getLogEntryRateSuccessReponsePayloadRT = rt.type({
   data: rt.type({
     bucketDuration: rt.number,
     histogramBuckets: rt.array(logEntryRateHistogramBucket),
-    totalNumberOfLogs: rt.number,
+    totalNumberOfLogEntries: rt.number,
   }),
 });
 

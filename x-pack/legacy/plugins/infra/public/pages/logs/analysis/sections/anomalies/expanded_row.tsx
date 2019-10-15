@@ -14,8 +14,8 @@ import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   getLogEntryRateSeriesForPartition,
   getAnnotationsForPartition,
-  getTotalNumberOfLogsForPartition,
   formatAnomalyScore,
+  getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
@@ -44,10 +44,10 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           },
     [results, partitionId]
   );
-  const totalNumberOfLogs = useMemo(
+  const totalNumberOfLogEntries = useMemo(
     () =>
       results && results.histogramBuckets
-        ? getTotalNumberOfLogsForPartition(results, partitionId)
+        ? getTotalNumberOfLogEntriesForPartition(results, partitionId)
         : undefined,
     [results, partitionId]
   );
@@ -64,9 +64,9 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiStat
-          title={numeral(totalNumberOfLogs).format('0.00a')}
+          title={numeral(totalNumberOfLogEntries).format('0.00a')}
           description={i18n.translate(
-            'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogsDescription',
+            'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogEntriesDescription',
             {
               defaultMessage: 'Number of log entries',
             }
