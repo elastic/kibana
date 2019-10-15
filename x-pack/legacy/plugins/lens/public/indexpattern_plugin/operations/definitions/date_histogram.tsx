@@ -160,7 +160,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       useNormalizedEsInterval: true,
       interval: column.params.interval,
       drop_partials: false,
-      min_doc_count: 1,
+      min_doc_count: 0,
       extended_bounds: {},
     },
   }),
