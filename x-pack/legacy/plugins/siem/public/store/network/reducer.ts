@@ -315,7 +315,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [NetworkTableType.tls]: {
+        tls: {
           ...state[networkType].queries.tls,
           limit,
         },
@@ -328,7 +328,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [NetworkTableType.tls]: {
+        tls: {
           ...state[networkType].queries.tls,
           tlsSortField,
         },
