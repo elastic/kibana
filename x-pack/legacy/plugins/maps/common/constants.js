@@ -39,6 +39,11 @@ export const LAYER_TYPE = {
   HEATMAP: 'HEATMAP'
 };
 
+export const SORT_ORDER = {
+  ASC: 'asc',
+  DESC: 'desc',
+};
+
 export const EMS_TMS = 'EMS_TMS';
 export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';

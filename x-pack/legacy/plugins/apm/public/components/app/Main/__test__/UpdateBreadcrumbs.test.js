@@ -10,7 +10,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
 import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
 
-jest.mock('ui/kfetch');
 jest.mock('ui/index_patterns');
 jest.mock('ui/new_platform');
 

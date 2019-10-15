@@ -24,7 +24,7 @@
  * from ui/index_patterns for backwards compatibility.
  */
 
-import { setup as data } from '../../../core_plugins/data/public/legacy';
+import { start as data } from '../../../core_plugins/data/public/legacy';
 
 export const {
   FieldList, // only used in Discover and StubIndexPattern
@@ -55,6 +55,7 @@ export {
 export {
   Field,
   FieldType,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,

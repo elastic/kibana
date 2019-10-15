@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Provider } from 'react-redux';
@@ -26,11 +26,19 @@ export interface GraphAppProps extends SearchBarProps {
   store: Storage;
   reduxStore: GraphStore;
   isInitialized: boolean;
+  noIndexPatterns: boolean;
 }
 
 export function GraphApp(props: GraphAppProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const { coreStart, pluginDataStart, store, reduxStore, ...searchBarProps } = props;
+  const {
+    coreStart,
+    pluginDataStart,
+    store,
+    reduxStore,
+    noIndexPatterns,
+    ...searchBarProps
+  } = props;
 
   return (
     <I18nProvider>
@@ -45,17 +53,13 @@ export function GraphApp(props: GraphAppProps) {
         <Provider store={reduxStore}>
           <>
             <div className="gphGraph__bar">
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFlexItem>
-                  <SearchBar {...searchBarProps} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <FieldManager pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <SearchBar {...searchBarProps} />
+              <EuiSpacer size="s" />
+              <FieldManager pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
             </div>
             {!props.isInitialized && (
               <GuidancePanel
+                noIndexPatterns={noIndexPatterns}
                 onOpenFieldPicker={() => {
                   setPickerOpen(true);
                 }}

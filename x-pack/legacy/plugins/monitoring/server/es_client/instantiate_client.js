@@ -14,21 +14,21 @@ import { LOGGING_TAG } from '../../common/constants';
  * Kibana itself is connected to a production cluster.
  */
 
-export function exposeClient(server) {
-  const config = hasMonitoringCluster(server) ? server.config().get('xpack.monitoring.elasticsearch') : {};
-  const cluster = server.plugins.elasticsearch.createCluster('monitoring', {
-    ...config,
+export function exposeClient({ config, events, log, elasticsearchPlugin }) {
+  const elasticsearchConfig = hasMonitoringCluster(config) ? config.get('xpack.monitoring.elasticsearch') : {};
+  const cluster = elasticsearchPlugin.createCluster('monitoring', {
+    ...elasticsearchConfig,
     plugins: [monitoringBulk],
-    logQueries: Boolean(config.logQueries),
+    logQueries: Boolean(elasticsearchConfig.logQueries),
   });
 
-  server.events.on('stop', bindKey(cluster, 'close'));
-  const configSource = hasMonitoringCluster(server) ? 'monitoring' : 'production';
-  server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster`);
+  events.on('stop', bindKey(cluster, 'close'));
+  const configSource = hasMonitoringCluster(config) ? 'monitoring' : 'production';
+  log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster`);
 }
 
-export function hasMonitoringCluster(server) {
-  const hosts = server.config().get('xpack.monitoring.elasticsearch.hosts');
+export function hasMonitoringCluster(config) {
+  const hosts = config.get('xpack.monitoring.elasticsearch.hosts');
   return Boolean(hosts && hosts.length);
 }
 
