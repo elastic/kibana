@@ -6,6 +6,7 @@
 
 import url from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
+import { validateUrls } from '../../../common/validate_urls';
 import { ConditionalHeaders, JobDocPayload, KbnServer } from '../../../types';
 
 function getSavedObjectAbsoluteUrl(job: JobDocPayload, relativeUrl: string, server: KbnServer) {
@@ -33,6 +34,8 @@ export const addForceNowQuerystring = async ({
     }
     job.urls = [getSavedObjectAbsoluteUrl(job, job.relativeUrl, server)];
   }
+
+  validateUrls(job.urls);
 
   const urls = job.urls.map((jobUrl: string) => {
     if (!job.forceNow) {
