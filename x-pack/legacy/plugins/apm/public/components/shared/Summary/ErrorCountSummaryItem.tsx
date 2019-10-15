@@ -6,9 +6,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { px } from '../../../../../code/public/style/variables';
 import { ErrorCountBadge } from '../../app/TransactionDetails/WaterfallWithSummmary/ErrorCountBadge';
-import { units } from '../../../style/variables';
+import { units, px } from '../../../style/variables';
 
 interface Props {
   count: number;

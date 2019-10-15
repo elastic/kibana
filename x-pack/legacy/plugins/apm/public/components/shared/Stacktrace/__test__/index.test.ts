@@ -8,7 +8,7 @@ import { IStackframe } from '../../../../../typings/es_schemas/raw/fields/Stackf
 import { getGroupedStackframes } from '../index';
 import stacktracesMock from './stacktraces.json';
 
-jest.mock('../../../../../../code/public', () => ({
+jest.mock('../../../../../../code/public/shared', () => ({
   CodeBlock: () => null
 }));
 
