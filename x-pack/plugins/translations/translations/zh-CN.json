@@ -782,7 +782,6 @@
     "data.filter.filterBar.filterItemBadgeIconAriaLabel": "删除",
     "data.filter.filterBar.includeFilterButtonLabel": "包括结果",
     "data.filter.filterBar.indexPatternSelectPlaceholder": "选择索引模式",
-    "data.filter.filterBar.moreFilterActionsMessage": "选择更多筛选操作。",
     "data.filter.filterBar.negatedFilterPrefix": "非 ",
     "data.filter.filterBar.pinFilterButtonLabel": "在所有应用上固定",
     "data.filter.filterBar.pinnedFilterPrefix": "已固定",
