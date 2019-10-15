@@ -28,8 +28,6 @@ import {
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-
 /**
  *
  * @public
