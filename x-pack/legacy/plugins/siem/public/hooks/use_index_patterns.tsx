@@ -6,24 +6,19 @@
 
 import { useEffect, useState } from 'react';
 
-import { getIndexPatterns } from '../api';
-import { useStateToaster } from '../../toasters';
-import { errorToToaster } from '../../ml/api/error_to_toaster';
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
+import { useStateToaster } from '../components/toasters';
+import { errorToToaster } from '../components/ml/api/error_to_toaster';
 
 import * as i18n from './translations';
-import { IndexPatternSavedObject } from '../types';
+import { IndexPatternSavedObject } from '../components/ml_popover/types';
+import { getIndexPatterns } from './api/api';
 
 type Return = [boolean, IndexPatternSavedObject[]];
-
-// TODO: Used by more than just ML now -- refactor to shared component https://github.com/elastic/siem-team/issues/448
 
 export const useIndexPatterns = (refreshToggle = false): Return => {
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -32,12 +27,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
 
     async function fetchIndexPatterns() {
       try {
-        const data = await getIndexPatterns(
-          {
-            'kbn-version': kbnVersion,
-          },
-          abortCtrl.signal
-        );
+        const data = await getIndexPatterns(abortCtrl.signal);
 
         if (isSubscribed) {
           setIndexPatterns(data);

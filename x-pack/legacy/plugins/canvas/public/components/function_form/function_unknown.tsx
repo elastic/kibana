@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
+import { ComponentStrings } from '../../../i18n';
 
-export const FunctionUnknown = ({ argType }) => (
+interface Props {
+  /** the type of the argument */
+  argType: string;
+}
+const { FunctionFormFunctionUnknown: strings } = ComponentStrings;
+
+export const FunctionUnknown: FunctionComponent<Props> = ({ argType }) => (
   <div className="canvasFunctionForm canvasFunctionForm--unknown-expression">
-    Unknown expression type "{argType}"
+    {strings.getUnknownArgumentTypeErrorMessage(argType)}
   </div>
 );
 

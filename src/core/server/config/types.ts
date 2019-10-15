@@ -17,6 +17,22 @@
  * under the License.
  */
 
-/** This module is intended for consumption by public to avoid import issues with server-side code */
+/**
+ * @public
+ */
+export interface PackageInfo {
+  version: string;
+  branch: string;
+  buildNum: number;
+  buildSha: string;
+  dist: boolean;
+}
 
-export { PluginOpaqueId } from './plugins/types';
+/**
+ * @public
+ */
+export interface EnvironmentMode {
+  name: 'development' | 'production';
+  dev: boolean;
+  prod: boolean;
+}

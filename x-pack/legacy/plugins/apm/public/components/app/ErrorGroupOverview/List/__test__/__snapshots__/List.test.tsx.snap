@@ -41,7 +41,6 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
       },
     ]
   }
-  hidePerPageOptions={false}
   initialPageSize={25}
   initialSortDirection="desc"
   initialSortField="latestOccurrenceAt"
@@ -284,49 +283,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         >
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <div
-              className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
-              id="customizablePagination"
-              onKeyDown={[Function]}
-              onMouseDown={[Function]}
-              onMouseUp={[Function]}
-              onTouchEnd={[Function]}
-              onTouchStart={[Function]}
-            >
-              <div
-                className="euiPopover__anchor"
-              >
-                <button
-                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--iconRight"
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <span
-                    className="euiButtonEmpty__content"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                      focusable="false"
-                      height={16}
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width={16}
-                      xmlns="http://www.w3.org/2000/svg"
-                    />
-                    <span
-                      className="euiButtonEmpty__text"
-                    >
-                      Rows per page
-                      : 
-                      25
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
+          />
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
@@ -404,7 +361,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       },
     ]
   }
-  hidePerPageOptions={false}
   initialPageSize={25}
   initialSortDirection="desc"
   initialSortField="latestOccurrenceAt"
@@ -1088,49 +1044,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         >
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <div
-              className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
-              id="customizablePagination"
-              onKeyDown={[Function]}
-              onMouseDown={[Function]}
-              onMouseUp={[Function]}
-              onTouchEnd={[Function]}
-              onTouchStart={[Function]}
-            >
-              <div
-                className="euiPopover__anchor"
-              >
-                <button
-                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--iconRight"
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <span
-                    className="euiButtonEmpty__content"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                      focusable="false"
-                      height={16}
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width={16}
-                      xmlns="http://www.w3.org/2000/svg"
-                    />
-                    <span
-                      className="euiButtonEmpty__text"
-                    >
-                      Rows per page
-                      : 
-                      25
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
+          />
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
