@@ -420,6 +420,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               indexPatterns={this.props.indexPatterns!}
               savedQueryService={this.savedQueryService}
               showSaveQuery={this.props.showSaveQuery}
+              timeHistory={this.props.timeHistory}
             />
           </div>
         </div>

@@ -33,6 +33,7 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 import { CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { TimeHistoryContract } from 'ui/timefilter';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
@@ -49,7 +50,7 @@ interface Props {
   savedObjects?: CoreStart['savedObjects'];
   showSaveQuery?: boolean;
   savedQueryService?: SavedQueryService;
-
+  timeHistory?: TimeHistoryContract;
   // TODO: Only for filter-bar directive!
   uiSettings?: CoreStart['uiSettings'];
   docLinks?: CoreStart['docLinks'];
@@ -109,6 +110,7 @@ function FilterBarUI(props: Props) {
           uiSettings={uiSettings!}
           savedQueryService={props.savedQueryService!}
           showSaveQuery={props.showSaveQuery}
+          timeHistory={props.timeHistory!}
         />
       </EuiFlexItem>
     ));
@@ -157,6 +159,7 @@ function FilterBarUI(props: Props) {
                 uiSettings={uiSettings!}
                 savedQueryService={props.savedQueryService!}
                 showSaveQuery={props.showSaveQuery}
+                timeHistory={props.timeHistory!}
               />
             </div>
           </EuiFlexItem>

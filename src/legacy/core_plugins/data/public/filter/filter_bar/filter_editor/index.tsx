@@ -39,6 +39,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { UiSettingsClientContract } from 'kibana/public';
+import { TimeHistoryContract } from 'ui/timefilter';
 import { Field, IndexPattern } from '../../../index_patterns';
 import { SavedQuery } from '../../../search/search_bar/index';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
@@ -73,6 +74,7 @@ interface Props {
   uiSettings: UiSettingsClientContract;
   savedQueryService: SavedQueryService;
   showSaveQuery?: boolean;
+  timeHistory?: TimeHistoryContract;
 }
 
 interface State {
@@ -498,6 +500,8 @@ class FilterEditorUI extends Component<Props, State> {
                 : this.props.indexPatterns
             }
             showSaveQuery={this.props.showSaveQuery!}
+            timeHistory={this.props.timeHistory!}
+            savedQueryService={this.props.savedQueryService}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

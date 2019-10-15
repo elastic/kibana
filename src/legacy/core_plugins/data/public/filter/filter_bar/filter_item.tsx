@@ -29,6 +29,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { UiSettingsClientContract } from 'src/core/public';
+import { TimeHistoryContract } from 'ui/timefilter';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
@@ -46,6 +47,7 @@ interface Props {
   uiSettings: UiSettingsClientContract;
   savedQueryService?: SavedQueryService;
   showSaveQuery?: boolean;
+  timeHistory?: TimeHistoryContract;
 }
 
 interface State {
@@ -179,6 +181,8 @@ class FilterItemUI extends Component<Props, State> {
               onCancel={this.closePopover}
               uiSettings={this.props.uiSettings}
               savedQueryService={this.props.savedQueryService!}
+              showSaveQuery={this.props.showSaveQuery}
+              timeHistory={this.props.timeHistory!}
             />
           </div>
         ),
