@@ -113,9 +113,9 @@ export {
 } from './http';
 
 export {
+  MountPoint,
+  UnmountCallback,
   OverlayStart,
-  OverlayBannerMount,
-  OverlayBannerUnmount,
   OverlayBannersStart,
   OverlayRef,
 } from './overlays';

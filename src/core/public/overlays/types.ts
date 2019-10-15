@@ -17,6 +17,19 @@
  * under the License.
  */
 
-export { MountPoint, UnmountCallback } from './types';
-export { OverlayBannersStart } from './banners';
-export { OverlayService, OverlayStart, OverlayRef } from './overlay_service';
+/**
+ * A function that will mount the banner inside the provided element.
+ * @param element the container element to render into
+ * @returns a {@link UnmountCallback} that unmount the element on call.
+ *
+ * @public
+ */
+export type MountPoint = (element: HTMLElement) => UnmountCallback;
+
+/**
+ * A function that will unmount the element previously mounted by
+ * the associated {@link MountPoint}
+ *
+ * @public
+ */
+export type UnmountCallback = () => void;
