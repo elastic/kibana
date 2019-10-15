@@ -28,16 +28,17 @@ export default function TaskManagerPerformanceAPI(kibana) {
     init(server) {
       const taskManager = server.plugins.task_manager;
       const performanceState = {
-        runningAverageTasks: 0,
+        runningAverageTasksPerSecond: 0,
         averagesTaken: [],
         runningAverageLeadTime: -1,
         averagesTakenLeadTime: [],
         leadTimeQueue: [],
       };
 
-      setInterval(() => {
+      function flushPerfStats() {
+        setTimeout(flushPerfStats, 5000);
         const tasks = performanceState.leadTimeQueue.length;
-        console.log(`I have processed ${tasks} tasks in the past 5s`);
+        console.log(`I have processed ${tasks} tasks in the past 5s (${tasks / 5} per second)`);
         if (tasks > 0) {
           const latestAverage = avg(performanceState.leadTimeQueue.splice(0, tasks));
 
@@ -45,13 +46,15 @@ export default function TaskManagerPerformanceAPI(kibana) {
           performanceState.averagesTaken.push(tasks);
           if (performanceState.averagesTakenLeadTime.length > 1) {
             performanceState.runningAverageLeadTime = avg(performanceState.averagesTakenLeadTime);
-            performanceState.runningAverageTasks = avg(performanceState.averagesTaken);
+            performanceState.runningAverageTasksPerSecond = avg(performanceState.averagesTaken) / 5;
           } else {
             performanceState.runningAverageLeadTime = latestAverage;
-            performanceState.runningAverageTasks = tasks;
+            performanceState.runningAverageTasksPerSecond = tasks / 5;
           }
         }
-      }, 5000);
+      }
+
+      setTimeout(flushPerfStats, 5000);
 
       taskManager.registerTaskDefinitions({
         performanceTestTask: {
@@ -64,12 +67,13 @@ export default function TaskManagerPerformanceAPI(kibana) {
               async run() {
                 const { params, state } = taskInstance;
 
-                const runAt = millisecondsFromNow(5000);
+                const counter = (state.counter ? 1 + state.counter : 1);
+
                 const now = Date.now();
                 const leadTime = now - taskInstance.runAt;
                 performanceState.leadTimeQueue.push(leadTime);
 
-                const counter = (state.counter ? 1 + state.counter : 1);
+                const runAt = counter === 1 ? new Date(params.startAt) :  millisecondsFromNow(500);
 
                 const stateUpdated = {
                   ...state,
@@ -79,7 +83,7 @@ export default function TaskManagerPerformanceAPI(kibana) {
                 if(params.trackExecutionTimeline) {
                   stateUpdated.timeline = stateUpdated.timeline || [];
                   stateUpdated.timeline.push({
-                    owner: taskInstance.owner.split('-')[0],
+                    owner: taskInstance.ownerId.split('-')[0],
                     counter,
                     leadTime,
                     ranAt: now
@@ -87,7 +91,7 @@ export default function TaskManagerPerformanceAPI(kibana) {
                 }
                 return {
                   state: stateUpdated,
-                  runAt,
+                  runAt: runAt.getTime() < params.runUntil ? runAt : undefined,
                 };
               },
             };

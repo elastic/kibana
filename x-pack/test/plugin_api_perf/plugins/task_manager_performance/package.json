@@ -7,6 +7,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
+    "lodash": "^4.17.15",
     "joi": "^13.5.2"
   }
 }

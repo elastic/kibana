@@ -114,8 +114,6 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
-
-    this.fetchAvailableTasks = this.fetchAvailableTasks.bind(this);
   }
 
   /**
@@ -153,88 +151,6 @@ export class TaskStore {
       search_after: opts.searchAfter,
       query: opts.query,
     });
-  }
-
-  /**
-   * Fetches tasks from the index, which are ready to be run.
-   * - runAt is now or past
-   * - id is not currently running in this instance of Kibana
-   * - has a type that is in our task definitions
-   *
-   * @param {TaskQuery} query
-   * @prop {string[]} types - Task types to be queried
-   * @prop {number} size - The number of task instances to retrieve
-   * @returns {Promise<ConcreteTaskInstance[]>}
-   */
-  public async fetchAvailableTasks(): Promise<ConcreteTaskInstance[]> {
-    const { docs } = await this.search({
-      query: {
-        bool: {
-          must: [
-            // Either a task with idle status and runAt <= now or
-            // status running with a retryAt <= now.
-            {
-              bool: {
-                should: [
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'task.status': 'idle' } },
-                        { range: { 'task.runAt': { lte: 'now' } } },
-                      ],
-                    },
-                  },
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'task.status': 'running' } },
-                        { range: { 'task.retryAt': { lte: 'now' } } },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-            // Either task has an interval or the attempts < the maximum configured
-            {
-              bool: {
-                should: [
-                  { exists: { field: 'task.interval' } },
-                  ...Object.entries(this.definitions).map(([type, definition]) => ({
-                    bool: {
-                      must: [
-                        { term: { 'task.taskType': type } },
-                        {
-                          range: {
-                            'task.attempts': {
-                              lt: definition.maxAttempts || this.maxAttempts,
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  })),
-                ],
-              },
-            },
-          ],
-        },
-      },
-      size: 10,
-      sort: {
-        _script: {
-          type: 'number',
-          order: 'asc',
-          script: {
-            lang: 'expression',
-            source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
-          },
-        },
-      },
-      seq_no_primary_term: true,
-    });
-
-    return docs;
   }
 
   /**
@@ -416,7 +332,7 @@ export class TaskStore {
         id: doc.id,
         type: 'task',
         attributes: taskInstanceToAttributes(doc),
-        options: { version: doc.version },
+        version: doc.version,
       }))
     )).saved_objects.map(instance => {
       const task = savedObjectToConcreteTaskInstance(instance);

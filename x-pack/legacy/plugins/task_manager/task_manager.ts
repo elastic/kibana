@@ -93,11 +93,12 @@ export class TaskManager {
       logger: this.logger,
       maxWorkers: this.maxWorkers,
     });
+    const bufferedStore = createTaskStoreUpdateBuffer(store, this.logger);
     const createRunner = (instance: ConcreteTaskInstance) =>
       new TaskManagerRunner({
         logger: this.logger,
         instance,
-        store: createTaskStoreUpdateBuffer(store, this.logger),
+        store: bufferedStore,
         definitions: this.definitions,
         beforeRun: this.middleware.beforeRun,
       });
@@ -137,8 +138,9 @@ export class TaskManager {
   }
 
   private async claimAvailableTasks() {
+    const { availableWorkers } = this.pool;
     const { docs, claimedTasks } = await this.store.claimAvailableTasks({
-      size: this.pool.availableWorkers,
+      size: availableWorkers,
       claimOwnershipUntil: intervalFromNow('30s')!,
     });
 

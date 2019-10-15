@@ -5,6 +5,7 @@
  */
 
 import Joi from 'joi';
+import { range } from 'lodash';
 
 const scope = 'perf-testing';
 export function initRoutes(server, performanceState) {
@@ -24,20 +25,17 @@ export function initRoutes(server, performanceState) {
     },
     async handler(request) {
       const { tasksToSpawn, durationInSeconds, trackExecutionTimeline } = request.payload;
-      const tasks = [];
-
-      for (let taskIndex = 0; taskIndex < tasksToSpawn; taskIndex++) {
-        tasks.push(
-          await taskManager.schedule(
-            {
-              taskType: 'performanceTestTask',
-              params: { taskIndex, trackExecutionTimeline },
-              scope: [scope],
-            },
-            { request }
-          )
-        );
-      }
+      const startAt = millisecondsFromNow(5000).getTime();
+      await Promise.all(
+        range(tasksToSpawn)
+          .map(taskIndex => taskManager.schedule({
+            taskType: 'performanceTestTask',
+            params: { startAt, taskIndex, trackExecutionTimeline, runUntil: millisecondsFromNow(durationInSeconds * 1000).getTime() },
+            scope: [scope],
+          },
+          { request }
+          ))
+      );
 
       return new Promise(resolve => {
         setTimeout(() => {
@@ -46,4 +44,14 @@ export function initRoutes(server, performanceState) {
       });
     },
   });
+}
+
+function millisecondsFromNow(ms) {
+  if (!ms) {
+    return;
+  }
+
+  const dt = new Date();
+  dt.setTime(dt.getTime() + ms);
+  return dt;
 }
