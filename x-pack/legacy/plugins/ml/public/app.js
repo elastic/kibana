@@ -9,7 +9,6 @@
 import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
-import 'ui/courier';
 import 'ui/angular-bootstrap';
 import 'ui/autoload/all';
 

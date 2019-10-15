@@ -17,6 +17,8 @@
  * under the License.
  */
 
+jest.useFakeTimers();
+
 jest.mock('./lib/parse_querystring', () => ({
   parseQueryString: () => {
     return {
@@ -124,23 +126,28 @@ describe('setTime', () => {
 describe('setRefreshInterval', () => {
   let update: sinon.SinonSpy;
   let fetch: sinon.SinonSpy;
+  let autoRefreshFetch: sinon.SinonSpy;
   let fetchSub: Subscription;
   let refreshSub: Subscription;
+  let autoRefreshSub: Subscription;
 
   beforeEach(() => {
     update = sinon.spy();
     fetch = sinon.spy();
+    autoRefreshFetch = sinon.spy();
     timefilter.setRefreshInterval({
       pause: false,
       value: 0,
     });
     refreshSub = timefilter.getRefreshIntervalUpdate$().subscribe(update);
     fetchSub = timefilter.getFetch$().subscribe(fetch);
+    autoRefreshSub = timefilter.getAutoRefreshFetch$().subscribe(autoRefreshFetch);
   });
 
   afterEach(() => {
     refreshSub.unsubscribe();
     fetchSub.unsubscribe();
+    autoRefreshSub.unsubscribe();
   });
 
   test('should update refresh interval', () => {
@@ -213,6 +220,32 @@ describe('setRefreshInterval', () => {
     timefilter.setRefreshInterval({ pause: false, value: 5000 });
     expect(update.calledTwice).to.be(true);
     expect(fetch.calledOnce).to.be(true);
+  });
+
+  test('should start auto refresh when unpaused', () => {
+    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+    expect(autoRefreshFetch.callCount).to.be(0);
+    jest.advanceTimersByTime(1000);
+    expect(autoRefreshFetch.callCount).to.be(1);
+    jest.advanceTimersByTime(1000);
+    expect(autoRefreshFetch.callCount).to.be(2);
+  });
+
+  test('should stop auto refresh when paused', () => {
+    timefilter.setRefreshInterval({ pause: true, value: 1000 });
+    expect(autoRefreshFetch.callCount).to.be(0);
+    jest.advanceTimersByTime(1000);
+    expect(autoRefreshFetch.callCount).to.be(0);
+  });
+
+  test('should not keep old interval when updated', () => {
+    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+    expect(autoRefreshFetch.callCount).to.be(0);
+    jest.advanceTimersByTime(1000);
+    expect(autoRefreshFetch.callCount).to.be(1);
+    timefilter.setRefreshInterval({ pause: false, value: 2000 });
+    jest.advanceTimersByTime(2000);
+    expect(autoRefreshFetch.callCount).to.be(2);
   });
 });
 

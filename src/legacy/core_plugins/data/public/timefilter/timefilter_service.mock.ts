@@ -41,7 +41,6 @@ const createSetupContractMock = () => {
     enableTimeRangeSelector: jest.fn(),
     getBounds: jest.fn(),
     calculateBounds: jest.fn(),
-    notifyShouldFetch: jest.fn(),
     createFilter: jest.fn(),
   };
 

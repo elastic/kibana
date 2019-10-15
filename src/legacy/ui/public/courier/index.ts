@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './courier';
-
 export * from './fetch';
 export * from './search_source';
 export * from './search_strategy';
