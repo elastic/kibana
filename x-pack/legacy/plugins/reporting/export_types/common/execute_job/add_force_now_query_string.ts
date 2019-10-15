@@ -32,10 +32,11 @@ export const addForceNowQuerystring = async ({
     if (!job.relativeUrl) {
       throw new Error(`Unable to generate report. Url is not defined.`);
     }
+
+    validateUrls([job.relativeUrl]);
+
     job.urls = [getSavedObjectAbsoluteUrl(job, job.relativeUrl, server)];
   }
-
-  validateUrls(job.urls);
 
   const urls = job.urls.map((jobUrl: string) => {
     if (!job.forceNow) {
