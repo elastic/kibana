@@ -6,15 +6,15 @@
 
 import classNames from 'classnames';
 import React, { useRef, FC } from 'react';
-import { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
+import { TooltipValueFormatter } from '@elastic/charts';
 
 // TODO: Below import is temporary, use `react-use` lib instead.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useObservable } from '../../../../../../../src/plugins/kibana_react/public/util/use_observable';
 
-import { chartTooltip$, mlChartTooltipService } from './chart_tooltip_service';
+import { chartTooltip$, mlChartTooltipService, ChartTooltipValue } from './chart_tooltip_service';
 
-const renderHeader = (headerData?: TooltipValue, formatter?: TooltipValueFormatter) => {
+const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFormatter) => {
   if (!headerData) {
     return null;
   }

@@ -8,20 +8,13 @@ import { BehaviorSubject } from 'rxjs';
 
 import { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
 
-interface TooltipData {
-  name: string;
-  value: any;
-  color: string;
-  isHighlighted: boolean;
-  isXValue: boolean;
-  seriesKey: string;
-  yAccessor: string;
+export interface ChartTooltipValue extends TooltipValue {
   skipHeader?: boolean;
 }
 
 interface ChartTooltipState {
   isTooltipVisible: boolean;
-  tooltipData: TooltipData[];
+  tooltipData: ChartTooltipValue[];
   tooltipHeaderFormatter?: TooltipValueFormatter;
   tooltipPosition: { transform: string };
 }
@@ -35,7 +28,11 @@ interface ToolTipOffset {
 
 interface MlChartTooltipService {
   element: HTMLElement | null;
-  show: (tooltipData: TooltipData[], target: HTMLElement | null, offset: ToolTipOffset) => void;
+  show: (
+    tooltipData: ChartTooltipValue[],
+    target: HTMLElement | null,
+    offset: ToolTipOffset
+  ) => void;
   hide: () => void;
 }
 
