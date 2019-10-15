@@ -19,7 +19,7 @@
 
 import { Registry } from './registry';
 import { Type } from '../../common/type';
-import { AnyExpressionType } from '../types';
+import { AnyExpressionType } from '../../common/types';
 
 export class TypesRegistry extends Registry<Type> {
   register(typeDefinition: AnyExpressionType | (() => AnyExpressionType)) {

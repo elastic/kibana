@@ -19,7 +19,8 @@
 
 import { useRef, useEffect } from 'react';
 import React from 'react';
-import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './types';
+import { IExpressionLoaderParams, IInterpreterResult } from './types';
+import { ExpressionAST } from '../common/types';
 import { IExpressionLoader, ExpressionLoader } from './loader';
 
 // Accept all options of the runner as props except for the

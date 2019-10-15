@@ -19,7 +19,7 @@
 
 import { fromExpression } from '@kbn/interpreter/common';
 import { execute, ExpressionDataHandler } from './execute';
-import { ExpressionAST } from './types';
+import { ExpressionAST } from '../common/types';
 
 jest.mock('./services', () => ({
   getInterpreter: () => {

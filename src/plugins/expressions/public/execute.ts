@@ -23,7 +23,8 @@ import { Adapters } from '../../inspector/public';
 // eslint-disable-next-line
 import { DataAdapter } from '../../inspector/public';
 import { getInterpreter } from './services';
-import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './types';
+import { IExpressionLoaderParams, IInterpreterResult } from './types';
+import { ExpressionAST } from '../common/types';
 
 /**
  * The search context describes a specific context (filters, time range and query)

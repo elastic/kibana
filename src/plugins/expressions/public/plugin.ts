@@ -18,12 +18,8 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import {
-  AnyExpressionFunction,
-  AnyExpressionType,
-  ExpressionInterpretWithHandlers,
-  ExpressionExecutor,
-} from './types';
+import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
+import { AnyExpressionFunction, AnyExpressionType } from '../common/types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import { setCoreStart, setInspector, setInterpreter, setRenderersRegistry } from './services';
@@ -103,7 +99,7 @@ export class ExpressionsPublicPlugin
     };
 
     const registerType: ExpressionsSetup['registerType'] = type => {
-      registerType(type);
+      types.register(type);
     };
 
     registerFunction(clogFunction);

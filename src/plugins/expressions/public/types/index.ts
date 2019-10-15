@@ -23,8 +23,6 @@ import { TimeRange } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
 import { Query } from '../../../data/public';
 
-export * from '../../common/types';
-
 export type ExpressionInterpretWithHandlers = (
   ast: Parameters<ExpressionInterpret>[0],
   context: Parameters<ExpressionInterpret>[1],
