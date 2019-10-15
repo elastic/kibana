@@ -30,6 +30,7 @@ export const EntityControl = injectI18n(
     static propTypes = {
       entity: PropTypes.object.isRequired,
       entityFieldValueChanged: PropTypes.func.isRequired,
+      forceSelection: PropTypes.bool.isRequired,
     };
 
     state = {
@@ -71,15 +72,14 @@ export const EntityControl = injectI18n(
     };
 
     render() {
-      const { entity, intl } = this.props;
+      const { entity, intl, forceSelection } = this.props;
       const { selectedOptions } = this.state;
       const options = getEntityControlOptions(entity);
-      const forceSelection = !selectedOptions;
 
       const control = (<EuiComboBox
         inputRef={input => {
-          if (input && forceSelection) {
-            input.focus();
+          if (input) {
+            this.inputRef = input;
           }
         }}
         style={{ minWidth: '300px' }}
@@ -94,19 +94,26 @@ export const EntityControl = injectI18n(
         isClearable={false}
       />);
 
+      const selectMessage = (<FormattedMessage
+        id="xpack.ml.timeSeriesExplorer.selectMetricMessage"
+        defaultMessage="Select {fieldName}"
+        values={{ fieldName: entity.fieldName }}
+      />);
+
+      if (forceSelection && this.inputRef) {
+        this.inputRef.focus();
+      }
+
       return (
         <EuiFlexItem grow={false}>
-          <EuiFormRow label={entity.fieldName}>
+          <EuiFormRow
+            label={entity.fieldName}
+            helpText={forceSelection ? selectMessage : null}
+          >
             {forceSelection ?
               <EuiToolTip
                 position="right"
-                content={
-                  <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer.selectMetricMessage"
-                    defaultMessage="Select {fieldName}"
-                    values={{ fieldName: entity.fieldName }}
-                  />
-                }
+                content={selectMessage}
               >{control}
               </EuiToolTip> : control}
           </EuiFormRow>
