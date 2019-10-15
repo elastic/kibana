@@ -20,9 +20,14 @@ export interface Policy {
  * can have multiple streams.
  */
 export interface Datasource {
+  id?: string;
+  /**
+   * Should be unique
+   */
+  name: string;
   package: Package;
+  read_alias?: string;
   streams: Stream[];
-  use_case: string;
 }
 
 /**
@@ -62,15 +67,26 @@ export interface Stream {
   id: string;
   input: Input;
   output: Output;
-  processors?: Processors;
+  processors?: string[];
 }
 
 /**
  * Where the data comes from
  */
 export interface Input {
-  input_configs: { [key: string]: any };
-  pipeline?: string;
+  /**
+   * Mix of configurable and required properties still TBD. Object for now might become string
+   */
+  config: { [key: string]: any };
+  fields?: Array<{ [key: string]: any }>;
+  id?: string;
+  ilm_policy?: string;
+  index_template?: string;
+  /**
+   * Need a distinction for "main" ingest pipeline. Should be handled during install. Likely
+   * by package/manifest format
+   */
+  ingest_pipelines?: string[];
   type: InputType;
 }
 
@@ -86,7 +102,14 @@ export enum InputType {
  */
 export interface Output {
   api_token?: string;
+  /**
+   * contains everything not otherwise specified (e.g. TLS, etc)
+   */
+  config?: { [key: string]: any };
   id: string;
+  /**
+   * unique alias with write index
+   */
   index_name?: string;
   ingest_pipeline?: string;
   name: string;
@@ -99,8 +122,6 @@ export enum OutputType {
   Else = 'else',
   Something = 'something',
 }
-
-export type Processors = string[] | string;
 
 export enum Status {
   Active = 'active',

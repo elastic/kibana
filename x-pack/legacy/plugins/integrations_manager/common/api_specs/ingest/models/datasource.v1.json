@@ -3,9 +3,10 @@
   "type": "object",
   "description": "A package with a use case (eg prod_west). The use case ID must be unique. A datasource can have multiple streams.",
   "properties": {
-    "use_case": {
+    "name": {
       "type": "string",
-      "example": "prod_west"
+      "example": "prod_west",
+      "description": "Should be unique"
     },
     "package": {
       "$ref": "./package.v1.json"
@@ -15,10 +16,17 @@
       "items": {
         "$ref": "./stream.v1.json"
       }
+    },
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "read_alias": {
+      "type": "string"
     }
   },
   "required": [
-    "use_case",
+    "name",
     "package",
     "streams"
   ]

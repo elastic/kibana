@@ -17,17 +17,10 @@
       "$ref": "./output.v1.json"
     },
     "processors": {
-      "oneOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      ]
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [
