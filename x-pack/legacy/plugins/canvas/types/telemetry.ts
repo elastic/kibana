@@ -5,14 +5,13 @@
  */
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { Legacy } from 'kibana';
 
 /**
   Function for collecting information about canvas usage
  */
 export type TelemetryCollector = (
   /** The server instance */
-  server: Legacy.Server,
+  kibanaIndex: string,
   /** Function for calling elasticsearch */
   callCluster: CallCluster
 ) => Record<string, any>;
