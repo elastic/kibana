@@ -11,6 +11,7 @@ import { EuiPage, EuiPageSideBar, EuiSideNav, EuiImage, EuiCallOut } from '@elas
 import { EndgameAppContext } from '../common/app_context';
 import LogoUrl from '../static/images/logo.png';
 import { routePaths } from '../common/route_paths';
+import { Page } from '../components/page';
 
 const NavBar = withRouter(function({ history }: RouteComponentProps) {
   return (
@@ -58,9 +59,11 @@ class EndgameApp extends PureComponent<{
                 <Route path={path} exact component={component} key={id} />
               ))}
               <Route path="*">
-                <EuiCallOut title="Route not found (404)" color="warning" iconType="help">
-                  <p>That page does not exists</p>
-                </EuiCallOut>
+                <Page>
+                  <EuiCallOut title="Route not found (404)" color="warning" iconType="help">
+                    <p>That page does not exists</p>
+                  </EuiCallOut>
+                </Page>
               </Route>
             </Switch>
           </EuiPage>

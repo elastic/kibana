@@ -14,7 +14,7 @@ class AlertsCard extends Component<RouteComponentProps> {
     return (
       <EuiCard
         layout="horizontal"
-        title="Alerts"
+        title="Alerts and Response"
         description="View and follow up on alerts"
         onClick={() => this.props.history.push(routePathsById.alerts.path)}
       />

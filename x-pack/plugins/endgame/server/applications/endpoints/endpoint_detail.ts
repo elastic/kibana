@@ -5,16 +5,24 @@
  */
 
 import { CoreSetup, IRouter } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 
-export function setupEndpointsApi(router: IRouter, coreSetup: CoreSetup): void {
+export function setupEndpointDetailApi(router: IRouter, coreSetup: CoreSetup): void {
   router.get(
     {
-      path: '/endpoints',
-      validate: false,
+      path: '/endpoints/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
     },
     async function handleGetEndpoints(context, request, response) {
+      const responseBody = {
+        id: request.params.id,
+      };
       return response.ok({
-        body: Array.from({ length: 20 }, (y, x) => ({ name: `endpoint ${x}`, id: x })),
+        body: responseBody,
       });
     }
   );

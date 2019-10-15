@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './endpoints_api';
+import { CoreSetup, IRouter } from 'kibana/server';
+import { setupEndpointListApi } from './endpoint_list';
+import { setupEndpointDetailApi } from './endpoint_detail';
+
+export function setupEndpointsApi(router: IRouter, coreSetup: CoreSetup): void {
+  setupEndpointListApi(router, coreSetup);
+  setupEndpointDetailApi(router, coreSetup);
+}
