@@ -1,21 +1,21 @@
-.codeFlyout .codeFlyout__header .codeFlyout__header--file {
+.codeFlyout__fileHeader {
   position: absolute;
   display: flex;
   align-items: center;
   z-index: 1;
 }
 
-.codeFlyout .codeFlyout__header .codeFlyout__header--file .euiIcon {
+.codeFlyout__icon {
   margin: $euiSizeS
 }
 
-.codeFlyout .codeFlyout__header .euiTabs {
+.codeFlyout__tabs {
   flex-direction: row-reverse;
   padding-right: $euiSizeS;
   flex-grow: 1;
 }
 
-.codeFlyout .codeFlyout--content {
+.codeFlyout__content {
   flex-grow: 1;
   display: flex;
   height: 100%;

@@ -57,16 +57,16 @@ export const CodeFlyoutMain = (props: { repo: string; file: string; revision: st
           <h2 id="flyoutTitle">File Preview</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <div className="codeFlyout__header">
-        <div className="codeFlyout__header--file">
-          <EuiIcon type="codeApp" size="m" />
+      <div>
+        <div className="codeFlyout__fileHeader">
+          <EuiIcon className="codeFlyout__icon" type="codeApp" size="m" />
           <EuiText size="s">
             <EuiLink href={`/app/code#/${props.repo}/blob/${props.revision}/${props.file}`}>
               <b> {props.file} </b>
             </EuiLink>
           </EuiText>
         </div>
-        <EuiTabs>
+        <EuiTabs className="codeFlyout__tabs">
           <EuiTab onClick={() => setSelectedTab(Tab.blame)} isSelected={selectedTab === Tab.blame}>
             Blame
           </EuiTab>
@@ -81,7 +81,7 @@ export const CodeFlyoutMain = (props: { repo: string; file: string; revision: st
           </EuiTab>
         </EuiTabs>
       </div>
-      <div className="codeFlyout--content">{content}</div>
+      <div className="codeFlyout__content">{content}</div>
     </Fragment>
   );
 };
