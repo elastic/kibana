@@ -37,6 +37,20 @@ interface Data extends Action {
 }
 type ActionTypeIndex = Record<string, ActionType>;
 
+function setActionTypeAttributeToActions(
+  actionTypesIndex: ActionTypeIndex,
+  actions: Action[]
+): Data[] {
+  return actions.map(action => {
+    return {
+      ...action,
+      actionType: actionTypesIndex[action.actionTypeId]
+        ? actionTypesIndex[action.actionTypeId].name
+        : action.actionTypeId,
+    };
+  });
+}
+
 export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
   match: {
     params: { api },
@@ -67,16 +81,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   }, []);
 
   useEffect(() => {
-    const updatedData: Data[] = [];
-    for (const action of data) {
-      updatedData.push({
-        ...action,
-        actionType: actionTypesIndex[action.actionTypeId]
-          ? actionTypesIndex[action.actionTypeId].name
-          : action.actionTypeId,
-      });
-    }
-    setData(updatedData);
+    setData(setActionTypeAttributeToActions(actionTypesIndex, data));
   }, [actionTypesIndex]);
 
   useEffect(() => {
@@ -85,15 +90,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
       setErrorCode(null);
       try {
         const actionsResponse = await loadActions({ http, sort, page });
-        const updatedData = actionsResponse.data.map(
-          (action: Action): Data => ({
-            ...action,
-            actionType: actionTypesIndex[action.actionTypeId]
-              ? actionTypesIndex[action.actionTypeId].name
-              : action.actionTypeId,
-          })
-        );
-        setData(updatedData);
+        setData(setActionTypeAttributeToActions(actionTypesIndex, data));
         setTotalItemCount(actionsResponse.total);
       } catch (e) {
         setErrorCode(e.response.status);
