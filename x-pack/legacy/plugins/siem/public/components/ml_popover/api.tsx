@@ -140,7 +140,7 @@ export const startDatafeeds = async ({
 }: {
   datafeedIds: string[];
   start: number;
-  headers?: Record<string, string | undefined>;
+  headers?: Record<string, string>;
 }): Promise<StartDatafeedResponse> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/force_start_datafeeds`, {
@@ -175,7 +175,7 @@ export const stopDatafeeds = async ({
   headers,
 }: {
   datafeedIds: string[];
-  headers?: Record<string, string | undefined>;
+  headers?: Record<string, string>;
 }): Promise<[StopDatafeedResponse, CloseJobsResponse]> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const stopDatafeedsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/stop_datafeeds`, {
@@ -220,6 +220,9 @@ export const stopDatafeeds = async ({
 
 /**
  * Fetches a summary of all ML jobs currently installed
+ *
+ * NOTE: If not sending jobIds in the body, you must at least send an empty body or the server will
+ * return a 500
  *
  * @param signal to cancel request
  */

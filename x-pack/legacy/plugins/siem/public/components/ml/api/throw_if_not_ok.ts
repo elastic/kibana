@@ -71,7 +71,7 @@ export const throwIfErrorAttachedToSetup = (
 
   const dataFeedErrors = setupResponse.datafeeds.reduce<string[]>(
     (accum, dataFeed) =>
-      dataFeed.error != null && jobIdErrorFilter.includes(`datafeed-${dataFeed.id}`)
+      dataFeed.error != null && jobIdErrorFilter.includes(dataFeed.id.substr('datafeed-'.length))
         ? [
             ...accum,
             dataFeed.error.msg,
