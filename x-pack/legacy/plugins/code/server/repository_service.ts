@@ -99,6 +99,9 @@ export class RepositoryService {
   public async remove(uri: string): Promise<DeleteWorkerResult> {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
     try {
+      if (localPath.split(path.sep).includes('..')) {
+        throw new Error('Repository path should not contain "..".');
+      }
       // For now, just `rm -rf`
       await del([localPath], { force: true });
       this.log.info(`Remove local repository ${uri} done.`);
