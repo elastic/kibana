@@ -13,6 +13,7 @@ export * from './errors';
 export * from './expression_types';
 export * from './elements';
 export * from './functions';
+export * from './renderers';
 export * from './shortcuts';
 export * from './transitions';
 export * from './ui';
