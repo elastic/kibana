@@ -184,6 +184,14 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       };
     }
 
+    async getTimeDurationForSharing() {
+      return await retry.try(async () => {
+        const element = await testSubjects.find('dataSharedTimefilterDuration');
+        const data = await element.getAttribute('data-shared-timefilter-duration');
+        return data;
+      });
+    }
+
     async getTimeConfigAsAbsoluteTimes() {
       await this.showStartEndTimes();
 

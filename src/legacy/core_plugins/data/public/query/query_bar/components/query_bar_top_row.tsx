@@ -184,7 +184,12 @@ function QueryBarTopRowUI(props: Props) {
       [],
       uiSettings.get('dateFormat')
     );
-    return <div data-shared-timefilter-duration={dateRangePretty} />;
+    return (
+      <div
+        data-shared-timefilter-duration={dateRangePretty}
+        data-test-subj="dataSharedTimefilterDuration"
+      />
+    );
   }
 
   function shouldRenderDatePicker(): boolean {
