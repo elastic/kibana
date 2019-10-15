@@ -131,6 +131,7 @@ function stateFromPersistedState(
     layers: persistedState.layers,
     indexPatterns: expectedIndexPatterns,
     indexPatternRefs: [],
+    existingFields: {},
     showEmptyFields: true,
   };
 }
@@ -280,6 +281,7 @@ describe('IndexPattern Data Source', () => {
     it('should insert an empty layer into the previous state', () => {
       const state = {
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -314,6 +316,7 @@ describe('IndexPattern Data Source', () => {
     it('should remove a layer', () => {
       const state = {
         indexPatternRefs: [],
+        existingFields: {},
         showEmptyFields: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
@@ -348,6 +351,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.getLayers({
           indexPatternRefs: [],
+          existingFields: {},
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
@@ -373,6 +377,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.getMetaData({
           indexPatternRefs: [],
+          existingFields: {},
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {

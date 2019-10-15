@@ -38,6 +38,7 @@ export const createNetworkResolvers = (
         ...createOptionsPaginated(source, args, info),
         flowTarget: args.flowTarget,
         networkTopNFlowSort: args.sort,
+        ip: args.ip,
       };
       return libs.network.getNetworkTopNFlow(req, options);
     },
