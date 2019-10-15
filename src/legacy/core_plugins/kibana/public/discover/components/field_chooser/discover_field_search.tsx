@@ -18,7 +18,8 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFacetButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface Props {
   /**
@@ -37,13 +38,23 @@ export interface Props {
    * the input value of the user
    */
   value?: string;
+  /**
+   * the number of selected filters
+   */
+  filtersActive: number;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value }: Props) {
+export function DiscoverFieldSearch({
+  showFilter,
+  onChange,
+  onShowFilter,
+  value,
+  filtersActive,
+}: Props) {
   if (typeof value !== 'string') {
     // at initial rendering value is undefined (angular related), this catches the warning
     // should be removed once all is react
@@ -61,31 +72,34 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value 
   });
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize={'s'}>
-      <EuiFlexItem>
-        <EuiFieldSearch
-          aria-label={searchPlaceholder}
-          data-test-subj="fieldFilterSearchInput"
-          compressed
-          fullWidth
-          onChange={event => onChange('name', event.currentTarget.value)}
-          placeholder={searchPlaceholder}
-          value={value}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={filterBtnAriaLabel} position="right">
-          <EuiButtonIcon
-            aria-expanded={showFilter}
-            aria-label={filterBtnAriaLabel}
-            className="dscToggleFieldFilterButton"
-            data-test-subj="toggleFieldFilterButton"
-            iconType="filter"
-            onClick={() => onShowFilter()}
-            size="m"
+    <React.Fragment>
+      <EuiFlexGroup responsive={false} gutterSize={'s'}>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            aria-label={searchPlaceholder}
+            data-test-subj="fieldFilterSearchInput"
+            compressed
+            fullWidth
+            onChange={event => onChange('name', event.currentTarget.value)}
+            placeholder={searchPlaceholder}
+            value={value}
           />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFacetButton
+        aria-label={filterBtnAriaLabel}
+        data-test-subj="toggleFieldFilterButton"
+        className="dscToggleFieldFilterButton"
+        icon={<EuiIcon type="filter" />}
+        isSelected={filtersActive > 0}
+        quantity={filtersActive}
+        onClick={() => onShowFilter()}
+      >
+        <FormattedMessage
+          id="kbn.discover.fieldChooser.fieldFilterFacetButtonLabel"
+          defaultMessage="Fields filtered"
+        />
+      </EuiFacetButton>
+    </React.Fragment>
   );
 }

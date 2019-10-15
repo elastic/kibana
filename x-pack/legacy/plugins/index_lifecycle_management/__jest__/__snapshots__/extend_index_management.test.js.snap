@@ -351,9 +351,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   className="euiDescriptionList__description"
                 >
                   <EuiLink
-                    color="primary"
                     href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
-                    type="button"
                   >
                     <a
                       className="euiLink euiLink--primary"
@@ -483,17 +481,15 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   <EuiPopover
                     anchorPosition="downCenter"
                     button={
-                      <EuiLink
-                        color="primary"
+                      <ForwardRef
                         onClick={[Function]}
-                        type="button"
                       >
                         <FormattedMessage
                           defaultMessage="Show definition"
                           id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                           values={Object {}}
                         />
-                      </EuiLink>
+                      </ForwardRef>
                     }
                     closePopover={[Function]}
                     display="inlineBlock"
@@ -522,9 +518,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                           className="euiPopover__anchor"
                         >
                           <EuiLink
-                            color="primary"
                             onClick={[Function]}
-                            type="button"
                           >
                             <button
                               className="euiLink euiLink--primary"
@@ -741,9 +735,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   className="euiDescriptionList__description"
                 >
                   <EuiLink
-                    color="primary"
                     href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
-                    type="button"
                   >
                     <a
                       className="euiLink euiLink--primary"
