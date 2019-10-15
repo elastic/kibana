@@ -7,9 +7,11 @@
 import { getTemplateStrings } from './template_strings';
 import { templateSpecs } from '../../canvas_plugin_src/templates';
 
+import { TagStrings } from '../tags';
+
 describe('TemplateStrings', () => {
   const templateStrings = getTemplateStrings();
-  const templateNames = templateSpecs.map(template => template.name);
+  const templateNames = templateSpecs.map(template => template().name);
   const stringKeys = Object.keys(templateStrings);
 
   test('All template names should exist in the strings definition', () => {
@@ -31,6 +33,14 @@ describe('TemplateStrings', () => {
   test('All templates should have a help string defined', () => {
     strings.forEach(value => {
       expect(value).toHaveProperty('help');
+    });
+  });
+
+  test('All templates should have tags that are defined', () => {
+    const tagNames = Object.keys(TagStrings);
+
+    templateSpecs.forEach(template => {
+      template().tags.forEach((tagName: string) => expect(tagNames).toContain(tagName));
     });
   });
 });
