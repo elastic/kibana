@@ -80,7 +80,7 @@ pipeline {
         always {
           dir("${BASE_DIR}/${CYPRESS_DIR}"){
             archiveArtifacts(allowEmptyArchive: false, artifacts: '**/*')
-            junit(allowEmptyResults: true, testResults: 'e2e-tests.xml')
+            junit(allowEmptyResults: true, testResults: '*e2e-tests.xml')
           }
         }
       }
