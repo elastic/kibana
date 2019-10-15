@@ -6,14 +6,7 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import {
-  EuiPageContent,
-  EuiBasicTable,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldSearch,
-} from '@elastic/eui';
+import { EuiPageContent, EuiBasicTable, EuiSpacer, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PageError } from '../../../components/page_error';
 import { Action, ActionType, loadActions, loadActionTypes } from '../../../lib/api';
@@ -145,21 +138,12 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   } else {
     content = (
       <Fragment>
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem>
-            <EuiFieldSearch
-              fullWidth
-              placeholder={i18n.translate(
-                'xpack.alertingUI.sections.actionsList.actionsListTable.searchFieldPlaceholder',
-                { defaultMessage: 'Search...' }
-              )}
-              onSearch={updatedSearchText => setSearchText(updatedSearchText)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AlertingActionsDropdown actionTypes={actionTypesIndex}></AlertingActionsDropdown>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiSearchBar
+          onChange={({ query }: { query: { text: string } }) => setSearchText(query.text)}
+          toolsRight={[
+            <AlertingActionsDropdown actionTypes={actionTypesIndex}></AlertingActionsDropdown>,
+          ]}
+        ></EuiSearchBar>
 
         <EuiSpacer size="s" />
 
