@@ -155,7 +155,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       { title: 'model_memory_limit', description: item.config.model_memory_limit },
       { title: 'version', description: item.config.version },
       {
-        title: 'generalisation mean squared error',
+        title: 'generalization mean squared error',
         description: (
           <LoadedStat
             isLoading={isLoadingGeneralization}
@@ -165,7 +165,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         ),
       },
       {
-        title: 'generalisation r squared',
+        title: 'generalization r squared',
         description: (
           <LoadedStat
             isLoading={isLoadingGeneralization}
