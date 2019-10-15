@@ -254,7 +254,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getOrdinalFields() {
-    const timeFields = await this._source.getTimeFields();
+    const timeFields = await this._source.getDateFields();
     const timeFieldOptions = timeFields.map(({ label, name }) => {
       return {
         label,

@@ -97,10 +97,10 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
-  async getTimeFields() {
+  async getDateFields() {
     try {
       const indexPattern = await this._getIndexPattern();
-      return indexPattern.fields.byType.date.map(field => {
+      return indexPattern.fields.getByType('date').map(field => {
         return { name: field.name, label: field.name };
       });
     } catch (error) {
@@ -169,11 +169,26 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
-  async _getFieldsExcludingTimeFields(fieldNames) {
-    const timeFieldNames = _.map(await this.getTimeFields(), 'name');
+  async _excludeDateFields(fieldNames) {
+    const dateFieldNames = _.map(await this.getDateFields(), 'name');
     return fieldNames.filter(field => {
-      return !timeFieldNames.includes(field);
+      return !dateFieldNames.includes(field);
     });
+  }
+
+  // Returns docvalue_field for the union of indexPattern's dateFields and request's field names.
+  async _getDateDocvalueFields(searchFields) {
+    const dateFieldNames = _.map(await this.getDateFields(), 'name');
+    return searchFields
+      .filter(fieldName => {
+        return dateFieldNames.includes(fieldName);
+      })
+      .map(fieldName => {
+        return {
+          field: fieldName,
+          format: 'epoch_millis'
+        };
+      });
   }
 
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
@@ -184,7 +199,6 @@ export class ESSearchSource extends AbstractESSource {
 
     const indexPattern = await this._getIndexPattern();
     const geoField = await this._getGeoField();
-    const timeFields = await this.getTimeFields();
 
     const scriptFields = {};
     searchFilters.fieldNames.forEach(fieldName => {
@@ -202,26 +216,19 @@ export class ESSearchSource extends AbstractESSource {
     const topHits = {
       size: topHitsSize,
       script_fields: scriptFields,
-      docvalue_fields: [],
+      docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames),
     };
+    const nonDateFieldNames = await this._excludeDateFields(searchFilters.fieldNames);
 
-    const fieldNames = await this._getFieldsExcludingTimeFields(searchFilters.fieldNames);
-
-    timeFields.forEach(field => {
-      topHits.docvalue_fields.push({
-        field: field.name,
-        format: 'epoch_millis'
-      });
-    });
     if (this._hasSort()) {
       topHits.sort = this._buildEsSort();
     }
     if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
       topHits._source = false;
-      topHits.docvalue_fields.push(...fieldNames);
+      topHits.docvalue_fields.push(...nonDateFieldNames);
     } else {
       topHits._source = {
-        includes: searchFilters.fieldNames
+        includes: nonDateFieldNames
       };
     }
 
@@ -268,24 +275,16 @@ export class ESSearchSource extends AbstractESSource {
   // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
   async _getSearchHits(layerName, searchFilters, registerCancelCallback) {
     const initialSearchContext = {
-      docvalue_fields: []
+      docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames)
     };
     const geoField = await this._getGeoField();
-    const timeFields = await this.getTimeFields();
-    const fieldNames = await this._getFieldsExcludingTimeFields(searchFilters.fieldNames);
-    timeFields.forEach(field => {
-      initialSearchContext.docvalue_fields.push({
-        field: field.name,
-        format: 'epoch_millis'
-      });
-    });
 
     let searchSource;
     if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
       // Request geo_point and style fields in docvalue_fields insted of _source
       // 1) Returns geo_point in a consistent format regardless of how geo_point is stored in source
       // 2) Setting _source to false so we avoid pulling back unneeded fields.
-      initialSearchContext.docvalue_fields.push(...fieldNames);
+      initialSearchContext.docvalue_fields.push(...(await this._excludeDateFields(searchFilters.fieldNames)));
       searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT, initialSearchContext);
       searchSource.setField('source', false); // do not need anything from _source
       searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
