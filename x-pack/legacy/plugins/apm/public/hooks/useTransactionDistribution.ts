@@ -12,7 +12,7 @@ import { TransactionDistributionAPIResponse } from '../../server/lib/transaction
 
 const INITIAL_DATA = {
   buckets: [] as TransactionDistributionAPIResponse['buckets'],
-  totalHits: 0,
+  noHits: true,
   bucketSize: 0
 };
 
