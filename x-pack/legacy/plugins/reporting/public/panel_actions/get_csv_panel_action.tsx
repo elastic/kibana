@@ -67,7 +67,7 @@ class GetCsvReportPanelAction extends Action<ISearchEmbeddable> {
       return {};
     }
 
-    return searchEmbeddable.searchScope.searchSource.getSearchRequestBody();
+    return searchEmbeddable.getSavedSearch().searchSource.getSearchRequestBody();
   }
 
   public isCompatible = async (context: ActionContext) => {
