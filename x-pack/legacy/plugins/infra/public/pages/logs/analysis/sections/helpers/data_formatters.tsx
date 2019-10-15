@@ -156,7 +156,7 @@ export const getTotalNumberOfLogEntriesForPartition = (
   results: GetLogEntryRateSuccessResponsePayload['data'],
   partitionId: string
 ) => {
-  return results.histogramBuckets.reduce<number>((sumPartitionNumberOfLogs, bucket) => {
+  return results.histogramBuckets.reduce<number>((sumPartitionNumberOfLogEntries, bucket) => {
     const partitionResults = bucket.partitions.find(partition => {
       return (
         partition.partitionId === partitionId ||
