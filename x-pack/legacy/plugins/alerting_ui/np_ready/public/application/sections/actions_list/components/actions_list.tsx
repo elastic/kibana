@@ -85,7 +85,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   }, []);
 
   useEffect(() => {
-    // Avoid flickering after action types load
+    // Avoid flickering before action types load
     if (typeof actionTypesIndex === 'undefined') {
       return;
     }
