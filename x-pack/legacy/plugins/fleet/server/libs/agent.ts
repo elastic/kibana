@@ -168,8 +168,12 @@ export class AgentLib {
   ): Promise<{ actions: AgentAction[]; policy: FullPolicyFile }> {
     const agent = await this.agentsRepository.getById(user, agentId);
 
-    if (!agent || !agent.active) {
+    if (!agent) {
       throw Boom.notFound('Agent not found or inactive');
+    }
+
+    if (!agent.active) {
+      throw Boom.forbidden('Agent inactive');
     }
 
     const actions = this._filterActionsForCheckin(agent);

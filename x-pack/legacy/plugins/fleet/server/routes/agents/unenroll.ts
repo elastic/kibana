@@ -15,13 +15,13 @@ export const createPOSTAgentsUnenrollRoute = (libs: FleetServerLib) => ({
   path: '/api/fleet/agents/unenroll',
   config: {
     validate: {
-      payload: {
+      payload: Joi.object({
         ids: Joi.array()
           .empty(false)
           .items(Joi.string())
           .optional(),
         kuery: Joi.string().optional(),
-      },
+      }),
     },
   },
   handler: async (

@@ -31,7 +31,7 @@ run(
       throw createFlagError('please provide a single --path flag');
     }
     const kibanaUrl: string = (flags.kibanaUrl as string) || 'http://localhost:5601';
-    const agent = await enroll(kibanaUrl, flags.enrollmentToken as string);
+    const agent = await enroll(kibanaUrl, flags.enrollmentToken as string, log);
 
     log.info('Enrolled with sucess', agent);
 
@@ -76,11 +76,17 @@ async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
     },
   });
 
+  if (res.status === 403) {
+    closing = true;
+    log.info('Unenrolling agent');
+    return;
+  }
+
   const json = await res.json();
   log.info('checkin', json);
 }
 
-async function enroll(kibanaURL: string, token: string): Promise<Agent> {
+async function enroll(kibanaURL: string, token: string, log: ToolingLog): Promise<Agent> {
   const res = await fetch(`${kibanaURL}/api/fleet/agents/enroll`, {
     method: 'POST',
     body: JSON.stringify({
@@ -92,7 +98,7 @@ async function enroll(kibanaURL: string, token: string): Promise<Agent> {
           system: `${os.type()} ${os.release()}`,
           memory: os.totalmem(),
         },
-        userProvided: {
+        user_provided: {
           dev_agent_version: '0.0.1',
           region: 'us-east',
         },
@@ -103,8 +109,13 @@ async function enroll(kibanaURL: string, token: string): Promise<Agent> {
       'kbn-fleet-enrollment-token': token,
     },
   });
-
   const json = await res.json();
+
+  if (!json.success) {
+    log.error(JSON.stringify(json, null, 2));
+    throw new Error('unable to enroll');
+  }
+
   return {
     id: json.item.id,
     access_token: json.item.access_token,
