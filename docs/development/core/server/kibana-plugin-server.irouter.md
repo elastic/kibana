@@ -4,7 +4,7 @@
 
 ## IRouter interface
 
-Registers route handlers for specified resource path and method.
+Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-server.routeconfig.md) and [RequestHandler](./kibana-plugin-server.requesthandler.md) for more information about arguments to route registrations.
 
 <b>Signature:</b>
 

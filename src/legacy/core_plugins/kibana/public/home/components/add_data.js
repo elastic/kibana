@@ -58,7 +58,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     const loggingData = {
       title: intl.formatMessage({
         id: 'kbn.home.addData.logging.nameTitle',
-        defaultMessage: 'Logging',
+        defaultMessage: 'Logs',
       }),
       description: intl.formatMessage({
         id: 'kbn.home.addData.logging.nameDescription',
