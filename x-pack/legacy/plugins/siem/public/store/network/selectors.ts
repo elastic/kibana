@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
-import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
 import { IpDetailsTableType, NetworkDetailsModel, NetworkPageModel, NetworkType } from './model';
@@ -16,9 +14,6 @@ import { FlowTargetSourceDest } from '../../graphql/types';
 const selectNetworkPage = (state: State): NetworkPageModel => state.network.page;
 
 const selectNetworkDetails = (state: State): NetworkDetailsModel => state.network.details;
-
-const selectNetworkByType = (state: State, networkType: NetworkType) =>
-  get(networkType, state.network);
 
 // Network Page Selectors
 export const dnsSelector = () =>
@@ -49,38 +44,6 @@ export const topNFlowSelector = (flowTarget: FlowTargetSourceDest, networkType: 
         : network.queries[IpDetailsTableType.topNFlowDestination]
   );
 };
-
-// Filter Query Selectors
-export const networkFilterQueryAsJson = () =>
-  createSelector(
-    selectNetworkByType,
-    network => (network.filterQuery ? network.filterQuery.serializedQuery : null)
-  );
-
-export const networkFilterExpression = () =>
-  createSelector(
-    selectNetworkByType,
-    network =>
-      network.filterQuery && network.filterQuery.kuery ? network.filterQuery.kuery.expression : null
-  );
-
-export const networkFilterQueryAsKuery = () =>
-  createSelector(
-    selectNetworkByType,
-    network => (network.filterQuery && network.filterQuery.kuery ? network.filterQuery.kuery : null)
-  );
-
-export const networkFilterQueryDraft = () =>
-  createSelector(
-    selectNetworkByType,
-    network => network.filterQueryDraft
-  );
-
-export const isNetworkFilterQueryDraftValid = () =>
-  createSelector(
-    selectNetworkByType,
-    network => isFromKueryExpressionValid(network.filterQueryDraft)
-  );
 
 // IP Details Selectors
 export const ipDetailsFlowTargetSelector = () =>
