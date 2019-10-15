@@ -46,9 +46,9 @@ const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
   ({
     detailName,
-    isInitializing,
     filters,
     from,
+    isInitializing,
     query,
     setAbsoluteRangeDatePicker,
     setHostDetailsTablesActivePageToZero,

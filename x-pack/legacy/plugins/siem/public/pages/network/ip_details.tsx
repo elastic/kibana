@@ -54,11 +54,11 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
     filters,
     flowTarget,
     from,
-    query,
-    setQuery,
     isInitializing,
+    query,
     setAbsoluteRangeDatePicker,
     setIpDetailsTablesActivePageToZero,
+    setQuery,
     to,
   }) => {
     useEffect(() => {
