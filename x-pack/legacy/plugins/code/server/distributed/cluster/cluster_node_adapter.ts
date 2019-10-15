@@ -6,6 +6,7 @@
 
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import util from 'util';
+import Boom from 'boom';
 import { ServiceHandlerAdapter, ServiceRegisterOptions } from '../service_handler_adapter';
 import { ResourceLocator } from '../resource_locator';
 import {
@@ -126,7 +127,7 @@ export class ClusterNodeAdapter implements ServiceHandlerAdapter {
               const data = await localHandler(params, context);
               return res.ok({ body: { data } });
             } catch (e) {
-              return res.internalError({ body: e.message || e.name });
+              throw Boom.boomify(e);
             }
           },
         });

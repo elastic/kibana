@@ -76,6 +76,8 @@ export function lspRoute(
                 statusCode: 500,
                 body: { error: { code: 500, msg: LANG_SERVER_ERROR } },
               });
+            } else if (error.isBoom) {
+              return error;
             } else {
               log.error(error);
               return res.custom({
@@ -189,6 +191,9 @@ export function lspRoute(
             statusCode: 500,
             body: { error: { code: error.code, msg: LANG_SERVER_ERROR } },
           });
+          // TODO: remove all these isBoom code.
+        } else if (error.isBoom) {
+          return error;
         } else {
           return res.custom({
             statusCode: 500,

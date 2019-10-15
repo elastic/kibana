@@ -63,7 +63,7 @@ export class WorkspaceHandler {
       try {
         gitStatus = await this.objectClient!.getRepositoryGitStatus(repositoryUri);
       } catch (error) {
-        throw new Error(`checkout workspace on an unknown status repository`);
+        throw Boom.internal(`checkout workspace on an unknown status repository`);
       }
 
       if (
@@ -74,7 +74,7 @@ export class WorkspaceHandler {
           this.log.debug(`Check repository ${repositoryUri} clone status at trial ${retryCount}`);
           return delay(tryGetGitStatus, 3000, retryCount + 1);
         } else {
-          throw new Error(`repository has not been fully cloned yet.`);
+          throw Boom.internal(`repository has not been fully cloned yet.`);
         }
       }
     };

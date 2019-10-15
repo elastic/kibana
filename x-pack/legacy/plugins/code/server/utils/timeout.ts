@@ -3,22 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import Boom from 'boom';
 
 export function promiseTimeout<T>(ms: number, promise: Promise<T>): Promise<T> {
-  const error = new Error('Timed out in ' + ms + 'ms.');
+  const boom = Boom.gatewayTimeout('Timed out in ' + ms + 'ms.');
+  // @ts-ignore
+  boom.isTimeout = true;
 
   if (ms > 0) {
     // Create a promise that rejects in <ms> milliseconds
     const timeout = new Promise<T>((resolve, reject) => {
       const id = setTimeout(() => {
         clearTimeout(id);
-        reject(error);
+        reject(boom);
       }, ms);
     });
 
     // Returns a race between our timeout and the passed in promise
     return Promise.race([promise, timeout]);
   } else {
-    return Promise.reject(error);
+    return Promise.reject(boom);
   }
 }

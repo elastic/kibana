@@ -37,7 +37,9 @@ export const getWorkspaceHandler = (
       await workspaceCmd.runInit(force);
       return {};
     } catch (e) {
-      return e;
+      if (e.isBoom) {
+        return e;
+      }
     }
   },
 });

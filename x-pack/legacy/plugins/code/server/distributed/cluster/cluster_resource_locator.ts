@@ -5,6 +5,7 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
+import Boom from 'boom';
 import { Endpoint, ResourceLocator } from '../resource_locator';
 import { ClusterService } from './cluster_service';
 import { LocalEndpoint } from '../local_endpoint';
@@ -33,14 +34,14 @@ export class ClusterResourceLocator implements ResourceLocator {
     const state = this.clusterService.state();
     const nodeId = state.routingTable.getNodeIdByRepositoryURI(this.repositoryUri(resource));
     if (!nodeId) {
-      throw new Error(`resource [${resource}] not exists`);
+      throw Boom.notFound(`resource [${resource}] not exists`);
     }
     if (this.clusterMembershipService.localNode.id === nodeId) {
       return new LocalEndpoint(req, resource);
     } else {
       const node = state.nodes.getNodeById(nodeId);
       if (!node) {
-        throw new Error(`Node [${nodeId}] not found`);
+        throw Boom.notFound(`Node [${nodeId}] not found`);
       }
       return new ClusterNodeEndpoint(req, resource, node);
     }
