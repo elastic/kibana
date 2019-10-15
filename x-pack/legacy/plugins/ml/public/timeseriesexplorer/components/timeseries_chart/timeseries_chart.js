@@ -1472,7 +1472,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       });
     }
 
-    console.warn('tooltipData', tooltipData);
     mlChartTooltipService.show(tooltipData, circle, {
       x: LINE_CHART_ANOMALY_RADIUS * 2,
       y: 0

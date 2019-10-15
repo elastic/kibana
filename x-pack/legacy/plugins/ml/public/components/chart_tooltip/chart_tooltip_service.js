@@ -32,6 +32,15 @@ mlChartTooltipService.show = function (tooltipData, target, offset = { x: 0, y: 
     return;
   }
 
+  // enable the tooltip to render it in the DOM
+  // so the correct `tooltipWidth` gets returned.
+  const tooltipState = {
+    ...chartTooltipDefaultState,
+    isTooltipVisible: true,
+    tooltipData,
+  };
+  chartTooltip$.next(tooltipState);
+
   const navOffset = euiNavDrawer[0].clientWidth; // Offset by width of side navbar
   const contentWidth = document.body.clientWidth - navOffset;
   const tooltipWidth = this.element.clientWidth;
@@ -41,7 +50,7 @@ mlChartTooltipService.show = function (tooltipData, target, offset = { x: 0, y: 
   if (left + tooltipWidth > contentWidth) {
     // the tooltip is hanging off the side of the page,
     // so move it to the other side of the target
-    const markerWidthAdjustment = 22;
+    const markerWidthAdjustment = 10;
     left = left - (tooltipWidth + offset.x + markerWidthAdjustment);
   }
 
@@ -50,10 +59,9 @@ mlChartTooltipService.show = function (tooltipData, target, offset = { x: 0, y: 
   const topNavHeightAdjustment = 190;
   const top = pos.top + offset.y + scrollTop - topNavHeightAdjustment;
 
+  // render the tooltip with adjusted position.
   chartTooltip$.next({
-    ...chartTooltipDefaultState,
-    isTooltipVisible: true,
-    tooltipData,
+    ...tooltipState,
     tooltipPosition: { transform: `translate(${left}px, ${top}px)` }
   });
 
