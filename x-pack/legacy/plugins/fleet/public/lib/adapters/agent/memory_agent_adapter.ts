@@ -6,6 +6,7 @@
 
 import { omit } from 'lodash';
 import { Agent, AgentEvent } from '../../../../common/types/domain_data';
+import { ReturnTypeBulkUnenroll } from '../../../../common/return_types';
 
 export class AgentAdapter {
   private memoryDB: Agent[];
@@ -51,5 +52,19 @@ export class AgentAdapter {
 
   public async getWithToken(enrollmentToken: string): Promise<Agent | null> {
     return this.memoryDB.map<Agent>((beat: any) => omit(beat, ['access_token']))[0];
+  }
+
+  public async unenrollByIds(ids: string[]): Promise<ReturnTypeBulkUnenroll> {
+    return {
+      results: [],
+      success: true,
+    };
+  }
+
+  public async unenrollByKuery(ids: string): Promise<ReturnTypeBulkUnenroll> {
+    return {
+      results: [],
+      success: true,
+    };
   }
 }

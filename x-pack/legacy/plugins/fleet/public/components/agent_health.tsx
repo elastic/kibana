@@ -28,6 +28,11 @@ const Status = {
       <FormattedMessage id="xpack.fleet.agentHealth.offlineStatusText" defaultMessage="Offline" />
     </EuiHealth>
   ),
+  Inactive: (
+    <EuiHealth color="subdued">
+      <FormattedMessage id="xpack.fleet.agentHealth.offlineStatusText" defaultMessage="Inactive" />
+    </EuiHealth>
+  ),
   Warning: (
     <EuiHealth color="warning">
       <FormattedMessage id="xpack.fleet.agentHealth.warningStatusText" defaultMessage="Error" />
@@ -50,21 +55,25 @@ export const AgentHealth: React.SFC<Props> = ({ agent }) => {
 
   let status: React.ReactElement = Status.Online;
 
-  switch (type) {
-    case AGENT_TYPE_PERMANENT:
-      if (intervalsSinceLastCheckIn >= 4) {
-        status = Status.Error;
-        break;
-      }
-      if (intervalsSinceLastCheckIn >= 2) {
-        status = Status.Warning;
-        break;
-      }
-    case AGENT_TYPE_TEMPORARY:
-      if (intervalsSinceLastCheckIn >= 3) {
-        status = Status.Offline;
-        break;
-      }
+  if (!agent.active) {
+    status = Status.Inactive;
+  } else {
+    switch (type) {
+      case AGENT_TYPE_PERMANENT:
+        if (intervalsSinceLastCheckIn >= 4) {
+          status = Status.Error;
+          break;
+        }
+        if (intervalsSinceLastCheckIn >= 2) {
+          status = Status.Warning;
+          break;
+        }
+      case AGENT_TYPE_TEMPORARY:
+        if (intervalsSinceLastCheckIn >= 3) {
+          status = Status.Offline;
+          break;
+        }
+    }
   }
 
   return (

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect, SFC } from 'react';
+import React, { SFC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -16,55 +16,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router-dom';
-import { AgentsLib } from '../../lib/agent';
-import { Agent } from '../../../common/types/domain_data';
 import { AgentEventsTable } from './components/agent_events_table';
 import { Loading } from '../../components/loading';
 import { PolicySection } from './components/policy_section';
 import { AgentDetailSection } from './components/details_section';
 import { AgentMetadataSection } from './components/metadata_section';
 import { FrontendLibs } from '../../lib/types';
-
-function useGetAgent(agents: AgentsLib, id: string) {
-  const [state, setState] = useState<{
-    isLoading: boolean;
-    agent: Agent | null;
-    error: Error | null;
-  }>({
-    isLoading: false,
-    agent: null,
-    error: null,
-  });
-
-  const fetchAgent = async () => {
-    setState({
-      isLoading: true,
-      agent: null,
-      error: null,
-    });
-    try {
-      const agent = await agents.get(id);
-      setState({
-        isLoading: false,
-        agent,
-        error: null,
-      });
-    } catch (error) {
-      setState({
-        isLoading: false,
-        agent: null,
-        error,
-      });
-    }
-  };
-  useEffect(() => {
-    fetchAgent();
-  }, [id]);
-
-  return {
-    ...state,
-  };
-}
+import { ModalConfirmUnenroll } from './components/modal_confirm_unenroll';
+import { useUnenroll } from './hooks/use_unenroll';
+import { useGetAgent } from './hooks/use_agent';
 
 export const Layout: SFC = ({ children }) => (
   <EuiPageBody>
@@ -84,7 +44,9 @@ export const AgentDetailsPage: SFC<Props> = ({
     params: { agentId },
   },
 }) => {
-  const { agent, isLoading, error } = useGetAgent(libs.agents, agentId);
+  const { agent, isLoading, error, refreshAgent } = useGetAgent(libs.agents, agentId);
+  const unenroll = useUnenroll(libs.agents, refreshAgent, agentId);
+
   if (isLoading) {
     return <Loading />;
   }
@@ -120,10 +82,17 @@ export const AgentDetailsPage: SFC<Props> = ({
 
   return (
     <Layout>
+      {unenroll.state.confirm && (
+        <ModalConfirmUnenroll onCancel={unenroll.clear} onConfirm={unenroll.confirmUnenrollement} />
+      )}
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={3}>
           <EuiFlexItem grow={null}>
-            <AgentDetailSection agent={agent} />
+            <AgentDetailSection
+              onClickUnenroll={unenroll.showConfirmModal}
+              agent={agent}
+              unenrollment={{ loading: unenroll.state.loading }}
+            />
             <EuiHorizontalRule />
           </EuiFlexItem>
           <EuiFlexItem grow={null}>
