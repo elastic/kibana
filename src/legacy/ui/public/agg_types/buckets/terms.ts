@@ -31,7 +31,7 @@ import {
   getResponseInspectorStats,
 } from '../../courier/utils/courier_inspector_utils';
 import { createFilterTerms } from './create_filter/terms';
-import { wrapWithInlineComp } from './_inline_comp_wrapper';
+import { wrapWithInlineComp } from './inline_comp_wrapper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { OrderAggParamEditor } from '../../vis/editors/default/controls/order_agg';
 import { OrderParamEditor } from '../../vis/editors/default/controls/order';

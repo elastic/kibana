@@ -95,7 +95,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
     return {
       buckets: {
         configurable: true,
-        get(this: IBucketDateHistogramAggConfig) {
+        get() {
           if (buckets) return buckets;
 
           buckets = new TimeBuckets();

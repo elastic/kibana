@@ -30,7 +30,7 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 // @ts-ignore
-import { wrapWithInlineComp } from '../buckets/_inline_comp_wrapper';
+import { wrapWithInlineComp } from '../buckets/inline_comp_wrapper';
 
 const isNumericFieldSelected = (agg: IMetricAggConfig) => {
   const field = agg.getParam('field');
