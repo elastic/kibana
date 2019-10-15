@@ -17,10 +17,10 @@ export class SymbolSearchClient extends AbstractSearchClient {
     super(client, log);
   }
 
-  public async findByQname(qname: string): Promise<SymbolSearchResult> {
+  public async findByQname(qname: string, repoScope: string[]): Promise<SymbolSearchResult> {
     const [from, size] = [0, 1];
     const rawRes = await this.client.search({
-      index: `${SymbolIndexNamePrefix}*`,
+      index: SymbolSearchIndexWithScope(repoScope),
       body: {
         from,
         size,
