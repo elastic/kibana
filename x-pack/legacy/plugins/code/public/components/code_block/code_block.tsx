@@ -17,14 +17,19 @@ export interface Position {
 }
 
 export interface Props {
-  content: string;
+  lines: string[];
   language: string;
+  /**
+   * Returns whether to highlight the given line.
+   * @param lineIndex The index of the line (0-based)
+   */
+  highlightLine: (lineIndex: number) => boolean;
   highlightRanges: IRange[];
   onClick: (event: Position) => void;
   folding: boolean;
   /**
    * Returns the line number to display for a given line.
-   * @param lineIndex The index of the given line (0-indexed)
+   * @param lineIndex The index of the line (0-based)
    */
   lineNumber: (lineIndex: number) => string;
 }
@@ -32,6 +37,7 @@ export interface Props {
 export class CodeBlock extends React.PureComponent<Props> {
   static defaultProps = {
     folding: false,
+    highlightLine: () => {},
     highlightRanges: [],
     language: 'text',
     lineNumber: String,
@@ -41,13 +47,13 @@ export class CodeBlock extends React.PureComponent<Props> {
   private el = createRef<HTMLDivElement>();
   private ed?: editor.IStandaloneCodeEditor;
   private resizeChecker?: ResizeChecker;
-  private currentHighlightDecorations: string[] = [];
+  private currentDecorations: string[] = [];
 
   public async componentDidMount() {
-    const { content, highlightRanges, language, onClick } = this.props;
+    const { language, onClick } = this.props;
 
     if (this.el.current) {
-      await this.tryLoadFile(content, language);
+      await this.tryLoadFile(this.text, language);
       this.ed!.onMouseDown((e: editor.IEditorMouseEvent) => {
         if (
           onClick &&
@@ -65,17 +71,8 @@ export class CodeBlock extends React.PureComponent<Props> {
       });
       registerEditor(this.ed!);
 
-      if (highlightRanges.length) {
-        const decorations = highlightRanges.map((range: IRange) => {
-          return {
-            range,
-            options: {
-              inlineClassName: 'codeSearch__highlight',
-            },
-          };
-        });
-        this.currentHighlightDecorations = this.ed!.deltaDecorations([], decorations);
-      }
+      this.setDecorations();
+
       this.resizeChecker = new ResizeChecker(this.el.current!);
       this.resizeChecker.on('resize', () => {
         setTimeout(() => {
@@ -85,18 +82,18 @@ export class CodeBlock extends React.PureComponent<Props> {
     }
   }
 
-  private async tryLoadFile(code: string, language: string) {
+  private async tryLoadFile(text: string, language: string) {
     try {
-      await monaco.editor.colorize(code, language, {});
-      this.loadFile(code, language);
+      await monaco.editor.colorize(text, language, {});
+      this.loadFile(text, language);
     } catch (e) {
-      this.loadFile(code);
+      this.loadFile(text);
     }
   }
 
-  private loadFile(code: string, language: string = 'text') {
+  private loadFile(text: string, language: string = 'text') {
     this.ed = monaco.editor.create(this.el.current!, {
-      value: code,
+      value: text,
       language,
       lineNumbers: this.lineNumber,
       readOnly: true,
@@ -122,28 +119,15 @@ export class CodeBlock extends React.PureComponent<Props> {
   }
 
   public componentDidUpdate(prevProps: Readonly<Props>) {
-    const { content, highlightRanges } = this.props;
+    const { highlightRanges } = this.props;
+    const prevText = prevProps.lines.join('\n');
 
-    if (prevProps.content !== content || prevProps.highlightRanges !== highlightRanges) {
+    if (prevText !== this.text || prevProps.highlightRanges !== highlightRanges) {
       if (this.ed) {
         const model = this.ed.getModel();
         if (model) {
-          model.setValue(content);
-
-          if (highlightRanges.length) {
-            const decorations = highlightRanges!.map((range: IRange) => {
-              return {
-                range,
-                options: {
-                  inlineClassName: 'codeSearch__highlight',
-                },
-              };
-            });
-            this.currentHighlightDecorations = this.ed.deltaDecorations(
-              this.currentHighlightDecorations,
-              decorations
-            );
-          }
+          model.setValue(this.text);
+          this.setDecorations();
         }
       }
     }
@@ -156,14 +140,45 @@ export class CodeBlock extends React.PureComponent<Props> {
   }
 
   public render() {
-    const height = this.lines.length * 18;
+    const height = this.props.lines.length * 18;
 
     return <div ref={this.el} className="codeContainer__monaco" style={{ height }} />;
   }
 
   private lineNumber = (lineIndex: number) => this.props.lineNumber(lineIndex - 1);
 
-  private get lines(): string[] {
-    return this.props.content.split('\n');
+  private get text(): string {
+    return this.props.lines.join('\n');
+  }
+
+  private setDecorations() {
+    const decorations = this.decorations;
+    if (decorations.length) {
+      this.currentDecorations = this.ed!.deltaDecorations(this.currentDecorations, decorations);
+    }
+  }
+
+  private get decorations(): editor.IModelDeltaDecoration[] {
+    const { lines, highlightRanges, highlightLine } = this.props;
+
+    const rangeHighlights = highlightRanges.map(range => ({
+      range,
+      options: {
+        inlineClassName: 'codeSearch__highlight',
+      },
+    }));
+
+    const lineHighlights = lines
+      .map((line, lineIndex) => ({
+        range: new monaco.Range(lineIndex + 1, 0, lineIndex + 1, 0),
+        options: {
+          isWholeLine: true,
+          className: 'codeBlock__line--highlighted',
+          linesDecorationsClassName: 'codeBlock__line--highlighted',
+        },
+      }))
+      .filter((decorations, lineIndex) => highlightLine(lineIndex));
+
+    return [...rangeHighlights, ...lineHighlights];
   }
 }
