@@ -365,6 +365,16 @@ export const ComponentStrings = {
         description: 'Title for the "My elements" tab when adding a new element',
       }),
   },
+  Error: {
+    getDescription: () =>
+      i18n.translate('xpack.canvas.errorComponent.description', {
+        defaultMessage: 'Expression failed with the message:',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.errorComponent.title', {
+        defaultMessage: 'Whoops! Expression failed',
+      }),
+  },
   Expression: {
     getCancelButtonLabel: () =>
       i18n.translate('xpack.canvas.expression.cancelButtonLabel', {
@@ -455,6 +465,24 @@ export const ComponentStrings = {
         },
       }),
   },
+  FunctionFormContextError: {
+    getContextErrorMessage: (errorMessage: string) =>
+      i18n.translate('xpack.canvas.functionForm.contextError', {
+        defaultMessage: 'ERROR: {errorMessage}',
+        values: {
+          errorMessage,
+        },
+      }),
+  },
+  FunctionFormFunctionUnknown: {
+    getUnknownArgumentTypeErrorMessage: (expressionType: string) =>
+      i18n.translate('xpack.canvas.functionForm.functionUnknown.unknownArgumentTypeError', {
+        defaultMessage: 'Unknown expression type "{expressionType}"',
+        values: {
+          expressionType,
+        },
+      }),
+  },
   GroupSettings: {
     getSaveGroupDescription: () =>
       i18n.translate('xpack.canvas.groupSettings.saveGroupDescription', {
@@ -502,6 +530,15 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
         defaultMessage: 'Keyboard Shortcuts',
+      }),
+  },
+  Link: {
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.link.errorMessage', {
+        defaultMessage: 'LINK ERROR: {message}',
+        values: {
+          message,
+        },
       }),
   },
   MultiElementSettings: {
