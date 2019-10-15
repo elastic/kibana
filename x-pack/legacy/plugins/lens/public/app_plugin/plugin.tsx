@@ -39,7 +39,6 @@ export interface LensPluginStartDependencies {
 export class AppPlugin {
   private instance: EditorFrameInstance | null = null;
   private store: SavedObjectIndexStore | null = null;
-  private reporter: LensReportManager | null = null;
 
   constructor() {}
 

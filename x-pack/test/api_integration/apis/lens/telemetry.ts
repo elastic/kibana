@@ -182,9 +182,13 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should collect telemetry on saved visualization types with a painless script', async () => {
+      const esArchiver = getService('esArchiver');
+
+      await esArchiver.loadIfNeeded('lens/basic');
+
       const results = await getVisualizationCounts(callCluster, {
         // Fake KibanaConfig service
-        get(key: string) {
+        get() {
           return '.kibana';
         },
         has: () => false,
@@ -201,9 +205,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(results.saved_overall).to.eql({
         lnsMetric: 1,
-        bar_stacked: 1,
       });
-      expect(results.saved_overall_total).to.eql(2);
+      expect(results.saved_overall_total).to.eql(1);
+
+      await esArchiver.unload('lens/basic');
     });
   });
 };
