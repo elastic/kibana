@@ -21,46 +21,50 @@ import { Logger } from '../../logging';
 import {
   HapiResponseAdapter,
   KibanaRequest,
-  KibanaResponse,
+  IKibanaResponse,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
+  isKibanaResponse,
 } from '../router';
 
-enum ResultType {
+/** @public */
+export enum AuthResultType {
   authenticated = 'authenticated',
 }
 
-interface Authenticated extends AuthResultParams {
-  type: ResultType.authenticated;
+/** @public */
+export interface Authenticated extends AuthResultParams {
+  type: AuthResultType.authenticated;
 }
 
-type AuthResult = Authenticated;
+/** @public */
+export type AuthResult = Authenticated;
 
 const authResult = {
   authenticated(data: Partial<AuthResultParams> = {}): AuthResult {
     return {
-      type: ResultType.authenticated,
+      type: AuthResultType.authenticated,
       state: data.state,
       requestHeaders: data.requestHeaders,
       responseHeaders: data.responseHeaders,
     };
   },
   isAuthenticated(result: AuthResult): result is Authenticated {
-    return result && result.type === ResultType.authenticated;
+    return result && result.type === AuthResultType.authenticated;
   },
 };
 
 /**
  * Auth Headers map
  * @public
- * */
+ */
 
 export type AuthHeaders = Record<string, string | string[]>;
 
 /**
  * Result of an incoming request authentication.
  * @public
- * */
+ */
 export interface AuthResultParams {
   /**
    * Data to associate with an incoming request. Any downstream plugin may get access to the data.
@@ -91,12 +95,15 @@ const toolkit: AuthToolkit = {
   authenticated: authResult.authenticated,
 };
 
-/** @public */
+/**
+ * See {@link AuthToolkit}.
+ * @public
+ */
 export type AuthenticationHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,
   toolkit: AuthToolkit
-) => AuthResult | KibanaResponse | Promise<AuthResult | KibanaResponse>;
+) => AuthResult | IKibanaResponse | Promise<AuthResult | IKibanaResponse>;
 
 /** @public */
 export function adoptToHapiAuthFormat(
@@ -115,7 +122,7 @@ export function adoptToHapiAuthFormat(
         lifecycleResponseFactory,
         toolkit
       );
-      if (result instanceof KibanaResponse) {
+      if (isKibanaResponse(result)) {
         return hapiResponseAdapter.handle(result);
       }
       if (authResult.isAuthenticated(result)) {

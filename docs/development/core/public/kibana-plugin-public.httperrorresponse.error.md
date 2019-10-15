@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-error: Error | HttpFetchError;
+error: Error | IHttpFetchError;
 ```
