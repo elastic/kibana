@@ -218,20 +218,35 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
           'This visualization is experimental. The design and implementation are less mature than stable visualizations and might be subject to change.',
       });
     } else if ('aliasUrl' in visType) {
-      const aliasDescription = i18n.translate(
-        'kbn.visualize.newVisWizard.visTypeAliasDescription',
-        {
-          defaultMessage: 'Opens a Kibana application that is outside of Visualize.',
-        }
-      );
-      stage = {
-        betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.visTypeAliasTitle', {
-          defaultMessage: 'Kibana application',
-        }),
-        betaBadgeTooltipContent: aliasDescription,
-        betaBadgeIconType: 'popout',
-      };
-      highlightMsg = aliasDescription;
+      if (visType.stage === 'beta') {
+        const aliasDescription = i18n.translate('kbn.visualize.newVisWizard.betaDescription', {
+          defaultMessage:
+            'This visualization is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
+        });
+        stage = {
+          betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.betaTitle', {
+            defaultMessage: 'Beta',
+          }),
+          betaBadgeTooltipContent: aliasDescription,
+          // betaBadgeIconType: 'popout',
+        };
+        highlightMsg = aliasDescription;
+      } else {
+        const aliasDescription = i18n.translate(
+          'kbn.visualize.newVisWizard.visTypeAliasDescription',
+          {
+            defaultMessage: 'Opens a Kibana application that is outside of Visualize.',
+          }
+        );
+        stage = {
+          betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.visTypeAliasTitle', {
+            defaultMessage: 'Kibana application',
+          }),
+          betaBadgeTooltipContent: aliasDescription,
+          betaBadgeIconType: 'popout',
+        };
+        highlightMsg = aliasDescription;
+      }
     }
 
     const isDisabled = this.state.query !== '' && !visType.highlighted;

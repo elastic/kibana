@@ -21,7 +21,7 @@ interface VisualizationListItem {
   editUrl: string;
   icon: string;
   id: string;
-  isExperimental: boolean;
+  stage: 'experimental' | 'beta' | 'production';
   savedObjectType: string;
   title: string;
   typeTitle: string;
@@ -49,6 +49,7 @@ export interface VisTypeAlias {
   icon: string;
   promotion?: VisTypeAliasPromotion;
   description: string;
+  stage: 'experimental' | 'beta' | 'production';
 
   appExtensions?: {
     visualizations: VisualizationsAppExtension;

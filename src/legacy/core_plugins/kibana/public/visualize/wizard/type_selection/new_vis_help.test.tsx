@@ -43,6 +43,7 @@ describe('NewVisHelp', () => {
                 description: 'Look at this fancy new thing!!!',
               },
               title: 'Test title',
+              stage: 'production',
             },
           ]}
         />
