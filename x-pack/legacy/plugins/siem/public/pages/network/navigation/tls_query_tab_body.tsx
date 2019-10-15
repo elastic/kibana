@@ -6,7 +6,6 @@
 import React from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../components/page/manage_query';
-import { networkModel } from '../../../store';
 import { TlsQuery } from '../../../containers/tls';
 import { TlsTable } from '../../../components/page/network/tls_table';
 import { TlsQueryTabBodyProps } from './types';
@@ -46,7 +45,7 @@ export const TlsQueryTabBody = ({
         refetch={refetch}
         setQuery={setQuery}
         totalCount={totalCount}
-        type={networkModel.NetworkType.page}
+        type={type}
       />
     )}
   </TlsQuery>
