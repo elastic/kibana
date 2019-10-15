@@ -270,7 +270,7 @@ back end server.
 `server.keepaliveTimeout:`:: *Default: "120000"* The number of milliseconds to wait for additional data before restarting
 the `server.socketTimeout` counter.
 
-`server.maxPayloadBytes:`:: *Default: 1048576* The maximum payload size in bytes
+`server.maxPayloadBytes:`:: *Default: 26214400* The maximum payload size in bytes
 for incoming server requests.
 
 `server.name:`:: *Default: "your-hostname"* A human-readable display name that
