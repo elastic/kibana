@@ -30,7 +30,8 @@ export { uiRoutes };
 import angular from 'angular';
 export { angular };
 
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
+const { chrome } = npStart.core;
 export { chrome };
 
 // @ts-ignore
@@ -43,8 +44,6 @@ export { i18n } from '@kbn/i18n';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
-
-export { npStart } from 'ui/new_platform';
 // @ts-ignore
 export { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 export { toastNotifications } from 'ui/notify';

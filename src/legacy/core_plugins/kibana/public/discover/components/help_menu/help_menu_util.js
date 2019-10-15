@@ -22,7 +22,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { HelpMenu } from './help_menu';
 
 export function addHelpMenuToAppChrome(chrome) {
-  chrome.helpExtension.set(domElement => {
+  chrome.setHelpExtension(domElement => {
     render(<HelpMenu/>, domElement);
     return () => {
       unmountComponentAtNode(domElement);

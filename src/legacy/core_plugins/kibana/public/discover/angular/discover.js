@@ -401,12 +401,12 @@ function discoverController(
   });
 
   if (savedSearch.id && savedSearch.title) {
-    chrome.breadcrumbs.set([{
+    chrome.setBreadcrumbs([{
       text: discoverBreadcrumbsTitle,
       href: '#/discover',
     }, { text: savedSearch.title }]);
   } else {
-    chrome.breadcrumbs.set([{
+    chrome.setBreadcrumbs([{
       text: discoverBreadcrumbsTitle,
     }]);
   }
