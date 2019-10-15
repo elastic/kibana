@@ -166,7 +166,7 @@ export const getTotalNumberOfLogEntriesForPartition = (
     if (!partitionResults || !partitionResults.numberOfLogEntries) {
       return sumPartitionNumberOfLogs;
     } else {
-      return (sumPartitionNumberOfLogs += partitionResults.numberOfLogs);
+      return (sumPartitionNumberOfLogEntries += partitionResults.numberOfLogEntries);
     }
   }, 0);
 };
