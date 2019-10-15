@@ -25,6 +25,7 @@ import {
   getLogEntryRateCombinedSeries,
   getAnnotationsForAll,
   getTopAnomalyScoreAcrossAllPartitions,
+  formatAnomalyScore,
 } from '../helpers/data_formatters';
 
 export const AnomaliesResults = ({
@@ -148,7 +149,7 @@ export const AnomaliesResults = ({
                 reverse
               />
               <EuiStat
-                title={Number(topAnomalyScore).toFixed(0)}
+                title={topAnomalyScore ? formatAnomalyScore(topAnomalyScore) : null}
                 description={i18n.translate(
                   'xpack.infra.logs.analysis.overallAnomaliesTopAnomalyScoreDescription',
                   {

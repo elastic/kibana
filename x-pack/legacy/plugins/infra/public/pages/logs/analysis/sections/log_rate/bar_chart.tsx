@@ -22,6 +22,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
+import { formatAnomalyScore } from '../helpers/data_formatters';
 
 export const LogEntryRateBarChart: React.FunctionComponent<{
   setTimeRange: (timeRange: TimeRange) => void;
@@ -68,7 +69,7 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
         <Axis
           id={getAxisId('values')}
           position="left"
-          tickFormat={value => Number(value).toFixed(0)}
+          tickFormat={value => formatAnomalyScore(value).toString()}
         />
         <BarSeries
           id={logEntryRateSpecId}

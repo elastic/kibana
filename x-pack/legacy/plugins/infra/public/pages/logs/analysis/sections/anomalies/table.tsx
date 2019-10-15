@@ -10,7 +10,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { AnomaliesTableExpandedRow } from './expanded_row';
-import { getTopAnomalyScoresByPartition } from '../helpers/data_formatters';
+import { getTopAnomalyScoresByPartition, formatAnomalyScore } from '../helpers/data_formatters';
 
 interface TableItem {
   id: string;
@@ -28,7 +28,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       return {
         id: key || 'unknown', // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap
         partition: key || 'unknown',
-        topAnomalyScore: parseInt(Number(value).toFixed(0), 10),
+        topAnomalyScore: formatAnomalyScore(value),
       };
     });
   }, [results]);

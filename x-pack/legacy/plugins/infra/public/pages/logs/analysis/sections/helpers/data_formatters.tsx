@@ -135,7 +135,7 @@ export const getAnnotationsForPartition = (
               {
                 defaultMessage: 'Max anomaly score: {maxAnomalyScore}',
                 values: {
-                  maxAnomalyScore: Number(partitionResults.maximumAnomalyScore).toFixed(0),
+                  maxAnomalyScore: formatAnomalyScore(partitionResults.maximumAnomalyScore),
                 },
               }
             ),
@@ -184,7 +184,7 @@ export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayl
           ...bucketMaxAnomalyScoresByPartition,
           {
             partitionId: partition.partitionId ? partition.partitionId : 'unknown',
-            maximumAnomalyScore: parseInt(Number(partition.maximumAnomalyScore).toFixed(0), 10),
+            maximumAnomalyScore: formatAnomalyScore(partition.maximumAnomalyScore),
           },
         ];
       }, []);
@@ -247,4 +247,8 @@ const getSeverityCategoryForScore = (score: number) => {
   } else {
     return 'critical';
   }
+};
+
+export const formatAnomalyScore = (score: number) => {
+  return Math.round(score);
 };

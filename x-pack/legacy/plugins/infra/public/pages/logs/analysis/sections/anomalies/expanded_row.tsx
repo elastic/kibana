@@ -15,6 +15,7 @@ import {
   getLogEntryRateSeriesForPartition,
   getAnnotationsForPartition,
   getTotalNumberOfLogsForPartition,
+  formatAnomalyScore,
 } from '../helpers/data_formatters';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
@@ -73,7 +74,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           reverse
         />
         <EuiStat
-          title={Number(topAnomalyScore).toFixed(0)}
+          title={formatAnomalyScore(topAnomalyScore)}
           description={i18n.translate(
             'xpack.infra.logs.analysis.anomaliesExpandedRowTopAnomalyScoreDescription',
             {
