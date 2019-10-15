@@ -17,6 +17,7 @@ import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { CodeServices } from '../distributed/code_services';
 import { GitServiceDefinition, LspServiceDefinition } from '../distributed/apis';
 import { Endpoint } from '../distributed/resource_locator';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
 
 export function statusRoute(router: CodeServerRouter, codeServices: CodeServices) {
   const gitService = codeServices.serviceFor(GitServiceDefinition);
@@ -115,7 +116,8 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
 
       try {
         // Check if the repository already exists
-        await repoObjectClient.getRepository(uri);
+        const repo = await repoObjectClient.getRepository(uri);
+        await getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repo.uri);
       } catch (e) {
         return Boom.notFound(`repo ${uri} not found`);
       }
