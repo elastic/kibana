@@ -6,19 +6,11 @@
 import { AppMountContext, AppMountParameters } from 'kibana/public';
 import React, { PureComponent } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Route, withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiPage, EuiPageSideBar, EuiSideNav, EuiImage } from '@elastic/eui';
-import { toAsyncComponent } from '../common/to_async_component';
+import { BrowserRouter, Route, withRouter, RouteComponentProps, Switch } from 'react-router-dom';
+import { EuiPage, EuiPageSideBar, EuiSideNav, EuiImage, EuiCallOut } from '@elastic/eui';
 import { EndgameAppContext } from '../common/app_context';
 import LogoUrl from '../static/images/logo.png';
-
-const ShowLanding = toAsyncComponent(
-  async () => ((await import('./landing')).LandingPage as unknown) as PureComponent
-);
-
-const ShowEndpoints = toAsyncComponent(
-  async () => ((await import('./endpoints')).EndpointsPage as unknown) as PureComponent
-);
+import { routePaths } from '../common/route_paths';
 
 const NavBar = withRouter(function({ history }: RouteComponentProps) {
   return (
@@ -35,38 +27,23 @@ const NavBar = withRouter(function({ history }: RouteComponentProps) {
               style={{ width: '16px' }}
             />
           ),
-          items: [
-            {
-              name: 'Home',
-              id: '1',
-              onClick: () => {
-                history.push('/');
-                return false;
-              },
+          items: routePaths.map(({ name, id, path }) => ({
+            name,
+            id,
+            onClick() {
+              history.push(path);
             },
-            {
-              name: 'Endpoints',
-              id: '2',
-              // href: history.createHref({ pathname: '/endpoints' }),
-              onClick: () => {
-                history.push('/endpoints');
-                return false;
-              },
-            },
-          ],
+          })),
         },
       ]}
     />
   );
 });
 
-class EndgameApp extends PureComponent<
-  {
-    appBasePath: string;
-    appContext: AppMountContext;
-  },
-  {}
-> {
+class EndgameApp extends PureComponent<{
+  appBasePath: string;
+  appContext: AppMountContext;
+}> {
   render() {
     const { appBasePath, appContext } = this.props;
     return (
@@ -76,8 +53,16 @@ class EndgameApp extends PureComponent<
             <EuiPageSideBar>
               <NavBar />
             </EuiPageSideBar>
-            <Route path="/" exact component={ShowLanding} />
-            <Route path="/endpoints" exact component={ShowEndpoints} />
+            <Switch>
+              {routePaths.map(({ id, path, component }) => (
+                <Route path={path} exact component={component} key={id} />
+              ))}
+              <Route path="*">
+                <EuiCallOut title="Proceed with caution!" color="warning" iconType="help">
+                  <p>That page does not exists</p>
+                </EuiCallOut>
+              </Route>
+            </Switch>
           </EuiPage>
         </EndgameAppContext.Provider>
       </BrowserRouter>

@@ -21,7 +21,11 @@ export function toAsyncComponent(asyncLoadComponent: () => Promise<PureComponent
     render() {
       const UIComponent = (this.state.UIComponent as unknown) as PureComponent;
       const { children, ...props } = this.props;
-      return UIComponent ? <UIComponent {...props}>{children}</UIComponent> : <EuiLoadingSpinner />;
+      return UIComponent ? (
+        <UIComponent {...props}>{children}</UIComponent>
+      ) : (
+        <EuiLoadingSpinner size="xl" />
+      );
     }
 
     async componentDidMount() {
