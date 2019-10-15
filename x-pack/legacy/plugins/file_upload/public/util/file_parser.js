@@ -114,10 +114,10 @@ export const fileHandler = async ({
   return filePromise;
 };
 
-export function jsonPreview(json, previewFunction) {
-  if (json && previewFunction) {
-    const defaultName = _.get(json, 'name', 'Import File');
-    previewFunction(json, defaultName);
+export function jsonPreview(fileResults, previewFunction) {
+  if (fileResults && fileResults.parsedGeojson && previewFunction) {
+    const defaultName = _.get(fileResults.parsedGeojson, 'name', 'Import File');
+    previewFunction(fileResults.parsedGeojson, defaultName);
   }
 }
 
@@ -153,6 +153,6 @@ export async function parseFile({
     cleanAndValidate,
     getFileParseActive
   });
-  jsonPreview(fileResults.parsedGeojson, previewCallback);
+  jsonPreview(fileResults, previewCallback);
   return fileResults;
 }

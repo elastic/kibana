@@ -146,7 +146,7 @@ export class JsonIndexFilePicker extends Component {
     }
     // Parse file
 
-    const { errors, parsedGeojson } = await parseFile({
+    const fileResult = await parseFile({
       file,
       transformDetails,
       onFileUpload,
@@ -180,10 +180,11 @@ export class JsonIndexFilePicker extends Component {
       featuresProcessed: 0,
       fileParseActive: currentFileTracker !== this.state.currentFileTracker
     });
-    if (!parsedGeojson) {
+    if (!fileResult) {
       resetFileAndIndexSettings();
       return;
     }
+    const { errors, parsedGeojson } = fileResult;
 
     if (errors.length) {
       // Set only the first error for now (since there's only one).
