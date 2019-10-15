@@ -24,6 +24,8 @@ import {
   IndexPatternField,
 } from './types';
 
+type IndexPatternSugestion = DatasourceSuggestion<IndexPatternPrivateState>;
+
 function buildSuggestion({
   state,
   updatedLayer,
@@ -85,7 +87,7 @@ export function getDatasourceSuggestionsForField(
   state: IndexPatternPrivateState,
   indexPatternId: string,
   field: IndexPatternField
-): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+): IndexPatternSugestion[] {
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter(id => state.layers[id].indexPatternId === indexPatternId);
 
@@ -123,23 +125,39 @@ function getExistingLayerSuggestionsForField(
   const fieldInUse = Object.values(layer.columns).some(
     column => hasField(column) && column.sourceField === field.name
   );
-  let updatedLayer: IndexPatternLayer | undefined;
+  const suggestions: IndexPatternSugestion[] = [];
+
   if (usableAsBucketOperation && !fieldInUse) {
-    updatedLayer = addFieldAsBucketOperation(layer, layerId, indexPattern, field);
-  } else if (!usableAsBucketOperation && operations.length > 0) {
-    updatedLayer = addFieldAsMetricOperation(layer, layerId, indexPattern, field);
+    suggestions.push(
+      buildSuggestion({
+        state,
+        updatedLayer: addFieldAsBucketOperation(layer, layerId, indexPattern, field),
+        layerId,
+        changeType: 'extended',
+      })
+    );
   }
 
-  return updatedLayer
-    ? [
+  if (!usableAsBucketOperation && operations.length > 0) {
+    const updatedLayer = addFieldAsMetricOperation(layer, layerId, indexPattern, field);
+    if (updatedLayer) {
+      suggestions.push(
         buildSuggestion({
           state,
           updatedLayer,
           layerId,
           changeType: 'extended',
-        }),
-      ]
-    : [];
+        })
+      );
+    }
+  }
+
+  const metricSuggestion = createMetricSuggestion(indexPattern, layerId, state, field);
+  if (metricSuggestion) {
+    suggestions.push(metricSuggestion);
+  }
+
+  return suggestions;
 }
 
 function addFieldAsMetricOperation(
