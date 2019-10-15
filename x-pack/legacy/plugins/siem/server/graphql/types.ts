@@ -69,12 +69,6 @@ export interface HostsSortField {
   direction: Direction;
 }
 
-export interface DomainsSortField {
-  field: DomainsFields;
-
-  direction: Direction;
-}
-
 export interface TlsSortField {
   field: TlsFields;
 
@@ -247,17 +241,8 @@ export enum HostsFields {
   lastSeen = 'lastSeen',
 }
 
-export enum DomainsFields {
-  domainName = 'domainName',
-  direction = 'direction',
-  bytes = 'bytes',
-  packets = 'packets',
-  uniqueIpCount = 'uniqueIpCount',
-}
-
-export enum FlowDirection {
-  uniDirectional = 'uniDirectional',
-  biDirectional = 'biDirectional',
+export enum TlsFields {
+  _id = '_id',
 }
 
 export enum FlowTarget {
@@ -267,27 +252,12 @@ export enum FlowTarget {
   source = 'source',
 }
 
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  incoming = 'incoming',
-  outgoing = 'outgoing',
-  listening = 'listening',
-  unknown = 'unknown',
-}
-
-export enum TlsFields {
-  _id = '_id',
-}
-
 export enum UsersFields {
   name = 'name',
   count = 'count',
 }
 
-export enum FlowTargetNew {
+export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
 }
@@ -313,6 +283,22 @@ export enum SortFieldTimeline {
   description = 'description',
   updated = 'updated',
   created = 'created',
+}
+
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  incoming = 'incoming',
+  outgoing = 'outgoing',
+  listening = 'listening',
+  unknown = 'unknown',
+}
+
+export enum FlowDirection {
+  uniDirectional = 'uniDirectional',
+  biDirectional = 'biDirectional',
 }
 
 export type ToStringArray = string[] | string;
@@ -433,8 +419,6 @@ export interface Source {
 
   IpOverview?: Maybe<IpOverviewData>;
 
-  Domains: DomainsData;
-
   Tls: TlsData;
 
   Users: UsersData;
@@ -541,6 +525,8 @@ export interface AuthenticationItem {
 }
 
 export interface UserEcsFields {
+  domain?: Maybe<string[] | string>;
+
   id?: Maybe<string[] | string>;
 
   name?: Maybe<string[] | string>;
@@ -689,6 +675,10 @@ export interface Ecs {
 
   destination?: Maybe<DestinationEcsFields>;
 
+  dns?: Maybe<DnsEcsFields>;
+
+  endgame?: Maybe<EndgameEcsFields>;
+
   event?: Maybe<EventEcsFields>;
 
   geo?: Maybe<GeoEcsFields>;
@@ -714,6 +704,8 @@ export interface Ecs {
   message?: Maybe<string[] | string>;
 
   user?: Maybe<UserEcsFields>;
+
+  winlog?: Maybe<WinlogEcsFields>;
 
   process?: Maybe<ProcessEcsFields>;
 
@@ -776,10 +768,54 @@ export interface DestinationEcsFields {
   packets?: Maybe<number[] | number>;
 }
 
+export interface DnsEcsFields {
+  question?: Maybe<DnsQuestionData>;
+
+  resolved_ip?: Maybe<string[] | string>;
+
+  response_code?: Maybe<string[] | string>;
+}
+
+export interface DnsQuestionData {
+  name?: Maybe<string[] | string>;
+
+  type?: Maybe<string[] | string>;
+}
+
+export interface EndgameEcsFields {
+  exit_code?: Maybe<number[] | number>;
+
+  file_name?: Maybe<string[] | string>;
+
+  file_path?: Maybe<string[] | string>;
+
+  logon_type?: Maybe<number[] | number>;
+
+  parent_process_name?: Maybe<string[] | string>;
+
+  pid?: Maybe<number[] | number>;
+
+  process_name?: Maybe<string[] | string>;
+
+  subject_domain_name?: Maybe<string[] | string>;
+
+  subject_logon_id?: Maybe<string[] | string>;
+
+  subject_user_name?: Maybe<string[] | string>;
+
+  target_domain_name?: Maybe<string[] | string>;
+
+  target_logon_id?: Maybe<string[] | string>;
+
+  target_user_name?: Maybe<string[] | string>;
+}
+
 export interface EventEcsFields {
   action?: Maybe<string[] | string>;
 
   category?: Maybe<string[] | string>;
+
+  code?: Maybe<string[] | string>;
 
   created?: Maybe<string[] | string>;
 
@@ -1044,7 +1080,13 @@ export interface UrlEcsFields {
   password?: Maybe<string[] | string>;
 }
 
+export interface WinlogEcsFields {
+  event_id?: Maybe<number[] | number>;
+}
+
 export interface ProcessEcsFields {
+  hash?: Maybe<ProcessHashData>;
+
   pid?: Maybe<number[] | number>;
 
   name?: Maybe<string[] | string>;
@@ -1062,6 +1104,14 @@ export interface ProcessEcsFields {
   working_directory?: Maybe<string[] | string>;
 }
 
+export interface ProcessHashData {
+  md5?: Maybe<string[] | string>;
+
+  sha1?: Maybe<string[] | string>;
+
+  sha256?: Maybe<string[] | string>;
+}
+
 export interface Thread {
   id?: Maybe<number[] | number>;
 
@@ -1069,6 +1119,8 @@ export interface Thread {
 }
 
 export interface FileFields {
+  name?: Maybe<string[] | string>;
+
   path?: Maybe<string[] | string>;
 
   target_path?: Maybe<string[] | string>;
@@ -1260,58 +1312,6 @@ export interface AutonomousSystem {
 
 export interface AutonomousSystemOrganization {
   name?: Maybe<string>;
-}
-
-export interface DomainsData {
-  edges: DomainsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface DomainsEdges {
-  node: DomainsNode;
-
-  cursor: CursorType;
-}
-
-export interface DomainsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  source?: Maybe<DomainsItem>;
-
-  destination?: Maybe<DomainsItem>;
-
-  client?: Maybe<DomainsItem>;
-
-  server?: Maybe<DomainsItem>;
-
-  network?: Maybe<DomainsNetworkField>;
-}
-
-export interface DomainsItem {
-  uniqueIpCount?: Maybe<number>;
-
-  domainName?: Maybe<string>;
-
-  firstSeen?: Maybe<string>;
-
-  lastSeen?: Maybe<string>;
-}
-
-export interface DomainsNetworkField {
-  bytes?: Maybe<number>;
-
-  packets?: Maybe<number>;
-
-  transport?: Maybe<string>;
-
-  direction?: Maybe<NetworkDirectionEcs[]>;
 }
 
 export interface TlsData {
@@ -1507,7 +1507,7 @@ export interface AutonomousSystemItem {
 export interface GeoItem {
   geo?: Maybe<GeoEcsFields>;
 
-  flowTarget?: Maybe<FlowTarget>;
+  flowTarget?: Maybe<FlowTargetSourceDest>;
 }
 
 export interface TopNFlowItemDestination {
@@ -1594,6 +1594,20 @@ export interface OverviewHostData {
   auditbeatProcess?: Maybe<number>;
 
   auditbeatUser?: Maybe<number>;
+
+  endgameDns?: Maybe<number>;
+
+  endgameFile?: Maybe<number>;
+
+  endgameImageLoad?: Maybe<number>;
+
+  endgameNetwork?: Maybe<number>;
+
+  endgameProcess?: Maybe<number>;
+
+  endgameRegistry?: Maybe<number>;
+
+  endgameSecurity?: Maybe<number>;
 
   filebeatSystemModule?: Maybe<number>;
 
@@ -1988,25 +2002,6 @@ export interface IpOverviewSourceArgs {
 
   defaultIndex: string[];
 }
-export interface DomainsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: DomainsSortField;
-
-  flowDirection: FlowDirection;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
 export interface TlsSourceArgs {
   filterQuery?: Maybe<string>;
 
@@ -2073,7 +2068,9 @@ export interface NetworkTopNFlowSourceArgs {
 
   filterQuery?: Maybe<string>;
 
-  flowTarget: FlowTargetNew;
+  ip?: Maybe<string>;
+
+  flowTarget: FlowTargetSourceDest;
 
   pagination: PaginationInputPaginated;
 
@@ -2536,8 +2533,6 @@ export namespace SourceResolvers {
 
     IpOverview?: IpOverviewResolver<Maybe<IpOverviewData>, TypeParent, TContext>;
 
-    Domains?: DomainsResolver<DomainsData, TypeParent, TContext>;
-
     Tls?: TlsResolver<TlsData, TypeParent, TContext>;
 
     Users?: UsersResolver<UsersData, TypeParent, TContext>;
@@ -2714,32 +2709,6 @@ export namespace SourceResolvers {
     defaultIndex: string[];
   }
 
-  export type DomainsResolver<R = DomainsData, Parent = Source, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext,
-    DomainsArgs
-  >;
-  export interface DomainsArgs {
-    filterQuery?: Maybe<string>;
-
-    id?: Maybe<string>;
-
-    ip: string;
-
-    pagination: PaginationInputPaginated;
-
-    sort: DomainsSortField;
-
-    flowDirection: FlowDirection;
-
-    flowTarget: FlowTarget;
-
-    timerange: TimerangeInput;
-
-    defaultIndex: string[];
-  }
-
   export type TlsResolver<R = TlsData, Parent = Source, TContext = SiemContext> = Resolver<
     R,
     Parent,
@@ -2843,7 +2812,9 @@ export namespace SourceResolvers {
 
     filterQuery?: Maybe<string>;
 
-    flowTarget: FlowTargetNew;
+    ip?: Maybe<string>;
+
+    flowTarget: FlowTargetSourceDest;
 
     pagination: PaginationInputPaginated;
 
@@ -3185,6 +3156,8 @@ export namespace AuthenticationItemResolvers {
 
 export namespace UserEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = UserEcsFields> {
+    domain?: DomainResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
     id?: IdResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
     name?: NameResolver<Maybe<string[] | string>, TypeParent, TContext>;
@@ -3198,6 +3171,11 @@ export namespace UserEcsFieldsResolvers {
     group?: GroupResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
+  export type DomainResolver<
+    R = Maybe<string[] | string>,
+    Parent = UserEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
   export type IdResolver<
     R = Maybe<string[] | string>,
     Parent = UserEcsFields,
@@ -3655,6 +3633,10 @@ export namespace EcsResolvers {
 
     destination?: DestinationResolver<Maybe<DestinationEcsFields>, TypeParent, TContext>;
 
+    dns?: DnsResolver<Maybe<DnsEcsFields>, TypeParent, TContext>;
+
+    endgame?: EndgameResolver<Maybe<EndgameEcsFields>, TypeParent, TContext>;
+
     event?: EventResolver<Maybe<EventEcsFields>, TypeParent, TContext>;
 
     geo?: GeoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
@@ -3681,6 +3663,8 @@ export namespace EcsResolvers {
 
     user?: UserResolver<Maybe<UserEcsFields>, TypeParent, TContext>;
 
+    winlog?: WinlogResolver<Maybe<WinlogEcsFields>, TypeParent, TContext>;
+
     process?: ProcessResolver<Maybe<ProcessEcsFields>, TypeParent, TContext>;
 
     file?: FileResolver<Maybe<FileFields>, TypeParent, TContext>;
@@ -3705,6 +3689,16 @@ export namespace EcsResolvers {
   > = Resolver<R, Parent, TContext>;
   export type DestinationResolver<
     R = Maybe<DestinationEcsFields>,
+    Parent = Ecs,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DnsResolver<R = Maybe<DnsEcsFields>, Parent = Ecs, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
+  export type EndgameResolver<
+    R = Maybe<EndgameEcsFields>,
     Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3770,6 +3764,11 @@ export namespace EcsResolvers {
   > = Resolver<R, Parent, TContext>;
   export type UserResolver<
     R = Maybe<UserEcsFields>,
+    Parent = Ecs,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type WinlogResolver<
+    R = Maybe<WinlogEcsFields>,
     Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3969,11 +3968,154 @@ export namespace DestinationEcsFieldsResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
+export namespace DnsEcsFieldsResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = DnsEcsFields> {
+    question?: QuestionResolver<Maybe<DnsQuestionData>, TypeParent, TContext>;
+
+    resolved_ip?: ResolvedIpResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    response_code?: ResponseCodeResolver<Maybe<string[] | string>, TypeParent, TContext>;
+  }
+
+  export type QuestionResolver<
+    R = Maybe<DnsQuestionData>,
+    Parent = DnsEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ResolvedIpResolver<
+    R = Maybe<string[] | string>,
+    Parent = DnsEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ResponseCodeResolver<
+    R = Maybe<string[] | string>,
+    Parent = DnsEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace DnsQuestionDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = DnsQuestionData> {
+    name?: NameResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    type?: TypeResolver<Maybe<string[] | string>, TypeParent, TContext>;
+  }
+
+  export type NameResolver<
+    R = Maybe<string[] | string>,
+    Parent = DnsQuestionData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TypeResolver<
+    R = Maybe<string[] | string>,
+    Parent = DnsQuestionData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace EndgameEcsFieldsResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = EndgameEcsFields> {
+    exit_code?: ExitCodeResolver<Maybe<number[] | number>, TypeParent, TContext>;
+
+    file_name?: FileNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    file_path?: FilePathResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    logon_type?: LogonTypeResolver<Maybe<number[] | number>, TypeParent, TContext>;
+
+    parent_process_name?: ParentProcessNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    pid?: PidResolver<Maybe<number[] | number>, TypeParent, TContext>;
+
+    process_name?: ProcessNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    subject_domain_name?: SubjectDomainNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    subject_logon_id?: SubjectLogonIdResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    subject_user_name?: SubjectUserNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    target_domain_name?: TargetDomainNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    target_logon_id?: TargetLogonIdResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    target_user_name?: TargetUserNameResolver<Maybe<string[] | string>, TypeParent, TContext>;
+  }
+
+  export type ExitCodeResolver<
+    R = Maybe<number[] | number>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FileNameResolver<
+    R = Maybe<string[] | string>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FilePathResolver<
+    R = Maybe<string[] | string>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type LogonTypeResolver<
+    R = Maybe<number[] | number>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ParentProcessNameResolver<
+    R = Maybe<string[] | string>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type PidResolver<
+    R = Maybe<number[] | number>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ProcessNameResolver<
+    R = Maybe<string[] | string>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SubjectDomainNameResolver<
+    R = Maybe<string[] | string>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SubjectLogonIdResolver<
+    R = Maybe<string[] | string>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SubjectUserNameResolver<
+    R = Maybe<string[] | string>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TargetDomainNameResolver<
+    R = Maybe<string[] | string>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TargetLogonIdResolver<
+    R = Maybe<string[] | string>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TargetUserNameResolver<
+    R = Maybe<string[] | string>,
+    Parent = EndgameEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 export namespace EventEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = EventEcsFields> {
     action?: ActionResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
     category?: CategoryResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    code?: CodeResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
     created?: CreatedResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
@@ -4014,6 +4156,11 @@ export namespace EventEcsFieldsResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type CategoryResolver<
+    R = Maybe<string[] | string>,
+    Parent = EventEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type CodeResolver<
     R = Maybe<string[] | string>,
     Parent = EventEcsFields,
     TContext = SiemContext
@@ -4869,8 +5016,22 @@ export namespace UrlEcsFieldsResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
+export namespace WinlogEcsFieldsResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = WinlogEcsFields> {
+    event_id?: EventIdResolver<Maybe<number[] | number>, TypeParent, TContext>;
+  }
+
+  export type EventIdResolver<
+    R = Maybe<number[] | number>,
+    Parent = WinlogEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 export namespace ProcessEcsFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ProcessEcsFields> {
+    hash?: HashResolver<Maybe<ProcessHashData>, TypeParent, TContext>;
+
     pid?: PidResolver<Maybe<number[] | number>, TypeParent, TContext>;
 
     name?: NameResolver<Maybe<string[] | string>, TypeParent, TContext>;
@@ -4888,6 +5049,11 @@ export namespace ProcessEcsFieldsResolvers {
     working_directory?: WorkingDirectoryResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
+  export type HashResolver<
+    R = Maybe<ProcessHashData>,
+    Parent = ProcessEcsFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
   export type PidResolver<
     R = Maybe<number[] | number>,
     Parent = ProcessEcsFields,
@@ -4930,6 +5096,32 @@ export namespace ProcessEcsFieldsResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
+export namespace ProcessHashDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = ProcessHashData> {
+    md5?: Md5Resolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    sha1?: Sha1Resolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    sha256?: Sha256Resolver<Maybe<string[] | string>, TypeParent, TContext>;
+  }
+
+  export type Md5Resolver<
+    R = Maybe<string[] | string>,
+    Parent = ProcessHashData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type Sha1Resolver<
+    R = Maybe<string[] | string>,
+    Parent = ProcessHashData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type Sha256Resolver<
+    R = Maybe<string[] | string>,
+    Parent = ProcessHashData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 export namespace ThreadResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = Thread> {
     id?: IdResolver<Maybe<number[] | number>, TypeParent, TContext>;
@@ -4951,6 +5143,8 @@ export namespace ThreadResolvers {
 
 export namespace FileFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = FileFields> {
+    name?: NameResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
     path?: PathResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
     target_path?: TargetPathResolver<Maybe<string[] | string>, TypeParent, TContext>;
@@ -4980,6 +5174,11 @@ export namespace FileFieldsResolvers {
     ctime?: CtimeResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
+  export type NameResolver<
+    R = Maybe<string[] | string>,
+    Parent = FileFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
   export type PathResolver<
     R = Maybe<string[] | string>,
     Parent = FileFields,
@@ -5578,178 +5777,6 @@ export namespace AutonomousSystemOrganizationResolvers {
   export type NameResolver<
     R = Maybe<string>,
     Parent = AutonomousSystemOrganization,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace DomainsDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = DomainsData> {
-    edges?: EdgesResolver<DomainsEdges[], TypeParent, TContext>;
-
-    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
-
-    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type EdgesResolver<
-    R = DomainsEdges[],
-    Parent = DomainsData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TotalCountResolver<
-    R = number,
-    Parent = DomainsData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PageInfoResolver<
-    R = PageInfoPaginated,
-    Parent = DomainsData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = DomainsData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace DomainsEdgesResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = DomainsEdges> {
-    node?: NodeResolver<DomainsNode, TypeParent, TContext>;
-
-    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
-  }
-
-  export type NodeResolver<
-    R = DomainsNode,
-    Parent = DomainsEdges,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type CursorResolver<
-    R = CursorType,
-    Parent = DomainsEdges,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace DomainsNodeResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = DomainsNode> {
-    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
-
-    timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
-
-    source?: SourceResolver<Maybe<DomainsItem>, TypeParent, TContext>;
-
-    destination?: DestinationResolver<Maybe<DomainsItem>, TypeParent, TContext>;
-
-    client?: ClientResolver<Maybe<DomainsItem>, TypeParent, TContext>;
-
-    server?: ServerResolver<Maybe<DomainsItem>, TypeParent, TContext>;
-
-    network?: NetworkResolver<Maybe<DomainsNetworkField>, TypeParent, TContext>;
-  }
-
-  export type _IdResolver<
-    R = Maybe<string>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TimestampResolver<
-    R = Maybe<string>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type SourceResolver<
-    R = Maybe<DomainsItem>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type DestinationResolver<
-    R = Maybe<DomainsItem>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type ClientResolver<
-    R = Maybe<DomainsItem>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type ServerResolver<
-    R = Maybe<DomainsItem>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type NetworkResolver<
-    R = Maybe<DomainsNetworkField>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace DomainsItemResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = DomainsItem> {
-    uniqueIpCount?: UniqueIpCountResolver<Maybe<number>, TypeParent, TContext>;
-
-    domainName?: DomainNameResolver<Maybe<string>, TypeParent, TContext>;
-
-    firstSeen?: FirstSeenResolver<Maybe<string>, TypeParent, TContext>;
-
-    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
-  }
-
-  export type UniqueIpCountResolver<
-    R = Maybe<number>,
-    Parent = DomainsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type DomainNameResolver<
-    R = Maybe<string>,
-    Parent = DomainsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FirstSeenResolver<
-    R = Maybe<string>,
-    Parent = DomainsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type LastSeenResolver<
-    R = Maybe<string>,
-    Parent = DomainsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace DomainsNetworkFieldResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = DomainsNetworkField> {
-    bytes?: BytesResolver<Maybe<number>, TypeParent, TContext>;
-
-    packets?: PacketsResolver<Maybe<number>, TypeParent, TContext>;
-
-    transport?: TransportResolver<Maybe<string>, TypeParent, TContext>;
-
-    direction?: DirectionResolver<Maybe<NetworkDirectionEcs[]>, TypeParent, TContext>;
-  }
-
-  export type BytesResolver<
-    R = Maybe<number>,
-    Parent = DomainsNetworkField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PacketsResolver<
-    R = Maybe<number>,
-    Parent = DomainsNetworkField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TransportResolver<
-    R = Maybe<string>,
-    Parent = DomainsNetworkField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type DirectionResolver<
-    R = Maybe<NetworkDirectionEcs[]>,
-    Parent = DomainsNetworkField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -6433,7 +6460,7 @@ export namespace GeoItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = GeoItem> {
     geo?: GeoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
 
-    flowTarget?: FlowTargetResolver<Maybe<FlowTarget>, TypeParent, TContext>;
+    flowTarget?: FlowTargetResolver<Maybe<FlowTargetSourceDest>, TypeParent, TContext>;
   }
 
   export type GeoResolver<
@@ -6442,7 +6469,7 @@ export namespace GeoItemResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type FlowTargetResolver<
-    R = Maybe<FlowTarget>,
+    R = Maybe<FlowTargetSourceDest>,
     Parent = GeoItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6702,6 +6729,20 @@ export namespace OverviewHostDataResolvers {
 
     auditbeatUser?: AuditbeatUserResolver<Maybe<number>, TypeParent, TContext>;
 
+    endgameDns?: EndgameDnsResolver<Maybe<number>, TypeParent, TContext>;
+
+    endgameFile?: EndgameFileResolver<Maybe<number>, TypeParent, TContext>;
+
+    endgameImageLoad?: EndgameImageLoadResolver<Maybe<number>, TypeParent, TContext>;
+
+    endgameNetwork?: EndgameNetworkResolver<Maybe<number>, TypeParent, TContext>;
+
+    endgameProcess?: EndgameProcessResolver<Maybe<number>, TypeParent, TContext>;
+
+    endgameRegistry?: EndgameRegistryResolver<Maybe<number>, TypeParent, TContext>;
+
+    endgameSecurity?: EndgameSecurityResolver<Maybe<number>, TypeParent, TContext>;
+
     filebeatSystemModule?: FilebeatSystemModuleResolver<Maybe<number>, TypeParent, TContext>;
 
     winlogbeat?: WinlogbeatResolver<Maybe<number>, TypeParent, TContext>;
@@ -6735,6 +6776,41 @@ export namespace OverviewHostDataResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type AuditbeatUserResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EndgameDnsResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EndgameFileResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EndgameImageLoadResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EndgameNetworkResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EndgameProcessResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EndgameRegistryResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EndgameSecurityResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
@@ -7781,6 +7857,9 @@ export type IResolvers<TContext = SiemContext> = {
   Summary?: SummaryResolvers.Resolvers<TContext>;
   PrimarySecondary?: PrimarySecondaryResolvers.Resolvers<TContext>;
   DestinationEcsFields?: DestinationEcsFieldsResolvers.Resolvers<TContext>;
+  DnsEcsFields?: DnsEcsFieldsResolvers.Resolvers<TContext>;
+  DnsQuestionData?: DnsQuestionDataResolvers.Resolvers<TContext>;
+  EndgameEcsFields?: EndgameEcsFieldsResolvers.Resolvers<TContext>;
   EventEcsFields?: EventEcsFieldsResolvers.Resolvers<TContext>;
   NetworkEcsField?: NetworkEcsFieldResolvers.Resolvers<TContext>;
   SuricataEcsFields?: SuricataEcsFieldsResolvers.Resolvers<TContext>;
@@ -7804,7 +7883,9 @@ export type IResolvers<TContext = SiemContext> = {
   HttpBodyData?: HttpBodyDataResolvers.Resolvers<TContext>;
   HttpResponseData?: HttpResponseDataResolvers.Resolvers<TContext>;
   UrlEcsFields?: UrlEcsFieldsResolvers.Resolvers<TContext>;
+  WinlogEcsFields?: WinlogEcsFieldsResolvers.Resolvers<TContext>;
   ProcessEcsFields?: ProcessEcsFieldsResolvers.Resolvers<TContext>;
+  ProcessHashData?: ProcessHashDataResolvers.Resolvers<TContext>;
   Thread?: ThreadResolvers.Resolvers<TContext>;
   FileFields?: FileFieldsResolvers.Resolvers<TContext>;
   SystemEcsField?: SystemEcsFieldResolvers.Resolvers<TContext>;
@@ -7829,11 +7910,6 @@ export type IResolvers<TContext = SiemContext> = {
   Overview?: OverviewResolvers.Resolvers<TContext>;
   AutonomousSystem?: AutonomousSystemResolvers.Resolvers<TContext>;
   AutonomousSystemOrganization?: AutonomousSystemOrganizationResolvers.Resolvers<TContext>;
-  DomainsData?: DomainsDataResolvers.Resolvers<TContext>;
-  DomainsEdges?: DomainsEdgesResolvers.Resolvers<TContext>;
-  DomainsNode?: DomainsNodeResolvers.Resolvers<TContext>;
-  DomainsItem?: DomainsItemResolvers.Resolvers<TContext>;
-  DomainsNetworkField?: DomainsNetworkFieldResolvers.Resolvers<TContext>;
   TlsData?: TlsDataResolvers.Resolvers<TContext>;
   TlsEdges?: TlsEdgesResolvers.Resolvers<TContext>;
   TlsNode?: TlsNodeResolvers.Resolvers<TContext>;

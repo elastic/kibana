@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BasicValidations } from './job_validator';
-import { Job } from '../job_creator/configs';
+import { Job, Datafeed } from '../job_creator/configs';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
 import { ValidationResults, ValidationMessage } from '../../../../../common/util/job_utils';
@@ -15,7 +15,8 @@ import { ExistingJobsAndGroups } from '../../../../services/job_service';
 export function populateValidationMessages(
   validationResults: ValidationResults,
   basicValidations: BasicValidations,
-  jobConfig: Job
+  jobConfig: Job,
+  datafeedConfig: Datafeed
 ) {
   const limits = newJobLimits();
 
@@ -136,20 +137,33 @@ export function populateValidationMessages(
     basicValidations.bucketSpan.message = msg;
   } else if (validationResults.contains('bucket_span_invalid')) {
     basicValidations.bucketSpan.valid = false;
-    const msg = i18n.translate(
-      'xpack.ml.newJob.wizard.validateJob.bucketSpanInvalidTimeIntervalFormatErrorMessage',
-      {
-        defaultMessage:
-          '{bucketSpan} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
-        values: {
-          bucketSpan: jobConfig.analysis_config.bucket_span,
-          tenMinutes: '10m',
-          oneHour: '1h',
-        },
-      }
+    basicValidations.bucketSpan.message = invalidTimeFormatMessage(
+      jobConfig.analysis_config.bucket_span
     );
+  }
 
-    basicValidations.bucketSpan.message = msg;
+  if (validationResults.contains('query_empty')) {
+    basicValidations.query.valid = false;
+    const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.queryCannotBeEmpty', {
+      defaultMessage: 'Datafeed query cannot be empty.',
+    });
+    basicValidations.query.message = msg;
+  } else if (validationResults.contains('query_invalid')) {
+    basicValidations.query.valid = false;
+    const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.queryIsInvalidEsQuery', {
+      defaultMessage: 'Datafeed query must be a valid elasticsearch query.',
+    });
+    basicValidations.query.message = msg;
+  }
+
+  if (validationResults.contains('query_delay_invalid')) {
+    basicValidations.queryDelay.valid = false;
+    basicValidations.queryDelay.message = invalidTimeFormatMessage(datafeedConfig.query_delay);
+  }
+
+  if (validationResults.contains('frequency_invalid')) {
+    basicValidations.frequency.valid = false;
+    basicValidations.frequency.message = invalidTimeFormatMessage(datafeedConfig.frequency);
   }
 }
 
@@ -181,4 +195,19 @@ export function checkForExistingJobAndGroupIds(
     contains: (id: string) => messages.some(m => id === m.id),
     find: (id: string) => messages.find(m => id === m.id),
   };
+}
+
+function invalidTimeFormatMessage(value: string | undefined) {
+  return i18n.translate(
+    'xpack.ml.newJob.wizard.validateJob.frequencyInvalidTimeIntervalFormatErrorMessage',
+    {
+      defaultMessage:
+        '{value} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
+      values: {
+        value,
+        tenMinutes: '10m',
+        oneHour: '1h',
+      },
+    }
+  );
 }

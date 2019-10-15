@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
-  FlowTargetNew,
+  FlowTargetSourceDest,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowEdges,
   NetworkTopNFlowSortField,
@@ -28,6 +28,7 @@ const ID = 'networkTopNFlowQuery';
 
 export interface NetworkTopNFlowArgs {
   id: string;
+  ip?: string;
   inspect: inputsModel.InspectQuery;
   isInspected: boolean;
   loading: boolean;
@@ -40,7 +41,8 @@ export interface NetworkTopNFlowArgs {
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: NetworkTopNFlowArgs) => React.ReactNode;
-  flowTarget: FlowTargetNew;
+  flowTarget: FlowTargetSourceDest;
+  ip?: string;
   type: networkModel.NetworkType;
 }
 
@@ -66,6 +68,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       flowTarget,
       filterQuery,
       id = `${ID}-${flowTarget}`,
+      ip,
       isInspected,
       limit,
       skip,
@@ -78,6 +81,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
+      ip,
       pagination: generateTablePaginationOptions(activePage, limit),
       sort: topNFlowSort,
       sourceId,
@@ -136,8 +140,11 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   }
 }
 
-const mapStateToProps = (state: State, { flowTarget, id = `${ID}-${flowTarget}` }: OwnProps) => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget);
+const mapStateToProps = (
+  state: State,
+  { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps
+) => {
+  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget, type);
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const { isInspected } = getQuery(state, id);
   return {
