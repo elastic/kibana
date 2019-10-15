@@ -127,7 +127,7 @@ export class ReferencesPanel extends React.Component<Props, State> {
         className="referencesPanel__code-block"
         key={key}
         header={header}
-        content={file.code}
+        lines={file.code.split('\n')}
         language={file.language}
         lineNumber={i => file.lineNumbers[i]}
         highlightRanges={file.highlights}
