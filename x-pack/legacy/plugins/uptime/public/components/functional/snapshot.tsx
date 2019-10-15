@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { get } from 'lodash';
 import { DonutChart } from './charts';
@@ -33,14 +33,17 @@ export const SnapshotComponent = ({
   <ChartWrapper loading={loading}>
     <EuiTitle size="s">
       <h2>
-        <FormattedMessage
-          id="xpack.uptime.snapshot.downCountsMessage"
-          defaultMessage="{down}/{total} monitors are down"
-          values={{
-            down: get<number>(data, 'snapshot.counts.down', 0),
-            total: get<number>(data, 'snapshot.counts.total', 0),
-          }}
-        />
+        {get<number>(data, 'snapshot.counts.down', 0) === 0
+          ? i18n.translate('xpack.uptime.snapshot.zeroDownMessage', {
+              defaultMessage: 'All monitors are up',
+            })
+          : i18n.translate('xpack.uptime.snapshot.downCountsMessage', {
+              defaultMessage: '{down}/{total} monitors are down',
+              values: {
+                down: get<number>(data, 'snapshot.counts.down', 0),
+                total: get<number>(data, 'snapshot.counts.total', 0),
+              },
+            })}
       </h2>
     </EuiTitle>
     <EuiSpacer size="xs" />
