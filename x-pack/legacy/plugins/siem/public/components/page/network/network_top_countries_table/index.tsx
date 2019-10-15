@@ -47,7 +47,6 @@ interface NetworkTopCountriesTableReduxProps {
 }
 
 interface NetworkTopCountriesTableDispatchProps {
-  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
   updateIpDetailsTableActivePage: ActionCreator<{
     activePage: number;
     tableType: networkModel.IpDetailsTableType;
