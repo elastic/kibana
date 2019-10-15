@@ -95,6 +95,7 @@ the time filter. This should be an array of objects, with each object containing
 `from`, `to` (see {ref}/common-options.html#date-math[accepted formats]), 
 and `display` (the title to be displayed).
 `timepicker:refreshIntervalDefaults`:: The default refresh interval for the time filter.
+Example: `{ "display": "15 seconds", "pause": true, "value": 15000 }`.
 `timepicker:timeDefaults`:: The default selection in the time filter.
 `truncate:maxHeight`:: The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
