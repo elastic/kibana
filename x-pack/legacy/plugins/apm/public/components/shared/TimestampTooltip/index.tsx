@@ -22,7 +22,7 @@ function getPreciseTime(precision: Props['precision']) {
     case 'minutes':
       return ', HH:mm';
     default:
-      return ', HH:mm.SSS';
+      return ', HH:mm:ss.SSS';
   }
 }
 
