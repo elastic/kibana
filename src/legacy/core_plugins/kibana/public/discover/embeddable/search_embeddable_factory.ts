@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import '../doc_table';
+import '../angular/doc_table';
 import { capabilities } from 'ui/capabilities';
 import { npStart, npSetup } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';

@@ -24,11 +24,11 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
 // doc table
-import '../doc_table';
-import { getSort } from '../doc_table/lib/get_sort';
-import { getSortForSearchSource } from '../doc_table/lib/get_sort_for_search_source';
-import * as columnActions from '../doc_table/actions/columns';
-import * as filterActions from '../doc_table/actions/filter';
+import './doc_table';
+import { getSort } from './doc_table/lib/get_sort';
+import { getSortForSearchSource } from './doc_table/lib/get_sort_for_search_source';
+import * as columnActions from './doc_table/actions/columns';
+import * as filterActions from './doc_table/actions/filter';
 
 import indexTemplate from './discover.html';
 import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';

@@ -23,7 +23,7 @@ import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
 import { SavedSearch } from '../types';
-import { SortOrder } from '../doc_table/components/table_header/helpers';
+import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;

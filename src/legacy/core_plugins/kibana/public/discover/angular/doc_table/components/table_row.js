@@ -21,12 +21,12 @@ import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import '../../doc_viewer';
-import { noWhiteSpace } from '../../../../common/utils/no_white_space';
+import { noWhiteSpace } from '../../../../../common/utils/no_white_space';
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 import { uiModules } from 'ui/modules';
 import { disableFilter } from '@kbn/es-query';
-import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
+import { dispatchRenderComplete } from '../../../../../../../../plugins/kibana_utils/public';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 

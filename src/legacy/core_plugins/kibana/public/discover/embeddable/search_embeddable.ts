@@ -44,12 +44,12 @@ import {
   Embeddable,
   Container,
 } from '../../../../embeddable_api/public/np_ready/public';
-import * as columnActions from '../doc_table/actions/columns';
+import * as columnActions from '../angular/doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SortOrder } from '../doc_table/components/table_header/helpers';
-import { getSortForSearchSource } from '../doc_table/lib/get_sort_for_search_source';
+import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
+import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
 
 const config = chrome.getUiSettingsClient();
 

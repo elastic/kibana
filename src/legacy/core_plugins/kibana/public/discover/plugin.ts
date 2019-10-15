@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import './saved_searches/saved_searches';
 import './components/field_chooser/field_chooser';
 import './angular';
-import './doc_table/components/table_row';
+
 import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory,

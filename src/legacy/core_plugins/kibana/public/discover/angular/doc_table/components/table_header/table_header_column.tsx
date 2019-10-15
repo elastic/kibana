@@ -17,11 +17,8 @@
  * under the License.
  */
 import React from 'react';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-// @ts-ignore
-import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
 import { SortOrder } from './helpers';
 
 interface Props {

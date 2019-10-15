@@ -19,7 +19,6 @@
 import React from 'react';
 import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
-import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';
 
