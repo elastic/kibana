@@ -25,5 +25,7 @@ export const CodeFlyout = (props: {
         <CodeFlyoutMain repo={props.repo} file={props.file} revision={props.revision} />
       </EuiFlyout>
     );
-  } else return <div />;
+  } else {
+    return null;
+  }
 };
