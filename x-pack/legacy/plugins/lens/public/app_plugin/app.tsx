@@ -151,7 +151,7 @@ export function App({
     }
   }, [docId]);
 
-  const isSaveable = lastKnownDoc && core.application.capabilities.lens.save;
+  const isSaveable = lastKnownDoc && core.application.capabilities.visualize.save;
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -207,7 +207,7 @@ export function App({
               showDatePicker={true}
               showQueryBar={true}
               showFilterBar={true}
-              showSaveQuery={core.application.capabilities.lens.saveQuery as boolean}
+              showSaveQuery={core.application.capabilities.visualize.saveQuery as boolean}
               savedQuery={state.savedQuery}
               onSaved={savedQuery => {
                 setState(s => ({ ...s, savedQuery }));
