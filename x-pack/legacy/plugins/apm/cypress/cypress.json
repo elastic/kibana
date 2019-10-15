@@ -13,8 +13,6 @@
   "reporter": "junit",
   "reporterOptions": {
     "mochaFile": "e2e-tests.xml",
-    "toConsole": false,
-    "outputs": false,
-    "attachments": false
+    "toConsole": true
   }
 }
