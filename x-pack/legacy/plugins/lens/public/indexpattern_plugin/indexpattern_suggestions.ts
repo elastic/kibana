@@ -442,9 +442,9 @@ function createMetricSuggestion(
 
 function getNestedTitle([outerBucket, innerBucket]: IndexPatternColumn[]) {
   return i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
-    defaultMessage: '{innerOperation} per each {outerOperation}',
+    defaultMessage: '{innerOperation} for each {outerOperation}',
     values: {
-      innerOperation: innerBucket.label,
+      innerOperation: hasField(innerBucket) ? innerBucket.sourceField : innerBucket.label,
       outerOperation: hasField(outerBucket) ? outerBucket.sourceField : outerBucket.label,
     },
   });

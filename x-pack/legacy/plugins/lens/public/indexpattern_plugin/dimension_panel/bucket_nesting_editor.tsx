@@ -7,8 +7,11 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiHorizontalRule, EuiSwitch, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiRadio, EuiSelect, htmlIdGenerator } from '@elastic/eui';
 import { IndexPatternLayer } from '../types';
+import { hasField } from '../utils';
+
+const generator = htmlIdGenerator('lens-nesting');
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter(c => c !== inner);
@@ -32,35 +35,76 @@ export function BucketNestingEditor({
   const columns = Object.entries(layer.columns);
   const aggColumns = columns
     .filter(([id, c]) => id !== columnId && c.isBucketed)
-    .map(([value, c]) => ({ value, text: c.label }));
+    .map(([value, c]) => ({
+      value,
+      text: c.label,
+      fieldName: hasField(c) ? c.sourceField : '',
+    }));
 
   if (!column || !column.isBucketed || !aggColumns.length) {
     return null;
   }
+
+  const fieldName = hasField(column) ? column.sourceField : '';
 
   const prevColumn = layer.columnOrder[layer.columnOrder.indexOf(columnId) - 1];
 
   if (aggColumns.length === 1) {
     const [target] = aggColumns;
 
+    function toggleNesting() {
+      if (prevColumn) {
+        setColumns(nestColumn(layer.columnOrder, columnId, target.value));
+      } else {
+        setColumns(nestColumn(layer.columnOrder, target.value, columnId));
+      }
+    }
+
     return (
       <>
         <EuiHorizontalRule margin="m" />
-        <EuiSwitch
-          data-test-subj="indexPattern-nesting-switch"
-          label={i18n.translate('xpack.lens.xyChart.nestUnderTarget', {
-            defaultMessage: 'Nest under {target}',
-            values: { target: target.text },
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.indexPattern.nestingControl', {
+            defaultMessage: 'Grouping',
           })}
-          checked={!!prevColumn}
-          onChange={() => {
-            if (prevColumn) {
-              setColumns(nestColumn(layer.columnOrder, columnId, target.value));
-            } else {
-              setColumns(nestColumn(layer.columnOrder, target.value, columnId));
-            }
-          }}
-        />
+        >
+          <>
+            <EuiRadio
+              id={generator()}
+              data-test-subj="indexPattern-nesting-topLevel"
+              label={
+                column.operationType === 'terms'
+                  ? i18n.translate('xpack.lens.indexPattern.nestingOverallTerms', {
+                      defaultMessage: 'Overall top {field}',
+                      values: { field: fieldName },
+                    })
+                  : i18n.translate('xpack.lens.indexPattern.nestingOverallDateHistogram', {
+                      defaultMessage: '{target} for each date',
+                      values: { target: target.fieldName },
+                    })
+              }
+              checked={!prevColumn}
+              onChange={toggleNesting}
+            />
+            <EuiRadio
+              id={generator()}
+              data-test-subj="indexPattern-nesting-bottomLevel"
+              label={
+                column.operationType === 'terms'
+                  ? i18n.translate('xpack.lens.indexPattern.nestingOverallTerms', {
+                      defaultMessage: 'Top values for each {target}',
+                      values: { target: target.fieldName },
+                    })
+                  : i18n.translate('xpack.lens.indexPattern.nestingOverallDateHistogram', {
+                      defaultMessage: 'Dates for each {target}',
+                      values: { target: target.fieldName },
+                    })
+              }
+              checked={!!prevColumn}
+              onChange={toggleNesting}
+            />
+          </>
+        </EuiFormRow>
       </>
     );
   }
@@ -69,8 +113,8 @@ export function BucketNestingEditor({
     <>
       <EuiHorizontalRule margin="m" />
       <EuiFormRow
-        label={i18n.translate('xpack.lens.xyChart.nestUnder', {
-          defaultMessage: 'Nest under',
+        label={i18n.translate('xpack.lens.indexPattern.groupByDropdown', {
+          defaultMessage: 'Group by',
         })}
         display="rowCompressed"
       >
@@ -81,7 +125,7 @@ export function BucketNestingEditor({
             {
               value: '',
               text: i18n.translate('xpack.lens.xyChart.nestUnderRoot', {
-                defaultMessage: 'Top level',
+                defaultMessage: 'Entire data set',
               }),
             },
             ...aggColumns,

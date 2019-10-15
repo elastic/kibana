@@ -189,6 +189,11 @@ export interface DatasourceDimensionPanelProps {
   // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
   onRemove?: (accessor: string) => void;
+
+  // Some dimension editors will allow users to change the operation grouping
+  // from the panel, and this lets the visualization hint that it doesn't want
+  // users to have that level of control
+  hideGrouping?: boolean;
 }
 
 export interface DatasourceLayerPanelProps {

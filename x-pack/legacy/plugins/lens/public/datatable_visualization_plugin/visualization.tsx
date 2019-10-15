@@ -58,6 +58,15 @@ export function DataTableLayer({
   dragDropContext,
 }: { layer: LayerState } & VisualizationProps<DatatableVisualizationState>) {
   const datasource = frame.datasourceLayers[layer.layerId];
+
+  const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+  // When we add a column it could be empty, and therefore have no order
+  const sortedColumns = originalOrder.concat(
+    layer.columns.filter(id => {
+      return !originalOrder.includes(id);
+    })
+  );
+
   return (
     <EuiPanel className="lnsConfigPanel__panel" paddingSize="s">
       <NativeRenderer
@@ -71,7 +80,7 @@ export function DataTableLayer({
         label={i18n.translate('xpack.lens.datatable.columns', { defaultMessage: 'Columns' })}
       >
         <MultiColumnEditor
-          accessors={layer.columns}
+          accessors={sortedColumns}
           datasource={datasource}
           dragDropContext={dragDropContext}
           filterOperations={allOperations}

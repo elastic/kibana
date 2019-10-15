@@ -69,6 +69,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
     layerId,
     currentIndexPattern,
     uniqueLabel,
+    hideGrouping,
   } = props;
   const { operationByDocument, operationByField, fieldByOperation } = operationFieldSupportMatrix;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -393,22 +394,25 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     />
                   </EuiFormRow>
                 )}
-                <BucketNestingEditor
-                  layer={state.layers[props.layerId]}
-                  columnId={props.columnId}
-                  setColumns={columnOrder => {
-                    setState({
-                      ...state,
-                      layers: {
-                        ...state.layers,
-                        [props.layerId]: {
-                          ...state.layers[props.layerId],
-                          columnOrder,
+
+                {!hideGrouping && (
+                  <BucketNestingEditor
+                    layer={state.layers[props.layerId]}
+                    columnId={props.columnId}
+                    setColumns={columnOrder => {
+                      setState({
+                        ...state,
+                        layers: {
+                          ...state.layers,
+                          [props.layerId]: {
+                            ...state.layers[props.layerId],
+                            columnOrder,
+                          },
                         },
-                      },
-                    });
-                  }}
-                />
+                      });
+                    }}
+                  />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
