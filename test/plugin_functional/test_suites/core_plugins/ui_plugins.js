@@ -44,5 +44,16 @@ export default function ({ getService, getPageObjects }) {
         expect(hasAccessToInjectedMetadata).to.equal(true);
       });
     });
+    describe('have env data provided', function describeIndexTests() {
+      before(async () => {
+        await PageObjects.common.navigateToApp('bar');
+      });
+
+      it('should attach pluginContext to window.corePluginB', async () => {
+        const envData = await browser.execute('return window.env');
+        expect(envData.mode.dev).to.be(true);
+        expect(envData.packageInfo.version).to.be.a('string');
+      });
+    });
   });
 }

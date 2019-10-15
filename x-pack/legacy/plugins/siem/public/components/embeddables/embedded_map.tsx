@@ -15,16 +15,16 @@ import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_a
 import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 import { Loader } from '../loader';
-import { useIndexPatterns } from '../ml_popover/hooks/use_index_patterns';
+import { useIndexPatterns } from '../../hooks/use_index_patterns';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { getIndexPatternTitleIdMapping } from '../ml_popover/helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapEmbeddable, SetQuery } from './types';
 import * as i18n from './translations';
 import { useStateToaster } from '../toasters';
 import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
+import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 
 const EmbeddableWrapper = styled(EuiFlexGroup)`
   position: relative;
