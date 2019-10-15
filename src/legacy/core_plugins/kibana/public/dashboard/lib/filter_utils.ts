@@ -66,6 +66,14 @@ export class FilterUtils {
    * @returns {Array.<Object>}
    */
   public static cleanFiltersForComparison(filters: Filter[]) {
-    return _.map(filters, filter => _.omit(filter, ['$$hashKey', '$state']));
+    return _.map(filters, filter => {
+      const f: Partial<Filter> = _.omit(filter, ['$$hashKey', '$state']);
+      if (f.meta) {
+        // f.meta.value is the value displayed in the filter bar.
+        // It may also be loaded differently and shouldn't be used in this comparison.
+        return _.omit(f.meta, ['value']);
+      }
+      return f;
+    });
   }
 }

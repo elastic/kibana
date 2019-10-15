@@ -87,7 +87,7 @@
   </div>
   <ul class="list-unstyled dscFieldList--selected" aria-labelledby="selected_fields">
     <discover-field
-      ng-repeat="field in fields.raw|filter:filter.isFieldFilteredAndDisplayed"
+      ng-repeat="field in fields|filter:filter.isFieldFilteredAndDisplayed"
       field="field"
       on-add-field="onAddField"
       on-add-filter="onAddFilter"

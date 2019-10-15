@@ -20,7 +20,7 @@
 import { Filter, isExistsFilter, FILTERS } from '@kbn/es-query';
 import { get } from 'lodash';
 
-export const mapExists = async (filter: Filter) => {
+export const mapExists = (filter: Filter) => {
   if (isExistsFilter(filter)) {
     return {
       type: FILTERS.EXISTS,

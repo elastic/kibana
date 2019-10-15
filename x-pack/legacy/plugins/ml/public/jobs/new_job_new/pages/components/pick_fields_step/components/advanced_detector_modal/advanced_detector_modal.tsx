@@ -23,7 +23,6 @@ import {
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../../../src/plugins/data/public';
 import { ModalWrapper } from './modal_wrapper';
-import { ES_AGGREGATION } from '../../../../../../../../common/constants/aggregation_types';
 import { MLCATEGORY } from '../../../../../../../../common/constants/field_types';
 
 import {
@@ -115,7 +114,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
     if (agg !== null) {
       setFieldsEnabled(true);
-      if (isCountAgg(agg) && eventRateField !== undefined) {
+      if (isFieldlessAgg(agg) && eventRateField !== undefined) {
         setFieldOption(emptyOption);
         setFieldOptionEnabled(false);
         field = eventRateField;
@@ -148,7 +147,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
     const agg = getAgg(aggOption.label);
     setFieldsEnabled(aggOption.label !== '');
     if (agg !== null) {
-      setFieldOptionEnabled(isCountAgg(agg) === false);
+      setFieldOptionEnabled(isFieldlessAgg(agg) === false);
     }
   }, []);
 
@@ -278,8 +277,8 @@ function createExcludeFrequentOption(excludeFrequent: string | null): EuiComboBo
   };
 }
 
-function isCountAgg(agg: Aggregation) {
-  return agg.dslName === ES_AGGREGATION.COUNT;
+function isFieldlessAgg(agg: Aggregation) {
+  return agg.fields && agg.fields.length === 1 && agg.fields[0].id === EVENT_RATE_FIELD_ID;
 }
 
 function createMlcategoryField(jobCreator: JobCreatorType): EuiComboBoxOptionProps[] {
