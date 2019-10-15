@@ -21,6 +21,7 @@ const initialState: IndexPatternPrivateState = {
     { id: '2', title: 'my-fake-restricted-pattern' },
     { id: '3', title: 'my-compatible-pattern' },
   ],
+  existingFields: {},
   currentIndexPatternId: '1',
   showEmptyFields: false,
   layers: {

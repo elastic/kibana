@@ -35,9 +35,14 @@ export interface SavedQueryService {
     config?: { overwrite: boolean }
   ) => Promise<SavedQuery>;
   getAllSavedQueries: () => Promise<SavedQuery[]>;
-  findSavedQueries: (searchText?: string) => Promise<SavedQuery[]>;
+  findSavedQueries: (
+    searchText?: string,
+    perPage?: number,
+    activePage?: number
+  ) => Promise<SavedQuery[]>;
   getSavedQuery: (id: string) => Promise<SavedQuery>;
   deleteSavedQuery: (id: string) => Promise<{}>;
+  getSavedQueryCount: () => Promise<number>;
 }
 
 export const createSavedQueryService = (
@@ -89,24 +94,32 @@ export const createSavedQueryService = (
 
     return parseSavedQueryObject(rawQueryResponse);
   };
-
+  // we have to tell the saved objects client how many to fetch, otherwise it defaults to fetching 20 per page
   const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
+    const count = await getSavedQueryCount();
     const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
       type: 'query',
+      perPage: count,
+      page: 1,
     });
-
     return response.savedObjects.map(
       (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
         parseSavedQueryObject(savedObject)
     );
   };
-
-  const findSavedQueries = async (searchText: string = ''): Promise<SavedQuery[]> => {
+  // findSavedQueries will do a 'match_all' if no search string is passed in
+  const findSavedQueries = async (
+    searchText: string = '',
+    perPage: number = 50,
+    activePage: number = 1
+  ): Promise<SavedQuery[]> => {
     const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
       type: 'query',
       search: searchText,
       searchFields: ['title^5', 'description'],
       sortField: '_score',
+      perPage,
+      page: activePage,
     });
 
     return response.savedObjects.map(
@@ -154,11 +167,21 @@ export const createSavedQueryService = (
     };
   };
 
+  const getSavedQueryCount = async (): Promise<number> => {
+    const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
+      type: 'query',
+      perPage: 0,
+      page: 1,
+    });
+    return response.total;
+  };
+
   return {
     saveQuery,
     getAllSavedQueries,
     findSavedQueries,
     getSavedQuery,
     deleteSavedQuery,
+    getSavedQueryCount,
   };
 };

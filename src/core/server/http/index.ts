@@ -18,8 +18,7 @@
  */
 
 export { config, HttpConfig, HttpConfigType } from './http_config';
-export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
-export { HttpServerSetup } from './http_server';
+export { HttpService } from './http_service';
 export { GetAuthHeaders } from './auth_headers_storage';
 export { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
 export {
@@ -31,6 +30,7 @@ export {
   ErrorHttpResponseOptions,
   KibanaRequest,
   KibanaRequestRoute,
+  IKibanaResponse,
   KnownHeaders,
   LegacyRequest,
   LifecycleResponseFactory,
@@ -53,6 +53,9 @@ export {
   AuthHeaders,
   AuthResultParams,
   AuthToolkit,
+  AuthResult,
+  Authenticated,
+  AuthResultType,
 } from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
 export { SessionStorageFactory, SessionStorage } from './session_storage';

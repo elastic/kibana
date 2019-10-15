@@ -47,7 +47,7 @@ describe('discoverField', function () {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
     _.assign($rootScope, {
-      field: indexPattern.fields.byName.extension,
+      field: indexPattern.fields.getByName('extension'),
       addField: sinon.spy(() => $rootScope.field.display = true),
       removeField: sinon.spy(() => $rootScope.field.display = false),
       showDetails: sinon.spy(() => $rootScope.field.details = { exists: true }),
