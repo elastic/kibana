@@ -38,13 +38,12 @@ export const MetricsExplorerCharts = ({
   options,
   chartOptions,
   onRefetch,
-
   onFilter,
   source,
   timeRange,
   onTimeChange,
 }: Props) => {
-  if (!data && loading) {
+  if (loading) {
     return (
       <InfraLoadingPanel
         height={800}
