@@ -23,7 +23,7 @@ import {
   SQL,
   TIMELION,
   URL,
-} from '../constants';
+} from './constants';
 
 export const ArgumentStrings = {
   AxisConfig: {

@@ -15,6 +15,7 @@ export * from './elements';
 export { getFunctionErrors, getFunctionHelp } from './functions';
 export * from './shortcuts';
 export * from './transitions';
+export * from './ui';
 export * from './units';
 
 export const getAppDescription = () =>
