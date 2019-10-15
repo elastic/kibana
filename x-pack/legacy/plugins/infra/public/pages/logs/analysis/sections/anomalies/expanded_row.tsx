@@ -14,7 +14,7 @@ import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   getLogEntryRateSeriesForPartition,
   getAnnotationsForPartition,
-  getTotalNumberOfLogsForPartition,
+  getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
