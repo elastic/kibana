@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FlowTarget, TlsSortField, TlsData } from '../../graphql/types';
+import { FlowTargetSourceDest, TlsSortField, TlsData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 
 import { TlsAdapter } from './types';
@@ -14,7 +14,7 @@ export * from './elasticsearch_adapter';
 export interface TlsRequestOptions extends RequestOptionsPaginated {
   ip?: string;
   tlsSortField: TlsSortField;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
 }
 
 export class TLS {

@@ -1787,7 +1787,7 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "ENUM", "name": "FlowTarget", "ofType": null }
+                  "ofType": { "kind": "ENUM", "name": "FlowTargetSourceDest", "ofType": null }
                 },
                 "defaultValue": null
               },

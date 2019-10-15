@@ -261,7 +261,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                 <TlsQuery
                   endDate={to}
                   filterQuery={filterQuery}
-                  flowTarget={FlowTargetSourceDest.source}
+                  flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
                   ip={ip}
                   skip={isInitializing}
                   sourceId="default"

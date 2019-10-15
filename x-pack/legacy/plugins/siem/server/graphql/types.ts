@@ -2107,7 +2107,7 @@ export interface TlsSourceArgs {
 
   sort: TlsSortField;
 
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
 
   timerange: TimerangeInput;
 
@@ -2869,7 +2869,7 @@ export namespace SourceResolvers {
 
     sort: TlsSortField;
 
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetSourceDest;
 
     timerange: TimerangeInput;
 

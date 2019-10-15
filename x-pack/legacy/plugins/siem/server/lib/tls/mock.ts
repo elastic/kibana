@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FlowTarget, Direction, TlsFields } from '../../graphql/types';
+import { Direction, TlsFields, FlowTargetSourceDest } from '../../graphql/types';
 
 export const mockTlsQuery = {
   allowNoIndices: true,
@@ -659,5 +659,5 @@ export const mockOptions = {
   ],
   ip: '',
   tlsSortField: { field: TlsFields._id, direction: Direction.desc },
-  flowTarget: FlowTarget.source,
+  flowTarget: FlowTargetSourceDest.source,
 };

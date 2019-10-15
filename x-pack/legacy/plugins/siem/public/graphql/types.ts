@@ -2105,7 +2105,7 @@ export interface TlsSourceArgs {
 
   sort: TlsSortField;
 
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
 
   timerange: TimerangeInput;
 

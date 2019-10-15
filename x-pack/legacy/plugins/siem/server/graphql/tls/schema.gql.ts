@@ -40,7 +40,7 @@ export const tlsSchema = gql`
       ip: String!
       pagination: PaginationInputPaginated!
       sort: TlsSortField!
-      flowTarget: FlowTarget!
+      flowTarget: FlowTargetSourceDest!
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): TlsData!
