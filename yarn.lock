@@ -1118,10 +1118,10 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@elastic/ems-client@1.0.2", "@elastic/ems-client@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-1.0.2.tgz#b4dcfcb1ce40a4f1d847e39f1d5d994ae7a9f04e"
-  integrity sha512-KYOQ44EEdoel+l1LntUjPvUDS4jfGF24ulojQD1GjStzA0sP8D7iIUY0H6o5Q06cy9lFkXarLKADjAxAqLATSw==
+"@elastic/ems-client@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-1.0.4.tgz#7e82aa1d57cdf70f133b892393f7df66e7ae8ba0"
+  integrity sha512-x+AlvdGNZWveotVfglgKXeC/C3bMSpwfaXsj6CF13vX7O3iZb/PPGH+Qr/hn3MlkJ9oBKhKIthY+9JZUK15l6g==
   dependencies:
     lodash "^4.17.15"
     node-fetch "^1.7.3"
