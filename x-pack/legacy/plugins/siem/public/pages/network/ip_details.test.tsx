@@ -62,7 +62,6 @@ const getMockHistory = (ip: string) => ({
 
 const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
 const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
-
 const getMockProps = (ip: string) => ({
   to,
   from,
@@ -84,6 +83,7 @@ const getMockProps = (ip: string) => ({
     from: number;
     to: number;
   }>,
+  setIpDetailsTablesActivePageToZero: (jest.fn() as unknown) as ActionCreator<null>,
 });
 
 jest.mock('ui/documentation_links', () => ({
@@ -118,17 +118,13 @@ describe('Ip Details', () => {
   let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
+    jest.clearAllMocks();
     store = createStore(state, apolloClientObservable);
     localSource = cloneDeep(mocksSource);
   });
   test('it renders', () => {
     const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
-    expect(
-      wrapper
-        .dive()
-        .find('[data-test-subj="ip-details-page"]')
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="ip-details-page"]').exists()).toBe(true);
   });
 
   test('it matches the snapshot', () => {

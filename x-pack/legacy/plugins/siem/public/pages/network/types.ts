@@ -34,8 +34,13 @@ export type NetworkComponentProps = NetworkComponentReduxProps &
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
   flowTarget: FlowTarget;
+}
+
+interface IPDetailsComponentDispatchProps {
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
+  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
 export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
+  IPDetailsComponentDispatchProps &
   GlobalTimeArgs & { detailName: string };
