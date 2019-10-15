@@ -91,6 +91,7 @@ export {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
+  SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -108,6 +109,7 @@ export {
   HttpFetchQuery,
   HttpErrorResponse,
   HttpErrorRequest,
+  HttpFetchError,
   HttpInterceptor,
   HttpResponse,
   HttpHandler,
@@ -145,6 +147,15 @@ export interface CoreSetup {
   notifications: NotificationsSetup;
   /** {@link UiSettingsClient} */
   uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
 /**
@@ -175,6 +186,15 @@ export interface CoreStart {
   overlays: OverlayStart;
   /** {@link UiSettingsClient} */
   uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
 /**

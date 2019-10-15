@@ -10,6 +10,6 @@
 
 --
 
-include::graph/index.asciidoc[leveloffset=+1]
+include::graph/index.asciidoc[]
 
 include::ml/index.asciidoc[]

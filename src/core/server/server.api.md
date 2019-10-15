@@ -5,30 +5,410 @@
 ```ts
 
 import Boom from 'boom';
+import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { CatAliasesParams } from 'elasticsearch';
+import { CatAllocationParams } from 'elasticsearch';
+import { CatCommonParams } from 'elasticsearch';
+import { CatFielddataParams } from 'elasticsearch';
+import { CatHealthParams } from 'elasticsearch';
+import { CatHelpParams } from 'elasticsearch';
+import { CatIndicesParams } from 'elasticsearch';
+import { CatRecoveryParams } from 'elasticsearch';
+import { CatSegmentsParams } from 'elasticsearch';
+import { CatShardsParams } from 'elasticsearch';
+import { CatSnapshotsParams } from 'elasticsearch';
+import { CatTasksParams } from 'elasticsearch';
+import { CatThreadPoolParams } from 'elasticsearch';
+import { ClearScrollParams } from 'elasticsearch';
+import { Client } from 'elasticsearch';
+import { ClusterAllocationExplainParams } from 'elasticsearch';
+import { ClusterGetSettingsParams } from 'elasticsearch';
+import { ClusterHealthParams } from 'elasticsearch';
+import { ClusterPendingTasksParams } from 'elasticsearch';
+import { ClusterPutSettingsParams } from 'elasticsearch';
+import { ClusterRerouteParams } from 'elasticsearch';
+import { ClusterStateParams } from 'elasticsearch';
+import { ClusterStatsParams } from 'elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
+import { CountParams } from 'elasticsearch';
+import { CreateDocumentParams } from 'elasticsearch';
+import { DeleteDocumentByQueryParams } from 'elasticsearch';
+import { DeleteDocumentParams } from 'elasticsearch';
+import { DeleteScriptParams } from 'elasticsearch';
+import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
+import { ExistsParams } from 'elasticsearch';
+import { ExplainParams } from 'elasticsearch';
+import { FieldStatsParams } from 'elasticsearch';
+import { GenericParams } from 'elasticsearch';
+import { GetParams } from 'elasticsearch';
+import { GetResponse } from 'elasticsearch';
+import { GetScriptParams } from 'elasticsearch';
+import { GetSourceParams } from 'elasticsearch';
+import { GetTemplateParams } from 'elasticsearch';
 import { IncomingHttpHeaders } from 'http';
+import { IndexDocumentParams } from 'elasticsearch';
 import { IndexPatternsService } from 'src/legacy/server/index_patterns';
+import { IndicesAnalyzeParams } from 'elasticsearch';
+import { IndicesClearCacheParams } from 'elasticsearch';
+import { IndicesCloseParams } from 'elasticsearch';
+import { IndicesCreateParams } from 'elasticsearch';
+import { IndicesDeleteAliasParams } from 'elasticsearch';
+import { IndicesDeleteParams } from 'elasticsearch';
+import { IndicesDeleteTemplateParams } from 'elasticsearch';
+import { IndicesExistsAliasParams } from 'elasticsearch';
+import { IndicesExistsParams } from 'elasticsearch';
+import { IndicesExistsTemplateParams } from 'elasticsearch';
+import { IndicesExistsTypeParams } from 'elasticsearch';
+import { IndicesFlushParams } from 'elasticsearch';
+import { IndicesFlushSyncedParams } from 'elasticsearch';
+import { IndicesForcemergeParams } from 'elasticsearch';
+import { IndicesGetAliasParams } from 'elasticsearch';
+import { IndicesGetFieldMappingParams } from 'elasticsearch';
+import { IndicesGetMappingParams } from 'elasticsearch';
+import { IndicesGetParams } from 'elasticsearch';
+import { IndicesGetSettingsParams } from 'elasticsearch';
+import { IndicesGetTemplateParams } from 'elasticsearch';
+import { IndicesGetUpgradeParams } from 'elasticsearch';
+import { IndicesOpenParams } from 'elasticsearch';
+import { IndicesPutAliasParams } from 'elasticsearch';
+import { IndicesPutMappingParams } from 'elasticsearch';
+import { IndicesPutSettingsParams } from 'elasticsearch';
+import { IndicesPutTemplateParams } from 'elasticsearch';
+import { IndicesRecoveryParams } from 'elasticsearch';
+import { IndicesRefreshParams } from 'elasticsearch';
+import { IndicesRolloverParams } from 'elasticsearch';
+import { IndicesSegmentsParams } from 'elasticsearch';
+import { IndicesShardStoresParams } from 'elasticsearch';
+import { IndicesShrinkParams } from 'elasticsearch';
+import { IndicesStatsParams } from 'elasticsearch';
+import { IndicesUpdateAliasesParams } from 'elasticsearch';
+import { IndicesUpgradeParams } from 'elasticsearch';
+import { IndicesValidateQueryParams } from 'elasticsearch';
+import { InfoParams } from 'elasticsearch';
+import { IngestDeletePipelineParams } from 'elasticsearch';
+import { IngestGetPipelineParams } from 'elasticsearch';
+import { IngestPutPipelineParams } from 'elasticsearch';
+import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Logger as Logger_2 } from 'src/core/server/logging';
+import { MGetParams } from 'elasticsearch';
+import { MGetResponse } from 'elasticsearch';
+import { MSearchParams } from 'elasticsearch';
+import { MSearchResponse } from 'elasticsearch';
+import { MSearchTemplateParams } from 'elasticsearch';
+import { MTermVectorsParams } from 'elasticsearch';
+import { NodesHotThreadsParams } from 'elasticsearch';
+import { NodesInfoParams } from 'elasticsearch';
+import { NodesStatsParams } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PeerCertificate } from 'tls';
+import { PingParams } from 'elasticsearch';
+import { PutScriptParams } from 'elasticsearch';
+import { PutTemplateParams } from 'elasticsearch';
 import { Readable } from 'stream';
+import { ReindexParams } from 'elasticsearch';
+import { ReindexRethrottleParams } from 'elasticsearch';
+import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
+import { ScrollParams } from 'elasticsearch';
+import { SearchParams } from 'elasticsearch';
+import { SearchResponse } from 'elasticsearch';
+import { SearchShardsParams } from 'elasticsearch';
+import { SearchTemplateParams } from 'elasticsearch';
 import { Server } from 'hapi';
 import { ShallowPromise } from '@kbn/utility-types';
+import { SnapshotCreateParams } from 'elasticsearch';
+import { SnapshotCreateRepositoryParams } from 'elasticsearch';
+import { SnapshotDeleteParams } from 'elasticsearch';
+import { SnapshotDeleteRepositoryParams } from 'elasticsearch';
+import { SnapshotGetParams } from 'elasticsearch';
+import { SnapshotGetRepositoryParams } from 'elasticsearch';
+import { SnapshotRestoreParams } from 'elasticsearch';
+import { SnapshotStatusParams } from 'elasticsearch';
+import { SnapshotVerifyRepositoryParams } from 'elasticsearch';
 import { Stream } from 'stream';
+import { SuggestParams } from 'elasticsearch';
+import { TasksCancelParams } from 'elasticsearch';
+import { TasksGetParams } from 'elasticsearch';
+import { TasksListParams } from 'elasticsearch';
+import { TermvectorsParams } from 'elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
+import { UpdateDocumentByQueryParams } from 'elasticsearch';
+import { UpdateDocumentParams } from 'elasticsearch';
 import { Url } from 'url';
 
 // @public (undocumented)
-export type APICaller = (endpoint: string, clientParams: Record<string, any>, options?: CallAPIOptions) => Promise<unknown>;
+export interface APICaller {
+    // (undocumented)
+    (endpoint: 'cluster.state', params: ClusterStateParams, options?: CallAPIOptions): ReturnType<Client['cluster']['state']>;
+    // (undocumented)
+    (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: CallAPIOptions): ReturnType<Client['bulk']>;
+    // (undocumented)
+    (endpoint: 'count', params: CountParams, options?: CallAPIOptions): ReturnType<Client['count']>;
+    // (undocumented)
+    (endpoint: 'create', params: CreateDocumentParams, options?: CallAPIOptions): ReturnType<Client['create']>;
+    // (undocumented)
+    (endpoint: 'delete', params: DeleteDocumentParams, options?: CallAPIOptions): ReturnType<Client['delete']>;
+    // (undocumented)
+    (endpoint: 'deleteByQuery', params: DeleteDocumentByQueryParams, options?: CallAPIOptions): ReturnType<Client['deleteByQuery']>;
+    // (undocumented)
+    (endpoint: 'deleteScript', params: DeleteScriptParams, options?: CallAPIOptions): ReturnType<Client['deleteScript']>;
+    // (undocumented)
+    (endpoint: 'deleteTemplate', params: DeleteTemplateParams, options?: CallAPIOptions): ReturnType<Client['deleteTemplate']>;
+    // (undocumented)
+    (endpoint: 'exists', params: ExistsParams, options?: CallAPIOptions): ReturnType<Client['exists']>;
+    // (undocumented)
+    (endpoint: 'explain', params: ExplainParams, options?: CallAPIOptions): ReturnType<Client['explain']>;
+    // (undocumented)
+    (endpoint: 'fieldStats', params: FieldStatsParams, options?: CallAPIOptions): ReturnType<Client['fieldStats']>;
+    // (undocumented)
+    <T>(endpoint: 'get', params: GetParams, options?: CallAPIOptions): Promise<GetResponse<T>>;
+    // (undocumented)
+    (endpoint: 'getScript', params: GetScriptParams, options?: CallAPIOptions): ReturnType<Client['getScript']>;
+    // (undocumented)
+    (endpoint: 'getSource', params: GetSourceParams, options?: CallAPIOptions): ReturnType<Client['getSource']>;
+    // (undocumented)
+    (endpoint: 'getTemplate', params: GetTemplateParams, options?: CallAPIOptions): ReturnType<Client['getTemplate']>;
+    // (undocumented)
+    <T>(endpoint: 'index', params: IndexDocumentParams<T>, options?: CallAPIOptions): ReturnType<Client['index']>;
+    // (undocumented)
+    (endpoint: 'info', params: InfoParams, options?: CallAPIOptions): ReturnType<Client['info']>;
+    // (undocumented)
+    <T>(endpoint: 'mget', params: MGetParams, options?: CallAPIOptions): Promise<MGetResponse<T>>;
+    // (undocumented)
+    <T>(endpoint: 'msearch', params: MSearchParams, options?: CallAPIOptions): Promise<MSearchResponse<T>>;
+    // (undocumented)
+    <T>(endpoint: 'msearchTemplate', params: MSearchTemplateParams, options?: CallAPIOptions): Promise<MSearchResponse<T>>;
+    // (undocumented)
+    (endpoint: 'mtermvectors', params: MTermVectorsParams, options?: CallAPIOptions): ReturnType<Client['mtermvectors']>;
+    // (undocumented)
+    (endpoint: 'ping', params: PingParams, options?: CallAPIOptions): ReturnType<Client['ping']>;
+    // (undocumented)
+    (endpoint: 'putScript', params: PutScriptParams, options?: CallAPIOptions): ReturnType<Client['putScript']>;
+    // (undocumented)
+    (endpoint: 'putTemplate', params: PutTemplateParams, options?: CallAPIOptions): ReturnType<Client['putTemplate']>;
+    // (undocumented)
+    (endpoint: 'reindex', params: ReindexParams, options?: CallAPIOptions): ReturnType<Client['reindex']>;
+    // (undocumented)
+    (endpoint: 'reindexRethrottle', params: ReindexRethrottleParams, options?: CallAPIOptions): ReturnType<Client['reindexRethrottle']>;
+    // (undocumented)
+    (endpoint: 'renderSearchTemplate', params: RenderSearchTemplateParams, options?: CallAPIOptions): ReturnType<Client['renderSearchTemplate']>;
+    // (undocumented)
+    <T>(endpoint: 'scroll', params: ScrollParams, options?: CallAPIOptions): Promise<SearchResponse<T>>;
+    // (undocumented)
+    <T>(endpoint: 'search', params: SearchParams, options?: CallAPIOptions): Promise<SearchResponse<T>>;
+    // (undocumented)
+    (endpoint: 'searchShards', params: SearchShardsParams, options?: CallAPIOptions): ReturnType<Client['searchShards']>;
+    // (undocumented)
+    (endpoint: 'searchTemplate', params: SearchTemplateParams, options?: CallAPIOptions): ReturnType<Client['searchTemplate']>;
+    // (undocumented)
+    (endpoint: 'suggest', params: SuggestParams, options?: CallAPIOptions): ReturnType<Client['suggest']>;
+    // (undocumented)
+    (endpoint: 'termvectors', params: TermvectorsParams, options?: CallAPIOptions): ReturnType<Client['termvectors']>;
+    // (undocumented)
+    (endpoint: 'update', params: UpdateDocumentParams, options?: CallAPIOptions): ReturnType<Client['update']>;
+    // (undocumented)
+    (endpoint: 'updateByQuery', params: UpdateDocumentByQueryParams, options?: CallAPIOptions): ReturnType<Client['updateByQuery']>;
+    // (undocumented)
+    (endpoint: 'cat.aliases', params: CatAliasesParams, options?: CallAPIOptions): ReturnType<Client['cat']['aliases']>;
+    // (undocumented)
+    (endpoint: 'cat.allocation', params: CatAllocationParams, options?: CallAPIOptions): ReturnType<Client['cat']['allocation']>;
+    // (undocumented)
+    (endpoint: 'cat.count', params: CatAllocationParams, options?: CallAPIOptions): ReturnType<Client['cat']['count']>;
+    // (undocumented)
+    (endpoint: 'cat.fielddata', params: CatFielddataParams, options?: CallAPIOptions): ReturnType<Client['cat']['fielddata']>;
+    // (undocumented)
+    (endpoint: 'cat.health', params: CatHealthParams, options?: CallAPIOptions): ReturnType<Client['cat']['health']>;
+    // (undocumented)
+    (endpoint: 'cat.help', params: CatHelpParams, options?: CallAPIOptions): ReturnType<Client['cat']['help']>;
+    // (undocumented)
+    (endpoint: 'cat.indices', params: CatIndicesParams, options?: CallAPIOptions): ReturnType<Client['cat']['indices']>;
+    // (undocumented)
+    (endpoint: 'cat.master', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['master']>;
+    // (undocumented)
+    (endpoint: 'cat.nodeattrs', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['nodeattrs']>;
+    // (undocumented)
+    (endpoint: 'cat.nodes', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['nodes']>;
+    // (undocumented)
+    (endpoint: 'cat.pendingTasks', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['pendingTasks']>;
+    // (undocumented)
+    (endpoint: 'cat.plugins', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['plugins']>;
+    // (undocumented)
+    (endpoint: 'cat.recovery', params: CatRecoveryParams, options?: CallAPIOptions): ReturnType<Client['cat']['recovery']>;
+    // (undocumented)
+    (endpoint: 'cat.repositories', params: CatCommonParams, options?: CallAPIOptions): ReturnType<Client['cat']['repositories']>;
+    // (undocumented)
+    (endpoint: 'cat.segments', params: CatSegmentsParams, options?: CallAPIOptions): ReturnType<Client['cat']['segments']>;
+    // (undocumented)
+    (endpoint: 'cat.shards', params: CatShardsParams, options?: CallAPIOptions): ReturnType<Client['cat']['shards']>;
+    // (undocumented)
+    (endpoint: 'cat.snapshots', params: CatSnapshotsParams, options?: CallAPIOptions): ReturnType<Client['cat']['snapshots']>;
+    // (undocumented)
+    (endpoint: 'cat.tasks', params: CatTasksParams, options?: CallAPIOptions): ReturnType<Client['cat']['tasks']>;
+    // (undocumented)
+    (endpoint: 'cat.threadPool', params: CatThreadPoolParams, options?: CallAPIOptions): ReturnType<Client['cat']['threadPool']>;
+    // (undocumented)
+    (endpoint: 'cluster.allocationExplain', params: ClusterAllocationExplainParams, options?: CallAPIOptions): ReturnType<Client['cluster']['allocationExplain']>;
+    // (undocumented)
+    (endpoint: 'cluster.getSettings', params: ClusterGetSettingsParams, options?: CallAPIOptions): ReturnType<Client['cluster']['getSettings']>;
+    // (undocumented)
+    (endpoint: 'cluster.health', params: ClusterHealthParams, options?: CallAPIOptions): ReturnType<Client['cluster']['health']>;
+    // (undocumented)
+    (endpoint: 'cluster.pendingTasks', params: ClusterPendingTasksParams, options?: CallAPIOptions): ReturnType<Client['cluster']['pendingTasks']>;
+    // (undocumented)
+    (endpoint: 'cluster.putSettings', params: ClusterPutSettingsParams, options?: CallAPIOptions): ReturnType<Client['cluster']['putSettings']>;
+    // (undocumented)
+    (endpoint: 'cluster.reroute', params: ClusterRerouteParams, options?: CallAPIOptions): ReturnType<Client['cluster']['reroute']>;
+    // (undocumented)
+    (endpoint: 'clearScroll', params: ClearScrollParams, options?: CallAPIOptions): ReturnType<Client['clearScroll']>;
+    // (undocumented)
+    (endpoint: 'cluster.stats', params: ClusterStatsParams, options?: CallAPIOptions): ReturnType<Client['cluster']['stats']>;
+    // (undocumented)
+    (endpoint: 'indices.analyze', params: IndicesAnalyzeParams, options?: CallAPIOptions): ReturnType<Client['indices']['analyze']>;
+    // (undocumented)
+    (endpoint: 'indices.clearCache', params: IndicesClearCacheParams, options?: CallAPIOptions): ReturnType<Client['indices']['clearCache']>;
+    // (undocumented)
+    (endpoint: 'indices.close', params: IndicesCloseParams, options?: CallAPIOptions): ReturnType<Client['indices']['close']>;
+    // (undocumented)
+    (endpoint: 'indices.create', params: IndicesCreateParams, options?: CallAPIOptions): ReturnType<Client['indices']['create']>;
+    // (undocumented)
+    (endpoint: 'indices.delete', params: IndicesDeleteParams, options?: CallAPIOptions): ReturnType<Client['indices']['delete']>;
+    // (undocumented)
+    (endpoint: 'indices.deleteAlias', params: IndicesDeleteAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['deleteAlias']>;
+    // (undocumented)
+    (endpoint: 'indices.deleteTemplate', params: IndicesDeleteTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['deleteTemplate']>;
+    // (undocumented)
+    (endpoint: 'indices.exists', params: IndicesExistsParams, options?: CallAPIOptions): ReturnType<Client['indices']['exists']>;
+    // (undocumented)
+    (endpoint: 'indices.existsAlias', params: IndicesExistsAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['existsAlias']>;
+    // (undocumented)
+    (endpoint: 'indices.existsTemplate', params: IndicesExistsTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['existsTemplate']>;
+    // (undocumented)
+    (endpoint: 'indices.existsType', params: IndicesExistsTypeParams, options?: CallAPIOptions): ReturnType<Client['indices']['existsType']>;
+    // (undocumented)
+    (endpoint: 'indices.flush', params: IndicesFlushParams, options?: CallAPIOptions): ReturnType<Client['indices']['flush']>;
+    // (undocumented)
+    (endpoint: 'indices.flushSynced', params: IndicesFlushSyncedParams, options?: CallAPIOptions): ReturnType<Client['indices']['flushSynced']>;
+    // (undocumented)
+    (endpoint: 'indices.forcemerge', params: IndicesForcemergeParams, options?: CallAPIOptions): ReturnType<Client['indices']['forcemerge']>;
+    // (undocumented)
+    (endpoint: 'indices.get', params: IndicesGetParams, options?: CallAPIOptions): ReturnType<Client['indices']['get']>;
+    // (undocumented)
+    (endpoint: 'indices.getAlias', params: IndicesGetAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['getAlias']>;
+    // (undocumented)
+    (endpoint: 'indices.getFieldMapping', params: IndicesGetFieldMappingParams, options?: CallAPIOptions): ReturnType<Client['indices']['getFieldMapping']>;
+    // (undocumented)
+    (endpoint: 'indices.getMapping', params: IndicesGetMappingParams, options?: CallAPIOptions): ReturnType<Client['indices']['getMapping']>;
+    // (undocumented)
+    (endpoint: 'indices.getSettings', params: IndicesGetSettingsParams, options?: CallAPIOptions): ReturnType<Client['indices']['getSettings']>;
+    // (undocumented)
+    (endpoint: 'indices.getTemplate', params: IndicesGetTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['getTemplate']>;
+    // (undocumented)
+    (endpoint: 'indices.getUpgrade', params: IndicesGetUpgradeParams, options?: CallAPIOptions): ReturnType<Client['indices']['getUpgrade']>;
+    // (undocumented)
+    (endpoint: 'indices.open', params: IndicesOpenParams, options?: CallAPIOptions): ReturnType<Client['indices']['open']>;
+    // (undocumented)
+    (endpoint: 'indices.putAlias', params: IndicesPutAliasParams, options?: CallAPIOptions): ReturnType<Client['indices']['putAlias']>;
+    // (undocumented)
+    (endpoint: 'indices.putMapping', params: IndicesPutMappingParams, options?: CallAPIOptions): ReturnType<Client['indices']['putMapping']>;
+    // (undocumented)
+    (endpoint: 'indices.putSettings', params: IndicesPutSettingsParams, options?: CallAPIOptions): ReturnType<Client['indices']['putSettings']>;
+    // (undocumented)
+    (endpoint: 'indices.putTemplate', params: IndicesPutTemplateParams, options?: CallAPIOptions): ReturnType<Client['indices']['putTemplate']>;
+    // (undocumented)
+    (endpoint: 'indices.recovery', params: IndicesRecoveryParams, options?: CallAPIOptions): ReturnType<Client['indices']['recovery']>;
+    // (undocumented)
+    (endpoint: 'indices.refresh', params: IndicesRefreshParams, options?: CallAPIOptions): ReturnType<Client['indices']['refresh']>;
+    // (undocumented)
+    (endpoint: 'indices.rollover', params: IndicesRolloverParams, options?: CallAPIOptions): ReturnType<Client['indices']['rollover']>;
+    // (undocumented)
+    (endpoint: 'indices.segments', params: IndicesSegmentsParams, options?: CallAPIOptions): ReturnType<Client['indices']['segments']>;
+    // (undocumented)
+    (endpoint: 'indices.shardStores', params: IndicesShardStoresParams, options?: CallAPIOptions): ReturnType<Client['indices']['shardStores']>;
+    // (undocumented)
+    (endpoint: 'indices.shrink', params: IndicesShrinkParams, options?: CallAPIOptions): ReturnType<Client['indices']['shrink']>;
+    // (undocumented)
+    (endpoint: 'indices.stats', params: IndicesStatsParams, options?: CallAPIOptions): ReturnType<Client['indices']['stats']>;
+    // (undocumented)
+    (endpoint: 'indices.updateAliases', params: IndicesUpdateAliasesParams, options?: CallAPIOptions): ReturnType<Client['indices']['updateAliases']>;
+    // (undocumented)
+    (endpoint: 'indices.upgrade', params: IndicesUpgradeParams, options?: CallAPIOptions): ReturnType<Client['indices']['upgrade']>;
+    // (undocumented)
+    (endpoint: 'indices.validateQuery', params: IndicesValidateQueryParams, options?: CallAPIOptions): ReturnType<Client['indices']['validateQuery']>;
+    // (undocumented)
+    (endpoint: 'ingest.deletePipeline', params: IngestDeletePipelineParams, options?: CallAPIOptions): ReturnType<Client['ingest']['deletePipeline']>;
+    // (undocumented)
+    (endpoint: 'ingest.getPipeline', params: IngestGetPipelineParams, options?: CallAPIOptions): ReturnType<Client['ingest']['getPipeline']>;
+    // (undocumented)
+    (endpoint: 'ingest.putPipeline', params: IngestPutPipelineParams, options?: CallAPIOptions): ReturnType<Client['ingest']['putPipeline']>;
+    // (undocumented)
+    (endpoint: 'ingest.simulate', params: IngestSimulateParams, options?: CallAPIOptions): ReturnType<Client['ingest']['simulate']>;
+    // (undocumented)
+    (endpoint: 'nodes.hotThreads', params: NodesHotThreadsParams, options?: CallAPIOptions): ReturnType<Client['nodes']['hotThreads']>;
+    // (undocumented)
+    (endpoint: 'nodes.info', params: NodesInfoParams, options?: CallAPIOptions): ReturnType<Client['nodes']['info']>;
+    // (undocumented)
+    (endpoint: 'nodes.stats', params: NodesStatsParams, options?: CallAPIOptions): ReturnType<Client['nodes']['stats']>;
+    // (undocumented)
+    (endpoint: 'snapshot.create', params: SnapshotCreateParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['create']>;
+    // (undocumented)
+    (endpoint: 'snapshot.createRepository', params: SnapshotCreateRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['createRepository']>;
+    // (undocumented)
+    (endpoint: 'snapshot.delete', params: SnapshotDeleteParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['delete']>;
+    // (undocumented)
+    (endpoint: 'snapshot.deleteRepository', params: SnapshotDeleteRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['deleteRepository']>;
+    // (undocumented)
+    (endpoint: 'snapshot.get', params: SnapshotGetParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['get']>;
+    // (undocumented)
+    (endpoint: 'snapshot.getRepository', params: SnapshotGetRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['getRepository']>;
+    // (undocumented)
+    (endpoint: 'snapshot.restore', params: SnapshotRestoreParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['restore']>;
+    // (undocumented)
+    (endpoint: 'snapshot.status', params: SnapshotStatusParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['status']>;
+    // (undocumented)
+    (endpoint: 'snapshot.verifyRepository', params: SnapshotVerifyRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['verifyRepository']>;
+    // (undocumented)
+    (endpoint: 'tasks.cancel', params: TasksCancelParams, options?: CallAPIOptions): ReturnType<Client['tasks']['cancel']>;
+    // (undocumented)
+    (endpoint: 'tasks.get', params: TasksGetParams, options?: CallAPIOptions): ReturnType<Client['tasks']['get']>;
+    // (undocumented)
+    (endpoint: 'tasks.list', params: TasksListParams, options?: CallAPIOptions): ReturnType<Client['tasks']['list']>;
+    // (undocumented)
+    (endpoint: 'transport.request', clientParams: AssistantAPIClientParams, options?: CallAPIOptions): Promise<AssistanceAPIResponse>;
+    // (undocumented)
+    (endpoint: 'transport.request', clientParams: DeprecationAPIClientParams, options?: CallAPIOptions): Promise<DeprecationAPIResponse>;
+    // (undocumented)
+    <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<T>;
+}
+
+// Warning: (ae-missing-release-tag) "AssistanceAPIResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface AssistanceAPIResponse {
+    // (undocumented)
+    indices: {
+        [indexName: string]: {
+            action_required: MIGRATION_ASSISTANCE_INDEX_ACTION;
+        };
+    };
+}
+
+// Warning: (ae-missing-release-tag) "AssistantAPIClientParams" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface AssistantAPIClientParams extends GenericParams {
+    // (undocumented)
+    method: 'GET';
+    // (undocumented)
+    path: '/_migration/assistance';
+}
 
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
@@ -81,10 +461,10 @@ export interface CallAPIOptions {
 }
 
 // @public
-export class ClusterClient {
+export class ClusterClient implements IClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
-    asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): ScopedClusterClient;
-    callAsInternalUser: (endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions | undefined) => Promise<any>;
+    asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
+    callAsInternalUser: APICaller;
     close(): void;
     }
 
@@ -124,9 +504,9 @@ export interface CoreSetup {
     };
     // (undocumented)
     elasticsearch: {
-        adminClient$: Observable<ClusterClient>;
-        dataClient$: Observable<ClusterClient>;
-        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
+        adminClient$: Observable<IClusterClient>;
+        dataClient$: Observable<IClusterClient>;
+        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => IClusterClient;
     };
     // (undocumented)
     http: {
@@ -151,6 +531,44 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     headers?: ResponseHeaders;
     // (undocumented)
     statusCode: number;
+}
+
+// Warning: (ae-missing-release-tag) "DeprecationAPIClientParams" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface DeprecationAPIClientParams extends GenericParams {
+    // (undocumented)
+    method: 'GET';
+    // (undocumented)
+    path: '/_migration/deprecations';
+}
+
+// Warning: (ae-missing-release-tag) "DeprecationAPIResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface DeprecationAPIResponse {
+    // (undocumented)
+    cluster_settings: DeprecationInfo[];
+    // (undocumented)
+    index_settings: IndexSettingsDeprecationInfo;
+    // (undocumented)
+    ml_settings: DeprecationInfo[];
+    // (undocumented)
+    node_settings: DeprecationInfo[];
+}
+
+// Warning: (ae-missing-release-tag) "DeprecationInfo" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface DeprecationInfo {
+    // (undocumented)
+    details?: string;
+    // (undocumented)
+    level: MIGRATION_DEPRECATION_LEVEL;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    url: string;
 }
 
 // @public
@@ -190,10 +608,10 @@ export class ElasticsearchErrorHelpers {
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
     // (undocumented)
-    readonly adminClient$: Observable<ClusterClient>;
-    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
+    readonly adminClient$: Observable<IClusterClient>;
+    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => IClusterClient;
     // (undocumented)
-    readonly dataClient$: Observable<ClusterClient>;
+    readonly dataClient$: Observable<IClusterClient>;
     // (undocumented)
     readonly legacy: {
         readonly config$: Observable<ElasticsearchConfig>;
@@ -280,6 +698,9 @@ export interface HttpServiceStart {
 export type IBasePath = Pick<BasePath, keyof BasePath>;
 
 // @public
+export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+
+// @public
 export interface IContextContainer<THandler extends HandlerFunction<any>> {
     createHandler(pluginOpaqueId: PluginOpaqueId, handler: THandler): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
     registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
@@ -297,6 +718,14 @@ export interface IKibanaSocket {
     // (undocumented)
     getPeerCertificate(detailed: false): PeerCertificate | null;
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
+}
+
+// Warning: (ae-missing-release-tag) "IndexSettingsDeprecationInfo" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface IndexSettingsDeprecationInfo {
+    // (undocumented)
+    [indexName: string]: DeprecationInfo[];
 }
 
 // @internal (undocumented)
@@ -332,6 +761,9 @@ export interface IRouter {
 
 // @public
 export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+
+// @public
+export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
@@ -494,6 +926,16 @@ export interface LogRecord {
     timestamp: Date;
 }
 
+// Warning: (ae-missing-release-tag) "MIGRATION_ASSISTANCE_INDEX_ACTION" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
+
+// Warning: (ae-missing-release-tag) "MIGRATION_DEPRECATION_LEVEL" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
+
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
@@ -602,8 +1044,8 @@ export interface RequestHandlerContext {
     // (undocumented)
     core: {
         elasticsearch: {
-            dataClient: ScopedClusterClient;
-            adminClient: ScopedClusterClient;
+            dataClient: IScopedClusterClient;
+            adminClient: IScopedClusterClient;
         };
     };
 }
@@ -662,14 +1104,17 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
     version?: string;
 }
 
-// @public (undocumented)
-export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+// @public
+export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
 
 // @public
 export interface SavedObjectAttributes {
     // (undocumented)
-    [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
+    [key: string]: SavedObjectAttribute;
 }
+
+// @public
+export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
 
 // @public
 export interface SavedObjectReference {
@@ -820,20 +1265,15 @@ export class SavedObjectsErrorHelpers {
 
 // @public
 export interface SavedObjectsExportOptions {
-    // (undocumented)
     exportSizeLimit: number;
-    // (undocumented)
     includeReferencesDeep?: boolean;
-    // (undocumented)
     namespace?: string;
-    // (undocumented)
     objects?: Array<{
         id: string;
         type: string;
     }>;
-    // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
-    // (undocumented)
+    search?: string;
     types?: string[];
 }
 
@@ -1074,16 +1514,18 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
 // Warning: (ae-forgotten-export) The symbol "Omit" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes'> {
+export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any> extends Omit<SavedObject<T>, 'attributes' | 'references'> {
     // (undocumented)
     attributes: Partial<T>;
+    // (undocumented)
+    references: SavedObjectReference[] | undefined;
 }
 
 // @public
-export class ScopedClusterClient {
+export class ScopedClusterClient implements IScopedClusterClient {
     constructor(internalAPICaller: APICaller, scopedAPICaller: APICaller, headers?: Headers | undefined);
-    callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<unknown>;
-    callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<unknown>;
+    callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
+    callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
     }
 
 // @public

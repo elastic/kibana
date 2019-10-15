@@ -23,6 +23,9 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
+import { ComponentStrings } from '../../../i18n';
+
+const { WorkpadConfig: strings } = ComponentStrings;
 
 export class WorkpadConfig extends PureComponent {
   static propTypes = {
@@ -57,7 +60,7 @@ export class WorkpadConfig extends PureComponent {
         size: { height: 842, width: 590 },
       },
       {
-        name: 'US Letter',
+        name: strings.getUSLetterButtonLabel(),
         size: { height: 792, width: 612 },
       },
     ];
@@ -65,12 +68,12 @@ export class WorkpadConfig extends PureComponent {
     return (
       <div>
         <EuiTitle size="xs">
-          <h4>Workpad</h4>
+          <h4>{strings.getTitle()}</h4>
         </EuiTitle>
 
         <EuiSpacer size="m" />
 
-        <EuiFormRow label="Name" display="rowCompressed">
+        <EuiFormRow label={strings.getNameLabel()} display="rowCompressed">
           <EuiFieldText compressed value={name} onChange={e => setName(e.target.value)} />
         </EuiFormRow>
 
@@ -78,7 +81,7 @@ export class WorkpadConfig extends PureComponent {
 
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
-            <EuiFormRow label="Width" display="rowCompressed">
+            <EuiFormRow label={strings.getPageWidthLabel()} display="rowCompressed">
               <EuiFieldNumber
                 compressed
                 onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
@@ -88,18 +91,18 @@ export class WorkpadConfig extends PureComponent {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow display="rowCompressed" hasEmptyLabelSpace>
-              <EuiToolTip position="bottom" content="Flip the width and height">
+              <EuiToolTip position="bottom" content={strings.getFlipDimensionTooltip()}>
                 <EuiButtonIcon
                   iconType="merge"
                   color="text"
                   onClick={rotate}
-                  aria-label="Swap Page Dimensions"
+                  aria-label={strings.getFlipDimensionAriaLabel()}
                 />
               </EuiToolTip>
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label="Height" display="rowCompressed">
+            <EuiFormRow label={strings.getPageHeightLabel()} display="rowCompressed">
               <EuiFieldNumber
                 compressed
                 onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
@@ -117,8 +120,8 @@ export class WorkpadConfig extends PureComponent {
               key={`page-size-badge-${i}`}
               color="hollow"
               onClick={() => setSize(badge.size)}
-              aria-label={`Preset Page Size: ${badge.name}`}
-              onClickAriaLabel={`Set page size to ${badge.name}`}
+              aria-label={strings.getPageSizeBadgeAriaLabel(badge.name)}
+              onClickAriaLabel={strings.getPageSizeBadgeOnClickAriaLabel(badge.name)}
             >
               {badge.name}
             </EuiBadge>
@@ -132,19 +135,19 @@ export class WorkpadConfig extends PureComponent {
           className="canvasArg__accordion"
           buttonContent={
             <EuiToolTip
-              content="Apply styles to all pages in this workpad"
+              content={strings.getGlobalCSSTooltip()}
               position="left"
               className="canvasArg__tooltip"
             >
               <EuiText size="s" color="subdued">
-                Global CSS overrides
+                {strings.getGlobalCSSLabel()}
               </EuiText>
             </EuiToolTip>
           }
         >
           <div className="canvasArg__content">
             <EuiTextArea
-              aria-label="Apply styles to all pages in this workpad"
+              aria-label={strings.getGlobalCSSTooltip()}
               value={css}
               compressed
               onChange={e => this.setState({ css: e.target.value })}
@@ -152,7 +155,7 @@ export class WorkpadConfig extends PureComponent {
             />
             <EuiSpacer size="s" />
             <EuiButton size="s" onClick={() => setWorkpadCSS(css || DEFAULT_WORKPAD_CSS)}>
-              Apply stylesheet
+              {strings.getApplyStylesheetButtonLabel()}
             </EuiButton>
             <EuiSpacer size="xs" />
           </div>

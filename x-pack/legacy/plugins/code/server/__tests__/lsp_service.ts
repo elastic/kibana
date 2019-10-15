@@ -4,21 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Git from '@elastic/nodegit';
 import fs from 'fs';
-import mkdirp from 'mkdirp';
 import path from 'path';
-import rimraf from 'rimraf';
 import sinon from 'sinon';
 
 import assert from 'assert';
 
+import { simplegit } from '@elastic/simple-git/dist';
 import { GitOperations } from '../git_operations';
 import { RepositoryConfigReservedField, RepositoryGitStatusReservedField } from '../indexer/schema';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryConfigController } from '../repository_config_controller';
-import { createTestHapiServer, createTestServerOption } from '../test_utils';
+import {
+  createTestHapiServer,
+  createTestServerOption,
+  prepareProjectByCloning,
+  prepareProjectByInit,
+} from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const filename = 'hello.ts';
@@ -43,41 +46,17 @@ describe('lsp_service tests', () => {
   let firstCommitSha = '';
   let secondCommitSha = '';
   async function prepareProject(repoPath: string) {
-    mkdirp.sync(repoPath);
-    const repo = await Git.Repository.init(repoPath, 0);
-    const helloContent = "console.log('hello world');";
-    fs.writeFileSync(path.join(repo.workdir(), filename), helloContent, 'utf8');
+    const { commits } = await prepareProjectByInit(repoPath, {
+      'commit for test': {
+        [filename]: "console.log('hello world');",
+      },
+      'commit2 for test': {
+        'package.json': packagejson,
+      },
+    });
 
-    let index = await repo.refreshIndex();
-    await index.addByPath(filename);
-    index.write();
-    const treeId = await index.writeTree();
-    const committer = Git.Signature.create('tester', 'test@test.com', Date.now() / 1000, 60);
-    const commit = await repo.createCommit(
-      'HEAD',
-      committer,
-      committer,
-      'commit for test',
-      treeId,
-      []
-    );
-    firstCommitSha = commit.tostrS();
-    fs.writeFileSync(path.join(repo.workdir(), 'package.json'), packagejson, 'utf8');
-    index = await repo.refreshIndex();
-    await index.addByPath('package.json');
-    index.write();
-    const treeId2 = await index.writeTree();
-    const commit2 = await repo.createCommit(
-      'HEAD',
-      committer,
-      committer,
-      'commit2 for test',
-      treeId2,
-      [commit]
-    );
-    secondCommitSha = commit2.tostrS();
-
-    return repo;
+    firstCommitSha = commits[0];
+    secondCommitSha = commits[1];
   }
 
   const serverOptions = createTestServerOption();
@@ -111,14 +90,7 @@ describe('lsp_service tests', () => {
   before(async () => {
     const tmpRepo = path.join(serverOptions.repoPath, 'tmp');
     await prepareProject(tmpRepo);
-    await Git.Clone.clone(`file://${tmpRepo}`, path.join(serverOptions.repoPath, repoUri), {
-      bare: 1,
-      fetchOpts: {
-        callbacks: {
-          certificateCheck: () => 0,
-        },
-      },
-    });
+    await prepareProjectByCloning(`file://${tmpRepo}`, path.join(serverOptions.repoPath, repoUri));
   });
 
   function comparePath(pathA: string, pathB: string) {
@@ -196,7 +168,7 @@ describe('lsp_service tests', () => {
       await lspservice.shutdown();
     }
     // @ts-ignore
-  }).timeout(10000);
+  }).timeout(30000);
 
   it('unload a workspace', async () => {
     const lspservice = mockLspService();
@@ -235,40 +207,7 @@ describe('lsp_service tests', () => {
       await lspservice.shutdown();
     }
     // @ts-ignore
-  }).timeout(10000);
-
-  it('should work if a worktree exists', async () => {
-    const lspservice = mockLspService();
-    try {
-      const revision = 'master';
-      // send a dummy request to open a workspace;
-      const response = await sendHoverRequest(lspservice, revision);
-      assert.ok(response);
-      const workspacePath = path.resolve(serverOptions.workspacePath, repoUri, revision);
-      const workspaceFolderExists = fs.existsSync(workspacePath);
-      // workspace is opened
-      assert.ok(workspaceFolderExists);
-      const bareRepoWorktree = path.join(
-        serverOptions.repoPath,
-        repoUri,
-        'worktrees',
-        `workspace-${revision}`
-      );
-      // worktree is exists
-      const bareRepoWorktreeExists = fs.existsSync(bareRepoWorktree);
-      assert.ok(bareRepoWorktreeExists);
-      // delete the workspace folder but leave worktree
-      rimraf.sync(workspacePath);
-      // send a dummy request to open it again
-      await sendHoverRequest(lspservice, revision);
-      assert.ok(fs.existsSync(workspacePath));
-
-      return;
-    } finally {
-      await lspservice.shutdown();
-    }
-    // @ts-ignore
-  }).timeout(20000);
+  }).timeout(30000);
 
   it('should update if a worktree is not the newest', async () => {
     const lspservice = mockLspService();
@@ -278,23 +217,22 @@ describe('lsp_service tests', () => {
       const response = await sendHoverRequest(lspservice, revision);
       assert.ok(response);
       const workspacePath = path.resolve(serverOptions.workspacePath, repoUri, revision);
-      const workspaceRepo = await Git.Repository.open(workspacePath);
+      const git = simplegit(workspacePath);
+      const workspaceCommit = await git.revparse(['HEAD']);
       // workspace is newest now
-      assert.strictEqual((await workspaceRepo.getHeadCommit()).sha(), secondCommitSha);
-      const firstCommit = await workspaceRepo.getCommit(firstCommitSha);
+      assert.strictEqual(workspaceCommit, secondCommitSha);
       // reset workspace to an older one
-      // @ts-ignore
-      await Git.Reset.reset(workspaceRepo, firstCommit, Git.Reset.TYPE.HARD, {});
-      assert.strictEqual((await workspaceRepo.getHeadCommit()).sha(), firstCommitSha);
+      await git.reset([firstCommitSha, '--hard']);
+      assert.strictEqual(await git.revparse(['HEAD']), firstCommitSha);
 
       // send a request again;
       await sendHoverRequest(lspservice, revision);
       // workspace_handler should update workspace to the newest one
-      assert.strictEqual((await workspaceRepo.getHeadCommit()).sha(), secondCommitSha);
+      assert.strictEqual(await git.revparse(['HEAD']), secondCommitSha);
       return;
     } finally {
       await lspservice.shutdown();
     }
     // @ts-ignore
-  }).timeout(10000);
+  }).timeout(30000);
 });

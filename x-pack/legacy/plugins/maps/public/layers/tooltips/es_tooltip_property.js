@@ -21,7 +21,7 @@ export class ESTooltipProperty extends TooltipProperty {
       return '-';
     }
 
-    const field = this._indexPattern.fields.byName[this._propertyName];
+    const field = this._indexPattern.fields.getByName(this._propertyName);
     if (!field) {
       return _.escape(this._rawValue);
     }
@@ -30,14 +30,14 @@ export class ESTooltipProperty extends TooltipProperty {
   }
 
   isFilterable() {
-    const field = this._indexPattern.fields.byName[this._propertyName];
+    const field = this._indexPattern.fields.getByName(this._propertyName);
     return field && (field.type === 'string' || field.type === 'date' || field.type === 'ip' || field.type === 'number');
   }
 
   async getESFilters() {
     return [
       buildPhraseFilter(
-        this._indexPattern.fields.byName[this._propertyName],
+        this._indexPattern.fields.getByName(this._propertyName),
         this._rawValue,
         this._indexPattern)
     ];

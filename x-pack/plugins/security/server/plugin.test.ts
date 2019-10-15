@@ -6,19 +6,23 @@
 
 import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { Plugin } from './plugin';
-import { ClusterClient, CoreSetup } from '../../../../src/core/server';
+import { IClusterClient, CoreSetup } from '../../../../src/core/server';
 
 describe('Security Plugin', () => {
   let plugin: Plugin;
   let mockCoreSetup: MockedKeys<CoreSetup>;
-  let mockClusterClient: jest.Mocked<PublicMethodsOf<ClusterClient>>;
+  let mockClusterClient: jest.Mocked<IClusterClient>;
   beforeEach(() => {
     plugin = new Plugin(
       coreMock.createPluginInitializerContext({
         cookieName: 'sid',
         sessionTimeout: 1500,
-        authc: { providers: ['saml', 'token'], saml: { realm: 'saml1' } },
+        authc: {
+          providers: ['saml', 'token'],
+          saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
+        },
       })
     );
 
@@ -27,7 +31,7 @@ describe('Security Plugin', () => {
 
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockCoreSetup.elasticsearch.createClient.mockReturnValue(
-      (mockClusterClient as unknown) as jest.Mocked<ClusterClient>
+      (mockClusterClient as unknown) as jest.Mocked<IClusterClient>
     );
   });
 
