@@ -1080,6 +1080,7 @@ export class TimeSeriesExplorer extends React.Component {
                 />
               );
             })}
+            {isMetricSelected &&
             <EuiFlexItem style={{ textAlign: 'right' }}>
               <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>
                 <ForecastingModal
@@ -1090,7 +1091,7 @@ export class TimeSeriesExplorer extends React.Component {
                   className="forecast-controls"
                 />
               </EuiFormRow>
-            </EuiFlexItem>
+            </EuiFlexItem>}
           </EuiFlexGroup>
         </div>
 
