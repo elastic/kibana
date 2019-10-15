@@ -61,7 +61,7 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
   });
 };
 
-const getTotalNumberOfLogs = (
+const getTotalNumberOfLogEntries = (
   logEntryRateBuckets: GetLogEntryRateSuccessResponsePayload['data']['histogramBuckets']
 ) => {
   return logEntryRateBuckets.reduce((sumNumberOfLogEntries, bucket) => {
