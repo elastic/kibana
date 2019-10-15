@@ -1,0 +1,34 @@
+version: "2.4"
+services:
+  cypress:
+    build:
+      context: ./ci
+    container_name: cypress
+    network_mode: "host"
+    command: >
+      /bin/bash -c "set -x
+        cd /app/x-pack/legacy/plugins/apm/cypress
+        npm install
+        yarn install
+        ./node_modules/.bin/cypress run"
+    volumes:
+      - ../../../../..:/app
+    user: ${USER_ID}
+    depends_on:
+      wait:
+        condition: service_healthy
+
+  wait:
+    image: yauritux/busybox-curl
+    network_mode: "host"
+    command: >
+      /bin/sh -c '
+        while [[ "`curl -s -o /dev/null -w \"%{http_code}\" localhost:5601)`" != "200" ]]; do
+          echo "waiting..."
+          sleep 5;
+        done;
+      '
+    healthcheck:
+      test: ["CMD", "/bin/sh", "-c", "curl -s -o /dev/null -w '%{http_code}' localhost:5601/status"]
+      retries: 20
+      interval: 30s

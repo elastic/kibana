@@ -96,14 +96,14 @@ pipeline {
         }
       }
       steps{
-        script {
-          def nodeDocker = docker.build('node-cypress', "${BASE_DIR}/${CYPRESS_DIR}/ci")
-          nodeDocker.inside('--network="host"'){
-            dir("${BASE_DIR}/${CYPRESS_DIR}"){
-              sh(label: 'Build tests', script: 'npm install && yarn install')
-              sh(label: 'Execute Smoke Tests', script: './node_modules/.bin/cypress run')
-            }
-          }
+        dir("${BASE_DIR}/${CYPRESS_DIR}"){
+          sh '''
+            USER_ID="$(id -u):$(id -g)" \
+            docker-compose up --build \
+                              --abort-on-container-exit \
+                              --exit-code-from cypress \
+                              --remove-orphans \
+                              cypress'''
         }
       }
       post {
