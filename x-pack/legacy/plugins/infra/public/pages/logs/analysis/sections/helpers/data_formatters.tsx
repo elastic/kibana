@@ -113,14 +113,13 @@ export const getAnnotationsForPartition = (
           (partition.partitionId === '' && partitionId === 'unknown')
         );
       });
-      if (
-        !partitionResults ||
-        !partitionResults.maximumAnomalyScore ||
-        partitionResults.maximumAnomalyScore < ML_SEVERITY_SCORES.warning
-      ) {
+      const severityCategory = partitionResults
+        ? getSeverityCategoryForScore(partitionResults.maximumAnomalyScore)
+        : null;
+      if (!partitionResults || !partitionResults.maximumAnomalyScore || !severityCategory) {
         return annotatedBucketsBySeverity;
       }
-      const severityCategory = getSeverityCategoryForScore(partitionResults.maximumAnomalyScore);
+
       return {
         ...annotatedBucketsBySeverity,
         [severityCategory]: [
@@ -177,7 +176,7 @@ export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayl
       const maxAnomalyScoresByPartition = bucket.partitions.reduce<
         Array<{ partitionId: string; maximumAnomalyScore: number }>
       >((bucketMaxAnomalyScoresByPartition, partition) => {
-        if (partition.maximumAnomalyScore < ML_SEVERITY_SCORES.warning) {
+        if (!getSeverityCategoryForScore(partition.maximumAnomalyScore)) {
           return bucketMaxAnomalyScoresByPartition;
         }
         return [
@@ -197,6 +196,9 @@ export const getAnnotationsForAll = (results: GetLogEntryRateSuccessResponsePayl
           ...maxAnomalyScoresByPartition.map(partitionScore => partitionScore.maximumAnomalyScore)
         )
       );
+      if (!severityCategory) {
+        return annotatedBucketsBySeverity;
+      }
       const sortedMaxAnomalyScoresByPartition = maxAnomalyScoresByPartition.sort(
         (a, b) => b.maximumAnomalyScore - a.maximumAnomalyScore
       );
@@ -237,15 +239,18 @@ export const getTopAnomalyScoreAcrossAllPartitions = (
   return Math.max(...allMaxScores);
 };
 
-const getSeverityCategoryForScore = (score: number) => {
-  if (score >= ML_SEVERITY_SCORES.warning && score < ML_SEVERITY_SCORES.minor) {
-    return 'warning';
-  } else if (score >= ML_SEVERITY_SCORES.minor && score < ML_SEVERITY_SCORES.major) {
-    return 'minor';
-  } else if (score >= ML_SEVERITY_SCORES.major && score < ML_SEVERITY_SCORES.critical) {
-    return 'major';
-  } else {
+const getSeverityCategoryForScore = (score: number): MLSeverityScoreCategories | undefined => {
+  if (score >= ML_SEVERITY_SCORES.critical) {
     return 'critical';
+  } else if (score >= ML_SEVERITY_SCORES.major) {
+    return 'major';
+  } else if (score >= ML_SEVERITY_SCORES.minor) {
+    return 'minor';
+  } else if (score >= ML_SEVERITY_SCORES.warning) {
+    return 'warning';
+  } else {
+    // Category is too low to include
+    return undefined;
   }
 };
 
