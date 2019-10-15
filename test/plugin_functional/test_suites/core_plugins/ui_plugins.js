@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
       it('should attach pluginContext to window.corePluginB', async () => {
         const envData = await browser.execute('return window.env');
         expect(envData.mode.dev).to.be(true);
-        expect(envData.packageInfo.dist).to.be(false);
+        expect(envData.packageInfo.version).to.be.a('string');
       });
     });
   });
