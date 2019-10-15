@@ -12,7 +12,6 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
 >
   <div
     className="euiFormRow euiFormRow--compressed"
-    id="generated-id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -93,7 +92,6 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
 >
   <div
     className="euiFormRow euiFormRow--compressed"
-    id="generated-id-row"
   >
     <div
       className="euiFormRow__labelWrapper"

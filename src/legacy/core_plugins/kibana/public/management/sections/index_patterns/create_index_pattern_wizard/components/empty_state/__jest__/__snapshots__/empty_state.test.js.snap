@@ -18,28 +18,24 @@ exports[`EmptyState should render normally 1`] = `
         id="kbn.management.createIndexPattern.emptyStateLabel.emptyStateDetail"
         values={
           Object {
-            "getStartedLink": <EuiLink
-              color="primary"
+            "getStartedLink": <ForwardRef
               href="#/home/tutorial_directory/sampleData"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="get started with some sample data sets."
                 id="kbn.management.createIndexPattern.emptyStateLabel.getStartedLink"
                 values={Object {}}
               />
-            </EuiLink>,
-            "learnHowLink": <EuiLink
-              color="primary"
+            </ForwardRef>,
+            "learnHowLink": <ForwardRef
               href="#/home/tutorial_directory"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Learn how"
                 id="kbn.management.createIndexPattern.emptyStateLabel.learnHowLink"
                 values={Object {}}
               />
-            </EuiLink>,
+            </ForwardRef>,
             "needToIndex": <EuiTextColor
               color="subdued"
             >

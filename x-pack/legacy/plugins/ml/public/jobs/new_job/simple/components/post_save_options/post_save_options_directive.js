@@ -8,7 +8,7 @@
 
 import { postSaveService } from './post_save_service';
 import { i18n } from '@kbn/i18n';
-import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
+// import { mlCreateWatchService } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
 import { xpackFeatureAvailable } from 'plugins/ml/license/check_license';
 import template from './post_save_options.html';
 
@@ -30,9 +30,9 @@ module.directive('mlPostSaveOptions', function () {
       $scope.status = postSaveService.status;
       $scope.STATUS = postSaveService.STATUS;
 
-      mlCreateWatchService.reset();
+      // mlCreateWatchService.reset();
 
-      mlCreateWatchService.config.includeInfluencers = $scope.includeInfluencers;
+      // mlCreateWatchService.config.includeInfluencers = $scope.includeInfluencers;
       $scope.runInRealtime = false;
       $scope.createWatch = false;
       $scope.embedded = true;

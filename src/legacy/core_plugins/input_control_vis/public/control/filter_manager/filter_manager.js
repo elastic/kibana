@@ -33,7 +33,7 @@ export class FilterManager {
   }
 
   getField() {
-    return this.indexPattern.fields.byName[this.fieldName];
+    return this.indexPattern.fields.getByName(this.fieldName);
   }
 
   createFilter() {
