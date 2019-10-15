@@ -68,7 +68,7 @@ export const getAugmentedFields = (
     : {
         moduleId: '',
         defaultIndexPattern: '',
-        isCompatible: false,
+        isCompatible: true,
         isElasticJob: false,
       };
 };
