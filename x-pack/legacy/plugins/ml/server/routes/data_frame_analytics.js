@@ -83,7 +83,7 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     path: '/api/ml/data_frame/_evaluate',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.evaluateDataFrameAnalyticsRegression', { body: request.payload })
+      return callWithRequest('ml.evaluateDataFrameAnalytics', { body: request.payload })
         .catch(resp => wrapError(resp));
     },
     config: {

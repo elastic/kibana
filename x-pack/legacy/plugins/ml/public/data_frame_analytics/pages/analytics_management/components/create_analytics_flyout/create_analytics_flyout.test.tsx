@@ -41,7 +41,6 @@ describe('Data Frame Analytics: <CreateAnalyticsFlyout />', () => {
     const wrapper = mount(<CreateAnalyticsFlyout {...props} />);
 
     expect(wrapper.find('[data-test-subj="mlDataFrameAnalyticsFlyoutHeaderTitle"]').text()).toBe(
-      // '.foo[data-index="5"]'
       'Create analytics job'
     );
   });

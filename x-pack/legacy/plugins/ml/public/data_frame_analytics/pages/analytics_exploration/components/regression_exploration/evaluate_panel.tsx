@@ -7,6 +7,7 @@
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
+import { idx } from '@kbn/elastic-idx';
 import { ml } from '../../../../../services/ml_api_service';
 import { getErrorMessage } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { RegressionEvaluateResponse } from '../../../../common';
@@ -47,16 +48,12 @@ const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
 const DEFAULT_SIG_FIGS = 3;
 
 function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let meanSquaredError =
-    response.regression &&
-    response.regression.mean_squared_error &&
-    response.regression.mean_squared_error.error;
+  let meanSquaredError = idx(response, _ => _.regression.mean_squared_error.error) as number;
   if (meanSquaredError) {
     meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));
   }
 
-  let rSquared =
-    response.regression && response.regression.r_squared && response.regression.r_squared.value;
+  let rSquared = idx(response, _ => _.regression.r_squared.value) as number;
   if (rSquared) {
     rSquared = Number(rSquared.toPrecision(DEFAULT_SIG_FIGS));
   }
@@ -95,7 +92,7 @@ export const EvaluatePanel: FC<Props> = ({ jobId, index, dependentVariable }) =>
     };
 
     try {
-      const evalResult = await ml.dataFrameAnalytics.evaluateDataFrameAnalyticsRegression(config);
+      const evalResult = await ml.dataFrameAnalytics.evaluateDataFrameAnalytics(config);
       results.success = true;
       results.eval = evalResult;
       return results;

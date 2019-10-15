@@ -33,7 +33,7 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2 data-test-subj="mlDataFrameAnalyticsFlyoutHeaderTitle">
-            {i18n.translate('xpack.ml.dataframe.analytics.create.modalHeaderTitle', {
+            {i18n.translate('xpack.ml.dataframe.analytics.create.flyoutHeaderTitle', {
               defaultMessage: 'Create analytics job',
             })}
           </h2>
@@ -43,29 +43,39 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
       <EuiFlyoutFooter>
         {(!isJobCreated || !isJobStarted) && (
           <EuiButtonEmpty onClick={closeModal}>
-            {i18n.translate('xpack.ml.dataframe.analytics.create.modalCancelButton', {
+            {i18n.translate('xpack.ml.dataframe.analytics.create.flyoutCancelButton', {
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>
         )}
 
         {!isJobCreated && !isJobStarted && (
-          <EuiButton disabled={!isValid || isModalButtonDisabled} onClick={createAnalyticsJob} fill>
-            {i18n.translate('xpack.ml.dataframe.analytics.create.modalCreateButton', {
+          <EuiButton
+            className="mlAnalyticsCreateFlyout__footerButton"
+            disabled={!isValid || isModalButtonDisabled}
+            onClick={createAnalyticsJob}
+            fill
+          >
+            {i18n.translate('xpack.ml.dataframe.analytics.create.flyoutCreateButton', {
               defaultMessage: 'Create',
             })}
           </EuiButton>
         )}
         {isJobCreated && !isJobStarted && (
-          <EuiButton disabled={isModalButtonDisabled} onClick={startAnalyticsJob} fill>
-            {i18n.translate('xpack.ml.dataframe.analytics.create.modalStartButton', {
+          <EuiButton
+            className="mlAnalyticsCreateFlyout__footerButton"
+            disabled={isModalButtonDisabled}
+            onClick={startAnalyticsJob}
+            fill
+          >
+            {i18n.translate('xpack.ml.dataframe.analytics.create.flyoutStartButton', {
               defaultMessage: 'Start',
             })}
           </EuiButton>
         )}
         {isJobCreated && isJobStarted && (
           <EuiButton onClick={closeModal} fill>
-            {i18n.translate('xpack.ml.dataframe.analytics.create.modalCloseButton', {
+            {i18n.translate('xpack.ml.dataframe.analytics.create.flyoutCloseButton', {
               defaultMessage: 'Close',
             })}
           </EuiButton>

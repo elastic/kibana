@@ -40,7 +40,7 @@ export const dataFrameAnalytics = {
       data: analyticsConfig
     });
   },
-  evaluateDataFrameAnalyticsRegression(evaluateConfig) {
+  evaluateDataFrameAnalytics(evaluateConfig) {
     return http({
       url: `${basePath}/data_frame/_evaluate`,
       method: 'POST',

@@ -160,7 +160,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'PUT'
   });
 
-  ml.evaluateDataFrameAnalyticsRegression = ca({
+  ml.evaluateDataFrameAnalytics = ca({
     urls: [
       {
         fmt: '/_ml/data_frame/_evaluate',

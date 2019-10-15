@@ -118,7 +118,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     if (jobType === JOB_TYPES.REGRESSION && sourceIndexNameEmpty === false) {
       loadDependentFieldOptions();
     }
-  }, [sourceIndex, jobType]);
+  }, [sourceIndex, jobType, sourceIndexNameEmpty]);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
@@ -327,7 +327,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                       {i18n.translate(
                         'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
                         {
-                          defaultMessage: 'There was a problem fetching fields. Please try again.',
+                          defaultMessage:
+                            'There was a problem fetching fields. Please refresh the page and try again.',
                         }
                       )}
                     </Fragment>,
@@ -378,32 +379,27 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               </EuiFormRow>
             </Fragment>
           )}
-          {jobType === JOB_TYPES.OUTLIER_DETECTION && (
-            <EuiFormRow
-              isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
-              error={
-                createIndexPattern &&
-                destinationIndexPatternTitleExists && [
-                  i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternTitleError', {
-                    defaultMessage: 'An index pattern with this title already exists.',
-                  }),
-                ]
-              }
-            >
-              <EuiSwitch
-                disabled={isJobCreated}
-                name="mlDataFrameAnalyticsCreateIndexPattern"
-                label={i18n.translate(
-                  'xpack.ml.dataframe.analytics.create.createIndexPatternLabel',
-                  {
-                    defaultMessage: 'Create index pattern',
-                  }
-                )}
-                checked={createIndexPattern === true}
-                onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
-              />
-            </EuiFormRow>
-          )}
+          <EuiFormRow
+            isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
+            error={
+              createIndexPattern &&
+              destinationIndexPatternTitleExists && [
+                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternExistsError', {
+                  defaultMessage: 'An index pattern with this title already exists.',
+                }),
+              ]
+            }
+          >
+            <EuiSwitch
+              disabled={isJobCreated}
+              name="mlDataFrameAnalyticsCreateIndexPattern"
+              label={i18n.translate('xpack.ml.dataframe.analytics.create.createIndexPatternLabel', {
+                defaultMessage: 'Create index pattern',
+              })}
+              checked={createIndexPattern === true}
+              onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
+            />
+          </EuiFormRow>
         </Fragment>
       )}
     </EuiForm>
