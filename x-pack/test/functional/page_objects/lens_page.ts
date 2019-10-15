@@ -124,8 +124,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
-    async save() {
+    async save(title: string) {
       await testSubjects.click('lnsApp_saveButton');
+      await testSubjects.setValue('savedObjectTitle', title);
       await testSubjects.click('confirmSaveSavedObjectButton');
       retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
         testSubjects
@@ -133,10 +134,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           .then(() => true)
           .catch(() => false)
       );
-    },
-
-    setTitle(title: string) {
-      return testSubjects.setValue('lns_ChartTitle', title);
     },
 
     getTitle() {
