@@ -29,7 +29,7 @@ describe('filter manager utilities', () => {
     test('should map query filters', async () => {
       const before = {
         meta: { index: 'logstash-*' },
-        query: { match: { _type: { query: 'apache' } } },
+        query: { match: { _type: { query: 'apache', type: 'phrase' } } },
       };
       const after = mapFilter(before as Filter);
 
