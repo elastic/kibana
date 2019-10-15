@@ -21,7 +21,8 @@ node ingest-data/replay.js --server-url http://localhost:8200 --secret-token abc
 echo "3/4 Start Kibana..."
 popd
 ## Might help to avoid FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
-nohup NODE_OPTIONS=--max-old-space-size=4096 node scripts/kibana > kibana.log 2>&1 &
+export NODE_OPTIONS="--max-old-space-size=4096"
+nohup node scripts/kibana > kibana.log 2>&1 &
 
 echo "4/4 Run cypress tests..."
 pushd ${CYPRESS_DIR}
