@@ -30,7 +30,7 @@ const Status = {
   ),
   Inactive: (
     <EuiHealth color="subdued">
-      <FormattedMessage id="xpack.fleet.agentHealth.offlineStatusText" defaultMessage="Inactive" />
+      <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
     </EuiHealth>
   ),
   Warning: (

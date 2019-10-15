@@ -271,6 +271,24 @@ describe('Agent lib', () => {
       ).rejects.toThrowError(/Agent not found/);
     });
 
+    it('should throw is the agent is not active', async () => {
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const policy = new PolicyLib({} as PoliciesRepository);
+      const agentsRepository = new InMemoryAgentsRepository();
+      const agentsEventsRepository = new InMemoryAgentEventsRepository();
+      agentsRepository.agents['agent:1'] = ({
+        id: 'agent:1',
+        actions: [],
+        active: false,
+        policy_id: 'policy:1',
+      } as unknown) as Agent;
+      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
+
+      await expect(agentLib.checkin(getUser(), 'agent:1', [])).rejects.toThrowError(
+        /Agent inactive/
+      );
+    });
+
     it('should persist new events', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
       const policy = new PolicyLib({} as PoliciesRepository);
@@ -412,6 +430,42 @@ describe('Agent lib', () => {
 
       const refreshAgent = (await agentsRepository.getById(getUser(), 'agent:1')) as Agent;
       expect(refreshAgent.actions[0].sent_at).toBeDefined();
+    });
+  });
+
+  describe('unenroll', () => {
+    it('should set the list of agents as inactive', async () => {
+      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
+      const agentsRepository = new InMemoryAgentsRepository();
+      const agentEventsRepository = new InMemoryAgentEventsRepository();
+      agentsRepository.agents['agent:1'] = ({
+        id: 'agent:1',
+        local_metadata: { key: 'local1' },
+        user_provided_metadata: { key: 'user1' },
+        actions: [],
+        events: [],
+        active: true,
+        policy_id: 'policy:1',
+      } as unknown) as Agent;
+      agentsRepository.agents['agent:2'] = ({
+        id: 'agent:2',
+        local_metadata: { key: 'local1' },
+        user_provided_metadata: { key: 'user1' },
+        actions: [],
+        events: [],
+        active: true,
+        policy_id: 'policy:1',
+      } as unknown) as Agent;
+      const policy = new PolicyLib({} as PoliciesRepository);
+      const agentLib = new AgentLib(agentsRepository, agentEventsRepository, token, policy);
+
+      await agentLib.unenroll(getUser(), ['agent:1', 'agent:2']);
+
+      const refreshAgent1 = (await agentsRepository.getById(getUser(), 'agent:1')) as Agent;
+      const refreshAgent2 = (await agentsRepository.getById(getUser(), 'agent:2')) as Agent;
+
+      expect(refreshAgent1.active).toBeFalsy();
+      expect(refreshAgent2.active).toBeFalsy();
     });
   });
 
