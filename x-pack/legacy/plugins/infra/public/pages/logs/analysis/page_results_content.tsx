@@ -19,10 +19,9 @@ import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
-
-import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisJobs,
@@ -36,6 +35,8 @@ import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { FirstUseCallout } from './first_use';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
+import { AnomaliesResults } from './sections/anomalies';
+import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
