@@ -10,6 +10,7 @@ yarn kbn bootstrap
 cp ${CYPRESS_DIR}/ci/kibana.dev.yml config/kibana.dev.yml
 echo 'elasticsearch:' >> config/kibana.dev.yml
 cp ${CYPRESS_DIR}/ci/kibana.dev.yml config/kibana.yml
+npm install -g wait-on
 
 echo "2/3 Ingest test data..."
 pushd ${CYPRESS_DIR}
@@ -21,6 +22,5 @@ echo "3/3 Start Kibana..."
 popd
 ## Might help to avoid FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
 export NODE_OPTIONS="--max-old-space-size=4096"
-nohup node scripts/kibana > kibana.log 2>&1 &
-timeout 600 bash -c 'while [[ "$(curl --insecure -s -o /dev/null -w ''%{http_code}'' http://localhost:5601)" != "200" ]]; do (echo -n '.'; sleep 5); done'
-echo 'Kibana is up and running'
+nohup node scripts/kibana --no-base-path --csp.strict=false --optimize.watch=false> kibana.log 2>&1 &
+wait-on http://localhost:5601/status && echo 'Kibana is up and running'
