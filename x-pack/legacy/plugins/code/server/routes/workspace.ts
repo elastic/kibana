@@ -11,6 +11,7 @@ import { ServerOptions } from '../server_options';
 import { CodeServerRouter } from '../security';
 import { CodeServices } from '../distributed/code_services';
 import { WorkspaceDefinition } from '../distributed/apis';
+import { getReferenceHelper } from '../utils/repository_reference_helper';
 
 export function workspaceRoute(
   router: CodeServerRouter,
@@ -33,6 +34,7 @@ export function workspaceRoute(
     method: 'POST',
     async handler(req: RequestFacade) {
       const repoUri = req.params.uri as string;
+      getReferenceHelper(req.getSavedObjectsClient()).ensureReference(repoUri);
       const revision = req.params.revision as string;
       const repoConfig = serverOptions.repoConfigs[repoUri];
       const force = !!(req.query as RequestQueryFacade).force;
