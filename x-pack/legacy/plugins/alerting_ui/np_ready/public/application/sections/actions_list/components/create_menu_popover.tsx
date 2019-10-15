@@ -15,78 +15,18 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionsContext } from '../../../context/app_context';
+import { actionTypesSettings } from '../../../constants/action_types_settings';
 
 interface Props {
   actionTypes: any;
 }
 
 export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({ actionTypes }) => {
-  const { addAction } = useContext(ActionsContext);
+  const { createAction } = useContext(ActionsContext);
 
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
-
-  const actionTypesSettings = (val: string) => {
-    let res;
-    switch (val) {
-      case '.email':
-        res = {
-          iconClass: 'email',
-          selectMessage: i18n.translate(
-            'xpack.alertingUI.sections.actions.emailAction.selectMessageText',
-            {
-              defaultMessage: 'Send an email from your server.',
-            }
-          ),
-          simulatePrompt: i18n.translate(
-            'xpack.alertingUI.sections.actions.emailAction.simulateButtonLabel',
-            {
-              defaultMessage: 'Send test email',
-            }
-          ),
-        };
-        break;
-      case '.slack':
-        res = {
-          iconClass: 'logoSlack',
-          selectMessage: i18n.translate(
-            'xpack.alertingUI.sections.actions.slackAction.selectMessageText',
-            {
-              defaultMessage: 'Send a message to a Slack user or channel.',
-            }
-          ),
-          simulatePrompt: i18n.translate(
-            'xpack.alertingUI.sections.actions.slackAction.simulateButtonLabel',
-            {
-              defaultMessage: 'Send a sample message',
-            }
-          ),
-        };
-        break;
-      case '.server-log':
-        res = {
-          iconClass: 'loggingApp',
-          selectMessage: i18n.translate(
-            'xpack.alertingUI.sections.actions.serverLogAction.selectMessageText',
-            {
-              defaultMessage: 'Add an item to the logs.',
-            }
-          ),
-          simulatePrompt: i18n.translate(
-            'xpack.alertingUI.sections.actions.serverLogAction.simulateButtonLabel',
-            {
-              defaultMessage: 'Log a sample message',
-            }
-          ),
-        };
-        break;
-      default:
-        res = { typeName: '', iconClass: 'apps', selectMessage: '' };
-    }
-    return res;
-  };
 
   const actions = Object.entries(!actionTypes ? [] : actionTypes).map(
     ([actionType, { id, name }]: any) => {
@@ -95,6 +35,7 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({ action
       const iconClass = actionSettings.iconClass;
       const selectMessage = !actionSettings.selectMessage ? name : actionSettings.selectMessage;
       return {
+        id,
         name,
         typeName,
         iconClass,
@@ -105,7 +46,7 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({ action
 
   const button = (
     <EuiButton
-      data-test-subj="addWatchActionButton"
+      data-test-subj="addAlertingActionButton"
       fill
       iconType="arrowDown"
       iconSide="right"
@@ -120,7 +61,7 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({ action
 
   return (
     <EuiPopover
-      id="watchActionPanel"
+      id="alertingActionPanel"
       button={button}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopOverOpen(false)}
@@ -137,8 +78,8 @@ export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({ action
               disabled={isActionDisabled}
               data-test-subj={`${action.name}ActionButton`}
               onClick={() => {
-                addAction({ type: action.name, defaults: { isNew: true } });
                 setIsPopOverOpen(false);
+                createAction(action);
               }}
             >
               <EuiFlexGroup>

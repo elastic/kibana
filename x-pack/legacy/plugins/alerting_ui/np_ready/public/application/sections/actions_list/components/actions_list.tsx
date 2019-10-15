@@ -20,6 +20,7 @@ import { Action, ActionType, loadActions, loadActionTypes } from '../../../lib/a
 import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
 import { AlertingActionsDropdown } from './create_menu_popover';
+import { ActionAdd } from '../../action_add';
 
 interface ActionsListProps {
   api: any;
@@ -54,13 +55,15 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [sort, setSort] = useState<Sorting>({ field: 'actionTypeId', direction: 'asc' });
+  const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
+  const [actionType, setActionTypeId] = useState<ActionType | null>(null);
 
   useEffect(() => {
     (async () => {
       const actionTypes = await loadActionTypes({ http });
       const index: ActionTypeIndex = {};
-      for (const actionType of actionTypes) {
-        index[actionType.id] = actionType;
+      for (const actionTypeItem of actionTypes) {
+        index[actionTypeItem.id] = actionTypeItem;
       }
       setActionTypesIndex(index);
     })();
@@ -136,6 +139,11 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     },
   ];
 
+  function createAction(actionTypeItem: ActionType) {
+    setFlyoutVisibility(true);
+    setActionTypeId(actionTypeItem);
+  }
+
   let content;
 
   if (errorCode) {
@@ -195,19 +203,36 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
 
   return (
     <section data-test-subj="actionsList">
-      <ContentWrapper>
+      <ContentWrapper
+        setFlyoutVisibility={setFlyoutVisibility}
+        flyoutVisible={flyoutVisible}
+        createAction={createAction}
+      >
         <EuiSpacer size="m" />
         {content}
+        <ActionAdd actionType={actionType} />
       </ContentWrapper>
     </section>
   );
 };
 
-export const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
+export const ContentWrapper = ({
+  flyoutVisible,
+  setFlyoutVisibility,
+  createAction,
+  children,
+}: {
+  flyoutVisible: boolean;
+  setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  createAction: (actionType: ActionType) => void;
+  children: React.ReactNode;
+}) => {
   return (
     <EuiPageContent>
       <EuiSpacer size="s" />
-      <ActionsContext.Provider value={{}}>{children}</ActionsContext.Provider>
+      <ActionsContext.Provider value={{ flyoutVisible, setFlyoutVisibility, createAction }}>
+        {children}
+      </ActionsContext.Provider>
     </EuiPageContent>
   );
 };
