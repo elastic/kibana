@@ -65,7 +65,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
         <EuiStat
           title={numeral(totalNumberOfLogs).format('0.00a')}
           description={i18n.translate(
-            'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogsDescription',
+            'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogEntriesDescription',
             {
               defaultMessage: 'Number of log entries',
             }
