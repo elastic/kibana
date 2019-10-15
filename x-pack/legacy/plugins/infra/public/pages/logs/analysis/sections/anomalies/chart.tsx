@@ -87,7 +87,7 @@ export const AnomaliesChart: React.FunctionComponent<{
           xAccessor={'time'}
           yAccessors={['value']}
           data={series}
-          barSeriesStyle={{ rect: { fill: '#D3DAE6', opacity: 0.6 } }} // TODO: Acquire this from "theme" as euiColorLightShade
+          barSeriesStyle={barSeriesStyle}
         />
         {renderAnnotations(annotations, chartId, renderAnnotationTooltip)}
         <Settings
@@ -144,3 +144,5 @@ const renderAnnotations = (
     );
   });
 };
+
+const barSeriesStyle = { rect: { fill: '#D3DAE6', opacity: 0.6 } }; // TODO: Acquire this from "theme" as euiColorLightShade
