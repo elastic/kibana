@@ -96,7 +96,7 @@ export class StylePropertyLegendRow extends Component {
     this._isMounted = false;
   }
 
-  _loadFieldFormatter = async () => {
+  async _loadFieldFormatter() {
     this._fieldValueFormatter = await this.props.getFieldFormatter(this.props.options.field);
     if (this._isMounted) {
       this.setState({ hasLoadedFieldFormatter: true });

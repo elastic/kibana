@@ -806,7 +806,7 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _getFieldSource = (field) => {
+  _getFieldSource(field) {
     if (!field) {
       return null;
     }

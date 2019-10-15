@@ -301,7 +301,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return this._descriptor.id;
   }
 
-  _getRawFieldName = fieldName => {
+  _getRawFieldName(fieldName) {
     const metricField = this.getMetricFields().find(({ propertyKey }) => {
       return propertyKey === fieldName;
     });
@@ -309,7 +309,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return metricField ? metricField.field : null;
   }
 
-  getFieldFormatter = async fieldName => {
+  async getFieldFormatter(fieldName) {
     // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
     const rawFieldName = this._getRawFieldName(fieldName);
     if (!rawFieldName) {
