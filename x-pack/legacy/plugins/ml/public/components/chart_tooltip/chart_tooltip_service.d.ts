@@ -36,6 +36,7 @@ interface ToolTipOffset {
 interface MlChartTooltipService {
   element: HTMLElement | null;
   show: (tooltipData: TooltipData[], target: HTMLElement | null, offset: ToolTipOffset) => void;
+  hide: () => void;
 }
 
 export declare const mlChartTooltipService: MlChartTooltipService;
