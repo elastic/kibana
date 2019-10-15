@@ -143,7 +143,7 @@ export const AnomaliesResults = ({
                 description={i18n.translate(
                   'xpack.infra.logs.analysis.overallAnomaliesNumberOfLogsDescription',
                   {
-                    defaultMessage: 'Number of logs',
+                    defaultMessage: 'Number of log entries',
                   }
                 )}
                 reverse

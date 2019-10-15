@@ -68,7 +68,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           description={i18n.translate(
             'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogsDescription',
             {
-              defaultMessage: 'Number of logs',
+              defaultMessage: 'Number of log entries',
             }
           )}
           reverse
