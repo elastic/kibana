@@ -22,7 +22,7 @@ import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService, HttpServiceSetup } from './http';
+import { HttpService, InternalHttpServiceSetup } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -145,7 +145,7 @@ export class Server {
     await this.http.stop();
   }
 
-  private registerDefaultRoute(httpSetup: HttpServiceSetup) {
+  private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
     const router = httpSetup.createRouter('/core');
     router.get({ path: '/', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })

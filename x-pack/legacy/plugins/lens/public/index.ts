@@ -20,6 +20,7 @@ import { IScope } from 'angular';
 import chrome from 'ui/chrome';
 import { appStart, appSetup, appStop } from './app_plugin';
 import { PLUGIN_ID } from '../common';
+import { addHelpMenuToAppChrome } from './help_menu_util';
 
 // TODO: Convert this to the "new platform" way of doing UI
 function Root($scope: IScope, $element: JQLite) {
@@ -30,6 +31,8 @@ function Root($scope: IScope, $element: JQLite) {
   });
 
   appSetup();
+  addHelpMenuToAppChrome(chrome);
+
   return render(appStart(), el);
 }
 
