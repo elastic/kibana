@@ -22,7 +22,7 @@ describe('TemplateStrings', () => {
     stringKeys.forEach(key => expect(templateNames).toContain(key));
   });
 
-  const strings = Object.values(templateNames);
+  const strings = Object.values(templateStrings);
 
   test('All templates should have a name string defined', () => {
     strings.forEach(value => {
