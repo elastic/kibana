@@ -4,7 +4,7 @@ set -e
 CYPRESS_DIR="x-pack/legacy/plugins/apm/cypress"
 
 ## Install dependencies
-test/scripts/jenkins_setup.sh
+source src/dev/ci_setup/setup_env.sh true
 yarn kbn bootstrap
 cp ${CYPRESS_DIR}/kibana.dev.yml config/kibana.dev.yml
 cp ${CYPRESS_DIR}/kibana.dev.yml config/kibana.yml
