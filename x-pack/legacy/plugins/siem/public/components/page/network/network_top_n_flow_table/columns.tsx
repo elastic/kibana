@@ -12,7 +12,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { CountryFlag } from '../../../source_destination/country_flag';
 import {
   AutonomousSystemItem,
-  FlowTargetNew,
+  FlowTargetSourceDest,
   NetworkTopNFlowEdges,
   TopNFlowNetworkEcsField,
 } from '../../../../graphql/types';
@@ -38,9 +38,18 @@ export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>
 ];
 
+export type NetworkTopNFlowColumnsIpDetails = [
+  Columns<NetworkTopNFlowEdges>,
+  Columns<NetworkTopNFlowEdges>,
+  Columns<NetworkTopNFlowEdges>,
+  Columns<TopNFlowNetworkEcsField['bytes_in']>,
+  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<NetworkTopNFlowEdges>
+];
+
 export const getNetworkTopNFlowColumns = (
   indexPattern: StaticIndexPattern,
-  flowTarget: FlowTargetNew,
+  flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopNFlowColumns => [
@@ -211,7 +220,7 @@ export const getNetworkTopNFlowColumns = (
   {
     align: 'right',
     field: `node.${flowTarget}.${getOppositeField(flowTarget)}_ips`,
-    name: flowTarget === FlowTargetNew.source ? i18n.DESTINATION_IPS : i18n.SOURCE_IPS,
+    name: flowTarget === FlowTargetSourceDest.source ? i18n.DESTINATION_IPS : i18n.SOURCE_IPS,
     sortable: true,
     render: ips => {
       if (ips != null) {
@@ -223,5 +232,24 @@ export const getNetworkTopNFlowColumns = (
   },
 ];
 
-const getOppositeField = (flowTarget: FlowTargetNew): FlowTargetNew =>
-  flowTarget === FlowTargetNew.source ? FlowTargetNew.destination : FlowTargetNew.source;
+export const getNFlowColumnsCurated = (
+  indexPattern: StaticIndexPattern,
+  flowTarget: FlowTargetSourceDest,
+  type: networkModel.NetworkType,
+  tableId: string
+): NetworkTopNFlowColumns | NetworkTopNFlowColumnsIpDetails => {
+  const columns = getNetworkTopNFlowColumns(indexPattern, flowTarget, type, tableId);
+
+  // Columns to exclude from host details pages
+  if (type === networkModel.NetworkType.details) {
+    columns.pop();
+    return columns;
+  }
+
+  return columns;
+};
+
+const getOppositeField = (flowTarget: FlowTargetSourceDest): FlowTargetSourceDest =>
+  flowTarget === FlowTargetSourceDest.source
+    ? FlowTargetSourceDest.destination
+    : FlowTargetSourceDest.source;
