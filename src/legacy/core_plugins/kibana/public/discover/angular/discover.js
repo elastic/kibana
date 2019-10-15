@@ -18,12 +18,9 @@
  */
 
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import angular from 'angular';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
-import chrome from 'ui/chrome';
 import dateMath from '@elastic/datemath';
 
 // doc table
@@ -39,35 +36,42 @@ import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
 
-import { npStart } from 'ui/new_platform';
-import { timefilter } from 'ui/timefilter';
-import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
-import { toastNotifications } from 'ui/notify';
-import { VisProvider } from 'ui/vis';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-import { docTitle } from 'ui/doc_title';
-import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
-import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import uiRoutes from 'ui/routes';
-import { uiModules } from 'ui/modules';
-import { StateProvider } from 'ui/state_management/state';
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-import { getFilterGenerator } from 'ui/filter_manager';
-import { getDocLink } from 'ui/documentation_links';
-import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
-import { Inspector } from 'ui/inspector';
-import { RequestAdapter } from 'ui/inspector/adapters';
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+import {
+  angular,
+  buildVislibDimensions,
+  chrome,
+  docTitle,
+  FilterBarQueryFilterProvider,
+  getDocLink,
+  getFilterGenerator,
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  getUnhashableStatesProvider,
+  hasSearchStategyForIndexPattern,
+  i18n,
+  Inspector,
+  intervalOptions,
+  isDefaultTypeIndexPattern,
+  migrateLegacyQuery,
+  npStart,
+  RequestAdapter,
+  SavedObjectSaveModal,
+  ShareContextMenuExtensionsRegistryProvider,
+  showSaveModal,
+  showShareContextMenu,
+  stateMonitorFactory,
+  StateProvider,
+  subscribeWithScope,
+  tabifyAggResponse,
+  timefilter,
+  toastNotifications,
+  uiModules,
+  uiRoutes,
+  vislibSeriesResponseHandlerProvider,
+  VisProvider,
+} from './dependencies';
+
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
-import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
-
-
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
 

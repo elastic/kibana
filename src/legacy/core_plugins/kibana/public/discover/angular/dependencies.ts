@@ -26,6 +26,13 @@ import 'ui/capabilities/route_setup';
 
 import uiRoutes from 'ui/routes';
 export { uiRoutes };
+
+import angular from 'angular';
+export { angular };
+
+import chrome from 'ui/chrome';
+export { chrome };
+
 // @ts-ignore
 export { uiModules } from 'ui/modules';
 export { IndexPatterns } from 'ui/index_patterns';
@@ -36,5 +43,39 @@ export { i18n } from '@kbn/i18n';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
+
+export { npStart } from 'ui/new_platform';
+// @ts-ignore
+export { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
+export { toastNotifications } from 'ui/notify';
+export { VisProvider } from 'ui/vis';
+// @ts-ignore
+export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+// @ts-ignore
+export { docTitle } from 'ui/doc_title';
+// @ts-ignore
+export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
+export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+// @ts-ignore
+export { StateProvider } from 'ui/state_management/state';
+export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+// @ts-ignore
+export { getFilterGenerator } from 'ui/filter_manager';
+export { getDocLink } from 'ui/documentation_links';
+export { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
+// @ts-ignore
+export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+export { Inspector } from 'ui/inspector';
+export { RequestAdapter } from 'ui/inspector/adapters';
+export {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from 'ui/courier/utils/courier_inspector_utils';
+// @ts-ignore
+export { tabifyAggResponse } from 'ui/agg_response/tabify';
+export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
+export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 
 import './directives';
