@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { SpacesPlugin } from '../../../../spaces';
+import { LegacySpacesPlugin } from '../../../../spaces';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from './check_privileges';
 
@@ -19,7 +19,7 @@ export type CheckSavedObjectsPrivileges = (
 
 export const checkSavedObjectsPrivilegesWithRequestFactory = (
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
-  spaces: OptionalPlugin<SpacesPlugin>
+  spaces: OptionalPlugin<LegacySpacesPlugin>
 ): CheckSavedObjectsPrivilegesWithRequest => {
   return function checkSavedObjectsPrivilegesWithRequest(request: Legacy.Request) {
     return async function checkSavedObjectsPrivileges(

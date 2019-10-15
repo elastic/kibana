@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsEdges, NetworkDirectionEcs, UsersEdges } from '../../graphql/types';
+import { UsersEdges } from '../../graphql/types';
 
-import { DomainsBuckets, IpOverviewHit, UsersResponse } from './types';
+import { IpOverviewHit, UsersResponse } from './types';
 
 export const responseAggs: IpOverviewHit = {
   aggregations: {
@@ -251,75 +251,6 @@ export const formattedEmptySource = {
     geo: {},
   },
 };
-
-export const mockDomainsResponseBuckets: DomainsBuckets[] = [
-  {
-    key: 'example.com',
-    uniqueIpCount: {
-      value: 805,
-    },
-    lastSeen: {
-      value: 1554920919000,
-      value_as_string: '2019-04-10T18:28:39.000Z',
-    },
-    bytes: {
-      value: 974964465,
-    },
-    packets: {
-      value: 16946245,
-    },
-    direction: {
-      buckets: [
-        {
-          key: NetworkDirectionEcs.outbound,
-          doc_count: 51668,
-        },
-        {
-          key: NetworkDirectionEcs.inbound,
-          doc_count: 25681,
-        },
-      ],
-    },
-  },
-];
-
-export const mockFormattedSource: DomainsEdges[] = [
-  {
-    cursor: { tiebreaker: null, value: 'example.com' },
-    node: {
-      _id: 'example.com',
-      network: {
-        bytes: 974964465,
-        direction: [NetworkDirectionEcs.outbound, NetworkDirectionEcs.inbound],
-        packets: 16946245,
-      },
-      source: {
-        domainName: 'example.com',
-        lastSeen: '2019-04-10T18:28:39.000Z',
-        uniqueIpCount: 805,
-      },
-    },
-  },
-];
-
-export const mockFormattedDestination: DomainsEdges[] = [
-  {
-    cursor: { tiebreaker: null, value: 'example.com' },
-    node: {
-      _id: 'example.com',
-      destination: {
-        domainName: 'example.com',
-        lastSeen: '2019-04-10T18:28:39.000Z',
-        uniqueIpCount: 805,
-      },
-      network: {
-        bytes: 974964465,
-        direction: [NetworkDirectionEcs.outbound, NetworkDirectionEcs.inbound],
-        packets: 16946245,
-      },
-    },
-  },
-];
 
 export const mockUsersData: UsersResponse = {
   took: 445,

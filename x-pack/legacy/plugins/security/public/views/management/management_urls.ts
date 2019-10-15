@@ -11,3 +11,4 @@ export const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
 export const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
 export const USERS_PATH = `${SECURITY_PATH}/users`;
 export const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
+export const API_KEYS_PATH = `${SECURITY_PATH}/api_keys`;

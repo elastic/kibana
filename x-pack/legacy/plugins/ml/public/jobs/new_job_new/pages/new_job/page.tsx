@@ -7,9 +7,11 @@
 import React, { FC, useEffect, Fragment } from 'react';
 
 import { EuiPage, EuiPageBody, EuiPageContentBody } from '@elastic/eui';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
-import { jobCreatorFactory } from '../../common/job_creator';
+import { jobCreatorFactory, isAdvancedJobCreator } from '../../common/job_creator';
 import {
   JOB_TYPE,
   DEFAULT_MODEL_MEMORY_LIMIT,
@@ -95,6 +97,21 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;
+    }
+
+    if (isAdvancedJobCreator(jobCreator)) {
+      // for advanced jobs, load the full time range start and end times
+      // so they can be used for job validation and bucket span estimation
+      try {
+        jobCreator.autoSetTimeRange();
+      } catch (error) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
+            defaultMessage: `Error retrieving beginning and end times of index`,
+          }),
+          text: error,
+        });
+      }
     }
   }
 

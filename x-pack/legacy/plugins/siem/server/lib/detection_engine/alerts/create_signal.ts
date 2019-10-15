@@ -82,6 +82,7 @@ export const createSignal = async ({
           id: actionResults.id,
           params: {
             message: 'SIEM Alert Fired',
+            level: 'info',
           },
         },
       ],

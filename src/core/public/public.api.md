@@ -4,8 +4,8 @@
 
 ```ts
 
+import { Breadcrumb } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
-import { MouseEventHandler } from 'react';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -103,16 +103,7 @@ export interface ChromeBrand {
 }
 
 // @public (undocumented)
-export interface ChromeBreadcrumb {
-    // (undocumented)
-    'data-test-subj'?: string;
-    // (undocumented)
-    href?: string;
-    // (undocumented)
-    onClick?: MouseEventHandler<HTMLButtonElement>;
-    // (undocumented)
-    text: string;
-}
+export type ChromeBreadcrumb = Breadcrumb;
 
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
@@ -226,6 +217,11 @@ export interface CoreContext {
     // 
     // (undocumented)
     coreId: CoreId;
+    // (undocumented)
+    env: {
+        mode: Readonly<EnvironmentMode>;
+        packageInfo: Readonly<PackageInfo>;
+    };
 }
 
 // @public
@@ -377,6 +373,16 @@ export interface DocLinksStart {
             readonly dateMath: string;
         };
     };
+}
+
+// @public (undocumented)
+export interface EnvironmentMode {
+    // (undocumented)
+    dev: boolean;
+    // (undocumented)
+    name: 'development' | 'production';
+    // (undocumented)
+    prod: boolean;
 }
 
 // Warning: (ae-missing-release-tag) "ErrorToastOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -681,6 +687,20 @@ export interface OverlayStart {
     }) => OverlayRef;
 }
 
+// @public (undocumented)
+export interface PackageInfo {
+    // (undocumented)
+    branch: string;
+    // (undocumented)
+    buildNum: number;
+    // (undocumented)
+    buildSha: string;
+    // (undocumented)
+    dist: boolean;
+    // (undocumented)
+    version: string;
+}
+
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
@@ -696,6 +716,11 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = obj
 
 // @public
 export interface PluginInitializerContext {
+    // (undocumented)
+    readonly env: {
+        mode: Readonly<EnvironmentMode>;
+        packageInfo: Readonly<PackageInfo>;
+    };
     readonly opaqueId: PluginOpaqueId;
 }
 

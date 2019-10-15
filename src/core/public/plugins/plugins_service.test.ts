@@ -26,7 +26,7 @@ import {
 } from './plugins_service.test.mocks';
 
 import { PluginName, DiscoveredPlugin } from 'src/core/server';
-import { CoreContext } from '../core_system';
+import { coreMock } from '../mocks';
 import {
   PluginsService,
   PluginsServiceStartDeps,
@@ -56,7 +56,7 @@ let plugins: Array<{ id: string; plugin: DiscoveredPlugin }>;
 
 type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 
-const mockCoreContext: CoreContext = { coreId: Symbol() };
+const mockCoreContext = coreMock.createCoreContext();
 let mockSetupDeps: DeeplyMocked<PluginsServiceSetupDeps>;
 let mockSetupContext: DeeplyMocked<CoreSetup>;
 let mockStartDeps: DeeplyMocked<PluginsServiceStartDeps>;
