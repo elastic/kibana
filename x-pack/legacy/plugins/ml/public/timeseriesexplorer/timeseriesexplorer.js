@@ -977,7 +977,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoomToFocusLoaded,
     } = this.state;
 
-    const isMetricSelected = entities.length > 0 && entities.some(entity => !!entity.fieldValue);
+    const isMetricSelected =  entities.length > 0 && entities.every(entity => !!entity.fieldValue);
 
     const chartProps = {
       modelPlotEnabled,
@@ -1041,6 +1041,12 @@ export class TimeSeriesExplorer extends React.Component {
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
 
+    /**
+     * Indicates if any of the previous controls is empty.
+     * @type {boolean}
+     */
+    let hasEmptyFieldValues = false;
+
     return (
       <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} loading={loading} resizeRef={this.resizeRef}>
         <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
@@ -1060,10 +1066,13 @@ export class TimeSeriesExplorer extends React.Component {
             </EuiFlexItem>
             {entities.map((entity) => {
               const entityKey = `${entity.fieldName}`;
+              const forceSelection = !hasEmptyFieldValues && !entity.fieldValue;
+              hasEmptyFieldValues = !hasEmptyFieldValues && forceSelection;
               return (
                 <EntityControl
                   entity={entity}
                   entityFieldValueChanged={this.entityFieldValueChanged}
+                  forceSelection={forceSelection}
                   key={entityKey}
                 />
               );
