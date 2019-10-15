@@ -109,7 +109,9 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     updateNetworkPageTableActivePage,
   }) => {
     useEffect(() => {
-      setIpDetailsTablesActivePageToZero(null);
+      if (ip && activePage !== 0) {
+        setIpDetailsTablesActivePageToZero(null);
+      }
     }, [ip]);
     const onChange = (criteria: Criteria, tableType: networkModel.TopCountriesTableType) => {
       if (criteria.sort != null) {
