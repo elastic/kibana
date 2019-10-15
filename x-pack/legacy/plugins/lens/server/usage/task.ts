@@ -230,9 +230,8 @@ export function telemetryTaskRunner(server: Server) {
 }
 
 function getNextMidnight() {
-  const nextMidnight = moment()
+  return moment()
     .add(1, 'day')
     .startOf('day')
-    .valueOf();
-  return nextMidnight;
+    .toDate();
 }
