@@ -19,6 +19,7 @@ import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pa
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ProgressBar } from './progress_bar';
 import { getDependentVar, getValuesFromResponse, loadEvalData, Eval } from '../../../../common';
+import { isCompletedAnalyticsJob } from './common';
 // import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
@@ -58,6 +59,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
   const index = idx(item, _ => _.config.dest.index) as string;
   const dependentVariable = getDependentVar(item.config.analysis);
+  const jobIsCompleted = isCompletedAnalyticsJob(item.stats);
 
   const loadData = async () => {
     setIsLoadingGeneralization(true);
@@ -111,8 +113,10 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (jobIsCompleted) {
+      loadData();
+    }
+  }, [jobIsCompleted]);
 
   const stateValues = { ...item.stats };
   delete stateValues.progress;
@@ -154,6 +158,12 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       },
       { title: 'model_memory_limit', description: item.config.model_memory_limit },
       { title: 'version', description: item.config.version },
+    ],
+    position: 'right',
+  };
+
+  if (jobIsCompleted) {
+    stats.items.push(
       {
         title: 'generalization mean squared error',
         description: (
@@ -193,10 +203,9 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
             resultProperty={'rSquared'}
           />
         ),
-      },
-    ],
-    position: 'right',
-  };
+      }
+    );
+  }
 
   const tabs = [
     {
