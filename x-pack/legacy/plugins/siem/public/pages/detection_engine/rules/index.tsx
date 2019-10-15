@@ -156,6 +156,8 @@ const AllRules = React.memo(() => {
           </UtilityBarSection>
         </UtilityBar>
 
+        {/* Example of potentially new TableCards component. This new table type may no longer be required for implementation, given the requirements changes that have been made over time. At present, the only afforded benefits of using it are 1) differentiation from regular tables and 2) the presence of a colored status bar on the left of each row. Neither are dealbreakers in my mind. If creating a new table component is out of the question for MVP, go with a standard EUI basic table. */}
+
         <TableCards>
           <TableCardsThead>
             <TableCardsRow>
