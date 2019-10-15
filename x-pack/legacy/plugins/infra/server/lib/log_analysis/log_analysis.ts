@@ -92,7 +92,7 @@ export class InfraLogAnalysis {
           }>;
           averageActualLogEntryRate: number;
           maximumAnomalyScore: number;
-          numberOfLogs: number;
+          numberOfLogEntries: number;
           partitionId: string;
         }>;
         startTime: number;
