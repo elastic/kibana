@@ -74,7 +74,7 @@ export const getAnalysisType = (analysis: AnalysisConfig) => {
 };
 
 export const getDependentVar = (analysis: AnalysisConfig) => {
-  let depVar;
+  let depVar = '';
   if (isRegressionAnalysis(analysis)) {
     depVar = analysis.regression.dependent_variable;
   }

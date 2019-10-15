@@ -18,7 +18,7 @@ import { DataFrameAnalyticsListRow } from './common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ProgressBar } from './progress_bar';
-import { getValuesFromResponse, loadEvalData, Eval } from '../../../../common';
+import { getDependentVar, getValuesFromResponse, loadEvalData, Eval } from '../../../../common';
 // import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
@@ -57,10 +57,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
   const index = idx(item, _ => _.config.dest.index) as string;
-  const dependentVariable = idx(
-    item,
-    _ => _.config.analysis.regression.dependent_variable
-  ) as string;
+  const dependentVariable = getDependentVar(item.config.analysis);
 
   const loadData = async () => {
     setIsLoadingGeneralization(true);
