@@ -22,7 +22,9 @@ export const SparseDataSwitch: FC = () => {
 
   useEffect(() => {
     const aggs = [ES_AGGREGATION.COUNT, ES_AGGREGATION.SUM];
-    const isCountOrSum = jobCreator.aggregations.some(agg => aggs.includes(agg.dslName));
+    const isCountOrSum = jobCreator.aggregations.some(
+      agg => agg.dslName !== null && aggs.includes(agg.dslName)
+    );
     setEnabled(isCountOrSum);
     if (isCountOrSum === false && sparseData === true) {
       setSparseData(false);

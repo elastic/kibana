@@ -82,6 +82,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
+        includeFields: ['visState'],
         type: 'visualization',
         getIconForSavedObject: savedObject => {
           if (!visTypes) {

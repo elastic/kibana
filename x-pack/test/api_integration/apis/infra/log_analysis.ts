@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(logEntryRateBuckets.data.histogramBuckets).to.not.be.empty();
           expect(
             logEntryRateBuckets.data.histogramBuckets.some(bucket => {
-              return bucket.dataSets.some(dataSet => dataSet.anomalies.length > 0);
+              return bucket.partitions.some(partition => partition.anomalies.length > 0);
             })
           ).to.be(true);
         });

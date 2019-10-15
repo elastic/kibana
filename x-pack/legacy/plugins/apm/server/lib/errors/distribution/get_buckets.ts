@@ -72,7 +72,7 @@ export async function getBuckets({
   }));
 
   return {
-    totalHits: resp.hits.total,
+    noHits: resp.hits.total.value === 0,
     buckets
   };
 }

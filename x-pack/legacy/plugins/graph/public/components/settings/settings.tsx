@@ -34,13 +34,13 @@ const tabs = [
   },
   {
     id: 'blacklist',
-    title: i18n.translate('xpack.graph.settings.blacklistTitle', { defaultMessage: 'Blacklist' }),
+    title: i18n.translate('xpack.graph.settings.blacklistTitle', { defaultMessage: 'Block list' }),
     component: BlacklistForm,
   },
   {
     id: 'drillDowns',
     title: i18n.translate('xpack.graph.settings.drillDownsTitle', {
-      defaultMessage: 'Drill-downs',
+      defaultMessage: 'Drilldowns',
     }),
     component: UrlTemplateList,
   },

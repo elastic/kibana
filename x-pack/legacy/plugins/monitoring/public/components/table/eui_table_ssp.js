@@ -38,10 +38,6 @@ export function EuiMonitoringSSPTable({
   }
 
   const columns = _columns.map(column => {
-    if (!column['data-test-subj']) {
-      column['data-test-subj'] = 'monitoringTableHasData';
-    }
-
     if (!('sortable' in column)) {
       column.sortable = true;
     }
@@ -90,6 +86,7 @@ export function EuiMonitoringSSPTable({
       <EuiSpacer size="l"/>
       <EuiBasicTable
         {...props}
+        data-test-subj={items.length ? 'monitoringTableHasData' : 'monitoringTableNoData'}
         items={items}
         pagination={pagination}
         onChange={onChange}
