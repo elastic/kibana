@@ -374,6 +374,7 @@ function discoverController(
   // the actual courier.SearchSource
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
+  // debugger;
 
   $scope.searchSource
     .setField('index', $scope.indexPattern)

@@ -298,14 +298,16 @@ describe('IndexPattern', () => {
       );
     });
 
-    test('should remove scripted field, by name', async () => {
+    test('should remove scripted field', async () => {
       // const saveSpy = sinon.spy(indexPattern, 'save');
+
       const scriptedFields = indexPattern.getScriptedFields();
       const oldCount = scriptedFields.length;
       const scriptedField = last(scriptedFields);
 
       await indexPattern.removeScriptedField(scriptedField);
-
+      // indexPattern.fields.forEach((item) => console.log(item.name));
+      // console.log(indexPattern.fields.getByName(scriptedField.name));
       // expect(saveSpy.callCount).to.equal(1);
       expect(indexPattern.getScriptedFields().length).toEqual(oldCount - 1);
       expect(indexPattern.fields.getByName(scriptedField.name)).toEqual(undefined);

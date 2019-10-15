@@ -23,7 +23,7 @@ import sinon from 'sinon';
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
 import { IndexPattern } from '../../legacy/core_plugins/data/public/index_patterns/index_patterns';
 import {
-  FieldList,
+  fieldList,
   getRoutes,
   formatHitProvider,
   flattenHitWrapper,
@@ -52,7 +52,7 @@ export default  function StubIndexPattern(pattern, getConfig, timeField, fields)
   this.formatField = this.formatHit.formatField;
 
   this._reindexFields = function () {
-    this.fields = new FieldList(this, this.fields || fields);
+    this.fields = fieldList(this, this.fields || fields);
   };
 
   this.stubSetFieldFormat = function (fieldName, id, params) {

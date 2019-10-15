@@ -28,7 +28,7 @@ import { NotificationsSetup, SavedObjectsClientContract } from 'src/core/public'
 import { SavedObjectNotFound, DuplicateField } from '../../../../../../plugins/kibana_utils/public';
 import { findIndexPatternByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../errors';
-import { Field, FieldList, FieldType, FieldListInterface } from '../fields';
+import { Field, fieldList, FieldType, FieldListInterface } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { getRoutes } from '../utils';
 import { formatHitProvider } from './format_hit';
@@ -121,7 +121,8 @@ export class IndexPattern implements StaticIndexPattern {
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig('metaFields');
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable, notifications);
+    this.fields = fieldList(this, [], this.shortDotsEnable, notifications);
+    // debugger;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
@@ -141,7 +142,8 @@ export class IndexPattern implements StaticIndexPattern {
 
   private initFields(input?: any) {
     const newValue = input || this.fields;
-    this.fields = new FieldList(this, newValue, this.shortDotsEnable, this.notifications);
+    this.fields = fieldList(this, newValue, this.shortDotsEnable, this.notifications);
+    // debugger;
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -299,8 +301,14 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   removeScriptedField(field: FieldType) {
+    console.log('before remove scripted field', this.fields.getByName(field.name));
+    console.log(this.fields.length);
     this.fields.remove(field);
-    return this.save();
+    debugger;
+    this.fields.getByName(field.name);
+    console.log('after remove scripted field', this.fields.getByName(field.name));
+    console.log(this.fields.length);
+    //return this.save();
   }
 
   async popularizeField(fieldName: string, unit = 1) {

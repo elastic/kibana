@@ -31,55 +31,59 @@ export interface FieldListInterface extends Array<Field> {
   remove(field: FieldType): void;
 }
 
-export class FieldList extends Array<Field> implements FieldListInterface {
-  private byName: FieldMap = new Map();
-  private groups: Map<Field['type'], FieldMap> = new Map();
-  private indexPattern: IndexPattern;
-  private shortDotsEnable: boolean;
-  private notifications: NotificationsSetup;
-  private setByName = (field: Field) => this.byName.set(field.name, field);
-  private setByGroup = (field: Field) => {
-    if (typeof this.groups.get(field.type) === 'undefined') {
-      this.groups.set(field.type, new Map());
+// placing private variables and functions in function scope because `private` methods compile to public 😭
+export function fieldList(
+  indexPattern: IndexPattern,
+  specs: FieldSpec[] = [],
+  shortDotsEnable = false,
+  notifications: NotificationsSetup
+) {
+  const byName: FieldMap = new Map();
+  const groups: Map<Field['type'], FieldMap> = new Map();
+
+  const setByName = (field: Field) => byName.set(field.name, field);
+  const setByGroup = (field: Field) => {
+    if (typeof groups.get(field.type) === 'undefined') {
+      groups.set(field.type, new Map());
     }
-    this.groups.get(field.type)!.set(field.name, field);
+    groups.get(field.type)!.set(field.name, field);
   };
-  private removeByGroup = (field: FieldType) => this.groups.get(field.type)!.delete(field.name);
-  constructor(
-    indexPattern: IndexPattern,
-    specs: FieldSpec[] = [],
-    shortDotsEnable = false,
-    notifications: NotificationsSetup
-  ) {
-    super();
-    this.indexPattern = indexPattern;
-    this.shortDotsEnable = shortDotsEnable;
-    this.notifications = notifications;
-    specs.map(field => this.add(field));
+  const removeByGroup = (field: FieldType) => groups.get(field.type)!.delete(field.name);
+
+  class FieldListClass extends Array<Field> implements FieldListInterface {
+    constructor() {
+      super();
+      specs.map(field => this.add(field));
+    }
+
+    getByName = (name: Field['name']) => {
+      // console.log('getByName', name, byName.size);
+      return byName.get(name)
+    };
+    getByType = (type: Field['type']) => [...(groups.get(type) || new Map()).values()];
+    add = (field: FieldSpec) => {
+      const newField = new Field(indexPattern, field, shortDotsEnable, notifications);
+      this.push(newField);
+      setByName(newField);
+      setByGroup(newField);
+    };
+
+    remove = (field: FieldType) => {
+      removeByGroup(field);
+      byName.delete(field.name);
+
+      const fieldIndex = findIndex(this, { name: field.name });
+      this.splice(fieldIndex, 1);
+    };
+
+    update = (field: Field) => {
+      const index = this.findIndex(f => f.name === field.name);
+      this.splice(index, 1, field);
+      setByName(field);
+      removeByGroup(field);
+      setByGroup(field);
+    };
   }
 
-  getByName = (name: Field['name']) => this.byName.get(name);
-  getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
-  add = (field: FieldSpec) => {
-    const newField = new Field(this.indexPattern, field, this.shortDotsEnable, this.notifications);
-    this.push(newField);
-    this.setByName(newField);
-    this.setByGroup(newField);
-  };
-
-  remove = (field: FieldType) => {
-    this.removeByGroup(field);
-    this.byName.delete(field.name);
-
-    const fieldIndex = findIndex(this, { name: field.name });
-    this.splice(fieldIndex, 1);
-  };
-
-  update = (field: Field) => {
-    const index = this.findIndex(f => f.name === field.name);
-    this.splice(index, 1, field);
-    this.setByName(field);
-    this.removeByGroup(field);
-    this.setByGroup(field);
-  };
+  return new FieldListClass();
 }
