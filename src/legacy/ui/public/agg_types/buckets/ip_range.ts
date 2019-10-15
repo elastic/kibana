@@ -17,68 +17,72 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { BucketAggType } from './_bucket_agg_type';
-import { createFilterIpRange } from './create_filter/ip_range';
+import { get, noop, map, omit, isNull } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
 import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
-import { i18n } from '@kbn/i18n';
+import { BUCKET_TYPES } from './bucket_agg_types';
+
+// @ts-ignore
+import { createFilterIpRange } from './create_filter/ip_range';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+
+const ipRangeTitle = i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
+  defaultMessage: 'IPv4 Range',
+});
 
 export const ipRangeBucketAgg = new BucketAggType({
-  name: 'ip_range',
-  title: i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
-    defaultMessage: 'IPv4 Range',
-  }),
+  name: BUCKET_TYPES.IP_RANGE,
+  title: ipRangeTitle,
   createFilter: createFilterIpRange,
-  getKey: function (bucket, key) {
+  getKey(bucket, key) {
     if (key) return key;
-    const from = _.get(bucket, 'from', '-Infinity');
-    const to = _.get(bucket, 'to', 'Infinity');
+    const from = get(bucket, 'from', '-Infinity');
+    const to = get(bucket, 'to', 'Infinity');
+
     return `${from} to ${to}`;
   },
-  makeLabel: function (aggConfig) {
+  makeLabel(aggConfig) {
     return i18n.translate('common.ui.aggTypes.buckets.ipRangeLabel', {
       defaultMessage: '{fieldName} IP ranges',
       values: {
-        fieldName: aggConfig.getFieldDisplayName()
-      }
+        fieldName: aggConfig.getFieldDisplayName(),
+      },
     });
   },
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'ip'
-    }, {
+      filterFieldTypes: KBN_FIELD_TYPES.IP,
+    },
+    {
       name: 'ipRangeType',
       editorComponent: IpRangeTypeParamEditor,
       default: 'fromTo',
-      write: _.noop
-    }, {
+      write: noop,
+    },
+    {
       name: 'ranges',
       default: {
         fromTo: [
           { from: '0.0.0.0', to: '127.255.255.255' },
-          { from: '128.0.0.0', to: '191.255.255.255' }
+          { from: '128.0.0.0', to: '191.255.255.255' },
         ],
-        mask: [
-          { mask: '0.0.0.0/1' },
-          { mask: '128.0.0.0/2' }
-        ]
+        mask: [{ mask: '0.0.0.0/1' }, { mask: '128.0.0.0/2' }],
       },
       editorComponent: IpRangesParamEditor,
-      write: function (aggConfig, output) {
+      write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
         const ipRangeType = aggConfig.params.ipRangeType;
         let ranges = aggConfig.params.ranges[ipRangeType];
 
         if (ipRangeType === 'fromTo') {
-          ranges = _.map(ranges, (range) => {
-            return _.omit(range, _.isNull);
-          });
+          ranges = map(ranges, (range: any) => omit(range, isNull));
         }
 
         output.params.ranges = ranges;
-      }
-    }
-  ]
+      },
+    },
+  ],
 });

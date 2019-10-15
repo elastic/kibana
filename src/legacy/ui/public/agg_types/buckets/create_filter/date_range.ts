@@ -17,24 +17,20 @@
  * under the License.
  */
 
-const id = Symbol('id');
+import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
+import { npSetup } from 'ui/new_platform';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
-class RangeKey {
-  constructor(bucket) {
-    this.gte = bucket.from == null ? -Infinity : bucket.from;
-    this.lt = bucket.to == null ? +Infinity : bucket.to;
+// @ts-ignore
+import { dateRange } from '../../../utils/date_range';
 
-    this[id] = RangeKey.idBucket(bucket);
-  }
+export const createFilterDateRange = (agg: IBucketAggConfig, rangeString: string) => {
+  const range = dateRange.parse(rangeString, npSetup.core.uiSettings.get('dateFormat'));
 
+  const filter: RangeFilterParams = {};
+  if (range.from) filter.gte = range.from.toISOString();
+  if (range.to) filter.lt = range.to.toISOString();
+  if (range.to && range.from) filter.format = 'strict_date_optional_time';
 
-  static idBucket(bucket) {
-    return `from:${bucket.from},to:${bucket.to}`;
-  }
-
-  toString() {
-    return this[id];
-  }
-}
-
-export { RangeKey };
+  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
+};

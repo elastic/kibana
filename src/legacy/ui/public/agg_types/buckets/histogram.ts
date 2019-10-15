@@ -18,51 +18,64 @@
  */
 
 import _ from 'lodash';
-
+import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
+
 import chrome from '../../chrome';
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType, IBucketAggConfig, BucketAggParam } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { NumberIntervalParamEditor } from '../../vis/editors/default/controls/number_interval';
 import { MinDocCountParamEditor } from '../../vis/editors/default/controls/min_doc_count';
 import { HasExtendedBoundsParamEditor } from '../../vis/editors/default/controls/has_extended_bounds';
 import { ExtendedBoundsParamEditor } from '../../vis/editors/default/controls/extended_bounds';
-import { i18n } from '@kbn/i18n';
+import { AggConfig } from '../agg_config';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { BUCKET_TYPES } from './bucket_agg_types';
+
+interface AutoBounds {
+  min: number;
+  max: number;
+}
+
+export interface IBucketHistogramAggConfig extends IBucketAggConfig {
+  setAutoBounds: (bounds: AutoBounds) => void;
+  getAutoBounds: () => AutoBounds;
+}
 
 const config = chrome.getUiSettingsClient();
-export const histogramBucketAgg = new BucketAggType({
-  name: 'histogram',
+export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
+  name: BUCKET_TYPES.HISTOGRAM,
   title: i18n.translate('common.ui.aggTypes.buckets.histogramTitle', {
     defaultMessage: 'Histogram',
   }),
   ordered: {},
-  makeLabel: function (aggConfig) {
+  makeLabel(aggConfig) {
     return aggConfig.getFieldDisplayName();
   },
   createFilter: createFilterHistogram,
-  decorateAggConfig: function () {
-    let autoBounds;
+  decorateAggConfig() {
+    let autoBounds: AutoBounds;
 
     return {
       setAutoBounds: {
         configurable: true,
-        value(newValue) {
+        value(newValue: AutoBounds) {
           autoBounds = newValue;
-        }
+        },
       },
       getAutoBounds: {
         configurable: true,
         value() {
           return autoBounds;
-        }
-      }
+        },
+      },
     };
   },
   params: [
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: 'number'
+      filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
     },
     {
       /*
@@ -76,7 +89,11 @@ export const histogramBucketAgg = new BucketAggType({
     {
       name: 'interval',
       editorComponent: NumberIntervalParamEditor,
-      modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, searchRequest) {
+      modifyAggConfigOnSearchRequestStart(
+        aggConfig: IBucketHistogramAggConfig,
+        searchSource: any,
+        searchRequest: any
+      ) {
         const field = aggConfig.getField();
         const aggBody = field.scripted
           ? { script: { source: field.script, lang: field.lang } }
@@ -87,31 +104,35 @@ export const histogramBucketAgg = new BucketAggType({
           .setField('size', 0)
           .setField('aggs', {
             maxAgg: {
-              max: aggBody
+              max: aggBody,
             },
             minAgg: {
-              min: aggBody
-            }
+              min: aggBody,
+            },
           });
 
         searchRequest.whenAborted(() => childSearchSource.cancelQueued());
 
-        return childSearchSource.fetch()
-          .then((resp) => {
+        return childSearchSource
+          .fetch()
+          .then((resp: any) => {
             aggConfig.setAutoBounds({
               min: _.get(resp, 'aggregations.minAgg.value'),
-              max: _.get(resp, 'aggregations.maxAgg.value')
+              max: _.get(resp, 'aggregations.maxAgg.value'),
             });
           })
-          .catch(e => {
+          .catch((e: Error) => {
             if (e.name === 'AbortError') return;
-            toastNotifications.addWarning(i18n.translate('common.ui.aggTypes.histogram.missingMaxMinValuesWarning', {
-              // eslint-disable-next-line max-len
-              defaultMessage: 'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.'
-            }));
+            toastNotifications.addWarning(
+              i18n.translate('common.ui.aggTypes.histogram.missingMaxMinValuesWarning', {
+                // eslint-disable-next-line max-len
+                defaultMessage:
+                  'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.',
+              })
+            );
           });
       },
-      write: function (aggConfig, output) {
+      write(aggConfig: IBucketHistogramAggConfig, output: Record<string, any>) {
         let interval = parseFloat(aggConfig.params.interval);
         if (interval <= 0) {
           interval = 1;
@@ -146,29 +167,26 @@ export const histogramBucketAgg = new BucketAggType({
         }
 
         output.params.interval = interval;
-      }
-    },
-
+      },
+    } as BucketAggParam,
     {
       name: 'min_doc_count',
       default: false,
       editorComponent: MinDocCountParamEditor,
-      write: function (aggConfig, output) {
+      write(aggConfig: AggConfig, output: Record<string, any>) {
         if (aggConfig.params.min_doc_count) {
           output.params.min_doc_count = 0;
         } else {
           output.params.min_doc_count = 1;
         }
-      }
+      },
     },
-
     {
       name: 'has_extended_bounds',
       default: false,
       editorComponent: HasExtendedBoundsParamEditor,
       write: () => {},
     },
-
     {
       name: 'extended_bounds',
       default: {
@@ -176,16 +194,14 @@ export const histogramBucketAgg = new BucketAggType({
         max: '',
       },
       editorComponent: ExtendedBoundsParamEditor,
-      write: function (aggConfig, output) {
+      write(aggConfig: AggConfig, output: Record<string, any>) {
         const { min, max } = aggConfig.params.extended_bounds;
 
-        if (aggConfig.params.has_extended_bounds &&
-          (min || min === 0) &&
-          (max || max === 0)) {
+        if (aggConfig.params.has_extended_bounds && (min || min === 0) && (max || max === 0)) {
           output.params.extended_bounds = { min, max };
         }
       },
-      shouldShow: aggConfig => aggConfig.params.has_extended_bounds
-    }
-  ]
+      shouldShow: (aggConfig: AggConfig) => aggConfig.params.has_extended_bounds,
+    },
+  ],
 });

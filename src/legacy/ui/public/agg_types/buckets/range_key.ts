@@ -17,29 +17,25 @@
  * under the License.
  */
 
-import { buildPhraseFilter, buildPhrasesFilter, buildExistsFilter } from '@kbn/es-query';
+const id = Symbol('id');
 
-export function createFilterTerms(aggConfig, key, params) {
-  const field = aggConfig.params.field;
-  const indexPattern = field.indexPattern;
+export class RangeKey {
+  [id]: string;
+  gte: string | number;
+  lt: string | number;
 
-  if (key === '__other__') {
-    const terms = params.terms;
+  constructor(bucket: any) {
+    this.gte = bucket.from == null ? -Infinity : bucket.from;
+    this.lt = bucket.to == null ? +Infinity : bucket.to;
 
-    const phraseFilter = buildPhrasesFilter(field, terms, indexPattern);
-    phraseFilter.meta.negate = true;
-
-    const filters = [phraseFilter];
-
-    if (terms.some(term => term === '__missing__')) {
-      filters.push(buildExistsFilter(field, indexPattern));
-    }
-
-    return filters;
-  } else if (key === '__missing__') {
-    const existsFilter = buildExistsFilter(field, indexPattern);
-    existsFilter.meta.negate = true;
-    return existsFilter;
+    this[id] = RangeKey.idBucket(bucket);
   }
-  return buildPhraseFilter(field, key, indexPattern);
+
+  static idBucket(bucket: any) {
+    return `from:${bucket.from},to:${bucket.to}`;
+  }
+
+  toString() {
+    return this[id];
+  }
 }
