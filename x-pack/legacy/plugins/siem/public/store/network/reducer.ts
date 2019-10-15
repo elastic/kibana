@@ -17,9 +17,6 @@ import {
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
-  applyNetworkFilterQuery,
-  setIpDetailsTablesActivePageToZero,
-  setNetworkFilterQueryDraft,
   setNetworkTablesActivePageToZero,
   updateDnsLimit,
   updateDnsSort,
@@ -34,12 +31,11 @@ import {
   updateUsersLimit,
   updateUsersSort,
 } from './actions';
-import { IpDetailsTableType, NetworkModel, NetworkTableType, NetworkType } from './model';
 import {
   setNetworkDetailsQueriesActivePageToZero,
   setNetworkPageQueriesActivePageToZero,
-  setNetworkQueriesActivePageToZero,
 } from './helpers';
+import { IpDetailsTableType, NetworkModel, NetworkTableType, NetworkType } from './model';
 
 export type NetworkState = NetworkModel;
 
@@ -80,8 +76,6 @@ export const initialNetworkState: NetworkState = {
         },
       },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
   },
   details: {
     queries: {
@@ -118,8 +112,6 @@ export const initialNetworkState: NetworkState = {
         },
       },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
     flowTarget: FlowTarget.source,
   },
 };
@@ -131,13 +123,6 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state.page,
       queries: setNetworkPageQueriesActivePageToZero(state),
     },
-    details: {
-      ...state.details,
-      queries: setNetworkDetailsQueriesActivePageToZero(state),
-    },
-  }))
-  .case(setIpDetailsTablesActivePageToZero, state => ({
-    ...state,
     details: {
       ...state.details,
       queries: setNetworkDetailsQueriesActivePageToZero(state),
@@ -286,22 +271,6 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
     }
     return state;
   })
-  .case(setNetworkFilterQueryDraft, (state, { filterQueryDraft, networkType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      filterQueryDraft,
-    },
-  }))
-  .case(applyNetworkFilterQuery, (state, { filterQuery, networkType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      queries: setNetworkQueriesActivePageToZero(state, networkType),
-      filterQueryDraft: filterQuery.kuery,
-      filterQuery,
-    },
-  }))
   .case(updateIpDetailsFlowTarget, (state, { flowTarget }) => ({
     ...state,
     [NetworkType.details]: {

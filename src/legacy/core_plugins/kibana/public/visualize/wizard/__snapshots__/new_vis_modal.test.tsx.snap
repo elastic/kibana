@@ -1230,7 +1230,9 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   className="euiSpacer euiSpacer--m"
                                 />
                               </EuiSpacer>
-                              <NewVisHelp>
+                              <NewVisHelp
+                                promotedTypes={Array []}
+                              >
                                 <EuiText>
                                   <div
                                     className="euiText euiText--medium"
@@ -2488,7 +2490,9 @@ exports[`NewVisModal should render as expected 1`] = `
                                   className="euiSpacer euiSpacer--m"
                                 />
                               </EuiSpacer>
-                              <NewVisHelp>
+                              <NewVisHelp
+                                promotedTypes={Array []}
+                              >
                                 <EuiText>
                                   <div
                                     className="euiText euiText--medium"

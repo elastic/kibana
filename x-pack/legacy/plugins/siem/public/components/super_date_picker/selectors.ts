@@ -11,7 +11,7 @@ export const getPolicy = (inputState: InputsRange): Policy => inputState.policy;
 
 export const getTimerange = (inputState: InputsRange): TimeRange => inputState.timerange;
 
-export const getQuery = (inputState: InputsRange): GlobalQuery[] => inputState.query;
+export const getQueries = (inputState: InputsRange): GlobalQuery[] => inputState.queries;
 
 export const policySelector = () =>
   createSelector(
@@ -57,18 +57,18 @@ export const toStrSelector = () =>
 
 export const isLoadingSelector = () =>
   createSelector(
-    getQuery,
-    query => query.some(i => i.loading === true)
+    getQueries,
+    queries => queries.some(i => i.loading === true)
   );
 
 export const queriesSelector = () =>
   createSelector(
-    getQuery,
-    query => query.filter(q => q.id !== 'kql')
+    getQueries,
+    queries => queries.filter(q => q.id !== 'kql')
   );
 
 export const kqlQuerySelector = () =>
   createSelector(
-    getQuery,
-    query => query.find(q => q.id === 'kql')
+    getQueries,
+    queries => queries.find(q => q.id === 'kql')
   );

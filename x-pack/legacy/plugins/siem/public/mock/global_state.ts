@@ -46,8 +46,6 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
       },
-      filterQuery: null,
-      filterQueryDraft: null,
     },
     details: {
       queries: {
@@ -62,8 +60,6 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
       },
-      filterQuery: null,
-      filterQueryDraft: null,
     },
   },
   network: {
@@ -91,12 +87,8 @@ export const mockGlobalState: State = {
           tlsSortField: { field: TlsFields._id, direction: Direction.desc },
         },
       },
-      filterQuery: null,
-      filterQueryDraft: null,
     },
     details: {
-      filterQuery: null,
-      filterQueryDraft: null,
       flowTarget: FlowTarget.source,
       queries: {
         [networkModel.IpDetailsTableType.topNFlowSource]: {
@@ -126,14 +118,24 @@ export const mockGlobalState: State = {
     global: {
       timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
       linkTo: ['timeline'],
-      query: [],
+      queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
     },
     timeline: {
       timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
       linkTo: ['global'],
-      query: [],
+      queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
     },
   },
   dragAndDrop: { dataProviders: {} },

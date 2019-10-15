@@ -9,17 +9,21 @@ import React, { useEffect, useState } from 'react';
 
 import {
   CENTER_ALIGNMENT,
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
-import * as i18n from '../translations';
+import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
-import { Job } from '../types';
+import { SiemJob } from '../types';
 
 const JobNameWrapper = styled.div`
   margin: 5px 0;
@@ -32,11 +36,11 @@ const truncateThreshold = 200;
 
 const getJobsTableColumns = (
   isLoading: boolean,
-  onJobStateChange: (jobName: string, latestTimestampMs: number, enable: boolean) => void
+  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void
 ) => [
   {
     name: i18n.COLUMN_JOB_NAME,
-    render: ({ id, description }: Job) => (
+    render: ({ id, description }: SiemJob) => (
       <JobNameWrapper>
         <EuiLink
           data-test-subj="jobs-table-link"
@@ -53,24 +57,40 @@ const getJobsTableColumns = (
       </JobNameWrapper>
     ),
   },
+  {
+    name: i18n.COLUMN_GROUPS,
+    render: ({ groups }: SiemJob) => (
+      <EuiFlexGroup wrap responsive={true} gutterSize="xs">
+        {groups.map(group => (
+          <EuiFlexItem grow={false} key={group}>
+            <EuiBadge color={'hollow'}>{group}</EuiBadge>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ),
+    width: '140px',
+  },
 
   {
     name: i18n.COLUMN_RUN_JOB,
-    render: (job: Job) => (
-      <JobSwitch job={job} isSummaryLoading={isLoading} onJobStateChange={onJobStateChange} />
-    ),
+    render: (job: SiemJob) =>
+      job.isCompatible ? (
+        <JobSwitch job={job} isSiemJobsLoading={isLoading} onJobStateChange={onJobStateChange} />
+      ) : (
+        <EuiIcon aria-label="Warning" size="s" type="alert" color="warning" />
+      ),
     align: CENTER_ALIGNMENT,
     width: '80px',
   },
 ];
 
-const getPaginatedItems = (items: Job[], pageIndex: number, pageSize: number): Job[] =>
+const getPaginatedItems = (items: SiemJob[], pageIndex: number, pageSize: number): SiemJob[] =>
   items.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
 
 export interface JobTableProps {
   isLoading: boolean;
-  jobs: Job[];
-  onJobStateChange: (jobName: string, latestTimestampMs: number, enable: boolean) => void;
+  jobs: SiemJob[];
+  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void;
 }
 
 export const JobsTable = React.memo(({ isLoading, jobs, onJobStateChange }: JobTableProps) => {

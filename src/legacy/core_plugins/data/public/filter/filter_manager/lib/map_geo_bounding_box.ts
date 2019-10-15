@@ -16,58 +16,46 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get } from 'lodash';
-import { GeoBoundingBoxFilter, Filter, FILTERS, isGeoBoundingBoxFilter } from '@kbn/es-query';
-import { IndexPatterns, IndexPattern } from '../../../index_patterns';
-import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
+import {
+  GeoBoundingBoxFilter,
+  Filter,
+  FILTERS,
+  isGeoBoundingBoxFilter,
+  FilterValueFormatter,
+} from '@kbn/es-query';
 
-const getFormattedValue = (params: any, key: string, indexPattern?: IndexPattern) => {
-  const formatter: any =
-    indexPattern && key && get(indexPattern, ['fields', 'byName', key, 'format']);
+const getFormattedValueFn = (params: any) => {
+  return (formatter?: FilterValueFormatter) => {
+    const corners = formatter
+      ? {
+          topLeft: formatter.convert(params.top_left),
+          bottomRight: formatter.convert(params.bottom_right),
+        }
+      : {
+          topLeft: JSON.stringify(params.top_left),
+          bottomRight: JSON.stringify(params.bottom_right),
+        };
 
-  return formatter
-    ? {
-        topLeft: formatter.convert(params.top_left),
-        bottomRight: formatter.convert(params.bottom_right),
-      }
-    : {
-        topLeft: JSON.stringify(params.top_left),
-        bottomRight: JSON.stringify(params.bottom_right),
-      };
+    return corners.topLeft + ' to ' + corners.bottomRight;
+  };
 };
 
-const getParams = (filter: GeoBoundingBoxFilter, indexPattern?: IndexPattern) => {
+const getParams = (filter: GeoBoundingBoxFilter) => {
   const key = Object.keys(filter.geo_bounding_box).filter(k => k !== 'ignore_unmapped')[0];
   const params = filter.geo_bounding_box[key];
-  const { topLeft, bottomRight } = getFormattedValue(params, key, indexPattern);
 
   return {
     key,
     params,
     type: FILTERS.GEO_BOUNDING_BOX,
-    value: topLeft + ' to ' + bottomRight,
+    value: getFormattedValueFn(params),
   };
 };
 
-export const mapGeoBoundingBox = (indexPatterns: IndexPatterns) => {
-  return async (filter: Filter) => {
-    if (!isGeoBoundingBoxFilter(filter)) {
-      throw filter;
-    }
+export const mapGeoBoundingBox = (filter: Filter) => {
+  if (!isGeoBoundingBoxFilter(filter)) {
+    throw filter;
+  }
 
-    try {
-      let indexPattern;
-
-      if (filter.meta.index) {
-        indexPattern = await indexPatterns.get(filter.meta.index);
-      }
-
-      return getParams(filter, indexPattern);
-    } catch (error) {
-      if (error instanceof SavedObjectNotFound) {
-        return getParams(filter);
-      }
-      throw error;
-    }
-  };
+  return getParams(filter);
 };
