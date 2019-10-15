@@ -322,14 +322,14 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
-  .case(updateTlsSort, (state, { tlsSortField }) => ({
+  .case(updateTlsSort, (state, { tlsSortField, networkType }) => ({
     ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
+    [networkType]: {
+      ...state[networkType],
       queries: {
-        ...state[NetworkType.details].queries,
+        ...state[networkType].queries,
         [IpDetailsTableType.tls]: {
-          ...state[NetworkType.details].queries.tls,
+          ...state[networkType].queries.tls,
           tlsSortField,
         },
       },

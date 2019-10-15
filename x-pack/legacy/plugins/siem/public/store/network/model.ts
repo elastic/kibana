@@ -88,7 +88,6 @@ export interface NetworkDetailsModel {
   queries: IpOverviewQueries;
 }
 
-// Network Model
 export interface NetworkModel {
   [NetworkType.page]: NetworkPageModel;
   [NetworkType.details]: NetworkDetailsModel;
