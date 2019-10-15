@@ -163,7 +163,7 @@ export const getTotalNumberOfLogEntriesForPartition = (
         (partition.partitionId === '' && partitionId === 'unknown')
       );
     });
-    if (!partitionResults || !partitionResults.numberOfLogs) {
+    if (!partitionResults || !partitionResults.numberOfLogEntries) {
       return sumPartitionNumberOfLogs;
     } else {
       return (sumPartitionNumberOfLogs += partitionResults.numberOfLogs);
