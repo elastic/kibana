@@ -54,7 +54,7 @@ describe('PhraseFilterManager', function () {
       expect(newFilter.meta.controlledBy).to.be(controlId);
       expect(newFilter.meta.key).to.be('field1');
       expect(newFilter).to.have.property('query');
-      expect(JSON.stringify(newFilter.query, null, '')).to.be('{"match":{"field1":{"query":"ios","type":"phrase"}}}');
+      expect(JSON.stringify(newFilter.query, null, '')).to.be('{"match_phrase":{"field1":"ios"}}');
     });
 
     test('should create bool filter from multiple values', function () {
