@@ -283,7 +283,7 @@ const getSetupStatus = (
     }
 
     const jobId = getJobId(spaceId, sourceId, jobType);
-    const jobDefinition = jobDefinitions.filter(({ id }) => id === jobType)[0];
+    const jobDefinition = jobDefinitions.find(({ id }) => id === jobType);
 
     if (jobStatus === 'missing') {
       return 'required';
