@@ -59,5 +59,18 @@ pipeline {
         }
       }
     }
+    stage('Smoke Tests (edge)'){
+      steps{
+        script {
+          def nodeDocker = docker.build('node-cypress', 'x-pack/legacy/plugins/apm/cypress/ci')
+          nodeDocker.inside(){
+            dir("${BASE_DIR}/x-pack/legacy/plugins/apm/cypress"){
+              sh(label: 'Build tests', script: 'npm install')
+              sh(label: 'Execute Smoke Tests', script: './node_modules/.bin/cypress run')
+            }
+          }
+        }
+      }
+    }
   }
 }
