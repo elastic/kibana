@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ITokenIterator, Position, Token, TokensProvider } from '../../types';
+import { Position, Token, TokensProvider } from '../../types';
 
 function isColumnInTokenRange(column: number, token: Token) {
   if (column < token.position.column) {
@@ -26,7 +26,7 @@ function isColumnInTokenRange(column: number, token: Token) {
   return column <= token.position.column + token.value.length;
 }
 
-export class TokenIterator implements ITokenIterator {
+export class TokenIterator {
   private currentTokenIdx = -1;
   private currentPosition: Position = { lineNumber: -1, column: -1 };
   private tokensLineCache: Token[];
@@ -53,10 +53,6 @@ export class TokenIterator implements ITokenIterator {
   private updatePosition(info: { tokenIdx: number; position: Position }) {
     this.currentTokenIdx = info.tokenIdx;
     this.currentPosition = { ...info.position };
-  }
-
-  getCurrentToken(): Token | null {
-    return this.tokensLineCache[this.currentTokenIdx] || null;
   }
 
   private step(direction: 1 | -1): Token | null {
@@ -97,19 +93,56 @@ export class TokenIterator implements ITokenIterator {
     return null;
   }
 
-  stepForward(): Token | null {
-    return this.step(1);
+  /**
+   * Report the token under the iterator's internal cursor.
+   */
+  public getCurrentToken(): Token | null {
+    return this.tokensLineCache[this.currentTokenIdx] || null;
   }
 
-  stepBackward(): Token | null {
-    return this.step(-1);
-  }
-
-  getCurrentPosition(): Position {
+  /**
+   * Return the current position in the document.
+   *
+   * This will correspond to the position of a token.
+   *
+   * Note: this method may not be that useful given {@link getCurrentToken}.
+   */
+  public getCurrentPosition(): Position {
     return this.currentPosition;
   }
 
-  getCurrentTokenLineNumber(): number | null {
+  /**
+   * Go to the previous token in the document.
+   *
+   * Stepping to the previous token can return null under the following conditions:
+   *
+   * 1. We are at the beginning of the document.
+   * 2. The preceding line is empty - no tokens.
+   * 3. We are in an empty document - not text, so no tokens.
+   */
+  public stepBackward(): Token | null {
+    return this.step(-1);
+  }
+
+  /**
+   * See documentation for {@link stepBackward}.
+   *
+   * Steps forward.
+   */
+  public stepForward(): Token | null {
+    return this.step(1);
+  }
+
+  /**
+   * Get the line number of the current token.
+   *
+   * Can be considered a convenience method for:
+   *
+   * ```ts
+   * it.getCurrentToken().lineNumber;
+   * ```
+   */
+  public getCurrentTokenLineNumber(): number | null {
     const currentToken = this.getCurrentToken();
     if (currentToken) {
       return currentToken.position.lineNumber;
@@ -117,7 +150,12 @@ export class TokenIterator implements ITokenIterator {
     return null;
   }
 
-  getCurrentTokenColumn(): number | null {
+  /**
+   * See documentation for {@link getCurrentTokenLineNumber}.
+   *
+   * Substitutes `column` for `lineNumber`.
+   */
+  public getCurrentTokenColumn(): number | null {
     const currentToken = this.getCurrentToken();
     if (currentToken) {
       return currentToken.position.column;

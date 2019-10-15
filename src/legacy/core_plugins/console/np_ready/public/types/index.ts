@@ -19,5 +19,4 @@
 
 export * from './core_editor';
 export * from './token';
-export * from './token_iterator';
 export * from './tokens_provider';
