@@ -6,17 +6,12 @@
 
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { DomainsRequestOptions, IpDetails, UsersRequestOptions } from '../../lib/ip_details';
+import { IpDetails, UsersRequestOptions } from '../../lib/ip_details';
 import { createOptions, createOptionsPaginated } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 export type QueryIpOverviewResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.IpOverviewResolver>,
-  QuerySourceResolver
->;
-
-export type QueryDomainsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.DomainsResolver>,
   QuerySourceResolver
 >;
 
@@ -34,7 +29,6 @@ export const createIpDetailsResolvers = (
 ): {
   Source: {
     IpOverview: QueryIpOverviewResolver;
-    Domains: QueryDomainsResolver;
     Users: QueryUsersResolver;
   };
 } => ({
@@ -42,16 +36,6 @@ export const createIpDetailsResolvers = (
     async IpOverview(source, args, { req }, info) {
       const options = { ...createOptions(source, args, info), ip: args.ip };
       return libs.ipDetails.getIpOverview(req, options);
-    },
-    async Domains(source, args, { req }, info) {
-      const options: DomainsRequestOptions = {
-        ...createOptionsPaginated(source, args, info),
-        ip: args.ip,
-        domainsSortField: args.sort,
-        flowTarget: args.flowTarget,
-        flowDirection: args.flowDirection,
-      };
-      return libs.ipDetails.getDomains(req, options);
     },
     async Users(source, args, { req }, info) {
       const options: UsersRequestOptions = {

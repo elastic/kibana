@@ -117,7 +117,7 @@ describe('Network redux store', () => {
           dnsSortField: { field: 'uniqueDomains', direction: 'desc' },
           isPtrIncluded: false,
         },
-        tls: {
+        [NetworkTableType.tls]: {
           activePage: 0,
           limit: 10,
           tlsSortField: {

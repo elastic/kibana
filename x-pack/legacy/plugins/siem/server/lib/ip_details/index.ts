@@ -15,13 +15,6 @@ export interface IpOverviewRequestOptions extends RequestOptions {
   ip: string;
 }
 
-export interface DomainsRequestOptions extends RequestOptionsPaginated {
-  ip: string;
-  domainsSortField: DomainsSortField;
-  flowTarget: FlowTarget;
-  flowDirection: FlowDirection;
-}
-
 export interface UsersRequestOptions extends RequestOptionsPaginated {
   ip: string;
   usersSortField: UsersSortField;
@@ -36,13 +29,6 @@ export class IpDetails {
     options: IpOverviewRequestOptions
   ): Promise<IpOverviewData> {
     return this.adapter.getIpDetails(req, options);
-  }
-
-  public async getDomains(
-    req: FrameworkRequest,
-    options: DomainsRequestOptions
-  ): Promise<DomainsData> {
-    return this.adapter.getDomains(req, options);
   }
 
   public async getUsers(req: FrameworkRequest, options: UsersRequestOptions): Promise<UsersData> {

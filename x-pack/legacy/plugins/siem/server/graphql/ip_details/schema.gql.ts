@@ -42,71 +42,6 @@ const ipOverviewSchema = gql`
   }
 `;
 
-const domainsSchema = gql`
-  enum DomainsFields {
-    domainName
-    direction
-    bytes
-    packets
-    uniqueIpCount
-  }
-
-  input DomainsSortField {
-    field: DomainsFields!
-    direction: Direction!
-  }
-
-  type DomainsNetworkField {
-    bytes: Float
-    packets: Float
-    transport: String
-    direction: [NetworkDirectionEcs!]
-  }
-
-  type DomainsItem {
-    uniqueIpCount: Float
-    domainName: String
-    firstSeen: Date
-    lastSeen: Date
-  }
-
-  type DomainsNode {
-    _id: String
-    timestamp: Date
-    source: DomainsItem
-    destination: DomainsItem
-    client: DomainsItem
-    server: DomainsItem
-    network: DomainsNetworkField
-  }
-
-  type DomainsEdges {
-    node: DomainsNode!
-    cursor: CursorType!
-  }
-
-  type DomainsData {
-    edges: [DomainsEdges!]!
-    totalCount: Float!
-    pageInfo: PageInfoPaginated!
-    inspect: Inspect
-  }
-
-  extend type Source {
-    Domains(
-      filterQuery: String
-      id: String
-      ip: String!
-      pagination: PaginationInputPaginated!
-      sort: DomainsSortField!
-      flowDirection: FlowDirection!
-      flowTarget: FlowTarget!
-      timerange: TimerangeInput!
-      defaultIndex: [String!]!
-    ): DomainsData!
-  }
-`;
-
 const usersSchema = gql`
   enum UsersFields {
     name
@@ -158,4 +93,4 @@ const usersSchema = gql`
   }
 `;
 
-export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, usersSchema];
+export const ipDetailsSchemas = [ipOverviewSchema, usersSchema];

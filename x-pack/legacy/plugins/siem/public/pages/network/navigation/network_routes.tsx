@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiFlexItem } from '@elastic/eui';
 
-import { FlowTargetSourceDest, FlowTarget } from '../../../graphql/types';
+import { FlowTargetSourceDest } from '../../../graphql/types';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 
 import { IPsQueryTabBody } from './ips_query_tab_body';
@@ -82,7 +82,7 @@ export const NetworkRoutes = ({
       />
       <Route
         path={`${networkPagePath}/:tabName(${NetworkRouteType.tls})`}
-        render={() => <TlsQueryTabBody {...tabProps} flowTarget={FlowTarget.source} />}
+        render={() => <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />}
       />
       <Route
         path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}
