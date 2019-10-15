@@ -10,10 +10,10 @@ import { EuiButtonEmpty, EuiPopover, EuiSelectable, EuiButtonEmptyProps } from '
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
 import { IndexPatternRef } from './types';
 
-export interface ChangeIndexPatternTriggerProps extends EuiButtonEmptyProps {
+export type ChangeIndexPatternTriggerProps = EuiButtonEmptyProps & {
   label: string;
   title?: string;
-}
+};
 
 export function ChangeIndexPattern({
   indexPatternRefs,

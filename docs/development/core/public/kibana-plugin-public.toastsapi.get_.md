@@ -4,6 +4,8 @@
 
 ## ToastsApi.get$() method
 
+Observable of the toast messages to show to the user.
+
 <b>Signature:</b>
 
 ```typescript

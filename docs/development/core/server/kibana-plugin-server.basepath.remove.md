@@ -4,7 +4,7 @@
 
 ## BasePath.remove property
 
-returns a new `basePath` value, cleaned up from passed `url`<!-- -->.
+Removes the prepended basePath from the `path`<!-- -->.
 
 <b>Signature:</b>
 
