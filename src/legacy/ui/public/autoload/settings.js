@@ -28,6 +28,10 @@ import moment from 'moment-timezone';
 import chrome from '../chrome';
 
 function setDefaultTimezone(tz) {
+  // If the setting is an existing timezone, use it. Otherwize, guess based on
+  // browser settings.
+  tz = moment.tz.zone(tz) !== null ? tz : moment.tz.guess();
+
   moment.tz.setDefault(tz);
 }
 
