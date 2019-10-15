@@ -7380,7 +7380,6 @@
     "xpack.ml.newJob.wizard.summaryStep.viewResultsButton": "結果を表示",
     "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel": "終了日",
     "xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.startDateLabel": "開始日",
-    "xpack.ml.newJob.wizard.validateJob.bucketSpanInvalidTimeIntervalFormatErrorMessage": "{bucketSpan} は有効な時間間隔のフォーマット (例: {tenMinutes}、{oneHour}) ではありません。また、0 よりも大きい数字である必要があります。",
     "xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage": "バケットスパンを設定する必要があります",
     "xpack.ml.newJob.wizard.validateJob.duplicatedDetectorsErrorMessage": "重複する検知器が検出されました。",
     "xpack.ml.newJob.wizard.validateJob.groupNameAlreadyExists": "グループ ID が既に存在します。グループ ID は既存のジョブやグループと同じにできません。",
