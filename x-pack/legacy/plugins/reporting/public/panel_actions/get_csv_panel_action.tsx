@@ -68,7 +68,7 @@ class GetCsvReportPanelAction implements IAction<ActionContext> {
       return {};
     }
 
-    return searchEmbeddable.searchScope.searchSource.getSearchRequestBody();
+    return searchEmbeddable.getSavedSearch().searchSource.getSearchRequestBody();
   }
 
   public isCompatible = async (context: ActionContext) => {
