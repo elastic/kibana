@@ -781,6 +781,7 @@
     "data.filter.filterBar.filterItemBadgeIconAriaLabel": "削除",
     "data.filter.filterBar.includeFilterButtonLabel": "結果を含める",
     "data.filter.filterBar.indexPatternSelectPlaceholder": "インデックスパターンの選択",
+    "data.filter.filterBar.moreFilterActionsMessage": "他のフィルターアクションを使用するには選択してください。",
     "data.filter.filterBar.negatedFilterPrefix": "NOT ",
     "data.filter.filterBar.pinFilterButtonLabel": "すべてのアプリにピン付け",
     "data.filter.filterBar.pinnedFilterPrefix": "ピン付け済み",

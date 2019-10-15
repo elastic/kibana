@@ -29,14 +29,17 @@ import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './partitioned_filters';
+import { IndexPatterns } from '../../index_patterns';
 
 export class FilterManager {
+  private indexPatterns: IndexPatterns;
   private filters: Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
   private uiSettings: UiSettingsClientContract;
 
-  constructor(uiSettings: UiSettingsClientContract) {
+  constructor(indexPatterns: IndexPatterns, uiSettings: UiSettingsClientContract) {
+    this.indexPatterns = indexPatterns;
     this.uiSettings = uiSettings;
   }
 
@@ -124,7 +127,7 @@ export class FilterManager {
 
   /* Setters */
 
-  public addFilters(filters: Filter[] | Filter, pinFilterStatus?: boolean) {
+  public async addFilters(filters: Filter[] | Filter, pinFilterStatus?: boolean) {
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
@@ -142,7 +145,7 @@ export class FilterManager {
     const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
     FilterManager.setFiltersStore(filters, store);
 
-    const mappedFilters = mapAndFlattenFilters(filters);
+    const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, filters);
 
     // This is where we add new filters to the correct place (app \ global)
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
@@ -154,8 +157,8 @@ export class FilterManager {
     this.handleStateUpdate(newFilters);
   }
 
-  public setFilters(newFilters: Filter[]) {
-    const mappedFilters = mapAndFlattenFilters(newFilters);
+  public async setFilters(newFilters: Filter[]) {
+    const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, newFilters);
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
     const mergedFilters = this.mergeIncomingFilters(newPartitionedFilters);
     this.handleStateUpdate(mergedFilters);
@@ -173,8 +176,8 @@ export class FilterManager {
     }
   }
 
-  public removeAll() {
-    this.setFilters([]);
+  public async removeAll() {
+    await this.setFilters([]);
   }
 
   public static setFiltersStore(filters: Filter[], store: FilterStateStore) {

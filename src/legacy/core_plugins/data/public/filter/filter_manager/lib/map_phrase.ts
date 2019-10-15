@@ -24,19 +24,21 @@ import {
   FILTERS,
   isPhraseFilter,
   isScriptedPhraseFilter,
-  FilterValueFormatter,
 } from '@kbn/es-query';
+import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
+import { IndexPatterns, IndexPattern } from '../../../index_patterns';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['script', 'script', 'params', 'value']);
 
-const getFormattedValueFn = (value: any) => {
-  return (formatter?: FilterValueFormatter) => {
-    return formatter ? formatter.convert(value) : value;
-  };
+const getFormattedValue = (value: any, key: string, indexPattern?: IndexPattern) => {
+  const formatter: any =
+    indexPattern && key && get(indexPattern, ['fields', 'byName', key, 'format']);
+
+  return formatter ? formatter.convert(value) : value;
 };
 
-const getParams = (filter: PhraseFilter) => {
+const getParams = (filter: PhraseFilter, indexPattern?: IndexPattern) => {
   const scriptedPhraseValue = getScriptedPhraseValue(filter);
   const isScriptedFilter = Boolean(scriptedPhraseValue);
   const key = isScriptedFilter ? filter.meta.field || '' : Object.keys(filter.query.match)[0];
@@ -47,17 +49,32 @@ const getParams = (filter: PhraseFilter) => {
     key,
     params,
     type: FILTERS.PHRASE,
-    value: getFormattedValueFn(query),
+    value: getFormattedValue(query, key, indexPattern),
   };
 };
 
 export const isMapPhraseFilter = (filter: any): filter is PhraseFilter =>
   isPhraseFilter(filter) || isScriptedPhraseFilter(filter);
 
-export const mapPhrase = (filter: Filter) => {
-  if (!isMapPhraseFilter(filter)) {
-    throw filter;
-  }
+export const mapPhrase = (indexPatterns: IndexPatterns) => {
+  return async (filter: Filter) => {
+    if (!isMapPhraseFilter(filter)) {
+      throw filter;
+    }
 
-  return getParams(filter);
+    try {
+      let indexPattern;
+
+      if (filter.meta.index) {
+        indexPattern = await indexPatterns.get(filter.meta.index);
+      }
+
+      return getParams(filter, indexPattern);
+    } catch (error) {
+      if (error instanceof SavedObjectNotFound) {
+        return getParams(filter);
+      }
+      throw error;
+    }
+  };
 };

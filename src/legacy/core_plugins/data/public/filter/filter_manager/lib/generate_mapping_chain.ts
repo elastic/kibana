@@ -23,14 +23,12 @@ const noop = () => {
 };
 
 export const generateMappingChain = (fn: Function, next: Function = noop) => {
-  return (filter: Filter) => {
-    try {
-      return fn(filter);
-    } catch (result) {
+  return async (filter: Filter) => {
+    return await fn(filter).catch((result: any) => {
       if (result === filter) {
         return next(filter);
       }
       throw result;
-    }
+    });
   };
 };

@@ -33,13 +33,10 @@ import {
 import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { IndexPattern } from '../../index_patterns';
-import { getDisplayValueFromFilter } from '../filter_bar/filter_editor/lib/filter_editor_utils';
-import { getFilterDisplayText } from '../filter_bar/filter_editor/lib/get_filter_display_text';
+import { getFilterDisplayText } from '../filter_bar/filter_view';
 
 interface Props {
   filters: Filter[];
-  indexPatterns: IndexPattern[];
   onCancel: () => void;
   onSubmit: (filters: Filter[]) => void;
 }
@@ -60,11 +57,6 @@ export class ApplyFiltersPopover extends Component<Props, State> {
     };
   }
 
-  private getLabel(filter: Filter) {
-    const filterDisplayValue = getDisplayValueFromFilter(filter, this.props.indexPatterns);
-    return getFilterDisplayText(filter, filterDisplayValue);
-  }
-
   public render() {
     if (this.props.filters.length === 0) {
       return '';
@@ -75,7 +67,7 @@ export class ApplyFiltersPopover extends Component<Props, State> {
         {this.props.filters.map((filter, i) => (
           <EuiFormRow key={i}>
             <EuiSwitch
-              label={this.getLabel(filter)}
+              label={getFilterDisplayText(filter)}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}
             />

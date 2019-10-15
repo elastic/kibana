@@ -16,25 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  GeoPolygonFilter,
-  Filter,
-  FILTERS,
-  isGeoPolygonFilter,
-  FilterValueFormatter,
-} from '@kbn/es-query';
+import { get } from 'lodash';
+import { GeoPolygonFilter, Filter, FILTERS, isGeoPolygonFilter } from '@kbn/es-query';
+import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
+import { IndexPatterns, IndexPattern } from '../../../index_patterns';
 
 const POINTS_SEPARATOR = ', ';
 
-const getFormattedValueFn = (points: string[]) => {
-  return (formatter?: FilterValueFormatter) => {
-    return points
-      .map((point: string) => (formatter ? formatter.convert(point) : JSON.stringify(point)))
-      .join(POINTS_SEPARATOR);
-  };
+const getFormattedValue = (value: any, key: string, indexPattern?: IndexPattern) => {
+  const formatter: any =
+    indexPattern && key && get(indexPattern, ['fields', 'byName', key, 'format']);
+
+  return formatter ? formatter.convert(value) : JSON.stringify(value);
 };
 
-function getParams(filter: GeoPolygonFilter) {
+function getParams(filter: GeoPolygonFilter, indexPattern?: IndexPattern) {
   const key = Object.keys(filter.geo_polygon).filter(k => k !== 'ignore_unmapped')[0];
   const params = filter.geo_polygon[key];
 
@@ -42,13 +38,31 @@ function getParams(filter: GeoPolygonFilter) {
     key,
     params,
     type: FILTERS.GEO_POLYGON,
-    value: getFormattedValueFn(params.points || []),
+    value: (params.points || [])
+      .map((point: string) => getFormattedValue(point, key, indexPattern))
+      .join(POINTS_SEPARATOR),
   };
 }
 
-export function mapGeoPolygon(filter: Filter) {
-  if (!isGeoPolygonFilter(filter)) {
-    throw filter;
-  }
-  return getParams(filter);
+export function mapGeoPolygon(indexPatterns: IndexPatterns) {
+  return async function(filter: Filter) {
+    if (!isGeoPolygonFilter(filter)) {
+      throw filter;
+    }
+
+    try {
+      let indexPattern;
+
+      if (filter.meta.index) {
+        indexPattern = await indexPatterns.get(filter.meta.index);
+      }
+
+      return getParams(filter, indexPattern);
+    } catch (error) {
+      if (error instanceof SavedObjectNotFound) {
+        return getParams(filter);
+      }
+      throw error;
+    }
+  };
 }

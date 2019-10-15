@@ -258,7 +258,7 @@ export class DashboardAppController {
             updateIndexPatterns(dashboardContainer);
           });
 
-          inputSubscription = dashboardContainer.getInput$().subscribe(() => {
+          inputSubscription = dashboardContainer.getInput$().subscribe(async () => {
             let dirty = false;
 
             // This has to be first because handleDashboardContainerChanges causes
@@ -266,7 +266,7 @@ export class DashboardAppController {
 
             // Add filters modifies the object passed to it, hence the clone deep.
             if (!_.isEqual(container.getInput().filters, queryFilter.getFilters())) {
-              queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
+              await queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
 
               dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
               dirty = true;
@@ -453,6 +453,7 @@ export class DashboardAppController {
     $scope.onClearSavedQuery = () => {
       delete $scope.savedQuery;
       dashboardStateManager.setSavedQueryId(undefined);
+      queryFilter.removeAll();
       dashboardStateManager.applyFilters(
         {
           query: '',
@@ -461,12 +462,10 @@ export class DashboardAppController {
         },
         []
       );
-      // Making this method sync broke the updates.
-      // Temporary fix, until we fix the complex state in this file.
-      setTimeout(queryFilter.removeAll, 0);
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
+      queryFilter.setFilters(savedQuery.attributes.filters || []);
       dashboardStateManager.applyFilters(
         savedQuery.attributes.query,
         savedQuery.attributes.filters || []
@@ -480,11 +479,6 @@ export class DashboardAppController {
           timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
       }
-      // Making this method sync broke the updates.
-      // Temporary fix, until we fix the complex state in this file.
-      setTimeout(() => {
-        queryFilter.setFilters(savedQuery.attributes.filters || []);
-      }, 0);
     };
 
     $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {

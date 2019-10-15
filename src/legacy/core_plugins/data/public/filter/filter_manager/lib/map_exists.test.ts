@@ -24,7 +24,7 @@ describe('filter manager utilities', () => {
   describe('mapExists()', () => {
     test('should return the key and value for matching filters', async () => {
       const filter: ExistsFilter = buildExistsFilter({ name: '_type' }, 'index');
-      const result = mapExists(filter);
+      const result = await mapExists(filter);
 
       expect(result).toHaveProperty('key', '_type');
       expect(result).toHaveProperty('value', 'exists');
@@ -34,7 +34,7 @@ describe('filter manager utilities', () => {
       const filter = buildEmptyFilter(true) as ExistsFilter;
 
       try {
-        mapQueryString(filter);
+        await mapQueryString(filter);
       } catch (e) {
         expect(e).toBe(filter);
         done();
