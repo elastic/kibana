@@ -5248,8 +5248,6 @@
     "xpack.infra.logs.analysis.logRateSectionNoDataBody": "您可能想调整时间范围。",
     "xpack.infra.logs.analysis.logRateSectionNoDataTitle": "没有可显示的数据。",
     "xpack.infra.logs.analysis.logRateSectionTitle": "日志速率",
-    "xpack.infra.logs.analysis.logRateSectionXaxisTitle": "时间",
-    "xpack.infra.logs.analysis.logRateSectionYaxisTitle": "每 15 分钟日志条目数",
     "xpack.infra.logs.analysisPage.loadingMessage": "正在检查分析作业的状态......",
     "xpack.infra.logs.analysisPage.unavailable.mlAppButton": "打开 Machine Learning",
     "xpack.infra.logs.analysisPage.unavailable.mlAppLink": "Machine Learning 应用",
