@@ -22,6 +22,8 @@ import { filterQuerySelector } from '../../search_bar/selectors';
 import { State } from '../../../store';
 import { InputsRange } from '../../../store/inputs/model';
 
+export * from './helpers';
+
 interface AddToKqlRedux {
   query: Query;
 }

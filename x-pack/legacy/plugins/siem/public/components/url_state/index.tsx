@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { compose, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { Query } from 'src/plugins/data/common';
 
-import { inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 
-import { CONSTANTS } from './constants';
 import { UrlStateContainerPropTypes, UrlStateProps } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { dispatchUpdateTimeline } from '../open_timeline/helpers';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
+import { makeMapStateToProps } from './helpers';
 
 export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
   (props: UrlStateContainerPropTypes) => {
@@ -32,61 +29,6 @@ export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
 );
 
 UrlStateContainer.displayName = 'UrlStateContainer';
-
-const makeMapStateToProps = () => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
-  const getTimelines = timelineSelectors.getTimelines();
-  const mapStateToProps = (state: State, { pageName, detailName }: UrlStateContainerPropTypes) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-
-    const timeline = Object.entries(getTimelines(state)).reduce(
-      (obj, [timelineId, timelineObj]) => ({
-        id: timelineObj.savedObjectId != null ? timelineObj.savedObjectId : '',
-        isOpen: timelineObj.show,
-      }),
-      { id: '', isOpen: false }
-    );
-
-    let searchAttr: {
-      [CONSTANTS.appQuery]?: Query;
-      [CONSTANTS.filters]?: Filter[];
-      [CONSTANTS.savedQuery]?: string;
-    } = {
-      [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
-      [CONSTANTS.filters]: getGlobalFiltersQuerySelector(state),
-    };
-    const savedQuery = getGlobalSavedQuerySelector(state);
-    if (savedQuery != null && savedQuery.id !== '') {
-      searchAttr = {
-        [CONSTANTS.savedQuery]: savedQuery.id,
-      };
-    }
-
-    return {
-      urlState: {
-        ...searchAttr,
-        [CONSTANTS.timerange]: {
-          global: {
-            [CONSTANTS.timerange]: globalTimerange,
-            linkTo: globalLinkTo,
-          },
-          timeline: {
-            [CONSTANTS.timerange]: timelineTimerange,
-            linkTo: timelineLinkTo,
-          },
-        },
-        [CONSTANTS.timeline]: timeline,
-      },
-    };
-  };
-
-  return mapStateToProps;
-};
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setInitialStateFromUrl: dispatchSetInitialStateFromUrl(dispatch),

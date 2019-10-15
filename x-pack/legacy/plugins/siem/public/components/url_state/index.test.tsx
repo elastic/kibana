@@ -62,7 +62,6 @@ describe('UrlStateContainer', () => {
             }).relativeTimeSearch.undefinedQuery;
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
-            // @ts-ignore property mock does not exists
             expect(mockSetRelativeRangeDatePicker.mock.calls[1][0]).toEqual({
               from: 1558591200000,
               fromStr: 'now-1d/d',
@@ -71,7 +70,7 @@ describe('UrlStateContainer', () => {
               toStr: 'now-1d/d',
               id: 'global',
             });
-            // @ts-ignore property mock does not exists
+
             expect(mockSetRelativeRangeDatePicker.mock.calls[0][0]).toEqual({
               from: 1558732849370,
               fromStr: 'now-15m',
@@ -92,14 +91,13 @@ describe('UrlStateContainer', () => {
               .absoluteTimeSearch.undefinedQuery;
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
-            // @ts-ignore property mock does not exists
             expect(mockSetAbsoluteRangeDatePicker.mock.calls[1][0]).toEqual({
               from: 1556736012685,
               kind: 'absolute',
               to: 1556822416082,
               id: 'global',
             });
-            // @ts-ignore property mock does not exists
+
             expect(mockSetAbsoluteRangeDatePicker.mock.calls[0][0]).toEqual({
               from: 1556736012685,
               kind: 'absolute',
@@ -117,7 +115,7 @@ describe('UrlStateContainer', () => {
             mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
               .relativeTimeSearch.undefinedQuery;
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
-            // @ts-ignore property mock does not exists
+
             expect(mockSetFilterQuery.mock.calls[0][0]).toEqual({
               id: 'global',
               language: 'kuery',
@@ -142,7 +140,6 @@ describe('UrlStateContainer', () => {
             }).noSearch.definedQuery;
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
-            // @ts-ignore property mock does not exists
             expect(
               mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
             ).toEqual({

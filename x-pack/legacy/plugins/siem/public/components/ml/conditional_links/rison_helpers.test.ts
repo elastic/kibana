@@ -20,7 +20,7 @@ describe('rison_helpers', () => {
     });
     test('returns null if given a bad value for RISON', () => {
       const expected = decodeRison('some invalid value');
-      expect(expected).toEqual(expected);
+      expect(expected).toEqual(null);
     });
 
     test('returns a RISON value decoded if sent in an object', () => {

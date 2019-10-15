@@ -297,7 +297,7 @@ const makeMapStateToProps = () => {
   };
 };
 
-SearchBarComponent.displayName = 'SiemSearchBarComponent';
+SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
   id: InputsModelId;

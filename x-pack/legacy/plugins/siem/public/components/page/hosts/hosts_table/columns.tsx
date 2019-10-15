@@ -9,7 +9,6 @@ import moment from 'moment';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
@@ -19,7 +18,7 @@ import { HostDetailsLink } from '../../../links';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
-import { AddToKql } from '../../add_to_kql';
+import { AddToKql, createFilter } from '../../add_to_kql';
 import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
@@ -58,27 +57,7 @@ export const getHostsColumns = (
                 <AddToKql
                   id="global"
                   indexPattern={indexPattern}
-                  filter={{
-                    meta: {
-                      alias: null,
-                      negate: false,
-                      disabled: false,
-                      type: 'phrase',
-                      key: 'host.name',
-                      value: hostName[0] as string,
-                      params: {
-                        query: hostName[0],
-                      },
-                    },
-                    query: {
-                      match: {
-                        'host.name': {
-                          query: hostName[0],
-                          type: 'phrase',
-                        },
-                      },
-                    },
-                  }}
+                  filter={createFilter('host.name', hostName[0])}
                 >
                   <HostDetailsLink hostName={hostName[0]} />
                 </AddToKql>
@@ -127,27 +106,7 @@ export const getHostsColumns = (
           <AddToKql
             id="global"
             indexPattern={indexPattern}
-            filter={{
-              meta: {
-                alias: null,
-                negate: false,
-                disabled: false,
-                type: 'phrase',
-                key: 'host.os.name',
-                value: escapeQueryValue(hostOsName) as string,
-                params: {
-                  query: escapeQueryValue(hostOsName),
-                },
-              },
-              query: {
-                match: {
-                  'host.os.name': {
-                    query: escapeQueryValue(hostOsName),
-                    type: 'phrase',
-                  },
-                },
-              },
-            }}
+            filter={createFilter('host.os.name', hostOsName)}
           >
             <>{hostOsName}</>
           </AddToKql>
@@ -168,27 +127,7 @@ export const getHostsColumns = (
           <AddToKql
             id="global"
             indexPattern={indexPattern}
-            filter={{
-              meta: {
-                alias: null,
-                negate: false,
-                disabled: false,
-                type: 'phrase',
-                key: 'host.os.version',
-                value: escapeQueryValue(hostOsVersion) as string,
-                params: {
-                  query: escapeQueryValue(hostOsVersion),
-                },
-              },
-              query: {
-                match: {
-                  'host.os.version': {
-                    query: escapeQueryValue(hostOsVersion),
-                    type: 'phrase',
-                  },
-                },
-              },
-            }}
+            filter={createFilter('host.os.version', hostOsVersion)}
           >
             <>{hostOsVersion}</>
           </AddToKql>

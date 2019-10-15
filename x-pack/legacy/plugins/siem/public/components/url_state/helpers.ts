@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { decode, encode, RisonValue } from 'rison-node';
 import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
+import { Query } from 'src/plugins/data/common';
 
+import { inputsSelectors, State, timelineSelectors } from '../../store';
 import { SiemPageName } from '../../pages/home/home_navigations';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
-import { LocationTypes } from './types';
+import { LocationTypes, UrlStateContainerPropTypes } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
@@ -128,4 +131,59 @@ export const isKqlForRoute = (
     return true;
   }
   return false;
+};
+
+export const makeMapStateToProps = () => {
+  const getInputsSelector = inputsSelectors.inputsSelector();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
+  const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
+  const getTimelines = timelineSelectors.getTimelines();
+  const mapStateToProps = (state: State, { pageName, detailName }: UrlStateContainerPropTypes) => {
+    const inputState = getInputsSelector(state);
+    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
+    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
+
+    const timeline = Object.entries(getTimelines(state)).reduce(
+      (obj, [timelineId, timelineObj]) => ({
+        id: timelineObj.savedObjectId != null ? timelineObj.savedObjectId : '',
+        isOpen: timelineObj.show,
+      }),
+      { id: '', isOpen: false }
+    );
+
+    let searchAttr: {
+      [CONSTANTS.appQuery]?: Query;
+      [CONSTANTS.filters]?: Filter[];
+      [CONSTANTS.savedQuery]?: string;
+    } = {
+      [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
+      [CONSTANTS.filters]: getGlobalFiltersQuerySelector(state),
+    };
+    const savedQuery = getGlobalSavedQuerySelector(state);
+    if (savedQuery != null && savedQuery.id !== '') {
+      searchAttr = {
+        [CONSTANTS.savedQuery]: savedQuery.id,
+      };
+    }
+
+    return {
+      urlState: {
+        ...searchAttr,
+        [CONSTANTS.timerange]: {
+          global: {
+            [CONSTANTS.timerange]: globalTimerange,
+            linkTo: globalLinkTo,
+          },
+          timeline: {
+            [CONSTANTS.timerange]: timelineTimerange,
+            linkTo: timelineLinkTo,
+          },
+        },
+        [CONSTANTS.timeline]: timeline,
+      },
+    };
+  };
+
+  return mapStateToProps;
 };
