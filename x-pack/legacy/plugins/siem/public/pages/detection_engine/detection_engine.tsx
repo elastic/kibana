@@ -6,18 +6,19 @@
 
 import {
   Axis,
-  BarSeries,
   Chart,
   HistogramBarSeries,
-  Position,
-  ScaleType,
   Settings,
   getAxisId,
   getSpecId,
+  niceTimeFormatByDay,
+  niceTimeFormatter,
+  timeFormatter,
 } from '@elastic/charts';
-import { EuiButton, EuiButtonGroup, EuiIcon, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { StickyContainer } from 'react-sticky';
+import { npStart } from 'ui/new_platform';
 
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
@@ -34,7 +35,7 @@ import { DetectionEngineKql } from './kql';
 import * as i18n from './translations';
 
 export const DetectionEngineComponent = React.memo(() => {
-  const stackOptions = [
+  const sampleChartOptions = [
     { text: 'Risk scores', value: 'risk_scores' },
     { text: 'Severities', value: 'severities' },
     { text: 'Top destination IPs', value: 'destination_ips' },
@@ -46,15 +47,50 @@ export const DetectionEngineComponent = React.memo(() => {
     { text: 'Top source IPs', value: 'source_ips' },
     { text: 'Top users', value: 'users' },
   ];
+  const sampleChartData = [
+    { x: 1571090784000, y: 2, a: 'a' },
+    { x: 1571090784000, y: 2, b: 'b' },
+    { x: 1571093484000, y: 7, a: 'a' },
+    { x: 1571096184000, y: 3, a: 'a' },
+    { x: 1571098884000, y: 2, a: 'a' },
+    { x: 1571101584000, y: 7, a: 'a' },
+    { x: 1571104284000, y: 3, a: 'a' },
+    { x: 1571106984000, y: 2, a: 'a' },
+    { x: 1571109684000, y: 7, a: 'a' },
+    { x: 1571112384000, y: 3, a: 'a' },
+    { x: 1571115084000, y: 2, a: 'a' },
+    { x: 1571117784000, y: 7, a: 'a' },
+    { x: 1571120484000, y: 3, a: 'a' },
+    { x: 1571123184000, y: 2, a: 'a' },
+    { x: 1571125884000, y: 7, a: 'a' },
+    { x: 1571128584000, y: 3, a: 'a' },
+    { x: 1571131284000, y: 2, a: 'a' },
+    { x: 1571133984000, y: 7, a: 'a' },
+    { x: 1571136684000, y: 3, a: 'a' },
+    { x: 1571139384000, y: 2, a: 'a' },
+    { x: 1571142084000, y: 7, a: 'a' },
+    { x: 1571144784000, y: 3, a: 'a' },
+    { x: 1571147484000, y: 2, a: 'a' },
+    { x: 1571150184000, y: 7, a: 'a' },
+    { x: 1571152884000, y: 3, a: 'a' },
+    { x: 1571155584000, y: 2, a: 'a' },
+    { x: 1571158284000, y: 7, a: 'a' },
+    { x: 1571160984000, y: 3, a: 'a' },
+    { x: 1571163684000, y: 2, a: 'a' },
+    { x: 1571166384000, y: 7, a: 'a' },
+    { x: 1571169084000, y: 3, a: 'a' },
+    { x: 1571171784000, y: 2, a: 'a' },
+    { x: 1571174484000, y: 7, a: 'a' },
+  ];
 
-  const idPrefix = 'signalType';
-  const toggleButtons = [
+  const signalTypePrefix = 'signalType';
+  const signalTypeButtons = [
     {
-      id: `${idPrefix}0`,
+      id: `${signalTypePrefix}0`,
       label: 'Open signals',
     },
     {
-      id: `${idPrefix}1`,
+      id: `${signalTypePrefix}1`,
       label: 'Closed signals',
     },
   ];
@@ -74,59 +110,36 @@ export const DetectionEngineComponent = React.memo(() => {
 
         <EuiPanel>
           <HeaderSection title="Signal detection frequency">
-            <EuiSelect options={stackOptions} prepend="Stack by" value={stackOptions[0].value} />
+            <EuiSelect
+              options={sampleChartOptions}
+              prepend="Stack by"
+              value={sampleChartOptions[0].value}
+            />
           </HeaderSection>
 
           <Chart size={['100%', 259]}>
-            <Settings legendPosition="bottom" showLegend />
+            <Settings
+              legendPosition="bottom"
+              showLegend
+              theme={npStart.plugins.eui_utils.useChartsTheme()}
+            />
 
-            <Axis id="signalAxisX" position="bottom" />
+            <Axis
+              id={getAxisId('signalAxisX')}
+              position="bottom"
+              tickFormat={timeFormatter(niceTimeFormatByDay(1))}
+            />
 
-            <Axis id="signalAxisY" position="left" />
+            <Axis id={getAxisId('signalAxisY')} position="left" />
 
             <HistogramBarSeries
-              id="signalBar"
-              xScaleType="linear"
+              id={getSpecId('signalBar')}
+              xScaleType="time"
               yScaleType="linear"
               xAccessor="x"
               yAccessors={['y']}
-              stackAccessors={['x']}
               splitSeriesAccessors={['a', 'b']}
-              data={[
-                { x: 0, y: 2, a: 'a' },
-                { x: 0, y: 2, b: 'b' },
-                { x: 1, y: 7, a: 'a' },
-                { x: 2, y: 3, a: 'a' },
-                { x: 3, y: 2, a: 'a' },
-                { x: 4, y: 7, a: 'a' },
-                { x: 5, y: 3, a: 'a' },
-                { x: 6, y: 2, a: 'a' },
-                { x: 7, y: 7, a: 'a' },
-                { x: 8, y: 3, a: 'a' },
-                { x: 9, y: 2, a: 'a' },
-                { x: 10, y: 7, a: 'a' },
-                { x: 11, y: 3, a: 'a' },
-                { x: 12, y: 2, a: 'a' },
-                { x: 13, y: 7, a: 'a' },
-                { x: 14, y: 3, a: 'a' },
-                { x: 15, y: 2, a: 'a' },
-                { x: 16, y: 7, a: 'a' },
-                { x: 17, y: 3, a: 'a' },
-                { x: 18, y: 2, a: 'a' },
-                { x: 19, y: 7, a: 'a' },
-                { x: 20, y: 3, a: 'a' },
-                { x: 21, y: 2, a: 'a' },
-                { x: 22, y: 7, a: 'a' },
-                { x: 23, y: 3, a: 'a' },
-                { x: 24, y: 2, a: 'a' },
-                { x: 25, y: 7, a: 'a' },
-                { x: 26, y: 3, a: 'a' },
-                { x: 27, y: 2, a: 'a' },
-                { x: 28, y: 7, a: 'a' },
-                { x: 29, y: 3, a: 'a' },
-                { x: 30, y: 2, a: 'a' },
-                { x: 31, y: 7, a: 'a' },
-              ]}
+              data={sampleChartData}
             />
           </Chart>
         </EuiPanel>
@@ -141,7 +154,7 @@ export const DetectionEngineComponent = React.memo(() => {
               onChange={() => {
                 return null;
               }}
-              options={toggleButtons}
+              options={signalTypeButtons}
             />
           </HeaderSection>
 
