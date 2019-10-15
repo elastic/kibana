@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { EuiSteps, EuiText, EuiCodeBlock } from '@elastic/eui';
+import { Writer } from 'mustache';
 
 export { ShellEnrollmentInstructions } from './shell';
 export { ContainerEnrollmentInstructions } from './container';
@@ -13,21 +14,56 @@ export { ToolsEnrollmentInstructions } from './tools';
 export type ManualEnrollmentInstructions = Array<{
   title: string;
   textPre?: string;
-  commands?: string[];
+  commands?: string;
+  commandsLang?: 'bash' | 'yaml';
 }>;
 
 export const ManualEnrollmentSteps: React.SFC<{ instructions: ManualEnrollmentInstructions }> = ({
   instructions,
 }) => (
   <EuiSteps
-    steps={instructions.map(({ title, textPre, commands }) => ({
+    steps={instructions.map(({ title, textPre, commands, commandsLang }) => ({
       title,
       children: (
         <EuiText size="s">
           {textPre ? <p>{textPre}</p> : null}
-          {commands ? <EuiCodeBlock language="bash">{commands.join(`\n`)}</EuiCodeBlock> : null}
+          {commands ? (
+            // TODO: Increase overflowHeight when https://github.com/elastic/eui/issues/2435 is fixed
+            // or be smarter with setting this number before release
+            <EuiCodeBlock overflowHeight={150} language={commandsLang || 'bash'} isCopyable>
+              {replaceTemplateStrings(commands.trim())}
+            </EuiCodeBlock>
+          ) : null}
         </EuiText>
       ),
     }))}
   />
 );
+
+// Setup for replacing template variables in install instructions
+const TEMPLATE_TAGS = ['{', '}'];
+const mustacheWriter = new Writer();
+
+// do not html escape output
+// @ts-ignore
+mustacheWriter.escapedValue = function escapedValue(token, context) {
+  const value = context.lookup(token[1]);
+  if (value != null) {
+    return value;
+  }
+};
+
+// Configure available variable values
+export function replaceTemplateStrings(text: string = '') {
+  const variables = {
+    // '{' and '}' can not be used in template since they are used as template tags.
+    // Must use '{curlyOpen}'' and '{curlyClose}'
+    curlyOpen: '{',
+    curlyClose: '}',
+    config: {
+      enrollmentToken: 'sometesttoken',
+    },
+  };
+  mustacheWriter.parse(text, TEMPLATE_TAGS);
+  return mustacheWriter.render(text, variables, () => {});
+}

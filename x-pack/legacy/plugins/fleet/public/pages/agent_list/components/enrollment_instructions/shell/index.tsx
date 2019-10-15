@@ -15,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ManualEnrollmentInstructions, ManualEnrollmentSteps } from './';
+import { ManualEnrollmentInstructions, ManualEnrollmentSteps } from '../';
+import * as MAC_COMMANDS from './mac_commands';
 
 // No need for i18n as these are platform names
 const PLATFORMS = {
@@ -34,31 +35,21 @@ const PLATFORM_INSTRUCTIONS: {
         defaultMessage: 'Download and install Elastic Agent',
       }),
       textPre: 'Lorem ipsum instructions here.',
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/some-file-to-download.tar.gz',
-        'tar xzvf some-file-to-download.tar.gz',
-        'cd some-file-to-download/',
-      ],
+      commands: MAC_COMMANDS.INSTALL,
     },
     {
       title: i18n.translate('xpack.fleet.agentEnrollment.typeShell.manualInstall.stepTwoTitle', {
         defaultMessage: 'Edit the configuration',
       }),
       textPre: 'Modify the configuration file to set the connection information:',
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-      ],
+      commands: MAC_COMMANDS.CONFIG,
+      commandsLang: 'yaml',
     },
     {
       title: i18n.translate('xpack.fleet.agentEnrollment.typeShell.manualInstall.stepThreeTitle', {
         defaultMessage: 'Start the agent',
       }),
-      commands: ['./somefile setup', './somefile -e'],
+      commands: MAC_COMMANDS.START,
     },
   ],
 };
