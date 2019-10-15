@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactElement } from 'react';
-import { IndexPatternPrivateState } from './indexpattern';
+import React from 'react';
+import { IndexPatternPrivateState } from './types';
 import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
-import { updateLayerIndexPattern } from './state_helpers';
 import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable, EuiSelectableList } from '@elastic/eui';
@@ -17,6 +16,12 @@ jest.mock('ui/new_platform');
 jest.mock('./state_helpers');
 
 const initialState: IndexPatternPrivateState = {
+  indexPatternRefs: [
+    { id: '1', title: 'my-fake-index-pattern' },
+    { id: '2', title: 'my-fake-restricted-pattern' },
+    { id: '3', title: 'my-compatible-pattern' },
+  ],
+  existingFields: {},
   currentIndexPatternId: '1',
   showEmptyFields: false,
   layers: {
@@ -173,7 +178,7 @@ describe('Layer Data Panel', () => {
     defaultProps = {
       layerId: 'first',
       state: initialState,
-      setState: jest.fn(),
+      onChangeIndexPattern: jest.fn(async () => {}),
     };
   });
 
@@ -213,40 +218,11 @@ describe('Layer Data Panel', () => {
     ]);
   });
 
-  it('should indicate whether the switch can be made without losing data', () => {
-    const instance = shallow(<LayerPanel {...defaultProps} />);
-
-    expect(
-      getIndexPatternPickerOptions(instance)!.map(option =>
-        Boolean(
-          option.append &&
-            (option.append as ReactElement).props.content.includes(
-              'Not all operations are compatible with this index pattern'
-            )
-        )
-      )
-    ).toEqual([false, true, false]);
-  });
-
   it('should switch data panel to target index pattern', () => {
     const instance = shallow(<LayerPanel {...defaultProps} />);
 
     selectIndexPatternPickerOption(instance, 'my-compatible-pattern');
 
-    expect(defaultProps.setState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        currentIndexPatternId: '3',
-      })
-    );
-  });
-
-  it('should switch using updateLayerIndexPattern', () => {
-    const instance = shallow(<LayerPanel {...defaultProps} />);
-    selectIndexPatternPickerOption(instance, 'my-compatible-pattern');
-
-    expect(updateLayerIndexPattern).toHaveBeenCalledWith(
-      defaultProps.state.layers.first,
-      defaultProps.state.indexPatterns['3']
-    );
+    expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('3');
   });
 });

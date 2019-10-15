@@ -232,7 +232,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                       aria-label={i18n.translate(
                         'xpack.snapshotRestore.policyList.table.actionEditAriaLabel',
                         {
-                          defaultMessage: 'Edit poicy `{name}`',
+                          defaultMessage: `Edit policy '{name}'`,
                           values: { name },
                         }
                       )}

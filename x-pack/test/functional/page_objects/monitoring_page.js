@@ -9,6 +9,7 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+
   return new class MonitoringPage {
     async getWelcome() {
       const el = await find.byCssSelector('.euiCallOut--primary', 10000 * 10);
@@ -57,6 +58,7 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
     async tableSetFilter(subj, text) {
       await testSubjects.setValue(subj, text);
       await PageObjects.common.pressEnterKey();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async tableClearFilter(subj) {

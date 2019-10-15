@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiPopover, EuiText } from '@elastic/eui';
 
 import { RepoSelector } from './repo_selector';
 
-interface Props {
+export interface Props {
   onRepoSelect: (repo: string) => void;
   onImportSuccess: (repo: string) => void;
   repos: string[];

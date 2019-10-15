@@ -105,11 +105,8 @@ function wrapQueryBarTopRowInContext(testProps: any) {
   };
 
   const services = {
+    ...startMock,
     appName: 'discover',
-    uiSettings: startMock.uiSettings,
-    savedObjects: startMock.savedObjects,
-    notifications: startMock.notifications,
-    http: startMock.http,
     store: createMockStorage(),
   };
 

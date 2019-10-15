@@ -10,6 +10,8 @@ import { getNonHeapMemoryChart } from './non_heap_memory';
 import { getThreadCountChart } from './thread_count';
 import { getCPUChartData } from '../shared/cpu';
 import { getMemoryChartData } from '../shared/memory';
+import { getGcRateChart } from './gc/getGcRateChart';
+import { getGcTimeChart } from './gc/getGcTimeChart';
 
 export async function getJavaMetricsCharts(
   setup: Setup,
@@ -21,7 +23,9 @@ export async function getJavaMetricsCharts(
     getMemoryChartData(setup, serviceName, serviceNodeName),
     getHeapMemoryChart(setup, serviceName, serviceNodeName),
     getNonHeapMemoryChart(setup, serviceName, serviceNodeName),
-    getThreadCountChart(setup, serviceName, serviceNodeName)
+    getThreadCountChart(setup, serviceName, serviceNodeName),
+    getGcRateChart(setup, serviceName, serviceNodeName),
+    getGcTimeChart(setup, serviceName, serviceNodeName)
   ]);
 
   return { charts };
