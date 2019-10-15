@@ -26,6 +26,7 @@ export function savedVisualization(): ExpressionFunction<
   Arguments,
   Return
 > {
+  // @ts-ignore elastic/kibana#44822 Disabling pending filters work
   const { help, args: argHelp } = getFunctionHelp().savedVisualization;
   return {
     name: 'savedVisualization',
