@@ -118,7 +118,6 @@ describe('Ip Details', () => {
   let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
-    jest.clearAllMocks();
     store = createStore(state, apolloClientObservable);
     localSource = cloneDeep(mocksSource);
   });

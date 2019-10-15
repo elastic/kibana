@@ -6,6 +6,7 @@ exports[`body render snapshot 1`] = `
     detailName="host-1"
     from={0}
     isInitializing={false}
+    setHostDetailsTablesActivePageToZero={[MockFunction]}
     setQuery={[Function]}
     to={0}
   >

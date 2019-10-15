@@ -12,6 +12,7 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 import {
   applyHostsFilterQuery,
   setHostsFilterQueryDraft,
+  setHostDetailsTablesActivePageToZero,
   setHostTablesActivePageToZero,
   updateHostsSort,
   updateTableActivePage,
@@ -86,6 +87,13 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       ...state.page,
       queries: setHostPageQueriesActivePageToZero(state),
     },
+    details: {
+      ...state.details,
+      queries: setHostDetailsQueriesActivePageToZero(state),
+    },
+  }))
+  .case(setHostDetailsTablesActivePageToZero, state => ({
+    ...state,
     details: {
       ...state.details,
       queries: setHostDetailsQueriesActivePageToZero(state),

@@ -5,7 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -21,6 +21,7 @@ import { LastEventIndexKey } from '../../../graphql/types';
 import { HostsEmptyPage } from '../hosts_empty_page';
 import { HostsKql } from '../kql';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
+import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../../containers/kpi_host_details';
 import { hostToCriteria } from '../../../components/ml/criteria/host_to_criteria';
@@ -45,14 +46,18 @@ const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
 const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
   ({
-    isInitializing,
+    detailName,
     filterQueryExpression,
     from,
-    detailName,
-    setQuery,
+    isInitializing,
     setAbsoluteRangeDatePicker,
+    setHostDetailsTablesActivePageToZero,
+    setQuery,
     to,
   }) => {
+    useEffect(() => {
+      setHostDetailsTablesActivePageToZero(null);
+    }, [detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     return (
       <>
@@ -165,6 +170,7 @@ export const HostDetails = compose<React.ComponentClass<HostsQueryProps & { deta
     makeMapStateToProps,
     {
       setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+      setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
     }
   )
 )(HostDetailsComponent);

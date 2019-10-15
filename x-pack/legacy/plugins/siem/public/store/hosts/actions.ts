@@ -20,6 +20,10 @@ export const updateTableActivePage = actionCreator<{
 
 export const setHostTablesActivePageToZero = actionCreator('SET_HOST_TABLES_ACTIVE_PAGE_TO_ZERO');
 
+export const setHostDetailsTablesActivePageToZero = actionCreator(
+  'SET_HOST_DETAILS_TABLES_ACTIVE_PAGE_TO_ZERO'
+);
+
 export const updateTableLimit = actionCreator<{
   hostsType: HostsType;
   limit: number;
