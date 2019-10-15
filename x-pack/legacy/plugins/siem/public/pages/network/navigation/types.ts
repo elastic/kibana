@@ -7,7 +7,7 @@
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { NavTab } from '../../../components/navigation/types';
-import { FlowTargetNew } from '../../../graphql/types';
+import { FlowTargetSourceDest } from '../../../graphql/types';
 import { networkModel } from '../../../store';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { NarrowDateRange } from '../../../components/ml/types';
@@ -25,7 +25,7 @@ export type DnsQueryTabBodyProps = QueryTabBodyProps & GlobalTimeArgs;
 export type IPsQueryTabBodyProps = QueryTabBodyProps &
   GlobalTimeArgs & {
     indexPattern: StaticIndexPattern;
-    flowTarget: FlowTargetNew;
+    flowTarget: FlowTargetSourceDest;
   };
 
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps &
