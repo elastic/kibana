@@ -18,8 +18,8 @@
  */
 
 // @ts-ignore
-import { uiModules } from 'ui/modules';
-import { DocViewer } from './doc_viewer';
+import { uiModules } from './dependencies';
+import { DocViewer } from '../doc_viewer';
 
 uiModules.get('apps/discover').directive('docViewer', (reactDirective: any) => {
   return reactDirective(DocViewer, undefined, {

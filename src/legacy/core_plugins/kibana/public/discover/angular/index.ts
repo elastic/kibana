@@ -20,3 +20,4 @@ import './dependencies';
 import './discover';
 import './doc';
 import './context';
+import './doc_viewer';

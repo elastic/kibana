@@ -17,6 +17,4 @@
  * under the License.
  */
 
-import './doc_viewer_directive';
-
 export * from './doc_viewer';
