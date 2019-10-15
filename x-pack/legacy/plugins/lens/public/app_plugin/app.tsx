@@ -126,7 +126,6 @@ export function App({
                 persistedDoc: doc,
                 query: doc.state.query,
                 filters: doc.state.filters,
-                dateRange: s.dateRange,
                 indexPatternsForTopNav: indexPatterns,
               }));
             })
