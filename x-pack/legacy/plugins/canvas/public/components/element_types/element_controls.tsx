@@ -7,6 +7,9 @@
 import React, { FunctionComponent, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { ComponentStrings } from '../../../i18n';
+
+const { ElementControls: strings } = ComponentStrings;
 
 interface Props {
   /**
@@ -26,16 +29,16 @@ export const ElementControls: FunctionComponent<Props> = ({ onDelete, onEdit }) 
     justifyContent="spaceBetween"
   >
     <EuiFlexItem grow={false}>
-      <EuiToolTip content="Edit">
-        <EuiButtonIcon iconType="pencil" aria-label="Edit element" onClick={onEdit} />
+      <EuiToolTip content={strings.getEditTooltip()}>
+        <EuiButtonIcon iconType="pencil" aria-label={strings.getEditAriaLabel()} onClick={onEdit} />
       </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiToolTip content="Delete">
+      <EuiToolTip content={strings.getDeleteTooltip()}>
         <EuiButtonIcon
           color="danger"
           iconType="trash"
-          aria-label="Delete element"
+          aria-label={strings.getDeleteAriaLabel()}
           onClick={onDelete}
         />
       </EuiToolTip>

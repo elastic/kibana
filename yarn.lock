@@ -1118,6 +1118,14 @@
     once "^1.4.0"
     pump "^3.0.0"
 
+"@elastic/ems-client@1.0.2", "@elastic/ems-client@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-1.0.2.tgz#b4dcfcb1ce40a4f1d847e39f1d5d994ae7a9f04e"
+  integrity sha512-KYOQ44EEdoel+l1LntUjPvUDS4jfGF24ulojQD1GjStzA0sP8D7iIUY0H6o5Q06cy9lFkXarLKADjAxAqLATSw==
+  dependencies:
+    lodash "^4.17.15"
+    node-fetch "^1.7.3"
+
 "@elastic/eslint-plugin-eui@0.0.2":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
@@ -19953,7 +19961,7 @@ node-environment-flags@1.0.5:
     object.getownpropertydescriptors "^2.0.3"
     semver "^5.7.0"
 
-node-fetch@1.7.3, node-fetch@^1.0.1:
+node-fetch@1.7.3, node-fetch@^1.0.1, node-fetch@^1.7.3:
   version "1.7.3"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-1.7.3.tgz#980f6f72d85211a5347c6b2bc18c5b84c3eb47ef"
   integrity sha512-NhZ4CsKx7cYm2vSrBAr2PvFOe6sWDf0UYLRqA6svUYg7+/TSfVAu49jYC4BvQ4Sms9SZgdqGBgroqfDhJdTyKQ==

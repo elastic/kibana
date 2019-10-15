@@ -140,7 +140,7 @@ export class AdvancedJobCreator extends JobCreator {
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
-    const detectors = getRichDetectors(job, datafeed);
+    const detectors = getRichDetectors(job, datafeed, true);
 
     this.removeAllDetectors();
     this._richDetectors.length = 0;

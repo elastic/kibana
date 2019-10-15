@@ -69,12 +69,6 @@ export interface HostsSortField {
   direction: Direction;
 }
 
-export interface DomainsSortField {
-  field: DomainsFields;
-
-  direction: Direction;
-}
-
 export interface TlsSortField {
   field: TlsFields;
 
@@ -247,17 +241,8 @@ export enum HostsFields {
   lastSeen = 'lastSeen',
 }
 
-export enum DomainsFields {
-  domainName = 'domainName',
-  direction = 'direction',
-  bytes = 'bytes',
-  packets = 'packets',
-  uniqueIpCount = 'uniqueIpCount',
-}
-
-export enum FlowDirection {
-  uniDirectional = 'uniDirectional',
-  biDirectional = 'biDirectional',
+export enum TlsFields {
+  _id = '_id',
 }
 
 export enum FlowTarget {
@@ -267,27 +252,12 @@ export enum FlowTarget {
   source = 'source',
 }
 
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  incoming = 'incoming',
-  outgoing = 'outgoing',
-  listening = 'listening',
-  unknown = 'unknown',
-}
-
-export enum TlsFields {
-  _id = '_id',
-}
-
 export enum UsersFields {
   name = 'name',
   count = 'count',
 }
 
-export enum FlowTargetNew {
+export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
 }
@@ -313,6 +283,22 @@ export enum SortFieldTimeline {
   description = 'description',
   updated = 'updated',
   created = 'created',
+}
+
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  incoming = 'incoming',
+  outgoing = 'outgoing',
+  listening = 'listening',
+  unknown = 'unknown',
+}
+
+export enum FlowDirection {
+  uniDirectional = 'uniDirectional',
+  biDirectional = 'biDirectional',
 }
 
 export type ToStringArray = string[] | string;
@@ -432,8 +418,6 @@ export interface Source {
   HostFirstLastSeen: FirstLastSeenHost;
 
   IpOverview?: Maybe<IpOverviewData>;
-
-  Domains: DomainsData;
 
   Tls: TlsData;
 
@@ -1330,58 +1314,6 @@ export interface AutonomousSystemOrganization {
   name?: Maybe<string>;
 }
 
-export interface DomainsData {
-  edges: DomainsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface DomainsEdges {
-  node: DomainsNode;
-
-  cursor: CursorType;
-}
-
-export interface DomainsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  source?: Maybe<DomainsItem>;
-
-  destination?: Maybe<DomainsItem>;
-
-  client?: Maybe<DomainsItem>;
-
-  server?: Maybe<DomainsItem>;
-
-  network?: Maybe<DomainsNetworkField>;
-}
-
-export interface DomainsItem {
-  uniqueIpCount?: Maybe<number>;
-
-  domainName?: Maybe<string>;
-
-  firstSeen?: Maybe<string>;
-
-  lastSeen?: Maybe<string>;
-}
-
-export interface DomainsNetworkField {
-  bytes?: Maybe<number>;
-
-  packets?: Maybe<number>;
-
-  transport?: Maybe<string>;
-
-  direction?: Maybe<NetworkDirectionEcs[]>;
-}
-
 export interface TlsData {
   edges: TlsEdges[];
 
@@ -1575,7 +1507,7 @@ export interface AutonomousSystemItem {
 export interface GeoItem {
   geo?: Maybe<GeoEcsFields>;
 
-  flowTarget?: Maybe<FlowTarget>;
+  flowTarget?: Maybe<FlowTargetSourceDest>;
 }
 
 export interface TopNFlowItemDestination {
@@ -2070,25 +2002,6 @@ export interface IpOverviewSourceArgs {
 
   defaultIndex: string[];
 }
-export interface DomainsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: DomainsSortField;
-
-  flowDirection: FlowDirection;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
 export interface TlsSourceArgs {
   filterQuery?: Maybe<string>;
 
@@ -2155,7 +2068,9 @@ export interface NetworkTopNFlowSourceArgs {
 
   filterQuery?: Maybe<string>;
 
-  flowTarget: FlowTargetNew;
+  ip?: Maybe<string>;
+
+  flowTarget: FlowTargetSourceDest;
 
   pagination: PaginationInputPaginated;
 
@@ -2618,8 +2533,6 @@ export namespace SourceResolvers {
 
     IpOverview?: IpOverviewResolver<Maybe<IpOverviewData>, TypeParent, TContext>;
 
-    Domains?: DomainsResolver<DomainsData, TypeParent, TContext>;
-
     Tls?: TlsResolver<TlsData, TypeParent, TContext>;
 
     Users?: UsersResolver<UsersData, TypeParent, TContext>;
@@ -2796,32 +2709,6 @@ export namespace SourceResolvers {
     defaultIndex: string[];
   }
 
-  export type DomainsResolver<R = DomainsData, Parent = Source, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext,
-    DomainsArgs
-  >;
-  export interface DomainsArgs {
-    filterQuery?: Maybe<string>;
-
-    id?: Maybe<string>;
-
-    ip: string;
-
-    pagination: PaginationInputPaginated;
-
-    sort: DomainsSortField;
-
-    flowDirection: FlowDirection;
-
-    flowTarget: FlowTarget;
-
-    timerange: TimerangeInput;
-
-    defaultIndex: string[];
-  }
-
   export type TlsResolver<R = TlsData, Parent = Source, TContext = SiemContext> = Resolver<
     R,
     Parent,
@@ -2925,7 +2812,9 @@ export namespace SourceResolvers {
 
     filterQuery?: Maybe<string>;
 
-    flowTarget: FlowTargetNew;
+    ip?: Maybe<string>;
+
+    flowTarget: FlowTargetSourceDest;
 
     pagination: PaginationInputPaginated;
 
@@ -5892,178 +5781,6 @@ export namespace AutonomousSystemOrganizationResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace DomainsDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = DomainsData> {
-    edges?: EdgesResolver<DomainsEdges[], TypeParent, TContext>;
-
-    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
-
-    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
-
-    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
-  }
-
-  export type EdgesResolver<
-    R = DomainsEdges[],
-    Parent = DomainsData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TotalCountResolver<
-    R = number,
-    Parent = DomainsData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PageInfoResolver<
-    R = PageInfoPaginated,
-    Parent = DomainsData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
-    Parent = DomainsData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace DomainsEdgesResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = DomainsEdges> {
-    node?: NodeResolver<DomainsNode, TypeParent, TContext>;
-
-    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
-  }
-
-  export type NodeResolver<
-    R = DomainsNode,
-    Parent = DomainsEdges,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type CursorResolver<
-    R = CursorType,
-    Parent = DomainsEdges,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace DomainsNodeResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = DomainsNode> {
-    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
-
-    timestamp?: TimestampResolver<Maybe<string>, TypeParent, TContext>;
-
-    source?: SourceResolver<Maybe<DomainsItem>, TypeParent, TContext>;
-
-    destination?: DestinationResolver<Maybe<DomainsItem>, TypeParent, TContext>;
-
-    client?: ClientResolver<Maybe<DomainsItem>, TypeParent, TContext>;
-
-    server?: ServerResolver<Maybe<DomainsItem>, TypeParent, TContext>;
-
-    network?: NetworkResolver<Maybe<DomainsNetworkField>, TypeParent, TContext>;
-  }
-
-  export type _IdResolver<
-    R = Maybe<string>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TimestampResolver<
-    R = Maybe<string>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type SourceResolver<
-    R = Maybe<DomainsItem>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type DestinationResolver<
-    R = Maybe<DomainsItem>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type ClientResolver<
-    R = Maybe<DomainsItem>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type ServerResolver<
-    R = Maybe<DomainsItem>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type NetworkResolver<
-    R = Maybe<DomainsNetworkField>,
-    Parent = DomainsNode,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace DomainsItemResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = DomainsItem> {
-    uniqueIpCount?: UniqueIpCountResolver<Maybe<number>, TypeParent, TContext>;
-
-    domainName?: DomainNameResolver<Maybe<string>, TypeParent, TContext>;
-
-    firstSeen?: FirstSeenResolver<Maybe<string>, TypeParent, TContext>;
-
-    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
-  }
-
-  export type UniqueIpCountResolver<
-    R = Maybe<number>,
-    Parent = DomainsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type DomainNameResolver<
-    R = Maybe<string>,
-    Parent = DomainsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type FirstSeenResolver<
-    R = Maybe<string>,
-    Parent = DomainsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type LastSeenResolver<
-    R = Maybe<string>,
-    Parent = DomainsItem,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace DomainsNetworkFieldResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = DomainsNetworkField> {
-    bytes?: BytesResolver<Maybe<number>, TypeParent, TContext>;
-
-    packets?: PacketsResolver<Maybe<number>, TypeParent, TContext>;
-
-    transport?: TransportResolver<Maybe<string>, TypeParent, TContext>;
-
-    direction?: DirectionResolver<Maybe<NetworkDirectionEcs[]>, TypeParent, TContext>;
-  }
-
-  export type BytesResolver<
-    R = Maybe<number>,
-    Parent = DomainsNetworkField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type PacketsResolver<
-    R = Maybe<number>,
-    Parent = DomainsNetworkField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type TransportResolver<
-    R = Maybe<string>,
-    Parent = DomainsNetworkField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type DirectionResolver<
-    R = Maybe<NetworkDirectionEcs[]>,
-    Parent = DomainsNetworkField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace TlsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TlsData> {
     edges?: EdgesResolver<TlsEdges[], TypeParent, TContext>;
@@ -6743,7 +6460,7 @@ export namespace GeoItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = GeoItem> {
     geo?: GeoResolver<Maybe<GeoEcsFields>, TypeParent, TContext>;
 
-    flowTarget?: FlowTargetResolver<Maybe<FlowTarget>, TypeParent, TContext>;
+    flowTarget?: FlowTargetResolver<Maybe<FlowTargetSourceDest>, TypeParent, TContext>;
   }
 
   export type GeoResolver<
@@ -6752,7 +6469,7 @@ export namespace GeoItemResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type FlowTargetResolver<
-    R = Maybe<FlowTarget>,
+    R = Maybe<FlowTargetSourceDest>,
     Parent = GeoItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -8193,11 +7910,6 @@ export type IResolvers<TContext = SiemContext> = {
   Overview?: OverviewResolvers.Resolvers<TContext>;
   AutonomousSystem?: AutonomousSystemResolvers.Resolvers<TContext>;
   AutonomousSystemOrganization?: AutonomousSystemOrganizationResolvers.Resolvers<TContext>;
-  DomainsData?: DomainsDataResolvers.Resolvers<TContext>;
-  DomainsEdges?: DomainsEdgesResolvers.Resolvers<TContext>;
-  DomainsNode?: DomainsNodeResolvers.Resolvers<TContext>;
-  DomainsItem?: DomainsItemResolvers.Resolvers<TContext>;
-  DomainsNetworkField?: DomainsNetworkFieldResolvers.Resolvers<TContext>;
   TlsData?: TlsDataResolvers.Resolvers<TContext>;
   TlsEdges?: TlsEdgesResolvers.Resolvers<TContext>;
   TlsNode?: TlsNodeResolvers.Resolvers<TContext>;
