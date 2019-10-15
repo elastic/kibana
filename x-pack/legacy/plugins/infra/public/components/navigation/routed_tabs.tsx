@@ -36,7 +36,7 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
                 href={`#${tab.path}`}
-                onClick={e => {
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                   e.preventDefault();
                   history.push(tab.path);
                 }}

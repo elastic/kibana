@@ -4,25 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
 import {
   getAPMIndexPattern,
   ISavedObject
 } from '../services/rest/savedObjects';
+import { useFetcher } from './useFetcher';
 
 export function useAPMIndexPattern() {
-  const [pattern, setPattern] = useState({} as ISavedObject);
+  const { data: apmIndexPattern = {} as ISavedObject, status } = useFetcher(
+    getAPMIndexPattern,
+    []
+  );
 
-  async function fetchPattern() {
-    const indexPattern = await getAPMIndexPattern();
-    if (indexPattern) {
-      setPattern(indexPattern);
-    }
-  }
-
-  useEffect(() => {
-    fetchPattern();
-  }, []);
-
-  return pattern;
+  return { apmIndexPattern, status };
 }

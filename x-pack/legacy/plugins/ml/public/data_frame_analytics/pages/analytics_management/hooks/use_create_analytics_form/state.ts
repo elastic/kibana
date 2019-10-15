@@ -9,14 +9,22 @@ import { checkPermission } from '../../../../../privilege/check_privilege';
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
-const ANALYTICS_DETAULT_MODEL_MEMORY_LIMIT = '50mb';
+const OUTLIER_DETECTION_DEFAULT_MODEL_MEMORY_LIMIT = '50mb';
+const REGRESSION_DEFAULT_MODEL_MEMORY_LIMIT = '100mb';
 
 export type EsIndexName = string;
+export type DependentVariable = string;
 export type IndexPatternTitle = string;
+export type AnalyticsJobType = JOB_TYPES | undefined;
 
 export interface FormMessage {
   error?: string;
   message: string;
+}
+
+export enum JOB_TYPES {
+  OUTLIER_DETECTION = 'outlier_detection',
+  REGRESSION = 'regression',
 }
 
 export interface State {
@@ -24,6 +32,9 @@ export interface State {
   advancedEditorRawString: string;
   form: {
     createIndexPattern: boolean;
+    dependentVariable: DependentVariable;
+    dependentVariableFetchFail: boolean;
+    dependentVariableOptions: Array<{ label: DependentVariable }> | [];
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
@@ -34,12 +45,16 @@ export interface State {
     jobIdEmpty: boolean;
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
+    jobType: AnalyticsJobType;
+    loadingDepFieldOptions: boolean;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
+    trainingPercent: number;
   };
   disabled: boolean;
   indexNames: EsIndexName[];
+  indexPatternsMap: any; // TODO: update type
   indexPatternTitles: IndexPatternTitle[];
   indexPatternsWithNumericFields: IndexPatternTitle[];
   isAdvancedEditorEnabled: boolean;
@@ -58,6 +73,9 @@ export const getInitialState = (): State => ({
   advancedEditorRawString: '',
   form: {
     createIndexPattern: false,
+    dependentVariable: '',
+    dependentVariableFetchFail: false,
+    dependentVariableOptions: [],
     destinationIndex: '',
     destinationIndexNameExists: false,
     destinationIndexNameEmpty: true,
@@ -68,15 +86,19 @@ export const getInitialState = (): State => ({
     jobIdEmpty: true,
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
+    jobType: undefined,
+    loadingDepFieldOptions: false,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
+    trainingPercent: 80,
   },
   jobConfig: {},
   disabled:
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics'),
   indexNames: [],
+  indexPatternsMap: {},
   indexPatternTitles: [],
   indexPatternsWithNumericFields: [],
   isAdvancedEditorEnabled: false,
@@ -92,7 +114,12 @@ export const getInitialState = (): State => ({
 export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
-  return {
+  const modelMemoryLimit =
+    formState.jobType === JOB_TYPES.REGRESSION
+      ? REGRESSION_DEFAULT_MODEL_MEMORY_LIMIT
+      : OUTLIER_DETECTION_DEFAULT_MODEL_MEMORY_LIMIT;
+
+  const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
     source: {
       // If a Kibana index patterns includes commas, we need to split
       // the into an array of indices to be in the correct format for
@@ -110,6 +137,17 @@ export const getJobConfigFromFormState = (
     analysis: {
       outlier_detection: {},
     },
-    model_memory_limit: ANALYTICS_DETAULT_MODEL_MEMORY_LIMIT,
+    model_memory_limit: modelMemoryLimit,
   };
+
+  if (formState.jobType === JOB_TYPES.REGRESSION) {
+    jobConfig.analysis = {
+      regression: {
+        dependent_variable: formState.dependentVariable,
+        training_percent: formState.trainingPercent,
+      },
+    };
+  }
+
+  return jobConfig;
 };

@@ -197,12 +197,12 @@ function VisEditor(
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return doSave(saveOptions).then(({ id, error }) => {
+        return doSave(saveOptions).then((response) => {
           // If the save wasn't successful, put the original values back.
-          if (!id || error) {
+          if (!response.id || response.error) {
             savedVis.title = currentTitle;
           }
-          return { id, error };
+          return response;
         });
       };
 
