@@ -5,7 +5,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { getOr, isEqual } from 'lodash/fp';
+import { getOr, isEqual, set } from 'lodash/fp';
 import React, { memo, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -16,13 +16,14 @@ import { StaticIndexPattern, IndexPattern } from 'ui/index_patterns';
 import { TimeRange, Query } from 'src/plugins/data/common/types';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
+import { OnTimeChangeProps } from '@elastic/eui';
 import { start as data } from '../../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 import { inputsActions } from '../../store/inputs';
 import { InputsRange } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
 import { State, inputsModel } from '../../store';
-import { dispatchUpdateReduxTime, DispatchUpdateReduxTime, formatDate } from '../super_date_picker';
+import { formatDate } from '../super_date_picker';
 import {
   endSelector,
   filterQuerySelector,
@@ -34,6 +35,7 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
+import { timelineActions, hostsActions, networkActions } from '../../store/actions';
 
 const {
   ui: { SearchBar },
@@ -57,16 +59,7 @@ interface SiemSearchBarRedux {
 }
 
 interface SiemSearchBarDispatch {
-  updateReduxTime: DispatchUpdateReduxTime;
-  setFilterQuery: ({
-    id,
-    query,
-    language,
-  }: {
-    id: InputsModelId;
-    query: string | { [key: string]: unknown };
-    language: string;
-  }) => void;
+  updateSearch: DispatchUpdateSearch;
   setSavedQuery: ({
     id,
     savedQuery,
@@ -99,13 +92,12 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     isLoading = false,
     queries,
     savedQuery,
-    setFilterQuery,
     setSavedQuery,
     setSearchBarFilter,
     start,
     timelineId,
     toStr,
-    updateReduxTime,
+    updateSearch,
   }) => {
     if (fromStr != null && toStr != null) {
       timefilter.timefilter.setTime({ from: fromStr, to: toStr });
@@ -117,9 +109,18 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     }
 
     const onQuerySubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
-      let isStateUpdated = false;
       const isQuickSelection =
         payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now');
+      let updateSearchBar: UpdateReduxSearchBar = {
+        id,
+        end: toStr != null ? toStr : new Date(end).toISOString(),
+        start: fromStr != null ? fromStr : new Date(start).toISOString(),
+        isInvalid: false,
+        isQuickSelection,
+        updateTime: false,
+      };
+      let isStateUpdated = false;
+
       if (
         (isQuickSelection &&
           (fromStr !== payload.dateRange.from || toStr !== payload.dateRange.to)) ||
@@ -128,53 +129,39 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
             end !== formatDate(payload.dateRange.to)))
       ) {
         isStateUpdated = true;
-        updateReduxTime({
-          end: payload.dateRange.to,
-          id,
-          isInvalid: false,
-          isQuickSelection,
-          kql: undefined,
-          start: payload.dateRange.from,
-          timelineId,
-        });
+        updateSearchBar.updateTime = true;
+        updateSearchBar.end = payload.dateRange.to;
+        updateSearchBar.start = payload.dateRange.from;
       }
 
       if (payload.query != null && !isEqual(payload.query, filterQuery)) {
         isStateUpdated = true;
-        setFilterQuery({
-          id,
-          ...payload.query,
-        });
+        updateSearchBar = set('query', payload.query, updateSearchBar);
       }
 
       if (!isStateUpdated) {
         // That mean we are doing a refresh!
         if (isQuickSelection) {
-          updateReduxTime({
-            end: payload.dateRange.to,
-            id,
-            isInvalid: false,
-            isQuickSelection,
-            kql: undefined,
-            start: payload.dateRange.from,
-            timelineId,
-          });
+          updateSearchBar.updateTime = true;
+          updateSearchBar.end = payload.dateRange.to;
+          updateSearchBar.start = payload.dateRange.from;
         } else {
           queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
       }
+
+      updateSearch(updateSearchBar);
     };
 
     const onRefresh = (payload: { dateRange: TimeRange }) => {
       if (payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now')) {
-        updateReduxTime({
-          end: payload.dateRange.to,
+        updateSearch({
           id,
+          end: payload.dateRange.to,
+          start: payload.dateRange.from,
           isInvalid: false,
           isQuickSelection: true,
-          kql: undefined,
-          start: payload.dateRange.from,
-          timelineId,
+          updateTime: true,
         });
       } else {
         queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
@@ -186,45 +173,54 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     };
 
     const onSavedQueryUpdated = (savedQueryUpdated: SavedQuery) => {
-      siemFilterManager.setFilters(savedQueryUpdated.attributes.filters || []);
-
       const isQuickSelection = savedQueryUpdated.attributes.timefilter
         ? savedQueryUpdated.attributes.timefilter.from.includes('now') ||
           savedQueryUpdated.attributes.timefilter.to.includes('now')
         : false;
 
+      let updateSearchBar: UpdateReduxSearchBar = {
+        id,
+        filters: savedQueryUpdated.attributes.filters || [],
+        end: toStr != null ? toStr : new Date(end).toISOString(),
+        start: fromStr != null ? fromStr : new Date(start).toISOString(),
+        isInvalid: false,
+        isQuickSelection,
+        updateTime: false,
+      };
+
       if (savedQueryUpdated.attributes.timefilter) {
-        updateReduxTime({
-          end: savedQueryUpdated.attributes.timefilter
-            ? savedQueryUpdated.attributes.timefilter.to
-            : toStr,
-          id,
-          isInvalid: false,
-          isQuickSelection,
-          kql: undefined,
-          start: savedQueryUpdated.attributes.timefilter
-            ? savedQueryUpdated.attributes.timefilter.from
-            : fromStr,
-          timelineId,
-        });
+        updateSearchBar.end = savedQueryUpdated.attributes.timefilter
+          ? savedQueryUpdated.attributes.timefilter.to
+          : updateSearchBar.end;
+        updateSearchBar.start = savedQueryUpdated.attributes.timefilter
+          ? savedQueryUpdated.attributes.timefilter.from
+          : updateSearchBar.start;
+        updateSearchBar.updateTime = true;
       }
 
-      setFilterQuery({
-        id,
-        ...savedQueryUpdated.attributes.query,
-      });
-      setSavedQuery({ id, savedQuery: savedQueryUpdated });
+      updateSearchBar = set('query', savedQueryUpdated.attributes.query, updateSearchBar);
+      updateSearchBar = set('savedQuery', savedQueryUpdated, updateSearchBar);
+
+      updateSearch(updateSearchBar);
     };
 
     const onClearSavedQuery = () => {
       if (savedQuery != null) {
-        setFilterQuery({
+        updateSearch({
           id,
-          query: '',
-          language: savedQuery.attributes.query.language,
+          filters: [],
+          end: toStr != null ? toStr : new Date(end).toISOString(),
+          start: fromStr != null ? fromStr : new Date(start).toISOString(),
+          isInvalid: false,
+          isQuickSelection: false,
+          updateTime: false,
+          query: {
+            query: '',
+            language: savedQuery.attributes.query.language,
+          },
+          resetSavedQuery: true,
+          savedQuery: undefined,
         });
-        setSavedQuery({ id, savedQuery: undefined });
-        siemFilterManager.setFilters([]);
       }
     };
 
@@ -303,17 +299,90 @@ const makeMapStateToProps = () => {
 
 SearchBarComponent.displayName = 'SiemSearchBarComponent';
 
+interface UpdateReduxSearchBar extends OnTimeChangeProps {
+  id: InputsModelId;
+  filters?: Filter[];
+  query?: Query;
+  savedQuery?: SavedQuery;
+  resetSavedQuery?: boolean;
+  timelineId?: string;
+  updateTime: boolean;
+}
+
+type DispatchUpdateSearch = ({
+  end,
+  id,
+  isQuickSelection,
+  start,
+  timelineId,
+}: UpdateReduxSearchBar) => void;
+
+export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
+  end,
+  filters,
+  id,
+  isQuickSelection,
+  query,
+  resetSavedQuery,
+  savedQuery,
+  start,
+  timelineId,
+  updateTime = false,
+}: UpdateReduxSearchBar): void => {
+  if (updateTime) {
+    const fromDate = formatDate(start);
+    let toDate = formatDate(end, { roundUp: true });
+    if (isQuickSelection) {
+      dispatch(
+        inputsActions.setRelativeRangeDatePicker({
+          id,
+          fromStr: start,
+          toStr: end,
+          from: fromDate,
+          to: toDate,
+        })
+      );
+    } else {
+      toDate = formatDate(end);
+      dispatch(
+        inputsActions.setAbsoluteRangeDatePicker({
+          id,
+          from: formatDate(start),
+          to: formatDate(end),
+        })
+      );
+    }
+    if (timelineId != null) {
+      dispatch(
+        timelineActions.updateRange({
+          id: timelineId,
+          start: fromDate,
+          end: toDate,
+        })
+      );
+    }
+  }
+  if (query != null) {
+    dispatch(
+      inputsActions.setFilterQuery({
+        id,
+        ...query,
+      })
+    );
+  }
+  if (filters != null) {
+    siemFilterManager.setFilters(filters);
+  }
+  if (savedQuery != null || resetSavedQuery) {
+    dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
+  }
+
+  dispatch(hostsActions.setHostTablesActivePageToZero());
+  dispatch(networkActions.setNetworkTablesActivePageToZero());
+};
+
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  updateReduxTime: dispatchUpdateReduxTime(dispatch),
-  setFilterQuery: ({
-    id,
-    query,
-    language,
-  }: {
-    id: InputsModelId;
-    query: string | { [key: string]: unknown };
-    language: string;
-  }) => dispatch(inputsActions.setFilterQuery({ id, query, language })),
+  updateSearch: dispatchUpdateSearch(dispatch),
   setSavedQuery: ({ id, savedQuery }: { id: InputsModelId; savedQuery: SavedQuery | undefined }) =>
     dispatch(inputsActions.setSavedQuery({ id, savedQuery })),
   setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) =>
