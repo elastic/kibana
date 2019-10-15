@@ -403,7 +403,7 @@ export class VectorStyle extends AbstractStyle {
           } else if (range.delta === 0) {//values are identical
             styleValue = 1;//snap to end of color range
           } else {
-            styleValue = (feature.properties[name] - range.min) / range.delta;
+            styleValue = (value - range.min) / range.delta;
           }
         } else {
           if (isNaN(value)) {

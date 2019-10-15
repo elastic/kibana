@@ -82,6 +82,16 @@ export const ErrorStrings = {
         },
       }),
   },
+  RepeatImage: {
+    getMissingMaxArgumentErrorMessage: () =>
+      i18n.translate('xpack.canvas.error.repeatImage.missingMaxArgument', {
+        defaultMessage: '{maxArgument} must be set if providing an {emptyImageArgument}',
+        values: {
+          maxArgument: '`max`',
+          emptyImageArgument: '`emptyImage`',
+        },
+      }),
+  },
   WorkpadFileUpload: {
     getAcceptJSONOnlyErrorMessage: () =>
       i18n.translate('xpack.canvas.error.workpadUpload.acceptJSONOnlyErrorMessage', {
