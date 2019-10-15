@@ -23,32 +23,53 @@ import {
   EuiTitle,
   EuiSideNav,
 } from '@elastic/eui';
+import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { AppMountContext, AppMountParameters } from 'kibana/public';
-import { number } from 'joi';
 
 export const AlertList = ({ context }: { context: AppMountContext }) => {
-  const [data, setData] = useState({ hits: [], pageIndex: 0, pageSize: 5, sortField: '', sortDirection: 'asc'});
+  interface AlertData {
+    hits: unknown[];
+    totalHits: number;
+    pageIndex: number;
+    pageSize: number;
+    sortField: string;
+    sortDirection: Direction;
+    showPerPageOptions: boolean;
+  }
+  const [data, setData]: [AlertData, any] = useState({
+    hits: [],
+    totalHits: 0,
+    pageIndex: 0,
+    pageSize: 10,
+    sortField: '',
+    sortDirection: 'asc',
+    showPerPageOptions: true,
+  });
 
   async function fetchAlertListData() {
     const response = await context.core.http.get('/alerts', {
-      query: {},
+      query: {
+        pageIndex: data.pageIndex,
+        pageSize: data.pageSize,
+      },
     });
     setData({
+      ...data,
       hits: response.elasticsearchResponse.hits.hits,
-      pageIndex: data.pageIndex,
-      pageSize: data.pageSize,
-      sortField: data.sortField,
-      sortDirection: data.sortDirection
+      totalHits: response.elasticsearchResponse.hits.total.value,
     });
   }
 
-  const onTableChange = ({ page = {}, sort = {} }: {page: any, sort: any}) => {
-    const { index: pageIndex, size: pageSize } = page;
+  useEffect(() => {
+    fetchAlertListData();
+  }, [data.pageSize, data.pageIndex]);
 
+  const onTableChange = ({ page = {}, sort = {} }: { page: any; sort: any }) => {
+    const { index: pageIndex, size: pageSize } = page;
     const { field: sortField, direction: sortDirection } = sort;
 
     setData({
-      hits: data.hits,
+      ...data,
       pageIndex,
       pageSize,
       sortField,
@@ -56,57 +77,69 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
     });
   };
 
-
-  useEffect(() => {
-    fetchAlertListData();
-  }, [data.pageIndex, data.sortDirection, data.sortField]);
-
-
   const items = data.hits.map((item: any) => {
-    return item._source})
+    return item._source;
+  });
+
+  const pagination = {
+    pageIndex: data.pageIndex,
+    pageSize: data.pageSize,
+    totalItemCount: data.totalHits,
+    pageSizeOptions: [5, 10, 20],
+    hidePerPageOptions: !data.showPerPageOptions,
+  };
 
   const sort: EuiTableCriteria['sort'] = {
-      field: 'endgame.timestamp_utc',
-      direction: 'asc',
+    field: data.sortField,
+    direction: data.sortDirection,
   };
 
   const sorting = {
-    sort: sort
-  }
-
+    sort,
+  };
 
   const columns = [
     {
       field: 'endgame.timestamp_utc',
       name: 'Timestamp',
       sortable: true,
-      render: (timestamp: string) => {return timestamp}
+      render: (timestamp: string) => {
+        return timestamp;
+      },
     },
     {
       field: 'endgame.data.alert_details.target_process.name',
       name: 'Process name',
       sortable: false,
-      render: (procName: string) => {return procName}
+      render: (procName: string) => {
+        return procName;
+      },
     },
     {
       field: 'host.hostname',
       name: 'Host',
       sortable: false,
-      render: (hostName: string) => {return hostName}
+      render: (hostName: string) => {
+        return hostName;
+      },
     },
     {
       field: 'host.os.name',
       name: 'Operating System',
       sortable: false,
-      render: (osName: string) => {return osName}
+      render: (osName: string) => {
+        return osName;
+      },
     },
     {
       field: 'host.ip',
       name: 'IP',
       sortable: false,
-      render: (ip: string) => {return ip}
+      render: (ip: string) => {
+        return ip;
+      },
     },
-  ]
+  ];
   return (
     <EuiPageBody data-test-subj="fooAppPageA">
       <EuiPageHeader>
@@ -125,13 +158,13 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody>
-
-        <EuiBasicTable
-          items={items}
-          columns={columns}
-          sorting={sorting}
-          onChange={onTableChange}
-        />
+          <EuiBasicTable
+            items={items}
+            columns={columns}
+            pagination={pagination}
+            sorting={sorting}
+            onChange={onTableChange}
+          />
         </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>

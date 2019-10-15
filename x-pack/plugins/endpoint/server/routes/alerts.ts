@@ -12,7 +12,10 @@ export function alertsRoutes(router: IRouter) {
     {
       path: '/alerts',
       validate: {
-        query: schema.object({}),
+        query: schema.object({
+          pageSize: schema.number(),
+          pageIndex: schema.number(),
+        }),
       },
     },
     async function(context, request, response) {
@@ -22,6 +25,8 @@ export function alertsRoutes(router: IRouter) {
           'search',
           {
             body: {
+              from: request.query.pageIndex,
+              size: request.query.pageSize,
               query: {
                 match: {
                   'event.kind': 'alert',
