@@ -29,9 +29,11 @@ import {
   getLogEntryRateCombinedSeries,
   getTopAnomalyScoreAcrossAllPartitions,
 } from '../helpers/data_formatters';
+import { GetMlLink } from '../helpers/ml_links';
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
 import { LogAnalysisJobProblemIndicator } from '../../../../../components/logging/log_analysis_job_status';
+import { AnalyzeInMlButton } from '../analyze_in_ml_button';
 
 export const AnomaliesResults: React.FunctionComponent<{
   isLoading: boolean;
@@ -42,6 +44,7 @@ export const AnomaliesResults: React.FunctionComponent<{
   timeRange: TimeRange;
   viewSetupForReconfiguration: () => void;
   viewSetupForUpdate: () => void;
+  getMlLink: GetMlLink;
 }> = ({
   isLoading,
   jobStatus,
@@ -51,6 +54,7 @@ export const AnomaliesResults: React.FunctionComponent<{
   timeRange,
   viewSetupForReconfiguration,
   viewSetupForUpdate,
+  getMlLink,
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.anomaliesSectionTitle', {
     defaultMessage: 'Anomalies',
@@ -105,12 +109,7 @@ export const AnomaliesResults: React.FunctionComponent<{
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill>
-            <FormattedMessage
-              id="xpack.infra.logs.analysis.analyzeInMlButtonLabel"
-              defaultMessage="Analyze in ML"
-            />
-          </EuiButton>
+          <AnalyzeInMlButton href={getMlLink()} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -193,7 +192,12 @@ export const AnomaliesResults: React.FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
-          <AnomaliesTable results={results} setTimeRange={setTimeRange} timeRange={timeRange} />
+          <AnomaliesTable
+            results={results}
+            setTimeRange={setTimeRange}
+            timeRange={timeRange}
+            getMlLink={getMlLink}
+          />
         </>
       )}
     </>

@@ -12,6 +12,7 @@ import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 import { getTopAnomalyScoresByPartition, formatAnomalyScore } from '../helpers/data_formatters';
+import { GetMlLink } from '../helpers/ml_links';
 
 interface TableItem {
   id: string;
@@ -52,7 +53,8 @@ export const AnomaliesTable: React.FunctionComponent<{
   results: GetLogEntryRateSuccessResponsePayload['data'];
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
-}> = ({ results, timeRange, setTimeRange }) => {
+  getMlLink: GetMlLink;
+}> = ({ results, timeRange, setTimeRange, getMlLink }) => {
   const tableItems: TableItem[] = useMemo(() => {
     return Object.entries(getTopAnomalyScoresByPartition(results)).map(([key, value]) => {
       return {
@@ -112,6 +114,7 @@ export const AnomaliesTable: React.FunctionComponent<{
               topAnomalyScore={item.topAnomalyScore}
               setTimeRange={setTimeRange}
               timeRange={timeRange}
+              getMlLink={getMlLink}
             />
           ),
         };

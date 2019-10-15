@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiSpacer } from '@elastic/eui';
 import { AnomaliesChart } from './chart';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
@@ -17,6 +17,8 @@ import {
   formatAnomalyScore,
   getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
+import { GetMlLink } from '../helpers/ml_links';
+import { AnalyzeInMlButton } from '../analyze_in_ml_button';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   partitionId: string;
@@ -24,7 +26,8 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   results: GetLogEntryRateSuccessResponsePayload['data'];
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
-}> = ({ results, timeRange, setTimeRange, topAnomalyScore, partitionId }) => {
+  getMlLink: GetMlLink;
+}> = ({ results, timeRange, setTimeRange, topAnomalyScore, partitionId, getMlLink }) => {
   const logEntryRateSeries = useMemo(
     () =>
       results && results.histogramBuckets
@@ -83,6 +86,12 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           )}
           reverse
         />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <AnalyzeInMlButton fill={false} href={getMlLink(partitionId)} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
