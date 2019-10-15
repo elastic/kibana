@@ -18,7 +18,7 @@
  */
 import { Filter, FILTERS, isSavedQueryFilter } from '@kbn/es-query';
 
-export const mapSavedQuery = async (filter: Filter) => {
+export const mapSavedQuery = (filter: Filter) => {
   if (!isSavedQueryFilter(filter)) {
     throw filter;
   } else {

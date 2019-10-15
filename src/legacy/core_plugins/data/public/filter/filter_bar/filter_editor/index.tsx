@@ -479,15 +479,16 @@ class FilterEditorUI extends Component<Props, State> {
     );
     this.onSavedQueryChange(selectedSavedQuery, savedQueries);
   };
-
+  // SavedQueryPicker is a list of the saved queries and allows for a single option to be selected.
+  // SavedQueryEditor is the Editor UI for the selected saved query and implements the SearchBar UI
   private renderSavedQueryEditor() {
     return (
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
-          {/* <SavedQueryPicker
+          <SavedQueryPicker
             savedQueryService={this.props.savedQueryService}
             onChange={this.onSavedQuerySelected}
-          /> */}
+          />
           <SavedQueryEditor
             currentSavedQuery={this.state.selectedSavedQuery}
             uiSettings={this.props.uiSettings}
