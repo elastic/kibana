@@ -43,6 +43,7 @@ exports[`TooltipHeader multiple features, multiple layers: locked should show pa
         describedByIds={Array []}
         display="rowCompressed"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         labelType="label"
       >

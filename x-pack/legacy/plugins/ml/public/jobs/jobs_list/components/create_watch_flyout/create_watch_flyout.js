@@ -24,8 +24,8 @@ import {
 
 import { toastNotifications } from 'ui/notify';
 import { loadFullJob } from '../utils';
-import { mlCreateWatchService } from '../../../../jobs/new_job/simple/components/watcher/create_watch_service';
-import { CreateWatch } from '../../../../jobs/new_job/simple/components/watcher/create_watch_view';
+import { mlCreateWatchService } from './create_watch_service';
+import { CreateWatch } from './create_watch_view';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 

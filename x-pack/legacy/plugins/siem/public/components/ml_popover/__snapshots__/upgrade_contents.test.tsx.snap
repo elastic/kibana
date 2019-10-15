@@ -15,18 +15,16 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
       id="xpack.siem.components.mlPopup.upgradeDescription"
       values={
         Object {
-          "cloudLink": <EuiLink
-            color="primary"
+          "cloudLink": <ForwardRef
             href="https://www.elastic.co/cloud/"
             target="_blank"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="cloud deployment"
               id="xpack.siem.components.mlPopup.cloudLink"
               values={Object {}}
             />
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />
