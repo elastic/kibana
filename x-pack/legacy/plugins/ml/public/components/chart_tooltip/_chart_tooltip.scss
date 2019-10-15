@@ -9,6 +9,7 @@
   transition: opacity $euiAnimSpeedNormal;
   pointer-events: none;
   user-select: none;
+  max-width: 512px;
 
   &__list {
     margin: $euiSizeXS;
@@ -34,6 +35,8 @@
   }
 
   &__value {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
     font-weight: $euiFontWeightBold;
     text-align: right;
     font-feature-settings: 'tnum';
