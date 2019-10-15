@@ -62,7 +62,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           annotations={anomalyAnnotations}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>
+      <EuiFlexItem>
         <EuiStat
           title={numeral(totalNumberOfLogs).format('0.00a')}
           description={i18n.translate(
