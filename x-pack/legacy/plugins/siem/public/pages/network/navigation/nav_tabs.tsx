@@ -24,7 +24,7 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       name: i18n.NAVIGATION_COUNTRIES_TITLE,
       href: getTabsOnNetworkUrl(NetworkRouteType.countries),
       disabled: false,
-      urlKey: 'countries',
+      urlKey: 'network',
     },
     [NetworkRouteType.dns]: {
       id: NetworkRouteType.dns,

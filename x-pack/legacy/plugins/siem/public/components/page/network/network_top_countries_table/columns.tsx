@@ -34,6 +34,14 @@ export type NetworkTopCountriesColumns = [
   Columns<NetworkTopCountriesEdges>
 ];
 
+export type NetworkTopCountriesColumnsIpDetails = [
+  Columns<NetworkTopCountriesEdges>,
+  Columns<TopNFlowNetworkEcsField['bytes_in']>,
+  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<NetworkTopCountriesEdges>,
+  Columns<NetworkTopCountriesEdges>
+];
+
 export const getNetworkTopCountriesColumns = (
   indexPattern: StaticIndexPattern,
   flowTarget: FlowTargetSourceDest,
@@ -119,7 +127,7 @@ export const getNetworkTopCountriesColumns = (
   },
   {
     align: 'right',
-    field: `node.${flowTarget}.source_ips`,
+    field: `node.${flowTarget}.${flowTarget}_ips`,
     name: i18n.SOURCE_IPS,
     sortable: true,
     render: ips => {
@@ -132,7 +140,7 @@ export const getNetworkTopCountriesColumns = (
   },
   {
     align: 'right',
-    field: `node.${flowTarget}.destination_ips`,
+    field: `node.${flowTarget}.${getOppositeField(flowTarget)}_ips`,
     name: i18n.DESTINATION_IPS,
     sortable: true,
     render: ips => {
@@ -144,3 +152,25 @@ export const getNetworkTopCountriesColumns = (
     },
   },
 ];
+
+export const getCountriesColumnsCurated = (
+  indexPattern: StaticIndexPattern,
+  flowTarget: FlowTargetSourceDest,
+  type: networkModel.NetworkType,
+  tableId: string
+): NetworkTopCountriesColumns | NetworkTopCountriesColumnsIpDetails => {
+  const columns = getNetworkTopCountriesColumns(indexPattern, flowTarget, type, tableId);
+
+  // Columns to exclude from host details pages
+  if (type === networkModel.NetworkType.details) {
+    columns.pop();
+    return columns;
+  }
+
+  return columns;
+};
+
+const getOppositeField = (flowTarget: FlowTargetSourceDest): FlowTargetSourceDest =>
+  flowTarget === FlowTargetSourceDest.source
+    ? FlowTargetSourceDest.destination
+    : FlowTargetSourceDest.source;

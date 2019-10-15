@@ -22,7 +22,7 @@ import {
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
-import { getNetworkTopCountriesColumns } from './columns';
+import { getCountriesColumnsCurated } from './columns';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -162,7 +162,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getNetworkTopCountriesColumns(
+        columns={getCountriesColumnsCurated(
           indexPattern,
           flowTargeted,
           type,
