@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash/fp';
+import { get, capitalize } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
 import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
-import { IpDetailsTableType, NetworkDetailsModel, NetworkPageModel, NetworkType } from './model';
-import { FlowTargetSourceDest } from '../../graphql/types';
+import { NetworkDetailsModel, NetworkPageModel, NetworkType } from './model';
+import { FlowTargetSourceDest, NetworkTopNFlowFields, Direction } from '../../graphql/types';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 const selectNetworkPage = (state: State): NetworkPageModel => state.network.page;
 
@@ -19,6 +20,20 @@ const selectNetworkDetails = (state: State): NetworkDetailsModel => state.networ
 
 const selectNetworkByType = (state: State, networkType: NetworkType) =>
   get(networkType, state.network);
+
+const selectTopNFlowByType = (
+  state: State,
+  networkType: NetworkType,
+  flowTarget: FlowTargetSourceDest
+) =>
+  get([networkType, 'queries', `topNFlow${capitalize(flowTarget)}`], state.network) || {
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+    limit: DEFAULT_TABLE_LIMIT,
+    topNFlowSort: {
+      field: NetworkTopNFlowFields.bytes_out,
+      direction: Direction.desc,
+    },
+  };
 
 // Network Page Selectors
 export const dnsSelector = () =>
@@ -31,24 +46,12 @@ export enum NetworkTableType {
   topNFlowSource = 'topNFlowSource',
   topNFlowDestination = 'topNFlowDestination',
 }
-export const topNFlowSelector = (flowTarget: FlowTargetSourceDest, networkType: NetworkType) => {
-  if (networkType === NetworkType.page) {
-    return createSelector(
-      selectNetworkPage,
-      network =>
-        flowTarget === FlowTargetSourceDest.source
-          ? network.queries[NetworkTableType.topNFlowSource]
-          : network.queries[NetworkTableType.topNFlowDestination]
-    );
-  }
-  return createSelector(
-    selectNetworkDetails,
-    network =>
-      flowTarget === FlowTargetSourceDest.source
-        ? network.queries[IpDetailsTableType.topNFlowSource]
-        : network.queries[IpDetailsTableType.topNFlowDestination]
+
+export const topNFlowSelector = () =>
+  createSelector(
+    selectTopNFlowByType,
+    topNFlowQueries => topNFlowQueries
   );
-};
 
 // Filter Query Selectors
 export const networkFilterQueryAsJson = () =>
