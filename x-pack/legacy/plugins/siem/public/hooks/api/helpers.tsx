@@ -12,7 +12,7 @@ import { IndexPatternSavedObject } from '../types';
  * @param indexPatterns IndexPatternSavedObject[] as provided from the useIndexPatterns() hook
  */
 export const getIndexPatternTitles = (indexPatterns: IndexPatternSavedObject[]): string[] =>
-  indexPatterns.reduce((acc: string[], v) => [...acc, v.attributes.title], []);
+  indexPatterns.reduce<string[]>((acc, v) => [...acc, v.attributes.title], []);
 
 /**
  * Returns a mapping of indexPatternTitle to indexPatternId
