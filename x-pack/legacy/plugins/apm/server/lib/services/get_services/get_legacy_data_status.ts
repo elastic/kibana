@@ -31,6 +31,6 @@ export async function getLegacyDataStatus(setup: Setup) {
   };
 
   const resp = await client.search(params, { includeLegacyData: true });
-  const hasLegacyData = resp.hits.total > 0;
+  const hasLegacyData = resp.hits.total.value > 0;
   return hasLegacyData;
 }

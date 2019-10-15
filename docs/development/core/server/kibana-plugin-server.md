@@ -27,6 +27,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Enumeration | Description |
 |  --- | --- |
+|  [AuthResultType](./kibana-plugin-server.authresulttype.md) |  |
 |  [AuthStatus](./kibana-plugin-server.authstatus.md) | Status indicating an outcome of the authentication. |
 
 ## Interfaces
@@ -36,6 +37,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [APICaller](./kibana-plugin-server.apicaller.md) |  |
 |  [AssistanceAPIResponse](./kibana-plugin-server.assistanceapiresponse.md) |  |
 |  [AssistantAPIClientParams](./kibana-plugin-server.assistantapiclientparams.md) |  |
+|  [Authenticated](./kibana-plugin-server.authenticated.md) |  |
 |  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of an incoming request authentication. |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
@@ -49,15 +51,17 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DiscoveredPlugin](./kibana-plugin-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchError](./kibana-plugin-server.elasticsearcherror.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
+|  [EnvironmentMode](./kibana-plugin-server.environmentmode.md) |  |
 |  [ErrorHttpResponseOptions](./kibana-plugin-server.errorhttpresponseoptions.md) | HTTP response parameters |
 |  [FakeRequest](./kibana-plugin-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
 |  [HttpResponseOptions](./kibana-plugin-server.httpresponseoptions.md) | HTTP response parameters |
-|  [HttpServerSetup](./kibana-plugin-server.httpserversetup.md) | Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to <code>hapi</code> server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs. |
+|  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) | Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to <code>hapi</code> server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs. |
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [IContextContainer](./kibana-plugin-server.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
+|  [IKibanaResponse](./kibana-plugin-server.ikibanaresponse.md) | A response data object, expected to returned as a result of [RequestHandler](./kibana-plugin-server.requesthandler.md) execution |
 |  [IKibanaSocket](./kibana-plugin-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
 |  [IndexSettingsDeprecationInfo](./kibana-plugin-server.indexsettingsdeprecationinfo.md) |  |
-|  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. |
+|  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-server.routeconfig.md) and [RequestHandler](./kibana-plugin-server.requesthandler.md) for more information about arguments to route registrations. |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
 |  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) |  |
 |  [LegacyServiceSetupDeps](./kibana-plugin-server.legacyservicesetupdeps.md) |  |
@@ -67,6 +71,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
 |  [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
+|  [PackageInfo](./kibana-plugin-server.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginManifest](./kibana-plugin-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
@@ -116,8 +121,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) |  |
+|  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-server.authheaders.md) | Auth Headers map |
+|  [AuthResult](./kibana-plugin-server.authresult.md) |  |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
@@ -127,7 +133,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HandlerParameters](./kibana-plugin-server.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-server.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-server.handlercontexttype.md)<!-- -->. |
 |  [Headers](./kibana-plugin-server.headers.md) | Http request headers to read. |
 |  [HttpResponsePayload](./kibana-plugin-server.httpresponsepayload.md) | Data send to the client as a response payload. |
-|  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
 |  [IBasePath](./kibana-plugin-server.ibasepath.md) | Access or manipulate the Kibana base path[BasePath](./kibana-plugin-server.basepath.md) |
 |  [IClusterClient](./kibana-plugin-server.iclusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
 |  [IContextProvider](./kibana-plugin-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
@@ -138,8 +143,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LifecycleResponseFactory](./kibana-plugin-server.lifecycleresponsefactory.md) | Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client. |
 |  [MIGRATION\_ASSISTANCE\_INDEX\_ACTION](./kibana-plugin-server.migration_assistance_index_action.md) |  |
 |  [MIGRATION\_DEPRECATION\_LEVEL](./kibana-plugin-server.migration_deprecation_level.md) |  |
-|  [OnPostAuthHandler](./kibana-plugin-server.onpostauthhandler.md) |  |
-|  [OnPreAuthHandler](./kibana-plugin-server.onpreauthhandler.md) |  |
+|  [OnPostAuthHandler](./kibana-plugin-server.onpostauthhandler.md) | See [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md)<!-- -->. |
+|  [OnPreAuthHandler](./kibana-plugin-server.onpreauthhandler.md) | See [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md)<!-- -->. |
 |  [PluginInitializer](./kibana-plugin-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
 |  [PluginName](./kibana-plugin-server.pluginname.md) | Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious. |
 |  [PluginOpaqueId](./kibana-plugin-server.pluginopaqueid.md) |  |
