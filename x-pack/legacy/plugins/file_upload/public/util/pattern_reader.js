@@ -11,23 +11,23 @@ export class PatternReader {
 
   constructor({ onFeatureDetect, onStreamComplete }) {
     this._oboeStream = oboe();
-    this._onGeoJSONFeaturePatternDetect(onFeatureDetect);
-    this._onStreamComplete(onStreamComplete);
+    this._registerFeaturePatternHandler(onFeatureDetect);
+    this._registerStreamCompleteHandler(onStreamComplete);
   }
 
-  _onGeoJSONFeaturePatternDetect = featureDetectCallback => {
+  _registerFeaturePatternHandler(featurePatternCallback) {
     this._oboeStream.node({
-      'features.*': feature => featureDetectCallback(feature),
+      'features.*': feature => featurePatternCallback(feature),
       // Handle single feature files
       '!.geometry': (geom, path, ancestors) => {
         const feature = ancestors[0];
-        const { geometry } = featureDetectCallback(feature);
+        const { geometry } = featurePatternCallback(feature);
         return geometry;
       }
     });
   }
 
-  _onStreamComplete(streamCompleteCallback) {
+  _registerStreamCompleteHandler(streamCompleteCallback) {
     this._oboeStream.done(streamCompleteCallback);
   }
 

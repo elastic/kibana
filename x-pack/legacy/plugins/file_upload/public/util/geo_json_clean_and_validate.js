@@ -36,10 +36,6 @@ export function cleanGeometry({ geometry }) {
   if (!geometry) {
     return null;
   }
-  const geometryToWrite = (geometry.isSimple() || geometry.isValid())
-    ? geometry
-    : geometry.buffer(0);
-  const cleanedGeometry = geoJSONWriter.write(geometryToWrite);
-
-  return cleanedGeometry;
+  const geometryToWrite = (geometry.isSimple() || geometry.isValid()) ? geometry : geometry.buffer(0);
+  return geoJSONWriter.write(geometryToWrite);
 }

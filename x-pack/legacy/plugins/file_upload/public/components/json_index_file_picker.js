@@ -126,7 +126,7 @@ export class JsonIndexFilePicker extends Component {
   // issues (update failure) in the nested progress component
   setFileProgress = _.debounce(({ featuresProcessed, bytesProcessed, totalBytes }) => {
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
-    if (this._isMounted && this.state.fileParseActive) {
+    if (this.getFileParseActive()) {
       this.setState({ featuresProcessed, percentageProcessed });
     }
   }, 150);
@@ -175,11 +175,10 @@ export class JsonIndexFilePicker extends Component {
     }
 
     // If another file is replacing this one, leave file parse active
-    const boolFileParseActive = currentFileTracker !== this.state.currentFileTracker;
     this.setState({
       percentageProcessed: 0,
       featuresProcessed: 0,
-      fileParseActive: boolFileParseActive
+      fileParseActive: currentFileTracker !== this.state.currentFileTracker
     });
     if (!parsedFileResult) {
       resetFileAndIndexSettings();

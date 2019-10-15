@@ -20,7 +20,10 @@ const readSlice = (fileReader, file, start, stop) => {
 let prevFileReader;
 let prevPatternReader;
 export const fileHandler = async ({
-  file, setFileProgress, cleanAndValidate, getFileParseActive,
+  file,
+  setFileProgress,
+  cleanAndValidate,
+  getFileParseActive,
   fileReader = new FileReader()
 }) => {
 
@@ -70,9 +73,7 @@ export const fileHandler = async ({
         resolve(parsedGeojson);
       }
     };
-    const patternReader = new PatternReader(
-      { onFeatureDetect: onFeatureRead, onStreamComplete }
-    );
+    const patternReader = new PatternReader({ onFeatureDetect: onFeatureRead, onStreamComplete });
     prevPatternReader = patternReader;
 
     fileReader.onloadend = ({ target: { readyState, result } }) => {
