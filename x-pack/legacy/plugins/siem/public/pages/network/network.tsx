@@ -15,18 +15,18 @@ import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent } from '../../components/page/network';
-import { KpiNetworkQuery } from '../../containers/kpi_network';
-import { NetworkFilter } from '../../containers/network';
 import { SiemNavigation } from '../../components/navigation';
+import { SiemSearchBar } from '../../components/search_bar';
+import { KpiNetworkQuery } from '../../containers/kpi_network';
 
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
-import { networkModel, networkSelectors, State } from '../../store';
+import { networkModel, State, inputsSelectors } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
+import { convertToBuildEsQuery } from '../../lib/keury';
 
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
 
@@ -37,8 +37,8 @@ const sourceId = 'default';
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({
-    filterQuery,
-    queryExpression,
+    filters,
+    query,
     setAbsoluteRangeDatePicker,
     networkPagePath,
     to,
@@ -50,99 +50,92 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
   }) => (
     <>
       <WithSource sourceId={sourceId}>
-        {({ indicesExist, indexPattern }) =>
-          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <>
-              <StickyContainer>
-                <>
-                  <FiltersGlobal>
-                    <NetworkKql
-                      indexPattern={indexPattern}
-                      setQuery={setQuery}
-                      type={networkModel.NetworkType.page}
-                    />
-                  </FiltersGlobal>
+        {({ indicesExist, indexPattern }) => {
+          const filterQuery = convertToBuildEsQuery({
+            indexPattern,
+            queries: [query],
+            filters,
+          });
+          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <StickyContainer>
+              <FiltersGlobal>
+                <SiemSearchBar indexPattern={indexPattern} id="global" />
+              </FiltersGlobal>
 
-                  <HeaderPage
-                    subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
-                    title={i18n.PAGE_TITLE}
+              <HeaderPage
+                subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
+                title={i18n.PAGE_TITLE}
+              />
+
+              <EmbeddedMap
+                query={query}
+                filters={filters}
+                startDate={from}
+                endDate={to}
+                setQuery={setQuery}
+              />
+
+              <KpiNetworkQuery
+                endDate={to}
+                filterQuery={filterQuery}
+                skip={isInitializing}
+                sourceId={sourceId}
+                startDate={from}
+              >
+                {({ kpiNetwork, loading, id, inspect, refetch }) => (
+                  <KpiNetworkComponentManage
+                    id={id}
+                    inspect={inspect}
+                    setQuery={setQuery}
+                    refetch={refetch}
+                    data={kpiNetwork}
+                    loading={loading}
+                    from={from}
+                    to={to}
+                    narrowDateRange={(min: number, max: number) => {
+                      setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                    }}
+                  />
+                )}
+              </KpiNetworkQuery>
+
+              {capabilitiesFetched && !isInitializing ? (
+                <>
+                  <EuiSpacer />
+
+                  <SiemNavigation
+                    navTabs={navTabsNetwork(hasMlUserPermissions)}
+                    display={sourceId}
+                    showBorder={true}
                   />
 
-                  <NetworkFilter indexPattern={indexPattern} type={networkModel.NetworkType.page}>
-                    {({ applyFilterQueryFromKueryExpression }) => (
-                      <EmbeddedMap
-                        applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
-                        queryExpression={queryExpression}
-                        startDate={from}
-                        endDate={to}
-                        setQuery={setQuery}
-                      />
-                    )}
-                  </NetworkFilter>
-
-                  <KpiNetworkQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    skip={isInitializing}
-                    sourceId={sourceId}
-                    startDate={from}
-                  >
-                    {({ kpiNetwork, loading, id, inspect, refetch }) => (
-                      <KpiNetworkComponentManage
-                        id={id}
-                        inspect={inspect}
-                        setQuery={setQuery}
-                        refetch={refetch}
-                        data={kpiNetwork}
-                        loading={loading}
-                        from={from}
-                        to={to}
-                        narrowDateRange={(min: number, max: number) => {
-                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                        }}
-                      />
-                    )}
-                  </KpiNetworkQuery>
-
-                  {capabilitiesFetched && !isInitializing ? (
-                    <>
-                      <EuiSpacer />
-
-                      <SiemNavigation
-                        navTabs={navTabsNetwork(hasMlUserPermissions)}
-                        display={sourceId}
-                        showBorder={true}
-                      />
-
-                      <EuiSpacer />
-
-                      <NetworkRoutes
-                        to={to}
-                        filterQuery={filterQuery}
-                        isInitializing={isInitializing}
-                        from={from}
-                        type={networkModel.NetworkType.page}
-                        indexPattern={indexPattern}
-                        setQuery={setQuery}
-                        setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                        networkPagePath={networkPagePath}
-                      />
-                    </>
-                  ) : (
-                    <NetworkRoutesLoading />
-                  )}
-
                   <EuiSpacer />
+
+                  <NetworkRoutes
+                    to={to}
+                    filterQuery={filterQuery}
+                    isInitializing={isInitializing}
+                    from={from}
+                    type={networkModel.NetworkType.page}
+                    indexPattern={indexPattern}
+                    setQuery={setQuery}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                    networkPagePath={networkPagePath}
+                  />
                 </>
-              </StickyContainer>
-            </>
+              ) : (
+                <NetworkRoutesLoading />
+              )}
+
+              <EuiSpacer />
+            </StickyContainer>
           ) : (
             <>
               <HeaderPage title={i18n.PAGE_TITLE} />
               <NetworkEmptyPage />
             </>
-          )
-        }
+          );
+        }}
       </WithSource>
       <SpyRoute />
     </>
@@ -152,11 +145,11 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 NetworkComponent.displayName = 'NetworkComponent';
 
 const makeMapStateToProps = () => {
-  const getNetworkFilterQueryAsJson = networkSelectors.networkFilterQueryAsJson();
-  const getNetworkFilterExpression = networkSelectors.networkFilterExpression();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const mapStateToProps = (state: State) => ({
-    filterQuery: getNetworkFilterQueryAsJson(state, networkModel.NetworkType.page) || '',
-    queryExpression: getNetworkFilterExpression(state, networkModel.NetworkType.page) || '',
+    query: getGlobalQuerySelector(state),
+    filters: getGlobalFiltersQuerySelector(state),
   });
   return mapStateToProps;
 };
