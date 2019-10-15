@@ -21,8 +21,8 @@ import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
-import { HttpServiceSetup } from '../http/http_service';
+import { InternalElasticsearchServiceSetup } from '../elasticsearch';
+import { InternalHttpServiceSetup } from '../http';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
@@ -48,8 +48,8 @@ export interface PluginsServiceStart {
 /** @internal */
 export interface PluginsServiceSetupDeps {
   context: ContextSetup;
-  elasticsearch: ElasticsearchServiceSetup;
-  http: HttpServiceSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
+  http: InternalHttpServiceSetup;
 }
 
 /** @internal */
