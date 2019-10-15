@@ -30,9 +30,7 @@ pipeline {
     stage('Checkout') {
       options { skipDefaultCheckout() }
       steps {
-        dir("${BASE_DIR}"){
-          checkout scm
-        }
+        gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false)
         dir("${APM_ITS}"){
           git changelog: false,
               credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba',
