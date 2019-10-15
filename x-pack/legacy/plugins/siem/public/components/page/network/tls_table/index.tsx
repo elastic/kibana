@@ -130,12 +130,8 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
   };
 }
 
-const makeMapStateToProps = () => {
-  const getTlsSelector = networkSelectors.tlsSelector();
-  return (state: State) => ({
-    ...getTlsSelector(state),
-  });
-};
+const makeMapStateToProps = (state: State, ownProps: OwnProps) =>
+  networkSelectors.tlsSelector(ownProps.type);
 
 export const TlsTable = connect(
   makeMapStateToProps,

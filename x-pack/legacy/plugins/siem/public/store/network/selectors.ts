@@ -52,6 +52,20 @@ export const topNFlowSelector = (flowTarget: FlowTargetSourceDest, networkType: 
   );
 };
 
+export const tlsSelector = (networkType: NetworkType) => {
+  if (networkType === NetworkType.page) {
+    return createSelector(
+      selectNetworkPage,
+      network => network.queries[NetworkTableType.tls]
+    );
+  }
+
+  return createSelector(
+    selectNetworkDetails,
+    network => network.queries[NetworkTableType.tls]
+  );
+};
+
 // Filter Query Selectors
 export const networkFilterQueryAsJson = () =>
   createSelector(
@@ -90,20 +104,6 @@ export const ipDetailsFlowTargetSelector = () =>
     selectNetworkDetails,
     network => network.flowTarget
   );
-
-export const tlsSelector = (networkType: NetworkType) => {
-  if (networkType === NetworkType.page) {
-    return createSelector(
-      selectNetworkPage,
-      network => network.queries[NetworkTableType.tls]
-    );
-  }
-
-  return createSelector(
-    selectNetworkDetails,
-    network => network.queries[NetworkTableType.tls]
-  );
-};
 
 export const usersSelector = () =>
   createSelector(
