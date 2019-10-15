@@ -24,7 +24,6 @@ import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
-import { LogAnalysisJobProblemIndicator } from '../../../components/logging/log_analysis_job_status';
 import {
   LogAnalysisJobs,
   StringTimeRange,
@@ -203,20 +202,18 @@ export const AnalysisResultsContent = ({
                     setTimeRange={handleChartTimeRangeChange}
                     timeRange={queryTimeRange}
                   />
-                  <LogAnalysisJobProblemIndicator
-                    jobStatus={jobStatus['log-entry-rate']}
-                    setupStatus={setupStatus}
-                    onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
-                    onRecreateMlJobForUpdate={viewSetupForUpdate}
-                  />
                 </EuiPanel>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPanel paddingSize="l">
                   <AnomaliesResults
                     isLoading={isLoading}
+                    jobStatus={jobStatus['log-entry-rate']}
+                    viewSetupForReconfiguration={viewSetupForReconfiguration}
+                    viewSetupForUpdate={viewSetupForUpdate}
                     results={logEntryRate}
                     setTimeRange={handleChartTimeRangeChange}
+                    setupStatus={setupStatus}
                     timeRange={queryTimeRange}
                   />
                 </EuiPanel>

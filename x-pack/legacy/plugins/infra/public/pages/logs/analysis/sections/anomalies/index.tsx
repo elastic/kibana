@@ -10,35 +10,45 @@ import {
   EuiFlexItem,
   EuiLoadingChart,
   EuiSpacer,
-  EuiTitle,
   EuiStat,
+  EuiTitle,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
-import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import euiStyled from '../../../../../../../../common/eui_styled_components';
+import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { JobStatus, SetupStatus } from '../../../../../../common/log_analysis';
+import {
+  formatAnomalyScore,
+  getAnnotationsForAll,
+  getLogEntryRateCombinedSeries,
+  getTopAnomalyScoreAcrossAllPartitions,
+} from '../helpers/data_formatters';
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
-import {
-  getLogEntryRateCombinedSeries,
-  getAnnotationsForAll,
-  getTopAnomalyScoreAcrossAllPartitions,
-  formatAnomalyScore,
-} from '../helpers/data_formatters';
+import { LogAnalysisJobProblemIndicator } from '../../../../../components/logging/log_analysis_job_status';
 
-export const AnomaliesResults = ({
-  isLoading,
-  results,
-  setTimeRange,
-  timeRange,
-}: {
+export const AnomaliesResults: React.FunctionComponent<{
   isLoading: boolean;
+  jobStatus: JobStatus;
   results: GetLogEntryRateSuccessResponsePayload['data'] | null;
   setTimeRange: (timeRange: TimeRange) => void;
+  setupStatus: SetupStatus;
   timeRange: TimeRange;
+  viewSetupForReconfiguration: () => void;
+  viewSetupForUpdate: () => void;
+}> = ({
+  isLoading,
+  jobStatus,
+  results,
+  setTimeRange,
+  setupStatus,
+  timeRange,
+  viewSetupForReconfiguration,
+  viewSetupForUpdate,
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.anomaliesSectionTitle', {
     defaultMessage: 'Anomalies',
@@ -89,7 +99,14 @@ export const AnomaliesResults = ({
       <EuiTitle size="s" aria-label={title}>
         <h2>{title}</h2>
       </EuiTitle>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
+      <LogAnalysisJobProblemIndicator
+        jobStatus={jobStatus}
+        setupStatus={setupStatus}
+        onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
+        onRecreateMlJobForUpdate={viewSetupForUpdate}
+      />
+      <EuiSpacer size="m" />
       {isLoading ? (
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
