@@ -17,12 +17,12 @@ import {
   DARK_THEME,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
-import { formatAnomalyScore } from '../helpers/data_formatters';
 
 export const LogEntryRateBarChart: React.FunctionComponent<{
   setTimeRange: (timeRange: TimeRange) => void;
@@ -69,7 +69,7 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
         <Axis
           id={getAxisId('values')}
           position="left"
-          tickFormat={value => formatAnomalyScore(value).toString()}
+          tickFormat={value => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
         />
         <BarSeries
           id={logEntryRateSpecId}
