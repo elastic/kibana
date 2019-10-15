@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import { buildRangeFilter } from '@kbn/es-query';
+import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
-export function createFilterRange(aggConfig, key) {
+export const createFilterHistogram = (aggConfig: IBucketAggConfig, key: string) => {
+  const value = parseInt(key, 10);
+  const params: RangeFilterParams = { gte: value, lt: value + aggConfig.params.interval };
+
   return buildRangeFilter(
     aggConfig.params.field,
-    key,
+    params,
     aggConfig.getIndexPattern(),
     aggConfig.fieldFormatter()(key)
   );
-}
+};

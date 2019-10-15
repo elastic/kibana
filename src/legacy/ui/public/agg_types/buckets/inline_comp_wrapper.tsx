@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { buildQueryFilter } from '@kbn/es-query';
-import _ from 'lodash';
+import React, { ComponentType } from 'react';
+import { AggParamEditorProps } from 'ui/vis/editors/default';
 
-export function createFilterFilters(aggConfig, key) {
-  // have the aggConfig write agg dsl params
-  const dslFilters = _.get(aggConfig.toDsl(), 'filters.filters');
-  const filter = dslFilters[key];
-
-  if (filter) {
-    return buildQueryFilter(filter.query, aggConfig.getIndexPattern().id, key);
-  }
-}
+export const wrapWithInlineComp = <T extends unknown>(
+  WrapComponent: ComponentType<AggParamEditorProps<T>>
+) => (props: AggParamEditorProps<T>) => (
+  <div className={`visEditorAggParam--half visEditorAggParam--half-${props.aggParam.name}`}>
+    <WrapComponent {...props} />
+  </div>
+);
