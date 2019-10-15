@@ -34,7 +34,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Capabilities](./kibana-plugin-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
-|  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [ChromeNavControl](./kibana-plugin-public.chromenavcontrol.md) |  |
 |  [ChromeNavControls](./kibana-plugin-public.chromenavcontrols.md) | [APIs](./kibana-plugin-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [ChromeNavLink](./kibana-plugin-public.chromenavlink.md) |  |
@@ -92,6 +91,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Type Alias | Description |
 |  --- | --- |
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
+|  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |
 |  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
