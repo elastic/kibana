@@ -116,7 +116,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
     this.update$ = this.coreContext.configService.getConfig$().pipe(
       tap(config => {
         if (this.kbnServer !== undefined) {
-          this.kbnServer.applyLoggingConfiguration(config.toRaw());
+          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config));
         }
       }),
       tap({ error: err => this.log.error(err) }),

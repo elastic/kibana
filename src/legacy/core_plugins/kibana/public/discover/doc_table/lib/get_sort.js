@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 function isSortable(field, indexPattern) {
-  return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field].sortable);
+  return (indexPattern.fields.getByName(field) && indexPattern.fields.getByName(field).sortable);
 }
 
 function createSortObject(sortPair, indexPattern) {
