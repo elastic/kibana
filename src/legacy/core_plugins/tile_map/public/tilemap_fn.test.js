@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 import { createTileMapFn } from './tile_map_fn';
 
 jest.mock('ui/new_platform');

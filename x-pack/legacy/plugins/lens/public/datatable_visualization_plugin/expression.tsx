@@ -13,7 +13,7 @@ import {
   KibanaDatatable,
 } from '../../../../../../src/plugins/expressions/common';
 import { LensMultiTable } from '../types';
-import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public';
+import { IInterpreterRenderFunction } from '../../../../../../src/plugins/expressions/public';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { VisualizationContainer } from '../visualization_container';
 

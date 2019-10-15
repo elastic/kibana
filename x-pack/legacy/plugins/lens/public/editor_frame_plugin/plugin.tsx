@@ -10,16 +10,13 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
+import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { start as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   setup as dataSetup,
   start as dataStart,
 } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
-import {
-  setup as expressionsSetup,
-  start as expressionsStart,
-} from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
 import {
   Datasource,
   Visualization,
@@ -34,12 +31,12 @@ import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: typeof dataSetup;
-  expressions: typeof expressionsSetup;
+  expressions: ExpressionsSetup;
 }
 
 export interface EditorFrameStartPlugins {
   data: typeof dataStart;
-  expressions: typeof expressionsStart;
+  expressions: ExpressionsStart;
   embeddables: ReturnType<EmbeddablePlugin['start']>;
   chrome: Chrome;
 }
@@ -128,13 +125,13 @@ const editorFrame = new EditorFramePlugin();
 export const editorFrameSetup = () =>
   editorFrame.setup(npSetup.core, {
     data: dataSetup,
-    expressions: expressionsSetup,
+    expressions: npSetup.plugins.expressions,
   });
 
 export const editorFrameStart = () =>
   editorFrame.start(npStart.core, {
     data: dataStart,
-    expressions: expressionsStart,
+    expressions: npStart.plugins.expressions,
     chrome,
     embeddables: embeddablePlugin,
   });
