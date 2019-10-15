@@ -59,7 +59,7 @@ import { SavedObjectsServiceStart } from './saved_objects';
 import { SavedObjectsClientContract } from './saved_objects/types';
 
 export { bootstrap } from './bootstrap';
-export { ConfigPath, ConfigService } from './config';
+export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
 export {
   IContextContainer,
   IContextProvider,

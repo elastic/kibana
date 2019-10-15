@@ -617,6 +617,16 @@ export interface ElasticsearchServiceSetup {
     };
 }
 
+// @public (undocumented)
+export interface EnvironmentMode {
+    // (undocumented)
+    dev: boolean;
+    // (undocumented)
+    name: 'development' | 'production';
+    // (undocumented)
+    prod: boolean;
+}
+
 // @public
 export interface ErrorHttpResponseOptions {
     body?: ResponseError;
@@ -956,6 +966,20 @@ export interface OnPreAuthToolkit {
     rewriteUrl: (url: string) => OnPreAuthResult;
 }
 
+// @public (undocumented)
+export interface PackageInfo {
+    // (undocumented)
+    branch: string;
+    // (undocumented)
+    buildNum: number;
+    // (undocumented)
+    buildSha: string;
+    // (undocumented)
+    dist: boolean;
+    // (undocumented)
+    version: string;
+}
+
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
@@ -979,6 +1003,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     // (undocumented)
     env: {
         mode: EnvironmentMode;
+        packageInfo: Readonly<PackageInfo>;
     };
     // (undocumented)
     logger: LoggerFactory;
@@ -1553,6 +1578,5 @@ export interface SessionStorageFactory<T> {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:162:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 
 ```

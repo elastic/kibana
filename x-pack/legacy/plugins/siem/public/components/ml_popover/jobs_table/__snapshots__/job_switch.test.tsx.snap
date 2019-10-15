@@ -8,7 +8,7 @@ exports[`JobSwitch renders correctly against snapshot 1`] = `
     grow={false}
   >
     <StaticSwitch
-      checked={true}
+      checked={false}
       data-test-subj="job-switch"
       disabled={false}
       onChange={[Function]}

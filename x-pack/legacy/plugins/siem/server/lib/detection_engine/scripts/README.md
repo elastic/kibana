@@ -11,6 +11,7 @@ export ELASTICSEARCH_URL=https://${ip}:9200
 export KIBANA_URL=http://localhost:5601
 export SIGNALS_INDEX=.siem-signals-${your user id}
 export TASK_MANAGER_INDEX=.kibana-task-manager-${your user id}
+export KIBANA_INDEX=.kibana-${your user id}
 
 # This is for the kbn-action and kbn-alert tool
 export KBN_URLBASE=http://${user}:${password}@localhost:5601
