@@ -152,7 +152,7 @@ export const getAnnotationsForPartition = (
   );
 };
 
-export const getTotalNumberOfLogsForPartition = (
+export const getTotalNumberOfLogEntriesForPartition = (
   results: GetLogEntryRateSuccessResponsePayload['data'],
   partitionId: string
 ) => {
