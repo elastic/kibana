@@ -59,7 +59,9 @@ pipeline {
       }
       post {
         always {
-          archiveArtifacts(allowEmptyArchive: true, artifacts: "${BASE_DIR}/${CYPRESS_DIR}/ingest-data.log,${BASE_DIR}/kibana.log")
+          dir("${BASE_DIR}"){
+            archiveArtifacts(allowEmptyArchive: true, artifacts: "${CYPRESS_DIR}/ingest-data.log,kibana.log")
+          }
         }
       }
     }
@@ -78,9 +80,9 @@ pipeline {
       }
       post {
         always {
-          dir("${BASE_DIR}/${CYPRESS_DIR}"){
-            archiveArtifacts(allowEmptyArchive: false, artifacts: 'screenshots/**,videos/**')
-            junit(allowEmptyResults: true, testResults: '*e2e-tests.xml')
+          dir("${BASE_DIR}"){
+            archiveArtifacts(allowEmptyArchive: false, artifacts: "${CYPRESS_DIR}/screenshots/**,${CYPRESS_DIR}/videos/**,${CYPRESS_DIR}/*e2e-tests.xml")
+            junit(allowEmptyResults: true, testResults: "${CYPRESS_DIR}/*e2e-tests.xml")
           }
         }
       }
