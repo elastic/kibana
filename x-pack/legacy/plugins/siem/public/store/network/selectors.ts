@@ -27,10 +27,12 @@ export const dnsSelector = () =>
     network => network.queries.dns
   );
 export enum NetworkTableType {
+  tls = 'tls',
   dns = 'dns',
   topNFlowSource = 'topNFlowSource',
   topNFlowDestination = 'topNFlowDestination',
 }
+
 export const topNFlowSelector = (flowTarget: FlowTargetSourceDest, networkType: NetworkType) => {
   if (networkType === NetworkType.page) {
     return createSelector(
@@ -89,11 +91,19 @@ export const ipDetailsFlowTargetSelector = () =>
     network => network.flowTarget
   );
 
-export const tlsSelector = () =>
-  createSelector(
+export const tlsSelector = (networkType: NetworkType) => {
+  if (networkType === NetworkType.page) {
+    return createSelector(
+      selectNetworkPage,
+      network => network.queries[NetworkTableType.tls]
+    );
+  }
+
+  return createSelector(
     selectNetworkDetails,
-    network => network.queries.tls
+    network => network.queries[NetworkTableType.tls]
   );
+};
 
 export const usersSelector = () =>
   createSelector(

@@ -139,18 +139,15 @@ class TlsComponentQuery extends QueryTemplatePaginated<
   }
 }
 
-const makeMapStateToProps = () => {
-  const getTlsSelector = networkSelectors.tlsSelector();
+const mapStateToProps = (state: State, { id = ID, type }: OwnProps) => {
+  const getTlsSelector = networkSelectors.tlsSelector(type);
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      ...getTlsSelector(state),
-      isInspected,
-    };
-  };
+  const { isInspected } = getQuery(state, id);
 
-  return mapStateToProps;
+  return {
+    ...getTlsSelector(state),
+    isInspected,
+  };
 };
 
-export const TlsQuery = connect(makeMapStateToProps)(TlsComponentQuery);
+export const TlsQuery = connect(mapStateToProps)(TlsComponentQuery);

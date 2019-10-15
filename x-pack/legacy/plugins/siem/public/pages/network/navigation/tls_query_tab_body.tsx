@@ -45,7 +45,7 @@ export const TlsQueryTabBody = ({
         refetch={refetch}
         setQuery={setQuery}
         totalCount={totalCount}
-        type={networkModel.NetworkType.details}
+        type={networkModel.NetworkType.page}
       />
     )}
   </TlsQuery>
