@@ -24,7 +24,7 @@ const emptyIndexPattern: IndexPatternSavedObject[] = [];
  */
 export const getIndexPatterns = async (
   signal: AbortSignal,
-  headers?: Record<string, string | undefined>
+  headers?: Record<string, string>
 ): Promise<IndexPatternSavedObject[]> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(

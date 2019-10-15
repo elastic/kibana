@@ -25,7 +25,7 @@ export interface Body {
 
 export const anomaliesTableData = async (
   body: Body,
-  headers: Record<string, string | undefined>,
+  headers: Record<string, string>,
   signal: AbortSignal
 ): Promise<Anomalies> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);

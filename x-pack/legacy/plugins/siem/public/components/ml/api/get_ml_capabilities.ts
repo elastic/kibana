@@ -25,7 +25,7 @@ export interface Body {
 }
 
 export const getMlCapabilities = async (
-  headers: Record<string, string | undefined>,
+  headers: Record<string, string>,
   signal: AbortSignal
 ): Promise<MlCapabilities> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
