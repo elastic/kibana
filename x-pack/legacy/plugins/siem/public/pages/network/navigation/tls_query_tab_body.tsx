@@ -21,6 +21,7 @@ export const TlsQueryTabBody = ({
   setQuery,
   isInitializing,
   from,
+  type,
 }: TlsQueryTabBodyProps) => (
   <TlsQuery
     endDate={to}
@@ -30,7 +31,7 @@ export const TlsQueryTabBody = ({
     skip={isInitializing}
     sourceId="default"
     startDate={from}
-    type={networkModel.NetworkType.details}
+    type={type}
   >
     {({ id, inspect, isInspected, tls, totalCount, pageInfo, loading, loadPage, refetch }) => (
       <TlsTableManage
