@@ -35,19 +35,15 @@ interface State {
 }
 
 export class CodeViewer extends Component<Props, State> {
-  private ed?: editor.IStandaloneCodeEditor;
+  public readonly state: State = {
+    loading: true,
+  };
   public blameWidgets: any;
+
+  private ed?: editor.IStandaloneCodeEditor;
   private lineDecorations: string[] | null = null;
   private resizeChecker?: ResizeChecker;
-  private viewerRef: React.RefObject<HTMLDivElement>;
-
-  constructor(props: Props, context: any) {
-    super(props, context);
-    this.state = {
-      loading: true,
-    };
-    this.viewerRef = React.createRef();
-  }
+  private viewerRef = React.createRef<HTMLDivElement>();
 
   public componentDidMount(): void {
     this.tryLoadFile(this.props);
