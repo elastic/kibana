@@ -30,6 +30,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={true}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
               <FormattedMessage
@@ -55,6 +56,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={true}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
               <FormattedMessage

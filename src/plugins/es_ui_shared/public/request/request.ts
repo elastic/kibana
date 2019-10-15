@@ -21,7 +21,7 @@ import { useEffect, useState, useRef } from 'react';
 
 export interface SendRequestConfig {
   path: string;
-  method: string;
+  method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
   body?: any;
 }
 
