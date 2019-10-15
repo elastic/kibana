@@ -15,7 +15,7 @@ import {
   logRateModelPlotResponseRT,
   createLogEntryRateQuery,
   LogRateModelPlotBucket,
-  CompositeTimestampDataSetKey,
+  CompositeTimestampPartitionKey,
 } from './queries';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
@@ -43,7 +43,7 @@ export class InfraLogAnalysis {
     const logRateJobId = this.getJobIds(request, sourceId).logEntryRate;
 
     let mlModelPlotBuckets: LogRateModelPlotBucket[] = [];
-    let afterLatestBatchKey: CompositeTimestampDataSetKey | undefined;
+    let afterLatestBatchKey: CompositeTimestampPartitionKey | undefined;
 
     while (true) {
       const mlModelPlotResponse = await this.libs.framework.callWithRequest(
@@ -67,7 +67,7 @@ export class InfraLogAnalysis {
 
       const { after_key: afterKey, buckets: latestBatchBuckets } = pipe(
         logRateModelPlotResponseRT.decode(mlModelPlotResponse),
-        map(response => response.aggregations.timestamp_data_set_buckets),
+        map(response => response.aggregations.timestamp_partition_buckets),
         fold(throwErrors(createPlainError), identity)
       );
 
@@ -81,7 +81,7 @@ export class InfraLogAnalysis {
 
     return mlModelPlotBuckets.reduce<
       Array<{
-        dataSets: Array<{
+        partitions: Array<{
           analysisBucketCount: number;
           anomalies: Array<{
             actualLogEntryRate: number;
@@ -91,15 +91,17 @@ export class InfraLogAnalysis {
             typicalLogEntryRate: number;
           }>;
           averageActualLogEntryRate: number;
-          dataSetId: string;
+          maximumAnomalyScore: number;
+          numberOfLogEntries: number;
+          partitionId: string;
         }>;
         startTime: number;
       }>
-    >((histogramBuckets, timestampDataSetBucket) => {
+    >((histogramBuckets, timestampPartitionBucket) => {
       const previousHistogramBucket = histogramBuckets[histogramBuckets.length - 1];
-      const dataSet = {
-        analysisBucketCount: timestampDataSetBucket.filter_model_plot.doc_count,
-        anomalies: timestampDataSetBucket.filter_records.top_hits_record.hits.hits.map(
+      const partition = {
+        analysisBucketCount: timestampPartitionBucket.filter_model_plot.doc_count,
+        anomalies: timestampPartitionBucket.filter_records.top_hits_record.hits.hits.map(
           ({ _source: record }) => ({
             actualLogEntryRate: record.actual[0],
             anomalyScore: record.record_score,
@@ -108,26 +110,30 @@ export class InfraLogAnalysis {
             typicalLogEntryRate: record.typical[0],
           })
         ),
-        averageActualLogEntryRate: timestampDataSetBucket.filter_model_plot.average_actual.value,
-        dataSetId: timestampDataSetBucket.key.data_set,
+        averageActualLogEntryRate:
+          timestampPartitionBucket.filter_model_plot.average_actual.value || 0,
+        maximumAnomalyScore:
+          timestampPartitionBucket.filter_records.maximum_record_score.value || 0,
+        numberOfLogEntries: timestampPartitionBucket.filter_model_plot.sum_actual.value || 0,
+        partitionId: timestampPartitionBucket.key.partition,
       };
       if (
         previousHistogramBucket &&
-        previousHistogramBucket.startTime === timestampDataSetBucket.key.timestamp
+        previousHistogramBucket.startTime === timestampPartitionBucket.key.timestamp
       ) {
         return [
           ...histogramBuckets.slice(0, -1),
           {
             ...previousHistogramBucket,
-            dataSets: [...previousHistogramBucket.dataSets, dataSet],
+            partitions: [...previousHistogramBucket.partitions, partition],
           },
         ];
       } else {
         return [
           ...histogramBuckets,
           {
-            dataSets: [dataSet],
-            startTime: timestampDataSetBucket.key.timestamp,
+            partitions: [partition],
+            startTime: timestampPartitionBucket.key.timestamp,
           },
         ];
       }
