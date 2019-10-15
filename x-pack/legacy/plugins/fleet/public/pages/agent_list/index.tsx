@@ -159,7 +159,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
             />
           </EuiButton>
         ) : (
-          <div />
+          null
         )
       }
     />
