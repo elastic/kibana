@@ -24,6 +24,7 @@ import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { setup, SetupTap } from '../../../test_utils/public/http_test_setup';
+import { HttpResponse } from './types';
 
 function delay<T>(duration: number) {
   return new Promise<T>(r => setTimeout(r, duration));
@@ -456,6 +457,75 @@ describe('interception', () => {
     expect(fetchMock.called()).toBe(true);
     expect(unusedSpy).toHaveBeenCalledTimes(0);
     expect(usedSpy).toHaveBeenCalledTimes(4);
+  });
+
+  it('should accumulate request information', async () => {
+    const routes = ['alpha', 'beta', 'gamma'];
+    const createRequest = jest.fn(
+      (request: Request) => new Request(`/api/${routes.shift()}`, request)
+    );
+
+    http.intercept({
+      request: createRequest,
+    });
+    http.intercept({
+      requestError(httpErrorRequest) {
+        return httpErrorRequest.request;
+      },
+    });
+    http.intercept({
+      request(request) {
+        throw new Error('Invalid');
+      },
+    });
+    http.intercept({
+      request: createRequest,
+    });
+    http.intercept({
+      request: createRequest,
+    });
+
+    await expect(http.fetch('/my/route')).resolves.toEqual({ foo: 'bar' });
+    expect(fetchMock.called()).toBe(true);
+    expect(routes.length).toBe(0);
+    expect(createRequest.mock.calls[0][0].url).toContain('/my/route');
+    expect(createRequest.mock.calls[1][0].url).toContain('/api/alpha');
+    expect(createRequest.mock.calls[2][0].url).toContain('/api/beta');
+    expect(fetchMock.lastCall()!.request.url).toContain('/api/gamma');
+  });
+
+  it('should accumulate response information', async () => {
+    const bodies = ['alpha', 'beta', 'gamma'];
+    const createResponse = jest.fn((httpResponse: HttpResponse) => ({
+      body: bodies.shift(),
+    }));
+
+    http.intercept({
+      response: createResponse,
+    });
+    http.intercept({
+      response: createResponse,
+    });
+    http.intercept({
+      response(httpResponse) {
+        throw new Error('Invalid');
+      },
+    });
+    http.intercept({
+      responseError({ error, ...httpResponse }) {
+        return httpResponse;
+      },
+    });
+    http.intercept({
+      response: createResponse,
+    });
+
+    await expect(http.fetch('/my/route')).resolves.toEqual('gamma');
+    expect(fetchMock.called()).toBe(true);
+    expect(bodies.length).toBe(0);
+    expect(createResponse.mock.calls[0][0].body).toEqual({ foo: 'bar' });
+    expect(createResponse.mock.calls[1][0].body).toBe('alpha');
+    expect(createResponse.mock.calls[2][0].body).toBe('beta');
   });
 
   describe('request availability during interception', () => {
