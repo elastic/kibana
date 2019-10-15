@@ -127,6 +127,11 @@ export class AbstractSource {
   async getPreIndexedShape(/* properties */) {
     return null;
   }
+
+  // Returns function used to format value
+  async getFieldFormatter(/* fieldName */) {
+    return null;
+  }
 }
 
 

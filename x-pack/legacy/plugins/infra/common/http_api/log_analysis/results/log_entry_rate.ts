@@ -37,15 +37,17 @@ export const logEntryRateAnomaly = rt.type({
   typicalLogEntryRate: rt.number,
 });
 
-export const logEntryRateDataSetRT = rt.type({
+export const logEntryRatePartitionRT = rt.type({
   analysisBucketCount: rt.number,
   anomalies: rt.array(logEntryRateAnomaly),
   averageActualLogEntryRate: rt.number,
-  dataSetId: rt.string,
+  maximumAnomalyScore: rt.number,
+  numberOfLogEntries: rt.number,
+  partitionId: rt.string,
 });
 
 export const logEntryRateHistogramBucket = rt.type({
-  dataSets: rt.array(logEntryRateDataSetRT),
+  partitions: rt.array(logEntryRatePartitionRT),
   startTime: rt.number,
 });
 
@@ -53,6 +55,7 @@ export const getLogEntryRateSuccessReponsePayloadRT = rt.type({
   data: rt.type({
     bucketDuration: rt.number,
     histogramBuckets: rt.array(logEntryRateHistogramBucket),
+    totalNumberOfLogEntries: rt.number,
   }),
 });
 

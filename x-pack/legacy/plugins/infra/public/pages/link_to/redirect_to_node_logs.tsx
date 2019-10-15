@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import compose from 'lodash/fp/compose';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
@@ -23,54 +24,44 @@ type RedirectToNodeLogsType = RouteComponentProps<{
   sourceId?: string;
 }>;
 
-interface RedirectToNodeLogsProps extends RedirectToNodeLogsType {
-  intl: InjectedIntl;
-}
+export const RedirectToNodeLogs = ({
+  match: {
+    params: { nodeId, nodeType, sourceId = 'default' },
+  },
+  location,
+}: RedirectToNodeLogsType) => {
+  const { source, isLoading } = useSource({ sourceId });
+  const configuration = source && source.configuration;
 
-export const RedirectToNodeLogs = injectI18n(
-  ({
-    match: {
-      params: { nodeId, nodeType, sourceId = 'default' },
-    },
-    location,
-    intl,
-  }: RedirectToNodeLogsProps) => {
-    const { source, isLoading } = useSource({ sourceId });
-    const configuration = source && source.configuration;
-
-    if (isLoading) {
-      return (
-        <LoadingPage
-          message={intl.formatMessage(
-            {
-              id: 'xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage',
-              defaultMessage: 'Loading {nodeType} logs',
-            },
-            {
-              nodeType,
-            }
-          )}
-        />
-      );
-    }
-
-    if (!configuration) {
-      return null;
-    }
-
-    const nodeFilter = `${configuration.fields[nodeType]}: ${nodeId}`;
-    const userFilter = getFilterFromLocation(location);
-    const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
-
-    const searchString = compose(
-      replaceLogFilterInQueryString(filter),
-      replaceLogPositionInQueryString(getTimeFromLocation(location)),
-      replaceSourceIdInQueryString(sourceId)
-    )('');
-
-    return <Redirect to={`/logs?${searchString}`} />;
+  if (isLoading) {
+    return (
+      <LoadingPage
+        message={i18n.translate('xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage', {
+          defaultMessage: 'Loading {nodeType} logs',
+          values: {
+            nodeType,
+          },
+        })}
+      />
+    );
   }
-);
+
+  if (!configuration) {
+    return null;
+  }
+
+  const nodeFilter = `${configuration.fields[nodeType]}: ${nodeId}`;
+  const userFilter = getFilterFromLocation(location);
+  const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
+
+  const searchString = compose(
+    replaceLogFilterInQueryString(filter),
+    replaceLogPositionInQueryString(getTimeFromLocation(location)),
+    replaceSourceIdInQueryString(sourceId)
+  )('');
+
+  return <Redirect to={`/logs?${searchString}`} />;
+};
 
 export const getNodeLogsUrl = ({
   nodeId,
