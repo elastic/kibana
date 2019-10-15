@@ -139,6 +139,8 @@ export class AdvancedJobCreator extends JobCreator {
     return isValidJson(this._queryString);
   }
 
+  // load the start and end times for the selected index
+  // and apply them to the job creator
   public async autoSetTimeRange() {
     try {
       const { start, end } = await ml.getTimeFieldRange({
