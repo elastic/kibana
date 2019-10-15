@@ -7,17 +7,17 @@
 
 
 import chrome from 'ui/chrome';
-import _ from 'lodash';
-import { http } from '../../../../../services/http_service';
+import { template } from 'lodash';
+import { http } from '../../../../services/http_service';
 
 import emailBody from './email.html';
-import emailInfluencersBody from './email-influencers.html';
+import emailInfluencersBody from './email_influencers.html';
 import { watch } from './watch.js';
 import { i18n } from '@kbn/i18n';
 
 
-const compiledEmailBody = _.template(emailBody);
-const compiledEmailInfluencersBody = _.template(emailInfluencersBody);
+const compiledEmailBody = template(emailBody);
+const compiledEmailInfluencersBody = template(emailInfluencersBody);
 
 const emailSection = {
   send_email: {
