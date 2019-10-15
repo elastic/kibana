@@ -126,7 +126,6 @@ export function App({
                 persistedDoc: doc,
                 query: doc.state.query,
                 filters: doc.state.filters,
-                dateRange: doc.state.dateRange || s.dateRange,
                 indexPatternsForTopNav: indexPatterns,
               }));
             })
@@ -153,7 +152,7 @@ export function App({
   // Can save if the frame has told us what it has, and there is either:
   // a) No saved doc
   // b) A saved doc that differs from the frame state
-  const isSaveable = state.isDirty && (core.application.capabilities.lens.save as boolean);
+  const isSaveable = state.isDirty && (core.application.capabilities.visualize.save as boolean);
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -229,7 +228,7 @@ export function App({
               showDatePicker={true}
               showQueryBar={true}
               showFilterBar={true}
-              showSaveQuery={core.application.capabilities.lens.saveQuery as boolean}
+              showSaveQuery={core.application.capabilities.visualize.saveQuery as boolean}
               savedQuery={state.savedQuery}
               onSaved={savedQuery => {
                 setState(s => ({ ...s, savedQuery }));

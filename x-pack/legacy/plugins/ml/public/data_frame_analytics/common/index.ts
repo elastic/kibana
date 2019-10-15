@@ -6,6 +6,7 @@
 
 export {
   getAnalysisType,
+  getDependentVar,
   isOutlierAnalysis,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
@@ -14,6 +15,8 @@ export {
   IndexName,
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,
+  ANALYSIS_CONFIG_TYPE,
+  RegressionEvaluateResponse,
 } from './analytics';
 
 export {

@@ -4,23 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import {
-  EuiLoadingSpinner,
   EuiButton,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+
+import { SetupStatus } from '../../../../../../common/log_analysis';
 import { CreateMLJobsButton } from '../create_ml_jobs_button';
-import { SetupStatus } from '../../../../../containers/logs/log_analysis';
+import { RecreateMLJobsButton } from '../recreate_ml_jobs_button';
 
 interface Props {
   viewResults: () => void;
   setup: () => void;
-  retry: () => void;
+  cleanupAndSetup: () => void;
   indexPattern: string;
   setupStatus: SetupStatus;
 }
@@ -28,7 +30,7 @@ interface Props {
 export const SetupProcess: React.FunctionComponent<Props> = ({
   viewResults,
   setup,
-  retry,
+  cleanupAndSetup,
   indexPattern,
   setupStatus,
 }: Props) => {
@@ -57,7 +59,7 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
             }}
           />
           <EuiSpacer />
-          <EuiButton fill onClick={retry}>
+          <EuiButton fill onClick={cleanupAndSetup}>
             <FormattedMessage
               id="xpack.infra.analysisSetup.steps.setupProcess.tryAgainButton"
               defaultMessage="Try again"
@@ -78,6 +80,8 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
             />
           </EuiButton>
         </>
+      ) : setupStatus === 'requiredForUpdate' || setupStatus === 'requiredForReconfiguration' ? (
+        <RecreateMLJobsButton onClick={cleanupAndSetup} />
       ) : (
         <CreateMLJobsButton onClick={setup} />
       )}
