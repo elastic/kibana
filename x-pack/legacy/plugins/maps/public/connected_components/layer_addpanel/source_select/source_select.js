@@ -11,10 +11,8 @@ import {
   EuiSpacer,
   EuiCard,
   EuiIcon,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
 export function SourceSelect({
@@ -26,9 +24,7 @@ export function SourceSelect({
       ? <EuiIcon type={Source.icon} size="l" />
       : null;
 
-    const sourceTitle = Source.isBeta
-      ? <div><span>{Source.title}</span>{generateBetaBadge(Source.title)}</div>
-      : Source.title;
+    const sourceTitle = Source.title;
 
     return (
       <Fragment key={Source.type}>
@@ -60,20 +56,5 @@ export function SourceSelect({
       </EuiTitle>
       {sourceCards}
     </Fragment>
-  );
-}
-
-function generateBetaBadge(appTitle) {
-  return (
-    <EuiBetaBadge
-      label="Beta"
-      tooltipContent={
-        i18n.translate('xpack.maps.sourceSelect.betaMessageBadge', {
-          defaultMessage:
-            `"{appTitle}" is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.`,
-          values: { appTitle }
-        })
-      }
-    />
   );
 }
