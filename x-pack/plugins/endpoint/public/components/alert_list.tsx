@@ -32,8 +32,8 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
     totalHits: number;
     pageIndex: number;
     pageSize: number;
-    sortField: string;
-    sortDirection: Direction;
+    sortField?: string;
+    sortDirection?: Direction;
     showPerPageOptions: boolean;
   }
   const [data, setData]: [AlertData, any] = useState({
@@ -41,8 +41,6 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
     totalHits: 0,
     pageIndex: 0,
     pageSize: 10,
-    sortField: '',
-    sortDirection: 'asc',
     showPerPageOptions: true,
   });
 
@@ -51,6 +49,8 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
       query: {
         pageIndex: data.pageIndex,
         pageSize: data.pageSize,
+        sortField: data.sortField,
+        sortDirection: data.sortDirection,
       },
     });
     setData({
@@ -62,7 +62,7 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
 
   useEffect(() => {
     fetchAlertListData();
-  }, [data.pageSize, data.pageIndex]);
+  }, [data.pageSize, data.pageIndex, data.sortField, data.sortDirection]);
 
   const onTableChange = ({ page = {}, sort = {} }: { page: any; sort: any }) => {
     const { index: pageIndex, size: pageSize } = page;
@@ -100,11 +100,11 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
 
   const columns = [
     {
-      field: 'endgame.timestamp_utc',
+      field: 'endgame.timestamp_utc.keyword',
       name: 'Timestamp',
       sortable: true,
-      render: (timestamp: string) => {
-        return timestamp;
+      render: (_: any, item: any) => {
+        return item.endgame.timestamp_utc;
       },
     },
     {
@@ -116,11 +116,11 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
       },
     },
     {
-      field: 'host.hostname',
+      field: 'host.hostname.keyword',
       name: 'Host',
-      sortable: false,
-      render: (hostName: string) => {
-        return hostName;
+      sortable: true,
+      render: (_: any, item: any) => {
+        return item.host.hostname;
       },
     },
     {
@@ -153,7 +153,7 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
-              <h2>Alert timestamps</h2>
+              <h2>Alert Data</h2>
             </EuiTitle>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>

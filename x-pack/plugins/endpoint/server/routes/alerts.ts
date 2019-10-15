@@ -15,18 +15,33 @@ export function alertsRoutes(router: IRouter) {
         query: schema.object({
           pageSize: schema.number(),
           pageIndex: schema.number(),
+          sortField: schema.maybe(schema.string()),
+          sortDirection: schema.maybe(schema.string()),
         }),
       },
     },
     async function(context, request, response) {
       let elasticsearchResponse;
       try {
+        function sortParams() {
+          if (request.query.sortField && request.query.sortDirection) {
+            return [
+              {
+                [request.query.sortField]: { order: request.query.sortDirection },
+              },
+            ];
+          } else {
+            return [];
+          }
+        }
+
         elasticsearchResponse = await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           {
             body: {
-              from: request.query.pageIndex,
+              from: request.query.pageIndex * request.query.pageSize,
               size: request.query.pageSize,
+              sort: sortParams(),
               query: {
                 match: {
                   'event.kind': 'alert',
