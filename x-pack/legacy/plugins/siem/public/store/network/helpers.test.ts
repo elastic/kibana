@@ -6,7 +6,7 @@
 
 import {
   Direction,
-  NetworkTopNFlowFields,
+  NetworkTopTablesFields,
   NetworkDnsFields,
   TlsFields,
   UsersFields,
@@ -23,7 +23,7 @@ export const mockNetworkState: NetworkModel = {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
         topCountriesSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -31,7 +31,7 @@ export const mockNetworkState: NetworkModel = {
         activePage: 3,
         limit: DEFAULT_TABLE_LIMIT,
         topCountriesSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -39,7 +39,7 @@ export const mockNetworkState: NetworkModel = {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -47,7 +47,7 @@ export const mockNetworkState: NetworkModel = {
         activePage: 3,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -70,7 +70,7 @@ export const mockNetworkState: NetworkModel = {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
         topCountriesSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -78,7 +78,7 @@ export const mockNetworkState: NetworkModel = {
         activePage: 3,
         limit: DEFAULT_TABLE_LIMIT,
         topCountriesSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -86,7 +86,7 @@ export const mockNetworkState: NetworkModel = {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -94,7 +94,7 @@ export const mockNetworkState: NetworkModel = {
         activePage: 3,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },

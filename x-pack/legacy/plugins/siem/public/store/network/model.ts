@@ -7,7 +7,7 @@
 import {
   FlowTarget,
   NetworkDnsSortField,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesSortField,
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
@@ -54,11 +54,11 @@ export interface BasicQueryPaginated {
 
 // Network Page Models
 export interface TopNFlowQuery extends BasicQueryPaginated {
-  topNFlowSort: NetworkTopNFlowSortField;
+  topNFlowSort: NetworkTopTablesSortField;
 }
 
 export interface TopCountriesQuery extends BasicQueryPaginated {
-  topCountriesSort: NetworkTopNFlowSortField;
+  topCountriesSort: NetworkTopTablesSortField;
 }
 
 export interface DnsQuery extends BasicQueryPaginated {

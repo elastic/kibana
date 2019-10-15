@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexItem } from '@elastic/eui';
+
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -16,8 +15,8 @@ import {
   Direction,
   FlowTargetSourceDest,
   NetworkTopCountriesEdges,
-  NetworkTopNFlowFields,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesFields,
+  NetworkTopTablesSortField,
 } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
@@ -43,7 +42,7 @@ interface OwnProps {
 interface NetworkTopCountriesTableReduxProps {
   activePage: number;
   limit: number;
-  topCountriesSort: NetworkTopNFlowSortField;
+  topCountriesSort: NetworkTopTablesSortField;
 }
 
 interface NetworkTopCountriesTableDispatchProps {
@@ -61,7 +60,7 @@ interface NetworkTopCountriesTableDispatchProps {
     tableType: networkModel.TopCountriesTableType;
   }>;
   updateTopCountriesSort: ActionCreator<{
-    topCountriesSort: NetworkTopNFlowSortField;
+    topCountriesSort: NetworkTopTablesSortField;
     networkType: networkModel.NetworkType;
     tableType: networkModel.TopCountriesTableType;
   }>;
@@ -111,8 +110,8 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
         const field = last(splitField);
         const newSortDirection =
           field !== topCountriesSort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-        const newTopCountriesSort: NetworkTopNFlowSortField = {
-          field: field as NetworkTopNFlowFields,
+        const newTopCountriesSort: NetworkTopTablesSortField = {
+          field: field as NetworkTopTablesFields,
           direction: newSortDirection,
         };
         if (!isEqual(newTopCountriesSort, topCountriesSort)) {
@@ -148,8 +147,8 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     }
 
     const field =
-      topCountriesSort.field === NetworkTopNFlowFields.bytes_out ||
-      topCountriesSort.field === NetworkTopNFlowFields.bytes_in
+      topCountriesSort.field === NetworkTopTablesFields.bytes_out ||
+      topCountriesSort.field === NetworkTopTablesFields.bytes_in
         ? `node.network.${topCountriesSort.field}`
         : `node.${flowTargeted}.${topCountriesSort.field}`;
 
@@ -205,9 +204,3 @@ export const NetworkTopCountriesTable = connect(
     updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
   }
 )(NetworkTopCountriesTableComponent);
-
-const SelectTypeItem = styled(EuiFlexItem)`
-  min-width: 180px;
-`;
-
-SelectTypeItem.displayName = 'SelectTypeItem';

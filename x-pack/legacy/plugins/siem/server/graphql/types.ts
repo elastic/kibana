@@ -81,8 +81,8 @@ export interface UsersSortField {
   direction: Direction;
 }
 
-export interface NetworkTopNFlowSortField {
-  field: NetworkTopNFlowFields;
+export interface NetworkTopTablesSortField {
+  field: NetworkTopTablesFields;
 
   direction: Direction;
 }
@@ -262,7 +262,7 @@ export enum FlowTargetSourceDest {
   source = 'source',
 }
 
-export enum NetworkTopNFlowFields {
+export enum NetworkTopTablesFields {
   bytes_in = 'bytes_in',
   bytes_out = 'bytes_out',
   flows = 'flows',
@@ -1483,7 +1483,7 @@ export interface NetworkTopCountriesItem {
 
   destination?: Maybe<TopCountriesItemDestination>;
 
-  network?: Maybe<TopNFlowNetworkEcsField>;
+  network?: Maybe<TopNetworkTablesEcsField>;
 }
 
 export interface TopCountriesItemSource {
@@ -1516,7 +1516,7 @@ export interface TopCountriesItemDestination {
   source_ips?: Maybe<number>;
 }
 
-export interface TopNFlowNetworkEcsField {
+export interface TopNetworkTablesEcsField {
   bytes_in?: Maybe<number>;
 
   bytes_out?: Maybe<number>;
@@ -1545,7 +1545,7 @@ export interface NetworkTopNFlowItem {
 
   destination?: Maybe<TopNFlowItemDestination>;
 
-  network?: Maybe<TopNFlowNetworkEcsField>;
+  network?: Maybe<TopNetworkTablesEcsField>;
 }
 
 export interface TopNFlowItemSource {
@@ -2126,7 +2126,7 @@ export interface NetworkTopCountriesSourceArgs {
 
   pagination: PaginationInputPaginated;
 
-  sort: NetworkTopNFlowSortField;
+  sort: NetworkTopTablesSortField;
 
   timerange: TimerangeInput;
 
@@ -2143,7 +2143,7 @@ export interface NetworkTopNFlowSourceArgs {
 
   pagination: PaginationInputPaginated;
 
-  sort: NetworkTopNFlowSortField;
+  sort: NetworkTopTablesSortField;
 
   timerange: TimerangeInput;
 
@@ -2893,7 +2893,7 @@ export namespace SourceResolvers {
 
     pagination: PaginationInputPaginated;
 
-    sort: NetworkTopNFlowSortField;
+    sort: NetworkTopTablesSortField;
 
     timerange: TimerangeInput;
 
@@ -2916,7 +2916,7 @@ export namespace SourceResolvers {
 
     pagination: PaginationInputPaginated;
 
-    sort: NetworkTopNFlowSortField;
+    sort: NetworkTopTablesSortField;
 
     timerange: TimerangeInput;
 
@@ -6463,7 +6463,7 @@ export namespace NetworkTopCountriesItemResolvers {
 
     destination?: DestinationResolver<Maybe<TopCountriesItemDestination>, TypeParent, TContext>;
 
-    network?: NetworkResolver<Maybe<TopNFlowNetworkEcsField>, TypeParent, TContext>;
+    network?: NetworkResolver<Maybe<TopNetworkTablesEcsField>, TypeParent, TContext>;
   }
 
   export type _IdResolver<
@@ -6482,7 +6482,7 @@ export namespace NetworkTopCountriesItemResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type NetworkResolver<
-    R = Maybe<TopNFlowNetworkEcsField>,
+    R = Maybe<TopNetworkTablesEcsField>,
     Parent = NetworkTopCountriesItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6587,8 +6587,8 @@ export namespace TopCountriesItemDestinationResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace TopNFlowNetworkEcsFieldResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = TopNFlowNetworkEcsField> {
+export namespace TopNetworkTablesEcsFieldResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = TopNetworkTablesEcsField> {
     bytes_in?: BytesInResolver<Maybe<number>, TypeParent, TContext>;
 
     bytes_out?: BytesOutResolver<Maybe<number>, TypeParent, TContext>;
@@ -6596,12 +6596,12 @@ export namespace TopNFlowNetworkEcsFieldResolvers {
 
   export type BytesInResolver<
     R = Maybe<number>,
-    Parent = TopNFlowNetworkEcsField,
+    Parent = TopNetworkTablesEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type BytesOutResolver<
     R = Maybe<number>,
-    Parent = TopNFlowNetworkEcsField,
+    Parent = TopNetworkTablesEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -6666,7 +6666,7 @@ export namespace NetworkTopNFlowItemResolvers {
 
     destination?: DestinationResolver<Maybe<TopNFlowItemDestination>, TypeParent, TContext>;
 
-    network?: NetworkResolver<Maybe<TopNFlowNetworkEcsField>, TypeParent, TContext>;
+    network?: NetworkResolver<Maybe<TopNetworkTablesEcsField>, TypeParent, TContext>;
   }
 
   export type _IdResolver<
@@ -6685,7 +6685,7 @@ export namespace NetworkTopNFlowItemResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type NetworkResolver<
-    R = Maybe<TopNFlowNetworkEcsField>,
+    R = Maybe<TopNetworkTablesEcsField>,
     Parent = NetworkTopNFlowItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -8191,7 +8191,7 @@ export type IResolvers<TContext = SiemContext> = {
   TopCountriesItemSource?: TopCountriesItemSourceResolvers.Resolvers<TContext>;
   GeoItem?: GeoItemResolvers.Resolvers<TContext>;
   TopCountriesItemDestination?: TopCountriesItemDestinationResolvers.Resolvers<TContext>;
-  TopNFlowNetworkEcsField?: TopNFlowNetworkEcsFieldResolvers.Resolvers<TContext>;
+  TopNetworkTablesEcsField?: TopNetworkTablesEcsFieldResolvers.Resolvers<TContext>;
   NetworkTopNFlowData?: NetworkTopNFlowDataResolvers.Resolvers<TContext>;
   NetworkTopNFlowEdges?: NetworkTopNFlowEdgesResolvers.Resolvers<TContext>;
   NetworkTopNFlowItem?: NetworkTopNFlowItemResolvers.Resolvers<TContext>;

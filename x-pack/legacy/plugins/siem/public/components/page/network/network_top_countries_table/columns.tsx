@@ -13,7 +13,7 @@ import { CountryFlagAndName } from '../../../source_destination/country_flag';
 import {
   FlowTargetSourceDest,
   NetworkTopCountriesEdges,
-  TopNFlowNetworkEcsField,
+  TopNetworkTablesEcsField,
 } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -27,8 +27,8 @@ import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 
 export type NetworkTopCountriesColumns = [
   Columns<NetworkTopCountriesEdges>,
-  Columns<TopNFlowNetworkEcsField['bytes_in']>,
-  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<TopNetworkTablesEcsField['bytes_in']>,
+  Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopCountriesEdges>,
   Columns<NetworkTopCountriesEdges>,
   Columns<NetworkTopCountriesEdges>
@@ -36,8 +36,8 @@ export type NetworkTopCountriesColumns = [
 
 export type NetworkTopCountriesColumnsIpDetails = [
   Columns<NetworkTopCountriesEdges>,
-  Columns<TopNFlowNetworkEcsField['bytes_in']>,
-  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<TopNetworkTablesEcsField['bytes_in']>,
+  Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopCountriesEdges>,
   Columns<NetworkTopCountriesEdges>
 ];

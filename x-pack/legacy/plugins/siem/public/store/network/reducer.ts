@@ -10,7 +10,7 @@ import {
   Direction,
   FlowTarget,
   NetworkDnsFields,
-  NetworkTopNFlowFields,
+  NetworkTopTablesFields,
   TlsFields,
   UsersFields,
 } from '../../graphql/types';
@@ -52,7 +52,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -60,7 +60,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -77,7 +77,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topCountriesSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -85,7 +85,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topCountriesSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -99,7 +99,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topCountriesSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -107,7 +107,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topCountriesSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -115,7 +115,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -123,7 +123,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },

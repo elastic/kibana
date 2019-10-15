@@ -9,7 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import {
   FlowTarget,
   NetworkDnsSortField,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesSortField,
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
@@ -57,7 +57,7 @@ export const updateTopNFlowLimit = actionCreator<{
 }>('UPDATE_TOP_N_FLOW_LIMIT');
 
 export const updateTopNFlowSort = actionCreator<{
-  topNFlowSort: NetworkTopNFlowSortField;
+  topNFlowSort: NetworkTopTablesSortField;
   networkType: networkModel.NetworkType;
   tableType: networkModel.TopNTableType;
 }>('UPDATE_TOP_N_FLOW_SORT');
@@ -69,7 +69,7 @@ export const updateTopCountriesLimit = actionCreator<{
 }>('UPDATE_TOP_COUNTRIES_LIMIT');
 
 export const updateTopCountriesSort = actionCreator<{
-  topCountriesSort: NetworkTopNFlowSortField;
+  topCountriesSort: NetworkTopTablesSortField;
   networkType: networkModel.NetworkType;
   tableType: networkModel.TopCountriesTableType;
 }>('UPDATE_TOP_COUNTRIES_SORT');

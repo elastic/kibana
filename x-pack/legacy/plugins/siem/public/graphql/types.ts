@@ -79,8 +79,8 @@ export interface UsersSortField {
   direction: Direction;
 }
 
-export interface NetworkTopNFlowSortField {
-  field: NetworkTopNFlowFields;
+export interface NetworkTopTablesSortField {
+  field: NetworkTopTablesFields;
 
   direction: Direction;
 }
@@ -260,7 +260,7 @@ export enum FlowTargetSourceDest {
   source = 'source',
 }
 
-export enum NetworkTopNFlowFields {
+export enum NetworkTopTablesFields {
   bytes_in = 'bytes_in',
   bytes_out = 'bytes_out',
   flows = 'flows',
@@ -1481,7 +1481,7 @@ export interface NetworkTopCountriesItem {
 
   destination?: Maybe<TopCountriesItemDestination>;
 
-  network?: Maybe<TopNFlowNetworkEcsField>;
+  network?: Maybe<TopNetworkTablesEcsField>;
 }
 
 export interface TopCountriesItemSource {
@@ -1514,7 +1514,7 @@ export interface TopCountriesItemDestination {
   source_ips?: Maybe<number>;
 }
 
-export interface TopNFlowNetworkEcsField {
+export interface TopNetworkTablesEcsField {
   bytes_in?: Maybe<number>;
 
   bytes_out?: Maybe<number>;
@@ -1543,7 +1543,7 @@ export interface NetworkTopNFlowItem {
 
   destination?: Maybe<TopNFlowItemDestination>;
 
-  network?: Maybe<TopNFlowNetworkEcsField>;
+  network?: Maybe<TopNetworkTablesEcsField>;
 }
 
 export interface TopNFlowItemSource {
@@ -2124,7 +2124,7 @@ export interface NetworkTopCountriesSourceArgs {
 
   pagination: PaginationInputPaginated;
 
-  sort: NetworkTopNFlowSortField;
+  sort: NetworkTopTablesSortField;
 
   timerange: TimerangeInput;
 
@@ -2141,7 +2141,7 @@ export interface NetworkTopNFlowSourceArgs {
 
   pagination: PaginationInputPaginated;
 
-  sort: NetworkTopNFlowSortField;
+  sort: NetworkTopTablesSortField;
 
   timerange: TimerangeInput;
 
@@ -3146,7 +3146,7 @@ export namespace GetNetworkTopCountriesQuery {
     ip?: Maybe<string>;
     filterQuery?: Maybe<string>;
     pagination: PaginationInputPaginated;
-    sort: NetworkTopNFlowSortField;
+    sort: NetworkTopTablesSortField;
     flowTarget: FlowTargetSourceDest;
     timerange: TimerangeInput;
     defaultIndex: string[];
@@ -3222,7 +3222,7 @@ export namespace GetNetworkTopCountriesQuery {
   };
 
   export type Network = {
-    __typename?: 'TopNFlowNetworkEcsField';
+    __typename?: 'TopNetworkTablesEcsField';
 
     bytes_in: Maybe<number>;
 
@@ -3260,7 +3260,7 @@ export namespace GetNetworkTopNFlowQuery {
     ip?: Maybe<string>;
     filterQuery?: Maybe<string>;
     pagination: PaginationInputPaginated;
-    sort: NetworkTopNFlowSortField;
+    sort: NetworkTopTablesSortField;
     flowTarget: FlowTargetSourceDest;
     timerange: TimerangeInput;
     defaultIndex: string[];
@@ -3408,7 +3408,7 @@ export namespace GetNetworkTopNFlowQuery {
   };
 
   export type Network = {
-    __typename?: 'TopNFlowNetworkEcsField';
+    __typename?: 'TopNetworkTablesEcsField';
 
     bytes_in: Maybe<number>;
 

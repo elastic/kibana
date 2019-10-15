@@ -10,7 +10,7 @@ import {
   NetworkDnsSortField,
   NetworkTopCountriesData,
   NetworkTopNFlowData,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesSortField,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 export * from './elasticsearch_adapter';
@@ -19,13 +19,13 @@ import { NetworkAdapter } from './types';
 export * from './types';
 
 export interface NetworkTopNFlowRequestOptions extends RequestOptionsPaginated {
-  networkTopNFlowSort: NetworkTopNFlowSortField;
+  networkTopNFlowSort: NetworkTopTablesSortField;
   flowTarget: FlowTargetSourceDest;
   ip?: Maybe<string>;
 }
 
 export interface NetworkTopCountriesRequestOptions extends RequestOptionsPaginated {
-  networkTopCountriesSort: NetworkTopNFlowSortField;
+  networkTopCountriesSort: NetworkTopTablesSortField;
   flowTarget: FlowTargetSourceDest;
   ip?: Maybe<string>;
 }

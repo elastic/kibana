@@ -22,7 +22,7 @@ export const getFlag = (countryCode: string): string | null =>
         .replace(/./g, c => String.fromCharCode(55356, 56741 + c.charCodeAt(0)))
     : null;
 
-/** Renders an emjoi flag for the specified country code */
+/** Renders an emoji flag for the specified country code */
 export const CountryFlag = memo<{
   countryCode: string;
   displayCountryNameOnHover?: boolean;

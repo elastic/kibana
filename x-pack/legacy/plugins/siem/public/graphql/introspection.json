@@ -1596,7 +1596,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "NetworkTopNFlowSortField",
+                    "name": "NetworkTopTablesSortField",
                     "ofType": null
                   }
                 },
@@ -1693,7 +1693,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "NetworkTopNFlowSortField",
+                    "name": "NetworkTopTablesSortField",
                     "ofType": null
                   }
                 },
@@ -7301,7 +7301,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "NetworkTopNFlowSortField",
+        "name": "NetworkTopTablesSortField",
         "description": "",
         "fields": null,
         "inputFields": [
@@ -7311,7 +7311,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "ENUM", "name": "NetworkTopNFlowFields", "ofType": null }
+              "ofType": { "kind": "ENUM", "name": "NetworkTopTablesFields", "ofType": null }
             },
             "defaultValue": null
           },
@@ -7332,7 +7332,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "NetworkTopNFlowFields",
+        "name": "NetworkTopTablesFields",
         "description": "",
         "fields": null,
         "inputFields": null,
@@ -7497,7 +7497,7 @@
             "name": "network",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowNetworkEcsField", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "TopNetworkTablesEcsField", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -7638,7 +7638,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TopNFlowNetworkEcsField",
+        "name": "TopNetworkTablesEcsField",
         "description": "",
         "fields": [
           {
@@ -7794,7 +7794,7 @@
             "name": "network",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowNetworkEcsField", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "TopNetworkTablesEcsField", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

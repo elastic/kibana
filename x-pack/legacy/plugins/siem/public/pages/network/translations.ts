@@ -38,12 +38,12 @@ export const NAVIGATION_COUNTRIES_TITLE = i18n.translate(
   }
 );
 
-export const NAVIGATION_DNS_TITLE = i18n.translate('xpack.siem.netowork.navigation.dnsTitle', {
+export const NAVIGATION_DNS_TITLE = i18n.translate('xpack.siem.network.navigation.dnsTitle', {
   defaultMessage: 'DNS',
 });
 
 export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
-  'xpack.siem.netowork.navigation.anomaliesTitle',
+  'xpack.siem.network.navigation.anomaliesTitle',
   {
     defaultMessage: 'Anomalies',
   }

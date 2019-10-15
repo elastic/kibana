@@ -15,7 +15,7 @@ import {
   FlowTargetSourceDest,
   GetNetworkTopCountriesQuery,
   NetworkTopCountriesEdges,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesSortField,
   PageInfoPaginated,
 } from '../../graphql/types';
 import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
@@ -50,7 +50,7 @@ export interface NetworkTopCountriesComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  topCountriesSort: NetworkTopNFlowSortField;
+  topCountriesSort: NetworkTopTablesSortField;
 }
 
 type NetworkTopCountriesProps = OwnProps & NetworkTopCountriesComponentReduxProps;
