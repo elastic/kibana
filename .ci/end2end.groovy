@@ -61,7 +61,7 @@ pipeline {
       }
       post {
         always {
-          archiveArtifacts(allowEmptyArchive: true, artifacts: '${BASE_DIR}/${CYPRESS_DIR}/ingest-data.log,${BASE_DIR}/kibana.log')
+          archiveArtifacts(allowEmptyArchive: true, artifacts: "${BASE_DIR}/${CYPRESS_DIR}/ingest-data.log,${BASE_DIR}/kibana.log")
         }
       }
     }
