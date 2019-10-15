@@ -53,7 +53,7 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
           data: {
             bucketDuration: payload.data.bucketDuration,
             histogramBuckets: logEntryRateBuckets,
-            totalNumberOfLogs: getTotalNumberOfLogs(logEntryRateBuckets),
+            totalNumberOfLogEntries: getTotalNumberOfLogEntries(logEntryRateBuckets),
           },
         })
       );
