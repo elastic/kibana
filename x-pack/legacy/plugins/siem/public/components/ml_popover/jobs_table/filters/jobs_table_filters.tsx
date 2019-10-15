@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+
+import {
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  // @ts-ignore no-exported-member
+  EuiSearchBar,
+} from '@elastic/eui';
+import { EuiSearchBarQuery } from '../../../open_timeline/types';
+import * as i18n from './translations';
+import { JobsFilters, SiemJob } from '../../types';
+import { GroupsFilterPopover } from './groups_filter_popover';
+
+interface JobsTableFiltersProps {
+  siemJobs: SiemJob[];
+  onFilterChanged: Dispatch<SetStateAction<JobsFilters>>;
+}
+
+/**
+ * Collection of filters for filtering data within the JobsTable. Contains search bar, Elastic/Custom
+ * Jobs filter button toggle, and groups selection
+ *
+ * @param siemJobs jobs to fetch groups from to display for filtering
+ * @param onFilterChanged change listener to be notified on filter changes
+ */
+export const JobsTableFilters = React.memo<JobsTableFiltersProps>(
+  ({ siemJobs, onFilterChanged }) => {
+    const [filterQuery, setFilterQuery] = useState<string>('');
+    const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+    const [showCustomJobs, setShowCustomJobs] = useState<boolean>(false);
+    const [showElasticJobs, setShowElasticJobs] = useState<boolean>(false);
+
+    // Propagate filter changes to parent
+    useEffect(() => {
+      onFilterChanged({ filterQuery, showCustomJobs, showElasticJobs, selectedGroups });
+    }, [filterQuery, selectedGroups.sort().join(), showCustomJobs, showElasticJobs]);
+
+    return (
+      <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
+        <EuiFlexItem grow={true}>
+          <EuiSearchBar
+            data-test-subj="jobs-filter-bar"
+            box={{
+              placeholder: i18n.FILTER_PLACEHOLDER,
+              incremental: true,
+            }}
+            onChange={(query: EuiSearchBarQuery) => setFilterQuery(query.queryText.trim())}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <GroupsFilterPopover siemJobs={siemJobs} onSelectedGroupsChanged={setSelectedGroups} />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <EuiFilterButton
+              hasActiveFilters={showElasticJobs}
+              onClick={() => {
+                setShowElasticJobs(!showElasticJobs);
+                setShowCustomJobs(false);
+              }}
+              data-test-subj="show-elastic-jobs-filter-button"
+              withNext
+            >
+              {i18n.SHOW_ELASTIC_JOBS}
+            </EuiFilterButton>
+            <EuiFilterButton
+              hasActiveFilters={showCustomJobs}
+              onClick={() => {
+                setShowCustomJobs(!showCustomJobs);
+                setShowElasticJobs(false);
+              }}
+              data-test-subj="show-custom-jobs-filter-button"
+            >
+              {i18n.SHOW_CUSTOM_JOBS}
+            </EuiFilterButton>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+
+JobsTableFilters.displayName = 'JobsTableFilters';

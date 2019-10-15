@@ -74,7 +74,7 @@ describe('<Settings />', () => {
       .simulate('click');
 
     // Wait for the animation and DOM update
-    await tick(20);
+    await tick(40);
     portal(wrapper).update();
     expect(portal(wrapper).html()).toMatchSnapshot();
 
