@@ -28,8 +28,9 @@ interface RefreshInterval {
   pause: boolean;
   value: number;
 }
-interface Query {
+export interface Query {
   query: string | { [key: string]: any };
+  language: string;
 }
 
 type SavedQueryTimeFilter = TimeRange & {

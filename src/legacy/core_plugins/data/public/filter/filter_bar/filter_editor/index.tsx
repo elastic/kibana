@@ -62,6 +62,7 @@ import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
 import { SavedQueryOption, SavedQueryPicker } from './saved_query_picker';
+import { SavedQueryEditor } from './saved_query_editor';
 
 interface Props {
   filter: Filter;
@@ -478,6 +479,8 @@ class FilterEditorUI extends Component<Props, State> {
     );
     this.onSavedQueryChange(selectedSavedQuery, savedQueries);
   };
+  // SavedQueryPicker is a list of the saved queries and allows for a single option to be selected.
+  // SavedQueryEditor is the Editor UI for the selected saved query and implements the SearchBar UI
   private renderSavedQueryEditor() {
     return (
       <EuiFlexGroup responsive={false} gutterSize="s">
@@ -485,6 +488,16 @@ class FilterEditorUI extends Component<Props, State> {
           <SavedQueryPicker
             savedQueryService={this.props.savedQueryService}
             onChange={this.onSavedQuerySelected}
+          />
+          <SavedQueryEditor
+            currentSavedQuery={this.state.selectedSavedQuery}
+            uiSettings={this.props.uiSettings}
+            indexPatterns={
+              this.state.selectedIndexPattern
+                ? [this.state.selectedIndexPattern]
+                : this.props.indexPatterns
+            }
+            showSaveQuery={this.props.showSaveQuery!}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
