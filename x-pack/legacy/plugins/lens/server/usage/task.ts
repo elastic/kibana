@@ -16,7 +16,7 @@ import {
   DeleteDocumentByQueryParams,
   SearchResponse,
   DeleteDocumentByQueryResponse,
-  AggregationSearchResponse,
+  AggregationSearchResponseWithTotalHitsAsInt,
 } from 'elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { RunContext } from '../../../task_manager';
@@ -134,7 +134,7 @@ export async function getDailyEvents(
     },
   };
 
-  const metrics: AggregationSearchResponse<
+  const metrics: AggregationSearchResponseWithTotalHitsAsInt<
     unknown,
     {
       body: { aggs: typeof aggs };
