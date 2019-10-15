@@ -140,7 +140,7 @@ export const AnomaliesResults = ({
               <EuiStat
                 title={numeral(results.totalNumberOfLogEntries).format('0.00a')}
                 description={i18n.translate(
-                  'xpack.infra.logs.analysis.overallAnomaliesNumberOfLogsDescription',
+                  'xpack.infra.logs.analysis.overallAnomaliesNumberOfLogEntriesDescription',
                   {
                     defaultMessage: 'Number of log entries',
                   }
