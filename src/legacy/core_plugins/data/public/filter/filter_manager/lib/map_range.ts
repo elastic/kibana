@@ -27,6 +27,16 @@ import {
 } from '@kbn/es-query';
 import { get, has } from 'lodash';
 
+const getFormattedValueFn = (left: any, right: any) => {
+  return (formatter?: FilterValueFormatter) => {
+    let displayValue = `${left} to ${right}`;
+    if (formatter) {
+      displayValue = `${formatter.convert(left)} to ${formatter.convert(right)}`;
+    }
+    return displayValue;
+  };
+};
+
 const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
 const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range', key]);
 
@@ -43,13 +53,7 @@ function getParams(filter: RangeFilter) {
   let right = has(params, 'lte') ? params.lte : params.lt;
   if (right == null) right = Infinity;
 
-  const value = (formatter?: FilterValueFormatter) => {
-    let displayValue = `${left} to ${right}`;
-    if (formatter) {
-      displayValue = `${formatter.convert(left)} to ${formatter.convert(right)}`;
-    }
-    return displayValue;
-  };
+  const value = getFormattedValueFn(left, right);
 
   return { type: FILTERS.RANGE, key, value, params };
 }
