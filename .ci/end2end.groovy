@@ -13,6 +13,7 @@ pipeline {
     BASE_DIR = 'src/github.com/elastic/kibana'
     HOME = "${env.WORKSPACE}"
     APM_ITS = 'apm-integration-testing'
+    CYPRESS_DIR = 'x-pack/legacy/plugins/apm/cypress'
   }
   options {
     timeout(time: 1, unit: 'HOURS')
@@ -40,7 +41,7 @@ pipeline {
         }
       }
     }
-    stage('Start ES - APM Server') {
+    stage('Start services') {
       options { skipDefaultCheckout() }
       steps {
         dir("${APM_ITS}"){
@@ -48,15 +49,14 @@ pipeline {
         }
       }
     }
-    stage('Test') {
+    stage('Prepare Kibana') {
       options { skipDefaultCheckout() }
       environment {
         JENKINS_NODE_COOKIE = 'dontKillMe'
-        CYPRESS_DIR = 'x-pack/legacy/plugins/apm/cypress'
       }
       steps {
         dir("${BASE_DIR}"){
-          sh script: "${CYPRESS_DIR}/ci/run.sh"
+          sh script: "${CYPRESS_DIR}/ci/prepare-kibana.sh"
         }
       }
       post {
@@ -65,13 +65,17 @@ pipeline {
         }
       }
     }
-    stage('Smoke Tests (edge)'){
+    stage('Smoke Tests'){
+      options { skipDefaultCheckout() }
       steps{
+        /*(dir("${BASE_DIR}/${CYPRESS_DIR}"){
+          sh script: 'yarn cypress run'
+        }*/
         script {
-          def nodeDocker = docker.build('node-cypress', 'x-pack/legacy/plugins/apm/cypress/ci')
-          nodeDocker.inside(){
-            dir("${BASE_DIR}/x-pack/legacy/plugins/apm/cypress"){
-              sh(label: 'Build tests', script: 'npm install')
+          def nodeDocker = docker.build('node-cypress', "${CYPRESS_DIR}/ci")
+          nodeDocker.inside('--network="host"'){
+            dir("${BASE_DIR}/${CYPRESS_DIR}"){
+              sh(label: 'Build tests', script: 'npm install && yarn install')
               sh(label: 'Execute Smoke Tests', script: './node_modules/.bin/cypress run')
             }
           }
