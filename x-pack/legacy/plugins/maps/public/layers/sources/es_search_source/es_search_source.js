@@ -176,7 +176,7 @@ export class ESSearchSource extends AbstractESSource {
     });
   }
 
-  // Returns docvalue_field for the union of indexPattern's dateFields and request's field names.
+  // Returns docvalue_fields array for the union of indexPattern's dateFields and request's field names.
   async _getDateDocvalueFields(searchFields) {
     const dateFieldNames = _.map(await this.getDateFields(), 'name');
     return searchFields
