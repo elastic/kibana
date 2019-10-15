@@ -60,14 +60,17 @@ export const BarGroup = styled.div.attrs({
   className: 'siemUtilityBar__group',
 })`
   ${({ theme }) => css`
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+
     & + & {
       margin-top: ${theme.eui.euiSizeS};
     }
 
     @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {
-      align-items: flex-start;
       border-right: ${theme.eui.euiBorderThin};
-      display: flex;
+      flex-wrap: nowrap;
       margin-right: ${theme.eui.paddingSizes.m};
       padding-right: ${theme.eui.paddingSizes.m};
 
@@ -83,7 +86,10 @@ export const BarGroup = styled.div.attrs({
     }
 
     & > * {
+      font-size: ${theme.eui.euiFontSizeXS};
+      line-height: ${theme.eui.euiLineHeight};
       margin-right: ${theme.eui.euiSize};
+      white-space: nowrap;
 
       &:last-child {
         margin-right: 0;
@@ -99,9 +105,6 @@ export const BarText = styled.p.attrs({
   ${({ theme }) => css`
     color: ${theme.eui.textColors.subdued};
     display: inline-block;
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-    white-space: nowrap;
   `}
 `;
 BarText.displayName = 'BarText';
@@ -119,8 +122,6 @@ export const BarAction = styled(EuiLink).attrs({
   ${({ iconSide, theme }) => css`
     align-items: center;
     display: inline-flex;
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
 
     ${iconSide === 'left' &&
       css`

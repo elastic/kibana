@@ -144,6 +144,7 @@ export const DetectionEngineComponent = React.memo(() => {
               options={toggleButtons}
             />
           </HeaderSection>
+
           <UtilityBar>
             <UtilityBarSection>
               <UtilityBarGroup>

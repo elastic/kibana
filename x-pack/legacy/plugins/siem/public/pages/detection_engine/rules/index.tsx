@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -146,15 +145,13 @@ const AllRules = React.memo(() => {
             <UtilityBarGroup>
               <UtilityBarText>{'Selected: 2 rules'}</UtilityBarText>
 
-              <UtilityBarAction>
-                {'Batch actions'} <EuiIcon size="s" type="arrowDown" />
+              <UtilityBarAction popoverContent={<p>{'Batch actions context menu here.'}</p>}>
+                {'Batch actions'}
               </UtilityBarAction>
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction>
-                <EuiIcon size="s" type="cross" /> {'Clear 7 filters'}
-              </UtilityBarAction>
+              <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>
@@ -329,15 +326,11 @@ const ActivityMonitor = React.memo(() => {
             <UtilityBarGroup>
               <UtilityBarText>{'Selected: 2 activities'}</UtilityBarText>
 
-              <UtilityBarAction>
-                <EuiIcon size="s" type="stop" /> {'Stop selected'}
-              </UtilityBarAction>
+              <UtilityBarAction iconType="stop">{'Stop selected'}</UtilityBarAction>
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction>
-                <EuiIcon size="s" type="cross" /> {'Clear 7 filters'}
-              </UtilityBarAction>
+              <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>

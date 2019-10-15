@@ -25,7 +25,7 @@ const Header = styled.header.attrs({
     ${border &&
       css`
         border-bottom: ${theme.eui.euiBorderThin};
-        padding-bottom: ${theme.eui.euiSizeL};
+        padding-bottom: ${theme.eui.paddingSizes.l};
       `}
   `}
 `;

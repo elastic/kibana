@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UtilityBarGroup it renders 1`] = `
+<Component>
+  <UtilityBarGroup>
+    <UtilityBarText>
+      Test text
+    </UtilityBarText>
+  </UtilityBarGroup>
+</Component>
+`;

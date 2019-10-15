@@ -47,7 +47,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
       return (
         <BarAction href={href} iconSide={iconSide} onClick={onClick}>
           {iconType && <EuiIcon size="s" type={iconType} />}
-          <span>{children}</span>
+          <span className="siemUtilityBar__actionLabel">{children}</span>
         </BarAction>
       );
     }

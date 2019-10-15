@@ -143,7 +143,7 @@ describe('HeaderSection', () => {
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
     expect(siemHeaderSection).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderSection).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+    expect(siemHeaderSection).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -155,6 +155,6 @@ describe('HeaderSection', () => {
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
     expect(siemHeaderSection).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
   });
 });

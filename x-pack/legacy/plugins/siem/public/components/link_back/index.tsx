@@ -16,15 +16,14 @@ const Link = styled(EuiLink).attrs({
   className: 'siemLinkBack',
 })<LinkProps>`
   ${({ theme }) => css`
-    display: inline-block;
+    align-items: center;
+    display: inline-flex;
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
     margin-bottom: ${theme.eui.euiSizeS};
 
     .euiIcon {
       margin-right: ${theme.eui.euiSizeXS};
-      position: relative;
-      top: -1px;
     }
   `}
 `;
@@ -37,7 +36,7 @@ export interface LinkBackProps extends LinkProps {
 export const LinkBack = React.memo<LinkBackProps>(({ href, text }) => (
   <Link href={href}>
     <EuiIcon size="s" type="arrowLeft" />
-    {text}
+    <span className="siemLinkBack__label">{text}</span>
   </Link>
 ));
 LinkBack.displayName = 'LinkBack';

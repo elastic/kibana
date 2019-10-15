@@ -181,7 +181,7 @@ describe('HeaderPage', () => {
     const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
 
     expect(siemHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+    expect(siemHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -193,7 +193,7 @@ describe('HeaderPage', () => {
     const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
 
     expect(siemHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+    expect(siemHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
   });
 
   test('it renders as a draggable when arguments provided', () => {
