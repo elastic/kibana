@@ -19,6 +19,13 @@ interface TableItem {
   topAnomalyScore: number;
 }
 
+interface SortingOptions {
+  sort: {
+    field: string;
+    direction: string;
+  };
+}
+
 const collapseAriaLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableCollapseLabel', {
   defaultMessage: 'Collapse',
 });
@@ -59,13 +66,6 @@ export const AnomaliesTable: React.FunctionComponent<{
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
-
-  interface SortingOptions {
-    sort: {
-      field: string;
-      direction: string;
-    };
-  }
 
   const [sorting, setSorting] = useState<SortingOptions>({
     sort: {
