@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { CoreSetup } from 'src/core/server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
@@ -162,13 +163,14 @@ export async function getDailyEvents(
   metrics.aggregations!.daily.buckets.forEach(daily => {
     const byType: Record<string, number> = byDateByType[daily.key] || {};
     daily.groups.buckets.regularEvents.names.buckets.forEach(bucket => {
-      byType[bucket.key] = bucket.sums.value || 0 + (byType[daily.key] || 0);
+      byType[bucket.key] = (bucket.sums.value || 0) + (byType[daily.key] || 0);
     });
     byDateByType[daily.key] = byType;
 
     const suggestionsByType: Record<string, number> = suggestionsByDate[daily.key] || {};
     daily.groups.buckets.suggestionEvents.names.buckets.forEach(bucket => {
-      suggestionsByType[bucket.key] = bucket.sums.value || 0 + (suggestionsByType[daily.key] || 0);
+      suggestionsByType[bucket.key] =
+        (bucket.sums.value || 0) + (suggestionsByType[daily.key] || 0);
     });
     suggestionsByDate[daily.key] = suggestionsByType;
   });
@@ -228,8 +230,9 @@ export function telemetryTaskRunner(server: Server) {
 }
 
 function getNextMidnight() {
-  const nextMidnight = new Date();
-  nextMidnight.setHours(0, 0, 0, 0);
-  nextMidnight.setDate(nextMidnight.getDate() + 1);
+  const nextMidnight = moment()
+    .add(1, 'day')
+    .startOf('day')
+    .valueOf();
   return nextMidnight;
 }

@@ -153,6 +153,8 @@ export default ({ getService }: FtrProviderContext) => {
           { index: { _index: '.kibana' } },
           getEvent('load', date1),
           { index: { _index: '.kibana' } },
+          getEvent('load', date1),
+          { index: { _index: '.kibana' } },
           getEvent('load', date2),
           { index: { _index: '.kibana' } },
           getEvent('revert', date1, 'suggestion'),
@@ -164,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(result).to.eql({
         byDate: {
           [date1]: {
-            load: 10,
+            load: 15,
           },
           [date2]: {
             load: 5,

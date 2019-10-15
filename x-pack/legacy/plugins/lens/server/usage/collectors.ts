@@ -80,7 +80,7 @@ export function registerLensUsageCollector(
 
 function addEvents(prevEvents: Record<string, number>, newEvents: Record<string, number>) {
   Object.keys(newEvents).forEach(key => {
-    prevEvents[key] = prevEvents[key] || 0 + newEvents[key];
+    prevEvents[key] = (prevEvents[key] || 0) + newEvents[key];
   });
 }
 
