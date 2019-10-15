@@ -63,7 +63,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <EuiStat
-          title={numeral(totalNumberOfLogs).format('0.00a')}
+          title={numeral(totalNumberOfLogEntries).format('0.00a')}
           description={i18n.translate(
             'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogEntriesDescription',
             {
