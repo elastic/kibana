@@ -8,6 +8,9 @@ import React, { ReactNode, FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import 'react-datetime/css/react-datetime.css';
+import { UnitStrings } from '../../../../../i18n';
+
+const { quickRanges: strings } = UnitStrings;
 
 interface Props {
   /** Initial start date string */
@@ -23,13 +26,13 @@ interface Props {
 }
 
 const quickRanges = [
-  { from: 'now/d', to: 'now', display: 'Today' },
-  { from: 'now-24h', to: 'now', display: 'Last 24 hours' },
-  { from: 'now-7d', to: 'now', display: 'Last 7 days' },
-  { from: 'now-14d', to: 'now', display: 'Last 2 weeks' },
-  { from: 'now-30d', to: 'now', display: 'Last 30 days' },
-  { from: 'now-90d', to: 'now', display: 'Last 90 days' },
-  { from: 'now-1y', to: 'now', display: 'Last 1 year' },
+  { from: 'now/d', to: 'now', display: strings.getTodayLabel() },
+  { from: 'now-24h', to: 'now', display: strings.getLast24HoursLabel() },
+  { from: 'now-7d', to: 'now', display: strings.getLast7DaysLabel() },
+  { from: 'now-14d', to: 'now', display: strings.getLast2WeeksLabel() },
+  { from: 'now-30d', to: 'now', display: strings.getLast30DaysLabel() },
+  { from: 'now-90d', to: 'now', display: strings.getLast90DaysLabel() },
+  { from: 'now-1y', to: 'now', display: strings.getLast1YearLabel() },
 ];
 
 export const DatetimeQuickList: FunctionComponent<Props> = ({ from, to, onSelect, children }) => (
