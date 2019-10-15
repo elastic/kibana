@@ -11,6 +11,7 @@ export * from './components';
 export * from './constants';
 export * from './errors';
 export * from './expression_types';
+export * from './renderers';
 export * from './shortcuts';
 export * from './transitions';
 export * from './units';
