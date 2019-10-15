@@ -68,6 +68,6 @@ const getTotalNumberOfLogs = (
     const sumPartitions = bucket.partitions.reduce((partitionsTotal, partition) => {
       return (partitionsTotal += partition.numberOfLogs);
     }, 0);
-    return (sumNumberOfLogs += sumPartitions);
+    return (sumNumberOfLogEntries += sumPartitions);
   }, 0);
 };
