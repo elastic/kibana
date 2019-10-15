@@ -53,14 +53,7 @@ import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
-import {
-  ErrorToastOptions,
-  NotificationsSetup,
-  NotificationsStart,
-  Toast,
-  ToastInput,
-  ToastsApi,
-} from './notifications';
+import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
@@ -111,12 +104,13 @@ export {
   HttpFetchQuery,
   HttpErrorResponse,
   HttpErrorRequest,
-  HttpFetchError,
   HttpInterceptor,
   HttpResponse,
   HttpHandler,
   HttpBody,
-  HttpInterceptController,
+  IBasePath,
+  IHttpInterceptController,
+  IHttpFetchError,
 } from './http';
 
 export {
@@ -126,6 +120,17 @@ export {
   OverlayBannersStart,
   OverlayRef,
 } from './overlays';
+
+export {
+  Toast,
+  ToastInput,
+  IToasts,
+  ToastsApi,
+  ToastInputFields,
+  ToastsSetup,
+  ToastsStart,
+  ErrorToastOptions,
+} from './notifications';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -252,7 +257,6 @@ export {
   IContextProvider,
   ContextSetup,
   DocLinksStart,
-  ErrorToastOptions,
   FatalErrorInfo,
   FatalErrorsSetup,
   HttpSetup,
@@ -266,9 +270,6 @@ export {
   PluginInitializerContext,
   SavedObjectsStart,
   PluginOpaqueId,
-  Toast,
-  ToastInput,
-  ToastsApi,
   UiSettingsClient,
   UiSettingsClientContract,
   UiSettingsState,

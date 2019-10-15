@@ -4,6 +4,8 @@
 
 ## HttpRequestInit.mode property
 
+The mode associated with request, which is a string indicating whether the request will use CORS, or will be restricted to same-origin URLs.
+
 <b>Signature:</b>
 
 ```typescript
