@@ -27,6 +27,6 @@ export declare class ToastsApi implements IToasts
 |  [addError(error, options)](./kibana-plugin-public.toastsapi.adderror.md) |  | Adds a new toast that displays an exception message with a button to open the full stacktrace in a modal. |
 |  [addSuccess(toastOrTitle)](./kibana-plugin-public.toastsapi.addsuccess.md) |  | Adds a new toast pre-configured with the success color and check icon. |
 |  [addWarning(toastOrTitle)](./kibana-plugin-public.toastsapi.addwarning.md) |  | Adds a new toast pre-configured with the warning color and help icon. |
-|  [get$()](./kibana-plugin-public.toastsapi.get_.md) |  | Current array of toast messages to show to user. |
+|  [get$()](./kibana-plugin-public.toastsapi.get_.md) |  | Observable of the toast messages to show to the user. |
 |  [remove(toast)](./kibana-plugin-public.toastsapi.remove.md) |  | Removes a toast from the current array of toasts if present. |
 

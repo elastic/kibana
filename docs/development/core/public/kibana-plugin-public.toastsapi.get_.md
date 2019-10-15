@@ -4,7 +4,7 @@
 
 ## ToastsApi.get$() method
 
-Current array of toast messages to show to user.
+Observable of the toast messages to show to the user.
 
 <b>Signature:</b>
 

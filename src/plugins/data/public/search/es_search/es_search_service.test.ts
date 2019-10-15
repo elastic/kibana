@@ -25,10 +25,9 @@ import { searchSetupMock } from '../mocks';
 describe('ES search strategy service', () => {
   let service: EsSearchService;
   let mockCoreSetup: MockedKeys<CoreSetup>;
-  const opaqueId = Symbol();
 
   beforeEach(() => {
-    service = new EsSearchService({ opaqueId });
+    service = new EsSearchService(coreMock.createPluginInitializerContext());
     mockCoreSetup = coreMock.createSetup();
   });
 
