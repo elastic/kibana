@@ -93,7 +93,7 @@ export interface ModuleDatafeed {
 export interface MlSetupArgs {
   configTemplate: string;
   indexPatternName: string;
-  jobIdErrorFilter?: string[];
+  jobIdErrorFilter: string[];
   groups: string[];
   prefix?: string;
   headers?: Record<string, string | undefined>;
