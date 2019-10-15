@@ -47,52 +47,34 @@ const getGroupPaths = (path: InfraSnapshotNodePath[]) => {
 };
 
 export const TableView = class extends React.PureComponent<Props, State> {
-    public readonly state: State = initialState;
-    public render() {
-      const { nodes, options, formatter, intl, timeRange, nodeType } = this.props;
-      const columns = [
-        {
-          field: 'name',
-          name: i18n.translate('xpack.infra.tableView.columnName.name', {
-            defaultMessage: 'Name',
-          }),
-          sortable: true,
-          truncateText: true,
-          textOnly: true,
-          render: (value: string, item: { node: InfraWaffleMapNode }) => {
-            const tooltipText = item.node.id === value ? `${value}` : `${value} (${item.node.id})`;
-            // For the table we need to create a UniqueID that takes into to account the groupings
-            // as well as the node name. There is the possibility that a node can be present in two
-            // different groups and be on the screen at the same time.
-            const uniqueID = [...item.node.path.map(p => p.value), item.node.name].join(':');
-            return (
-              <NodeContextMenu
-                node={item.node}
-                nodeType={nodeType}
-                closePopover={this.closePopoverFor(uniqueID)}
-                timeRange={timeRange}
-                isPopoverOpen={this.state.isPopoverOpen.includes(uniqueID)}
-                options={options}
-                popoverPosition="rightCenter"
-              >
-                <EuiToolTip content={tooltipText}>
-                  <EuiButtonEmpty onClick={this.openPopoverFor(uniqueID)}>{value}</EuiButtonEmpty>
-                </EuiToolTip>
-              </NodeContextMenu>
-            );
-          },
-        },
-        ...options.groupBy.map((grouping, index) => ({
-          field: `group_${index}`,
-          name: fieldToName((grouping && grouping.field) || '', intl),
-          sortable: true,
-          truncateText: true,
-          textOnly: true,
-          render: (value: string) => {
-            const handleClick = () => this.props.onFilter(`${grouping.field}:"${value}"`);
-            return (
-              <EuiToolTip content="Set Filter">
-                <EuiButtonEmpty onClick={handleClick}>{value}</EuiButtonEmpty>
+  public readonly state: State = initialState;
+  public render() {
+    const { nodes, options, formatter, timeRange, nodeType } = this.props;
+    const columns = [
+      {
+        field: 'name',
+        name: i18n.translate('xpack.infra.tableView.columnName.name', { defaultMessage: 'Name' }),
+        sortable: true,
+        truncateText: true,
+        textOnly: true,
+        render: (value: string, item: { node: InfraWaffleMapNode }) => {
+          const tooltipText = item.node.id === value ? `${value}` : `${value} (${item.node.id})`;
+          // For the table we need to create a UniqueID that takes into to account the groupings
+          // as well as the node name. There is the possibility that a node can be present in two
+          // different groups and be on the screen at the same time.
+          const uniqueID = [...item.node.path.map(p => p.value), item.node.name].join(':');
+          return (
+            <NodeContextMenu
+              node={item.node}
+              nodeType={nodeType}
+              closePopover={this.closePopoverFor(uniqueID)}
+              timeRange={timeRange}
+              isPopoverOpen={this.state.isPopoverOpen.includes(uniqueID)}
+              options={options}
+              popoverPosition="rightCenter"
+            >
+              <EuiToolTip content={tooltipText}>
+                <EuiButtonEmpty onClick={this.openPopoverFor(uniqueID)}>{value}</EuiButtonEmpty>
               </EuiToolTip>
             </NodeContextMenu>
           );
