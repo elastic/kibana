@@ -1444,14 +1444,16 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     }
 
     if (_.has(marker, 'scheduledEvents')) {
-      tooltipData.push({
-        name: intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.scheduledEventsLabel',
-          defaultMessage: 'Scheduled events'
-        }),
-        value: marker.scheduledEvents.map(mlEscape).join('<br/>'),
-        seriesKey,
-        yAccessor: 'scheduled_events'
+      marker.scheduledEvents.forEach((scheduledEvent, i) => {
+        tooltipData.push({
+          name: intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.scheduledEventsLabel',
+            defaultMessage: 'scheduled event{counter}'
+          }, { counter: marker.scheduledEvents.length > 1 ? ` #${i + 1}` : '' }),
+          value: scheduledEvent,
+          seriesKey,
+          yAccessor: `scheduled_events_${i + 1}`
+        });
       });
     }
 

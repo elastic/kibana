@@ -30,7 +30,6 @@ import {
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { TimeBuckets } from '../../util/time_buckets';
-import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 import { severity$ } from '../../components/controls/select_severity/select_severity';
@@ -482,14 +481,16 @@ export const ExplorerChartDistribution = injectI18n(class ExplorerChartDistribut
       }
 
       if (_.has(marker, 'scheduledEvents')) {
-        tooltipData.push({
-          name: intl.formatMessage({
-            id: 'xpack.ml.explorer.distributionChart.scheduledEventsLabel',
-            defaultMessage: 'Scheduled events'
-          }),
-          value: marker.scheduledEvents.map(mlEscape).join('<br/>'),
-          seriesKey,
-          yAccessor: 'scheduled_events'
+        marker.scheduledEvents.forEach((scheduledEvent, i) => {
+          tooltipData.push({
+            name: intl.formatMessage({
+              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.scheduledEventsLabel',
+              defaultMessage: 'scheduled event{counter}'
+            }, { counter: marker.scheduledEvents.length > 1 ? ` #${i + 1}` : '' }),
+            value: scheduledEvent,
+            seriesKey,
+            yAccessor: `scheduled_events_${i + 1}`
+          });
         });
       }
 
