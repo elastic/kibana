@@ -13,7 +13,7 @@ import {
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
-import { KueryFilterQuery, networkModel, SerializedFilterQuery } from '../model';
+import { networkModel } from '../model';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/network');
 
@@ -61,16 +61,6 @@ export const updateTopNFlowSort = actionCreator<{
   networkType: networkModel.NetworkType;
   tableType: networkModel.TopNTableType;
 }>('UPDATE_TOP_N_FLOW_SORT');
-
-export const setNetworkFilterQueryDraft = actionCreator<{
-  filterQueryDraft: KueryFilterQuery;
-  networkType: networkModel.NetworkType;
-}>('SET_NETWORK_FILTER_QUERY_DRAFT');
-
-export const applyNetworkFilterQuery = actionCreator<{
-  filterQuery: SerializedFilterQuery;
-  networkType: networkModel.NetworkType;
-}>('APPLY_NETWORK_FILTER_QUERY');
 
 // IP Details Actions
 export const updateIpDetailsFlowTarget = actionCreator<{

@@ -96,9 +96,7 @@ export default function({ getService, getPageObjects, ...rest }: FtrProviderCont
         field: 'ip',
       });
 
-      await PageObjects.lens.setTitle('Afancilenstest');
-
-      await PageObjects.lens.save();
+      await PageObjects.lens.save('Afancilenstest');
 
       // Ensure the visualization shows up in the visualize list, and takes
       // us back to the visualization as we configured it.
