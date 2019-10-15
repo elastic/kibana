@@ -1274,24 +1274,27 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   </EuiFlexGroup>
 
                   {showViewBySwimlane && (
-                    <div
-                      className="ml-explorer-swimlane euiText"
-                      onMouseEnter={this.onSwimlaneEnterHandler}
-                      onMouseLeave={this.onSwimlaneLeaveHandler}
-                      data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
-                    >
-                      <ExplorerSwimlane
-                        chartWidth={swimlaneWidth}
-                        filterActive={filterActive}
-                        maskAll={maskAll}
-                        TimeBuckets={TimeBuckets}
-                        swimlaneCellClick={this.swimlaneCellClick}
-                        swimlaneData={viewBySwimlaneData}
-                        swimlaneType={SWIMLANE_TYPE.VIEW_BY}
-                        selection={selectedCells}
-                        swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                      />
-                    </div>
+                    <React.Fragment>
+                      <EuiSpacer size="m" />
+                      <div
+                        className="ml-explorer-swimlane euiText"
+                        onMouseEnter={this.onSwimlaneEnterHandler}
+                        onMouseLeave={this.onSwimlaneLeaveHandler}
+                        data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
+                      >
+                        <ExplorerSwimlane
+                          chartWidth={swimlaneWidth}
+                          filterActive={filterActive}
+                          maskAll={maskAll}
+                          TimeBuckets={TimeBuckets}
+                          swimlaneCellClick={this.swimlaneCellClick}
+                          swimlaneData={viewBySwimlaneData}
+                          swimlaneType={SWIMLANE_TYPE.VIEW_BY}
+                          selection={selectedCells}
+                          swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                        />
+                      </div>
+                    </React.Fragment>
                   )}
 
                   {viewBySwimlaneDataLoading && (

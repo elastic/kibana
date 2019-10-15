@@ -50,10 +50,11 @@ export const fillWorkspaceSaga = ({
       notifyAngular();
       workspace.fillInGraph(fields.length * 10);
     } catch (e) {
+      const message = 'body' in e ? e.body.message : e.message;
       notifications.toasts.addDanger({
         title: i18n.translate('xpack.graph.fillWorkspaceError', {
           defaultMessage: 'Fetching top terms failed: {message}',
-          values: { message: e.message },
+          values: { message },
         }),
       });
     }
