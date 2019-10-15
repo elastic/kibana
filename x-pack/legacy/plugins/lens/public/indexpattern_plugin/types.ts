@@ -18,9 +18,6 @@ export interface IndexPattern {
       params: unknown;
     }
   >;
-
-  // TODO: Load index patterns and existence data in one API call
-  hasExistence?: boolean;
 }
 
 export interface IndexPatternField {
@@ -42,11 +39,6 @@ export interface IndexPatternField {
       }
     >
   >;
-
-  // TODO: This is loaded separately, but should be combined into one API
-  exists?: boolean;
-  cardinality?: number;
-  count?: number;
 }
 
 export interface IndexPatternLayer {
@@ -64,6 +56,11 @@ export interface IndexPatternPersistedState {
 export type IndexPatternPrivateState = IndexPatternPersistedState & {
   indexPatternRefs: IndexPatternRef[];
   indexPatterns: Record<string, IndexPattern>;
+
+  /**
+   * indexPatternId -> fieldName -> boolean
+   */
+  existingFields: Record<string, Record<string, boolean>>;
   showEmptyFields: boolean;
 };
 

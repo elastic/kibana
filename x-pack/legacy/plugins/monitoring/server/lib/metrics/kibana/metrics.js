@@ -180,13 +180,25 @@ export const metrics = {
     metricAgg: 'max',
     units: ''
   }),
-  kibana_requests: new KibanaMetric({
+  kibana_requests_total: new KibanaMetric({
     field: 'kibana_stats.requests.total',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clientRequestsLabel', {
       defaultMessage: 'Client Requests'
     }),
     description: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clientRequestsDescription', {
       defaultMessage: 'Total number of client requests received by the Kibana instance.'
+    }),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: ''
+  }),
+  kibana_requests_disconnects: new KibanaMetric({
+    field: 'kibana_stats.requests.disconnects',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clientRequestsDisconnectsLabel', {
+      defaultMessage: 'Client Disconnects'
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clientRequestsDisconnectsDescription', {
+      defaultMessage: 'Total number of client disconnects to the Kibana instance.'
     }),
     format: SMALL_FLOAT,
     metricAgg: 'max',
