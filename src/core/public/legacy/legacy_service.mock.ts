@@ -18,8 +18,8 @@
  */
 import { LegacyPlatformService } from './legacy_service';
 
-// Use Pick and keyof to get only public properties
-type LegacyPlatformServiceContract = Pick<LegacyPlatformService, keyof LegacyPlatformService>;
+// Use Required to get only public properties
+type LegacyPlatformServiceContract = Required<LegacyPlatformService>;
 const createMock = () => {
   const mocked: jest.Mocked<LegacyPlatformServiceContract> = {
     legacyId: Symbol(),
