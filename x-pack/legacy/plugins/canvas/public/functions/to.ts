@@ -9,7 +9,7 @@ import { castProvider } from '@kbn/interpreter/common';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped Elastic library
 import { registries } from 'plugins/interpreter/registries';
-import { getFunctionHelp, getFunctionErrors } from '../../i18n/functions';
+import { getFunctionHelp, getFunctionErrors } from '../../i18n';
 
 interface Arguments {
   type: string[];

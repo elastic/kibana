@@ -7,7 +7,7 @@
 import { uniq } from 'lodash';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Datatable, Render } from '../../../types';
-import { getFunctionHelp } from '../../../i18n/functions';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   filterColumn: string;

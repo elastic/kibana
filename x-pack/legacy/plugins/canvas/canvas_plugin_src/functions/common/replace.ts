@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../../i18n/functions';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   pattern: string;

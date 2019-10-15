@@ -8,7 +8,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore unconverted local lib
 import { getState } from '../state/store';
 import { getAssetById } from '../state/selectors/assets';
-import { getFunctionHelp, getFunctionErrors } from '../../i18n/functions';
+import { getFunctionHelp, getFunctionErrors } from '../../i18n';
 
 interface Arguments {
   id: string;

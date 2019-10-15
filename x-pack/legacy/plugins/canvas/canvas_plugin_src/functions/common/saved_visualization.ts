@@ -12,7 +12,7 @@ import {
 } from '../../expression_types';
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
 import { Filter } from '../../../types';
-import { getFunctionHelp } from '../../../i18n/functions';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   id: string;

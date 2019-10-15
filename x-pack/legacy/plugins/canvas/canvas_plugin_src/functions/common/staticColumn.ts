@@ -8,7 +8,7 @@
 import { getType } from '@kbn/interpreter/common';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Datatable } from '../../../types';
-import { getFunctionHelp } from '../../../i18n/functions';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   name: string;

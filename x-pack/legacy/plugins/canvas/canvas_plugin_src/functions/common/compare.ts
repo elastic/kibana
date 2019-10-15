@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp, getFunctionErrors } from '../../../i18n/functions';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Operation {
   EQ = 'eq',

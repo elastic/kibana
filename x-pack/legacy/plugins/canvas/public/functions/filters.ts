@@ -15,7 +15,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getState } from '../state/store';
 import { getGlobalFilters } from '../state/selectors/workpad';
 import { Filter } from '../../types';
-import { getFunctionHelp } from '../../i18n/functions';
+import { getFunctionHelp } from '../../i18n';
 
 interface Arguments {
   group: string[];

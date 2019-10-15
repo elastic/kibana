@@ -8,7 +8,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
 import { Filter } from '../../../types';
-import { getFunctionHelp } from '../../../i18n/functions';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   index: string | null;

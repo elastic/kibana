@@ -11,7 +11,7 @@ import { fetch } from '../../common/lib/fetch';
 // @ts-ignore untyped local
 import { buildBoolArray } from '../../server/lib/build_bool_array';
 import { Datatable, Filter } from '../../types';
-import { getFunctionHelp } from '../../i18n/functions';
+import { getFunctionHelp } from '../../i18n';
 
 interface Arguments {
   query: string;
