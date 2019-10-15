@@ -22,7 +22,7 @@ export const getIndexPatternTitles = (indexPatterns: IndexPatternSavedObject[]):
 export const getIndexPatternTitleIdMapping = (
   indexPatterns: IndexPatternSavedObject[]
 ): Array<{ title: string; id: string }> =>
-  indexPatterns.reduce((acc: Array<{ title: string; id: string }>, v) => {
+indexPatterns.reduce<Array<{ title: string; id: string }>>((acc, v) => {
     if (v.attributes && v.attributes.title) {
       return [...acc, { title: v.attributes.title, id: v.id }];
     } else {
