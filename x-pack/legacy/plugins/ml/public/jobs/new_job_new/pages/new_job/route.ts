@@ -9,21 +9,20 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { checkFullLicense } from '../../../../license/check_license';
 import { checkGetJobsPrivilege } from '../../../../privilege/check_privilege';
-// @ts-ignore
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../../util/index_utils';
 
 import {
   getCreateSingleMetricJobBreadcrumbs,
   getCreateMultiMetricJobBreadcrumbs,
   getCreatePopulationJobBreadcrumbs,
-  // @ts-ignore
+  getAdvancedJobConfigurationBreadcrumbs,
 } from '../../../breadcrumbs';
 
 import { Route } from '../../../../../common/types/kibana';
 
 import { loadNewJobCapabilities } from '../../../../services/new_job_capabilities_service';
 
-import { loadNewJobDefaults } from '../../../new_job/utils/new_job_defaults';
+import { loadNewJobDefaults } from '../../utils/new_job_defaults';
 
 import { mlJobService } from '../../../../services/job_service';
 import { JOB_TYPE } from '../../common/job_creator/util/constants';
@@ -42,6 +41,10 @@ const routes: Route[] = [
   {
     id: JOB_TYPE.POPULATION,
     k7Breadcrumbs: getCreatePopulationJobBreadcrumbs,
+  },
+  {
+    id: JOB_TYPE.ADVANCED,
+    k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
   },
 ];
 

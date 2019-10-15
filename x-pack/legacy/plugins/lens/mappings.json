@@ -8,8 +8,7 @@
         "type": "keyword"
       },
       "state": {
-        "enabled": false,
-        "type": "object"
+        "type": "flattened"
       },
       "expression": {
         "index": false,

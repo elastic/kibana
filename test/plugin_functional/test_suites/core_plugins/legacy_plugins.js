@@ -22,6 +22,7 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('legacy plugins', function describeIndexTests() {
     it('have access to New Platform HTTP service', async () => {
@@ -30,6 +31,13 @@ export default function ({ getService, getPageObjects }) {
 
       const pageSource = await browser.execute('return window.document.body.textContent;');
       expect(pageSource).to.equal('Pong in legacy via new platform: true');
+    });
+
+    describe('application service compatibility layer', function describeIndexTests() {
+      it('can render legacy apps', async () => {
+        await PageObjects.common.navigateToApp('core_legacy_compat');
+        expect(await testSubjects.exists('coreLegacyCompatH1')).to.be(true);
+      });
     });
   });
 }

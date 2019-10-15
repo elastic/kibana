@@ -254,7 +254,7 @@ Home.propTypes = {
   fetchTelemetry: PropTypes.func.isRequired,
   getTelemetryBannerId: PropTypes.func.isRequired,
   setOptIn: PropTypes.func.isRequired,
-  shouldShowTelemetryOptIn: PropTypes.bool.isRequired,
+  shouldShowTelemetryOptIn: PropTypes.bool,
   directories: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

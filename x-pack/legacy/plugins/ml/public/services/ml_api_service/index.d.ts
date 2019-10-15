@@ -8,11 +8,8 @@ import { Annotation } from '../../../common/types/annotations';
 import { AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
-import {
-  DataFrameTransformEndpointRequest,
-  DataFrameTransformEndpointResult,
-} from '../../data_frame/pages/transform_management/components/transform_list/common';
 import { MlSummaryJobs } from '../../../common/types/jobs';
+import { MlServerDefaults, MlServerLimits } from '../../jobs/new_job_new/utils/new_job_defaults';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -26,6 +23,16 @@ export interface GetTimeFieldRangeResponse {
   success: boolean;
   start: { epoch: number; string: string };
   end: { epoch: number; string: string };
+}
+
+export interface MlInfoResponse {
+  defaults: MlServerDefaults;
+  limits: MlServerLimits;
+  native_code: {
+    build_hash: string;
+    version: string;
+  };
+  upgrade_mode: boolean;
 }
 
 declare interface Ml {
@@ -48,23 +55,6 @@ declare interface Ml {
     getAnalyticsAuditMessages(analyticsId: string): Promise<any>;
   };
 
-  dataFrame: {
-    getDataFrameTransforms(jobId?: string): Promise<any>;
-    getDataFrameTransformsStats(jobId?: string): Promise<any>;
-    createDataFrameTransform(jobId: string, jobConfig: any): Promise<any>;
-    deleteDataFrameTransforms(
-      jobsData: DataFrameTransformEndpointRequest[]
-    ): Promise<DataFrameTransformEndpointResult>;
-    getDataFrameTransformsPreview(payload: any): Promise<any>;
-    startDataFrameTransforms(
-      jobsData: DataFrameTransformEndpointRequest[]
-    ): Promise<DataFrameTransformEndpointResult>;
-    stopDataFrameTransforms(
-      jobsData: DataFrameTransformEndpointRequest[]
-    ): Promise<DataFrameTransformEndpointResult>;
-    getTransformAuditMessages(transformId: string): Promise<any>;
-  };
-
   hasPrivileges(obj: object): Promise<any>;
 
   checkMlPrivileges(): Promise<PrivilegesResponse>;
@@ -73,7 +63,9 @@ declare interface Ml {
   getDatafeedStats(obj: object): Promise<any>;
   esSearch(obj: object): any;
   getIndices(): Promise<EsIndex[]>;
-
+  dataRecognizerModuleJobsExist(obj: { moduleId: string }): Promise<any>;
+  getDataRecognizerModule(obj: { moduleId: string }): Promise<any>;
+  setupDataRecognizerConfig(obj: object): Promise<any>;
   getTimeFieldRange(obj: object): Promise<GetTimeFieldRangeResponse>;
   calculateModelMemoryLimit(obj: object): Promise<{ modelMemoryLimit: string }>;
   calendars(): Promise<
@@ -136,6 +128,9 @@ declare interface Ml {
   estimateBucketSpan(
     data: object
   ): Promise<{ name: string; ms: number; error?: boolean; message?: { msg: string } | string }>;
+
+  mlNodeCount(): Promise<{ count: number }>;
+  mlInfo(): Promise<MlInfoResponse>;
 }
 
 declare const ml: Ml;

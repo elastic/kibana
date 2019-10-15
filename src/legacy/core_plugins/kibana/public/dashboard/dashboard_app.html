@@ -46,6 +46,7 @@
     filters="appState.$newFilters"
     on-cancel="onCancelApplyFilters"
     on-submit="onApplyFilters"
+    index-patterns="indexPatterns"
   ></apply-filters-popover>
 
   <div ng-show="getShouldShowEditHelp() || getShouldShowViewHelp()" class="dshStartScreen">
@@ -120,6 +121,7 @@
     </div>
   </div>
 
+  <h1 class="euiScreenReaderOnly">{{screenTitle}}</h1>
   <div id="dashboardViewport"></div>
 
 </dashboard-app>

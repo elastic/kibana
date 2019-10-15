@@ -5,22 +5,25 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiPopover, EuiButton } from '@elastic/eui';
+import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiButton } from '@elastic/eui';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';
-import { GraphStore, createGraphStore, loadFields } from '../../state_management';
+import { GraphStore, loadFields } from '../../state_management';
 import { getSuitableIcon } from '../../helpers/style_choices';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { FieldManager } from './field_manager';
+import { Provider } from 'react-redux';
+import { createMockGraphStore } from '../../state_management/mocks';
 
 describe('field_manager', () => {
   let store: GraphStore;
   let instance: ShallowWrapper;
+  let getInstance: () => ShallowWrapper;
   let dispatchSpy: jest.Mock;
 
   beforeEach(() => {
-    store = createGraphStore();
+    store = createMockGraphStore({}).store;
     store.dispatch(
       loadFields([
         {
@@ -52,27 +55,31 @@ describe('field_manager', () => {
     );
 
     dispatchSpy = jest.fn(store.dispatch);
+    store.dispatch = dispatchSpy;
 
-    instance = shallow(<FieldManager state={store.getState()} dispatch={dispatchSpy} />);
+    instance = shallow(
+      <Provider store={store}>
+        <FieldManager pickerOpen={true} setPickerOpen={() => {}} />
+      </Provider>
+    );
+
+    getInstance = () =>
+      instance
+        .find(FieldManager)
+        .dive()
+        .dive();
   });
 
-  function update() {
-    instance.setProps({
-      state: store.getState(),
-      dispatch: dispatchSpy,
-    });
-  }
-
   it('should list editors for all selected fields', () => {
-    expect(instance.find(FieldEditor).length).toEqual(2);
+    expect(getInstance().find(FieldEditor).length).toEqual(2);
     expect(
-      instance
+      getInstance()
         .find(FieldEditor)
         .at(0)
         .prop('field').name
     ).toEqual('field1');
     expect(
-      instance
+      getInstance()
         .find(FieldEditor)
         .at(1)
         .prop('field').name
@@ -80,23 +87,21 @@ describe('field_manager', () => {
   });
 
   it('should select fields from picker', () => {
-    const fieldPicker = instance.find(FieldPicker).dive();
-
-    act(() => {
-      (fieldPicker.find(EuiPopover).prop('button')! as ReactElement).props.onClick();
-    });
-
-    fieldPicker.update();
-
     expect(
-      fieldPicker
+      getInstance()
+        .find(FieldPicker)
+        .dive()
         .find(EuiSelectable)
         .prop('options')
         .map((option: { label: string }) => option.label)
     ).toEqual(['field1', 'field2', 'field3']);
 
     act(() => {
-      fieldPicker.find(EuiSelectable).prop('onChange')([{ checked: 'on', label: 'field3' }]);
+      getInstance()
+        .find(FieldPicker)
+        .dive()
+        .find(EuiSelectable)
+        .prop('onChange')([{ checked: 'on', label: 'field3' }]);
     });
 
     expect(dispatchSpy).toHaveBeenCalledWith({
@@ -104,13 +109,12 @@ describe('field_manager', () => {
       payload: 'field3',
     });
 
-    update();
-    expect(instance.find(FieldEditor).length).toEqual(3);
+    expect(getInstance().find(FieldEditor).length).toEqual(3);
   });
 
   it('should deselect field', () => {
     act(() => {
-      instance
+      getInstance()
         .find(FieldEditor)
         .at(0)
         .dive()
@@ -123,19 +127,18 @@ describe('field_manager', () => {
       payload: 'field1',
     });
 
-    update();
-    expect(instance.find(FieldEditor).length).toEqual(1);
+    expect(getInstance().find(FieldEditor).length).toEqual(1);
   });
 
   it('should disable field', () => {
-    const toggleItem = instance
+    const toggleItem = getInstance()
       .find(FieldEditor)
       .at(0)
       .dive()
       .find(EuiContextMenu)
       .prop('panels')![0].items![1];
 
-    expect(toggleItem.name).toEqual('Temporarily disable');
+    expect(toggleItem.name).toEqual('Disable field');
 
     toggleItem.onClick!({} as any);
 
@@ -150,27 +153,25 @@ describe('field_manager', () => {
       },
     });
 
-    update();
-
     expect(
-      instance
+      getInstance()
         .find(FieldEditor)
         .at(0)
         .dive()
         .find(EuiContextMenu)
         .prop('panels')![0].items![1].name
-    ).toEqual('Enable');
+    ).toEqual('Enable field');
   });
 
   it('should enable field', () => {
-    const toggleItem = instance
+    const toggleItem = getInstance()
       .find(FieldEditor)
       .at(1)
       .dive()
       .find(EuiContextMenu)
       .prop('panels')![0].items![1];
 
-    expect(toggleItem.name).toEqual('Enable');
+    expect(toggleItem.name).toEqual('Enable field');
 
     toggleItem.onClick!({} as any);
 
@@ -185,20 +186,18 @@ describe('field_manager', () => {
       },
     });
 
-    update();
-
     expect(
-      instance
+      getInstance()
         .find(FieldEditor)
         .at(1)
         .dive()
         .find(EuiContextMenu)
         .prop('panels')![0].items![1].name
-    ).toEqual('Temporarily disable');
+    ).toEqual('Disable field');
   });
 
   it('should change color', () => {
-    const fieldEditor = instance
+    const fieldEditor = getInstance()
       .find(FieldEditor)
       .at(1)
       .dive();

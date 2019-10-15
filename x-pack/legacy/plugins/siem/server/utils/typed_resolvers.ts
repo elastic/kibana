@@ -5,8 +5,15 @@
  */
 
 import * as runtimeTypes from 'io-ts';
+import { GraphQLResolveInfo } from 'graphql';
 
-import { Resolver } from '../graphql/types';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Resolver<Result, Parent = never, TContext = never, Args = any> = (
+  parent: Parent,
+  args: Args,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => Promise<Result> | Result;
 
 type ResolverResult<R> = R | Promise<R>;
 

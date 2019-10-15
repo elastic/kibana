@@ -10,8 +10,8 @@ import { createSelector } from 'reselect';
 import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
-import { NetworkDetailsModel, NetworkPageModel, NetworkType } from './model';
-import { FlowTargetNew } from '../../graphql/types';
+import { IpDetailsTableType, NetworkDetailsModel, NetworkPageModel, NetworkType } from './model';
+import { FlowTargetSourceDest } from '../../graphql/types';
 
 const selectNetworkPage = (state: State): NetworkPageModel => state.network.page;
 
@@ -31,14 +31,24 @@ export enum NetworkTableType {
   topNFlowSource = 'topNFlowSource',
   topNFlowDestination = 'topNFlowDestination',
 }
-export const topNFlowSelector = (flowTarget: FlowTargetNew) =>
-  createSelector(
-    selectNetworkPage,
+export const topNFlowSelector = (flowTarget: FlowTargetSourceDest, networkType: NetworkType) => {
+  if (networkType === NetworkType.page) {
+    return createSelector(
+      selectNetworkPage,
+      network =>
+        flowTarget === FlowTargetSourceDest.source
+          ? network.queries[NetworkTableType.topNFlowSource]
+          : network.queries[NetworkTableType.topNFlowDestination]
+    );
+  }
+  return createSelector(
+    selectNetworkDetails,
     network =>
-      flowTarget === FlowTargetNew.source
-        ? network.queries[NetworkTableType.topNFlowSource]
-        : network.queries[NetworkTableType.topNFlowDestination]
+      flowTarget === FlowTargetSourceDest.source
+        ? network.queries[IpDetailsTableType.topNFlowSource]
+        : network.queries[IpDetailsTableType.topNFlowDestination]
   );
+};
 
 // Filter Query Selectors
 export const networkFilterQueryAsJson = () =>
@@ -77,12 +87,6 @@ export const ipDetailsFlowTargetSelector = () =>
   createSelector(
     selectNetworkDetails,
     network => network.flowTarget
-  );
-
-export const domainsSelector = () =>
-  createSelector(
-    selectNetworkDetails,
-    network => network.queries.domains
   );
 
 export const tlsSelector = () =>

@@ -6,8 +6,18 @@
 
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiText,
+  EuiBetaBadge,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
+import { CoreStart, CoreSetup } from 'src/core/public';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
@@ -32,6 +42,7 @@ export interface WorkspacePanelProps {
   framePublicAPI: FramePublicAPI;
   dispatch: (action: Action) => void;
   ExpressionRenderer: ExpressionRenderer;
+  core: CoreStart | CoreSetup;
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -46,8 +57,14 @@ export function InnerWorkspacePanel({
   datasourceStates,
   framePublicAPI,
   dispatch,
+  core,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
+  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+  const emptyStateGraphicURL = IS_DARK_THEME
+    ? '/plugins/lens/assets/lens_app_graphic_dark_2x.png'
+    : '/plugins/lens/assets/lens_app_graphic_light_2x.png';
+
   const dragDropContext = useContext(DragContext);
 
   const suggestionForDraggedField = useMemo(() => {
@@ -86,13 +103,45 @@ export function InnerWorkspacePanel({
   }
 
   function renderEmptyWorkspace() {
+    const tooltipContent = i18n.translate('xpack.lens.editorFrame.tooltipContent', {
+      defaultMessage:
+        'Lens is in beta and is subject to change.  The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
+    });
     return (
-      <p data-test-subj="empty-workspace">
-        <FormattedMessage
-          id="xpack.lens.editorFrame.emptyWorkspace"
-          defaultMessage="This is the workspace panel. Drop fields here"
-        />
-      </p>
+      <div className="eui-textCenter">
+        <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
+          <h3>
+            <FormattedMessage
+              id="xpack.lens.editorFrame.emptyWorkspace"
+              defaultMessage="Drop some fields here to start"
+            />
+          </h3>
+          <EuiImage
+            style={{ width: 360 }}
+            url={core.http.basePath.prepend(emptyStateGraphicURL)}
+            alt=""
+          />
+          <p>
+            <FormattedMessage
+              id="xpack.lens.editorFrame.emptyWorkspaceHeading"
+              defaultMessage="Lens is a new tool for creating visualizations"
+            />{' '}
+            <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
+          </p>
+          <EuiButtonEmpty
+            href="https://discuss.elastic.co/c/kibana"
+            iconType="popout"
+            iconSide="right"
+            size="xs"
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.lens.editorFrame.goToForums"
+              defaultMessage="Make requests and give feedback"
+            />
+          </EuiButtonEmpty>
+        </EuiText>
+      </div>
     );
   }
 
@@ -121,6 +170,7 @@ export function InnerWorkspacePanel({
       datasourceStates,
       framePublicAPI.dateRange,
       framePublicAPI.query,
+      framePublicAPI.filters,
     ]);
 
     useEffect(() => {

@@ -8,8 +8,7 @@
 
 import _ from 'lodash';
 
-import { parseInterval } from 'ui/utils/parse_interval';
-
+import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
 import { WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';

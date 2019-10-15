@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { sortByOrder } from 'lodash';
 import React, { ChangeEvent } from 'react';
-import chrome from 'ui/chrome';
 
 import {
   EuiFieldSearch,
@@ -41,7 +40,7 @@ import { VisTypeAlias } from '../../../../../visualizations/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
-import { TypesStart } from '../../../../../visualizations/public/np_ready/types';
+import { TypesStart } from '../../../../../visualizations/public/np_ready/public/types';
 
 export interface VisTypeListEntry extends VisType {
   highlighted: boolean;
@@ -52,7 +51,7 @@ export interface VisTypeAliasListEntry extends VisTypeAlias {
 }
 
 interface TypeSelectionProps {
-  onVisTypeSelected: (visType: VisType) => void;
+  onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
   visTypesRegistry: TypesStart;
   showExperimental: boolean;
 }
@@ -236,12 +235,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     }
 
     const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const onClick =
-      'aliasUrl' in visType
-        ? () => {
-            window.location = chrome.addBasePath(visType.aliasUrl);
-          }
-        : () => this.props.onVisTypeSelected(visType);
+    const onClick = () => this.props.onVisTypeSelected(visType);
 
     const highlightedType: HighlightedType = {
       title: visType.title,
