@@ -226,6 +226,11 @@ export interface CoreContext {
     // 
     // (undocumented)
     coreId: CoreId;
+    // (undocumented)
+    env: {
+        mode: Readonly<EnvironmentMode>;
+        packageInfo: Readonly<PackageInfo>;
+    };
 }
 
 // @public
@@ -379,6 +384,16 @@ export interface DocLinksStart {
     };
 }
 
+// @public (undocumented)
+export interface EnvironmentMode {
+    // (undocumented)
+    dev: boolean;
+    // (undocumented)
+    name: 'development' | 'production';
+    // (undocumented)
+    prod: boolean;
+}
+
 // Warning: (ae-missing-release-tag) "ErrorToastOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
 // @public (undocumented)
@@ -425,14 +440,23 @@ export interface HttpErrorRequest {
 export interface HttpErrorResponse {
     // (undocumented)
     body?: HttpBody;
-    // Warning: (ae-forgotten-export) The symbol "HttpFetchError" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     error: Error | HttpFetchError;
     // (undocumented)
     request?: Request;
     // (undocumented)
     response?: Response;
+}
+
+// @public (undocumented)
+export class HttpFetchError extends Error {
+    constructor(message: string, request: Request, response?: Response | undefined, body?: any);
+    // (undocumented)
+    readonly body?: any;
+    // (undocumented)
+    readonly request: Request;
+    // (undocumented)
+    readonly response?: Response | undefined;
 }
 
 // @public (undocumented)
@@ -672,6 +696,20 @@ export interface OverlayStart {
     }) => OverlayRef;
 }
 
+// @public (undocumented)
+export interface PackageInfo {
+    // (undocumented)
+    branch: string;
+    // (undocumented)
+    buildNum: number;
+    // (undocumented)
+    buildSha: string;
+    // (undocumented)
+    dist: boolean;
+    // (undocumented)
+    version: string;
+}
+
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
@@ -687,6 +725,11 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = obj
 
 // @public
 export interface PluginInitializerContext {
+    // (undocumented)
+    readonly env: {
+        mode: Readonly<EnvironmentMode>;
+        packageInfo: Readonly<PackageInfo>;
+    };
     readonly opaqueId: PluginOpaqueId;
 }
 

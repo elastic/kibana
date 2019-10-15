@@ -134,8 +134,7 @@ export default function ({ getService, getPageObjects }) {
       it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.removeIndexPattern();
+        await PageObjects.settings.removeLogstashIndexPatternIfExist();
 
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
@@ -169,8 +168,7 @@ export default function ({ getService, getPageObjects }) {
         // First, we need to delete the index pattern
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.removeIndexPattern();
+        await PageObjects.settings.removeLogstashIndexPatternIfExist();
 
         // Then, import the objects
         await PageObjects.settings.clickKibanaSavedObjects();
@@ -301,8 +299,7 @@ export default function ({ getService, getPageObjects }) {
         // Second, we need to delete the index pattern
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.removeIndexPattern();
+        await PageObjects.settings.removeLogstashIndexPatternIfExist();
 
         // Last, import a saved object connected to the saved search
         // This should NOT show the conflicts
@@ -337,8 +334,7 @@ export default function ({ getService, getPageObjects }) {
         // First, we need to delete the index pattern
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        await PageObjects.settings.removeIndexPattern();
+        await PageObjects.settings.removeLogstashIndexPatternIfExist();
 
         // Then, import the objects
         await PageObjects.settings.clickKibanaSavedObjects();
