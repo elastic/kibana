@@ -52,7 +52,15 @@ export function workspaceRoute(
           return res.ok();
         } catch (e) {
           if (e.isBoom) {
-            return res.internalError({ body: e });
+            return res.customError({
+              body: e.error,
+              statusCode: e.statusCode,
+            });
+          } else {
+            return res.customError({
+              body: e.error,
+              statusCode: 500,
+            });
           }
         }
       } else {

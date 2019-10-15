@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
+
 import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { DEFAULT_TREE_CHILDREN_LIMIT } from '../git_operations';
 import { CodeServerRouter } from '../security';
@@ -55,7 +57,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       }
       const endpoint = await codeServices.locate(req, uri);
       try {
-        return await gitService.fileTree(endpoint, {
+        const filetree = gitService.fileTree(endpoint, {
           uri: repoUri,
           path,
           revision,
@@ -64,9 +66,13 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
           withParents,
           flatten,
         });
+        return res.ok({ body: filetree });
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode,
+          });
         } else {
           return res.internalError({ body: e.message || e.name });
         }
@@ -124,7 +130,10 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         }
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode,
+          });
         } else {
           return res.internalError({ body: e.message || e.name });
         }
@@ -163,7 +172,10 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         }
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode,
+          });
         } else {
           return res.internalError({ body: e.message || e.name });
         }
@@ -202,7 +214,10 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       return await gitService.history(endpoint, { uri: repoUri, path, revision, count, after });
     } catch (e) {
       if (e.isBoom) {
-        return e;
+        return res.customError({
+          body: e.error,
+          statusCode: e.statusCode,
+        });
       } else {
         return res.internalError({ body: e.message || e.name });
       }
@@ -229,7 +244,10 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         return res.ok({ body: branchesAndTags });
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode,
+          });
         } else {
           return res.internalError({ body: e.message || e.name });
         }
@@ -259,7 +277,10 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         return res.ok({ body: diff });
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode,
+          });
         } else {
           return res.internalError({ body: e.message || e.name });
         }
@@ -290,7 +311,10 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         });
       } catch (e) {
         if (e.isBoom) {
-          return e;
+          return res.customError({
+            body: e.error,
+            statusCode: e.statusCode,
+          });
         } else {
           return res.internalError({ body: e.message || e.name });
         }

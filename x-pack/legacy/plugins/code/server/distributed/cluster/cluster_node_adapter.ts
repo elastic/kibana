@@ -127,7 +127,11 @@ export class ClusterNodeAdapter implements ServiceHandlerAdapter {
               const data = await localHandler(params, context);
               return res.ok({ body: { data } });
             } catch (e) {
-              throw Boom.boomify(e);
+              if (Boom.isBoom(e)) {
+                throw e;
+              } else {
+                throw Boom.boomify(e, { statusCode: 500 });
+              }
             }
           },
         });
