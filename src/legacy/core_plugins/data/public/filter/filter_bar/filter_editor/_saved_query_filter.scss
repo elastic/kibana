@@ -3,3 +3,7 @@
 .kbnSavedQueryFilterEditor__text {
   padding: $euiSizeM $euiSizeM ($euiSizeM / 2) $euiSizeM;
 }
+.savedQueryFilterEditor {
+  width: calc(95vw - #{$euiSizeXXL * 11});
+  overflow-y: visible;
+}
