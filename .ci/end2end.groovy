@@ -68,9 +68,6 @@ pipeline {
     stage('Smoke Tests'){
       options { skipDefaultCheckout() }
       steps{
-        /*(dir("${BASE_DIR}/${CYPRESS_DIR}"){
-          sh script: 'yarn cypress run'
-        }*/
         script {
           def nodeDocker = docker.build('node-cypress', "${CYPRESS_DIR}/ci")
           nodeDocker.inside('--network="host"'){
@@ -78,6 +75,14 @@ pipeline {
               sh(label: 'Build tests', script: 'npm install && yarn install')
               sh(label: 'Execute Smoke Tests', script: './node_modules/.bin/cypress run')
             }
+          }
+        }
+      }
+      post {
+        always {
+          dir("${BASE_DIR}/${CYPRESS_DIR}"){
+            archiveArtifacts(allowEmptyArchive: false, artifacts: 'screenshots/**,videos/**')
+            junit(allowEmptyResults: true, testResults: 'e2e-tests.xml')
           }
         }
       }
