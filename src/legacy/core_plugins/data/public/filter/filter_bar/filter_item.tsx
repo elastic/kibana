@@ -33,6 +33,7 @@ import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { SavedQueryService } from '../../search/search_bar/lib/saved_query_service';
+import { getDisplayValueFromFilter } from './filter_editor/lib/filter_editor_utils';
 
 interface Props {
   id: string;
@@ -70,8 +71,9 @@ class FilterItemUI extends Component<Props, State> {
       this.props.className
     );
 
+    const displayName = getDisplayValueFromFilter(filter, this.props.indexPatterns);
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
-    const dataTestSubjValue = filter.meta.value ? `filter-value-${filter.meta.value}` : '';
+    const dataTestSubjValue = filter.meta.value ? `filter-value-${displayName}` : '';
     const dataTestSubjDisabled = `filter-${
       this.props.filter.meta.disabled ? 'disabled' : 'enabled'
     }`;
@@ -79,6 +81,7 @@ class FilterItemUI extends Component<Props, State> {
     const badge = (
       <FilterView
         filter={filter}
+        displayName={displayName}
         className={classes}
         iconOnClick={() => this.props.onRemove()}
         onClick={this.togglePopover}

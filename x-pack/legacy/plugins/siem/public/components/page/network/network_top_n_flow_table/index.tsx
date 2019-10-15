@@ -5,7 +5,7 @@
  */
 import { EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
@@ -14,7 +14,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { networkActions } from '../../../../store/actions';
 import {
   Direction,
-  FlowTargetNew,
+  FlowTargetSourceDest,
   NetworkTopNFlowEdges,
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
@@ -22,15 +22,16 @@ import {
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
-import { getNetworkTopNFlowColumns } from './columns';
+import { getNFlowColumnsCurated } from './columns';
 import * as i18n from './translations';
 
 interface OwnProps {
   data: NetworkTopNFlowEdges[];
   fakeTotalCount: number;
-  flowTargeted: FlowTargetNew;
+  flowTargeted: FlowTargetSourceDest;
   id: string;
   indexPattern: StaticIndexPattern;
+  ip?: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -46,7 +47,12 @@ interface NetworkTopNFlowTableReduxProps {
 }
 
 interface NetworkTopNFlowTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
+  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
+  updateIpDetailsTableActivePage: ActionCreator<{
+    activePage: number;
+    tableType: networkModel.IpDetailsTableType;
+  }>;
+  updateNetworkPageTableActivePage: ActionCreator<{
     activePage: number;
     tableType: networkModel.NetworkTableType;
   }>;
@@ -87,18 +93,26 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     flowTargeted,
     id,
     indexPattern,
+    ip,
     isInspect,
     limit,
     loading,
     loadPage,
+    setIpDetailsTablesActivePageToZero,
     showMorePagesIndicator,
     topNFlowSort,
     totalCount,
     type,
+    updateIpDetailsTableActivePage,
+    updateNetworkPageTableActivePage,
     updateTopNFlowLimit,
     updateTopNFlowSort,
-    updateTableActivePage,
   }) => {
+    useEffect(() => {
+      if (ip && activePage !== 0) {
+        setIpDetailsTablesActivePageToZero(null);
+      }
+    }, [ip]);
     const onChange = (criteria: Criteria, tableType: networkModel.TopNTableType) => {
       if (criteria.sort != null) {
         const splitField = criteria.sort.field.split('.');
@@ -120,14 +134,23 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     };
 
     let tableType: networkModel.TopNTableType;
-    let headerTitle: string;
+    const headerTitle: string =
+      flowTargeted === FlowTargetSourceDest.source ? i18n.SOURCE_IP : i18n.DESTINATION_IP;
 
-    if (flowTargeted === FlowTargetNew.source) {
-      headerTitle = i18n.SOURCE_IP;
-      tableType = networkModel.NetworkTableType.topNFlowSource;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let updateTableActivePage: any;
+    if (type === networkModel.NetworkType.page) {
+      tableType =
+        flowTargeted === FlowTargetSourceDest.source
+          ? networkModel.NetworkTableType.topNFlowSource
+          : networkModel.NetworkTableType.topNFlowDestination;
+      updateTableActivePage = updateNetworkPageTableActivePage;
     } else {
-      headerTitle = i18n.DESTINATION_IP;
-      tableType = networkModel.NetworkTableType.topNFlowDestination;
+      tableType =
+        flowTargeted === FlowTargetSourceDest.source
+          ? networkModel.IpDetailsTableType.topNFlowSource
+          : networkModel.IpDetailsTableType.topNFlowDestination;
+      updateTableActivePage = updateIpDetailsTableActivePage;
     }
 
     const field =
@@ -139,12 +162,7 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getNetworkTopNFlowColumns(
-          indexPattern,
-          flowTargeted,
-          type,
-          NetworkTopNFlowTableId
-        )}
+        columns={getNFlowColumnsCurated(indexPattern, flowTargeted, type, NetworkTopNFlowTableId)}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={headerTitle}
@@ -177,14 +195,16 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
 NetworkTopNFlowTableComponent.displayName = 'NetworkTopNFlowTableComponent';
 
 const mapStateToProps = (state: State, ownProps: OwnProps) =>
-  networkSelectors.topNFlowSelector(ownProps.flowTargeted);
+  networkSelectors.topNFlowSelector(ownProps.flowTargeted, ownProps.type);
 
 export const NetworkTopNFlowTable = connect(
   mapStateToProps,
   {
+    setIpDetailsTablesActivePageToZero: networkActions.setIpDetailsTablesActivePageToZero,
     updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
     updateTopNFlowSort: networkActions.updateTopNFlowSort,
-    updateTableActivePage: networkActions.updateNetworkPageTableActivePage,
+    updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,
+    updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
   }
 )(NetworkTopNFlowTableComponent);
 
