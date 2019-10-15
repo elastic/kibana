@@ -84,7 +84,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
       setErrorCode(null);
       try {
         const actionsResponse = await loadActions({ http, sort, page, searchText });
-        setData(setActionTypeAttributeToActions(actionTypesIndex, data));
+        setData(setActionTypeAttributeToActions(actionTypesIndex, actionsResponse.data));
         setTotalItemCount(actionsResponse.total);
       } catch (e) {
         setErrorCode(e.response.status);
