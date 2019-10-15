@@ -84,6 +84,7 @@ export const updateTlsSort = actionCreator<{
 
 export const updateTlsLimit = actionCreator<{
   limit: number;
+  networkType: networkModel.NetworkType;
 }>('UPDATE_TLS_LIMIT');
 
 // Users Table Actions

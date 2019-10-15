@@ -309,14 +309,14 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       flowTarget,
     },
   }))
-  .case(updateTlsLimit, (state, { limit }) => ({
+  .case(updateTlsLimit, (state, { limit, networkType }) => ({
     ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
+    [networkType]: {
+      ...state[networkType],
       queries: {
-        ...state[NetworkType.details].queries,
-        [IpDetailsTableType.tls]: {
-          ...state[NetworkType.details].queries.tls,
+        ...state[networkType].queries,
+        [NetworkTableType.tls]: {
+          ...state[networkType].queries.tls,
           limit,
         },
       },
