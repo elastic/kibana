@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
-import { AggregationSearchResponse } from 'elasticsearch';
+import { AggregationSearchResponseWithTotalHitsAsInt } from 'elasticsearch';
 import { CoreSetup } from 'src/core/server';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 
@@ -135,10 +135,9 @@ export async function getNumberHistogram(
     },
   };
 
-  const minMaxResult = (await aggSearchWithBody(searchBody)) as AggregationSearchResponse<
-    unknown,
-    { body: { aggs: typeof searchBody } }
-  >;
+  const minMaxResult = (await aggSearchWithBody(
+    searchBody
+  )) as AggregationSearchResponseWithTotalHitsAsInt<unknown, { body: { aggs: typeof searchBody } }>;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
@@ -179,7 +178,9 @@ export async function getNumberHistogram(
       },
     },
   };
-  const histogramResult = (await aggSearchWithBody(histogramBody)) as AggregationSearchResponse<
+  const histogramResult = (await aggSearchWithBody(
+    histogramBody
+  )) as AggregationSearchResponseWithTotalHitsAsInt<
     unknown,
     { body: { aggs: typeof histogramBody } }
   >;
@@ -213,7 +214,9 @@ export async function getStringSamples(
       },
     },
   };
-  const topValuesResult = (await aggSearchWithBody(topValuesBody)) as AggregationSearchResponse<
+  const topValuesResult = (await aggSearchWithBody(
+    topValuesBody
+  )) as AggregationSearchResponseWithTotalHitsAsInt<
     unknown,
     { body: { aggs: typeof topValuesBody } }
   >;
@@ -260,7 +263,9 @@ export async function getDateHistogram(
   const histogramBody = {
     histo: { date_histogram: { field: field.name, fixed_interval: fixedInterval } },
   };
-  const results = (await aggSearchWithBody(histogramBody)) as AggregationSearchResponse<
+  const results = (await aggSearchWithBody(
+    histogramBody
+  )) as AggregationSearchResponseWithTotalHitsAsInt<
     unknown,
     { body: { aggs: typeof histogramBody } }
   >;

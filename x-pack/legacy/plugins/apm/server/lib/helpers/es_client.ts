@@ -10,7 +10,7 @@ import {
   IndexDocumentParams,
   IndicesDeleteParams,
   IndicesCreateParams,
-  AggregationSearchResponse
+  AggregationSearchResponseWithTotalHitsAsObject
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set } from 'lodash';
@@ -76,8 +76,7 @@ async function getParamsForSearchRequest(
   const includeFrozen = await uiSettings.get('search:includeFrozen');
   return {
     ...addFilterForLegacyData(apmIndices, params, apmOptions), // filter out pre-7.0 data
-    ignore_throttled: !includeFrozen, // whether to query frozen indices or not
-    rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
+    ignore_throttled: !includeFrozen // whether to query frozen indices or not
   };
 }
 
@@ -93,7 +92,7 @@ export function getESClient(req: Legacy.Request) {
     search: async <Hits = unknown, U extends SearchParams = {}>(
       params: U,
       apmOptions?: APMOptions
-    ): Promise<AggregationSearchResponse<Hits, U>> => {
+    ): Promise<AggregationSearchResponseWithTotalHitsAsObject<Hits, U>> => {
       const nextParams = await getParamsForSearchRequest(
         req,
         params,
@@ -111,8 +110,12 @@ export function getESClient(req: Legacy.Request) {
         console.log(JSON.stringify(nextParams.body, null, 4));
       }
 
-      return cluster.callWithRequest(req, 'search', nextParams) as Promise<
-        AggregationSearchResponse<Hits, U>
+      return (cluster.callWithRequest(
+        req,
+        'search',
+        nextParams
+      ) as unknown) as Promise<
+        AggregationSearchResponseWithTotalHitsAsObject<Hits, U>
       >;
     },
     index: <Body>(params: IndexDocumentParams<Body>) => {
