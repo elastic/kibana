@@ -34,6 +34,12 @@ export const authenticationsSchema = gql`
     inspect: Inspect
   }
 
+  type AuthenticationsOverTimeData {
+    inspect: Inspect
+    authenticationsOverTime: [MatrixOverTimeHistogramData!]!
+    totalCount: Float!
+  }
+
   extend type Source {
     "Gets Authentication success and failures based on a timerange"
     Authentications(
@@ -42,5 +48,10 @@ export const authenticationsSchema = gql`
       filterQuery: String
       defaultIndex: [String!]!
     ): AuthenticationsData!
+    AuthenticationsOverTime(
+      timerange: TimerangeInput!
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): AuthenticationsOverTimeData!
   }
 `;

@@ -32,7 +32,7 @@ export interface MatrixOverTimeBasicProps {
 
 export interface MatrixOverTimeProps extends MatrixOverTimeBasicProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   dataKey: string;
 }
 
