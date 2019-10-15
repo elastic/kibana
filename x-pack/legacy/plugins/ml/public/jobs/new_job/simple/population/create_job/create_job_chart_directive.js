@@ -11,15 +11,12 @@
  */
 
 import $ from 'jquery';
-import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import angular from 'angular';
 import moment from 'moment';
 
-import { formatHumanReadableDateTime } from '../../../../../util/date_utils';
 import { TimeBuckets } from '../../../../../util/time_buckets';
 import { numTicksForDateFormat } from '../../../../../util/chart_utils';
-import { mlEscape } from '../../../../../util/string_utils';
 import { mlChartTooltipService } from '../../../../../components/chart_tooltip/chart_tooltip_service';
 
 import { uiModules } from 'ui/modules';
@@ -230,19 +227,8 @@ module.directive('mlPopulationJobChart', function () {
 
     function showTooltip(data, el) {
       scope;
-      let contents = '';
-      const formattedDate = formatHumanReadableDateTime(data.date);
-      contents += `${formattedDate}<br/><hr/>`;
-      contents += `${mlEscape(scope.overFieldName)}: ${mlEscape(data.label)}<br/>`;
-      contents += i18n.translate('xpack.ml.newJob.simple.population.chartTooltipValueLabel', {
-        defaultMessage: 'Value: {dataValue}',
-        values: {
-          dataValue: scope.chartData.fieldFormat !== undefined
-            ? scope.chartData.fieldFormat.convert(data.value, 'text')
-            : parseInt(data.value)
-        }
-      });
-      mlChartTooltipService.show(contents, el, {
+      // Deprecated code which will be removed soon, tooltip content not migrated.
+      mlChartTooltipService.show([], el, {
         x: 5,
         y: 10
       });
