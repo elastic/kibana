@@ -26,17 +26,12 @@ pipeline {
     issueCommentTrigger('(?i).*jenkins\\W+run\\W+(?:the\\W+)?e2e(?:\\W+please)?.*')
   }
   stages {
-    stage('Checkout Kibana') {
+    stage('Checkout') {
       options { skipDefaultCheckout() }
       steps {
         dir("${BASE_DIR}"){
           checkout scm
         }
-      }
-    }
-    stage('Checkout APM-ITS') {
-      options { skipDefaultCheckout() }
-      steps {
         dir("${APM_ITS}"){
           git changelog: false,
               credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba',
@@ -53,34 +48,14 @@ pipeline {
         }
       }
     }
-    stage('Ingest data') {
-      options { skipDefaultCheckout() }
-      steps {
-        dir("${BASE_DIR}/x-pack/legacy/plugins/apm/cypress/ingest-data"){
-          sh '''
-            curl https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output events.json
-            node replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json
-          '''
-        }
-      }
-    }
-    stage('Start Kibana') {
+    stage('Test') {
       options { skipDefaultCheckout() }
       environment {
         JENKINS_NODE_COOKIE = 'dontKillMe'
       }
       steps {
         dir("${BASE_DIR}"){
-          sh 'yarn kbn bootstrap'
-          sh 'nohup yarn start --no-base-path --csp.strict=false --optimize.watch=false >${WORKSPACE}/kibana.log 2>&1 &'
-        }
-      }
-    }
-    stage('Tests') {
-      options { skipDefaultCheckout() }
-      steps {
-        dir("${BASE_DIR}/x-pack/legacy/plugins/apm/cypress"){
-          sh 'yarn cypress run'
+          sh script: 'x-pack/legacy/plugins/apm/cypress/ci/run.sh'
         }
       }
     }
