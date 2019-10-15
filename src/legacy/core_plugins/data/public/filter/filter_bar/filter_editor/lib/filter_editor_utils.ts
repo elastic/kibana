@@ -31,7 +31,7 @@ import {
   PhrasesFilter,
   RangeFilter,
 } from '@kbn/es-query';
-import { omit } from 'lodash';
+import { omit, get } from 'lodash';
 import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
 import { Field, IndexPattern, isFilterable } from '../../../../index_patterns';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
@@ -45,15 +45,19 @@ export function getIndexPatternFromFilter(
 
 function getValueFormatter(indexPattern?: IndexPattern, key?: string) {
   if (!indexPattern || !key) return;
-  const field = indexPattern.fields.getByName(key);
-  return field && field.format;
+  let format = get(indexPattern, ['fields', 'byName', key, 'format']);
+  if (!format && indexPattern.fields.getByName) {
+    // TODO: Why is indexPatterns sometimes a map and sometimes an array?
+    format = (indexPattern.fields.getByName(key) as Field).format;
+  }
+  return format;
 }
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IndexPattern[]): string {
   const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
-  const valueFormatter: any = getValueFormatter(indexPattern, filter.meta.key);
 
   if (typeof filter.meta.value === 'function') {
+    const valueFormatter: any = getValueFormatter(indexPattern, filter.meta.key);
     return filter.meta.value(valueFormatter);
   } else {
     return filter.meta.value || '';

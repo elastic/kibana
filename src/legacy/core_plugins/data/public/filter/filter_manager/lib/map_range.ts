@@ -31,7 +31,8 @@ const getFormattedValueFn = (left: any, right: any) => {
   return (formatter?: FilterValueFormatter) => {
     let displayValue = `${left} to ${right}`;
     if (formatter) {
-      displayValue = `${formatter.convert(left)} to ${formatter.convert(right)}`;
+      const convert = formatter.getConverterFor('text');
+      displayValue = `${convert(left)} to ${convert(right)}`;
     }
     return displayValue;
   };

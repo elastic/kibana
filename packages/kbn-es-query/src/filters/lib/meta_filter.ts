@@ -26,8 +26,10 @@ export interface FilterState {
   store: FilterStateStore;
 }
 
+type FilterFormatterFunction = (value: any) => string;
 export interface FilterValueFormatter {
-  convert: (value: any) => string;
+  convert: FilterFormatterFunction;
+  getConverterFor: (type: string) => FilterFormatterFunction;
 }
 
 export interface FilterMeta {
