@@ -45,6 +45,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DocLinksStart](./kibana-plugin-public.doclinksstart.md) |  |
+|  [EnvironmentMode](./kibana-plugin-public.environmentmode.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-public.errortoastoptions.md) |  |
 |  [FatalErrorInfo](./kibana-plugin-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
@@ -67,6 +68,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayBannersStart](./kibana-plugin-public.overlaybannersstart.md) |  |
 |  [OverlayRef](./kibana-plugin-public.overlayref.md) |  |
 |  [OverlayStart](./kibana-plugin-public.overlaystart.md) |  |
+|  [PackageInfo](./kibana-plugin-public.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [SavedObject](./kibana-plugin-public.savedobject.md) |  |
