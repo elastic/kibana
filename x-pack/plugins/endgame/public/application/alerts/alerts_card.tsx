@@ -9,17 +9,17 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiCard } from '@elastic/eui';
 import { routePathsById } from '../../common/route_paths';
 
-class EndpointsCard extends Component<RouteComponentProps> {
+class AlertsCard extends Component<RouteComponentProps> {
   render() {
     return (
       <EuiCard
         layout="horizontal"
-        title="Endpoints"
-        description="View and manage the endpoints"
-        onClick={() => this.props.history.push(routePathsById.endpoints.path)}
+        title="Alerts"
+        description="View and follow up on alerts"
+        onClick={() => this.props.history.push(routePathsById.alerts.path)}
       />
     );
   }
 }
 
-export const EndpointsCardShowcase = withRouter(EndpointsCard);
+export const AlertsCardShowcase = withRouter(AlertsCard);
