@@ -17,12 +17,17 @@ import { HttpServiceBase } from 'kibana/public';
 
 jest.useFakeTimers();
 
-const createMockStorage = () => ({
-  get: jest.fn().mockReturnValue({ events: {}, suggestionEvents: {} }),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
-});
+const createMockStorage = () => {
+  let lastData = { events: {}, suggestionEvents: {} };
+  return {
+    get: jest.fn().mockImplementation(() => lastData),
+    set: jest.fn().mockImplementation((key, value) => {
+      lastData = value;
+    }),
+    remove: jest.fn(),
+    clear: jest.fn(),
+  };
+};
 
 describe('Lens UI telemetry', () => {
   let storage: jest.Mocked<Storage>;

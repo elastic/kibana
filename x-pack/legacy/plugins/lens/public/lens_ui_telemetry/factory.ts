@@ -15,6 +15,9 @@ const STORAGE_KEY = 'lens-ui-telemetry';
 let reportManager: LensReportManager;
 
 export function setReportManager(newManager: LensReportManager) {
+  if (reportManager) {
+    reportManager.stop();
+  }
   reportManager = newManager;
 }
 
@@ -58,7 +61,7 @@ export class LensReportManager {
     this.http = http;
     this.basePath = basePath;
 
-    this.validateStorage();
+    this.readFromStorage();
 
     this.timer = setInterval(() => {
       this.postToServer();
@@ -66,20 +69,22 @@ export class LensReportManager {
   }
 
   public trackEvent(name: string) {
+    this.readFromStorage();
     this.trackTo(this.events, name);
   }
 
   public trackSuggestionEvent(name: string) {
+    this.readFromStorage();
     this.trackTo(this.suggestionEvents, name);
   }
 
   public stop() {
     if (this.timer) {
-      clearTimeout(this.timer);
+      clearInterval(this.timer);
     }
   }
 
-  private validateStorage() {
+  private readFromStorage() {
     const data = this.storage.get(STORAGE_KEY);
     if (data && typeof data.events === 'object' && typeof data.suggestionEvents === 'object') {
       this.events = data.events;
@@ -88,6 +93,7 @@ export class LensReportManager {
   }
 
   private async postToServer() {
+    this.readFromStorage();
     if (Object.keys(this.events).length || Object.keys(this.suggestionEvents).length) {
       try {
         await this.http.post(`${this.basePath}${BASE_API_URL}/telemetry`, {

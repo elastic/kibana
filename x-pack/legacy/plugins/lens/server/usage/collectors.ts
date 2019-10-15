@@ -47,47 +47,15 @@ export function registerLensUsageCollector(
         // get the accumulated state from the recurring task
         const state: LensTelemetryState = get(docs, '[0].state');
 
-        const dates = Object.keys(state.byDate || {}).map(dateStr => parseInt(dateStr, 10));
-        const suggestionDates = Object.keys(state.suggestionsByDate || {}).map(dateStr =>
-          parseInt(dateStr, 10)
-        );
-
-        const eventsLast30: Record<string, number> = {};
-        const eventsLast90: Record<string, number> = {};
-        const suggestionsLast30: Record<string, number> = {};
-        const suggestionsLast90: Record<string, number> = {};
-
-        const last30 = moment()
-          .subtract(30, 'days')
-          .unix();
-        const last90 = moment()
-          .subtract(90, 'days')
-          .unix();
-
-        dates.forEach(date => {
-          if (date >= last30) {
-            addEvents(eventsLast30, state.byDate[date]);
-            addEvents(eventsLast90, state.byDate[date]);
-          } else if (date > last90) {
-            addEvents(eventsLast90, state.byDate[date]);
-          }
-        });
-
-        suggestionDates.forEach(date => {
-          if (date >= last30) {
-            addEvents(suggestionsLast30, state.suggestionsByDate[date]);
-            addEvents(suggestionsLast90, state.suggestionsByDate[date]);
-          } else if (date > last90) {
-            addEvents(suggestionsLast90, state.suggestionsByDate[date]);
-          }
-        });
+        const events = getDataByDate(state.byDate);
+        const suggestions = getDataByDate(state.suggestionsByDate);
 
         return {
           ...state.saved,
-          events_30_days: eventsLast30,
-          events_90_days: eventsLast90,
-          suggestion_events_30_days: suggestionsLast30,
-          suggestion_events_90_days: suggestionsLast90,
+          events_30_days: events.last30,
+          events_90_days: events.last90,
+          suggestion_events_30_days: suggestions.last30,
+          suggestion_events_90_days: suggestions.last90,
         };
       } catch (err) {
         return {
@@ -141,4 +109,32 @@ async function getLatestTaskState(server: Server) {
   }
 
   return null;
+}
+
+function getDataByDate(dates: Record<string, Record<string, number>>) {
+  const byDate = Object.keys(dates || {}).map(dateStr => parseInt(dateStr, 10));
+
+  const last30: Record<string, number> = {};
+  const last90: Record<string, number> = {};
+
+  const last30Timestamp = moment()
+    .subtract(30, 'days')
+    .unix();
+  const last90Timestamp = moment()
+    .subtract(90, 'days')
+    .unix();
+
+  byDate.forEach(dateKey => {
+    if (dateKey >= last30Timestamp) {
+      addEvents(last30, dates[dateKey]);
+      addEvents(last90, dates[dateKey]);
+    } else if (dateKey > last90Timestamp) {
+      addEvents(last90, dates[dateKey]);
+    }
+  });
+
+  return {
+    last30,
+    last90,
+  };
 }

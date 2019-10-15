@@ -61,7 +61,6 @@ export function InnerWorkspacePanel({
   core,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
-  const [isEmpty, setIsEmpty] = useState(true);
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
     ? '/plugins/lens/assets/lens_app_graphic_dark_2x.png'
@@ -93,9 +92,37 @@ export function InnerWorkspacePanel({
     return suggestions.find(s => s.visualizationId === activeVisualizationId) || suggestions[0];
   }, [dragDropContext.dragging]);
 
+  const [expressionError, setExpressionError] = useState<unknown>(undefined);
+
+  const activeVisualization = activeVisualizationId
+    ? visualizationMap[activeVisualizationId]
+    : null;
+  const expression = useMemo(() => {
+    try {
+      return buildExpression({
+        visualization: activeVisualization,
+        visualizationState,
+        datasourceMap,
+        datasourceStates,
+        framePublicAPI,
+      });
+    } catch (e) {
+      setExpressionError(e.toString());
+    }
+  }, [
+    activeVisualization,
+    visualizationState,
+    datasourceMap,
+    datasourceStates,
+    framePublicAPI.dateRange,
+    framePublicAPI.query,
+    framePublicAPI.filters,
+  ]);
+
   function onDrop() {
     if (suggestionForDraggedField) {
-      trackUiEvent(isEmpty ? 'workspace_drop_on_empty' : 'workspace_drop_non_empty');
+      trackUiEvent('drop_onto_workspace');
+      trackUiEvent(expression ? 'drop_non_empty' : 'drop_empty');
       switchToSuggestion(
         framePublicAPI,
         dispatch,
@@ -149,39 +176,6 @@ export function InnerWorkspacePanel({
   }
 
   function renderVisualization() {
-    const [expressionError, setExpressionError] = useState<unknown>(undefined);
-
-    const activeVisualization = activeVisualizationId
-      ? visualizationMap[activeVisualizationId]
-      : null;
-    const expression = useMemo(() => {
-      try {
-        const tempExpression = buildExpression({
-          visualization: activeVisualization,
-          visualizationState,
-          datasourceMap,
-          datasourceStates,
-          framePublicAPI,
-        });
-        if (tempExpression) {
-          setIsEmpty(false);
-        } else {
-          setIsEmpty(true);
-        }
-        return tempExpression;
-      } catch (e) {
-        setExpressionError(e.toString());
-      }
-    }, [
-      activeVisualization,
-      visualizationState,
-      datasourceMap,
-      datasourceStates,
-      framePublicAPI.dateRange,
-      framePublicAPI.query,
-      framePublicAPI.filters,
-    ]);
-
     useEffect(() => {
       // reset expression error if component attempts to run it again
       if (expressionError) {

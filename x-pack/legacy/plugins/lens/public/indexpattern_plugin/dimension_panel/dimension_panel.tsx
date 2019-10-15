@@ -139,6 +139,8 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
               });
 
           trackUiEvent('drop_onto_dimension');
+          const hasData = Object.values(props.state.layers).some(({ columns }) => columns.length);
+          trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
 
           props.setState(
             changeColumn({

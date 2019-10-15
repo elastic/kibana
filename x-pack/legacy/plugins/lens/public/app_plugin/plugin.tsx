@@ -69,9 +69,6 @@ export class AppPlugin {
 
     this.instance = editorFrameStartInterface.createInstance({});
 
-    // Sets it in memory for future click tracking
-    // If there was any previous manager set, clear it
-    stopReportManager();
     setReportManager(
       new LensReportManager({
         storage: new Storage(localStorage),
