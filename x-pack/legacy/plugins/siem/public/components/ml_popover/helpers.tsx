@@ -32,7 +32,9 @@ export const filterJobs = ({
     jobs
       .filter(job => !showCustomJobs || (showCustomJobs && !job.isElasticJob))
       .filter(job => !showElasticJobs || (showElasticJobs && job.isElasticJob))
-      .filter(job => selectedGroups.length === 0 || selectedGroups.some(job.groups.includes)),
+      .filter(
+        job => selectedGroups.length === 0 || selectedGroups.some(g => job.groups.includes(g))
+      ),
     filterQuery
   );
 
