@@ -32,6 +32,7 @@ import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { FirstUseCallout } from './first_use';
 import { LogRateResults } from './sections/log_rate';
 import { AnomaliesResults } from './sections/anomalies';
+import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 
 export const AnalysisResultsContent = ({
   sourceId,
@@ -42,6 +43,8 @@ export const AnalysisResultsContent = ({
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results', delay: 15000 });
+
+  const [dateFormat] = useKibanaUiSetting('dateFormat', 'MMMM D, YYYY h:mm A');
 
   const {
     timeRange: selectedTimeRange,
@@ -151,15 +154,9 @@ export const AnalysisResultsContent = ({
                                 </EuiBadge>
                               ),
                               startTime: (
-                                <b>
-                                  {moment(queryTimeRange.startTime).format('MMMM D, YYYY h:mm A')}
-                                </b>
+                                <b>{moment(queryTimeRange.startTime).format(dateFormat)}</b>
                               ),
-                              endTime: (
-                                <b>
-                                  {moment(queryTimeRange.endTime).format('MMMM D, YYYY h:mm A')}
-                                </b>
-                              ),
+                              endTime: <b>{moment(queryTimeRange.endTime).format(dateFormat)}</b>,
                             }}
                           />
                         </EuiText>
