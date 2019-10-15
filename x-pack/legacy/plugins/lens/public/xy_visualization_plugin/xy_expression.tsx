@@ -45,11 +45,6 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export interface XYChartProps {
-  data: LensMultiTable;
-  args: XYArgs;
-}
-
 type XYChartRenderProps = XYChartProps & {
   formatFactory: FormatFactory;
   timeZone: string;
@@ -83,7 +78,7 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
     },
   },
   context: {
-    types: ['lens_multitable'],
+    types: ['lens_multitable', 'kibana_context', 'null'],
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
@@ -191,6 +186,14 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
         showLegendDisplayValue={false}
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
+        xDomain={
+          data.dateRange && layers.every(l => l.xScaleType === 'time')
+            ? {
+                min: data.dateRange.fromDate.getTime(),
+                max: data.dateRange.toDate.getTime(),
+              }
+            : undefined
+        }
       />
 
       <Axis
