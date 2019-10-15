@@ -173,8 +173,8 @@ export class CodeBlock extends React.PureComponent<Props> {
         range: new monaco.Range(lineIndex + 1, 0, lineIndex + 1, 0),
         options: {
           isWholeLine: true,
-          className: `code-monaco-highlight-line code-line-number-${lineIndex}`,
-          linesDecorationsClassName: 'code-mark-line-number',
+          className: 'codeBlock__line--highlighted',
+          linesDecorationsClassName: 'codeBlock__line--highlighted',
         },
       }))
       .filter((decorations, lineIndex) => highlightLine(lineIndex));
