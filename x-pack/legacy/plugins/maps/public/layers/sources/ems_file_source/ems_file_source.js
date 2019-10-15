@@ -7,7 +7,7 @@
 import { AbstractVectorSource } from '../vector_source';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import React from 'react';
-import { EMS_FILE } from '../../../../common/constants';
+import { EMS_FILE, FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
 import { getEMSClient } from '../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
@@ -79,6 +79,16 @@ export class EMSFileSource extends AbstractVectorSource {
       featureCollectionPath: 'data',
       fetchUrl: emsFileLayer.getDefaultFormatUrl()
     });
+
+    const emsIdField = emsFileLayer._config.fields.find(field => {
+      return field.type === 'id';
+    });
+    featureCollection.features.forEach((feature, index) => {
+      feature.properties[FEATURE_ID_PROPERTY_NAME] = emsIdField
+        ? feature.properties[emsIdField.id]
+        : index;
+    });
+
     return {
       data: featureCollection,
       meta: {}

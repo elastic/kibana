@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopNFlowData, FlowTarget } from '../../../../graphql/types';
+import { NetworkTopNFlowData, FlowTargetSourceDest } from '../../../../graphql/types';
 
 export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
   NetworkTopNFlow: {
@@ -30,7 +30,7 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
                 region_iso_code: ['US-CA'],
                 region_name: ['California'],
               },
-              flowTarget: FlowTarget.source,
+              flowTarget: FlowTargetSourceDest.source,
             },
           },
           destination: null,
@@ -63,7 +63,7 @@ export const mockData: { NetworkTopNFlow: NetworkTopNFlowData } = {
                 region_iso_code: ['MY-10'],
                 region_name: ['Selangor'],
               },
-              flowTarget: FlowTarget.source,
+              flowTarget: FlowTargetSourceDest.source,
             },
           },
           destination: null,

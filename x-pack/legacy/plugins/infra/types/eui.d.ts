@@ -96,6 +96,7 @@ declare module '@elastic/eui' {
     message?: any;
     rowProps?: any;
     cellProps?: any;
+    responsive?: boolean;
   };
   export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
 }
