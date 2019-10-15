@@ -19,17 +19,26 @@
 
 import { ExpressionType } from '../types';
 import { Render } from './render';
+import { ExpressionValueBoxed } from '../types/types';
 
 const name = 'error';
 
-// TODO: Improve typings on this interface [#38553]
-export interface InterpreterErrorType {
-  type: typeof name;
-  error: unknown;
-  info: unknown;
-}
+export type ExpressionValueError = ExpressionValueBoxed<
+  'error',
+  {
+    error: unknown;
+    info: unknown;
+  }
+>;
 
-export const error = (): ExpressionType<typeof name, InterpreterErrorType> => ({
+/**
+ * @deprecated
+ *
+ * Exported for backwards compatibility.
+ */
+export type InterpreterErrorType = ExpressionValueError;
+
+export const error = (): ExpressionType<'error', ExpressionValueError> => ({
   name,
   to: {
     render: (input): Render<Pick<InterpreterErrorType, 'error' | 'info'>> => {

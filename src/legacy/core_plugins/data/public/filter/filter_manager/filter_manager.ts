@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Filter, isFilterPinned, isRangeFilter, FilterStateStore } from '@kbn/es-query';
+import { Filter, isFilterPinned, FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
 import { Subject } from 'rxjs';
@@ -27,29 +27,17 @@ import { UiSettingsClientContract } from 'src/core/public';
 import { compareFilters } from './lib/compare_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
-import { extractTimeFilter } from './lib/extract_time_filter';
-import { changeTimeFilter } from './lib/change_time_filter';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './partitioned_filters';
-import { IndexPatterns } from '../../index_patterns';
-import { TimefilterContract } from '../../timefilter';
 
 export class FilterManager {
-  private indexPatterns: IndexPatterns;
   private filters: Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
   private uiSettings: UiSettingsClientContract;
-  private timefilter: TimefilterContract;
 
-  constructor(
-    indexPatterns: IndexPatterns,
-    uiSettings: UiSettingsClientContract,
-    timefilter: TimefilterContract
-  ) {
-    this.indexPatterns = indexPatterns;
+  constructor(uiSettings: UiSettingsClientContract) {
     this.uiSettings = uiSettings;
-    this.timefilter = timefilter;
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
@@ -136,7 +124,7 @@ export class FilterManager {
 
   /* Setters */
 
-  public async addFilters(filters: Filter[] | Filter, pinFilterStatus?: boolean) {
+  public addFilters(filters: Filter[] | Filter, pinFilterStatus?: boolean) {
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
@@ -154,7 +142,7 @@ export class FilterManager {
     const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
     FilterManager.setFiltersStore(filters, store);
 
-    const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, filters);
+    const mappedFilters = mapAndFlattenFilters(filters);
 
     // This is where we add new filters to the correct place (app \ global)
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
@@ -166,8 +154,8 @@ export class FilterManager {
     this.handleStateUpdate(newFilters);
   }
 
-  public async setFilters(newFilters: Filter[]) {
-    const mappedFilters = await mapAndFlattenFilters(this.indexPatterns, newFilters);
+  public setFilters(newFilters: Filter[]) {
+    const mappedFilters = mapAndFlattenFilters(newFilters);
     const newPartitionedFilters = FilterManager.partitionFilters(mappedFilters);
     const mergedFilters = this.mergeIncomingFilters(newPartitionedFilters);
     this.handleStateUpdate(mergedFilters);
@@ -185,17 +173,8 @@ export class FilterManager {
     }
   }
 
-  public async removeAll() {
-    await this.setFilters([]);
-  }
-
-  public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
-    const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
-
-    if (isRangeFilter(timeFilter)) {
-      changeTimeFilter(this.timefilter, timeFilter);
-    }
-    return this.addFilters(filters.filter(filter => filter !== timeFilter));
+  public removeAll() {
+    this.setFilters([]);
   }
 
   public static setFiltersStore(filters: Filter[], store: FilterStateStore) {

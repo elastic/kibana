@@ -20,7 +20,11 @@
 import 'uiExports/interpreter';
 // @ts-ignore
 import { register, registryFactory } from '@kbn/interpreter/common';
-import { initializeInterpreter } from './lib/interpreter';
+import {
+  initializeExecutor,
+  ExpressionExecutor,
+  ExpressionInterpretWithHandlers,
+} from './lib/interpreter';
 import { registries } from './registries';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
@@ -39,16 +43,16 @@ register(registries, {
   renderers: [visualization],
 });
 
-let interpreterPromise: Promise<any> | undefined;
+let executorPromise: Promise<ExpressionExecutor> | undefined;
 
 export const getInterpreter = async () => {
-  if (!interpreterPromise) {
-    interpreterPromise = initializeInterpreter();
+  if (!executorPromise) {
+    executorPromise = initializeExecutor();
   }
-  return await interpreterPromise;
+  return await executorPromise;
 };
 
-export const interpretAst = async (...params: any) => {
+export const interpretAst: ExpressionInterpretWithHandlers = async (ast, context, handlers) => {
   const { interpreter } = await getInterpreter();
-  return await interpreter.interpretAst(...params);
+  return await interpreter.interpretAst(ast, context, handlers);
 };
