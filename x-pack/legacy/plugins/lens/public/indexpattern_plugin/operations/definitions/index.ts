@@ -32,7 +32,9 @@ const internalOperationDefinitions = [
   cardinalityOperation,
   sumOperation,
   countOperation,
-  filterRatioOperation,
+  // This operation is being removed from beta, but should be enabled once
+  // the bugs in its implementation are resolved
+  // filterRatioOperation,
 ];
 
 export { termsOperation } from './terms';
