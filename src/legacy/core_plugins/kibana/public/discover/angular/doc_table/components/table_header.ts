@@ -17,8 +17,7 @@
  * under the License.
  */
 import { wrapInI18nContext } from 'ui/i18n';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../dependencies';
 import { TableHeader } from './table_header/table_header';
 const module = uiModules.get('app/discover');
 

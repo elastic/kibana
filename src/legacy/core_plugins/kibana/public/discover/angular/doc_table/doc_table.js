@@ -23,7 +23,7 @@ import './infinite_scroll';
 import './components/table_header';
 import './components/table_row';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../dependencies';
 import './components/pager';
 import './lib/pager';
 

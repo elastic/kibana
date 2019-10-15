@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../dependencies';
 // @ts-ignore
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';

@@ -35,7 +35,7 @@ export { chrome };
 
 // @ts-ignore
 export { uiModules } from 'ui/modules';
-export { IndexPatterns } from 'ui/index_patterns';
+export { IndexPattern, IndexPatterns, StaticIndexPattern } from 'ui/index_patterns';
 export { wrapInI18nContext } from 'ui/i18n';
 export { timefilter } from 'ui/timefilter';
 export { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';

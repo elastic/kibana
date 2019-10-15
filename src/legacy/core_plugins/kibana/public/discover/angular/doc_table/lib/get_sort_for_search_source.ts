@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../dependencies';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
 

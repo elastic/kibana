@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { StaticIndexPattern } from '../../dependencies';
 import { SortOrder } from '../components/table_header/helpers';
 
 export function getSort(

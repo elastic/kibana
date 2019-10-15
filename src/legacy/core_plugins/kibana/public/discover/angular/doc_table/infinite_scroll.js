@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../dependencies';
 const module = uiModules.get('app/discover');
 
 module.directive('kbnInfiniteScroll', function () {
