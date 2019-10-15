@@ -24,13 +24,24 @@ interface RegressionAnalysis {
   };
 }
 
+export interface RegressionEvaluateResponse {
+  regression: {
+    mean_squared_error: {
+      error: number;
+    };
+    r_squared: {
+      value: number;
+    };
+  };
+}
+
 interface GenericAnalysis {
   [key: string]: Record<string, any>;
 }
 
 type AnalysisConfig = OutlierAnalysis | RegressionAnalysis | GenericAnalysis;
 
-enum ANALYSIS_CONFIG_TYPE {
+export enum ANALYSIS_CONFIG_TYPE {
   OUTLIER_DETECTION = 'outlier_detection',
   REGRESSION = 'regression',
   UNKNOWN = 'unknown',
@@ -46,9 +57,22 @@ export const getAnalysisType = (analysis: AnalysisConfig) => {
   return ANALYSIS_CONFIG_TYPE.UNKNOWN;
 };
 
+export const getDependentVar = (analysis: AnalysisConfig) => {
+  let depVar;
+  if (isRegressionAnalysis(analysis)) {
+    depVar = analysis.regression.dependent_variable;
+  }
+  return depVar;
+};
+
 export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
+};
+
+export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
 };
 
 export interface DataFrameAnalyticsConfig {
