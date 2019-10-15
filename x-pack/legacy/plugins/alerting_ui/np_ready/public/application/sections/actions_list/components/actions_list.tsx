@@ -32,20 +32,6 @@ interface Data extends Action {
 }
 type ActionTypeIndex = Record<string, ActionType>;
 
-function setActionTypeAttributeToActions(
-  actionTypesIndex: ActionTypeIndex,
-  actions: Action[]
-): Data[] {
-  return actions.map(action => {
-    return {
-      ...action,
-      actionType: actionTypesIndex[action.actionTypeId]
-        ? actionTypesIndex[action.actionTypeId].name
-        : action.actionTypeId,
-    };
-  });
-}
-
 const canDelete = capabilities.get().actions.delete;
 
 export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
@@ -58,7 +44,8 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     core: { http },
   } = useAppDependencies();
 
-  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex>({});
+  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
+  const [actions, setActions] = useState<Action[]>([]);
   const [data, setData] = useState<Data[]>([]);
   const [selectedItems, setSelectedItems] = useState<Data[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -68,12 +55,12 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   const [sort, setSort] = useState<Sorting>({ field: 'actionTypeId', direction: 'asc' });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
 
-  async function loadTable() {
+  async function loadActionsTable() {
     setIsLoading(true);
     setErrorCode(null);
     try {
       const actionsResponse = await loadActions({ http, sort, page, searchText });
-      setData(setActionTypeAttributeToActions(actionTypesIndex, actionsResponse.data));
+      setActions(actionsResponse.data);
       setTotalItemCount(actionsResponse.total);
     } catch (e) {
       setErrorCode(e.response.status);
@@ -81,6 +68,10 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
       setIsLoading(false);
     }
   }
+
+  useEffect(() => {
+    loadActionsTable();
+  }, [sort, page, searchText]);
 
   useEffect(() => {
     (async () => {
@@ -94,12 +85,20 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   }, []);
 
   useEffect(() => {
-    setData(setActionTypeAttributeToActions(actionTypesIndex, data));
-  }, [actionTypesIndex]);
-
-  useEffect(() => {
-    loadTable();
-  }, [sort, page, searchText]);
+    // Avoid flickering after action types load
+    if (typeof actionTypesIndex === 'undefined') {
+      return;
+    }
+    const updatedData = actions.map(action => {
+      return {
+        ...action,
+        actionType: actionTypesIndex[action.actionTypeId]
+          ? actionTypesIndex[action.actionTypeId].name
+          : action.actionTypeId,
+      };
+    });
+    setData(updatedData);
+  }, [actions, actionTypesIndex]);
 
   const actionsTableColumns = [
     {
