@@ -6,6 +6,7 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
@@ -17,6 +18,28 @@ interface TableItem {
   partition: string;
   topAnomalyScore: number;
 }
+
+const collapseAriaLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableCollapseLabel', {
+  defaultMessage: 'Collapse',
+});
+
+const expandAriaLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableExpandLabel', {
+  defaultMessage: 'Expand',
+});
+
+const partitionColumnName = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTablePartitionColumnName',
+  {
+    defaultMessage: 'Partition',
+  }
+);
+
+const maxAnomalyScoreColumnName = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableMaxAnomalyScoreColumnName',
+  {
+    defaultMessage: 'Max anomaly score',
+  }
+);
 
 export const AnomaliesTable: React.FunctionComponent<{
   results: GetLogEntryRateSuccessResponsePayload['data'];
@@ -104,13 +127,13 @@ export const AnomaliesTable: React.FunctionComponent<{
   const columns = [
     {
       field: 'partition',
-      name: 'Partition',
+      name: partitionColumnName,
       sortable: true,
       truncateText: true,
     },
     {
       field: 'topAnomalyScore',
-      name: 'Max anomaly score',
+      name: maxAnomalyScoreColumnName,
       sortable: true,
       truncateText: true,
     },
@@ -121,7 +144,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       render: (item: TableItem) => (
         <EuiButtonIcon
           onClick={() => toggleExpandedItems(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+          aria-label={itemIdToExpandedRowMap[item.id] ? collapseAriaLabel : expandAriaLabel}
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
