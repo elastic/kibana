@@ -162,16 +162,12 @@ export class CodeViewer extends Component<Props, State> {
       </EuiPage>
     );
   };
+
   render() {
     return (
       <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
         {this.state.loading && this.renderFileLoadingIndicator()}
-        <div
-          tabIndex={0}
-          className="codeContainer__monaco"
-          ref={this.viewerRef}
-          style={{ flexGrow: 1 }}
-        />
+        <div tabIndex={0} className="codeViewer codeContainer__monaco" ref={this.viewerRef} />
       </EuiFlexGroup>
     );
   }
