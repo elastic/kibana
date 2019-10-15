@@ -31,6 +31,7 @@
         "user.name"
       ]
     },
+    "allow_lazy_open": true,
     "analysis_limits": {
       "model_memory_limit": "32mb"
     },
