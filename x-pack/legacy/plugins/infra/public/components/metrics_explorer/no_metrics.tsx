@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const MetricsExplorerNoMetrics = injectI18n(() => {
+export const MetricsExplorerNoMetrics = () => {
   return (
     <EuiEmptyPrompt
       iconType="stats"
@@ -30,4 +30,4 @@ export const MetricsExplorerNoMetrics = injectI18n(() => {
       }
     />
   );
-});
+};

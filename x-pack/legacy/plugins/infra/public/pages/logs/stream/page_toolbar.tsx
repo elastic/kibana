@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 
 import { AutocompleteField } from '../../../components/autocomplete_field';
@@ -24,7 +24,7 @@ import { WithLogPosition } from '../../../containers/logs/with_log_position';
 import { Source } from '../../../containers/source';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 
-export const LogsToolbar = injectI18n(({ intl }) => {
+export const LogsToolbar = () => {
   const { createDerivedIndexPattern } = useContext(Source.Context);
   const derivedIndexPattern = createDerivedIndexPattern('logs');
   const {
@@ -74,16 +74,16 @@ export const LogsToolbar = injectI18n(({ intl }) => {
                       setSurroundingLogsId(null);
                       applyFilterQueryFromKueryExpression(expression);
                     }}
-                    placeholder={intl.formatMessage({
-                      id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',
-                      defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
-                    })}
+                    placeholder={i18n.translate(
+                      'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',
+                      { defaultMessage: 'Search for log entries… (e.g. host.name:host-1)' }
+                    )}
                     suggestions={suggestions}
                     value={filterQueryDraft ? filterQueryDraft.expression : ''}
-                    aria-label={intl.formatMessage({
-                      id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel',
-                      defaultMessage: 'Search for log entries',
-                    })}
+                    aria-label={i18n.translate(
+                      'xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel',
+                      { defaultMessage: 'Search for log entries' }
+                    )}
                   />
                 )}
               </WithLogFilter>
@@ -126,7 +126,6 @@ export const LogsToolbar = injectI18n(({ intl }) => {
               jumpToTargetPositionTime,
               startLiveStreaming,
               stopLiveStreaming,
-              targetPosition,
             }) => (
               <LogTimeControls
                 currentTime={visibleMidpointTime}
@@ -144,4 +143,4 @@ export const LogsToolbar = injectI18n(({ intl }) => {
       </EuiFlexGroup>
     </Toolbar>
   );
-});
+};
