@@ -21,7 +21,7 @@ import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
-import euiStyled from '../../../../../../../legacy/common/eui_styled_components';
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   StringTimeRange,
