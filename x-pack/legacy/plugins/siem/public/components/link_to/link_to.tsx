@@ -8,10 +8,7 @@ import React from 'react';
 import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
-import { RedirectToHostsPage, RedirectToHostDetailsPage } from './redirect_to_hosts';
-import { RedirectToNetworkPage } from './redirect_to_network';
-import { RedirectToOverviewPage } from './redirect_to_overview';
-import { RedirectToTimelinesPage } from './redirect_to_timelines';
+import { HostsTableType } from '../../store/hosts/model';
 import {
   RedirectToCreateRulePage,
   RedirectToDetectionEnginePage,
@@ -19,7 +16,10 @@ import {
   RedirectToRuleDetailsPage,
   RedirectToRulesPage,
 } from './redirect_to_detection_engine';
-import { HostsTableType } from '../../store/hosts/model';
+import { RedirectToHostsPage, RedirectToHostDetailsPage } from './redirect_to_hosts';
+import { RedirectToNetworkPage } from './redirect_to_network';
+import { RedirectToOverviewPage } from './redirect_to_overview';
+import { RedirectToTimelinesPage } from './redirect_to_timelines';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
@@ -27,47 +27,51 @@ interface LinkToPageProps {
 
 export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
   <Switch>
-    <Route path={`${match.url}/:pageName(overview)`} component={RedirectToOverviewPage} />
-    <Route exact path={`${match.url}/:pageName(hosts)`} component={RedirectToHostsPage} />
+    <Route component={RedirectToOverviewPage} path={`${match.url}/:pageName(overview)`} />
+    <Route component={RedirectToHostsPage} exact path={`${match.url}/:pageName(hosts)`} />
     <Route
-      path={`${match.url}/:pageName(hosts)/:tabName(${HostsTableType.hosts}|${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
       component={RedirectToHostsPage}
+      path={`${match.url}/:pageName(hosts)/:tabName(${HostsTableType.hosts}|${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
     />
     <Route
+      component={RedirectToHostDetailsPage}
       path={`${match.url}/:pageName(hosts)/:detailName/:tabName(${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
-      component={RedirectToHostDetailsPage}
     />
     <Route
-      path={`${match.url}/:pageName(hosts)/:detailName`}
       component={RedirectToHostDetailsPage}
+      path={`${match.url}/:pageName(hosts)/:detailName`}
     />
 
-    <Route exact path={`${match.url}/:pageName(network)`} component={RedirectToNetworkPage} />
+    <Route component={RedirectToNetworkPage} exact path={`${match.url}/:pageName(network)`} />
     <Route
-      path={`${match.url}/:pageName(network)/ip/:detailName`}
       component={RedirectToNetworkPage}
+      path={`${match.url}/:pageName(network)/ip/:detailName`}
     />
     <Route
-      path={`${match.url}/:pageName(detection-engine)`}
       component={RedirectToDetectionEnginePage}
+      exact
+      path={`${match.url}/:pageName(detection-engine)`}
+      strict
     />
     <Route
-      path={`${match.url}/:pageName(detection-engine)/rules`}
       component={RedirectToRulesPage}
+      exact
+      path={`${match.url}/:pageName(detection-engine)/rules`}
     />
     <Route
-      path={`${match.url}/:pageName(detection-engine)/rules/create-rule`}
       component={RedirectToCreateRulePage}
+      path={`${match.url}/:pageName(detection-engine)/rules/create-rule`}
     />
     <Route
-      path={`${match.url}/:pageName(detection-engine)/rules/rule-details`}
       component={RedirectToRuleDetailsPage}
+      exact
+      path={`${match.url}/:pageName(detection-engine)/rules/rule-details`}
     />
     <Route
-      path={`${match.url}/:pageName(detection-engine)/rules/rule-details/edit-rule`}
       component={RedirectToEditRulePage}
+      path={`${match.url}/:pageName(detection-engine)/rules/rule-details/edit-rule`}
     />
-    <Route path={`${match.url}/:pageName(timelines)`} component={RedirectToTimelinesPage} />
+    <Route component={RedirectToTimelinesPage} path={`${match.url}/:pageName(timelines)`} />
     <Redirect to="/" />
   </Switch>
 ));
