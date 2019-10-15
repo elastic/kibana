@@ -68,6 +68,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [sort, setSort] = useState<Sorting>({ field: 'actionTypeId', direction: 'asc' });
+  const [searchText, setSearchText] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
@@ -89,7 +90,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
       setIsLoading(true);
       setErrorCode(null);
       try {
-        const actionsResponse = await loadActions({ http, sort, page });
+        const actionsResponse = await loadActions({ http, sort, page, searchText });
         setData(setActionTypeAttributeToActions(actionTypesIndex, data));
         setTotalItemCount(actionsResponse.total);
       } catch (e) {
@@ -98,7 +99,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
         setIsLoading(false);
       }
     })();
-  }, [sort, page]);
+  }, [sort, page, searchText]);
 
   const actionsTableColumns = [
     {
@@ -148,8 +149,11 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
           <EuiFlexItem>
             <EuiFieldSearch
               fullWidth
-              placeholder="Search action"
-              aria-label="Use aria labels when no actual label is in use"
+              placeholder={i18n.translate(
+                'xpack.alertingUI.sections.actionsList.actionsListTable.searchFieldPlaceholder',
+                { defaultMessage: 'Search...' }
+              )}
+              onSearch={updatedSearchText => setSearchText(updatedSearchText)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
