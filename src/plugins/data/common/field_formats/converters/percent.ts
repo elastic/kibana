@@ -17,20 +17,60 @@
  * under the License.
  */
 
-import { createNumeralFormat } from './_numeral';
+// @ts-ignore
+import numeral from '@elastic/numeral';
+// @ts-ignore
+import numeralLanguages from '@elastic/numeral/languages';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert } from '../types';
 
-export const PercentFormat = createNumeralFormat({
-  id: 'percent',
-  title: 'Percentage',
+const numeralInst = numeral();
 
-  getParamDefaults: (getConfig: Function) => {
+numeralLanguages.forEach(function(numeralLanguage: Record<string, any>) {
+  numeral.language(numeralLanguage.id, numeralLanguage.lang);
+});
+
+export class PercentFormat extends FieldFormat {
+  static id = 'percent';
+  static title = 'Percentage';
+  static fieldType = KBN_FIELD_TYPES.NUMBER;
+
+  private getConfig: Function;
+
+  constructor(params: Record<string, any>, getConfig: Function) {
+    super(params);
+    this.getConfig = getConfig;
+  }
+
+  getParamDefaults() {
     return {
-      pattern: getConfig('format:percent:defaultPattern'),
+      pattern: this.getConfig(`format:${PercentFormat.id}:defaultPattern`),
       fractional: true,
     };
-  },
+  }
 
   afterConvert(val: number) {
     return this.param('fractional') ? val : val / 100;
-  },
-});
+  }
+
+  textConvert: TextContextTypeConvert = val => {
+    if (val === -Infinity) return '-∞';
+    if (val === +Infinity) return '+∞';
+    if (typeof val !== 'number') {
+      val = parseFloat(val);
+    }
+
+    if (isNaN(val)) return '';
+
+    const previousLocale = numeral.language();
+    const defaultLocale = (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
+    numeral.language(defaultLocale);
+
+    const formatted = numeralInst.set(val).format(this.param('pattern'));
+
+    numeral.language(previousLocale);
+
+    return String(this.afterConvert(formatted));
+  };
+}
