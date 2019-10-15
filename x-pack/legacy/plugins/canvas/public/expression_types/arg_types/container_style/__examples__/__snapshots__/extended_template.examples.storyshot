@@ -31,7 +31,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -71,7 +70,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -160,7 +158,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -247,7 +244,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -287,7 +283,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -390,7 +385,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -430,7 +424,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
           style={
             Object {
               "fontSize": 0,
@@ -518,7 +511,6 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -558,7 +550,6 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -647,7 +638,6 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -733,7 +723,6 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -773,7 +762,6 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -876,7 +864,6 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
       >
         <div
           className="euiFormRow__labelWrapper"
@@ -916,7 +903,6 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
     >
       <div
         className="euiFormRow euiFormRow--compressed"
-        id="generated-id-row"
         style={
           Object {
             "fontSize": 0,
@@ -1015,7 +1001,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1055,7 +1040,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1144,7 +1128,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1231,7 +1214,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1271,7 +1253,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1374,7 +1355,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
         >
           <div
             className="euiFormRow__labelWrapper"
@@ -1414,7 +1394,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       >
         <div
           className="euiFormRow euiFormRow--compressed"
-          id="generated-id-row"
           style={
             Object {
               "fontSize": 0,

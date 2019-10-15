@@ -26,7 +26,11 @@ import { createSavedQueryService } from './search_bar/lib/saved_query_service';
  */
 
 export class SearchService {
-  public setup(savedObjectsClient: SavedObjectsClientContract) {
+  public setup() {
+    // Service requires index patterns, which are only available in `start`
+  }
+
+  public start(savedObjectsClient: SavedObjectsClientContract) {
     return {
       services: {
         savedQueryService: createSavedQueryService(savedObjectsClient),
@@ -39,4 +43,4 @@ export class SearchService {
 
 /** @public */
 
-export type SearchSetup = ReturnType<SearchService['setup']>;
+export type SearchStart = ReturnType<SearchService['start']>;
