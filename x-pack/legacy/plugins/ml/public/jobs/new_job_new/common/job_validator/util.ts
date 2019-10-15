@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { BasicValidations } from './job_validator';
 import { Job, Datafeed } from '../job_creator/configs';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
-import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
+import { newJobLimits } from '../../../new_job_new/utils/new_job_defaults';
 import { ValidationResults, ValidationMessage } from '../../../../../common/util/job_utils';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
@@ -103,12 +103,13 @@ export function populateValidationMessages(
 
   if (validationResults.contains('model_memory_limit_invalid')) {
     basicValidations.modelMemoryLimit.valid = false;
+    const maxModelMemoryLimit = (limits.max_model_memory_limit || '').toUpperCase();
     const msg = i18n.translate(
       'xpack.ml.newJob.wizard.validateJob.modelMemoryLimitRangeInvalidErrorMessage',
       {
         defaultMessage:
           'Model memory limit cannot be higher than the maximum value of {maxModelMemoryLimit}',
-        values: { maxModelMemoryLimit: limits.max_model_memory_limit.toUpperCase() },
+        values: { maxModelMemoryLimit },
       }
     );
     basicValidations.modelMemoryLimit.message = msg;
