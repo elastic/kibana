@@ -5,13 +5,6 @@
  */
 
 declare interface MlMessageBarService {
-  getMessages(): any[];
-  addMessage(msg: any): void;
-  removeMessage(index: number): void;
-  clear(): void;
-  info(text: any): void;
-  warning(text: any): void;
-  error(text: any, resp?: any): void;
   notify: {
     error(text: any, resp?: any): void;
   };

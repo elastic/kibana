@@ -26,7 +26,7 @@ import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
-import { mlMessageBarService } from '../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../components/messagebar';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 

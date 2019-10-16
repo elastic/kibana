@@ -9,7 +9,7 @@ import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { mlJobService } from '../../../../../services/job_service';
-import { ValidateJob } from '../../../../../components/validate_job/validate_job_view';
+import { ValidateJob } from '../../../../../components/validate_job';
 import { JOB_TYPE } from '../../../common/job_creator/util/constants';
 
 const idFilterList = [

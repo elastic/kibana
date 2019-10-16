@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -62,17 +62,18 @@ function NumberIntervalParamEditor({
     setValidity(isValid);
   }, [isValid]);
 
-  const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const numberValue = parseFloat(event.target.value);
-    setValue(isNaN(numberValue) ? undefined : numberValue);
-  };
+  const onChange = useCallback(
+    ({ target }: React.ChangeEvent<HTMLInputElement>) =>
+      setValue(isNaN(target.valueAsNumber) ? undefined : target.valueAsNumber),
+    [setValue]
+  );
 
   return (
     <EuiFormRow
       compressed
       label={label}
       fullWidth={true}
-      isInvalid={showValidation ? !isValid : false}
+      isInvalid={showValidation && !isValid}
       helpText={get(editorConfig, 'interval.help')}
     >
       <EuiFieldNumber
@@ -80,7 +81,7 @@ function NumberIntervalParamEditor({
         min={min}
         step={base}
         data-test-subj={`visEditorInterval${agg.id}`}
-        isInvalid={showValidation ? !isValid : false}
+        isInvalid={showValidation && !isValid}
         onChange={onChange}
         onBlur={setTouched}
         fullWidth={true}

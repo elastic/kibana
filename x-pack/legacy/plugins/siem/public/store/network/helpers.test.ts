@@ -6,7 +6,7 @@
 
 import {
   Direction,
-  NetworkTopNFlowFields,
+  NetworkTopTablesFields,
   NetworkDnsFields,
   TlsFields,
   UsersFields,
@@ -19,11 +19,27 @@ import { setNetworkQueriesActivePageToZero } from './helpers';
 export const mockNetworkState: NetworkModel = {
   page: {
     queries: {
+      [NetworkTableType.topCountriesSource]: {
+        activePage: 7,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopTablesFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [NetworkTableType.topCountriesDestination]: {
+        activePage: 3,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopTablesFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
       [NetworkTableType.topNFlowSource]: {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -31,7 +47,7 @@ export const mockNetworkState: NetworkModel = {
         activePage: 3,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -44,17 +60,39 @@ export const mockNetworkState: NetworkModel = {
         },
         isPtrIncluded: false,
       },
+      [NetworkTableType.tls]: {
+        activePage: 2,
+        limit: DEFAULT_TABLE_LIMIT,
+        tlsSortField: {
+          field: TlsFields._id,
+          direction: Direction.desc,
+        },
+      },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
   },
   details: {
     queries: {
+      [IpDetailsTableType.topCountriesSource]: {
+        activePage: 7,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopTablesFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [IpDetailsTableType.topCountriesDestination]: {
+        activePage: 3,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopTablesFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
       [IpDetailsTableType.topNFlowSource]: {
         activePage: 7,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -62,7 +100,7 @@ export const mockNetworkState: NetworkModel = {
         activePage: 3,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -83,15 +121,13 @@ export const mockNetworkState: NetworkModel = {
         },
       },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
     flowTarget: FlowTarget.source,
   },
 };
 
 describe('Network redux store', () => {
   describe('#setNetworkQueriesActivePageToZero', () => {
-    test('set activePage to zero for all queries in hosts page  ', () => {
+    test('set activePage to zero for all queries in network page', () => {
       expect(setNetworkQueriesActivePageToZero(mockNetworkState, NetworkType.page)).toEqual({
         [NetworkTableType.topNFlowSource]: {
           activePage: 0,
@@ -109,10 +145,34 @@ describe('Network redux store', () => {
           dnsSortField: { field: 'uniqueDomains', direction: 'desc' },
           isPtrIncluded: false,
         },
+        [NetworkTableType.tls]: {
+          activePage: 0,
+          limit: 10,
+          tlsSortField: {
+            direction: 'desc',
+            field: '_id',
+          },
+        },
+        [NetworkTableType.topCountriesDestination]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: {
+            direction: 'desc',
+            field: 'bytes_out',
+          },
+        },
+        [NetworkTableType.topCountriesSource]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: {
+            direction: 'desc',
+            field: 'bytes_out',
+          },
+        },
       });
     });
 
-    test('set activePage to zero for all queries in host details  ', () => {
+    test('set activePage to zero for all queries in ip details  ', () => {
       expect(setNetworkQueriesActivePageToZero(mockNetworkState, NetworkType.details)).toEqual({
         [IpDetailsTableType.topNFlowSource]: {
           activePage: 0,
@@ -123,6 +183,22 @@ describe('Network redux store', () => {
           activePage: 0,
           limit: 10,
           topNFlowSort: { field: 'bytes_out', direction: 'desc' },
+        },
+        [IpDetailsTableType.topCountriesDestination]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: {
+            direction: 'desc',
+            field: 'bytes_out',
+          },
+        },
+        [IpDetailsTableType.topCountriesSource]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: {
+            direction: 'desc',
+            field: 'bytes_out',
+          },
         },
         [IpDetailsTableType.tls]: {
           activePage: 0,
