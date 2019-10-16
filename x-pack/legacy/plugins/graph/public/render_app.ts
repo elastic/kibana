@@ -200,7 +200,7 @@ function createLocalPersistedStateModule() {
 
 function createLocalKbnUrlModule() {
   angular
-    .module('graphKbnUrl', ['graphPrivate'])
+    .module('graphKbnUrl', ['graphPrivate', 'ngRoute'])
     .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
 }
 
