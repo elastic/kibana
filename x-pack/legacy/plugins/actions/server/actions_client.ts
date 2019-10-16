@@ -15,7 +15,7 @@ interface ActionUpdate extends SavedObjectAttributes {
   secrets: SavedObjectAttributes;
 }
 
-export interface Action extends ActionUpdate {
+interface Action extends ActionUpdate {
   actionTypeId: string;
 }
 
@@ -31,7 +31,6 @@ interface FindOptions {
     defaultSearchOperator?: 'AND' | 'OR';
     searchFields?: string[];
     sortField?: string;
-    sortOrder?: string;
     hasReference?: {
       type: string;
       id: string;
