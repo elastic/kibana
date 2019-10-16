@@ -577,18 +577,74 @@
             174
           ]
         ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1504027457000,
+          "max": 1504027568000
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.requests.disconnects",
+          "metricAgg": "max",
+          "label": "Client Disconnects",
+          "description": "Total number of client disconnects to the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1504027460000,
+            0
+          ],
+          [
+            1504027470000,
+            0
+          ],
+          [
+            1504027480000,
+            0
+          ],
+          [
+            1504027490000,
+            0
+          ],
+          [
+            1504027500000,
+            0
+          ],
+          [
+            1504027510000,
+            0
+          ],
+          [
+            1504027520000,
+            0
+          ],
+          [
+            1504027530000,
+            0
+          ],
+          [
+            1504027540000,
+            0
+          ]
+        ]
       }
     ]
   },
   "kibanaSummary": {
-    "uuid": "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9",
-    "name": "tsullivan.local",
-    "index": ".kibana",
     "host": "tsullivan.local",
-    "transport_address": "tsullivan.local:5601",
-    "version": "7.0.0-alpha1",
+    "index": ".kibana",
+    "name": "tsullivan.local",
     "snapshot": false,
     "status": "green",
+    "transport_address": "tsullivan.local:5601",
+    "uuid": "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9",
+    "version": "7.0.0-alpha1",
     "availability": false,
     "os_memory_free": 1645989888,
     "uptime": 200102

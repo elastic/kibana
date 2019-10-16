@@ -19,7 +19,7 @@
 
 import { Filter, isPhrasesFilter } from '@kbn/es-query';
 
-export const mapPhrases = async (filter: Filter) => {
+export const mapPhrases = (filter: Filter) => {
   if (!isPhrasesFilter(filter)) {
     throw filter;
   }
