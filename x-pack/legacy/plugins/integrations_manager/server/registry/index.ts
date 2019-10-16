@@ -18,12 +18,16 @@ import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { integrationsManagerConfigStore } from '../config';
-import { ImageRequestParams } from '../types';
 
 export { ArchiveEntry } from './extract';
 
 export interface SearchParams {
   category?: CategoryId;
+}
+
+export interface ImageRequestParams {
+  pkgkey: string;
+  imgPath: string;
 }
 
 export async function fetchList(params?: SearchParams): Promise<RegistryList> {

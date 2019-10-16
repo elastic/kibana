@@ -9,7 +9,6 @@ import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import { InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
-import { ImageRequestParams } from '../types';
 
 export { SearchParams } from '../registry';
 
@@ -69,7 +68,8 @@ export async function getIntegrationInfo(options: {
   return createInstallableFrom(updated, savedObject);
 }
 
-export const getImage = async (options: ImageRequestParams) => Registry.fetchImage(options);
+export const getImage = async (options: Registry.ImageRequestParams) =>
+  Registry.fetchImage(options);
 
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;

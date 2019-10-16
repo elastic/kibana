@@ -17,7 +17,7 @@ import {
   installIntegration,
   removeInstallation,
 } from './index';
-import { ImageRequestParams } from '../types';
+import { ImageRequestParams } from '../registry';
 
 interface Extra extends ResponseToolkit {
   context: PluginContext;
@@ -34,7 +34,7 @@ interface PackageRequest extends Request {
 }
 
 interface ImageRequest extends Request {
-  params: ImageRequestParams;
+  params: Request['params'] & ImageRequestParams;
 }
 
 interface InstallAssetRequest extends Request {
