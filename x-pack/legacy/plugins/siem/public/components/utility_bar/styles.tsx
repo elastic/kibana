@@ -86,10 +86,7 @@ export const BarGroup = styled.div.attrs({
     }
 
     & > * {
-      font-size: ${theme.eui.euiFontSizeXS};
-      line-height: ${theme.eui.euiLineHeight};
       margin-right: ${theme.eui.euiSize};
-      white-space: nowrap;
 
       &:last-child {
         margin-right: 0;
@@ -104,7 +101,9 @@ export const BarText = styled.p.attrs({
 })`
   ${({ theme }) => css`
     color: ${theme.eui.textColors.subdued};
-    display: inline-block;
+    font-size: ${theme.eui.euiFontSizeXS};
+    line-height: ${theme.eui.euiLineHeight};
+    white-space: nowrap;
   `}
 `;
 BarText.displayName = 'BarText';
@@ -121,7 +120,10 @@ export const BarAction = styled(EuiLink).attrs({
 })<BarActionProps>`
   ${({ iconSide, theme }) => css`
     align-items: center;
-    display: inline-flex;
+    display: flex;
+    font-size: ${theme.eui.euiFontSizeXS};
+    line-height: ${theme.eui.euiLineHeight};
+    white-space: nowrap;
 
     ${iconSide === 'left' &&
       css`
