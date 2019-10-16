@@ -15,115 +15,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  InfraSnapshotMetricInput,
-  InfraSnapshotMetricType,
-  InfraNodeType,
-} from '../../graphql/types';
+import { InfraSnapshotMetricInput, InfraSnapshotMetricType } from '../../graphql/types';
 
 interface Props {
-  nodeType: InfraNodeType;
+  options: Array<{ text: string; value: InfraSnapshotMetricType }>;
   metric: InfraSnapshotMetricInput;
   onChange: (metric: InfraSnapshotMetricInput) => void;
 }
-
-let OPTIONS: { [P in InfraNodeType]: Array<{ text: string; value: InfraSnapshotMetricType }> };
-const getOptions = (
-  nodeType: InfraNodeType
-): Array<{ text: string; value: InfraSnapshotMetricType }> => {
-  if (!OPTIONS) {
-    const CPUUsage = i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
-      defaultMessage: 'CPU usage',
-    });
-
-    const MemoryUsage = i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {
-      defaultMessage: 'Memory usage',
-    });
-
-    const InboundTraffic = i18n.translate('xpack.infra.waffle.metricOptions.inboundTrafficText', {
-      defaultMessage: 'Inbound traffic',
-    });
-
-    const OutboundTraffic = i18n.translate('xpack.infra.waffle.metricOptions.outboundTrafficText', {
-      defaultMessage: 'Outbound traffic',
-    });
-
-    const LogRate = i18n.translate('xpack.infra.waffle.metricOptions.hostLogRateText', {
-      defaultMessage: 'Log rate',
-    });
-
-    const Load = i18n.translate('xpack.infra.waffle.metricOptions.loadText', {
-      defaultMessage: 'Load',
-    });
-
-    OPTIONS = {
-      [InfraNodeType.pod]: [
-        {
-          text: CPUUsage,
-          value: InfraSnapshotMetricType.cpu,
-        },
-        {
-          text: MemoryUsage,
-          value: InfraSnapshotMetricType.memory,
-        },
-        {
-          text: InboundTraffic,
-          value: InfraSnapshotMetricType.rx,
-        },
-        {
-          text: OutboundTraffic,
-          value: InfraSnapshotMetricType.tx,
-        },
-      ],
-      [InfraNodeType.container]: [
-        {
-          text: CPUUsage,
-          value: InfraSnapshotMetricType.cpu,
-        },
-        {
-          text: MemoryUsage,
-          value: InfraSnapshotMetricType.memory,
-        },
-        {
-          text: InboundTraffic,
-          value: InfraSnapshotMetricType.rx,
-        },
-        {
-          text: OutboundTraffic,
-          value: InfraSnapshotMetricType.tx,
-        },
-      ],
-      [InfraNodeType.host]: [
-        {
-          text: CPUUsage,
-          value: InfraSnapshotMetricType.cpu,
-        },
-        {
-          text: MemoryUsage,
-          value: InfraSnapshotMetricType.memory,
-        },
-        {
-          text: Load,
-          value: InfraSnapshotMetricType.load,
-        },
-        {
-          text: InboundTraffic,
-          value: InfraSnapshotMetricType.rx,
-        },
-        {
-          text: OutboundTraffic,
-          value: InfraSnapshotMetricType.tx,
-        },
-        {
-          text: LogRate,
-          value: InfraSnapshotMetricType.logRate,
-        },
-      ],
-    };
-  }
-
-  return OPTIONS[nodeType];
-};
 
 const initialState = {
   isPopoverOpen: false,
@@ -134,8 +32,7 @@ export const WaffleMetricControls = class extends React.PureComponent<Props, Sta
   public static displayName = 'WaffleMetricControls';
   public readonly state: State = initialState;
   public render() {
-    const { metric, nodeType } = this.props;
-    const options = getOptions(nodeType);
+    const { metric, options } = this.props;
     const value = metric.type;
 
     if (!options.length || !value) {
@@ -176,6 +73,7 @@ export const WaffleMetricControls = class extends React.PureComponent<Props, Sta
           isOpen={this.state.isPopoverOpen}
           id="metricsPanel"
           button={button}
+          anchorPosition="downLeft"
           panelPaddingSize="none"
           closePopover={this.handleClose}
         >

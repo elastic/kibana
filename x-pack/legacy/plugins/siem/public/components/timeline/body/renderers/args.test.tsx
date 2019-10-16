@@ -10,7 +10,6 @@ import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../mock';
-import { getEmptyString } from '../../../empty_value';
 import { Args } from './args';
 
 describe('Args', () => {
@@ -20,28 +19,60 @@ describe('Args', () => {
         <Args
           contextId="context-123"
           eventId="event-123"
-          args="arg1 arg2 arg3"
+          args={['arg1', 'arg2', 'arg3']}
           processTitle="process-title-1"
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('it returns null if args is undefined', () => {
+    test('it returns an empty string when both args and process title are undefined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <Args
             contextId="context-123"
             eventId="event-123"
             args={undefined}
-            processTitle="process-title-1"
+            processTitle={undefined}
           />
         </TestProviders>
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(wrapper.text()).toEqual('');
     });
 
-    test('it returns null if args is null', () => {
+    test('it returns an empty string when both args and process title are null', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <Args contextId="context-123" eventId="event-123" args={null} processTitle={null} />
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('');
+    });
+
+    test('it returns an empty string when args is an empty array, and title is an empty string', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <Args contextId="context-123" eventId="event-123" args={[]} processTitle="" />
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('');
+    });
+
+    test('it returns args when args are provided, and process title is NOT provided', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <Args
+            contextId="context-123"
+            eventId="event-123"
+            args={['arg1', 'arg2', 'arg3']}
+            processTitle={undefined}
+          />
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('arg1arg2arg3');
+    });
+
+    test('it returns process title when process title is provided, and args is NOT provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <Args
@@ -52,21 +83,21 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(wrapper.text()).toEqual('process-title-1');
     });
 
-    test('it returns empty string if args happens to be an empty string', () => {
+    test('it returns both args and process title, when both are provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <Args
             contextId="context-123"
             eventId="event-123"
-            args=""
+            args={['arg1', 'arg2', 'arg3']}
             processTitle="process-title-1"
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(getEmptyString());
+      expect(wrapper.text()).toEqual('arg1arg2arg3process-title-1');
     });
   });
 });

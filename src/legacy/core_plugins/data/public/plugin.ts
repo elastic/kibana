@@ -20,7 +20,7 @@
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { SearchService, SearchStart, createSearchBar, StatetfulSearchBarProps } from './search';
 import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterStart } from './filter';
+import { FilterService, FilterSetup, FilterStart } from './filter';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
 import {
@@ -52,6 +52,7 @@ export interface DataSetup {
   query: QuerySetup;
   timefilter: TimefilterSetup;
   indexPatterns: IndexPatternsSetup;
+  filter: FilterSetup;
 }
 
 /**
@@ -100,10 +101,14 @@ export class DataPlugin
       uiSettings,
       store: __LEGACY.storage,
     });
+    const filterService = this.filter.setup({
+      uiSettings,
+    });
     this.setupApi = {
       indexPatterns: this.indexPatterns.setup(),
       query: this.query.setup(),
       timefilter: timefilterService,
+      filter: filterService,
     };
 
     return this.setupApi;
@@ -119,23 +124,17 @@ export class DataPlugin
       notifications,
     });
 
-    const filterService = this.filter.start({
-      uiSettings,
-      indexPatterns: indexPatternsService.indexPatterns,
-    });
-
     const SearchBar = createSearchBar({
       core,
       data,
       store: __LEGACY.storage,
       timefilter: this.setupApi.timefilter,
-      filterManager: filterService.filterManager,
+      filterManager: this.setupApi.filter.filterManager,
     });
 
     return {
       ...this.setupApi!,
       indexPatterns: indexPatternsService,
-      filter: filterService,
       search: this.search.start(savedObjects.client),
       ui: {
         SearchBar,
