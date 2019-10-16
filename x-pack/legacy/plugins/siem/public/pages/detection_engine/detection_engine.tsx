@@ -12,11 +12,17 @@ import {
   getAxisId,
   getSpecId,
   niceTimeFormatByDay,
-  niceTimeFormatter,
   timeFormatter,
 } from '@elastic/charts';
-import { EuiButton, EuiButtonGroup, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiButton,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+} from '@elastic/eui';
+import React, { useState } from 'react';
 import { StickyContainer } from 'react-sticky';
 import { npStart } from 'ui/new_platform';
 
@@ -33,6 +39,76 @@ import {
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { DetectionEngineKql } from './kql';
 import * as i18n from './translations';
+
+const OpenSignals = React.memo(() => {
+  return (
+    <>
+      <UtilityBar>
+        <UtilityBarSection>
+          <UtilityBarGroup>
+            <UtilityBarText>{`${i18n.PANEL_SUBTITLE_SHOWING}: 7,712 signals`}</UtilityBarText>
+          </UtilityBarGroup>
+
+          <UtilityBarGroup>
+            <UtilityBarText>{'Selected: 20 signals'}</UtilityBarText>
+
+            <UtilityBarAction popoverContent={<p>{'Batch actions context menu here.'}</p>}>
+              {'Batch actions'}
+            </UtilityBarAction>
+
+            <UtilityBarAction iconType="listAdd">
+              {'Select all signals on all pages'}
+            </UtilityBarAction>
+          </UtilityBarGroup>
+
+          <UtilityBarGroup>
+            <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
+
+            <UtilityBarAction iconType="cross">{'Clear aggregation'}</UtilityBarAction>
+          </UtilityBarGroup>
+        </UtilityBarSection>
+
+        <UtilityBarSection>
+          <UtilityBarGroup>
+            <UtilityBarAction popoverContent={<p>{'Customize columns context menu here.'}</p>}>
+              {'Customize columns'}
+            </UtilityBarAction>
+
+            <UtilityBarAction iconType="indexMapping">{'Aggregate data'}</UtilityBarAction>
+          </UtilityBarGroup>
+        </UtilityBarSection>
+      </UtilityBar>
+
+      {/* Open signals datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
+    </>
+  );
+});
+
+const ClosedSignals = React.memo(() => {
+  return (
+    <>
+      <UtilityBar>
+        <UtilityBarSection>
+          <UtilityBarGroup>
+            <UtilityBarText>{`${i18n.PANEL_SUBTITLE_SHOWING}: 7,712 signals`}</UtilityBarText>
+          </UtilityBarGroup>
+        </UtilityBarSection>
+
+        <UtilityBarSection>
+          <UtilityBarGroup>
+            <UtilityBarAction popoverContent={<p>{'Customize columns context menu here.'}</p>}>
+              {'Customize columns'}
+            </UtilityBarAction>
+
+            <UtilityBarAction iconType="indexMapping">{'Aggregate data'}</UtilityBarAction>
+          </UtilityBarGroup>
+        </UtilityBarSection>
+      </UtilityBar>
+
+      {/* Closed signals datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
+    </>
+  );
+});
 
 export const DetectionEngineComponent = React.memo(() => {
   const sampleChartOptions = [
@@ -83,17 +159,8 @@ export const DetectionEngineComponent = React.memo(() => {
     { x: 1571174484000, y: 7, a: 'a' },
   ];
 
-  const signalTypePrefix = 'signalType';
-  const signalTypeButtons = [
-    {
-      id: `${signalTypePrefix}0`,
-      label: 'Open signals',
-    },
-    {
-      id: `${signalTypePrefix}1`,
-      label: 'Closed signals',
-    },
-  ];
+  const filterGroupOptions = ['open', 'closed'];
+  const [filterGroupState, setFilterGroupState] = useState(filterGroupOptions[0]);
 
   return (
     <>
@@ -148,53 +215,29 @@ export const DetectionEngineComponent = React.memo(() => {
 
         <EuiPanel>
           <HeaderSection title="All signals">
-            <EuiButtonGroup
-              color="primary"
-              legend="Signal types"
-              onChange={() => {
-                return null;
-              }}
-              options={signalTypeButtons}
-            />
+            <EuiFilterGroup>
+              <EuiFilterButton
+                hasActiveFilters={filterGroupState === filterGroupOptions[0]}
+                iconSide="left"
+                iconType="folderOpen"
+                onClick={() => setFilterGroupState(filterGroupOptions[0])}
+                withNext
+              >
+                {'Open signals'}
+              </EuiFilterButton>
+
+              <EuiFilterButton
+                hasActiveFilters={filterGroupState === filterGroupOptions[1]}
+                iconSide="left"
+                iconType="folderClosed"
+                onClick={() => setFilterGroupState(filterGroupOptions[1])}
+              >
+                {'Closed signals'}
+              </EuiFilterButton>
+            </EuiFilterGroup>
           </HeaderSection>
 
-          <UtilityBar>
-            <UtilityBarSection>
-              <UtilityBarGroup>
-                <UtilityBarText>{`${i18n.PANEL_SUBTITLE_SHOWING}: 7,712 signals`}</UtilityBarText>
-              </UtilityBarGroup>
-
-              <UtilityBarGroup>
-                <UtilityBarText>{'Selected: 20 signals'}</UtilityBarText>
-
-                <UtilityBarAction popoverContent={<p>{'Batch actions context menu here.'}</p>}>
-                  {'Batch actions'}
-                </UtilityBarAction>
-
-                <UtilityBarAction iconType="listAdd">
-                  {'Select all signals on all pages'}
-                </UtilityBarAction>
-              </UtilityBarGroup>
-
-              <UtilityBarGroup>
-                <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
-
-                <UtilityBarAction iconType="cross">{'Clear aggregation'}</UtilityBarAction>
-              </UtilityBarGroup>
-            </UtilityBarSection>
-
-            <UtilityBarSection>
-              <UtilityBarGroup>
-                <UtilityBarAction popoverContent={<p>{'Customize columns context menu here.'}</p>}>
-                  {'Customize columns'}
-                </UtilityBarAction>
-
-                <UtilityBarAction iconType="indexMapping">{'Aggregate data'}</UtilityBarAction>
-              </UtilityBarGroup>
-            </UtilityBarSection>
-          </UtilityBar>
-
-          {/* Open signals datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
+          {filterGroupState === filterGroupOptions[0] ? <OpenSignals /> : <ClosedSignals />}
         </EuiPanel>
       </StickyContainer>
 
