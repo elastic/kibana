@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -13,22 +14,23 @@ import { networkActions } from '../../../../store/actions';
 import {
   Direction,
   FlowTargetSourceDest,
-  NetworkTopNFlowEdges,
+  NetworkTopCountriesEdges,
   NetworkTopTablesFields,
   NetworkTopTablesSortField,
 } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
-import { getNFlowColumnsCurated } from './columns';
+import { getCountriesColumnsCurated } from './columns';
 import * as i18n from './translations';
 
 interface OwnProps {
-  data: NetworkTopNFlowEdges[];
+  data: NetworkTopCountriesEdges[];
   fakeTotalCount: number;
   flowTargeted: FlowTargetSourceDest;
   id: string;
   indexPattern: StaticIndexPattern;
+  ip?: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -37,13 +39,13 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-interface NetworkTopNFlowTableReduxProps {
+interface NetworkTopCountriesTableReduxProps {
   activePage: number;
   limit: number;
-  topNFlowSort: NetworkTopTablesSortField;
+  topCountriesSort: NetworkTopTablesSortField;
 }
 
-interface NetworkTopNFlowTableDispatchProps {
+interface NetworkTopCountriesTableDispatchProps {
   updateIpDetailsTableActivePage: ActionCreator<{
     activePage: number;
     tableType: networkModel.IpDetailsTableType;
@@ -52,21 +54,21 @@ interface NetworkTopNFlowTableDispatchProps {
     activePage: number;
     tableType: networkModel.NetworkTableType;
   }>;
-  updateTopNFlowLimit: ActionCreator<{
+  updateTopCountriesLimit: ActionCreator<{
     limit: number;
     networkType: networkModel.NetworkType;
-    tableType: networkModel.TopNTableType;
+    tableType: networkModel.TopCountriesTableType;
   }>;
-  updateTopNFlowSort: ActionCreator<{
-    topNFlowSort: NetworkTopTablesSortField;
+  updateTopCountriesSort: ActionCreator<{
+    topCountriesSort: NetworkTopTablesSortField;
     networkType: networkModel.NetworkType;
-    tableType: networkModel.TopNTableType;
+    tableType: networkModel.TopCountriesTableType;
   }>;
 }
 
-type NetworkTopNFlowTableProps = OwnProps &
-  NetworkTopNFlowTableReduxProps &
-  NetworkTopNFlowTableDispatchProps;
+type NetworkTopCountriesTableProps = OwnProps &
+  NetworkTopCountriesTableReduxProps &
+  NetworkTopCountriesTableDispatchProps;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -79,9 +81,9 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-export const NetworkTopNFlowTableId = 'networkTopSourceFlow-top-talkers';
+export const NetworkTopCountriesTableId = 'networkTopCountries-top-talkers';
 
-const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
+const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTableProps>(
   ({
     activePage,
     data,
@@ -94,27 +96,27 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     loading,
     loadPage,
     showMorePagesIndicator,
-    topNFlowSort,
+    topCountriesSort,
     totalCount,
     type,
     updateIpDetailsTableActivePage,
+    updateTopCountriesLimit,
+    updateTopCountriesSort,
     updateNetworkPageTableActivePage,
-    updateTopNFlowLimit,
-    updateTopNFlowSort,
   }) => {
-    const onChange = (criteria: Criteria, tableType: networkModel.TopNTableType) => {
+    const onChange = (criteria: Criteria, tableType: networkModel.TopCountriesTableType) => {
       if (criteria.sort != null) {
         const splitField = criteria.sort.field.split('.');
         const field = last(splitField);
         const newSortDirection =
-          field !== topNFlowSort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-        const newTopNFlowSort: NetworkTopTablesSortField = {
+          field !== topCountriesSort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
+        const newTopCountriesSort: NetworkTopTablesSortField = {
           field: field as NetworkTopTablesFields,
           direction: newSortDirection,
         };
-        if (!isEqual(newTopNFlowSort, topNFlowSort)) {
-          updateTopNFlowSort({
-            topNFlowSort: newTopNFlowSort,
+        if (!isEqual(newTopCountriesSort, topCountriesSort)) {
+          updateTopCountriesSort({
+            topCountriesSort: newTopCountriesSort,
             networkType: type,
             tableType,
           });
@@ -122,36 +124,43 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
       }
     };
 
-    let tableType: networkModel.TopNTableType;
+    let tableType: networkModel.TopCountriesTableType;
     const headerTitle: string =
-      flowTargeted === FlowTargetSourceDest.source ? i18n.SOURCE_IP : i18n.DESTINATION_IP;
+      flowTargeted === FlowTargetSourceDest.source
+        ? i18n.SOURCE_COUNTRIES
+        : i18n.DESTINATION_COUNTRIES;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let updateTableActivePage: any;
     if (type === networkModel.NetworkType.page) {
       tableType =
         flowTargeted === FlowTargetSourceDest.source
-          ? networkModel.NetworkTableType.topNFlowSource
-          : networkModel.NetworkTableType.topNFlowDestination;
+          ? networkModel.NetworkTableType.topCountriesSource
+          : networkModel.NetworkTableType.topCountriesDestination;
       updateTableActivePage = updateNetworkPageTableActivePage;
     } else {
       tableType =
         flowTargeted === FlowTargetSourceDest.source
-          ? networkModel.IpDetailsTableType.topNFlowSource
-          : networkModel.IpDetailsTableType.topNFlowDestination;
+          ? networkModel.IpDetailsTableType.topCountriesSource
+          : networkModel.IpDetailsTableType.topCountriesDestination;
       updateTableActivePage = updateIpDetailsTableActivePage;
     }
 
     const field =
-      topNFlowSort.field === NetworkTopTablesFields.bytes_out ||
-      topNFlowSort.field === NetworkTopTablesFields.bytes_in
-        ? `node.network.${topNFlowSort.field}`
-        : `node.${flowTargeted}.${topNFlowSort.field}`;
+      topCountriesSort.field === NetworkTopTablesFields.bytes_out ||
+      topCountriesSort.field === NetworkTopTablesFields.bytes_in
+        ? `node.network.${topCountriesSort.field}`
+        : `node.${flowTargeted}.${topCountriesSort.field}`;
 
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getNFlowColumnsCurated(indexPattern, flowTargeted, type, NetworkTopNFlowTableId)}
+        columns={getCountriesColumnsCurated(
+          indexPattern,
+          flowTargeted,
+          type,
+          NetworkTopCountriesTableId
+        )}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerTitle={headerTitle}
@@ -165,7 +174,7 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
         onChange={criteria => onChange(criteria, tableType)}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
-        sorting={{ field, direction: topNFlowSort.direction }}
+        sorting={{ field, direction: topCountriesSort.direction }}
         totalCount={fakeTotalCount}
         updateActivePage={newPage =>
           updateTableActivePage({
@@ -174,24 +183,24 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
           })
         }
         updateLimitPagination={newLimit =>
-          updateTopNFlowLimit({ limit: newLimit, networkType: type, tableType })
+          updateTopCountriesLimit({ limit: newLimit, networkType: type, tableType })
         }
       />
     );
   }
 );
 
-NetworkTopNFlowTableComponent.displayName = 'NetworkTopNFlowTableComponent';
+NetworkTopCountriesTableComponent.displayName = 'NetworkTopCountriesTableComponent';
 
 const mapStateToProps = (state: State, ownProps: OwnProps) =>
-  networkSelectors.topNFlowSelector(ownProps.flowTargeted, ownProps.type);
+  networkSelectors.topCountriesSelector(ownProps.flowTargeted, ownProps.type);
 
-export const NetworkTopNFlowTable = connect(
+export const NetworkTopCountriesTable = connect(
   mapStateToProps,
   {
-    updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
-    updateTopNFlowSort: networkActions.updateTopNFlowSort,
+    updateTopCountriesLimit: networkActions.updateTopCountriesLimit,
+    updateTopCountriesSort: networkActions.updateTopCountriesSort,
     updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,
     updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
   }
-)(NetworkTopNFlowTableComponent);
+)(NetworkTopCountriesTableComponent);

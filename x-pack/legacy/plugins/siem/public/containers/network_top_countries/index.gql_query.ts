@@ -6,8 +6,8 @@
 
 import gql from 'graphql-tag';
 
-export const networkTopNFlowQuery = gql`
-  query GetNetworkTopNFlowQuery(
+export const networkTopCountriesQuery = gql`
+  query GetNetworkTopCountriesQuery(
     $sourceId: ID!
     $ip: String
     $filterQuery: String
@@ -20,7 +20,7 @@ export const networkTopNFlowQuery = gql`
   ) {
     source(id: $sourceId) {
       id
-      NetworkTopNFlow(
+      NetworkTopCountries(
         filterQuery: $filterQuery
         flowTarget: $flowTarget
         ip: $ip
@@ -33,44 +33,14 @@ export const networkTopNFlowQuery = gql`
         edges {
           node {
             source {
-              autonomous_system {
-                name
-                number
-              }
-              domain
-              ip
-              location {
-                geo {
-                  continent_name
-                  country_name
-                  country_iso_code
-                  city_name
-                  region_iso_code
-                  region_name
-                }
-                flowTarget
-              }
-              flows
+              country
               destination_ips
+              flows
+              source_ips
             }
             destination {
-              autonomous_system {
-                name
-                number
-              }
-              domain
-              ip
-              location {
-                geo {
-                  continent_name
-                  country_name
-                  country_iso_code
-                  city_name
-                  region_iso_code
-                  region_name
-                }
-                flowTarget
-              }
+              country
+              destination_ips
               flows
               source_ips
             }

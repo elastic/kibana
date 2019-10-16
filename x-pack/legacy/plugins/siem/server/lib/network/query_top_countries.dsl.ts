@@ -12,28 +12,28 @@ import {
 } from '../../graphql/types';
 import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 
-import { NetworkTopNFlowRequestOptions } from './index';
+import { NetworkTopCountriesRequestOptions } from './index';
 
 const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
-  top_n_flow_count: {
+  top_countries_count: {
     cardinality: {
-      field: `${flowTarget}.ip`,
+      field: `${flowTarget}.geo.country_iso_code`,
     },
   },
 });
 
-export const buildTopNFlowQuery = ({
+export const buildTopCountriesQuery = ({
   defaultIndex,
   filterQuery,
   flowTarget,
-  networkTopNFlowSort,
+  networkTopCountriesSort,
   pagination: { querySize },
   sourceConfiguration: {
     fields: { timestamp },
   },
   timerange: { from, to },
   ip,
-}: NetworkTopNFlowRequestOptions) => {
+}: NetworkTopCountriesRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
@@ -46,7 +46,7 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getFlowTargetAggs(networkTopNFlowSort, flowTarget, querySize),
+        ...getFlowTargetAggs(networkTopCountriesSort, flowTarget, querySize),
       },
       query: {
         bool: ip
@@ -73,16 +73,16 @@ export const buildTopNFlowQuery = ({
 };
 
 const getFlowTargetAggs = (
-  networkTopNFlowSortField: NetworkTopTablesSortField,
+  networkTopCountriesSortField: NetworkTopTablesSortField,
   flowTarget: FlowTargetSourceDest,
   querySize: number
 ) => ({
   [flowTarget]: {
     terms: {
-      field: `${flowTarget}.ip`,
+      field: `${flowTarget}.geo.country_iso_code`,
       size: querySize,
       order: {
-        ...getQueryOrder(networkTopNFlowSortField),
+        ...getQueryOrder(networkTopCountriesSortField),
       },
     },
     aggs: {
@@ -96,59 +96,19 @@ const getFlowTargetAggs = (
           field: `${flowTarget}.bytes`,
         },
       },
-      domain: {
-        terms: {
-          field: `${flowTarget}.domain`,
-          order: {
-            timestamp: 'desc',
-          },
-        },
-        aggs: {
-          timestamp: {
-            max: {
-              field: '@timestamp',
-            },
-          },
-        },
-      },
-      location: {
-        filter: {
-          exists: {
-            field: `${flowTarget}.geo`,
-          },
-        },
-        aggs: {
-          top_geo: {
-            top_hits: {
-              _source: `${flowTarget}.geo.*`,
-              size: 1,
-            },
-          },
-        },
-      },
-      autonomous_system: {
-        filter: {
-          exists: {
-            field: `${flowTarget}.as`,
-          },
-        },
-        aggs: {
-          top_as: {
-            top_hits: {
-              _source: `${flowTarget}.as.*`,
-              size: 1,
-            },
-          },
-        },
-      },
       flows: {
         cardinality: {
           field: 'network.community_id',
         },
       },
-      [`${getOppositeField(flowTarget)}_ips`]: {
+      source_ips: {
         cardinality: {
-          field: `${getOppositeField(flowTarget)}.ip`,
+          field: 'source.ip',
+        },
+      },
+      destination_ips: {
+        cardinality: {
+          field: 'destination.ip',
         },
       },
     },
@@ -172,18 +132,18 @@ type QueryOrder =
   | { destination_ips: Direction }
   | { source_ips: Direction };
 
-const getQueryOrder = (networkTopNFlowSortField: NetworkTopTablesSortField): QueryOrder => {
-  switch (networkTopNFlowSortField.field) {
+const getQueryOrder = (networkTopCountriesSortField: NetworkTopTablesSortField): QueryOrder => {
+  switch (networkTopCountriesSortField.field) {
     case NetworkTopTablesFields.bytes_in:
-      return { bytes_in: networkTopNFlowSortField.direction };
+      return { bytes_in: networkTopCountriesSortField.direction };
     case NetworkTopTablesFields.bytes_out:
-      return { bytes_out: networkTopNFlowSortField.direction };
+      return { bytes_out: networkTopCountriesSortField.direction };
     case NetworkTopTablesFields.flows:
-      return { flows: networkTopNFlowSortField.direction };
+      return { flows: networkTopCountriesSortField.direction };
     case NetworkTopTablesFields.destination_ips:
-      return { destination_ips: networkTopNFlowSortField.direction };
+      return { destination_ips: networkTopCountriesSortField.direction };
     case NetworkTopTablesFields.source_ips:
-      return { source_ips: networkTopNFlowSortField.direction };
+      return { source_ips: networkTopCountriesSortField.direction };
   }
-  assertUnreachable(networkTopNFlowSortField.field);
+  assertUnreachable(networkTopCountriesSortField.field);
 };
