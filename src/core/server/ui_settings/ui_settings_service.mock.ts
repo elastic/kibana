@@ -48,6 +48,6 @@ const createSetupMock = () => {
 };
 
 export const uiSettingsServiceMock = {
-  createSetup: createSetupMock,
+  createSetupContract: createSetupMock,
   createClient: createClientMock,
 };

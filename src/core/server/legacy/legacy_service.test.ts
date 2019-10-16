@@ -72,7 +72,7 @@ beforeEach(() => {
     core: {
       context: contextServiceMock.createSetupContract(),
       elasticsearch: { legacy: {} } as any,
-      uiSettings: uiSettingsServiceMock.createSetup(),
+      uiSettings: uiSettingsServiceMock.createSetupContract(),
       http: {
         ...httpServiceMock.createSetupContract(),
         auth: {
