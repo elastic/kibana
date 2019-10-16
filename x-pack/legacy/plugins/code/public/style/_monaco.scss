@@ -8,14 +8,8 @@
 	cursor: pointer;
 }
 
-
-.code-monaco-highlight-line {
-  background: $euiCodeBlockBuiltInColor;
-}
-
-.code-mark-line-number {
-  background: $euiCodeBlockBuiltInColor;
-  width: $euiSizeXS;
+.codeBlock__line--highlighted {
+  background-color: $euiColorLightShade;
 }
 
 .monaco-editor .margin-view-overlays .line-numbers {
@@ -69,11 +63,6 @@
 
 .monaco-editor .scroll-decoration {
   display: none;
-}
-
-.code-mark-line-number,
-.code-monaco-highlight-line {
-  background-color: $euiColorLightShade;
 }
 
 .text-placeholder {

@@ -136,7 +136,7 @@ describe('date_histogram', () => {
       expect(column.params.interval).toEqual('auto');
     });
 
-    it('should create column object with manual interval for non-primary time fields', () => {
+    it('should create column object with auto interval for non-primary time fields', () => {
       const column = dateHistogramOperation.buildColumn({
         columns: {},
         suggestedPriority: 0,
@@ -150,7 +150,7 @@ describe('date_histogram', () => {
           searchable: true,
         },
       });
-      expect(column.params.interval).toEqual('d');
+      expect(column.params.interval).toEqual('auto');
     });
 
     it('should create column object with restrictions', () => {

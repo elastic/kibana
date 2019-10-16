@@ -87,7 +87,7 @@ export class SectionPanel extends Component<Props, State> {
       <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
-            <h3>
+            <h2>
               {this.props.iconType && (
                 <Fragment>
                   <EuiIcon
@@ -98,7 +98,7 @@ export class SectionPanel extends Component<Props, State> {
                 </Fragment>
               )}
               {this.props.title}
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         {this.props.collapsible && (

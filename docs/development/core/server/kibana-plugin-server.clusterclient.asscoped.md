@@ -4,7 +4,7 @@
 
 ## ClusterClient.asScoped() method
 
-Creates an instance of `ScopedClusterClient` based on the configuration the current cluster client that exposes additional `callAsCurrentUser` method scoped to the provided req. Consumers shouldn't worry about closing scoped client instances, these will be automatically closed as soon as the original cluster client isn't needed anymore and closed.
+Creates an instance of [IScopedClusterClient](./kibana-plugin-server.iscopedclusterclient.md) based on the configuration the current cluster client that exposes additional `callAsCurrentUser` method scoped to the provided req. Consumers shouldn't worry about closing scoped client instances, these will be automatically closed as soon as the original cluster client isn't needed anymore and closed.
 
 <b>Signature:</b>
 
@@ -16,7 +16,7 @@ asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterC
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  request | <code>KibanaRequest &#124; LegacyRequest &#124; FakeRequest</code> | Request the <code>ScopedClusterClient</code> instance will be scoped to. Supports request optionality, Legacy.Request &amp; FakeRequest for BWC with LegacyPlatform |
+|  request | <code>KibanaRequest &#124; LegacyRequest &#124; FakeRequest</code> | Request the <code>IScopedClusterClient</code> instance will be scoped to. Supports request optionality, Legacy.Request &amp; FakeRequest for BWC with LegacyPlatform |
 
 <b>Returns:</b>
 
