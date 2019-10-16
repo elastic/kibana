@@ -114,7 +114,7 @@ export class TaskManager {
           pool.run,
           () =>
             claimAvailableTasks(
-              this.store.claimAvailableTasks,
+              this.store.claimAvailableTasks.bind(this.store),
               this.pool.availableWorkers,
               this.logger
             ),
