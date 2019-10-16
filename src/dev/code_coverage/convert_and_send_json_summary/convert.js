@@ -18,7 +18,8 @@
  */
 
 import { fromEventPattern } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+// import { tap } from 'rxjs/operators';
 import moment from 'moment';
 import jsonStream from './json_stream';
 
@@ -41,7 +42,7 @@ export default ({ coveragePath }, log) => {
       map(distro),
       map(last),
       // debug stream
-      tap(x => console.log(`\n### x\n\t${JSON.stringify(x, null, 2)}`)),
+      // tap(x => console.log(`\n### x\n\t${JSON.stringify(x, null, 2)}`)),
     );
 };
 function statsAndPath(...xs) {
@@ -54,15 +55,18 @@ function statsAndPath(...xs) {
 }
 function addPath(coveragePath, obj) {
   return {
-    coveragePath,
+    coveragePath: _truncate(coveragePath),
     ...obj,
   };
+}
+function _truncate(x) {
+  return x.replace(/(?:.*)(kibana.*$)/gm, '$1');
 }
 function truncate(obj) {
   const { coveredFilePath } = obj;
 
   if (coveredFilePath.includes('kibana')) {
-    obj.coveredFilePath = coveredFilePath.replace(/(?:.*)(kibana.*$)/gm, '$1');
+    obj.coveredFilePath = _truncate(coveredFilePath);
   }
 
   return obj;
