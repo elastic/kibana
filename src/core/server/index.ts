@@ -48,7 +48,9 @@ import { InternalHttpServiceSetup, HttpServiceSetup } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
+
 import { InternalUiSettingsServiceSetup } from './ui_settings';
+import { SavedObjectsClientContract } from './saved_objects/types';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
@@ -188,10 +190,22 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
 
 /**
  * Plugin specific context passed to a route handler.
+ *
+ * Provides the following clients:
+ *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
+ *      which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
+ *      data client which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
+ *      admin client which uses the credentials of the incoming request
+ *
  * @public
  */
 export interface RequestHandlerContext {
   core: {
+    savedObjects: {
+      client: SavedObjectsClientContract;
+    };
     elasticsearch: {
       dataClient: IScopedClusterClient;
       adminClient: IScopedClusterClient;

@@ -276,6 +276,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
           uiSettings: setupDeps.core.uiSettings,
+          savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
         },
         logger: this.coreContext.logger,
       },
