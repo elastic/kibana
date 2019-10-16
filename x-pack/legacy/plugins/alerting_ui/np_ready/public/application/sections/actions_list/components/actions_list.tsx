@@ -19,10 +19,6 @@ import { AlertingActionsDropdown } from './create_menu_popover';
 interface ActionsListProps {
   api: any;
 }
-interface Sorting {
-  field: string;
-  direction: 'asc' | 'desc';
-}
 interface Pagination {
   index: number;
   size: number;
@@ -54,14 +50,13 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   const [errorCode, setErrorCode] = useState<number | null>(null);
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
-  const [sort, setSort] = useState<Sorting>({ field: 'actionTypeId', direction: 'asc' });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
 
   async function loadActionsTable() {
     setIsLoadingActions(true);
     setErrorCode(null);
     try {
-      const actionsResponse = await loadActions({ http, sort, page, searchText });
+      const actionsResponse = await loadActions({ http, page, searchText });
       setActions(actionsResponse.data);
       setTotalItemCount(actionsResponse.total);
     } catch (e) {
@@ -73,7 +68,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
 
   useEffect(() => {
     loadActionsTable();
-  }, [sort, page, searchText]);
+  }, [page, searchText]);
 
   useEffect(() => {
     (async () => {
@@ -219,21 +214,13 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
             'data-test-subj': 'cell',
           })}
           data-test-subj="actionsTable"
-          sorting={{ sort }}
           pagination={{
             pageIndex: page.index,
             pageSize: page.size,
             totalItemCount,
           }}
-          onChange={({
-            sort: changedSort,
-            page: changedPage,
-          }: {
-            sort: Sorting;
-            page: Pagination;
-          }) => {
+          onChange={({ page: changedPage }: { page: Pagination }) => {
             setPage(changedPage);
-            setSort(changedSort);
           }}
           selection={{
             onSelectionChange(updatedSelectedItemsList: Data[]) {

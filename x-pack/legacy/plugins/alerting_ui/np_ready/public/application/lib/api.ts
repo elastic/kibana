@@ -32,7 +32,6 @@ export async function loadActionTypes({
 
 export interface LoadActionsOpts {
   http: HttpServiceBase;
-  sort: { field: string; direction: 'asc' | 'desc' };
   page: { index: number; size: number };
   searchText?: string;
 }
@@ -46,14 +45,11 @@ export interface LoadActionsResponse {
 
 export async function loadActions({
   http,
-  sort,
   page,
   searchText,
 }: LoadActionsOpts): Promise<LoadActionsResponse> {
   return http.get(`${BASE_ACTION_API_PATH}/_find`, {
     query: {
-      sort_field: sort.field,
-      sort_order: sort.direction,
       page: page.index + 1,
       per_page: page.size,
       search_fields: searchText ? 'description' : undefined,
