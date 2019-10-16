@@ -23,8 +23,10 @@ export const dnsSelector = () =>
   );
 export enum NetworkTableType {
   dns = 'dns',
-  topNFlowSource = 'topNFlowSource',
+  topCountriesDestination = 'topCountriesDestination',
+  topCountriesSource = 'topCountriesSource',
   topNFlowDestination = 'topNFlowDestination',
+  topNFlowSource = 'topNFlowSource',
 }
 export const topNFlowSelector = (flowTarget: FlowTargetSourceDest, networkType: NetworkType) => {
   if (networkType === NetworkType.page) {
@@ -42,6 +44,28 @@ export const topNFlowSelector = (flowTarget: FlowTargetSourceDest, networkType: 
       flowTarget === FlowTargetSourceDest.source
         ? network.queries[IpDetailsTableType.topNFlowSource]
         : network.queries[IpDetailsTableType.topNFlowDestination]
+  );
+};
+
+export const topCountriesSelector = (
+  flowTarget: FlowTargetSourceDest,
+  networkType: NetworkType
+) => {
+  if (networkType === NetworkType.page) {
+    return createSelector(
+      selectNetworkPage,
+      network =>
+        flowTarget === FlowTargetSourceDest.source
+          ? network.queries[NetworkTableType.topCountriesSource]
+          : network.queries[NetworkTableType.topCountriesDestination]
+    );
+  }
+  return createSelector(
+    selectNetworkDetails,
+    network =>
+      flowTarget === FlowTargetSourceDest.source
+        ? network.queries[IpDetailsTableType.topCountriesSource]
+        : network.queries[IpDetailsTableType.topCountriesDestination]
   );
 };
 
