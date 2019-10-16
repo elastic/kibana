@@ -102,7 +102,6 @@ export function createSearchBar({ core, store, timefilter, data }: StatefulSearc
       };
     }, []);
 
-
     return (
       <KibanaContextProvider
         services={{
