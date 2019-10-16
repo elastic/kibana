@@ -6,7 +6,6 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
   EuiKeyPadMenu,
@@ -18,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { Visualization, FramePublicAPI, Datasource } from '../../types';
 import { Action } from './state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from './suggestion_helpers';
+import { LensIcon } from '../../lens_icon';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -63,7 +63,7 @@ function VisualizationSummary(props: Props) {
   return (
     <>
       {description.icon && (
-        <EuiIcon size="xl" className="lnsChartSwitch__summaryIcon" type={description.icon} />
+        <LensIcon size="xl" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
       {description.label}
     </>
@@ -226,7 +226,7 @@ export function ChartSwitch(props: Props) {
             }
             betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
           >
-            <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} size="l" />
+            <LensIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} size="l" />
           </EuiKeyPadMenuItemButton>
         ))}
       </EuiKeyPadMenu>

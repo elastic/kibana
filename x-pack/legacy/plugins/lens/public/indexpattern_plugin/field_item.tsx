@@ -18,7 +18,6 @@ import {
   EuiButtonGroup,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiIconTip,
 } from '@elastic/eui';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import {
@@ -45,6 +44,7 @@ import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField } from './types';
 import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
+import { LensIconTip } from '../lens_icon';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -184,7 +184,7 @@ export function FieldItem(props: FieldItemProps) {
                 {wrappableHighlightableFieldName}
               </span>
 
-              <EuiIconTip
+              <LensIconTip
                 anchorClassName="lnsFieldItem__infoIcon"
                 content={i18n.translate('xpack.lens.indexPattern.fieldStatsButton', {
                   defaultMessage:

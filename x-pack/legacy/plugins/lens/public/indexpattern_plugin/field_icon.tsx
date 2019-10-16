@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { ICON_TYPES, palettes, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import { DataType } from '../types';
@@ -31,7 +31,7 @@ export function getColorForDataType(type: string) {
 
 export type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
-export function FieldIcon({ type }: { type: DataType }) {
+export const FieldIcon = memo(function RawFieldIcon({ type }: { type: DataType }) {
   const iconType = getIconForDataType(type);
 
   const classes = classNames(
@@ -40,4 +40,4 @@ export function FieldIcon({ type }: { type: DataType }) {
   );
 
   return <EuiIcon type={iconType} color={getColorForDataType(type)} className={classes} />;
-}
+});

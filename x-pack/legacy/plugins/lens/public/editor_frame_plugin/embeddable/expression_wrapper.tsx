@@ -6,14 +6,14 @@
 
 import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
-
 import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
+import { LensIcon } from '../../lens_icon';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ExpressionRenderer;
@@ -43,7 +43,7 @@ export function ExpressionWrapper({
       {expression === '' || expressionError ? (
         <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
           <EuiFlexItem>
-            <EuiIcon type="alert" color="danger" />
+            <LensIcon type="alert" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s">

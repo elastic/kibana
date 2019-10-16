@@ -5,12 +5,13 @@
  */
 
 import React from 'react';
-import { EuiHorizontalRule, EuiSpacer, EuiLink, EuiText, EuiIcon, EuiButton } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiLink, EuiText, EuiButton } from '@elastic/eui';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Chrome } from 'ui/chrome';
+import { LensIcon } from './lens_icon';
 
 const docsPage = undefined;
 
@@ -46,7 +47,7 @@ function HelpMenu() {
 
       <EuiSpacer />
       <EuiText size="s">
-        <EuiIcon type="logoGithub" color="primary" /> &nbsp;
+        <LensIcon type="logoGithub" color="primary" /> &nbsp;
         <EuiLink href="https://github.com/elastic/kibana/issues/new" target="_blank">
           {i18n.translate('xpack.lens.helpMenu.feedbackLinkText', {
             defaultMessage: 'Provide feedback for the Lens application',

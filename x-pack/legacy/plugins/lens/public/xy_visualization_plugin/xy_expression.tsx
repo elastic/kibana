@@ -20,7 +20,7 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
+import { EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
@@ -30,6 +30,7 @@ import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
+import { LensIcon } from '../lens_icon';
 
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
@@ -143,7 +144,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return (
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
-        <EuiIcon type={icon} color="subdued" size="l" />
+        <LensIcon type={icon} color="subdued" size="l" />
         <EuiSpacer size="s" />
         <p>
           <FormattedMessage

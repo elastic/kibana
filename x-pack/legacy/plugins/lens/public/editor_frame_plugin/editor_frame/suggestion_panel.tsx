@@ -8,10 +8,8 @@ import _ from 'lodash';
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiIcon,
   EuiTitle,
   EuiPanel,
-  EuiIconTip,
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +25,7 @@ import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
+import { LensIconTip, LensIcon } from '../../lens_icon';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -70,7 +69,7 @@ const PreviewRenderer = ({
 
   return expressionError ? (
     <div className="lnsSuggestionPanel__suggestionIcon">
-      <EuiIconTip
+      <LensIconTip
         size="xl"
         color="danger"
         type="alert"
@@ -134,7 +133,7 @@ const SuggestionPreview = ({
           />
         ) : (
           <span className="lnsSuggestionPanel__suggestionIcon">
-            <EuiIcon size="xxl" type={preview.icon} />
+            <LensIcon size="xxl" type={preview.icon} />
           </span>
         )}
         {showTitleAsLabel && (
