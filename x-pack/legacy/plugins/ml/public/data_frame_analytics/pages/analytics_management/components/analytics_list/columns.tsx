@@ -27,7 +27,7 @@ import {
   DataFrameAnalyticsListRow,
   DataFrameAnalyticsStats,
 } from './common';
-import { getActions } from './actions';
+import { getActions, AnalyticsViewAction } from './actions';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -117,7 +117,7 @@ export const getColumns = (
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false
 ) => {
-  const actions = getActions();
+  const actions = isManagementTable === true ? [AnalyticsViewAction] : getActions();
 
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -221,23 +221,23 @@ export const getColumns = (
     },
     */
     progressColumn,
+    {
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
+        defaultMessage: 'Actions',
+      }),
+      actions,
+      width: isManagementTable === true ? '100px' : '200px',
+    },
   ];
 
   if (isManagementTable === true) {
-    columns.push({
+    // insert before last column
+    columns.splice(columns.length - 1, 0, {
       name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
         defaultMessage: 'Spaces',
       }),
       render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
       width: '75px',
-    });
-  } else {
-    columns.push({
-      name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
-        defaultMessage: 'Actions',
-      }),
-      actions,
-      width: '200px',
     });
   }
 
