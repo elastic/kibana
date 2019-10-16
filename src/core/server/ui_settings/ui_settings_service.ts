@@ -65,7 +65,7 @@ export interface UiSettingsParams {
 }
 
 /** @internal */
-export interface UiSettingsServiceSetup {
+export interface InternalUiSettingsServiceSetup {
   /**
    * Sets the parameters with default values for the uiSettings.
    * @param values
@@ -79,7 +79,7 @@ export interface UiSettingsServiceSetup {
 }
 
 /** @internal */
-export class UiSettingsService implements CoreService<UiSettingsServiceSetup> {
+export class UiSettingsService implements CoreService<InternalUiSettingsServiceSetup> {
   private readonly log: Logger;
   private readonly config$: Observable<UiSettingsConfigType>;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
@@ -89,7 +89,7 @@ export class UiSettingsService implements CoreService<UiSettingsServiceSetup> {
     this.config$ = coreContext.configService.atPath<UiSettingsConfigType>('uiSettings');
   }
 
-  public async setup(deps: SetupDeps): Promise<UiSettingsServiceSetup> {
+  public async setup(deps: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
     this.log.debug('Setting up ui settings service');
     const overrides = await this.getOverrides(deps);
     const { version, buildNum } = this.coreContext.env.packageInfo;

@@ -48,7 +48,7 @@ import { InternalHttpServiceSetup, HttpServiceSetup } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
-import { UiSettingsServiceSetup } from './ui_settings';
+import { InternalUiSettingsServiceSetup } from './ui_settings';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
@@ -166,7 +166,7 @@ export {
 export {
   IUiSettingsClient,
   UiSettingsParams,
-  UiSettingsServiceSetup,
+  InternalUiSettingsServiceSetup,
   UiSettingsType,
 } from './ui_settings';
 
@@ -225,7 +225,7 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  uiSettings: UiSettingsServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
 }
 
 /**

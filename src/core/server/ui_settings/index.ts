@@ -27,6 +27,6 @@ export { config } from './ui_settings_config';
 export {
   UiSettingsParams,
   UiSettingsService,
-  UiSettingsServiceSetup,
+  InternalUiSettingsServiceSetup,
   UiSettingsType,
 } from './ui_settings_service';

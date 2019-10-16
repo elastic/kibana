@@ -18,7 +18,7 @@
  */
 
 import { IUiSettingsClient } from './ui_settings_client';
-import { UiSettingsServiceSetup } from './ui_settings_service';
+import { InternalUiSettingsServiceSetup } from './ui_settings_service';
 
 const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = {
@@ -37,7 +37,7 @@ const createClientMock = () => {
 };
 
 const createSetupMock = () => {
-  const mocked: jest.Mocked<UiSettingsServiceSetup> = {
+  const mocked: jest.Mocked<InternalUiSettingsServiceSetup> = {
     setDefaults: jest.fn(),
     asScopedToClient: jest.fn(),
   };
