@@ -104,7 +104,6 @@ export const AnomalyDetectionPanel: FC = () => {
       Object.keys(scores).forEach(groupId => {
         const resultsIndex = scores[groupId] && scores[groupId].index;
         const { maxScore } = resultsIndex !== undefined && results[resultsIndex];
-        scores[groupId].maxScore = maxScore || undefined;
         tempGroups[groupId].max_anomaly_score = maxScore || undefined;
       });
 
