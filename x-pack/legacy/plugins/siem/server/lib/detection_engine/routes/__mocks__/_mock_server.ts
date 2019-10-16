@@ -6,8 +6,8 @@
 
 import Hapi from 'hapi';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { alertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
-import { actionsClientMock } from '../../../../../actions/server/actions_client.mock';
+import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
+import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
 
 const defaultConfig = {
   'kibana.index': '.kibana',

@@ -9,38 +9,22 @@ import {
   createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
   createMockServerWithoutActionOrAlertClientDecoration,
-} from './_mock_server';
+} from './__mocks__/_mock_server';
+
 import { deleteSignalsRoute } from './delete_signals_route';
 import { ServerInjectOptions } from 'hapi';
-
-const getDeleteRequest = (): ServerInjectOptions => ({
-  method: 'DELETE',
-  url: '/api/siem/signals/rule-1',
-});
-
-const getFindResult = () => ({
-  page: 1,
-  perPage: 1,
-  total: 1,
-  data: [{}],
-});
-
-const getResult = () => ({
-  id: 'result-1',
-  enabled: false,
-  alertTypeId: '',
-  interval: undefined,
-  actions: undefined,
-  alertTypeParams: undefined,
-});
+import { getFindResult, getResult, getDeleteRequest } from './__mocks__/request_responses';
 
 describe('delete_signals', () => {
   let { server, alertsClient } = createMockServer();
 
   beforeEach(() => {
-    jest.resetAllMocks();
     ({ server, alertsClient } = createMockServer());
     deleteSignalsRoute(server);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('status codes with actionClient and alertClient', () => {

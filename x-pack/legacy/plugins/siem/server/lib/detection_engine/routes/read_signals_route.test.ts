@@ -10,46 +10,42 @@ import {
   createMockServerWithoutAlertClientDecoration,
   createMockServerWithoutActionOrAlertClientDecoration,
 } from './__mocks__/_mock_server';
-import { createSignalsRoute } from './create_signals_route';
-import { ServerInjectOptions } from 'hapi';
-import {
-  getFindResult,
-  getResult,
-  createActionResult,
-  createAlertResult,
-  getCreateRequest,
-} from './__mocks__/request_responses';
 
-describe('create_signals', () => {
-  let { server, alertsClient, actionsClient } = createMockServer();
+import { readSignalsRoute } from './read_signals_route';
+import { ServerInjectOptions } from 'hapi';
+import { getFindResult, getResult, getReadRequest } from './__mocks__/request_responses';
+
+describe('read_signals', () => {
+  let { server, alertsClient } = createMockServer();
 
   beforeEach(() => {
+    ({ server, alertsClient } = createMockServer());
+    readSignalsRoute(server);
+  });
+
+  afterEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient } = createMockServer());
-    createSignalsRoute(server);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     it('returns 200 when deleting a single signal with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(createAlertResult());
-      const { statusCode } = await server.inject(getCreateRequest());
+      const { statusCode } = await server.inject(getReadRequest());
       expect(statusCode).toBe(200);
     });
 
     it('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      createSignalsRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getCreateRequest());
+      readSignalsRoute(serverWithoutActionClient);
+      const { statusCode } = await serverWithoutActionClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
 
     it('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      createSignalsRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getCreateRequest());
+      readSignalsRoute(serverWithoutAlertClient);
+      const { statusCode } = await serverWithoutAlertClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
 
@@ -57,34 +53,23 @@ describe('create_signals', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      createSignalsRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getCreateRequest());
+      readSignalsRoute(serverWithoutActionOrAlertClient);
+      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
   });
 
   describe('validation', () => {
-    it('returns 400 if id is not given', async () => {
+    it('returns 404 if given a non-existent id', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
+      alertsClient.delete.mockResolvedValue({});
       const request: ServerInjectOptions = {
-        method: 'POST',
-        url: '/api/siem/signals',
-        payload: {
-          // missing id should throw a 400
-          description: 'Detecting root and admin users',
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          name: 'Detect Root/Admin Users',
-          severity: 1,
-          type: 'kql',
-          from: 'now-6m',
-          to: 'now',
-          kql: 'user.name: root or user.name: admin',
-        },
+        method: 'GET',
+        url: '/api/siem/signals/',
       };
       const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+      expect(statusCode).toBe(404);
     });
   });
 });
