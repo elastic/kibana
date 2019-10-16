@@ -11,6 +11,8 @@ Unenroll an agent
 - `ids` (Optional, string) An list of agent id to unenroll.
 - `kuery` (Optional, string) a kibana query to search for agent to unenroll.
 
+> Note: one and only of this keys should be present:
+
 ## Response code
 
 `200` Indicates a successful call.

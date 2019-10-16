@@ -37,10 +37,7 @@ export const createPOSTAgentsUnenrollRoute = (libs: FleetServerLib) => ({
       throw Boom.badRequest('You need to specify ids or kuery');
     }
 
-    let toUnenrollIds: string[] = [];
-    if (ids) {
-      toUnenrollIds = ids;
-    }
+    let toUnenrollIds: string[] = ids || [];
 
     if (kuery) {
       let hasMore = true;
