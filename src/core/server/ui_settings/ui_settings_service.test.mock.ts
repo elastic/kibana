@@ -16,21 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Legacy } from 'kibana';
-import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/server';
 
-export interface UiSettingsServiceFactoryOptions {
-  savedObjectsClient: SavedObjectsClientContract;
-}
-/**
- *  Create an instance of UiSettingsClient that will use the
- *  passed `savedObjectsClient` to communicate with elasticsearch
- *
- *  @return {IUiSettingsClient}
- */
-export function uiSettingsServiceFactory(
-  server: Legacy.Server,
-  options: UiSettingsServiceFactoryOptions
-): IUiSettingsClient {
-  return server.newPlatform.__internals.uiSettings.asScopedToClient(options.savedObjectsClient);
-}
+export const MockUiSettingsClientConstructor = jest.fn();
+
+jest.doMock('./ui_settings_client', () => ({
+  UiSettingsClient: MockUiSettingsClientConstructor,
+}));

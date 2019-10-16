@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { TaskManager } from './task_manager';
+import { TaskManager, claimAvailableTasks } from './task_manager';
 import { SavedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema } from 'src/core/server';
 import { mockLogger } from './test_utils';
@@ -66,6 +66,7 @@ describe('TaskManager', () => {
     const promise = client.schedule(task);
     client.start();
     await promise;
+
     expect(savedObjectsClient.create).toHaveBeenCalled();
   });
 
@@ -163,5 +164,29 @@ describe('TaskManager', () => {
     expect(() => client.addMiddleware(middleware)).toThrow(
       /Cannot add middleware after the task manager is initialized/i
     );
+  });
+
+  describe('claimAvailableTasks', () => {
+    test('should claim Available Tasks when there are available workers', () => {
+      const logger = mockLogger();
+      const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
+
+      const availableWorkers = 1;
+
+      claimAvailableTasks(claim, availableWorkers, logger);
+
+      expect(claim).toHaveBeenCalledTimes(1);
+    });
+
+    test('shouldnt claim Available Tasks when there are no available workers', () => {
+      const logger = mockLogger();
+      const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
+
+      const availableWorkers = 0;
+
+      claimAvailableTasks(claim, availableWorkers, logger);
+
+      expect(claim).not.toHaveBeenCalled();
+    });
   });
 });

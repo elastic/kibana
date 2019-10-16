@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import { SavedObjectsClient } from '../../../../src/core/server';
+import { SavedObjectsClient } from '../saved_objects';
 
 export const savedObjectsClientErrors = SavedObjectsClient.errors;
 

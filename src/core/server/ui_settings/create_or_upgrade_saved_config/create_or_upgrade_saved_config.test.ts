@@ -18,14 +18,13 @@
  */
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
 import Chance from 'chance';
 
+import { loggingServiceMock } from '../../logging/logging_service.mock';
 import * as getUpgradeableConfigNS from './get_upgradeable_config';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 const chance = new Chance();
-
 describe('uiSettings/createOrUpgradeSavedConfig', function() {
   const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
@@ -35,7 +34,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
   const buildNum = chance.integer({ min: 1000, max: 5000 });
 
   function setup() {
-    const logWithMetadata = sinon.stub();
+    const logger = loggingServiceMock.create();
     const getUpgradeableConfig = sandbox.stub(getUpgradeableConfigNS, 'getUpgradeableConfig');
     const savedObjectsClient = {
       create: sinon.stub().callsFake(async (type, attributes, options = {}) => ({
@@ -50,7 +49,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         savedObjectsClient,
         version,
         buildNum,
-        logWithMetadata,
+        log: logger.get(),
         ...options,
       });
 
@@ -62,7 +61,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
 
     return {
       buildNum,
-      logWithMetadata,
+      logger,
       run,
       version,
       savedObjectsClient,
@@ -126,7 +125,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
     });
 
     it('should log a message for upgrades', async () => {
-      const { getUpgradeableConfig, logWithMetadata, run } = setup();
+      const { getUpgradeableConfig, logger, run } = setup();
 
       getUpgradeableConfig.resolves({
         id: prevVersion,
@@ -136,20 +135,21 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
       });
 
       await run();
-      sinon.assert.calledOnce(logWithMetadata);
-      sinon.assert.calledWithExactly(
-        logWithMetadata,
-        ['plugin', 'elasticsearch'],
-        sinon.match('Upgrade'),
-        sinon.match({
-          prevVersion,
-          newVersion: version,
-        })
-      );
+      expect(loggingServiceMock.collect(logger).debug).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Upgrade config from 4.0.0 to 4.0.1",
+            Object {
+              "newVersion": "4.0.1",
+              "prevVersion": "4.0.0",
+            },
+          ],
+        ]
+      `);
     });
 
     it('does not log when upgrade fails', async () => {
-      const { getUpgradeableConfig, logWithMetadata, run, savedObjectsClient } = setup();
+      const { getUpgradeableConfig, logger, run, savedObjectsClient } = setup();
 
       getUpgradeableConfig.resolves({
         id: prevVersion,
@@ -166,10 +166,10 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         await run();
         throw new Error('Expected run() to throw an error');
       } catch (error) {
-        expect(error.message).to.be('foo');
+        expect(error.message).toBe('foo');
       }
 
-      sinon.assert.notCalled(logWithMetadata);
+      expect(loggingServiceMock.collect(logger).debug).toHaveLength(0);
     });
   });
 
@@ -198,7 +198,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
       });
 
       const result = await run({ onWriteError: () => 123 });
-      expect(result).to.be(123);
+      expect(result).toBe(123);
     });
 
     it('rejects with the error from onWriteError() if it rejects', async () => {
@@ -214,7 +214,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         });
         throw new Error('expected run() to reject');
       } catch (error) {
-        expect(error.message).to.be('foo bar');
+        expect(error.message).toBe('foo bar');
       }
     });
 
@@ -233,7 +233,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         });
         throw new Error('expected run() to reject');
       } catch (error) {
-        expect(error.message).to.be('foo bar');
+        expect(error.message).toBe('foo bar');
       }
     });
 
@@ -250,7 +250,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         });
         throw new Error('expected run() to reject');
       } catch (error) {
-        expect(error.message).to.be('foo');
+        expect(error.message).toBe('foo');
       }
     });
   });
