@@ -17,5 +17,16 @@
  * under the License.
  */
 
-export { getTelemetryOptInService, TelemetryOptInService } from './telemetry_opt_in';
-export { isUnauthenticated } from './path';
+import { Legacy } from 'kibana';
+import { getDeprecatedXpackConfig } from './handle_deprecated_xpack_configs';
+
+export function getTelemetryUrl(config: Legacy.KibanaConfig) {
+  const CONFIG_URL = 'telemetry.url';
+
+  const deprecatedXpackConfig = getDeprecatedXpackConfig(config, CONFIG_URL);
+  if (deprecatedXpackConfig !== null) {
+    return deprecatedXpackConfig;
+  }
+
+  return config.get(CONFIG_URL);
+}

@@ -18,24 +18,20 @@
  */
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { swallowError } from '../util';
 
-export function getXpackConfigWithDeprecated(config: KibanaConfig, configPath: string) {
-  try {
-    const deprecatedXpackmainConfig = config.get(`xpack.xpack_main.${configPath}`);
-    if (typeof deprecatedXpackmainConfig !== 'undefined') {
-      return deprecatedXpackmainConfig;
-    }
-  } catch (err) {
-    // swallow error
-  }
-  try {
-    const deprecatedXpackConfig = config.get(`xpack.${configPath}`);
-    if (typeof deprecatedXpackConfig !== 'undefined') {
-      return deprecatedXpackConfig;
-    }
-  } catch (err) {
-    // swallow error
+export function getDeprecatedXpackConfig(config: KibanaConfig, configPath: string) {
+  const deprecatedXpackmainConfig = swallowError(() =>
+    config.get(`xpack.xpack_main.${configPath}`)
+  );
+  if (typeof deprecatedXpackmainConfig !== 'undefined') {
+    return deprecatedXpackmainConfig;
   }
 
-  return config.get(configPath);
+  const deprecatedXpackConfig = swallowError(() => config.get(`xpack.${configPath}`));
+  if (typeof deprecatedXpackConfig !== 'undefined') {
+    return deprecatedXpackConfig;
+  }
+
+  return null;
 }

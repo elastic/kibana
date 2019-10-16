@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export { getTelemetryOptInService, TelemetryOptInService } from './telemetry_opt_in';
-export { isUnauthenticated } from './path';
+export function swallowError(fn: any) {
+  try {
+    return fn();
+  } catch (err) {
+    // swallow error;
+  }
+}

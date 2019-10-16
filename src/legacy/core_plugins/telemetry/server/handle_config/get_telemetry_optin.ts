@@ -17,5 +17,9 @@
  * under the License.
  */
 
-export { getTelemetryOptInService, TelemetryOptInService } from './telemetry_opt_in';
-export { isUnauthenticated } from './path';
+import { Legacy } from 'kibana';
+import { getOldOptInSetting } from './handle_old_monitoring_configs';
+
+export function getTelemetryOptIn(config: Legacy.KibanaConfig) {
+  return getOldOptInSetting(config);
+}

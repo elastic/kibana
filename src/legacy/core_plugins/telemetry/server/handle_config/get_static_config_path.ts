@@ -17,23 +17,16 @@
  * under the License.
  */
 
-import uiChrome from 'ui/chrome';
-import moment from 'moment';
+import { Legacy } from 'kibana';
+import { getDeprecatedXpackConfig } from './handle_deprecated_xpack_configs';
 
-/**
- * Fetch Telemetry data by calling the Kibana API.
- *
- * @param {Object} $http The HTTP handler
- * @param {String} basePath The base URI
- * @param {Function} _moment moment.js, but injectable for tests
- * @return {Promise} An array of cluster Telemetry objects.
- */
-export function fetchTelemetry($http, { basePath = uiChrome.getBasePath(), _moment = moment, unencrypted = false } = { }) {
-  return $http.post(`${basePath}/api/telemetry/v2/clusters/_stats`, {
-    unencrypted,
-    timeRange: {
-      min: _moment().subtract(20, 'minutes').toISOString(),
-      max: _moment().toISOString()
-    }
-  });
+export function getStaticTelemetryConfigPath(config: Legacy.KibanaConfig): string {
+  const CONFIG_STATIC_PATH = 'telemetry.config';
+
+  const deprecatedXpackConfig = getDeprecatedXpackConfig(config, CONFIG_STATIC_PATH) as string;
+  if (deprecatedXpackConfig !== null) {
+    return deprecatedXpackConfig;
+  }
+
+  return config.get(CONFIG_STATIC_PATH);
 }

@@ -22,7 +22,7 @@ import {
   EuiPageContentBody,
 } from '@elastic/eui';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
-import { optInToTelemetry } from '../../lib/telemetry';
+import { getTelemetryOptInService } from '../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class UploadLicense extends React.PureComponent {
@@ -34,7 +34,7 @@ export class UploadLicense extends React.PureComponent {
     const fr = new FileReader();
     fr.onload = ({ target: { result } }) => {
       if (this.telemetryOptIn.isOptingInToTelemetry()) {
-        optInToTelemetry(true);
+        getTelemetryOptInService().setOptIn(true);
       }
       this.props.uploadLicense(result, this.props.currentLicenseType, acknowledge);
     };

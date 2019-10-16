@@ -21,19 +21,18 @@ import {
   REPORT_INTERVAL_MS,
   LOCALSTORAGE_KEY,
 } from '../../common/constants';
+import { getTelemetryOptInService } from '../services';
 
 export class Telemetry {
-
   /**
    * @param {Object} $injector - AngularJS injector service
-   * @param {Function} fetchTelemetry Method used to fetch telemetry data (expects an array response)
    */
-  constructor($injector, fetchTelemetry) {
+  constructor($injector, telemetryOptInService) {
     this._storage = $injector.get('localStorage');
     this._$http = $injector.get('$http');
     this._telemetryUrl = $injector.get('telemetryUrl');
     this._telemetryOptedIn = $injector.get('telemetryOptedIn');
-    this._fetchTelemetry = fetchTelemetry;
+    this._fetchTelemetry = telemetryOptInService.fetchTelemetry;
     this._sending = false;
 
     // try to load the local storage data
@@ -78,7 +77,7 @@ export class Telemetry {
 
     return this._fetchTelemetry()
       .then(response => {
-        const clusters = [].concat(response.data);
+        const clusters = [].concat(response);
         return Promise.all(clusters.map(cluster => {
           const req = {
             method: 'POST',

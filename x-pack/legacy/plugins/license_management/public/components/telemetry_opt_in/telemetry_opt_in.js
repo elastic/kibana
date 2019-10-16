@@ -13,7 +13,7 @@ import {
   EuiTitle,
   EuiPopover
 } from '@elastic/eui';
-import { shouldShowTelemetryOptIn, getTelemetryFetcher, PRIVACY_STATEMENT_URL, OptInExampleFlyout } from '../../lib/telemetry';
+import { shouldShowTelemetryOptIn, getTelemetryOptInService, PRIVACY_STATEMENT_URL, OptInExampleFlyout } from '../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class TelemetryOptIn extends React.Component {
@@ -52,7 +52,7 @@ export class TelemetryOptIn extends React.Component {
       example = (
         <OptInExampleFlyout
           onClose={() => this.setState({ showExample: false })}
-          fetchTelemetry={getTelemetryFetcher}
+          fetchTelemetry={getTelemetryOptInService().fetchExample}
         />
       );
     }

@@ -25,8 +25,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
-import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_deprecated';
-import { telemetryPlugin } from './server';
+import { telemetryPlugin, handleConfig } from './server';
 
 import {
   createLocalizationUsageCollector,
@@ -48,6 +47,7 @@ const telemetry = (kibana: any) => {
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
         banner: Joi.boolean().default(true),
+        optInNotifications: Joi.boolean().default(true),
         url: Joi.when('$dev', {
           is: true,
           then: Joi.string().default(
@@ -79,10 +79,11 @@ const telemetry = (kibana: any) => {
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {
-          telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
-          telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
-          telemetryBanner: getXpackConfigWithDeprecated(config, 'telemetry.banner'),
-          telemetryOptedIn: null,
+          telemetryEnabled: handleConfig.getTelemetryEnabled(config),
+          telemetryUrl: handleConfig.getTelemetryUrl(config),
+          telemetryOptInNotifications: config.get('telemetry.optInNotifications'),
+          telemetryBanner: handleConfig.getShowBanner(config),
+          telemetryOptedIn: handleConfig.getTelemetryOptIn(config),
         };
       },
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],

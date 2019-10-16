@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export { getTelemetryOptInService, TelemetryOptInService } from './telemetry_opt_in';
-export { isUnauthenticated } from './path';
+import { Legacy } from 'kibana';
+import { getOldShowBannerSettings } from './handle_old_monitoring_configs';
+
+export async function getShowBanner(config: Legacy.KibanaConfig) {
+  const optinNotificationsDisabled = config.get('telemetry.telemetryOptInNotifications');
+  const userSetOptIn = config.get('telemetryOptedIn') !== null;
+
+  return !optinNotificationsDisabled && !userSetOptIn && (await getOldShowBannerSettings(config));
+}

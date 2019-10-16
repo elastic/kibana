@@ -225,10 +225,10 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
-        shouldShowTelemetryOptIn={this.props.shouldShowTelemetryOptIn}
-        fetchTelemetry={this.props.fetchTelemetry}
-        setOptIn={this.props.setOptIn}
-        getTelemetryBannerId={this.props.getTelemetryBannerId}
+        shouldShowTelemetryOptIn={this.props.telemetryOptInService.setShowWelcomeCard()}
+        fetchTelemetry={this.props.telemetryOptInService.fetchExample}
+        setOptIn={this.props.telemetryOptInService.setOptIn}
+        getTelemetryBannerId={this.props.telemetryOptInService.getTelemetryBannerId}
       />
     );
   }
@@ -250,11 +250,7 @@ export class Home extends Component {
 }
 
 Home.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
-  fetchTelemetry: PropTypes.func.isRequired,
-  getTelemetryBannerId: PropTypes.func.isRequired,
-  setOptIn: PropTypes.func.isRequired,
-  shouldShowTelemetryOptIn: PropTypes.bool,
+  telemetryOptInService: PropTypes.object.isRequired,
   directories: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

@@ -20,18 +20,18 @@ import React from 'react';
 import routes from 'ui/routes';
 
 import { registerSettingsComponent, PAGE_FOOTER_COMPONENT } from 'ui/management';
-import { TelemetryOptInProvider } from '../../services';
+import { getTelemetryOptInService } from '../../services';
 import { TelemetryForm } from '../../components';
 
 routes.defaults(/\/management/, {
   resolve: {
-    telemetryManagementSection: function (Private) {
-      const telemetryOptInProvider = Private(TelemetryOptInProvider);
+    telemetryManagementSection: function () {
+      const telemetryOptInService = getTelemetryOptInService();
 
       const Component = (props) => (
         <TelemetryForm
           showAppliesSettingMessage={true}
-          telemetryOptInProvider={telemetryOptInProvider}
+          telemetryOptInService={telemetryOptInService}
           {...props}
         />
       );
