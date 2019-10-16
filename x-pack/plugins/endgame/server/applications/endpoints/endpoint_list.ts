@@ -20,7 +20,7 @@ export function setupEndpointListApi(router: IRouter, coreSetup: CoreSetup): voi
       // DEVELOPMENT MODE (is removed during webpack build)
       if (process.env.NODE_ENV !== 'production') {
         // TODO: is this valid in Kibana runtime? Search of code base seems to suggest its OK
-        responseBody = (await import('./endpoint_dev_stubs')).endpoints;
+        responseBody = (await import('./endpoint_dev_stubs2')).endpoints;
       } else {
         return response.customError({
           body: 'This API is not implemented yet.',

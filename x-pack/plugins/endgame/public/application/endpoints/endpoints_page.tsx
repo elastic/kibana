@@ -17,27 +17,36 @@ const EndpointName = withRouter(function({ history, path, name }) {
 
 const columns = [
   {
-    field: 'name',
+    field: '_source',
     name: 'Name',
-    render: (name: string, item: { id: string }) => {
-      return <EndpointName name={name} path={`/endpoints/${item.id}`} />;
+    render: source => {
+      return <span>{source.host.name}</span>;
     },
   },
   {
-    field: 'ip_address',
+    field: '_source',
     name: 'IP Address',
+    render: source => {
+      return <span>{source.host.ip}</span>;
+    },
   },
   {
-    field: 'display_operating_system',
+    field: '_source',
     name: 'Operating System',
+    render: source => {
+      return <span>{source.host.os.name + ' ' + source.host.os.version}</span>;
+    },
   },
   {
     field: 'alert_count',
     name: 'Alerts',
   },
   {
-    field: 'hostname',
+    field: '_source',
     name: 'Host Name',
+    render: source => {
+      return <span>{source.host.hostname}</span>;
+    },
   },
 ];
 
