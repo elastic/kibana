@@ -23,7 +23,7 @@ interface Props {
   viewResults: () => void;
   setup: () => void;
   cleanupAndSetup: () => void;
-  indexPattern: string;
+  indices: string[];
   setupStatus: SetupStatus;
 }
 
@@ -31,7 +31,7 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
   viewResults,
   setup,
   cleanupAndSetup,
-  indexPattern,
+  indices,
   setupStatus,
 }: Props) => {
   return (
@@ -53,9 +53,9 @@ export const SetupProcess: React.FunctionComponent<Props> = ({
           <FormattedMessage
             id="xpack.infra.analysisSetup.steps.setupProcess.failureText"
             defaultMessage="Something went wrong creating the necessary ML jobs.
-            Please ensure your configured logs indices ({indexPattern}) exist."
+            Please ensure your configured log indices ({indexPattern}) exist."
             values={{
-              indexPattern,
+              indexPattern: indices.join(','),
             }}
           />
           <EuiSpacer />

@@ -22,19 +22,23 @@ import { SetupStatus } from '../../../../common/log_analysis';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { AnalysisSetupSteps } from './setup/steps';
 
-type SetupHandler = (startTime?: number | undefined, endTime?: number | undefined) => void;
+type SetupHandler = (
+  indices: string[],
+  startTime: number | undefined,
+  endTime: number | undefined
+) => void;
 
 interface AnalysisSetupContentProps {
+  availableIndices: string[];
   cleanupAndSetup: SetupHandler;
-  indexPattern: string;
   setup: SetupHandler;
   setupStatus: SetupStatus;
   viewResults: () => void;
 }
 
 export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
+  availableIndices,
   cleanupAndSetup,
-  indexPattern,
   setup,
   setupStatus,
   viewResults,
@@ -71,10 +75,10 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
             </EuiText>
             <EuiSpacer />
             <AnalysisSetupSteps
+              availableIndices={availableIndices}
               setup={setup}
               cleanupAndSetup={cleanupAndSetup}
               viewResults={viewResults}
-              indexPattern={indexPattern}
               setupStatus={setupStatus}
             />
           </EuiPageContentBody>
@@ -86,7 +90,7 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
 
 // !important due to https://github.com/elastic/eui/issues/2232
 const AnalysisPageContent = euiStyled(EuiPageContent)`
-  max-width: 518px !important;
+  max-width: 768px !important;
 `;
 
 const AnalysisSetupPage = euiStyled(EuiPage)`

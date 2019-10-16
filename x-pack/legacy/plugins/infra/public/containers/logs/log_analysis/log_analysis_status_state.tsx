@@ -348,10 +348,18 @@ const isJobConfigurationConsistent = (
       return (
         jobConfiguration &&
         jobConfiguration.bucketSpan === sourceConfiguration.bucketSpan &&
-        jobConfiguration.indexPattern === sourceConfiguration.indexPattern &&
+        jobConfiguration.indexPattern &&
+        isIndexPatternSubset(jobConfiguration.indexPattern, sourceConfiguration.indexPattern) &&
         jobConfiguration.timestampField === sourceConfiguration.timestampField
       );
     });
+
+const isIndexPatternSubset = (indexPatternSubset: string, indexPatternSuperset: string) => {
+  const subsetSubPatterns = indexPatternSubset.split(',');
+  const supersetSubPatterns = new Set(indexPatternSuperset.split(','));
+
+  return subsetSubPatterns.every(subPattern => supersetSubPatterns.has(subPattern));
+};
 
 export const useStatusState = (sourceConfiguration: JobSourceConfiguration) => {
   return useReducer(statusReducer, sourceConfiguration, createInitialState);

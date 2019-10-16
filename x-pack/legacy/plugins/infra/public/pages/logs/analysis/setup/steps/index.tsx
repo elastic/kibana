@@ -13,19 +13,23 @@ import { useAnalysisSetupState } from '../../../../../containers/logs/log_analys
 import { InitialConfiguration } from './initial_configuration';
 import { SetupProcess } from './setup_process';
 
-type SetupHandler = (startTime?: number | undefined, endTime?: number | undefined) => void;
+type SetupHandler = (
+  indices: string[],
+  startTime: number | undefined,
+  endTime: number | undefined
+) => void;
 
 interface AnalysisSetupStepsProps {
+  availableIndices: string[];
   cleanupAndSetup: SetupHandler;
-  indexPattern: string;
   setup: SetupHandler;
   setupStatus: SetupStatus;
   viewResults: () => void;
 }
 
 export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps> = ({
+  availableIndices,
   cleanupAndSetup: cleanupAndSetupModule,
-  indexPattern,
   setup: setupModule,
   setupStatus,
   viewResults,
@@ -37,15 +41,20 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
     setEndTime,
     startTime,
     endTime,
+    selectedIndexNames,
+    selectedIndices,
+    setSelectedIndices,
+    validationErrors,
   } = useAnalysisSetupState({
+    availableIndices,
     setupModule,
     cleanupAndSetupModule,
   });
 
   const steps = [
     {
-      title: i18n.translate('xpack.infra.analysisSetup.stepOneTitle', {
-        defaultMessage: 'Configuration (optional)',
+      title: i18n.translate('xpack.infra.analysisSetup.configurationStepTitle', {
+        defaultMessage: 'Configuration',
       }),
       children: (
         <InitialConfiguration
@@ -53,20 +62,23 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
           setEndTime={setEndTime}
           startTime={startTime}
           endTime={endTime}
+          selectedIndices={selectedIndices}
+          setSelectedIndices={setSelectedIndices}
+          validationErrors={validationErrors}
         />
       ),
     },
     {
-      title: i18n.translate('xpack.infra.analysisSetup.stepTwoTitle', {
+      title: i18n.translate('xpack.infra.analysisSetup.actionStepTitle', {
         defaultMessage: 'Create ML job',
       }),
       children: (
         <SetupProcess
+          indices={selectedIndexNames}
           setupStatus={setupStatus}
           viewResults={viewResults}
           setup={setup}
           cleanupAndSetup={cleanupAndSetup}
-          indexPattern={indexPattern}
         />
       ),
       status:
