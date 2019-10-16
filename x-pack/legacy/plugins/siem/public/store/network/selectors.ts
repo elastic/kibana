@@ -5,11 +5,23 @@
  */
 
 import { createSelector } from 'reselect';
+import { get } from 'lodash/fp';
 
+import {
+  FlowTargetSourceDest,
+  NetworkTopTablesFields,
+  Direction,
+  TlsFields,
+} from '../../graphql/types';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 import { State } from '../reducer';
-
-import { IpDetailsTableType, NetworkDetailsModel, NetworkPageModel, NetworkType } from './model';
-import { FlowTargetSourceDest } from '../../graphql/types';
+import {
+  IpDetailsTableType,
+  NetworkDetailsModel,
+  NetworkPageModel,
+  NetworkTableType,
+  NetworkType,
+} from './model';
 
 const selectNetworkPage = (state: State): NetworkPageModel => state.network.page;
 
@@ -21,69 +33,78 @@ export const dnsSelector = () =>
     selectNetworkPage,
     network => network.queries.dns
   );
-export enum NetworkTableType {
-  tls = 'tls',
-  dns = 'dns',
-  topCountriesDestination = 'topCountriesDestination',
-  topCountriesSource = 'topCountriesSource',
-  topNFlowDestination = 'topNFlowDestination',
-  topNFlowSource = 'topNFlowSource',
-}
 
-export const topNFlowSelector = (flowTarget: FlowTargetSourceDest, networkType: NetworkType) => {
-  if (networkType === NetworkType.page) {
-    return createSelector(
-      selectNetworkPage,
-      network =>
-        flowTarget === FlowTargetSourceDest.source
-          ? network.queries[NetworkTableType.topNFlowSource]
-          : network.queries[NetworkTableType.topNFlowDestination]
-    );
-  }
-  return createSelector(
-    selectNetworkDetails,
-    network =>
-      flowTarget === FlowTargetSourceDest.source
-        ? network.queries[IpDetailsTableType.topNFlowSource]
-        : network.queries[IpDetailsTableType.topNFlowDestination]
-  );
-};
-
-export const tlsSelector = (networkType: NetworkType) => {
-  if (networkType === NetworkType.page) {
-    return createSelector(
-      selectNetworkPage,
-      network => network.queries[NetworkTableType.tls]
-    );
-  }
-
-  return createSelector(
-    selectNetworkDetails,
-    network => network.queries[IpDetailsTableType.tls]
-  );
-};
-
-export const topCountriesSelector = (
-  flowTarget: FlowTargetSourceDest,
-  networkType: NetworkType
+const selectTopNFlowByType = (
+  state: State,
+  networkType: NetworkType,
+  flowTarget: FlowTargetSourceDest
 ) => {
-  if (networkType === NetworkType.page) {
-    return createSelector(
-      selectNetworkPage,
-      network =>
-        flowTarget === FlowTargetSourceDest.source
-          ? network.queries[NetworkTableType.topCountriesSource]
-          : network.queries[NetworkTableType.topCountriesDestination]
-    );
-  }
-  return createSelector(
-    selectNetworkDetails,
-    network =>
-      flowTarget === FlowTargetSourceDest.source
-        ? network.queries[IpDetailsTableType.topCountriesSource]
-        : network.queries[IpDetailsTableType.topCountriesDestination]
+  const ft = flowTarget === FlowTargetSourceDest.source ? 'topNFlowSource' : 'topNFlowDestination';
+  const nFlowType =
+    networkType === NetworkType.page ? NetworkTableType[ft] : IpDetailsTableType[ft];
+  return (
+    get([networkType, 'queries', nFlowType], state.network) || {
+      activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+      limit: DEFAULT_TABLE_LIMIT,
+      topNFlowSort: {
+        field: NetworkTopTablesFields.bytes_out,
+        direction: Direction.desc,
+      },
+    }
   );
 };
+
+export const topNFlowSelector = () =>
+  createSelector(
+    selectTopNFlowByType,
+    topNFlowQueries => topNFlowQueries
+  );
+const selectTlsByType = (state: State, networkType: NetworkType) => {
+  const tlsType = networkType === NetworkType.page ? NetworkTableType.tls : IpDetailsTableType.tls;
+  return (
+    get([networkType, 'queries', tlsType], state.network) || {
+      activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+      limit: DEFAULT_TABLE_LIMIT,
+      tlsSortField: {
+        field: TlsFields._id,
+        direction: Direction.desc,
+      },
+    }
+  );
+};
+
+export const tlsSelector = () =>
+  createSelector(
+    selectTlsByType,
+    tlsQueries => tlsQueries
+  );
+
+const selectTopCountriesByType = (
+  state: State,
+  networkType: NetworkType,
+  flowTarget: FlowTargetSourceDest
+) => {
+  const ft =
+    flowTarget === FlowTargetSourceDest.source ? 'topCountriesSource' : 'topCountriesDestination';
+  const nFlowType =
+    networkType === NetworkType.page ? NetworkTableType[ft] : IpDetailsTableType[ft];
+  return (
+    get([networkType, 'queries', nFlowType], state.network) || {
+      activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+      limit: DEFAULT_TABLE_LIMIT,
+      topCountriesSort: {
+        field: NetworkTopTablesFields.bytes_out,
+        direction: Direction.desc,
+      },
+    }
+  );
+};
+
+export const topCountriesSelector = () =>
+  createSelector(
+    selectTopCountriesByType,
+    topCountriesQueries => topCountriesQueries
+  );
 
 // IP Details Selectors
 export const ipDetailsFlowTargetSelector = () =>

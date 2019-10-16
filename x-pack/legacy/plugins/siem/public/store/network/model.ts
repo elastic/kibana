@@ -40,10 +40,10 @@ export type TopCountriesTableType =
 
 export enum IpDetailsTableType {
   tls = 'tls',
-  topCountriesDestination = 'topCountriesDestinationIp',
-  topCountriesSource = 'topCountriesSourceIp',
-  topNFlowDestination = 'topNFlowDestinationIp',
-  topNFlowSource = 'topNFlowSourceIp',
+  topCountriesDestination = 'topCountriesDestination',
+  topCountriesSource = 'topCountriesSource',
+  topNFlowDestination = 'topNFlowDestination',
+  topNFlowSource = 'topNFlowSource',
   users = 'users',
 }
 

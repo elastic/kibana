@@ -8,6 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -140,17 +141,18 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
   }
 }
 
-const mapStateToProps = (
-  state: State,
-  { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps
-) => {
-  const getNetworkTopCountriesSelector = networkSelectors.topCountriesSelector(flowTarget, type);
+const makeMapStateToProps = () => {
+  const getTopCountriesSelector = networkSelectors.topCountriesSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const { isInspected } = getQuery(state, id);
-  return {
-    ...getNetworkTopCountriesSelector(state),
-    isInspected,
+  return (state: State, { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getTopCountriesSelector(state, type, flowTarget),
+      isInspected,
+    };
   };
 };
 
-export const NetworkTopCountriesQuery = connect(mapStateToProps)(NetworkTopCountriesComponentQuery);
+export const NetworkTopCountriesQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps)
+)(NetworkTopCountriesComponentQuery);

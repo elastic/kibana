@@ -6,6 +6,7 @@
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -183,15 +184,20 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
 
 NetworkTopNFlowTableComponent.displayName = 'NetworkTopNFlowTableComponent';
 
-const mapStateToProps = (state: State, ownProps: OwnProps) =>
-  networkSelectors.topNFlowSelector(ownProps.flowTargeted, ownProps.type);
+const makeMapStateToProps = () => {
+  const getTopNFlowSelector = networkSelectors.topNFlowSelector();
+  return (state: State, { type, flowTargeted }: OwnProps) =>
+    getTopNFlowSelector(state, type, flowTargeted);
+};
 
-export const NetworkTopNFlowTable = connect(
-  mapStateToProps,
-  {
-    updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
-    updateTopNFlowSort: networkActions.updateTopNFlowSort,
-    updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,
-    updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
-  }
+export const NetworkTopNFlowTable = compose<React.ComponentClass<OwnProps>>(
+  connect(
+    makeMapStateToProps,
+    {
+      updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
+      updateTopNFlowSort: networkActions.updateTopNFlowSort,
+      updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,
+      updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
+    }
+  )
 )(NetworkTopNFlowTableComponent);

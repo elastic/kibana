@@ -7,6 +7,7 @@
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -30,7 +31,6 @@ interface OwnProps {
   flowTargeted: FlowTargetSourceDest;
   id: string;
   indexPattern: StaticIndexPattern;
-  ip?: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -192,15 +192,20 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
 
 NetworkTopCountriesTableComponent.displayName = 'NetworkTopCountriesTableComponent';
 
-const mapStateToProps = (state: State, ownProps: OwnProps) =>
-  networkSelectors.topCountriesSelector(ownProps.flowTargeted, ownProps.type);
+const makeMapStateToProps = () => {
+  const getTopCountriesSelector = networkSelectors.topCountriesSelector();
+  return (state: State, { type, flowTargeted }: OwnProps) =>
+    getTopCountriesSelector(state, type, flowTargeted);
+};
 
-export const NetworkTopCountriesTable = connect(
-  mapStateToProps,
-  {
-    updateTopCountriesLimit: networkActions.updateTopCountriesLimit,
-    updateTopCountriesSort: networkActions.updateTopCountriesSort,
-    updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,
-    updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
-  }
+export const NetworkTopCountriesTable = compose<React.ComponentClass<OwnProps>>(
+  connect(
+    makeMapStateToProps,
+    {
+      updateTopCountriesLimit: networkActions.updateTopCountriesLimit,
+      updateTopCountriesSort: networkActions.updateTopCountriesSort,
+      updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,
+      updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
+    }
+  )
 )(NetworkTopCountriesTableComponent);
