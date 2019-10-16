@@ -95,7 +95,7 @@ export const EntityControl = injectI18n(
       />);
 
       const selectMessage = (<FormattedMessage
-        id="xpack.ml.timeSeriesExplorer.selectMetricMessage"
+        id="xpack.ml.timeSeriesExplorer.selectFieldMessage"
         defaultMessage="Select {fieldName}"
         values={{ fieldName: entity.fieldName }}
       />);
