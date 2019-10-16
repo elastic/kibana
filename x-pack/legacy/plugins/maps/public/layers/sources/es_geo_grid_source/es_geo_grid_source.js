@@ -186,7 +186,6 @@ export class ESGeoGridSource extends AbstractESSource {
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this._getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
-    console.log('precision', searchFilters.geogridPrecision);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
     const esResponse = await this._runEsQuery(
@@ -202,8 +201,6 @@ export class ESGeoGridSource extends AbstractESSource {
       table: tabifiedResp,
       renderAs: this._descriptor.requestType,
     });
-
-    console.log('grid feature collection', featureCollection);
 
     return {
       data: featureCollection,
