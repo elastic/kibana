@@ -60,7 +60,6 @@ const services = {
 };
 
 const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
-  isSecurityEnabled: true,
   getServices: jest.fn().mockReturnValue(services),
   executeAction: jest.fn(),
   encryptedSavedObjectsPlugin,
@@ -315,10 +314,7 @@ test('uses API key when provided', async () => {
 
 test(`doesn't use API key when not provided`, async () => {
   const factory = new TaskRunnerFactory();
-  factory.initialize({
-    ...taskRunnerFactoryInitializerParams,
-    isSecurityEnabled: false,
-  });
+  factory.initialize(taskRunnerFactoryInitializerParams);
   const taskRunner = factory.create(alertType, {
     taskInstance: mockedTaskInstance,
   });

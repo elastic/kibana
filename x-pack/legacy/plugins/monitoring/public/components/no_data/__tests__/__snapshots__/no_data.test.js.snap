@@ -4,7 +4,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
 <div
   class="euiPage"
 >
-  <div
+  <main
     class="euiPageBody euiPageBody--restrictWidth-custom"
     style="max-width:600px"
   >
@@ -86,7 +86,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         </span>
       </button>
     </div>
-  </div>
+  </main>
 </div>
 `;
 
@@ -94,7 +94,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
 <div
   class="euiPage"
 >
-  <div
+  <main
     class="euiPageBody euiPageBody--restrictWidth-custom"
     style="max-width:600px"
   >
@@ -176,6 +176,6 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         </span>
       </button>
     </div>
-  </div>
+  </main>
 </div>
 `;

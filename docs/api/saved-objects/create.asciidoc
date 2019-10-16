@@ -1,10 +1,10 @@
 [[saved-objects-api-create]]
-=== Create saved object API
+=== Create saved objects API
 ++++
-<titleabbrev>Create object</titleabbrev>
+<titleabbrev>Create saved objects</titleabbrev>
 ++++
 
-experimental[] Create a {kib} saved object.
+experimental[] Create {kib} saved objects.
 
 [[saved-objects-api-create-request]]
 ==== Request

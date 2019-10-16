@@ -30,7 +30,7 @@ export interface VisType {
   responseHandler: string;
   icon?: IconType;
   image?: string;
-  stage: 'experimental' | 'production';
+  stage: 'experimental' | 'beta' | 'production';
   requiresSearch: boolean;
   hidden: boolean;
 
@@ -83,7 +83,7 @@ export type TypesSetup = ReturnType<TypesService['setup']>;
 export type TypesStart = ReturnType<TypesService['start']>;
 
 /** @public types */
-export type VisTypeAlias = VisTypeAlias;
+export { VisTypeAlias };
 
 /** @public static code */
 // TODO once items are moved from ui/vis into this service

@@ -5,7 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/types';
+import dateMath from '@elastic/datemath';
+import {
+  ExpressionFunction,
+  KibanaContext,
+} from '../../../../../../src/legacy/core_plugins/interpreter/types';
 import { KibanaDatatable } from '../../../../../../src/legacy/core_plugins/interpreter/common';
 import { LensMultiTable } from '../types';
 
@@ -16,7 +20,7 @@ interface MergeTables {
 
 export const mergeTables: ExpressionFunction<
   'lens_merge_tables',
-  null,
+  KibanaContext | null,
   MergeTables,
   LensMultiTable
 > = {
@@ -38,9 +42,9 @@ export const mergeTables: ExpressionFunction<
     },
   },
   context: {
-    types: ['null'],
+    types: ['kibana_context', 'null'],
   },
-  fn(_ctx, { layerIds, tables }: MergeTables) {
+  fn(ctx, { layerIds, tables }: MergeTables) {
     const resultTables: Record<string, KibanaDatatable> = {};
     tables.forEach((table, index) => {
       resultTables[layerIds[index]] = table;
@@ -48,6 +52,25 @@ export const mergeTables: ExpressionFunction<
     return {
       type: 'lens_multitable',
       tables: resultTables,
+      dateRange: getDateRange(ctx),
     };
   },
 };
+
+function getDateRange(ctx?: KibanaContext | null) {
+  if (!ctx || !ctx.timeRange) {
+    return;
+  }
+
+  const fromDate = dateMath.parse(ctx.timeRange.from);
+  const toDate = dateMath.parse(ctx.timeRange.to);
+
+  if (!fromDate || !toDate) {
+    return;
+  }
+
+  return {
+    fromDate: fromDate.toDate(),
+    toDate: toDate.toDate(),
+  };
+}

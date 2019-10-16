@@ -20,9 +20,23 @@
 import React, { useEffect } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { safeMakeLabel, isCompatibleAggregation } from '../../../../agg_types/agg_utils';
+import {
+  isCompatibleAggregation,
+  useAvailableOptions,
+  useFallbackMetric,
+  useValidation,
+} from './agg_utils';
 import { AggParamEditorProps } from '..';
 
+const DEFAULT_VALUE = '_key';
+const DEFAULT_OPTIONS = [
+  {
+    text: i18n.translate('common.ui.aggTypes.orderAgg.alphabeticalLabel', {
+      defaultMessage: 'Alphabetical',
+    }),
+    value: DEFAULT_VALUE,
+  },
+];
 const aggFilter = [
   '!top_hits',
   '!percentiles',
@@ -53,14 +67,12 @@ function OrderByParamEditor({
   });
   const isValid = !!value;
 
-  useEffect(() => {
-    setValidity(isValid);
-  }, [isValid]);
+  useValidation(setValidity, isValid);
 
   useEffect(() => {
     // setup the initial value of orderBy
     if (!value) {
-      let respAgg = { id: '_key' };
+      let respAgg = { id: DEFAULT_VALUE };
 
       if (metricAggs) {
         respAgg = metricAggs.filter(isCompatibleAgg)[0] || respAgg;
@@ -70,61 +82,19 @@ function OrderByParamEditor({
     }
   }, []);
 
-  useEffect(() => {
-    if (metricAggs && value && value !== 'custom') {
-      // ensure that orderBy is set to a valid agg
-      const respAgg = metricAggs
-        .filter(isCompatibleAgg)
-        .find(aggregation => aggregation.id === value);
+  useFallbackMetric(setValue, aggFilter, metricAggs, value, DEFAULT_VALUE);
 
-      if (!respAgg) {
-        setValue('_key');
-      }
-    }
-  }, [metricAggs]);
-
-  const defaultOptions = [
-    {
-      text: i18n.translate('common.ui.aggTypes.orderAgg.customMetricLabel', {
-        defaultMessage: 'Custom metric',
-      }),
-      value: 'custom',
-    },
-    {
-      text: i18n.translate('common.ui.aggTypes.orderAgg.alphabeticalLabel', {
-        defaultMessage: 'Alphabetical',
-      }),
-      value: '_key',
-    },
-  ];
-
-  const options = metricAggs
-    ? metricAggs.map(respAgg => ({
-        text: i18n.translate('common.ui.aggTypes.orderAgg.metricLabel', {
-          defaultMessage: 'Metric: {metric}',
-          values: {
-            metric: safeMakeLabel(respAgg),
-          },
-        }),
-        value: respAgg.id,
-        disabled: !isCompatibleAgg(respAgg),
-      }))
-    : [];
+  const options = useAvailableOptions(aggFilter, metricAggs, DEFAULT_OPTIONS);
 
   return (
-    <EuiFormRow
-      label={label}
-      fullWidth={true}
-      isInvalid={showValidation ? !isValid : false}
-      compressed
-    >
+    <EuiFormRow label={label} fullWidth isInvalid={showValidation && !isValid} compressed>
       <EuiSelect
-        options={[...options, ...defaultOptions]}
+        options={options}
         value={value}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
         compressed
-        isInvalid={showValidation ? !isValid : false}
+        isInvalid={showValidation && !isValid}
         onBlur={setTouched}
         data-test-subj={`visEditorOrderBy${agg.id}`}
       />

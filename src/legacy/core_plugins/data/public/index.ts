@@ -27,13 +27,13 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export type DataSetup = DataSetup;
-export type DataStart = DataStart;
+export { DataSetup, DataStart };
 
 export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,

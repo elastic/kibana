@@ -6,7 +6,7 @@
 
 import React, { Fragment, FC } from 'react';
 import { EuiFlexGroup, EuiPage, EuiPageBody } from '@elastic/eui';
-import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../components/navigation_menu';
 import { OverviewSideBar } from './components/sidebar';
 import { OverviewContent } from './components/content';
 

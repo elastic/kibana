@@ -82,15 +82,14 @@ exports[`TooltipControl render tooltipState is provided should render tooltip po
 >
   <EuiText
     size="xs"
-  >
-    <FeatureTooltip
-      addFilters={[Function]}
-      anchorLocation={
-        Array [
-          -120,
-          30,
-        ]
+    style={
+      Object {
+        "maxWidth": "425px",
       }
+    }
+  >
+    <FeaturesTooltip
+      addFilters={[Function]}
       closeTooltip={[Function]}
       features={
         Array [

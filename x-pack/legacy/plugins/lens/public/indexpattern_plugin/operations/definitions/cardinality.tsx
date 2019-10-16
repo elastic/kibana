@@ -67,6 +67,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     schema: 'metric',
     params: {
       field: column.sourceField,
+      missing: 0,
     },
   }),
   onFieldChange: (oldColumn, indexPattern, field) => {
