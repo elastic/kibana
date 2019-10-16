@@ -217,13 +217,6 @@ export const datatableVisualization: Visualization<
                     function: 'lens_datatable_columns',
                     arguments: {
                       columnIds: operations.map(o => o.columnId),
-                      labels: operations.map(
-                        o =>
-                          o.operation.label ||
-                          i18n.translate('xpack.lens.datatable.na', {
-                            defaultMessage: 'N/A',
-                          })
-                      ),
                     },
                   },
                 ],
