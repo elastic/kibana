@@ -32,7 +32,7 @@ import {
   prettyDuration,
 } from '@elastic/eui';
 // @ts-ignore
-import { EuiSuperUpdateButton } from '@elastic/eui';
+import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
 import { TimeRange } from 'src/plugins/data/public';
@@ -49,10 +49,12 @@ interface Props {
   query?: Query;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onRefresh?: (payload: { dateRange: TimeRange }) => void;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   indexPatterns?: Array<IndexPattern | string>;
   intl: InjectedIntl;
+  isLoading?: boolean;
   prepend?: React.ReactNode;
   showQueryInput?: boolean;
   showDatePicker?: boolean;
@@ -133,6 +135,18 @@ function QueryBarTopRowUI(props: Props) {
     }
   }
 
+  function onRefresh({ start, end }: OnRefreshProps) {
+    const retVal = {
+      dateRange: {
+        from: start,
+        to: end,
+      },
+    };
+    if (props.onRefresh) {
+      props.onRefresh(retVal);
+    }
+  }
+
   function onSubmit({ query, dateRange }: { query?: Query; dateRange: TimeRange }) {
     handleLuceneSyntaxWarning();
 
@@ -207,6 +221,7 @@ function QueryBarTopRowUI(props: Props) {
       <EuiSuperUpdateButton
         needsUpdate={props.isDirty}
         isDisabled={isDateRangeInvalid}
+        isLoading={props.isLoading}
         onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
       />
@@ -259,6 +274,7 @@ function QueryBarTopRowUI(props: Props) {
           isPaused={props.isRefreshPaused}
           refreshInterval={props.refreshInterval}
           onTimeChange={onTimeChange}
+          onRefresh={onRefresh}
           onRefreshChange={props.onRefreshChange}
           showUpdateButton={false}
           recentlyUsedRanges={recentlyUsedRanges}

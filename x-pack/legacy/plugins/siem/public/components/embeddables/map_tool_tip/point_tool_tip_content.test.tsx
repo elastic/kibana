@@ -13,6 +13,12 @@ import { TestProviders } from '../../../mock';
 import { getEmptyStringTag } from '../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
 
+jest.mock('../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+
 describe('PointToolTipContent', () => {
   const mockFeatureProps: FeatureProperty[] = [
     {
