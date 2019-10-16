@@ -12,6 +12,7 @@ import { PromiseReturnType } from '../../../typings/common';
 import { Setup } from '../helpers/setup_request';
 import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { SortOptions } from '../../../typings/elasticsearch/aggregations';
 
 interface TopTransactionOptions {
   type: 'top_transactions';
@@ -36,6 +37,11 @@ export function transactionGroupsFetcher(options: Options, setup: Setup) {
     options
   });
 
+  const sort: SortOptions = [
+    { _score: 'desc' as const }, // sort by _score to ensure that buckets with sampled:true ends up on top
+    { '@timestamp': { order: 'desc' as const } }
+  ];
+
   const params = mergeProjection(projection, {
     body: {
       size: 0,
@@ -48,17 +54,15 @@ export function transactionGroupsFetcher(options: Options, setup: Setup) {
       aggs: {
         transactions: {
           terms: {
-            order: { sum: 'desc' },
+            ...projection.body.aggs.transactions.terms,
+            order: { sum: 'desc' as const },
             size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
           },
           aggs: {
             sample: {
               top_hits: {
                 size: 1,
-                sort: [
-                  { _score: 'desc' }, // sort by _score to ensure that buckets with sampled:true ends up on top
-                  { '@timestamp': { order: 'desc' } }
-                ]
+                sort
               }
             },
             avg: { avg: { field: TRANSACTION_DURATION } },

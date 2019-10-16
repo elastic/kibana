@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { ESSearchHit } from 'elasticsearch';
+import { ESSearchHit } from '../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT

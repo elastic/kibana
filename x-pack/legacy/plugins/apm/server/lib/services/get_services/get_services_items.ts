@@ -28,6 +28,7 @@ export async function getServicesItems(setup: Setup) {
       aggs: {
         services: {
           terms: {
+            ...projection.body.aggs.services.terms,
             size: 500
           },
           aggs: {
@@ -74,7 +75,9 @@ export async function getServicesItems(setup: Setup) {
 
     return {
       serviceName: bucket.key,
-      agentName: idx(bucket, _ => _.agents.buckets[0].key),
+      agentName: idx(bucket, _ => _.agents.buckets[0].key) as
+        | string
+        | undefined,
       transactionsPerMinute,
       errorsPerMinute,
       avgResponseTime: bucket.avg.value,
