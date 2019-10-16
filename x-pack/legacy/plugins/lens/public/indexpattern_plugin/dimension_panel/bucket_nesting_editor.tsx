@@ -70,7 +70,7 @@ export function BucketNestingEditor({
         >
           <>
             <EuiRadio
-              id={generator()}
+              id={generator('topLevel')}
               data-test-subj="indexPattern-nesting-topLevel"
               label={
                 column.operationType === 'terms'
@@ -86,7 +86,7 @@ export function BucketNestingEditor({
               onChange={toggleNesting}
             />
             <EuiRadio
-              id={generator()}
+              id={generator('bottomLevel')}
               data-test-subj="indexPattern-nesting-bottomLevel"
               label={
                 column.operationType === 'terms'

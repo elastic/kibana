@@ -61,11 +61,7 @@ export function DataTableLayer({
 
   const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
   // When we add a column it could be empty, and therefore have no order
-  const sortedColumns = originalOrder.concat(
-    layer.columns.filter(id => {
-      return !originalOrder.includes(id);
-    })
-  );
+  const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
 
   return (
     <EuiPanel className="lnsConfigPanel__panel" paddingSize="s">
