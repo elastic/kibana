@@ -17,13 +17,13 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { PLUGIN } from '../../../common/constants';
-import { IntegrationInfo } from '../../../common/types';
+import { PackageInfo } from '../../../common/types';
 import { VersionBadge } from '../../components/version_badge';
 import { IconPanel } from '../../components/icon_panel';
 import { useBreadcrumbs, useCore, useLinks } from '../../hooks';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 
-type HeaderProps = IntegrationInfo & { iconType?: IconType };
+type HeaderProps = PackageInfo & { iconType?: IconType };
 
 export function Header(props: HeaderProps) {
   const { iconType, title, version } = props;
@@ -83,15 +83,15 @@ function NavButtonBack() {
 
   return (
     <ButtonEmpty iconType="arrowLeft" size="xs" flush="left">
-      Browse Integrations
+      Browse Packages
     </ButtonEmpty>
   );
 }
 
-function InstallationButton({ status }: IntegrationInfo) {
+function InstallationButton({ status }: PackageInfo) {
   const isInstalled = status === 'installed';
   const iconType = isInstalled ? '' : 'plusInCircle';
-  const buttonText = isInstalled ? 'Installed' : 'Add Integration';
+  const buttonText = isInstalled ? 'Installed' : 'Add Package';
 
   return (
     <EuiButton fill={!isInstalled} iconType={iconType}>

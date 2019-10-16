@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { SideNavLinks } from './side_nav_links';
-import { IntegrationInfo } from '../../../common/types';
+import { PackageInfo } from '../../../common/types';
 import { AssetAccordion } from '../../components/asset_accordion';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { Requirements } from '../../components/requirements';
@@ -24,7 +24,7 @@ import { OverviewPanel } from './overview_panel';
 import { useCore } from '../../hooks/use_core';
 import { DEFAULT_PANEL, DetailProps } from '.';
 
-type ContentProps = IntegrationInfo & Pick<DetailProps, 'panel'> & { hasIconPanel: boolean };
+type ContentProps = PackageInfo & Pick<DetailProps, 'panel'> & { hasIconPanel: boolean };
 export function Content(props: ContentProps) {
   const { hasIconPanel, name, panel, version } = props;
   const { theme } = useCore();
@@ -56,7 +56,7 @@ export function Content(props: ContentProps) {
   );
 }
 
-type ContentPanelProps = IntegrationInfo & Pick<DetailProps, 'panel'>;
+type ContentPanelProps = PackageInfo & Pick<DetailProps, 'panel'>;
 export function ContentPanel(props: ContentPanelProps) {
   const { assets, panel } = props;
   switch (panel) {
@@ -76,7 +76,7 @@ export function ContentPanel(props: ContentPanelProps) {
   }
 }
 
-type RightColumnContentProps = IntegrationInfo & Pick<DetailProps, 'panel'>;
+type RightColumnContentProps = PackageInfo & Pick<DetailProps, 'panel'>;
 function RightColumnContent(props: RightColumnContentProps) {
   const { assets, requirement, panel } = props;
   switch (panel) {

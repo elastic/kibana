@@ -5,16 +5,16 @@
  */
 import React, { Fragment, ReactNode } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { IntegrationList, IntegrationListItem } from '../../common/types';
-import { IntegrationCard, BadgeProps } from './integration_card';
+import { PackageList, PackageListItem } from '../../common/types';
+import { PackageCard, BadgeProps } from './package_card';
 
 type ListProps = {
   controls?: ReactNode;
   title: string;
-  list: IntegrationList;
+  list: PackageList;
 } & BadgeProps;
 
-export function IntegrationListGrid({ controls, title, list, showInstalledBadge }: ListProps) {
+export function PackageListGrid({ controls, title, list, showInstalledBadge }: ListProps) {
   const controlsContent = <ControlsColumn title={title} controls={controls} />;
   const gridContent = <GridColumn list={list} showInstalledBadge={showInstalledBadge} />;
 
@@ -30,12 +30,12 @@ export function IntegrationListGrid({ controls, title, list, showInstalledBadge 
   );
 }
 
-type GridItemProps = IntegrationListItem & BadgeProps;
+type GridItemProps = PackageListItem & BadgeProps;
 
 function GridItem(item: GridItemProps) {
   return (
     <EuiFlexItem>
-      <IntegrationCard {...item} showInstalledBadge={item.showInstalledBadge} />
+      <PackageCard {...item} showInstalledBadge={item.showInstalledBadge} />
     </EuiFlexItem>
   );
 }
@@ -61,7 +61,7 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
 }
 
 type GridColumnProps = {
-  list: IntegrationList;
+  list: PackageList;
 } & BadgeProps;
 
 function GridColumn({ list, showInstalledBadge }: GridColumnProps) {

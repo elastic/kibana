@@ -84,7 +84,7 @@ function HeroCopy() {
       <EuiTitle size="l">
         <h1>Add Your Data</h1>
       </EuiTitle>
-      <Subtitle>Some creative copy about integrations goes here.</Subtitle>
+      <Subtitle>Some creative copy about packages goes here.</Subtitle>
     </Fragment>
   );
 }

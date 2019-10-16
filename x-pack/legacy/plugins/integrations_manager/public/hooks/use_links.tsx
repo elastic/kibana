@@ -11,7 +11,7 @@ import { patterns } from '../routes';
 import { useCore } from '.';
 import { DetailViewPanelName } from '..';
 
-// TODO: get this from server/integrations/handlers.ts (move elsewhere?)
+// TODO: get this from server/packages/handlers.ts (move elsewhere?)
 // seems like part of the name@version change
 interface DetailParams {
   name: string;

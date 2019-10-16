@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Calling Object.entries(IntegrationsGroupedByStatus) gave `status: string`
+// Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
 // which causes a "string is not assignable to type InstallationStatus` error
 // see https://github.com/Microsoft/TypeScript/issues/20322
 // and https://github.com/Microsoft/TypeScript/pull/12253#issuecomment-263132208

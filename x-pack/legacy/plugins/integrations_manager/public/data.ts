@@ -15,9 +15,9 @@ import {
 } from '../common/routes';
 import {
   CategorySummaryList,
-  IntegrationInfo,
-  IntegrationList,
-  IntegrationsGroupedByStatus,
+  PackageInfo,
+  PackageList,
+  PackagesGroupedByStatus,
 } from '../common/types';
 
 const defaultClient: HttpHandler = (path, options?) => fetch(path, options).then(res => res.json());
@@ -35,18 +35,18 @@ export async function getCategories(): Promise<CategorySummaryList> {
   return list;
 }
 
-export async function getIntegrations(params?: ListParams): Promise<IntegrationList> {
+export async function getPackages(params?: ListParams): Promise<PackageList> {
   const path = getListPath();
   const options = params ? { query: { ...params } } : undefined;
-  const list: IntegrationList = await _fetch(path, options);
+  const list: PackageList = await _fetch(path, options);
 
   return list;
 }
 
-export async function getIntegrationsGroupedByStatus() {
+export async function getPackagesGroupedByStatus() {
   const path = getListPath();
-  const list: IntegrationList = await _fetch(path);
-  const initialValue: IntegrationsGroupedByStatus = {
+  const list: PackageList = await _fetch(path);
+  const initialValue: PackagesGroupedByStatus = {
     installed: [],
     not_installed: [],
   };
@@ -63,19 +63,19 @@ export async function getIntegrationsGroupedByStatus() {
   return groupedByStatus;
 }
 
-export async function getIntegrationInfoByKey(pkgkey: string): Promise<IntegrationInfo> {
+export async function getPackageInfoByKey(pkgkey: string): Promise<PackageInfo> {
   const path = getInfoPath(pkgkey);
-  const info: IntegrationInfo = await _fetch(path);
+  const info: PackageInfo = await _fetch(path);
 
   return info;
 }
 
-export async function installIntegration(pkgkey: string) {
+export async function installPackage(pkgkey: string) {
   const path = getInstallPath(pkgkey);
   return await _fetch(path);
 }
 
-export async function removeIntegration(pkgkey: string) {
+export async function removePackage(pkgkey: string) {
   const path = getRemovePath(pkgkey);
   return await _fetch(path);
 }

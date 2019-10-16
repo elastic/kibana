@@ -5,9 +5,9 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { CategorySummaryList, IntegrationList } from '../../../common/types';
-import { getCategories, getIntegrations } from '../../data';
-import { LocalSearch, fieldsToSearch, searchIdField } from './search_integrations';
+import { CategorySummaryList, PackageList } from '../../../common/types';
+import { getCategories, getPackages } from '../../data';
+import { LocalSearch, fieldsToSearch, searchIdField } from './search_packages';
 
 export function useCategories() {
   const [categories, setCategories] = useState<CategorySummaryList>([]);
@@ -19,59 +19,53 @@ export function useCategories() {
   return [categories, setCategories] as [typeof categories, typeof setCategories];
 }
 
-export function useCategoryIntegrations(selectedCategory: string) {
-  const [categoryIntegrations, setCategoryIntegrations] = useState<IntegrationList>([]);
+export function useCategoryPackages(selectedCategory: string) {
+  const [categoryPackages, setCategoryPackages] = useState<PackageList>([]);
 
   useEffect(() => {
-    getIntegrations({ category: selectedCategory }).then(setCategoryIntegrations);
+    getPackages({ category: selectedCategory }).then(setCategoryPackages);
   }, [selectedCategory]);
 
-  return [categoryIntegrations, setCategoryIntegrations] as [
-    typeof categoryIntegrations,
-    typeof setCategoryIntegrations
+  return [categoryPackages, setCategoryPackages] as [
+    typeof categoryPackages,
+    typeof setCategoryPackages
   ];
 }
 
-export function useAllIntegrations(
-  selectedCategory: string,
-  categoryIntegrations: IntegrationList
-) {
-  const [allIntegrations, setAllIntegrations] = useState<IntegrationList>([]);
+export function useAllPackages(selectedCategory: string, categoryPackages: PackageList) {
+  const [allPackages, setAllPackages] = useState<PackageList>([]);
 
   useEffect(() => {
-    if (!selectedCategory) setAllIntegrations(categoryIntegrations);
-  }, [selectedCategory, categoryIntegrations]);
+    if (!selectedCategory) setAllPackages(categoryPackages);
+  }, [selectedCategory, categoryPackages]);
 
-  return [allIntegrations, setAllIntegrations] as [
-    typeof allIntegrations,
-    typeof setAllIntegrations
-  ];
+  return [allPackages, setAllPackages] as [typeof allPackages, typeof setAllPackages];
 }
 
-export function useLocalSearch(allIntegrations: IntegrationList) {
+export function useLocalSearch(allPackages: PackageList) {
   const localSearchRef = useRef<LocalSearch | null>(null);
 
   useEffect(() => {
-    if (!allIntegrations.length) return;
+    if (!allPackages.length) return;
 
     const localSearch = new LocalSearch(searchIdField);
     fieldsToSearch.forEach(field => localSearch.addIndex(field));
-    localSearch.addDocuments(allIntegrations);
+    localSearch.addDocuments(allPackages);
     localSearchRef.current = localSearch;
-  }, [allIntegrations]);
+  }, [allPackages]);
 
   return localSearchRef;
 }
 
-export function useInstalledIntegrations(allIntegrations: IntegrationList) {
-  const [installedIntegrations, setInstalledIntegrations] = useState<IntegrationList>([]);
+export function useInstalledPackages(allPackages: PackageList) {
+  const [installedPackages, setInstalledPackages] = useState<PackageList>([]);
 
   useEffect(() => {
-    setInstalledIntegrations(allIntegrations.filter(({ status }) => status === 'installed'));
-  }, [allIntegrations]);
+    setInstalledPackages(allPackages.filter(({ status }) => status === 'installed'));
+  }, [allPackages]);
 
-  return [installedIntegrations, setInstalledIntegrations] as [
-    typeof installedIntegrations,
-    typeof setInstalledIntegrations
+  return [installedPackages, setInstalledPackages] as [
+    typeof installedPackages,
+    typeof setInstalledPackages
   ];
 }

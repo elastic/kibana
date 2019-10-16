@@ -20,7 +20,7 @@ export async function getCategories() {
   return Registry.fetchCategories();
 }
 
-export async function getIntegrations(
+export async function getPackages(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
   } & Registry.SearchParams
@@ -37,7 +37,7 @@ export async function getIntegrations(
   }));
   const results = await savedObjectsClient.bulkGet<InstallationAttributes>(searchObjects);
   const savedObjects = results.saved_objects.filter(o => !o.error); // ignore errors for now
-  const integrationList = registryItems
+  const packageList = registryItems
     .map(item =>
       createInstallableFrom(
         item,
@@ -45,10 +45,10 @@ export async function getIntegrations(
       )
     )
     .sort(sortByName);
-  return integrationList;
+  return packageList;
 }
 
-export async function getIntegrationInfo(options: {
+export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
 }) {

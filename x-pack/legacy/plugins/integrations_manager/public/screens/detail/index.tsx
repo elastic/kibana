@@ -6,9 +6,9 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { EuiPage, EuiPageBody, EuiPageWidthProps, ICON_TYPES } from '@elastic/eui';
 import styled from 'styled-components';
-import { IntegrationInfo } from '../../../common/types';
+import { PackageInfo } from '../../../common/types';
 import { DetailViewPanelName } from '../../';
-import { getIntegrationInfoByKey } from '../../data';
+import { getPackageInfoByKey } from '../../data';
 import { useCore } from '../../hooks/use_core';
 import { Header } from './header';
 import { Content } from './content';
@@ -21,9 +21,9 @@ export interface DetailProps {
 }
 
 export function Detail({ pkgkey, panel = DEFAULT_PANEL }: DetailProps) {
-  const [info, setInfo] = useState<IntegrationInfo | null>(null);
+  const [info, setInfo] = useState<PackageInfo | null>(null);
   useEffect(() => {
-    getIntegrationInfoByKey(pkgkey).then(response => {
+    getPackageInfoByKey(pkgkey).then(response => {
       const { title } = response;
       setInfo({ ...response, title });
     });
@@ -35,7 +35,7 @@ export function Detail({ pkgkey, panel = DEFAULT_PANEL }: DetailProps) {
   return <DetailLayout restrictWidth={1200} {...info} panel={panel} />;
 }
 
-type LayoutProps = IntegrationInfo & Pick<DetailProps, 'panel'> & EuiPageWidthProps;
+type LayoutProps = PackageInfo & Pick<DetailProps, 'panel'> & EuiPageWidthProps;
 export function DetailLayout(props: LayoutProps) {
   const { name, restrictWidth, panel } = props;
   const { theme } = useCore();

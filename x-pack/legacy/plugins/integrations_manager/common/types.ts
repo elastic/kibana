@@ -21,7 +21,7 @@ export type AssetType =
 
 // Registry's response types
 // from /search
-// https://github.com/elastic/integrations-registry/blob/master/docs/api/search.json
+// https://github.com/elastic/packages-registry/blob/master/docs/api/search.json
 export type RegistryList = RegistryListItem[];
 export interface RegistryListItem {
   description: string;
@@ -37,7 +37,7 @@ export interface ScreenshotItem {
 }
 
 // from /package/{name}
-// https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
+// https://github.com/elastic/packages-registry/blob/master/docs/api/package.json
 export type ServiceName = 'kibana' | 'elasticsearch' | 'filebeat' | 'metricbeat';
 export type RequirementVersion = string;
 export interface ServiceRequirements {
@@ -46,7 +46,7 @@ export interface ServiceRequirements {
 }
 
 // from /categories
-// https://github.com/elastic/integrations-registry/blob/master/docs/api/categories.json
+// https://github.com/elastic/packages-registry/blob/master/docs/api/categories.json
 export type CategorySummaryList = CategorySummaryItem[];
 export type CategoryId = string;
 export interface CategorySummaryItem {
@@ -76,14 +76,14 @@ export interface RegistryPackage {
 
 // Managers public HTTP response types
 // from API_LIST_PATTERN
-export type IntegrationList = IntegrationListItem[];
+export type PackageList = PackageListItem[];
 // add title here until it's a part of registry response
-export type IntegrationListItem = Installable<Required<RegistryListItem>>;
-export type IntegrationsGroupedByStatus = Record<InstallationStatus, IntegrationList>;
+export type PackageListItem = Installable<Required<RegistryListItem>>;
+export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
 
 // from API_INFO_PATTERN
 // add title here until it's a part of registry response
-export type IntegrationInfo = Installable<
+export type PackageInfo = Installable<
   Required<RegistryPackage> & { assets: AssetsGroupedByServiceByType }
 >;
 
