@@ -20,6 +20,7 @@ import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ProgressBar } from './progress_bar';
 import { getDependentVar, getValuesFromResponse, loadEvalData, Eval } from '../../../../common';
 import { isCompletedAnalyticsJob } from './common';
+import { isRegressionAnalysis } from '../../../../common/analytics';
 // import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
@@ -60,6 +61,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const index = idx(item, _ => _.config.dest.index) as string;
   const dependentVariable = getDependentVar(item.config.analysis);
   const jobIsCompleted = isCompletedAnalyticsJob(item.stats);
+  const isRegressionJob = isRegressionAnalysis(item.config.analysis);
 
   const loadData = async () => {
     setIsLoadingGeneralization(true);
@@ -113,7 +115,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   };
 
   useEffect(() => {
-    if (jobIsCompleted) {
+    if (jobIsCompleted && isRegressionJob) {
       loadData();
     }
   }, [jobIsCompleted]);
@@ -162,7 +164,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     position: 'right',
   };
 
-  if (jobIsCompleted) {
+  if (jobIsCompleted && isRegressionJob) {
     stats.items.push(
       {
         title: 'generalization mean squared error',

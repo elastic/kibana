@@ -21,9 +21,13 @@ import expect from '@kbn/expect';
 import Chance from 'chance';
 import sinon from 'sinon';
 
-import { UiSettingsService } from './ui_settings_service';
+import { loggingServiceMock } from '../logging/logging_service.mock';
+
+import { UiSettingsClient } from './ui_settings_client';
 import * as createOrUpgradeSavedConfigNS from './create_or_upgrade_saved_config/create_or_upgrade_saved_config';
 import { createObjectsClientStub, savedObjectsClientErrors } from './create_objects_client_stub';
+
+const logger = loggingServiceMock.create().get();
 
 const TYPE = 'config';
 const ID = 'kibana-version';
@@ -31,7 +35,6 @@ const BUILD_NUM = 1234;
 const chance = new Chance();
 
 interface SetupOptions {
-  getDefaults?: () => Record<string, any>;
   defaults?: Record<string, any>;
   esDocSource?: Record<string, any>;
   overrides?: Record<string, any>;
@@ -41,17 +44,18 @@ describe('ui settings', () => {
   const sandbox = sinon.createSandbox();
 
   function setup(options: SetupOptions = {}) {
-    const { getDefaults, defaults = {}, overrides = {}, esDocSource = {} } = options;
+    const { defaults = {}, overrides = {}, esDocSource = {} } = options;
 
     const savedObjectsClient = createObjectsClientStub(esDocSource);
 
-    const uiSettings = new UiSettingsService({
+    const uiSettings = new UiSettingsClient({
       type: TYPE,
       id: ID,
       buildNum: BUILD_NUM,
-      getDefaults: getDefaults || (() => defaults),
+      defaults,
       savedObjectsClient,
       overrides,
+      log: logger,
     });
 
     const createOrUpgradeSavedConfig = sandbox.stub(
@@ -239,25 +243,10 @@ describe('ui settings', () => {
   });
 
   describe('#getDefaults()', () => {
-    it('returns a promise for the defaults', async () => {
-      const { uiSettings } = setup();
-      const promise = uiSettings.getDefaults();
-      expect(promise).to.be.a(Promise);
-      expect(await promise).to.eql({});
-    });
-  });
-
-  describe('getDefaults() argument', () => {
-    it('casts sync `getDefaults()` to promise', () => {
-      const getDefaults = () => ({ key: { value: chance.word() } });
-      const { uiSettings } = setup({ getDefaults });
-      expect(uiSettings.getDefaults()).to.be.a(Promise);
-    });
-
-    it('returns the defaults returned by getDefaults() argument', async () => {
+    it('returns the defaults passed to the constructor', () => {
       const value = chance.word();
       const { uiSettings } = setup({ defaults: { key: { value } } });
-      expect(await uiSettings.getDefaults()).to.eql({
+      expect(uiSettings.getDefaults()).to.eql({
         key: { value },
       });
     });

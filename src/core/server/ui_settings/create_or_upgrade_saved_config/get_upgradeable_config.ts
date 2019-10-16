@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from '../../saved_objects/types';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 /**
