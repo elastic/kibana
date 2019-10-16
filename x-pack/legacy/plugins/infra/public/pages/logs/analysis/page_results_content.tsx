@@ -19,7 +19,6 @@ import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
-import chrome from 'ui/chrome';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
@@ -36,24 +35,20 @@ import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { FirstUseCallout } from './first_use';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
-import { getMlLinkFormatter } from './sections/helpers/ml_links';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
 export const AnalysisResultsContent = ({
   sourceId,
   isFirstUse,
-  jobId,
 }: {
   sourceId: string;
   isFirstUse: boolean;
-  jobId: string;
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results', delay: 15000 });
 
   const [dateFormat] = useKibanaUiSetting('dateFormat', 'MMMM D, YYYY h:mm A');
-  const basePath = chrome.getBasePath();
 
   const {
     timeRange: selectedTimeRange,
@@ -65,12 +60,7 @@ export const AnalysisResultsContent = ({
   const [queryTimeRange, setQueryTimeRange] = useState<TimeRange>(
     stringToNumericTimeRange(selectedTimeRange)
   );
-  const getMlLink = getMlLinkFormatter({
-    basePath,
-    jobId,
-    startTime: queryTimeRange.startTime,
-    endTime: queryTimeRange.endTime,
-  });
+
   const bucketDuration = useMemo(() => {
     // This function takes the current time range in ms,
     // works out the bucket interval we'd need to always
@@ -144,6 +134,7 @@ export const AnalysisResultsContent = ({
     setupStatus,
     viewSetupForReconfiguration,
     viewSetupForUpdate,
+    jobIds,
   } = useContext(LogAnalysisJobs.Context);
 
   useInterval(() => {
@@ -224,7 +215,7 @@ export const AnalysisResultsContent = ({
                     setTimeRange={handleChartTimeRangeChange}
                     setupStatus={setupStatus}
                     timeRange={queryTimeRange}
-                    getMlLink={getMlLink}
+                    jobId={jobIds['log-entry-rate']}
                   />
                 </EuiPanel>
               </EuiFlexItem>

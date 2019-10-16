@@ -27,7 +27,6 @@ import {
   getLogEntryRateCombinedSeries,
   getTopAnomalyScoreAcrossAllPartitions,
 } from '../helpers/data_formatters';
-import { GetMlLink } from '../helpers/ml_links';
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
 import { LogAnalysisJobProblemIndicator } from '../../../../../components/logging/log_analysis_job_status';
@@ -42,7 +41,7 @@ export const AnomaliesResults: React.FunctionComponent<{
   timeRange: TimeRange;
   viewSetupForReconfiguration: () => void;
   viewSetupForUpdate: () => void;
-  getMlLink: GetMlLink;
+  jobId: string;
 }> = ({
   isLoading,
   jobStatus,
@@ -52,7 +51,7 @@ export const AnomaliesResults: React.FunctionComponent<{
   timeRange,
   viewSetupForReconfiguration,
   viewSetupForUpdate,
-  getMlLink,
+  jobId,
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.anomaliesSectionTitle', {
     defaultMessage: 'Anomalies',
@@ -107,7 +106,7 @@ export const AnomaliesResults: React.FunctionComponent<{
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AnalyzeInMlButton href={getMlLink()} />
+          <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -194,7 +193,7 @@ export const AnomaliesResults: React.FunctionComponent<{
             results={results}
             setTimeRange={setTimeRange}
             timeRange={timeRange}
-            getMlLink={getMlLink}
+            jobId={jobId}
           />
         </>
       )}

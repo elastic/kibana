@@ -20,7 +20,7 @@ export const AnalysisPageContent = () => {
   const { sourceId, source } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const { setup, cleanupAndSetup, setupStatus, viewResults, fetchJobStatus, jobIds } = useContext(
+  const { setup, cleanupAndSetup, setupStatus, viewResults, fetchJobStatus } = useContext(
     LogAnalysisJobs.Context
   );
 
@@ -45,7 +45,6 @@ export const AnalysisPageContent = () => {
       <AnalysisResultsContent
         sourceId={sourceId}
         isFirstUse={setupStatus === 'hiddenAfterSuccess'}
-        jobId={jobIds['log-entry-rate']}
       />
     );
   } else {

@@ -17,7 +17,6 @@ import {
   formatAnomalyScore,
   getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
-import { GetMlLink } from '../helpers/ml_links';
 import { AnalyzeInMlButton } from '../analyze_in_ml_button';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
@@ -26,8 +25,8 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   results: GetLogEntryRateSuccessResponsePayload['data'];
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
-  getMlLink: GetMlLink;
-}> = ({ results, timeRange, setTimeRange, topAnomalyScore, partitionId, getMlLink }) => {
+  jobId: string;
+}> = ({ results, timeRange, setTimeRange, topAnomalyScore, partitionId, jobId }) => {
   const logEntryRateSeries = useMemo(
     () =>
       results && results.histogramBuckets
@@ -89,7 +88,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
         <EuiSpacer size="s" />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <AnalyzeInMlButton fill={false} href={getMlLink(partitionId)} />
+            <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} partition={partitionId} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
