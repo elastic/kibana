@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Range } from '../../../../../../utils/range';
 
-interface NumberRowProps {
+export interface NumberRowProps {
   autoFocus: boolean;
   disableDelete: boolean;
   isInvalid: boolean;
@@ -40,7 +40,7 @@ export interface NumberRowModel {
   id: string;
   isInvalid: boolean;
   value: number | '';
-  errors?: string[];
+  error?: string;
 }
 
 function NumberRow({
@@ -63,11 +63,16 @@ function NumberRow({
     }
   );
 
-  const onValueChanged = (event: React.ChangeEvent<HTMLInputElement>) =>
-    onChange({
-      value: event.target.value,
-      id: model.id,
-    });
+  const onValueChanged = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      onChange({
+        value: event.target.value,
+        id: model.id,
+      }),
+    [onChange, model.id]
+  );
+
+  const onDeleteFn = useCallback(() => onDelete(model.id), [onDelete, model.id]);
 
   return (
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
@@ -95,7 +100,7 @@ function NumberRow({
           title={deleteBtnAriaLabel}
           color="danger"
           iconType="trash"
-          onClick={() => onDelete(model.id)}
+          onClick={onDeleteFn}
           disabled={disableDelete}
         />
       </EuiFlexItem>

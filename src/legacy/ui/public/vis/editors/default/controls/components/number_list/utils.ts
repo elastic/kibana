@@ -42,28 +42,25 @@ function getRange(range?: string): Range {
 }
 
 function validateValue(value: number | '', numberRange: Range) {
-  const result = {
+  const result: { isValid: boolean; error?: string } = {
     isValid: true,
-    errors: [] as string[],
   };
 
   if (value === EMPTY_STRING) {
     result.isValid = false;
   } else if (!numberRange.within(value)) {
     result.isValid = false;
-    result.errors.push(
-      i18n.translate('common.ui.aggTypes.numberList.invalidRangeErrorMessage', {
-        defaultMessage: 'The value should be in the range of {min} to {max}.',
-        values: { min: numberRange.min, max: numberRange.max },
-      })
-    );
+    result.error = i18n.translate('common.ui.aggTypes.numberList.invalidRangeErrorMessage', {
+      defaultMessage: 'The value should be in the range of {min} to {max}.',
+      values: { min: numberRange.min, max: numberRange.max },
+    });
   }
 
   return result;
 }
 
 function validateOrder(list: NumberRowModel[]) {
-  let isInvalidOrder = false;
+  let isValidOrder = true;
   list.forEach((model, index, array) => {
     const previousModel = array[index - 1];
     if (previousModel && model.value !== EMPTY_STRING) {
@@ -74,12 +71,12 @@ function validateOrder(list: NumberRowModel[]) {
       }
 
       if (isInvalidOrderOfItem) {
-        isInvalidOrder = true;
+        isValidOrder = false;
       }
     }
   });
 
-  return isInvalidOrder;
+  return isValidOrder;
 }
 
 function getNextModel(list: NumberRowModel[], range: Range): NumberRowModel {
@@ -118,12 +115,12 @@ function getUpdatedModels(
   return numberList.map((number, index) => {
     const model = modelList[index] || { id: generateId() };
     const newValue: NumberRowModel['value'] = number === undefined ? EMPTY_STRING : number;
-    const { isValid, errors } = validateValue(newValue, numberRange);
+    const { isValid, error } = validateValue(newValue, numberRange);
     return {
       ...model,
       value: newValue,
       isInvalid: !isValid,
-      errors,
+      error,
     };
   });
 }
