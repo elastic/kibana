@@ -15,6 +15,7 @@ export * from './elements';
 export * from './functions';
 export * from './renderers';
 export * from './shortcuts';
+export * from './tags';
 export * from './transitions';
 export * from './ui';
 export * from './units';
