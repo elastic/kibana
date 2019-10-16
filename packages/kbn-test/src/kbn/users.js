@@ -30,6 +30,6 @@ export const kibanaServerTestUser = {
 };
 
 export const adminTestUser = {
-  username: env.TEST_ES_USER || 'kibana',
+  username: env.TEST_ES_USER || 'elastic',
   password: env.TEST_ES_PASS || 'changeme',
 };
