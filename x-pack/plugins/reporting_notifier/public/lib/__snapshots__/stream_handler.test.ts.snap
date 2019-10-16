@@ -103,7 +103,7 @@ Array [
       </p>
     </React.Fragment>,
     "title": <FormattedMessage
-      defaultMessage="Couldn't create report for {reportObjectType} '{reportObjectTitle}'"
+      defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
       id="xpack.reportingNotifier.error.couldNotCreateReportTitle"
       values={
         Object {
