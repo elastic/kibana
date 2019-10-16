@@ -16,7 +16,9 @@ import { KpiHosts } from '../kpi_hosts';
 import { ElasticsearchKpiHostsAdapter } from '../kpi_hosts/elasticsearch_adapter';
 
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
-import { ElasticsearchIpOverviewAdapter, IpDetails } from '../ip_details';
+import { ElasticsearchIpDetailsAdapter, IpDetails } from '../ip_details';
+import { ElasticsearchTlsAdapter, TLS } from '../tls';
+
 import { KpiNetwork } from '../kpi_network';
 import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
 import { ElasticsearchNetworkAdapter, Network } from '../network';
@@ -45,7 +47,8 @@ export function compose(server: Server): AppBackendLibs {
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
-    ipDetails: new IpDetails(new ElasticsearchIpOverviewAdapter(framework)),
+    ipDetails: new IpDetails(new ElasticsearchIpDetailsAdapter(framework)),
+    tls: new TLS(new ElasticsearchTlsAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
     network: new Network(new ElasticsearchNetworkAdapter(framework)),

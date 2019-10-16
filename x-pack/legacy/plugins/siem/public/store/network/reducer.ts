@@ -10,7 +10,7 @@ import {
   Direction,
   FlowTarget,
   NetworkDnsFields,
-  NetworkTopNFlowFields,
+  NetworkTopTablesFields,
   TlsFields,
   UsersFields,
 } from '../../graphql/types';
@@ -24,6 +24,8 @@ import {
   updateIpDetailsTableActivePage,
   updateIsPtrIncluded,
   updateNetworkPageTableActivePage,
+  updateTopCountriesLimit,
+  updateTopCountriesSort,
   updateTlsLimit,
   updateTlsSort,
   updateTopNFlowLimit,
@@ -46,7 +48,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -54,7 +56,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -67,15 +69,55 @@ export const initialNetworkState: NetworkState = {
         },
         isPtrIncluded: false,
       },
+      [NetworkTableType.tls]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        tlsSortField: {
+          field: TlsFields._id,
+          direction: Direction.desc,
+        },
+      },
+      [NetworkTableType.topCountriesSource]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopTablesFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [NetworkTableType.topCountriesDestination]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopTablesFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
     },
   },
   details: {
     queries: {
+      [IpDetailsTableType.topCountriesSource]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopTablesFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [IpDetailsTableType.topCountriesDestination]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        topCountriesSort: {
+          field: NetworkTopTablesFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
       [IpDetailsTableType.topNFlowSource]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -83,7 +125,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_out,
           direction: Direction.desc,
         },
       },
@@ -263,6 +305,84 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
     }
     return state;
   })
+  .case(updateTopCountriesLimit, (state, { limit, networkType, tableType }) => {
+    if (
+      networkType === NetworkType.page &&
+      (tableType === NetworkTableType.topCountriesSource ||
+        tableType === NetworkTableType.topCountriesDestination)
+    ) {
+      return {
+        ...state,
+        [networkType]: {
+          ...state[networkType],
+          queries: {
+            ...state[networkType].queries,
+            [tableType]: {
+              ...state[networkType].queries[tableType],
+              limit,
+            },
+          },
+        },
+      };
+    } else if (
+      tableType === IpDetailsTableType.topCountriesDestination ||
+      tableType === IpDetailsTableType.topCountriesSource
+    ) {
+      return {
+        ...state,
+        [NetworkType.details]: {
+          ...state[NetworkType.details],
+          queries: {
+            ...state[NetworkType.details].queries,
+            [tableType]: {
+              ...state[NetworkType.details].queries[tableType],
+              limit,
+            },
+          },
+        },
+      };
+    }
+    return state;
+  })
+  .case(updateTopCountriesSort, (state, { topCountriesSort, networkType, tableType }) => {
+    if (
+      networkType === NetworkType.page &&
+      (tableType === NetworkTableType.topCountriesSource ||
+        tableType === NetworkTableType.topCountriesDestination)
+    ) {
+      return {
+        ...state,
+        [networkType]: {
+          ...state[networkType],
+          queries: {
+            ...state[networkType].queries,
+            [tableType]: {
+              ...state[networkType].queries[tableType],
+              topCountriesSort,
+            },
+          },
+        },
+      };
+    } else if (
+      tableType === IpDetailsTableType.topCountriesDestination ||
+      tableType === IpDetailsTableType.topCountriesSource
+    ) {
+      return {
+        ...state,
+        [NetworkType.details]: {
+          ...state[NetworkType.details],
+          queries: {
+            ...state[NetworkType.details].queries,
+            [tableType]: {
+              ...state[NetworkType.details].queries[tableType],
+              topCountriesSort,
+            },
+          },
+        },
+      };
+    }
+    return state;
+  })
   .case(updateIpDetailsFlowTarget, (state, { flowTarget }) => ({
     ...state,
     [NetworkType.details]: {
@@ -270,27 +390,27 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       flowTarget,
     },
   }))
-  .case(updateTlsLimit, (state, { limit }) => ({
+  .case(updateTlsLimit, (state, { limit, networkType }) => ({
     ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
+    [networkType]: {
+      ...state[networkType],
       queries: {
-        ...state[NetworkType.details].queries,
-        [IpDetailsTableType.tls]: {
-          ...state[NetworkType.details].queries.tls,
+        ...state[networkType].queries,
+        tls: {
+          ...state[networkType].queries.tls,
           limit,
         },
       },
     },
   }))
-  .case(updateTlsSort, (state, { tlsSortField }) => ({
+  .case(updateTlsSort, (state, { tlsSortField, networkType }) => ({
     ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
+    [networkType]: {
+      ...state[networkType],
       queries: {
-        ...state[NetworkType.details].queries,
-        [IpDetailsTableType.tls]: {
-          ...state[NetworkType.details].queries.tls,
+        ...state[networkType].queries,
+        tls: {
+          ...state[networkType].queries.tls,
           tlsSortField,
         },
       },

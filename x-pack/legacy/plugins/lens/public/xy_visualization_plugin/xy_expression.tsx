@@ -177,6 +177,8 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
     layers.length > 1 || data.tables[layers[0].layerId].columns.length > 2;
   const shouldRotate = isHorizontalChart(layers);
 
+  const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
+
   return (
     <Chart>
       <Settings
@@ -198,7 +200,7 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
       <Axis
         id={getAxisId('x')}
         position={shouldRotate ? Position.Left : Position.Bottom}
-        title={args.xTitle}
+        title={xTitle}
         showGridLines={false}
         hide={layers[0].hide}
         tickFormat={d => xAxisFormatter.convert(d)}

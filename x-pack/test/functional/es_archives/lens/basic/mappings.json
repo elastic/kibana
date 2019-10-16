@@ -9,9 +9,6 @@
     "mappings": {
       "_meta": {
         "migrationMappingPropertyHashes": {
-          "action": "ecc01e367a369542bc2b15dae1fb1773",
-          "action_task_params": "a9d49f184ee89641044be0ca2950fa3a",
-          "alert": "b2d549df61fd5bf8098427ec68a4712d",
           "apm-telemetry": "07ee1939fa4302c62ddc052ec03fed90",
           "canvas-element": "7390014e1091044523666d97247392fc",
           "canvas-workpad": "b0a1706d356228dbdcb4a17e6b9eb231",
@@ -21,10 +18,12 @@
           "graph-workspace": "cd7ba1330e6682e9cc00b78850874be1",
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
           "infrastructure-ui-source": "ddc0ecb18383f6b26101a2fadb2dab0c",
+          "inventory-view": "84b320fd67209906333ffce261128462",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
-          "lens": "d69713426be87ba23283776aab149b9a",
+          "lens": "21c3ea0763beb1ecb0162529706b88c5",
           "map": "23d7aa4a720d4938ccde3983f87bd58d",
           "maps-telemetry": "a4229f8b16a6820c6d724b7e0c1f729d",
+          "metrics-explorer-view": "53c5365793677328df0ccb6138bf3cdd",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
           "ml-telemetry": "257fd1d4b4fdbb9cb4b8a3b27da201e9",
           "namespace": "2f4316de49999235636386fe51dc06c1",
@@ -36,7 +35,7 @@
           "siem-ui-timeline": "1f6f0860ad7bc0dba3e42467ca40470d",
           "siem-ui-timeline-note": "8874706eedc49059d4cf0f5094559084",
           "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
-          "space": "25de8c2deec044392922989cfcf24c54",
+          "space": "c5ca8acafa0beaa4d08d014a97b6bc6b",
           "telemetry": "e1c8bc94e443aefd9458932cc0697a4d",
           "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "type": "2f4316de49999235636386fe51dc06c1",
@@ -458,6 +457,77 @@
             }
           }
         },
+        "inventory-view": {
+          "properties": {
+            "autoBounds": {
+              "type": "boolean"
+            },
+            "autoReload": {
+              "type": "boolean"
+            },
+            "boundsOverride": {
+              "properties": {
+                "max": {
+                  "type": "integer"
+                },
+                "min": {
+                  "type": "integer"
+                }
+              }
+            },
+            "customOptions": {
+              "properties": {
+                "field": {
+                  "type": "keyword"
+                },
+                "text": {
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
+            },
+            "filterQuery": {
+              "properties": {
+                "expression": {
+                  "type": "keyword"
+                },
+                "kind": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "groupBy": {
+              "properties": {
+                "field": {
+                  "type": "keyword"
+                },
+                "label": {
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
+            },
+            "metric": {
+              "properties": {
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "nodeType": {
+              "type": "keyword"
+            },
+            "time": {
+              "type": "integer"
+            },
+            "view": {
+              "type": "keyword"
+            }
+          }
+        },
         "kql-telemetry": {
           "properties": {
             "optInCount": {
@@ -475,8 +545,7 @@
               "type": "keyword"
             },
             "state": {
-              "enabled": false,
-              "type": "object"
+              "type": "flattened"
             },
             "title": {
               "type": "text"
@@ -556,6 +625,72 @@
             },
             "timeCaptured": {
               "type": "date"
+            }
+          }
+        },
+        "metrics-explorer-view": {
+          "properties": {
+            "chartOptions": {
+              "properties": {
+                "stack": {
+                  "type": "boolean"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "yAxisMode": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "currentTimerange": {
+              "properties": {
+                "from": {
+                  "type": "keyword"
+                },
+                "interval": {
+                  "type": "keyword"
+                },
+                "to": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "options": {
+              "properties": {
+                "aggregation": {
+                  "type": "keyword"
+                },
+                "filterQuery": {
+                  "type": "keyword"
+                },
+                "groupBy": {
+                  "type": "keyword"
+                },
+                "limit": {
+                  "type": "integer"
+                },
+                "metrics": {
+                  "properties": {
+                    "aggregation": {
+                      "type": "keyword"
+                    },
+                    "color": {
+                      "type": "keyword"
+                    },
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "label": {
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "nested"
+                }
+              }
             }
           }
         },
@@ -949,6 +1084,10 @@
             },
             "disabledFeatures": {
               "type": "keyword"
+            },
+            "imageUrl": {
+              "index": false,
+              "type": "text"
             },
             "initials": {
               "type": "keyword"

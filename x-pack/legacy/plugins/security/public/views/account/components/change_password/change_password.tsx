@@ -35,7 +35,7 @@ export class ChangePassword extends Component<Props, {}> {
     return (
       <EuiDescribedFormGroup
         fullWidth
-        title={<h3>{changePasswordTitle}</h3>}
+        title={<h2>{changePasswordTitle}</h2>}
         description={
           <p>
             <FormattedMessage

@@ -18,6 +18,7 @@ import { Visualization, FramePublicAPI, Datasource } from '../../types';
 import { Action } from './state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from './suggestion_helpers';
 import { LensIcon } from '../../lens_icon';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -75,6 +76,8 @@ export function ChartSwitch(props: Props) {
 
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
+
+    trackUiEvent(`chart_switch`);
 
     switchToSuggestion(
       props.framePublicAPI,
