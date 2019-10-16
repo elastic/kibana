@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import { noop, times } from 'lodash';
 import { constants } from '../constants';
-import { ClientMock } from './fixtures/elasticsearch';
+import { ClientMock } from './fixtures/legacy_elasticsearch';
 import { JobMock } from './fixtures/job';
 import { WorkerMock } from './fixtures/worker';
 

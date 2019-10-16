@@ -6,7 +6,7 @@
 
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/server';
 
-export { Request, ResponseToolkit, ServerRoute } from 'hapi';
+export { Request, ResponseToolkit, Server, ServerRoute } from 'hapi';
 
 export type InstallationStatus = Installed['status'] | NotInstalled['status'];
 

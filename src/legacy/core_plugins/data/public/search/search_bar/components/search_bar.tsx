@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { compact } from 'lodash';
 import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
@@ -66,7 +67,6 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
-  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
   // Show when user has privileges to save
@@ -196,7 +196,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private shouldRenderFilterBar() {
-    return this.props.showFilterBar && this.props.filters && this.props.indexPatterns;
+    return (
+      this.props.showFilterBar &&
+      this.props.filters &&
+      this.props.indexPatterns &&
+      compact(this.props.indexPatterns).length > 0
+    );
   }
 
   public setFilterBarHeight = () => {

@@ -6,28 +6,28 @@
 
 import { Observable } from 'rxjs';
 import {
-  ClusterClient,
+  CoreSetup as _CoreSetup,
   CoreStart,
-  ElasticsearchServiceSetup,
-  HttpServiceSetup,
+  IClusterClient,
   PluginInitializerContext,
 } from 'src/core/server';
 import { IntegrationsManagerConfigSchema, integrationsManagerConfigStore } from './config';
 import { PLUGIN } from '../common/constants';
+import { Server } from '../common/types';
 import { fetchList } from './registry';
 import { routes } from './routes';
 
 export type IntegrationsManagerPluginInitializerContext = Pick<PluginInitializerContext, 'config'>;
 
 export interface CoreSetup {
-  elasticsearch: ElasticsearchServiceSetup;
-  http: HttpServiceSetup;
+  elasticsearch: _CoreSetup['elasticsearch'];
+  hapiServer: Server;
 }
 
 export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 export interface PluginContext {
-  esClient: ClusterClient;
+  esClient: IClusterClient;
 }
 
 export class Plugin {
@@ -40,8 +40,7 @@ export class Plugin {
     });
   }
   public setup(core: CoreSetup) {
-    const { http, elasticsearch } = core;
-    const { server } = http;
+    const { elasticsearch, hapiServer } = core;
     const pluginContext: PluginContext = {
       esClient: elasticsearch.createClient(PLUGIN.ID),
     };
@@ -60,7 +59,7 @@ export class Plugin {
     });
 
     // map routes to handlers
-    server.route(routesWithContext);
+    hapiServer.route(routesWithContext);
 
     // the JS API for other consumers
     return {
