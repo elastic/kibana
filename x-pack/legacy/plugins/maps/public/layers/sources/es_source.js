@@ -158,7 +158,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  async _makeSearchSource(searchFilters, limit) {
+  async _makeSearchSource(searchFilters, limit, initialSearchContext) {
     const indexPattern = await this._getIndexPattern();
     const isTimeAware = await this.isTimeAware();
     const applyGlobalQuery = _.get(searchFilters, 'applyGlobalQuery', true);
@@ -172,7 +172,7 @@ export class AbstractESSource extends AbstractVectorSource {
       allFilters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
     }
 
-    const searchSource = new SearchSource();
+    const searchSource = new SearchSource(initialSearchContext);
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
@@ -273,7 +273,7 @@ export class AbstractESSource extends AbstractVectorSource {
 
   async _getGeoField() {
     const indexPattern = await this._getIndexPattern();
-    const geoField = indexPattern.fields.byName[this._descriptor.geoField];
+    const geoField = indexPattern.fields.getByName(this._descriptor.geoField);
     if (!geoField) {
       throw new Error(i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
         defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
@@ -301,4 +301,33 @@ export class AbstractESSource extends AbstractVectorSource {
     return this._descriptor.id;
   }
 
+  _getRawFieldName(fieldName) {
+    const metricField = this.getMetricFields().find(({ propertyKey }) => {
+      return propertyKey === fieldName;
+    });
+
+    return metricField ? metricField.field : null;
+  }
+
+  async getFieldFormatter(fieldName) {
+    // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
+    const rawFieldName = this._getRawFieldName(fieldName);
+    if (!rawFieldName) {
+      return null;
+    }
+
+    let indexPattern;
+    try {
+      indexPattern = await this._getIndexPattern();
+    } catch(error) {
+      return null;
+    }
+
+    const fieldFromIndexPattern = indexPattern.fields.getByName(rawFieldName);
+    if (!fieldFromIndexPattern) {
+      return null;
+    }
+
+    return fieldFromIndexPattern.format.getConverterFor('text');
+  }
 }

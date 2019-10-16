@@ -36,6 +36,8 @@ import {
   IndexPatternPrivateState,
   IndexPatternPersistedState,
 } from './types';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { Plugin as DataPlugin } from '../../../../../../src/plugins/data/public';
 import { Datasource, StateSetter } from '..';
 
 export { OperationType, IndexPatternColumn } from './operations';
@@ -97,12 +99,14 @@ export function getIndexPatternDatasource({
   core,
   storage,
   savedObjectsClient,
+  data,
 }: Pick<IndexPatternDatasourceSetupPlugins, 'chrome'> & {
   // Core start is being required here because it contains the savedObject client
   // In the new platform, this plugin wouldn't be initialized until after setup
   core: CoreStart;
   storage: Storage;
   savedObjectsClient: SavedObjectsClientContract;
+  data: ReturnType<DataPlugin['start']>;
 }) {
   const uiSettings = chrome.getUiSettingsClient();
   const onIndexPatternLoadError = (err: Error) =>
@@ -214,17 +218,28 @@ export function getIndexPatternDatasource({
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
             <I18nProvider>
-              <IndexPatternDimensionPanel
-                state={state}
-                setState={setState}
-                uiSettings={uiSettings}
-                storage={storage}
-                savedObjectsClient={core.savedObjects.client}
-                layerId={props.layerId}
-                http={core.http}
-                uniqueLabel={columnLabelMap[props.columnId]}
-                {...props}
-              />
+              <KibanaContextProvider
+                services={{
+                  appName: 'lens',
+                  store: storage,
+                  uiSettings,
+                  data,
+                  savedObjects: core.savedObjects,
+                  docLinks: core.docLinks,
+                }}
+              >
+                <IndexPatternDimensionPanel
+                  state={state}
+                  setState={setState}
+                  uiSettings={uiSettings}
+                  storage={storage}
+                  savedObjectsClient={core.savedObjects.client}
+                  layerId={props.layerId}
+                  http={core.http}
+                  uniqueLabel={columnLabelMap[props.columnId]}
+                  {...props}
+                />
+              </KibanaContextProvider>
             </I18nProvider>,
             domElement
           );

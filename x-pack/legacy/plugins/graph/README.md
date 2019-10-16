@@ -26,7 +26,8 @@ Currently most of the state handling is done by a central angular controller. Th
 * `helpers/` contains side effect free helper functions that can be imported and used from components and services
 * `state_management/` contains reducers, action creators, selectors and sagas. It also exports the central store creator
   * Each file covers one functional area (e.g. handling of fields, handling of url templates...)
-  * There is no file separation between reducers, action creators, selectors and sagas of the same functional area
+  * Generally there is no file separation between reducers, action creators, selectors and sagas of the same functional area
+  * Sagas may contain cross-references between multiple functional areas (e.g. the loading saga sets fields and meta data). Because of this it is possible that circular imports occur. In this case the sagas are moved to a separate file `<functional area>.sagas.ts`.
 * `types/` contains type definitions for unmigrated functions in `angular/` and business objects
 * `app.js` is the central entrypoint of the app. It initializes router, state management and root components. This will become `app.tsx` when the migration is complete
 
