@@ -4,6 +4,8 @@
 
 ## HttpRequestInit.credentials property
 
+The credentials mode associated with request, which is a string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL.
+
 <b>Signature:</b>
 
 ```typescript

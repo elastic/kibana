@@ -12,9 +12,9 @@ import { ESFieldsSelect } from '../../components/es_fields_select';
 import { ESFieldSelect } from '../../components/es_field_select';
 import { ESIndexSelect } from '../../components/es_index_select';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
-import { DataSourceStrings } from '../../../i18n';
+import { ExpressionDataSourceStrings } from '../../../i18n';
 
-const { ESDocs: strings } = DataSourceStrings;
+const { ESDocs: strings } = ExpressionDataSourceStrings;
 
 const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   const setArg = (name, value) => {

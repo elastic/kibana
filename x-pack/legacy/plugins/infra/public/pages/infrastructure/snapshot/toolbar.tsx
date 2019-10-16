@@ -10,22 +10,29 @@ import React from 'react';
 
 import { AutocompleteField } from '../../../components/autocomplete_field';
 import { Toolbar } from '../../../components/eui/toolbar';
-import { WaffleGroupByControls } from '../../../components/waffle/waffle_group_by_controls';
-import { WaffleMetricControls } from '../../../components/waffle/waffle_metric_controls';
-import { WaffleNodeTypeSwitcher } from '../../../components/waffle/waffle_node_type_switcher';
 import { WaffleTimeControls } from '../../../components/waffle/waffle_time_controls';
 import { WithWaffleFilter } from '../../../containers/waffle/with_waffle_filters';
-import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 import { WithSource } from '../../../containers/with_source';
-import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
-import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
-import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
+import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_options';
+import { WaffleInventorySwitcher } from '../../../components/waffle/waffle_inventory_switcher';
 
 export const SnapshotToolbar = () => (
   <Toolbar>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <WithWaffleOptions>
+          {({ changeMetric, changeNodeType, changeGroupBy, nodeType }) => (
+            <WaffleInventorySwitcher
+              nodeType={nodeType}
+              changeNodeType={changeNodeType}
+              changeMetric={changeMetric}
+              changeGroupBy={changeGroupBy}
+            />
+          )}
+        </WithWaffleOptions>
+      </EuiFlexItem>
       <EuiFlexItem>
         <WithSource>
           {({ createDerivedIndexPattern }) => (
@@ -74,65 +81,6 @@ export const SnapshotToolbar = () => (
           )}
         </WithWaffleTime>
       </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup alignItems="center" gutterSize="m">
-      <WithSource>
-        {({ createDerivedIndexPattern }) => (
-          <WithWaffleOptions>
-            {({
-              changeMetric,
-              changeNodeType,
-              changeGroupBy,
-              changeCustomOptions,
-              customOptions,
-              groupBy,
-              metric,
-              nodeType,
-            }) => (
-              <React.Fragment>
-                <EuiFlexItem grow={false}>
-                  <WaffleNodeTypeSwitcher
-                    nodeType={nodeType}
-                    changeNodeType={changeNodeType}
-                    changeMetric={changeMetric}
-                    changeGroupBy={changeGroupBy}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <WaffleMetricControls
-                    metric={metric}
-                    nodeType={nodeType}
-                    onChange={changeMetric}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <WaffleGroupByControls
-                    groupBy={groupBy}
-                    nodeType={nodeType}
-                    onChange={changeGroupBy}
-                    fields={createDerivedIndexPattern('metrics').fields}
-                    onChangeCustomOptions={changeCustomOptions}
-                    customOptions={customOptions}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={true} />
-                <EuiFlexItem grow={false}>
-                  <WithWaffleViewState indexPattern={createDerivedIndexPattern('metrics')}>
-                    {({ defaultViewState, viewState, onViewChange }) => (
-                      <SavedViewsToolbarControls
-                        defaultViewState={defaultViewState}
-                        viewState={viewState}
-                        onViewChange={onViewChange}
-                        viewType={inventoryViewSavedObjectType}
-                      />
-                    )}
-                  </WithWaffleViewState>
-                </EuiFlexItem>
-              </React.Fragment>
-            )}
-          </WithWaffleOptions>
-        )}
-      </WithSource>
     </EuiFlexGroup>
   </Toolbar>
 );

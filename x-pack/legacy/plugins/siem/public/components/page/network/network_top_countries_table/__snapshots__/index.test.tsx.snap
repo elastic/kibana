@@ -126,6 +126,12 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
           "searchable": true,
           "type": "string",
         },
+        Object {
+          "aggregatable": true,
+          "name": "host.name",
+          "searchable": true,
+          "type": "string",
+        },
       ],
       "title": "filebeat-*,auditbeat-*,packetbeat-*",
     }
@@ -262,6 +268,12 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
         Object {
           "aggregatable": true,
           "name": "agent.test8",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "host.name",
           "searchable": true,
           "type": "string",
         },

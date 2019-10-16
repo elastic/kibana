@@ -61,8 +61,6 @@ export const mockNetworkState: NetworkModel = {
         isPtrIncluded: false,
       },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
   },
   details: {
     queries: {
@@ -115,8 +113,6 @@ export const mockNetworkState: NetworkModel = {
         },
       },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
     flowTarget: FlowTarget.source,
   },
 };

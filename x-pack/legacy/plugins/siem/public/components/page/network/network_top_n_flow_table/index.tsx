@@ -107,7 +107,9 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     updateTopNFlowSort,
   }) => {
     useEffect(() => {
-      setIpDetailsTablesActivePageToZero(null);
+      if (ip && activePage !== 0) {
+        setIpDetailsTablesActivePageToZero(null);
+      }
     }, [ip]);
     const onChange = (criteria: Criteria, tableType: networkModel.TopNTableType) => {
       if (criteria.sort != null) {

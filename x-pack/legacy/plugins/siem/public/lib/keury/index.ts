@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import {
+  buildEsQuery,
+  getEsQueryConfig,
+  Filter,
+  fromKueryExpression,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { npSetup } from 'ui/new_platform';
+import { Query } from 'src/plugins/data/common';
 
 import { KueryFilterQuery } from '../../store';
 
@@ -65,3 +73,26 @@ export const escapeKuery = flow(
   escapeNot,
   escapeWhitespace
 );
+
+export const convertToBuildEsQuery = ({
+  indexPattern,
+  queries,
+  filters,
+}: {
+  indexPattern: StaticIndexPattern;
+  queries: Query[];
+  filters: Filter[];
+}) => {
+  try {
+    return JSON.stringify(
+      buildEsQuery(
+        indexPattern,
+        queries,
+        filters.filter(f => f.meta.disabled === false),
+        getEsQueryConfig(npSetup.core.uiSettings)
+      )
+    );
+  } catch (exp) {
+    return '';
+  }
+};

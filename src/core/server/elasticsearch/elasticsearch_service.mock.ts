@@ -21,7 +21,8 @@ import { BehaviorSubject } from 'rxjs';
 import { IClusterClient } from './cluster_client';
 import { IScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch_service';
+import { ElasticsearchService } from './elasticsearch_service';
+import { InternalElasticsearchServiceSetup } from './types';
 
 const createScopedClusterClientMock = (): jest.Mocked<IScopedClusterClient> => ({
   callAsInternalUser: jest.fn(),
@@ -35,7 +36,7 @@ const createClusterClientMock = (): jest.Mocked<IClusterClient> => ({
 });
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<ElasticsearchServiceSetup> = {
+  const setupContract: jest.Mocked<InternalElasticsearchServiceSetup> = {
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },

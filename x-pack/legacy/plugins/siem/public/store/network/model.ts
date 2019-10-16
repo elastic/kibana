@@ -11,7 +11,6 @@ import {
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export enum NetworkType {
   page = 'page',
@@ -75,8 +74,6 @@ export interface NetworkQueries {
 }
 
 export interface NetworkPageModel {
-  filterQuery: SerializedFilterQuery | null;
-  filterQueryDraft: KueryFilterQuery | null;
   queries: NetworkQueries;
 }
 
@@ -100,8 +97,6 @@ export interface IpOverviewQueries {
 }
 
 export interface NetworkDetailsModel {
-  filterQuery: SerializedFilterQuery | null;
-  filterQueryDraft: KueryFilterQuery | null;
   flowTarget: FlowTarget;
   queries: IpOverviewQueries;
 }

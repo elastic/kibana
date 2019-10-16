@@ -85,10 +85,12 @@ export class NotificationsService {
 
 /** @public */
 export interface NotificationsSetup {
+  /** {@link ToastsSetup} */
   toasts: ToastsSetup;
 }
 
 /** @public */
 export interface NotificationsStart {
+  /** {@link ToastsStart} */
   toasts: ToastsStart;
 }
