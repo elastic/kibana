@@ -48,6 +48,11 @@ test('Git url validation', () => {
     validateGitUrl('https://github.com/elastic/elasticsearch.git', [], ['ssh']);
   }).toThrow('Git url protocol is not whitelisted.');
 
+  // An valid git url but contains invalid content
+  expect(() => {
+    validateGitUrl('https://github.com/elastic/../../elasticsearch.git', [], ['ssh']);
+  }).toThrow('Git url contains invalid content.');
+
   // An valid git url with both whitelisted host and protocol
   expect(
     validateGitUrl('https://github.com/elastic/elasticsearch.git', ['github.com'], ['https'])
