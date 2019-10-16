@@ -276,8 +276,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     // avoids any 'Object with id x not found' errors when switching tests.
     async clearSavedObjectsFromAppLinks() {
-      await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.header.clickVisualize();
+      await PageObjects.visualize.gotoLandingPage();
+      await PageObjects.header.clickDashboard();
+      await this.gotoDashboardLandingPage();
     }
 
     async isMarginsOn() {
