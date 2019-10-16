@@ -186,6 +186,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 filterOperations: isBucketed,
                 suggestedPriority: 1,
                 layerId: layer.layerId,
+                hideGrouping: true,
               }}
             />
           </EuiFormRow>
