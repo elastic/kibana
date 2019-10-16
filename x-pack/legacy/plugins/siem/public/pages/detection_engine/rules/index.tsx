@@ -14,15 +14,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
   EuiTabbedContent,
+  EuiText,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import styled, { css } from 'styled-components';
 
+import { getEmptyTagValue } from '../../../components/empty_value';
 import { HeaderPage } from '../../../components/header_page';
 import { HeaderSection } from '../../../components/header_section';
 import {
@@ -214,7 +217,7 @@ const AllRules = React.memo(() => {
               <EuiSwitch />
             </TableCardsTd>
             <TableCardsTd style={{ width: '40px' }}>
-              <EuiButtonIcon iconType="boxesVertical" />
+              <EuiButtonIcon aria-label="Rule options" iconType="boxesVertical" />
             </TableCardsTd>
           </TableCardsRow>
 
@@ -250,7 +253,7 @@ const AllRules = React.memo(() => {
               <EuiSwitch />
             </TableCardsTd>
             <TableCardsTd style={{ width: '40px' }}>
-              <EuiButtonIcon iconType="boxesVertical" />
+              <EuiButtonIcon aria-label="Rule options" iconType="boxesVertical" />
             </TableCardsTd>
           </TableCardsRow>
         </TableCardsTbody>
@@ -261,52 +264,141 @@ const AllRules = React.memo(() => {
 AllRules.displayName = 'AllRules';
 
 const ActivityMonitor = React.memo(() => {
-  const columns = [
+  const [selectedState, setSelectedState] = useState([]);
+  const [sortFieldState, setSortFieldState] = useState('ran');
+  const [sortDirectionState, setSortDirectionState] = useState('desc');
+
+  // const actions = [
+  //   {
+  //     render: (item = {}) => {
+  //       if (item.status === 'Running') {
+  //         return <EuiLink color="danger">{'Stop'}</EuiLink>;
+  //       } else if (item.status === 'Stopped') {
+  //         return <EuiLink color="danger">{'Resume'}</EuiLink>;
+  //       } else {
+  //         return <p>{'Nada'}</p>;
+  //       }
+  //     },
+  //   },
+  // ];
+
+  const actions = [
     {
-      field: 'checkbox',
-      name: 'Checkbox',
-      truncateText: true,
+      available: (item = {}) => {
+        return item.status === 'Running' ? true : false;
+      },
+      name: 'Stop',
+      isPrimary: true,
+      description: 'Stop rule from running',
+      icon: 'stop',
+      type: 'button',
+      onClick: () => {},
     },
+    {
+      available: (item = {}) => {
+        return item.status === 'Stopped' ? true : false;
+      },
+      name: 'Resume',
+      isPrimary: true,
+      description: 'Resume running rule',
+      icon: 'play',
+      type: 'button',
+      onClick: () => {},
+    },
+  ];
+
+  const columns = [
     {
       field: 'rule',
       name: 'Rule',
+      render: (value: string) => (
+        <EuiLink href="#/detection-engine/rules/rule-details">{value}</EuiLink>
+      ),
+      sortable: true,
       truncateText: true,
     },
     {
       field: 'ran',
       name: 'Ran',
+      sortable: true,
       truncateText: true,
     },
     {
       field: 'lookedBackTo',
       name: 'Looked back to',
+      sortable: true,
       truncateText: true,
     },
     {
       field: 'status',
       name: 'Status',
+      sortable: true,
       truncateText: true,
     },
     {
       field: 'response',
       name: 'Response',
+      render: (value: string | undefined) => {
+        return value === undefined ? (
+          getEmptyTagValue()
+        ) : (
+          <>
+            {value === 'Fail' ? (
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiHealth color="danger">{value}</EuiHealth>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip content="Full fail message here." type="iInCircle" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiHealth color="success">{value}</EuiHealth>
+            )}
+          </>
+        );
+      },
+      sortable: true,
       truncateText: true,
     },
     {
-      field: 'actions',
-      name: '',
+      actions,
     },
   ];
 
   const items = [
     {
-      checkbox: 'test',
-      rule: 'test',
-      ran: 'test',
-      lookedBackTo: 'test',
-      status: 'test',
-      response: 'test',
-      actions: 'test',
+      id: 1,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Running',
+      actions: 'Stop',
+    },
+    {
+      id: 2,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Stopped',
+      actions: 'Resume',
+    },
+    {
+      id: 3,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Fail',
+    },
+    {
+      id: 4,
+      rule: 'Automated exfiltration',
+      ran: '12/28/2019, 12:00 PM',
+      lookedBackTo: '12/28/2019, 12:00 PM',
+      status: 'Completed',
+      response: 'Success',
     },
   ];
 
@@ -335,7 +427,30 @@ const ActivityMonitor = React.memo(() => {
           </UtilityBarSection>
         </UtilityBar>
 
-        <EuiBasicTable items={items} columns={columns} />
+        <EuiBasicTable
+          columns={columns}
+          isSelectable={true}
+          itemId="id"
+          items={items}
+          onChange={({ sort = {} }) => {
+            setSortFieldState(sort.field);
+            setSortDirectionState(sort.direction);
+          }}
+          selection={{
+            selectable: (item = {}) => item.status !== 'Completed',
+            selectableMessage: (item = {}) =>
+              item.status !== 'Completed' ? 'Completed runs cannot be acted upon' : undefined,
+            onSelectionChange: (item = {}) => {
+              setSelectedState(item);
+            },
+          }}
+          sorting={{
+            sort: {
+              field: sortFieldState,
+              direction: sortDirectionState,
+            },
+          }}
+        />
       </EuiPanel>
     </>
   );
