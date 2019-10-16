@@ -764,19 +764,17 @@ export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = 
     // (undocumented)
     id: string;
     // (undocumented)
-    options?: SavedObjectsBulkUpdateOptions;
+    references?: SavedObjectReference[];
     // (undocumented)
     type: string;
+    // (undocumented)
+    version?: string;
 }
 
 // @public (undocumented)
 export interface SavedObjectsBulkUpdateOptions {
     // (undocumented)
     namespace?: string;
-    // (undocumented)
-    references?: SavedObjectReference[];
-    // (undocumented)
-    version?: string;
 }
 
 // @public
@@ -788,7 +786,7 @@ export class SavedObjectsClient {
         id: string;
         type: string;
     }[]) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
-    bulkUpdate<T extends SavedObjectAttributes>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
+    bulkUpdate<T extends SavedObjectAttributes>(objects?: SavedObjectsBulkUpdateObject[], options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
     find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "searchFields" | "defaultSearchOperator" | "hasReference" | "sortField" | "page" | "perPage" | "fields">) => Promise<SavedObjectsFindResponsePublic<T>>;

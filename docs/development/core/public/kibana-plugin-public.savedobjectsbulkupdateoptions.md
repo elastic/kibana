@@ -16,6 +16,4 @@ export interface SavedObjectsBulkUpdateOptions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [namespace](./kibana-plugin-public.savedobjectsbulkupdateoptions.namespace.md) | <code>string</code> |  |
-|  [references](./kibana-plugin-public.savedobjectsbulkupdateoptions.references.md) | <code>SavedObjectReference[]</code> |  |
-|  [version](./kibana-plugin-public.savedobjectsbulkupdateoptions.version.md) | <code>string</code> |  |
 

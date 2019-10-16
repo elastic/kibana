@@ -1166,7 +1166,7 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> extends SavedObjectsUpdateOptions, SavedObjectsBaseOptions {
+export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any> extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
     attributes: Partial<T>;
     id: string;
     type: string;
@@ -1178,13 +1178,13 @@ export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes 
     saved_objects: Array<SavedObjectsUpdateResponse<T>>;
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export class SavedObjectsClient {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepository" needs to be exported by the entry point index.d.ts
     constructor(repository: SavedObjectsRepository);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
-    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>): Promise<SavedObjectsBulkUpdateResponse<T>>;
+    bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T extends SavedObjectAttributes = any>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     delete(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<{}>;
     // (undocumented)
