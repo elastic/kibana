@@ -12,7 +12,7 @@ export const networkTopNFlowQuery = gql`
     $ip: String
     $filterQuery: String
     $pagination: PaginationInputPaginated!
-    $sort: NetworkTopNFlowSortField!
+    $sort: NetworkTopTablesSortField!
     $flowTarget: FlowTargetSourceDest!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!

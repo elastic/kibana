@@ -3,11 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -16,8 +14,8 @@ import {
   Direction,
   FlowTargetSourceDest,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowFields,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesFields,
+  NetworkTopTablesSortField,
 } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
@@ -42,7 +40,7 @@ interface OwnProps {
 interface NetworkTopNFlowTableReduxProps {
   activePage: number;
   limit: number;
-  topNFlowSort: NetworkTopNFlowSortField;
+  topNFlowSort: NetworkTopTablesSortField;
 }
 
 interface NetworkTopNFlowTableDispatchProps {
@@ -60,7 +58,7 @@ interface NetworkTopNFlowTableDispatchProps {
     tableType: networkModel.TopNTableType;
   }>;
   updateTopNFlowSort: ActionCreator<{
-    topNFlowSort: NetworkTopNFlowSortField;
+    topNFlowSort: NetworkTopTablesSortField;
     networkType: networkModel.NetworkType;
     tableType: networkModel.TopNTableType;
   }>;
@@ -110,8 +108,8 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
         const field = last(splitField);
         const newSortDirection =
           field !== topNFlowSort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-        const newTopNFlowSort: NetworkTopNFlowSortField = {
-          field: field as NetworkTopNFlowFields,
+        const newTopNFlowSort: NetworkTopTablesSortField = {
+          field: field as NetworkTopTablesFields,
           direction: newSortDirection,
         };
         if (!isEqual(newTopNFlowSort, topNFlowSort)) {
@@ -145,8 +143,8 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     }
 
     const field =
-      topNFlowSort.field === NetworkTopNFlowFields.bytes_out ||
-      topNFlowSort.field === NetworkTopNFlowFields.bytes_in
+      topNFlowSort.field === NetworkTopTablesFields.bytes_out ||
+      topNFlowSort.field === NetworkTopTablesFields.bytes_in
         ? `node.network.${topNFlowSort.field}`
         : `node.${flowTargeted}.${topNFlowSort.field}`;
 
@@ -197,9 +195,3 @@ export const NetworkTopNFlowTable = connect(
     updateIpDetailsTableActivePage: networkActions.updateIpDetailsTableActivePage,
   }
 )(NetworkTopNFlowTableComponent);
-
-const SelectTypeItem = styled(EuiFlexItem)`
-  min-width: 180px;
-`;
-
-SelectTypeItem.displayName = 'SelectTypeItem';

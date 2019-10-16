@@ -10,7 +10,7 @@ import {
   FlowTarget,
   HostsFields,
   NetworkDnsFields,
-  NetworkTopNFlowFields,
+  NetworkTopTablesFields,
   TlsFields,
   UsersFields,
 } from '../graphql/types';
@@ -65,15 +65,25 @@ export const mockGlobalState: State = {
   network: {
     page: {
       queries: {
+        [networkModel.NetworkTableType.topCountriesDestination]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
+        [networkModel.NetworkTableType.topCountriesSource]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
         [networkModel.NetworkTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
         [networkModel.NetworkTableType.topNFlowDestination]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
         [networkModel.NetworkTableType.dns]: {
           activePage: 0,
@@ -91,15 +101,25 @@ export const mockGlobalState: State = {
     details: {
       flowTarget: FlowTarget.source,
       queries: {
+        [networkModel.IpDetailsTableType.topCountriesDestination]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
+        [networkModel.IpDetailsTableType.topCountriesSource]: {
+          activePage: 0,
+          limit: 10,
+          topCountriesSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
         [networkModel.IpDetailsTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
         [networkModel.IpDetailsTableType.topNFlowDestination]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+          topNFlowSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
         [networkModel.IpDetailsTableType.tls]: {
           activePage: 0,

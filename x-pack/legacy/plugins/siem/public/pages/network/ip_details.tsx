@@ -40,6 +40,8 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../store/network/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { NetworkEmptyPage } from './network_empty_page';
+import { NetworkTopCountriesQuery } from '../../containers/network_top_countries';
+import { NetworkTopCountriesTable } from '../../components/page/network/network_top_countries_table';
 import * as i18n from './translations';
 import { IPDetailsComponentProps } from './types';
 
@@ -47,6 +49,7 @@ const TlsTableManage = manageQuery(TlsTable);
 const UsersTableManage = manageQuery(UsersTable);
 const IpOverviewManage = manageQuery(IpOverview);
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
+const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 
 export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
   ({
@@ -217,6 +220,94 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                         />
                       )}
                     </NetworkTopNFlowQuery>
+                  </EuiFlexItem>
+                </ConditionalFlexGroup>
+
+                <EuiSpacer />
+
+                <ConditionalFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <NetworkTopCountriesQuery
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      flowTarget={FlowTargetSourceDest.source}
+                      ip={ip}
+                      skip={isInitializing}
+                      sourceId="default"
+                      startDate={from}
+                      type={networkModel.NetworkType.details}
+                    >
+                      {({
+                        id,
+                        inspect,
+                        isInspected,
+                        loading,
+                        loadPage,
+                        networkTopCountries,
+                        pageInfo,
+                        refetch,
+                        totalCount,
+                      }) => (
+                        <NetworkTopCountriesTableManage
+                          data={networkTopCountries}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                          flowTargeted={FlowTargetSourceDest.source}
+                          id={id}
+                          indexPattern={indexPattern}
+                          inspect={inspect}
+                          isInspect={isInspected}
+                          loading={loading}
+                          loadPage={loadPage}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                          totalCount={totalCount}
+                          type={networkModel.NetworkType.details}
+                        />
+                      )}
+                    </NetworkTopCountriesQuery>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <NetworkTopCountriesQuery
+                      endDate={to}
+                      flowTarget={FlowTargetSourceDest.destination}
+                      filterQuery={filterQuery}
+                      ip={ip}
+                      skip={isInitializing}
+                      sourceId="default"
+                      startDate={from}
+                      type={networkModel.NetworkType.details}
+                    >
+                      {({
+                        id,
+                        inspect,
+                        isInspected,
+                        loading,
+                        loadPage,
+                        networkTopCountries,
+                        pageInfo,
+                        refetch,
+                        totalCount,
+                      }) => (
+                        <NetworkTopCountriesTableManage
+                          data={networkTopCountries}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                          flowTargeted={FlowTargetSourceDest.destination}
+                          id={id}
+                          indexPattern={indexPattern}
+                          inspect={inspect}
+                          isInspect={isInspected}
+                          loading={loading}
+                          loadPage={loadPage}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                          totalCount={totalCount}
+                          type={networkModel.NetworkType.details}
+                        />
+                      )}
+                    </NetworkTopCountriesQuery>
                   </EuiFlexItem>
                 </ConditionalFlexGroup>
 

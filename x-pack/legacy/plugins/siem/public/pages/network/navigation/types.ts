@@ -47,8 +47,9 @@ export type NetworkRoutesProps = GlobalTimeArgs & {
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };
 
-export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.ips &
+export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.countries &
   NetworkRouteType.dns &
+  NetworkRouteType.ips &
   NetworkRouteType.tls;
 
 type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
@@ -60,6 +61,7 @@ export type NetworkNavTab = Record<KeyNetworkNavTab, NavTab>;
 
 export enum NetworkRouteType {
   ips = 'ips',
+  countries = 'countries',
   dns = 'dns',
   anomalies = 'anomalies',
   tls = 'tls',

@@ -16,6 +16,14 @@ import { DEFAULT_TABLE_ACTIVE_PAGE } from '../constants';
 
 export const setNetworkPageQueriesActivePageToZero = (state: NetworkModel): NetworkQueries => ({
   ...state.page.queries,
+  [NetworkTableType.topCountriesSource]: {
+    ...state.page.queries[NetworkTableType.topCountriesSource],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
+  [NetworkTableType.topCountriesDestination]: {
+    ...state.page.queries[NetworkTableType.topCountriesDestination],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
   [NetworkTableType.topNFlowSource]: {
     ...state.page.queries[NetworkTableType.topNFlowSource],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -38,6 +46,14 @@ export const setNetworkDetailsQueriesActivePageToZero = (
   state: NetworkModel
 ): IpOverviewQueries => ({
   ...state.details.queries,
+  [IpDetailsTableType.topCountriesSource]: {
+    ...state.details.queries[IpDetailsTableType.topCountriesSource],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
+  [IpDetailsTableType.topCountriesDestination]: {
+    ...state.details.queries[IpDetailsTableType.topCountriesDestination],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
   [IpDetailsTableType.topNFlowSource]: {
     ...state.details.queries[IpDetailsTableType.topNFlowSource],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
