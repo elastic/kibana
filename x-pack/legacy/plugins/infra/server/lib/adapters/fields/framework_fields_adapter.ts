@@ -37,13 +37,14 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
 
   public async getIndexFields(
     request: InfraFrameworkRequest,
-    indices: string
+    indices: string,
+    timefield: string
   ): Promise<IndexFieldDescriptor[]> {
     const indexPatternsService = this.framework.getIndexPatternsService(request);
     const response = await indexPatternsService.getFieldsForWildcard({
       pattern: indices,
     });
-    const { dataSets, modules } = await this.getDataSetsAndModules(request, indices);
+    const { dataSets, modules } = await this.getDataSetsAndModules(request, indices, timefield);
     const allowedList = modules.reduce(
       (acc, name) => uniq([...acc, ...getAllowedListForPrefix(name)]),
       [] as string[]
@@ -57,7 +58,8 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
 
   private async getDataSetsAndModules(
     request: InfraFrameworkRequest,
-    indices: string
+    indices: string,
+    timefield: string
   ): Promise<{ dataSets: string[]; modules: string[] }> {
     const params = {
       index: indices,
@@ -65,6 +67,20 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
       ignoreUnavailable: true,
       body: {
         size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [timefield]: {
+                    gte: 'now-24h',
+                    lte: 'now',
+                  },
+                },
+              },
+            ],
+          },
+        },
         aggs: {
           datasets: {
             composite: {
