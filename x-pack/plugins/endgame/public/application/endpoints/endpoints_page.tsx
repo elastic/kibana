@@ -10,6 +10,7 @@ import { withRouter } from 'react-router-dom';
 import { EuiBasicTable, EuiLink } from '@elastic/eui';
 import { EndgameAppContext } from '../../common/app_context';
 import { Page } from '../../components/page';
+import { SearchBar } from '../../components/search_bar';
 
 const EndpointName = withRouter(function({ history, path, name }) {
   return <EuiLink onClick={() => history.push(path)}>{name}</EuiLink>;
@@ -50,10 +51,21 @@ const columns = [
   },
 ];
 
+interface Props {
+  endpointMetadata: any;
+}
+
+interface State {
+  queriedEndpointMetadata: {};
+}
+
 export class EndpointsPage extends PureComponent {
   static contextType = EndgameAppContext;
 
-  state = { results: [] };
+  state = { results: [], queriedEndpointMetadata: null };
+  public updateOnChange = ({ updatedResult }: { updatedResult: {} }) => {
+    this.setState({ queriedEndpointMetadata: updatedResult });
+  };
 
   context!: React.ContextType<typeof EndgameAppContext>;
 
@@ -62,6 +74,11 @@ export class EndpointsPage extends PureComponent {
 
     return (
       <Page title="Endpoints">
+        <SearchBar
+          searchItems={results}
+          defaultFields={[`_source`]}
+          updateOnChange={this.updateOnChange}
+        />
         <EuiBasicTable items={results} columns={columns} />
         <code>
           <pre>{JSON.stringify(this.state.results, null, 4)}</pre>
