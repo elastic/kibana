@@ -24,13 +24,17 @@ interface HostDetailsComponentReduxProps {
   filters: Filter[];
 }
 
-interface HostDetailsComponentDispatchProps {
+interface HostBodyComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
     to: number;
   }>;
   detailName: string;
+}
+
+interface HostDetailsComponentDispatchProps extends HostBodyComponentDispatchProps {
+  setHostDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
 export interface HostDetailsBodyProps extends HostsQueryProps {
@@ -43,7 +47,7 @@ export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
   HostsQueryProps;
 
 export type HostDetailsBodyComponentProps = HostDetailsComponentReduxProps &
-  HostDetailsComponentDispatchProps &
+  HostBodyComponentDispatchProps &
   HostDetailsBodyProps;
 
 type KeyHostDetailsNavTabWithoutMlPermission = HostsTableType.authentications &
