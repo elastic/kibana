@@ -30,19 +30,19 @@ const whitelistUrlSchemes = ['http://', 'https://'];
 const URL_TYPES = [
   {
     kind: 'a',
-    text: i18n.translate('dataNP.common.fieldFormats.url.types.link', {
+    text: i18n.translate('data.common.fieldFormats.url.types.link', {
       defaultMessage: 'Link',
     }),
   },
   {
     kind: 'img',
-    text: i18n.translate('dataNP.common.fieldFormats.url.types.img', {
+    text: i18n.translate('data.common.fieldFormats.url.types.img', {
       defaultMessage: 'Image',
     }),
   },
   {
     kind: 'audio',
-    text: i18n.translate('dataNP.common.fieldFormats.url.types.audio', {
+    text: i18n.translate('data.common.fieldFormats.url.types.audio', {
       defaultMessage: 'Audio',
     }),
   },
