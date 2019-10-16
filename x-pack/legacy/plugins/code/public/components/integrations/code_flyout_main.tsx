@@ -57,7 +57,7 @@ export const CodeFlyoutMain = (props: { repo: string; file: string; revision: st
           <h2 id="flyoutTitle">File Preview</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <div>
+      <div className="codeFlyout__subHeader">
         <div className="codeFlyout__fileHeader">
           <EuiIcon className="codeFlyout__icon" type="codeApp" size="m" />
           <EuiText size="s">

@@ -1,3 +1,9 @@
+.codeFlyout__subHeader {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .codeFlyout__fileHeader {
   position: absolute;
   display: flex;
@@ -15,7 +21,6 @@
 
 .codeFlyout__tabs {
   justify-content: flex-end;
-  padding-right: $euiSizeS;
 }
 
 .codeFlyout__content {
