@@ -1,5 +1,5 @@
 {
-  "id": "1",
+  "id": "rule-1",
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",

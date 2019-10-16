@@ -48,23 +48,6 @@ const walk = dir => {
   }, []);
 };
 
-// Temporary hash function for converting string to numbers.
-// TODO: Once we move from numbers to pure strings for id's this can be removed
-// and the file name used as the id (or a GUID), etc...
-const hashFunc = str => {
-  let chr;
-  let hash = 0;
-  if (str.length === 0) return 0;
-  for (let i = 0; i < str.length; i++) {
-    chr = str.charCodeAt(i);
-    // eslint-disable-next-line no-bitwise
-    hash = (hash << 5) - hash + chr;
-    // eslint-disable-next-line no-bitwise
-    hash |= 0;
-  }
-  return hash;
-};
-
 //clean up the file system characters
 const cleanupFileName = file => {
   return path
@@ -109,7 +92,7 @@ async function main() {
     const query = savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.query.query;
     if (query != null && query.trim() !== '') {
       const outputMessage = {
-        id: `${hashFunc(fileToWrite)}`, // TODO: Remove this once we change id to a string
+        id: fileToWrite,
         description: savedSearch.attributes.description || savedSearch.attributes.title,
         index: INDEX,
         interval: INTERVAL,

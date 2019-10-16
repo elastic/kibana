@@ -22,9 +22,7 @@ export const findSignalInArrayById = (objects: object[], id: string): SignalAler
   if (isAlertTypeArray(objects)) {
     const signals: SignalAlertType[] = objects;
     const signal: SignalAlertType[] = signals.filter(datum => {
-      // TODO: Change String(datum.alertTypeParams.id) below once the data type is a string
-      // in the alert params schema
-      return String(datum.alertTypeParams.id) === id;
+      return datum.alertTypeParams.id === id;
     });
     if (signal.length !== 0) {
       return signal[0];
@@ -45,19 +43,28 @@ export const readSignalById = async ({
   alertsClient,
   id,
 }: ReadSignalByIdParams): Promise<SignalAlertType | null> => {
-  let length: number = 0;
-  let page: number = 1;
-  do {
-    const signals = await findSignals({ alertsClient, page });
-    const signal = findSignalInArrayById(signals.data, id);
-    if (signal != null) {
-      return signal;
-    } else {
-      length = signals.data.length;
-      page++;
-    }
-  } while (length !== 0);
-  return null;
+  const firstSignals = await findSignals({ alertsClient, page: 1 });
+  const firstSignal = findSignalInArrayById(firstSignals.data, id);
+  if (firstSignal != null) {
+    return firstSignal;
+  } else {
+    const totalPages = Math.ceil(firstSignals.total / firstSignals.perPage);
+    return Array(totalPages)
+      .fill({})
+      .map((_, page) => {
+        // page index never starts at zero. It always has to be 1 or greater
+        return findSignals({ alertsClient, page: page + 1 });
+      })
+      .reduce<Promise<SignalAlertType | null>>(async (accum, findSignal) => {
+        const signals = await findSignal;
+        const signal = findSignalInArrayById(signals.data, id);
+        if (signal != null) {
+          return signal;
+        } else {
+          return accum;
+        }
+      }, Promise.resolve(null));
+  }
 };
 
 export const readSignals = async ({ alertsClient, id }: ReadSignalParams) => {
