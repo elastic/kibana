@@ -6,10 +6,12 @@
 
 import { get } from 'lodash/fp';
 
+import Hapi from 'hapi';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { Alert } from '../../../../../alerting/server/types';
+import { AlertsClient } from '../../../../../alerting/server/alerts_client';
+import { ActionsClient } from '../../../../../actions/server/actions_client';
 
-// TODO: Migrate the other types over to using this one
 export interface SignalAlertParams {
   description: string;
   from: string;
@@ -22,14 +24,53 @@ export interface SignalAlertParams {
   maxSignals: string;
   name: string;
   severity: number;
-  type: string; // TODO: Replace this type with a static enum type
+  type: 'filter' | 'kql';
   to: string;
+  references: string[];
+}
+
+export interface Clients {
+  alertsClient: AlertsClient;
+  actionsClient: ActionsClient;
+}
+
+export type SignalParams = SignalAlertParams & Clients;
+
+export type DeleteSignalParams = Clients & { id: string };
+
+export interface FindSignalsRequest extends Omit<Hapi.Request, 'query'> {
+  query: {
+    per_page: number;
+    page: number;
+    search?: string;
+    sort_field?: string;
+    fields?: string[];
+  };
+}
+
+export interface FindSignalParams {
+  alertsClient: AlertsClient;
+  perPage?: number;
+  page?: number;
+  sortField?: string;
+  fields?: string[];
+}
+
+export interface ReadSignalParams {
+  alertsClient: AlertsClient;
+  id: string;
 }
 
 export type SignalAlertType = Alert & {
   id: string;
   alertTypeParams: SignalAlertParams;
 };
+
+export interface SignalsRequest extends Hapi.Request {
+  payload: Omit<SignalAlertParams, 'maxSignals'> & {
+    max_signals: string;
+  };
+}
 
 export const isAlertType = (obj: unknown): obj is SignalAlertType => {
   return get('alertTypeId', obj) === SIGNALS_ID;

@@ -6,14 +6,8 @@
 
 import { AlertAction } from '../../../../../alerting/server/types';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { readSignals } from './read_signals';
-
-export interface DeleteSignalParams {
-  alertsClient: AlertsClient;
-  actionsClient: ActionsClient;
-  id: string;
-}
+import { DeleteSignalParams } from './types';
 
 export const deleteAllSignalActions = async (
   actionsClient: ActionsClient,

@@ -88,6 +88,81 @@ describe('update_signals', () => {
       expect(statusCode).toBe(400);
     });
 
+    it('returns 200 if type is kql', async () => {
+      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.get.mockResolvedValue(getResult());
+      actionsClient.update.mockResolvedValue(updateActionResult());
+      alertsClient.update.mockResolvedValue(updateAlertResult());
+      const request: ServerInjectOptions = {
+        method: 'PUT',
+        url: '/api/siem/signals',
+        payload: {
+          id: 'rule-1',
+          description: 'Detecting root and admin users',
+          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          interval: '5m',
+          name: 'Detect Root/Admin Users',
+          severity: 1,
+          type: 'kql',
+          from: 'now-6m',
+          to: 'now',
+          kql: 'user.name: root or user.name: admin',
+        },
+      };
+      const { statusCode } = await server.inject(request);
+      expect(statusCode).toBe(200);
+    });
+
+    it('returns 200 if type is filter', async () => {
+      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.get.mockResolvedValue(getResult());
+      actionsClient.update.mockResolvedValue(updateActionResult());
+      alertsClient.update.mockResolvedValue(updateAlertResult());
+      const request: ServerInjectOptions = {
+        method: 'PUT',
+        url: '/api/siem/signals',
+        payload: {
+          id: 'rule-1',
+          description: 'Detecting root and admin users',
+          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          interval: '5m',
+          name: 'Detect Root/Admin Users',
+          severity: 1,
+          type: 'filter',
+          from: 'now-6m',
+          to: 'now',
+          kql: 'user.name: root or user.name: admin',
+        },
+      };
+      const { statusCode } = await server.inject(request);
+      expect(statusCode).toBe(200);
+    });
+
+    it('returns 400 if type is not filter or kql', async () => {
+      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.get.mockResolvedValue(getResult());
+      actionsClient.update.mockResolvedValue(updateActionResult());
+      alertsClient.update.mockResolvedValue(updateAlertResult());
+      const request: ServerInjectOptions = {
+        method: 'PUT',
+        url: '/api/siem/signals',
+        payload: {
+          id: 'rule-1',
+          description: 'Detecting root and admin users',
+          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          interval: '5m',
+          name: 'Detect Root/Admin Users',
+          severity: 1,
+          type: 'something-made-up', // This is a made up type that causes the 400
+          from: 'now-6m',
+          to: 'now',
+          kql: 'user.name: root or user.name: admin',
+        },
+      };
+      const { statusCode } = await server.inject(request);
+      expect(statusCode).toBe(400);
+    });
+
     it('returns 200 if id is given in the url but not the payload', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());

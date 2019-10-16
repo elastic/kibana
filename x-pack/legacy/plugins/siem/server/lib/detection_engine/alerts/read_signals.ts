@@ -4,19 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { findSignals } from './find_signals';
-import { SignalAlertType, isAlertTypeArray } from './types';
-
-export interface ReadSignalParams {
-  alertsClient: AlertsClient;
-  id: string;
-}
-
-export interface ReadSignalByIdParams {
-  alertsClient: AlertsClient;
-  id: string;
-}
+import { SignalAlertType, isAlertTypeArray, ReadSignalParams } from './types';
 
 export const findSignalInArrayById = (objects: object[], id: string): SignalAlertType | null => {
   if (isAlertTypeArray(objects)) {
@@ -42,7 +31,7 @@ export const findSignalInArrayById = (objects: object[], id: string): SignalAler
 export const readSignalById = async ({
   alertsClient,
   id,
-}: ReadSignalByIdParams): Promise<SignalAlertType | null> => {
+}: ReadSignalParams): Promise<SignalAlertType | null> => {
   const firstSignals = await findSignals({ alertsClient, page: 1 });
   const firstSignal = findSignalInArrayById(firstSignals.data, id);
   if (firstSignal != null) {

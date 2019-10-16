@@ -5,28 +5,8 @@
  */
 
 import { SIGNALS_ID } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
-import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { updateSignal } from './update_signals';
-
-export interface SignalParams {
-  alertsClient: AlertsClient;
-  actionsClient: ActionsClient;
-  description: string;
-  from: string;
-  id: string;
-  index: string[];
-  interval: string;
-  enabled: boolean;
-  filter: Record<string, {}> | undefined;
-  kql: string | undefined;
-  maxSignals: string;
-  name: string;
-  severity: number;
-  type: string; // TODO: Replace this type with a static enum type
-  to: string;
-  references: string[];
-}
+import { SignalParams } from './types';
 
 // TODO: This updateIfIdExists should be temporary and we will remove it once we can POST id's directly to
 // the alerting framework.
@@ -41,6 +21,7 @@ export const updateIfIdExists = async ({
   index,
   interval,
   kql,
+  maxSignals,
   name,
   severity,
   to,
@@ -59,6 +40,7 @@ export const updateIfIdExists = async ({
       index,
       interval,
       kql,
+      maxSignals,
       name,
       severity,
       to,

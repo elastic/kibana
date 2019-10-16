@@ -8,25 +8,7 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { createSignal } from '../alerts/create_signal';
-
-interface SignalsRequest extends Hapi.Request {
-  payload: {
-    description: string;
-    enabled: boolean;
-    filter: Record<string, {}> | undefined;
-    from: string;
-    id: string;
-    index: string[];
-    interval: string;
-    kql: string | undefined;
-    max_signals: string;
-    name: string;
-    severity: number;
-    type: string;
-    to: string;
-    references: string[];
-  };
-}
+import { SignalsRequest } from '../alerts/types';
 
 export const createCreateSignalsRoute: Hapi.ServerRoute = {
   method: 'POST',
@@ -50,7 +32,9 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
         name: Joi.string().required(),
         severity: Joi.number().required(),
         to: Joi.string().required(),
-        type: Joi.string().required(), // TODO: Restrict this to only be kql or filter for the moment
+        type: Joi.string()
+          .valid('filter', 'kql')
+          .required(),
         references: Joi.array().default([]),
       }).xor('filter', 'kql'),
     },

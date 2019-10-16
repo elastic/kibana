@@ -6,28 +6,8 @@
 
 import { defaults } from 'lodash/fp';
 import { AlertAction } from '../../../../../alerting/server/types';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
-import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { readSignals } from './read_signals';
-
-export interface SignalParams {
-  alertsClient: AlertsClient;
-  actionsClient: ActionsClient;
-  description?: string;
-  from?: string;
-  id: string;
-  index?: string[];
-  interval?: string;
-  enabled?: boolean;
-  filter?: Record<string, {}> | undefined;
-  kql?: string | undefined;
-  maxSignals?: string;
-  name?: string;
-  severity?: number;
-  type?: string; // TODO: Replace this type with a static enum type
-  to?: string;
-  references?: string[];
-}
+import { SignalParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -66,6 +46,7 @@ export const updateSignal = async ({
   index,
   interval,
   kql,
+  maxSignals,
   name,
   severity,
   to,
@@ -94,6 +75,7 @@ export const updateSignal = async ({
       from,
       index,
       kql: nextKql,
+      maxSignals,
       name,
       severity,
       to,

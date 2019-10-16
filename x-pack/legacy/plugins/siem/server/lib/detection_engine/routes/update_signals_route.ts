@@ -8,25 +8,7 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { updateSignal } from '../alerts/update_signals';
-
-interface SignalsRequest extends Hapi.Request {
-  payload: {
-    description: string;
-    enabled: boolean;
-    filter: Record<string, {}> | undefined;
-    from: string;
-    id: string;
-    index: string[];
-    interval: string;
-    kql: string | undefined;
-    max_signals: string;
-    name: string;
-    severity: number;
-    type: string;
-    to: string;
-    references: string[];
-  };
-}
+import { SignalsRequest } from '../alerts/types';
 
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   method: 'PUT',
@@ -57,7 +39,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
         name: Joi.string(),
         severity: Joi.number(),
         to: Joi.string(),
-        type: Joi.string(), // TODO: Restrict this to only be kql or filter for the moment
+        type: Joi.string().valid('filter', 'kql'),
         references: Joi.array().default([]),
       }).nand('filter', 'kql'),
     },

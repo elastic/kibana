@@ -8,16 +8,7 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { findSignals } from '../alerts/find_signals';
-
-interface FindSignalsRequest extends Omit<Hapi.Request, 'query'> {
-  query: {
-    per_page: number;
-    page: number;
-    search?: string;
-    sort_field?: string;
-    fields?: string[];
-  };
-}
+import { FindSignalsRequest } from '../alerts/types';
 
 export const createFindSignalRoute: Hapi.ServerRoute = {
   method: 'GET',
