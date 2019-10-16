@@ -17,26 +17,14 @@
  * under the License.
  */
 
-import { JsonObject } from '..';
+import { ISavedObjectsClientProvider } from './scoped_client_provider';
 
-/**
- * WARNING: these typings are incomplete
- */
+const create = (): jest.Mocked<ISavedObjectsClientProvider> => ({
+  addClientWrapperFactory: jest.fn(),
+  getClient: jest.fn(),
+  setClientFactory: jest.fn(),
+});
 
-export type KueryNode = any;
-
-export interface KueryParseOptions {
-  helpers: {
-    [key: string]: any;
-  };
-  startRule: string;
-}
-
-export function fromKueryExpression(
-  expression: string,
-  parseOptions?: KueryParseOptions
-): KueryNode;
-
-export function toElasticsearchQuery(node: KueryNode, indexPattern?: any): JsonObject;
-
-export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;
+export const savedObjectsClientProviderMock = {
+  create,
+};
