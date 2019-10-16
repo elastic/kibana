@@ -81,13 +81,11 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
     });
   };
 
-
-
-  const onSelectionChange = (selectedItems) => {
+  const onSelectionChange = selectedItems => {
     setData({
       ...data,
-      selectedItems
-    })
+      selectedItems,
+    });
   };
 
   const items = data.hits.map((item: any) => {
@@ -112,39 +110,37 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
   };
 
   const selection = {
-    selectable: () => {return true},
-    selectableMessage: () => "Select me",
+    selectable: () => {
+      return true;
+    },
+    selectableMessage: () => 'Select me',
     onSelectionChange,
   };
 
-
   const renderDeleteButton = () => {
-    const { selectedItems } = data
+    const { selectedItems } = data;
 
     if (selectedItems.length === 0) {
       return;
     }
 
-
     async function onClickDelete() {
-
       const toArchive: string[] = selectedItems.map((item: any) => {
         return item._id;
       });
 
       const response = await context.core.http.post('/alerts/archive', {
         query: {
-          alerts: toArchive.join(","),  // TODO: seems strange that we can't use lists in query params
+          alerts: toArchive.join(','), // TODO: seems strange that we can't use lists in query params
         },
       });
-      console.log(response);
 
       // TODO: how to unselect once pressed?
       data.selectedItems = [];
       setData({
         ...data,
         selectedItems: [],
-      })
+      });
     }
 
     return (
@@ -152,11 +148,9 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
         Archive Alert
       </EuiButton>
     );
-  }
+  };
 
   const deleteButton = renderDeleteButton();
-
-
 
   const columns = [
     {

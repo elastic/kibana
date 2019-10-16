@@ -33,14 +33,13 @@ export function alertsRoutes(router: IRouter) {
       },
     },
     handleArchive
-  )
+  );
 }
 
 async function handleArchive(context, request, response) {
-
   // TODO: archive the alert
   return response.ok({
-    body: JSON.stringify(request.query)
+    body: JSON.stringify(request.query),
   });
 }
 
