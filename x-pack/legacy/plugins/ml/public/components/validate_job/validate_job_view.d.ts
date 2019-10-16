@@ -5,7 +5,7 @@
  */
 
 import { FC } from 'react';
-declare const ValidateJob: FC<{
+export const ValidateJob: FC<{
   getJobConfig: any;
   getDuration: any;
   mlJobService: any;
