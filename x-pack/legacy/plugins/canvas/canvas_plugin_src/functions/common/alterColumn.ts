@@ -7,7 +7,7 @@
 import { omit } from 'lodash';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { Datatable, DatatableColumn, DatatableColumnType } from '../../../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   column: string;

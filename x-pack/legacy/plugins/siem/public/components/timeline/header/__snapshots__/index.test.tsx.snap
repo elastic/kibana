@@ -231,6 +231,12 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
             "searchable": true,
             "type": "string",
           },
+          Object {
+            "aggregatable": true,
+            "name": "host.name",
+            "searchable": true,
+            "type": "string",
+          },
         ],
         "title": "filebeat-*,auditbeat-*,packetbeat-*",
       }

@@ -7,43 +7,46 @@
 import React, { memo } from 'react';
 import { connect } from 'react-redux';
 
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
+import { Anomaly } from '../../components/ml/types';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-
-import { hostsModel, hostsSelectors, State } from '../../store';
+import { convertToBuildEsQuery } from '../../lib/keury';
+import { hostsModel, inputsSelectors, State } from '../../store';
+import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
 import { HostsComponentProps } from './hosts';
 import { CommonChildren, AnomaliesChildren } from './navigation/types';
-import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { Anomaly } from '../../components/ml/types';
 
 interface HostsBodyComponentProps extends HostsComponentProps {
-  kqlQueryExpression: string;
   children: CommonChildren | AnomaliesChildren;
 }
 
 const HostsBodyComponent = memo<HostsBodyComponentProps>(
   ({
-    deleteQuery,
-    filterQuery,
-    kqlQueryExpression,
-    setAbsoluteRangeDatePicker,
     children,
-    to,
+    deleteQuery,
+    filters,
     from,
-    setQuery,
     isInitializing,
+    query,
+    setAbsoluteRangeDatePicker,
+    setQuery,
+    to,
   }) => {
     return (
       <WithSource sourceId="default">
-        {({ indicesExist, indexPattern }) =>
-          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+        {({ indicesExist, indexPattern }) => {
+          const filterQuery = convertToBuildEsQuery({
+            indexPattern,
+            queries: [query],
+            filters,
+          });
+          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <>
               {children({
                 deleteQuery,
                 endDate: to,
                 filterQuery,
-                kqlQueryExpression,
                 skip: isInitializing,
                 setQuery,
                 startDate: from,
@@ -62,8 +65,8 @@ const HostsBodyComponent = memo<HostsBodyComponentProps>(
                 },
               })}
             </>
-          ) : null
-        }
+          ) : null;
+        }}
       </WithSource>
     );
   }
@@ -72,11 +75,11 @@ const HostsBodyComponent = memo<HostsBodyComponentProps>(
 HostsBodyComponent.displayName = 'HostsBodyComponent';
 
 const makeMapStateToProps = () => {
-  const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();
-  const hostsFilterQueryExpression = hostsSelectors.hostsFilterQueryExpression();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const mapStateToProps = (state: State) => ({
-    filterQuery: getHostsFilterQueryAsJson(state, hostsModel.HostsType.page) || '',
-    kqlQueryExpression: hostsFilterQueryExpression(state, hostsModel.HostsType.page) || '',
+    query: getGlobalQuerySelector(state),
+    filters: getGlobalFiltersQuerySelector(state),
   });
   return mapStateToProps;
 };

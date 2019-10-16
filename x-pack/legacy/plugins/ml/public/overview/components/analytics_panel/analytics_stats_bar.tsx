@@ -8,8 +8,10 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { StatsBar, AnalyticStatsBarStats } from '../../../components/stats_bar';
 import {
+  isDataFrameAnalyticsFailed,
+  isDataFrameAnalyticsRunning,
+  isDataFrameAnalyticsStopped,
   DataFrameAnalyticsListRow,
-  DATA_FRAME_TASK_STATE,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 
 function getAnalyticsStats(analyticsList: any[]) {
@@ -53,15 +55,11 @@ function getAnalyticsStats(analyticsList: any[]) {
   let stoppedJobs = 0;
 
   analyticsList.forEach(job => {
-    if (job.stats.state === DATA_FRAME_TASK_STATE.FAILED) {
+    if (isDataFrameAnalyticsFailed(job.stats.state)) {
       failedJobs++;
-    } else if (
-      job.stats.state === DATA_FRAME_TASK_STATE.STARTED ||
-      job.stats.state === DATA_FRAME_TASK_STATE.ANALYZING ||
-      job.stats.state === DATA_FRAME_TASK_STATE.REINDEXING
-    ) {
+    } else if (isDataFrameAnalyticsRunning(job.stats.state)) {
       startedJobs++;
-    } else if (job.stats.state === DATA_FRAME_TASK_STATE.STOPPED) {
+    } else if (isDataFrameAnalyticsStopped(job.stats.state)) {
       stoppedJobs++;
     }
   });

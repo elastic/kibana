@@ -17,6 +17,9 @@ export {
   REFRESH_ANALYTICS_LIST_STATE,
   ANALYSIS_CONFIG_TYPE,
   RegressionEvaluateResponse,
+  getValuesFromResponse,
+  loadEvalData,
+  Eval,
 } from './analytics';
 
 export {

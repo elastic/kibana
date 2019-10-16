@@ -10,6 +10,9 @@ import { requireUIRoutes } from './routes';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initMonitoringXpackInfo } from './init_monitoring_xpack_info';
 import { initBulkUploader } from './kibana_monitoring';
+import { telemetryCollectionManager } from '../../../../../src/legacy/core_plugins/telemetry/server';
+import { getStatsWithMonitoring } from './telemetry_collection';
+
 import {
   getKibanaUsageCollector,
   getOpsStatsCollector,
@@ -35,6 +38,8 @@ export class Plugin {
     }));
     collectorSet.register(getKibanaUsageCollector({ collectorSet, config }));
     collectorSet.register(getSettingsCollector({ collectorSet, config }));
+
+    telemetryCollectionManager.setStatsGetter(getStatsWithMonitoring, 'monitoring', 2);
 
     /*
     * Instantiate and start the internal background task that calls collector
@@ -90,7 +95,6 @@ export class Plugin {
 
     const bulkUploader = initBulkUploader({
       elasticsearchPlugin: plugins.elasticsearch,
-      xpackMainPlugin: plugins.xpack_main,
       config,
       log: core.log,
       kbnServerStatus: kbnServer.status,
