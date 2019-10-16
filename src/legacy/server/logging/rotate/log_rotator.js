@@ -17,23 +17,27 @@
  * under the License.
  */
 
-import good from '@elastic/good';
-import loggingConfiguration from './configuration';
-import { logWithMetadata } from './log_with_metadata';
-import { setupLoggingRotate } from './rotate';
+export class LogRotator {
+  constructor(config, logInterceptor) {
+    this.logInterceptor = logInterceptor;
+    this.logFilePath = config.get('logging.dest');
+    this.interval = config.get('logging.rotate.interval');
+    this.everyBytes = config.get('logging.rotate.everyBytes');
+    this.keepFiles = config.get('logging.rotate.keepFiles');
+    this.onStartup = config.get('logging.rotate.onStartup');
+  }
 
-export async function setupLogging(server, loggingConfig) {
-  return await server.register({
-    plugin: good,
-    options: loggingConfig
-  });
-}
+  start() {}
 
-export async function loggingMixin(kbnServer, server, config) {
-  const generatedLoggingConfiguration = loggingConfiguration(config);
+  stop() {}
 
-  logWithMetadata.decorateServer(server);
-  setupLoggingRotate(config, generatedLoggingConfiguration.reporters.logReporter[0]);
+  _shouldRotate() {}
 
-  return await setupLogging(server, generatedLoggingConfiguration);
+  _rotate() {}
+
+  _rotateNow() {
+    // rename old
+    // reload log configuration
+    process.kill(process.pid, 'SIGHUP');
+  }
 }

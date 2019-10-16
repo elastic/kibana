@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function setupLoggingRotate(config) {
+import { LogRotator } from './log_rotator';
+
+export function setupLoggingRotate(config, logInterceptor) {
   // We just want to start the logging rotate service once
   // and we choose to use the worker server type for it
   if (process.env.kbnWorkerType !== 'server') {
@@ -32,8 +34,16 @@ export function setupLoggingRotate(config) {
   // We don't want to run logging rotate server if
   // we are not logging to a file
   if (config.get('logging.rotate.enable') && config.get('logging.dest') === 'stdout') {
+    this.logWithMetadata(
+      ['warning', 'logging:rotate'],
+      'Logging rotate is enabled but logging.dest is configured for stdout. The logging rotate will take no action.'
+    );
     return;
   }
 
   // Enable Logging Rotate Service
+  const logRotator = new LogRotator(config, logInterceptor);
+  logRotator.start();
+
+  return logRotator;
 }
