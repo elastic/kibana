@@ -55,7 +55,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       }
       const endpoint = await codeServices.locate(req, uri);
       try {
-        const filetree = gitService.fileTree(endpoint, {
+        const filetree = await gitService.fileTree(endpoint, {
           uri: repoUri,
           path,
           revision,
