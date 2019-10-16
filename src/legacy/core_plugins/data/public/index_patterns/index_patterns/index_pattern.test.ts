@@ -34,15 +34,20 @@ jest.mock('ui/registry/field_formats', () => ({
   },
 }));
 
-jest.mock('ui/utils/mapping_setup', () => ({
-  expandShorthand: jest.fn().mockImplementation(() => ({
-    id: true,
-    title: true,
-    fieldFormatMap: {
-      _deserialize: jest.fn().mockImplementation(() => []),
-    },
-  })),
-}));
+jest.mock('../../../../../../plugins/kibana_utils/public', () => {
+  const originalModule = jest.requireActual('../../../../../../plugins/kibana_utils/public');
+
+  return {
+    ...originalModule,
+    expandShorthand: jest.fn(() => ({
+      id: true,
+      title: true,
+      fieldFormatMap: {
+        _deserialize: jest.fn().mockImplementation(() => []),
+      },
+    })),
+  };
+});
 
 jest.mock('ui/notify', () => ({
   toastNotifications: {
