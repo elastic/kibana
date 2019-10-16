@@ -7,6 +7,7 @@
 import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
 import { DragContext } from './providers';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 type DroppableEvent = React.DragEvent<HTMLElement>;
 
@@ -121,7 +122,8 @@ export function DragDrop(props: Props) {
     setState({ ...state, isActive: false });
     setDragging(undefined);
 
-    if (onDrop) {
+    if (onDrop && droppable) {
+      trackUiEvent('drop_total');
       onDrop(dragging);
     }
   };

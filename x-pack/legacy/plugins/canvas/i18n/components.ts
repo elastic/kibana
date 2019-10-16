@@ -18,6 +18,17 @@ export const ComponentStrings = {
         defaultMessage: 'Embed Object',
       }),
   },
+  AdvancedFilter: {
+    getApplyButtonLabel: () =>
+      i18n.translate('xpack.canvas.renderer.advancedFilter.applyButtonLabel', {
+        defaultMessage: 'Apply',
+        description: 'This refers to applying the filter to the Canvas workpad',
+      }),
+    getInputPlaceholder: () =>
+      i18n.translate('xpack.canvas.renderer.advancedFilter.inputPlaceholder', {
+        defaultMessage: 'Enter filter expression',
+      }),
+  },
   App: {
     getLoadErrorMessage: (error: string) =>
       i18n.translate('xpack.canvas.app.loadErrorMessage', {
@@ -257,6 +268,13 @@ export const ComponentStrings = {
         defaultMessage: 'No data source present',
       }),
   },
+  DropdownFilter: {
+    getMatchAllOptionLabel: () =>
+      i18n.translate('xpack.canvas.renderer.dropdownFilter.matchAllOptionLabel', {
+        defaultMessage: 'ANY',
+        description: 'The dropdown filter option to match any value in the field.',
+      }),
+  },
   ElementConfig: {
     getFailedLabel: () =>
       i18n.translate('xpack.canvas.elementConfig.failedLabel', {
@@ -286,6 +304,24 @@ export const ComponentStrings = {
         description: 'The label for the total number of elements in a workpad',
       }),
   },
+  ElementControls: {
+    getEditTooltip: () =>
+      i18n.translate('xpack.canvas.elementControls.editToolTip', {
+        defaultMessage: 'Edit',
+      }),
+    getEditAriaLabel: () =>
+      i18n.translate('xpack.canvas.elementControls.editAriaLabel', {
+        defaultMessage: 'Edit element',
+      }),
+    getDeleteTooltip: () =>
+      i18n.translate('xpack.canvas.elementControls.deleteToolTip', {
+        defaultMessage: 'Delete',
+      }),
+    getDeleteAriaLabel: () =>
+      i18n.translate('xpack.canvas.elementControls.deleteAriaLabel', {
+        defaultMessage: 'Delete element',
+      }),
+  },
   ElementSettings: {
     getDataTabLabel: () =>
       i18n.translate('xpack.canvas.elementSettings.dataTabLabel', {
@@ -298,6 +334,63 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.elementSettings.displayTabLabel', {
         defaultMessage: 'Display',
         description: 'This tab contains the settings for how data is displayed in a Canvas element',
+      }),
+  },
+  ElementTypes: {
+    getEditElementTitle: () =>
+      i18n.translate('xpack.canvas.elementTypes.editElementTitle', {
+        defaultMessage: 'Edit element',
+      }),
+    getDeleteElementTitle: (elementName: string) =>
+      i18n.translate('xpack.canvas.elementTypes.deleteElementTitle', {
+        defaultMessage: `Delete element '{elementName}'?`,
+        values: {
+          elementName,
+        },
+      }),
+    getDeleteElementDescription: () =>
+      i18n.translate('xpack.canvas.elementTypes.deleteElementDescription', {
+        defaultMessage: 'Are you sure you want to delete this element?',
+      }),
+    getCancelButtonLabel: () =>
+      i18n.translate('xpack.canvas.elementTypes.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      }),
+    getDeleteButtonLabel: () =>
+      i18n.translate('xpack.canvas.elementTypes.deleteButtonLabel', {
+        defaultMessage: 'Delete',
+      }),
+    getAddNewElementTitle: () =>
+      i18n.translate('xpack.canvas.elementTypes.addNewElementTitle', {
+        defaultMessage: 'Add new elements',
+      }),
+    getAddNewElementDescription: () =>
+      i18n.translate('xpack.canvas.elementTypes.addNewElementDescription', {
+        defaultMessage: 'Group and save workpad elements to create new elements',
+      }),
+    getFindElementPlaceholder: () =>
+      i18n.translate('xpack.canvas.elementTypes.findElementPlaceholder', {
+        defaultMessage: 'Find element',
+      }),
+    getElementsTitle: () =>
+      i18n.translate('xpack.canvas.elementTypes.elementsTitle', {
+        defaultMessage: 'Elements',
+        description: 'Title for the "Elements" tab when adding a new element',
+      }),
+    getMyElementsTitle: () =>
+      i18n.translate('xpack.canvas.elementTypes.myElementsTitle', {
+        defaultMessage: 'My elements',
+        description: 'Title for the "My elements" tab when adding a new element',
+      }),
+  },
+  Error: {
+    getDescription: () =>
+      i18n.translate('xpack.canvas.errorComponent.description', {
+        defaultMessage: 'Expression failed with the message:',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.errorComponent.title', {
+        defaultMessage: 'Whoops! Expression failed',
       }),
   },
   Expression: {
@@ -390,6 +483,24 @@ export const ComponentStrings = {
         },
       }),
   },
+  FunctionFormContextError: {
+    getContextErrorMessage: (errorMessage: string) =>
+      i18n.translate('xpack.canvas.functionForm.contextError', {
+        defaultMessage: 'ERROR: {errorMessage}',
+        values: {
+          errorMessage,
+        },
+      }),
+  },
+  FunctionFormFunctionUnknown: {
+    getUnknownArgumentTypeErrorMessage: (expressionType: string) =>
+      i18n.translate('xpack.canvas.functionForm.functionUnknown.unknownArgumentTypeError', {
+        defaultMessage: 'Unknown expression type "{expressionType}"',
+        values: {
+          expressionType,
+        },
+      }),
+  },
   GroupSettings: {
     getSaveGroupDescription: () =>
       i18n.translate('xpack.canvas.groupSettings.saveGroupDescription', {
@@ -437,6 +548,15 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
         defaultMessage: 'Keyboard Shortcuts',
+      }),
+  },
+  Link: {
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.link.errorMessage', {
+        defaultMessage: 'LINK ERROR: {message}',
+        values: {
+          message,
+        },
       }),
   },
   MultiElementSettings: {
@@ -793,6 +913,12 @@ export const ComponentStrings = {
         defaultMessage: 'Underline',
       }),
   },
+  TimePicker: {
+    getApplyButtonLabel: () =>
+      i18n.translate('xpack.canvas.timePicker.applyButtonLabel', {
+        defaultMessage: 'Apply',
+      }),
+  },
   Toolbar: {
     getEditorButtonLabel: () =>
       i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {
@@ -847,6 +973,10 @@ export const ComponentStrings = {
     getGlobalCSSTooltip: () =>
       i18n.translate('xpack.canvas.workpadConfig.globalCSSTooltip', {
         defaultMessage: `Apply styles to all pages in this workpad`,
+      }),
+    getNameLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.nameLabel', {
+        defaultMessage: 'Name',
       }),
     getPageHeightLabel: () =>
       i18n.translate('xpack.canvas.workpadConfig.heightLabel', {

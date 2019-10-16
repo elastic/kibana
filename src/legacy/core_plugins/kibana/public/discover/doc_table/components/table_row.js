@@ -104,7 +104,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
 
       $scope.inlineFilter = function inlineFilter($event, type) {
         const column = $($event.target).data().column;
-        const field = $scope.indexPattern.fields.byName[column];
+        const field = $scope.indexPattern.fields.getByName(column);
         $scope.filter(field, $scope.flattenedRow[column], type);
       };
 
@@ -130,7 +130,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         // We just create a string here because its faster.
         const newHtmls = [openRowHtml];
 
-        const mapping = indexPattern.fields.byName;
+        const mapping = indexPattern.fields.getByName;
         const hideTimeColumn = config.get('doc_table:hideTimeColumn');
         if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(
@@ -138,7 +138,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
               timefield: true,
               formatted: _displayField(row, indexPattern.timeFieldName),
               filterable:
-                mapping[indexPattern.timeFieldName].filterable && _.isFunction($scope.filter),
+                mapping(indexPattern.timeFieldName).filterable && _.isFunction($scope.filter),
               column: indexPattern.timeFieldName,
             })
           );
@@ -147,8 +147,8 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         $scope.columns.forEach(function (column) {
           const isFilterable =
             $scope.flattenedRow[column] !== undefined &&
-            mapping[column] &&
-            mapping[column].filterable &&
+            mapping(column) &&
+            mapping(column).filterable &&
             _.isFunction($scope.filter);
 
           newHtmls.push(

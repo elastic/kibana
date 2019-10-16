@@ -22,6 +22,7 @@ import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_dr
 import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -137,6 +138,10 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                 field: droppedItem.field,
               });
 
+          trackUiEvent('drop_onto_dimension');
+          const hasData = Object.values(props.state.layers).some(({ columns }) => columns.length);
+          trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
+
           props.setState(
             changeColumn({
               state: props.state,
@@ -170,6 +175,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
               defaultMessage: 'Remove configuration',
             })}
             onClick={() => {
+              trackUiEvent('indexpattern_dimension_removed');
               props.setState(
                 deleteColumn({
                   state: props.state,

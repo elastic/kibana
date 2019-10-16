@@ -4,6 +4,8 @@
 
 ## HttpServiceBase.get property
 
+Makes an HTTP request with the GET method. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options.
+
 <b>Signature:</b>
 
 ```typescript

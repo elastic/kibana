@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Sticky } from 'react-sticky';
 import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
-
-import { SuperDatePicker } from '../super_date_picker';
 
 const offsetChrome = 49;
 const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
@@ -45,16 +42,6 @@ const Aside = styled.aside<{ isSticky?: boolean }>`
 
 Aside.displayName = 'Aside';
 
-// Temporary fix for EuiSuperDatePicker whitespace bug and auto width - Michael Marcialis
-const FlexItemWithDatePickerFix = styled(EuiFlexItem)`
-  .euiSuperDatePicker__flexWrapper {
-    max-width: none;
-    width: auto;
-  }
-`;
-
-FlexItemWithDatePickerFix.displayName = 'FlexItemWithDatePickerFix';
-
 export interface FiltersGlobalProps {
   children: React.ReactNode;
 }
@@ -63,13 +50,7 @@ export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
   <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
     {({ style, isSticky }) => (
       <Aside isSticky={isSticky} style={style}>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={7}>{children}</EuiFlexItem>
-
-          <FlexItemWithDatePickerFix grow={5} data-test-subj="globalDatePicker">
-            <SuperDatePicker id="global" />
-          </FlexItemWithDatePickerFix>
-        </EuiFlexGroup>
+        {children}
       </Aside>
     )}
   </Sticky>

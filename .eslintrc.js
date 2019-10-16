@@ -149,6 +149,10 @@ module.exports = {
                   'src/core/server/**/*',
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
+                  '!src/core/server/types.ts',
+                  // for absolute imports until fixed in
+                  // https://github.com/elastic/kibana/issues/36096
+                  '!src/core/server/types',
                   '!src/core/server/*.test.mocks.ts',
 
                   'src/plugins/**/public/**/*',

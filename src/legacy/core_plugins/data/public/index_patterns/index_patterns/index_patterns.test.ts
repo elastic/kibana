@@ -36,12 +36,6 @@ jest.mock('ui/registry/field_formats', () => ({
   },
 }));
 
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addDanger: jest.fn(),
-  },
-}));
-
 jest.mock('./index_pattern', () => {
   class IndexPattern {
     init = async () => {

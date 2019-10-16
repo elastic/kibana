@@ -46,7 +46,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       icon: 'visualizeApp',
       navLinkId: 'kibana:visualize',
-      app: ['kibana'],
+      app: ['kibana', 'lens'],
       catalogue: ['visualize'],
       privileges: {
         all: {

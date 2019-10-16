@@ -24,7 +24,6 @@ import { IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
-import { SavedObjectsIndexPattern } from '../cache_index_patterns';
 
 interface GetSearchDslOptions {
   type: string | string[];
@@ -39,7 +38,6 @@ interface GetSearchDslOptions {
     id: string;
   };
   kueryNode?: KueryNode;
-  indexPattern?: SavedObjectsIndexPattern;
 }
 
 export function getSearchDsl(
@@ -57,7 +55,6 @@ export function getSearchDsl(
     namespace,
     hasReference,
     kueryNode,
-    indexPattern,
   } = options;
 
   if (!type) {
@@ -79,7 +76,6 @@ export function getSearchDsl(
       defaultSearchOperator,
       hasReference,
       kueryNode,
-      indexPattern,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };

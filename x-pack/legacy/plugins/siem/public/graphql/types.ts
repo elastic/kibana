@@ -67,32 +67,26 @@ export interface HostsSortField {
   direction: Direction;
 }
 
-export interface DomainsSortField {
-  field: DomainsFields;
-
-  direction: Direction;
-}
-
-export interface TlsSortField {
-  field: TlsFields;
-
-  direction: Direction;
-}
-
 export interface UsersSortField {
   field: UsersFields;
 
   direction: Direction;
 }
 
-export interface NetworkTopNFlowSortField {
-  field: NetworkTopNFlowFields;
+export interface NetworkTopTablesSortField {
+  field: NetworkTopTablesFields;
 
   direction: Direction;
 }
 
 export interface NetworkDnsSortField {
   field: NetworkDnsFields;
+
+  direction: Direction;
+}
+
+export interface TlsSortField {
+  field: TlsFields;
 
   direction: Direction;
 }
@@ -245,17 +239,9 @@ export enum HostsFields {
   lastSeen = 'lastSeen',
 }
 
-export enum DomainsFields {
-  domainName = 'domainName',
-  direction = 'direction',
-  bytes = 'bytes',
-  packets = 'packets',
-  uniqueIpCount = 'uniqueIpCount',
-}
-
-export enum FlowDirection {
-  uniDirectional = 'uniDirectional',
-  biDirectional = 'biDirectional',
+export enum UsersFields {
+  name = 'name',
+  count = 'count',
 }
 
 export enum FlowTarget {
@@ -265,32 +251,12 @@ export enum FlowTarget {
   source = 'source',
 }
 
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  incoming = 'incoming',
-  outgoing = 'outgoing',
-  listening = 'listening',
-  unknown = 'unknown',
-}
-
-export enum TlsFields {
-  _id = '_id',
-}
-
-export enum UsersFields {
-  name = 'name',
-  count = 'count',
-}
-
-export enum FlowTargetNew {
+export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
 }
 
-export enum NetworkTopNFlowFields {
+export enum NetworkTopTablesFields {
   bytes_in = 'bytes_in',
   bytes_out = 'bytes_out',
   flows = 'flows',
@@ -306,11 +272,31 @@ export enum NetworkDnsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
+export enum TlsFields {
+  _id = '_id',
+}
+
 export enum SortFieldTimeline {
   title = 'title',
   description = 'description',
   updated = 'updated',
   created = 'created',
+}
+
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  incoming = 'incoming',
+  outgoing = 'outgoing',
+  listening = 'listening',
+  unknown = 'unknown',
+}
+
+export enum FlowDirection {
+  uniDirectional = 'uniDirectional',
+  biDirectional = 'biDirectional',
 }
 
 export type ToStringArray = string[];
@@ -431,10 +417,6 @@ export interface Source {
 
   IpOverview?: Maybe<IpOverviewData>;
 
-  Domains: DomainsData;
-
-  Tls: TlsData;
-
   Users: UsersData;
 
   KpiNetwork?: Maybe<KpiNetworkData>;
@@ -442,7 +424,9 @@ export interface Source {
   KpiHosts: KpiHostsData;
 
   KpiHostDetails: KpiHostDetailsData;
-  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+
+  NetworkTopCountries: NetworkTopCountriesData;
+
   NetworkTopNFlow: NetworkTopNFlowData;
 
   NetworkDns: NetworkDnsData;
@@ -450,6 +434,8 @@ export interface Source {
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
   OverviewHost?: Maybe<OverviewHostData>;
+
+  Tls: TlsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -1328,90 +1314,6 @@ export interface AutonomousSystemOrganization {
   name?: Maybe<string>;
 }
 
-export interface DomainsData {
-  edges: DomainsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface DomainsEdges {
-  node: DomainsNode;
-
-  cursor: CursorType;
-}
-
-export interface DomainsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  source?: Maybe<DomainsItem>;
-
-  destination?: Maybe<DomainsItem>;
-
-  client?: Maybe<DomainsItem>;
-
-  server?: Maybe<DomainsItem>;
-
-  network?: Maybe<DomainsNetworkField>;
-}
-
-export interface DomainsItem {
-  uniqueIpCount?: Maybe<number>;
-
-  domainName?: Maybe<string>;
-
-  firstSeen?: Maybe<string>;
-
-  lastSeen?: Maybe<string>;
-}
-
-export interface DomainsNetworkField {
-  bytes?: Maybe<number>;
-
-  packets?: Maybe<number>;
-
-  transport?: Maybe<string>;
-
-  direction?: Maybe<NetworkDirectionEcs[]>;
-}
-
-export interface TlsData {
-  edges: TlsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface TlsEdges {
-  node: TlsNode;
-
-  cursor: CursorType;
-}
-
-export interface TlsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  alternativeNames?: Maybe<string[]>;
-
-  notAfter?: Maybe<string[]>;
-
-  commonNames?: Maybe<string[]>;
-
-  ja3?: Maybe<string[]>;
-
-  issuerNames?: Maybe<string[]>;
-}
-
 export interface UsersData {
   edges: UsersEdges[];
 
@@ -1524,6 +1426,68 @@ export interface KpiHostDetailsData {
   inspect?: Maybe<Inspect>;
 }
 
+export interface NetworkTopCountriesData {
+  edges: NetworkTopCountriesEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkTopCountriesEdges {
+  node: NetworkTopCountriesItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkTopCountriesItem {
+  _id?: Maybe<string>;
+
+  source?: Maybe<TopCountriesItemSource>;
+
+  destination?: Maybe<TopCountriesItemDestination>;
+
+  network?: Maybe<TopNetworkTablesEcsField>;
+}
+
+export interface TopCountriesItemSource {
+  country?: Maybe<string>;
+
+  destination_ips?: Maybe<number>;
+
+  flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface GeoItem {
+  geo?: Maybe<GeoEcsFields>;
+
+  flowTarget?: Maybe<FlowTargetSourceDest>;
+}
+
+export interface TopCountriesItemDestination {
+  country?: Maybe<string>;
+
+  destination_ips?: Maybe<number>;
+
+  flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface TopNetworkTablesEcsField {
+  bytes_in?: Maybe<number>;
+
+  bytes_out?: Maybe<number>;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1547,7 +1511,7 @@ export interface NetworkTopNFlowItem {
 
   destination?: Maybe<TopNFlowItemDestination>;
 
-  network?: Maybe<TopNFlowNetworkEcsField>;
+  network?: Maybe<TopNetworkTablesEcsField>;
 }
 
 export interface TopNFlowItemSource {
@@ -1570,12 +1534,6 @@ export interface AutonomousSystemItem {
   number?: Maybe<number>;
 }
 
-export interface GeoItem {
-  geo?: Maybe<GeoEcsFields>;
-
-  flowTarget?: Maybe<FlowTarget>;
-}
-
 export interface TopNFlowItemDestination {
   autonomous_system?: Maybe<AutonomousSystemItem>;
 
@@ -1588,12 +1546,6 @@ export interface TopNFlowItemDestination {
   flows?: Maybe<number>;
 
   source_ips?: Maybe<number>;
-}
-
-export interface TopNFlowNetworkEcsField {
-  bytes_in?: Maybe<number>;
-
-  bytes_out?: Maybe<number>;
 }
 
 export interface NetworkDnsData {
@@ -1680,6 +1632,38 @@ export interface OverviewHostData {
   winlogbeat?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
+}
+
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: Maybe<string>;
+
+  timestamp?: Maybe<string>;
+
+  alternativeNames?: Maybe<string[]>;
+
+  notAfter?: Maybe<string[]>;
+
+  commonNames?: Maybe<string[]>;
+
+  ja3?: Maybe<string[]>;
+
+  issuerNames?: Maybe<string[]>;
 }
 
 export interface UncommonProcessesData {
@@ -2068,42 +2052,6 @@ export interface IpOverviewSourceArgs {
 
   defaultIndex: string[];
 }
-export interface DomainsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: DomainsSortField;
-
-  flowDirection: FlowDirection;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface TlsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: TlsSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
 export interface UsersSourceArgs {
   filterQuery?: Maybe<string>;
 
@@ -2148,16 +2096,35 @@ export interface KpiHostDetailsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface NetworkTopCountriesSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip?: Maybe<string>;
+
+  flowTarget: FlowTargetSourceDest;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkTopTablesSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
 export interface NetworkTopNFlowSourceArgs {
   id?: Maybe<string>;
 
   filterQuery?: Maybe<string>;
 
-  flowTarget: FlowTargetNew;
+  ip?: Maybe<string>;
+
+  flowTarget: FlowTargetSourceDest;
 
   pagination: PaginationInputPaginated;
 
-  sort: NetworkTopNFlowSortField;
+  sort: NetworkTopTablesSortField;
 
   timerange: TimerangeInput;
 
@@ -2193,6 +2160,23 @@ export interface OverviewHostSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface TlsSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  id?: Maybe<string>;
+
+  ip: string;
+
+  pagination: PaginationInputPaginated;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTargetSourceDest;
+
+  timerange: TimerangeInput;
 
   defaultIndex: string[];
 }
@@ -2369,123 +2353,6 @@ export namespace GetAuthenticationsQuery {
     id: Maybe<string[]>;
 
     name: Maybe<string[]>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetDomainsQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: Maybe<string>;
-    flowDirection: FlowDirection;
-    flowTarget: FlowTarget;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: DomainsSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Domains: Domains;
-  };
-
-  export type Domains = {
-    __typename?: 'DomainsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'DomainsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'DomainsNode';
-
-    source: Maybe<_Source>;
-
-    destination: Maybe<Destination>;
-
-    network: Maybe<Network>;
-  };
-
-  export type _Source = {
-    __typename?: 'DomainsItem';
-
-    uniqueIpCount: Maybe<number>;
-
-    domainName: Maybe<string>;
-
-    firstSeen: Maybe<string>;
-
-    lastSeen: Maybe<string>;
-  };
-
-  export type Destination = {
-    __typename?: 'DomainsItem';
-
-    uniqueIpCount: Maybe<number>;
-
-    domainName: Maybe<string>;
-
-    firstSeen: Maybe<string>;
-
-    lastSeen: Maybe<string>;
-  };
-
-  export type Network = {
-    __typename?: 'DomainsNetworkField';
-
-    bytes: Maybe<number>;
-
-    direction: Maybe<NetworkDirectionEcs[]>;
-
-    packets: Maybe<number>;
   };
 
   export type Cursor = {
@@ -3273,13 +3140,128 @@ export namespace GetNetworkDnsQuery {
   };
 }
 
+export namespace GetNetworkTopCountriesQuery {
+  export type Variables = {
+    sourceId: string;
+    ip?: Maybe<string>;
+    filterQuery?: Maybe<string>;
+    pagination: PaginationInputPaginated;
+    sort: NetworkTopTablesSortField;
+    flowTarget: FlowTargetSourceDest;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkTopCountries: NetworkTopCountries;
+  };
+
+  export type NetworkTopCountries = {
+    __typename?: 'NetworkTopCountriesData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkTopCountriesEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkTopCountriesItem';
+
+    source: Maybe<_Source>;
+
+    destination: Maybe<Destination>;
+
+    network: Maybe<Network>;
+  };
+
+  export type _Source = {
+    __typename?: 'TopCountriesItemSource';
+
+    country: Maybe<string>;
+
+    destination_ips: Maybe<number>;
+
+    flows: Maybe<number>;
+
+    source_ips: Maybe<number>;
+  };
+
+  export type Destination = {
+    __typename?: 'TopCountriesItemDestination';
+
+    country: Maybe<string>;
+
+    destination_ips: Maybe<number>;
+
+    flows: Maybe<number>;
+
+    source_ips: Maybe<number>;
+  };
+
+  export type Network = {
+    __typename?: 'TopNetworkTablesEcsField';
+
+    bytes_in: Maybe<number>;
+
+    bytes_out: Maybe<number>;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: Maybe<string>;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
 export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
+    ip?: Maybe<string>;
     filterQuery?: Maybe<string>;
     pagination: PaginationInputPaginated;
-    sort: NetworkTopNFlowSortField;
-    flowTarget: FlowTargetNew;
+    sort: NetworkTopTablesSortField;
+    flowTarget: FlowTargetSourceDest;
     timerange: TimerangeInput;
     defaultIndex: string[];
     inspect: boolean;
@@ -3358,7 +3340,7 @@ export namespace GetNetworkTopNFlowQuery {
 
     geo: Maybe<Geo>;
 
-    flowTarget: Maybe<FlowTarget>;
+    flowTarget: Maybe<FlowTargetSourceDest>;
   };
 
   export type Geo = {
@@ -3406,7 +3388,7 @@ export namespace GetNetworkTopNFlowQuery {
 
     geo: Maybe<_Geo>;
 
-    flowTarget: Maybe<FlowTarget>;
+    flowTarget: Maybe<FlowTargetSourceDest>;
   };
 
   export type _Geo = {
@@ -3426,7 +3408,7 @@ export namespace GetNetworkTopNFlowQuery {
   };
 
   export type Network = {
-    __typename?: 'TopNFlowNetworkEcsField';
+    __typename?: 'TopNetworkTablesEcsField';
 
     bytes_in: Maybe<number>;
 
@@ -5131,7 +5113,7 @@ export namespace GetTlsQuery {
   export type Variables = {
     sourceId: string;
     filterQuery?: Maybe<string>;
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetSourceDest;
     ip: string;
     pagination: PaginationInputPaginated;
     sort: TlsSortField;
