@@ -17,27 +17,94 @@
  * under the License.
  */
 
-import { createReadStream } from 'fs';
 import { fromEventPattern } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import moment from 'moment';
-import oboe from 'oboe';
+import jsonStream from './json_stream';
 
-export default (path, log) => {
-  const jsonStream = oboe(createReadStream(path))
-    .on('done', () => log.debug(`Done streaming from \n\t${path}`));
+const XPACK = 'x-pack';
 
-  return fromEventPattern(_ => jsonStream.on('node', '!.*', _))
+export default ({ coveragePath }, log) => {
+
+  const objStream = jsonStream(coveragePath)
+    .on('done', () => log.debug(`Done streaming from \n\t${coveragePath}`));
+
+  const addCoveragePath = addPath.bind(null, coveragePath);
+
+  return fromEventPattern(_ => objStream.on('node', '!.*', _))
     .pipe(
-      map((...xs) => {
-        const [name] = xs[0][1];
-        const [stats] = xs[0];
-
-        return {
-          'folderPath': name.includes('kibana') ? name.replace(/(?:.*)(kibana.*$)/gm, '$1') : name,
-          '@timestamp': moment().format(),
-          ...stats,
-        };
-      }),
+      map(statsAndPath),
+      map(addCoveragePath),
+      map(coverageType),
+      map(truncate),
+      map(timeStamp),
+      map(distro),
+      map(last),
+      // debug stream
+      tap(x => console.log(`\n### x\n\t${JSON.stringify(x, null, 2)}`)),
     );
 };
+function statsAndPath(...xs) {
+  const [coveredFilePath] = xs[0][1];
+  const [stats] = xs[0];
+  return {
+    coveredFilePath,
+    ...stats,
+  };
+}
+function addPath(coveragePath, obj) {
+  return {
+    coveragePath,
+    ...obj,
+  };
+}
+function truncate(obj) {
+  const { coveredFilePath } = obj;
+
+  if (coveredFilePath.includes('kibana')) {
+    obj.coveredFilePath = coveredFilePath.replace(/(?:.*)(kibana.*$)/gm, '$1');
+  }
+
+  return obj;
+}
+function timeStamp(obj) {
+  return {
+    ...obj,
+    '@timestamp': moment().format(),
+  };
+}
+function distro(obj) {
+  const { coveredFilePath } = obj;
+  return {
+    ...obj,
+    distro: coveredFilePath.includes(XPACK) ? XPACK : 'OSS',
+  };
+}
+function coverageType(obj) {
+  const { coveragePath } = obj;
+
+  let coverageType = 'OTHER';
+
+  if (coveragePath.includes('kibana-coverage/mocha')) {
+    coverageType = 'MOCHA';
+  }
+
+  if (coveragePath.includes('kibana-coverage/jest')) {
+    coverageType = 'JEST';
+  }
+
+  return {
+    coverageType,
+    ...obj,
+  };
+}
+// last :: obj -> obj
+// Since we do not wish to post a path if it's a total,
+// drop it when it's a total (totals go to a different index).
+function last(obj) {
+  const { coveredFilePath } = obj;
+  if (coveredFilePath === 'total') {
+    delete obj.coveredFilePath;
+  }
+  return obj;
+}
