@@ -5,9 +5,9 @@
  */
 
 import hash from 'object-hash';
-import { IndexDocumentParams } from 'elasticsearch';
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from './configuration_types';
+import { APMIndexDocumentParams } from '../../helpers/es_client';
 
 export async function createOrUpdateConfiguration({
   configurationId,
@@ -23,8 +23,7 @@ export async function createOrUpdateConfiguration({
 }) {
   const { client, config } = setup;
 
-  const params: IndexDocumentParams<AgentConfiguration> = {
-    type: '_doc',
+  const params: APMIndexDocumentParams<AgentConfiguration> = {
     refresh: true,
     index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
     body: {

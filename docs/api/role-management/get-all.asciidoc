@@ -4,7 +4,7 @@
 <titleabbrev>Get all roles</titleabbrev>
 ++++
 
-Retrieves all {kib} roles.
+Retrieve all {kib} roles.
 
 experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
 

@@ -116,7 +116,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
     this.update$ = this.coreContext.configService.getConfig$().pipe(
       tap(config => {
         if (this.kbnServer !== undefined) {
-          this.kbnServer.applyLoggingConfiguration(config.toRaw());
+          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config));
         }
       }),
       tap({ error: err => this.log.error(err) }),
@@ -257,6 +257,10 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
       settings,
       config,
       {
+        env: {
+          mode: this.coreContext.env.mode,
+          packageInfo: this.coreContext.env.packageInfo,
+        },
         handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
         setupDeps: {
           core: coreSetup,
@@ -271,6 +275,8 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
+          uiSettings: setupDeps.core.uiSettings,
+          savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
         },
         logger: this.coreContext.logger,
       },

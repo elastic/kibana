@@ -83,7 +83,6 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
         >
           <div
             className="euiFormRow euiFormRow--compressed"
-            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -130,7 +129,6 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
         >
           <div
             className="euiFormRow"
-            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -260,7 +258,6 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
         >
           <div
             className="euiFormRow euiFormRow--compressed"
-            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -307,7 +304,6 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
         >
           <div
             className="euiFormRow"
-            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -437,7 +433,6 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
         >
           <div
             className="euiFormRow euiFormRow--compressed"
-            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -484,7 +479,6 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
         >
           <div
             className="euiFormRow"
-            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
