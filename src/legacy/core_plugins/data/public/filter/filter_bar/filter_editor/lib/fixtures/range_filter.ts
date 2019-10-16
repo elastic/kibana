@@ -30,7 +30,7 @@ export const rangeFilter: RangeFilter = {
     value: '0 to 10',
     params: {
       gte: 0,
-      lt: 10,
+      lte: 10,
     },
   },
   $state: {
