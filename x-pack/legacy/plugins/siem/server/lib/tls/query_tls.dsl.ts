@@ -65,11 +65,12 @@ export const buildTlsQuery = ({
   },
   timerange: { from, to },
 }: TlsRequestOptions) => {
-  const filter = [
+  const defaultFilter = [
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
-    { term: { [`${flowTarget}.ip`]: ip } },
   ];
+
+  const filter = ip ? [...defaultFilter, { term: { [`${flowTarget}.ip`]: ip } }] : defaultFilter;
 
   const dslQuery = {
     allowNoIndices: true,

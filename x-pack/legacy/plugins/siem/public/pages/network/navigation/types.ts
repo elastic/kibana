@@ -28,6 +28,12 @@ export type IPsQueryTabBodyProps = QueryTabBodyProps &
     flowTarget: FlowTargetSourceDest;
   };
 
+export type TlsQueryTabBodyProps = QueryTabBodyProps &
+  GlobalTimeArgs & {
+    flowTarget: FlowTargetSourceDest;
+    ip?: string;
+  };
+
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps &
   Pick<GlobalTimeArgs, 'to' | 'from' | 'isInitializing'> & {
     narrowDateRange: NarrowDateRange;
@@ -43,7 +49,8 @@ export type NetworkRoutesProps = GlobalTimeArgs & {
 
 export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.countries &
   NetworkRouteType.dns &
-  NetworkRouteType.ips;
+  NetworkRouteType.ips &
+  NetworkRouteType.tls;
 
 type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
   NetworkRouteType.anomalies;
@@ -57,6 +64,7 @@ export enum NetworkRouteType {
   countries = 'countries',
   dns = 'dns',
   anomalies = 'anomalies',
+  tls = 'tls',
 }
 
 export type GetNetworkRoutePath = (

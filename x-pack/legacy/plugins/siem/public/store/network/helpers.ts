@@ -36,6 +36,10 @@ export const setNetworkPageQueriesActivePageToZero = (state: NetworkModel): Netw
     ...state.page.queries[NetworkTableType.dns],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
+  [NetworkTableType.tls]: {
+    ...state.page.queries[NetworkTableType.tls],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
 });
 
 export const setNetworkDetailsQueriesActivePageToZero = (

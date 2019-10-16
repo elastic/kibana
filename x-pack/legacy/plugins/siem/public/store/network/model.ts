@@ -23,6 +23,7 @@ export enum NetworkTableType {
   topCountriesSource = 'topCountriesSource',
   topNFlowDestination = 'topNFlowDestination',
   topNFlowSource = 'topNFlowSource',
+  tls = 'tls',
 }
 
 export type TopNTableType =
@@ -65,22 +66,21 @@ export interface DnsQuery extends BasicQueryPaginated {
   isPtrIncluded: boolean;
 }
 
+export interface TlsQuery extends BasicQueryPaginated {
+  tlsSortField: TlsSortField;
+}
+
 export interface NetworkQueries {
   [NetworkTableType.dns]: DnsQuery;
   [NetworkTableType.topCountriesDestination]: TopCountriesQuery;
   [NetworkTableType.topCountriesSource]: TopCountriesQuery;
   [NetworkTableType.topNFlowDestination]: TopNFlowQuery;
   [NetworkTableType.topNFlowSource]: TopNFlowQuery;
+  [NetworkTableType.tls]: TlsQuery;
 }
 
 export interface NetworkPageModel {
   queries: NetworkQueries;
-}
-
-// IP Details Models
-
-export interface TlsQuery extends BasicQueryPaginated {
-  tlsSortField: TlsSortField;
 }
 
 export interface UsersQuery extends BasicQueryPaginated {
@@ -101,7 +101,6 @@ export interface NetworkDetailsModel {
   queries: IpOverviewQueries;
 }
 
-// Network Model
 export interface NetworkModel {
   [NetworkType.page]: NetworkPageModel;
   [NetworkType.details]: NetworkDetailsModel;

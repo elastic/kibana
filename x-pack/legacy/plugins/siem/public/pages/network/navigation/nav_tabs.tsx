@@ -33,6 +33,13 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       disabled: false,
       urlKey: 'network',
     },
+    [NetworkRouteType.tls]: {
+      id: NetworkRouteType.tls,
+      name: i18n.NAVIGATION_TLS_TITLE,
+      href: getTabsOnNetworkUrl(NetworkRouteType.tls),
+      disabled: false,
+      urlKey: 'network',
+    },
     [NetworkRouteType.anomalies]: {
       id: NetworkRouteType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
