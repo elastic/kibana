@@ -8,8 +8,7 @@ import { ServerRoute } from '../common/types';
 import * as CommonRoutes from '../common/routes';
 import * as Integrations from './integrations/handlers';
 
-export const API_ROOT = `/api/${PLUGIN.ID}`;
-export const API_IMG_PATTERN = `${API_ROOT}/package/{pkgkey}/img/{imgPath*}`;
+const API_IMG_PATTERN = `${CommonRoutes.API_ROOT}/package/{pkgkey}/img/{imgPath*}`;
 
 // Manager public API paths
 export const routes: ServerRoute[] = [
