@@ -40,6 +40,7 @@ export default ({ coveragePath }, log) => {
       map(truncate),
       map(timeStamp),
       map(distro),
+      map(enrich),
       map(last),
       // debug stream
       // tap(x => console.log(`\n### x\n\t${JSON.stringify(x, null, 2)}`)),
@@ -113,4 +114,14 @@ function last(obj) {
     delete obj.coveredFilePath;
   }
   return obj;
+}
+function enrich(obj) {
+  const { env } = process;
+  if (env.BUILD_ID) {
+    obj.BUILD_ID = env.BUILD_ID;
+  }
+
+  return {
+    ...obj,
+  };
 }
