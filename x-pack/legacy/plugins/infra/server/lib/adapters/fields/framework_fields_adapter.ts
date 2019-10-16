@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set, startsWith, uniq, first } from 'lodash';
+import { startsWith, uniq, first } from 'lodash';
+import { idx } from '@kbn/elastic-idx';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
@@ -13,6 +14,7 @@ import {
 import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';
 import { getAllowedListForPrefix } from '../../../../common/ecs_allowed_list';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
+import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
 
 interface Bucket {
   key: { dataset: string };
@@ -101,22 +103,9 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
 
     const bucketSelector = (response: InfraDatabaseSearchResponse<{}, DataSetResponse>) =>
       (response.aggregations && response.aggregations.datasets.buckets) || [];
-
-    const handleAfterKey = (
-      options: object,
-      response: InfraDatabaseSearchResponse<{}, DataSetResponse>
-    ) => {
-      if (!response.aggregations) {
-        return options;
-      }
-      const newOptions = { ...options };
-      set(
-        newOptions,
-        'body.aggs.datasets.composite.after',
-        response.aggregations.datasets.after_key
-      );
-      return newOptions;
-    };
+    const handleAfterKey = createAfterKeyHandler('body.aggs.datasets.composite.after', input =>
+      idx(input, _ => _.aggregations.datasets.after_key)
+    );
 
     const buckets = await getAllCompositeData<DataSetResponse, Bucket>(
       this.framework,

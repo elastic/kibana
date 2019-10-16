@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { idx } from '@kbn/elastic-idx';
 import {
   InfraSnapshotGroupbyInput,
   InfraSnapshotMetricInput,
@@ -37,6 +37,7 @@ import {
 } from './response_helpers';
 import { IP_FIELDS } from '../constants';
 import { getAllCompositeData } from '../../utils/get_all_composite_data';
+import { createAfterKeyHandler } from '../../utils/create_afterkey_handler';
 
 export interface InfraSnapshotRequestOptions {
   nodeType: InfraNodeType;
@@ -69,23 +70,13 @@ export class InfraSnapshot {
   }
 }
 
-// This is used by the getAllCompositeData to select the bucket to return.
 const bucketSelector = (
   response: InfraDatabaseSearchResponse<{}, InfraSnapshotAggregationResponse>
 ) => (response.aggregations && response.aggregations.nodes.buckets) || [];
 
-// This is used by getAllCompositeData to add the after key to the subsequent requests
-const handleAfterKey = (
-  options: object,
-  response: InfraDatabaseSearchResponse<{}, InfraSnapshotAggregationResponse>
-) => {
-  if (!response.aggregations) {
-    return options;
-  }
-  const newOptions = { ...options };
-  set(newOptions, 'body.aggregations.nodes.composite.after', response.aggregations.nodes.after_key);
-  return newOptions;
-};
+const handleAfterKey = createAfterKeyHandler('body.aggregations.nodes.composite.after', input =>
+  idx(input, _ => _.aggregations.nodes.after_key)
+);
 
 const requestGroupedNodes = async (
   request: InfraFrameworkRequest,
