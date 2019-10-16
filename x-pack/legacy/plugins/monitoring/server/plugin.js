@@ -18,7 +18,7 @@ import {
   getOpsStatsCollector,
   getSettingsCollector,
 } from './kibana_monitoring/collectors';
-import { getLicenseExpiration } from './alerts/types/license_expiration';
+import { getLicenseExpiration } from './alerts/license_expiration';
 
 export class Plugin {
   setup(core, plugins) {
@@ -156,6 +156,7 @@ export class Plugin {
       return null;
     }
 
-    plugins.alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster));
+    const logger = core.newPlatform.coreContext.logger.get('plugins', LOGGING_TAG);
+    plugins.alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster, logger));
   }
 }

@@ -48,6 +48,7 @@ export const monitoring = (kibana) => new kibana.Plugin({
 
     const serverConfig = server.config();
     const serverFacade = {
+      newPlatform: server.newPlatform,
       config: () => ({
         get: key => {
           if (configs.includes(key)) {

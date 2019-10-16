@@ -16,7 +16,7 @@ import {
   getSettingsCollector,
 } from './server/kibana_monitoring/collectors';
 import { initInfraSource } from './server/lib/logs/init_infra_source';
-import { getLicenseExpiration } from './server/alerts/types/license_expiration';
+import { getLicenseExpiration } from './server/alerts/license_expiration';
 
 /**
  * Initialize the Kibana Monitoring plugin by starting up asynchronous server tasks

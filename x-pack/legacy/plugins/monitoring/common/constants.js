@@ -225,3 +225,9 @@ export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
 
 export const ALERT_TYPE_LICENSE_EXPIRATION = 'monitoring_alert_type_license_expiration';
 export const ALERT_ACTION_TYPE_EMAIL = '.email'; // built in
+export const CLUSTER_ALERTS_TO_BLACKLIST = [
+  'xpack_license_expiration'
+];
+export const CLUSTER_ALERT_ID_TO_KIBANA_ALERT_TYPE_ID = {
+  'xpack_license_expiration': ALERT_TYPE_LICENSE_EXPIRATION
+};

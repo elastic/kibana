@@ -6,37 +6,10 @@
 
 import Joi from 'joi';
 import { isFunction } from 'lodash';
-import { ALERT_ACTION_TYPE_EMAIL, ALERT_TYPE_LICENSE_EXPIRATION } from '../../../../../common/constants';
+import { ALERT_TYPE_LICENSE_EXPIRATION } from '../../../../../common/constants';
 
-async function createAlerts(actionsClient, alertsClient, { clusterUuid }) {
-
-  // Create actions
-  const ACTION_TYPES = {
-    [ALERT_ACTION_TYPE_EMAIL]: {
-      description: 'Sends an email',
-      config: {
-        service: 'Gmail',
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        from: 'Friendly Monitoring Cluster :)'
-      },
-      secrets: {
-        user: 'my.email@email.com',
-        password: 'mypassword',
-      },
-    }
-  };
-
-  for (const actionTypeId of Object.keys(ACTION_TYPES)) {
-    const { id } = await actionsClient.create({
-      action: {
-        actionTypeId,
-        ...ACTION_TYPES[actionTypeId]
-      },
-    });
-    ACTION_TYPES[actionTypeId].id = id;
-  }
+async function createAlerts(alertsClient, { selectedEmailActionId, clusterUuid }) {
+  const createdAlerts = [];
 
   // Create alerts
   const ALERT_TYPES = {
@@ -47,11 +20,11 @@ async function createAlerts(actionsClient, alertsClient, { clusterUuid }) {
       actions: [
         {
           group: 'default',
-          id: ACTION_TYPES[ALERT_ACTION_TYPE_EMAIL].id,
+          id: selectedEmailActionId,
           params: {
             subject: '{{context.subject}}',
             message: `{{context.message}}`,
-            to: ['my.email@email.com']
+            to: ['{{context.to}}']
           }
         }
       ]
@@ -62,14 +35,72 @@ async function createAlerts(actionsClient, alertsClient, { clusterUuid }) {
     const result = await alertsClient.create({
       data: {
         enabled: true,
-        interval: '10s',
+        interval: '1m',
         alertTypeId,
         ...ALERT_TYPES[alertTypeId],
       }
     });
-    console.log(`Created alert ${result.id}`);
+    createdAlerts.push(result);
   }
+
+  return createdAlerts;
 }
+
+// async function blacklistClusterAlertsIfAvailable(req) {
+//   const BLACKLIST = {
+//     'cluster_alerts.management.blacklist': CLUSTER_ALERTS_TO_BLACKLIST
+//   };
+
+//   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
+//   const readResponse = await callWithRequest(req, 'cluster.getSettings', {
+//     includeDefaults: true
+//   });
+
+//   const exporters = {
+//     persistent: {},
+//     transient: {}
+//   };
+
+//   for (const source of ['persistent', 'transient', 'defaults']) {
+//     const sourcedExporters = get(readResponse[source], 'xpack.monitoring.exporters');
+//     if (sourcedExporters) {
+//       const newSource = source === 'defaults' ? 'persistent' : source;
+//       exporters[newSource] = {
+//         xpack: {
+//           monitoring: {
+//             exporters: Object.keys(sourcedExporters).reduce((accum, exporterName) => ({
+//               ...accum,
+//               [exporterName]: {
+//                 ...sourcedExporters[exporterName],
+//                 ...BLACKLIST
+//               }
+//             }), {})
+//           }
+//         }
+//       };
+//     }
+//   }
+
+//   if (Object.keys(exporters.persistent).length === 0 && Object.keys(exporters.transient).length === 0) {
+//     // Add a local one, as it is the default
+//     exporters.persistent = {
+//       xpack: {
+//         monitoring: {
+//           exporters: {
+//             local: {
+//               type: 'local',
+//               ...BLACKLIST
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
+
+//   await callWithRequest(req, 'cluster.putSettings', {
+//     body: exporters
+//   });
+// }
 
 export function createKibanaAlertsRoute(server) {
   server.route({
@@ -79,21 +110,21 @@ export function createKibanaAlertsRoute(server) {
       validate: {
         params: Joi.object({
           clusterUuid: Joi.string().required()
+        }),
+        payload: Joi.object({
+          selectedEmailActionId: Joi.string().required(),
         })
       }
     },
     async handler(req, headers) {
-      // const config = server.config();
-      const clusterUuid = req.params.clusterUuid;
-
       const alertsClient = isFunction(req.getAlertsClient) ? req.getAlertsClient() : null;
-      const actionsClient = isFunction(req.getActionsClient) ? req.getActionsClient() : null;
-      if (!alertsClient || !actionsClient) {
+      if (!alertsClient) {
         return headers.response().code(404);
       }
 
-      await createAlerts(actionsClient, alertsClient, { clusterUuid });
-      return { success: true };
+      // await blacklistClusterAlertsIfAvailable(req);
+      const alerts = await createAlerts(alertsClient, { ...req.params, ...req.payload });
+      return { alerts };
     }
   });
 }

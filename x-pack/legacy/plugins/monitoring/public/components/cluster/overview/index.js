@@ -21,9 +21,9 @@ export function Overview(props) {
   return (
     <EuiPage>
       <EuiPageBody>
-        <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
-
         <MigrationStatus clusterUuid={props.cluster.cluster_uuid}/>
+
+        <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
 
         { !isFromStandaloneCluster ?
           (
