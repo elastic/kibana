@@ -33,6 +33,7 @@ pipeline {
     stage('Checkout') {
       options { skipDefaultCheckout() }
       steps {
+        deleteDir()
         gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false)
         script {
           dir("${BASE_DIR}"){
@@ -110,6 +111,11 @@ pipeline {
           dir("${BASE_DIR}"){
             archiveArtifacts(allowEmptyArchive: false, artifacts: "${CYPRESS_DIR}/screenshots/**,${CYPRESS_DIR}/videos/**,${CYPRESS_DIR}/*e2e-tests.xml")
             junit(allowEmptyResults: true, testResults: "${CYPRESS_DIR}/*e2e-tests.xml")
+          }
+          dir("${APM_ITS}"){
+            sh 'docker-compose logs || true'
+            sh 'docker-compose down -v > apm-its.logs || true'
+            archiveArtifacts(allowEmptyArchive: false, artifacts: 'apm-its.logs')
           }
         }
       }
