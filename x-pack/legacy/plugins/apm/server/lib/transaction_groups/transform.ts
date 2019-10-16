@@ -37,7 +37,7 @@ function getTransactionGroup(
   const sample = bucket.sample.hits.hits[0]._source as Transaction;
 
   return {
-    name: bucket.key,
+    name: bucket.key as string,
     sample,
     p95: bucket.p95.values['95.0'],
     averageResponseTime,

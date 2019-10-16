@@ -70,7 +70,7 @@ const getServiceNodes = async ({
 
   return response.aggregations.nodes.buckets.map(bucket => {
     return {
-      name: bucket.key,
+      name: bucket.key as string,
       cpu: bucket.cpu.value,
       heapMemory: bucket.heapMemory.value,
       nonHeapMemory: bucket.nonHeapMemory.value,
