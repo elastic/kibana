@@ -24,7 +24,7 @@ import {
   EuiCard,
   EuiButton,
 } from '@elastic/eui';
-import { OptInMessage } from './opt_in_message';
+import { OptInMessage } from '../../../../../telemetry/public/components/opt_in_message';
 
 export interface Props {
   urlBasePath: string;

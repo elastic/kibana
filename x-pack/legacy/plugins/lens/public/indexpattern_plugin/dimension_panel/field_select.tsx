@@ -18,6 +18,7 @@ import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
 import { OperationFieldSupportMatrix } from './dimension_panel';
 import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../types';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
 
 export type FieldChoice =
@@ -169,6 +170,8 @@ export function FieldSelect({
           onDeleteColumn();
           return;
         }
+
+        trackUiEvent('indexpattern_dimension_field_changed');
 
         onChoose((choices[0].value as unknown) as FieldChoice);
       }}
