@@ -421,7 +421,7 @@ class HeaderUI extends Component<Props, State> {
             <EuiNavDrawerGroup
               data-test-subj="navDrawerAppsMenu"
               listItems={navLinksArray}
-              aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+              aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
                 defaultMessage: 'Primary navigation links',
               })}
             />
