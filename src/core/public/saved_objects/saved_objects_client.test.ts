@@ -327,16 +327,14 @@ describe('SavedObjectsClient', () => {
       id: 'AVwSwFxtcMV38qjDZoQg',
       type: 'config',
       attributes: { title: 'Example title' },
-      options: {
-        version: 'foo',
-      },
+      version: 'foo',
     };
     beforeEach(() => {
       http.fetch.mockResolvedValue({ saved_objects: [bulkUpdateDoc] });
     });
 
     test('resolves with array of SimpleSavedObject instances', async () => {
-      const response = savedObjectsClient.bulkUpdate([bulkUpdateDoc]);
+      const response = savedObjectsClient.bulkUpdate([bulkUpdateDoc], { namespace: 'ns' });
       await expect(response).resolves.toHaveProperty('savedObjects');
 
       const result = await response;
@@ -345,13 +343,13 @@ describe('SavedObjectsClient', () => {
     });
 
     test('makes HTTP call', async () => {
-      await savedObjectsClient.bulkUpdate([bulkUpdateDoc]);
+      await savedObjectsClient.bulkUpdate([bulkUpdateDoc], { namespace: 'ns' });
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
             "/api/saved_objects/_bulk_update",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"options\\":{\\"version\\":\\"foo\\"}}]",
+              "body": "{\\"objects\\":[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}],\\"options\\":{\\"namespace\\":\\"ns\\"}}",
               "method": "PUT",
               "query": undefined,
             },

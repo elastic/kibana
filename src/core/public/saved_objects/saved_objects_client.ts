@@ -80,14 +80,13 @@ export interface SavedObjectsBulkUpdateObject<
   type: string;
   id: string;
   attributes: T;
-  options?: SavedObjectsBulkUpdateOptions;
+  version?: string;
+  references?: SavedObjectReference[];
 }
 
 /** @public */
 export interface SavedObjectsBulkUpdateOptions {
-  version?: string;
   namespace?: string;
-  references?: SavedObjectReference[];
 }
 
 /** @public */
@@ -434,12 +433,15 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
    * @returns The result of the update operation containing both failed and updated saved objects.
    */
-  public bulkUpdate<T extends SavedObjectAttributes>(objects: SavedObjectsBulkUpdateObject[] = []) {
+  public bulkUpdate<T extends SavedObjectAttributes>(
+    objects: SavedObjectsBulkUpdateObject[] = [],
+    options: SavedObjectsBulkUpdateOptions = {}
+  ) {
     const path = this.getPath(['_bulk_update']);
 
     return this.savedObjectsFetch(path, {
       method: 'PUT',
-      body: JSON.stringify(objects),
+      body: JSON.stringify({ objects, options }),
     }).then(resp => {
       resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
       return renameKeys<

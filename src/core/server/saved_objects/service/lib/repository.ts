@@ -684,7 +684,8 @@ export class SavedObjectsRepository {
    * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
   async bulkUpdate<T extends SavedObjectAttributes = any>(
-    objects: Array<SavedObjectsBulkUpdateObject<T>>
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
+    options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     const time = this._getCurrentTime();
     const bulkUpdateParams: object[] = [];
@@ -704,7 +705,8 @@ export class SavedObjectsRepository {
         };
       }
 
-      const { attributes, references, namespace, version } = object;
+      const { attributes, references, version } = object;
+      const { namespace } = options;
 
       const documentToSave = {
         [type]: attributes,

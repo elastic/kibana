@@ -2237,17 +2237,15 @@ describe('SavedObjectsRepository', () => {
     it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
 
       const objects = [
-        generateSavedObject({
-          namespace: 'foo-namespace'
-        }),
-        generateSavedObject({
-          namespace: 'foo-another-namespace'
-        })
+        generateSavedObject(),
+        generateSavedObject()
       ];
 
       mockValidResponse(objects);
 
-      await savedObjectsRepository.bulkUpdate(objects);
+      await savedObjectsRepository.bulkUpdate(objects, {
+        namespace: 'foo-namespace'
+      });
 
       const [,
         { body: [
@@ -2277,7 +2275,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       expect(secondUpdate).toMatchObject({
-        _id: 'foo-another-namespace:index-pattern:logstash-2',
+        _id: 'foo-namespace:index-pattern:logstash-2',
         _index: '.kibana-test',
       });
 

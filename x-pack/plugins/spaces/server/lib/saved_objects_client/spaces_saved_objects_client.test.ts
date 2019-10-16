@@ -358,7 +358,7 @@ const createMockResponse = () => ({
         });
 
         await expect(
-          client.bulkUpdate([{ id: '', type: 'foo', attributes: {}, namespace: 'bar' }])
+          client.bulkUpdate([{ id: '', type: 'foo', attributes: {} }], { namespace: 'bar' })
         ).rejects.toThrowError('Spaces currently determines the namespaces');
       });
 
@@ -383,15 +383,17 @@ const createMockResponse = () => ({
         ]);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.bulkUpdate).toHaveBeenCalledWith([
-          {
-            id: 'id',
-            type: 'foo',
-            attributes: {},
-            references: [],
-            namespace: currentSpace.expectedNamespace,
-          },
-        ]);
+        expect(baseClient.bulkUpdate).toHaveBeenCalledWith(
+          [
+            {
+              id: 'id',
+              type: 'foo',
+              attributes: {},
+              references: [],
+            },
+          ],
+          { namespace: currentSpace.expectedNamespace }
+        );
       });
     });
 

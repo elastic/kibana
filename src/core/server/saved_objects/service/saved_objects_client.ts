@@ -62,8 +62,7 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any>
-  extends SavedObjectsUpdateOptions,
-    SavedObjectsBaseOptions {
+  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -262,8 +261,9 @@ export class SavedObjectsClient {
    * @param objects
    */
   async bulkUpdate<T extends SavedObjectAttributes = any>(
-    objects: Array<SavedObjectsBulkUpdateObject<T>>
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
+    options?: SavedObjectsBaseOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
-    return await this._repository.bulkUpdate(objects);
+    return await this._repository.bulkUpdate(objects, options);
   }
 }
