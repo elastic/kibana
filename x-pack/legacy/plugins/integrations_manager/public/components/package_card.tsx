@@ -41,12 +41,12 @@ export function PackageCard({
     optionalIcon = <EuiIcon type={iconType} size="l" />;
   } else if (iconUrl) {
     // skipping b/c images from registry are Not Good
-    // https://github.com/elastic/packages-registry/issues/45
+    // https://github.com/elastic/integrations-registry/issues/45
     // optionalIcon = (
     //   <img
     //     width="24"
     //     height="24"
-    //     src={`http://packages-registry.app.elstc.co${iconUrl}`}
+    //     src={`http://integrations-registry.app.elstc.co${iconUrl}`}
     //     alt={`${name} icon`}
     //   />
     // );

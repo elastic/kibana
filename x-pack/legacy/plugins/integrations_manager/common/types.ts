@@ -21,7 +21,7 @@ export type AssetType =
 
 // Registry's response types
 // from /search
-// https://github.com/elastic/packages-registry/blob/master/docs/api/search.json
+// https://github.com/elastic/integrations-registry/blob/master/docs/api/search.json
 export type RegistryList = RegistryListItem[];
 export interface RegistryListItem {
   description: string;
@@ -37,7 +37,7 @@ export interface ScreenshotItem {
 }
 
 // from /package/{name}
-// https://github.com/elastic/packages-registry/blob/master/docs/api/package.json
+// https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
 export type ServiceName = 'kibana' | 'elasticsearch' | 'filebeat' | 'metricbeat';
 export type RequirementVersion = string;
 export interface ServiceRequirements {
@@ -46,7 +46,7 @@ export interface ServiceRequirements {
 }
 
 // from /categories
-// https://github.com/elastic/packages-registry/blob/master/docs/api/categories.json
+// https://github.com/elastic/integrations-registry/blob/master/docs/api/categories.json
 export type CategorySummaryList = CategorySummaryItem[];
 export type CategoryId = string;
 export interface CategorySummaryItem {
