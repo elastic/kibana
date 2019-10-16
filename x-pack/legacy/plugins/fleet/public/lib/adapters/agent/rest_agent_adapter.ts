@@ -5,7 +5,12 @@
  */
 
 import { Agent } from '../../../../common/types/domain_data';
-import { ReturnTypeGet, ReturnTypeList, ReturnTypeUpdate } from '../../../../common/return_types';
+import {
+  ReturnTypeGet,
+  ReturnTypeList,
+  ReturnTypeUpdate,
+  ReturnTypeBulkUnenroll,
+} from '../../../../common/return_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { AgentAdapter } from './memory_agent_adapter';
 import { AgentEvent } from '../../../../common/types/domain_data';
@@ -86,5 +91,17 @@ export class RestAgentAdapter extends AgentAdapter {
   public async update(id: string, beatData: Partial<Agent>): Promise<boolean> {
     await this.REST.put<ReturnTypeUpdate<Agent>>(`/api/fleet/agent/${id}`, beatData);
     return true;
+  }
+
+  public async unenrollByIds(ids: string[]): Promise<ReturnTypeBulkUnenroll> {
+    return await this.REST.post<ReturnTypeBulkUnenroll>(`/api/fleet/agents/unenroll`, {
+      ids,
+    });
+  }
+
+  public async unenrollByKuery(kuery: string): Promise<ReturnTypeBulkUnenroll> {
+    return await this.REST.post<ReturnTypeBulkUnenroll>(`/api/fleet/agents/unenroll`, {
+      kuery,
+    });
   }
 }

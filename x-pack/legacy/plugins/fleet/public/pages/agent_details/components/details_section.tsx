@@ -6,7 +6,14 @@
 
 import React, { SFC } from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
-import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiDescriptionList,
+  EuiButton,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Agent } from '../../../../common/types/domain_data';
 import { AgentHealth } from '../../../components/agent_health';
@@ -37,7 +44,12 @@ function getMetadataTitle(key: string): string {
   }
 }
 
-export const AgentDetailSection: SFC<{ agent: Agent }> = ({ agent }) => {
+interface Props {
+  agent: Agent;
+  unenrollment: { loading: boolean };
+  onClickUnenroll: () => void;
+}
+export const AgentDetailSection: SFC<Props> = ({ agent, onClickUnenroll, unenrollment }) => {
   const mapMetadata = (obj: { [key: string]: string } | undefined) => {
     return Object.keys(obj || {}).map(key => ({
       key,
@@ -95,6 +107,16 @@ export const AgentDetailSection: SFC<{ agent: Agent }> = ({ agent }) => {
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiDescriptionList type="column" compressed listItems={items} />
+      <EuiSpacer size="m" />
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          disabled={unenrollment.loading === true || agent.active === false}
+          isLoading={unenrollment.loading}
+          onClick={onClickUnenroll}
+        >
+          <FormattedMessage id="xpack.fleet.agentDetails.unenroll" defaultMessage="Unenroll" />
+        </EuiButton>
+      </EuiFlexItem>
     </>
   );
 };

@@ -77,6 +77,17 @@ export interface ReturnTypeBulkUpsert extends BaseReturnType {
   }>;
 }
 
+export interface ReturnTypeBulkUnenroll extends BaseReturnType {
+  results: Array<{
+    id: string;
+    success: boolean;
+    action: 'unenrolled';
+    error?: {
+      message: string;
+    };
+  }>;
+}
+
 // list
 export interface ReturnTypeList<T> extends BaseReturnType {
   list: T[];

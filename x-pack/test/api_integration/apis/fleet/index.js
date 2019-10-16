@@ -9,6 +9,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./delete_agent'));
     loadTestFile(require.resolve('./list_agent'));
     loadTestFile(require.resolve('./enroll_agent'));
+    loadTestFile(require.resolve('./unenroll_agent'));
     loadTestFile(require.resolve('./agent_checkin'));
     loadTestFile(require.resolve('./agent_actions'));
     loadTestFile(require.resolve('./agent_events'));

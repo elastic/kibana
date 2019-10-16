@@ -92,6 +92,32 @@ export class AgentLib {
     return { ...agent, access_token: accessToken };
   }
 
+  public async unenroll(
+    user: FrameworkUser,
+    ids: string[]
+  ): Promise<Array<{ id: string; success: boolean; error?: Error | Boom<null> }>> {
+    const response = [];
+    for (const id of ids) {
+      try {
+        await this.agentsRepository.update(user, id, {
+          active: false,
+        });
+        response.push({
+          id,
+          success: true,
+        });
+      } catch (error) {
+        response.push({
+          id,
+          error,
+          success: false,
+        });
+      }
+    }
+
+    return response;
+  }
+
   /**
    * Delete an agent
    */
@@ -142,8 +168,12 @@ export class AgentLib {
   ): Promise<{ actions: AgentAction[]; policy: FullPolicyFile }> {
     const agent = await this.agentsRepository.getById(user, agentId);
 
-    if (!agent || !agent.active) {
+    if (!agent) {
       throw Boom.notFound('Agent not found or inactive');
+    }
+
+    if (!agent.active) {
+      throw Boom.forbidden('Agent inactive');
     }
 
     const actions = this._filterActionsForCheckin(agent);

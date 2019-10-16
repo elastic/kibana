@@ -58,4 +58,8 @@ export class AgentsLib {
   public update = async (id: string, agentData: Partial<Agent>): Promise<boolean> => {
     return await this.adapter.update(id, agentData);
   };
+
+  public unenroll = async (ids: string[]) => {
+    return await this.adapter.unenrollByIds(ids);
+  };
 }
