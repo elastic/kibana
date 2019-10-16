@@ -20,8 +20,6 @@
 import expect from '@kbn/expect';
 
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
-// @ts-ignore
-import { pkg } from '../../../utils';
 
 describe('savedObjects/health_check/isConfigVersionUpgradeable', function() {
   function isUpgradeableTest(savedVersion: string, kibanaVersion: string, expected: boolean) {
@@ -30,10 +28,10 @@ describe('savedObjects/health_check/isConfigVersionUpgradeable', function() {
     });
   }
 
-  isUpgradeableTest('1.0.0-beta1', pkg.version, false);
-  isUpgradeableTest('1.0.0-beta256', pkg.version, false);
+  isUpgradeableTest('1.0.0-beta1', '7.4.0', false);
+  isUpgradeableTest('1.0.0-beta256', '7.4.0', false);
   isUpgradeableTest('10.100.1000-beta256', '10.100.1000-beta257', false);
-  isUpgradeableTest(pkg.version, pkg.version, false);
+  isUpgradeableTest('7.4.0', '7.4.0', false);
   isUpgradeableTest('4.0.0-RC1', '4.0.0-RC2', true);
   isUpgradeableTest('10.100.1000-rc256', '10.100.1000-RC257', true);
   isUpgradeableTest('4.0.0-rc2', '4.0.0-rc1', false);
@@ -48,6 +46,6 @@ describe('savedObjects/health_check/isConfigVersionUpgradeable', function() {
   isUpgradeableTest('4.1.0-rc1-SNAPSHOT', '4.1.0-rc1', false);
   isUpgradeableTest('5.0.0-alpha11', '5.0.0', false);
   isUpgradeableTest('50.0.10-rc150-SNAPSHOT', '50.0.9', false);
-  isUpgradeableTest(undefined as any, pkg.version, false);
-  isUpgradeableTest('@@version', pkg.version, false);
+  isUpgradeableTest(undefined as any, '7.4.0', false);
+  isUpgradeableTest('@@version', '7.4.0', false);
 });
