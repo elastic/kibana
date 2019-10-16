@@ -26,11 +26,20 @@ pipeline {
   triggers {
     issueCommentTrigger('(?i).*jenkins\\W+run\\W+(?:the\\W+)?e2e(?:\\W+please)?.*')
   }
+  parameters {
+    booleanParam(name: 'FORCE', defaultValue: false, description: 'Whether to force the run.')
+  }
   stages {
     stage('Checkout') {
       options { skipDefaultCheckout() }
       steps {
         gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false)
+        script {
+          dir("${BASE_DIR}"){
+            def regexps =[ "^x-pack/legacy/plugins/apm/" ]
+            env.APM_UPDATED = isGitRegionMatch(regexps: regexps)
+          }
+        }
         dir("${APM_ITS}"){
           git changelog: false,
               credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba',
@@ -41,6 +50,12 @@ pipeline {
     }
     stage('Start services') {
       options { skipDefaultCheckout() }
+      when {
+        anyOf {
+          expression { return params.FORCE }
+          expression { return env.APM_UPDATED != "false" }
+        }
+      }
       steps {
         dir("${APM_ITS}"){
           sh './scripts/compose.py start master --no-kibana'
@@ -49,6 +64,12 @@ pipeline {
     }
     stage('Prepare Kibana') {
       options { skipDefaultCheckout() }
+      when {
+        anyOf {
+          expression { return params.FORCE }
+          expression { return env.APM_UPDATED != "false" }
+        }
+      }
       environment {
         JENKINS_NODE_COOKIE = 'dontKillMe'
       }
@@ -67,6 +88,12 @@ pipeline {
     }
     stage('Smoke Tests'){
       options { skipDefaultCheckout() }
+      when {
+        anyOf {
+          expression { return params.FORCE }
+          expression { return env.APM_UPDATED != "false" }
+        }
+      }
       steps{
         script {
           def nodeDocker = docker.build('node-cypress', "${CYPRESS_DIR}/ci")
