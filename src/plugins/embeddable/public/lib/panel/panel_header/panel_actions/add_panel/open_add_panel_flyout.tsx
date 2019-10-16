@@ -17,8 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { NotificationsStart } from 'src/core/public';
-import { KibanaReactOverlays } from 'src/plugins/kibana_react/public';
+import { NotificationsStart, OverlayStart } from 'src/core/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
@@ -27,7 +26,7 @@ export async function openAddPanelFlyout(options: {
   embeddable: IContainer;
   getFactory: GetEmbeddableFactory;
   getAllFactories: GetEmbeddableFactories;
-  overlays: KibanaReactOverlays;
+  overlays: OverlayStart;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
 }) {

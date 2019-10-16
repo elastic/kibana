@@ -80,7 +80,8 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   } = props;
 
   const kibana = useKibana<IDataPluginServices>();
-  const { overlays, savedObjects, uiSettings, chrome, application } = kibana.services;
+  const { services, overlays } = kibana;
+  const { savedObjects, uiSettings, chrome, application } = services;
   if (!overlays || !chrome || !application) return null;
 
   const onOpenDatasourcePicker = () => {

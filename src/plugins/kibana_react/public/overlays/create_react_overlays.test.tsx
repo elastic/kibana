@@ -68,13 +68,10 @@ test('can open modal with React element', () => {
   overlays.openModal(<div>bar</div>);
 
   expect(coreOverlays.openModal).toHaveBeenCalledTimes(1);
-  expect(coreOverlays.openModal.mock.calls[0][0]).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <div>
-            bar
-          </div>
-        </React.Fragment>
-    `);
+  const container = document.createElement('div');
+  const mount = coreOverlays.openModal.mock.calls[0][0];
+  mount(container);
+  expect(container.innerHTML).toMatchInlineSnapshot(`"<div>bar</div>"`);
 });
 
 test('passes through flyout options when opening flyout', () => {

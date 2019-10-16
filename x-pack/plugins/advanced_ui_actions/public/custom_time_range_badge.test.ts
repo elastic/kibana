@@ -13,7 +13,6 @@ import { EmbeddableFactory } from '../../../../src/plugins/embeddable/public';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { TimeRangeEmbeddableFactory } from './test_helpers/time_range_embeddable_factory';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
-import { coreMock } from '../../../../src/core/public/mocks';
 import { ReactElement } from 'react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
@@ -50,11 +49,11 @@ test('Removing custom time range from badge resets embeddable back to container 
   const child1 = container.getChild<TimeRangeEmbeddable>('1');
   const child2 = container.getChild<TimeRangeEmbeddable>('2');
 
-  const start = coreMock.createStart();
-  const overlayMock = start.overlays;
-  overlayMock.openModal.mockClear();
+  const openModalMock = jest.fn();
+  openModalMock.mockReturnValue({ close: jest.fn() });
+
   new CustomTimeRangeBadge({
-    openModal: start.overlays.openModal,
+    openModal: openModalMock,
     dateFormat: 'MM YYYY',
     commonlyUsedRanges: [],
   }).execute({
@@ -62,7 +61,7 @@ test('Removing custom time range from badge resets embeddable back to container 
   });
 
   await nextTick();
-  const openModal = overlayMock.openModal.mock.calls[0][0] as ReactElement;
+  const openModal = openModalMock.mock.calls[0][0] as ReactElement;
 
   const wrapper = mount(openModal);
   findTestSubject(wrapper, 'removePerPanelTimeRangeButton').simulate('click');
@@ -102,9 +101,9 @@ test(`badge is not compatible with embeddable that inherits from parent`, async 
 
   const child = container.getChild<TimeRangeEmbeddable>('1');
 
-  const start = coreMock.createStart();
+  const openModalMock = jest.fn();
   const compatible = await new CustomTimeRangeBadge({
-    openModal: start.overlays.openModal,
+    openModal: openModalMock,
     dateFormat: 'MM YYYY',
     commonlyUsedRanges: [],
   }).isCompatible({
@@ -137,9 +136,9 @@ test(`badge is compatible with embeddable that has custom time range`, async () 
 
   const child = container.getChild<TimeRangeEmbeddable>('1');
 
-  const start = coreMock.createStart();
+  const openModalMock = jest.fn();
   const compatible = await new CustomTimeRangeBadge({
-    openModal: start.overlays.openModal,
+    openModal: openModalMock,
     dateFormat: 'MM YYYY',
     commonlyUsedRanges: [],
   }).isCompatible({
@@ -171,9 +170,9 @@ test('Attempting to execute on incompatible embeddable throws an error', async (
 
   const child = container.getChild<TimeRangeEmbeddable>('1');
 
-  const start = coreMock.createStart();
+  const openModalMock = jest.fn();
   const badge = await new CustomTimeRangeBadge({
-    openModal: start.overlays.openModal,
+    openModal: openModalMock,
     dateFormat: 'MM YYYY',
     commonlyUsedRanges: [],
   });

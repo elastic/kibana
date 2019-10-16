@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 import {
   EuiButton,
@@ -29,7 +30,7 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 
 import { OverlayStart } from '../../overlays';
 
@@ -39,6 +40,11 @@ interface ErrorToastProps {
   toastMessage: string;
   openModal: OverlayStart['openModal'];
 }
+
+const mount = (component: React.ReactElement) => (element: HTMLElement) => {
+  ReactDOM.render(<I18nProvider>{component}</I18nProvider>, element);
+  return () => ReactDOM.unmountComponentAtNode(element);
+};
 
 /**
  * This should instead be replaced by the overlay service once it's available.
@@ -52,27 +58,32 @@ function showErrorDialog({
   openModal,
 }: Pick<ErrorToastProps, 'error' | 'title' | 'openModal'>) {
   const modal = openModal(
-    <React.Fragment>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
-        {error.stack && (
-          <React.Fragment>
-            <EuiSpacer size="s" />
-            <EuiCodeBlock isCopyable={true} paddingSize="s">
-              {error.stack}
-            </EuiCodeBlock>
-          </React.Fragment>
-        )}
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButton onClick={() => modal.close()} fill>
-          <FormattedMessage id="core.notifications.errorToast.closeModal" defaultMessage="Close" />
-        </EuiButton>
-      </EuiModalFooter>
-    </React.Fragment>
+    mount(
+      <React.Fragment>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
+          {error.stack && (
+            <React.Fragment>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock isCopyable={true} paddingSize="s">
+                {error.stack}
+              </EuiCodeBlock>
+            </React.Fragment>
+          )}
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButton onClick={() => modal.close()} fill>
+            <FormattedMessage
+              id="core.notifications.errorToast.closeModal"
+              defaultMessage="Close"
+            />
+          </EuiButton>
+        </EuiModalFooter>
+      </React.Fragment>
+    )
   );
 }
 
