@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { IndexPatternColumn } from './indexpattern';
-import { buildColumn, operationDefinitionMap } from './operations';
+import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState } from './types';
 import { OriginalColumn } from './rename_columns';
 
@@ -42,10 +42,6 @@ function getExpressionForLayer(
         };
       },
       {} as Record<string, OriginalColumn>
-    );
-
-    const filterRatios = columnEntries.filter(
-      ([colId, col]) => col.operationType === 'filter_ratio'
     );
 
     const expression = `esaggs

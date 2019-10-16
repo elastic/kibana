@@ -3,18 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { applyTemplateStrings } from '../../i18n/templates';
 
-const darkTemplate = require('./theme_dark.json');
-const lightTemplate = require('./theme_light.json');
-const pitchTemplate = require('./pitch_presentation.json');
-const statusTemplate = require('./status_report.json');
-const summaryTemplate = require('./summary_report.json');
+import darkTemplate from './theme_dark.json';
+import lightTemplate from './theme_light.json';
+import pitchTemplate from './pitch_presentation.json';
+import statusTemplate from './status_report.json';
+import summaryTemplate from './summary_report.json';
 
 // Registry expects a function that returns a spec object
-export const templateSpecs = [
+export const templateSpecs = applyTemplateStrings([
   darkTemplate,
   lightTemplate,
   pitchTemplate,
   statusTemplate,
   summaryTemplate,
-].map(template => () => template);
+]);
