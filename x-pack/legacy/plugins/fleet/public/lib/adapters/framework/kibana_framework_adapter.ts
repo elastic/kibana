@@ -11,6 +11,7 @@ import { isLeft } from 'fp-ts/lib/Either';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { UIRoutes } from 'ui/routes';
+import { capabilities } from 'ui/capabilities';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import {
   FrameworkAdapter,
@@ -36,6 +37,10 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public get currentUser() {
     return this.shieldUser!;
   }
+  public get capabilities(): Readonly<{ read: boolean; write: boolean }> {
+    return capabilities.get().fleet as { read: boolean; write: boolean };
+  }
+
   private xpackInfo: FrameworkInfo | null = null;
   private adapterService: KibanaAdapterServiceProvider;
   private shieldUser: FrameworkUser | null = null;

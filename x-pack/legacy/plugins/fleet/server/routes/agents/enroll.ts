@@ -13,7 +13,7 @@ import { Agent } from '../../../common/types/domain_data';
 export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
   method: 'POST',
   path: '/api/fleet/agents/enroll',
-  config: {
+  options: {
     auth: false,
     validate: {
       headers: Joi.object({

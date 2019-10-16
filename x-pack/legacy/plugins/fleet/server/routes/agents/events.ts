@@ -13,7 +13,8 @@ import { AgentEvent } from '../../../common/types/domain_data';
 export const createGETAgentEventsRoute = (libs: FleetServerLib) => ({
   method: 'GET',
   path: '/api/fleet/agents/{agentId}/events',
-  config: {
+  options: {
+    tags: ['access:fleet-read'],
     validate: {
       query: Joi.object({
         kuery: Joi.string()

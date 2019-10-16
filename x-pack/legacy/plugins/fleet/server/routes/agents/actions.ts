@@ -17,7 +17,8 @@ import { AgentAction } from '../../../common/types/domain_data';
 export const createAgentsAddActionRoute = (libs: FleetServerLib) => ({
   method: 'POST',
   path: '/api/fleet/agents/{agentId}/actions',
-  config: {
+  options: {
+    tags: ['access:fleet-all'],
     validate: {
       payload: Joi.object(),
     },
