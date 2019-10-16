@@ -352,7 +352,7 @@ app.controller('graphuiPlugin', function (
     }
   };
 
-  function canWipeWorkspace(callback) {
+  function canWipeWorkspace(callback, text, options) {
     if (!hasFieldsSelector(store.getState())) {
       callback();
       return;
@@ -360,14 +360,15 @@ app.controller('graphuiPlugin', function (
     const confirmModalOptions = {
       onConfirm: callback,
       onCancel: (() => {}),
-      confirmButtonText: i18n.translate('xpack.graph.clearWorkspace.confirmButtonLabel', {
+      confirmButtonText: i18n.translate('xpack.graph.leaveWorkspace.confirmButtonLabel', {
         defaultMessage: 'Leave anyway',
       }),
-      title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
+      title: i18n.translate('xpack.graph.leaveWorkspace.modalTitle', {
         defaultMessage: 'Unsaved changes',
       }),
+      ...options,
     };
-    confirmModal(i18n.translate('xpack.graph.clearWorkspace.confirmText', {
+    confirmModal(text || i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
       defaultMessage: 'If you leave now, you will lose unsaved changes.',
     }), confirmModalOptions);
   }
