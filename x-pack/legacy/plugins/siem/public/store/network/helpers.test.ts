@@ -60,6 +60,14 @@ export const mockNetworkState: NetworkModel = {
         },
         isPtrIncluded: false,
       },
+      [NetworkTableType.tls]: {
+        activePage: 2,
+        limit: DEFAULT_TABLE_LIMIT,
+        tlsSortField: {
+          field: TlsFields._id,
+          direction: Direction.desc,
+        },
+      },
     },
   },
   details: {
@@ -136,6 +144,14 @@ describe('Network redux store', () => {
           limit: 10,
           dnsSortField: { field: 'uniqueDomains', direction: 'desc' },
           isPtrIncluded: false,
+        },
+        [NetworkTableType.tls]: {
+          activePage: 0,
+          limit: 10,
+          tlsSortField: {
+            direction: 'desc',
+            field: '_id',
+          },
         },
         [NetworkTableType.topCountriesDestination]: {
           activePage: 0,

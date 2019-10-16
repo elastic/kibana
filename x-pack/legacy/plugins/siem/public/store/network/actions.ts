@@ -81,10 +81,12 @@ export const updateIpDetailsFlowTarget = actionCreator<{
 // TLS Table Actions
 export const updateTlsSort = actionCreator<{
   tlsSortField: TlsSortField;
+  networkType: networkModel.NetworkType;
 }>('UPDATE_TLS_SORT');
 
 export const updateTlsLimit = actionCreator<{
   limit: number;
+  networkType: networkModel.NetworkType;
 }>('UPDATE_TLS_LIMIT');
 
 // Users Table Actions

@@ -17,6 +17,7 @@ import { AnomaliesQueryTabBody } from './anomalies_query_tab_body';
 import { DnsQueryTabBody } from './dns_query_tab_body';
 import { ConditionalFlexGroup } from './conditional_flex_group';
 import { NetworkRoutesProps, NetworkRouteType } from './types';
+import { TlsQueryTabBody } from './tls_query_tab_body';
 
 export const NetworkRoutes = ({
   networkPagePath,
@@ -79,6 +80,10 @@ export const NetworkRoutes = ({
             </EuiFlexItem>
           </ConditionalFlexGroup>
         )}
+      />
+      <Route
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.tls})`}
+        render={() => <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />}
       />
       <Route
         path={`${networkPagePath}/:tabName(${NetworkRouteType.countries})`}

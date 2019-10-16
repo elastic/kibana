@@ -357,7 +357,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                 <TlsQuery
                   endDate={to}
                   filterQuery={filterQuery}
-                  flowTarget={flowTarget}
+                  flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
                   ip={ip}
                   skip={isInitializing}
                   sourceId="default"
