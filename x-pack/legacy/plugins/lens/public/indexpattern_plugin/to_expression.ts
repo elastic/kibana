@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { IndexPatternColumn } from './indexpattern';
-import { buildColumn, operationDefinitionMap } from './operations';
+import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState } from './types';
 
 function getExpressionForLayer(
@@ -39,30 +39,6 @@ function getExpressionForLayer(
       },
       {} as Record<string, string>
     );
-
-    const filterRatios = columnEntries.filter(
-      ([colId, col]) => col.operationType === 'filter_ratio'
-    );
-
-    if (filterRatios.length) {
-      const countColumn = buildColumn({
-        op: 'count',
-        columns,
-        suggestedPriority: 2,
-        layerId,
-        indexPattern,
-      });
-      aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
-
-      return `esaggs
-        index="${indexPattern.id}"
-        metricsAtAllLevels=false
-        partialRows=false
-        includeFormatHints=true
-        aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(
-        idMap
-      )}' | ${filterRatios.map(([id]) => `lens_calculate_filter_ratio id=${id}`).join(' | ')}`;
-    }
 
     return `esaggs
       index="${indexPattern.id}"

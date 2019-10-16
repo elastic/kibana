@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
-import { ArgumentStrings } from '../../../../strings';
+import { ArgumentStrings } from '../../../../../i18n';
 
 const { ImageUpload: strings } = ArgumentStrings;
 

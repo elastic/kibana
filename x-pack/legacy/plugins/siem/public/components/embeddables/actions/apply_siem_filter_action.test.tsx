@@ -3,15 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { Filter } from '@kbn/es-query';
 import { get } from 'lodash/fp';
 
-import {
-  ApplySiemFilterAction,
-  getExpressionFromArray,
-  getFilterExpression,
-  ActionContext,
-} from './apply_siem_filter_action';
+import { ApplySiemFilterAction, ActionContext } from './apply_siem_filter_action';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
 import {
@@ -19,7 +14,20 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { Filter } from '@kbn/es-query';
+
+import { siemFilterManager } from '../../search_bar';
+
+interface MockSiemFilterManager {
+  addFilters: (filters: Filter[]) => void;
+}
+const mockSiemFilterManager: MockSiemFilterManager = siemFilterManager as MockSiemFilterManager;
+jest.mock('../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+const mockAddFilters = jest.fn();
+mockSiemFilterManager.addFilters = mockAddFilters;
 
 // Using type narrowing to remove all the any's -- https://github.com/elastic/kibana/pull/43965/files#r318796100
 const isEmbeddable = (
@@ -41,26 +49,20 @@ const isPartialFilterAction = (embeddable: unknown): embeddable is PartialAction
 };
 
 describe('ApplySiemFilterAction', () => {
-  let applyFilterQueryFromKueryExpression: (expression: string) => void;
-
-  beforeEach(() => {
-    applyFilterQueryFromKueryExpression = jest.fn(expression => {});
-  });
-
   test('it has APPLY_SIEM_FILTER_ACTION_ID type and id', () => {
-    const action = new ApplySiemFilterAction({ applyFilterQueryFromKueryExpression });
+    const action = new ApplySiemFilterAction();
     expect(action.id).toBe('APPLY_SIEM_FILTER_ACTION_ID');
     expect(action.type).toBe('APPLY_SIEM_FILTER_ACTION_ID');
   });
 
   test('it has expected display name', () => {
-    const action = new ApplySiemFilterAction({ applyFilterQueryFromKueryExpression });
+    const action = new ApplySiemFilterAction();
     expect(action.getDisplayName()).toMatchInlineSnapshot(`"Apply filter"`);
   });
 
   describe('#isCompatible', () => {
     test('when embeddable type is MAP_SAVED_OBJECT_TYPE and filters exist, returns true', async () => {
-      const action = new ApplySiemFilterAction({ applyFilterQueryFromKueryExpression });
+      const action = new ApplySiemFilterAction();
       const embeddable = {
         type: MAP_SAVED_OBJECT_TYPE,
       };
@@ -76,7 +78,7 @@ describe('ApplySiemFilterAction', () => {
     });
 
     test('when embeddable type is MAP_SAVED_OBJECT_TYPE and filters do not exist, returns false', async () => {
-      const action = new ApplySiemFilterAction({ applyFilterQueryFromKueryExpression });
+      const action = new ApplySiemFilterAction();
       const embeddable = {
         type: MAP_SAVED_OBJECT_TYPE,
       };
@@ -91,7 +93,7 @@ describe('ApplySiemFilterAction', () => {
     });
 
     test('when embeddable type is not MAP_SAVED_OBJECT_TYPE, returns false', async () => {
-      const action = new ApplySiemFilterAction({ applyFilterQueryFromKueryExpression });
+      const action = new ApplySiemFilterAction();
       const embeddable = {
         type: 'defaultEmbeddable',
       };
@@ -109,9 +111,7 @@ describe('ApplySiemFilterAction', () => {
 
   describe('#execute', () => {
     test('it throws an error when triggerContext not set', async () => {
-      const action = new ApplySiemFilterAction({
-        applyFilterQueryFromKueryExpression,
-      });
+      const action = new ApplySiemFilterAction();
       const embeddable = {
         type: MAP_SAVED_OBJECT_TYPE,
       };
@@ -127,7 +127,7 @@ describe('ApplySiemFilterAction', () => {
     });
 
     test('it calls applyFilterQueryFromKueryExpression() with valid expression', async () => {
-      const action = new ApplySiemFilterAction({ applyFilterQueryFromKueryExpression });
+      const action = new ApplySiemFilterAction();
       const embeddable = {
         type: MAP_SAVED_OBJECT_TYPE,
         getInput: () => ({
@@ -157,47 +157,17 @@ describe('ApplySiemFilterAction', () => {
           filters,
         });
 
-        expect(
-          (applyFilterQueryFromKueryExpression as jest.Mock<(expression: string) => void>).mock
-            .calls[0][0]
-        ).toBe('host.name: "zeek-newyork-sha-aa8df15"');
+        expect(mockAddFilters.mock.calls[0][0]).toEqual([
+          {
+            meta: { alias: '', disabled: false, negate: false },
+            query: {
+              match: { 'host.name': { query: 'zeek-newyork-sha-aa8df15', type: 'phrase' } },
+            },
+          },
+        ]);
       } else {
         throw new Error('Invalid embeddable in unit test');
       }
     });
-  });
-});
-
-describe('#getFilterExpression', () => {
-  test('it returns an empty expression if no filterValue is provided', () => {
-    const layerList = getFilterExpression('host.id', undefined);
-    expect(layerList).toEqual('(NOT host.id:*)');
-  });
-
-  test('it returns a valid expression when provided single filterValue', () => {
-    const layerList = getFilterExpression('host.id', 'aa8df15');
-    expect(layerList).toEqual('host.id: "aa8df15"');
-  });
-
-  test('it returns a valid expression when provided array filterValue', () => {
-    const layerList = getFilterExpression('host.id', ['xavier', 'angela', 'frank']);
-    expect(layerList).toEqual('(host.id: "xavier" OR host.id: "angela" OR host.id: "frank")');
-  });
-
-  test('it returns a valid expression when provided array filterValue with a single value', () => {
-    const layerList = getFilterExpression('host.id', ['xavier']);
-    expect(layerList).toEqual('(host.id: "xavier")');
-  });
-});
-
-describe('#getExpressionFromArray', () => {
-  test('it returns an empty expression if no filterValues are provided', () => {
-    const layerList = getExpressionFromArray('host.id', []);
-    expect(layerList).toEqual('');
-  });
-
-  test('it returns a valid expression when provided multiple filterValues', () => {
-    const layerList = getExpressionFromArray('host.id', ['xavier', 'angela', 'frank']);
-    expect(layerList).toEqual('(host.id: "xavier" OR host.id: "angela" OR host.id: "frank")');
   });
 });

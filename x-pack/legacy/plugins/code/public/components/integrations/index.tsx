@@ -31,6 +31,7 @@ export const Integrations = () => (
         const { compositeContent, filePath, language, uri } = snippet;
         const { content, lineMapping } = compositeContent;
         const fileUrl = externalFileURI(uri, filePath);
+        const lines = content.split('\n');
 
         return (
           <div key={key} className="codeIntegrations__frame">
@@ -41,7 +42,7 @@ export const Integrations = () => (
                 lineNumber={lineNumber}
                 onClick={() => history.push(fileUrl)}
               />
-              <CodeBlock content={content} language={language} lineNumber={i => lineMapping[i]} />
+              <CodeBlock lines={lines} language={language} lineNumber={i => lineMapping[i]} />
             </EuiPanel>
           </div>
         );
