@@ -64,11 +64,22 @@ declare module 'elasticsearch' {
 
   // eslint-disable-next-line @typescript-eslint/prefer-interface
   type FiltersAggregation<SubAggregationMap> = {
-    buckets: Array<
-      {
-        doc_count: number;
-      } & SubAggregation<SubAggregationMap>
-    >;
+    // The filters aggregation can have named filters or anonymous filters,
+    // which changes the structure of the return
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filters-aggregation.html
+    buckets: SubAggregationMap extends {
+      filters: { filters: Record<string, unknown> };
+    }
+      ? {
+          [key in keyof SubAggregationMap['filters']['filters']]: {
+            doc_count: number;
+          } & SubAggregation<SubAggregationMap>;
+        }
+      : Array<
+          {
+            doc_count: number;
+          } & SubAggregation<SubAggregationMap>
+        >;
   };
 
   type SamplerAggregation<SubAggregationMap> = SubAggregation<
