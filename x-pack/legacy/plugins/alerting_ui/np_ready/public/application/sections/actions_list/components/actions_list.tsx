@@ -29,38 +29,6 @@ interface Data extends Action {
 }
 
 const canDelete = capabilities.get().actions.delete;
-const actionsTableColumns = [
-  {
-    field: 'description',
-    name: i18n.translate(
-      'xpack.alertingUI.sections.actionsList.actionsListTable.descriptionHeader',
-      {
-        defaultMessage: 'Description',
-      }
-    ),
-    sortable: false,
-    truncateText: true,
-  },
-  {
-    field: 'actionType',
-    name: i18n.translate(
-      'xpack.alertingUI.sections.actionsList.actionsListTable.actionTypeHeader',
-      {
-        defaultMessage: 'Action Type',
-      }
-    ),
-    sortable: false,
-    truncateText: true,
-  },
-  {
-    field: 'config',
-    name: i18n.translate('xpack.alertingUI.sections.actionsList.actionsListTable.configHeader', {
-      defaultMessage: 'Config',
-    }),
-    sortable: false,
-    truncateText: false,
-  },
-];
 
 export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
   match: {
@@ -136,12 +104,69 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     setData(updatedData);
   }, [actions, actionTypesIndex]);
 
-  async function deleteSelectedItems() {
+  async function deleteItems(items: Data[]) {
     setIsDeletingActions(true);
-    await deleteActions({ http, ids: selectedItems.map(item => item.id) });
+    await deleteActions({ http, ids: items.map(item => item.id) });
     await loadActionsTable();
     setIsDeletingActions(false);
   }
+
+  async function deleteSelectedItems() {
+    await deleteItems(selectedItems);
+  }
+
+  const actionsTableColumns = [
+    {
+      field: 'description',
+      name: i18n.translate(
+        'xpack.alertingUI.sections.actionsList.actionsListTable.descriptionHeader',
+        {
+          defaultMessage: 'Description',
+        }
+      ),
+      sortable: false,
+      truncateText: true,
+    },
+    {
+      field: 'actionType',
+      name: i18n.translate(
+        'xpack.alertingUI.sections.actionsList.actionsListTable.actionTypeHeader',
+        {
+          defaultMessage: 'Action Type',
+        }
+      ),
+      sortable: false,
+      truncateText: true,
+    },
+    {
+      field: 'config',
+      name: i18n.translate('xpack.alertingUI.sections.actionsList.actionsListTable.configHeader', {
+        defaultMessage: 'Config',
+      }),
+      sortable: false,
+      truncateText: false,
+    },
+    {
+      name: i18n.translate('xpack.alertingUI.sections.actionsList.actionsListTable.actionsHeader', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          name: i18n.translate(
+            'xpack.alertingUI.sections.actionsList.actionsListTable.deleteActionName',
+            { defaultMessage: 'Delete' }
+          ),
+          description: i18n.translate(
+            'xpack.alertingUI.sections.actionsList.actionsListTable.deleteActionDescription',
+            { defaultMessage: 'Delete' }
+          ),
+          type: 'icon',
+          icon: 'trash',
+          onClick: (item: Data) => deleteItems([item]),
+        },
+      ],
+    },
+  ];
 
   let content;
 
