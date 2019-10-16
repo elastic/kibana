@@ -48,7 +48,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
   }
 
   public isEditable() {
-    return capabilities.get().lens.save as boolean;
+    return capabilities.get().visualize.save as boolean;
   }
 
   canCreateNew() {

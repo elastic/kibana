@@ -18,7 +18,7 @@ import { getSingleMetricViewerBreadcrumbs } from './breadcrumbs';
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
-    template: '<ml-chart-tooltip /><ml-time-series-explorer data-test-subj="mlPageSingleMetricViewer" />',
+    template: '<ml-time-series-explorer data-test-subj="mlPageSingleMetricViewer" />',
     k7Breadcrumbs: getSingleMetricViewerBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
