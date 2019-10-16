@@ -48,7 +48,8 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   const [actions, setActions] = useState<Action[]>([]);
   const [data, setData] = useState<Data[]>([]);
   const [selectedItems, setSelectedItems] = useState<Data[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
+  const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
   const [errorCode, setErrorCode] = useState<number | null>(null);
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
@@ -56,7 +57,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
 
   async function loadActionsTable() {
-    setIsLoading(true);
+    setIsLoadingActions(true);
     setErrorCode(null);
     try {
       const actionsResponse = await loadActions({ http, sort, page, searchText });
@@ -65,7 +66,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     } catch (e) {
       setErrorCode(e.response.status);
     } finally {
-      setIsLoading(false);
+      setIsLoadingActions(false);
     }
   }
 
@@ -75,12 +76,19 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
 
   useEffect(() => {
     (async () => {
-      const actionTypes = await loadActionTypes({ http });
-      const index: ActionTypeIndex = {};
-      for (const actionType of actionTypes) {
-        index[actionType.id] = actionType;
+      try {
+        setIsLoadingActionTypes(true);
+        const actionTypes = await loadActionTypes({ http });
+        const index: ActionTypeIndex = {};
+        for (const actionType of actionTypes) {
+          index[actionType.id] = actionType;
+        }
+        setActionTypesIndex(index);
+      } catch (e) {
+        setErrorCode(e.response.status);
+      } finally {
+        setIsLoadingActionTypes(false);
       }
-      setActionTypesIndex(index);
     })();
   }, []);
 
@@ -134,9 +142,8 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   ];
 
   const deleteSelectedItems = async () => {
-    setIsLoading(true);
     await deleteActions({ http, ids: selectedItems.map(item => item.id) });
-    await loadTable();
+    await loadActionsTable();
   };
 
   let content;
@@ -183,7 +190,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
         <EuiSpacer size="s" />
 
         <EuiBasicTable
-          loading={isLoading}
+          loading={isLoadingActions || isLoadingActionTypes}
           items={data}
           itemId="id"
           columns={actionsTableColumns}
