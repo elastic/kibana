@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
@@ -17,9 +16,6 @@ import { useAppDependencies } from '../../../index';
 import { AlertingActionsDropdown } from './create_menu_popover';
 
 type ActionTypeIndex = Record<string, ActionType>;
-interface ActionsListProps {
-  api: any;
-}
 interface Pagination {
   index: number;
   size: number;
@@ -30,12 +26,7 @@ interface Data extends Action {
 
 const canDelete = capabilities.get().actions.delete;
 
-export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
-  match: {
-    params: { api },
-  },
-  history,
-}) => {
+export const ActionsList: React.FunctionComponent = () => {
   const {
     core: { http },
   } = useAppDependencies();
