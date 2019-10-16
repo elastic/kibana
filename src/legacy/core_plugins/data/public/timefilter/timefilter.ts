@@ -148,7 +148,10 @@ export class Timefilter {
     // Clear the previous auto refresh interval and start a new one (if not paused)
     clearInterval(this._autoRefreshIntervalId);
     if (!newRefreshInterval.pause) {
-      this._autoRefreshIntervalId = setInterval(this.notifyShouldFetch, newRefreshInterval.value);
+      this._autoRefreshIntervalId = window.setInterval(
+        () => this.autoRefreshFetch$.next(),
+        newRefreshInterval.value
+      );
     }
   };
 
@@ -200,13 +203,6 @@ export class Timefilter {
   public disableAutoRefreshSelector = () => {
     this._isAutoRefreshSelectorEnabled = false;
     this.enabledUpdated$.next(false);
-  };
-
-  /**
-   * Trigger an auto refresh event
-   */
-  private notifyShouldFetch: TimerHandler = () => {
-    this.autoRefreshFetch$.next();
   };
 
   private getForceNow = () => {
