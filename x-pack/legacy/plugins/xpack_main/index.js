@@ -10,7 +10,6 @@ import {
   XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
   XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
 } from '../../server/lib/constants';
-import { getXpackConfigWithDeprecated } from '../telemetry/common/get_xpack_config_with_deprecated';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
@@ -19,15 +18,10 @@ import { i18n } from '@kbn/i18n';
 
 import { has } from 'lodash';
 
-function movedToTelemetry(configPath) {
-  return (settings, log) => {
-    if (has(settings, configPath)) {
-      log(`Config key ${configPath} is deprecated. Use "xpack.telemetry.${configPath}" instead.`);
-    }
-  };
-}
-
 export { callClusterFactory } from './server/lib/call_cluster_factory';
+import { getStatsWithXpack } from './server/telemetry_collection';
+import { telemetryCollectionManager } from '../../../../src/legacy/core_plugins/telemetry/server';
+
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({
     id: 'xpack_main',
@@ -78,7 +72,6 @@ export const xpackMain = (kibana) => {
         const config = server.config();
 
         return {
-          telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
         };
@@ -102,6 +95,8 @@ export const xpackMain = (kibana) => {
 
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
+      telemetryCollectionManager.setStatsGetter(getStatsWithXpack, 'local_xpack', 1);
+
       featuresPlugin.registerLegacyAPI({
         xpackInfo: setupXPackMain(server),
         savedObjectTypes: server.savedObjects.types
@@ -111,10 +106,19 @@ export const xpackMain = (kibana) => {
       xpackInfoRoute(server);
       settingsRoute(server, this.kbnServer);
     },
-    deprecations: () => [
-      movedToTelemetry('telemetry.config'),
-      movedToTelemetry('telemetry.url'),
-      movedToTelemetry('telemetry.enabled'),
-    ],
+    deprecations: () => {
+      function movedToTelemetry(configPath) {
+        return (settings, log) => {
+          if (has(settings, configPath)) {
+            log(`Config key "xpack.xpack_main.${configPath}" is deprecated. Use "telemetry.${configPath}" instead.`);
+          }
+        };
+      }
+      return [
+        movedToTelemetry('telemetry.config'),
+        movedToTelemetry('telemetry.url'),
+        movedToTelemetry('telemetry.enabled'),
+      ];
+    },
   });
 };
