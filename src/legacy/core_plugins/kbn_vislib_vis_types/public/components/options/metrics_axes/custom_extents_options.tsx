@@ -43,11 +43,8 @@ function CustomExtentsOptions({
     { defaultMessage: 'Bounds margin must be greater than or equal to 0.' }
   );
 
-  const isBoundsMarginValid = axis.scale.defaultYExtents
-    ? axis.scale.boundsMargin === undefined
-      ? true
-      : axis.scale.boundsMargin >= 0
-    : true;
+  const isBoundsMarginValid =
+    !axis.scale.defaultYExtents || !axis.scale.boundsMargin || axis.scale.boundsMargin >= 0;
 
   const setBoundsMargin = useCallback(
     (paramName: 'boundsMargin', value: number | '') =>
