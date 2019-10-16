@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +15,6 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../../../common/eui_styled_components';
@@ -32,6 +30,7 @@ import {
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
 import { LogAnalysisJobProblemIndicator } from '../../../../../components/logging/log_analysis_job_status';
+import { AnalyzeInMlButton } from '../analyze_in_ml_button';
 
 export const AnomaliesResults: React.FunctionComponent<{
   isLoading: boolean;
@@ -42,6 +41,7 @@ export const AnomaliesResults: React.FunctionComponent<{
   timeRange: TimeRange;
   viewSetupForReconfiguration: () => void;
   viewSetupForUpdate: () => void;
+  jobId: string;
 }> = ({
   isLoading,
   jobStatus,
@@ -51,6 +51,7 @@ export const AnomaliesResults: React.FunctionComponent<{
   timeRange,
   viewSetupForReconfiguration,
   viewSetupForUpdate,
+  jobId,
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.anomaliesSectionTitle', {
     defaultMessage: 'Anomalies',
@@ -105,12 +106,7 @@ export const AnomaliesResults: React.FunctionComponent<{
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill>
-            <FormattedMessage
-              id="xpack.infra.logs.analysis.analyzeInMlButtonLabel"
-              defaultMessage="Analyze in ML"
-            />
-          </EuiButton>
+          <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -193,7 +189,12 @@ export const AnomaliesResults: React.FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
-          <AnomaliesTable results={results} setTimeRange={setTimeRange} timeRange={timeRange} />
+          <AnomaliesTable
+            results={results}
+            setTimeRange={setTimeRange}
+            timeRange={timeRange}
+            jobId={jobId}
+          />
         </>
       )}
     </>
