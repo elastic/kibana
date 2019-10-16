@@ -5,7 +5,7 @@
  */
 import { EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
@@ -31,7 +31,6 @@ interface OwnProps {
   flowTargeted: FlowTargetSourceDest;
   id: string;
   indexPattern: StaticIndexPattern;
-  ip?: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -47,7 +46,6 @@ interface NetworkTopNFlowTableReduxProps {
 }
 
 interface NetworkTopNFlowTableDispatchProps {
-  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
   updateIpDetailsTableActivePage: ActionCreator<{
     activePage: number;
     tableType: networkModel.IpDetailsTableType;
@@ -93,12 +91,10 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     flowTargeted,
     id,
     indexPattern,
-    ip,
     isInspect,
     limit,
     loading,
     loadPage,
-    setIpDetailsTablesActivePageToZero,
     showMorePagesIndicator,
     topNFlowSort,
     totalCount,
@@ -108,11 +104,6 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     updateTopNFlowLimit,
     updateTopNFlowSort,
   }) => {
-    useEffect(() => {
-      if (ip && activePage !== 0) {
-        setIpDetailsTablesActivePageToZero(null);
-      }
-    }, [ip]);
     const onChange = (criteria: Criteria, tableType: networkModel.TopNTableType) => {
       if (criteria.sort != null) {
         const splitField = criteria.sort.field.split('.');
@@ -200,7 +191,6 @@ const mapStateToProps = (state: State, ownProps: OwnProps) =>
 export const NetworkTopNFlowTable = connect(
   mapStateToProps,
   {
-    setIpDetailsTablesActivePageToZero: networkActions.setIpDetailsTablesActivePageToZero,
     updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
     updateTopNFlowSort: networkActions.updateTopNFlowSort,
     updateNetworkPageTableActivePage: networkActions.updateNetworkPageTableActivePage,
