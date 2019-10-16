@@ -16,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Legacy } from 'kibana';
-import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/server';
 
-export interface UiSettingsServiceFactoryOptions {
-  savedObjectsClient: SavedObjectsClientContract;
-}
-/**
- *  Create an instance of UiSettingsClient that will use the
- *  passed `savedObjectsClient` to communicate with elasticsearch
- *
- *  @return {IUiSettingsClient}
- */
-export function uiSettingsServiceFactory(
-  server: Legacy.Server,
-  options: UiSettingsServiceFactoryOptions
-): IUiSettingsClient {
-  return server.newPlatform.__internals.uiSettings.asScopedToClient(options.savedObjectsClient);
-}
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export type UiSettingsConfigType = TypeOf<typeof config.schema>;
+
+export const config = {
+  path: 'uiSettings',
+  schema: schema.object({
+    overrides: schema.object({}, { allowUnknowns: true }),
+    // Deprecation is implemented in LP.
+    // We define schema here not to fail on the validation step.
+    enabled: schema.maybe(schema.boolean()),
+  }),
+};
