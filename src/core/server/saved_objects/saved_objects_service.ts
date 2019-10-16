@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreService } from 'src/core/types';
+import { Service, ServiceType } from 'src/core/types';
 import { first } from 'rxjs/operators';
 import {
   SavedObjectsClient,
@@ -63,8 +63,9 @@ export interface SavedObjectsSetupDeps {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsStartDeps {}
 
-export class SavedObjectsService
-  implements CoreService<SavedObjectsServiceSetup, SavedObjectsServiceStart> {
+export type ISavedObjectsService = ServiceType<SavedObjectsService>;
+
+export class SavedObjectsService implements Service {
   private migrator: KibanaMigrator | undefined;
   private logger: Logger;
   private clientProvider: ISavedObjectsClientProvider<KibanaRequest> | undefined;

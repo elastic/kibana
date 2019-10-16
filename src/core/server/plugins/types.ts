@@ -22,6 +22,7 @@ import { Type } from '@kbn/config-schema';
 
 import { ConfigPath, EnvironmentMode, PackageInfo } from '../config';
 import { LoggerFactory } from '../logging';
+import { Service } from '../../types';
 import { CoreSetup, CoreStart } from '..';
 
 export type PluginConfigSchema = Type<unknown> | null;
@@ -137,20 +138,19 @@ export interface DiscoveredPluginInternal extends DiscoveredPlugin {
 }
 
 /**
- * The interface that should be returned by a `PluginInitializer`.
+ * The type that should be returned by a `PluginInitializer`.
  *
  * @public
  */
-export interface Plugin<
+export type Plugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
-> {
-  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
-  start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
-  stop?(): void;
-}
+> = Service<
+  (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>,
+  (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>
+>;
 
 /**
  * Context that's available to plugins during initialization stage.

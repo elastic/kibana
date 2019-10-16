@@ -27,7 +27,7 @@ import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
-import { SavedObjectsService } from '../server/saved_objects';
+import { SavedObjectsService, ISavedObjectsService } from '../server/saved_objects';
 
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
@@ -51,7 +51,7 @@ export class Server {
   private readonly legacy: LegacyService;
   private readonly log: Logger;
   private readonly plugins: PluginsService;
-  private readonly savedObjects: SavedObjectsService;
+  private readonly savedObjects: ISavedObjectsService;
   private readonly uiSettings: UiSettingsService;
 
   constructor(
