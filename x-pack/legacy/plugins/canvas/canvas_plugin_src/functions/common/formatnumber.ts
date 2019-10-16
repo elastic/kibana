@@ -6,7 +6,7 @@
 
 import numeral from '@elastic/numeral';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n';
 
 export interface Arguments {
   format: string;
