@@ -180,7 +180,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       });
 
-      await assertExpectedSavedObjects(4);
+      await assertExpectedSavedObjects(5);
     });
 
     it('should collect telemetry on saved visualization types with a painless script', async () => {
