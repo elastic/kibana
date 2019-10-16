@@ -17,7 +17,7 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[saved-objects-api-find-query-params]]
 ==== Query Parameters

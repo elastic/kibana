@@ -17,7 +17,7 @@ experimental[] Retrieve a single {kib} saved object by ID.
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 
 `type`::
@@ -65,8 +65,7 @@ GET /s/testspace/api/saved_objects/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------

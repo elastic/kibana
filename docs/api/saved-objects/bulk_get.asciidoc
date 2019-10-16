@@ -17,7 +17,7 @@ experimental[] Retrieves multiple {kib} saved objects by ID.
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[saved-objects-api-bulk-get-request-body]]
 ==== Request Body
@@ -26,7 +26,7 @@ experimental[] Retrieves multiple {kib} saved objects by ID.
   (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
 `id`::
-  (Required, string) ID of the retrieved object. This can be a Kibana's unique identifier or a custom one.
+  (Required, string) ID of the retrieved object. The ID includes the {kib} unique identifier or a custom identifier.
 
 `fields`::
   (Optional, array) The fields returned in the object response.
@@ -43,7 +43,7 @@ Saved objects that are unable to persist are replaced with an error object.
 ==== Response code
 
 `200`::
-  Indicates a successfully call.
+  Indicates a successful call.
 
 [[saved-objects-api-bulk-get-body-example]]
 ==== Example
