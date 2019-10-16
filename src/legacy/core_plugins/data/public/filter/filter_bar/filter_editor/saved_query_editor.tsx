@@ -28,10 +28,15 @@ import { TimeRange } from 'src/plugins/data/common/types';
 import { IndexPattern, Query } from '../../../../../data/public';
 import { SearchBar } from '../../../search/search_bar/components/search_bar';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
+/*
+TODO: figure out how to import and use the Stateful SearchBar. So far, the following cause webpack errors:
 // import { SearchBarProps } from '../../../../../../core_plugins/data/public';
 // import { start as data } from '../../../../../data/public/legacy';
 // import { start as data } from '../../../legacy';
 // const { SearchBar } = data.ui;
+
+Take a look at the graph app implementation: x-pack/legacy/plugins/graph/public/components/app.tsx
+*/
 interface Props {
   uiSettings: UiSettingsClientContract;
   currentSavedQuery?: SavedQuery[];
@@ -78,7 +83,6 @@ export const SavedQueryEditor: FunctionComponent<Props> = ({
     >
       <div className="savedQueryFilterEditor">
         <SearchBar
-          // appName="SavedQueryFilterEditor"
           indexPatterns={indexPatterns}
           showFilterBar={true}
           filters={
@@ -105,7 +109,6 @@ export const SavedQueryEditor: FunctionComponent<Props> = ({
             currentSavedQuery && currentSavedQuery.length > 0 ? currentSavedQuery[0] : undefined
           }
           onClearSavedQuery={onClearSavedQuery}
-          savedQueryService={savedQueryService}
           showDatePicker={true}
           timeHistory={timeHistory!}
         />
