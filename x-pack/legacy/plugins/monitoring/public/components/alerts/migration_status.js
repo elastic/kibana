@@ -85,7 +85,7 @@ export function MigrationStatus({ clusterUuid }) {
   async function createKibanaAlerts() {
     setIsCreating(true);
 
-    await kfetch({
+    const { alerts } = await kfetch({
       method: 'POST',
       pathname: `/api/monitoring/v1/clusters/${clusterUuid}/alerts`,
       body: JSON.stringify({ selectedEmailActionId })
@@ -93,6 +93,10 @@ export function MigrationStatus({ clusterUuid }) {
 
     setIsCreating(false);
     setShowCreate(false);
+    setKibanaAlerts([
+      ...kibanaAlerts,
+      ...alerts,
+    ]);
   }
 
   // async function deleteKibanaAlerts() {
