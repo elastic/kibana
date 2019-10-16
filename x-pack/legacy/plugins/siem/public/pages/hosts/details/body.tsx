@@ -11,36 +11,61 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../c
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../../components/ml/types';
-import { getHostDetailsEventsKqlQueryExpression } from './helpers';
+import { convertToBuildEsQuery } from '../../../lib/keury';
 
 import { HostDetailsBodyComponentProps } from './types';
-import { getFilterQuery, type, makeMapStateToProps } from './utils';
+import { type, makeMapStateToProps } from './utils';
 
 const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
   ({
     children,
     deleteQuery,
-    filterQueryExpression,
+    detailName,
+    filters,
     from,
     isInitializing,
-    detailName,
+    query,
     setAbsoluteRangeDatePicker,
     setQuery,
     to,
   }) => {
     return (
       <WithSource sourceId="default">
-        {({ indicesExist, indexPattern }) =>
-          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+        {({ indicesExist, indexPattern }) => {
+          const filterQuery = convertToBuildEsQuery({
+            indexPattern,
+            queries: [query],
+            filters: [
+              {
+                meta: {
+                  alias: null,
+                  negate: false,
+                  disabled: false,
+                  type: 'phrase',
+                  key: 'host.name',
+                  value: detailName,
+                  params: {
+                    query: detailName,
+                  },
+                },
+                query: {
+                  match: {
+                    'host.name': {
+                      query: detailName,
+                      type: 'phrase',
+                    },
+                  },
+                },
+              },
+              ...filters,
+            ],
+          });
+          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <>
               {children({
                 deleteQuery,
                 endDate: to,
-                filterQuery: getFilterQuery(detailName, filterQueryExpression, indexPattern),
-                kqlQueryExpression: getHostDetailsEventsKqlQueryExpression({
-                  filterQueryExpression,
-                  hostName: detailName,
-                }),
+                filterQuery,
                 skip: isInitializing,
                 setQuery,
                 startDate: from,
@@ -60,8 +85,8 @@ const HostDetailsBodyComponent = React.memo<HostDetailsBodyComponentProps>(
                 },
               })}
             </>
-          ) : null
-        }
+          ) : null;
+        }}
       </WithSource>
     );
   }

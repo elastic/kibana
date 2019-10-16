@@ -32,10 +32,10 @@ import {
 } from '../../../containers/logs/log_analysis';
 import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { FirstUseCallout } from './first_use';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
-import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { getMlLinkFormatter } from './sections/helpers/ml_links';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;

@@ -8,8 +8,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { DataSourceStrings } from '../../strings';
-import { ComponentStrings, CANVAS } from '../../../i18n';
+import { ComponentStrings, CANVAS, DataSourceStrings } from '../../../i18n';
 
 const { DemoData: strings } = DataSourceStrings;
 

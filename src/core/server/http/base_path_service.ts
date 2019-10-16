@@ -65,7 +65,7 @@ export class BasePath {
   };
 
   /**
-   * returns a new `basePath` value, prefixed with passed `url`.
+   * Prepends `path` with the basePath.
    */
   public prepend = (path: string): string => {
     if (this.serverBasePath === '') return path;
@@ -77,7 +77,7 @@ export class BasePath {
   };
 
   /**
-   * returns a new `basePath` value, cleaned up from passed `url`.
+   * Removes the prepended basePath from the `path`.
    */
   public remove = (path: string): string => {
     if (this.serverBasePath === '') {
