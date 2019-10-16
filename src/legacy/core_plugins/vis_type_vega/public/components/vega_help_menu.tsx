@@ -47,7 +47,7 @@ function VegaHelpMenu() {
     >
       <FormattedMessage
         id="visTypeVega.editor.vegaHelpLinkText"
-        defaultMessage="Kibana Vega Help"
+        defaultMessage="Kibana Vega help"
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
@@ -58,7 +58,7 @@ function VegaHelpMenu() {
     >
       <FormattedMessage
         id="visTypeVega.editor.vegaLiteDocumentationLinkText"
-        defaultMessage="Vega-Lite Documentation"
+        defaultMessage="Vega-Lite documentation"
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
@@ -69,7 +69,7 @@ function VegaHelpMenu() {
     >
       <FormattedMessage
         id="visTypeVega.editor.vegaDocumentationLinkText"
-        defaultMessage="Vega Documentation"
+        defaultMessage="Vega documentation"
       />
     </EuiContextMenuItem>,
   ];

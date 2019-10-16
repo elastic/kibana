@@ -39,10 +39,15 @@ const aceOptions = {
   wrap: true,
 };
 
-function format(value: string, stringify: typeof compactStringify) {
+const hjsonStringifyOptions = {
+  bracesSameLine: true,
+  keepWsc: true,
+};
+
+function format(value: string, stringify: typeof compactStringify, options?: any) {
   try {
     const spec = hjson.parse(value, { legacyRoot: false, keepWsc: true });
-    return stringify(spec);
+    return stringify(spec, options);
   } catch (err) {
     // This is a common case - user tries to format an invalid HJSON text
     toastNotifications.addError(err, {
@@ -69,7 +74,7 @@ function VegaVisEditor({ stateParams, setValue }: VisOptionsProps<VisParams>) {
   );
 
   const formatHJson = useCallback(
-    () => setValue('spec', format(stateParams.spec, hjson.stringify)),
+    () => setValue('spec', format(stateParams.spec, hjson.stringify, hjsonStringifyOptions)),
     [setValue, stateParams.spec]
   );
 
