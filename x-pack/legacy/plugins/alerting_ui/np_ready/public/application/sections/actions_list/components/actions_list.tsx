@@ -16,6 +16,7 @@ import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
 import { AlertingActionsDropdown } from './create_menu_popover';
 
+type ActionTypeIndex = Record<string, ActionType>;
 interface ActionsListProps {
   api: any;
 }
@@ -26,9 +27,40 @@ interface Pagination {
 interface Data extends Action {
   actionType: ActionType['name'];
 }
-type ActionTypeIndex = Record<string, ActionType>;
 
 const canDelete = capabilities.get().actions.delete;
+const actionsTableColumns = [
+  {
+    field: 'description',
+    name: i18n.translate(
+      'xpack.alertingUI.sections.actionsList.actionsListTable.descriptionHeader',
+      {
+        defaultMessage: 'Description',
+      }
+    ),
+    sortable: false,
+    truncateText: true,
+  },
+  {
+    field: 'actionType',
+    name: i18n.translate(
+      'xpack.alertingUI.sections.actionsList.actionsListTable.actionTypeHeader',
+      {
+        defaultMessage: 'Action Type',
+      }
+    ),
+    sortable: false,
+    truncateText: true,
+  },
+  {
+    field: 'config',
+    name: i18n.translate('xpack.alertingUI.sections.actionsList.actionsListTable.configHeader', {
+      defaultMessage: 'Config',
+    }),
+    sortable: false,
+    truncateText: false,
+  },
+];
 
 export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
   match: {
@@ -104,45 +136,12 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     setData(updatedData);
   }, [actions, actionTypesIndex]);
 
-  const actionsTableColumns = [
-    {
-      field: 'description',
-      name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.descriptionHeader',
-        {
-          defaultMessage: 'Description',
-        }
-      ),
-      sortable: false,
-      truncateText: true,
-    },
-    {
-      field: 'actionType',
-      name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.actionTypeHeader',
-        {
-          defaultMessage: 'Action Type',
-        }
-      ),
-      sortable: false,
-      truncateText: true,
-    },
-    {
-      field: 'config',
-      name: i18n.translate('xpack.alertingUI.sections.actionsList.actionsListTable.configHeader', {
-        defaultMessage: 'Config',
-      }),
-      sortable: false,
-      truncateText: false,
-    },
-  ];
-
-  const deleteSelectedItems = async () => {
+  async function deleteSelectedItems() {
     setIsDeletingActions(true);
     await deleteActions({ http, ids: selectedItems.map(item => item.id) });
     await loadActionsTable();
     setIsDeletingActions(false);
-  };
+  }
 
   let content;
 
