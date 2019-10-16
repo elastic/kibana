@@ -20,6 +20,7 @@ const NavBar = withRouter(function({ history }: RouteComponentProps) {
         {
           name: 'Endpoint Security',
           id: '0',
+          /**
           icon: (
             <EuiImage
               alt="Endpoint Security"
@@ -28,6 +29,7 @@ const NavBar = withRouter(function({ history }: RouteComponentProps) {
               style={{ width: '16px' }}
             />
           ),
+             **/
           items: routePaths.map(({ name, id, path }) => ({
             name,
             id,
