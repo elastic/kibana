@@ -17,60 +17,28 @@
  * under the License.
  */
 
-// @ts-ignore
-import numeral from '@elastic/numeral';
-// @ts-ignore
-import numeralLanguages from '@elastic/numeral/languages';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
-import { FieldFormat } from '../field_format';
+import { NumeralFormat } from './numeral';
 import { TextContextTypeConvert } from '../types';
 
-const numeralInst = numeral();
-
-numeralLanguages.forEach(function(numeralLanguage: Record<string, any>) {
-  numeral.language(numeralLanguage.id, numeralLanguage.lang);
-});
-
-export class PercentFormat extends FieldFormat {
+export class PercentFormat extends NumeralFormat {
   static id = 'percent';
   static title = 'Percentage';
-  static fieldType = KBN_FIELD_TYPES.NUMBER;
 
-  private getConfig: Function;
+  id = PercentFormat.id;
+  title = PercentFormat.title;
 
-  constructor(params: Record<string, any>, getConfig: Function) {
-    super(params);
-    this.getConfig = getConfig;
-  }
-
-  getParamDefaults() {
-    return {
-      pattern: this.getConfig(`format:${PercentFormat.id}:defaultPattern`),
-      fractional: true,
-    };
-  }
-
-  afterConvert(val: number) {
-    return this.param('fractional') ? val : val / 100;
-  }
+  getParamDefaults = () => ({
+    pattern: this.getConfig('format:percent:defaultPattern'),
+    fractional: true,
+  });
 
   textConvert: TextContextTypeConvert = val => {
-    if (val === -Infinity) return '-∞';
-    if (val === +Infinity) return '+∞';
-    if (typeof val !== 'number') {
-      val = parseFloat(val);
+    const formatted = super.getConvertedValue(val);
+
+    if (this.param('fractional')) {
+      return formatted;
     }
 
-    if (isNaN(val)) return '';
-
-    const previousLocale = numeral.language();
-    const defaultLocale = (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
-    numeral.language(defaultLocale);
-
-    const formatted: any = numeralInst.set(val).format(this.param('pattern'));
-
-    numeral.language(previousLocale);
-
-    return String(this.afterConvert(formatted));
+    return String(Number(formatted) / 100);
   };
 }

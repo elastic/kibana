@@ -17,55 +17,12 @@
  * under the License.
  */
 
-// @ts-ignore
-import numeral from '@elastic/numeral';
-// @ts-ignore
-import numeralLanguages from '@elastic/numeral/languages';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
-import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { NumeralFormat } from './numeral';
 
-const numeralInst = numeral();
-
-numeralLanguages.forEach(function(numeralLanguage: Record<string, any>) {
-  numeral.language(numeralLanguage.id, numeralLanguage.lang);
-});
-
-export class NumberFormat extends FieldFormat {
+export class NumberFormat extends NumeralFormat {
   static id = 'number';
   static title = 'Number';
-  static fieldType = KBN_FIELD_TYPES.NUMBER;
 
-  private getConfig: Function;
-
-  constructor(params: Record<string, any>, getConfig: Function) {
-    super(params);
-    this.getConfig = getConfig;
-  }
-
-  getParamDefaults() {
-    return {
-      pattern: this.getConfig(`format:${NumberFormat.id}:defaultPattern`),
-    };
-  }
-
-  textConvert: TextContextTypeConvert = val => {
-    if (val === -Infinity) return '-∞';
-    if (val === +Infinity) return '+∞';
-    if (typeof val !== 'number') {
-      val = parseFloat(val);
-    }
-
-    if (isNaN(val)) return '';
-
-    const previousLocale = numeral.language();
-    const defaultLocale = (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
-    numeral.language(defaultLocale);
-
-    const formatted = numeralInst.set(val).format(this.param('pattern'));
-
-    numeral.language(previousLocale);
-
-    return formatted;
-  };
+  id = NumberFormat.id;
+  title = NumberFormat.title;
 }
