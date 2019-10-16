@@ -19,7 +19,13 @@
 
 import _ from 'lodash';
 import { FilterManager } from './filter_manager.js';
-import { buildPhraseFilter, buildPhrasesFilter, getPhraseFilterValue, isPhraseFilter } from '@kbn/es-query';
+import {
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
+  isPhraseFilter,
+} from '@kbn/es-query';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(controlId, fieldName, indexPattern, queryFilter) {
@@ -102,6 +108,10 @@ export class PhraseFilterManager extends FilterManager {
 
     // single phrase filter
     if (isPhraseFilter(kbnFilter)) {
+      if (getPhraseFilterField(kbnFilter) !== this.fieldName) {
+        return;
+      }
+
       return getPhraseFilterValue(kbnFilter);
     }
 
