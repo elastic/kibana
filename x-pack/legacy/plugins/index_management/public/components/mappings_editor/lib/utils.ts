@@ -38,16 +38,25 @@ const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
 
 export const getFieldMeta = (field: Field): FieldMeta => {
   const childFieldsName = getChildFieldsName(field.type);
-  const canHaveChildFields = Boolean(childFieldsName);
+
+  const canHaveChildFields = childFieldsName === 'properties';
   const hasChildFields =
-    childFieldsName !== undefined &&
-    Boolean(field[childFieldsName]) &&
-    Object.keys(field[childFieldsName]!).length > 0;
+    canHaveChildFields &&
+    Boolean(field[childFieldsName!]) &&
+    Object.keys(field[childFieldsName!]!).length > 0;
+
+  const canHaveMultiFields = childFieldsName === 'fields';
+  const hasMultiFields =
+    canHaveMultiFields &&
+    Boolean(field[childFieldsName!]) &&
+    Object.keys(field[childFieldsName!]!).length > 0;
 
   return {
-    hasChildFields,
     childFieldsName,
     canHaveChildFields,
+    hasChildFields,
+    canHaveMultiFields,
+    hasMultiFields,
     isExpanded: false,
   };
 };

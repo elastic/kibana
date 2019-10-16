@@ -1,3 +1,9 @@
+
+/*
+ [1] When the <CreateField /> component is embedded inside the tree, we need
+ to add some extra indent to make room for the child "bullet" on the left.
+ */
+
 .mappings-editor {
   &__fields-list-item {
     &__field {
@@ -7,6 +13,21 @@
         background-color: $euiColorLightestShade;
         .mappings-editor__fields-list-item__actions {
           opacity: 1;
+        }
+      }
+
+      &--selected {
+        background-color: $euiColorLightestShade;
+        &:hover {
+          background-color: $euiColorLightestShade;
+        }
+      }
+
+      &--dim {
+        opacity: 0.3;
+
+        &:hover {
+          background-color: initial;
         }
       }
     }
@@ -29,15 +50,11 @@
 
   &__create-field-wrapper {
     background-color: $euiColorLightShade;
-    padding: $euiSizeM;
+    padding: $euiSize;
   }
 
   &__create-field-content {
     position: relative;
-
-    form {
-      padding-left: $euiSizeXL;
-    }
   }
 }
 
@@ -61,6 +78,11 @@
         height: $euiSizeS;
       }
     }
+
+    .mappings-editor__create-field-content {
+      padding-left: $euiSizeXL; // [1]
+    }
+
     .mappings-editor__fields-list .mappings-editor__fields-list-item__content--toggle {
       &::before{
         content: none;

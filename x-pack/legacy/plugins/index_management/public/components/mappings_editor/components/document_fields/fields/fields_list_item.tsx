@@ -24,7 +24,7 @@ const INDENT_SIZE = 32;
 export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
   const dispatch = useDispatch();
   const {
-    documentFields: { status, fieldToAddFieldTo },
+    documentFields: { status, fieldToAddFieldTo, fieldToEdit },
     fields: { byId },
   } = useState();
   const getField = (propId: string) => byId[propId];
@@ -32,8 +32,10 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
     id,
     source,
     childFields,
-    hasChildFields,
     canHaveChildFields,
+    hasChildFields,
+    canHaveMultiFields,
+    hasMultiFields,
     nestedDepth,
     isExpanded,
   } = field;
@@ -85,15 +87,18 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
 
     return (
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          {canHaveChildFields && (
-            <>
+        {(canHaveMultiFields || canHaveChildFields) && (
+          <EuiFlexItem grow={false}>
+            {canHaveChildFields && (
               <EuiButtonEmpty onClick={addField} disabled={isAddFieldBtnDisabled}>
                 Add child
               </EuiButtonEmpty>
-            </>
-          )}
-        </EuiFlexItem>
+            )}
+            {canHaveMultiFields && (
+              <EuiButtonEmpty onClick={toggleExpand}>Multi-fields</EuiButtonEmpty>
+            )}
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={editField}>Edit</EuiButtonEmpty>
         </EuiFlexItem>
@@ -110,7 +115,14 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
 
   return (
     <>
-      <div style={{ paddingLeft: indent }} className="mappings-editor__fields-list-item__field">
+      <div
+        style={{ paddingLeft: indent }}
+        className={classNames('mappings-editor__fields-list-item__field', {
+          'mappings-editor__fields-list-item__field--selected': fieldToEdit === id,
+          'mappings-editor__fields-list-item__field--dim':
+            status === 'editingField' && fieldToEdit !== id,
+        })}
+      >
         <div className="mappings-editor__fields-list-item__wrapper">
           <EuiFlexGroup
             gutterSize="s"
@@ -132,9 +144,14 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
             <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__name">
               {source.name}
             </EuiFlexItem>
-            <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__type">
+            <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">{source.type}</EuiBadge>
             </EuiFlexItem>
+            {hasMultiFields && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{`${childFields!.length} multi-field`}</EuiBadge>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem className="mappings-editor__fields-list-item__actions">
               {renderActionButtons()}
             </EuiFlexItem>

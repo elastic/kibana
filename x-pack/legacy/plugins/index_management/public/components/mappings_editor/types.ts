@@ -103,7 +103,9 @@ export interface Field {
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;
   canHaveChildFields: boolean;
+  canHaveMultiFields: boolean;
   hasChildFields: boolean;
+  hasMultiFields: boolean;
   childFields?: string[];
   isExpanded: boolean;
 }
