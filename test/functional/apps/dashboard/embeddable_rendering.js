@@ -92,6 +92,12 @@ export default function ({ getService, getPageObjects }) {
   // FLAKY: https://github.com/elastic/kibana/issues/46305
   describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
+      await PageObjects.dashboard.initTests({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
 
       const fromTime = '2018-01-01 00:00:00.000';

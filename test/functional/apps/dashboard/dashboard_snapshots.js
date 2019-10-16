@@ -28,6 +28,12 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
+      await PageObjects.dashboard.initTests({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.dashboard.preserveCrossAppState();
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setScreenshotSize(1000, 500);
       // adding this navigate adds the timestamp hash to the url which invalidates previous

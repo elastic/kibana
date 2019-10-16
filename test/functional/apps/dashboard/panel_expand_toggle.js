@@ -26,6 +26,12 @@ export default function ({ getService, getPageObjects }) {
 
   describe('expanding a panel', () => {
     before(async () => {
+      await PageObjects.dashboard.initTests({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
 

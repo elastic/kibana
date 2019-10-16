@@ -17,34 +17,17 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile, getPageObjects }) {
+export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['dashboard']);
-
-  async function loadCurrentData() {
-    await browser.setWindowSize(1300, 900);
-    await PageObjects.dashboard.initTests({
-      kibanaIndex: 'dashboard/current/kibana',
-      dataIndex: 'dashboard/current/data',
-      defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-    });
-    await PageObjects.dashboard.preserveCrossAppState();
-  }
-
-  async function unloadCurrentData() {
-    await PageObjects.dashboard.clearSavedObjectsFromAppLinks();
-    await esArchiver.unload('dashboard/current/kibana');
-    await esArchiver.unload('dashboard/current/data');
-  }
 
   describe('dashboard app', function () {
     // This has to be first since the other tests create some embeddables as side affects and our counting assumes
     // a fresh index.
     describe('using current data', function () {
       this.tags('ciGroup2');
-      before(loadCurrentData);
-      after(unloadCurrentData);
+      before(async () => {
+        await browser.setWindowSize(1300, 900);
+      });
 
       loadTestFile(require.resolve('./empty_dashboard'));
       loadTestFile(require.resolve('./embeddable_rendering'));
@@ -62,8 +45,9 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
 
     describe('using current data', function () {
       this.tags('ciGroup3');
-      before(loadCurrentData);
-      after(unloadCurrentData);
+      before(async () => {
+        await browser.setWindowSize(1300, 900);
+      });
 
       loadTestFile(require.resolve('./full_screen_mode'));
       loadTestFile(require.resolve('./dashboard_filter_bar'));
@@ -83,7 +67,9 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
       this.tags('ciGroup4');
-      before(() => browser.setWindowSize(1200, 900));
+      before(async () => {
+        await browser.setWindowSize(1200, 900);
+      });
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
@@ -93,7 +79,9 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
 
     describe('using legacy data', function () {
       this.tags('ciGroup5');
-      before(() => browser.setWindowSize(1200, 900));
+      before(async () => {
+        await browser.setWindowSize(1200, 900);
+      });
 
       loadTestFile(require.resolve('./dashboard_save'));
       loadTestFile(require.resolve('./dashboard_time'));
