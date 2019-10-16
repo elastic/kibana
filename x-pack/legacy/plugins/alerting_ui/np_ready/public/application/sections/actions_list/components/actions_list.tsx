@@ -161,7 +161,22 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     content = (
       <Fragment>
         <EuiSearchBar
-          onChange={({ query }: { query: { text: string } }) => setSearchText(query.text)}
+          onChange={({ queryText }: { queryText: string }) => setSearchText(queryText)}
+          filters={[
+            {
+              type: 'field_value_selection',
+              field: 'type',
+              name: i18n.translate(
+                'xpack.alertingUI.sections.actionsList.actionsListTable.typeFilterName',
+                { defaultMessage: 'Type' }
+              ),
+              multiSelect: 'or',
+              options: Object.values(actionTypesIndex || {}).map(actionType => ({
+                value: actionType.id,
+                name: actionType.name,
+              })),
+            },
+          ]}
           toolsRight={[
             <EuiButton
               key="delete"
