@@ -4,7 +4,7 @@
 
 ## IUiSettingsClient.getDefaults property
 
-Returns uiSettings default values
+Returns uiSettings default values [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md)
 
 <b>Signature:</b>
 

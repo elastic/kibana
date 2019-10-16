@@ -4,7 +4,7 @@
 
 ## UiSettingsParams.type property
 
-defines a type of UI element
+defines a type of UI element [UiSettingsType](./kibana-plugin-server.uisettingstype.md)
 
 <b>Signature:</b>
 

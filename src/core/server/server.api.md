@@ -723,7 +723,7 @@ export interface InternalCoreSetup {
     // (undocumented)
     http: InternalHttpServiceSetup;
     // (undocumented)
-    uiSettings: UiSettingsServiceSetup;
+    uiSettings: InternalUiSettingsServiceSetup;
 }
 
 // @internal (undocumented)
@@ -732,6 +732,12 @@ export interface InternalCoreStart {
     // 
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
+}
+
+// @internal (undocumented)
+export interface InternalUiSettingsServiceSetup {
+    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+    setDefaults(values: Record<string, UiSettingsParams>): void;
 }
 
 // @public
@@ -1574,12 +1580,6 @@ export interface UiSettingsParams {
     requiresPageReload?: boolean;
     type?: UiSettingsType;
     value: SavedObjectAttribute;
-}
-
-// @internal (undocumented)
-export interface UiSettingsServiceSetup {
-    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
-    setDefaults(values: Record<string, UiSettingsParams>): void;
 }
 
 // @public

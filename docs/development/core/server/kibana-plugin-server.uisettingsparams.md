@@ -23,6 +23,6 @@ export interface UiSettingsParams
 |  [options](./kibana-plugin-server.uisettingsparams.options.md) | <code>string[]</code> | a range of valid values |
 |  [readonly](./kibana-plugin-server.uisettingsparams.readonly.md) | <code>boolean</code> | a flag indicating that value cannot be changed |
 |  [requiresPageReload](./kibana-plugin-server.uisettingsparams.requirespagereload.md) | <code>boolean</code> | a flag indicating whether new value applying requires page reloading |
-|  [type](./kibana-plugin-server.uisettingsparams.type.md) | <code>UiSettingsType</code> | defines a type of UI element |
+|  [type](./kibana-plugin-server.uisettingsparams.type.md) | <code>UiSettingsType</code> | defines a type of UI element [UiSettingsType](./kibana-plugin-server.uisettingstype.md) |
 |  [value](./kibana-plugin-server.uisettingsparams.value.md) | <code>SavedObjectAttribute</code> | default value to fall back to if a user doesn't provide any |
 
