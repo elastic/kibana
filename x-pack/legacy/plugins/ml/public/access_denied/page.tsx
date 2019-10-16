@@ -42,7 +42,7 @@ export const AccessDeniedPage = () => (
           <EuiSpacer size="m" />
           <EuiCallOut
             title={i18n.translate('xpack.ml.accessDenied.label', {
-              defaultMessage: 'You need permission to access ML jobs',
+              defaultMessage: 'You need permission to the Ml plugin',
             })}
             color="danger"
             iconType="cross"
@@ -51,7 +51,7 @@ export const AccessDeniedPage = () => (
               <p>
                 <FormattedMessage
                   id="xpack.ml.accessDenied.description"
-                  defaultMessage="You don’t have permission to manage ML jobs"
+                  defaultMessage="You don’t have permission to access the ML plugin"
                 />
               </p>
             </EuiText>
