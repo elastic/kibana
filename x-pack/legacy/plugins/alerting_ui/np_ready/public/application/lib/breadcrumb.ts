@@ -33,7 +33,7 @@ class BreadcrumbService {
       },
     ];
     this.breadcrumbs.actions = [
-      ...this.breadcrumbs.actions,
+      ...this.breadcrumbs.home,
       {
         text: textService.breadcrumbs.actions,
         href: linkToActions(),
