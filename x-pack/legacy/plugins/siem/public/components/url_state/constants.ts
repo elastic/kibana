@@ -5,15 +5,17 @@
  */
 
 export enum CONSTANTS {
+  appQuery = 'query',
+  filters = 'filters',
+  savedQuery = 'savedQuery',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
-  kqlQuery = 'kqlQuery',
   networkDetails = 'network.details',
   networkPage = 'network.page',
   overviewPage = 'overview.page',
   timelinePage = 'timeline.page',
   timerange = 'timerange',
-  timelineId = 'timelineId',
+  timeline = 'timeline',
   unknown = 'unknown',
 }
 

@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
 import { StylePropertyLegendRow } from './style_property_legend_row';
 
-export function VectorStyleLegend({ getFieldLabel, styleProperties }) {
+export function VectorStyleLegend({ getFieldLabel, getFieldFormatter, styleProperties }) {
   return styleProperties.map(styleProperty => {
     return (
       <StylePropertyLegendRow
@@ -20,6 +20,7 @@ export function VectorStyleLegend({ getFieldLabel, styleProperties }) {
         options={styleProperty.options}
         range={styleProperty.range}
         getFieldLabel={getFieldLabel}
+        getFieldFormatter={getFieldFormatter}
       />
     );
   });
@@ -34,5 +35,6 @@ const stylePropertyShape = PropTypes.shape({
 
 VectorStyleLegend.propTypes = {
   styleProperties: PropTypes.arrayOf(stylePropertyShape).isRequired,
-  getFieldLabel: PropTypes.func.isRequired
+  getFieldLabel: PropTypes.func.isRequired,
+  getFieldFormatter: PropTypes.func.isRequired,
 };

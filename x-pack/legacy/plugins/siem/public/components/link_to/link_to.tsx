@@ -13,7 +13,6 @@ import { RedirectToNetworkPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
 import { RedirectToTimelinesPage } from './redirect_to_timelines';
 import { HostsTableType } from '../../store/hosts/model';
-
 interface LinkToPageProps {
   match: RouteMatch<{}>;
 }

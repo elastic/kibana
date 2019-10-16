@@ -20,7 +20,7 @@
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 
-import { ConfigPath, EnvironmentMode } from '../config';
+import { ConfigPath, EnvironmentMode, PackageInfo } from '../config';
 import { LoggerFactory } from '../logging';
 import { CoreSetup, CoreStart } from '..';
 
@@ -159,7 +159,10 @@ export interface Plugin<
  */
 export interface PluginInitializerContext<ConfigSchema = unknown> {
   opaqueId: PluginOpaqueId;
-  env: { mode: EnvironmentMode };
+  env: {
+    mode: EnvironmentMode;
+    packageInfo: Readonly<PackageInfo>;
+  };
   logger: LoggerFactory;
   config: {
     create: <T = ConfigSchema>() => Observable<T>;
