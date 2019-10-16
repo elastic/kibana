@@ -595,6 +595,26 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async checkImportSucceeded() {
+      await testSubjects.existOrFail('importSavedObjectsSuccess', { timeout: 20000 });
+    }
+
+    async checkNoneImported() {
+      await testSubjects.existOrFail('importSavedObjectsSuccessNoneImported', { timeout: 20000 });
+    }
+
+    async checkImportConflictsWarning() {
+      await testSubjects.existOrFail('importSavedObjectsConflictsWarning', { timeout: 20000 });
+    }
+
+    async checkImportLegacyWarning() {
+      await testSubjects.existOrFail('importSavedObjectsLegacyWarning', { timeout: 20000 });
+    }
+
+    async checkImportFailedWarning() {
+      await testSubjects.existOrFail('importSavedObjectsFailedWarning', { timeout: 20000 });
+    }
+
     async clickImportDone() {
       await testSubjects.click('importSavedObjectsDoneBtn');
     }
