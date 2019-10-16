@@ -9,13 +9,14 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
+  EuiFieldSearch
 } from '@elastic/eui';
 import React from 'react';
 import { get, pick, isEmpty } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DottedKeyValueTable } from '../DottedKeyValueTable';
+import { DottedKeyValueTable, pathify } from '../DottedKeyValueTable';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { Section as SectionType } from './sections';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
@@ -32,25 +33,34 @@ interface Props {
 const filterSections = (sections: SectionType[], item: Item) =>
   sections
     .map(section => {
-      const data: Record<string, unknown> = get(item, section.key);
-      return {
-        ...section,
-        data: section.properties ? pick(data, section.properties) : data
-      };
+      const sectionData: Record<string, unknown> = get(item, section.key);
+      let data = section.properties
+        ? pick(sectionData, section.properties)
+        : sectionData;
+
+      if (!isEmpty(data)) {
+        data = pathify(data, { maxDepth: 5, parentKey: section.key });
+      }
+      return { ...section, data };
     })
     .filter(({ required, data }) => required || !isEmpty(data));
 
 export function MetadataTable({ item, sections }: Props) {
   const filteredSections = filterSections(sections, item);
+
+  const onSearchChange = () => {};
   return (
     <React.Fragment>
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
         <EuiFlexItem grow={false}>
           <ElasticDocsLink section="/apm/get-started" path="/metadata.html">
             <EuiText size="s">
               <EuiIcon type="help" /> How to add labels and other data
             </EuiText>
           </ElasticDocsLink>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFieldSearch onChange={onSearchChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {filteredSections.map(section => (
@@ -84,8 +94,5 @@ function Section({
       </EuiText>
     );
   }
-
-  return (
-    <DottedKeyValueTable data={propData} parentKey={propKey} maxDepth={5} />
-  );
+  return <DottedKeyValueTable data={propData} skipPathify />;
 }

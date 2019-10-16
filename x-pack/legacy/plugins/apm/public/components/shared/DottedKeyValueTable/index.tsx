@@ -59,14 +59,18 @@ export function DottedKeyValueTable({
   data,
   parentKey,
   maxDepth,
-  tableProps = {}
+  tableProps = {},
+  skipPathify = false
 }: {
-  data: StringMap;
+  data: StringMap | PathifyResult;
   parentKey?: string;
   maxDepth?: number;
   tableProps?: EuiTableProps & TableHTMLAttributes<HTMLTableElement>;
+  skipPathify?: boolean;
 }) {
-  const pathified = pathify(data, { maxDepth, parentKey });
+  const pathified: PathifyResult = skipPathify
+    ? data
+    : pathify(data, { maxDepth, parentKey });
   const rows = Object.keys(pathified)
     .sort()
     .map(k => [k, pathified[k]]);
