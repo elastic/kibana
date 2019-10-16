@@ -60,7 +60,7 @@ export interface UiSettingsParams {
   requiresPageReload?: boolean;
   /** a flag indicating that value cannot be changed */
   readonly?: boolean;
-  /** defines a type of UI element */
+  /** defines a type of UI element {@link UiSettingsType} */
   type?: UiSettingsType;
 }
 
@@ -72,7 +72,7 @@ export interface InternalUiSettingsServiceSetup {
    */
   setDefaults(values: Record<string, UiSettingsParams>): void;
   /**
-   * Creates uiSettings client with provided *scoped* saved objects client.
+   * Creates uiSettings client with provided *scoped* saved objects client {@link IUiSettingsClient}
    * @param values
    */
   asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;

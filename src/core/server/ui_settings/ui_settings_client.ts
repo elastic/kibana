@@ -56,7 +56,7 @@ type UiSettingsRaw = Record<string, UiSettingsRawValue>;
  */
 export interface IUiSettingsClient {
   /**
-   * Returns uiSettings default values
+   * Returns uiSettings default values {@link UiSettingsParams}
    */
   getDefaults: () => Record<string, UiSettingsParams>;
   /**
