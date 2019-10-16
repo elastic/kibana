@@ -22,11 +22,8 @@ export function Screenshots(props: ScreenshotProps) {
   const ScreenshotsContainer = styled.div`
     background: linear-gradient(360deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 100%),
       ${theme.eui.euiColorPrimary};
-    padding: 54px 64px;
+    padding: 32px 64px 56px 64px;
     border-radius: 4px;
-  `;
-  const ImageCaptionContainer = styled(EuiFlexItem)`
-    margin: 0;
   `;
   return (
     <Fragment>
@@ -35,13 +32,13 @@ export function Screenshots(props: ScreenshotProps) {
       </EuiTitle>
       <EuiSpacer size="m" />
       <ScreenshotsContainer>
-        <EuiFlexGroup direction="column" alignItems="center">
-          <ImageCaptionContainer>
+        <EuiFlexGroup gutterSize="none" direction="column" alignItems="center">
+          <EuiFlexItem>
             <EuiText color="ghost">
               We need image descriptions to be returned in the response
             </EuiText>
             <EuiSpacer />
-          </ImageCaptionContainer>
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiImage url={src} alt="image" size="l" allowFullScreen />
           </EuiFlexItem>
