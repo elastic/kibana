@@ -6,7 +6,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import { registerRouter } from './lib/navigation';
 import { BASE_PATH, Section, DEFAULT_SECTION } from './constants';
 import { AlertsUIHome } from './home';
 
@@ -21,13 +20,6 @@ class ShareRouter extends Component {
   };
   constructor(props: any, context?: any) {
     super(props, context);
-    this.registerRouter();
-  }
-
-  registerRouter() {
-    // Share the router with the app without requiring React or context.
-    const { router } = this.context;
-    registerRouter(router);
   }
 
   render() {
