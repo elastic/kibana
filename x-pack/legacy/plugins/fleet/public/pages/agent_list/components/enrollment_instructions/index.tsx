@@ -41,7 +41,6 @@ export const ManualEnrollmentSteps: React.SFC<{ instructions: ManualEnrollmentIn
 );
 
 // Setup for replacing template variables in install instructions
-const TEMPLATE_TAGS = ['{', '}'];
 const mustacheWriter = new Writer();
 
 // do not html escape output
@@ -56,14 +55,10 @@ mustacheWriter.escapedValue = function escapedValue(token, context) {
 // Configure available variable values
 export function replaceTemplateStrings(text: string = '') {
   const variables = {
-    // '{' and '}' can not be used in template since they are used as template tags.
-    // Must use '{curlyOpen}'' and '{curlyClose}'
-    curlyOpen: '{',
-    curlyClose: '}',
     config: {
       enrollmentToken: 'sometesttoken',
     },
   };
-  mustacheWriter.parse(text, TEMPLATE_TAGS);
+  mustacheWriter.parse(text);
   return mustacheWriter.render(text, variables, () => {});
 }

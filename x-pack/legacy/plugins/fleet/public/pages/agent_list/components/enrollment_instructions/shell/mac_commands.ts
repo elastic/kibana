@@ -39,5 +39,5 @@ setup.kibana:
 
 export const START = `
 ./somefile setup
-./somefile --token={config.enrollmentToken}
+./somefile --token={{config.enrollmentToken}}
 `;
