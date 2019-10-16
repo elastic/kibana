@@ -23,7 +23,7 @@ import { Query } from '../../query/query_bar';
 
 export * from './components';
 
-type SavedQueryTimeFilter = TimeRange & {
+export type SavedQueryTimeFilter = TimeRange & {
   refreshInterval: RefreshInterval;
 };
 
