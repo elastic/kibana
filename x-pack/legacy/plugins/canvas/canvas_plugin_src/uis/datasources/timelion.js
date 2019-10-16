@@ -18,8 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { DataSourceStrings } from '../../strings';
-import { TIMELION, CANVAS } from '../../../i18n';
+import { DataSourceStrings, TIMELION, CANVAS } from '../../../i18n';
 
 const { Timelion: strings } = DataSourceStrings;
 

@@ -5,8 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 
+import { isSetupStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import { LogAnalysisCapabilities, LogAnalysisJobs } from '../../../containers/logs/log_analysis';
 import { Source } from '../../../containers/source';
@@ -19,9 +20,13 @@ export const AnalysisPageContent = () => {
   const { sourceId, source } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const { setup, retry, setupStatus, viewResults, fetchJobStatus } = useContext(
+  const { setup, cleanupAndSetup, setupStatus, viewResults, fetchJobStatus } = useContext(
     LogAnalysisJobs.Context
   );
+
+  useEffect(() => {
+    fetchJobStatus();
+  }, []);
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;
@@ -35,7 +40,7 @@ export const AnalysisPageContent = () => {
     );
   } else if (setupStatus === 'unknown') {
     return <AnalysisSetupStatusUnknownContent retry={fetchJobStatus} />;
-  } else if (setupStatus === 'skipped' || setupStatus === 'hiddenAfterSuccess') {
+  } else if (isSetupStatusWithResults(setupStatus)) {
     return (
       <AnalysisResultsContent
         sourceId={sourceId}
@@ -46,7 +51,7 @@ export const AnalysisPageContent = () => {
     return (
       <AnalysisSetupContent
         setup={setup}
-        retry={retry}
+        cleanupAndSetup={cleanupAndSetup}
         setupStatus={setupStatus}
         indexPattern={source ? source.configuration.logAlias : ''}
         viewResults={viewResults}
