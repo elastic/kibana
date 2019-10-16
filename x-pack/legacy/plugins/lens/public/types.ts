@@ -222,6 +222,10 @@ export interface OperationMetadata {
 export interface LensMultiTable {
   type: 'lens_multitable';
   tables: Record<string, KibanaDatatable>;
+  dateRange?: {
+    fromDate: Date;
+    toDate: Date;
+  };
 }
 
 export interface VisualizationProps<T = unknown> {
