@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 
+import { i18n } from '@kbn/i18n';
 import { RequestFacade, ResponseToolkitFacade } from '../..';
 import { validateGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
@@ -57,6 +58,22 @@ export function repositoryRoute(
       try {
         // Check if the repository already exists
         await repoObjectClient.getRepository(repo.uri);
+        // distinguish between that the repository exists in the current space and that the repository exists in
+        // another space, and return the default message if error happens during reference checking.
+        try {
+          const hasRef = await getReferenceHelper(req.getSavedObjectsClient()).hasReference(
+            repo.uri
+          );
+          if (!hasRef) {
+            return Boom.conflict(
+              i18n.translate('xpack.code.repositoryManagement.repoOtherSpaceImportedMessage', {
+                defaultMessage: 'The repository has already been imported in another space!',
+              })
+            );
+          }
+        } catch (e) {
+          log.error(`Failed to check reference for ${repo.uri} in current space`);
+        }
         const msg = `Repository ${repoUrl} already exists. Skip clone.`;
         log.info(msg);
         return h.response(msg).code(304); // Not Modified
