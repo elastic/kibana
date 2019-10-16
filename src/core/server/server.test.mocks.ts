@@ -36,6 +36,7 @@ jest.doMock('./elasticsearch/elasticsearch_service', () => ({
 }));
 
 export const mockLegacyService = {
+  legacyId: Symbol(),
   setup: jest.fn().mockReturnValue({ uiExports: {} }),
   start: jest.fn(),
   stop: jest.fn(),
@@ -54,4 +55,10 @@ import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.m
 export const mockSavedObjectsService = savedObjectsServiceMock.create();
 jest.doMock('./saved_objects/saved_objects_service', () => ({
   SavedObjectsService: jest.fn(() => mockSavedObjectsService),
+}));
+
+import { contextServiceMock } from './context/context_service.mock';
+export const mockContextService = contextServiceMock.create();
+jest.doMock('./context/context_service', () => ({
+  ContextService: jest.fn(() => mockContextService),
 }));

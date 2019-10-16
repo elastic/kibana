@@ -16,20 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { LegacyPlatformService } from './legacy_service';
 
-// Use Required to get only public properties
-type LegacyPlatformServiceContract = Required<LegacyPlatformService>;
-const createMock = () => {
-  const mocked: jest.Mocked<LegacyPlatformServiceContract> = {
-    legacyId: Symbol(),
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-  return mocked;
-};
+import { KibanaSupertestProvider } from './supertest';
 
-export const legacyPlatformServiceMock = {
-  create: createMock,
+export const services = {
+  supertest: KibanaSupertestProvider,
 };

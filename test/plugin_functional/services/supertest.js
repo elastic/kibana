@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
-  return new kibana.Plugin({
-    uiExports: {
-      app: {
-        title: 'Core Legacy Compat',
-        description: 'This is a sample plugin to test core to legacy compatibility',
-        main: 'plugins/core_legacy_compat/index',
-      },
-    },
+import { format as formatUrl } from 'url';
 
-    init(server: Server) {},
-  });
+import supertestAsPromised from 'supertest-as-promised';
+
+export function KibanaSupertestProvider({ getService }) {
+  const config = getService('config');
+  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
+  return supertestAsPromised(kibanaServerUrl);
 }
