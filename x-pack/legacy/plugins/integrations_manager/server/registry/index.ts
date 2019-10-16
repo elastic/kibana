@@ -18,7 +18,7 @@ import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponseStream, getResponse } from './requests';
 import { streamToBuffer } from './streams';
-import { integrationsManagerConfigStore } from '../config';
+import { epmConfigStore } from '../config';
 
 export { ArchiveEntry } from './extract';
 
@@ -32,7 +32,7 @@ export interface ImageRequestParams {
 }
 
 export async function fetchList(params?: SearchParams): Promise<RegistryList> {
-  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  const { registryUrl } = epmConfigStore.getConfig();
   const url = new URL(`${registryUrl}/search`);
   if (params && params.category) {
     url.searchParams.set('category', params.category);
@@ -42,7 +42,7 @@ export async function fetchList(params?: SearchParams): Promise<RegistryList> {
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
-  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  const { registryUrl } = epmConfigStore.getConfig();
   return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
 }
 
@@ -53,7 +53,7 @@ export async function fetchImage(params: ImageRequestParams): Promise<Response> 
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {
-  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  const { registryUrl } = epmConfigStore.getConfig();
   return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
 }
 
@@ -111,7 +111,7 @@ async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
 }
 
 async function fetchArchiveBuffer(key: string): Promise<Buffer> {
-  const { registryUrl } = integrationsManagerConfigStore.getConfig();
+  const { registryUrl } = epmConfigStore.getConfig();
   return getResponseStream(`${registryUrl}/package/${key}`).then(streamToBuffer);
 }
 

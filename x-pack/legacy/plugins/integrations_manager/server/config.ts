@@ -45,7 +45,7 @@ const DEFAULT_CONFIG = {
 
 let _config: EPMConfigSchema = DEFAULT_CONFIG;
 
-export const integrationsManagerConfigStore = {
+export const epmConfigStore = {
   updateConfig(newConfig: EPMConfigSchema) {
     _config = Object.assign({}, _config, newConfig);
   },

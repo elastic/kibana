@@ -11,7 +11,7 @@ import {
   IClusterClient,
   PluginInitializerContext,
 } from 'src/core/server';
-import { EPMConfigSchema, integrationsManagerConfigStore } from './config';
+import { EPMConfigSchema, epmConfigStore } from './config';
 import { PLUGIN } from '../common/constants';
 import { Server } from '../common/types';
 import { fetchList } from './registry';
@@ -36,7 +36,7 @@ export class Plugin {
   constructor(initializerContext: EPMPluginInitializerContext) {
     this.config$ = initializerContext.config.create<EPMConfigSchema>();
     this.config$.subscribe(configValue => {
-      integrationsManagerConfigStore.updateConfig(configValue);
+      epmConfigStore.updateConfig(configValue);
     });
   }
   public setup(core: CoreSetup) {

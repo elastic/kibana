@@ -97,5 +97,4 @@ const pluginOptions: LegacyPluginOptions = {
   isEnabled: false,
 };
 
-export const integrationsManager: LegacyPluginInitializer = kibana =>
-  new kibana.Plugin(pluginOptions);
+export const epm: LegacyPluginInitializer = kibana => new kibana.Plugin(pluginOptions);
