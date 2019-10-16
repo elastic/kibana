@@ -45,13 +45,13 @@ production cluster as well as monitor data sent to a dedicated monitoring
 cluster.
 
 `xpack.monitoring.elasticsearch.username`::
-Specifies the user ID that {kib} uses for authentication when it retrieves data
-from the monitoring cluster. If not set, {kib} uses the value of the
+Specifies the user ID that {kib} uses for authentication when it sends data
+to the monitoring cluster. If not set, {kib} uses the value of the
 `elasticsearch.username` setting.
 
 `xpack.monitoring.elasticsearch.password`::
-Specifies the password that {kib} uses for authentication when it retrieves data
-from the monitoring cluster. If not set, {kib} uses the value of the
+Specifies the password that {kib} uses for authentication when it sends data
+to the monitoring cluster. If not set, {kib} uses the value of the
 `elasticsearch.password` setting.
 
 `telemetry.enabled`::
