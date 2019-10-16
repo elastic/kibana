@@ -17,7 +17,10 @@
  * under the License.
  */
 
-export class HttpFetchError extends Error {
+import { IHttpFetchError } from './types';
+
+/** @internal */
+export class HttpFetchError extends Error implements IHttpFetchError {
   constructor(
     message: string,
     public readonly request: Request,

@@ -26,6 +26,7 @@ enum ErrorCode {
   NOT_AUTHORIZED = 'Elasticsearch/notAuthorized',
 }
 
+/** @public */
 export interface ElasticsearchError extends Boom {
   [code]?: string;
 }

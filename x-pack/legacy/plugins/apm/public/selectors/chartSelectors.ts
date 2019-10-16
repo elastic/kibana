@@ -20,6 +20,7 @@ import {
 import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
+import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 
 export interface ITpmBucket {
   title: string;
@@ -179,15 +180,18 @@ export function getTpmSeries(
   });
 }
 
-function getColorByKey(keys: string[]) {
-  const assignedColors: StringMap<string> = {
-    'HTTP 2xx': theme.euiColorVis0,
-    'HTTP 3xx': theme.euiColorVis5,
-    'HTTP 4xx': theme.euiColorVis7,
-    'HTTP 5xx': theme.euiColorVis2
-  };
+function colorMatch(key: string) {
+  if (/ok|success/i.test(key)) {
+    return theme.euiColorSecondary;
+  } else if (/error|fail/i.test(key)) {
+    return theme.euiColorDanger;
+  }
+}
 
-  const unknownKeys = difference(keys, Object.keys(assignedColors));
+function getColorByKey(keys: string[]) {
+  const assignedColors = ['HTTP 2xx', 'HTTP 3xx', 'HTTP 4xx', 'HTTP 5xx'];
+
+  const unknownKeys = difference(keys, assignedColors);
   const unassignedColors: StringMap<string> = zipObject(unknownKeys, [
     theme.euiColorVis1,
     theme.euiColorVis3,
@@ -197,5 +201,6 @@ function getColorByKey(keys: string[]) {
     theme.euiColorVis8
   ]);
 
-  return (key: string) => assignedColors[key] || unassignedColors[key];
+  return (key: string) =>
+    colorMatch(key) || httpStatusCodeToColor(key) || unassignedColors[key];
 }

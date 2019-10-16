@@ -67,7 +67,6 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
     source.icon = source.type.icon;
     source.image = source.type.image;
     source.typeTitle = source.type.title;
-    source.isExperimental = source.type.shouldMarkAsExperimentalInUI();
     source.editUrl = `#${createVisualizeEditUrl(id)}`;
 
     return source;

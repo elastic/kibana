@@ -14,13 +14,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import classname from 'classnames';
-import { IPosition } from 'monaco-editor';
 import queryString from 'querystring';
 import React from 'react';
 import { parseSchema } from '../../../common/uri_util';
 import { GroupedFileResults, GroupedRepoResults } from '../../actions';
 import { history } from '../../utils/url';
-import { CodeBlock } from '../codeblock/codeblock';
+import { CodeBlockPanel, Position } from '../code_block';
 
 interface Props {
   isLoading: boolean;
@@ -114,12 +113,9 @@ export class ReferencesPanel extends React.Component<Props, State> {
 
   private renderReference(file: GroupedFileResults) {
     const key = `${file.uri}`;
-    const lineNumberFn = (l: number) => {
-      return file.lineNumbers[l - 1];
-    };
-    const fileComponent = (
+    const header = (
       <React.Fragment>
-        <EuiText>
+        <EuiText size="s">
           <a href={`#${this.computeUrl(file.uri)}`}>{file.file}</a>
         </EuiText>
         <EuiSpacer size="s" />
@@ -127,24 +123,23 @@ export class ReferencesPanel extends React.Component<Props, State> {
     );
 
     return (
-      <CodeBlock
+      <CodeBlockPanel
+        className="referencesPanel__code-block"
         key={key}
+        header={header}
+        lines={file.code.split('\n')}
         language={file.language}
-        startLine={0}
-        code={file.code}
-        folding={false}
-        lineNumbersFunc={lineNumberFn}
+        lineNumber={i => file.lineNumbers[i]}
         highlightRanges={file.highlights}
-        fileComponent={fileComponent}
-        onClick={this.onCodeClick.bind(this, file.lineNumbers, file.uri)}
+        onClick={this.onCodeClick(file.uri)}
       />
     );
   }
 
-  private onCodeClick(lineNumbers: string[], url: string, pos: IPosition) {
-    const line = parseInt(lineNumbers[pos.lineNumber - 1], 10);
-    history.push(this.computeUrl(url, line));
-  }
+  private onCodeClick = (url: string) => (position: Position) => {
+    const lineNum = parseInt(position.lineNumber, 10);
+    history.push(this.computeUrl(url, lineNum));
+  };
 
   private computeUrl(url: string, line?: number) {
     const { uri } = parseSchema(url)!;
@@ -158,6 +153,7 @@ export class ReferencesPanel extends React.Component<Props, State> {
       tab: 'references',
       refUrl: this.props.refUrl,
     });
+
     return line !== undefined ? `${uri}!L${line}:0?${query}` : `${uri}?${query}`;
   }
 }

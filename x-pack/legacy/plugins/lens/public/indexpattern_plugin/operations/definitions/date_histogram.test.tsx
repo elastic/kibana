@@ -8,7 +8,6 @@ import React from 'react';
 import { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
-import { IndexPatternPrivateState } from '../../indexpattern';
 import { EuiRange, EuiSwitch } from '@elastic/eui';
 import {
   UiSettingsClientContract,
@@ -17,6 +16,7 @@ import {
 } from 'src/core/public';
 import { Storage } from 'ui/storage';
 import { createMockedIndexPattern } from '../../mocks';
+import { IndexPatternPrivateState } from '../../types';
 
 jest.mock('ui/new_platform');
 
@@ -26,6 +26,8 @@ describe('date_histogram', () => {
 
   beforeEach(() => {
     state = {
+      indexPatternRefs: [],
+      existingFields: {},
       currentIndexPatternId: '1',
       showEmptyFields: false,
       indexPatterns: {
@@ -134,7 +136,7 @@ describe('date_histogram', () => {
       expect(column.params.interval).toEqual('auto');
     });
 
-    it('should create column object with manual interval for non-primary time fields', () => {
+    it('should create column object with auto interval for non-primary time fields', () => {
       const column = dateHistogramOperation.buildColumn({
         columns: {},
         suggestedPriority: 0,
@@ -148,7 +150,7 @@ describe('date_histogram', () => {
           searchable: true,
         },
       });
-      expect(column.params.interval).toEqual('d');
+      expect(column.params.interval).toEqual('auto');
     });
 
     it('should create column object with restrictions', () => {
@@ -354,7 +356,7 @@ describe('date_histogram', () => {
       expect(instance.find(EuiRange).prop('value')).toEqual(2);
     });
 
-    it('should render disabled switch and no level of detail control for auto interval', () => {
+    it('should render disabled switch and no time intervals control for auto interval', () => {
       const instance = shallow(
         <InlineOptions
           state={state}

@@ -6,6 +6,33 @@
 
 import uuid from 'uuid';
 import { IndexPatternMapping } from './types';
+import * as i18n from './translations';
+
+// Update source/destination field mappings to modify what fields will be returned to map tooltip
+const sourceFieldMappings: Record<string, string> = {
+  'host.name': i18n.HOST,
+  'source.ip': i18n.SOURCE_IP,
+  'source.domain': i18n.SOURCE_DOMAIN,
+  'source.geo.country_iso_code': i18n.LOCATION,
+  'source.as.organization.name': i18n.ASN,
+};
+const destinationFieldMappings: Record<string, string> = {
+  'host.name': i18n.HOST,
+  'destination.ip': i18n.DESTINATION_IP,
+  'destination.domain': i18n.DESTINATION_DOMAIN,
+  'destination.geo.country_iso_code': i18n.LOCATION,
+  'destination.as.organization.name': i18n.ASN,
+};
+
+// Mapping of field -> display name for use within map tooltip
+export const sourceDestinationFieldMappings: Record<string, string> = {
+  ...sourceFieldMappings,
+  ...destinationFieldMappings,
+};
+
+// Field names of LineLayer props returned from Maps API
+export const SUM_OF_SOURCE_BYTES = 'sum_of_source.bytes';
+export const SUM_OF_DESTINATION_BYTES = 'sum_of_destination.bytes';
 
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
@@ -24,8 +51,8 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
       alpha: 1,
       visible: true,
       applyGlobalQuery: true,
-      style: { type: 'TILE', properties: {} },
-      type: 'TILE',
+      style: null,
+      type: 'VECTOR_TILE',
     },
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
       return [
@@ -51,7 +78,7 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
     type: 'ES_SEARCH',
     geoField: 'source.geo.location',
     filterByMapBounds: false,
-    tooltipProperties: ['host.name', 'source.ip', 'source.domain', 'source.as.organization.name'],
+    tooltipProperties: Object.keys(sourceFieldMappings),
     useTopHits: false,
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
@@ -60,19 +87,30 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: { type: 'STATIC', options: { color: '#3185FC' } },
-      lineColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
-      lineWidth: { type: 'STATIC', options: { size: 1 } },
-      iconSize: { type: 'STATIC', options: { size: 6 } },
-      iconOrientation: { type: 'STATIC', options: { orientation: 0 } },
-      symbol: { options: { symbolizeAs: 'circle', symbolId: 'arrow-es' } },
+      fillColor: {
+        type: 'STATIC',
+        options: { color: '#3185FC' },
+      },
+      lineColor: {
+        type: 'STATIC',
+        options: { color: '#FFFFFF' },
+      },
+      lineWidth: { type: 'STATIC', options: { size: 2 } },
+      iconSize: { type: 'STATIC', options: { size: 8 } },
+      iconOrientation: {
+        type: 'STATIC',
+        options: { orientation: 0 },
+      },
+      symbol: {
+        options: { symbolizeAs: 'icon', symbolId: 'home' },
+      },
     },
   },
   id: uuid.v4(),
-  label: `${indexPatternTitle} | Source Point`,
+  label: `${indexPatternTitle} | ${i18n.SOURCE_LAYER}`,
   minZoom: 0,
   maxZoom: 24,
-  alpha: 0.75,
+  alpha: 1,
   visible: true,
   applyGlobalQuery: true,
   type: 'VECTOR',
@@ -93,12 +131,7 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
     type: 'ES_SEARCH',
     geoField: 'destination.geo.location',
     filterByMapBounds: true,
-    tooltipProperties: [
-      'host.name',
-      'destination.ip',
-      'destination.domain',
-      'destination.as.organization.name',
-    ],
+    tooltipProperties: Object.keys(destinationFieldMappings),
     useTopHits: false,
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
@@ -107,19 +140,30 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: { type: 'STATIC', options: { color: '#DB1374' } },
-      lineColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
-      lineWidth: { type: 'STATIC', options: { size: 1 } },
-      iconSize: { type: 'STATIC', options: { size: 6 } },
-      iconOrientation: { type: 'STATIC', options: { orientation: 0 } },
-      symbol: { options: { symbolizeAs: 'circle', symbolId: 'airfield' } },
+      fillColor: {
+        type: 'STATIC',
+        options: { color: '#DB1374' },
+      },
+      lineColor: {
+        type: 'STATIC',
+        options: { color: '#FFFFFF' },
+      },
+      lineWidth: { type: 'STATIC', options: { size: 2 } },
+      iconSize: { type: 'STATIC', options: { size: 8 } },
+      iconOrientation: {
+        type: 'STATIC',
+        options: { orientation: 0 },
+      },
+      symbol: {
+        options: { symbolizeAs: 'icon', symbolId: 'marker' },
+      },
     },
   },
   id: uuid.v4(),
-  label: `${indexPatternTitle} | Destination Point`,
+  label: `${indexPatternTitle} | ${i18n.DESTINATION_LAYER}`,
   minZoom: 0,
   maxZoom: 24,
-  alpha: 0.75,
+  alpha: 1,
   visible: true,
   applyGlobalQuery: true,
   type: 'VECTOR',
@@ -141,41 +185,48 @@ export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) 
     sourceGeoField: 'source.geo.location',
     destGeoField: 'destination.geo.location',
     metrics: [
-      { type: 'sum', field: 'source.bytes', label: 'Total Src Bytes' },
-      { type: 'sum', field: 'destination.bytes', label: 'Total Dest Bytes' },
-      { type: 'count', label: 'Total Documents' },
+      { type: 'sum', field: 'source.bytes', label: 'source.bytes' },
+      { type: 'sum', field: 'destination.bytes', label: 'destination.bytes' },
     ],
   },
   style: {
     type: 'VECTOR',
     properties: {
-      fillColor: { type: 'STATIC', options: { color: '#e6194b' } },
+      fillColor: {
+        type: 'STATIC',
+        options: { color: '#1EA593' },
+      },
       lineColor: {
-        type: 'DYNAMIC',
-        options: {
-          color: 'Green to Red',
-          field: { label: 'count', name: 'doc_count', origin: 'source' },
-          useCustomColorRamp: false,
-        },
+        type: 'STATIC',
+        options: { color: '#3185FC' },
       },
       lineWidth: {
         type: 'DYNAMIC',
         options: {
+          field: {
+            label: 'count',
+            name: 'doc_count',
+            origin: 'source',
+          },
           minSize: 1,
-          maxSize: 4,
-          field: { label: 'count', name: 'doc_count', origin: 'source' },
+          maxSize: 8,
         },
       },
       iconSize: { type: 'STATIC', options: { size: 10 } },
-      iconOrientation: { type: 'STATIC', options: { orientation: 0 } },
-      symbol: { options: { symbolizeAs: 'circle', symbolId: 'airfield' } },
+      iconOrientation: {
+        type: 'STATIC',
+        options: { orientation: 0 },
+      },
+      symbol: {
+        options: { symbolizeAs: 'circle', symbolId: 'airfield' },
+      },
     },
   },
   id: uuid.v4(),
-  label: `${indexPatternTitle} | Line`,
+  label: `${indexPatternTitle} | ${i18n.LINE_LAYER}`,
   minZoom: 0,
   maxZoom: 24,
-  alpha: 1,
+  alpha: 0.5,
   visible: true,
   applyGlobalQuery: true,
   type: 'VECTOR',

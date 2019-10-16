@@ -30,6 +30,7 @@ export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingServiceMock } from './logging/logging_service.mock';
 export { SavedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
+export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
@@ -40,7 +41,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   return mock;
 }
 
-function pluginInitializerContextMock<T>(config: T) {
+function pluginInitializerContextMock<T>(config: T = {} as T) {
   const mock: PluginInitializerContext<T> = {
     opaqueId: Symbol(),
     logger: loggingServiceMock.create(),
@@ -49,6 +50,13 @@ function pluginInitializerContextMock<T>(config: T) {
         dev: true,
         name: 'development',
         prod: false,
+      },
+      packageInfo: {
+        version: 'version',
+        branch: 'branch',
+        buildNum: 100,
+        buildSha: 'buildSha',
+        dist: false,
       },
     },
     config: pluginInitializerContextConfigMock<T>(config),

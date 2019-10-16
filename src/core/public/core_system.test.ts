@@ -62,6 +62,7 @@ const defaultCoreSystemParams = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  MockPluginsService.getOpaqueIds.mockReturnValue(new Map());
 });
 
 function createCoreSystem(params = {}) {
@@ -165,6 +166,22 @@ describe('#setup()', () => {
   it('calls context#setup()', async () => {
     await setupCore();
     expect(MockContextService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('injects legacy dependency to context#setup()', async () => {
+    const pluginA = Symbol();
+    const pluginB = Symbol();
+    const pluginDependencies = new Map<symbol, symbol[]>([[pluginA, []], [pluginB, [pluginA]]]);
+    MockPluginsService.getOpaqueIds.mockReturnValue(pluginDependencies);
+    await setupCore();
+
+    expect(MockContextService.setup).toHaveBeenCalledWith({
+      pluginDependencies: new Map([
+        [pluginA, []],
+        [pluginB, [pluginA]],
+        [MockLegacyPlatformService.legacyId, [pluginA, pluginB]],
+      ]),
+    });
   });
 
   it('calls injectedMetadata#setup()', async () => {

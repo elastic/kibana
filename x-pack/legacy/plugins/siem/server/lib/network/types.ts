@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
+import { NetworkTopCountriesData, NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
-import { SearchHit, TotalValue } from '../types';
+import { TotalValue } from '../types';
 
 export interface NetworkAdapter {
+  getNetworkTopCountries(
+    req: FrameworkRequest,
+    options: RequestOptionsPaginated
+  ): Promise<NetworkTopCountriesData>;
   getNetworkTopNFlow(
     req: FrameworkRequest,
     options: RequestOptionsPaginated
@@ -75,18 +79,18 @@ export interface NetworkTopNFlowBuckets {
   source_ips?: number;
 }
 
-export interface NetworkTopNFlowData extends SearchHit {
-  aggregations: {
-    top_n_flow_count?: {
-      value: number;
-    };
-    destination?: {
-      buckets: NetworkTopNFlowBuckets[];
-    };
-    source?: {
-      buckets: NetworkTopNFlowBuckets[];
-    };
+export interface NetworkTopCountriesBuckets {
+  country: string;
+  key: string;
+  bytes_in: {
+    value: number;
   };
+  bytes_out: {
+    value: number;
+  };
+  flows: number;
+  destination_ips: number;
+  source_ips: number;
 }
 
 export interface NetworkDnsBuckets {
@@ -100,16 +104,5 @@ export interface NetworkDnsBuckets {
   };
   dns_bytes_out: {
     value: number;
-  };
-}
-
-export interface NetworkDnsData extends SearchHit {
-  aggregations: {
-    dns_count?: {
-      value: number;
-    };
-    dns_name_query_count?: {
-      buckets: NetworkDnsBuckets[];
-    };
   };
 }

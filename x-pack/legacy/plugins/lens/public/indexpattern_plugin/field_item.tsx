@@ -20,6 +20,7 @@ import {
   EuiPopoverTitle,
   EuiIconTip,
 } from '@elastic/eui';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import {
   Chart,
   Axis,
@@ -38,11 +39,13 @@ import { Filter, buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
 // @ts-ignore
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
-import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
+import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
-import { FieldIcon, getColorForDataType } from './field_icon';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
+import { IndexPattern, IndexPatternField } from './types';
+import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -139,6 +142,7 @@ export function FieldItem(props: FieldItemProps) {
   function togglePopover() {
     setOpen(!infoIsOpen);
     if (!infoIsOpen) {
+      trackUiEvent('indexpattern_field_info_click');
       fetchData();
     }
   }
@@ -176,7 +180,7 @@ export function FieldItem(props: FieldItemProps) {
                 values: { fieldName: field.name },
               })}
             >
-              <FieldIcon type={field.type as DataType} />
+              <LensFieldIcon type={field.type as DataType} />
 
               <span className="lnsFieldItem__name" title={field.name}>
                 {wrappableHighlightableFieldName}
@@ -209,6 +213,9 @@ export function FieldItem(props: FieldItemProps) {
 
 function FieldItemPopoverContents(props: State & FieldItemProps) {
   const { histogram, topValues, indexPattern, field, dateRange, core, sampledValues } = props;
+
+  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+  const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
 
   if (props.isLoading) {
     return <EuiLoadingSpinner />;
@@ -358,11 +365,11 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         defaultMessage: 'Count',
       })
     );
-    const expectedColor = getColorForDataType(field.type);
     const colors: DataSeriesColorsValues = {
       colorValues: [],
       specId,
     };
+    const expectedColor = getColorForDataType(field.type);
 
     const seriesColors = new Map([[colors, expectedColor]]);
 
@@ -371,7 +378,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: 300 - 32 }}>
           <Settings
             tooltip={{ type: TooltipType.None }}
-            theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
+            theme={chartTheme}
             xDomain={
               fromDate && toDate
                 ? {
@@ -409,11 +416,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     } else if (showingHistogram || !topValues || !topValues.buckets.length) {
       return wrapInPopover(
         <Chart data-test-subj="lnsFieldListPanel-histogram" size={{ height: 200, width: '100%' }}>
-          <Settings
-            rotation={90}
-            tooltip={{ type: TooltipType.None }}
-            theme={{ chartMargins: { top: 0, bottom: 0, left: 0, right: 0 } }}
-          />
+          <Settings rotation={90} tooltip={{ type: TooltipType.None }} theme={chartTheme} />
 
           <Axis
             id={getAxisId('key')}
@@ -446,7 +449,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
                 <EuiFlexItem grow={true} className="eui-textTruncate">
                   {formatted === '' ? (
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <em>
                         {i18n.translate('xpack.lens.indexPattern.fieldPanelEmptyStringValue', {
                           defaultMessage: 'Empty string',
@@ -455,7 +458,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                     </EuiText>
                   ) : (
                     <EuiToolTip content={formatted} delay="long">
-                      <EuiText size="s" className="eui-textTruncate">
+                      <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {formatted}
                       </EuiText>
                     </EuiToolTip>
@@ -482,7 +485,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           <>
             <EuiFlexGroup alignItems="stretch" gutterSize="xs">
               <EuiFlexItem grow={true} className="eui-textTruncate">
-                <EuiText size="s" className="eui-textTruncate" color="subdued">
+                <EuiText size="xs" className="eui-textTruncate" color="subdued">
                   {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
                     defaultMessage: 'Other',
                   })}

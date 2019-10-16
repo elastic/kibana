@@ -5,24 +5,28 @@
  */
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { createPortalNode, InPortal } from 'react-reverse-portal';
+import { Query } from 'src/plugins/data/common';
 
 import styled from 'styled-components';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 import { Loader } from '../loader';
-import { useIndexPatterns } from '../ml_popover/hooks/use_index_patterns';
+import { useIndexPatterns } from '../../hooks/use_index_patterns';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { getIndexPatternTitleIdMapping } from '../ml_popover/helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapEmbeddable, SetQuery } from './types';
 import * as i18n from './translations';
 import { useStateToaster } from '../toasters';
 import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
+import { MapToolTip } from './map_tool_tip/map_tool_tip';
+import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 
 const EmbeddableWrapper = styled(EuiFlexGroup)`
   position: relative;
@@ -35,15 +39,15 @@ const EmbeddableWrapper = styled(EuiFlexGroup)`
 `;
 
 export interface EmbeddedMapProps {
-  applyFilterQueryFromKueryExpression: (expression: string) => void;
-  queryExpression: string;
+  query: Query;
+  filters: Filter[];
   startDate: number;
   endDate: number;
   setQuery: SetQuery;
 }
 
 export const EmbeddedMap = React.memo<EmbeddedMapProps>(
-  ({ applyFilterQueryFromKueryExpression, endDate, queryExpression, setQuery, startDate }) => {
+  ({ endDate, filters, query, setQuery, startDate }) => {
     const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
@@ -53,13 +57,19 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
     const [siemDefaultIndices] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
 
+    // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
+    // own component tree instead of the embeddables (default). This is necessary to have access to
+    // the Redux store, theme provider, etc, which is required to register and un-register the draggable
+    // Search InPortal/OutPortal for implementation touch points
+    const portalNode = React.useMemo(() => createPortalNode(), []);
+
     // Initial Load useEffect
     useEffect(() => {
       let isSubscribed = true;
       async function setupEmbeddable() {
         // Configure Embeddables API
         try {
-          setupEmbeddablesAPI(applyFilterQueryFromKueryExpression);
+          setupEmbeddablesAPI();
         } catch (e) {
           displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
           setIsLoading(false);
@@ -80,11 +90,13 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         // Create & set Embeddable
         try {
           const embeddableObject = await createEmbeddable(
+            filters,
             getIndexPatternTitleIdMapping(matchingIndexPatterns),
-            queryExpression,
+            query,
             startDate,
             endDate,
-            setQuery
+            setQuery,
+            portalNode
           );
           if (isSubscribed) {
             setEmbeddable(embeddableObject);
@@ -110,11 +122,16 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
 
     // queryExpression updated useEffect
     useEffect(() => {
-      if (embeddable != null && queryExpression != null) {
-        const query = { query: queryExpression, language: 'kuery' };
+      if (embeddable != null) {
         embeddable.updateInput({ query });
       }
-    }, [queryExpression]);
+    }, [query]);
+
+    useEffect(() => {
+      if (embeddable != null) {
+        embeddable.updateInput({ filters });
+      }
+    }, [filters]);
 
     // DateRange updated useEffect
     useEffect(() => {
@@ -129,6 +146,9 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
 
     return isError ? null : (
       <>
+        <InPortal node={portalNode}>
+          <MapToolTip />
+        </InPortal>
         <EmbeddableWrapper>
           {embeddable != null ? (
             <EmbeddablePanel

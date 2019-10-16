@@ -6,14 +6,10 @@
 
 import { StringMap, IndexAsString } from './common';
 
-export interface BoolQuery {
-  must_not: Array<Record<string, any>>;
-  should: Array<Record<string, any>>;
-  filter: Array<Record<string, any>>;
-}
-
 declare module 'elasticsearch' {
   // extending SearchResponse to be able to have typed aggregations
+
+  type ESSearchHit<T> = SearchResponse<T>['hits']['hits'][0];
 
   type AggregationType =
     | 'date_histogram'
@@ -30,7 +26,9 @@ declare module 'elasticsearch' {
     | 'filters'
     | 'cardinality'
     | 'sampler'
-    | 'value_count';
+    | 'value_count'
+    | 'derivative'
+    | 'bucket_script';
 
   type AggOptions = AggregationOptionMap & {
     [key: string]: any;
@@ -66,11 +64,22 @@ declare module 'elasticsearch' {
 
   // eslint-disable-next-line @typescript-eslint/prefer-interface
   type FiltersAggregation<SubAggregationMap> = {
-    buckets: Array<
-      {
-        doc_count: number;
-      } & SubAggregation<SubAggregationMap>
-    >;
+    // The filters aggregation can have named filters or anonymous filters,
+    // which changes the structure of the return
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filters-aggregation.html
+    buckets: SubAggregationMap extends {
+      filters: { filters: Record<string, unknown> };
+    }
+      ? {
+          [key in keyof SubAggregationMap['filters']['filters']]: {
+            doc_count: number;
+          } & SubAggregation<SubAggregationMap>;
+        }
+      : Array<
+          {
+            doc_count: number;
+          } & SubAggregation<SubAggregationMap>
+        >;
   };
 
   type SamplerAggregation<SubAggregationMap> = SubAggregation<
@@ -81,6 +90,11 @@ declare module 'elasticsearch' {
 
   interface AggregatedValue {
     value: number | null;
+  }
+
+  interface HitsTotal {
+    value: number;
+    relation: 'eq' | 'gte';
   }
 
   type AggregationResultMap<AggregationOption> = IndexAsString<
@@ -103,7 +117,7 @@ declare module 'elasticsearch' {
         >;
         top_hits: {
           hits: {
-            total: number;
+            total: HitsTotal;
             max_score: number | null;
             hits: Array<{
               _source: AggregationOption[AggregationName] extends {
@@ -139,11 +153,21 @@ declare module 'elasticsearch' {
           value: number;
         };
         sampler: SamplerAggregation<AggregationOption[AggregationName]>;
+        derivative: BucketAggregation<
+          AggregationOption[AggregationName],
+          number
+        >;
+        bucket_script: {
+          value: number | null;
+        };
       }[AggregationType & keyof AggregationOption[AggregationName]];
     }
   >;
 
-  export type AggregationSearchResponse<HitType, SearchParams> = Pick<
+  export type AggregationSearchResponseWithTotalHitsAsInt<
+    HitType,
+    SearchParams
+  > = Pick<
     SearchResponse<HitType>,
     Exclude<keyof SearchResponse<HitType>, 'aggregations'>
   > &
@@ -152,6 +176,24 @@ declare module 'elasticsearch' {
           aggregations?: AggregationResultMap<SearchParams['body']['aggs']>;
         }
       : {});
+
+  type Hits<HitType> = Pick<
+    SearchResponse<HitType>['hits'],
+    Exclude<keyof SearchResponse<HitType>['hits'], 'total'>
+  > & {
+    total: HitsTotal;
+  };
+
+  export type AggregationSearchResponseWithTotalHitsAsObject<
+    HitType,
+    SearchParams
+  > = Pick<
+    AggregationSearchResponseWithTotalHitsAsInt<HitType, SearchParams>,
+    Exclude<
+      keyof AggregationSearchResponseWithTotalHitsAsInt<HitType, SearchParams>,
+      'hits'
+    >
+  > & { hits: Hits<HitType> };
 
   export interface ESFilter {
     [key: string]: {

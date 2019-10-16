@@ -27,10 +27,10 @@ export const replaceKqlCommasWithOrUsingRegex = (expression: string) => {
 export const replaceKqlCommasWithOr = (kqlQuery: string): string => {
   const value: RisonValue = decodeRison(kqlQuery);
   if (isRisonObject(value)) {
-    const filterQuery = value.filterQuery;
-    if (isRisonObject(filterQuery)) {
-      if (isRegularString(filterQuery.expression)) {
-        filterQuery.expression = replaceKqlCommasWithOrUsingRegex(filterQuery.expression);
+    const appQuery = value;
+    if (isRisonObject(appQuery)) {
+      if (isRegularString(appQuery.query)) {
+        appQuery.query = replaceKqlCommasWithOrUsingRegex(appQuery.query);
         return encode(value);
       }
     }

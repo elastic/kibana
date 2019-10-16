@@ -4,10 +4,12 @@
 
 ## HttpInterceptor.request() method
 
+Define an interceptor to be executed before a request is sent.
+
 <b>Signature:</b>
 
 ```typescript
-request?(request: Request, controller: HttpInterceptController): Promise<Request> | Request | void;
+request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
 ```
 
 ## Parameters
@@ -15,7 +17,7 @@ request?(request: Request, controller: HttpInterceptController): Promise<Request
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  request | <code>Request</code> |  |
-|  controller | <code>HttpInterceptController</code> |  |
+|  controller | <code>IHttpInterceptController</code> |  |
 
 <b>Returns:</b>
 

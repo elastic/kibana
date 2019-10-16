@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
-import { mkdirp as mkdirpNode } from 'mkdirp';
+import Fs from 'fs';
 import { resolve } from 'path';
+import { promisify } from 'util';
 
 import { migrations } from './migrations';
 import manageUuid from './server/lib/manage_uuid';
@@ -38,10 +38,11 @@ import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
 import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
+import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
 
-const mkdirp = Promise.promisify(mkdirpNode);
+const mkdirAsync = promisify(Fs.mkdir);
 
 export default function (kibana) {
   const kbnBaseUrl = '/app/kibana';
@@ -320,7 +321,7 @@ export default function (kibana) {
       try {
         // Create the data directory (recursively, if the a parent dir doesn't exist).
         // If it already exists, does nothing.
-        await mkdirp(server.config().get('path.data'));
+        await mkdirAsync(server.config().get('path.data'), { recursive: true });
       } catch (err) {
         server.log(['error', 'init'], err);
         // Stop the server startup with a fatal error
@@ -328,9 +329,9 @@ export default function (kibana) {
       }
     },
 
-    init: function (server) {
+    init: async function (server) {
       // uuid
-      manageUuid(server);
+      await manageUuid(server);
       // routes
       searchApi(server);
       scriptsApi(server);
@@ -344,6 +345,7 @@ export default function (kibana) {
       registerFieldFormats(server);
       registerTutorials(server);
       makeKQLUsageCollector(server);
+      registerCspCollector(server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },
