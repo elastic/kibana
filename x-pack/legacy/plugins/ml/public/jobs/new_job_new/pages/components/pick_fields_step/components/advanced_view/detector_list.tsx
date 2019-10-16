@@ -38,7 +38,7 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
     setDetectors(jobCreator.detectors);
   }, [jobCreatorUpdated]);
 
-  const Icons: FC<{ index: number }> = ({ index }) => {
+  const Buttons: FC<{ index: number }> = ({ index }) => {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -95,11 +95,11 @@ export const DetectorList: FC<Props> = ({ onEditJob, onDeleteJob }) => {
                   {d.detector_description !== undefined ? (
                     <div style={{ fontWeight: 'bold' }}>{d.detector_description}</div>
                   ) : (
-                    <div>{detectorToString(d)}</div>
+                    detectorToString(d)
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} style={{ margin: '8px' }}>
-                  <Icons index={i} />
+                  <Buttons index={i} />
                 </EuiFlexItem>
               </EuiFlexGroup>
               {d.detector_description !== undefined && (
