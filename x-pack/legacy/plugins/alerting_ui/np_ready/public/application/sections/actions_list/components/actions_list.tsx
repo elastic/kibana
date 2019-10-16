@@ -52,20 +52,6 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
 
-  async function loadActionsTable() {
-    setIsLoadingActions(true);
-    setErrorCode(null);
-    try {
-      const actionsResponse = await loadActions({ http, page, searchText });
-      setActions(actionsResponse.data);
-      setTotalItemCount(actionsResponse.total);
-    } catch (e) {
-      setErrorCode(e.response.status);
-    } finally {
-      setIsLoadingActions(false);
-    }
-  }
-
   useEffect(() => {
     loadActionsTable();
   }, [page, searchText]);
@@ -104,6 +90,20 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     setData(updatedData);
   }, [actions, actionTypesIndex]);
 
+  async function loadActionsTable() {
+    setIsLoadingActions(true);
+    setErrorCode(null);
+    try {
+      const actionsResponse = await loadActions({ http, page, searchText });
+      setActions(actionsResponse.data);
+      setTotalItemCount(actionsResponse.total);
+    } catch (e) {
+      setErrorCode(e.response.status);
+    } finally {
+      setIsLoadingActions(false);
+    }
+  }
+
   async function deleteItems(items: Data[]) {
     setIsDeletingActions(true);
     await deleteActions({ http, ids: items.map(item => item.id) });
@@ -119,7 +119,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     {
       field: 'description',
       name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.descriptionHeader',
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.description',
         {
           defaultMessage: 'Description',
         }
@@ -130,7 +130,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     {
       field: 'actionType',
       name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.actionTypeHeader',
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actionType',
         {
           defaultMessage: 'Action Type',
         }
@@ -140,25 +140,27 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     },
     {
       field: 'config',
-      name: i18n.translate('xpack.alertingUI.sections.actionsList.actionsListTable.configHeader', {
-        defaultMessage: 'Config',
-      }),
+      name: i18n.translate(
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.config',
+        { defaultMessage: 'Config' }
+      ),
       sortable: false,
       truncateText: false,
     },
     {
-      name: i18n.translate('xpack.alertingUI.sections.actionsList.actionsListTable.actionsHeader', {
-        defaultMessage: 'Actions',
-      }),
+      name: i18n.translate(
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions',
+        { defaultMessage: 'Actions' }
+      ),
       actions: [
         {
           name: i18n.translate(
-            'xpack.alertingUI.sections.actionsList.actionsListTable.deleteActionName',
+            'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions.deleteActionName',
             { defaultMessage: 'Delete' }
           ),
           description: i18n.translate(
-            'xpack.alertingUI.sections.actionsList.actionsListTable.deleteActionDescription',
-            { defaultMessage: 'Delete' }
+            'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions.deleteActionDescription',
+            { defaultMessage: 'Delete this action' }
           ),
           type: 'icon',
           icon: 'trash',
@@ -185,10 +187,9 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
             {
               type: 'field_value_selection',
               field: 'type',
-              name: i18n.translate(
-                'xpack.alertingUI.sections.actionsList.actionsListTable.typeFilterName',
-                { defaultMessage: 'Type' }
-              ),
+              name: i18n.translate('xpack.alertingUI.sections.actionsList.filters.typeName', {
+                defaultMessage: 'Type',
+              }),
               multiSelect: 'or',
               options: Object.values(actionTypesIndex || {}).map(actionType => ({
                 value: actionType.id,
@@ -206,14 +207,13 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
               title={
                 canDelete
                   ? undefined
-                  : i18n.translate(
-                      'xpack.alertingUI.sections.actionsList.actionsListTable.deleteButtonTitle',
-                      { defaultMessage: 'Unable to delete saved objects' }
-                    )
+                  : i18n.translate('xpack.alertingUI.sections.actionsList.buttons.deleteTitle', {
+                      defaultMessage: 'Unable to delete saved objects',
+                    })
               }
             >
               <FormattedMessage
-                id="xpack.alertingUI.sections.actionsList.actionsListTable.deleteButtonLabel"
+                id="xpack.alertingUI.sections.actionsList.buttons.deleteLabel"
                 defaultMessage="Delete"
               />
             </EuiButton>,
