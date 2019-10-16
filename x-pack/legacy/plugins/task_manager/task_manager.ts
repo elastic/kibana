@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
@@ -35,12 +34,6 @@ export interface TaskManagerOpts {
   callWithInternalUser: any;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
-}
-
-function generateTaskManagerUUID(logger: Logger): string {
-  const taskManagerUUID = uuid.v4();
-  logger.info(`Initialising Task Manager with UUID: ${taskManagerUUID}`);
-  return taskManagerUUID;
 }
 
 /*
@@ -82,6 +75,16 @@ export class TaskManager {
     this.definitions = {};
     this.logger = opts.logger;
 
+    const taskManagerId = opts.config.get('server.uuid');
+    if (!taskManagerId) {
+      this.logger.error(
+        `TaskManager is unable to start as there the Kibana UUID is invalid (value of the "server.uuid" configuration is ${taskManagerId})`
+      );
+      throw new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`);
+    } else {
+      this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
+    }
+
     /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
      * to initialize, and can change after startup */
     const store = new TaskStore({
@@ -91,7 +94,7 @@ export class TaskManager {
       index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
-      taskManagerId: generateTaskManagerUUID(this.logger),
+      taskManagerId: `kibana:${taskManagerId}`,
     });
 
     const pool = new TaskPool({
