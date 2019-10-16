@@ -49,7 +49,6 @@ xpack.siem.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.spaces.enabled: false
 xpack.task_manager.enabled: false
-xpack.telemetry.enabled: false
 xpack.tilemap.enabled: false
 xpack.upgrade_assistant.enabled: false
 xpack.uptime.enabled: false
