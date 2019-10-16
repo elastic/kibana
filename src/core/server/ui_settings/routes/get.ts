@@ -16,35 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Legacy } from 'kibana';
-import Joi from 'joi';
+import { IRouter } from '../../http';
+import { SavedObjectsErrorHelpers } from '../../saved_objects';
 
-async function handleRequest(request: Legacy.Request) {
-  const { changes } = request.payload as any;
-  const uiSettings = request.getUiSettingsService();
+export function registerGetRoute(router: IRouter) {
+  router.get(
+    { path: '/api/kibana/settings', validate: false },
+    async (context, request, response) => {
+      try {
+        const uiSettingsClient = context.core.uiSettings.client;
+        return response.ok({
+          body: {
+            settings: await uiSettingsClient.getUserProvided(),
+          },
+        });
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+          return response.customError({
+            body: error,
+            statusCode: error.output.statusCode,
+          });
+        }
 
-  await uiSettings.setMany(changes);
-
-  return {
-    settings: await uiSettings.getUserProvided(),
-  };
+        throw error;
+      }
+    }
+  );
 }
-
-export const setManyRoute = {
-  path: '/api/kibana/settings',
-  method: 'POST',
-  config: {
-    validate: {
-      payload: Joi.object()
-        .keys({
-          changes: Joi.object()
-            .unknown(true)
-            .required(),
-        })
-        .required(),
-    },
-    handler(request: Legacy.Request) {
-      return handleRequest(request);
-    },
-  },
-};

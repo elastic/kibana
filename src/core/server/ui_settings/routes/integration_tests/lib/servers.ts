@@ -20,7 +20,7 @@
 import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
 
-import KbnServer from '../../../../../server/kbn_server';
+import KbnServer from '../../../../../../legacy/server/kbn_server';
 import { createTestServers } from '../../../../../../test_utils/kbn_server';
 import { CallCluster } from '../../../../../../legacy/core_plugins/elasticsearch';
 

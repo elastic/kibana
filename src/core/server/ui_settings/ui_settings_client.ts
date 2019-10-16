@@ -17,12 +17,12 @@
  * under the License.
  */
 import { defaultsDeep } from 'lodash';
-import Boom from 'boom';
 
 import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
 import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 import { IUiSettingsClient, UiSettingsParams } from './types';
+import { CannotOverrideError } from './ui_settings_errors';
 
 export interface UiSettingsServiceOptions {
   type: string;
@@ -149,7 +149,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   // NOTE: should be private method
   assertUpdateAllowed(key: string) {
     if (this.isOverridden(key)) {
-      throw Boom.badRequest(`Unable to update "${key}" because it is overridden`);
+      throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
     }
   }
 

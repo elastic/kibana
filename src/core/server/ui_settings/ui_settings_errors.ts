@@ -16,19 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Legacy } from 'kibana';
 
-async function handleRequest(request: Legacy.Request) {
-  const uiSettings = request.getUiSettingsService();
-  return {
-    settings: await uiSettings.getUserProvided(),
-  };
+export class CannotOverrideError extends Error {
+  public cause?: Error;
+
+  constructor(message: string, cause?: Error) {
+    super(message);
+    this.cause = cause;
+
+    // Set the prototype explicitly, see:
+    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, CannotOverrideError.prototype);
+  }
 }
-
-export const getRoute = {
-  path: '/api/kibana/settings',
-  method: 'GET',
-  handler(request: Legacy.Request) {
-    return handleRequest(request);
-  },
-};

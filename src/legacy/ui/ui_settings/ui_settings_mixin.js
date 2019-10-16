@@ -19,12 +19,6 @@
 
 import { uiSettingsServiceFactory } from './ui_settings_service_factory';
 import { getUiSettingsServiceForRequest } from './ui_settings_service_for_request';
-import {
-  deleteRoute,
-  getRoute,
-  setManyRoute,
-  setRoute,
-} from './routes';
 
 export function uiSettingsMixin(kbnServer, server) {
   const { uiSettingDefaults = {} } = kbnServer.uiExports;
@@ -58,9 +52,4 @@ export function uiSettingsMixin(kbnServer, server) {
       server.uiSettings has been removed, see https://github.com/elastic/kibana/pull/12243.
     `);
   });
-
-  server.route(deleteRoute);
-  server.route(getRoute);
-  server.route(setManyRoute);
-  server.route(setRoute);
 }

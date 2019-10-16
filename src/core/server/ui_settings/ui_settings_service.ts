@@ -30,6 +30,8 @@ import { UiSettingsClient } from './ui_settings_client';
 import { InternalUiSettingsServiceSetup, UiSettingsParams } from './types';
 import { mapToObject } from '../../utils/';
 
+import { registerRoutes } from './routes';
+
 interface SetupDeps {
   http: InternalHttpServiceSetup;
 }
@@ -46,6 +48,7 @@ export class UiSettingsService implements CoreService<InternalUiSettingsServiceS
   }
 
   public async setup(deps: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
+    registerRoutes(deps.http.createRouter(''));
     this.log.debug('Setting up ui settings service');
     const overrides = await this.getOverrides(deps);
     const { version, buildNum } = this.coreContext.env.packageInfo;

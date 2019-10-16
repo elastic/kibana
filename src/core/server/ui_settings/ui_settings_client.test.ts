@@ -24,6 +24,7 @@ import sinon from 'sinon';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
 import { UiSettingsClient } from './ui_settings_client';
+import { CannotOverrideError } from './ui_settings_errors';
 import * as createOrUpgradeSavedConfigNS from './create_or_upgrade_saved_config/create_or_upgrade_saved_config';
 import { createObjectsClientStub, savedObjectsClientErrors } from './create_objects_client_stub';
 
@@ -551,15 +552,14 @@ describe('ui settings', () => {
       const { uiSettings } = setup();
       expect(uiSettings.assertUpdateAllowed('foo')).to.be(undefined);
     });
-    it('throws 400 Boom error when keys is overridden', () => {
+    it('throws CannotOverrideError when key is overridden', () => {
       const { uiSettings } = setup({ overrides: { foo: true } });
       expect(() => uiSettings.assertUpdateAllowed('foo')).to.throwError(error => {
+        expect(error).to.be.a(CannotOverrideError);
         expect(error).to.have.property(
           'message',
           'Unable to update "foo" because it is overridden'
         );
-        expect(error).to.have.property('isBoom', true);
-        expect(error.output).to.have.property('statusCode', 400);
       });
     });
   });
