@@ -1,5 +1,5 @@
 {
-    "id": "xpackAlertingUI",
+    "id": "alertingUI",
     "version": "kibana",
     "server": false,
     "ui": true

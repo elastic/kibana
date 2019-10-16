@@ -15,17 +15,8 @@ class TextService {
       home: i18n.translate('xpack.alertingUI.home.breadcrumbTitle', {
         defaultMessage: 'Alerting UI',
       }),
-      alerts: i18n.translate('xpack.alertingUI.alerts.breadcrumbTitle', {
-        defaultMessage: 'Alerts',
-      }),
       actions: i18n.translate('xpack.alertingUI.actions.breadcrumbTitle', {
         defaultMessage: 'Actions',
-      }),
-      notifications: i18n.translate('xpack.alertingUI.notifications.breadcrumbTitle', {
-        defaultMessage: 'Notifications',
-      }),
-      activity_logs: i18n.translate('xpack.alertingUI.activity_logs.breadcrumbTitle', {
-        defaultMessage: 'Activity logs',
       }),
     };
   }

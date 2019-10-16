@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory,
 } from 'ui/registry/feature_catalogue';
-import { i18n } from '@kbn/i18n';
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
