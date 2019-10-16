@@ -6,72 +6,81 @@
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { pure } from 'recompose';
 import { Breadcrumb } from 'ui/chrome';
 
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { getNetworkUrl } from '../../components/link_to/redirect_to_network';
+import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
+import { networkToCriteria } from '../../components/ml/criteria/network_to_criteria';
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
+import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_network_table';
 import { manageQuery } from '../../components/page/manage_query';
 import { FlowTargetSelectConnected } from '../../components/page/network/flow_target_select_connected';
 import { IpOverview } from '../../components/page/network/ip_overview';
-import { UsersTable } from '../../components/page/network/users_table';
+import { NetworkTopNFlowTable } from '../../components/page/network/network_top_n_flow_table';
 import { TlsTable } from '../../components/page/network/tls_table';
+import { UsersTable } from '../../components/page/network/users_table';
+import { SiemSearchBar } from '../../components/search_bar';
 import { IpOverviewQuery } from '../../containers/ip_overview';
+import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { TlsQuery } from '../../containers/tls';
 import { UsersQuery } from '../../containers/users';
 import { FlowTargetSourceDest, LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
-import { networkModel, networkSelectors, State } from '../../store';
+import { convertToBuildEsQuery } from '../../lib/keury';
+import { ConditionalFlexGroup } from '../../pages/network/navigation/conditional_flex_group';
+import { networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-
-import { NetworkKql } from './kql';
+import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../store/network/actions';
+import { SpyRoute } from '../../utils/route/spy_routes';
 import { NetworkEmptyPage } from './network_empty_page';
-import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
-import { NetworkTopNFlowTable } from '../../components/page/network/network_top_n_flow_table';
+import { NetworkTopCountriesQuery } from '../../containers/network_top_countries';
+import { NetworkTopCountriesTable } from '../../components/page/network/network_top_countries_table';
 import * as i18n from './translations';
 import { IPDetailsComponentProps } from './types';
-import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
-import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
-import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_network_table';
-import { networkToCriteria } from '../../components/ml/criteria/network_to_criteria';
-import { SpyRoute } from '../../utils/route/spy_routes';
-import { ConditionalFlexGroup } from '../../pages/network/navigation/conditional_flex_group';
 
 const TlsTableManage = manageQuery(TlsTable);
 const UsersTableManage = manageQuery(UsersTable);
 const IpOverviewManage = manageQuery(IpOverview);
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
+const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 
-export const IPDetailsComponent = pure<IPDetailsComponentProps>(
+export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
   ({
     detailName,
-    filterQuery,
+    filters,
     flowTarget,
-    setAbsoluteRangeDatePicker,
-    to,
     from,
-    setQuery,
     isInitializing,
-  }) => (
-    <>
-      <WithSource sourceId="default" data-test-subj="ip-details-page">
-        {({ indicesExist, indexPattern }) => {
-          const ip = decodeIpv6(detailName);
-          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <StickyContainer>
-              <>
+    query,
+    setAbsoluteRangeDatePicker,
+    setIpDetailsTablesActivePageToZero,
+    setQuery,
+    to,
+  }) => {
+    useEffect(() => {
+      setIpDetailsTablesActivePageToZero(null);
+    }, [detailName]);
+    return (
+      <>
+        <WithSource sourceId="default" data-test-subj="ip-details-page">
+          {({ indicesExist, indexPattern }) => {
+            const ip = decodeIpv6(detailName);
+            const filterQuery = convertToBuildEsQuery({
+              indexPattern,
+              queries: [query],
+              filters,
+            });
+            return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+              <StickyContainer>
                 <FiltersGlobal>
-                  <NetworkKql
-                    indexPattern={indexPattern}
-                    setQuery={setQuery}
-                    type={networkModel.NetworkType.details}
-                  />
+                  <SiemSearchBar indexPattern={indexPattern} id="global" />
                 </FiltersGlobal>
 
                 <HeaderPage
@@ -200,7 +209,6 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           id={id}
                           indexPattern={indexPattern}
                           inspect={inspect}
-                          ip={ip}
                           isInspect={isInspected}
                           loading={loading}
                           loadPage={loadPage}
@@ -212,6 +220,94 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         />
                       )}
                     </NetworkTopNFlowQuery>
+                  </EuiFlexItem>
+                </ConditionalFlexGroup>
+
+                <EuiSpacer />
+
+                <ConditionalFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <NetworkTopCountriesQuery
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      flowTarget={FlowTargetSourceDest.source}
+                      ip={ip}
+                      skip={isInitializing}
+                      sourceId="default"
+                      startDate={from}
+                      type={networkModel.NetworkType.details}
+                    >
+                      {({
+                        id,
+                        inspect,
+                        isInspected,
+                        loading,
+                        loadPage,
+                        networkTopCountries,
+                        pageInfo,
+                        refetch,
+                        totalCount,
+                      }) => (
+                        <NetworkTopCountriesTableManage
+                          data={networkTopCountries}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                          flowTargeted={FlowTargetSourceDest.source}
+                          id={id}
+                          indexPattern={indexPattern}
+                          inspect={inspect}
+                          isInspect={isInspected}
+                          loading={loading}
+                          loadPage={loadPage}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                          totalCount={totalCount}
+                          type={networkModel.NetworkType.details}
+                        />
+                      )}
+                    </NetworkTopCountriesQuery>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <NetworkTopCountriesQuery
+                      endDate={to}
+                      flowTarget={FlowTargetSourceDest.destination}
+                      filterQuery={filterQuery}
+                      ip={ip}
+                      skip={isInitializing}
+                      sourceId="default"
+                      startDate={from}
+                      type={networkModel.NetworkType.details}
+                    >
+                      {({
+                        id,
+                        inspect,
+                        isInspected,
+                        loading,
+                        loadPage,
+                        networkTopCountries,
+                        pageInfo,
+                        refetch,
+                        totalCount,
+                      }) => (
+                        <NetworkTopCountriesTableManage
+                          data={networkTopCountries}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                          flowTargeted={FlowTargetSourceDest.destination}
+                          id={id}
+                          indexPattern={indexPattern}
+                          inspect={inspect}
+                          isInspect={isInspected}
+                          loading={loading}
+                          loadPage={loadPage}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                          totalCount={totalCount}
+                          type={networkModel.NetworkType.details}
+                        />
+                      )}
+                    </NetworkTopCountriesQuery>
                   </EuiFlexItem>
                 </ConditionalFlexGroup>
 
@@ -261,7 +357,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                 <TlsQuery
                   endDate={to}
                   filterQuery={filterQuery}
-                  flowTarget={flowTarget}
+                  flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
                   ip={ip}
                   skip={isInitializing}
                   sourceId="default"
@@ -314,29 +410,31 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     });
                   }}
                 />
-              </>
-            </StickyContainer>
-          ) : (
-            <>
-              <HeaderPage title={ip} />
+              </StickyContainer>
+            ) : (
+              <>
+                <HeaderPage title={ip} />
 
-              <NetworkEmptyPage />
-            </>
-          );
-        }}
-      </WithSource>
-      <SpyRoute />
-    </>
-  )
+                <NetworkEmptyPage />
+              </>
+            );
+          }}
+        </WithSource>
+        <SpyRoute />
+      </>
+    );
+  }
 );
 
 IPDetailsComponent.displayName = 'IPDetailsComponent';
 
 const makeMapStateToProps = () => {
-  const getNetworkFilterQuery = networkSelectors.networkFilterQueryAsJson();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
   return (state: State) => ({
-    filterQuery: getNetworkFilterQuery(state, networkModel.NetworkType.details) || '',
+    query: getGlobalQuerySelector(state),
+    filters: getGlobalFiltersQuerySelector(state),
     flowTarget: getIpDetailsFlowTargetSelector(state),
   });
 };
@@ -345,6 +443,7 @@ export const IPDetails = connect(
   makeMapStateToProps,
   {
     setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+    setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
   }
 )(IPDetailsComponent);
 

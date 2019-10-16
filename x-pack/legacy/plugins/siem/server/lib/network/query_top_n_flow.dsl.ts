@@ -7,8 +7,8 @@
 import {
   Direction,
   FlowTargetSourceDest,
-  NetworkTopNFlowSortField,
-  NetworkTopNFlowFields,
+  NetworkTopTablesSortField,
+  NetworkTopTablesFields,
 } from '../../graphql/types';
 import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 
@@ -73,7 +73,7 @@ export const buildTopNFlowQuery = ({
 };
 
 const getFlowTargetAggs = (
-  networkTopNFlowSortField: NetworkTopNFlowSortField,
+  networkTopNFlowSortField: NetworkTopTablesSortField,
   flowTarget: FlowTargetSourceDest,
   querySize: number
 ) => ({
@@ -172,17 +172,17 @@ type QueryOrder =
   | { destination_ips: Direction }
   | { source_ips: Direction };
 
-const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): QueryOrder => {
+const getQueryOrder = (networkTopNFlowSortField: NetworkTopTablesSortField): QueryOrder => {
   switch (networkTopNFlowSortField.field) {
-    case NetworkTopNFlowFields.bytes_in:
+    case NetworkTopTablesFields.bytes_in:
       return { bytes_in: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.bytes_out:
+    case NetworkTopTablesFields.bytes_out:
       return { bytes_out: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.flows:
+    case NetworkTopTablesFields.flows:
       return { flows: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.destination_ips:
+    case NetworkTopTablesFields.destination_ips:
       return { destination_ips: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.source_ips:
+    case NetworkTopTablesFields.source_ips:
       return { source_ips: networkTopNFlowSortField.direction };
   }
   assertUnreachable(networkTopNFlowSortField.field);

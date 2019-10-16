@@ -158,6 +158,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
             Array [
               Array [
                 Object {
+                  "excludeExportDetails": true,
                   "exportSizeLimit": 1000,
                   "includeReferencesDeep": true,
                   "namespace": "sourceSpace",
