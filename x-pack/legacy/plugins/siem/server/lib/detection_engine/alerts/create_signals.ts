@@ -55,7 +55,7 @@ export const updateIfIdExists = async ({
   return null;
 };
 
-export const createSignal = async ({
+export const createSignals = async ({
   alertsClient,
   actionsClient,
   description,

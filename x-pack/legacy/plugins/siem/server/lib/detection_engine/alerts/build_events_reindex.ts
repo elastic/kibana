@@ -14,10 +14,10 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 interface BuildEventsReIndexParams {
   description: string;
   index: string[];
-  from: number;
-  to: number;
+  from: string;
+  to: string;
   signalsIndex: string;
-  maxDocs: number;
+  maxDocs: string;
   filter: Record<string, {}> | undefined;
   kql: string | undefined;
   severity: number;

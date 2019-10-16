@@ -8,8 +8,8 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 interface BuildEventsScrollQuery {
   index: string[];
-  from: number;
-  to: number;
+  from: string;
+  to: string;
   kql: string | undefined;
   filter: Record<string, {}> | undefined;
   size: number;

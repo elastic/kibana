@@ -8,7 +8,12 @@ import { get } from 'lodash/fp';
 
 import Hapi from 'hapi';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { Alert } from '../../../../../alerting/server/types';
+import {
+  Alert,
+  AlertType,
+  State,
+  AlertExecutorOptions,
+} from '../../../../../alerting/server/types';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 
@@ -71,6 +76,37 @@ export interface SignalsRequest extends Hapi.Request {
     max_signals: string;
   };
 }
+
+export type SignalExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
+  params: {
+    description: string;
+    from: string;
+    id: string;
+    index: string[];
+    interval: string;
+    enabled: boolean;
+    filter: Record<string, {}> | undefined;
+    kql: string | undefined;
+    maxSignals: string;
+    name: string;
+    severity: number;
+    type: 'filter' | 'kql';
+    to: string;
+    references: string[];
+    scrollSize: number;
+    scrollLock: string;
+  };
+};
+
+// This returns true because by default a SignalAlertTypeDefinition is an AlertType
+// since we are only increasing the strictness of params.
+export const isAlertExecutor = (obj: SignalAlertTypeDefinition): obj is AlertType => {
+  return true;
+};
+
+export type SignalAlertTypeDefinition = Omit<AlertType, 'executor'> & {
+  executor: ({ services, params, state }: SignalExecutorOptions) => Promise<State | void>;
+};
 
 export const isAlertType = (obj: unknown): obj is SignalAlertType => {
   return get('alertTypeId', obj) === SIGNALS_ID;

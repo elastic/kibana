@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
-import { createSignal } from '../alerts/create_signal';
+import { createSignals } from '../alerts/create_signals';
 import { SignalsRequest } from '../alerts/types';
 
 export const createCreateSignalsRoute: Hapi.ServerRoute = {
@@ -66,7 +66,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    return createSignal({
+    return createSignals({
       alertsClient,
       actionsClient,
       description,
