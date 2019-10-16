@@ -19,7 +19,6 @@
 
 // @ts-ignore
 import { SearchSource } from 'ui/courier';
-import { IPrivate } from 'ui/private';
 import { Filter } from '@kbn/es-query';
 import { IndexPatterns, IndexPattern } from 'ui/index_patterns';
 import { reverseSortDir, SortDirection } from './utils/sorting';
