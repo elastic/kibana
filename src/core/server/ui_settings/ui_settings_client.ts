@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Legacy } from 'kibana';
 import { defaultsDeep } from 'lodash';
 import Boom from 'boom';
 
-import { SavedObjectsClientContract, SavedObjectAttribute } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
+import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+import { UiSettingsParams } from './ui_settings_service';
 
 export interface UiSettingsServiceOptions {
   type: string;
@@ -29,8 +30,8 @@ export interface UiSettingsServiceOptions {
   buildNum: number;
   savedObjectsClient: SavedObjectsClientContract;
   overrides?: Record<string, SavedObjectAttribute>;
-  getDefaults?: () => Record<string, UiSettingsParams>;
-  logWithMetadata?: Legacy.Server['logWithMetadata'];
+  defaults?: Record<string, UiSettingsParams>;
+  log: Logger;
 }
 
 interface ReadOptions {
@@ -38,82 +39,87 @@ interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
 }
 
-interface UserProvidedValue {
-  userValue?: SavedObjectAttribute;
+interface UserProvidedValue<T extends SavedObjectAttribute = any> {
+  userValue?: T;
   isOverridden?: boolean;
 }
 
 type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
 
-type UserProvided = Record<string, UserProvidedValue>;
+type UserProvided<T extends SavedObjectAttribute = any> = Record<string, UserProvidedValue<T>>;
 type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
-type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
-
-interface UiSettingsParams {
-  name: string;
-  value: SavedObjectAttribute;
-  description: string;
-  category: string[];
-  options?: string[];
-  optionLabels?: Record<string, string>;
-  requiresPageReload?: boolean;
-  readonly?: boolean;
-  type?: UiSettingsType;
-}
-
+/**
+ * Service that provides access to the UiSettings stored in elasticsearch.
+ *
+ * @public
+ */
 export interface IUiSettingsClient {
-  getDefaults: () => Promise<Record<string, UiSettingsParams>>;
+  /**
+   * Returns uiSettings default values {@link UiSettingsParams}
+   */
+  getDefaults: () => Record<string, UiSettingsParams>;
+  /**
+   * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
+   */
   get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
+  /**
+   * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
+   */
   getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
-  getUserProvided: () => Promise<UserProvided>;
+  /**
+   * Retrieves a set of all uiSettings values set by the user.
+   */
+  getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<
+    Record<string, { userValue?: T; isOverridden?: boolean }>
+  >;
+  /**
+   * Writes multiple uiSettings values and marks them as set by the user.
+   */
   setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+  /**
+   * Writes uiSettings value and marks it as set by the user.
+   */
   set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
+  /**
+   * Removes uiSettings value by key.
+   */
   remove: (key: string) => Promise<void>;
+  /**
+   * Removes multiple uiSettings values by keys.
+   */
   removeMany: (keys: string[]) => Promise<void>;
+  /**
+   * Shows whether the uiSettings value set by the user.
+   */
   isOverridden: (key: string) => boolean;
 }
-/**
- *  Service that provides access to the UiSettings stored in elasticsearch.
- *  @class UiSettingsService
- */
-export class UiSettingsService implements IUiSettingsClient {
-  private readonly _type: UiSettingsServiceOptions['type'];
-  private readonly _id: UiSettingsServiceOptions['id'];
-  private readonly _buildNum: UiSettingsServiceOptions['buildNum'];
-  private readonly _savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
-  private readonly _overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
-  private readonly _getDefaults: NonNullable<UiSettingsServiceOptions['getDefaults']>;
-  private readonly _logWithMetadata: NonNullable<UiSettingsServiceOptions['logWithMetadata']>;
+
+export class UiSettingsClient implements IUiSettingsClient {
+  private readonly type: UiSettingsServiceOptions['type'];
+  private readonly id: UiSettingsServiceOptions['id'];
+  private readonly buildNum: UiSettingsServiceOptions['buildNum'];
+  private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
+  private readonly overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
+  private readonly defaults: NonNullable<UiSettingsServiceOptions['defaults']>;
+  private readonly log: Logger;
 
   constructor(options: UiSettingsServiceOptions) {
-    const {
-      type,
-      id,
-      buildNum,
-      savedObjectsClient,
-      // we use a function for getDefaults() so that defaults can be different in
-      // different scenarios, and so they can change over time
-      getDefaults = () => ({}),
-      // function that accepts log messages in the same format as server.logWithMetadata
-      logWithMetadata = () => {},
-      overrides = {},
-    } = options;
+    const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
 
-    this._type = type;
-    this._id = id;
-    this._buildNum = buildNum;
-    this._savedObjectsClient = savedObjectsClient;
-    this._getDefaults = getDefaults;
-    this._overrides = overrides;
-    this._logWithMetadata = logWithMetadata;
+    this.type = type;
+    this.id = id;
+    this.buildNum = buildNum;
+    this.savedObjectsClient = savedObjectsClient;
+    this.defaults = defaults;
+    this.overrides = overrides;
+    this.log = log;
   }
 
-  async getDefaults() {
-    return await this._getDefaults();
+  getDefaults() {
+    return this.defaults;
   }
 
-  // returns a Promise for the value of the requested setting
   async get<T extends SavedObjectAttribute = any>(key: string): Promise<T> {
     const all = await this.getAll();
     return all[key];
@@ -135,14 +141,16 @@ export class UiSettingsService implements IUiSettingsClient {
   // NOTE: should be a private method
   async getRaw(): Promise<UiSettingsRaw> {
     const userProvided = await this.getUserProvided();
-    return defaultsDeep(userProvided, await this.getDefaults());
+    return defaultsDeep(userProvided, this.defaults);
   }
 
-  async getUserProvided(options: ReadOptions = {}): Promise<UserProvided> {
+  async getUserProvided<T extends SavedObjectAttribute = any>(
+    options: ReadOptions = {}
+  ): Promise<UserProvided<T>> {
     const userProvided: UserProvided = {};
 
     // write the userValue for each key stored in the saved object that is not overridden
-    for (const [key, userValue] of Object.entries(await this._read(options))) {
+    for (const [key, userValue] of Object.entries(await this.read(options))) {
       if (userValue !== null && !this.isOverridden(key)) {
         userProvided[key] = {
           userValue,
@@ -152,7 +160,7 @@ export class UiSettingsService implements IUiSettingsClient {
 
     // write all overridden keys, dropping the userValue is override is null and
     // adding keys for overrides that are not in saved object
-    for (const [key, userValue] of Object.entries(this._overrides)) {
+    for (const [key, userValue] of Object.entries(this.overrides)) {
       userProvided[key] =
         userValue === null ? { isOverridden: true } : { isOverridden: true, userValue };
     }
@@ -161,7 +169,7 @@ export class UiSettingsService implements IUiSettingsClient {
   }
 
   async setMany<T extends SavedObjectAttribute = any>(changes: Record<string, T>) {
-    await this._write({ changes });
+    await this.write({ changes });
   }
 
   async set<T extends SavedObjectAttribute = any>(key: string, value: T) {
@@ -181,7 +189,7 @@ export class UiSettingsService implements IUiSettingsClient {
   }
 
   isOverridden(key: string) {
-    return this._overrides.hasOwnProperty(key);
+    return this.overrides.hasOwnProperty(key);
   }
 
   // NOTE: should be private method
@@ -191,7 +199,7 @@ export class UiSettingsService implements IUiSettingsClient {
     }
   }
 
-  private async _write<T extends SavedObjectAttribute = any>({
+  private async write<T extends SavedObjectAttribute = any>({
     changes,
     autoCreateOrUpgradeIfMissing = true,
   }: {
@@ -203,28 +211,28 @@ export class UiSettingsService implements IUiSettingsClient {
     }
 
     try {
-      await this._savedObjectsClient.update(this._type, this._id, changes);
+      await this.savedObjectsClient.update(this.type, this.id, changes);
     } catch (error) {
-      const { isNotFoundError } = this._savedObjectsClient.errors;
+      const { isNotFoundError } = this.savedObjectsClient.errors;
       if (!isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
         throw error;
       }
 
       await createOrUpgradeSavedConfig({
-        savedObjectsClient: this._savedObjectsClient,
-        version: this._id,
-        buildNum: this._buildNum,
-        logWithMetadata: this._logWithMetadata,
+        savedObjectsClient: this.savedObjectsClient,
+        version: this.id,
+        buildNum: this.buildNum,
+        log: this.log,
       });
 
-      await this._write({
+      await this.write({
         changes,
         autoCreateOrUpgradeIfMissing: false,
       });
     }
   }
 
-  private async _read<T extends SavedObjectAttribute>({
+  private async read<T extends SavedObjectAttribute>({
     ignore401Errors = false,
     autoCreateOrUpgradeIfMissing = true,
   }: ReadOptions = {}): Promise<Record<string, T>> {
@@ -233,18 +241,18 @@ export class UiSettingsService implements IUiSettingsClient {
       isNotFoundError,
       isForbiddenError,
       isNotAuthorizedError,
-    } = this._savedObjectsClient.errors;
+    } = this.savedObjectsClient.errors;
 
     try {
-      const resp = await this._savedObjectsClient.get(this._type, this._id);
+      const resp = await this.savedObjectsClient.get(this.type, this.id);
       return resp.attributes;
     } catch (error) {
       if (isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
         const failedUpgradeAttributes = await createOrUpgradeSavedConfig<T>({
-          savedObjectsClient: this._savedObjectsClient,
-          version: this._id,
-          buildNum: this._buildNum,
-          logWithMetadata: this._logWithMetadata,
+          savedObjectsClient: this.savedObjectsClient,
+          version: this.id,
+          buildNum: this.buildNum,
+          log: this.log,
           onWriteError(writeError, attributes) {
             if (isConflictError(writeError)) {
               // trigger `!failedUpgradeAttributes` check below, since another
@@ -262,7 +270,7 @@ export class UiSettingsService implements IUiSettingsClient {
         });
 
         if (!failedUpgradeAttributes) {
-          return await this._read({
+          return await this.read({
             ignore401Errors,
             autoCreateOrUpgradeIfMissing: false,
           });
@@ -284,7 +292,7 @@ export class UiSettingsService implements IUiSettingsClient {
       isForbiddenError,
       isEsUnavailableError,
       isNotAuthorizedError,
-    } = this._savedObjectsClient.errors;
+    } = this.savedObjectsClient.errors;
 
     return (
       isForbiddenError(error) ||
