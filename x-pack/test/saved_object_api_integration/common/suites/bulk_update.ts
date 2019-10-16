@@ -143,19 +143,17 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
         await supertest
           .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
           .auth(user.username, user.password)
-          .send({
-            objects: [
-              generateNonSpaceAwareGlobalSavedObject(),
-              {
-                type: 'visualization',
-                id: `${getIdPrefix(otherSpaceId || spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-                attributes: {
-                  title: 'My second favorite vis',
-                },
+          .send([
+            generateNonSpaceAwareGlobalSavedObject(),
+            {
+              type: 'visualization',
+              id: `${getIdPrefix(otherSpaceId || spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
+              attributes: {
+                title: 'My second favorite vis',
               },
-              generateNonSpaceAwareGlobalSavedObject(),
-            ],
-          })
+            },
+            generateNonSpaceAwareGlobalSavedObject(),
+          ])
           .expect(tests.spaceAware.statusCode)
           .then(tests.spaceAware.response);
       });
@@ -164,19 +162,17 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
         await supertest
           .put(`${getUrlPrefix(otherSpaceId || spaceId)}/api/saved_objects/_bulk_update`)
           .auth(user.username, user.password)
-          .send({
-            objects: [
-              generateNonSpaceAwareGlobalSavedObject(),
-              {
-                type: 'globaltype',
-                id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-                attributes: {
-                  name: 'My second favorite',
-                },
+          .send([
+            generateNonSpaceAwareGlobalSavedObject(),
+            {
+              type: 'globaltype',
+              id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
+              attributes: {
+                name: 'My second favorite',
               },
-              generateNonSpaceAwareGlobalSavedObject(),
-            ],
-          })
+            },
+            generateNonSpaceAwareGlobalSavedObject(),
+          ])
           .expect(tests.notSpaceAware.statusCode)
           .then(tests.notSpaceAware.response);
       });
@@ -185,19 +181,17 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
         await supertest
           .put(`${getUrlPrefix(otherSpaceId || spaceId)}/api/saved_objects/_bulk_update`)
           .auth(user.username, user.password)
-          .send({
-            objects: [
-              generateNonSpaceAwareGlobalSavedObject(),
-              {
-                type: 'hiddentype',
-                id: 'hiddentype_1',
-                attributes: {
-                  name: 'My favorite hidden type',
-                },
+          .send([
+            generateNonSpaceAwareGlobalSavedObject(),
+            {
+              type: 'hiddentype',
+              id: 'hiddentype_1',
+              attributes: {
+                name: 'My favorite hidden type',
               },
-              generateNonSpaceAwareGlobalSavedObject(),
-            ],
-          })
+            },
+            generateNonSpaceAwareGlobalSavedObject(),
+          ])
           .expect(tests.hiddenType.statusCode)
           .then(tests.hiddenType.response);
       });
@@ -207,19 +201,17 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
           await supertest
             .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
             .auth(user.username, user.password)
-            .send({
-              objects: [
-                generateNonSpaceAwareGlobalSavedObject(),
-                {
-                  type: 'visualization',
-                  id: `${getIdPrefix(spaceId)}not an id`,
-                  attributes: {
-                    title: 'My second favorite vis',
-                  },
+            .send([
+              generateNonSpaceAwareGlobalSavedObject(),
+              {
+                type: 'visualization',
+                id: `${getIdPrefix(spaceId)}not an id`,
+                attributes: {
+                  title: 'My second favorite vis',
                 },
-                generateNonSpaceAwareGlobalSavedObject(),
-              ],
-            })
+              },
+              generateNonSpaceAwareGlobalSavedObject(),
+            ])
             .expect(tests.doesntExist.statusCode)
             .then(tests.doesntExist.response);
         });

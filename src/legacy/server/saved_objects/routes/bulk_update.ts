@@ -19,21 +19,14 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import {
-  SavedObjectsBaseOptions,
-  SavedObjectsClient,
-  SavedObjectsBulkUpdateObject,
-} from 'src/core/server';
+import { SavedObjectsClient, SavedObjectsBulkUpdateObject } from 'src/core/server';
 import { Prerequisites } from './types';
 
 interface BulkUpdateRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
-  payload: {
-    objects: SavedObjectsBulkUpdateObject[];
-    options: SavedObjectsBaseOptions;
-  };
+  payload: SavedObjectsBulkUpdateObject[];
 }
 
 export const createBulkUpdateRoute = (prereqs: Prerequisites) => {
@@ -43,31 +36,25 @@ export const createBulkUpdateRoute = (prereqs: Prerequisites) => {
     config: {
       pre: [prereqs.getSavedObjectsClient],
       validate: {
-        payload: Joi.object({
-          objects: Joi.array().items(
-            Joi.object({
-              type: Joi.string().required(),
-              id: Joi.string().required(),
-              attributes: Joi.object().required(),
-              version: Joi.string(),
-              references: Joi.array().items(
-                Joi.object().keys({
-                  name: Joi.string().required(),
-                  type: Joi.string().required(),
-                  id: Joi.string().required(),
-                })
-              ),
-            })
-          ),
-          options: Joi.object({
-            namespace: Joi.string(),
-          }).default({}),
-        }),
+        payload: Joi.array().items(
+          Joi.object({
+            type: Joi.string().required(),
+            id: Joi.string().required(),
+            attributes: Joi.object().required(),
+            version: Joi.string(),
+            references: Joi.array().items(
+              Joi.object().keys({
+                name: Joi.string().required(),
+                type: Joi.string().required(),
+                id: Joi.string().required(),
+              })
+            ),
+          })
+        ),
       },
       handler(request: BulkUpdateRequest) {
         const { savedObjectsClient } = request.pre;
-        const { objects, options } = request.payload;
-        return savedObjectsClient.bulkUpdate(objects, options);
+        return savedObjectsClient.bulkUpdate(request.payload);
       },
     },
   };

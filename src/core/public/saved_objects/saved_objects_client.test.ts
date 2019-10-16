@@ -334,7 +334,7 @@ describe('SavedObjectsClient', () => {
     });
 
     test('resolves with array of SimpleSavedObject instances', async () => {
-      const response = savedObjectsClient.bulkUpdate([bulkUpdateDoc], { namespace: 'ns' });
+      const response = savedObjectsClient.bulkUpdate([bulkUpdateDoc]);
       await expect(response).resolves.toHaveProperty('savedObjects');
 
       const result = await response;
@@ -343,13 +343,13 @@ describe('SavedObjectsClient', () => {
     });
 
     test('makes HTTP call', async () => {
-      await savedObjectsClient.bulkUpdate([bulkUpdateDoc], { namespace: 'ns' });
+      await savedObjectsClient.bulkUpdate([bulkUpdateDoc]);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
             "/api/saved_objects/_bulk_update",
             Object {
-              "body": "{\\"objects\\":[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}],\\"options\\":{\\"namespace\\":\\"ns\\"}}",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
               "method": "PUT",
               "query": undefined,
             },

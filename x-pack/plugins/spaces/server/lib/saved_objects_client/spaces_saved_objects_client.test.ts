@@ -345,24 +345,7 @@ const createMockResponse = () => ({
     });
 
     describe('#bulkUpdate', () => {
-      test(`throws error if options.namespace is specified`, async () => {
-        const request = createMockRequest();
-        const baseClient = createMockClient();
-        const spacesService = await createSpacesService(currentSpace.id);
-
-        const client = new SpacesSavedObjectsClient({
-          request,
-          baseClient,
-          spacesService,
-          types,
-        });
-
-        await expect(
-          client.bulkUpdate([{ id: '', type: 'foo', attributes: {} }], { namespace: 'bar' })
-        ).rejects.toThrowError('Spaces currently determines the namespaces');
-      });
-
-      test(`supplements options with undefined namespace`, async () => {
+      test(`supplements options with the spaces namespace`, async () => {
         const request = createMockRequest();
         const baseClient = createMockClient();
         const expectedReturnValue = {

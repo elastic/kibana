@@ -225,13 +225,8 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    *   { id: 'foo', type: 'index-pattern', attributes: {} }
    * ])
    */
-  public async bulkUpdate(
-    objects: SavedObjectsBulkUpdateObject[] = [],
-    options: SavedObjectsBaseOptions = {}
-  ) {
-    throwErrorIfNamespaceSpecified(options);
+  public async bulkUpdate(objects: SavedObjectsBulkUpdateObject[] = []) {
     return await this.client.bulkUpdate(objects, {
-      ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
   }

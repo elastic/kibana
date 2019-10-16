@@ -433,15 +433,12 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
    * @returns The result of the update operation containing both failed and updated saved objects.
    */
-  public bulkUpdate<T extends SavedObjectAttributes>(
-    objects: SavedObjectsBulkUpdateObject[] = [],
-    options: SavedObjectsBulkUpdateOptions = {}
-  ) {
+  public bulkUpdate<T extends SavedObjectAttributes>(objects: SavedObjectsBulkUpdateObject[] = []) {
     const path = this.getPath(['_bulk_update']);
 
     return this.savedObjectsFetch(path, {
       method: 'PUT',
-      body: JSON.stringify({ objects, options }),
+      body: JSON.stringify(objects),
     }).then(resp => {
       resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
       return renameKeys<
