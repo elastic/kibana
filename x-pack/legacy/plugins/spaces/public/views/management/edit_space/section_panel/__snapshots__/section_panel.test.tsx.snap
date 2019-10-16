@@ -13,7 +13,7 @@ exports[`it renders without blowing up 1`] = `
       <EuiTitle
         size="m"
       >
-        <h3>
+        <h2>
           <EuiIcon
             className="collapsiblePanel__logo"
             size="xl"
@@ -21,7 +21,7 @@ exports[`it renders without blowing up 1`] = `
           />
            
           Elasticsearch
-        </h3>
+        </h2>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
