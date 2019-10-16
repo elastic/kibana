@@ -55,6 +55,7 @@ export default function () {
         `--elasticsearch.username=${servers.elasticsearch.username}`,
         `--elasticsearch.password=${servers.elasticsearch.password}`,
         `--kibana.disableWelcomeScreen=true`,
+        '--telemetry.banner=false',
         `--server.maxPayloadBytes=1679958`,
       ],
     },

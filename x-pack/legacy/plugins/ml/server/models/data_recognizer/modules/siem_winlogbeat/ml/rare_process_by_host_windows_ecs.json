@@ -3,7 +3,8 @@
   "description": "SIEM Winlogbeat: Detect unusually rare processes on Windows (beta)",
   "groups": [
     "siem",
-    "winlogbeat","process"
+    "winlogbeat",
+    "process"
   ],
   "analysis_config": {
     "bucket_span": "15m",
@@ -21,6 +22,7 @@
       "user.name"
     ]
   },
+  "allow_lazy_open": true,
   "analysis_limits": {
     "model_memory_limit": "256mb"
   },
@@ -32,19 +34,19 @@
     "custom_urls": [
       {
         "url_name": "Host Details by process name",
-        "url_value": "siem#/ml-hosts/$host.name$?_g=()&kqlQuery=(filterQuery:(expression:'process.name%20:%20%22$process.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "siem#/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       },
       {
         "url_name": "Host Details by user name",
-        "url_value": "siem#/ml-hosts/$host.name$?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "siem#/ml-hosts/$host.name$?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       },
       {
         "url_name": "Hosts Overview by process name",
-        "url_value": "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'process.name%20:%20%22$process.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "siem#/ml-hosts?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       },
       {
         "url_name": "Hosts Overview by user name",
-        "url_value": "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "siem#/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
     ]
   }

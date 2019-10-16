@@ -18,7 +18,7 @@ import { connect } from 'react-redux';
 
 import { Dispatch } from 'redux';
 import { inputsModel, State } from '../../store';
-import { inputsActions, timelineActions, hostsActions, networkActions } from '../../store/actions';
+import { inputsActions, timelineActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import {
   policySelector,
@@ -55,18 +55,13 @@ interface UpdateReduxTime extends OnTimeChangeProps {
   timelineId?: string;
 }
 
-interface ReturnUpdateReduxTime {
-  kqlHasBeenUpdated: boolean;
-}
-
-type DispatchUpdateReduxTime = ({
+export type DispatchUpdateReduxTime = ({
   end,
   id,
   isQuickSelection,
-  kql,
   start,
   timelineId,
-}: UpdateReduxTime) => ReturnUpdateReduxTime;
+}: UpdateReduxTime) => void;
 
 interface SuperDatePickerDispatchProps {
   setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) => void;
@@ -109,7 +104,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
       []
     );
     const onRefresh = ({ start: newStart, end: newEnd }: OnRefreshProps): void => {
-      const { kqlHasBeenUpdated } = updateReduxTime({
+      updateReduxTime({
         end: newEnd,
         id,
         isInvalid: false,
@@ -122,10 +117,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
       const currentEnd = isQuickSelection
         ? formatDate(newEnd, { roundUp: true })
         : formatDate(newEnd);
-      if (
-        !kqlHasBeenUpdated &&
-        (!isQuickSelection || (start === currentStart && end === currentEnd))
-      ) {
+      if (!isQuickSelection || (start === currentStart && end === currentEnd)) {
         refetchQuery(queries);
       }
     };
@@ -201,7 +193,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
   }
 );
 
-const formatDate = (
+export const formatDate = (
   date: string,
   options?: {
     roundUp?: boolean;
@@ -211,14 +203,13 @@ const formatDate = (
   return momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0;
 };
 
-const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
+export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
   end,
   id,
   isQuickSelection,
-  kql,
   start,
   timelineId,
-}: UpdateReduxTime): ReturnUpdateReduxTime => {
+}: UpdateReduxTime): void => {
   const fromDate = formatDate(start);
   let toDate = formatDate(end, { roundUp: true });
   if (isQuickSelection) {
@@ -250,21 +241,6 @@ const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
       })
     );
   }
-
-  let kqlHasBeenUpdated = false;
-  if (kql) {
-    // if refetch is successful, it will have a side effect
-    // to set all the tables on its activePage to zero (meaning pagination)
-    kqlHasBeenUpdated = kql.refetch(dispatch);
-  }
-  if (!kqlHasBeenUpdated) {
-    // Date picker is global to all the page in the app
-    // (Hosts/Network are the only one having tables)
-    dispatch(hostsActions.setHostTablesActivePageToZero());
-    dispatch(networkActions.setNetworkTablesActivePageToZero());
-  }
-
-  return { kqlHasBeenUpdated };
 };
 
 export const makeMapStateToProps = () => {

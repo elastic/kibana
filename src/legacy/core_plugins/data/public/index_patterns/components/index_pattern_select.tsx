@@ -22,6 +22,7 @@ import React, { Component } from 'react';
 
 import { EuiComboBox } from '@elastic/eui';
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../../core/public';
+import { getIndexPatternTitle } from '../utils';
 
 interface IndexPatternSelectProps {
   onChange: (opt: any) => void;
@@ -52,17 +53,6 @@ const getIndexPatterns = async (
     perPage: 100,
   });
   return resp.savedObjects;
-};
-
-const getIndexPatternTitle = async (
-  client: SavedObjectsClientContract,
-  indexPatternId: string
-): Promise<SimpleSavedObject<any>> => {
-  const savedObject = (await client.get('index-pattern', indexPatternId)) as SimpleSavedObject<any>;
-  if (savedObject.error) {
-    throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
-  }
-  return savedObject.attributes.title;
 };
 
 // Takes in stateful runtime dependencies and pre-wires them to the component

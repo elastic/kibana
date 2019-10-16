@@ -18,6 +18,17 @@ export const ComponentStrings = {
         defaultMessage: 'Embed Object',
       }),
   },
+  AdvancedFilter: {
+    getApplyButtonLabel: () =>
+      i18n.translate('xpack.canvas.renderer.advancedFilter.applyButtonLabel', {
+        defaultMessage: 'Apply',
+        description: 'This refers to applying the filter to the Canvas workpad',
+      }),
+    getInputPlaceholder: () =>
+      i18n.translate('xpack.canvas.renderer.advancedFilter.inputPlaceholder', {
+        defaultMessage: 'Enter filter expression',
+      }),
+  },
   App: {
     getLoadErrorMessage: (error: string) =>
       i18n.translate('xpack.canvas.app.loadErrorMessage', {
@@ -257,6 +268,13 @@ export const ComponentStrings = {
         defaultMessage: 'No data source present',
       }),
   },
+  DropdownFilter: {
+    getMatchAllOptionLabel: () =>
+      i18n.translate('xpack.canvas.renderer.dropdownFilter.matchAllOptionLabel', {
+        defaultMessage: 'ANY',
+        description: 'The dropdown filter option to match any value in the field.',
+      }),
+  },
   ElementConfig: {
     getFailedLabel: () =>
       i18n.translate('xpack.canvas.elementConfig.failedLabel', {
@@ -365,6 +383,16 @@ export const ComponentStrings = {
         description: 'Title for the "My elements" tab when adding a new element',
       }),
   },
+  Error: {
+    getDescription: () =>
+      i18n.translate('xpack.canvas.errorComponent.description', {
+        defaultMessage: 'Expression failed with the message:',
+      }),
+    getTitle: () =>
+      i18n.translate('xpack.canvas.errorComponent.title', {
+        defaultMessage: 'Whoops! Expression failed',
+      }),
+  },
   Expression: {
     getCancelButtonLabel: () =>
       i18n.translate('xpack.canvas.expression.cancelButtonLabel', {
@@ -455,6 +483,24 @@ export const ComponentStrings = {
         },
       }),
   },
+  FunctionFormContextError: {
+    getContextErrorMessage: (errorMessage: string) =>
+      i18n.translate('xpack.canvas.functionForm.contextError', {
+        defaultMessage: 'ERROR: {errorMessage}',
+        values: {
+          errorMessage,
+        },
+      }),
+  },
+  FunctionFormFunctionUnknown: {
+    getUnknownArgumentTypeErrorMessage: (expressionType: string) =>
+      i18n.translate('xpack.canvas.functionForm.functionUnknown.unknownArgumentTypeError', {
+        defaultMessage: 'Unknown expression type "{expressionType}"',
+        values: {
+          expressionType,
+        },
+      }),
+  },
   GroupSettings: {
     getSaveGroupDescription: () =>
       i18n.translate('xpack.canvas.groupSettings.saveGroupDescription', {
@@ -502,6 +548,15 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
         defaultMessage: 'Keyboard Shortcuts',
+      }),
+  },
+  Link: {
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.link.errorMessage', {
+        defaultMessage: 'LINK ERROR: {message}',
+        values: {
+          message,
+        },
       }),
   },
   MultiElementSettings: {
@@ -856,6 +911,12 @@ export const ComponentStrings = {
     getStyleUnderlineOption: () =>
       i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
         defaultMessage: 'Underline',
+      }),
+  },
+  TimePicker: {
+    getApplyButtonLabel: () =>
+      i18n.translate('xpack.canvas.timePicker.applyButtonLabel', {
+        defaultMessage: 'Apply',
       }),
   },
   Toolbar: {

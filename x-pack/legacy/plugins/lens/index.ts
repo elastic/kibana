@@ -54,33 +54,6 @@ export const lens: LegacyPluginInitializer = kibana => {
     init(server: Server) {
       const kbnServer = (server as unknown) as KbnServer;
 
-      server.plugins.xpack_main.registerFeature({
-        id: PLUGIN_ID,
-        name: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-        app: [PLUGIN_ID, 'kibana'],
-        catalogue: [PLUGIN_ID],
-        privileges: {
-          all: {
-            api: [PLUGIN_ID],
-            catalogue: [PLUGIN_ID],
-            savedObject: {
-              all: ['search'],
-              read: ['index-pattern'],
-            },
-            ui: ['save', 'show', 'saveQuery'],
-          },
-          read: {
-            api: [PLUGIN_ID],
-            catalogue: [PLUGIN_ID],
-            savedObject: {
-              all: [],
-              read: ['index-pattern'],
-            },
-            ui: ['show'],
-          },
-        },
-      });
-
       // Set up with the new platform plugin lifecycle API.
       const plugin = lensServerPlugin();
       plugin.setup(kbnServer.newPlatform.setup.core, {
@@ -88,6 +61,7 @@ export const lens: LegacyPluginInitializer = kibana => {
         savedObjects: server.savedObjects,
         usage: server.usage,
         config: server.config(),
+        server,
       });
 
       server.events.on('stop', () => {

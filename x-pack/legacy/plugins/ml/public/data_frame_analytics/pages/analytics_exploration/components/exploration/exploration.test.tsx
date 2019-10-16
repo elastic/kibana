@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 jest.mock('../../../../../contexts/ui/use_ui_chrome_context');
+jest.mock('ui/new_platform');
 
 import { Exploration } from './exploration';
 
