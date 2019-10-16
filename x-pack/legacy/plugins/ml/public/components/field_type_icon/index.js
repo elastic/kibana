@@ -5,7 +5,4 @@
  */
 
 
-
-import './field_type_icon_directive';
-
 export { FieldTypeIcon } from './field_type_icon';
