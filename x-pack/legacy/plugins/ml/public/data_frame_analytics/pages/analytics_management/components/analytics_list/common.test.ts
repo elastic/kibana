@@ -11,10 +11,12 @@ import {
   isCompletedAnalyticsJob,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStats,
+  DataFrameAnalyticsStats,
+  DATA_FRAME_TASK_STATE,
 } from './common';
 
-const completedJob = StatsMock.data_frame_analytics[0];
-const runningJob = StatsMock.data_frame_analytics[1];
+const completedJob = StatsMock.data_frame_analytics[0] as DataFrameAnalyticsStats;
+const runningJob = StatsMock.data_frame_analytics[1] as DataFrameAnalyticsStats;
 
 describe('Data Frame Analytics: common utils', () => {
   test('isCompletedAnalyticsJob()', () => {
@@ -23,8 +25,16 @@ describe('Data Frame Analytics: common utils', () => {
   });
 
   test('isDataFrameAnalyticsRunning()', () => {
-    expect(isDataFrameAnalyticsRunning(completedJob)).toBe(false);
-    expect(isDataFrameAnalyticsRunning(runningJob)).toBe(true);
+    expect(isDataFrameAnalyticsRunning(completedJob.state)).toBe(false);
+    expect(isDataFrameAnalyticsRunning(runningJob.state)).toBe(true);
+    runningJob.state = DATA_FRAME_TASK_STATE.STARTED;
+    expect(isDataFrameAnalyticsRunning(runningJob.state)).toBe(true);
+    runningJob.state = DATA_FRAME_TASK_STATE.STARTING;
+    expect(isDataFrameAnalyticsRunning(runningJob.state)).toBe(true);
+    runningJob.state = DATA_FRAME_TASK_STATE.REINDEXING;
+    expect(isDataFrameAnalyticsRunning(runningJob.state)).toBe(true);
+    runningJob.state = DATA_FRAME_TASK_STATE.FAILED;
+    expect(isDataFrameAnalyticsRunning(runningJob.state)).toBe(false);
   });
 
   test('isDataFrameAnalyticsStats()', () => {
