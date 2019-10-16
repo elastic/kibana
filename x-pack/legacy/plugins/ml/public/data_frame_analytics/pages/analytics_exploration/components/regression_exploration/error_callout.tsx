@@ -57,7 +57,7 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
         <p>
           {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.noDataCalloutBody', {
             defaultMessage:
-              'The query for the index returned no results. Please make sure the job has been completed and the index contains documents.',
+              'The query for the index returned no results. Please make sure the job has completed and the index contains documents.',
           })}
         </p>
       </EuiCallOut>

@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
-import { ModelStrings } from '../../strings';
+import { ModelStrings } from '../../../i18n';
 
 const { PointSeries: strings } = ModelStrings;
 

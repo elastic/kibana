@@ -38,6 +38,7 @@ export const config = {
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
+      defaultRoute: schema.maybe(schema.string()),
       cors: schema.conditional(
         schema.contextRef('dev'),
         true,
@@ -106,6 +107,7 @@ export class HttpConfig {
   public basePath?: string;
   public rewriteBasePath: boolean;
   public publicDir: string;
+  public defaultRoute?: string;
   public ssl: SslConfig;
 
   /**
@@ -123,5 +125,6 @@ export class HttpConfig {
     this.rewriteBasePath = rawConfig.rewriteBasePath;
     this.publicDir = env.staticFilesDir;
     this.ssl = new SslConfig(rawConfig.ssl || {});
+    this.defaultRoute = rawConfig.defaultRoute;
   }
 }

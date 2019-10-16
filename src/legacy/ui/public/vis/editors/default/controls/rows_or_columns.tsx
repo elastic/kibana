@@ -28,7 +28,7 @@ const PARAMS = {
   COLUMNS: 'visEditorSplitBy__false',
 };
 
-function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps<boolean>) {
+function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps) {
   const idSelected = `visEditorSplitBy__${aggParams.row}`;
   const options = [
     {

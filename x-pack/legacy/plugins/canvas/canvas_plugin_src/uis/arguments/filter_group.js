@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { ArgumentStrings } from '../../strings';
+import { ArgumentStrings } from '../../../i18n';
 
 const { FilterGroup: strings } = ArgumentStrings;
 

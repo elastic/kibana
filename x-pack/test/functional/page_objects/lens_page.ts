@@ -124,16 +124,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
-    save() {
-      return testSubjects.click('lnsApp_saveButton');
-    },
-
-    setTitle(title: string) {
-      return testSubjects.setValue('lns_ChartTitle', title);
+    async save(title: string) {
+      await testSubjects.click('lnsApp_saveButton');
+      await testSubjects.setValue('savedObjectTitle', title);
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+        testSubjects
+          .missingOrFail('confirmSaveSavedObjectButton')
+          .then(() => true)
+          .catch(() => false)
+      );
     },
 
     getTitle() {
-      return testSubjects.getAttribute('lns_ChartTitle', 'value');
+      return testSubjects.getVisibleText('lns_ChartTitle');
     },
   });
 }

@@ -19,7 +19,7 @@ import { unquoteString } from '../../../../common/lib/unquote_string';
 import { isColumnReference } from './lib/is_column_reference';
 // @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
-import { getFunctionHelp, getFunctionErrors } from '../../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../../../i18n';
 import {
   Datatable,
   DatatableRow,
