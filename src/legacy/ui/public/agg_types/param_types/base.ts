@@ -56,8 +56,8 @@ export class BaseParamType implements AggParam {
    */
   modifyAggConfigOnSearchRequestStart: (
     aggconfig: AggConfig,
-    searchSource: SearchSource,
-    searchRequest: any
+    searchSource?: SearchSource,
+    searchRequest?: any
   ) => void;
 
   constructor(config: Record<string, any>) {

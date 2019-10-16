@@ -6,7 +6,7 @@
 
 import { RENDER_AS } from './render_as';
 import { getTileBoundingBox } from './geo_tile_utils';
-import { EMPTY_FEATURE_COLLECTION } from '../../../../common/constants';
+import { EMPTY_FEATURE_COLLECTION, FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
 
 export function convertToGeoJson({ table, renderAs }) {
 
@@ -35,7 +35,9 @@ export function convertToGeoJson({ table, renderAs }) {
       return;
     }
 
-    const properties = {};
+    const properties = {
+      [FEATURE_ID_PROPERTY_NAME]: gridKey
+    };
     metricColumns.forEach(metricColumn => {
       properties[metricColumn.aggConfig.id] = row[metricColumn.id];
     });

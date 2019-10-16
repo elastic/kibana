@@ -13,7 +13,7 @@ import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from '.
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesPlugin } from '../../../../spaces';
+import { LegacySpacesPlugin } from '../../../../spaces';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 
 export type CheckPrivilegesDynamically = (
@@ -26,7 +26,7 @@ export type CheckPrivilegesDynamicallyWithRequest = (
 
 export function checkPrivilegesDynamicallyWithRequestFactory(
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
-  spaces: OptionalPlugin<SpacesPlugin>
+  spaces: OptionalPlugin<LegacySpacesPlugin>
 ): CheckPrivilegesDynamicallyWithRequest {
   return function checkPrivilegesDynamicallyWithRequest(request: Legacy.Request) {
     const checkPrivileges = checkPrivilegesWithRequest(request);

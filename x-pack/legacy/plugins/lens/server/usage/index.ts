@@ -5,3 +5,4 @@
  */
 
 export * from './collectors';
+export * from './task';
