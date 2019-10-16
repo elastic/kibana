@@ -17,6 +17,19 @@
  * under the License.
  */
 
-export * from './types';
-export * from './create_react_overlays';
-export * from './mount_for_component';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+import { MountPoint } from 'kibana/public';
+
+/**
+ * Mount converter for react components.
+ *
+ * @param component to get a mount for
+ */
+export const mountForComponent = (component: React.ReactElement): MountPoint => (
+  element: HTMLElement
+) => {
+  ReactDOM.render(<I18nProvider>{component}</I18nProvider>, element);
+  return () => ReactDOM.unmountComponentAtNode(element);
+};

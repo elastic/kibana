@@ -23,6 +23,7 @@ import { FlyoutService } from './flyout';
 import { ModalService } from './modal';
 import { I18nStart } from '../i18n';
 import { OverlayBannersStart, OverlayBannersService } from './banners';
+import { MountPoint } from './types';
 import { UiSettingsClientContract } from '../ui_settings';
 
 /**
@@ -83,7 +84,7 @@ export interface OverlayStart {
     }
   ) => OverlayRef;
   openModal: (
-    modalChildren: React.ReactNode,
+    modalChildren: MountPoint,
     modalProps?: {
       className?: string;
       closeButtonAriaLabel?: string;

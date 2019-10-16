@@ -14,7 +14,6 @@ import { EmbeddableFactory } from '../../../../src/plugins/embeddable/public';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { TimeRangeEmbeddableFactory } from './test_helpers/time_range_embeddable_factory';
 import { CustomTimeRangeAction } from './custom_time_range_action';
-import { coreMock } from '../../../../src/core/public/mocks';
 /* eslint-disable */
 import {
   HelloWorldEmbeddableFactory,
@@ -28,6 +27,12 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { ReactElement } from 'react';
 
 jest.mock('ui/new_platform');
+
+const createOpenModalMock = () => {
+  const mock = jest.fn();
+  mock.mockReturnValue({ close: jest.fn() });
+  return mock;
+};
 
 test('Custom time range action prevents embeddable from using container time', async done => {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
@@ -66,11 +71,10 @@ test('Custom time range action prevents embeddable from using container time', a
   expect(child2).toBeDefined();
   expect(child2.getInput().timeRange).toEqual({ from: 'now-15m', to: 'now' });
 
-  const start = coreMock.createStart();
-  const overlayMock = start.overlays;
-  overlayMock.openModal.mockClear();
+  const openModalMock = createOpenModalMock();
+
   new CustomTimeRangeAction({
-    openModal: start.overlays.openModal,
+    openModal: openModalMock,
     commonlyUsedRanges: [],
     dateFormat: 'MM YYY',
   }).execute({
@@ -78,7 +82,7 @@ test('Custom time range action prevents embeddable from using container time', a
   });
 
   await nextTick();
-  const openModal = overlayMock.openModal.mock.calls[0][0] as ReactElement;
+  const openModal = openModalMock.mock.calls[0][0] as ReactElement;
 
   const wrapper = mount(openModal);
   wrapper.setState({ timeRange: { from: 'now-30days', to: 'now-29days' } });
@@ -129,11 +133,9 @@ test('Removing custom time range action resets embeddable back to container time
   const child1 = container.getChild<TimeRangeEmbeddable>('1');
   const child2 = container.getChild<TimeRangeEmbeddable>('2');
 
-  const start = coreMock.createStart();
-  const overlayMock = start.overlays;
-  overlayMock.openModal.mockClear();
+  const openModalMock = createOpenModalMock();
   new CustomTimeRangeAction({
-    openModal: start.overlays.openModal,
+    openModal: openModalMock,
     commonlyUsedRanges: [],
     dateFormat: 'MM YYY',
   }).execute({
@@ -141,7 +143,7 @@ test('Removing custom time range action resets embeddable back to container time
   });
 
   await nextTick();
-  const openModal = overlayMock.openModal.mock.calls[0][0] as ReactElement;
+  const openModal = openModalMock.mock.calls[0][0] as ReactElement;
 
   const wrapper = mount(openModal);
   wrapper.setState({ timeRange: { from: 'now-30days', to: 'now-29days' } });
@@ -151,7 +153,7 @@ test('Removing custom time range action resets embeddable back to container time
   container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
 
   new CustomTimeRangeAction({
-    openModal: start.overlays.openModal,
+    openModal: openModalMock,
     commonlyUsedRanges: [],
     dateFormat: 'MM YYY',
   }).execute({
@@ -159,7 +161,7 @@ test('Removing custom time range action resets embeddable back to container time
   });
 
   await nextTick();
-  const openModal2 = (overlayMock.openModal as any).mock.calls[1][0];
+  const openModal2 = openModalMock.mock.calls[1][0];
 
   const wrapper2 = mount(openModal2);
   findTestSubject(wrapper2, 'removePerPanelTimeRangeButton').simulate('click');
@@ -209,11 +211,9 @@ test('Cancelling custom time range action leaves state alone', async done => {
   const child1 = container.getChild<TimeRangeEmbeddable>('1');
   const child2 = container.getChild<TimeRangeEmbeddable>('2');
 
-  const start = coreMock.createStart();
-  const overlayMock = start.overlays;
-  overlayMock.openModal.mockClear();
+  const openModalMock = createOpenModalMock();
   new CustomTimeRangeAction({
-    openModal: start.overlays.openModal,
+    openModal: openModalMock,
     commonlyUsedRanges: [],
     dateFormat: 'MM YYY',
   }).execute({
@@ -221,7 +221,7 @@ test('Cancelling custom time range action leaves state alone', async done => {
   });
 
   await nextTick();
-  const openModal = overlayMock.openModal.mock.calls[0][0] as ReactElement;
+  const openModal = openModalMock.mock.calls[0][0] as ReactElement;
 
   const wrapper = mount(openModal);
   wrapper.setState({ timeRange: { from: 'now-300m', to: 'now-400m' } });
@@ -263,9 +263,9 @@ test(`badge is compatible with embeddable that inherits from parent`, async () =
 
   const child = container.getChild<TimeRangeEmbeddable>('1');
 
-  const start = coreMock.createStart();
+  const openModalMock = createOpenModalMock();
   const compatible = await new CustomTimeRangeAction({
-    openModal: start.overlays.openModal,
+    openModal: openModalMock,
     commonlyUsedRanges: [],
     dateFormat: 'MM YYY',
   }).isCompatible({
@@ -333,9 +333,9 @@ test('Attempting to execute on incompatible embeddable throws an error', async (
 
   const child = container.getChild<HelloWorldEmbeddable>('1');
 
-  const start = coreMock.createStart();
+  const openModalMock = createOpenModalMock();
   const action = await new CustomTimeRangeAction({
-    openModal: start.overlays.openModal,
+    openModal: openModalMock,
     dateFormat: 'MM YYYY',
     commonlyUsedRanges: [],
   });

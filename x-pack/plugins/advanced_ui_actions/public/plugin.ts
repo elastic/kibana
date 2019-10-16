@@ -10,6 +10,7 @@ import {
   CoreStart,
   Plugin,
 } from '../../../../src/core/public';
+import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
 import { IUiActionsStart, IUiActionsSetup } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -44,8 +45,9 @@ export class AdvancedUiActionsPublicPlugin
   public start(core: CoreStart, { uiActions }: StartDependencies): Start {
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
+    const { openModal } = createReactOverlays(core);
     const timeRangeAction = new CustomTimeRangeAction({
-      openModal: core.overlays.openModal,
+      openModal,
       dateFormat,
       commonlyUsedRanges,
     });
@@ -53,7 +55,7 @@ export class AdvancedUiActionsPublicPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, timeRangeAction.id);
 
     const timeRangeBadge = new CustomTimeRangeBadge({
-      openModal: core.overlays.openModal,
+      openModal,
       dateFormat,
       commonlyUsedRanges,
     });
