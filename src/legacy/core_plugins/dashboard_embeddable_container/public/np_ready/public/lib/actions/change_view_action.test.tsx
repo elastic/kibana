@@ -30,8 +30,6 @@ import {
 } from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples';
 import { DashboardOptions } from '../embeddable/dashboard_container_factory';
 
-import { CoreStart } from '../../../../../../../../core/public';
-
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(
   CONTACT_CARD_EMBEDDABLE,
@@ -81,20 +79,19 @@ beforeEach(async () => {
 });
 
 /*
-test('Sets the embeddable expanded panel id on the parent', async () => {
-  const expandPanelAction = new ExpandPanelAction();
-
-  expect(container.getInput().expandedPanelId).toBeUndefined();
-
-  expandPanelAction.execute({ embeddable });
-
-  expect(container.getInput().expandedPanelId).toBe(embeddable.id);
+// need some help on this one!
+test('Executes the replace panel action', async () => {
+  let core: any;
+  let SavedObjectFinder: any;
+  let notifications: any;
+  const action = new ChangeViewAction(core, SavedObjectFinder, notifications);
+  action.execute({ embeddable });
 });
 */
 
 test('Is not compatible when embeddable is not in a dashboard container', async () => {
-  let core: CoreStart;
-  let SavedObjectFinder: React.ComponentType<any>;
+  let core: any;
+  let SavedObjectFinder: any;
   let notifications: any;
   const action = new ChangeViewAction(core, SavedObjectFinder, notifications);
   expect(
@@ -108,8 +105,8 @@ test('Is not compatible when embeddable is not in a dashboard container', async 
 });
 
 test('Execute throws an error when called with an embeddable not in a parent', async () => {
-  let core: CoreStart;
-  let SavedObjectFinder: React.ComponentType<any>;
+  let core: any;
+  let SavedObjectFinder: any;
   let notifications: any;
   const action = new ChangeViewAction(core, SavedObjectFinder, notifications);
   async function check() {
@@ -119,16 +116,16 @@ test('Execute throws an error when called with an embeddable not in a parent', a
 });
 
 test('Returns title', async () => {
-  let core: CoreStart;
-  let SavedObjectFinder: React.ComponentType<any>;
+  let core: any;
+  let SavedObjectFinder: any;
   let notifications: any;
   const action = new ChangeViewAction(core, SavedObjectFinder, notifications);
   expect(action.getDisplayName({ embeddable })).toBeDefined();
 });
 
 test('Returns an icon', async () => {
-  let core: CoreStart;
-  let SavedObjectFinder: React.ComponentType<any>;
+  let core: any;
+  let SavedObjectFinder: any;
   let notifications: any;
   const action = new ChangeViewAction(core, SavedObjectFinder, notifications);
   expect(action.getIconType({ embeddable })).toBeDefined();

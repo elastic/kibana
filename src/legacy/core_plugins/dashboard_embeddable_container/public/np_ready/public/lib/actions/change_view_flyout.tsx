@@ -45,12 +45,12 @@ interface Props {
   savedObjectsFinder: React.ComponentType<any>;
   onClose: () => void;
   notifications: NotificationsStart;
-  viewToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+  panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }
 
 export class ChangeViewFlyout extends React.Component<Props> {
   private lastToast: Toast = {
-    id: 'viewReplaceToast',
+    id: 'panelReplaceToast',
   };
 
   constructor(props: Props) {
@@ -82,10 +82,10 @@ export class ChangeViewFlyout extends React.Component<Props> {
     const originalPanels = this.props.container.getInput().panels;
     const filteredPanels = { ...originalPanels };
 
-    const nnw = (filteredPanels[this.props.viewToRemove.id] as DashboardPanelState).gridData.w;
-    const nnh = (filteredPanels[this.props.viewToRemove.id] as DashboardPanelState).gridData.h;
-    const nnx = (filteredPanels[this.props.viewToRemove.id] as DashboardPanelState).gridData.x;
-    const nny = (filteredPanels[this.props.viewToRemove.id] as DashboardPanelState).gridData.y;
+    const nnw = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.w;
+    const nnh = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.h;
+    const nnx = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.x;
+    const nny = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.y;
 
     // add the new view
     const newObj = await this.props.container.addSavedObjectEmbeddable(type, id);
@@ -97,7 +97,7 @@ export class ChangeViewFlyout extends React.Component<Props> {
     (finalPanels[newObj.id] as DashboardPanelState).gridData.y = nny;
 
     // delete the old view
-    delete finalPanels[this.props.viewToRemove.id];
+    delete finalPanels[this.props.panelToRemove.id];
 
     // apply changes
     this.props.container.updateInput(finalPanels);
@@ -128,14 +128,14 @@ export class ChangeViewFlyout extends React.Component<Props> {
       />
     );
 
-    const viewToReplace = 'Replace view ' + this.props.viewToRemove.getTitle() + ' with:';
+    const panelToReplace = 'Replace panel ' + this.props.panelToRemove.getTitle() + ' with:';
 
     return (
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardChangeView">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <span>{viewToReplace}</span>
+              <span>{panelToReplace}</span>
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>

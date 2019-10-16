@@ -34,9 +34,9 @@ export async function openChangeViewFlyout(options: {
   core: CoreStart;
   savedObjectFinder: React.ComponentType<any>;
   notifications: NotificationsStart;
-  viewToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+  panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }) {
-  const { embeddable, core, viewToRemove, savedObjectFinder, notifications } = options;
+  const { embeddable, core, panelToRemove, savedObjectFinder, notifications } = options;
   const flyoutSession = core.overlays.openFlyout(
     <ChangeViewFlyout
       container={embeddable}
@@ -45,7 +45,7 @@ export async function openChangeViewFlyout(options: {
           flyoutSession.close();
         }
       }}
-      viewToRemove={viewToRemove}
+      panelToRemove={panelToRemove}
       savedObjectsFinder={savedObjectFinder}
       notifications={notifications}
     />,

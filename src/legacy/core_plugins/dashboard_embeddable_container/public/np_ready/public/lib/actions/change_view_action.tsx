@@ -54,8 +54,8 @@ export class ChangeViewAction implements IAction<ActionContext> {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    return i18n.translate('dashboardEmbeddableContainer.panel.removePanel.replaceView', {
-      defaultMessage: 'Replace visualization',
+    return i18n.translate('dashboardEmbeddableContainer.panel.removePanel.replacePanel', {
+      defaultMessage: 'Replace panel',
     });
   }
 
@@ -88,7 +88,7 @@ export class ChangeViewAction implements IAction<ActionContext> {
       core: this.core,
       savedObjectFinder: this.savedobjectfinder,
       notifications: this.notifications,
-      viewToRemove: view,
+      panelToRemove: view,
     });
   }
 }
