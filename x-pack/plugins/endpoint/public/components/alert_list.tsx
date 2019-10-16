@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 
 import {
   EuiPage,
+  EuiButton,
   EuiBasicTable,
   EuiLink,
   EuiHealth,
@@ -35,6 +36,7 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
     sortField?: string;
     sortDirection?: Direction;
     showPerPageOptions: boolean;
+    selectedItems: object[];
   }
   const [data, setData]: [AlertData, any] = useState({
     hits: [],
@@ -42,6 +44,7 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
     pageIndex: 0,
     pageSize: 10,
     showPerPageOptions: true,
+    selectedItems: [],
   });
 
   async function fetchAlertListData() {
@@ -53,6 +56,7 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
         sortDirection: data.sortDirection,
       },
     });
+
     setData({
       ...data,
       hits: response.elasticsearchResponse.hits.hits,
@@ -77,8 +81,17 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
     });
   };
 
+
+
+  const onSelectionChange = (selectedItems) => {
+    setData({
+      ...data,
+      selectedItems
+    })
+  };
+
   const items = data.hits.map((item: any) => {
-    return item._source;
+    return item;
   });
 
   const pagination = {
@@ -98,17 +111,64 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
     sort,
   };
 
+  const selection = {
+    selectable: () => {return true},
+    selectableMessage: () => "Select me",
+    onSelectionChange,
+  };
+
+
+  const renderDeleteButton = () => {
+    const { selectedItems } = data
+
+    if (selectedItems.length === 0) {
+      return;
+    }
+
+
+    async function onClickDelete() {
+
+      const toArchive: string[] = selectedItems.map((item: any) => {
+        return item._id;
+      });
+
+      const response = await context.core.http.post('/alerts/archive', {
+        query: {
+          alerts: toArchive.join(","),  // TODO: seems strange that we can't use lists in query params
+        },
+      });
+      console.log(response);
+
+      // TODO: how to unselect once pressed?
+      data.selectedItems = [];
+      setData({
+        ...data,
+        selectedItems: [],
+      })
+    }
+
+    return (
+      <EuiButton color="danger" iconType="trash" onClick={onClickDelete}>
+        Archive Alert
+      </EuiButton>
+    );
+  }
+
+  const deleteButton = renderDeleteButton();
+
+
+
   const columns = [
     {
-      field: 'endgame.timestamp_utc.keyword',
+      field: '_source.endgame.timestamp_utc.keyword',
       name: 'Timestamp',
       sortable: true,
       render: (_: any, item: any) => {
-        return item.endgame.timestamp_utc;
+        return item._source.endgame.timestamp_utc;
       },
     },
     {
-      field: 'endgame.data.alert_details.target_process.name',
+      field: '_source.endgame.data.alert_details.target_process.name',
       name: 'Process name',
       sortable: false,
       render: (procName: string) => {
@@ -116,15 +176,15 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
       },
     },
     {
-      field: 'host.hostname.keyword',
+      field: '_source.host.hostname.keyword',
       name: 'Host',
       sortable: true,
       render: (_: any, item: any) => {
-        return item.host.hostname;
+        return item._source.host.hostname;
       },
     },
     {
-      field: 'host.os.name',
+      field: '_source.host.os.name',
       name: 'Operating System',
       sortable: false,
       render: (osName: string) => {
@@ -132,7 +192,7 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
       },
     },
     {
-      field: 'host.ip',
+      field: '_source.host.ip',
       name: 'IP',
       sortable: false,
       render: (ip: string) => {
@@ -158,12 +218,16 @@ export const AlertList = ({ context }: { context: AppMountContext }) => {
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody>
+          {deleteButton}
           <EuiBasicTable
             items={items}
+            itemId="_id"
             columns={columns}
             pagination={pagination}
+            isSelectable={true}
             sorting={sorting}
             onChange={onTableChange}
+            selection={selection}
           />
         </EuiPageContentBody>
       </EuiPageContent>

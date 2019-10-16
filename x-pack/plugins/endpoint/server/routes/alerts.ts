@@ -20,44 +20,66 @@ export function alertsRoutes(router: IRouter) {
         }),
       },
     },
-    async function(context, request, response) {
-      let elasticsearchResponse;
-      try {
-        function sortParams() {
-          if (request.query.sortField && request.query.sortDirection) {
-            return [
-              {
-                [request.query.sortField]: { order: request.query.sortDirection },
-              },
-            ];
-          } else {
-            return [];
-          }
-        }
-
-        elasticsearchResponse = await context.core.elasticsearch.dataClient.callAsCurrentUser(
-          'search',
-          {
-            body: {
-              from: request.query.pageIndex * request.query.pageSize,
-              size: request.query.pageSize,
-              sort: sortParams(),
-              query: {
-                match: {
-                  'event.kind': 'alert',
-                },
-              },
-            },
-          }
-        );
-      } catch (error) {
-        return response.internalError();
-      }
-      return response.ok({
-        body: JSON.stringify({
-          elasticsearchResponse,
-        }),
-      });
-    }
+    handleAlerts
   );
+
+  router.post(
+    {
+      path: '/alerts/archive',
+      validate: {
+        query: schema.object({
+          alerts: schema.string(),
+        }),
+      },
+    },
+    handleArchive
+  )
+}
+
+async function handleArchive(context, request, response) {
+
+  // TODO: archive the alert
+  return response.ok({
+    body: JSON.stringify(request.query)
+  });
+}
+
+async function handleAlerts(context, request, response) {
+  let elasticsearchResponse;
+  try {
+    function sortParams() {
+      if (request.query.sortField && request.query.sortDirection) {
+        return [
+          {
+            [request.query.sortField]: { order: request.query.sortDirection },
+          },
+        ];
+      } else {
+        return [];
+      }
+    }
+
+    elasticsearchResponse = await context.core.elasticsearch.dataClient.callAsCurrentUser(
+      'search',
+      {
+        body: {
+          from: request.query.pageIndex * request.query.pageSize,
+          size: request.query.pageSize,
+          sort: sortParams(),
+          query: {
+            match: {
+              'event.kind': 'alert',
+            },
+          },
+        },
+      }
+    );
+  } catch (error) {
+    return response.internalError();
+  }
+  return response.ok({
+    body: JSON.stringify({
+      elasticsearchResponse,
+    }),
+  });
 }
