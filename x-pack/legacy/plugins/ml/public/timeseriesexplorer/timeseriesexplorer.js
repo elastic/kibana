@@ -1066,7 +1066,7 @@ export class TimeSeriesExplorer extends React.Component {
     return (
       <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} loading={loading} resizeRef={this.resizeRef}>
 
-        {!loading && !arePartitioningFieldsProvided && <EuiCallOut
+        {fieldNamesWithEmptyValues.length > 0 && <EuiCallOut
           className="single-metric-request-callout"
           title={<FormattedMessage
             id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
