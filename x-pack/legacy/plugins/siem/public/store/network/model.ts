@@ -7,7 +7,7 @@
 import {
   FlowTarget,
   NetworkDnsSortField,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesSortField,
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
@@ -19,20 +19,30 @@ export enum NetworkType {
 
 export enum NetworkTableType {
   dns = 'dns',
-  topNFlowSource = 'topNFlowSource',
+  topCountriesDestination = 'topCountriesDestination',
+  topCountriesSource = 'topCountriesSource',
   topNFlowDestination = 'topNFlowDestination',
+  topNFlowSource = 'topNFlowSource',
 }
 
 export type TopNTableType =
-  | NetworkTableType.topNFlowDestination
-  | NetworkTableType.topNFlowSource
   | IpDetailsTableType.topNFlowDestination
-  | IpDetailsTableType.topNFlowSource;
+  | IpDetailsTableType.topNFlowSource
+  | NetworkTableType.topNFlowDestination
+  | NetworkTableType.topNFlowSource;
+
+export type TopCountriesTableType =
+  | IpDetailsTableType.topCountriesDestination
+  | IpDetailsTableType.topCountriesSource
+  | NetworkTableType.topCountriesDestination
+  | NetworkTableType.topCountriesSource;
 
 export enum IpDetailsTableType {
-  topNFlowSource = 'topNFlowSourceIp',
-  topNFlowDestination = 'topNFlowDestinationIp',
   tls = 'tls',
+  topCountriesDestination = 'topCountriesDestinationIp',
+  topCountriesSource = 'topCountriesSourceIp',
+  topNFlowDestination = 'topNFlowDestinationIp',
+  topNFlowSource = 'topNFlowSourceIp',
   users = 'users',
 }
 
@@ -43,7 +53,11 @@ export interface BasicQueryPaginated {
 
 // Network Page Models
 export interface TopNFlowQuery extends BasicQueryPaginated {
-  topNFlowSort: NetworkTopNFlowSortField;
+  topNFlowSort: NetworkTopTablesSortField;
+}
+
+export interface TopCountriesQuery extends BasicQueryPaginated {
+  topCountriesSort: NetworkTopTablesSortField;
 }
 
 export interface DnsQuery extends BasicQueryPaginated {
@@ -53,8 +67,10 @@ export interface DnsQuery extends BasicQueryPaginated {
 
 export interface NetworkQueries {
   [NetworkTableType.dns]: DnsQuery;
-  [NetworkTableType.topNFlowSource]: TopNFlowQuery;
+  [NetworkTableType.topCountriesDestination]: TopCountriesQuery;
+  [NetworkTableType.topCountriesSource]: TopCountriesQuery;
   [NetworkTableType.topNFlowDestination]: TopNFlowQuery;
+  [NetworkTableType.topNFlowSource]: TopNFlowQuery;
 }
 
 export interface NetworkPageModel {
@@ -72,9 +88,11 @@ export interface UsersQuery extends BasicQueryPaginated {
 }
 
 export interface IpOverviewQueries {
-  [IpDetailsTableType.topNFlowSource]: TopNFlowQuery;
-  [IpDetailsTableType.topNFlowDestination]: TopNFlowQuery;
   [IpDetailsTableType.tls]: TlsQuery;
+  [IpDetailsTableType.topCountriesDestination]: TopCountriesQuery;
+  [IpDetailsTableType.topCountriesSource]: TopCountriesQuery;
+  [IpDetailsTableType.topNFlowDestination]: TopNFlowQuery;
+  [IpDetailsTableType.topNFlowSource]: TopNFlowQuery;
   [IpDetailsTableType.users]: UsersQuery;
 }
 

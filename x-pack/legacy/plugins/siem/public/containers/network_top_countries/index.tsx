@@ -13,8 +13,8 @@ import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   FlowTargetSourceDest,
-  GetNetworkTopNFlowQuery,
-  NetworkTopNFlowEdges,
+  GetNetworkTopCountriesQuery,
+  NetworkTopCountriesEdges,
   NetworkTopTablesSortField,
   PageInfoPaginated,
 } from '../../graphql/types';
@@ -22,43 +22,43 @@ import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } f
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-import { networkTopNFlowQuery } from './index.gql_query';
+import { networkTopCountriesQuery } from './index.gql_query';
 
-const ID = 'networkTopNFlowQuery';
+const ID = 'networkTopCountriesQuery';
 
-export interface NetworkTopNFlowArgs {
+export interface NetworkTopCountriesArgs {
   id: string;
   ip?: string;
   inspect: inputsModel.InspectQuery;
   isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
-  networkTopNFlow: NetworkTopNFlowEdges[];
+  networkTopCountries: NetworkTopCountriesEdges[];
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   totalCount: number;
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: NetworkTopNFlowArgs) => React.ReactNode;
+  children: (args: NetworkTopCountriesArgs) => React.ReactNode;
   flowTarget: FlowTargetSourceDest;
   ip?: string;
   type: networkModel.NetworkType;
 }
 
-export interface NetworkTopNFlowComponentReduxProps {
+export interface NetworkTopCountriesComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  topNFlowSort: NetworkTopTablesSortField;
+  topCountriesSort: NetworkTopTablesSortField;
 }
 
-type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps;
+type NetworkTopCountriesProps = OwnProps & NetworkTopCountriesComponentReduxProps;
 
-class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
-  NetworkTopNFlowProps,
-  GetNetworkTopNFlowQuery.Query,
-  GetNetworkTopNFlowQuery.Variables
+class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
+  NetworkTopCountriesProps,
+  GetNetworkTopCountriesQuery.Query,
+  GetNetworkTopCountriesQuery.Variables
 > {
   public render() {
     const {
@@ -74,16 +74,16 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       skip,
       sourceId,
       startDate,
-      topNFlowSort,
+      topCountriesSort,
     } = this.props;
-    const variables: GetNetworkTopNFlowQuery.Variables = {
+    const variables: GetNetworkTopCountriesQuery.Variables = {
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: topNFlowSort,
+      sort: topCountriesSort,
       sourceId,
       timerange: {
         interval: '12h',
@@ -92,15 +92,15 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       },
     };
     return (
-      <Query<GetNetworkTopNFlowQuery.Query, GetNetworkTopNFlowQuery.Variables>
+      <Query<GetNetworkTopCountriesQuery.Query, GetNetworkTopCountriesQuery.Variables>
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
-        query={networkTopNFlowQuery}
+        query={networkTopCountriesQuery}
         skip={skip}
         variables={variables}
       >
         {({ data, loading, fetchMore, networkStatus, refetch }) => {
-          const networkTopNFlow = getOr([], `source.NetworkTopNFlow.edges`, data);
+          const networkTopCountries = getOr([], `source.NetworkTopCountries.edges`, data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
@@ -114,9 +114,9 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
                 ...fetchMoreResult,
                 source: {
                   ...fetchMoreResult.source,
-                  NetworkTopNFlow: {
-                    ...fetchMoreResult.source.NetworkTopNFlow,
-                    edges: [...fetchMoreResult.source.NetworkTopNFlow.edges],
+                  NetworkTopCountries: {
+                    ...fetchMoreResult.source.NetworkTopCountries,
+                    edges: [...fetchMoreResult.source.NetworkTopCountries.edges],
                   },
                 },
               };
@@ -125,14 +125,14 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
           const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             id,
-            inspect: getOr(null, 'source.NetworkTopNFlow.inspect', data),
+            inspect: getOr(null, 'source.NetworkTopCountries.inspect', data),
             isInspected,
             loading: isLoading,
             loadPage: this.wrappedLoadMore,
-            networkTopNFlow,
-            pageInfo: getOr({}, 'source.NetworkTopNFlow.pageInfo', data),
+            networkTopCountries,
+            pageInfo: getOr({}, 'source.NetworkTopCountries.pageInfo', data),
             refetch: this.memoizedRefetchQuery(variables, limit, refetch),
-            totalCount: getOr(-1, 'source.NetworkTopNFlow.totalCount', data),
+            totalCount: getOr(-1, 'source.NetworkTopCountries.totalCount', data),
           });
         }}
       </Query>
@@ -144,13 +144,13 @@ const mapStateToProps = (
   state: State,
   { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps
 ) => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget, type);
+  const getNetworkTopCountriesSelector = networkSelectors.topCountriesSelector(flowTarget, type);
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const { isInspected } = getQuery(state, id);
   return {
-    ...getNetworkTopNFlowSelector(state),
+    ...getNetworkTopCountriesSelector(state),
     isInspected,
   };
 };
 
-export const NetworkTopNFlowQuery = connect(mapStateToProps)(NetworkTopNFlowComponentQuery);
+export const NetworkTopCountriesQuery = connect(mapStateToProps)(NetworkTopCountriesComponentQuery);

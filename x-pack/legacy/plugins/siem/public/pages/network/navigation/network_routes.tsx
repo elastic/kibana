@@ -12,6 +12,7 @@ import { FlowTargetSourceDest } from '../../../graphql/types';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 
 import { IPsQueryTabBody } from './ips_query_tab_body';
+import { CountriesQueryTabBody } from './countries_query_tab_body';
 import { AnomaliesQueryTabBody } from './anomalies_query_tab_body';
 import { DnsQueryTabBody } from './dns_query_tab_body';
 import { ConditionalFlexGroup } from './conditional_flex_group';
@@ -75,6 +76,20 @@ export const NetworkRoutes = ({
 
             <EuiFlexItem>
               <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
+            </EuiFlexItem>
+          </ConditionalFlexGroup>
+        )}
+      />
+      <Route
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.countries})`}
+        render={() => (
+          <ConditionalFlexGroup direction="column">
+            <EuiFlexItem>
+              <CountriesQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <CountriesQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
             </EuiFlexItem>
           </ConditionalFlexGroup>
         )}
