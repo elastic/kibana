@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpFn, JobId, JobContent, SourceJob } from '../../index.d';
+import { HttpService, JobId, JobContent, SourceJob } from '../../index.d';
 import { API_BASE_URL } from '../../constants';
 
 export class JobQueue {
-  public findForJobIds = (httpFn: HttpFn, jobIds: JobId[]): Promise<SourceJob[]> => {
-    return httpFn().fetch(`${API_BASE_URL}/list`, {
+  public findForJobIds = (http: HttpService, jobIds: JobId[]): Promise<SourceJob[]> => {
+    return http.fetch(`${API_BASE_URL}/list`, {
       query: { page: 0, ids: jobIds.join(',') },
       method: 'GET',
     });
   };
 
-  public getContent(httpFn: HttpFn, jobId: JobId): Promise<string> {
-    return httpFn()
+  public getContent(http: HttpService, jobId: JobId): Promise<string> {
+    return http
       .fetch(`${API_BASE_URL}/output/${jobId}`, {
         method: 'GET',
       })

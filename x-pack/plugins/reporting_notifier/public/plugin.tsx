@@ -43,9 +43,7 @@ export class ReportingNotifierPublicPlugin implements Plugin<any, any> {
   // Depends on https://github.com/elastic/kibana/pull/39477
   public start(core: CoreStart) {
     const { http, notifications } = core;
-    const httpFn = () => http;
-    const notificationsFn = () => notifications;
-    const streamHandler = new StreamHandler(httpFn, notificationsFn);
+    const streamHandler = new StreamHandler(http, notifications);
 
     this.poller$ = Rx.timer(0, JOBS_REFRESH_INTERVAL).pipe(
       map(() => getStored()), // Read all pending job IDs from session storage
@@ -58,7 +56,7 @@ export class ReportingNotifierPublicPlugin implements Plugin<any, any> {
       }),
       catchError(err => {
         // show general toast, log the error and resume
-        notificationsFn().toasts.addDanger(
+        notifications.toasts.addDanger(
           getGeneralErrorToast(
             i18n.translate('xpack.reportingNotifier.pollingErrorMessage', {
               defaultMessage: 'Reporting notifier error!',

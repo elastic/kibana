@@ -18,8 +18,8 @@ import {
   JobId,
   JobSummary,
   JobStatusBuckets,
-  HttpFn,
-  NotificationsFn,
+  HttpService,
+  NotificationsService,
   SourceJob,
   DownloadReportFn,
   ManagementLinkFn,
@@ -53,15 +53,15 @@ export class ReportingNotifierStreamHandler {
   private getDownloadLink: DownloadReportFn;
 
   constructor(
-    private httpFn: HttpFn,
-    private notificationsFn: NotificationsFn,
+    private http: HttpService,
+    private notifications: NotificationsService,
     private jobQueueClient = defaultJobQueueClient
   ) {
     this.getManagementLink = () => {
-      return httpFn().basePath.prepend(REPORTING_MANAGEMENT_HOME);
+      return http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
     };
     this.getDownloadLink = (jobId: JobId) => {
-      return httpFn().basePath.prepend(`${API_BASE_URL}/download/${jobId}`);
+      return http.basePath.prepend(`${API_BASE_URL}/download/${jobId}`);
     };
   }
 
@@ -76,15 +76,15 @@ export class ReportingNotifierStreamHandler {
       // notifications with download link
       for (const job of completedJobs) {
         if (job.csvContainsFormulas) {
-          this.notificationsFn().toasts.addWarning(
+          this.notifications.toasts.addWarning(
             getWarningFormulasToast(job, this.getManagementLink, this.getDownloadLink)
           );
         } else if (job.maxSizeReached) {
-          this.notificationsFn().toasts.addWarning(
+          this.notifications.toasts.addWarning(
             getWarningMaxSizeToast(job, this.getManagementLink, this.getDownloadLink)
           );
         } else {
-          this.notificationsFn().toasts.addSuccess(
+          this.notifications.toasts.addSuccess(
             getSuccessToast(job, this.getManagementLink, this.getDownloadLink)
           );
         }
@@ -92,10 +92,8 @@ export class ReportingNotifierStreamHandler {
 
       // no download link available
       for (const job of failedJobs) {
-        const content = await this.jobQueueClient.getContent(this.httpFn, job.id);
-        this.notificationsFn().toasts.addDanger(
-          getFailureToast(content, job, this.getManagementLink)
-        );
+        const content = await this.jobQueueClient.getContent(this.http, job.id);
+        this.notifications.toasts.addDanger(getFailureToast(content, job, this.getManagementLink));
       }
       return { completed: completedJobs, failed: failedJobs };
     };
@@ -108,7 +106,7 @@ export class ReportingNotifierStreamHandler {
    * session storage) but have non-processing job status on the server
    */
   public findChangedStatusJobs(storedJobs: JobId[]): Rx.Observable<JobStatusBuckets> {
-    return Rx.from(this.jobQueueClient.findForJobIds(this.httpFn, storedJobs)).pipe(
+    return Rx.from(this.jobQueueClient.findForJobIds(this.http, storedJobs)).pipe(
       map((jobs: SourceJob[]) => {
         const completedJobs: JobSummary[] = [];
         const failedJobs: JobSummary[] = [];
@@ -136,7 +134,7 @@ export class ReportingNotifierStreamHandler {
       }),
       catchError(err => {
         // show connection refused toast
-        this.notificationsFn().toasts.addDanger(
+        this.notifications.toasts.addDanger(
           getGeneralErrorToast(
             i18n.translate('xpack.reportingNotifier.httpErrorMessage', {
               defaultMessage: 'Could not check Reporting job status!',

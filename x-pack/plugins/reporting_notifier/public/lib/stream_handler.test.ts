@@ -6,7 +6,7 @@
 
 import sinon, { stub } from 'sinon';
 import { HttpServiceBase, NotificationsStart } from '../../../../../src/core/public';
-import { SourceJob, JobSummary, HttpFn } from '../../index.d';
+import { SourceJob, JobSummary, HttpService } from '../../index.d';
 import { JobQueue } from './job_queue';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
@@ -45,7 +45,7 @@ const mockJobsFound = [
 ];
 
 const jobQueueClientMock: JobQueue = {
-  findForJobIds: async (httpFn: HttpFn, jobIds: string[]) => {
+  findForJobIds: async (http: HttpService, jobIds: string[]) => {
     return mockJobsFound as SourceJob[];
   },
   getContent: () => {
@@ -53,24 +53,22 @@ const jobQueueClientMock: JobQueue = {
   },
 };
 
-const httpFnMock = () =>
-  (({
-    basePath: {
-      prepend: stub(),
-    },
-  } as unknown) as HttpServiceBase);
+const httpMock: HttpService = ({
+  basePath: {
+    prepend: stub(),
+  },
+} as unknown) as HttpServiceBase;
 
 const mockShowDanger = stub();
 const mockShowSuccess = stub();
 const mockShowWarning = stub();
-const notificationsFnMock = () =>
-  (({
-    toasts: {
-      addDanger: mockShowDanger,
-      addSuccess: mockShowSuccess,
-      addWarning: mockShowWarning,
-    },
-  } as unknown) as NotificationsStart);
+const notificationsMock = ({
+  toasts: {
+    addDanger: mockShowDanger,
+    addSuccess: mockShowSuccess,
+    addWarning: mockShowWarning,
+  },
+} as unknown) as NotificationsStart;
 
 describe('stream handler', () => {
   afterEach(() => {
@@ -78,19 +76,15 @@ describe('stream handler', () => {
   });
 
   it('constructs', () => {
-    const sh = new ReportingNotifierStreamHandler(
-      httpFnMock,
-      notificationsFnMock,
-      jobQueueClientMock
-    );
+    const sh = new ReportingNotifierStreamHandler(httpMock, notificationsMock, jobQueueClientMock);
     expect(sh).not.toBe(null);
   });
 
   describe('findChangedStatusJobs', () => {
     it('finds no changed status jobs from empty', done => {
       const sh = new ReportingNotifierStreamHandler(
-        httpFnMock,
-        notificationsFnMock,
+        httpMock,
+        notificationsMock,
         jobQueueClientMock
       );
       const findJobs = sh.findChangedStatusJobs([]);
@@ -102,8 +96,8 @@ describe('stream handler', () => {
 
     it('finds changed status jobs', done => {
       const sh = new ReportingNotifierStreamHandler(
-        httpFnMock,
-        notificationsFnMock,
+        httpMock,
+        notificationsMock,
         jobQueueClientMock
       );
       const findJobs = sh.findChangedStatusJobs([
@@ -122,8 +116,8 @@ describe('stream handler', () => {
   describe('showNotifications', () => {
     it('show success', done => {
       const sh = new ReportingNotifierStreamHandler(
-        httpFnMock,
-        notificationsFnMock,
+        httpMock,
+        notificationsMock,
         jobQueueClientMock
       );
       sh.showNotifications({
@@ -147,8 +141,8 @@ describe('stream handler', () => {
 
     it('show max length warning', done => {
       const sh = new ReportingNotifierStreamHandler(
-        httpFnMock,
-        notificationsFnMock,
+        httpMock,
+        notificationsMock,
         jobQueueClientMock
       );
       sh.showNotifications({
@@ -173,8 +167,8 @@ describe('stream handler', () => {
 
     it('show csv formulas warning', done => {
       const sh = new ReportingNotifierStreamHandler(
-        httpFnMock,
-        notificationsFnMock,
+        httpMock,
+        notificationsMock,
         jobQueueClientMock
       );
       sh.showNotifications({
@@ -199,8 +193,8 @@ describe('stream handler', () => {
 
     it('show failed job toast', done => {
       const sh = new ReportingNotifierStreamHandler(
-        httpFnMock,
-        notificationsFnMock,
+        httpMock,
+        notificationsMock,
         jobQueueClientMock
       );
       sh.showNotifications({
@@ -224,8 +218,8 @@ describe('stream handler', () => {
 
     it('show multiple toast', done => {
       const sh = new ReportingNotifierStreamHandler(
-        httpFnMock,
-        notificationsFnMock,
+        httpMock,
+        notificationsMock,
         jobQueueClientMock
       );
       sh.showNotifications({

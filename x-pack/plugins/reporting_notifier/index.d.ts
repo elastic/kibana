@@ -16,8 +16,8 @@ import {
 export type JobId = string;
 export type JobStatus = 'completed' | 'pending' | 'processing' | 'failed';
 
-export type HttpFn = () => HttpServiceBase;
-export type NotificationsFn = () => NotificationsStart;
+export type HttpService = HttpServiceBase;
+export type NotificationsService = NotificationsStart;
 
 export interface SourceJob {
   _id: JobId;
