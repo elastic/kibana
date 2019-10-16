@@ -3,9 +3,6 @@
 cd "$KIBANA_DIR"
 source src/dev/ci_setup/setup_env.sh
 
-echo " -> downloading es snapshot"
-node scripts/es snapshot --download-only;
-
 echo " -> Ensuring all functional tests are in a ciGroup"
 cd "$XPACK_DIR"
 node scripts/functional_tests --assert-none-excluded \

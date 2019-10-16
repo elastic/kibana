@@ -2,9 +2,6 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-echo " -> downloading es snapshot"
-node scripts/es snapshot --license=oss --download-only;
-
 echo " -> Ensuring all functional tests are in a ciGroup"
 yarn run grunt functionalTests:ensureAllTestsInCiGroup;
 
