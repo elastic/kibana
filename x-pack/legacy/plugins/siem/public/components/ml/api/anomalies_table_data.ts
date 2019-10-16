@@ -9,7 +9,7 @@ import chrome from 'ui/chrome';
 import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { Anomalies, InfluencerInput, CriteriaFields } from '../types';
-import { throwIfNotOk } from './throw_if_not_ok';
+import { throwIfNotOk } from '../../../hooks/api/api';
 export interface Body {
   jobIds: string[];
   criteriaFields: CriteriaFields[];
@@ -25,7 +25,7 @@ export interface Body {
 
 export const anomaliesTableData = async (
   body: Body,
-  headers: Record<string, string | undefined>,
+  headers: Record<string, string>,
   signal: AbortSignal
 ): Promise<Anomalies> => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);

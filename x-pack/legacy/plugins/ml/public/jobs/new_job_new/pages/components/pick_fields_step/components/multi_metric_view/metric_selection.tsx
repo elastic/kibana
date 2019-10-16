@@ -7,7 +7,7 @@
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { MultiMetricJobCreator, isMultiMetricJobCreator } from '../../../../../common/job_creator';
+import { MultiMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
@@ -15,7 +15,7 @@ import { AggFieldPair } from '../../../../../../../../common/types/fields';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';
-import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -30,9 +30,6 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     chartInterval,
   } = useContext(JobCreatorContext);
 
-  if (isMultiMetricJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as MultiMetricJobCreator;
 
   const { fields } = newJobCapsService;

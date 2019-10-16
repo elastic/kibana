@@ -64,11 +64,22 @@ declare module 'elasticsearch' {
 
   // eslint-disable-next-line @typescript-eslint/prefer-interface
   type FiltersAggregation<SubAggregationMap> = {
-    buckets: Array<
-      {
-        doc_count: number;
-      } & SubAggregation<SubAggregationMap>
-    >;
+    // The filters aggregation can have named filters or anonymous filters,
+    // which changes the structure of the return
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filters-aggregation.html
+    buckets: SubAggregationMap extends {
+      filters: { filters: Record<string, unknown> };
+    }
+      ? {
+          [key in keyof SubAggregationMap['filters']['filters']]: {
+            doc_count: number;
+          } & SubAggregation<SubAggregationMap>;
+        }
+      : Array<
+          {
+            doc_count: number;
+          } & SubAggregation<SubAggregationMap>
+        >;
   };
 
   type SamplerAggregation<SubAggregationMap> = SubAggregation<
@@ -79,6 +90,11 @@ declare module 'elasticsearch' {
 
   interface AggregatedValue {
     value: number | null;
+  }
+
+  interface HitsTotal {
+    value: number;
+    relation: 'eq' | 'gte';
   }
 
   type AggregationResultMap<AggregationOption> = IndexAsString<
@@ -101,7 +117,7 @@ declare module 'elasticsearch' {
         >;
         top_hits: {
           hits: {
-            total: number;
+            total: HitsTotal;
             max_score: number | null;
             hits: Array<{
               _source: AggregationOption[AggregationName] extends {
@@ -148,7 +164,10 @@ declare module 'elasticsearch' {
     }
   >;
 
-  export type AggregationSearchResponse<HitType, SearchParams> = Pick<
+  export type AggregationSearchResponseWithTotalHitsAsInt<
+    HitType,
+    SearchParams
+  > = Pick<
     SearchResponse<HitType>,
     Exclude<keyof SearchResponse<HitType>, 'aggregations'>
   > &
@@ -157,6 +176,24 @@ declare module 'elasticsearch' {
           aggregations?: AggregationResultMap<SearchParams['body']['aggs']>;
         }
       : {});
+
+  type Hits<HitType> = Pick<
+    SearchResponse<HitType>['hits'],
+    Exclude<keyof SearchResponse<HitType>['hits'], 'total'>
+  > & {
+    total: HitsTotal;
+  };
+
+  export type AggregationSearchResponseWithTotalHitsAsObject<
+    HitType,
+    SearchParams
+  > = Pick<
+    AggregationSearchResponseWithTotalHitsAsInt<HitType, SearchParams>,
+    Exclude<
+      keyof AggregationSearchResponseWithTotalHitsAsInt<HitType, SearchParams>,
+      'hits'
+    >
+  > & { hits: Hits<HitType> };
 
   export interface ESFilter {
     [key: string]: {

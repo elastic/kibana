@@ -25,7 +25,11 @@ export { SavedObjectsManagement } from './management';
 
 export * from './import';
 
-export { getSortedObjectsForExport, SavedObjectsExportOptions } from './export';
+export {
+  getSortedObjectsForExport,
+  SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
+} from './export';
 
 export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serialization';
 

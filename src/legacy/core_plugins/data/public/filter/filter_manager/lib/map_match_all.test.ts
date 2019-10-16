@@ -41,7 +41,7 @@ describe('filter_manager/lib', () => {
         delete filter.match_all;
 
         try {
-          await mapMatchAll(filter);
+          mapMatchAll(filter);
         } catch (e) {
           expect(e).toBe(filter);
           done();
@@ -51,13 +51,13 @@ describe('filter_manager/lib', () => {
 
     describe('when given a match_all filter', () => {
       test('key is set to meta field', async () => {
-        const result = await mapMatchAll(filter);
+        const result = mapMatchAll(filter);
 
         expect(result).toHaveProperty('key', filter.meta.field);
       });
 
       test('value is set to meta formattedValue', async () => {
-        const result = await mapMatchAll(filter);
+        const result = mapMatchAll(filter);
 
         expect(result).toHaveProperty('value', filter.meta.formattedValue);
       });

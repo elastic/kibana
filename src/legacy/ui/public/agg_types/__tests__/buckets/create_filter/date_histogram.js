@@ -47,7 +47,7 @@ describe('AggConfig Filters', function () {
         interval = interval || 'auto';
         if (interval === 'custom') interval = agg.params.customInterval;
         duration = duration || moment.duration(15, 'minutes');
-        field = _.sample(_.reject(indexPattern.fields.byType.date, 'scripted'));
+        field = _.sample(_.reject(indexPattern.fields.getByType('date'), 'scripted'));
         vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [

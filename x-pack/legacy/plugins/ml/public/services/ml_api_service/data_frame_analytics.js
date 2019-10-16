@@ -40,6 +40,13 @@ export const dataFrameAnalytics = {
       data: analyticsConfig
     });
   },
+  evaluateDataFrameAnalytics(evaluateConfig) {
+    return http({
+      url: `${basePath}/data_frame/_evaluate`,
+      method: 'POST',
+      data: evaluateConfig
+    });
+  },
   deleteDataFrameAnalytics(analyticsId) {
     return http({
       url: `${basePath}/data_frame/analytics/${analyticsId}`,
