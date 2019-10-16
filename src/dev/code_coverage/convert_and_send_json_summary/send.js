@@ -18,33 +18,45 @@
  */
 
 const { Client } = require('@elastic/elasticsearch');
-// import { of } from 'rxjs';
-// import { delay, concatMap } from 'rxjs/operators';
 import { createFailError } from '@kbn/dev-utils';
 import chalk from 'chalk';
+import { of } from 'rxjs';
+import { delay, concatMap } from 'rxjs/operators';
 
-const index = 'kibana_coverage';
-const client = new Client({ node: 'http://localhost:9200' });
+const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_coverage';
+const TOTALS_INDEX = `${COVERAGE_INDEX}_totals`;
+const client = new Client({ node: process.env.ES_SERVER || 'http://localhost:9200' });
 
 export default (obs$, log) => {
-  // const ms = 50;
-  // log.verbose(`Code coverage sender set to delay for ${ms} milliseconds\n`);
+  const ms = process.env.DELAY || 50;
+  log.verbose(`Code coverage sender set to delay for ${ms} milliseconds\n`);
+
+  const postWithLogger = post.bind(null, log);
 
   obs$
-  // .pipe(concatMap(x => of(x).pipe(delay(ms)))) // Slow down the requests
-    .subscribe(async body => {
-      const { path } = body;
-      try {
-        await client.index({ index, body });
-        log.debug(`Posted coverage for\n\t${path}`);
-      } catch (e) {
-        const msg = 'Failed attempting to post coverage for ';
-        const err = `
-${chalk.red.bgWhiteBright(msg + path)}, \nPartial orig err stack: \n[\n\t${partial(e.stack)}\n]`;
-        throw createFailError(err);
-      }
-    });
+    .pipe(concatMap(x => of(x).pipe(delay(ms))))
+    .subscribe(postWithLogger);
+
 };
+async function post(log, body) {
+  let index = '';
+  if (!body.coveredFilePath) {
+    index = TOTALS_INDEX;
+  } else {
+    index = COVERAGE_INDEX;
+  }
+
+  try {
+    await client.index({ index, body });
+    log.verbose('\nSent to es:\n', JSON.stringify(body,  null, 2));
+  } catch (e) {
+    const { coverageType } = body;
+    const msg = 'Failed attempting to post coverage for ';
+    const err = `
+${chalk.red.bgWhiteBright(msg + coverageType)}, \nPartial orig err stack: \n[\n\t${partial(e.stack)}\n]`;
+    throw createFailError(err);
+  }
+}
 function partial(x) {
   return x.split('\n').splice(0, 2).join('\n');
 }

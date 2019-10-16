@@ -55,18 +55,20 @@ function statsAndPath(...xs) {
 }
 function addPath(coveragePath, obj) {
   return {
-    coveragePath: _truncate(coveragePath),
+    coveragePath: trimLeft('target', coveragePath),
     ...obj,
   };
 }
-function _truncate(x) {
-  return x.replace(/(?:.*)(kibana.*$)/gm, '$1');
+function trimLeft(text, x) {
+  const re = new RegExp(`(?:.*)(${text}.*$)`, 'gm');
+  return x.replace(re, '$1');
 }
 function truncate(obj) {
   const { coveredFilePath } = obj;
 
-  if (coveredFilePath.includes('kibana')) {
-    obj.coveredFilePath = _truncate(coveredFilePath);
+  const text = 'kibana';
+  if (coveredFilePath.includes(text)) {
+    obj.coveredFilePath = trimLeft(text, coveredFilePath);
   }
 
   return obj;

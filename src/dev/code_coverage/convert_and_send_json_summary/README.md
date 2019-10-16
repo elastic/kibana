@@ -88,3 +88,7 @@ PUT kibana_coverage
     }
 }
 ```
+
+## Examples  
+Run with custom delay 
+`DELAY=500 node scripts/convert_and_send_json_summary.js --path target/kibana-coverage/mocha/coverage-summary.json --verbose`  

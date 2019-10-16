@@ -17,34 +17,9 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import convert from './convert';
-import send from './send';
-import { run, createFlagError } from '@kbn/dev-utils';
 
-const ROOT = resolve(__dirname, '../../../..');
-const flags = {
-  string: ['path'],
-  help: `
-          --path             Required, path to the file to extract coverage data
-        `,
-};
+import oboe from 'oboe';
+import { createReadStream } from 'fs';
 
-export function runCodeCoverageConverterCli() {
-  run(
-    ({ flags, log }) => {
-      if (flags.path === '') {
-        throw createFlagError('please provide a single --path flag');
-      }
-
-      const coveragePath = resolve(ROOT, flags.path);
-      send(convert({ coveragePath }, log), log);
-    },
-    {
-      description: `
-        Post code coverage in json-summary format to an ES index.
-      `,
-      flags,
-    },
-  );
-}
+export default coveragePath =>
+  oboe(createReadStream(coveragePath));
