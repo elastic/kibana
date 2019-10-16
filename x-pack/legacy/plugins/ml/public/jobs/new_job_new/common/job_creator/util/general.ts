@@ -32,6 +32,7 @@ export function getRichDetectors(job: Job, datafeed: Datafeed, advanced: boolean
           ? newJobCapsService.getFieldById(d.partition_field_name)
           : null,
       excludeFrequent: d.exclude_frequent || null,
+      description: d.detector_description || null,
     };
   });
 }

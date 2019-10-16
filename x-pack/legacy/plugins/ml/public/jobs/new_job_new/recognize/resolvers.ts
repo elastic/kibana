@@ -7,7 +7,6 @@
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-import { IPrivate } from 'ui/private';
 import { mlJobService } from '../../../services/job_service';
 import { ml } from '../../../services/ml_api_service';
 import { KibanaObjects } from './page';
@@ -17,15 +16,11 @@ import { KibanaObjects } from './page';
  * Redirects to the Anomaly Explorer to view the jobs if they have been created,
  * or the recognizer job wizard for the module if not.
  */
-export function checkViewOrCreateJobs(
-  Private: IPrivate,
-  $route: any,
-  kbnBaseUrl: string,
-  kbnUrl: any
-) {
+export function checkViewOrCreateJobs($route: any) {
   return new Promise((resolve, reject) => {
     const moduleId = $route.current.params.id;
     const indexPatternId = $route.current.params.index;
+    const basePath = `${chrome.getBasePath()}/app/`;
 
     // Load the module, and check if the job(s) in the module have been created.
     // If so, load the jobs in the Anomaly Explorer.
@@ -33,8 +28,6 @@ export function checkViewOrCreateJobs(
     // Always want to call reject() so as not to load original page.
     ml.dataRecognizerModuleJobsExist({ moduleId })
       .then((resp: any) => {
-        const basePath = `${chrome.getBasePath()}/app/`;
-
         if (resp.jobsExist === true) {
           const resultsPageUrl = mlJobService.createResultsUrlForJobs(resp.jobs, 'explorer');
           window.location.href = `${basePath}${resultsPageUrl}`;
@@ -58,7 +51,7 @@ export function checkViewOrCreateJobs(
           }),
         });
 
-        kbnUrl.redirect(`/jobs`);
+        window.location.href = `${basePath}ml#/jobs`;
         reject();
       });
   });

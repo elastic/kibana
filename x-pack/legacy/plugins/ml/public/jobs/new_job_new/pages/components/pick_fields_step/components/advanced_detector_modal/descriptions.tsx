@@ -158,3 +158,28 @@ export const ExcludeFrequentDescription: FC = memo(({ children }) => {
     </EuiDescribedFormGroup>
   );
 });
+
+export const DescriptionDescription: FC = memo(({ children }) => {
+  const title = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.description.title',
+    {
+      defaultMessage: 'Description',
+    }
+  );
+  return (
+    <EuiDescribedFormGroup
+      idAria="description"
+      title={<h3>{title}</h3>}
+      description={
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.description.description"
+          defaultMessage="Override the default detector description with a meaningful description of what the detector is analyzing."
+        />
+      }
+    >
+      <EuiFormRow label={title} describedByIds={['description']}>
+        <>{children}</>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  );
+});
