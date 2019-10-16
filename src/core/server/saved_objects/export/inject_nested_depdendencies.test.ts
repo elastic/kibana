@@ -18,10 +18,7 @@
  */
 
 import { SavedObject } from '../types';
-import {
-  getObjectReferencesToFetch,
-  injectNestedDependencies,
-} from './inject_nested_depdendencies';
+import { getObjectReferencesToFetch, fetchNestedDependencies } from './inject_nested_depdendencies';
 
 describe('getObjectReferencesToFetch()', () => {
   test('works with no saved objects', () => {
@@ -110,7 +107,7 @@ describe('getObjectReferencesToFetch()', () => {
   });
 });
 
-describe('injectNestedDependencies', () => {
+describe('fetchNestedDependencies', () => {
   const savedObjectsClient = {
     errors: {} as any,
     find: jest.fn(),
@@ -135,16 +132,19 @@ describe('injectNestedDependencies', () => {
         references: [],
       },
     ];
-    const result = await injectNestedDependencies(savedObjects, savedObjectsClient);
+    const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-      ]
+      Object {
+        "missingRefs": Array [],
+        "objects": Array [
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "references": Array [],
+            "type": "index-pattern",
+          },
+        ],
+      }
     `);
   });
 
@@ -169,28 +169,31 @@ describe('injectNestedDependencies', () => {
         ],
       },
     ];
-    const result = await injectNestedDependencies(savedObjects, savedObjectsClient);
+    const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [
-            Object {
-              "id": "1",
-              "name": "ref_0",
-              "type": "index-pattern",
-            },
-          ],
-          "type": "search",
-        },
-      ]
+      Object {
+        "missingRefs": Array [],
+        "objects": Array [
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "references": Array [],
+            "type": "index-pattern",
+          },
+          Object {
+            "attributes": Object {},
+            "id": "2",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "ref_0",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "search",
+          },
+        ],
+      }
     `);
   });
 
@@ -219,28 +222,31 @@ describe('injectNestedDependencies', () => {
         },
       ],
     });
-    const result = await injectNestedDependencies(savedObjects, savedObjectsClient);
+    const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [
-            Object {
-              "id": "1",
-              "name": "ref_0",
-              "type": "index-pattern",
-            },
-          ],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-      ]
+      Object {
+        "missingRefs": Array [],
+        "objects": Array [
+          Object {
+            "attributes": Object {},
+            "id": "2",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "ref_0",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "search",
+          },
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "references": Array [],
+            "type": "index-pattern",
+          },
+        ],
+      }
     `);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
       [MockFunction] {
@@ -337,69 +343,72 @@ describe('injectNestedDependencies', () => {
         },
       ],
     });
-    const result = await injectNestedDependencies(savedObjects, savedObjectsClient);
+    const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "5",
-          "references": Array [
-            Object {
-              "id": "4",
-              "name": "panel_0",
-              "type": "visualization",
-            },
-            Object {
-              "id": "3",
-              "name": "panel_1",
-              "type": "visualization",
-            },
-          ],
-          "type": "dashboard",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "4",
-          "references": Array [
-            Object {
-              "id": "2",
-              "name": "ref_0",
-              "type": "search",
-            },
-          ],
-          "type": "visualization",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "3",
-          "references": Array [
-            Object {
-              "id": "1",
-              "name": "ref_0",
-              "type": "index-pattern",
-            },
-          ],
-          "type": "visualization",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [
-            Object {
-              "id": "1",
-              "name": "ref_0",
-              "type": "index-pattern",
-            },
-          ],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-      ]
+      Object {
+        "missingRefs": Array [],
+        "objects": Array [
+          Object {
+            "attributes": Object {},
+            "id": "5",
+            "references": Array [
+              Object {
+                "id": "4",
+                "name": "panel_0",
+                "type": "visualization",
+              },
+              Object {
+                "id": "3",
+                "name": "panel_1",
+                "type": "visualization",
+              },
+            ],
+            "type": "dashboard",
+          },
+          Object {
+            "attributes": Object {},
+            "id": "4",
+            "references": Array [
+              Object {
+                "id": "2",
+                "name": "ref_0",
+                "type": "search",
+              },
+            ],
+            "type": "visualization",
+          },
+          Object {
+            "attributes": Object {},
+            "id": "3",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "ref_0",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "visualization",
+          },
+          Object {
+            "attributes": Object {},
+            "id": "2",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "ref_0",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "search",
+          },
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "references": Array [],
+            "type": "index-pattern",
+          },
+        ],
+      }
     `);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
       [MockFunction] {
@@ -449,10 +458,10 @@ describe('injectNestedDependencies', () => {
     `);
   });
 
-  test('throws error when bulkGet returns an error', async () => {
+  test('returns list of missing references', async () => {
     const savedObjects = [
       {
-        id: '2',
+        id: '1',
         type: 'search',
         attributes: {},
         references: [
@@ -460,6 +469,11 @@ describe('injectNestedDependencies', () => {
             name: 'ref_0',
             type: 'index-pattern',
             id: '1',
+          },
+          {
+            name: 'ref_1',
+            type: 'index-pattern',
+            id: '2',
           },
         ],
       },
@@ -474,11 +488,50 @@ describe('injectNestedDependencies', () => {
             message: 'Not found',
           },
         },
+        {
+          id: '2',
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
+        },
       ],
     });
-    await expect(
-      injectNestedDependencies(savedObjects, savedObjectsClient)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad Request"`);
+    const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "missingRefs": Array [
+          Object {
+            "id": "1",
+            "type": "index-pattern",
+          },
+        ],
+        "objects": Array [
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "ref_0",
+                "type": "index-pattern",
+              },
+              Object {
+                "id": "2",
+                "name": "ref_1",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "search",
+          },
+          Object {
+            "attributes": Object {},
+            "id": "2",
+            "references": Array [],
+            "type": "index-pattern",
+          },
+        ],
+      }
+    `);
   });
 
   test(`doesn't deal with circular dependencies`, async () => {
@@ -512,34 +565,37 @@ describe('injectNestedDependencies', () => {
         },
       ],
     });
-    const result = await injectNestedDependencies(savedObjects, savedObjectsClient);
+    const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [
-            Object {
-              "id": "1",
-              "name": "ref_0",
-              "type": "index-pattern",
-            },
-          ],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [
-            Object {
-              "id": "2",
-              "name": "ref_0",
-              "type": "search",
-            },
-          ],
-          "type": "index-pattern",
-        },
-      ]
+      Object {
+        "missingRefs": Array [],
+        "objects": Array [
+          Object {
+            "attributes": Object {},
+            "id": "2",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "ref_0",
+                "type": "index-pattern",
+              },
+            ],
+            "type": "search",
+          },
+          Object {
+            "attributes": Object {},
+            "id": "1",
+            "references": Array [
+              Object {
+                "id": "2",
+                "name": "ref_0",
+                "type": "search",
+              },
+            ],
+            "type": "index-pattern",
+          },
+        ],
+      }
     `);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
       [MockFunction] {

@@ -64,6 +64,7 @@ import {
   fetchExportByTypeAndSearch,
   findObjects,
 } from '../../lib';
+import { extractExportDetails } from '../../lib/extract_export_details';
 
 export const POSSIBLE_TYPES = chrome.getInjected('importAndExportableTypes');
 
@@ -296,32 +297,31 @@ export class ObjectsTable extends Component {
     }
 
     saveAs(blob, 'export.ndjson');
-    toastNotifications.addSuccess({
-      title: i18n.translate('kbn.management.objects.objectsTable.export.successNotification', {
-        defaultMessage: 'Your file is downloading in the background',
-      }),
-    });
+
+    const exportDetails = await extractExportDetails(blob);
+    this.showExportSuccessMessage(exportDetails);
   };
 
   onExportAll = async () => {
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
     const { queryText } = parseQuery(activeQuery);
-    const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
-      (accum, [id, selected]) => {
-        if (selected) {
-          accum.push(id);
-        }
-        return accum;
-      },
-      []
-    );
+    const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
+      if (selected) {
+        accum.push(id);
+      }
+      return accum;
+    }, []);
 
     let blob;
     try {
-      blob = await fetchExportByTypeAndSearch(exportTypes, queryText ? `${queryText}*` : undefined, isIncludeReferencesDeepChecked);
+      blob = await fetchExportByTypeAndSearch(
+        exportTypes,
+        queryText ? `${queryText}*` : undefined,
+        isIncludeReferencesDeepChecked
+      );
     } catch (e) {
       toastNotifications.addDanger({
-        title: i18n.translate('kbn.management.objects.objectsTable.exportAll.dangerNotification', {
+        title: i18n.translate('kbn.management.objects.objectsTable.export.dangerNotification', {
           defaultMessage: 'Unable to generate export',
         }),
       });
@@ -329,12 +329,32 @@ export class ObjectsTable extends Component {
     }
 
     saveAs(blob, 'export.ndjson');
-    toastNotifications.addSuccess({
-      title: i18n.translate('kbn.management.objects.objectsTable.exportAll.successNotification', {
-        defaultMessage: 'Your file is downloading in the background',
-      }),
-    });
+
+    const exportDetails = await extractExportDetails(blob);
+    this.showExportSuccessMessage(exportDetails);
     this.setState({ isShowingExportAllOptionsModal: false });
+  };
+
+  showExportSuccessMessage = exportDetails => {
+    if (exportDetails && exportDetails.missingReferences.length > 0) {
+      toastNotifications.addWarning({
+        title: i18n.translate(
+          'kbn.management.objects.objectsTable.export.successWithMissingRefsNotification',
+          {
+            defaultMessage:
+              'Your file is downloading in the background. ' +
+              'Some related objects could not be found. ' +
+              'Please see the last line in the exported file for a list of missing objects.',
+          }
+        ),
+      });
+    } else {
+      toastNotifications.addSuccess({
+        title: i18n.translate('kbn.management.objects.objectsTable.export.successNotification', {
+          defaultMessage: 'Your file is downloading in the background',
+        }),
+      });
+    }
   };
 
   finishImport = () => {

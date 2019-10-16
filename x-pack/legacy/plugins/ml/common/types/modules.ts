@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { SavedObjectAttributes } from 'src/core/server/types';
 import { Datafeed, Job } from '../../public/jobs/new_job_new/common/job_creator/configs';
-import { SavedObjectAttributes } from '../../../../../../target/types/core/server';
 
 export interface ModuleJob {
   id: string;

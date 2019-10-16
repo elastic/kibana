@@ -21,6 +21,7 @@
       "source.ip"
     ]
   },
+  "allow_lazy_open": true,
   "analysis_limits": {
     "model_memory_limit": "256mb"
   },

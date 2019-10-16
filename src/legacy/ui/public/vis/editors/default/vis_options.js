@@ -20,7 +20,7 @@
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { VisOptionsReactWrapper } from './vis_options_react_wrapper';
-import { safeMakeLabel } from 'ui/agg_types/agg_utils';
+import { safeMakeLabel } from './controls/agg_utils';
 
 /**
  * This directive sort of "transcludes" in whatever template you pass in via the `editor` attribute.

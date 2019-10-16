@@ -11,13 +11,15 @@ import {
   EuiLoadingChart,
   EuiSpacer,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { LogEntryRateBarChart } from './bar_chart';
+import { getLogEntryRatePartitionedSeries } from '../helpers/data_formatters';
 
 export const LogRateResults = ({
   isLoading,
@@ -31,7 +33,7 @@ export const LogRateResults = ({
   timeRange: TimeRange;
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.logRateSectionTitle', {
-    defaultMessage: 'Log rate',
+    defaultMessage: 'Log entries',
   });
 
   const loadingAriaLabel = i18n.translate(
@@ -39,43 +41,66 @@ export const LogRateResults = ({
     { defaultMessage: 'Loading log rate results' }
   );
 
+  const logEntryRateSeries = useMemo(
+    () => (results && results.histogramBuckets ? getLogEntryRatePartitionedSeries(results) : []),
+    [results]
+  );
+
   return (
     <>
       <EuiTitle size="m" aria-label={title}>
         <h2>{title}</h2>
       </EuiTitle>
-      <EuiSpacer size="l" />
       {isLoading ? (
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingChart size="xl" aria-label={loadingAriaLabel} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingChart size="xl" aria-label={loadingAriaLabel} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       ) : !results || (results && results.histogramBuckets && !results.histogramBuckets.length) ? (
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataTitle', {
-                defaultMessage: 'There is no data to display.',
-              })}
-            </h2>
-          }
-          titleSize="m"
-          body={
+        <>
+          <EuiSpacer size="l" />
+          <EuiEmptyPrompt
+            title={
+              <h2>
+                {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataTitle', {
+                  defaultMessage: 'There is no data to display.',
+                })}
+              </h2>
+            }
+            titleSize="m"
+            body={
+              <p>
+                {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataBody', {
+                  defaultMessage: 'You may want to adjust your time range.',
+                })}
+              </p>
+            }
+          />
+        </>
+      ) : (
+        <>
+          <EuiText size="s">
             <p>
-              {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataBody', {
-                defaultMessage: 'You may want to adjust your time range.',
+              <b>
+                {i18n.translate('xpack.infra.logs.analysis.logRateSectionBucketSpanLabel', {
+                  defaultMessage: 'Bucket span: ',
+                })}
+              </b>
+              {i18n.translate('xpack.infra.logs.analysis.logRateSectionBucketSpanValue', {
+                defaultMessage: '15 minutes',
               })}
             </p>
-          }
-        />
-      ) : (
-        <LogEntryRateBarChart
-          bucketDuration={results.bucketDuration}
-          histogramBuckets={results.histogramBuckets}
-          setTimeRange={setTimeRange}
-          timeRange={timeRange}
-        />
+          </EuiText>
+          <LogEntryRateBarChart
+            setTimeRange={setTimeRange}
+            timeRange={timeRange}
+            series={logEntryRateSeries}
+          />
+        </>
       )}
     </>
   );

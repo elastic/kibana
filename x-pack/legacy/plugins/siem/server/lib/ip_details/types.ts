@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TlsData, IpOverviewData, UsersData } from '../../graphql/types';
+import { IpOverviewData, UsersData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { Hit, ShardsResponse, TotalValue } from '../types';
 
 export interface IpDetailsAdapter {
   getIpDetails(request: FrameworkRequest, options: RequestBasicOptions): Promise<IpOverviewData>;
-  getTls(request: FrameworkRequest, options: RequestBasicOptions): Promise<TlsData>;
   getUsers(request: FrameworkRequest, options: RequestBasicOptions): Promise<UsersData>;
 }
 
@@ -79,34 +78,6 @@ export interface IpOverviewHit {
   };
   took: number;
   timeout: number;
-}
-
-export interface TlsBuckets {
-  key: string;
-  timestamp?: {
-    value: number;
-    value_as_string: string;
-  };
-
-  alternative_names: {
-    buckets: Readonly<Array<{ key: string; doc_count: number }>>;
-  };
-
-  common_names: {
-    buckets: Readonly<Array<{ key: string; doc_count: number }>>;
-  };
-
-  ja3: {
-    buckets: Readonly<Array<{ key: string; doc_count: number }>>;
-  };
-
-  issuer_names: {
-    buckets: Readonly<Array<{ key: string; doc_count: number }>>;
-  };
-
-  not_after: {
-    buckets: Readonly<Array<{ key: number; key_as_string: string; doc_count: number }>>;
-  };
 }
 
 // Users Table
