@@ -42,7 +42,7 @@ export const AccessDeniedPage = () => (
           <EuiSpacer size="m" />
           <EuiCallOut
             title={i18n.translate('xpack.ml.accessDenied.label', {
-              defaultMessage: 'You need permission to the Ml plugin',
+              defaultMessage: 'Insufficient permissions',
             })}
             color="danger"
             iconType="cross"
