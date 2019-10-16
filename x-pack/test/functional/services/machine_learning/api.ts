@@ -8,10 +8,24 @@ import expect from '@kbn/expect';
 import { isEmpty } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+export enum JobState {
+  opening = 'opening',
+  opened = 'opened',
+  closing = 'closing',
+  closed = 'closed',
+}
+
+export enum DatafeedState {
+  started = 'started',
+  stopping = 'stopping',
+  stopped = 'stopped',
+}
+
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
+  const esSupertest = getService('esSupertest');
 
   return {
     async hasJobResults(jobId: string): Promise<boolean> {
@@ -78,6 +92,70 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async cleanMlIndices() {
       await this.deleteIndices('.ml-*');
+    },
+
+    async getJobState(jobId: string): Promise<JobState | undefined> {
+      log.debug(`Fetching job state for job ${jobId}`);
+      const jobStats = await esSupertest
+        .get(`/_ml/anomaly_detectors/${jobId}/_stats`)
+        .expect(200)
+        .then((res: any) => res.body);
+
+      expect(jobStats.jobs).to.have.length(1);
+      const state = jobStats.jobs[0].state as JobState;
+
+      if (state in JobState) {
+        return state;
+      }
+
+      return undefined;
+    },
+
+    async waitForJobState(jobId: string, expectedJobState: JobState) {
+      await retry.waitForWithTimeout(
+        `job state to be ${expectedJobState}`,
+        2 * 60 * 1000,
+        async () => {
+          const state = await this.getJobState(jobId);
+          if (state === expectedJobState) {
+            return true;
+          } else {
+            throw new Error(`expected job state to be ${expectedJobState} but got ${state}`);
+          }
+        }
+      );
+    },
+
+    async getDatafeedState(datafeedId: string): Promise<DatafeedState | undefined> {
+      log.debug(`Fetching datafeed state for datafeed ${datafeedId}`);
+      const datafeedStats = await esSupertest
+        .get(`/_ml/datafeeds/${datafeedId}/_stats`)
+        .expect(200)
+        .then((res: any) => res.body);
+
+      expect(datafeedStats.datafeeds).to.have.length(1);
+      const state = datafeedStats.datafeeds[0].state as DatafeedState;
+
+      if (state in DatafeedState) {
+        return state;
+      }
+
+      return undefined;
+    },
+
+    async waitForDatafeedState(datafeedId: string, expectedDatafeedState: DatafeedState) {
+      await retry.waitForWithTimeout(
+        `datafeed state to be ${expectedDatafeedState}`,
+        2 * 60 * 1000,
+        async () => {
+          const state = await this.getDatafeedState(datafeedId);
+          if (state === expectedDatafeedState) {
+            return true;
+          } else {
+            throw new Error(`expected job state to be ${expectedDatafeedState} but got ${state}`);
+          }
+        }
+      );
     },
   };
 }

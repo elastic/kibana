@@ -3,10 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MachineLearningAPIProvider, JobState, DatafeedState } from './api';
 
-export function MachineLearningJobManagementProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobManagementProvider(
+  { getService }: FtrProviderContext,
+  mlApi: ProvidedType<typeof MachineLearningAPIProvider>
+) {
   const testSubjects = getService('testSubjects');
 
   return {
@@ -25,6 +30,20 @@ export function MachineLearningJobManagementProvider({ getService }: FtrProvider
 
     async assertJobStatsBarExists() {
       await testSubjects.existOrFail('~mlJobStatsBar');
+    },
+
+    async assertStartDatafeedModalExists() {
+      await testSubjects.existOrFail('mlStartDatafeedModal');
+    },
+
+    async confirmStartDatafeedModal() {
+      await testSubjects.click('mlStartDatafeedModalStartButton');
+      await testSubjects.missingOrFail('mlStartDatafeedModal');
+    },
+
+    async waitForJobCompletion(jobId: string) {
+      await mlApi.waitForDatafeedState(`datafeed-${jobId}`, DatafeedState.stopped);
+      await mlApi.waitForJobState(jobId, JobState.closed);
     },
   };
 }

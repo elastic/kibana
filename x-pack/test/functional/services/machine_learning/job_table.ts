@@ -157,6 +157,11 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       });
     }
 
+    public async refreshJobList() {
+      await testSubjects.click('mlRefreshJobListButton');
+      await this.waitForJobsToLoad();
+    }
+
     public async waitForJobsToLoad() {
       await testSubjects.existOrFail('~mlJobListTable', { timeout: 60 * 1000 });
       await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
