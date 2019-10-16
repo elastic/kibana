@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const AUTHENTICATIONS_COUNT = i18n.translate(
-  'xpack.siem.authenticationsOverTime.authenticationCount',
+  'xpack.siem.authenticationsOverTime.authenticationCountTitle',
   {
     defaultMessage: 'Authentications count',
   }

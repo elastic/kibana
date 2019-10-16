@@ -28,6 +28,7 @@ import {
   getSeriesStyle,
   getChartHeight,
   getChartWidth,
+  getUniqueSplitSeries,
   SeriesType,
   WrappedByAutoSizer,
 } from './common';
@@ -63,26 +64,34 @@ export const BarChartBaseComponent = React.memo<{
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings {...settings} />
+
       {data.map(series => {
         const barSeriesKey = series.key;
         const barSeriesSpecId = getSpecId(barSeriesKey);
         const seriesType = SeriesType.BAR;
-        return checkIfAllTheDataInTheSeriesAreValid ? (
-          <BarSeries
-            id={barSeriesSpecId}
-            key={barSeriesKey}
-            name={series.key}
-            xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
-            yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
-            xAccessor="x"
-            yAccessors={['y']}
-            timeZone={browserTimezone}
-            splitSeriesAccessors={['g']}
-            data={series.value!}
-            stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
-            customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
-          />
-        ) : null;
+
+        if (checkIfAllTheDataInTheSeriesAreValid) {
+          const splitSeries = getUniqueSplitSeries(series.value);
+
+          return (
+            <BarSeries
+              id={barSeriesSpecId}
+              key={barSeriesKey}
+              name={splitSeries.length > 1 ? barSeriesKey : splitSeries[0]}
+              xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
+              yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
+              xAccessor="x"
+              yAccessors={['y']}
+              timeZone={browserTimezone}
+              splitSeriesAccessors={['g']}
+              data={series.value!}
+              stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
+              customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
+            />
+          );
+        }
+
+        return null;
       })}
 
       <Axis
