@@ -24,11 +24,11 @@ import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
 
 const module = uiModules.get('kibana');
 
-module.directive('kbnTopNav', () => {
+export function createTopNavDirective() {
   return {
     restrict: 'E',
     template: '',
-    compile: (elem) => {
+    compile: elem => {
       const child = document.createElement('kbn-top-nav-helper');
 
       // Copy attributes to the child directive
@@ -44,73 +44,76 @@ module.directive('kbnTopNav', () => {
       elem.append(child);
 
       const linkFn = ($scope, _, $attr) => {
-
         // Watch config changes
-        $scope.$watch(() => {
-          const config = $scope.$eval($attr.config) || [];
-          return config.map((item) => {
-            // Copy key into id, as it's a reserved react propery.
-            // This is done for Angular directive backward compatibility.
-            // In React only id is recognized.
-            if (item.key && !item.id) {
-              item.id = item.key;
-            }
+        $scope.$watch(
+          () => {
+            const config = $scope.$eval($attr.config) || [];
+            return config.map(item => {
+              // Copy key into id, as it's a reserved react propery.
+              // This is done for Angular directive backward compatibility.
+              // In React only id is recognized.
+              if (item.key && !item.id) {
+                item.id = item.key;
+              }
 
-            // Watch the disableButton functions
-            if (typeof item.disableButton === 'function') {
-              return item.disableButton();
-            }
-            return item.disableButton;
-          });
-        }, (newVal) => {
-          $scope.disabledButtons = newVal;
-        },
-        true);
+              // Watch the disableButton functions
+              if (typeof item.disableButton === 'function') {
+                return item.disableButton();
+              }
+              return item.disableButton;
+            });
+          },
+          newVal => {
+            $scope.disabledButtons = newVal;
+          },
+          true
+        );
       };
 
       return linkFn;
-    }
+    },
   };
-});
+}
 
-module.directive('kbnTopNavHelper', (reactDirective) => {
-  return reactDirective(
-    wrapInI18nContext(TopNavMenu),
-    [
-      ['config', { watchDepth: 'value' }],
-      ['disabledButtons', { watchDepth: 'reference' }],
+module.directive('kbnTopNav', createTopNavDirective);
 
-      ['query', { watchDepth: 'reference' }],
-      ['savedQuery', { watchDepth: 'reference' }],
-      ['intl', { watchDepth: 'reference' }],
+export function createTopNavHelper(reactDirective) {
+  return reactDirective(wrapInI18nContext(TopNavMenu), [
+    ['config', { watchDepth: 'value' }],
+    ['disabledButtons', { watchDepth: 'reference' }],
 
-      ['onQuerySubmit', { watchDepth: 'reference' }],
-      ['onFiltersUpdated', { watchDepth: 'reference' }],
-      ['onRefreshChange', { watchDepth: 'reference' }],
-      ['onClearSavedQuery', { watchDepth: 'reference' }],
-      ['onSaved', { watchDepth: 'reference' }],
-      ['onSavedQueryUpdated', { watchDepth: 'reference' }],
+    ['query', { watchDepth: 'reference' }],
+    ['savedQuery', { watchDepth: 'reference' }],
+    ['intl', { watchDepth: 'reference' }],
 
-      ['indexPatterns', { watchDepth: 'collection' }],
-      ['filters', { watchDepth: 'collection' }],
+    ['onQuerySubmit', { watchDepth: 'reference' }],
+    ['onFiltersUpdated', { watchDepth: 'reference' }],
+    ['onRefreshChange', { watchDepth: 'reference' }],
+    ['onClearSavedQuery', { watchDepth: 'reference' }],
+    ['onSaved', { watchDepth: 'reference' }],
+    ['onSavedQueryUpdated', { watchDepth: 'reference' }],
 
-      // All modifiers default to true.
-      // Set to false to hide subcomponents.
-      'showSearchBar',
-      'showFilterBar',
-      'showQueryBar',
-      'showQueryInput',
-      'showDatePicker',
-      'showSaveQuery',
+    ['indexPatterns', { watchDepth: 'collection' }],
+    ['filters', { watchDepth: 'collection' }],
 
-      'appName',
-      'screenTitle',
-      'dateRangeFrom',
-      'dateRangeTo',
-      'isRefreshPaused',
-      'refreshInterval',
-      'disableAutoFocus',
-      'showAutoRefreshOnly',
-    ],
-  );
-});
+    // All modifiers default to true.
+    // Set to false to hide subcomponents.
+    'showSearchBar',
+    'showFilterBar',
+    'showQueryBar',
+    'showQueryInput',
+    'showDatePicker',
+    'showSaveQuery',
+
+    'appName',
+    'screenTitle',
+    'dateRangeFrom',
+    'dateRangeTo',
+    'isRefreshPaused',
+    'refreshInterval',
+    'disableAutoFocus',
+    'showAutoRefreshOnly',
+  ]);
+}
+
+module.directive('kbnTopNavHelper', createTopNavHelper);
