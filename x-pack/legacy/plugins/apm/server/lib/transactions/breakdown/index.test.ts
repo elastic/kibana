@@ -24,7 +24,18 @@ describe('getTransactionBreakdown', () => {
           get: () => 'myIndex' as any,
           has: () => true
         },
-        uiFiltersES: []
+        uiFiltersES: [],
+        indices: {
+          apm_oss: {
+            sourcemapIndices: 'myIndex',
+            errorIndices: 'myIndex',
+            onboardingIndices: 'myIndex',
+            spanIndices: 'myIndex',
+            transactionIndices: 'myIndex',
+            metricsIndices: 'myIndex',
+            apmAgentConfigurationIndex: 'myIndex'
+          }
+        }
       }
     });
 
@@ -47,7 +58,18 @@ describe('getTransactionBreakdown', () => {
           get: () => 'myIndex' as any,
           has: () => true
         },
-        uiFiltersES: []
+        uiFiltersES: [],
+        indices: {
+          apm_oss: {
+            sourcemapIndices: 'myIndex',
+            errorIndices: 'myIndex',
+            onboardingIndices: 'myIndex',
+            spanIndices: 'myIndex',
+            transactionIndices: 'myIndex',
+            metricsIndices: 'myIndex',
+            apmAgentConfigurationIndex: 'myIndex'
+          }
+        }
       }
     });
 
@@ -87,7 +109,18 @@ describe('getTransactionBreakdown', () => {
           get: () => 'myIndex' as any,
           has: () => true
         },
-        uiFiltersES: []
+        uiFiltersES: [],
+        indices: {
+          apm_oss: {
+            sourcemapIndices: 'myIndex',
+            errorIndices: 'myIndex',
+            onboardingIndices: 'myIndex',
+            spanIndices: 'myIndex',
+            transactionIndices: 'myIndex',
+            metricsIndices: 'myIndex',
+            apmAgentConfigurationIndex: 'myIndex'
+          }
+        }
       }
     });
 
@@ -126,7 +159,18 @@ describe('getTransactionBreakdown', () => {
           get: () => 'myIndex' as any,
           has: () => true
         },
-        uiFiltersES: []
+        uiFiltersES: [],
+        indices: {
+          apm_oss: {
+            sourcemapIndices: 'myIndex',
+            errorIndices: 'myIndex',
+            onboardingIndices: 'myIndex',
+            spanIndices: 'myIndex',
+            transactionIndices: 'myIndex',
+            metricsIndices: 'myIndex',
+            apmAgentConfigurationIndex: 'myIndex'
+          }
+        }
       }
     });
 
@@ -149,7 +193,18 @@ describe('getTransactionBreakdown', () => {
           get: () => 'myIndex' as any,
           has: () => true
         },
-        uiFiltersES: []
+        uiFiltersES: [],
+        indices: {
+          apm_oss: {
+            sourcemapIndices: 'myIndex',
+            errorIndices: 'myIndex',
+            onboardingIndices: 'myIndex',
+            spanIndices: 'myIndex',
+            transactionIndices: 'myIndex',
+            metricsIndices: 'myIndex',
+            apmAgentConfigurationIndex: 'myIndex'
+          }
+        }
       }
     });
 

@@ -102,6 +102,17 @@ interface MockSetup {
     has: any;
   };
   uiFiltersES: ESFilter[];
+  indices: {
+    apm_oss: {
+      sourcemapIndices: string;
+      errorIndices: string;
+      onboardingIndices: string;
+      spanIndices: string;
+      transactionIndices: string;
+      metricsIndices: string;
+      apmAgentConfigurationIndex: string;
+    };
+  };
 }
 
 export async function inspectSearchParams(
@@ -130,13 +141,13 @@ export async function inspectSearchParams(
     ],
     indices: {
       apm_oss: {
-        sourcemapIndices: 'apm-*',
-        errorIndices: 'apm-*',
-        onboardingIndices: 'apm-*',
-        spanIndices: 'apm-*',
-        transactionIndices: 'apm-*',
-        metricsIndices: 'apm-*',
-        apmAgentConfigurationIndex: '.apm-agent-configuration'
+        sourcemapIndices: 'myIndex',
+        errorIndices: 'myIndex',
+        onboardingIndices: 'myIndex',
+        spanIndices: 'myIndex',
+        transactionIndices: 'myIndex',
+        metricsIndices: 'myIndex',
+        apmAgentConfigurationIndex: 'myIndex'
       }
     }
   };

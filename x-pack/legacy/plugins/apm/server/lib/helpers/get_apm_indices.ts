@@ -9,6 +9,7 @@ import { isObject } from 'lodash';
 import { getSavedObjectsClient } from './saved_objects_client';
 
 interface UiIndices {
+  [key: string]: any;
   apm_oss: {
     sourcemapIndices?: string;
     errorIndices?: string;

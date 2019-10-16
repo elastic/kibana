@@ -29,7 +29,18 @@ describe('timeseriesFetcher', () => {
           {
             term: { 'service.environment': 'test' }
           }
-        ]
+        ],
+        indices: {
+          apm_oss: {
+            sourcemapIndices: 'myIndex',
+            errorIndices: 'myIndex',
+            onboardingIndices: 'myIndex',
+            spanIndices: 'myIndex',
+            transactionIndices: 'myIndex',
+            metricsIndices: 'myIndex',
+            apmAgentConfigurationIndex: 'myIndex'
+          }
+        }
       }
     });
   });

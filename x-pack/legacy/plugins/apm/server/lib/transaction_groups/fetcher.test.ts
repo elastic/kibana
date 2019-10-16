@@ -16,15 +16,24 @@ function getSetup() {
     config: {
       get: jest.fn<any, string[]>((key: string) => {
         switch (key) {
-          case 'apm_oss.transactionIndices':
-            return 'myIndex';
           case 'xpack.apm.ui.transactionGroupBucketSize':
             return 100;
         }
       }),
       has: () => true
     },
-    uiFiltersES: [{ term: { 'service.environment': 'test' } }]
+    uiFiltersES: [{ term: { 'service.environment': 'test' } }],
+    indices: {
+      apm_oss: {
+        sourcemapIndices: 'myIndex',
+        errorIndices: 'myIndex',
+        onboardingIndices: 'myIndex',
+        spanIndices: 'myIndex',
+        transactionIndices: 'myIndex',
+        metricsIndices: 'myIndex',
+        apmAgentConfigurationIndex: 'myIndex'
+      }
+    }
   };
 }
 
