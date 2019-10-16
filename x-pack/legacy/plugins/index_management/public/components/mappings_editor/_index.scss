@@ -80,7 +80,7 @@
     }
 
     .mappings-editor__create-field-content {
-      padding-left: $euiSizeXL; // [1]
+      padding-left: $euiSizeXXL - $euiSizeXS; // [1]
     }
 
     .mappings-editor__fields-list .mappings-editor__fields-list-item__content--toggle {

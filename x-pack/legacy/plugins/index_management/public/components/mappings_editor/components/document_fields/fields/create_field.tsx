@@ -48,9 +48,9 @@ export const CreateField = React.memo(() => {
 
   return (
     <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
               <NameParameter />
             </EuiFlexItem>
@@ -69,7 +69,7 @@ export const CreateField = React.memo(() => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
             </EuiFlexItem>

@@ -19,11 +19,18 @@ import { DATA_TYPE_DEFINITION, MAX_DEPTH_DEFAULT_EDITOR } from '../constants';
 import { State } from '../reducer';
 
 export const getUniqueId = () => {
+  const dateNow = Date.now();
+
+  let performanceNow: number;
+  try {
+    performanceNow = performance.now(); // only available in the browser
+  } catch {
+    performanceNow = process.hrtime()[0]; // only in Node
+  }
+
   return (
     '_' +
-    (Number(String(Math.random()).slice(2)) + Date.now() + Math.round(performance.now())).toString(
-      36
-    )
+    (Number(String(Math.random()).slice(2)) + dateNow + Math.round(performanceNow)).toString(36)
   );
 };
 
@@ -138,7 +145,8 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
 
   const normalizeFields = (
     props: Fields,
-    to: NormalizedFields['byId'] = {},
+    to: NormalizedFields['byId'],
+    paths: string[],
     idsArray: string[],
     nestedDepth: number,
     parentId?: string
@@ -153,7 +161,14 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
       if (childFieldsName && field[childFieldsName]) {
         meta.childFields = [];
         maxNestedDepth = Math.max(maxNestedDepth, nestedDepth + 1);
-        normalizeFields(field[meta.childFieldsName!]!, to, meta.childFields, nestedDepth + 1, id);
+        normalizeFields(
+          field[meta.childFieldsName!]!,
+          to,
+          [...paths, propName],
+          meta.childFields,
+          nestedDepth + 1,
+          id
+        );
       }
 
       const { properties, fields, ...rest } = field;
@@ -162,6 +177,7 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
         id,
         parentId,
         nestedDepth,
+        path: paths.length ? `${paths.join('.')}.${propName}` : propName,
         source: rest,
         ...meta,
       };
@@ -172,7 +188,7 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
     }, to);
 
   const rootLevelFields: string[] = [];
-  const byId = normalizeFields(fieldsToNormalize, {}, rootLevelFields, 0);
+  const byId = normalizeFields(fieldsToNormalize, {}, [], rootLevelFields, 0);
 
   return {
     byId,
@@ -200,6 +216,43 @@ export const deNormalize = (normalized: NormalizedFields): Fields => {
 };
 
 /**
+ * If we change the "name" of a field, we need to update its `path` and the
+ * one of **all** of its child properties or multi-fields.
+ *
+ * @param field The field who's name has changed
+ * @param byId The map of all the document fields
+ */
+export const updateFieldsPathAfterFieldNameChange = (
+  field: NormalizedField,
+  byId: NormalizedFields['byId']
+): { path: string; byId: NormalizedFields['byId'] } => {
+  const updatedById = { ...byId };
+  const paths = field.parentId ? byId[field.parentId].path.split('.') : [];
+
+  const updateFieldPath = (_field: NormalizedField, _paths: string[]): void => {
+    const { name } = _field.source;
+    const path = _paths.length === 0 ? name : `${_paths.join('.')}.${name}`;
+
+    updatedById[_field.id] = {
+      ..._field,
+      path,
+    };
+
+    if (_field.hasChildFields || _field.hasMultiFields) {
+      _field
+        .childFields!.map(fieldId => byId[fieldId])
+        .forEach(childField => {
+          updateFieldPath(childField, [..._paths, name]);
+        });
+    }
+  };
+
+  updateFieldPath(field, paths);
+
+  return { path: updatedById[field.id].path, byId: updatedById };
+};
+
+/**
  * Retrieve recursively all the children fields of a field
  *
  * @param field The field to return the children from
@@ -210,7 +263,7 @@ export const getAllChildFields = (
   byId: NormalizedFields['byId']
 ): NormalizedField[] => {
   const getChildFields = (_field: NormalizedField, to: NormalizedField[] = []) => {
-    if (_field.hasChildFields) {
+    if (_field.hasChildFields || _field.hasMultiFields) {
       _field
         .childFields!.map(fieldId => byId[fieldId])
         .forEach(childField => {
@@ -260,7 +313,7 @@ export const canUseMappingsEditor = (maxNestedDepth: number) =>
 
 const stateWithValidity: Array<keyof State> = ['configuration', 'fieldsJsonEditor', 'fieldForm'];
 
-export const determineIfValid = (state: State): boolean | undefined =>
+export const isStateValid = (state: State): boolean | undefined =>
   Object.entries(state)
     .filter(([key]) => stateWithValidity.includes(key as keyof State))
     .reduce(
@@ -278,3 +331,51 @@ export const determineIfValid = (state: State): boolean | undefined =>
       },
       true as undefined | boolean
     );
+
+// const data = {
+//   title: {
+//     type: 'text',
+//   },
+//   address: {
+//     type: 'object',
+//     properties: {
+//       street: {
+//         type: 'text',
+//         fields: {
+//           raw: {
+//             type: 'keyword',
+//           },
+//         },
+//       },
+//       geo: {
+//         type: 'object',
+//         properties: {
+//           long: {
+//             type: 'text',
+//           },
+//           lat: {
+//             type: 'text',
+//           },
+//         },
+//       },
+//     },
+//   },
+// };
+
+// const normalized = normalize(data);
+
+// const { byId } = normalized;
+// let addressField;
+
+// Object.entries(byId).forEach(([id, normalizedField]) => {
+//   if (normalizedField.path === 'address.street') {
+//     addressField = normalizedField;
+//   }
+// });
+
+// addressField.source.name = 'changed';
+// const updatedById = updateFieldsPathAfterFieldNameChange(addressField, byId);
+
+// // console.log(JSON.stringify(normalized, null, 4));
+// console.log(JSON.stringify(addressField, null, 4));
+// console.log(JSON.stringify(updatedById, null, 4));

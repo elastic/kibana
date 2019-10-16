@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCode,
 } from '@elastic/eui';
 
 import { useForm, Form, OnFormUpdateArg } from '../../../../shared_imports';
@@ -128,6 +129,7 @@ export const EditField = React.memo(({ field }: Props) => {
             <EuiTitle size="m">
               <h2>Edit field '{field.source.name}'</h2>
             </EuiTitle>
+            <EuiCode>{field.path}</EuiCode>
           </EuiFlyoutHeader>
 
           <EuiFlyoutBody>

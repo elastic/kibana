@@ -11,8 +11,9 @@ import {
   shouldDeleteChildFieldsAfterTypeChange,
   getAllChildFields,
   getMaxNestedDepth,
-  determineIfValid,
+  isStateValid,
   normalize,
+  updateFieldsPathAfterFieldNameChange,
 } from './lib';
 
 export interface MappingsConfiguration {
@@ -67,7 +68,7 @@ export const reducer = (state: State, action: Action): State => {
     case 'configuration.update': {
       return {
         ...state,
-        isValid: determineIfValid({
+        isValid: isStateValid({
           ...state,
           configuration: action.value,
         }),
@@ -77,7 +78,7 @@ export const reducer = (state: State, action: Action): State => {
     case 'fieldForm.update': {
       return {
         ...state,
-        isValid: determineIfValid({
+        isValid: isStateValid({
           ...state,
           fieldForm: action.value,
         }),
@@ -140,14 +141,16 @@ export const reducer = (state: State, action: Action): State => {
       const rootLevelFields = addToRootLevel
         ? [...state.fields.rootLevelFields, id]
         : state.fields.rootLevelFields;
-
       const nestedDepth = parentField ? parentField.nestedDepth + 1 : 0;
       const maxNestedDepth = Math.max(state.fields.maxNestedDepth, nestedDepth);
+      const { name } = action.value;
+      const path = parentField ? `${parentField.path}.${name}` : name;
 
       state.fields.byId[id] = {
         id,
         parentId: fieldToAddFieldTo,
         source: action.value,
+        path,
         nestedDepth,
         ...getFieldMeta(action.value),
       };
@@ -166,7 +169,7 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
-        isValid: determineIfValid(state),
+        isValid: isStateValid(state),
         fields: { ...state.fields, rootLevelFields, maxNestedDepth },
       };
     }
@@ -240,9 +243,23 @@ export const reducer = (state: State, action: Action): State => {
         }
       }
 
+      let updatedById: NormalizedFields['byId'];
+      const nameHasChanged = newField.source.name !== previousField.source.name;
+
+      if (nameHasChanged) {
+        // If the name has changed, we need to update the `path` of the field and recursively
+        // the paths of all its "descendant" fields (child or multi-field)
+        const { path, byId } = updateFieldsPathAfterFieldNameChange(newField, state.fields.byId);
+        updatedById = byId;
+        updatedById[fieldToEdit] = { ...newField, path };
+      } else {
+        updatedById = { ...state.fields.byId };
+        updatedById[fieldToEdit] = newField;
+      }
+
       return {
         ...state,
-        isValid: determineIfValid(state),
+        isValid: isStateValid(state),
         fieldForm: undefined,
         documentFields: {
           ...state.documentFields,
@@ -251,10 +268,7 @@ export const reducer = (state: State, action: Action): State => {
         },
         fields: {
           ...state.fields,
-          byId: {
-            ...state.fields.byId,
-            [fieldToEdit]: newField,
-          },
+          byId: updatedById,
         },
       };
     }
@@ -289,7 +303,7 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
 
-      nextState.isValid = determineIfValid(nextState);
+      nextState.isValid = isStateValid(nextState);
 
       return nextState;
     }

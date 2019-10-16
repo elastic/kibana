@@ -96,8 +96,8 @@ export interface Fields {
 export interface Field {
   name: string;
   type: DataType;
-  properties?: { [key: string]: Field };
-  fields?: { [key: string]: Field };
+  properties?: { [key: string]: Omit<Field, 'name'> };
+  fields?: { [key: string]: Omit<Field, 'name'> };
 }
 
 export interface FieldMeta {
@@ -122,6 +122,7 @@ export interface NormalizedField extends FieldMeta {
   id: string;
   parentId?: string;
   nestedDepth: number;
+  path: string;
   source: Omit<Field, 'properties' | 'fields'>;
 }
 
