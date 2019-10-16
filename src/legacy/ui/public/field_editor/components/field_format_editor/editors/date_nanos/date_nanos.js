@@ -49,6 +49,11 @@ export class DateNanosFormatEditor extends DefaultFormatEditor {
     ];
   }
 
+  scrubSamples = samples => {
+    samples.forEach(sample => sample.output = sample.output.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+    return samples;
+  }
+
   render() {
     const { format, formatParams } = this.props;
     const { error, samples } = this.state;
@@ -88,7 +93,7 @@ export class DateNanosFormatEditor extends DefaultFormatEditor {
           />
         </EuiFormRow>
         <FormatEditorSamples
-          samples={samples}
+          samples={this.scrubSamples(samples)}
         />
       </Fragment>
     );
