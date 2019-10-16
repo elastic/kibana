@@ -34,9 +34,10 @@ uiModules.get('kibana').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');
 
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
+  const telemetryOptInNotifications = npStart.core.injectedMetadata.getInjectedVar('telemetryOptInNotifications');
   const showBanner = telemetryOptInService.getShowBanner();
 
-  const shouldShowTelemetryOptIn = telemetryEnabled && showBanner && !telemetryOptInService.getOptIn();
+  const shouldShowTelemetryOptIn = telemetryEnabled && !telemetryOptInService.getOptIn();
   if (shouldShowTelemetryOptIn) {
     telemetryOptInService.setShowBanner(false);
     telemetryOptInService.getShowWelcomeCard(true);
