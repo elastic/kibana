@@ -61,6 +61,30 @@ export function fleet(kibana: any) {
         attributesToEncrypt: new Set(['token']),
         attributesToExcludeFromAAD: new Set(['enrollment_rules']),
       });
+      server.plugins.xpack_main.registerFeature({
+        id: 'fleet',
+        name: 'Fleet',
+        app: ['fleet', 'kibana'],
+        excludeFromBasePrivileges: true,
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['agents', 'events', 'tokens'],
+              read: [],
+            },
+            ui: ['read', 'write'],
+            api: ['fleet-read', 'fleet-all'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['agents', 'events', 'tokens'],
+            },
+            ui: ['read'],
+            api: ['fleet-read'],
+          },
+        },
+      });
       initServerWithKibana(server);
     },
   });

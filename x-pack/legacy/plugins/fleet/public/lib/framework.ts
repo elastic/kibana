@@ -21,6 +21,10 @@ export class FrameworkLib {
     return this.adapter.currentUser;
   }
 
+  public get capabilities(): { read: boolean; write: boolean } {
+    return this.adapter.capabilities;
+  }
+
   public get info() {
     return this.adapter.info;
   }

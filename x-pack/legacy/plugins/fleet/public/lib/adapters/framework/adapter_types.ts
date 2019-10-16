@@ -13,6 +13,7 @@ export interface FrameworkAdapter {
   // Instance vars
   info: FrameworkInfo;
   version: string;
+  capabilities: { read: boolean; write: boolean };
   currentUser: FrameworkUser;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
