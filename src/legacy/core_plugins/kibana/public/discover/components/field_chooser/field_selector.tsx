@@ -18,6 +18,7 @@
  */
 import React, { OptionHTMLAttributes, ReactNode } from 'react';
 import { EuiTitle, EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export interface Props {
   /**
@@ -53,11 +54,14 @@ export function FieldSelector({ id, options, label, value, onChange }: Props) {
         <h4>{label}</h4>
       </EuiTitle>
       <EuiSelect
-        id={`${id}Select`}
+        id={`${id}-select`}
         options={options}
         value={value}
         onChange={handleChange}
-        aria-label={id}
+        aria-label={i18n.translate('kbn.discover.fieldChooser.filter.fieldSelectorLabel', {
+          defaultMessage: 'Selection of {id} filter options',
+          values: { id },
+        })}
       />
     </React.Fragment>
   );
