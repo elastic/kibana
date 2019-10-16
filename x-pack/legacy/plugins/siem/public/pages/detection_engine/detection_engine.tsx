@@ -218,8 +218,6 @@ export const DetectionEngineComponent = React.memo(() => {
             <EuiFilterGroup>
               <EuiFilterButton
                 hasActiveFilters={filterGroupState === filterGroupOptions[0]}
-                iconSide="left"
-                iconType="folderOpen"
                 onClick={() => setFilterGroupState(filterGroupOptions[0])}
                 withNext
               >
@@ -228,8 +226,6 @@ export const DetectionEngineComponent = React.memo(() => {
 
               <EuiFilterButton
                 hasActiveFilters={filterGroupState === filterGroupOptions[1]}
-                iconSide="left"
-                iconType="folderClosed"
                 onClick={() => setFilterGroupState(filterGroupOptions[1])}
               >
                 {'Closed signals'}
