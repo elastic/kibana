@@ -35,7 +35,7 @@ export function validateRequiredOptions({
   if (!options.accessToken || !options.username) {
     const globalConfigPath = getGlobalConfigPath();
     throw new HandledError(
-      `Please update your config file: ${globalConfigPath}.\nIt must contain a valid "username" and "acccessToken".\n\nRead more: ${GLOBAL_CONFIG_DOCS_LINK}`
+      `Please update your config file: ${globalConfigPath}.\nIt must contain a valid "username" and "accessToken".\n\nRead more: ${GLOBAL_CONFIG_DOCS_LINK}`
     );
   }
 

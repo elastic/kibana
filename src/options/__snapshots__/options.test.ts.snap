@@ -2,14 +2,14 @@
 
 exports[`validateRequiredOptions should throw when accessToken is empty 1`] = `
 "Please update your config file: /myHomeDir/.backport/config.json.
-It must contain a valid \\"username\\" and \\"acccessToken\\".
+It must contain a valid \\"username\\" and \\"accessToken\\".
 
 Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#global-config-backportconfigjson"
 `;
 
 exports[`validateRequiredOptions should throw when accessToken is missing 1`] = `
 "Please update your config file: /myHomeDir/.backport/config.json.
-It must contain a valid \\"username\\" and \\"acccessToken\\".
+It must contain a valid \\"username\\" and \\"accessToken\\".
 
 Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#global-config-backportconfigjson"
 `;
@@ -40,14 +40,14 @@ You can add it with either:
 
 exports[`validateRequiredOptions should throw when username is empty 1`] = `
 "Please update your config file: /myHomeDir/.backport/config.json.
-It must contain a valid \\"username\\" and \\"acccessToken\\".
+It must contain a valid \\"username\\" and \\"accessToken\\".
 
 Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#global-config-backportconfigjson"
 `;
 
 exports[`validateRequiredOptions should throw when username is missing 1`] = `
 "Please update your config file: /myHomeDir/.backport/config.json.
-It must contain a valid \\"username\\" and \\"acccessToken\\".
+It must contain a valid \\"username\\" and \\"accessToken\\".
 
 Read more: https://github.com/sqren/backport/blob/f0535241177c5b343b04fe12844bfb513237d847/docs/configuration.md#global-config-backportconfigjson"
 `;
