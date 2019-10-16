@@ -20,7 +20,7 @@
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
-import { TelemetryOptInProvider } from './telemetry_opt_in';
+import { TelemetryOptInProvider } from '../../../telemetry/public/services';
 
 export let indexPatternService;
 export let shouldShowTelemetryOptIn;
