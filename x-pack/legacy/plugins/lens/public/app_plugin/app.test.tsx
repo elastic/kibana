@@ -586,7 +586,7 @@ describe('Lens App', () => {
 
       const instance = mount(<App {...args} />);
 
-      args.dataShim.filter.filterManager.setFilters([
+      args.data.query.filterManager.setFilters([
         buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
 
@@ -717,7 +717,7 @@ describe('Lens App', () => {
         query: { query: 'new', language: 'lucene' },
       });
 
-      args.dataShim.filter.filterManager.setFilters([
+      args.data.query.filterManager.setFilters([
         buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
       instance.update();

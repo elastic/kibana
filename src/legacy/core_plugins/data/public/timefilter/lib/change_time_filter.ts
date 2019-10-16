@@ -20,7 +20,7 @@
 import moment from 'moment';
 import { keys } from 'lodash';
 import { RangeFilter } from '@kbn/es-query';
-import { TimefilterContract } from '../../../timefilter';
+import { TimefilterContract } from '../timefilter';
 
 export function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
   const key = keys(filter.range)[0];

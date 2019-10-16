@@ -17,12 +17,6 @@
  * under the License.
  */
 
-export class StubIndexPatterns {
-  async get(index: string) {
-    return {
-      fields: {
-        getByName: () => undefined,
-      },
-    };
-  }
-}
+export * from './query_service';
+
+export * from './filter_manager';

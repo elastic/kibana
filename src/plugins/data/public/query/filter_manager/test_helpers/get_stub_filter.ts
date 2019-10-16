@@ -17,40 +17,29 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'src/core/public';
-import { FilterManager } from './filter_manager';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
-/**
- * Filter Service
- * @internal
- */
-
-export interface FilterServiceDependencies {
-  uiSettings: UiSettingsClientContract;
+export function getFilter(
+  store: FilterStateStore,
+  disabled: boolean,
+  negated: boolean,
+  queryKey: string,
+  queryValue: any
+): Filter {
+  return {
+    $state: {
+      store,
+    },
+    meta: {
+      index: 'logstash-*',
+      disabled,
+      negate: negated,
+      alias: null,
+    },
+    query: {
+      match: {
+        [queryKey]: queryValue,
+      },
+    },
+  };
 }
-
-export class FilterService {
-  filterManager!: FilterManager;
-
-  public setup({ uiSettings }: FilterServiceDependencies) {
-    this.filterManager = new FilterManager(uiSettings);
-
-    return {
-      filterManager: this.filterManager,
-    };
-  }
-
-  public start() {
-    return {
-      filterManager: this.filterManager,
-    };
-  }
-
-  public stop() {
-    // nothing to do here yet
-  }
-}
-
-/** @public */
-export type FilterSetup = ReturnType<FilterService['setup']>;
-export type FilterStart = ReturnType<FilterService['start']>;

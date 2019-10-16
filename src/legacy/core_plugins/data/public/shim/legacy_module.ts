@@ -28,8 +28,7 @@ import { npStart } from 'ui/new_platform';
 import { FilterBar, ApplyFiltersPopover } from '../filter';
 import template from './apply_filter_directive.html';
 
-// @ts-ignore
-import { mapAndFlattenFilters } from '../filter/filter_manager/lib/map_and_flatten_filters';
+import { mapAndFlattenFilters } from '../../../../../plugins/data/public';
 import { IndexPatterns } from '../index_patterns/index_patterns';
 
 /** @internal */

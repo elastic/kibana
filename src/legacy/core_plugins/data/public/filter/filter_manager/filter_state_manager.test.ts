@@ -24,7 +24,7 @@ import { FilterStateManager } from './filter_state_manager';
 
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
-import { FilterManager } from './filter_manager';
+import { FilterManager } from '../../../../../../plugins/data/public';
 
 import { coreMock } from '../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
@@ -101,25 +101,29 @@ describe('filter_state_manager', () => {
     });
 
     test('should update filter manager global filters', done => {
-      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      globalStateStub.filters.push(f1);
-
-      setTimeout(() => {
+      const updateSubscription = filterManager.getUpdates$().subscribe(() => {
         expect(filterManager.getGlobalFilters()).toHaveLength(1);
+        if (updateSubscription) {
+          updateSubscription.unsubscribe();
+        }
         done();
-      }, 100);
+      });
+
+      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'age', 34);
+      globalStateStub.filters.push(f1);
     });
 
-    test('should update filter manager app filters', done => {
-      expect(filterManager.getAppFilters()).toHaveLength(0);
+    test('should update filter manager app filter', done => {
+      const updateSubscription = filterManager.getUpdates$().subscribe(() => {
+        expect(filterManager.getAppFilters()).toHaveLength(1);
+        if (updateSubscription) {
+          updateSubscription.unsubscribe();
+        }
+        done();
+      });
 
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       appStateStub.filters.push(f1);
-
-      setTimeout(() => {
-        expect(filterManager.getAppFilters()).toHaveLength(1);
-        done();
-      }, 100);
     });
 
     test('should update URL when filter manager filters are set', () => {

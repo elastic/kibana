@@ -20,7 +20,6 @@
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { SearchService, SearchStart, createSearchBar, StatetfulSearchBarProps } from './search';
 import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterSetup, FilterStart } from './filter';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
 import {
@@ -52,7 +51,6 @@ export interface DataSetup {
   query: QuerySetup;
   timefilter: TimefilterSetup;
   indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
 }
 
 /**
@@ -64,7 +62,6 @@ export interface DataStart {
   query: QuerySetup;
   timefilter: TimefilterSetup;
   indexPatterns: IndexPatternsStart;
-  filter: FilterStart;
   search: SearchStart;
   ui: {
     SearchBar: React.ComponentType<StatetfulSearchBarProps>;
@@ -85,8 +82,6 @@ export interface DataStart {
 export class DataPlugin
   implements
     Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
-  // Exposed services, sorted alphabetically
-  private readonly filter: FilterService = new FilterService();
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
   private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
@@ -101,14 +96,10 @@ export class DataPlugin
       uiSettings,
       store: __LEGACY.storage,
     });
-    const filterService = this.filter.setup({
-      uiSettings,
-    });
     this.setupApi = {
       indexPatterns: this.indexPatterns.setup(),
       query: this.query.setup(),
       timefilter: timefilterService,
-      filter: filterService,
     };
 
     return this.setupApi;
@@ -129,7 +120,6 @@ export class DataPlugin
       data,
       store: __LEGACY.storage,
       timefilter: this.setupApi.timefilter,
-      filterManager: this.setupApi.filter.filterManager,
     });
 
     return {
@@ -144,7 +134,6 @@ export class DataPlugin
 
   public stop() {
     this.indexPatterns.stop();
-    this.filter.stop();
     this.query.stop();
     this.search.stop();
     this.timefilter.stop();

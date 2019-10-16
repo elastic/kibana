@@ -19,7 +19,7 @@
 import { RangeFilter } from '@kbn/es-query';
 import { changeTimeFilter } from './change_time_filter';
 import { TimeRange } from 'src/plugins/data/public';
-import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
+import { timefilterServiceMock } from '../timefilter_service.mock';
 
 const timefilterMock = timefilterServiceMock.createSetupContract();
 const timefilter = timefilterMock.timefilter;

@@ -39,6 +39,9 @@ export const npSetup = {
       },
     },
     data: {
+      query: {
+        filterManager: sinon.fake(),
+      },
     },
     inspector: {
       registerView: () => undefined,
@@ -73,6 +76,9 @@ export const npStart = {
     },
     data: {
       getSuggestions: sinon.fake(),
+      query: {
+        filterManager: sinon.fake(),
+      },
     },
     inspector: {
       isAvailable: () => false,

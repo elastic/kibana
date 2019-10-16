@@ -24,7 +24,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { getFilterGenerator } from '..';
 import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
-import { uniqFilters } from '../../../../core_plugins/data/public/filter/filter_manager/lib/uniq_filters';
+import { uniqFilters } from '../../../../../plugins/data/public';
 import { getPhraseScript } from '@kbn/es-query';
 let queryFilter;
 let filterGen;

@@ -35,10 +35,10 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-import { TimeRange } from 'src/plugins/data/public';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { TimeRange, onlyDisabledFiltersChanged } from '../../../../../../plugins/data/public';
 import { setup as data } from '../../../../data/public/legacy';
-import { Query, onlyDisabledFiltersChanged, getTime } from '../../../../data/public';
+import { Query, getTime } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,

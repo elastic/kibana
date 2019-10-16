@@ -21,7 +21,7 @@ import { FilterStateStore } from '@kbn/es-query';
 
 import _ from 'lodash';
 import { State } from 'ui/state_management/state';
-import { FilterManager } from './filter_manager';
+import { FilterManager } from '../../../../../../plugins/data/public';
 
 type GetAppStateFunc = () => State | undefined | null;
 

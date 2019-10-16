@@ -17,6 +17,8 @@
  * under the License.
  */
 
-export { FilterBar } from './filter_bar';
+export { FilterManager } from './filter_manager';
 
-export { ApplyFiltersPopover } from './apply_filters';
+export { uniqFilters } from './lib/uniq_filters';
+export { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
+export { onlyDisabledFiltersChanged } from './lib/only_disabled';

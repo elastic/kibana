@@ -17,6 +17,40 @@
  * under the License.
  */
 
-export { FilterBar } from './filter_bar';
+import { UiSettingsClientContract } from 'src/core/public';
+import { FilterManager } from './filter_manager';
 
-export { ApplyFiltersPopover } from './apply_filters';
+/**
+ * Query Service
+ * @internal
+ */
+
+export interface QueryServiceDependencies {
+  uiSettings: UiSettingsClientContract;
+}
+
+export class QueryService {
+  filterManager!: FilterManager;
+
+  public setup({ uiSettings }: QueryServiceDependencies) {
+    this.filterManager = new FilterManager(uiSettings);
+
+    return {
+      filterManager: this.filterManager,
+    };
+  }
+
+  public start() {
+    return {
+      filterManager: this.filterManager,
+    };
+  }
+
+  public stop() {
+    // nothing to do here yet
+  }
+}
+
+/** @public */
+export type QuerySetup = ReturnType<QueryService['setup']>;
+export type QueryStart = ReturnType<QueryService['start']>;
