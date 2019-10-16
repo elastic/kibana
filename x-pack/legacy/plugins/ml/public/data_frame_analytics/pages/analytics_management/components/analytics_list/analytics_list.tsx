@@ -60,12 +60,14 @@ function stringMatch(str: string | undefined, substr: string) {
 
 interface Props {
   isManagementTable?: boolean;
+  isMlEnabledInSpace?: boolean;
   blockRefresh?: boolean;
   openCreateJobModal?: ActionDispatchers['openModal'];
 }
 // isManagementTable - for use in Kibana managagement ML section
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
+  isMlEnabledInSpace = true,
   blockRefresh = false,
   openCreateJobModal,
 }) => {
@@ -227,7 +229,12 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     );
   }
 
-  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds, isManagementTable);
+  const columns = getColumns(
+    expandedRowItemIds,
+    setExpandedRowItemIds,
+    isManagementTable,
+    isMlEnabledInSpace
+  );
 
   const sorting = {
     sort: {

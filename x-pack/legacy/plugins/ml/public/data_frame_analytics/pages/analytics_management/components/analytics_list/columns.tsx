@@ -115,7 +115,8 @@ export const progressColumn = {
 export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
-  isManagementTable: boolean = false
+  isManagementTable: boolean = false,
+  isMlEnabledInSpace: boolean = true
 ) => {
   const actions = isManagementTable === true ? [AnalyticsViewAction] : getActions();
 
@@ -239,6 +240,11 @@ export const getColumns = (
       render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
       width: '75px',
     });
+
+    // Remove actions if Ml not enabled in current space
+    if (isMlEnabledInSpace === false) {
+      columns.pop();
+    }
   }
 
   return columns;
