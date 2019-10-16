@@ -8,10 +8,10 @@ import _ from 'lodash';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState } from './types';
+import { OriginalColumn } from './rename_columns';
 
 function getExpressionForLayer(
   indexPattern: IndexPattern,
-  layerId: string,
   columns: Record<string, IndexPatternColumn>,
   columnOrder: string[]
 ) {
@@ -34,10 +34,13 @@ function getExpressionForLayer(
       (currentIdMap, [colId], index) => {
         return {
           ...currentIdMap,
-          [`col-${index}-${colId}`]: colId,
+          [`col-${index}-${colId}`]: {
+            ...columns[colId],
+            id: colId,
+          },
         };
       },
-      {} as Record<string, string>
+      {} as Record<string, OriginalColumn>
     );
 
     return `esaggs
@@ -45,7 +48,9 @@ function getExpressionForLayer(
       metricsAtAllLevels=false
       partialRows=false
       includeFormatHints=true
-      aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
+      aggConfigs={lens_auto_date aggConfigs='${JSON.stringify(
+        aggs
+      )}'} | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
   }
 
   return null;
@@ -55,7 +60,6 @@ export function toExpression(state: IndexPatternPrivateState, layerId: string) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.indexPatterns[state.layers[layerId].indexPatternId],
-      layerId,
       state.layers[layerId].columns,
       state.layers[layerId].columnOrder
     );
