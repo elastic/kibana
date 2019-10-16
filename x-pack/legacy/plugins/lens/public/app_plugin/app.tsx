@@ -25,6 +25,7 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 interface State {
   isLoading: boolean;
@@ -84,6 +85,8 @@ export function App({
     const subscription = dataShim.filter.filterManager.getUpdates$().subscribe({
       next: () => {
         setState(s => ({ ...s, filters: dataShim.filter.filterManager.getFilters() }));
+
+        trackUiEvent('app_filters_updated');
       },
     });
     return () => {
@@ -191,6 +194,16 @@ export function App({
               screenTitle={'lens'}
               onQuerySubmit={payload => {
                 const { dateRange, query } = payload;
+
+                if (
+                  dateRange.from !== state.dateRange.fromDate ||
+                  dateRange.to !== state.dateRange.toDate
+                ) {
+                  trackUiEvent('app_date_change');
+                } else {
+                  trackUiEvent('app_query_change');
+                }
+
                 setState(s => ({
                   ...s,
                   dateRange: {
@@ -309,6 +322,7 @@ export function App({
                   }
                 })
                 .catch(() => {
+                  trackUiEvent('save_failed');
                   core.notifications.toasts.addDanger(
                     i18n.translate('xpack.lens.app.docSavingError', {
                       defaultMessage: 'Error saving document',
