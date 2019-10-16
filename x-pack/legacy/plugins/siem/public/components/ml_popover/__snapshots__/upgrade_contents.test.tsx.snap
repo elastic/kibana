@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FilterGroup renders correctly against snapshot 1`] = `
+exports[`JobsTableFilters renders correctly against snapshot 1`] = `
 <PopoverContentsDiv
   data-test-subj="ml-popover-upgrade-contents"
 >
@@ -10,16 +10,53 @@ exports[`FilterGroup renders correctly against snapshot 1`] = `
   <EuiText
     size="s"
   >
-    In order to access SIEM’s anomaly detection features, you must be subscribed to an Elastic Platinum license. With it, you’ll have the ability to run Machine Learning jobs to view anomalous events throughout SIEM.
+    <FormattedMessage
+      defaultMessage="To access SIEM’s anomaly detection features, you must update your license to Platinum, start a free 30-day trial, or spin up a {cloudLink} on AWS, GCP, or Azure. You can then run Machine Learning jobs and view anomalies."
+      id="xpack.siem.components.mlPopup.upgradeDescription"
+      values={
+        Object {
+          "cloudLink": <ForwardRef
+            href="https://www.elastic.co/cloud/"
+            target="_blank"
+          >
+            <FormattedMessage
+              defaultMessage="cloud deployment"
+              id="xpack.siem.components.mlPopup.cloudLink"
+              values={Object {}}
+            />
+          </ForwardRef>,
+        }
+      }
+    />
   </EuiText>
   <EuiSpacer />
-  <EuiButton
-    href="https://www.elastic.co/subscriptions"
-    iconSide="right"
-    iconType="popout"
-    target="_blank"
+  <EuiFlexGroup
+    gutterSize="s"
+    wrap={true}
   >
-    Subscription options
-  </EuiButton>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        href="https://www.elastic.co/subscriptions"
+        iconSide="right"
+        iconType="popout"
+        target="_blank"
+      >
+        Subscription plans
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        href="/test/base/path/app/kibana#/management/elasticsearch/license_management"
+        iconType="gear"
+        target="_blank"
+      >
+        Manage license
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </PopoverContentsDiv>
 `;

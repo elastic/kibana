@@ -38,6 +38,7 @@ import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { contextServiceMock } from '../context/context_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
+
 import { BasePathProxyServer } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
@@ -50,6 +51,7 @@ const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 let coreId: symbol;
 let env: Env;
 let config$: BehaviorSubject<Config>;
+
 let setupDeps: LegacyServiceSetupDeps;
 
 let startDeps: LegacyServiceStartDeps;

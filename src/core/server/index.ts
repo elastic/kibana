@@ -39,27 +39,19 @@
  * @packageDocumentation
  */
 
-import { Observable } from 'rxjs';
 import {
-  IClusterClient,
-  ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
+  InternalElasticsearchServiceSetup,
   IScopedClusterClient,
 } from './elasticsearch';
-import {
-  HttpServiceSetup,
-  HttpServiceStart,
-  IRouter,
-  RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
-} from './http';
+import { InternalHttpServiceSetup, HttpServiceSetup } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
 import { UiSettingsServiceSetup } from './ui_settings';
 
 export { bootstrap } from './bootstrap';
-export { ConfigPath, ConfigService } from './config';
+export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
 export {
   IContextContainer,
   IContextProvider,
@@ -77,6 +69,8 @@ export {
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
+  ElasticsearchServiceSetup,
+  APICaller,
   FakeRequest,
 } from './elasticsearch';
 export * from './elasticsearch/api_types';
@@ -86,6 +80,9 @@ export {
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  AuthResult,
+  AuthResultType,
+  Authenticated,
   BasePath,
   IBasePath,
   CustomHttpResponseOptions,
@@ -93,12 +90,14 @@ export {
   GetAuthState,
   HttpResponseOptions,
   HttpResponsePayload,
-  HttpServerSetup,
+  HttpServiceSetup,
+  HttpServiceStart,
   ErrorHttpResponseOptions,
   IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  IKibanaResponse,
   LifecycleResponseFactory,
   KnownHeaders,
   LegacyRequest,
@@ -206,30 +205,12 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CoreSetup {
-  context: {
-    createContextContainer: ContextSetup['createContextContainer'];
-  };
-  elasticsearch: {
-    adminClient$: Observable<IClusterClient>;
-    dataClient$: Observable<IClusterClient>;
-    createClient: (
-      type: string,
-      clientConfig?: Partial<ElasticsearchClientConfig>
-    ) => IClusterClient;
-  };
-  http: {
-    createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
-    registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-    registerAuth: HttpServiceSetup['registerAuth'];
-    registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    basePath: HttpServiceSetup['basePath'];
-    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-      name: T,
-      provider: RequestHandlerContextProvider<T>
-    ) => RequestHandlerContextContainer;
-    createRouter: () => IRouter;
-  };
+  /** {@link ContextSetup} */
+  context: ContextSetup;
+  /** {@link ElasticsearchServiceSetup} */
+  elasticsearch: ElasticsearchServiceSetup;
+  /** {@link HttpServiceSetup} */
+  http: HttpServiceSetup;
 }
 
 /**
@@ -242,8 +223,8 @@ export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty
 /** @internal */
 export interface InternalCoreSetup {
   context: ContextSetup;
-  http: HttpServiceSetup;
-  elasticsearch: ElasticsearchServiceSetup;
+  http: InternalHttpServiceSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
   uiSettings: UiSettingsServiceSetup;
 }
 
@@ -254,12 +235,4 @@ export interface InternalCoreStart {
   savedObjects: SavedObjectsServiceStart;
 }
 
-export {
-  ContextSetup,
-  HttpServiceSetup,
-  HttpServiceStart,
-  ElasticsearchServiceSetup,
-  PluginsServiceSetup,
-  PluginsServiceStart,
-  PluginOpaqueId,
-};
+export { ContextSetup, PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId };

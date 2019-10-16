@@ -59,6 +59,7 @@ exports[`CcrShard that it renders normally 1`] = `
   }
 >
   <EuiPageBody
+    component="main"
     restrictWidth={false}
   >
     <Status

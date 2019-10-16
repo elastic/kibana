@@ -24,13 +24,13 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 
 import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
-import { HttpServiceSetup } from '../http';
+import { InternalHttpServiceSetup } from '../http';
 import { UiSettingsConfigType } from './ui_settings_config';
 import { IUiSettingsClient, UiSettingsClient } from './ui_settings_client';
 import { mapToObject } from '../../utils/';
 
 interface SetupDeps {
-  http: HttpServiceSetup;
+  http: InternalHttpServiceSetup;
 }
 
 /**

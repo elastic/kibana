@@ -1,4 +1,4 @@
-.codeContainer__root {
+.codeContainer__monaco {
   .monaco-editor .cursors-layer > .cursor {
     display: none !important;
   }
@@ -13,7 +13,6 @@
     background-color: $euiColorLightestShade;
   }
 
-  .cldr.code-mark-line-number + .cldr.folding,
   .cldr.code-line-decoration + .cldr.folding {
     left: -124px !important;
     opacity: 1;

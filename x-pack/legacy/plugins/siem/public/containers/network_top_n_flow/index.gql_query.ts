@@ -9,10 +9,11 @@ import gql from 'graphql-tag';
 export const networkTopNFlowQuery = gql`
   query GetNetworkTopNFlowQuery(
     $sourceId: ID!
+    $ip: String
     $filterQuery: String
     $pagination: PaginationInputPaginated!
-    $sort: NetworkTopNFlowSortField!
-    $flowTarget: FlowTargetNew!
+    $sort: NetworkTopTablesSortField!
+    $flowTarget: FlowTargetSourceDest!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
     $inspect: Boolean!
@@ -22,6 +23,7 @@ export const networkTopNFlowQuery = gql`
       NetworkTopNFlow(
         filterQuery: $filterQuery
         flowTarget: $flowTarget
+        ip: $ip
         pagination: $pagination
         sort: $sort
         timerange: $timerange

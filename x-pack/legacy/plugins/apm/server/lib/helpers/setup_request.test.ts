@@ -42,8 +42,7 @@ describe('setupRequest', () => {
           }
         }
       },
-      ignore_throttled: true,
-      rest_total_hits_as_int: true
+      ignore_throttled: true
     });
   });
 

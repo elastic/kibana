@@ -17,7 +17,6 @@ import { useTrackPageview } from '../../../../../infra/public';
 import { useKibanaCore } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { callApmApi } from '../../../services/rest/callApmApi';
 
 const initalData = {
   items: [],
@@ -33,16 +32,19 @@ export function ServiceOverview() {
     urlParams: { start, end },
     uiFilters
   } = useUrlParams();
-  const { data = initalData, status } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services',
-        params: {
-          query: { start, end, uiFilters: JSON.stringify(uiFilters) }
-        }
-      });
-    }
-  }, [start, end, uiFilters]);
+  const { data = initalData, status } = useFetcher(
+    callApmApi => {
+      if (start && end) {
+        return callApmApi({
+          pathname: '/api/apm/services',
+          params: {
+            query: { start, end, uiFilters: JSON.stringify(uiFilters) }
+          }
+        });
+      }
+    },
+    [start, end, uiFilters]
+  );
 
   useEffect(() => {
     if (data.hasLegacyData && !hasDisplayedToast) {

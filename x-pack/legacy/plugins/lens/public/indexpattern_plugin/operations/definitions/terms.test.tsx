@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPatternPrivateState } from '../../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
 import {
   UiSettingsClientContract,
@@ -17,6 +16,7 @@ import { Storage } from 'ui/storage';
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
 import { termsOperation } from '.';
+import { IndexPatternPrivateState } from '../../types';
 
 jest.mock('ui/new_platform');
 
@@ -26,7 +26,9 @@ describe('terms', () => {
 
   beforeEach(() => {
     state = {
+      indexPatternRefs: [],
       indexPatterns: {},
+      existingFields: {},
       currentIndexPatternId: '1',
       showEmptyFields: false,
       layers: {
@@ -342,49 +344,6 @@ describe('terms', () => {
         'column$$$col2',
         'alphabetical',
       ]);
-    });
-
-    it('should not show filter ratio column as sort target', () => {
-      const setStateSpy = jest.fn();
-      const instance = shallow(
-        <InlineOptions
-          state={{
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col2: {
-                    label: 'Count',
-                    dataType: 'number',
-                    isBucketed: false,
-
-                    // Private
-                    operationType: 'filter_ratio',
-                    params: {
-                      numerator: { query: '', language: 'kuery' },
-                      denominator: { query: '', language: 'kuery' },
-                    },
-                  },
-                },
-              },
-            },
-          }}
-          setState={setStateSpy}
-          columnId="col1"
-          layerId="first"
-          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
-        />
-      );
-
-      const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
-
-      expect(select.prop('options').map(({ value }) => value)).toEqual(['alphabetical']);
     });
 
     it('should update state with the order by value', () => {

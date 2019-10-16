@@ -49,7 +49,9 @@ export default function({ getPageObjects }: FtrProviderContext) {
         await visualBuilder.setLabel('Cardinality');
         await visualBuilder.selectAggType('Cardinality');
         await visualBuilder.setFieldForAggregation('machine.ram');
+        const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
         const tableData = await visualBuilder.getViewTable();
+        expect(isFieldForAggregationValid).to.be(true);
         expect(tableData).to.be(EXPECTED);
       });
     });

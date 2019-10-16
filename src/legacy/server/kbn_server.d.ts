@@ -24,10 +24,12 @@ import { SavedObjectsClientProviderOptions, CoreSetup } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
+  EnvironmentMode,
   LoggerFactory,
   SavedObjectsClientContract,
   SavedObjectsLegacyService,
   IUiSettingsClient,
+  PackageInfo,
 } from '../../core/server';
 
 import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
@@ -108,6 +110,10 @@ export default class KbnServer {
       elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
       uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
       kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
+    };
+    env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
     };
     coreContext: {
       logger: LoggerFactory;
