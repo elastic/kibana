@@ -33,15 +33,20 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldSelector } from './field_selector';
 
+export interface State {
+  searchable: string;
+  aggregatable: string;
+  type: string;
+  missing: boolean;
+  [index: string]: string | boolean;
+}
+
 export interface Props {
   /**
    * triggered on input of user into search field
    */
-  onChange: (field: string, value: string) => void;
-  /**
-   * triggered when the "additional filter btn" is clicked
-   */
-  onShowFilter: () => void;
+  onChange: (field: string, value: string | boolean | undefined) => void;
+
   /**
    * determines whether additional filter fields are displayed
    */
@@ -51,6 +56,9 @@ export interface Props {
    */
   value?: string;
 
+  /**
+   * types for the type filter
+   */
   types: string[];
 }
 
@@ -58,7 +66,7 @@ export interface Props {
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value, types }: Props) {
+export function DiscoverFieldSearch({ showFilter, onChange, value, types }: Props) {
   if (typeof value !== 'string') {
     // at initial rendering value is undefined (angular related), this catches the warning
     // should be removed once all is react
@@ -74,32 +82,75 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value,
   const searchPlaceholder = i18n.translate('kbn.discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search fields',
   });
-
   const options = [
-    { value: undefined, text: 'any' },
-    { value: true, text: 'yes' },
-    { value: false, text: 'no' },
+    { value: 'any', text: 'any' },
+    { value: 'true', text: 'yes' },
+    { value: 'false', text: 'no' },
   ];
+
   const typeOptions = types
     ? types.map(type => {
         return { value: type, text: type };
       })
-    : [{ value: undefined, text: 'any' }];
-  const [filtersActive, setFiltersActive] = useState({
-    searchable: false,
-    aggregatable: false,
-    type: false,
-  });
-  const [filtersActiveCount, setFiltersActiveCount] = useState(0);
-  const [values, setValues] = useState({
-    searchable: options[0].value,
-    aggregatable: options[0].value,
-    type: 'any',
-  });
+    : [{ value: 'any', text: 'any' }];
+
+  const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [isPopoverOpen, setPopoverOpen] = useState(false);
+
+  const [values, setValues] = useState<State>({
+    searchable: 'any',
+    aggregatable: 'any',
+    type: 'any',
+    missing: true,
+  });
 
   const handleFacetButtonClicked = () => {
     setPopoverOpen(!isPopoverOpen);
+  };
+
+  const applyFilterValue = (id: string, filterValue: string | boolean) => {
+    switch (filterValue) {
+      case 'any':
+        onChange(id, undefined);
+        break;
+      case 'true':
+        onChange(id, true);
+        break;
+      case 'false':
+        onChange(id, false);
+        break;
+      default:
+        onChange(id, filterValue);
+    }
+  };
+
+  const isFilterActive = (name: string, filterValue: string | boolean) => {
+    return name !== 'missing' && filterValue !== 'any';
+  };
+
+  const handleValueChange = (name: string, filterValue: string | boolean) => {
+    const previousValue = values[name];
+    updateFilterCount(name, previousValue, filterValue);
+    const updatedValues = { ...values };
+    updatedValues[name] = filterValue;
+    setValues(updatedValues);
+    applyFilterValue(name, filterValue);
+  };
+
+  const updateFilterCount = (
+    name: string,
+    previousValue: string | boolean,
+    currentValue: string | boolean
+  ) => {
+    const previouslyFilterActive = isFilterActive(name, previousValue);
+    const filterActive = isFilterActive(name, currentValue);
+    const diff = Number(filterActive) - Number(previouslyFilterActive);
+    setActiveFiltersCount(activeFiltersCount + diff);
+  };
+
+  const handleMissingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const missingValue = e.target.checked;
+    handleValueChange('missing', missingValue);
   };
 
   const buttonContent = (
@@ -108,8 +159,8 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value,
       data-test-subj="toggleFieldFilterButton"
       className="dscToggleFieldFilterButton"
       icon={<EuiIcon type="filter" />}
-      isSelected={filtersActiveCount > 0}
-      quantity={filtersActiveCount}
+      isSelected={activeFiltersCount > 0}
+      quantity={activeFiltersCount}
       onClick={handleFacetButtonClicked}
     >
       <FormattedMessage
@@ -119,32 +170,45 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value,
     </EuiFacetButton>
   );
 
-  const updateFilterActiveCount = (oldValue: number, newValue: number) => {
-    const diff = newValue - oldValue;
-    setFiltersActiveCount(filtersActiveCount + diff);
-  };
-
-  const updateValue = (id: string, fieldValue: string) => {
-    const updatedValues = { ...values };
-    updatedValues[id] = fieldValue;
-    setValues(updatedValues);
-  };
-
-  const updateFiltersActive = (id: string, fieldValue: string) => {
-    const filterActive = Number(fieldValue !== 'any');
-    const updatedFiltersActive = { ...filtersActive };
-    updatedFiltersActive[id] = !!filterActive;
-    setFiltersActive(updatedFiltersActive);
-  };
-
-  const handleValueChange = (id: string, fieldValue: string) => {
-    updateValue(id, fieldValue);
-    const filterActive = Number(fieldValue !== 'any');
-    const previouslyFilterActive = Number(filtersActive[id]);
-    updateFilterActiveCount(previouslyFilterActive, filterActive);
-    updateFiltersActive(id, value);
-    onChange(id, fieldValue);
-  };
+  const selectionPanel = (
+    <EuiPanel paddingSize="s">
+      <FieldSelector
+        id={'aggregatable'}
+        options={options}
+        value={values.aggregatable}
+        onChange={handleValueChange}
+        label={i18n.translate('kbn.discover.fieldChooser.filter.aggregatableLabel', {
+          defaultMessage: 'Aggregatable',
+        })}
+      />
+      <FieldSelector
+        id={'searchable'}
+        options={options}
+        value={values.searchable}
+        onChange={handleValueChange}
+        label={i18n.translate('kbn.discover.fieldChooser.filter.searchableLabel', {
+          defaultMessage: 'Searchable',
+        })}
+      />
+      <FieldSelector
+        id={'type'}
+        options={typeOptions}
+        value={values.type}
+        onChange={handleValueChange}
+        label={i18n.translate('kbn.discover.fieldChooser.filter.typeLabel', {
+          defaultMessage: 'Type',
+        })}
+      />
+      <EuiSpacer size="s" />
+      <EuiSwitch
+        label={i18n.translate('kbn.discover.fieldChooser.filter.hideMissingFieldsLabel', {
+          defaultMessage: 'Hide missing fields',
+        })}
+        checked={values.missing}
+        onChange={handleMissingChange}
+      />
+    </EuiPanel>
+  );
 
   return (
     <React.Fragment>
@@ -177,37 +241,7 @@ export function DiscoverFieldSearch({ showFilter, onChange, onShowFilter, value,
               defaultMessage: 'Filter by type',
             })}
           </EuiPopoverTitle>
-          <EuiPanel paddingSize="s">
-            <FieldSelector
-              id={'aggregatable'}
-              options={options}
-              value={values.aggregatable}
-              onChange={handleValueChange}
-              label={i18n.translate('kbn.discover.fieldChooser.filter.aggregatableLabel', {
-                defaultMessage: 'Aggregatable',
-              })}
-            />
-            <FieldSelector
-              id={'searchable'}
-              options={options}
-              value={values.searchable}
-              onChange={handleValueChange}
-              label={i18n.translate('kbn.discover.fieldChooser.filter.searchableLabel', {
-                defaultMessage: 'Searchable',
-              })}
-            />
-            <FieldSelector
-              id={'type'}
-              options={typeOptions}
-              value={values.type}
-              onChange={handleValueChange}
-              label={i18n.translate('kbn.discover.fieldChooser.filter.typeLabel', {
-                defaultMessage: 'Type',
-              })}
-            />
-            <EuiSpacer size="s" />
-            <EuiSwitch label="Hide missing fields" checked={true} onChange={() => {}} />
-          </EuiPanel>
+          {selectionPanel}
         </EuiPopover>
       </div>
     </React.Fragment>

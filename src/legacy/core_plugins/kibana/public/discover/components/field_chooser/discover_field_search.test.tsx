@@ -26,10 +26,10 @@ describe('DiscoverFieldSearch', () => {
   function mountComponent() {
     const props = {
       onChange: jest.fn(),
-      onShowFilter: jest.fn(),
       showFilter: false,
       filtersActive: 0,
       value: 'test',
+      types: ['number', 'string', '_source'],
     };
     const comp = mountWithIntl(<DiscoverFieldSearch {...props} />);
     const input = findTestSubject(comp, 'fieldFilterSearchInput');
@@ -41,13 +41,6 @@ describe('DiscoverFieldSearch', () => {
     const { input, props } = mountComponent();
     input.simulate('change', { target: { value: 'new filter' } });
     expect(props.onChange).toBeCalledTimes(1);
-  });
-
-  // this should work, but doesn't, have to do some research
-  test('click toggle filter button', () => {
-    const { btn, props } = mountComponent();
-    btn.simulate('click');
-    expect(props.onShowFilter).toBeCalledTimes(1);
   });
 
   test('change showFilter value should change aria label', () => {
