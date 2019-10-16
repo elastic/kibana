@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { FilterService, FilterStart } from './filter_service';
+export * from './filter_service';
 
 export { FilterBar } from './filter_bar';
 
