@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from './ui_settings_client';
-import { InternalUiSettingsServiceSetup } from './ui_settings_service';
+import { IUiSettingsClient, InternalUiSettingsServiceSetup } from './types';
 
 const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = {

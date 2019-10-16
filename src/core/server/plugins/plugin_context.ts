@@ -123,6 +123,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       basePath: deps.http.basePath,
       isTlsEnabled: deps.http.isTlsEnabled,
     },
+    uiSettings: {
+      setDefaults: deps.uiSettings.setDefaults,
+    },
   };
 }
 

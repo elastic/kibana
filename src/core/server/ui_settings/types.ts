@@ -1,0 +1,118 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
+/**
+ * Client that provides access to the UiSettings stored in elasticsearch.
+ *
+ * @public
+ */
+export interface IUiSettingsClient {
+  /**
+   * Returns uiSettings default values {@link UiSettingsParams}
+   */
+  getDefaults: () => Record<string, UiSettingsParams>;
+  /**
+   * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
+   */
+  get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
+  /**
+   * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
+   */
+  getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
+  /**
+   * Retrieves a set of all uiSettings values set by the user.
+   */
+  getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<
+    Record<string, { userValue?: T; isOverridden?: boolean }>
+  >;
+  /**
+   * Writes multiple uiSettings values and marks them as set by the user.
+   */
+  setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+  /**
+   * Writes uiSettings value and marks it as set by the user.
+   */
+  set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
+  /**
+   * Removes uiSettings value by key.
+   */
+  remove: (key: string) => Promise<void>;
+  /**
+   * Removes multiple uiSettings values by keys.
+   */
+  removeMany: (keys: string[]) => Promise<void>;
+  /**
+   * Shows whether the uiSettings value set by the user.
+   */
+  isOverridden: (key: string) => boolean;
+}
+
+/**
+ * UI element type to represent the settings.
+ * @public
+ * */
+export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
+
+/**
+ * UiSettings parameters defined by the plugins.
+ * @public
+ * */
+export interface UiSettingsParams {
+  /** title in the UI */
+  name: string;
+  /** default value to fall back to if a user doesn't provide any */
+  value: SavedObjectAttribute;
+  /** description provided to a user in UI */
+  description: string;
+  /** used to group the configured setting in the UI */
+  category: string[];
+  /** a range of valid values */
+  options?: string[];
+  /** text labels for 'select' type UI element */
+  optionLabels?: Record<string, string>;
+  /** a flag indicating whether new value applying requires page reloading */
+  requiresPageReload?: boolean;
+  /** a flag indicating that value cannot be changed */
+  readonly?: boolean;
+  /** defines a type of UI element {@link UiSettingsType} */
+  type?: UiSettingsType;
+}
+
+/** @internal */
+export interface InternalUiSettingsServiceSetup {
+  /**
+   * Sets settings with default values for the uiSettings.
+   * @param values
+   */
+  setDefaults(values: Record<string, UiSettingsParams>): void;
+  /**
+   * Creates uiSettings client with provided *scoped* saved objects client {@link IUiSettingsClient}
+   * @param values
+   */
+  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+}
+
+/** @public */
+export interface UiSettingsServiceSetup {
+  /**
+   * Sets settings with default values for the uiSettings.
+   * @param values
+   */
+  setDefaults(values: Record<string, UiSettingsParams>): void;
+}
