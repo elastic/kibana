@@ -38,10 +38,8 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
     grow={false}
   >
     <EuiLink
-      color="primary"
       onClick={[Function]}
       size="s"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Update"
@@ -91,10 +89,8 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
     grow={false}
   >
     <EuiLink
-      color="primary"
       onClick={[Function]}
       size="s"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Update"
@@ -144,10 +140,8 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
     grow={false}
   >
     <EuiLink
-      color="primary"
       onClick={[Function]}
       size="s"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="Update"

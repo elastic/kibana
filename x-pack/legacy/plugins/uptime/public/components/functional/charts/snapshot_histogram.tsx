@@ -16,15 +16,28 @@ import {
 } from '@elastic/charts';
 import { EuiEmptyPrompt, EuiTitle, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
+import styled from 'styled-components';
 import { HistogramDataPoint } from '../../../../common/graphql/types';
 import { getColorsMap } from './get_colors_map';
 import { getChartDateLabel } from '../../../lib/helper';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { snapshotHistogramQuery } from '../../../queries/snapshot_histogram_query';
 import { ChartWrapper } from './chart_wrapper';
+import { UptimeSettingsContext } from '../../../contexts';
+
+const SnapshotHistogramWrapper = styled.div`
+  margin-left: 120px;
+  @media (max-width: 950px) {
+    margin-left: 48px;
+  }
+  @media (max-width: 767px) {
+    margin-left: 12px;
+    margin-top: 40px;
+  }
+`;
 
 export interface SnapshotHistogramProps {
   /**
@@ -35,14 +48,6 @@ export interface SnapshotHistogramProps {
    * The date/time for the end of the timespan.
    */
   absoluteEndDate: number;
-  /**
-   * The color value that is used to represent up checks.
-   */
-  successColor: string;
-  /**
-   * The color value that is used to represent down checks.
-   */
-  dangerColor: string;
 
   /**
    * Height is needed, since by default charts takes height of 100%
@@ -59,8 +64,6 @@ type Props = UptimeGraphQLQueryProps<SnapshotHistogramQueryResult> & SnapshotHis
 export const SnapshotHistogramComponent = ({
   absoluteStartDate,
   absoluteEndDate,
-  dangerColor,
-  successColor,
   data,
   loading = false,
   height,
@@ -105,96 +108,97 @@ export const SnapshotHistogramComponent = ({
       </>
     );
   const { histogram } = data;
-  const downMonitorsName = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
+
+  const {
+    colors: { danger, gray },
+  } = useContext(UptimeSettingsContext);
+
+  const downMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
     defaultMessage: 'Down Monitors',
   });
-  const downSpecId = getSpecId(downMonitorsName);
+
+  const downSpecId = getSpecId(downMonitorsId);
 
   const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
     defaultMessage: 'Up',
   });
   const upSpecId = getSpecId(upMonitorsId);
   return (
-    <>
-      <EuiPanel paddingSize="m">
-        <EuiTitle size="xs">
-          <h5>
-            <FormattedMessage
-              id="xpack.uptime.snapshot.pingsOverTimeTitle"
-              defaultMessage="Pings over time"
-            />
-          </h5>
-        </EuiTitle>
-        <ChartWrapper
-          height={height}
-          loading={loading}
-          aria-label={i18n.translate('xpack.uptime.snapshotHistogram.description', {
-            defaultMessage:
-              'Bar Chart showing uptime status over time from {startTime} to {endTime}.',
-            values: {
-              startTime: moment(new Date(absoluteStartDate).valueOf()).fromNow(),
-              endTime: moment(new Date(absoluteEndDate).valueOf()).fromNow(),
-            },
-          })}
-        >
-          <Chart>
-            <Settings
-              xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
-              showLegend={false}
-            />
-            <Axis
-              id={getAxisId(
-                i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
-                  defaultMessage: 'Snapshot X Axis',
-                })
-              )}
-              position={Position.Bottom}
-              showOverlappingTicks={false}
-              tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
-            />
-            <Axis
-              id={getAxisId(
-                i18n.translate('xpack.uptime.snapshotHistogram.yAxisId', {
-                  defaultMessage: 'Snapshot Y Axis',
-                })
-              )}
-              position="left"
-              title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
-                defaultMessage: 'Pings',
-                description:
-                  'The label on the y-axis of a chart that displays the number of times Heartbeat has pinged a set of services/websites.',
-              })}
-            />
-            <BarSeries
-              customSeriesColors={getColorsMap(successColor, upSpecId)}
-              data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
-              id={upSpecId}
-              name={upMonitorsId}
-              stackAccessors={[0]}
-              timeZone="local"
-              xAccessor={0}
-              xScaleType="time"
-              yAccessors={[1]}
-              yScaleType="linear"
-            />
-            <BarSeries
-              customSeriesColors={getColorsMap(dangerColor, downSpecId)}
-              data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
-              id={downSpecId}
-              name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
-                defaultMessage: 'Down',
-              })}
-              stackAccessors={[0]}
-              timeZone="local"
-              xAccessor={0}
-              xScaleType="time"
-              yAccessors={[1]}
-              yScaleType="linear"
-            />
-          </Chart>
-        </ChartWrapper>
-      </EuiPanel>
-    </>
+    <SnapshotHistogramWrapper>
+      <EuiTitle size="xs">
+        <h2>
+          <FormattedMessage
+            id="xpack.uptime.snapshot.pingsOverTimeTitle"
+            defaultMessage="Pings over time"
+          />
+        </h2>
+      </EuiTitle>
+      <ChartWrapper
+        height={height}
+        loading={loading}
+        aria-label={i18n.translate('xpack.uptime.snapshotHistogram.description', {
+          defaultMessage:
+            'Bar Chart showing uptime status over time from {startTime} to {endTime}.',
+          values: {
+            startTime: moment(new Date(absoluteStartDate).valueOf()).fromNow(),
+            endTime: moment(new Date(absoluteEndDate).valueOf()).fromNow(),
+          },
+        })}
+      >
+        <Chart>
+          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
+          <Axis
+            id={getAxisId(
+              i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {
+                defaultMessage: 'Snapshot X Axis',
+              })
+            )}
+            position={Position.Bottom}
+            showOverlappingTicks={false}
+            tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+          />
+          <Axis
+            id={getAxisId(
+              i18n.translate('xpack.uptime.snapshotHistogram.yAxisId', {
+                defaultMessage: 'Snapshot Y Axis',
+              })
+            )}
+            position="left"
+            title={i18n.translate('xpack.uptime.snapshotHistogram.yAxis.title', {
+              defaultMessage: 'Pings',
+              description:
+                'The label on the y-axis of a chart that displays the number of times Heartbeat has pinged a set of services/websites.',
+            })}
+          />
+          <BarSeries
+            customSeriesColors={getColorsMap(danger, downSpecId)}
+            data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
+            id={downSpecId}
+            name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
+              defaultMessage: 'Down',
+            })}
+            stackAccessors={[0]}
+            timeZone="local"
+            xAccessor={0}
+            xScaleType="time"
+            yAccessors={[1]}
+            yScaleType="linear"
+          />
+          <BarSeries
+            customSeriesColors={getColorsMap(gray, upSpecId)}
+            data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
+            id={upSpecId}
+            name={upMonitorsId}
+            stackAccessors={[0]}
+            timeZone="local"
+            xAccessor={0}
+            xScaleType="time"
+            yAccessors={[1]}
+            yScaleType="linear"
+          />
+        </Chart>
+      </ChartWrapper>
+    </SnapshotHistogramWrapper>
   );
 };
 

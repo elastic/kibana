@@ -4,15 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { trunc } from 'lodash';
+import open from 'opn';
 import { parse as parseUrl } from 'url';
 import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import { LevelLogger } from '../../../../server/lib';
+import { allowRequest } from '../../network_policy';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
   ElementPosition,
+  NetworkPolicy,
 } from '../../../../types';
+
+export interface ChromiumDriverOptions {
+  inspect: boolean;
+  networkPolicy: NetworkPolicy;
+}
 
 interface WaitForSelectorOpts {
   silent?: boolean;
@@ -22,9 +31,24 @@ const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
   private readonly page: Page;
+  private readonly inspect: boolean;
+  private readonly networkPolicy: NetworkPolicy;
 
-  constructor(page: Page) {
+  constructor(page: Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
     this.page = page;
+    this.inspect = inspect;
+    this.networkPolicy = networkPolicy;
+  }
+
+  private allowRequest(url: string) {
+    return !this.networkPolicy.enabled || allowRequest(url, this.networkPolicy.rules);
+  }
+
+  private truncateUrl(url: string) {
+    return trunc(url, {
+      length: 100,
+      omission: '[truncated]',
+    });
   }
 
   public async open(
@@ -35,13 +59,25 @@ export class HeadlessChromiumDriver {
     }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string },
     logger: LevelLogger
   ) {
-    logger.info(`opening url ${url}`);
     await this.page.setRequestInterception(true);
+    logger.info(`opening url ${url}`);
     let interceptedCount = 0;
-    this.page.on('request', (interceptedRequest: any) => {
-      let isData = false;
-      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
-        logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
+
+    this.page.on('request', interceptedRequest => {
+      const interceptedUrl = interceptedRequest.url();
+      const allowed = !interceptedUrl.startsWith('file://');
+      const isData = interceptedUrl.startsWith('data:');
+
+      // We should never ever let file protocol requests go through
+      if (!allowed || !this.allowRequest(interceptedUrl)) {
+        logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
+        interceptedRequest.abort('blockedbyclient');
+        this.page.browser().close();
+        throw new Error(`Received disallowed outgoing URL: "${interceptedUrl}", exiting`);
+      }
+
+      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
+        logger.debug(`Using custom headers for ${interceptedUrl}`);
         interceptedRequest.continue({
           headers: {
             ...interceptedRequest.headers(),
@@ -49,21 +85,32 @@ export class HeadlessChromiumDriver {
           },
         });
       } else {
-        let interceptedUrl = interceptedRequest.url();
-
-        if (interceptedUrl.startsWith('data:')) {
-          // `data:image/xyz;base64` can be very long URLs
-          interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';
-          isData = true;
-        }
-
-        logger.debug(`No custom headers for ${interceptedUrl}`);
+        const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
+        logger.debug(`No custom headers for ${loggedUrl}`);
         interceptedRequest.continue();
       }
       interceptedCount = interceptedCount + (isData ? 0 : 1);
     });
 
+    // Even though 3xx redirects go through our request
+    // handler, we should probably inspect responses just to
+    // avoid being bamboozled by some malicious request
+    this.page.on('response', interceptedResponse => {
+      const interceptedUrl = interceptedResponse.url();
+      const allowed = !interceptedUrl.startsWith('file://');
+
+      if (!allowed || !this.allowRequest(interceptedUrl)) {
+        logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
+        this.page.browser().close();
+        throw new Error(`Received disallowed URL in response: ${interceptedUrl}`);
+      }
+    });
+
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
+
+    if (this.inspect) {
+      await this.launchDebugger();
+    }
 
     await this.waitForSelector(waitForSelector, {}, logger);
     logger.info(`handled ${interceptedCount} page requests`);
@@ -150,6 +197,27 @@ export class HeadlessChromiumDriver {
       deviceScaleFactor: zoom,
       isMobile: false,
     });
+  }
+
+  private async launchDebugger() {
+    // In order to pause on execution we have to reach more deeply into Chromiums Devtools Protocol,
+    // and more specifically, for the page being used. _client is per-page, and puppeteer doesn't expose
+    // a page's client in their api, so we have to reach into internals to get this behavior.
+    // Finally, in order to get the inspector running, we have to know the page's internal ID (again, private)
+    // in order to construct the final debugging URL.
+
+    // @ts-ignore
+    await this.page._client.send('Debugger.enable');
+    // @ts-ignore
+    await this.page._client.send('Debugger.pause');
+    // @ts-ignore
+    const targetId = this.page._target._targetId;
+    const wsEndpoint = this.page.browser().wsEndpoint();
+    const { port } = parseUrl(wsEndpoint);
+
+    open(
+      `http://localhost:${port}/devtools/inspector.html?ws=localhost:${port}/devtools/page/${targetId}`
+    );
   }
 
   private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {

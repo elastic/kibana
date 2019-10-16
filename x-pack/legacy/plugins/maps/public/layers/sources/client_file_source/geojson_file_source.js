@@ -31,7 +31,6 @@ export class GeojsonFileSource extends AbstractVectorSource {
   });
   static icon = 'importAction';
   static isIndexingSource = true;
-  static isBeta = true;
   static layerDefaults = {
     applyGlobalQuery: DEFAULT_APPLY_GLOBAL_QUERY
   }
