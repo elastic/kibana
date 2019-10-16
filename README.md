@@ -25,7 +25,7 @@ This tools is for anybody who is working on a codebase where they have to mainta
  - interactively backport one or more commits to one or more branches with an intuitive UI
  - backport a commit by specifying a PR (`--pr 1337`)
  - list and backport commits by a particular user (`--author john`)
- - list and backport commits by a particular path (`--path john`) 
+ - list and backport commits by a particular path (`--path src/plugins/chatbot`) 
  - see which commits have been backported and to which branches
  - add a custom title, description and labels to the created backport PR
 
