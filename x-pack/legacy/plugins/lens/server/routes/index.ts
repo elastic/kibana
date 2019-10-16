@@ -4,11 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { initStatsRoute } from './index_stats';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
+import { existingFieldsRoute } from './existing_fields';
 import { initFieldsRoute } from './field_stats';
+import { initLensUsageRoute } from './telemetry';
 
-export function setupRoutes(setup: CoreSetup) {
-  initStatsRoute(setup);
+export function setupRoutes(
+  setup: CoreSetup,
+  plugins: {
+    savedObjects: SavedObjectsLegacyService;
+    config: KibanaConfig;
+  }
+) {
+  existingFieldsRoute(setup);
   initFieldsRoute(setup);
+  initLensUsageRoute(setup, plugins);
 }

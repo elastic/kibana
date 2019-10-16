@@ -42,6 +42,7 @@ import {
   mlFunctionToESAggregation,
 } from '../../common/util/job_utils';
 
+import { ChartTooltip } from '../components/chart_tooltip';
 import { jobSelectServiceFactory, setGlobalState, getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -1041,6 +1042,7 @@ export class TimeSeriesExplorer extends React.Component {
 
     return (
       <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} loading={loading} resizeRef={this.resizeRef}>
+        <ChartTooltip />
         <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>

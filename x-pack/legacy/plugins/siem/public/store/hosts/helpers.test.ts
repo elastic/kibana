@@ -32,8 +32,6 @@ export const mockHostsState: HostsModel = {
       },
       [HostsTableType.anomalies]: null,
     },
-    filterQuery: null,
-    filterQueryDraft: null,
   },
   details: {
     queries: {
@@ -57,8 +55,6 @@ export const mockHostsState: HostsModel = {
       },
       [HostsTableType.anomalies]: null,
     },
-    filterQuery: null,
-    filterQueryDraft: null,
   },
 };
 

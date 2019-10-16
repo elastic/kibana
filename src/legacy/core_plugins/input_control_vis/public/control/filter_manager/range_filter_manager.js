@@ -56,7 +56,7 @@ export class RangeFilterManager extends FilterManager {
    */
   createFilter(value) {
     const newFilter = buildRangeFilter(
-      this.indexPattern.fields.byName[this.fieldName],
+      this.indexPattern.fields.getByName(this.fieldName),
       toRange(value),
       this.indexPattern);
     newFilter.meta.key = this.fieldName;

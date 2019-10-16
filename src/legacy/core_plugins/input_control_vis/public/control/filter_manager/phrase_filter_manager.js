@@ -38,12 +38,12 @@ export class PhraseFilterManager extends FilterManager {
     let newFilter;
     if (phrases.length === 1) {
       newFilter = buildPhraseFilter(
-        this.indexPattern.fields.byName[this.fieldName],
+        this.indexPattern.fields.getByName(this.fieldName),
         phrases[0],
         this.indexPattern);
     } else {
       newFilter = buildPhrasesFilter(
-        this.indexPattern.fields.byName[this.fieldName],
+        this.indexPattern.fields.getByName(this.fieldName),
         phrases,
         this.indexPattern);
     }
