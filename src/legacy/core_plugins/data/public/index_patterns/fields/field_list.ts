@@ -57,8 +57,7 @@ export function fieldList(
     }
 
     getByName = (name: Field['name']) => {
-      // console.log('getByName', name, byName.size);
-      return byName.get(name)
+      return byName.get(name);
     };
     getByType = (type: Field['type']) => [...(groups.get(type) || new Map()).values()];
     add = (field: FieldSpec) => {

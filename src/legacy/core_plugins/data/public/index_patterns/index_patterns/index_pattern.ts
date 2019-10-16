@@ -122,7 +122,6 @@ export class IndexPattern implements StaticIndexPattern {
     this.metaFields = this.getConfig('metaFields');
 
     this.fields = fieldList(this, [], this.shortDotsEnable, notifications);
-    // debugger;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
@@ -143,7 +142,6 @@ export class IndexPattern implements StaticIndexPattern {
   private initFields(input?: any) {
     const newValue = input || this.fields;
     this.fields = fieldList(this, newValue, this.shortDotsEnable, this.notifications);
-    // debugger;
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -301,14 +299,8 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   removeScriptedField(field: FieldType) {
-    console.log('before remove scripted field', this.fields.getByName(field.name));
-    console.log(this.fields.length);
     this.fields.remove(field);
-    debugger;
-    this.fields.getByName(field.name);
-    console.log('after remove scripted field', this.fields.getByName(field.name));
-    console.log(this.fields.length);
-    //return this.save();
+    return this.save();
   }
 
   async popularizeField(fieldName: string, unit = 1) {

@@ -23,7 +23,7 @@ import {
   HttpServiceBase,
   NotificationsSetup,
 } from 'src/core/public';
-import { Field, FieldList, FieldListInterface, FieldType } from './fields';
+import { Field, fieldList, FieldListInterface, FieldType } from './fields';
 import { createFlattenHitWrapper } from './index_patterns';
 import { createIndexPatternSelect } from './components';
 import {
@@ -50,7 +50,7 @@ export class IndexPatternsService {
 
   public setup() {
     this.setupApi = {
-      FieldList,
+      fieldList,
       flattenHitWrapper: createFlattenHitWrapper(),
       formatHitProvider,
       __LEGACY: {
