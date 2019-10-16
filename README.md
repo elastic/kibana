@@ -21,6 +21,14 @@ This tools is for anybody who is working on a codebase where they have to mainta
 
 `backport` is a CLI that will ask you which commit(s) to backport and to which branch(es) and then cherry-pick accordingly, and create pull requests. It will always perform the git operation in a temporary folder (`~/.backport/repositories/`) separate from your working directory, thus never interfering with any unstages changes your might have.
 
+**Features:**
+ - interactively backport one or more commits to one or more branches with an intuitive UI
+ - backport a commit by specifying a PR (`--pr 1337`)
+ - list and backport commits by a particular user (`--author john`)
+ - list and backport commits by a particular path (`--path john`) 
+ - see which commits have been backported and to which branches
+ - add a custom title, description and labels to the created backport PR
+
 ## Requirements
 
 - Node 8 or higher
