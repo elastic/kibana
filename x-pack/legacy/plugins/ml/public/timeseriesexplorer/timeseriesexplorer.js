@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 import React, { createRef, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiCheckbox,
@@ -26,6 +27,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
@@ -109,7 +111,7 @@ function getTimeseriesexplorerDefaultState() {
     jobs: [],
     // Counter to keep track of what data sets have been loaded.
     loadCounter: 0,
-    loading: false,
+    loading: true,
     modelPlotEnabled: false,
     selectedJob: undefined,
     // Toggles display of annotations in the focus chart
@@ -977,7 +979,10 @@ export class TimeSeriesExplorer extends React.Component {
       zoomToFocusLoaded,
     } = this.state;
 
-    const isMetricSelected =  entities.length > 0 && entities.every(entity => !!entity.fieldValue);
+    const fieldNamesWithEmptyValues = entities
+      .filter(({ fieldValue }) => !fieldValue)
+      .map(({ fieldName }) => fieldName);
+    const arePartitioningFieldsProvided = fieldNamesWithEmptyValues.length === 0;
 
     const chartProps = {
       modelPlotEnabled,
@@ -1049,6 +1054,24 @@ export class TimeSeriesExplorer extends React.Component {
 
     return (
       <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} loading={loading} resizeRef={this.resizeRef}>
+
+        {!loading && !arePartitioningFieldsProvided && <EuiCallOut
+          className="single-metric-request-callout"
+          title={<FormattedMessage
+            id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
+            /* eslint-disable-next-line max-len */
+            defaultMessage="To view a single metric you must select {missingValuesCount, plural, one {a value for {fieldName1}} other {values for {fieldName1} and {fieldName2}}}"
+            values={{
+              missingValuesCount: fieldNamesWithEmptyValues.length,
+              fieldName1: fieldNamesWithEmptyValues[0],
+              fieldName2: fieldNamesWithEmptyValues[1],
+            }}
+          />}
+          color="warning"
+          iconType="help"
+          size="s"
+        />}
+
         <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -1077,7 +1100,7 @@ export class TimeSeriesExplorer extends React.Component {
                 />
               );
             })}
-            {isMetricSelected &&
+            {arePartitioningFieldsProvided &&
             <EuiFlexItem style={{ textAlign: 'right' }}>
               <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>
                 <ForecastingModal
@@ -1104,7 +1127,7 @@ export class TimeSeriesExplorer extends React.Component {
           <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
-        {(isMetricSelected && jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === true) && (
+        {(arePartitioningFieldsProvided && jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === true) && (
           <EuiText className="results-container">
             <span className="panel-title">
               {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
