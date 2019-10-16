@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore
-import { SearchSourceProvider, SearchSource } from 'ui/courier';
+import { SearchSourceProvider } from 'ui/courier';
 import { IPrivate } from 'ui/private';
 import { Filter } from '@kbn/es-query';
 import { IndexPatterns, IndexPattern } from 'ui/index_patterns';

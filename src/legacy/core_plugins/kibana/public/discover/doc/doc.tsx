@@ -22,7 +22,7 @@ import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic
 import { IndexPatterns } from 'ui/index_patterns';
 import { metadata } from 'ui/metadata';
 import { ElasticSearchHit } from 'ui/registry/doc_views_types';
-import { DocViewer } from '../doc_viewer/doc_viewer';
+import { DocViewer } from '../doc_viewer';
 import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
 
 export interface ElasticSearchResult {

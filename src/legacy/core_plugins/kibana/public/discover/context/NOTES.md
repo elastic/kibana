@@ -29,11 +29,11 @@ employed in some cases, e.g. when dealing with the isolate scope bindings in
 **Loose Coupling**: An attempt was made to couple the parts that make up this
 app as loosely as possible. This means using pure functions whenever possible
 and isolating the angular directives diligently. To that end, the app has been
-implemented as the independent `ContextApp` directive in [app.js](./app.js). It
+implemented as the independent `ContextApp` directive in [app.js](app.js). It
 does not access the Kibana `AppState` directly but communicates only via its
 directive properties. The binding of these attributes to the state and thereby
 to the route is performed by the `CreateAppRouteController`in
-[index.js](./index.js). Similarly, the `SizePicker` directive only communicates
+[index.js](index.js). Similarly, the `SizePicker` directive only communicates
 with its parent via the passed properties.
 
 
