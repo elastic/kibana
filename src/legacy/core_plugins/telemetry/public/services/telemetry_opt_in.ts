@@ -23,11 +23,11 @@ import { toastNotifications } from 'ui/notify';
 import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 
+let bannerId: string | null = null;
+let currentOptInStatus = false;
+
 export function TelemetryOptInProvider($injector: any, chrome: any) {
-  let currentOptInStatus = npStart.core.injectedMetadata.getInjectedVar(
-    'telemetryOptedIn'
-  ) as boolean;
-  let bannerId: string | null = null;
+  currentOptInStatus = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
 
   setCanTrackUiMetrics(currentOptInStatus);
   const provider = {

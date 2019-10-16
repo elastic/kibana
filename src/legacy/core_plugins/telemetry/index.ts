@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
 import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_deprecated';
-import { telemetryPlugin } from './server';
+import { telemetryPlugin, getTelemetryOptIn } from './server';
 
 import {
   createLocalizationUsageCollector,
@@ -75,6 +75,14 @@ const telemetry = (kibana: any) => {
         telemetry: {
           isNamespaceAgnostic: true,
         },
+      },
+      async replaceInjectedVars(originalInjectedVars: any, request: any) {
+        const telemetryOptedIn = await getTelemetryOptIn(request);
+
+        return {
+          ...originalInjectedVars,
+          telemetryOptedIn,
+        };
       },
       injectDefaultVars(server: Server) {
         const config = server.config();
