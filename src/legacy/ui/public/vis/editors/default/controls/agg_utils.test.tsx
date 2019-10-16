@@ -194,7 +194,7 @@ describe('Aggregations utils', () => {
       setValidity = jest.fn();
     });
 
-    test('shold call setValidity', () => {
+    test('should call setValidity', () => {
       testHook(() => {
         useValidation(setValidity, false);
       });
@@ -202,7 +202,7 @@ describe('Aggregations utils', () => {
       expect(setValidity).toBeCalledWith(false);
     });
 
-    test('shold call setValidity with true on component unmount', () => {
+    test('should call setValidity with true on component unmount', () => {
       testHook(() => {
         useValidation(setValidity, false);
       });
@@ -221,11 +221,10 @@ describe('Aggregations utils', () => {
       expect(label).toBe('count');
     });
 
-    test('should return safety string if makeLabel func is not exist', () => {
+    test('should not fail and return a safety string if makeLabel func is not exist', () => {
       const label = safeMakeLabel({} as AggConfig);
 
-      expect(label.startsWith('-')).toBeTruthy();
-      expect(label.endsWith('-')).toBeTruthy();
+      expect(label).toEqual(expect.any(String));
     });
   });
 });

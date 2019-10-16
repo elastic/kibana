@@ -99,7 +99,7 @@ describe('ExtendedBoundsParamEditor', () => {
   });
 
   describe('handle changes', () => {
-    test('should set numeric "min" or an emty string on change event', () => {
+    test('should set numeric "min" or an empty string on change event', () => {
       const comp = mount(
         <ExtendedBoundsParamEditor
           {...(defaultProps as AggParamEditorProps<Bounds>)}
@@ -117,7 +117,7 @@ describe('ExtendedBoundsParamEditor', () => {
       expect(defaultProps.setValue).lastCalledWith({ min: '' });
     });
 
-    test('should set numeric "max" or an emty string on change event', () => {
+    test('should set numeric "max" or an empty string on change event', () => {
       const comp = mount(
         <ExtendedBoundsParamEditor
           {...(defaultProps as AggParamEditorProps<Bounds>)}
