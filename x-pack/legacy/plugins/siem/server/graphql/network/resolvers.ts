@@ -10,6 +10,11 @@ import { Network } from '../../lib/network';
 import { createOptionsPaginated } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
+type QueryNetworkTopCountriesResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.NetworkTopCountriesResolver>,
+  QuerySourceResolver
+>;
+
 type QueryNetworkTopNFlowResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.NetworkTopNFlowResolver>,
   QuerySourceResolver
@@ -28,16 +33,27 @@ export const createNetworkResolvers = (
   libs: NetworkResolversDeps
 ): {
   Source: {
+    NetworkTopCountries: QueryNetworkTopCountriesResolver;
     NetworkTopNFlow: QueryNetworkTopNFlowResolver;
     NetworkDns: QueryDnsResolver;
   };
 } => ({
   Source: {
+    async NetworkTopCountries(source, args, { req }, info) {
+      const options = {
+        ...createOptionsPaginated(source, args, info),
+        flowTarget: args.flowTarget,
+        networkTopCountriesSort: args.sort,
+        ip: args.ip,
+      };
+      return libs.network.getNetworkTopCountries(req, options);
+    },
     async NetworkTopNFlow(source, args, { req }, info) {
       const options = {
         ...createOptionsPaginated(source, args, info),
         flowTarget: args.flowTarget,
         networkTopNFlowSort: args.sort,
+        ip: args.ip,
       };
       return libs.network.getNetworkTopNFlow(req, options);
     },

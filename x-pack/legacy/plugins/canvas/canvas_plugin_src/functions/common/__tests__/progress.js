@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { progress } from '../progress';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { getFunctionErrors } from '../../../strings';
+import { getFunctionErrors } from '../../../../i18n';
 import { fontStyle } from './fixtures/test_styles';
 
 const errors = getFunctionErrors().progress;

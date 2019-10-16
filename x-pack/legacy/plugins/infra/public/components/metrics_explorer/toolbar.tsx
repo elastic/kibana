@@ -23,12 +23,16 @@ import { MetricsExplorerMetrics } from './metrics';
 import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
+import { SavedViewsToolbarControls } from '../saved_views/toolbar_control';
+import { MetricExplorerViewState } from '../../pages/infrastructure/metrics_explorer/use_metric_explorer_state';
+import { metricsExplorerViewSavedObjectType } from '../../../common/saved_objects/metrics_explorer_view';
 
 interface Props {
   derivedIndexPattern: StaticIndexPattern;
   timeRange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
+  defaultViewState: MetricExplorerViewState;
   onRefresh: () => void;
   onTimeChange: (start: string, end: string) => void;
   onGroupByChange: (groupBy: string | null) => void;
@@ -36,6 +40,7 @@ interface Props {
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
   onChartOptionsChange: (chartOptions: MetricsExplorerChartOptions) => void;
+  onViewStateChange: (vs: MetricExplorerViewState) => void;
 }
 
 export const MetricsExplorerToolbar = ({
@@ -50,6 +55,8 @@ export const MetricsExplorerToolbar = ({
   onAggregationChange,
   chartOptions,
   onChartOptionsChange,
+  defaultViewState,
+  onViewStateChange,
 }: Props) => {
   const isDefaultOptions =
     options.aggregation === MetricsExplorerAggregation.avg && options.metrics.length === 0;
@@ -95,7 +102,7 @@ export const MetricsExplorerToolbar = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
@@ -107,6 +114,19 @@ export const MetricsExplorerToolbar = ({
           <MetricsExplorerChartOptionsComponent
             onChange={onChartOptionsChange}
             chartOptions={chartOptions}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <SavedViewsToolbarControls
+            defaultViewState={defaultViewState}
+            viewState={{
+              options,
+              chartOptions,
+              currentTimerange: timeRange,
+            }}
+            viewType={metricsExplorerViewSavedObjectType}
+            onViewChange={onViewStateChange}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ marginRight: 5 }}>

@@ -7,6 +7,7 @@
 import { Setup } from '../helpers/setup_request';
 import { getServiceNodesProjection } from '../../../common/projections/service_nodes';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import {
   METRIC_PROCESS_CPU_PERCENT,
   METRIC_JAVA_THREAD_COUNT,
@@ -30,7 +31,8 @@ const getServiceNodes = async ({
         aggs: {
           nodes: {
             terms: {
-              size: 10000
+              size: 10000,
+              missing: SERVICE_NODE_NAME_MISSING
             },
             aggs: {
               cpu: {

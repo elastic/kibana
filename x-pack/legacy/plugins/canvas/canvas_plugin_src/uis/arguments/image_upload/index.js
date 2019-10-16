@@ -15,7 +15,7 @@ import { isValidHttpUrl } from '../../../../common/lib/httpurl';
 import { encode } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
-import { ArgumentStrings } from '../../../strings';
+import { ArgumentStrings } from '../../../../i18n';
 import { FileForm, LinkForm } from './forms';
 
 const { ImageUpload: strings } = ArgumentStrings;
