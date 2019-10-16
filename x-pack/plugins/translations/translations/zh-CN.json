@@ -1885,8 +1885,6 @@
     "kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModalTitle": "删除已保存对象",
     "kbn.management.objects.objectsTable.export.dangerNotification": "无法生成报告",
     "kbn.management.objects.objectsTable.export.successNotification": "您的文件正在后台下载",
-    "kbn.management.objects.objectsTable.exportAll.dangerNotification": "无法生成报告",
-    "kbn.management.objects.objectsTable.exportAll.successNotification": "您的文件正在后台下载",
     "kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel": "取消",
     "kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel": "全部导出",
     "kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportOptionsLabel": "选项",

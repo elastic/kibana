@@ -1263,6 +1263,7 @@ export class SavedObjectsErrorHelpers {
 
 // @public
 export interface SavedObjectsExportOptions {
+    excludeExportDetails?: boolean;
     exportSizeLimit: number;
     includeReferencesDeep?: boolean;
     namespace?: string;
@@ -1273,6 +1274,16 @@ export interface SavedObjectsExportOptions {
     savedObjectsClient: SavedObjectsClientContract;
     search?: string;
     types?: string[];
+}
+
+// @public
+export interface SavedObjectsExportResultDetails {
+    exportedCount: number;
+    missingRefCount: number;
+    missingReferences: Array<{
+        id: string;
+        type: string;
+    }>;
 }
 
 // @public (undocumented)
