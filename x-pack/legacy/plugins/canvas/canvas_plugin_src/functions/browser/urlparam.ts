@@ -6,7 +6,7 @@
 
 import { parse } from 'url';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   param: string;

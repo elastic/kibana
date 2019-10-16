@@ -49,14 +49,9 @@ describe('BulkUploader', () => {
 
       server = {
         log: sinon.spy(),
-        plugins: {
-          xpack_main: {
-            telemetryCollectionInterval: 3000,
-          },
-          elasticsearch: {
-            createCluster: () => cluster,
-            getCluster: () => cluster,
-          },
+        elasticsearchPlugin: {
+          createCluster: () => cluster,
+          getCluster: () => cluster,
         },
         usage: {},
       };
@@ -72,7 +67,8 @@ describe('BulkUploader', () => {
         }
       ]);
 
-      const uploader = new BulkUploader(server, {
+      const uploader = new BulkUploader({
+        ...server,
         interval: FETCH_INTERVAL
       });
 
@@ -117,9 +113,7 @@ describe('BulkUploader', () => {
         }
       ]);
 
-      const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL
-      });
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
 
       uploader.start(collectors);
 
@@ -154,9 +148,7 @@ describe('BulkUploader', () => {
           formatForBulkUpload: result => result
         }
       ]);
-      const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL
-      });
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
 
       uploader.start(collectors);
 
@@ -200,9 +192,7 @@ describe('BulkUploader', () => {
         }
       ]);
 
-      const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL
-      });
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
       uploader._lastFetchUsageTime = Date.now();
 
       uploader.start(collectors);
@@ -227,9 +217,7 @@ describe('BulkUploader', () => {
         }
       ]);
 
-      const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL
-      });
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
 
       uploader._onPayload = async () => ({ took: 0, ignored: true, errors: false });
 
@@ -260,9 +248,7 @@ describe('BulkUploader', () => {
         }
       ]);
 
-      const uploader = new BulkUploader(server, {
-        interval: FETCH_INTERVAL
-      });
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
       uploader._lastFetchUsageTime = Date.now() - uploader._usageInterval;
 
       uploader.start(collectors);

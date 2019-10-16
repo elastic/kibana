@@ -47,7 +47,7 @@ export const createSignalsRoute = (server: Hapi.Server) => {
           index: Joi.array().required(),
           interval: Joi.string().default('5m'),
           kql: Joi.string(),
-          max_signals: Joi.array().default([]),
+          max_signals: Joi.number().default(100),
           name: Joi.string().required(),
           severity: Joi.number().required(),
           to: Joi.string().required(),

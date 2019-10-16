@@ -17,14 +17,17 @@
  * under the License.
  */
 
-export class HttpInterceptController {
+import { IHttpInterceptController } from './types';
+
+/** @internal */
+export class HttpInterceptController implements IHttpInterceptController {
   private _halted = false;
 
   public get halted() {
     return this._halted;
   }
 
-  halt() {
+  public halt() {
     this._halted = true;
   }
 }

@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { parseFile } from '../util/file_parser';
 import { MAX_FILE_SIZE } from '../../common/constants/file_import';
+import _ from 'lodash';
 
 const ACCEPTABLE_FILETYPES = [
   'json',
@@ -20,7 +21,10 @@ export class JsonIndexFilePicker extends Component {
 
   state = {
     fileUploadError: '',
-    fileParsingProgress: '',
+    percentageProcessed: 0,
+    featuresProcessed: 0,
+    fileParseActive: false,
+    currentFileTracker: null,
   };
 
   async componentDidMount() {
@@ -31,16 +35,28 @@ export class JsonIndexFilePicker extends Component {
     this._isMounted = false;
   }
 
+  getFileParseActive = () => this._isMounted && this.state.fileParseActive;
+
   _fileHandler = fileList => {
     const fileArr = Array.from(fileList);
     this.props.resetFileAndIndexSettings();
-    this.setState({ fileUploadError: '' });
+    this.setState({
+      fileUploadError: '',
+      percentageProcessed: 0,
+      featuresProcessed: 0,
+    });
     if (fileArr.length === 0) { // Remove
+      this.setState({
+        fileParseActive: false
+      });
       return;
     }
     const file = fileArr[0];
 
-    this._parseFile(file);
+    this.setState({
+      fileParseActive: true,
+      currentFileTracker: Symbol()
+    }, () => this._parseFile(file));
   };
 
   _checkFileSize = ({ size }) => {
@@ -106,7 +122,17 @@ export class JsonIndexFilePicker extends Component {
     return fileNameOnly.toLowerCase();
   }
 
+  // It's necessary to throttle progress. Updates that are too frequent cause
+  // issues (update failure) in the nested progress component
+  setFileProgress = _.debounce(({ featuresProcessed, bytesProcessed, totalBytes }) => {
+    const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
+    if (this.getFileParseActive()) {
+      this.setState({ featuresProcessed, percentageProcessed });
+    }
+  }, 150);
+
   async _parseFile(file) {
+    const { currentFileTracker } = this.state;
     const {
       setFileRef, setParsedFile, resetFileAndIndexSettings, onFileUpload,
       transformDetails, setIndexName
@@ -119,15 +145,19 @@ export class JsonIndexFilePicker extends Component {
       return;
     }
     // Parse file
-    this.setState({ fileParsingProgress: i18n.translate(
-      'xpack.fileUpload.jsonIndexFilePicker.parsingFile',
-      { defaultMessage: 'Parsing file...' })
-    });
-    const parsedFileResult = await parseFile(
-      file, transformDetails, onFileUpload
-    ).catch(err => {
+
+    const fileResult = await parseFile({
+      file,
+      transformDetails,
+      onFileUpload,
+      setFileProgress: this.setFileProgress,
+      getFileParseActive: this.getFileParseActive
+    }).catch(err => {
       if (this._isMounted) {
         this.setState({
+          fileParseActive: false,
+          percentageProcessed: 0,
+          featuresProcessed: 0,
           fileUploadError: (
             <FormattedMessage
               id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
@@ -143,25 +173,59 @@ export class JsonIndexFilePicker extends Component {
     if (!this._isMounted) {
       return;
     }
-    this.setState({ fileParsingProgress: '' });
-    if (!parsedFileResult) {
+
+    // If another file is replacing this one, leave file parse active
+    this.setState({
+      percentageProcessed: 0,
+      featuresProcessed: 0,
+      fileParseActive: currentFileTracker !== this.state.currentFileTracker
+    });
+    if (!fileResult) {
       resetFileAndIndexSettings();
       return;
     }
+    const { errors, parsedGeojson } = fileResult;
 
+    if (errors.length) {
+      // Set only the first error for now (since there's only one).
+      // TODO: Add handling in case of further errors
+      const error = errors[0];
+      this.setState({
+        fileUploadError: (
+          <FormattedMessage
+            id="xpack.fileUpload.jsonIndexFilePicker.fileParseError"
+            defaultMessage="File parse error(s) detected: {error}"
+            values={{ error }}
+          />
+        )
+      });
+    }
     setIndexName(defaultIndexName);
     setFileRef(file);
-    setParsedFile(parsedFileResult);
+    setParsedFile(parsedGeojson);
   }
 
 
 
   render() {
-    const { fileParsingProgress, fileUploadError } = this.state;
+    const {
+      fileUploadError,
+      percentageProcessed,
+      featuresProcessed,
+    } = this.state;
 
     return (
       <Fragment>
-        {fileParsingProgress ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
+        {percentageProcessed
+          ? <EuiProgress
+            value={percentageProcessed}
+            max={100}
+            size="xs"
+            color="accent"
+            position="absolute"
+          />
+          : null
+        }
         <EuiFormRow
           label={
             <FormattedMessage
@@ -172,8 +236,14 @@ export class JsonIndexFilePicker extends Component {
           isInvalid={fileUploadError !== ''}
           error={[fileUploadError]}
           helpText={
-            fileParsingProgress ? (
-              fileParsingProgress
+            percentageProcessed ? (
+              i18n.translate(
+                'xpack.fileUpload.jsonIndexFilePicker.parsingFile', {
+                  defaultMessage: '{featuresProcessed} features parsed...',
+                  values: {
+                    featuresProcessed
+                  }
+                })
             ) : (
               <span>
                 {i18n.translate('xpack.fileUpload.jsonIndexFilePicker.formatsAccepted', {

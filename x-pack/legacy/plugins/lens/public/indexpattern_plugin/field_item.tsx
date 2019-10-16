@@ -45,6 +45,7 @@ import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField } from './types';
 import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -141,6 +142,7 @@ export function FieldItem(props: FieldItemProps) {
   function togglePopover() {
     setOpen(!infoIsOpen);
     if (!infoIsOpen) {
+      trackUiEvent('indexpattern_field_info_click');
       fetchData();
     }
   }
@@ -447,7 +449,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
                 <EuiFlexItem grow={true} className="eui-textTruncate">
                   {formatted === '' ? (
-                    <EuiText size="s" color="subdued">
+                    <EuiText size="xs" color="subdued">
                       <em>
                         {i18n.translate('xpack.lens.indexPattern.fieldPanelEmptyStringValue', {
                           defaultMessage: 'Empty string',
@@ -456,7 +458,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                     </EuiText>
                   ) : (
                     <EuiToolTip content={formatted} delay="long">
-                      <EuiText size="s" className="eui-textTruncate">
+                      <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {formatted}
                       </EuiText>
                     </EuiToolTip>
@@ -483,7 +485,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           <>
             <EuiFlexGroup alignItems="stretch" gutterSize="xs">
               <EuiFlexItem grow={true} className="eui-textTruncate">
-                <EuiText size="s" className="eui-textTruncate" color="subdued">
+                <EuiText size="xs" className="eui-textTruncate" color="subdued">
                   {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
                     defaultMessage: 'Other',
                   })}
