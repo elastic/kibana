@@ -4,7 +4,7 @@
 <titleabbrev>Get space</titleabbrev>
 ++++
 
-Retrieves a specified {kib} space.
+Retrieve a specified {kib} space.
 
 experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 
