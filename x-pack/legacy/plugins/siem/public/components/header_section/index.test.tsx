@@ -157,4 +157,38 @@ describe('HeaderSection', () => {
     expect(siemHeaderSection).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
     expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
   });
+
+  test('it splits the title and supplement areas evenly when split is true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection split title="Test title">
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('.euiFlexItem--flexGrowZero[data-test-subj="header-section-supplements"]')
+        .first()
+        .exists()
+    ).toBe(false);
+  });
+
+  test('it DOES NOT split the title and supplement areas evenly when split is false', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection title="Test title">
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('.euiFlexItem--flexGrowZero[data-test-subj="header-section-supplements"]')
+        .first()
+        .exists()
+    ).toBe(true);
+  });
 });

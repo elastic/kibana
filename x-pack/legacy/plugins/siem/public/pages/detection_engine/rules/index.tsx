@@ -127,136 +127,134 @@ const AllRules = React.memo(() => {
     <>
       <EuiSpacer />
 
-      <section>
-        <HeaderSection title="All rules">
-          <EuiFieldSearch
-            aria-label="Search rules"
-            fullWidth
-            placeholder="e.g. rule name or description"
-          />
-        </HeaderSection>
+      <HeaderSection split title="All rules">
+        <EuiFieldSearch
+          aria-label="Search rules"
+          fullWidth
+          placeholder="e.g. rule name or description"
+        />
+      </HeaderSection>
 
-        <UtilityBar border>
-          <UtilityBarSection>
-            <UtilityBarGroup>
-              <UtilityBarText>{'Showing: 39 rules'}</UtilityBarText>
-            </UtilityBarGroup>
+      <UtilityBar border>
+        <UtilityBarSection>
+          <UtilityBarGroup>
+            <UtilityBarText>{'Showing: 39 rules'}</UtilityBarText>
+          </UtilityBarGroup>
 
-            <UtilityBarGroup>
-              <UtilityBarText>{'Selected: 2 rules'}</UtilityBarText>
+          <UtilityBarGroup>
+            <UtilityBarText>{'Selected: 2 rules'}</UtilityBarText>
 
-              <UtilityBarAction popoverContent={<p>{'Batch actions context menu here.'}</p>}>
-                {'Batch actions'}
-              </UtilityBarAction>
-            </UtilityBarGroup>
+            <UtilityBarAction popoverContent={<p>{'Batch actions context menu here.'}</p>}>
+              {'Batch actions'}
+            </UtilityBarAction>
+          </UtilityBarGroup>
 
-            <UtilityBarGroup>
-              <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
-            </UtilityBarGroup>
-          </UtilityBarSection>
-        </UtilityBar>
+          <UtilityBarGroup>
+            <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>
+          </UtilityBarGroup>
+        </UtilityBarSection>
+      </UtilityBar>
 
-        {/* Example of potentially new TableCards component. This new table type may no longer be required for implementation, given the requirements changes that have been made over time. At present, the only afforded benefits of using it are 1) differentiation from regular tables and 2) the presence of a colored status bar on the left of each row. Neither are dealbreakers in my mind. If creating a new table component is out of the question for MVP, go with a standard EUI basic table. */}
+      {/* Example of potentially new TableCards component. This new table type may no longer be required for implementation, given the requirements changes that have been made over time. At present, the only afforded benefits of using it are 1) differentiation from regular tables and 2) the presence of a colored status bar on the left of each row. Neither are dealbreakers in my mind. If creating a new table component is out of the question for MVP, go with a standard EUI basic table. */}
 
-        <TableCards>
-          <TableCardsThead>
-            <TableCardsRow>
-              <TableCardsTh scope="col" style={{ width: '32px' }}>
-                <EuiCheckbox
-                  id="test"
-                  onChange={() => {
-                    return null;
-                  }}
-                />
-              </TableCardsTh>
-              <TableCardsTh scope="col">{'Rule'}</TableCardsTh>
-              <TableCardsTh scope="col">{'Method'}</TableCardsTh>
-              <TableCardsTh scope="col">{'Severity'}</TableCardsTh>
-              <TableCardsTh scope="col">{'Last completed run'}</TableCardsTh>
-              <TableCardsTh scope="col">{'Last response'}</TableCardsTh>
-              <TableCardsTh scope="col">{'Tags'}</TableCardsTh>
-              <TableCardsTh scope="col" style={{ width: '48px' }}>
-                {'Activate'}
-              </TableCardsTh>
-              <TableCardsTh scope="col" style={{ width: '40px' }}></TableCardsTh>
-            </TableCardsRow>
-          </TableCardsThead>
+      <TableCards>
+        <TableCardsThead>
+          <TableCardsRow>
+            <TableCardsTh scope="col" style={{ width: '32px' }}>
+              <EuiCheckbox
+                id="test"
+                onChange={() => {
+                  return null;
+                }}
+              />
+            </TableCardsTh>
+            <TableCardsTh scope="col">{'Rule'}</TableCardsTh>
+            <TableCardsTh scope="col">{'Method'}</TableCardsTh>
+            <TableCardsTh scope="col">{'Severity'}</TableCardsTh>
+            <TableCardsTh scope="col">{'Last completed run'}</TableCardsTh>
+            <TableCardsTh scope="col">{'Last response'}</TableCardsTh>
+            <TableCardsTh scope="col">{'Tags'}</TableCardsTh>
+            <TableCardsTh scope="col" style={{ width: '48px' }}>
+              {'Activate'}
+            </TableCardsTh>
+            <TableCardsTh scope="col" style={{ width: '40px' }}></TableCardsTh>
+          </TableCardsRow>
+        </TableCardsThead>
 
-          <TableCardsTbody>
-            <TableCardsRow>
-              <TableCardsTd style={{ width: '32px' }}>
-                <EuiCheckbox
-                  id="test"
-                  onChange={() => {
-                    return null;
-                  }}
-                />
-              </TableCardsTd>
-              <TableCardsTh scope="row">
-                <EuiLink href="#/detection-engine/rules/rule-details">
-                  {'Automated exfiltration'}
-                </EuiLink>{' '}
-                <EuiBadge color="hollow">{'Experimental'}</EuiBadge>
-              </TableCardsTh>
-              <TableCardsTd>{'Kibana Query Language'}</TableCardsTd>
-              <TableCardsTd>
-                <EuiHealth color="warning">{'Medium'}</EuiHealth>
-              </TableCardsTd>
-              <TableCardsTd>
-                <time>{'12/28/2019, 12:00 PM'}</time>
-              </TableCardsTd>
-              <TableCardsTd>
-                <span>{'Success'}</span>
-              </TableCardsTd>
-              <TableCardsTd>
-                <EuiBadge color="hollow">{'attack.t1234'}</EuiBadge>
-              </TableCardsTd>
-              <TableCardsTd style={{ width: '48px' }}>
-                <EuiSwitch />
-              </TableCardsTd>
-              <TableCardsTd style={{ width: '40px' }}>
-                <EuiButtonIcon iconType="boxesVertical" />
-              </TableCardsTd>
-            </TableCardsRow>
+        <TableCardsTbody>
+          <TableCardsRow>
+            <TableCardsTd style={{ width: '32px' }}>
+              <EuiCheckbox
+                id="test"
+                onChange={() => {
+                  return null;
+                }}
+              />
+            </TableCardsTd>
+            <TableCardsTh scope="row">
+              <EuiLink href="#/detection-engine/rules/rule-details">
+                {'Automated exfiltration'}
+              </EuiLink>{' '}
+              <EuiBadge color="hollow">{'Experimental'}</EuiBadge>
+            </TableCardsTh>
+            <TableCardsTd>{'Kibana Query Language'}</TableCardsTd>
+            <TableCardsTd>
+              <EuiHealth color="warning">{'Medium'}</EuiHealth>
+            </TableCardsTd>
+            <TableCardsTd>
+              <time>{'12/28/2019, 12:00 PM'}</time>
+            </TableCardsTd>
+            <TableCardsTd>
+              <span>{'Success'}</span>
+            </TableCardsTd>
+            <TableCardsTd>
+              <EuiBadge color="hollow">{'attack.t1234'}</EuiBadge>
+            </TableCardsTd>
+            <TableCardsTd style={{ width: '48px' }}>
+              <EuiSwitch />
+            </TableCardsTd>
+            <TableCardsTd style={{ width: '40px' }}>
+              <EuiButtonIcon iconType="boxesVertical" />
+            </TableCardsTd>
+          </TableCardsRow>
 
-            <TableCardsRow>
-              <TableCardsTd style={{ width: '32px' }}>
-                <EuiCheckbox
-                  id="test"
-                  onChange={() => {
-                    return null;
-                  }}
-                />
-              </TableCardsTd>
-              <TableCardsTh scope="row">
-                <EuiLink href="#/detection-engine/rules/rule-details">
-                  {'Automated exfiltration'}
-                </EuiLink>{' '}
-                <EuiBadge color="hollow">{'Experimental'}</EuiBadge>
-              </TableCardsTh>
-              <TableCardsTd>{'Kibana Query Language'}</TableCardsTd>
-              <TableCardsTd>
-                <EuiHealth color="warning">{'Medium'}</EuiHealth>
-              </TableCardsTd>
-              <TableCardsTd>
-                <time>{'12/28/2019, 12:00 PM'}</time>
-              </TableCardsTd>
-              <TableCardsTd>
-                <span>{'Fail'}</span>
-              </TableCardsTd>
-              <TableCardsTd>
-                <EuiBadge color="hollow">{'attack.t1234'}</EuiBadge>
-              </TableCardsTd>
-              <TableCardsTd style={{ width: '48px' }}>
-                <EuiSwitch />
-              </TableCardsTd>
-              <TableCardsTd style={{ width: '40px' }}>
-                <EuiButtonIcon iconType="boxesVertical" />
-              </TableCardsTd>
-            </TableCardsRow>
-          </TableCardsTbody>
-        </TableCards>
-      </section>
+          <TableCardsRow>
+            <TableCardsTd style={{ width: '32px' }}>
+              <EuiCheckbox
+                id="test"
+                onChange={() => {
+                  return null;
+                }}
+              />
+            </TableCardsTd>
+            <TableCardsTh scope="row">
+              <EuiLink href="#/detection-engine/rules/rule-details">
+                {'Automated exfiltration'}
+              </EuiLink>{' '}
+              <EuiBadge color="hollow">{'Experimental'}</EuiBadge>
+            </TableCardsTh>
+            <TableCardsTd>{'Kibana Query Language'}</TableCardsTd>
+            <TableCardsTd>
+              <EuiHealth color="warning">{'Medium'}</EuiHealth>
+            </TableCardsTd>
+            <TableCardsTd>
+              <time>{'12/28/2019, 12:00 PM'}</time>
+            </TableCardsTd>
+            <TableCardsTd>
+              <span>{'Fail'}</span>
+            </TableCardsTd>
+            <TableCardsTd>
+              <EuiBadge color="hollow">{'attack.t1234'}</EuiBadge>
+            </TableCardsTd>
+            <TableCardsTd style={{ width: '48px' }}>
+              <EuiSwitch />
+            </TableCardsTd>
+            <TableCardsTd style={{ width: '40px' }}>
+              <EuiButtonIcon iconType="boxesVertical" />
+            </TableCardsTd>
+          </TableCardsRow>
+        </TableCardsTbody>
+      </TableCards>
     </>
   );
 });

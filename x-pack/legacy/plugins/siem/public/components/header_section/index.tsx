@@ -34,6 +34,7 @@ Header.displayName = 'Header';
 export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
   id?: string;
+  split?: boolean;
   subtitle?: SubtitleProps['text'];
   showInspect?: boolean;
   title: string | React.ReactNode;
@@ -41,7 +42,7 @@ export interface HeaderSectionProps extends HeaderProps {
 }
 
 export const HeaderSection = React.memo<HeaderSectionProps>(
-  ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
+  ({ border, children, id, showInspect = false, split, subtitle, title, tooltip }) => (
     <Header border={border}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
@@ -71,7 +72,7 @@ export const HeaderSection = React.memo<HeaderSectionProps>(
         </EuiFlexItem>
 
         {children && (
-          <EuiFlexItem data-test-subj="header-section-supplements" grow={false}>
+          <EuiFlexItem data-test-subj="header-section-supplements" grow={split ? true : false}>
             {children}
           </EuiFlexItem>
         )}
