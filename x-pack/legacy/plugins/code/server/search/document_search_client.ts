@@ -14,6 +14,7 @@ import {
   SearchResultItem,
   SourceHit,
   SourceRange,
+  emptyDocumentSearchResult,
 } from '../../model';
 import { DocumentIndexNamePrefix, DocumentSearchIndexWithScope } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
@@ -104,6 +105,9 @@ export class DocumentSearchClient extends AbstractSearchClient {
     const index = req.repoScope
       ? DocumentSearchIndexWithScope(req.repoScope)
       : `${DocumentIndexNamePrefix}*`;
+    if (index.length === 0) {
+      return emptyDocumentSearchResult(req.query);
+    }
 
     const rawRes = await this.client.search({
       index,
@@ -241,6 +245,9 @@ export class DocumentSearchClient extends AbstractSearchClient {
     const index = req.repoScope
       ? DocumentSearchIndexWithScope(req.repoScope)
       : `${DocumentIndexNamePrefix}*`;
+    if (index.length === 0) {
+      return emptyDocumentSearchResult(req.query);
+    }
 
     const queryStr = req.query.toLowerCase();
 

@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Repository, RepositorySearchRequest, RepositorySearchResult } from '../../model';
+import {
+  Repository,
+  RepositorySearchRequest,
+  RepositorySearchResult,
+  emptyRepositorySearchResult,
+} from '../../model';
 import {
   RepositoryIndexNamePrefix,
   RepositoryReservedField,
@@ -27,6 +32,10 @@ export class RepositorySearchClient extends AbstractSearchClient {
     const index = req.repoScope
       ? RepositorySearchIndexWithScope(req.repoScope)
       : `${RepositoryIndexNamePrefix}*`;
+
+    if (index.length === 0) {
+      return emptyRepositorySearchResult();
+    }
 
     const queryStr = req.query.toLowerCase();
 

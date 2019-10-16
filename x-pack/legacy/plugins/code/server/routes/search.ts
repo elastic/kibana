@@ -9,16 +9,12 @@ import Boom from 'boom';
 import { RequestFacade, RequestQueryFacade } from '../../';
 import {
   CommitSearchRequest,
-  CommitSearchResult,
   DocumentSearchRequest,
-  DocumentSearchResult,
   RepositorySearchRequest,
-  RepositorySearchResult,
   ResolveSnippetsRequest,
   StackTraceItem,
   StackTraceSnippetsRequest,
   SymbolSearchRequest,
-  SymbolSearchResult,
 } from '../../model';
 import { Logger } from '../log';
 import {
@@ -43,19 +39,10 @@ export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      const scope = await getScope(req, repoScope);
-      if (scope.length === 0) {
-        return {
-          total: 0,
-          took: 0,
-          repositories: [],
-        } as RepositorySearchResult;
-      }
-
       const searchReq: RepositorySearchRequest = {
         query: q as string,
         page,
-        repoScope: scope,
+        repoScope: await getScope(req, repoScope),
       };
       try {
         const repoSearchClient = new RepositorySearchClient(new EsClientWithRequest(req), log);
@@ -77,19 +64,10 @@ export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      const scope = await getScope(req, repoScope);
-      if (scope.length === 0) {
-        return {
-          total: 0,
-          took: 0,
-          repositories: [],
-        } as RepositorySearchResult;
-      }
-
       const searchReq: RepositorySearchRequest = {
         query: q as string,
         page,
-        repoScope: scope,
+        repoScope: await getScope(req, repoScope),
       };
       try {
         const repoSearchClient = new RepositorySearchClient(new EsClientWithRequest(req), log);
@@ -113,21 +91,12 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      const scope = await getScope(req, repoScope);
-      if (scope.length === 0) {
-        return {
-          total: 0,
-          took: 0,
-          query: q,
-        } as DocumentSearchResult;
-      }
-
       const searchReq: DocumentSearchRequest = {
         query: q as string,
         page,
         langFilters: langs ? (langs as string).split(',') : [],
         repoFilters: repos ? decodeURIComponent(repos as string).split(',') : [],
-        repoScope: scope,
+        repoScope: await getScope(req, repoScope),
       };
       try {
         const docSearchClient = new DocumentSearchClient(new EsClientWithRequest(req), log);
@@ -149,19 +118,10 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      const scope = await getScope(req, repoScope);
-      if (scope.length === 0) {
-        return {
-          total: 0,
-          took: 0,
-          query: q,
-        } as DocumentSearchResult;
-      }
-
       const searchReq: DocumentSearchRequest = {
         query: q as string,
         page,
-        repoScope: scope,
+        repoScope: await getScope(req, repoScope),
       };
       try {
         const docSearchClient = new DocumentSearchClient(new EsClientWithRequest(req), log);
@@ -218,19 +178,10 @@ export function symbolSearchRoute(router: CodeServerRouter, log: Logger) {
       page = parseInt(p as string, 10);
     }
 
-    const scope = await getScope(req, repoScope);
-    if (scope.length === 0) {
-      return {
-        total: 0,
-        took: 0,
-        symbols: [],
-      } as SymbolSearchResult;
-    }
-
     const searchReq: SymbolSearchRequest = {
       query: q as string,
       page,
-      repoScope: scope,
+      repoScope: await getScope(req, repoScope),
     };
     try {
       const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
@@ -265,21 +216,11 @@ export function commitSearchRoute(router: CodeServerRouter, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      const scope = await getScope(req, repoScope);
-      if (scope.length === 0) {
-        return {
-          total: 0,
-          took: 0,
-          query: q,
-          commits: [],
-        } as CommitSearchResult;
-      }
-
       const searchReq: CommitSearchRequest = {
         query: q as string,
         page,
         repoFilters: repos ? decodeURIComponent(repos as string).split(',') : [],
-        repoScope: scope,
+        repoScope: await getScope(req, repoScope),
       };
       try {
         const commitSearchClient = new CommitSearchClient(new EsClientWithRequest(req), log);

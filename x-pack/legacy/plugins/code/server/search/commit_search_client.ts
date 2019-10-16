@@ -11,6 +11,7 @@ import {
   CommitSearchRequest,
   CommitSearchResult,
   CommitSearchResultItem,
+  emptyCommitSearchResult,
 } from '../../model';
 import { CommitSearchIndexWithScope, CommitIndexNamePrefix } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
@@ -30,6 +31,9 @@ export class CommitSearchClient extends AbstractSearchClient {
     const index = req.repoScope
       ? CommitSearchIndexWithScope(req.repoScope)
       : `${CommitIndexNamePrefix}*`;
+    if (index.length === 0) {
+      return emptyCommitSearchResult(req.query);
+    }
 
     // Post filters for repository
     let repositoryPostFilters: object[] = [];
