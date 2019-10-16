@@ -33,6 +33,7 @@ bower_components
 /x-pack/legacy/plugins/**/__tests__/fixtures/**
 /packages/kbn-interpreter/src/common/lib/grammar.js
 /x-pack/legacy/plugins/canvas/canvas_plugin
+/x-pack/legacy/plugins/canvas/shareable_runtime/build
 /x-pack/legacy/plugins/canvas/storybook
 /x-pack/legacy/plugins/canvas/canvas_plugin_src/lib/flot-charts
 /x-pack/legacy/plugins/infra/common/graphql/types.ts

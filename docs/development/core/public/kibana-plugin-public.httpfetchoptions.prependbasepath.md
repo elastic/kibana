@@ -4,6 +4,8 @@
 
 ## HttpFetchOptions.prependBasePath property
 
+Whether or not the request should automatically prepend the basePath. Defaults to `true`<!-- -->.
+
 <b>Signature:</b>
 
 ```typescript

@@ -19,25 +19,14 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import {
-  SavedObjectAttributes,
-  SavedObjectsUpdateOptions,
-  SavedObjectsClient,
-} from 'src/core/server';
+import { SavedObjectsClient, SavedObjectsBulkUpdateObject } from 'src/core/server';
 import { Prerequisites } from './types';
-
-interface SavedObject {
-  type: string;
-  id: string;
-  attributes: SavedObjectAttributes;
-  options: SavedObjectsUpdateOptions;
-}
 
 interface BulkUpdateRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
-  payload: SavedObject[];
+  payload: SavedObjectsBulkUpdateObject[];
 }
 
 export const createBulkUpdateRoute = (prereqs: Prerequisites) => {
@@ -53,7 +42,6 @@ export const createBulkUpdateRoute = (prereqs: Prerequisites) => {
             id: Joi.string().required(),
             attributes: Joi.object().required(),
             version: Joi.string(),
-            namespace: Joi.string(),
             references: Joi.array().items(
               Joi.object().keys({
                 name: Joi.string().required(),

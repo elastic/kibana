@@ -20,6 +20,7 @@ import { JobValidator } from '../../common/job_validator';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 import { WizardSteps } from './wizard_steps';
 import { WizardHorizontalSteps } from './wizard_horizontal_steps';
+import { JOB_TYPE } from '../../common/job_creator/util/constants';
 
 interface Props {
   jobCreator: JobCreatorType;
@@ -62,8 +63,13 @@ export const Wizard: FC<Props> = ({
     existingJobsAndGroups,
   };
 
-  const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.TIME_RANGE);
-  const [highestStep, setHighestStep] = useState(WIZARD_STEPS.TIME_RANGE);
+  const firstStep =
+    jobCreator.type === JOB_TYPE.ADVANCED
+      ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
+      : WIZARD_STEPS.TIME_RANGE;
+
+  const [currentStep, setCurrentStep] = useState(firstStep);
+  const [highestStep, setHighestStep] = useState(firstStep);
   const [disableSteps, setDisableSteps] = useState(false);
   const [progress, setProgress] = useState(resultsLoader.progress);
   const [stringifiedConfigs, setStringifiedConfigs] = useState(

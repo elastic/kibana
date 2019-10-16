@@ -327,9 +327,7 @@ describe('SavedObjectsClient', () => {
       id: 'AVwSwFxtcMV38qjDZoQg',
       type: 'config',
       attributes: { title: 'Example title' },
-      options: {
-        version: 'foo',
-      },
+      version: 'foo',
     };
     beforeEach(() => {
       http.fetch.mockResolvedValue({ saved_objects: [bulkUpdateDoc] });
@@ -351,7 +349,7 @@ describe('SavedObjectsClient', () => {
           Array [
             "/api/saved_objects/_bulk_update",
             Object {
-              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"options\\":{\\"version\\":\\"foo\\"}}]",
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
               "method": "PUT",
               "query": undefined,
             },

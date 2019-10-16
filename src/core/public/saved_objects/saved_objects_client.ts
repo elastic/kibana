@@ -80,14 +80,13 @@ export interface SavedObjectsBulkUpdateObject<
   type: string;
   id: string;
   attributes: T;
-  options?: SavedObjectsBulkUpdateOptions;
+  version?: string;
+  references?: SavedObjectReference[];
 }
 
 /** @public */
 export interface SavedObjectsBulkUpdateOptions {
-  version?: string;
   namespace?: string;
-  references?: SavedObjectReference[];
 }
 
 /** @public */

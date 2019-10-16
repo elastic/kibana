@@ -112,20 +112,23 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
-  public async bulkUpdate(objects: SavedObjectsBulkUpdateObject[]) {
+  public async bulkUpdate(
+    objects: SavedObjectsBulkUpdateObject[],
+    options?: SavedObjectsBaseOptions
+  ) {
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
     // sequential processing.
     const encryptedObjects = await Promise.all(
       objects.map(async object => {
-        const { type, id, attributes, namespace } = object;
+        const { type, id, attributes } = object;
         if (!this.options.service.isRegistered(type)) {
           return object;
         }
         return {
           ...object,
           attributes: await this.options.service.encryptAttributes(
-            { type, id, namespace },
+            { type, id, namespace: options && options.namespace },
             attributes
           ),
         };
@@ -133,7 +136,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
 
     return this.stripEncryptedAttributesFromBulkResponse(
-      await this.options.baseClient.bulkUpdate(encryptedObjects)
+      await this.options.baseClient.bulkUpdate(encryptedObjects, options)
     );
   }
 

@@ -33,22 +33,24 @@ export default function ({ getService }) {
       it('should return 200', async () => {
         const response = await supertest
           .put(`/api/saved_objects/_bulk_update`)
-          .send([
-            {
-              type: 'visualization',
-              id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-              attributes: {
-                title: 'An existing visualization'
-              }
-            },
-            {
-              type: 'dashboard',
-              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-              attributes: {
-                title: 'An existing dashboard'
-              }
-            },
-          ])
+          .send({
+            objects: [
+              {
+                type: 'visualization',
+                id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                attributes: {
+                  title: 'An existing visualization'
+                }
+              },
+              {
+                type: 'dashboard',
+                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                attributes: {
+                  title: 'An existing dashboard'
+                }
+              },
+            ]
+          })
           .expect(200);
 
         const { saved_objects: [ firstObject, secondObject ] } = response.body;
@@ -91,25 +93,27 @@ export default function ({ getService }) {
 
         const response = await supertest
           .put(`/api/saved_objects/_bulk_update`)
-          .send([
-            {
-              type: 'visualization',
-              id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-              attributes: {
-                title: 'Changed title but nothing else'
+          .send({
+            objects: [
+              {
+                type: 'visualization',
+                id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                attributes: {
+                  title: 'Changed title but nothing else'
+                },
+                version: visObject.version
               },
-              version: visObject.version
-            },
-            {
-              type: 'dashboard',
-              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-              attributes: {
-                title: 'Changed title and references'
+              {
+                type: 'dashboard',
+                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                attributes: {
+                  title: 'Changed title and references'
+                },
+                version: dashObject.version,
+                references: [{ id: 'foo', name: 'Foo', type: 'visualization' }]
               },
-              version: dashObject.version,
-              references: [{ id: 'foo', name: 'Foo', type: 'visualization' }]
-            },
-          ])
+            ]
+          })
           .expect(200);
 
         const { saved_objects: [ firstUpdatedObject, secondUpdatedObject ] } = response.body;
@@ -145,17 +149,19 @@ export default function ({ getService }) {
 
         await supertest
           .put(`/api/saved_objects/_bulk_update`)
-          .send([
-            {
-              type: 'visualization',
-              id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-              attributes: {
-                title: 'Changed title but nothing else'
-              },
-              version,
-              references: []
-            }
-          ])
+          .send({
+            objects: [
+              {
+                type: 'visualization',
+                id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                attributes: {
+                  title: 'Changed title but nothing else'
+                },
+                version,
+                references: []
+              }
+            ]
+          })
           .expect(200);
 
         const { body: { saved_objects: [ visObjectAfterUpdate ] } } = await supertest
@@ -174,22 +180,24 @@ export default function ({ getService }) {
         it('should return a generic 404', async () => {
           const response = await supertest
             .put(`/api/saved_objects/_bulk_update`)
-            .send([
-              {
-                type: 'visualization',
-                id: 'not an id',
-                attributes: {
-                  title: 'An existing visualization'
-                }
-              },
-              {
-                type: 'dashboard',
-                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                attributes: {
-                  title: 'An existing dashboard'
-                }
-              },
-            ])
+            .send({
+              objects: [
+                {
+                  type: 'visualization',
+                  id: 'not an id',
+                  attributes: {
+                    title: 'An existing visualization'
+                  }
+                },
+                {
+                  type: 'dashboard',
+                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                  attributes: {
+                    title: 'An existing dashboard'
+                  }
+                },
+              ]
+            })
             .expect(200);
 
           const { saved_objects: [ missingObject, updatedObject ] } = response.body;
@@ -229,22 +237,24 @@ export default function ({ getService }) {
       it('should return generic 404', async () => {
         const response = await supertest
           .put(`/api/saved_objects/_bulk_update`)
-          .send([
-            {
-              type: 'visualization',
-              id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-              attributes: {
-                title: 'An existing visualization'
-              }
-            },
-            {
-              type: 'dashboard',
-              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-              attributes: {
-                title: 'An existing dashboard'
-              }
-            },
-          ])
+          .send({
+            objects: [
+              {
+                type: 'visualization',
+                id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                attributes: {
+                  title: 'An existing visualization'
+                }
+              },
+              {
+                type: 'dashboard',
+                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                attributes: {
+                  title: 'An existing dashboard'
+                }
+              },
+            ]
+          })
           .expect(200);
 
         const { saved_objects: [ firstObject, secondObject ] } = response.body;

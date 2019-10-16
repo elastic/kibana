@@ -328,15 +328,17 @@ describe('#bulkUpdate', () => {
     mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
 
     await expect(
-      wrapper.bulkUpdate([
-        { type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' },
-      ])
+      wrapper.bulkUpdate(
+        [{ type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' }],
+        {}
+      )
     ).resolves.toEqual(mockedResponse);
 
     expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([
-      { type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' },
-    ]);
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
+      [{ type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' }],
+      {}
+    );
   });
 
   it('encrypts attributes and strips them from response', async () => {
@@ -367,7 +369,7 @@ describe('#bulkUpdate', () => {
 
     mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
 
-    await expect(wrapper.bulkUpdate(docs.map(doc => ({ ...doc, options: {} })))).resolves.toEqual({
+    await expect(wrapper.bulkUpdate(docs.map(doc => ({ ...doc })), {})).resolves.toEqual({
       saved_objects: [
         {
           id: 'some-id',
@@ -399,28 +401,29 @@ describe('#bulkUpdate', () => {
     );
 
     expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([
-      {
-        id: 'some-id',
-        type: 'known-type',
-        attributes: {
-          attrOne: 'one',
-          attrSecret: '*secret*',
-          attrThree: 'three',
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
+      [
+        {
+          id: 'some-id',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one',
+            attrSecret: '*secret*',
+            attrThree: 'three',
+          },
         },
-        options: {},
-      },
-      {
-        id: 'some-id-2',
-        type: 'known-type',
-        attributes: {
-          attrOne: 'one 2',
-          attrSecret: '*secret 2*',
-          attrThree: 'three 2',
+        {
+          id: 'some-id-2',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one 2',
+            attrSecret: '*secret 2*',
+            attrThree: 'three 2',
+          },
         },
-        options: {},
-      },
-    ]);
+      ],
+      {}
+    );
   });
 
   it('uses `namespace` to encrypt attributes if it is specified', async () => {
@@ -434,7 +437,6 @@ describe('#bulkUpdate', () => {
           attrThree: 'three',
         },
         version: 'some-version',
-        namespace: 'some-namespace',
       },
     ];
 
@@ -442,7 +444,7 @@ describe('#bulkUpdate', () => {
       saved_objects: docs.map(doc => ({ ...doc, references: undefined })),
     });
 
-    await expect(wrapper.bulkUpdate(docs)).resolves.toEqual({
+    await expect(wrapper.bulkUpdate(docs, { namespace: 'some-namespace' })).resolves.toEqual({
       saved_objects: [
         {
           id: 'some-id',
@@ -452,7 +454,6 @@ describe('#bulkUpdate', () => {
             attrThree: 'three',
           },
           version: 'some-version',
-          namespace: 'some-namespace',
           references: undefined,
         },
       ],
@@ -465,20 +466,23 @@ describe('#bulkUpdate', () => {
     );
 
     expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([
-      {
-        id: 'some-id',
-        type: 'known-type',
-        attributes: {
-          attrOne: 'one',
-          attrSecret: '*secret*',
-          attrThree: 'three',
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
+      [
+        {
+          id: 'some-id',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one',
+            attrSecret: '*secret*',
+            attrThree: 'three',
+          },
+          version: 'some-version',
+
+          references: undefined,
         },
-        version: 'some-version',
-        namespace: 'some-namespace',
-        references: undefined,
-      },
-    ]);
+      ],
+      { namespace: 'some-namespace' }
+    );
   });
 
   it('fails if base client fails', async () => {
@@ -488,15 +492,17 @@ describe('#bulkUpdate', () => {
     mockBaseClient.bulkUpdate.mockRejectedValue(failureReason);
 
     await expect(
-      wrapper.bulkUpdate([
-        { type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' },
-      ])
+      wrapper.bulkUpdate(
+        [{ type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' }],
+        {}
+      )
     ).rejects.toThrowError(failureReason);
 
     expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith([
-      { type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' },
-    ]);
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
+      [{ type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' }],
+      {}
+    );
   });
 });
 

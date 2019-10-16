@@ -140,7 +140,7 @@ export const ArgTypesStrings = {
   },
 };
 
-export const DataSourceStrings = {
+export const ExpressionDataSourceStrings = {
   ESDocs: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsTitle', {

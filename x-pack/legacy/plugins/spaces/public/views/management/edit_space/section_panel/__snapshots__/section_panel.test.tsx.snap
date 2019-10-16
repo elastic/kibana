@@ -29,10 +29,8 @@ exports[`it renders without blowing up 1`] = `
     >
       <EuiLink
         aria-label="hide desc"
-        color="primary"
         data-test-subj="show-hide-section-link"
         onClick={[Function]}
-        type="button"
       >
         hide
       </EuiLink>
