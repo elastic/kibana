@@ -31,7 +31,7 @@ import { toastNotifications } from 'ui/notify';
 import { EditFilterListHeader } from './header';
 import { EditFilterListToolbar } from './toolbar';
 import { ItemsGrid } from '../../../components/items_grid';
-import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../../../components/navigation_menu';
 import {
   isValidFilterListId,
   saveFilterList
