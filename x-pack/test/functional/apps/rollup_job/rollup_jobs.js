@@ -16,8 +16,12 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['rollup', 'common']);
 
   describe('rollup job', function () {
-    const rollupJobName = 'rollup-to-be-' + Math.floor(Math.random() * 10000);
-    const indexName = 'rollup-to-be';
+    //Since rollups can only be created once with the same name (even if you delete it),
+    //we add the Date.now() to avoid name collision.
+    const rollupJobName = 'rollup-to-be-' + Date.now();
+    const targetIndexName = 'rollup-to-be';
+    const rollupSourceIndexPattern = 'to-be*';
+    const rollupSourceDataPrepend = 'to-be';
     //make sure all dates have the same concept of "now"
     const now = new Date();
     const pastDates = [
@@ -27,37 +31,36 @@ export default function ({ getService, getPageObjects }) {
     ];
 
     it('create new rollup job', async () => {
-      const indexPattern = 'to-be*';
       const interval = '1000ms';
 
       pastDates.map(async (day) => {
-        await es.index(mockIndices(day, 'to-be'));
+        await es.index(mockIndices(day, rollupSourceDataPrepend));
       });
 
       await PageObjects.common.navigateToApp('rollupJob');
-      await PageObjects.rollup.createNewRollUpJob(rollupJobName, indexPattern, indexName,
+      await PageObjects.rollup.createNewRollUpJob(rollupJobName, rollupSourceIndexPattern, targetIndexName,
         interval, ' ', true, { time: '*/10 * * * * ?', cron: true });
 
       const jobList = await PageObjects.rollup.getJobList();
       expect(jobList.length).to.be(1);
 
+    });
+
+    after(async () => {
       //Stop the running rollup job.
       await es.transport.request({
         path: `/_rollup/job/${rollupJobName}/_stop?wait_for_completion=true`,
         method: 'POST',
       });
-    });
-
-    after(async () => {
       // Delete the rollup job.
-      es.transport.request({
+      await es.transport.request({
         path: `/_rollup/job/${rollupJobName}`,
         method: 'DELETE',
       });
 
+      //Delete all data indices that were created.
       await es.indices.delete({ index: 'rollup*' });
-      await es.indices.delete({ index: 'to-be*' });
-      await es.indices.delete({ index: 'live*' });
+      await es.indices.delete({ index: `${rollupSourceIndexPattern}` });
       await esArchiver.load('empty_kibana');
     });
   });

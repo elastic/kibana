@@ -17,7 +17,9 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'settings']);
 
   describe('hybrid index pattern', function () {
-    const rollupJobName = `hybrid-index-pattern-test-rollup-job-` + Math.floor(Math.random() * 10000);
+    //Since rollups can only be created once with the same name (even if you delete it),
+    //we add the Date.now() to avoid name collision.
+    const rollupJobName = `hybrid-index-pattern-test-rollup-job-` + Date.now();
     const rollupTargetIndexName = `rollup-target-data`;
     const regularIndexPrefix = `regular-index`;
     const rollupSourceIndexPrefix = `rollup-source-data`;
@@ -37,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.waitForWithTimeout('waiting for 3 records to be loaded into elasticsearch.', 10000, async () => {
         const response = await es.indices.get({
-          index: `rollup-source-data*`,
+          index: `${rollupSourceIndexPrefix}*`,
           allow_no_indices: false
         });
         return Object.keys(response).length === 3;
@@ -49,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
           path: `/_rollup/job/${rollupJobName}`,
           method: 'PUT',
           body: {
-            'index_pattern': 'rollup-source-data*',
+            'index_pattern': `${rollupSourceIndexPrefix}*`,
             'rollup_index': rollupTargetIndexName,
             'cron': '*/10 * * * * ?',
             'groups': {
@@ -70,12 +72,9 @@ export default function ({ getService, getPageObjects }) {
         await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
       });
 
-      //Add data for today, 1,2 and 3 days into the future.
+      //Add data for today as live data.
       const futureDates = [
-        datemath.parse('now', { forceNow: now }),
-        datemath.parse('now+1d', { forceNow: now }),
-        datemath.parse('now+2d', { forceNow: now }),
-        datemath.parse('now+3d', { forceNow: now }),
+        datemath.parse('now', { forceNow: now })
       ];
 
       //Index live data to be used in the test.
@@ -84,11 +83,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.createIndexPattern('regular-index*,' + rollupTargetIndexName, '@timestamp', false);
+      await PageObjects.settings.createIndexPattern(`${regularIndexPrefix}*,${rollupTargetIndexName}`, '@timestamp', false);
 
 
       await PageObjects.settings.clickKibanaIndexPatterns();
-      expect(await PageObjects.settings.isIndexPatternListEmpty()).to.be(false);
+      const indexPatternList = await PageObjects.settings.getIndexPatternList();
+      expect(indexPatternList.length).to.be(1);
     });
 
     after(async () => {

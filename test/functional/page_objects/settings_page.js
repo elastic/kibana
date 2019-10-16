@@ -287,9 +287,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await indexLink.click();
     }
 
+    async getIndexPatternList() {
+      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
+      return await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable a');
+    }
+
     async isIndexPatternListEmpty() {
       await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
-      const indexPatternList = await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable a');
+      const indexPatternList = await this.getIndexPatternList();
       return indexPatternList.length === 0;
     }
 
