@@ -9,7 +9,7 @@ import React from 'react';
 import { manageQuery } from '../../../components/page/manage_query';
 import { TlsTable } from '../../../components/page/network/tls_table';
 import { TlsQuery } from '../../../containers/tls';
-import { NetworkComponentsQueryProps } from './types';
+import { TlsQueryTableComponentProps } from './types';
 
 const TlsTableManage = manageQuery(TlsTable);
 
@@ -22,7 +22,7 @@ export const TlsQueryTable = ({
   skip,
   startDate,
   type,
-}: NetworkComponentsQueryProps) => (
+}: TlsQueryTableComponentProps) => (
   <TlsQuery
     endDate={endDate}
     filterQuery={filterQuery}

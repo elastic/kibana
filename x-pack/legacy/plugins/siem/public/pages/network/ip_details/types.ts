@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
+import { Query } from 'src/plugins/data/common';
 
 import { NetworkType } from '../../../store/network/model';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
-import { FlowTarget } from '../../../graphql/types';
+import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
 import { InputsModelId } from '../../../store/inputs/constants';
 import { GlobalTimeArgs } from '../../../containers/global_time';
 
@@ -23,12 +25,14 @@ type SetAbsoluteRangeDatePicker = ActionCreator<{
 }>;
 
 interface IPDetailsComponentReduxProps {
-  filterQuery: string;
+  filters: Filter[];
   flowTarget: FlowTarget;
+  query: Query;
 }
 
 interface IPDetailsComponentDispatchProps {
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
+  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
 export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
@@ -40,7 +44,6 @@ interface OwnProps {
   startDate: number;
   endDate: number;
   filterQuery: string | ESTermQuery;
-  flowTarget: FlowTarget;
   ip: string;
   skip: boolean;
   setQuery: ({
@@ -56,8 +59,15 @@ interface OwnProps {
   }) => void;
 }
 
-export type NetworkComponentsQueryProps = OwnProps;
+export type NetworkComponentsQueryProps = OwnProps & {
+  flowTarget: FlowTarget;
+};
 
-export type DomainsQueryTableProps = OwnProps & {
+export type TlsQueryTableComponentProps = OwnProps & {
+  flowTarget: FlowTargetSourceDest;
+};
+
+export type NetworkWithIndexComponentsQueryTableProps = OwnProps & {
+  flowTarget: FlowTargetSourceDest;
   indexPattern: StaticIndexPattern;
 };

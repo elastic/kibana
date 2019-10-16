@@ -43,5 +43,15 @@ export default function ({ getPageObjects, getService }) {
       expect(Object.keys(firstHit.fields).join(',')).to.equal('geo.coordinates,bytes,hour_of_day');
     });
 
+    it('should format date fields as epoch_millis when data driven styling is applied to a date field', async () => {
+      await PageObjects.maps.loadSavedMap('document example with data driven styles on date field');
+      const response = await getResponse();
+      const firstHit = response.hits.hits[0];
+      expect(Object.keys(firstHit).join(',')).to.equal('_index,_type,_id,_score,fields');
+      expect(Object.keys(firstHit.fields).join(',')).to.equal('geo.coordinates,bytes,@timestamp');
+      expect(firstHit.fields['@timestamp']).to.be.an('array');
+      expect(firstHit.fields['@timestamp'][0]).to.equal('1442709321445');
+    });
+
   });
 }

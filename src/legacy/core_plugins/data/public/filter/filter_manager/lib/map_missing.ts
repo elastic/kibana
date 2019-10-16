@@ -18,7 +18,7 @@
  */
 import { Filter, FILTERS, isMissingFilter } from '@kbn/es-query';
 
-export const mapMissing = async (filter: Filter) => {
+export const mapMissing = (filter: Filter) => {
   if (isMissingFilter(filter)) {
     return {
       type: FILTERS.MISSING,
