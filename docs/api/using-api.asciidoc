@@ -5,6 +5,8 @@ Interact with the {kib} APIs using the Command Line through the `curl` command a
 
 It is recommended that you use HTTPs on port 5601 because it is more secure.
 
+NOTE: The {kib} Console supports only Elasticsearch APIs. You are unable to interact with the {kib} APIs with the Console and must use `curl` or another HTTP tool instead. For more information, refer to <<console-kibana,Console>>.
+
 [float]
 [[api-authentication]]
 === Authentication
@@ -29,14 +31,11 @@ For example, the following `curl` command exports a dashboard:
 
 [source,sh]
 --
-curl -X POST -u $USER:$PASSWORD "localhost:5601/apikibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c"<1> <2>
--H 'kbn-xsrf: true'
+curl -X POST -u $USER:$PASSWORD "localhost:5601/api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c"<1> <2>
 --
 
 <1> User with sufficient privileges
 <2> User password
-
-The {kib} Console supports only Elasticsearch APIs. You are unable to interact with the {kib} APIs with the Console. For more information, refer to <<console-kibana,Console>>.
 
 The following {kib} APIs are available:
 
