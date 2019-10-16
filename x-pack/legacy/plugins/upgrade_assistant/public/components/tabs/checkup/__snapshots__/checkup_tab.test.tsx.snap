@@ -39,18 +39,16 @@ exports[`CheckupTab render with deprecations 1`] = `
         id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.calloutDetail"
         values={
           Object {
-            "snapshotRestoreDocsButton": <EuiLink
-              color="primary"
+            "snapshotRestoreDocsButton": <ForwardRef
               href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
               target="_blank"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="snapshot and restore APIs"
                 id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.snapshotRestoreDocsButtonLabel"
                 values={Object {}}
               />
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />
@@ -325,18 +323,16 @@ exports[`CheckupTab render with error 1`] = `
         id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.calloutDetail"
         values={
           Object {
-            "snapshotRestoreDocsButton": <EuiLink
-              color="primary"
+            "snapshotRestoreDocsButton": <ForwardRef
               href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
               target="_blank"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="snapshot and restore APIs"
                 id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.snapshotRestoreDocsButtonLabel"
                 values={Object {}}
               />
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />
@@ -394,18 +390,16 @@ exports[`CheckupTab render without deprecations 1`] = `
         id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.calloutDetail"
         values={
           Object {
-            "snapshotRestoreDocsButton": <EuiLink
-              color="primary"
+            "snapshotRestoreDocsButton": <ForwardRef
               href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
               target="_blank"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="snapshot and restore APIs"
                 id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.snapshotRestoreDocsButtonLabel"
                 values={Object {}}
               />
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />
@@ -440,17 +434,15 @@ exports[`CheckupTab render without deprecations 1`] = `
                 id="xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail"
                 values={
                   Object {
-                    "overviewTabButton": <EuiLink
-                      color="primary"
+                    "overviewTabButton": <ForwardRef
                       onClick={[Function]}
-                      type="button"
                     >
                       <FormattedMessage
                         defaultMessage="Overview tab"
                         id="xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail.overviewTabButtonLabel"
                         values={Object {}}
                       />
-                    </EuiLink>,
+                    </ForwardRef>,
                   }
                 }
               />

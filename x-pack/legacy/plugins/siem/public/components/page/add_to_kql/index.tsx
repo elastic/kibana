@@ -5,33 +5,40 @@
  */
 
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { Filter } from '@kbn/es-query';
+import { getOr } from 'lodash/fp';
 import React from 'react';
+import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { Query } from 'src/plugins/data/common';
 
-import { HostsFilter } from '../../../containers/hosts';
-import { NetworkFilter } from '../../../containers/network';
-import { assertUnreachable } from '../../../lib/helpers';
-import { hostsModel, KueryFilterQuery, networkModel } from '../../../store';
 import { WithHoverActions } from '../../with_hover_actions';
-import * as i18n from './translations';
+import { InputsModelId } from '../../../store/inputs/constants';
+import { siemFilterManager } from '../../search_bar';
 
-interface Props {
-  applyFilterQueryFromKueryExpression: (expression: string) => void;
-  children: JSX.Element;
-  expression: string;
-  filterQueryDraft: KueryFilterQuery;
+import * as i18n from './translations';
+import { filterQuerySelector } from '../../search_bar/selectors';
+import { State } from '../../../store';
+import { InputsRange } from '../../../store/inputs/model';
+
+export * from './helpers';
+
+interface AddToKqlRedux {
+  query: Query;
 }
 
-const AddToKqlComponent = React.memo<Props>(
-  ({ children, expression, filterQueryDraft, applyFilterQueryFromKueryExpression }) => {
+interface OwnProps {
+  id: InputsModelId;
+  children: JSX.Element;
+  indexPattern: StaticIndexPattern;
+  filter: Filter;
+}
+
+const AddToKqlComponent = React.memo<OwnProps & AddToKqlRedux>(
+  ({ children, id, indexPattern, filter, query }) => {
     const addToKql = () => {
-      applyFilterQueryFromKueryExpression(
-        filterQueryDraft && !isEmpty(filterQueryDraft.expression)
-          ? `${filterQueryDraft.expression} and ${expression}`
-          : expression
-      );
+      siemFilterManager.addFilters(filter);
     };
     return (
       <WithHoverActions
@@ -63,50 +70,14 @@ export const HoverActionsContainer = styled(EuiPanel)`
   cursor: pointer;
 `;
 
-HoverActionsContainer.displayName = 'HoverActionsContainer';
+const makeMapStateToProps = () => {
+  const getFilterQuerySelector = filterQuerySelector();
+  return (state: State, { id }: OwnProps) => {
+    const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
+    return {
+      query: getFilterQuerySelector(inputsRange),
+    };
+  };
+};
 
-interface AddToKqlProps {
-  children: JSX.Element;
-  indexPattern: StaticIndexPattern;
-  expression: string;
-  componentFilterType: 'network' | 'hosts';
-  type: networkModel.NetworkType | hostsModel.HostsType;
-}
-
-export const AddToKql = React.memo<AddToKqlProps>(
-  ({ children, expression, type, componentFilterType, indexPattern }) => {
-    switch (componentFilterType) {
-      case 'hosts':
-        return (
-          <HostsFilter indexPattern={indexPattern} type={type as hostsModel.HostsType}>
-            {({ applyFilterQueryFromKueryExpression, filterQueryDraft }) => (
-              <AddToKqlComponent
-                applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
-                expression={expression}
-                filterQueryDraft={filterQueryDraft}
-              >
-                {children}
-              </AddToKqlComponent>
-            )}
-          </HostsFilter>
-        );
-      case 'network':
-        return (
-          <NetworkFilter indexPattern={indexPattern} type={type as networkModel.NetworkType}>
-            {({ applyFilterQueryFromKueryExpression, filterQueryDraft }) => (
-              <AddToKqlComponent
-                applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
-                expression={expression}
-                filterQueryDraft={filterQueryDraft}
-              >
-                {children}
-              </AddToKqlComponent>
-            )}
-          </NetworkFilter>
-        );
-    }
-    assertUnreachable(componentFilterType, 'Unknown Filter Type in switch statement');
-  }
-);
-
-AddToKql.displayName = 'AddToKql';
+export const AddToKql = connect(makeMapStateToProps)(AddToKqlComponent);

@@ -25,7 +25,6 @@ import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import { SavedObjectsErrorHelpers } from './errors';
-import { SavedObjectsCacheIndexPatterns } from './cache_index_patterns';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
@@ -79,7 +78,6 @@ export interface SavedObjectsRepositoryOptions {
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
   allowedTypes: string[];
-  cacheIndexPatterns: SavedObjectsCacheIndexPatterns;
   onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
@@ -97,13 +95,11 @@ export class SavedObjectsRepository {
   private _onBeforeWrite: (...args: Parameters<CallCluster>) => Promise<void>;
   private _unwrappedCallCluster: CallCluster;
   private _serializer: SavedObjectsSerializer;
-  private _cacheIndexPatterns: SavedObjectsCacheIndexPatterns;
 
   constructor(options: SavedObjectsRepositoryOptions) {
     const {
       index,
       config,
-      cacheIndexPatterns,
       mappings,
       callCluster,
       schema,
@@ -125,7 +121,6 @@ export class SavedObjectsRepository {
     this._config = config;
     this._mappings = mappings;
     this._schema = schema;
-    this._cacheIndexPatterns = cacheIndexPatterns;
     if (allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
     }
@@ -135,9 +130,6 @@ export class SavedObjectsRepository {
 
     this._unwrappedCallCluster = async (...args: Parameters<CallCluster>) => {
       await migrator.runMigrations();
-      if (this._cacheIndexPatterns.getIndexPatterns() == null) {
-        await this._cacheIndexPatterns.setIndexPatterns(index);
-      }
       return callCluster(...args);
     };
     this._schema = schema;
@@ -433,20 +425,19 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError('options.fields must be an array');
     }
 
-    if (filter && filter !== '' && this._cacheIndexPatterns.getIndexPatterns() == null) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'options.filter is missing index pattern to work correctly'
-      );
+    let kueryNode;
+    try {
+      kueryNode =
+        filter && filter !== ''
+          ? validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings)
+          : null;
+    } catch (e) {
+      if (e.name === 'KQLSyntaxError') {
+        throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
+      } else {
+        throw e;
+      }
     }
-
-    const kueryNode =
-      filter && filter !== ''
-        ? validateConvertFilterToKueryNode(
-            allowedTypes,
-            filter,
-            this._cacheIndexPatterns.getIndexPatterns()
-          )
-        : null;
 
     const esOptions = {
       index: this.getIndicesForTypes(allowedTypes),
@@ -466,7 +457,6 @@ export class SavedObjectsRepository {
           sortOrder,
           namespace,
           hasReference,
-          indexPattern: kueryNode != null ? this._cacheIndexPatterns.getIndexPatterns() : undefined,
           kueryNode,
         }),
       },
