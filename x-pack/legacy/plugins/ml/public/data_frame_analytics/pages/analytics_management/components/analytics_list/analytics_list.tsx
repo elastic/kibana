@@ -8,12 +8,7 @@ import React, { Fragment, FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  // EuiBadge,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
@@ -24,7 +19,6 @@ import {
   DataFrameAnalyticsListRow,
   ItemIdToExpandedRowMap,
   DATA_FRAME_TASK_STATE,
-  // DATA_FRAME_MODE,
   Query,
   Clause,
 } from './common';

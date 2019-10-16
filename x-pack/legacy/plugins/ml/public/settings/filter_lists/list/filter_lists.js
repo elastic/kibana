@@ -21,7 +21,7 @@ import { injectI18n } from '@kbn/i18n/react';
 
 import { toastNotifications } from 'ui/notify';
 
-import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../../../components/navigation_menu';
 
 import { FilterListsHeader } from './header';
 import { FilterListsTable } from './table';
