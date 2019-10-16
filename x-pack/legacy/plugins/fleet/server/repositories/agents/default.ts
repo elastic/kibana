@@ -12,8 +12,13 @@ import {
   AgentsRepository as AgentsRepositoryType,
   SortOptions,
   SavedObjectAgentAttributes,
+  ListOptions,
 } from './types';
-import { DEFAULT_AGENTS_PAGE_SIZE } from '../../../common/constants';
+import {
+  DEFAULT_AGENTS_PAGE_SIZE,
+  AGENT_POLLING_THRESHOLD_MS,
+  AGENT_TYPE_EPHEMERAL,
+} from '../../../common/constants';
 import { SODatabaseAdapter } from '../../adapters/saved_objects_database/adapter_types';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
@@ -148,22 +153,38 @@ export class AgentsRepository implements AgentsRepositoryType {
    */
   public async list(
     user: FrameworkUser,
-    sortOptions?: SortOptions,
-    page: number = 1,
-    perPage: number = DEFAULT_AGENTS_PAGE_SIZE,
-    kuery?: string
+    options: ListOptions = {}
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
+    const {
+      page = 1,
+      perPage = DEFAULT_AGENTS_PAGE_SIZE,
+      kuery,
+      showInactive = false,
+      sortOptions = SortOptions.EnrolledAtDESC,
+    } = options;
+
+    const filters = [];
+
+    if (kuery && kuery !== '') {
+      filters.push(kuery.replace(/agents\./g, 'agents.attributes.'));
+    }
+
+    if (showInactive === false) {
+      const agentActiveCondition = `agents.attributes.active:true AND not agents.attributes.type:${AGENT_TYPE_EPHEMERAL}`;
+      const recentlySeenEphemeralAgent = `agents.attributes.active:true AND agents.attributes.type:${AGENT_TYPE_EPHEMERAL} AND agents.attributes.last_checkin > ${Date.now() -
+        3 * AGENT_POLLING_THRESHOLD_MS}`;
+      filters.push(`(${agentActiveCondition}) OR (${recentlySeenEphemeralAgent})`);
+    }
+
     const { saved_objects, total } = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
       type: 'agents',
       page,
       perPage,
-      filter: kuery && kuery !== '' ? kuery.replace(/agents\./g, 'agents.attributes.') : undefined,
+      filter: _joinFilters(filters),
       ...this._getSortFields(sortOptions),
     });
 
-    const agents: Agent[] = saved_objects
-      .map(this._savedObjectToAgent)
-      .filter(agent => agent.type !== 'EPHEMERAL_INSTANCE');
+    const agents: Agent[] = saved_objects.map(this._savedObjectToAgent);
 
     return {
       agents,
@@ -237,4 +258,14 @@ export class AgentsRepository implements AgentsRepositoryType {
         return {};
     }
   }
+}
+
+function _joinFilters(filters: string[], operator = 'AND') {
+  return filters.reduce((acc: string | undefined, filter) => {
+    if (acc) {
+      return `${acc} ${operator} (${filter})`;
+    }
+
+    return `(${filter})`;
+  }, undefined);
 }

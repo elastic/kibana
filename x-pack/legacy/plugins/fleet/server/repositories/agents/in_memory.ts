@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AgentsRepository, Agent, NewAgent } from './types';
+import { AgentsRepository, Agent, NewAgent, ListOptions } from './types';
 import { DEFAULT_AGENTS_PAGE_SIZE } from '../../../common/constants';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
@@ -63,11 +63,9 @@ export class InMemoryAgentsRepository implements AgentsRepository {
 
   public async list(
     user: FrameworkUser,
-    sortOptions: any,
-    page: number = 1,
-    perPage: number = DEFAULT_AGENTS_PAGE_SIZE,
-    kuery?: string
+    options: ListOptions = {}
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
+    const { page = 1, perPage = DEFAULT_AGENTS_PAGE_SIZE } = options;
     const start = (page - 1) * perPage;
     const agents = Object.values(this.agents).slice(start, start + perPage);
     const total = Object.keys(this.agents).length;

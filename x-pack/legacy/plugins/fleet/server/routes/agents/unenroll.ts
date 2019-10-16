@@ -43,7 +43,11 @@ export const createPOSTAgentsUnenrollRoute = (libs: FleetServerLib) => ({
       let hasMore = true;
       let page = 1;
       while (hasMore) {
-        const response = await libs.agents.list(request.user, undefined, page++, 1000, kuery);
+        const response = await libs.agents.list(request.user, {
+          page: page++,
+          perPage: 100,
+          kuery,
+        });
         if (response.agents.length === 0) {
           hasMore = false;
         }

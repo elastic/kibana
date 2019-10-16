@@ -20,6 +20,7 @@ export const createListAgentsRoute = (libs: FleetServerLib) => ({
       query: {
         page: Joi.number().default(1),
         perPage: Joi.number().default(DEFAULT_AGENTS_PAGE_SIZE),
+        showInactive: Joi.boolean().default(false),
         kuery: Joi.string()
           .trim()
           .optional(),
@@ -27,15 +28,16 @@ export const createListAgentsRoute = (libs: FleetServerLib) => ({
     },
   },
   handler: async (
-    request: FrameworkRequest<{ query: { page: string; perPage: string; kuery: string } }>
+    request: FrameworkRequest<{
+      query: { page: string; perPage: string; kuery: string; showInactive: string };
+    }>
   ): Promise<ReturnTypeList<Agent>> => {
-    const { agents, total, page, perPage } = await libs.agents.list(
-      request.user,
-      undefined,
-      parseInt(request.query.page, 10),
-      parseInt(request.query.perPage, 10),
-      request.query.kuery
-    );
+    const { agents, total, page, perPage } = await libs.agents.list(request.user, {
+      page: parseInt(request.query.page, 10),
+      perPage: parseInt(request.query.perPage, 10),
+      kuery: request.query.kuery,
+      showInactive: Boolean(request.query.showInactive),
+    });
 
     return { list: agents, success: true, total, page, perPage };
   },

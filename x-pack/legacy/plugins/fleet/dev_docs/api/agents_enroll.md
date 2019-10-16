@@ -12,6 +12,7 @@ Enroll agent
 
 ## Request body
 
+- `type` (Required, string) Agent type should be one of `EPHEMERAL`, `TEMPORARY`, `PERMANENT`
 - `shared_id` (Optional, string) An ID for the agent.
 - `metadata` (Optional, object) Objects with `local` and `user_provided` properties that contain the metadata for an agent. The metadata is a dictionary of strings (example: `"local": { "os": "macos" }`).
 

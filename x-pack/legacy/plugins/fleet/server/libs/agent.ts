@@ -56,18 +56,12 @@ export class AgentLib {
 
     const enrolledAt = new Date().toISOString();
 
-    const parentId =
-      type === 'EPHEMERAL_INSTANCE'
-        ? (await this._createParentForEphemeral(user, policyId)).id
-        : undefined;
-
     const agentData: NewAgent = {
       shared_id: sharedId,
       active: true,
       policy_id: policyId,
       type,
       enrolled_at: enrolledAt,
-      parent_id: parentId,
       user_provided_metadata: metadata && metadata.userProvided,
       local_metadata: metadata && metadata.local,
     };
@@ -122,7 +116,7 @@ export class AgentLib {
    * Delete an agent
    */
   public async delete(user: FrameworkUser, agent: Agent) {
-    if (agent.type === 'EPHEMERAL_INSTANCE') {
+    if (agent.type === 'EPHEMERAL') {
       await this.agentEventsRepository.deleteEventsForAgent(user, agent.id);
       return await this.agentsRepository.delete(user, agent);
     }
@@ -234,37 +228,21 @@ export class AgentLib {
    */
   public async list(
     user: FrameworkUser,
-    sortOptions: SortOptions = SortOptions.EnrolledAtDESC,
-    page?: number,
-    perPage?: number,
-    kuery?: string
+    options: {
+      showInactive?: boolean;
+      sortOptions?: SortOptions;
+      kuery?: string;
+      page?: number;
+      perPage?: number;
+    } = {
+      showInactive: false,
+      sortOptions: SortOptions.EnrolledAtDESC,
+    }
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }> {
-    return this.agentsRepository.list(user, sortOptions, page, perPage, kuery);
+    return this.agentsRepository.list(user, options);
   }
 
   public _filterActionsForCheckin(agent: Agent): AgentAction[] {
     return agent.actions.filter(a => !a.sent_at);
-  }
-
-  private async _createParentForEphemeral(user: FrameworkUser, policyId: string): Promise<Agent> {
-    const ephemeralParentId = `agents:ephemeral:${policyId}`;
-    const parentAgent = await this.agentsRepository.getById(user, 'ephemeralParentId');
-
-    if (parentAgent) {
-      return parentAgent;
-    }
-
-    return await this.agentsRepository.create(
-      user,
-      {
-        type: 'EPHEMERAL',
-        policy_id: policyId,
-        active: true,
-      },
-      {
-        id: ephemeralParentId,
-        overwrite: true,
-      }
-    );
   }
 }

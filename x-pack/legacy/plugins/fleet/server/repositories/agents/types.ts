@@ -7,7 +7,6 @@
 import * as t from 'io-ts';
 import {
   AGENT_TYPE_EPHEMERAL,
-  AGENT_TYPE_EPHEMERAL_INSTANCE,
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
 } from '../../../common/constants';
@@ -16,7 +15,6 @@ import { FrameworkUser } from '../../adapters/framework/adapter_types';
 export const RuntimeAgentType = t.union([
   t.literal(AGENT_TYPE_PERMANENT),
   t.literal(AGENT_TYPE_EPHEMERAL),
-  t.literal(AGENT_TYPE_EPHEMERAL_INSTANCE),
   t.literal(AGENT_TYPE_TEMPORARY),
 ]);
 
@@ -117,6 +115,14 @@ export enum SortOptions {
   EnrolledAtDESC,
 }
 
+export interface ListOptions {
+  showInactive?: boolean;
+  sortOptions?: SortOptions;
+  kuery?: string;
+  page?: number;
+  perPage?: number;
+}
+
 export interface AgentsRepository {
   create(
     user: FrameworkUser,
@@ -139,10 +145,7 @@ export interface AgentsRepository {
 
   list(
     user: FrameworkUser,
-    sortOptions?: SortOptions,
-    page?: number,
-    perPage?: number,
-    kuery?: string
+    options?: ListOptions
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }>;
 
   findEphemeralByPolicyId(user: FrameworkUser, policyId: string): Promise<Agent | null>;
