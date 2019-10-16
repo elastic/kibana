@@ -62,6 +62,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
                 defaultMessage: 'Edit',
               }
             )}
+            data-test-subj="mlAdvancedDetectorEditButton"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -75,6 +76,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
                 defaultMessage: 'Delete',
               }
             )}
+            data-test-subj="mlAdvancedDetectorDeleteButton"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -98,7 +100,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
 
       <EuiFlexGrid columns={3}>
         {detectors.map((d, i) => (
-          <EuiFlexItem key={i}>
+          <EuiFlexItem key={i} data-test-subj={`mlAdvancedDetector ${detectorToString(d)}`}>
             <EuiPanel paddingSize="m">
               <EuiFlexGroup>
                 <EuiFlexItem>
@@ -142,6 +144,7 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
           defaultMessage: 'No detectors',
         })}
         iconType="alert"
+        data-test-subj="mlAdvancedNoDetectorsMessage"
       >
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.message"
