@@ -12,7 +12,6 @@ import { OriginalColumn } from './rename_columns';
 
 function getExpressionForLayer(
   indexPattern: IndexPattern,
-  layerId: string,
   columns: Record<string, IndexPatternColumn>,
   columnOrder: string[]
 ) {
@@ -44,7 +43,7 @@ function getExpressionForLayer(
       {} as Record<string, OriginalColumn>
     );
 
-    const expression = `esaggs
+    return `esaggs
       index="${indexPattern.id}"
       metricsAtAllLevels=false
       partialRows=false
@@ -52,23 +51,6 @@ function getExpressionForLayer(
       aggConfigs={lens_auto_date aggConfigs='${JSON.stringify(
         aggs
       )}'} | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
-
-    if (!filterRatios.length) {
-      return expression;
-    }
-
-    const countColumn = buildColumn({
-      op: 'count',
-      columns,
-      suggestedPriority: 2,
-      layerId,
-      indexPattern,
-    });
-    aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
-
-    return `${expression} | ${filterRatios
-      .map(([id]) => `lens_calculate_filter_ratio id=${id}`)
-      .join(' | ')}`;
   }
 
   return null;
@@ -78,7 +60,6 @@ export function toExpression(state: IndexPatternPrivateState, layerId: string) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.indexPatterns[state.layers[layerId].indexPatternId],
-      layerId,
       state.layers[layerId].columns,
       state.layers[layerId].columnOrder
     );
