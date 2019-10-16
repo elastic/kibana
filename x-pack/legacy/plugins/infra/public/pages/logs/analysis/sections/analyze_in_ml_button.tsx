@@ -9,6 +9,7 @@ import url from 'url';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
+import { QueryString } from 'ui/utils/query_string';
 import { encode } from 'rison-node';
 import { TimeRange } from '../../../../../common/http_api/shared/time_range';
 
@@ -51,7 +52,7 @@ const getOverallAnomalyExplorerLink = (pathname: string, jobId: string, timeRang
     },
   });
 
-  const hash = `/explorer?_g=${_g}`;
+  const hash = `/explorer?${QueryString.encode({ _g })}`;
 
   return url.format({
     pathname,
@@ -84,7 +85,7 @@ const getPartitionSpecificSingleMetricViewerLink = (
     },
   });
 
-  const hash = `/timeseriesexplorer?_g=${_g}&_a=${encodeURIComponent(_a)}`;
+  const hash = `/timeseriesexplorer?${QueryString.encode({ _g, _a })}`;
 
   return url.format({
     pathname,
