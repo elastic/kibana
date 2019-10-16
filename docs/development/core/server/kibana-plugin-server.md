@@ -92,6 +92,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-server.savedobjectsclientwrapperoptions.md) | Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsExportOptions](./kibana-plugin-server.savedobjectsexportoptions.md) | Options controlling the export operation. |
+|  [SavedObjectsExportResultDetails](./kibana-plugin-server.savedobjectsexportresultdetails.md) | Structure of the export result details entry |
 |  [SavedObjectsFindOptions](./kibana-plugin-server.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindResponse](./kibana-plugin-server.savedobjectsfindresponse.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |
 |  [SavedObjectsImportConflictError](./kibana-plugin-server.savedobjectsimportconflicterror.md) | Represents a failure to import due to a conflict. |

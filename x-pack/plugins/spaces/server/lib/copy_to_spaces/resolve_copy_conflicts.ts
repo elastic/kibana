@@ -31,6 +31,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
     const objectStream = await importExport.getSortedObjectsForExport({
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
+      excludeExportDetails: true,
       objects: options.objects,
       savedObjectsClient,
       types: eligibleTypes,
