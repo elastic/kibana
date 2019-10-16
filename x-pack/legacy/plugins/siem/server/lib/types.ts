@@ -21,6 +21,7 @@ import { UncommonProcesses } from './uncommon_processes';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
+import { TLS } from './tls';
 
 export * from './hosts';
 
@@ -35,6 +36,7 @@ export interface AppDomainLibs {
   overview: Overview;
   uncommonProcesses: UncommonProcesses;
   kpiHosts: KpiHosts;
+  tls: TLS;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {

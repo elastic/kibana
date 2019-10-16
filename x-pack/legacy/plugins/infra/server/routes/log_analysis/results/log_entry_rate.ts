@@ -14,6 +14,7 @@ import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
   getLogEntryRateRequestPayloadRT,
   getLogEntryRateSuccessReponsePayloadRT,
+  GetLogEntryRateSuccessResponsePayload,
 } from '../../../../common/http_api/log_analysis';
 import { throwErrors } from '../../../../common/runtime_types';
 import { NoLogRateResultsIndexError } from '../../../lib/log_analysis';
@@ -52,9 +53,21 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
           data: {
             bucketDuration: payload.data.bucketDuration,
             histogramBuckets: logEntryRateBuckets,
+            totalNumberOfLogEntries: getTotalNumberOfLogEntries(logEntryRateBuckets),
           },
         })
       );
     },
   });
+};
+
+const getTotalNumberOfLogEntries = (
+  logEntryRateBuckets: GetLogEntryRateSuccessResponsePayload['data']['histogramBuckets']
+) => {
+  return logEntryRateBuckets.reduce((sumNumberOfLogEntries, bucket) => {
+    const sumPartitions = bucket.partitions.reduce((partitionsTotal, partition) => {
+      return (partitionsTotal += partition.numberOfLogEntries);
+    }, 0);
+    return (sumNumberOfLogEntries += sumPartitions);
+  }, 0);
 };

@@ -7,7 +7,7 @@
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
 import { SearchParams, SearchResponse } from 'elasticsearch';
-import { LensUsage } from './types';
+import { LensVisualizationUsage } from './types';
 
 type ClusterSearchType = (
   endpoint: 'search',
@@ -20,7 +20,7 @@ type ClusterSearchType = (
 export async function getVisualizationCounts(
   callCluster: ClusterSearchType,
   config: KibanaConfig
-): Promise<LensUsage> {
+): Promise<LensVisualizationUsage> {
   const scriptedMetric = {
     scripted_metric: {
       // Each cluster collects its own type data in a key-value Map that looks like:
@@ -82,11 +82,11 @@ export async function getVisualizationCounts(
   const buckets = results.aggregations.groups.buckets;
 
   return {
-    visualization_types_overall: buckets.overall.byType.value.types,
-    visualization_types_last_30_days: buckets.last30.byType.value.types,
-    visualization_types_last_90_days: buckets.last90.byType.value.types,
-    saved_total: buckets.overall.doc_count,
-    saved_last_30_days: buckets.last30.doc_count,
-    saved_last_90_days: buckets.last90.doc_count,
+    saved_overall: buckets.overall.byType.value.types,
+    saved_30_days: buckets.last30.byType.value.types,
+    saved_90_days: buckets.last90.byType.value.types,
+    saved_overall_total: buckets.overall.doc_count,
+    saved_30_days_total: buckets.last30.doc_count,
+    saved_90_days_total: buckets.last90.doc_count,
   };
 }

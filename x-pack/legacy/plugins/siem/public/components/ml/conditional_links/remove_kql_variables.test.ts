@@ -42,76 +42,68 @@ describe('remove_kql_variables', () => {
     });
   });
   test('should not replace a single empty string value', () => {
-    const replacement = removeKqlVariables(
-      '(filterQuery:(expression:\'process.name : ""\',kind:kuery))'
-    );
-    expect(replacement).toEqual('(filterQuery:(expression:\'process.name : ""\',kind:kuery))');
+    const replacement = removeKqlVariables('(query:\'process.name : ""\',language:kuery)');
+    expect(replacement).toEqual('(language:kuery,query:\'process.name : ""\')');
   });
 
   test('should not replace a complex string when no variables are present', () => {
     const replacement = removeKqlVariables(
-      '(filterQuery:(expression:\'user.name : "user-1" and process.name : "process-1"\',kind:kuery))'
+      '(query:\'user.name : "user-1" and process.name : "process-1"\',language:kuery)'
     );
     expect(replacement).toEqual(
-      '(filterQuery:(expression:\'user.name : "user-1" and process.name : "process-1"\',kind:kuery))'
+      '(language:kuery,query:\'user.name : "user-1" and process.name : "process-1"\')'
     );
   });
 
   test('replacing a string with a variable $user.name$ into an empty string', () => {
-    const replacement = removeKqlVariables(
-      '(filterQuery:(expression:\'user.name : "$user.name$"\',kind:kuery))'
-    );
-    expect(replacement).toEqual("(filterQuery:(expression:'',kind:kuery))");
+    const replacement = removeKqlVariables('(query:\'user.name : "$user.name$"\',language:kuery)');
+    expect(replacement).toEqual("(language:kuery,query:'')");
   });
 
   test('replacing a string with a variable $user.name$ and an "and" clause that does not have a variable', () => {
     const replacement = removeKqlVariables(
-      '(filterQuery:(expression:\'user.name : "$user.name$" and process.name : "process-name"\',kind:kuery))'
+      '(query:\'user.name : "$user.name$" and process.name : "process-name"\',language:kuery)'
     );
-    expect(replacement).toEqual(
-      '(filterQuery:(expression:\'process.name : "process-name"\',kind:kuery))'
-    );
+    expect(replacement).toEqual('(language:kuery,query:\'process.name : "process-name"\')');
   });
 
   test('replacing a string with an "and" clause and a variable $user.name$', () => {
     const replacement = removeKqlVariables(
-      '(filterQuery:(expression:\'process.name : "process-name" and user.name : "$user.name$"\',kind:kuery))'
+      '(query:\'process.name : "process-name" and user.name : "$user.name$"\',language:kuery)'
     );
-    expect(replacement).toEqual(
-      '(filterQuery:(expression:\'process.name : "process-name"\',kind:kuery))'
-    );
+    expect(replacement).toEqual('(language:kuery,query:\'process.name : "process-name"\')');
   });
 
   test('replacing a string with an "and" clause, a variable $user.name$, and then another "and" clause', () => {
     const replacement = removeKqlVariables(
-      '(filterQuery:(expression:\'process.name : "process-name" and user.name : "$user.name$" and host.name : "host-1"\',kind:kuery))'
+      '(query:\'process.name : "process-name" and user.name : "$user.name$" and host.name : "host-1"\',language:kuery)'
     );
     expect(replacement).toEqual(
-      '(filterQuery:(expression:\'process.name : "process-name" and host.name : "host-1"\',kind:kuery))'
+      '(language:kuery,query:\'process.name : "process-name" and host.name : "host-1"\')'
     );
   });
 
   test('replacing a string with an "and" clause, a variable $user.name$, and then another "and" clause and then another variable', () => {
     const replacement = removeKqlVariables(
-      '(filterQuery:(expression:\'process.name : "process-name" and user.name : "$user.name$" and host.name : "host-1" and process.title : "$process.title$"\',kind:kuery))'
+      '(query:\'process.name : "process-name" and user.name : "$user.name$" and host.name : "host-1" and process.title : "$process.title$"\',language:kuery)'
     );
     expect(replacement).toEqual(
-      '(filterQuery:(expression:\'process.name : "process-name" and host.name : "host-1"\',kind:kuery))'
+      '(language:kuery,query:\'process.name : "process-name" and host.name : "host-1"\')'
     );
   });
 
   test('replacing a string with two variables of $user.name$ and $process.name$ into an empty string', () => {
     const replacement = removeKqlVariables(
-      '(filterQuery:(expression:\'user.name : "$user.name$" and process.name : "$process.name$"\',kind:kuery))'
+      '(query:\'user.name : "$user.name$" and process.name : "$process.name$"\',language:kuery)'
     );
-    expect(replacement).toEqual("(filterQuery:(expression:'',kind:kuery))");
+    expect(replacement).toEqual("(language:kuery,query:'')");
   });
 
   test('replacing a string with two variables of $user.name$ and $process.name$ and an "and" clause', () => {
     const replacement = removeKqlVariables(
-      '(filterQuery:(expression:\'user.name : "$user.name$" and process.name : "$process.name$" and host.name="host-1"\',kind:kuery))'
+      '(query:\'user.name : "$user.name$" and process.name : "$process.name$" and host.name="host-1"\',language:kuery)'
     );
-    expect(replacement).toEqual('(filterQuery:(expression:host.name="host-1",kind:kuery))');
+    expect(replacement).toEqual('(language:kuery,query:host.name="host-1")');
   });
 
   test('empty string should return an empty string', () => {
