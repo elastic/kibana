@@ -1,4 +1,4 @@
-[[dashboard-import-api-import]]
+[[dashboard-import-api]]
 === Import dashboard API
 ++++
 <titleabbrev>Import dashboard</titleabbrev>

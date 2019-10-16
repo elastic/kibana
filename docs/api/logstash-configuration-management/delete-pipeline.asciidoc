@@ -1,4 +1,3 @@
-[role="xpack"]
 [[logstash-configuration-management-api-delete]]
 === Delete Logstash pipeline API
 ++++
@@ -32,3 +31,4 @@ experimental[] Delete a centrally-managed Logstash pipeline.
 DELETE api/logstash/pipeline/hello-world
 --------------------------------------------------
 // KIBANA
+
