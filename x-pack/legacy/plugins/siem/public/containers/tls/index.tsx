@@ -50,7 +50,7 @@ export interface TlsComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  tlsSortField: TlsSortField;
+  sort: TlsSortField;
 }
 
 type TlsProps = OwnProps & TlsComponentReduxProps;
@@ -74,7 +74,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       skip,
       sourceId,
       startDate,
-      tlsSortField,
+      sort,
     } = this.props;
     const variables: GetTlsQuery.Variables = {
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
@@ -83,7 +83,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: tlsSortField,
+      sort,
       sourceId,
       timerange: {
         interval: '12h',

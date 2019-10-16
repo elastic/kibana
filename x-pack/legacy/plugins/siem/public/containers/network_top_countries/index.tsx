@@ -51,7 +51,7 @@ export interface NetworkTopCountriesComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  topCountriesSort: NetworkTopTablesSortField;
+  sort: NetworkTopTablesSortField;
 }
 
 type NetworkTopCountriesProps = OwnProps & NetworkTopCountriesComponentReduxProps;
@@ -75,7 +75,7 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
       skip,
       sourceId,
       startDate,
-      topCountriesSort,
+      sort,
     } = this.props;
     const variables: GetNetworkTopCountriesQuery.Variables = {
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
@@ -84,7 +84,7 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: topCountriesSort,
+      sort,
       sourceId,
       timerange: {
         interval: '12h',

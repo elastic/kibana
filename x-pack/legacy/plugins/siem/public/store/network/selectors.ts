@@ -46,7 +46,7 @@ const selectTopNFlowByType = (
     get([networkType, 'queries', nFlowType], state.network) || {
       activePage: DEFAULT_TABLE_ACTIVE_PAGE,
       limit: DEFAULT_TABLE_LIMIT,
-      topNFlowSort: {
+      sort: {
         field: NetworkTopTablesFields.bytes_out,
         direction: Direction.desc,
       },
@@ -65,7 +65,7 @@ const selectTlsByType = (state: State, networkType: NetworkType) => {
     get([networkType, 'queries', tlsType], state.network) || {
       activePage: DEFAULT_TABLE_ACTIVE_PAGE,
       limit: DEFAULT_TABLE_LIMIT,
-      tlsSortField: {
+      sort: {
         field: TlsFields._id,
         direction: Direction.desc,
       },
@@ -92,7 +92,7 @@ const selectTopCountriesByType = (
     get([networkType, 'queries', nFlowType], state.network) || {
       activePage: DEFAULT_TABLE_ACTIVE_PAGE,
       limit: DEFAULT_TABLE_LIMIT,
-      topCountriesSort: {
+      sort: {
         field: NetworkTopTablesFields.bytes_out,
         direction: Direction.desc,
       },

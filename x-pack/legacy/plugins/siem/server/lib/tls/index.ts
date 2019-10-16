@@ -13,7 +13,7 @@ export * from './elasticsearch_adapter';
 
 export interface TlsRequestOptions extends RequestOptionsPaginated {
   ip?: string;
-  tlsSortField: TlsSortField;
+  sort: TlsSortField;
   flowTarget: FlowTargetSourceDest;
 }
 

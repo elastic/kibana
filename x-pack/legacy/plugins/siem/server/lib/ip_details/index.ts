@@ -17,7 +17,7 @@ export interface IpOverviewRequestOptions extends RequestOptions {
 
 export interface UsersRequestOptions extends RequestOptionsPaginated {
   ip: string;
-  usersSortField: UsersSortField;
+  sort: UsersSortField;
   flowTarget: FlowTarget;
 }
 

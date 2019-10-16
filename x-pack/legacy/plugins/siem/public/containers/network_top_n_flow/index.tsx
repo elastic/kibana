@@ -51,7 +51,7 @@ export interface NetworkTopNFlowComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  topNFlowSort: NetworkTopTablesSortField;
+  sort: NetworkTopTablesSortField;
 }
 
 type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps;
@@ -75,7 +75,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       skip,
       sourceId,
       startDate,
-      topNFlowSort,
+      sort,
     } = this.props;
     const variables: GetNetworkTopNFlowQuery.Variables = {
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
@@ -84,7 +84,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: topNFlowSort,
+      sort,
       sourceId,
       timerange: {
         interval: '12h',

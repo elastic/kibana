@@ -9,7 +9,7 @@ import { createQueryFilterClauses, assertUnreachable } from '../../utils/build_q
 import { TlsRequestOptions } from './index';
 import { TlsSortField, Direction, TlsFields } from '../../graphql/types';
 
-const getAggs = (querySize: number, tlsSortField: TlsSortField) => ({
+const getAggs = (querySize: number, sort: TlsSortField) => ({
   count: {
     cardinality: {
       field: 'tls.server_certificate.fingerprint.sha1',
@@ -20,7 +20,7 @@ const getAggs = (querySize: number, tlsSortField: TlsSortField) => ({
       field: 'tls.server_certificate.fingerprint.sha1',
       size: querySize,
       order: {
-        ...getQueryOrder(tlsSortField),
+        ...getQueryOrder(sort),
       },
     },
     aggs: {
@@ -55,7 +55,7 @@ const getAggs = (querySize: number, tlsSortField: TlsSortField) => ({
 
 export const buildTlsQuery = ({
   ip,
-  tlsSortField,
+  sort,
   filterQuery,
   flowTarget,
   pagination: { querySize },
@@ -78,7 +78,7 @@ export const buildTlsQuery = ({
     ignoreUnavailable: true,
     body: {
       aggs: {
-        ...getAggs(querySize, tlsSortField),
+        ...getAggs(querySize, sort),
       },
       query: {
         bool: {
@@ -97,11 +97,11 @@ interface QueryOrder {
   _key: Direction;
 }
 
-const getQueryOrder = (tlsSortField: TlsSortField): QueryOrder => {
-  switch (tlsSortField.field) {
+const getQueryOrder = (sort: TlsSortField): QueryOrder => {
+  switch (sort.field) {
     case TlsFields._id:
-      return { _key: tlsSortField.direction };
+      return { _key: sort.direction };
     default:
-      return assertUnreachable(tlsSortField.field);
+      return assertUnreachable(sort.field);
   }
 };
