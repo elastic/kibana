@@ -236,6 +236,14 @@ export interface HttpResponse {
 export interface IHttpFetchError extends Error {
   readonly request: Request;
   readonly response?: Response;
+  /**
+   * @deprecated Provided for legacy compatibility. Prefer the `request` property instead.
+   */
+  readonly req: Request;
+  /**
+   * @deprecated Provided for legacy compatibility. Prefer the `response` property instead.
+   */
+  readonly res?: Response;
   readonly body?: any;
 }
 
