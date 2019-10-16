@@ -7,7 +7,7 @@
 import { Server } from 'hapi';
 
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { SpacesPlugin } from '../../../../spaces';
+import { LegacySpacesPlugin } from '../../../../spaces';
 import { XPackFeature, XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { APPLICATION_PREFIX } from '../../../common/constants';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
@@ -38,7 +38,7 @@ export function createAuthorizationService(
   server: Server,
   securityXPackFeature: XPackFeature,
   xpackMainPlugin: XPackMainPlugin,
-  spaces: OptionalPlugin<SpacesPlugin>
+  spaces: OptionalPlugin<LegacySpacesPlugin>
 ): AuthorizationService {
   const shieldClient = getClient(server);
   const config = server.config();

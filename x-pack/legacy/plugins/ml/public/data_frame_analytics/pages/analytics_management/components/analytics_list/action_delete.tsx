@@ -28,7 +28,10 @@ interface DeleteActionProps {
 }
 
 export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
-  const disabled = item.stats.state === DATA_FRAME_TASK_STATE.STARTED;
+  const disabled =
+    item.stats.state === DATA_FRAME_TASK_STATE.STARTED ||
+    item.stats.state === DATA_FRAME_TASK_STATE.ANALYZING ||
+    item.stats.state === DATA_FRAME_TASK_STATE.REINDEXING;
 
   const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
 

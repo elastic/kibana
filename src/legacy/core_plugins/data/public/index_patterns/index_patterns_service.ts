@@ -23,7 +23,7 @@ import {
   HttpServiceBase,
   NotificationsSetup,
 } from 'src/core/public';
-import { Field, FieldList, FieldType } from './fields';
+import { Field, FieldList, FieldListInterface, FieldType } from './fields';
 import { createFlattenHitWrapper } from './index_patterns';
 import { createIndexPatternSelect } from './components';
 import {
@@ -46,23 +46,28 @@ export interface IndexPatternDependencies {
  * @internal
  */
 export class IndexPatternsService {
-  public setup({ uiSettings, savedObjectsClient, http, notifications }: IndexPatternDependencies) {
-    return {
+  private setupApi: any;
+
+  public setup() {
+    this.setupApi = {
       FieldList,
       flattenHitWrapper: createFlattenHitWrapper(),
       formatHitProvider,
-      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http, notifications),
-      IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
       __LEGACY: {
         // For BWC we must temporarily export the class implementation of Field,
         // which is only used externally by the Index Pattern UI.
         FieldImpl: Field,
       },
     };
+    return this.setupApi;
   }
 
-  public start() {
-    // nothing to do here yet
+  public start({ uiSettings, savedObjectsClient, http, notifications }: IndexPatternDependencies) {
+    return {
+      ...this.setupApi,
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http, notifications),
+      IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
+    };
   }
 
   public stop() {
@@ -99,6 +104,10 @@ export {
 
 /** @internal */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
+export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 
 /** @public */
-export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType };
+export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
+
+/** @public */
+export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';

@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Git from '@elastic/nodegit';
 import assert from 'assert';
 import { delay } from 'bluebird';
-import fs from 'fs';
 import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
-
+import { prepareProjectByCloning as prepareProject } from '../test_utils';
 import { CloneWorkerResult, Repository } from '../../model';
 import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
@@ -29,27 +27,6 @@ const esQueue = {};
 
 const serverOptions = createTestServerOption();
 const gitOps = new GitOperations(serverOptions.repoPath);
-
-function prepareProject(url: string, p: string) {
-  return new Promise(resolve => {
-    if (!fs.existsSync(p)) {
-      rimraf(p, error => {
-        Git.Clone.clone(url, p, {
-          fetchOpts: {
-            callbacks: {
-              certificateCheck: () => 0,
-            },
-          },
-          bare: 1,
-        }).then(repo => {
-          resolve(repo);
-        });
-      });
-    } else {
-      resolve();
-    }
-  });
-}
 
 function cleanWorkspace() {
   return new Promise(resolve => {
