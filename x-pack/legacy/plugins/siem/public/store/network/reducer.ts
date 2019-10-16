@@ -17,6 +17,7 @@ import {
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
+  setIpDetailsTablesActivePageToZero,
   setNetworkTablesActivePageToZero,
   updateIpDetailsFlowTarget,
   updateNetworkTable,
@@ -158,6 +159,13 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state.page,
       queries: setNetworkPageQueriesActivePageToZero(state),
     },
+    details: {
+      ...state.details,
+      queries: setNetworkDetailsQueriesActivePageToZero(state),
+    },
+  }))
+  .case(setIpDetailsTablesActivePageToZero, state => ({
+    ...state,
     details: {
       ...state.details,
       queries: setNetworkDetailsQueriesActivePageToZero(state),

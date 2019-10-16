@@ -49,7 +49,7 @@ export enum IpDetailsTableType {
   users = 'users',
 }
 
-export type AllNetworkTables = NetworkTableType & IpDetailsTableType;
+export type AllNetworkTables = NetworkTableType | IpDetailsTableType;
 
 export interface BasicQueryPaginated {
   activePage: number;

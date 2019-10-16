@@ -7,7 +7,8 @@
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import { compose, ActionCreator } from 'redux';
+import { compose } from 'redux';
+import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { networkActions } from '../../../../store/actions';
@@ -47,7 +48,7 @@ interface NetworkTopCountriesTableReduxProps {
 interface NetworkTopCountriesTableDispatchProps {
   updateNetworkTable: ActionCreator<{
     networkType: networkModel.NetworkType;
-    tableType: networkModel.TopNTableType;
+    tableType: networkModel.AllNetworkTables;
     updates: networkModel.TableUpdates;
   }>;
 }

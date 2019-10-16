@@ -7,7 +7,7 @@
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import { ActionCreator } from 'redux';
+import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/actions';
 import { NetworkDnsEdges, NetworkDnsFields, NetworkDnsSortField } from '../../../../graphql/types';
@@ -42,7 +42,7 @@ interface NetworkDnsTableReduxProps {
 interface NetworkDnsTableDispatchProps {
   updateNetworkTable: ActionCreator<{
     networkType: networkModel.NetworkType;
-    tableType: networkModel.TopNTableType;
+    tableType: networkModel.AllNetworkTables;
     updates: networkModel.TableUpdates;
   }>;
 }

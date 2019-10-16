@@ -7,7 +7,8 @@
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import { compose, ActionCreator } from 'redux';
+import { compose } from 'redux';
+import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/network';
 import { TlsEdges, TlsSortField, TlsFields } from '../../../../graphql/types';
@@ -37,7 +38,7 @@ interface TlsTableReduxProps {
 interface TlsTableDispatchProps {
   updateNetworkTable: ActionCreator<{
     networkType: networkModel.NetworkType;
-    tableType: networkModel.TopNTableType;
+    tableType: networkModel.AllNetworkTables;
     updates: networkModel.TableUpdates;
   }>;
 }

@@ -7,7 +7,7 @@
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import { ActionCreator } from 'redux';
+import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/network';
 import { FlowTarget, UsersEdges, UsersFields, UsersSortField } from '../../../../graphql/types';
@@ -41,7 +41,7 @@ interface UsersTableReduxProps {
 interface UsersTableDispatchProps {
   updateNetworkTable: ActionCreator<{
     networkType: networkModel.NetworkType;
-    tableType: networkModel.TopNTableType;
+    tableType: networkModel.AllNetworkTables;
     updates: networkModel.TableUpdates;
   }>;
 }
