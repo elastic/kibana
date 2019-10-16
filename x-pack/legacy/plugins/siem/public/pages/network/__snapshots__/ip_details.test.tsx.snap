@@ -3,7 +3,7 @@
 exports[`Ip Details it matches the snapshot 1`] = `
 <Component
   detailName="123.456.78.90"
-  filterQuery="coolQueryhuh?"
+  filters={Array []}
   flowTarget="source"
   from={1521862432253}
   history={
@@ -44,6 +44,12 @@ exports[`Ip Details it matches the snapshot 1`] = `
       },
       "path": "",
       "url": "",
+    }
+  }
+  query={
+    Object {
+      "language": "keury",
+      "query": "coolQueryhuh?",
     }
   }
   setAbsoluteRangeDatePicker={[MockFunction]}

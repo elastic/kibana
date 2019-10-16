@@ -10,6 +10,7 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
+import { npSetup } from 'ui/new_platform';
 
 import {
   apolloClientObservable,
@@ -17,11 +18,15 @@ import {
   mockGlobalState,
   TestProviders,
 } from '../../../../mock';
+import { MockNpSetUp, mockUiSettings } from '../../../../mock/ui_settings';
 import { createStore, hostsModel, State } from '../../../../store';
-
+import { HostsTableType } from '../../../../store/hosts/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
-import { HostsTableType } from '../../../../store/hosts/model';
+
+const mockNpSetup: MockNpSetUp = (npSetup as unknown) as MockNpSetUp;
+jest.mock('ui/new_platform');
+mockNpSetup.core.uiSettings = mockUiSettings;
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();

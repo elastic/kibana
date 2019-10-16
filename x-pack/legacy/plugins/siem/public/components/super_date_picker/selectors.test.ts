@@ -33,8 +33,13 @@ describe('selectors', () => {
       kind: 'manual',
       duration: 0,
     },
-    query: [],
+    queries: [],
     linkTo: [],
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
   };
 
   const getPolicySelector = policySelector();
@@ -62,8 +67,13 @@ describe('selectors', () => {
         kind: 'manual',
         duration: 0,
       },
-      query: [],
+      queries: [],
       linkTo: [],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
     };
   });
 
@@ -295,7 +305,7 @@ describe('selectors', () => {
       const result1 = getIsLoadingSelector(inputState);
       const change: InputsRange = {
         ...inputState,
-        query: [
+        queries: [
           {
             loading: true,
             id: '1',
@@ -313,7 +323,7 @@ describe('selectors', () => {
     test('returns false if there are no queries loading', () => {
       const inputsRange: InputsRange = {
         ...inputState,
-        query: [
+        queries: [
           {
             loading: false,
             id: '1',
@@ -339,7 +349,7 @@ describe('selectors', () => {
     test('returns true if at least one query is loading', () => {
       const inputsRange: InputsRange = {
         ...inputState,
-        query: [
+        queries: [
           {
             loading: false,
             id: '1',
@@ -381,7 +391,7 @@ describe('selectors', () => {
       const result1 = getQueriesSelector(inputState);
       const change: InputsRange = {
         ...inputState,
-        query: [
+        queries: [
           {
             loading: false,
             id: '1',
