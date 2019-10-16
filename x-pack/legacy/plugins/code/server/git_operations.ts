@@ -6,188 +6,123 @@
 
 /* eslint-disable @typescript-eslint/camelcase */
 
-import {
-  Blame,
-  Commit as NodeGitCommit,
-  Diff as NodeGitDiff,
-  Error as NodeGitError,
-  Oid,
-  Repository,
-  Revwalk,
-} from '@elastic/nodegit';
+import { FileItem, LsTreeSummary, simplegit, SimpleGit } from '@elastic/simple-git/dist';
 import Boom from 'boom';
-import LruCache from 'lru-cache';
 import * as Path from 'path';
 import * as fs from 'fs';
+import { isBinaryFileSync } from 'isbinaryfile';
+import { BlameSummary, DiffResultTextFile } from '@elastic/simple-git/dist/response';
+import moment from 'moment';
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
-import { Commit, FileTree, FileTreeItemType, RepositoryUri } from '../model';
+import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
-import {
-  GitPrime,
-  TreeEntry,
-  CommitDescription,
-  TreeDescription,
-  TagDescription,
-  GitObjectDescription,
-  BlobDescription,
-} from './utils/git_prime';
+import { FormatParser } from './utils/format_parser';
 
 export const HEAD = 'HEAD';
-const REFS_HEADS = 'refs/heads/';
 export const DEFAULT_TREE_CHILDREN_LIMIT = 50;
 
-/**
- * do a nodegit operation and check the results. If it throws a not found error or returns null,
- * rethrow a Boom.notFound error.
- * @param func the nodegit operation
- * @param message the message pass to Boom.notFound error
- */
-async function checkExists<R>(func: () => Promise<R>, message: string): Promise<R> {
-  let result: R;
-  try {
-    result = await func();
-  } catch (e) {
-    if (e.errno === NodeGitError.CODE.ENOTFOUND) {
-      throw Boom.notFound(message);
-    } else {
-      throw e;
-    }
-  }
-  if (result == null) {
-    throw Boom.notFound(message);
-  }
-  return result;
+export interface Blob {
+  isBinary(): boolean;
+  content(): Buffer;
+  rawsize(): number;
 }
 
-function entry2Tree(entry: TreeEntry, prefixPath: string = ''): FileTree {
+function entry2Tree(entry: FileItem, prefixPath: string = ''): FileTree {
   const type: FileTreeItemType = GitOperations.mode2type(entry.mode);
-  const { path, oid } = entry;
+  const { path, id } = entry;
   return {
     name: path,
     path: prefixPath ? prefixPath + '/' + path : path,
-    sha1: oid,
+    sha1: id,
     type,
   };
 }
 
 interface Tree {
-  entries: TreeEntry[];
-  gitdir: string;
+  entries: FileItem[];
   oid: string;
 }
 export class GitOperations {
-  private REPO_LRU_CACHE_SIZE = 16;
-  private REPO_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour;
   private repoRoot: string;
-  private repoCache: LruCache<RepositoryUri, Repository>;
 
   constructor(repoRoot: string) {
     this.repoRoot = repoRoot;
-
-    const options = {
-      max: this.REPO_LRU_CACHE_SIZE,
-      maxAge: this.REPO_MAX_AGE_MS,
-      dispose: (repoUri: RepositoryUri, repo: Repository) => {
-        // Clean up the repository before disposing this repo out of the cache.
-        repo.cleanup();
-      },
-    };
-    this.repoCache = new LruCache(options);
-  }
-
-  public cleanRepo(uri: RepositoryUri) {
-    if (this.repoCache.has(uri)) {
-      this.repoCache.del(uri);
-    }
-  }
-
-  public async cleanAllRepo() {
-    this.repoCache.reset();
   }
 
   public async fileContent(uri: RepositoryUri, path: string, revision: string = 'master') {
-    const gitdir = this.repoDir(uri);
+    const git = await this.openGit(uri);
     const commit: CommitInfo = await this.getCommitOr404(uri, revision);
-    const file = await GitPrime.readObject({
-      gitdir,
-      oid: commit.id,
-      filepath: path,
-      format: 'content',
-    });
-    if (file && file.type === 'blob') {
-      return file.object as BlobDescription;
-    }
-    throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
-  }
+    const p = `${commit.id}:${path}`;
 
-  public async getCommit(uri: RepositoryUri, revision: string): Promise<NodeGitCommit> {
-    const info = await this.getCommitOr404(uri, revision);
-    const repo = await this.openRepo(uri);
-    return (await checkExists(
-      () => this.findCommit(repo, info.id),
-      `revision or branch ${revision} not found in ${uri}`
-    )) as NodeGitCommit;
+    const type = await git.catFile(['-t', p]);
+    if (type.trim() === 'blob') {
+      const buffer: Buffer = await git.binaryCatFile(['blob', p]);
+      return {
+        content(): Buffer {
+          return buffer;
+        },
+        rawsize(): number {
+          return buffer.length;
+        },
+        isBinary(): boolean {
+          return isBinaryFileSync(buffer);
+        },
+      } as Blob;
+    } else {
+      throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
+    }
   }
 
   public async getDefaultBranch(uri: RepositoryUri): Promise<string> {
-    const gitdir = this.repoDir(uri);
-    const ref = await GitPrime.resolveRef({ gitdir, ref: HEAD, depth: 2 });
-    if (ref.startsWith(REFS_HEADS)) {
-      return ref.substr(REFS_HEADS.length);
-    }
-    return ref;
+    const git = await this.openGit(uri);
+    return (await git.raw(['symbolic-ref', HEAD, '--short'])).trim();
   }
 
   public async getHeadRevision(uri: RepositoryUri): Promise<string> {
-    const gitdir = this.repoDir(uri);
-    return await GitPrime.resolveRef({ gitdir, ref: HEAD, depth: 10 });
+    return await this.getRevision(uri, HEAD);
+  }
+
+  public async getRevision(uri: RepositoryUri, ref: string): Promise<string> {
+    const git = await this.openGit(uri);
+    return await git.revparse([ref]);
   }
 
   public async blame(uri: RepositoryUri, revision: string, path: string): Promise<GitBlame[]> {
-    const repo = await this.openRepo(uri);
-    const newestCommit = (await this.getCommit(uri, revision)).id();
-    const blame = await Blame.file(repo, path, { newestCommit });
+    const git = await this.openGit(uri);
+    const blameSummary: BlameSummary = await git.blame(revision, path);
     const results: GitBlame[] = [];
-    for (let i = 0; i < blame.getHunkCount(); i++) {
-      const hunk = blame.getHunkByIndex(i);
-      // @ts-ignore wrong definition in nodegit
-      const commit = await repo.getCommit(hunk.finalCommitId());
+    for (const blame of blameSummary.blames) {
       results.push({
         committer: {
-          // @ts-ignore wrong definition in nodegit
-          name: hunk.finalSignature().name(),
-          // @ts-ignore wrong definition in nodegit
-          email: hunk.finalSignature().email(),
+          name: blame.commit.author!.name,
+          email: blame.commit.author!.email,
         },
-        // @ts-ignore wrong definition in nodegit
-        startLine: hunk.finalStartLineNumber(),
-        // @ts-ignore wrong definition in nodegit
-        lines: hunk.linesInHunk(),
+        startLine: blame.resultLine,
+        lines: blame.lines,
         commit: {
-          id: commit.sha(),
-          message: commit.message(),
-          date: commit.date().toISOString(),
+          id: blame.commit.id!,
+          message: blame.commit.message!,
+          date: moment
+            .unix(blame.commit.author!.time)
+            .utcOffset(blame.commit.author!.tz)
+            .toISOString(true),
         },
       });
     }
     return results;
   }
 
-  public async openRepo(uri: RepositoryUri): Promise<Repository> {
-    if (this.repoCache.has(uri)) {
-      const repo = this.repoCache.get(uri) as Repository;
-      return Promise.resolve(repo);
-    }
-
+  public async openGit(uri: RepositoryUri, check: boolean = true): Promise<SimpleGit> {
     const repoDir = this.repoDir(uri);
-    const repo = await checkExists<Repository>(
-      () => Repository.open(repoDir),
-      `repo ${uri} not found`
-    );
-    this.repoCache.set(uri, repo);
-    return Promise.resolve(repo);
+    const git = simplegit(repoDir);
+    if (!check) return git;
+    if (await git.checkIsRepo()) {
+      return git;
+    } else {
+      throw Boom.notFound(`repo ${uri} not found`);
+    }
   }
 
   private repoDir(uri: RepositoryUri) {
@@ -202,85 +137,33 @@ export class GitOperations {
     }
   }
 
-  private static async isTextFile(gitdir: string, entry: TreeEntry) {
-    if (entry.type === 'blob') {
-      const type = GitOperations.mode2type(entry.mode);
-      if (type === FileTreeItemType.File) {
-        return await GitPrime.isTextFile({ gitdir, oid: entry.oid });
-      }
-    }
-    return false;
-  }
-
   public async countRepoFiles(uri: RepositoryUri, revision: string): Promise<number> {
-    let count = 0;
-    const commit = await this.getCommitOr404(uri, revision);
-    const gitdir = this.repoDir(uri);
-    const commitObject = await GitPrime.readObject({ gitdir, oid: commit.id });
-    const treeId = (commitObject.object as CommitDescription).tree;
+    const git = await this.openGit(uri);
+    const ls = new LsTreeSummary(git, revision, '.', { recursive: true });
+    return (await ls.allFiles()).length;
+  }
 
-    async function walk(oid: string) {
-      const tree = await GitOperations.readTree(gitdir, oid);
-      for (const entry of tree.entries) {
-        if (entry.type === 'tree') {
-          await walk(entry.oid);
-        } else if (await GitOperations.isTextFile(gitdir, entry)) {
-          count++;
-        }
+  public async *iterateRepo(uri: RepositoryUri, revision: string) {
+    const git = await this.openGit(uri);
+    const ls = new LsTreeSummary(git, revision, '.', { showSize: true, recursive: true });
+    for await (const file of ls.iterator()) {
+      const type = GitOperations.mode2type(file.mode);
+      if (type === FileTreeItemType.File) {
+        yield file;
       }
     }
-
-    await walk(treeId);
-    return count;
   }
 
-  public async iterateRepo(
-    uri: RepositoryUri,
-    revision: string
-  ): Promise<AsyncIterableIterator<FileTree>> {
-    const commit = await this.getCommitOr404(uri, revision);
-    const gitdir = this.repoDir(uri);
-    const commitObject = await GitPrime.readObject({ gitdir, oid: commit.id });
-    const treeId = (commitObject.object as CommitDescription).tree;
-    async function* walk(oid: string, prefix: string = ''): AsyncIterableIterator<FileTree> {
-      const tree = await GitOperations.readTree(gitdir, oid);
-      for (const entry of tree.entries) {
-        const path = prefix ? `${prefix}/${entry.path}` : entry.path;
-        if (entry.type === 'tree') {
-          yield* walk(entry.oid, path);
-        } else if (await GitOperations.isTextFile(gitdir, entry)) {
-          const type = GitOperations.mode2type(entry.mode);
-          yield {
-            name: entry.path,
-            type,
-            path,
-            repoUri: uri,
-            sha1: entry.oid,
-          } as FileTree;
-        }
-      }
-    }
-
-    return walk(treeId);
+  public async readTree(git: SimpleGit, oid: string, path: string = '.'): Promise<Tree> {
+    const lsTree = new LsTreeSummary(git, oid, path, {});
+    const entries = await lsTree.allFiles();
+    return {
+      entries,
+      oid,
+    } as Tree;
   }
 
-  private static async readTree(gitdir: string, oid: string): Promise<Tree> {
-    const { type, object } = await GitPrime.readObject({ gitdir, oid });
-    if (type === 'commit') {
-      return await this.readTree(gitdir, (object as CommitDescription).tree);
-    } else if (type === 'tree') {
-      const tree = object as TreeDescription;
-      return {
-        entries: tree.entries,
-        gitdir,
-        oid,
-      } as Tree;
-    } else {
-      throw new Error(`${oid} is not a tree`);
-    }
-  }
-
-  static mode2type(mode: string): FileTreeItemType {
+  public static mode2type(mode: string): FileTreeItemType {
     switch (mode) {
       case '100755':
       case '100644':
@@ -295,44 +178,6 @@ export class GitOperations {
       default:
         throw new Error('unknown mode: ' + mode);
     }
-  }
-
-  public async iterateCommits(
-    uri: RepositoryUri,
-    startRevision: string,
-    untilRevision?: string
-  ): Promise<Commit[]> {
-    const repository = await this.openRepo(uri);
-    const commit = await this.getCommit(uri, startRevision);
-
-    const revWalk = repository.createRevWalk();
-    revWalk.sorting(Revwalk.SORT.TOPOLOGICAL);
-    revWalk.push(commit.id());
-
-    const commits: NodeGitCommit[] = await revWalk.getCommitsUntil((c: NodeGitCommit) => {
-      // Iterate commits all the way to the oldest one.
-      return true;
-    });
-
-    const res: Commit[] = commits.map(c => {
-      return {
-        repoUri: uri,
-        id: c.sha(),
-        message: c.message(),
-        body: c.body(),
-        date: c.date(),
-        parents: c.parents().map(i => i.tostrS()),
-        author: {
-          name: c.author().name(),
-          email: c.author().email(),
-        },
-        committer: {
-          name: c.committer().name(),
-          email: c.committer().email(),
-        },
-      } as Commit;
-    });
-    return res;
   }
 
   /**
@@ -355,7 +200,7 @@ export class GitOperations {
     flatten: boolean = false
   ): Promise<FileTree> {
     const commit = await this.getCommitOr404(uri, revision);
-    const gitdir = this.repoDir(uri);
+    const git = await this.openGit(uri);
     if (path.startsWith('/')) {
       path = path.slice(1);
     }
@@ -382,38 +227,46 @@ export class GitOperations {
         path: '',
         type: FileTreeItemType.Directory,
       };
-      const tree = await GitOperations.readTree(gitdir, commit.treeId);
-      await this.fillChildren(root, tree, { skip, limit, flatten });
+      const tree = await this.readTree(git, commit.treeId);
+      await this.fillChildren(git, root, tree, { skip, limit, flatten });
       if (path) {
-        await this.resolvePath(root, tree, path.split('/'), { skip, limit, flatten });
+        await this.resolvePath(git, root, tree, path.split('/'), { skip, limit, flatten });
       }
       return root;
     } else {
-      const obj = await GitPrime.readObject({ gitdir, oid: commit.id, filepath: path });
-      const result: FileTree = {
-        name: path.split('/').pop() || '',
-        path,
-        type: type2item(obj.type!),
-        sha1: obj.oid,
-      };
-      if (result.type === FileTreeItemType.Directory) {
-        await this.fillChildren(
-          result,
-          {
-            gitdir,
-            entries: (obj.object as TreeDescription).entries,
-            oid: obj.oid,
-          },
-          { skip, limit, flatten }
-        );
+      if (path) {
+        const file = (await this.readTree(git, commit.id, path)).entries[0];
+        const result: FileTree = {
+          name: path.split('/').pop() || '',
+          path,
+          type: type2item(file.type!),
+          sha1: file.id,
+        };
+        if (file.type === 'tree') {
+          await this.fillChildren(git, result, await this.readTree(git, file.id), {
+            skip,
+            limit,
+            flatten,
+          });
+        }
+        return result;
+      } else {
+        const root: FileTree = {
+          name: '',
+          path: '',
+          type: FileTreeItemType.Directory,
+        };
+        const tree = await this.readTree(git, commit.id, '.');
+        await this.fillChildren(git, root, tree, { skip, limit, flatten });
+        return root;
       }
-      return result;
     }
   }
 
   private async fillChildren(
+    git: SimpleGit,
     result: FileTree,
-    { entries, gitdir }: Tree,
+    { entries }: Tree,
     { skip, limit, flatten }: { skip: number; limit: number; flatten: boolean }
   ) {
     result.childrenCount = entries.length;
@@ -422,15 +275,16 @@ export class GitOperations {
       const child = entry2Tree(e, result.path);
       result.children.push(child);
       if (flatten && child.type === FileTreeItemType.Directory) {
-        const tree = await GitOperations.readTree(gitdir, e.oid);
+        const tree = await this.readTree(git, e.id);
         if (tree.entries.length === 1) {
-          await this.fillChildren(child, tree, { skip, limit, flatten });
+          await this.fillChildren(git, child, tree, { skip, limit, flatten });
         }
       }
     }
   }
 
   private async resolvePath(
+    git: SimpleGit,
     result: FileTree,
     tree: Tree,
     paths: string[],
@@ -443,17 +297,17 @@ export class GitOperations {
           result.children = [];
         }
         const child = entry2Tree(entry, result.path);
-        const idx = result.children.findIndex(i => i.sha1 === entry.oid);
+        const idx = result.children.findIndex(i => i.sha1 === entry.id);
         if (idx < 0) {
           result.children.push(child);
         } else {
           result.children[idx] = child;
         }
         if (entry.type === 'tree') {
-          const subTree = await GitOperations.readTree(tree.gitdir, entry.oid);
-          await this.fillChildren(child, subTree, opt);
+          const subTree = await this.readTree(git, entry.id);
+          await this.fillChildren(git, child, subTree, opt);
           if (rest.length > 0) {
-            await this.resolvePath(child, subTree, rest, opt);
+            await this.resolvePath(git, child, subTree, rest, opt);
           }
         }
       }
@@ -461,71 +315,85 @@ export class GitOperations {
   }
 
   public async getCommitDiff(uri: string, revision: string): Promise<CommitDiff> {
-    const repo = await this.openRepo(uri);
-    const commit = await this.getCommit(uri, revision);
-    const diffs = await commit.getDiff();
+    const git = await this.openGit(uri);
+    const commit = await this.getCommitOr404(uri, revision);
+    if (!revision.includes('..')) {
+      revision = `${revision}..${revision}~1`;
+    }
+    const diffs = await git.diffSummary([revision]);
 
     const commitDiff: CommitDiff = {
-      commit: commitInfo(commit),
-      additions: 0,
-      deletions: 0,
+      commit,
+      additions: diffs.insertions,
+      deletions: diffs.deletions,
       files: [],
     };
-    for (const diff of diffs) {
-      const patches = await diff.patches();
-      for (const patch of patches) {
-        const { total_deletions, total_additions } = patch.lineStats();
-        commitDiff.additions += total_additions;
-        commitDiff.deletions += total_deletions;
-        if (patch.isAdded()) {
-          const path = patch.newFile().path();
-          const modifiedCode = await this.getModifiedCode(commit, path);
-          const language = await detectLanguage(path, modifiedCode);
-          commitDiff.files.push({
-            language,
-            path,
-            modifiedCode,
-            additions: total_additions,
-            deletions: total_deletions,
-            kind: DiffKind.ADDED,
-          });
-        } else if (patch.isDeleted()) {
-          const path = patch.oldFile().path();
-          const originCode = await this.getOriginCode(commit, repo, path);
-          const language = await detectLanguage(path, originCode);
-          commitDiff.files.push({
-            language,
-            path,
-            originCode,
-            kind: DiffKind.DELETED,
-            additions: total_additions,
-            deletions: total_deletions,
-          });
-        } else if (patch.isModified()) {
-          const path = patch.newFile().path();
-          const modifiedCode = await this.getModifiedCode(commit, path);
-          const originPath = patch.oldFile().path();
-          const originCode = await this.getOriginCode(commit, repo, originPath);
-          const language = await detectLanguage(patch.newFile().path(), modifiedCode);
-          commitDiff.files.push({
-            language,
-            path,
-            originPath,
-            originCode,
-            modifiedCode,
-            kind: DiffKind.MODIFIED,
-            additions: total_additions,
-            deletions: total_deletions,
-          });
-        } else if (patch.isRenamed()) {
-          const path = patch.newFile().path();
-          commitDiff.files.push({
-            path,
-            originPath: patch.oldFile().path(),
-            kind: DiffKind.RENAMED,
-            additions: total_additions,
-            deletions: total_deletions,
-          });
+    for (const d of diffs.files) {
+      if (!d.binary) {
+        const diff = d as DiffResultTextFile;
+        const kind = this.diffKind(diff);
+        switch (kind) {
+          case DiffKind.ADDED:
+            {
+              const path = diff.file;
+              const modifiedCode = await this.getModifiedCode(git, commit, path);
+              const language = await detectLanguage(path, modifiedCode);
+              commitDiff.files.push({
+                language,
+                path,
+                modifiedCode,
+                additions: diff.insertions,
+                deletions: diff.deletions,
+                kind,
+              });
+            }
+            break;
+          case DiffKind.DELETED:
+            {
+              const path = diff.file;
+              const originCode = await this.getOriginCode(git, commit, path);
+              const language = await detectLanguage(path, originCode);
+              commitDiff.files.push({
+                language,
+                path,
+                originCode,
+                kind,
+                additions: diff.insertions,
+                deletions: diff.deletions,
+              });
+            }
+            break;
+          case DiffKind.MODIFIED:
+            {
+              const path = diff.rename || diff.file;
+              const modifiedCode = await this.getModifiedCode(git, commit, path);
+              const originPath = diff.file;
+              const originCode = await this.getOriginCode(git, commit, originPath);
+              const language = await detectLanguage(path, modifiedCode);
+              commitDiff.files.push({
+                language,
+                path,
+                originPath,
+                originCode,
+                modifiedCode,
+                kind,
+                additions: diff.insertions,
+                deletions: diff.deletions,
+              });
+            }
+            break;
+          case DiffKind.RENAMED:
+            {
+              const path = diff.rename || diff.file;
+              commitDiff.files.push({
+                path,
+                originPath: diff.file,
+                kind,
+                additions: diff.insertions,
+                deletions: diff.deletions,
+              });
+            }
+            break;
         }
       }
     }
@@ -533,120 +401,91 @@ export class GitOperations {
   }
 
   public async getDiff(uri: string, oldRevision: string, newRevision: string): Promise<Diff> {
-    const repo = await this.openRepo(uri);
-    const oldCommit = await this.getCommit(uri, oldRevision);
-    const newCommit = await this.getCommit(uri, newRevision);
-    const oldTree = await oldCommit.getTree();
-    const newTree = await newCommit.getTree();
-
-    const diff = await NodeGitDiff.treeToTree(repo, oldTree, newTree);
-
+    const git = await this.openGit(uri);
+    const diff = await git.diffSummary([oldRevision, newRevision]);
     const res: Diff = {
-      additions: 0,
-      deletions: 0,
+      additions: diff.insertions,
+      deletions: diff.deletions,
       files: [],
     };
-    const patches = await diff.patches();
-    for (const patch of patches) {
-      const { total_deletions, total_additions } = patch.lineStats();
-      res.additions += total_additions;
-      res.deletions += total_deletions;
-      if (patch.isAdded()) {
-        const path = patch.newFile().path();
+    diff.files.forEach(d => {
+      if (!d.binary) {
+        const td = d as DiffResultTextFile;
+        const kind = this.diffKind(td);
         res.files.push({
-          path,
-          additions: total_additions,
-          deletions: total_deletions,
-          kind: DiffKind.ADDED,
-        });
-      } else if (patch.isDeleted()) {
-        const path = patch.oldFile().path();
-        res.files.push({
-          path,
-          kind: DiffKind.DELETED,
-          additions: total_additions,
-          deletions: total_deletions,
-        });
-      } else if (patch.isModified()) {
-        const path = patch.newFile().path();
-        const originPath = patch.oldFile().path();
-        res.files.push({
-          path,
-          originPath,
-          kind: DiffKind.MODIFIED,
-          additions: total_additions,
-          deletions: total_deletions,
-        });
-      } else if (patch.isRenamed()) {
-        const path = patch.newFile().path();
-        res.files.push({
-          path,
-          originPath: patch.oldFile().path(),
-          kind: DiffKind.RENAMED,
-          additions: total_additions,
-          deletions: total_deletions,
+          path: d.file,
+          additions: td.insertions,
+          deletions: td.deletions,
+          kind,
         });
       }
-    }
+    });
+
     return res;
   }
 
-  private async getOriginCode(commit: NodeGitCommit, repo: Repository, path: string) {
-    for (const oid of commit.parents()) {
-      const parentCommit = await repo.getCommit(oid);
-      if (parentCommit) {
-        const entry = await parentCommit.getEntry(path);
-        if (entry) {
-          return (await entry.getBlob()).content().toString('utf8');
-        }
-      }
+  private diffKind(diff: DiffResultTextFile) {
+    let kind: DiffKind = DiffKind.MODIFIED;
+    if (diff.changes === diff.insertions) {
+      kind = DiffKind.ADDED;
+    } else if (diff.changes === diff.deletions) {
+      kind = DiffKind.DELETED;
+    } else if (diff.rename) {
+      kind = DiffKind.RENAMED;
     }
-    return '';
+    return kind;
   }
 
-  private async getModifiedCode(commit: NodeGitCommit, path: string) {
-    const entry = await commit.getEntry(path);
-    return (await entry.getBlob()).content().toString('utf8');
+  private async getOriginCode(git: SimpleGit, commit: CommitInfo, path: string) {
+    const buffer: Buffer = await git.binaryCatFile(['blob', `${commit.id}~1:${path}`]);
+    return buffer.toString('utf8');
   }
 
-  private async findCommit(repo: Repository, oid: string): Promise<NodeGitCommit | null> {
-    try {
-      return repo.getCommit(Oid.fromString(oid));
-    } catch (e) {
-      return null;
-    }
+  private async getModifiedCode(git: SimpleGit, commit: CommitInfo, path: string) {
+    const buffer: Buffer = await git.binaryCatFile(['blob', `${commit.id}:${path}`]);
+    return buffer.toString('utf8');
   }
 
   public async getBranchAndTags(repoUri: string): Promise<ReferenceInfo[]> {
-    const gitdir = this.repoDir(repoUri);
-    const remoteBranches = await GitPrime.listBranches({ gitdir, remote: 'origin' });
-    const results: ReferenceInfo[] = [];
-    for (const name of remoteBranches) {
-      const reference = `refs/remotes/origin/${name}`;
-      const commit = await this.getCommitInfo(repoUri, reference);
-      if (commit) {
-        results.push({
-          name,
-          reference,
-          type: ReferenceType.REMOTE_BRANCH,
-          commit,
-        });
+    const format = {
+      name: '%(refname:short)',
+      reference: '%(refname)',
+      type: '%(objecttype)',
+      commit: {
+        updated: '%(*authordate)',
+        message: '%(*contents)',
+        committer: '%(*committername)',
+        author: '%(*authorname)',
+        id: '%(*objectname)',
+        parents: '%(*parent)',
+        treeId: '%(*tree)',
+      },
+    };
+    const parser = new FormatParser(format);
+    const git = await this.openGit(repoUri);
+    const result = await git.raw([
+      'for-each-ref',
+      '--format=' + parser.toFormatStr(),
+      'refs/tags/*',
+      'refs/remotes/origin/*',
+    ]);
+    const results = parser.parseResult(result);
+    return results.map(r => {
+      const ref: ReferenceInfo = {
+        name: r.name.startsWith('origin/') ? r.name.slice(7) : r.name,
+        reference: r.reference,
+        type: r.type === 'tag' ? ReferenceType.TAG : ReferenceType.REMOTE_BRANCH,
+      };
+      if (r.commit && r.commit.id) {
+        const commit = {
+          ...r.commit,
+        };
+        commit.parents = r.commit.parents ? r.commit.parents.split(' ') : [];
+        commit.updated = new Date(r.commit.updated);
+        ref.commit = commit;
       }
-    }
-    const tags = await GitPrime.listTags({ gitdir });
-    for (const name of tags) {
-      const reference = `refs/tags/${name}`;
-      const commit = await this.getCommitInfo(repoUri, reference);
-      if (commit) {
-        results.push({
-          name,
-          reference,
-          type: ReferenceType.TAG,
-          commit,
-        });
-      }
-    }
-    return results;
+      return ref;
+    });
   }
 
   public async getCommitOr404(repoUri: string, ref: string): Promise<CommitInfo> {
@@ -657,71 +496,63 @@ export class GitOperations {
     return commit;
   }
 
+  public async log(
+    repoUri: string,
+    revision: string,
+    count: number,
+    path?: string
+  ): Promise<CommitInfo[]> {
+    const git = await this.openGit(repoUri);
+    const options: any = {
+      n: count,
+      format: {
+        updated: '%ai',
+        message: '%B',
+        author: '%an',
+        authorEmail: '%ae',
+        committer: '%cn',
+        committerEmail: '%ce',
+        id: '%H',
+        parents: '%p',
+        treeId: '%T',
+      },
+      from: revision,
+    };
+    if (path) {
+      options.file = path;
+    }
+    const result = await git.log(options);
+    return (result.all as unknown) as CommitInfo[];
+  }
+
+  public async resolveRef(repoUri: string, ref: string): Promise<string | null> {
+    const git = await this.openGit(repoUri);
+    let oid = '';
+
+    try {
+      // try local branches or tags
+      oid = (await git.revparse(['-q', '--verify', ref])).trim();
+    } catch (e) {
+      // try remote branches
+    }
+    if (!oid) {
+      try {
+        oid = (await git.revparse(['-q', '--verify', `origin/${ref}`])).trim();
+      } catch (e1) {
+        // no match
+      }
+    }
+    return oid || null;
+  }
+
   public async getCommitInfo(repoUri: string, ref: string): Promise<CommitInfo | null> {
-    const gitdir = this.repoDir(repoUri);
-    // depth: avoid infinite loop
-    let obj: GitObjectDescription | null = null;
-    let oid: string = '';
-    if (/^[0-9a-f]{5,40}$/.test(ref)) {
-      // it's possible ref is sha-1 object id
-      try {
-        oid = ref;
-        if (oid.length < 40) {
-          oid = await GitPrime.expandOid({ gitdir, oid });
-        }
-        obj = await GitPrime.readObject({ gitdir, oid, format: 'parsed' });
-      } catch (e) {
-        // expandOid or readObject failed
-      }
-    }
-    // test if it is a reference
-    if (!obj) {
-      try {
-        // try local branches or tags
-        oid = await GitPrime.resolveRef({ gitdir, ref, depth: 10 });
-      } catch (e) {
-        // try remote branches
-        try {
-          oid = await GitPrime.resolveRef({ gitdir, ref: `origin/${ref}`, depth: 10 });
-        } catch (e1) {
-          // no match
-        }
-      }
-      if (oid) {
-        obj = await GitPrime.readObject({ gitdir, oid, format: 'parsed' });
-      }
-    }
-    if (obj) {
-      if (obj.type === 'commit') {
-        const commit = obj.object as CommitDescription;
-        return {
-          id: obj.oid,
-          author: commit.author.name,
-          committer: commit.committer.name,
-          message: commit.message,
-          updated: new Date(commit.committer.timestamp * 1000),
-          parents: commit.parent,
-          treeId: commit.tree,
-        } as CommitInfo;
-      } else if (obj.type === 'tag') {
-        const tag = obj.object as TagDescription;
-        if (tag.type === 'commit') {
-          return await this.getCommitInfo(repoUri, tag.object);
-        }
+    const oid = await this.resolveRef(repoUri, ref);
+    if (oid) {
+      const commits = await this.log(repoUri, oid, 1);
+      if (commits.length > 0) {
+        return commits[0];
       }
     }
     return null;
   }
-}
-
-export function commitInfo(commit: NodeGitCommit): CommitInfo {
-  return {
-    updated: commit.date(),
-    message: commit.message(),
-    author: commit.author().name(),
-    committer: commit.committer().name(),
-    id: commit.sha().substr(0, 7),
-    parents: commit.parents().map(oid => oid.toString().substring(0, 7)),
-    treeId: commit.treeId().tostrS(),
-  };
 }

@@ -41,7 +41,7 @@ export function buildPhrasesFilter(
   indexPattern: IndexPattern
 ): PhrasesFilter;
 
-export function buildQueryFilter(query: any, index: string): CustomFilter;
+export function buildQueryFilter(query: any, index: string, alias?: string): CustomFilter;
 
 export function buildRangeFilter(
   field: Field,

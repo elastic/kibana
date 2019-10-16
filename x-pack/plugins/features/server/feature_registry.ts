@@ -15,7 +15,9 @@ export class FeatureRegistry {
 
   public register(feature: FeatureWithAllOrReadPrivileges) {
     if (this.locked) {
-      throw new Error(`Features are locked, can't register new features`);
+      throw new Error(
+        `Features are locked, can't register new features. Attempt to register ${feature.id} failed.`
+      );
     }
 
     validateFeature(feature);

@@ -28,7 +28,12 @@ import { GeoPolygonFilter, isGeoPolygonFilter } from './geo_polygon_filter';
 import { PhraseFilter, isPhraseFilter, isScriptedPhraseFilter } from './phrase_filter';
 import { PhrasesFilter, isPhrasesFilter } from './phrases_filter';
 import { QueryStringFilter, isQueryStringFilter } from './query_string_filter';
-import { RangeFilter, isRangeFilter, isScriptedRangeFilter } from './range_filter';
+import {
+  RangeFilter,
+  isRangeFilter,
+  isScriptedRangeFilter,
+  RangeFilterParams,
+} from './range_filter';
 import { MatchAllFilter, isMatchAllFilter } from './match_all_filter';
 import { MissingFilter, isMissingFilter } from './missing_filter';
 
@@ -50,6 +55,7 @@ export {
   RangeFilter,
   isRangeFilter,
   isScriptedRangeFilter,
+  RangeFilterParams,
   MatchAllFilter,
   isMatchAllFilter,
   MissingFilter,

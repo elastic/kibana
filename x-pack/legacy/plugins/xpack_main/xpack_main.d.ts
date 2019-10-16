@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import KbnServer from 'src/legacy/server/kbn_server';
 import { Feature, FeatureWithAllOrReadPrivileges } from '../../../plugins/features/server';
 import { XPackInfo, XPackInfoOptions } from './server/lib/xpack_info';
 export { XPackFeature } from './server/lib/xpack_info';

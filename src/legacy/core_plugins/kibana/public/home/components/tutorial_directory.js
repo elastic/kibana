@@ -64,7 +64,7 @@ class TutorialDirectoryUi extends React.Component {
         id: 'logging',
         name: this.props.intl.formatMessage({
           id: 'kbn.home.tutorial.tabs.loggingTitle',
-          defaultMessage: 'Logging',
+          defaultMessage: 'Logs',
         }),
       },
       {

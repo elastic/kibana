@@ -17,14 +17,15 @@
  * under the License.
  */
 
-import React, { useEffect, ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
+import { useValidation } from './agg_utils';
 import { AggParamEditorProps } from '..';
 
-interface Bounds {
+export interface Bounds {
   min: number | '';
   max: number | '';
 }
@@ -61,11 +62,7 @@ function ExtendedBoundsParamEditor({
     });
   }
 
-  useEffect(() => {
-    setValidity(isValid);
-
-    return () => setValidity(true);
-  }, [isValid]);
+  useValidation(setValidity, isValid);
 
   const handleChange = (ev: ChangeEvent<HTMLInputElement>, name: string) => {
     setValue({

@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function({ getService, getPageObjects, ...rest }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -72,7 +73,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow creation of lens visualizations', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.toggleExistenceFilter();
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
@@ -96,9 +96,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         field: 'ip',
       });
 
-      await PageObjects.lens.setTitle('Afancilenstest');
-
-      await PageObjects.lens.save();
+      await PageObjects.lens.save('Afancilenstest');
 
       // Ensure the visualization shows up in the visualize list, and takes
       // us back to the visualization as we configured it.

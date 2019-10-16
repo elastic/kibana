@@ -6,15 +6,18 @@
 
 import { get } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
+import { ModelStrings } from '../../../i18n';
+
+const { Math: strings } = ModelStrings;
 
 export const math = () => ({
   name: 'math',
-  displayName: 'Measure',
+  displayName: strings.getDisplayName(),
   args: [
     {
       name: '_',
-      displayName: 'Value',
-      help: 'Function and column to use in extracting a value from the datasource',
+      displayName: strings.getValueDisplayName(),
+      help: strings.getValueHelp(),
       argType: 'datacolumn',
       options: {
         onlyMath: false,

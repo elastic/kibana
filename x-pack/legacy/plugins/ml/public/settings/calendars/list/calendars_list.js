@@ -17,7 +17,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../../../components/navigation_menu';
 import { CalendarsListHeader } from './header';
 import { CalendarsListTable } from './table/';
 import { ml } from '../../../services/ml_api_service';
