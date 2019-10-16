@@ -32,6 +32,10 @@ export class TestingFrameworkAdapter implements FrameworkAdapter {
     return this.settings[key];
   }
 
+  public get capabilities(): Readonly<{ read: boolean; write: boolean }> {
+    return { read: true, write: true };
+  }
+
   public setUISettings = (key: string, value: any) => {
     this.settings[key] = value;
   };

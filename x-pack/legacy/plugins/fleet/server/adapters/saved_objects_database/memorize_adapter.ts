@@ -83,7 +83,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T>> {
     return Slapshot.memorize(
-      `find:${JSON.stringify(options)}`,
+      `find:${JSON.stringify(options.type)}`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
