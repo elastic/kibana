@@ -10,12 +10,14 @@ import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
+import { ESGeoGridSource, getTileBoundingBox } from '../es_geo_grid_source';
 import { SearchSource } from '../../../kibana_services';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   ES_SEARCH,
+  ES_GEO_GRID,
   ES_GEO_FIELD_TYPE,
   ES_SIZE_LIMIT,
   FEATURE_ID_PROPERTY_NAME,
@@ -27,6 +29,8 @@ import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
 import { getSourceFields } from '../../../index_pattern_util';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
+
+const CLUSTER_ID_PREFIX = 'cluster:';
 
 export class ESSearchSource extends AbstractESSource {
 
@@ -273,7 +277,7 @@ export class ESSearchSource extends AbstractESSource {
 
   // searchFilters.fieldNames contains geo field and any fields needed for styling features
   // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
-  async _getSearchHits(layerName, searchFilters, registerCancelCallback) {
+  async _getSearchHits(layerName, searchFilters, registerCancelCallback, limit) {
     const initialSearchContext = {
       docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames)
     };
@@ -285,12 +289,12 @@ export class ESSearchSource extends AbstractESSource {
       // 1) Returns geo_point in a consistent format regardless of how geo_point is stored in source
       // 2) Setting _source to false so we avoid pulling back unneeded fields.
       initialSearchContext.docvalue_fields.push(...(await this._excludeDateFields(searchFilters.fieldNames)));
-      searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT, initialSearchContext);
+      searchSource = await this._makeSearchSource(searchFilters, limit, initialSearchContext);
       searchSource.setField('source', false); // do not need anything from _source
       searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     } else {
       // geo_shape fields do not support docvalue_fields yet, so still have to be pulled from _source
-      searchSource = await this._makeSearchSource(searchFilters, ES_SIZE_LIMIT, initialSearchContext);
+      searchSource = await this._makeSearchSource(searchFilters, limit, initialSearchContext);
       // Setting "fields" instead of "source: { includes: []}"
       // because SearchSource automatically adds the following by default
       // 1) all scripted fields
@@ -323,10 +327,10 @@ export class ESSearchSource extends AbstractESSource {
     return !!sortField && !!sortOrder;
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+  async _getGeoJsonFromHits(layerName, searchFilters, registerCancelCallback, limit) {
     const { hits, meta } = this._isTopHits()
       ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
-      : await this._getSearchHits(layerName, searchFilters, registerCancelCallback);
+      : await this._getSearchHits(layerName, searchFilters, registerCancelCallback, limit);
 
     const indexPattern = await this._getIndexPattern();
     const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
@@ -358,6 +362,95 @@ export class ESSearchSource extends AbstractESSource {
       data: featureCollection,
       meta
     };
+  }
+
+  async _getGeoJsonFromBlended(layerName, searchFilters, registerCancelCallback) {
+    // Use es_grid_source to get clustered view
+    const gridSourceDescriptor = {
+      type: ES_GEO_GRID,
+      resolution: 'COARSE',
+      id: this.getId(),
+      geoField: this._descriptor.geoField,
+      requestType: 'grid',
+      metrics: [
+        {
+          type: 'count',
+        }
+      ],
+      indexPatternId: this._descriptor.indexPatternId
+    };
+    const gridSource = new ESGeoGridSource(gridSourceDescriptor, this._inspectorAdapters);
+    const gridSearchFilters = {
+      ...searchFilters,
+      geogridPrecision: gridSource.getGeoGridPrecision(searchFilters.zoom),
+    };
+    const { data: gridGeoJson } = await gridSource.getGeoJsonWithMeta(layerName, gridSearchFilters, registerCancelCallback);
+
+    const totalCount = gridGeoJson.features.reduce((total, feature) => {
+      return total + feature.properties.doc_count;
+    }, 0);
+
+    if (totalCount <= ES_SIZE_LIMIT) {
+      return this._getGeoJsonFromHits(layerName, searchFilters, registerCancelCallback, ES_SIZE_LIMIT);
+    }
+
+    const clusterLimit = ES_SIZE_LIMIT / 10;
+    const fetchPromises = gridGeoJson.features
+      .filter(feature => {
+        return feature.properties.doc_count <= clusterLimit;
+      })
+      .map(feature => {
+        const { top, bottom, right, left } = getTileBoundingBox(feature.properties[FEATURE_ID_PROPERTY_NAME]);
+        const hitsSearchFilters = {
+          ...searchFilters,
+          buffer: {
+            maxLat: top,
+            maxLon: right,
+            minLat: bottom,
+            minLon: left,
+          },
+        };
+        return this._getGeoJsonFromHits(layerName, hitsSearchFilters, registerCancelCallback, clusterLimit);
+      });
+
+    const results = await Promise.all(fetchPromises);
+
+    const featureCollection = {
+      type: 'FeatureCollection',
+      features: []
+    };
+
+    // put clusters into feature collection
+    gridGeoJson.features
+      .filter(feature => {
+        return feature.properties.doc_count > clusterLimit;
+      })
+      .forEach(feature => {
+        feature.properties[FEATURE_ID_PROPERTY_NAME] = `${CLUSTER_ID_PREFIX}${feature.properties[FEATURE_ID_PROPERTY_NAME]}`;
+        featureCollection.features.push(feature);
+      });
+
+    // put documents into feature collection
+    results.forEach(({ data }) => {
+      featureCollection.features.push(...data.features);
+    });
+
+    return {
+      data: featureCollection,
+      meta: {
+        areResultsTrimmed: true
+      }
+    };
+  }
+
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+    const geoField = await this._getGeoField();
+
+    if (this._isTopHits() || geoField.type !== ES_GEO_FIELD_TYPE.GEO_POINT) {
+      return this._getGeoJsonFromHits(layerName, searchFilters, registerCancelCallback, ES_SIZE_LIMIT);
+    } else {
+      return this._getGeoJsonFromBlended(layerName, searchFilters, registerCancelCallback);
+    }
   }
 
   canFormatFeatureProperties() {
@@ -401,6 +494,24 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
+    if (properties[FEATURE_ID_PROPERTY_NAME].startsWith(CLUSTER_ID_PREFIX)) {
+      const gridSourceDescriptor = {
+        type: ES_GEO_GRID,
+        resolution: 'COARSE',
+        id: this.getId(),
+        geoField: this._descriptor.geoField,
+        requestType: 'grid',
+        metrics: [
+          {
+            type: 'count',
+          }
+        ],
+        indexPatternId: this._descriptor.indexPatternId
+      };
+      const gridSource = new ESGeoGridSource(gridSourceDescriptor, this._inspectorAdapters);
+      return gridSource.filterAndFormatPropertiesToHtml(properties);
+    }
+
     const indexPattern = await this._getIndexPattern();
     const propertyValues = await this._loadTooltipProperties(properties[FEATURE_ID_PROPERTY_NAME], indexPattern);
 

@@ -5,3 +5,5 @@
  */
 
 export { ESGeoGridSource } from './es_geo_grid_source';
+
+export { getTileBoundingBox } from './geo_tile_utils';
