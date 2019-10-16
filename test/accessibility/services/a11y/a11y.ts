@@ -99,7 +99,7 @@ export function A11yProvider({ getService }: FtrProviderContext) {
             matches: '.euiCodeEditorWrapper',
           },
           'duplicate-id': {
-            matches: '.euiCodeEditorWrapper', // TODO remove after #<FILL THIS IN> is resolved
+            matches: '.euiCodeEditorWrapper', // https://github.com/elastic/eui/issues/2415
           },
         },
       };

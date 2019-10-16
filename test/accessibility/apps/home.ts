@@ -17,27 +17,20 @@
  * under the License.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { services } from './services';
-import { pageObjects } from './page_objects';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+export default function({ getService, getPageObjects }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common', 'home']);
+  const globalNav = getService('globalNav');
+  const a11y = getService('a11y');
 
-  return {
-    ...functionalConfig.getAll(),
+  describe('Kibana Home', () => {
+    before(async () => {
+      await PageObjects.common.navigateToApp('home');
+    });
 
-    testFiles: [
-      require.resolve('./apps/discover'),
-      require.resolve('./apps/management'),
-      require.resolve('./apps/home'),
-    ],
-    // testFiles: [require.resolve('./apps/management')],
-    pageObjects,
-    services,
-
-    junit: {
-      reportName: 'Accessibility Tests',
-    },
-  };
+    it('Kibana Home view', async () => {
+      await a11y.testAppSnapshot();
+    });
+  });
 }
