@@ -44,8 +44,12 @@ import { HttpServiceStart, BasePathProxyServer } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins/plugins_service';
-import { SavedObjectsServiceStart } from 'src/core/server/saved_objects/saved_objects_service';
+import {
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
+} from 'src/core/server/saved_objects/saved_objects_service';
 import { KibanaMigrator } from '../saved_objects/migrations';
+import { ISavedObjectsClientProvider } from '../saved_objects';
 import { httpServiceMock } from '../http/http_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
@@ -59,6 +63,7 @@ let setupDeps: {
     elasticsearch: InternalElasticsearchServiceSetup;
     http: any;
     plugins: PluginsServiceSetup;
+    savedObjects: SavedObjectsServiceSetup;
   };
   plugins: Record<string, unknown>;
 };
@@ -99,6 +104,9 @@ beforeEach(() => {
           internal: new Map([['plugin-id', {} as DiscoveredPluginInternal]]),
         },
       },
+      savedObjects: {
+        clientProvider: {} as ISavedObjectsClientProvider,
+      },
     },
     plugins: { 'plugin-id': 'plugin-value' },
   };
@@ -110,6 +118,7 @@ beforeEach(() => {
       },
       savedObjects: {
         migrator: {} as KibanaMigrator,
+        clientProvider: {} as ISavedObjectsClientProvider,
       },
       plugins: { contracts: new Map() },
     },

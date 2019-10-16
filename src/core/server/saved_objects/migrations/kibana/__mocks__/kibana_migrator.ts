@@ -17,26 +17,10 @@
  * under the License.
  */
 
-import { JsonObject } from '..';
+import { mockKibanaMigrator } from '../kibana_migrator.mock';
 
-/**
- * WARNING: these typings are incomplete
- */
+export const mockKibanaMigratorInstance = mockKibanaMigrator.create();
 
-export type KueryNode = any;
+const mockConstructor = jest.fn().mockImplementation(() => mockKibanaMigratorInstance);
 
-export interface KueryParseOptions {
-  helpers: {
-    [key: string]: any;
-  };
-  startRule: string;
-}
-
-export function fromKueryExpression(
-  expression: string,
-  parseOptions?: KueryParseOptions
-): KueryNode;
-
-export function toElasticsearchQuery(node: KueryNode, indexPattern?: any): JsonObject;
-
-export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;
+export const KibanaMigrator = mockConstructor;
