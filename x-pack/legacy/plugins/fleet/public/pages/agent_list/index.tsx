@@ -28,6 +28,7 @@ import { AgentHealth } from '../../components/agent_health';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { usePagination } from '../../hooks/use_pagination';
 import { SearchBar } from '../../components/search_bar';
+import { AgentEnrollmentFlyout } from './components/agent_enrollment';
 
 interface RouterProps {
   libs: FrontendLibs;
@@ -42,8 +43,10 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
 
   // Table and search states
   const [search, setSearch] = useState('');
-
   const { pagination, pageSizeOptions, setPagination } = usePagination();
+
+  // Agent enrollment flyout state
+  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
 
   // Fetch agents method
   const fetchAgents = async () => {
@@ -152,7 +155,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
       }
       actions={
         libs.framework.capabilities.write ? (
-          <EuiButton fill iconType="plusInCircle">
+          <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
             <FormattedMessage
               id="xpack.fleet.agentList.addButton"
               defaultMessage="Install new agent"
@@ -168,6 +171,10 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
   return (
     <EuiPageBody>
       <EuiPageContent>
+        {isEnrollmentFlyoutOpen ? (
+          <AgentEnrollmentFlyout libs={libs} onClose={() => setIsEnrollmentFlyoutOpen(false)} />
+        ) : null}
+
         <EuiTitle size="l">
           <h1>
             <FormattedMessage id="xpack.fleet.agentList.pageTitle" defaultMessage="Elastic Fleet" />
@@ -190,7 +197,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
           </EuiFlexItem>
           {libs.framework.capabilities.write && (
             <EuiFlexItem>
-              <EuiButton fill iconType="plusInCircle">
+              <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
                 <FormattedMessage
                   id="xpack.fleet.agentList.addButton"
                   defaultMessage="Install new agent"
@@ -203,18 +210,18 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
         <EuiSpacer size="m" />
         <EuiBasicTable
           loading={isLoading}
-          message={
+          noItemsMessage={
             isLoading
               ? i18n.translate('xpack.fleet.agentList.loadingAgentsMessage', {
                   defaultMessage: 'Loading agents…',
                 })
-              : agents.length === 0
+              : totalAgents === 0
               ? emptyPrompt
               : i18n.translate('xpack.fleet.agentList.noFilteredAgentsPrompt', {
                   defaultMessage: 'No agents found',
                 })
           }
-          items={agents}
+          items={totalAgents ? agents : []}
           itemId="id"
           columns={columns}
           pagination={{
