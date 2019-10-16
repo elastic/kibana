@@ -24,7 +24,7 @@ import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
-const MainContainer = styled.div`
+const MainContainer = styled.main`
   min-width: ${px(unit * 50)};
   padding: ${px(units.plus)};
 `;

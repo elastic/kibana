@@ -19,6 +19,7 @@
 
 import { EuiIcon, EuiSideNav, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { IndexedArray } from 'ui/indexed_array';
 
@@ -73,6 +74,9 @@ export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState
   public render() {
     return (
       <EuiSideNav
+        aria-label={i18n.translate('common.ui.management.nav.label', {
+          defaultMessage: 'Management',
+        })}
         mobileTitle={this.renderMobileTitle()}
         isOpenOnMobile={this.state.isSideNavOpenOnMobile}
         toggleOpenOnMobile={this.toggleOpenOnMobile}

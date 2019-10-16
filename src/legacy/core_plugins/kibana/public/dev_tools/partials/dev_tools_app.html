@@ -1,9 +1,9 @@
-<div class="devApp app-container">
-    <!-- Tabs. -->
+<main class="devApp app-container">
+  <!-- Tabs. -->
   <div class="euiTabs" role="tablist">
     <a
       role="tab"
-      aria-selected="{{kbnDevToolsApp.currentPath === item.url}}"
+      aria-selected="{{ kbnDevToolsApp.currentPath === item.url }}"
       ng-repeat="item in kbnDevToolsApp.devTools"
       class="euiTab"
       ng-class="{'euiTab-isSelected': kbnDevToolsApp.currentPath === item.url, 'euiTab-isDisabled': item.disabled}"
@@ -18,5 +18,5 @@
       {{::item.display}}
     </a>
   </div>
-  <main class="devApp__container" role="tabpanel" ng-transclude></main>
-</div>
+  <div class="devApp__container" role="tabpanel" ng-transclude></div>
+</main>
