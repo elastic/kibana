@@ -50,6 +50,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   const [selectedItems, setSelectedItems] = useState<Data[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
+  const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
   const [errorCode, setErrorCode] = useState<number | null>(null);
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
@@ -142,8 +143,10 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   ];
 
   const deleteSelectedItems = async () => {
+    setIsDeletingActions(true);
     await deleteActions({ http, ids: selectedItems.map(item => item.id) });
     await loadActionsTable();
+    setIsDeletingActions(false);
   };
 
   let content;
@@ -190,7 +193,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
         <EuiSpacer size="s" />
 
         <EuiBasicTable
-          loading={isLoadingActions || isLoadingActionTypes}
+          loading={isLoadingActions || isLoadingActionTypes || isDeletingActions}
           items={data}
           itemId="id"
           columns={actionsTableColumns}
