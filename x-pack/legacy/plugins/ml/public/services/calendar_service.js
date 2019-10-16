@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
-import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar';
 
 
 
