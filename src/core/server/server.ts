@@ -78,9 +78,14 @@ export class Server {
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const pluginDependencies = await this.plugins.discover();
     const contextServiceSetup = this.context.setup({
-      // We inject a fake "legacy plugin" with no dependencies so that legacy plugins can register context providers
-      // that will only be available to other legacy plugins and will not leak into New Platform plugins.
-      pluginDependencies: new Map([...pluginDependencies, [this.legacy.legacyId, []]]),
+      // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
+      // 1) Can access context from any NP plugin
+      // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
+      //    New Platform plugins.
+      pluginDependencies: new Map([
+        ...pluginDependencies,
+        [this.legacy.legacyId, [...pluginDependencies.keys()]],
+      ]),
     });
 
     const httpSetup = await this.http.setup({
