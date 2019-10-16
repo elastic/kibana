@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Winlogbeat Auth: Unusual terminal services users can indicate account takeover or credentialed access (beta)",
+  "description": "SIEM Winlogbeat Auth: Unusual RDP (remote desktop protocol) user logins can indicate account takeover or credentialed access (beta)",
   "groups": [
     "siem",
     "winlogbeat",
