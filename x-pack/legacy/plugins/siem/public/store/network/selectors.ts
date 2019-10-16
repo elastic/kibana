@@ -22,10 +22,14 @@ export const dnsSelector = () =>
     network => network.queries.dns
   );
 export enum NetworkTableType {
+  tls = 'tls',
   dns = 'dns',
-  topNFlowSource = 'topNFlowSource',
+  topCountriesDestination = 'topCountriesDestination',
+  topCountriesSource = 'topCountriesSource',
   topNFlowDestination = 'topNFlowDestination',
+  topNFlowSource = 'topNFlowSource',
 }
+
 export const topNFlowSelector = (flowTarget: FlowTargetSourceDest, networkType: NetworkType) => {
   if (networkType === NetworkType.page) {
     return createSelector(
@@ -45,17 +49,47 @@ export const topNFlowSelector = (flowTarget: FlowTargetSourceDest, networkType: 
   );
 };
 
+export const tlsSelector = (networkType: NetworkType) => {
+  if (networkType === NetworkType.page) {
+    return createSelector(
+      selectNetworkPage,
+      network => network.queries[NetworkTableType.tls]
+    );
+  }
+
+  return createSelector(
+    selectNetworkDetails,
+    network => network.queries[IpDetailsTableType.tls]
+  );
+};
+
+export const topCountriesSelector = (
+  flowTarget: FlowTargetSourceDest,
+  networkType: NetworkType
+) => {
+  if (networkType === NetworkType.page) {
+    return createSelector(
+      selectNetworkPage,
+      network =>
+        flowTarget === FlowTargetSourceDest.source
+          ? network.queries[NetworkTableType.topCountriesSource]
+          : network.queries[NetworkTableType.topCountriesDestination]
+    );
+  }
+  return createSelector(
+    selectNetworkDetails,
+    network =>
+      flowTarget === FlowTargetSourceDest.source
+        ? network.queries[IpDetailsTableType.topCountriesSource]
+        : network.queries[IpDetailsTableType.topCountriesDestination]
+  );
+};
+
 // IP Details Selectors
 export const ipDetailsFlowTargetSelector = () =>
   createSelector(
     selectNetworkDetails,
     network => network.flowTarget
-  );
-
-export const tlsSelector = () =>
-  createSelector(
-    selectNetworkDetails,
-    network => network.queries.tls
   );
 
 export const usersSelector = () =>

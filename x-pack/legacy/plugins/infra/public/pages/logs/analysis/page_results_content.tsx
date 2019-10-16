@@ -19,9 +19,9 @@ import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
-import euiStyled from '../../../../../../common/eui_styled_components';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisJobs,
@@ -134,6 +134,7 @@ export const AnalysisResultsContent = ({
     setupStatus,
     viewSetupForReconfiguration,
     viewSetupForUpdate,
+    jobIds,
   } = useContext(LogAnalysisJobs.Context);
 
   useInterval(() => {
@@ -214,6 +215,7 @@ export const AnalysisResultsContent = ({
                     setTimeRange={handleChartTimeRangeChange}
                     setupStatus={setupStatus}
                     timeRange={queryTimeRange}
+                    jobId={jobIds['log-entry-rate']}
                   />
                 </EuiPanel>
               </EuiFlexItem>

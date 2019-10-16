@@ -19,6 +19,7 @@ describe('UserHostWorkingDir', () => {
         <UserHostWorkingDir
           contextId="context-123"
           eventId="event-123"
+          userDomain="[userDomain-123]"
           userName="[userName-123]"
           hostName="[hostName-123]"
           workingDirectory="[working-directory-123]"
@@ -27,12 +28,13 @@ describe('UserHostWorkingDir', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('it returns null if userName, hostName, and workingDirectory are all null', () => {
+    test('it returns null if userDomain, userName, hostName, and workingDirectory are all null', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <UserHostWorkingDir
             contextId="context-123"
             eventId="event-123"
+            userDomain={null}
             userName={null}
             hostName={null}
             workingDirectory={null}
@@ -42,12 +44,13 @@ describe('UserHostWorkingDir', () => {
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
-    test('it returns null if userName, hostName, and workingDirectory are all undefined', () => {
+    test('it returns null if userDomain, userName, hostName, and workingDirectory are all undefined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <UserHostWorkingDir
             contextId="context-123"
             eventId="event-123"
+            userDomain={undefined}
             userName={undefined}
             hostName={undefined}
             workingDirectory={undefined}
@@ -57,6 +60,24 @@ describe('UserHostWorkingDir', () => {
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
+    test('it returns userDomain if that is the only attribute defined', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <div>
+            <UserHostWorkingDir
+              contextId="context-123"
+              eventId="event-123"
+              userDomain="[user-domain-123]"
+              userName={undefined}
+              hostName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('\\[user-domain-123]');
+    });
+
     test('it returns userName if that is the only attribute defined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
@@ -64,6 +85,7 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              userDomain={undefined}
               userName="[user-name-123]"
               hostName={undefined}
               workingDirectory={undefined}
@@ -81,6 +103,7 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              userDomain={undefined}
               userName={null}
               hostName="[host-name-123]"
               workingDirectory={undefined}
@@ -98,6 +121,7 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              userDomain={null}
               userName={null}
               hostName={null}
               workingDirectory="[working-directory-123]"
@@ -115,6 +139,7 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              userDomain={null}
               userName="[user-name-123]"
               hostName={null}
               workingDirectory="[working-directory-123]"
@@ -132,6 +157,7 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              userDomain={null}
               userName={null}
               hostName="[host-name-123]"
               workingDirectory="[working-directory-123]"
@@ -142,13 +168,14 @@ describe('UserHostWorkingDir', () => {
       expect(wrapper.text()).toEqual('[host-name-123]in[working-directory-123]');
     });
 
-    test('it returns userName, hostName', () => {
+    test('it returns userName, userDomain, hostName', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <div>
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
+              userDomain="[user-domain-123]"
               userName="[user-name-123]"
               hostName="[host-name-123]"
               workingDirectory={null}
@@ -156,7 +183,7 @@ describe('UserHostWorkingDir', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[user-name-123]@[host-name-123]');
+      expect(wrapper.text()).toEqual('[user-name-123]\\[user-domain-123]@[host-name-123]');
     });
   });
 });

@@ -19,6 +19,7 @@
 
 import Api from './api';
 import { getSpec } from './spec';
+import { register } from './es_6_0/ingest';
 const ES_6_0 = new Api('es_6_0');
 const spec = getSpec();
 
@@ -33,7 +34,7 @@ require('./es_6_0/aggregations')(ES_6_0);
 require('./es_6_0/document')(ES_6_0);
 require('./es_6_0/filter')(ES_6_0);
 require('./es_6_0/globals')(ES_6_0);
-require('./es_6_0/ingest')(ES_6_0);
+register(ES_6_0);
 require('./es_6_0/mappings')(ES_6_0);
 require('./es_6_0/query')(ES_6_0);
 require('./es_6_0/reindex')(ES_6_0);

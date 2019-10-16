@@ -501,7 +501,7 @@ export class DashboardAppController {
           $scope.savedQuery = undefined;
           return;
         }
-        if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
+        if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
           savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery: SavedQuery) => {
             $scope.$evalAsync(() => {
               $scope.savedQuery = savedQuery;

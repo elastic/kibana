@@ -1056,7 +1056,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'id1',
                 operation: {
-                  label: 'Date histogram of timestamp',
+                  label: 'timestamp',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',
@@ -1132,7 +1132,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'id1',
                 operation: {
-                  label: 'Date histogram of timestamp',
+                  label: 'timestamp',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',
