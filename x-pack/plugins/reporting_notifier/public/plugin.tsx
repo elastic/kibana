@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { catchError, filter, map, mergeMap } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
@@ -34,7 +34,6 @@ function handleError(
   notifications: NotificationsService,
   err: Error
 ): Rx.Observable<JobStatusBuckets> {
-  // show general toast, log the error and resume
   notifications.toasts.addDanger(
     getGeneralErrorToast(
       i18n.translate('xpack.reportingNotifier.pollingErrorMessage', {
@@ -48,7 +47,7 @@ function handleError(
 }
 
 export class ReportingNotifierPublicPlugin implements Plugin<any, any> {
-  private poller$: Rx.Observable<JobStatusBuckets> | null = null;
+  private readonly stop$ = new Rx.ReplaySubject(1);
 
   // FIXME: License checking: only active, non-expired licenses allowed
   // Depends on https://github.com/elastic/kibana/pull/44922
@@ -62,18 +61,21 @@ export class ReportingNotifierPublicPlugin implements Plugin<any, any> {
     const { http, notifications } = core;
     const streamHandler = new StreamHandler(http, notifications);
 
-    this.poller$ = Rx.timer(0, JOBS_REFRESH_INTERVAL).pipe(
-      map(() => getStored()), // Read all pending job IDs from session storage
-      filter(storedJobs => storedJobs.length > 0), // stop the pipeline here if there are none pending
-      mergeMap(storedJobs => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
-      mergeMap(({ completed, failed }) => streamHandler.showNotifications({ completed, failed })),
-      catchError(err => handleError(notifications, err))
-    );
-
-    this.poller$.subscribe();
+    Rx.timer(0, JOBS_REFRESH_INTERVAL)
+      .pipe(
+        takeUntil(this.stop$), // stop the interval when stop method is called
+        map(() => getStored()), // read all pending job IDs from session storage
+        filter(storedJobs => storedJobs.length > 0), // stop the pipeline here if there are none pending
+        mergeMap(storedJobs => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
+        mergeMap(({ completed, failed }) => streamHandler.showNotifications({ completed, failed })),
+        catchError(err => handleError(notifications, err))
+      )
+      .subscribe();
   }
 
-  public stop() {} // cancel poller$
+  public stop() {
+    this.stop$.next();
+  }
 }
 
 export type Setup = ReturnType<ReportingNotifierPublicPlugin['setup']>;
