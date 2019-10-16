@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
-    "moment-timezone": "^0.5.14",
+    "moment-timezone": "^0.5.27",
     "@kbn/i18n": "1.0.0"
   },
   "devDependencies": {
