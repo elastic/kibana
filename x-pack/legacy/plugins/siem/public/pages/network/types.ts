@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Filter } from '@kbn/es-query';
 import { RouteComponentProps } from 'react-router-dom';
 import { ActionCreator } from 'typescript-fsa';
+import { Query } from 'src/plugins/data/common';
 
 import { FlowTarget } from '../../graphql/types';
 import { GlobalTimeArgs } from '../../containers/global_time';
@@ -18,8 +20,8 @@ export type SetAbsoluteRangeDatePicker = ActionCreator<{
 }>;
 
 interface NetworkComponentReduxProps {
-  filterQuery: string;
-  queryExpression: string;
+  filters: Filter[];
+  query: Query;
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 }
 
@@ -32,10 +34,16 @@ export type NetworkComponentProps = NetworkComponentReduxProps &
   };
 
 interface IPDetailsComponentReduxProps {
-  filterQuery: string;
+  filters: Filter[];
   flowTarget: FlowTarget;
+  query: Query;
+}
+
+interface IPDetailsComponentDispatchProps {
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
+  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
 export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
+  IPDetailsComponentDispatchProps &
   GlobalTimeArgs & { detailName: string };
