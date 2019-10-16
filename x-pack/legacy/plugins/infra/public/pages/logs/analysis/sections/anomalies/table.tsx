@@ -52,7 +52,8 @@ export const AnomaliesTable: React.FunctionComponent<{
   results: GetLogEntryRateSuccessResponsePayload['data'];
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
-}> = ({ results, timeRange, setTimeRange }) => {
+  jobId: string;
+}> = ({ results, timeRange, setTimeRange, jobId }) => {
   const tableItems: TableItem[] = useMemo(() => {
     return Object.entries(getTopAnomalyScoresByPartition(results)).map(([key, value]) => {
       return {
@@ -112,6 +113,7 @@ export const AnomaliesTable: React.FunctionComponent<{
               topAnomalyScore={item.topAnomalyScore}
               setTimeRange={setTimeRange}
               timeRange={timeRange}
+              jobId={jobId}
             />
           ),
         };
