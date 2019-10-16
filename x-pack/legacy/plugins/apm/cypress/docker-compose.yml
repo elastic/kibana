@@ -22,10 +22,16 @@ services:
 
   ## https://docs.docker.com/docker-for-mac/networking/#use-cases-and-workarounds
   wait:
-    image: yauritux/busybox-curl
+    image: dschuldt/dnsutils:1.1-alpine
     network_mode: "host"
-    command: tail -f /dev/null
+    command: >
+      /bin/sh -c '
+        ## host.docker.internal is not available in native docker installations
+        [ -n `dig +short host.docker.internal` ] && echo "`dig +short host.docker.internal` localhost" >> /etc/hosts || true
+        cat /etc/hosts
+        tail -f /dev/null
+      '
     healthcheck:
-      test: ["CMD", "/bin/sh", "-c", "curl -s -o /dev/null -w '%{http_code}' host.docker.internal:5601/status"]
+      test: ["CMD", "/bin/sh", "-c", "curl -s -o /dev/null -w '%{http_code}' localhost:5601/status"]
       retries: 50
       interval: 10s

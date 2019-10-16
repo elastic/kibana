@@ -18,5 +18,7 @@ RUN apt-get -qq update \
     --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
-RUN echo "$(dig +short  host.docker.internal) localhost" >> /etc/hosts \
+## host.docker.internal is not available in native docker installations
+RUN localhost=$(dig +short host.docker.internal) \
+  && [ -n "${localhost}" ] && echo "${localhost} localhost" >> /etc/hosts || true \
   && cat /etc/hosts
