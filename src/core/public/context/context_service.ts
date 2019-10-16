@@ -53,18 +53,17 @@ export class ContextService {
  * }
  *
  * export type VizRenderer = (context: VizRenderContext, domElement: HTMLElement) => () => void;
+ * // When a renderer is bound via `contextContainer.createHandler` this is the type that will be returned.
+ * type BoundVizRenderer = (domElement: HTMLElement) => () => void;
  *
  * class VizRenderingPlugin {
- *   private readonly vizRenderers = new Map<string, ((domElement: HTMLElement) => () => void)>();
+ *   private readonly contextContainer?: IContextContainer<VizRenderer>;
+ *   private readonly vizRenderers = new Map<string, BoundVizRenderer>();
  *
  *   constructor(private readonly initContext: PluginInitializerContext) {}
  *
  *   setup(core) {
- *     this.contextContainer = core.context.createContextContainer<
- *       VizRenderContext,
- *       ReturnType<VizRenderer>,
- *       [HTMLElement]
- *     >();
+ *     this.contextContainer = core.context.createContextContainer();
  *
  *     return {
  *       registerContext: this.contextContainer.registerContext,

@@ -19,7 +19,6 @@ import {
   ScaleType,
   Settings,
   TooltipValueFormatter,
-  TooltipValue,
 } from '@elastic/charts';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
@@ -28,6 +27,7 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
+import { ChartTooltipValue } from '../../../../../components/chart_tooltip/chart_tooltip_service';
 
 export interface MetricDistributionChartData {
   x: number;
@@ -60,7 +60,7 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
   const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
   const AREA_SERIES_COLOR = themeName.euiColorVis1;
 
-  const headerFormatter: TooltipValueFormatter = (tooltipData: TooltipValue) => {
+  const headerFormatter: TooltipValueFormatter = (tooltipData: ChartTooltipValue) => {
     const xValue = tooltipData.value;
     const chartPoint: MetricDistributionChartData | undefined = chartData.find(
       data => data.x === xValue

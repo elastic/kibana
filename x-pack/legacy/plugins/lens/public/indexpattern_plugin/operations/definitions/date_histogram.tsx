@@ -29,13 +29,6 @@ const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
   }
 >;
 
-function ofName(name: string) {
-  return i18n.translate('xpack.lens.indexPattern.dateHistogramOf', {
-    defaultMessage: 'Date histogram of {name}',
-    values: { name },
-  });
-}
-
 function supportsAutoInterval(fieldName: string, indexPattern: IndexPattern): boolean {
   return indexPattern.timeFieldName ? indexPattern.timeFieldName === fieldName : false;
 }
@@ -67,7 +60,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     }
   },
   buildColumn({ suggestedPriority, field, indexPattern }) {
-    let interval = indexPattern.timeFieldName === field.name ? autoInterval : defaultCustomInterval;
+    let interval = autoInterval;
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
       interval = (field.aggregationRestrictions.date_histogram.calendar_interval ||
@@ -75,7 +68,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       timeZone = field.aggregationRestrictions.date_histogram.time_zone;
     }
     return {
-      label: ofName(field.name),
+      label: field.name,
       dataType: 'date',
       operationType: 'date_histogram',
       suggestedPriority,
@@ -136,7 +129,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.name),
+      label: field.name,
       sourceField: field.name,
       params: {
         ...oldColumn.params,
@@ -160,7 +153,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       useNormalizedEsInterval: true,
       interval: column.params.interval,
       drop_partials: false,
-      min_doc_count: 1,
+      min_doc_count: 0,
       extended_bounds: {},
     },
   }),
@@ -172,8 +165,6 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       );
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
-    const fieldAllowsAutoInterval =
-      state.indexPatterns[state.layers[layerId].indexPatternId].timeFieldName === field!.name;
 
     function intervalToNumeric(interval: string) {
       return supportedIntervals.indexOf(interval);
@@ -192,7 +183,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
 
     return (
       <EuiForm>
-        {fieldAllowsAutoInterval && (
+        {!intervalIsRestricted && (
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {

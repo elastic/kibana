@@ -325,5 +325,30 @@ export default function({ getService }: FtrProviderContext) {
         );
       });
     });
+
+    describe('job deletion', function() {
+      it('has results for the job before deletion', async () => {
+        await ml.api.assertJobResultsExist(jobIdClone);
+      });
+
+      it('triggers the delete action', async () => {
+        await ml.jobTable.clickDeleteJobAction(jobIdClone);
+      });
+
+      it('confirms the delete modal', async () => {
+        await ml.jobTable.confirmDeleteJobModal();
+      });
+
+      it('does not display the deleted job in the job list any more', async () => {
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(jobIdClone);
+        const rows = await ml.jobTable.parseJobTable();
+        expect(rows.filter(row => row.id === jobIdClone)).to.have.length(0);
+      });
+
+      it('does not have results for the deleted job any more', async () => {
+        await ml.api.assertNoJobResultsExist(jobIdClone);
+      });
+    });
   });
 }

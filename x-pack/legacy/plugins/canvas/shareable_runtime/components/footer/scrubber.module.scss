@@ -1,0 +1,26 @@
+@import '@elastic/eui/src/global_styling/variables/_size.scss';
+@import '@elastic/eui/src/global_styling/variables/_colors.scss';
+@import '@elastic/eui/src/global_styling/mixins/_helpers.scss';
+
+:global .kbnCanvas :local .root {
+  background: $euiColorGhost;
+  position: absolute;
+  bottom: -172px;
+  left: 0;
+  right: 0;
+  padding: $euiSizeS 0 ($euiSizeL * 2) 0;
+  transition: bottom 0.25s;
+  height: 172px;
+}
+
+:global .kbnCanvas :local .visible {
+  bottom: 0;
+}
+
+:global .kbnCanvas :local .slideContainer {
+  @include euiScrollBar;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+}

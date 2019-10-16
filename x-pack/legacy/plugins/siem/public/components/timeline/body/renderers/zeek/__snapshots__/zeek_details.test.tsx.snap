@@ -366,6 +366,7 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
             "format": "",
             "indexes": Array [
               "auditbeat-*",
+              "endgame-*",
               "filebeat-*",
               "packetbeat-*",
               "winlogbeat-*",

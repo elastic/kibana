@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { compact } from 'lodash';
 import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
@@ -57,6 +58,7 @@ interface SearchBarInjectedDeps {
 
 export interface SearchBarOwnProps {
   indexPatterns?: IndexPattern[];
+  isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
 
@@ -78,6 +80,8 @@ export interface SearchBarOwnProps {
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
   // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
+
+  onRefresh?: (payload: { dateRange: TimeRange }) => void;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -195,7 +199,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private shouldRenderFilterBar() {
-    return this.props.showFilterBar && this.props.filters && this.props.indexPatterns;
+    return (
+      this.props.showFilterBar &&
+      this.props.filters &&
+      this.props.indexPatterns &&
+      compact(this.props.indexPatterns).length > 0
+    );
   }
 
   public setFilterBarHeight = () => {
@@ -371,6 +380,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
+          isLoading={this.props.isLoading}
           prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
@@ -379,6 +389,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           refreshInterval={this.props.refreshInterval}
           showAutoRefreshOnly={this.props.showAutoRefreshOnly}
           showQueryInput={this.props.showQueryInput}
+          onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onChange={this.onQueryBarChange}
           isDirty={this.isDirty()}

@@ -165,6 +165,22 @@ export default function ({ getService }) {
               });
             })
         ));
+
+        it('KQL syntax error should return 400 with Bad Request', async () => (
+          await supertest
+            .get('/api/saved_objects/_find?type=dashboard&filter=dashboard.attributes.title:foo<invalid')
+            .expect(400)
+            .then(resp => {
+              console.log('body', JSON.stringify(resp.body));
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message: 'KQLSyntaxError: Expected AND, OR, end of input, ' +
+                'whitespace but \"<\" found.\ndashboard.attributes.title:foo' +
+                '<invalid\n------------------------------^: Bad Request',
+                statusCode: 400,
+              });
+            })
+        ));
       });
     });
 

@@ -18,24 +18,26 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
+import { SetupStatus } from '../../../../common/log_analysis';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { AnalysisSetupSteps } from './setup/steps';
-import { SetupStatus } from '../../../containers/logs/log_analysis';
+
+type SetupHandler = (startTime?: number | undefined, endTime?: number | undefined) => void;
 
 interface AnalysisSetupContentProps {
-  setup: (startTime?: number | undefined, endTime?: number | undefined) => void;
-  retry: (startTime?: number | undefined, endTime?: number | undefined) => void;
+  cleanupAndSetup: SetupHandler;
   indexPattern: string;
-  viewResults: () => void;
+  setup: SetupHandler;
   setupStatus: SetupStatus;
+  viewResults: () => void;
 }
 
 export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
-  setup,
+  cleanupAndSetup,
   indexPattern,
-  viewResults,
-  retry,
+  setup,
   setupStatus,
+  viewResults,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
@@ -70,7 +72,7 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
             <EuiSpacer />
             <AnalysisSetupSteps
               setup={setup}
-              retry={retry}
+              cleanupAndSetup={cleanupAndSetup}
               viewResults={viewResults}
               indexPattern={indexPattern}
               setupStatus={setupStatus}

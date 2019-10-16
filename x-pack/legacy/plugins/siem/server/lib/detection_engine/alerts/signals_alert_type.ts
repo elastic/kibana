@@ -14,7 +14,10 @@ import { buildEventsReIndex } from './build_events_reindex';
 
 // TODO: Comment this in and use this instead of the reIndex API
 // once scrolling and other things are done with it.
-// import { buildEventsQuery } from './build_events_query';
+import { buildEventsScrollQuery } from './build_events_query';
+
+// bulk scroll class
+import { scrollAndBulkIndex } from './utils';
 
 export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
   return {
@@ -25,25 +28,23 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
       params: schema.object({
         description: schema.string(),
         from: schema.string(),
-        filter: schema.maybe(schema.object({}, { allowUnknowns: true })),
+        filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
         id: schema.number(),
         index: schema.arrayOf(schema.string()),
-        kql: schema.maybe(schema.string({ defaultValue: undefined })),
+        kql: schema.nullable(schema.string()),
         maxSignals: schema.number({ defaultValue: 100 }),
         name: schema.string(),
         severity: schema.number(),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        scrollSize: schema.maybe(schema.number()),
+        scrollLock: schema.maybe(schema.string()),
       }),
     },
     // TODO: Type the params as it is all filled with any
     async executor({ services, params, state }: AlertExecutorOptions) {
       const instance = services.alertInstanceFactory('siem-signals');
-
-      // TODO: Comment this in eventually and use the buildEventsQuery()
-      // for scrolling and other fun stuff instead of using the buildEventsReIndex()
-      // const query = buildEventsQuery();
 
       const {
         description,
@@ -58,7 +59,24 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
         severity,
         to,
         type,
+        scrollSize,
+        scrollLock,
       } = params;
+
+      const scroll = scrollLock ? scrollLock : '1m';
+      const size = scrollSize ? scrollSize : 400;
+
+      // TODO: Turn these options being sent in into a template for the alert type
+      const noReIndex = buildEventsScrollQuery({
+        index,
+        from,
+        to,
+        kql,
+        filter,
+        size,
+        scroll,
+      });
+
       const reIndex = buildEventsReIndex({
         index,
         from,
@@ -84,11 +102,31 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
 
         // TODO: Comment this in eventually and use this for manual insertion of the
         // signals instead of the ReIndex() api
-        // const result = await services.callCluster('search', query);
-        const result = await services.callCluster('reindex', reIndex);
 
-        // TODO: Error handling here and writing of any errors that come back from ES by
-        logger.info(`Result of reindex: ${JSON.stringify(result, null, 2)}`);
+        if (process.env.USE_REINDEX_API === 'true') {
+          const result = await services.callCluster('reindex', reIndex);
+
+          // TODO: Error handling here and writing of any errors that come back from ES by
+          logger.info(`Result of reindex: ${JSON.stringify(result, null, 2)}`);
+        } else {
+          logger.info(`[+] Initial search call`);
+
+          const noReIndexResult = await services.callCluster('search', noReIndex);
+          logger.info(`Total docs to reindex: ${noReIndexResult.hits.total.value}`);
+
+          const bulkIndexResult = await scrollAndBulkIndex(
+            noReIndexResult,
+            params,
+            services,
+            logger
+          );
+
+          if (bulkIndexResult) {
+            logger.info('Finished SIEM signal job');
+          } else {
+            logger.error('Error processing SIEM signal job');
+          }
+        }
       } catch (err) {
         // TODO: Error handling and writing of errors into a signal that has error
         // handling/conditions

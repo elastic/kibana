@@ -4,6 +4,7 @@
 
 ## DeprecationAPIClientParams interface
 
+
 <b>Signature:</b>
 
 ```typescript

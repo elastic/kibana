@@ -6,20 +6,23 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
+import { ActionCreator } from 'typescript-fsa';
+import { npSetup } from 'ui/new_platform';
 
 import '../../mock/match_media';
-import '../../mock/ui_settings';
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
-import { IPDetailsComponent, IPDetails } from './ip_details';
-import { FlowTarget } from '../../graphql/types';
-import { createStore, State } from '../../store';
-import { cloneDeep } from 'lodash/fp';
+
 import { mocksSource } from '../../containers/source/mock';
+import { FlowTarget } from '../../graphql/types';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
+import { MockNpSetUp, mockUiSettings } from '../../mock/ui_settings';
+import { createStore, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
-import { ActionCreator } from 'typescript-fsa';
+
+import { IPDetailsComponent, IPDetails } from './ip_details';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
@@ -27,6 +30,16 @@ type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
 type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
+
+const mockNpSetup: MockNpSetUp = (npSetup as unknown) as MockNpSetUp;
+jest.mock('ui/new_platform');
+mockNpSetup.core.uiSettings = mockUiSettings;
+
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar
+jest.mock('../../components/search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
 
 let localSource: Array<{
   request: {};
@@ -60,8 +73,15 @@ const getMockHistory = (ip: string) => ({
   listen: jest.fn(),
 });
 
+const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
+const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
 const getMockProps = (ip: string) => ({
-  filterQuery: 'coolQueryhuh?',
+  to,
+  from,
+  isInitializing: false,
+  setQuery: jest.fn(),
+  query: { query: 'coolQueryhuh?', language: 'keury' },
+  filters: [],
   flowTarget: FlowTarget.source,
   history: getMockHistory(ip),
   location: {
@@ -77,6 +97,7 @@ const getMockProps = (ip: string) => ({
     from: number;
     to: number;
   }>,
+  setIpDetailsTablesActivePageToZero: (jest.fn() as unknown) as ActionCreator<null>,
 });
 
 jest.mock('ui/documentation_links', () => ({
@@ -116,12 +137,7 @@ describe('Ip Details', () => {
   });
   test('it renders', () => {
     const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
-    expect(
-      wrapper
-        .dive()
-        .find('[data-test-subj="ip-details-page"]')
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="ip-details-page"]').exists()).toBe(true);
   });
 
   test('it matches the snapshot', () => {
