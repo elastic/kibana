@@ -6,6 +6,7 @@ exports[`ExtendedBoundsParamEditor should be rendered with default set of props 
   display="row"
   error="Min should be less than or equal to Max."
   fullWidth={true}
+  hasChildLabel={true}
   hasEmptyLabelSpace={false}
   isInvalid={false}
   labelType="label"
