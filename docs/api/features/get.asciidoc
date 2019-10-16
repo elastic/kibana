@@ -9,7 +9,7 @@ experimental[] Retrieves all {kib} features.
 [[features-api-get-request]]
 ==== Request
 
-`/api/features/v1`
+`/api/features`
 
 [[features-api-get-codes]]
 ==== Response code
