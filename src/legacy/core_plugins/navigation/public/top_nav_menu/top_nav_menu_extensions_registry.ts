@@ -29,7 +29,7 @@ export class TopNavMenuExtensionsRegistry {
   /** @public **/
   // Items registered into this registry will be appended to any TopNavMenu rendered in any application.
   public register(menuItem: TopNavMenuData) {
-    this.menuItems.push(extension);
+    this.menuItems.push(menuItem);
   }
 
   /** @internal **/
