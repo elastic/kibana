@@ -127,7 +127,7 @@ describe('Agent lib', () => {
       expect((error as Error).message).toBe('Impossible to enroll an already active agent');
     });
 
-    it('Should enroll a new EPHEMERAL_INSTANCE agent', async () => {
+    it('Should enroll a new EPHEMERAL agent', async () => {
       const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
       const agentsRepository = new InMemoryAgentsRepository();
       const policy = new PolicyLib({} as PoliciesRepository);
@@ -137,7 +137,7 @@ describe('Agent lib', () => {
       const agent = await agentLib.enroll(
         getUser(),
         'valid-enrollment-token',
-        'EPHEMERAL_INSTANCE',
+        'EPHEMERAL',
         undefined
       );
 
@@ -145,53 +145,6 @@ describe('Agent lib', () => {
       expect(agent).toMatchObject({
         access_token: 'mock-access-token-1',
         policy_id: 'policyId',
-      });
-    });
-
-    it('When enrolling a new EPHEMERAL_INSTANCE agent it should create a EPHEMERAL agent too', async () => {
-      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentsRepository = new InMemoryAgentsRepository();
-      const policy = new PolicyLib({} as PoliciesRepository);
-      const agentsEventsRepository = new InMemoryAgentEventsRepository();
-      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
-
-      const agent = await agentLib.enroll(
-        getUser(),
-        'valid-enrollment-token',
-        'EPHEMERAL_INSTANCE',
-        undefined
-      );
-
-      const parentAgent = agentsRepository.agents[agent.parent_id as string];
-      expect(parentAgent).toBeDefined();
-      expect(parentAgent).toMatchObject({
-        type: 'EPHEMERAL',
-      });
-    });
-    it('When enrolling multiple EPHEMERAL_INSTANCE agent it should create only one EPHEMERAL agent', async () => {
-      const token = new TokenLib({} as TokensRepository, {} as FrameworkLib);
-      const agentsRepository = new InMemoryAgentsRepository();
-      const policy = new PolicyLib({} as PoliciesRepository);
-      const agentsEventsRepository = new InMemoryAgentEventsRepository();
-      const agentLib = new AgentLib(agentsRepository, agentsEventsRepository, token, policy);
-
-      const agent1 = await agentLib.enroll(
-        getUser(),
-        'valid-enrollment-token',
-        'EPHEMERAL_INSTANCE',
-        undefined
-      );
-      const agent2 = await agentLib.enroll(
-        getUser(),
-        'valid-enrollment-token',
-        'EPHEMERAL_INSTANCE',
-        undefined
-      );
-      expect(agent1.parent_id).toBe(agent2.parent_id);
-      const parentAgent = agentsRepository.agents[agent1.parent_id as string];
-      expect(parentAgent).toBeDefined();
-      expect(parentAgent).toMatchObject({
-        type: 'EPHEMERAL',
       });
     });
   });
@@ -207,7 +160,7 @@ describe('Agent lib', () => {
 
       await agentLib.delete(getUser(), {
         id: 'agent:1',
-        type: 'EPHEMERAL_INSTANCE',
+        type: 'EPHEMERAL',
       } as Agent);
 
       expect(agentsRepository.delete).toHaveBeenCalled();

@@ -161,9 +161,7 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
               defaultMessage="Install new agent"
             />
           </EuiButton>
-        ) : (
-          null
-        )
+        ) : null
       }
     />
   );
@@ -197,7 +195,11 @@ export const AgentListPage: React.SFC<RouterProps> = ({ libs }) => {
           </EuiFlexItem>
           {libs.framework.capabilities.write && (
             <EuiFlexItem>
-              <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
+              <EuiButton
+                fill
+                iconType="plusInCircle"
+                onClick={() => setIsEnrollmentFlyoutOpen(true)}
+              >
                 <FormattedMessage
                   id="xpack.fleet.agentList.addButton"
                   defaultMessage="Install new agent"

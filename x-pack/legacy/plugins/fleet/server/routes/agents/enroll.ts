@@ -24,7 +24,7 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
       payload: {
         shared_id: Joi.string().optional(),
         type: Joi.string()
-          .allow('PERMANENT', 'EPHEMERAL_INSTANCE', 'TEMPORARY')
+          .allow('PERMANENT', 'EPHEMERAL', 'TEMPORARY')
           .required(),
         metadata: Joi.object({
           local: Joi.object(),
@@ -37,7 +37,7 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
     request: FrameworkRequest<{
       payload: {
         shared_id?: string;
-        type: 'PERMANENT' | 'EPHEMERAL_INSTANCE';
+        type: 'PERMANENT' | 'EPHEMERAL';
         metadata: { local: any; user_provided: any };
       };
       headers: {

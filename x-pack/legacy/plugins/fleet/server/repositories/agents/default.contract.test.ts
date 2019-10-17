@@ -293,15 +293,15 @@ describe('AgentsRepository', () => {
 
   describe('list', () => {
     beforeEach(async () => {
-      const agents = Array(20)
+      const permanentAgents = Array(20)
         .fill(null)
         .map((_, idx) => {
           return {
             shared_id: `agent${idx}`,
-            active: false,
+            active: true,
             access_token: 'TOKEN_1',
             policy_id: 'policy_id_1',
-            type: 'EPHEMERAL',
+            type: 'PERMANENT',
             version: '1',
             local_metadata: {
               host: 'test.fr',
@@ -310,26 +310,106 @@ describe('AgentsRepository', () => {
               color: 'red',
             },
             enrolled_at: moment('2019-08-05T19:35:14.861Z')
-              .add(idx, 'day')
+              .add(idx + 2, 'day')
               .toISOString(),
           };
         });
-      await loadFixtures(agents);
+      const ephemeralAgents = [
+        {
+          shared_id: `ephemeral1`,
+          active: true,
+          access_token: 'TOKEN_1',
+          policy_id: 'policy_id_1',
+          type: 'EPHEMERAL',
+          version: '1',
+          local_metadata: {
+            host: 'test.fr',
+          },
+          user_provided_metadata: {
+            color: 'red',
+          },
+          last_checkin: moment().toISOString(),
+          enrolled_at: moment('2019-08-05T19:35:14.861Z').toISOString(),
+        },
+      ];
+
+      const inactiveAgents = [
+        // Inactive besace active:false
+        {
+          shared_id: `inactive_agent_1`,
+          active: false,
+          access_token: 'TOKEN_1',
+          policy_id: 'policy_id_1',
+          type: 'PERMANENT',
+          version: '1',
+          local_metadata: {
+            host: 'test.fr',
+          },
+          user_provided_metadata: {
+            color: 'red',
+          },
+          enrolled_at: moment('2019-08-05T19:35:14.861Z')
+            .add(100, 'day')
+            .toISOString(),
+        },
+        // Inactive because ephemeral and last_checkin is after 3 polling times
+        {
+          shared_id: `inactive_agent_2`,
+          active: true,
+          access_token: 'TOKEN_1',
+          policy_id: 'policy_id_1',
+          type: 'EPHEMERAL',
+          version: '1',
+          local_metadata: {
+            host: 'test.fr',
+          },
+          user_provided_metadata: {
+            color: 'red',
+          },
+          last_checkin: moment()
+            .subtract(2, 'day')
+            .toISOString(),
+          enrolled_at: moment('2019-08-05T19:35:14.861Z').toISOString(),
+        },
+      ];
+
+      await loadFixtures(permanentAgents.concat(inactiveAgents, ephemeralAgents));
     });
 
-    it('should list all agents', async () => {
-      const res = await adapter.list(getUser());
-      expect(res.total).toBe(20);
+    it('should list all active agents', async () => {
+      const res = await adapter.list(getUser(), { page: 1, perPage: 100 });
+      const agentIds = res.agents.map(a => a.shared_id as string);
+      expect(res.total).toBe(21);
+
+      expect(agentIds).not.toContain('inactive_agent_1');
+      expect(agentIds).not.toContain('inactive_agent_2');
+    });
+
+    it('should list all agents with showInactive set to true', async () => {
+      const res = await adapter.list(getUser(), { page: 1, perPage: 100, showInactive: true });
+      const agentIds = res.agents.map(a => a.shared_id as string);
+      expect(res.total).toBe(23);
+
+      expect(agentIds).toContain('inactive_agent_1');
+      expect(agentIds).toContain('inactive_agent_2');
     });
 
     it('should support to sort by enrolled_at date ASC', async () => {
-      const res = await adapter.list(getUser(), SortOptions.EnrolledAtASC, 1, 3);
+      const res = await adapter.list(getUser(), {
+        sortOptions: SortOptions.EnrolledAtASC,
+        page: 1,
+        perPage: 3,
+      });
 
-      expect(res.agents.map(a => a.shared_id)).toEqual(['agent0', 'agent1', 'agent2']);
+      expect(res.agents.map(a => a.shared_id)).toEqual(['ephemeral1', 'agent0', 'agent1']);
     });
 
     it('should support to sort by enrolled_at date DESC', async () => {
-      const res = await adapter.list(getUser(), SortOptions.EnrolledAtDESC, 1, 3);
+      const res = await adapter.list(getUser(), {
+        sortOptions: SortOptions.EnrolledAtDESC,
+        page: 1,
+        perPage: 3,
+      });
 
       expect(res.agents.map(a => a.shared_id)).toEqual(['agent19', 'agent18', 'agent17']);
     });
