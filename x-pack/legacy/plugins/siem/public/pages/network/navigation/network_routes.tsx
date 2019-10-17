@@ -68,7 +68,7 @@ export const NetworkRoutes = ({
         render={() => <DnsQueryTabBody {...tabProps} />}
       />
       <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.ips})`}
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.flows})`}
         render={() => (
           <>
             <ConditionalFlexGroup direction="column">

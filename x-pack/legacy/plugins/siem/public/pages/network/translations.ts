@@ -27,7 +27,7 @@ export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.network.emptyAc
   defaultMessage: 'Go to documentation',
 });
 
-export const NAVIGATION_IPS_TITLE = i18n.translate('xpack.siem.network.navigation.ipsTitle', {
+export const NAVIGATION_FLOWS_TITLE = i18n.translate('xpack.siem.network.navigation.flowsTitle', {
   defaultMessage: 'Flows',
 });
 

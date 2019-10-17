@@ -48,7 +48,7 @@ export type NetworkRoutesProps = GlobalTimeArgs & {
 };
 
 export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.dns &
-  NetworkRouteType.ips &
+  NetworkRouteType.flows &
   NetworkRouteType.tls;
 
 type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
@@ -59,7 +59,7 @@ type KeyNetworkNavTab = KeyNetworkNavTabWithoutMlPermission | KeyNetworkNavTabWi
 export type NetworkNavTab = Record<KeyNetworkNavTab, NavTab>;
 
 export enum NetworkRouteType {
-  ips = 'ips',
+  flows = 'flows',
   dns = 'dns',
   anomalies = 'anomalies',
   tls = 'tls',
