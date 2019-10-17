@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }) {
         'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.dashboard.switchToEditMode();
       originalTitles = await PageObjects.dashboard.getPanelTitles();

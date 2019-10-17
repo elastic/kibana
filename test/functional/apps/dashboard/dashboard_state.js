@@ -40,6 +40,7 @@ export default function ({ getService, getPageObjects }) {
   describe('dashboard state', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.preserveCrossAppState();
     });
 
     after(async function () {

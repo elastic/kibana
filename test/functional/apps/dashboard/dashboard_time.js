@@ -31,6 +31,7 @@ export default function ({ getPageObjects, getService }) {
   describe('dashboard time', () => {
     before(async function () {
       await PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.preserveCrossAppState();
     });
 
     after(async function () {
