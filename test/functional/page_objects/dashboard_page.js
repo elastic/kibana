@@ -51,6 +51,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         'defaultIndex': defaultIndex,
       });
       await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
     }
 
     async preserveCrossAppState() {
