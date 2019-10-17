@@ -5,6 +5,7 @@
  */
 
 import { URL } from 'url';
+import { Response } from 'node-fetch';
 import {
   AssetsGroupedByServiceByType,
   AssetParts,
@@ -15,7 +16,7 @@ import {
 } from '../../common/types';
 import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
-import { fetchUrl, getResponseStream } from './requests';
+import { fetchUrl, getResponseStream, getResponse } from './requests';
 import { streamToBuffer } from './streams';
 import { integrationsManagerConfigStore } from '../config';
 
@@ -45,10 +46,10 @@ export async function fetchInfo(key: string): Promise<RegistryPackage> {
   return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
 }
 
-export async function fetchImage(params: ImageRequestParams): Promise<NodeJS.ReadableStream> {
+export async function fetchImage(params: ImageRequestParams): Promise<Response> {
   const { registryUrl } = integrationsManagerConfigStore.getConfig();
   const { pkgkey, imgPath } = params;
-  return getResponseStream(`${registryUrl}/package/${pkgkey}/img/${imgPath}`);
+  return getResponse(`${registryUrl}/package/${pkgkey}/img/${imgPath}`);
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {
