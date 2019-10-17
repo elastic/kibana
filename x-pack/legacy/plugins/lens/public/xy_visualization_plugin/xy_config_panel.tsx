@@ -27,6 +27,7 @@ import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
@@ -105,7 +106,10 @@ function LayerSettings({
               iconType: t.icon || 'empty',
             }))}
           idSelected={layer.seriesType}
-          onChange={seriesType => setSeriesType(seriesType as SeriesType)}
+          onChange={seriesType => {
+            trackUiEvent('xy_change_layer_display');
+            setSeriesType(seriesType as SeriesType);
+          }}
           isIconOnly
           buttonSize="compressed"
         />
@@ -149,6 +153,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                   setState(updateLayer(state, { ...layer, seriesType }, index))
                 }
                 removeLayer={() => {
+                  trackUiEvent('xy_layer_removed');
                   frame.removeLayers([layer.layerId]);
                   setState({ ...state, layers: state.layers.filter(l => l !== layer) });
                 }}
@@ -181,6 +186,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 filterOperations: isBucketed,
                 suggestedPriority: 1,
                 layerId: layer.layerId,
+                hideGrouping: true,
               }}
             />
           </EuiFormRow>
@@ -258,6 +264,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           defaultMessage: 'Add layer',
         })}
         onClick={() => {
+          trackUiEvent('xy_layer_added');
           const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
           setState({
             ...state,

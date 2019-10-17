@@ -11,7 +11,7 @@ import { ActionsConfigType } from './types';
 import { TaskManager } from '../../task_manager';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
-import { SpacesPlugin as SpacesPluginStartContract } from '../../spaces';
+import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
 import {

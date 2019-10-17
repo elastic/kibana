@@ -189,6 +189,7 @@ export default function (api) {
       stats: [''],
       timeout: '1s',
       version: { __one_of: [true, false] },
+      track_total_hits: { __one_of: [true, false] },
     },
   });
 

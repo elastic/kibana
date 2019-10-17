@@ -5,12 +5,12 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { IAction } from 'src/plugins/ui_actions/public';
 import { IEmbeddable } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
+import { siemFilterManager } from '../../search_bar';
 
 export const APPLY_SIEM_FILTER_ACTION_ID = 'APPLY_SIEM_FILTER_ACTION_ID';
 
@@ -21,16 +21,7 @@ export interface ActionContext {
 
 export class ApplySiemFilterAction implements IAction<ActionContext> {
   public readonly type = APPLY_SIEM_FILTER_ACTION_ID;
-  private readonly applyFilterQueryFromKueryExpression: (expression: string) => void;
   public id = APPLY_SIEM_FILTER_ACTION_ID;
-
-  constructor({
-    applyFilterQueryFromKueryExpression,
-  }: {
-    applyFilterQueryFromKueryExpression: (filterQuery: string) => void;
-  }) {
-    this.applyFilterQueryFromKueryExpression = applyFilterQueryFromKueryExpression;
-  }
 
   public getDisplayName() {
     return i18n.translate('xpack.siem.components.embeddables.actions.applySiemFilterActionTitle', {
@@ -50,37 +41,6 @@ export class ApplySiemFilterAction implements IAction<ActionContext> {
     if (!filters) {
       throw new TypeError('Applying a filter requires a filter as context');
     }
-
-    // Parse queryExpression from queryDSL and apply to SIEM global KQL Bar via redux
-    const filterObject = getOr(null, '[0].query.match', filters);
-
-    if (filterObject != null) {
-      const filterQuery = getOr('', 'query.query', embeddable.getInput());
-      const filterKey = Object.keys(filterObject)[0];
-
-      const filterExpression = getFilterExpression(filterKey, filterObject[filterKey].query);
-
-      this.applyFilterQueryFromKueryExpression(
-        filterQuery.length > 0 ? `${filterQuery} and ${filterExpression}` : filterExpression
-      );
-    }
+    siemFilterManager.addFilters(filters);
   }
 }
-
-export const getFilterExpression = (
-  filterKey: string,
-  filterValue: string | string[] | undefined
-): string => {
-  if (Array.isArray(filterValue)) {
-    return getExpressionFromArray(filterKey, filterValue);
-  } else if (filterValue != null) {
-    return `${filterKey}: "${filterValue}"`;
-  } else {
-    return `(NOT ${filterKey}:*)`;
-  }
-};
-
-export const getExpressionFromArray = (filterKey: string, filterValues: string[]): string =>
-  filterValues.length > 0
-    ? `(${filterValues.map(filterValue => `${filterKey}: "${filterValue}"`).join(' OR ')})`
-    : '';

@@ -9,11 +9,11 @@ import actionCreatorFactory from 'typescript-fsa';
 import {
   FlowTarget,
   NetworkDnsSortField,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesSortField,
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
-import { KueryFilterQuery, networkModel, SerializedFilterQuery } from '../model';
+import { networkModel } from '../model';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/network');
 
@@ -57,22 +57,23 @@ export const updateTopNFlowLimit = actionCreator<{
 }>('UPDATE_TOP_N_FLOW_LIMIT');
 
 export const updateTopNFlowSort = actionCreator<{
-  topNFlowSort: NetworkTopNFlowSortField;
+  topNFlowSort: NetworkTopTablesSortField;
   networkType: networkModel.NetworkType;
   tableType: networkModel.TopNTableType;
 }>('UPDATE_TOP_N_FLOW_SORT');
 
-export const setNetworkFilterQueryDraft = actionCreator<{
-  filterQueryDraft: KueryFilterQuery;
+export const updateTopCountriesLimit = actionCreator<{
+  limit: number;
   networkType: networkModel.NetworkType;
-}>('SET_NETWORK_FILTER_QUERY_DRAFT');
+  tableType: networkModel.TopCountriesTableType;
+}>('UPDATE_TOP_COUNTRIES_LIMIT');
 
-export const applyNetworkFilterQuery = actionCreator<{
-  filterQuery: SerializedFilterQuery;
+export const updateTopCountriesSort = actionCreator<{
+  topCountriesSort: NetworkTopTablesSortField;
   networkType: networkModel.NetworkType;
-}>('APPLY_NETWORK_FILTER_QUERY');
+  tableType: networkModel.TopCountriesTableType;
+}>('UPDATE_TOP_COUNTRIES_SORT');
 
-// IP Details Actions
 export const updateIpDetailsFlowTarget = actionCreator<{
   flowTarget: FlowTarget;
 }>('UPDATE_IP_DETAILS_TARGET');
@@ -80,10 +81,12 @@ export const updateIpDetailsFlowTarget = actionCreator<{
 // TLS Table Actions
 export const updateTlsSort = actionCreator<{
   tlsSortField: TlsSortField;
+  networkType: networkModel.NetworkType;
 }>('UPDATE_TLS_SORT');
 
 export const updateTlsLimit = actionCreator<{
   limit: number;
+  networkType: networkModel.NetworkType;
 }>('UPDATE_TLS_LIMIT');
 
 // Users Table Actions
