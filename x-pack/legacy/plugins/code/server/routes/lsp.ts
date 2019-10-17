@@ -31,7 +31,7 @@ import { SymbolSearchResult } from '../../model';
 const LANG_SERVER_ERROR = 'language server error';
 
 export function lspRoute(
-  server: CodeServerRouter,
+  router: CodeServerRouter,
   codeServices: CodeServices,
   serverOptions: ServerOptions,
   log: Logger
@@ -39,7 +39,7 @@ export function lspRoute(
   const lspService = codeServices.serviceFor(LspServiceDefinition);
   const gitService = codeServices.serviceFor(GitServiceDefinition);
 
-  server.route({
+  router.route({
     path: '/api/code/lsp/textDocument/{method}',
     async npHandler(
       context: RequestHandlerContext,
@@ -79,7 +79,7 @@ export function lspRoute(
             } else if (error.isBoom) {
               return res.customError({
                 body: error.error,
-                statusCode: error.statusCode,
+                statusCode: error.statusCode ? error.statusCode : 500,
               });
             } else {
               log.error(error);
@@ -99,7 +99,7 @@ export function lspRoute(
     method: 'POST',
   });
 
-  server.route({
+  router.route({
     path: '/api/code/lsp/findDefinitions',
     method: 'POST',
     async npHandler(
@@ -110,7 +110,7 @@ export function lspRoute(
       // @ts-ignore
       const { textDocument, position } = req.body as any;
       // @ts-ignore
-      const { qname } = res.params as any;
+      const { qname } = req.params as any;
       const { uri } = textDocument;
       const { repoUri } = parseLspUrl(uri);
       await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
@@ -130,7 +130,7 @@ export function lspRoute(
         },
       });
       const title: string = await findTitleFromHover(hover, uri, position);
-      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(context), log);
+      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(context, req), log);
 
       const locators = response.result as SymbolLocator[];
       const locations = [];
@@ -153,7 +153,7 @@ export function lspRoute(
     },
   });
 
-  server.route({
+  router.route({
     path: '/api/code/lsp/findReferences',
     method: 'POST',
     async npHandler(
@@ -197,7 +197,7 @@ export function lspRoute(
         } else if (error.isBoom) {
           return res.customError({
             body: error.error,
-            statusCode: error.statusCode,
+            statusCode: error.statusCode ? error.statusCode : 500,
           });
         } else {
           return res.custom({
@@ -219,25 +219,21 @@ export function symbolByQnameRoute(router: CodeServerRouter, log: Logger) {
       req: KibanaRequest,
       res: KibanaResponseFactory
     ) {
-      try {
-        // @ts-ignore
-        const { qname } = res.params as any;
-        const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(context), log);
-        const repoScope = await getReferenceHelper(
-          context.core.savedObjects.client
-        ).findReferences();
-        if (repoScope.length === 0) {
-          return {
+      // @ts-ignore
+      const { qname } = req.params as any;
+      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(context, req), log);
+      const repoScope = await getReferenceHelper(context.core.savedObjects.client).findReferences();
+      if (repoScope.length === 0) {
+        return res.ok({
+          body: {
             symbols: [],
             total: 0,
             took: 0,
-          } as SymbolSearchResult;
-        }
-        const symbol = await symbolSearchClient.findByQname(qname, repoScope);
-        return res.ok({ body: symbol });
-      } catch (error) {
-        return res.internalError({ body: `Search Exception` });
+          } as SymbolSearchResult,
+        });
       }
+      const symbol = await symbolSearchClient.findByQname(qname, repoScope);
+      return res.ok({ body: symbol });
     },
   });
 }

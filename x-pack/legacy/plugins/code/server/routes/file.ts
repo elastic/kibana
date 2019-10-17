@@ -19,9 +19,10 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
 
   async function getRepoUriFromMeta(
     context: RequestHandlerContext,
+    req: KibanaRequest,
     repoUri: string
   ): Promise<string | undefined> {
-    const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+    const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
 
     try {
       const repo = await repoObjectClient.getRepository(repoUri);
@@ -49,7 +50,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       const skip = queries.skip ? parseInt(queries.skip as string, 10) : 0;
       const withParents = 'parents' in queries;
       const flatten = 'flatten' in queries;
-      const repoUri = await getRepoUriFromMeta(context, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
         return res.notFound({ body: `repo ${uri} not found` });
       }
@@ -69,7 +70,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         if (e.isBoom) {
           return res.customError({
             body: e.error,
-            statusCode: e.statusCode,
+            statusCode: e.statusCode ? e.statusCode : 500,
           });
         } else {
           return res.internalError({ body: e.message || e.name });
@@ -88,7 +89,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
     ) {
       const { uri, path, ref } = req.params as any;
       const revision = decodeRevisionString(ref);
-      const repoUri = await getRepoUriFromMeta(context, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
         return res.notFound({ body: `repo ${uri} not found` });
       }
@@ -130,7 +131,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         if (e.isBoom) {
           return res.customError({
             body: e.error,
-            statusCode: e.statusCode,
+            statusCode: e.statusCode ? e.statusCode : 500,
           });
         } else {
           return res.internalError({ body: e.message || e.name });
@@ -149,7 +150,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
     ) {
       const { uri, path, ref } = req.params as any;
       const revision = decodeRevisionString(ref);
-      const repoUri = await getRepoUriFromMeta(context, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
         return res.notFound({ body: `repo ${uri} not found` });
       }
@@ -172,7 +173,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         if (e.isBoom) {
           return res.customError({
             body: e.error,
-            statusCode: e.statusCode,
+            statusCode: e.statusCode ? e.statusCode : 500,
           });
         } else {
           return res.internalError({ body: e.message || e.name });
@@ -204,7 +205,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
     const count = queries.count ? parseInt(queries.count as string, 10) : 10;
     const after = queries.after !== undefined;
     try {
-      const repoUri = await getRepoUriFromMeta(context, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
         return res.notFound({ body: `repo ${uri} not found` });
       }
@@ -221,7 +222,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       if (e.isBoom) {
         return res.customError({
           body: e.error,
-          statusCode: e.statusCode,
+          statusCode: e.statusCode ? e.statusCode : 500,
         });
       } else {
         return res.internalError({ body: e.message || e.name });
@@ -238,7 +239,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       res: KibanaResponseFactory
     ) {
       const { uri } = req.params as any;
-      const repoUri = await getRepoUriFromMeta(context, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
         return res.badRequest({ body: `repo ${uri} not found` });
       }
@@ -251,7 +252,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         if (e.isBoom) {
           return res.customError({
             body: e.error,
-            statusCode: e.statusCode,
+            statusCode: e.statusCode ? e.statusCode : 500,
           });
         } else {
           return res.internalError({ body: e.message || e.name });
@@ -269,7 +270,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       res: KibanaResponseFactory
     ) {
       const { uri, revision } = req.params as any;
-      const repoUri = await getRepoUriFromMeta(context, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
         return res.notFound({ body: `repo ${uri} not found` });
       }
@@ -284,7 +285,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         if (e.isBoom) {
           return res.customError({
             body: e.error,
-            statusCode: e.statusCode,
+            statusCode: e.statusCode ? e.statusCode : 500,
           });
         } else {
           return res.internalError({ body: e.message || e.name });
@@ -302,7 +303,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
       res: KibanaResponseFactory
     ) {
       const { uri, path, revision } = req.params as any;
-      const repoUri = await getRepoUriFromMeta(context, uri);
+      const repoUri = await getRepoUriFromMeta(context, req, uri);
       if (!repoUri) {
         return res.notFound({ body: `repo ${uri} not found` });
       }
@@ -319,7 +320,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         if (e.isBoom) {
           return res.customError({
             body: e.error,
-            statusCode: e.statusCode,
+            statusCode: e.statusCode ? e.statusCode : 500,
           });
         } else {
           return res.internalError({ body: e.message || e.name });

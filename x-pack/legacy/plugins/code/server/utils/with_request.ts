@@ -4,21 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, RequestHandlerContext } from 'src/core/server';
+import { APICaller, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 
 export class WithRequest {
   public readonly callCluster: APICaller;
 
-  constructor(readonly context: RequestHandlerContext) {
-    // @ts-ignore
-    // const securityPlugin = req.server.plugins.security;
-    // if (securityPlugin) {
-    //   const useRbac = securityPlugin.authorization.mode.useRbacForRequest(req);
-    //   if (useRbac) {
-    //     this.callCluster = cluster.callWithInternalUser;
-    //     return;
-    //   }
-    // }
-    this.callCluster = context.core.elasticsearch.dataClient.callAsInternalUser;
+  constructor(readonly context: RequestHandlerContext, readonly req: KibanaRequest) {
+    const securityPlugin = context.code.legacy.securityPlugin;
+    const useRbac =
+      securityPlugin &&
+      securityPlugin.authorization &&
+      // @ts-ignore
+      securityPlugin.authorization.mode.useRbacForRequest(req);
+    this.callCluster = useRbac
+      ? context.core.elasticsearch.dataClient.callAsInternalUser
+      : context.core.elasticsearch.dataClient.callAsCurrentUser;
   }
 }

@@ -47,7 +47,10 @@ export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
         repoScope: await getScope(context, repoScope),
       };
       try {
-        const repoSearchClient = new RepositorySearchClient(new EsClientWithRequest(context), log);
+        const repoSearchClient = new RepositorySearchClient(
+          new EsClientWithRequest(context, req),
+          log
+        );
         const searchRes = await repoSearchClient.search(searchReq);
         return res.ok({ body: searchRes });
       } catch (error) {
@@ -76,7 +79,10 @@ export function repositorySearchRoute(router: CodeServerRouter, log: Logger) {
         repoScope: await getScope(context, repoScope),
       };
       try {
-        const repoSearchClient = new RepositorySearchClient(new EsClientWithRequest(context), log);
+        const repoSearchClient = new RepositorySearchClient(
+          new EsClientWithRequest(context, req),
+          log
+        );
         const searchRes = await repoSearchClient.suggest(searchReq);
         return res.ok({ body: searchRes });
       } catch (error) {
@@ -109,7 +115,10 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
         repoScope: await getScope(context, repoScope),
       };
       try {
-        const docSearchClient = new DocumentSearchClient(new EsClientWithRequest(context), log);
+        const docSearchClient = new DocumentSearchClient(
+          new EsClientWithRequest(context, req),
+          log
+        );
         const searchRes = await docSearchClient.search(searchReq);
         return res.ok({ body: searchRes });
       } catch (error) {
@@ -138,7 +147,10 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
         repoScope: await getScope(context, repoScope),
       };
       try {
-        const docSearchClient = new DocumentSearchClient(new EsClientWithRequest(context), log);
+        const docSearchClient = new DocumentSearchClient(
+          new EsClientWithRequest(context, req),
+          log
+        );
         const searchRes = await docSearchClient.suggest(searchReq);
         return res.ok({ body: searchRes });
       } catch (error) {
@@ -168,7 +180,10 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
       const reqs: StackTraceSnippetsRequest[] = (req.body as any).requests;
       const searchRes = await Promise.all(
         reqs.map((stacktraceReq: StackTraceSnippetsRequest) => {
-          const integClient = new IntegrationsSearchClient(new EsClientWithRequest(context), log);
+          const integClient = new IntegrationsSearchClient(
+            new EsClientWithRequest(context, req),
+            log
+          );
           return Promise.all(
             stacktraceReq.stacktraceItems.map((stacktrace: StackTraceItem) => {
               const repoUris = stacktraceReq.repoUris.filter(uri => scopes.has(uri));
@@ -207,7 +222,7 @@ export function symbolSearchRoute(router: CodeServerRouter, log: Logger) {
       repoScope: await getScope(context, repoScope),
     };
     try {
-      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(context), log);
+      const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(context, req), log);
       const searchRes = await symbolSearchClient.suggest(searchReq);
       return res.ok({ body: searchRes });
     } catch (error) {
@@ -250,7 +265,10 @@ export function commitSearchRoute(router: CodeServerRouter, log: Logger) {
         repoScope: await getScope(context, repoScope),
       };
       try {
-        const commitSearchClient = new CommitSearchClient(new EsClientWithRequest(context), log);
+        const commitSearchClient = new CommitSearchClient(
+          new EsClientWithRequest(context, req),
+          log
+        );
         const searchRes = await commitSearchClient.search(searchReq);
         return res.ok({ body: searchRes });
       } catch (error) {

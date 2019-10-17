@@ -54,7 +54,7 @@ export function workspaceRoute(
           if (e.isBoom) {
             return res.customError({
               body: e.error,
-              statusCode: e.statusCode,
+              statusCode: e.statusCode ? e.statusCode : 500,
             });
           } else {
             return res.customError({

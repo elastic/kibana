@@ -114,7 +114,7 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
     ) {
       const { uri, path, ref } = req.params as any;
       const report: StatusReport = {};
-      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
       const endpoint = await codeServices.locate(req, uri);
 
       try {

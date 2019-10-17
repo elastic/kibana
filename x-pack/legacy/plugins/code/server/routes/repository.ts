@@ -56,7 +56,7 @@ export function repositoryRoute(
       }
 
       const repo = RepositoryUtils.buildRepository(repoUrl);
-      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
 
       try {
         // Check if the repository already exists
@@ -137,7 +137,7 @@ export function repositoryRoute(
       res: KibanaResponseFactory
     ) {
       const { uri: repoUri } = req.params as any;
-      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
       try {
         // make sure the repo belongs to the current space
         getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
@@ -189,7 +189,7 @@ export function repositoryRoute(
       const { uri: repoUri } = req.params as any;
       try {
         await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
-        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
         const repo = await repoObjectClient.getRepository(repoUri);
         return res.ok({ body: repo });
       } catch (error) {
@@ -211,7 +211,7 @@ export function repositoryRoute(
     ) {
       const { uri: repoUri } = req.params as any;
       try {
-        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
         let gitStatus = null;
         let indexStatus = null;
         let deleteStatus = null;
@@ -264,7 +264,7 @@ export function repositoryRoute(
     ) {
       try {
         const uris = await getReferenceHelper(context.core.savedObjects.client).findReferences();
-        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
         const repo = await repoObjectClient.getRepositories(uris);
         return res.ok({ body: repo });
       } catch (error) {
@@ -292,7 +292,7 @@ export function repositoryRoute(
       const reindex: boolean = (req.body as any).reindex;
       try {
         await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
-        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
         const cloneStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
 
         const payload = {
@@ -324,7 +324,7 @@ export function repositoryRoute(
     ) {
       const config: RepositoryConfig = req.body as RepositoryConfig;
       const repoUri: RepositoryUri = config.uri;
-      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+      const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
 
       try {
         // Check if the repository exists
@@ -360,7 +360,7 @@ export function repositoryRoute(
       const { uri: repoUri } = req.params as any;
       try {
         await getReferenceHelper(context.core.savedObjects.client).ensureReference(repoUri);
-        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context));
+        const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(context, req));
         const config = await repoObjectClient.getRepositoryConfig(repoUri);
         return res.ok({ body: config });
       } catch (error) {

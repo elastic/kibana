@@ -59,6 +59,10 @@ declare module 'src/core/server' {
   interface RequestHandlerContext {
     code: {
       codeServices: CodeServices | null;
+      // @deprecated
+      legacy: {
+        securityPlugin: any;
+      };
     };
   }
 }
@@ -94,6 +98,9 @@ export class CodePlugin {
     npHttp.registerRouteHandlerContext('code', () => {
       return {
         codeServices: this.codeServices,
+        legacy: {
+          securityPlugin: server.plugins.security,
+        },
       };
     });
   }
