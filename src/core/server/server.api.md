@@ -511,6 +511,8 @@ export interface CoreSetup {
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: HttpServiceSetup;
+    // (undocumented)
+    uiSettings: UiSettingsServiceSetup;
 }
 
 // @public
@@ -763,7 +765,7 @@ export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser'
 export interface IUiSettingsClient {
     get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
     getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
-    getDefaults: () => Record<string, UiSettingsParams>;
+    getDefaults: () => Readonly<Record<string, UiSettingsParams>>;
     getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, {
         userValue?: T;
         isOverridden?: boolean;
@@ -1070,6 +1072,9 @@ export interface RequestHandlerContext {
         elasticsearch: {
             dataClient: IScopedClusterClient;
             adminClient: IScopedClusterClient;
+        };
+        uiSettings: {
+            client: IUiSettingsClient;
         };
     };
 }
@@ -1593,6 +1598,11 @@ export interface UiSettingsParams {
     value: SavedObjectAttribute;
 }
 
+// @public (undocumented)
+export interface UiSettingsServiceSetup {
+    setDefaults(values: Record<string, UiSettingsParams>): void;
+}
+
 // @public
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
@@ -1600,6 +1610,6 @@ export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolea
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:38:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 ```

@@ -175,6 +175,7 @@ export {
   UiSettingsParams,
   InternalUiSettingsServiceSetup,
   UiSettingsType,
+  UiSettingsServiceSetup,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';

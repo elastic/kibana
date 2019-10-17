@@ -9,5 +9,5 @@ Returns uiSettings default values [UiSettingsParams](./kibana-plugin-server.uise
 <b>Signature:</b>
 
 ```typescript
-getDefaults: () => Record<string, UiSettingsParams>;
+getDefaults: () => Readonly<Record<string, UiSettingsParams>>;
 ```
