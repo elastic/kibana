@@ -1,4 +1,3 @@
-import { appendFileSync, readFileSync, writeFileSync } from 'fs';
 import dotEnv from 'dotenv';
 import testsList from './tests_list';
 
