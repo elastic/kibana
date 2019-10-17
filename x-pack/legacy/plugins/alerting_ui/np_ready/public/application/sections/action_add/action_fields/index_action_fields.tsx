@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../../../components/page_error';
 import { Action } from '../../../lib/api';
 
 interface Props {
@@ -24,14 +23,10 @@ export const IndexActionFields: React.FunctionComponent<Props> = ({
 }) => {
   const { index }: any = action.config;
   return (
-    <ErrableFormRow
-      id="indexName"
-      errorKey="index"
+    <EuiFormRow
       fullWidth
-      errors={errors}
-      isShowingErrors={hasErrors && index !== undefined}
-      label={i18n.translate('xpack.alertingUI.sections.actionAdd.indexAction.indexFieldLabel', {
-        defaultMessage: 'Index',
+      label={i18n.translate('xpack.alertingUI.sections.actionAdd.indexAction.indexTextFieldLabel', {
+        defaultMessage: 'Index (optional)',
       })}
     >
       <EuiFieldText
@@ -48,6 +43,6 @@ export const IndexActionFields: React.FunctionComponent<Props> = ({
           }
         }}
       />
-    </ErrableFormRow>
+    </EuiFormRow>
   );
 };

@@ -11,12 +11,14 @@ export class ActionModel {
   actionTypeId: string;
   description: string;
   config: Record<string, any>;
+  secrets: Record<string, any>;
 
   constructor(props = {}) {
     this.id = get(props, 'id');
     this.actionTypeId = get(props, 'actionTypeId');
     this.description = get(props, 'description');
     this.config = get(props, 'config', {});
+    this.secrets = get(props, 'secrets', {});
   }
 
   validate() {

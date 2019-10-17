@@ -66,7 +66,6 @@ export async function saveAction({
   http: HttpServiceBase;
   action: Action;
 }): Promise<Action> {
-  action.secrets = {};
   return http.post(`${BASE_ACTION_API_PATH}`, {
     body: JSON.stringify(action),
   });

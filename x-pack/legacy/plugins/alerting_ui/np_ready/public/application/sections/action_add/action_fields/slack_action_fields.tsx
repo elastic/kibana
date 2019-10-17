@@ -4,70 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiComboBox, EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Action } from '../../../lib/api';
+import { ErrableFormRow } from '../../../components/page_error';
 
 interface Props {
   action: Action;
-  editActionConfig: (property: string, value: any) => void;
-  children: React.ReactNode;
+  editActionSecrets: (property: string, value: any) => void;
+  errors: { [key: string]: string[] };
+  hasErrors: boolean;
 }
 
 export const SlackActionFields: React.FunctionComponent<Props> = ({
   action,
-  editActionConfig,
-  children,
+  editActionSecrets,
+  errors,
+  hasErrors,
 }) => {
-  const { text, to }: any = action.config;
-  const toOptions = to ? to.map((label: any) => ({ label })) : [];
+  const { webhookUrl }: any = action.secrets;
 
   return (
     <Fragment>
-      {children}
-      <EuiFormRow
+      <ErrableFormRow
+        id="webhookUrl"
+        errorKey="webhookUrl"
         fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors && webhookUrl !== undefined}
         label={i18n.translate(
-          'xpack.alertingUI.sections.actionAdd.slackAction.recipientTextFieldLabel',
+          'xpack.alertingUI.sections.actionAdd.slackPassword.methodWebhookUrlLabel',
           {
-            defaultMessage: 'Recipient (optional)',
+            defaultMessage: 'WebhookUrl',
           }
         )}
       >
-        <EuiComboBox
-          noSuggestions
+        <EuiFieldText
           fullWidth
-          selectedOptions={toOptions}
-          data-test-subj="slackRecipientComboBox"
-          onCreateOption={(searchValue: string) => {
-            const newOptions = [...toOptions, { label: searchValue }];
-            editActionConfig('to', newOptions.map(newOption => newOption.label));
-          }}
-          onChange={(selectedOptions: Array<{ label: string }>) => {
-            editActionConfig('to', selectedOptions.map(selectedOption => selectedOption.label));
-          }}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.alertingUI.sections.actionAdd.slackAction.messageTextAreaFieldLabel',
-          {
-            defaultMessage: 'Message (optional)',
-          }
-        )}
-      >
-        <EuiTextArea
-          fullWidth
-          name="text"
-          value={text}
-          data-test-subj="slackMessageTextarea"
+          name="webhookUrl"
+          value={webhookUrl || ''}
+          data-test-subj="slackWebhookUrlTextarea"
           onChange={e => {
-            editActionConfig('text', e.target.value);
+            editActionSecrets('webhookUrl', e.target.value);
+          }}
+          onBlur={() => {
+            if (!webhookUrl) {
+              editActionSecrets('webhookUrl', '');
+            }
           }}
         />
-      </EuiFormRow>
+      </ErrableFormRow>
     </Fragment>
   );
 };

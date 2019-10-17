@@ -96,6 +96,23 @@ const actionReducer = (state: any, actionItem: any) => {
         };
       }
     }
+    case 'setSecretsProperty': {
+      const { property, value } = payload;
+      if (isEqual(action.secrets[property], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          action: new ActionModel({
+            ...action,
+            secrets: {
+              ...action.secrets,
+              [property]: value,
+            },
+          }),
+        };
+      }
+    }
   }
 };
 
@@ -117,12 +134,17 @@ export const ActionAdd = ({ actionType }: Props) => {
     dispatch({ command: 'setConfigProperty', payload: { property, value } });
   };
 
+  const setActionSecretsProperty = (property: string, value: any) => {
+    dispatch({ command: 'setSecretsProperty', payload: { property, value } });
+  };
+
   const getAction = () => {
     dispatch({ command: 'setAction', payload: new ActionModel({ actionTypeId: actionType.id }) });
   };
 
   useEffect(() => {
     getAction();
+    setServerError(null);
   }, [flyoutVisible]);
 
   const closeFlyout = useCallback(() => setFlyoutVisibility(false), []);
@@ -137,7 +159,7 @@ export const ActionAdd = ({ actionType }: Props) => {
 
   const FieldsComponent = actionFieldsComponentMap[actionType.id];
   const actionSettings = actionTypesSettings(actionType.id);
-  const { errors } = action.validate();
+  const errors = { ...actionSettings.validate(action).errors, ...action.validate().errors };
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   return (
@@ -205,6 +227,7 @@ export const ActionAdd = ({ actionType }: Props) => {
             action={action}
             errors={errors}
             editActionConfig={setActionConfigProperty}
+            editActionSecrets={setActionSecretsProperty}
             hasErrors={hasErrors}
           >
             {actionType.id === null ? (

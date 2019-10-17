@@ -12,9 +12,9 @@ import { Action } from '../../../lib/api';
 interface Props {
   action: Action;
   editActionConfig: (property: string, value: any) => void;
+  editActionSecrets: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   hasErrors: boolean;
-  children: React.ReactNode;
 }
 
 export const PagerDutyActionFields: React.FunctionComponent<Props> = ({
@@ -22,36 +22,64 @@ export const PagerDutyActionFields: React.FunctionComponent<Props> = ({
   hasErrors,
   action,
   editActionConfig,
-  children,
+  editActionSecrets,
 }) => {
-  const { description } = action.config;
+  const { apiUrl } = action.config;
+  const { routingKey } = action.secrets;
   return (
     <Fragment>
-      {children}
       <ErrableFormRow
-        id="pagerDutyDescription"
-        errorKey="description"
+        id="apiUrl"
+        errorKey="apiUrl"
         fullWidth
         errors={errors}
-        isShowingErrors={hasErrors && description !== undefined}
+        isShowingErrors={hasErrors && apiUrl !== undefined}
         label={i18n.translate(
-          'xpack.alertingUI.sections.actionAdd.pagerDutyAction.descriptionFieldLabel',
+          'xpack.alertingUI.sections.actionAdd.pagerDutyAction.apiUrlFieldLabel',
           {
-            defaultMessage: 'Description',
+            defaultMessage: 'ApiUrl',
           }
         )}
       >
         <EuiFieldText
           fullWidth
-          name="description"
-          value={description || ''}
-          data-test-subj="pagerdutyDescriptionInput"
+          name="apiUrl"
+          value={apiUrl || ''}
+          data-test-subj="pagerdutyApiUrlInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editActionConfig('description', e.target.value);
+            editActionConfig('apiUrl', e.target.value);
           }}
           onBlur={() => {
-            if (!description) {
-              editActionConfig('description', '');
+            if (!apiUrl) {
+              editActionConfig('apiUrl', '');
+            }
+          }}
+        />
+      </ErrableFormRow>
+      <ErrableFormRow
+        id="routingKey"
+        errorKey="routingKey"
+        fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors && routingKey !== undefined}
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.pagerDutyAction.routingKeyFieldLabel',
+          {
+            defaultMessage: 'RoutingKey',
+          }
+        )}
+      >
+        <EuiFieldText
+          fullWidth
+          name="routingKey"
+          value={routingKey || ''}
+          data-test-subj="pagerdutyRoutingKeyInput"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            editActionSecrets('routingKey', e.target.value);
+          }}
+          onBlur={() => {
+            if (!routingKey) {
+              editActionSecrets('routingKey', '');
             }
           }}
         />
