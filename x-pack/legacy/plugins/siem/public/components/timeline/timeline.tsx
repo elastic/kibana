@@ -111,15 +111,16 @@ export const Timeline = React.memo<Props>(
     sort,
     toggleColumn,
   }) => {
-    const combinedQueries = combineQueries(
+    const combinedQueries = combineQueries({
       dataProviders,
       indexPattern,
       browserFields,
-      kqlQueryExpression,
+      filters: [],
+      kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
       kqlMode,
       start,
-      end
-    );
+      end,
+    });
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     return (
       <AutoSizer detectAnyWindowResize={true} content>

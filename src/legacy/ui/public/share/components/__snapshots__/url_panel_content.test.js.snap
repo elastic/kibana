@@ -9,6 +9,7 @@ exports[`render 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <FormattedMessage
@@ -113,6 +114,7 @@ exports[`render 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
@@ -172,6 +174,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
@@ -265,6 +268,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
@@ -324,6 +328,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
