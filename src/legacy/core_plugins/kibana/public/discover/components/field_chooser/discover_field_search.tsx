@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFacetButton,
@@ -26,12 +26,13 @@ import {
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
-  EuiPanel,
+  EuiSelect,
   EuiSwitch,
   EuiSpacer,
+  EuiForm,
+  EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldSelector } from './field_selector';
 
 export interface State {
   searchable: string;
@@ -48,10 +49,6 @@ export interface Props {
   onChange: (field: string, value: string | boolean | undefined) => void;
 
   /**
-   * determines whether additional filter fields are displayed
-   */
-  showFilter: boolean;
-  /**
    * the input value of the user
    */
   value?: string;
@@ -66,19 +63,12 @@ export interface Props {
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ showFilter, onChange, value, types }: Props) {
+export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   if (typeof value !== 'string') {
     // at initial rendering value is undefined (angular related), this catches the warning
     // should be removed once all is react
     return null;
   }
-  const filterBtnAriaLabel = showFilter
-    ? i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
-        defaultMessage: 'Hide field filter settings',
-      })
-    : i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
-        defaultMessage: 'Show field filter settings',
-      });
   const searchPlaceholder = i18n.translate('kbn.discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search fields',
   });
@@ -87,7 +77,6 @@ export function DiscoverFieldSearch({ showFilter, onChange, value, types }: Prop
     { value: 'true', text: 'yes' },
     { value: 'false', text: 'no' },
   ];
-
   const typeOptions = types
     ? types.map(type => {
         return { value: type, text: type };
@@ -96,13 +85,20 @@ export function DiscoverFieldSearch({ showFilter, onChange, value, types }: Prop
 
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-
   const [values, setValues] = useState<State>({
     searchable: 'any',
     aggregatable: 'any',
     type: 'any',
     missing: true,
   });
+
+  const filterBtnAriaLabel = isPopoverOpen
+    ? i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
+        defaultMessage: 'Hide field filter settings',
+      })
+    : i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
+        defaultMessage: 'Show field filter settings',
+      });
 
   const handleFacetButtonClicked = () => {
     setPopoverOpen(!isPopoverOpen);
@@ -170,44 +166,65 @@ export function DiscoverFieldSearch({ showFilter, onChange, value, types }: Prop
     </EuiFacetButton>
   );
 
+  const select = (
+    id: string,
+    selectOptions: Array<{ text: ReactNode } & OptionHTMLAttributes<HTMLOptionElement>>,
+    selectValue: string
+  ) => {
+    return (
+      <EuiSelect
+        id={`${id}-select`}
+        options={selectOptions}
+        value={selectValue}
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+          handleValueChange(id, e.target.value)
+        }
+        aria-label={i18n.translate('kbn.discover.fieldChooser.filter.fieldSelectorLabel', {
+          defaultMessage: 'Selection of {id} filter options',
+          values: { id },
+        })}
+        data-test-subj={`${id}Select`}
+      />
+    );
+  };
+
   const selectionPanel = (
-    <EuiPanel paddingSize="s">
-      <FieldSelector
-        id={'aggregatable'}
-        options={options}
-        value={values.aggregatable}
-        onChange={handleValueChange}
-        label={i18n.translate('kbn.discover.fieldChooser.filter.aggregatableLabel', {
-          defaultMessage: 'Aggregatable',
-        })}
-      />
-      <FieldSelector
-        id={'searchable'}
-        options={options}
-        value={values.searchable}
-        onChange={handleValueChange}
-        label={i18n.translate('kbn.discover.fieldChooser.filter.searchableLabel', {
-          defaultMessage: 'Searchable',
-        })}
-      />
-      <FieldSelector
-        id={'type'}
-        options={typeOptions}
-        value={values.type}
-        onChange={handleValueChange}
-        label={i18n.translate('kbn.discover.fieldChooser.filter.typeLabel', {
-          defaultMessage: 'Type',
-        })}
-      />
-      <EuiSpacer size="s" />
-      <EuiSwitch
-        label={i18n.translate('kbn.discover.fieldChooser.filter.hideMissingFieldsLabel', {
-          defaultMessage: 'Hide missing fields',
-        })}
-        checked={values.missing}
-        onChange={handleMissingChange}
-      />
-    </EuiPanel>
+    <div className="dscFieldSearch__formWrapper">
+      <EuiForm>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('kbn.discover.fieldChooser.filter.aggregatableLabel', {
+            defaultMessage: 'Aggregatable',
+          })}
+        >
+          {select('aggregatable', options, values.aggregatable)}
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('kbn.discover.fieldChooser.filter.searchableLabel', {
+            defaultMessage: 'Searchable',
+          })}
+        >
+          {select('searchable', options, values.searchable)}
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('kbn.discover.fieldChooser.filter.typeLabel', {
+            defaultMessage: 'Type',
+          })}
+        >
+          {select('type', typeOptions, values.type)}
+        </EuiFormRow>
+        <EuiSpacer size="s" />
+        <EuiSwitch
+          label={i18n.translate('kbn.discover.fieldChooser.filter.hideMissingFieldsLabel', {
+            defaultMessage: 'Hide missing fields',
+          })}
+          checked={values.missing}
+          onChange={handleMissingChange}
+        />
+      </EuiForm>
+    </div>
   );
 
   return (
@@ -225,7 +242,7 @@ export function DiscoverFieldSearch({ showFilter, onChange, value, types }: Prop
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div className="lnsInnerIndexPatternDataPanel__filtersWrapper">
+      <div className="dscFieldSearch__filterWrapper">
         <EuiPopover
           id="dataPanelTypeFilter"
           panelClassName="euiFilterGroup__popoverPanel"
@@ -237,7 +254,7 @@ export function DiscoverFieldSearch({ showFilter, onChange, value, types }: Prop
           button={buttonContent}
         >
           <EuiPopoverTitle>
-            {i18n.translate('xpack.lens.indexPatterns.filterByTypeLabel', {
+            {i18n.translate('kbn.discover.fieldChooser.filter.filterByTypeLabel', {
               defaultMessage: 'Filter by type',
             })}
           </EuiPopoverTitle>

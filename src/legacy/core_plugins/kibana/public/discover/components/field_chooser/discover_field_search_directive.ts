@@ -26,8 +26,6 @@ const app = uiModules.get('apps/discover');
 app.directive('discoverFieldSearch', function(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DiscoverFieldSearch), [
     ['onChange', { watchDepth: 'reference' }],
-    ['onShowFilter', { watchDepth: 'reference' }],
-    ['showFilter', { watchDepth: 'value' }],
     ['value', { watchDepth: 'value' }],
     ['types', { watchDepth: 'value' }],
   ]);

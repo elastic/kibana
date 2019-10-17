@@ -23,41 +23,25 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DiscoverFieldSearch } from './discover_field_search';
 
 describe('DiscoverFieldSearch', () => {
-  function mountComponent() {
-    const props = {
-      onChange: jest.fn(),
-      showFilter: false,
-      filtersActive: 0,
-      value: 'test',
-      types: ['number', 'string', '_source'],
-    };
-    const comp = mountWithIntl(<DiscoverFieldSearch {...props} />);
-    const input = findTestSubject(comp, 'fieldFilterSearchInput');
-    const btn = findTestSubject(comp, 'toggleFieldFilterButton');
-    return { comp, input, btn, props };
-  }
+  const props = {
+    onChange: jest.fn(),
+    value: 'test',
+    types: ['number', 'string', '_source'],
+  };
 
   test('enter value', () => {
-    const { input, props } = mountComponent();
+    const component = mountWithIntl(<DiscoverFieldSearch {...props} />);
+    const input = findTestSubject(component, 'fieldFilterSearchInput');
     input.simulate('change', { target: { value: 'new filter' } });
     expect(props.onChange).toBeCalledTimes(1);
   });
 
-  test('change showFilter value should change aria label', () => {
-    const { comp } = mountComponent();
-    let btn = findTestSubject(comp, 'toggleFieldFilterButton');
-    expect(btn.prop('aria-label')).toEqual('Show field filter settings');
-    comp.setProps({ showFilter: true });
-    btn = findTestSubject(comp, 'toggleFieldFilterButton');
-    expect(btn.prop('aria-label')).toEqual('Hide field filter settings');
-  });
-
-  test('change filtersActive should change facet selection', () => {
-    const { comp } = mountComponent();
-    let btn = findTestSubject(comp, 'toggleFieldFilterButton');
+  test('change in active filters should change facet selection', () => {
+    const component = mountWithIntl(<DiscoverFieldSearch {...props} />);
+    const btn = findTestSubject(component, 'toggleFieldFilterButton');
     expect(btn.hasClass('euiFacetButton--isSelected')).toBeFalsy();
-    comp.setProps({ filtersActive: 3 });
-    btn = findTestSubject(comp, 'toggleFieldFilterButton');
+    const aggregatableSelector = findTestSubject(component, 'aggregatableSelect');
+    aggregatableSelector.simulate('change', { target: { value: 'yes'} });
     expect(btn.hasClass('euiFacetButton--isSelected')).toBe(true);
   });
 });
