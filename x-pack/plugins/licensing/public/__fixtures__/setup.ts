@@ -10,15 +10,15 @@ import { coreMock } from '../../../../../src/core/public/mocks';
 import { licenseMerge } from '../../common/license_merge';
 import { Plugin } from '../plugin';
 
-export function setupOnly(pluginInitializerContext: any = {}) {
+export function setupOnly() {
   const coreSetup = coreMock.createSetup();
-  const plugin = new Plugin(coreMock.createPluginInitializerContext(pluginInitializerContext));
+  const plugin = new Plugin(coreMock.createPluginInitializerContext());
 
   return { coreSetup, plugin };
 }
 
-export async function setup(xpackInfo = {}, pluginInitializerContext: any = {}, shouldSkip = true) {
-  const { coreSetup, plugin } = setupOnly(pluginInitializerContext);
+export async function setup(xpackInfo = {}, shouldSkip = true) {
+  const { coreSetup, plugin } = setupOnly();
 
   coreSetup.http.get.mockResolvedValue(licenseMerge(xpackInfo));
 
