@@ -10,10 +10,15 @@ import { Action } from '../../../lib/api';
 
 interface Props {
   action: Action;
+  editActionConfig: (property: string, value: any) => void;
   children: React.ReactNode;
 }
 
-export const SlackActionFields: React.FunctionComponent<Props> = ({ action, children }) => {
+export const SlackActionFields: React.FunctionComponent<Props> = ({
+  action,
+  editActionConfig,
+  children,
+}) => {
   const { text, to }: any = action.config;
   const toOptions = to ? to.map((label: any) => ({ label })) : [];
 
@@ -36,13 +41,10 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({ action, chil
           data-test-subj="slackRecipientComboBox"
           onCreateOption={(searchValue: string) => {
             const newOptions = [...toOptions, { label: searchValue }];
-            // editAction({ key: 'to', value: newOptions.map(newOption => newOption.label) });
+            editActionConfig('to', newOptions.map(newOption => newOption.label));
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
-            /* editAction({
-              key: 'to',
-              value: selectedOptions.map(selectedOption => selectedOption.label),
-            }); */
+            editActionConfig('to', selectedOptions.map(selectedOption => selectedOption.label));
           }}
         />
       </EuiFormRow>
@@ -62,7 +64,7 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({ action, chil
           value={text}
           data-test-subj="slackMessageTextarea"
           onChange={e => {
-            // editAction({ key: 'text', value: e.target.value });
+            editActionConfig('text', e.target.value);
           }}
         />
       </EuiFormRow>

@@ -16,16 +16,18 @@ import {
   EuiContextMenuItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ActionsContext } from '../../../context/app_context';
 import { actionTypesSettings } from '../../../constants/action_types_settings';
+import { ActionType } from '../../../lib/api';
 
 interface Props {
-  actionTypes: any;
+  actionTypes: Record<string, ActionType>;
+  createAction: (actionTypeItem: ActionType) => void;
 }
 
-export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({ actionTypes }) => {
-  const { createAction } = useContext(ActionsContext);
-
+export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
+  actionTypes,
+  createAction,
+}) => {
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
   const actions = Object.entries(!actionTypes ? [] : actionTypes).map(

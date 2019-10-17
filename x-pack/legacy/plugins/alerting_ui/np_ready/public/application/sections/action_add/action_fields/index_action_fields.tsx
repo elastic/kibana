@@ -11,14 +11,14 @@ import { Action } from '../../../lib/api';
 
 interface Props {
   action: Action;
-  // editAction: (changedProperty: { key: string; value: string }) => void;
+  editActionConfig: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   hasErrors: boolean;
 }
 
 export const IndexActionFields: React.FunctionComponent<Props> = ({
   action,
-  // editAction,
+  editActionConfig,
   errors,
   hasErrors,
 }) => {
@@ -38,13 +38,13 @@ export const IndexActionFields: React.FunctionComponent<Props> = ({
         fullWidth
         name="index"
         data-test-subj="indexInput"
-        value={index || ''}
+        value={index}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          // editAction({ key: 'index', value: e.target.value });
+          editActionConfig('index', e.target.value);
         }}
         onBlur={() => {
           if (!index) {
-            // editAction({ key: 'index', value: '' });
+            editActionConfig('index', '');
           }
         }}
       />

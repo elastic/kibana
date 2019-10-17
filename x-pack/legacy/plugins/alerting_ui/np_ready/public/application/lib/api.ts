@@ -12,10 +12,11 @@ export interface ActionType {
 }
 
 export interface Action {
+  secrets: Record<string, any>;
   id: string;
   actionTypeId: string;
   description: string;
-  config: Record<string, unknown>;
+  config: Record<string, any>;
 }
 
 export interface LoadActionTypesOpts {
@@ -55,5 +56,18 @@ export async function loadActions({
       page: page.index + 1,
       per_page: page.size,
     },
+  });
+}
+
+export async function saveAction({
+  http,
+  action,
+}: {
+  http: HttpServiceBase;
+  action: Action;
+}): Promise<Action> {
+  action.secrets = {};
+  return http.post(`${BASE_ACTION_API_PATH}`, {
+    body: JSON.stringify(action),
   });
 }

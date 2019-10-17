@@ -11,7 +11,7 @@ import { Action } from '../../../lib/api';
 
 interface Props {
   action: Action;
-  // editAction: (changedProperty: { key: string; value: string }) => void;
+  editActionConfig: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   hasErrors: boolean;
   children: React.ReactNode;
@@ -21,10 +21,10 @@ export const PagerDutyActionFields: React.FunctionComponent<Props> = ({
   errors,
   hasErrors,
   action,
-  // editAction,
+  editActionConfig,
   children,
 }) => {
-  const { description } = action;
+  const { description } = action.config;
   return (
     <Fragment>
       {children}
@@ -47,11 +47,11 @@ export const PagerDutyActionFields: React.FunctionComponent<Props> = ({
           value={description || ''}
           data-test-subj="pagerdutyDescriptionInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            // editAction({ key: 'description', value: e.target.value });
+            editActionConfig('description', e.target.value);
           }}
           onBlur={() => {
             if (!description) {
-              // editAction({ key: 'description', value: '' });
+              editActionConfig('description', '');
             }
           }}
         />

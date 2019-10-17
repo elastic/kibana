@@ -164,7 +164,10 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <AlertingActionsDropdown actionTypes={actionTypesIndex}></AlertingActionsDropdown>
+            <AlertingActionsDropdown
+              actionTypes={actionTypesIndex}
+              createAction={createAction}
+            ></AlertingActionsDropdown>
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -201,6 +204,11 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     );
   }
 
+  let flyout = null;
+  if (actionType) {
+    flyout = <ActionAdd actionType={actionType} />;
+  }
+
   return (
     <section data-test-subj="actionsList">
       <ContentWrapper
@@ -210,7 +218,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
       >
         <EuiSpacer size="m" />
         {content}
-        <ActionAdd actionType={actionType} />
+        {flyout}
       </ContentWrapper>
     </section>
   );
@@ -230,7 +238,7 @@ export const ContentWrapper = ({
   return (
     <EuiPageContent>
       <EuiSpacer size="s" />
-      <ActionsContext.Provider value={{ flyoutVisible, setFlyoutVisibility, createAction }}>
+      <ActionsContext.Provider value={{ flyoutVisible, setFlyoutVisibility }}>
         {children}
       </ActionsContext.Provider>
     </EuiPageContent>

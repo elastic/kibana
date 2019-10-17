@@ -11,18 +11,18 @@ import { Action } from '../../../lib/api';
 
 interface Props {
   action: Action;
-  // editAction: (changedProperty: { key: string; value: string }) => void;
+  editActionConfig: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   hasErrors: boolean;
 }
 
 export const LoggingActionFields: React.FunctionComponent<Props> = ({
   action,
-  // editAction,
+  editActionConfig,
   errors,
   hasErrors,
 }) => {
-  const { text }: any = action.config;
+  const { text } = action.config;
   return (
     <ErrableFormRow
       id="loggingText"
@@ -40,11 +40,11 @@ export const LoggingActionFields: React.FunctionComponent<Props> = ({
         value={text || ''}
         data-test-subj="loggingTextInput"
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          // editAction({ key: 'text', value: e.target.value });
+          editActionConfig('text', e.target.value);
         }}
         onBlur={() => {
           if (!text) {
-            // editAction({ key: 'text', value: '' });
+            editActionConfig('text', '');
           }
         }}
       />

@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useContext, useState, useCallback } from 'react';
-
+import React, { Fragment, useContext, useState, useCallback, useReducer, useEffect } from 'react';
+import { isEqual } from 'lodash';
+import { HttpServiceBase } from 'kibana/public';
+import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -21,10 +23,11 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyout,
+  EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Action, ActionType } from '../../lib/api';
+import { Action, ActionType, saveAction } from '../../lib/api';
 import { ActionsContext } from '../../context/app_context';
 import {
   WebhookActionFields,
@@ -34,8 +37,10 @@ import {
   EmailActionFields,
   PagerDutyActionFields,
 } from './action_fields';
-import { SectionError } from '../../../application/components/page_error';
+import { SectionError, ErrableFormRow } from '../../../application/components/page_error';
 import { actionTypesSettings, BUILDIN_ACTION_TYPES } from '../../constants/action_types_settings';
+import { useAppDependencies } from '../..';
+import { ActionModel } from '../../models/action';
 
 const actionFieldsComponentMap = {
   [BUILDIN_ACTION_TYPES.LOGGING]: LoggingActionFields,
@@ -47,30 +52,96 @@ const actionFieldsComponentMap = {
 };
 
 interface Props {
-  actionType: ActionType | null;
+  actionType: ActionType;
 }
 
+const actionReducer = (state: any, actionItem: any) => {
+  const { command, payload } = actionItem;
+  const { action } = state;
+
+  switch (command) {
+    case 'setAction':
+      return {
+        ...state,
+        action: payload,
+      };
+    case 'setProperty': {
+      const { property, value } = payload;
+      if (isEqual(action[property], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          action: new ActionModel({
+            ...action,
+            [property]: value,
+          }),
+        };
+      }
+    }
+    case 'setConfigProperty': {
+      const { property, value } = payload;
+      if (isEqual(action.config[property], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          action: new ActionModel({
+            ...action,
+            config: {
+              ...action.config,
+              [property]: value,
+            },
+          }),
+        };
+      }
+    }
+  }
+};
+
 export const ActionAdd = ({ actionType }: Props) => {
+  const {
+    core: { http },
+  } = useAppDependencies();
   const { flyoutVisible, setFlyoutVisibility } = useContext(ActionsContext);
+  // hooks
+  const [{ action }, dispatch] = useReducer(actionReducer, {
+    action: new ActionModel({ actionTypeId: actionType.id }),
+  });
+
+  const setActionProperty = (property: string, value: any) => {
+    dispatch({ command: 'setProperty', payload: { property, value } });
+  };
+
+  const setActionConfigProperty = (property: string, value: any) => {
+    dispatch({ command: 'setConfigProperty', payload: { property, value } });
+  };
+
+  const getAction = () => {
+    dispatch({ command: 'setAction', payload: new ActionModel({ actionTypeId: actionType.id }) });
+  };
+
+  useEffect(() => {
+    getAction();
+  }, [flyoutVisible]);
+
   const closeFlyout = useCallback(() => setFlyoutVisibility(false), []);
-  const [isExecuting, setIsExecuting] = useState<{ [key: string]: boolean }>({});
-  const [executeResultsError, setExecuteResultsError] = useState<any>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [serverError, setServerError] = useState<{
-    data: { nessage: string; error: string };
+    body: { message: string; error: string };
   } | null>(null);
 
   if (!flyoutVisible) {
     return null;
   }
-  if (!actionType) return null;
+
   const FieldsComponent = actionFieldsComponentMap[actionType.id];
   const actionSettings = actionTypesSettings(actionType.id);
-  const hasErrors = false; // !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
-  const action = { actionTypeId: actionType.id, config: {} } as Action;
+  const { errors } = action.validate();
+  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   return (
-    <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutAlertEditTitle" size="s">
+    <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -81,7 +152,7 @@ export const ActionAdd = ({ actionType }: Props) => {
               <h3 id="flyoutTitle">
                 <FormattedMessage
                   defaultMessage={`Create action ${actionType.name}`}
-                  id="xpack.alerting.createAlertFlyout.flyoutTitle"
+                  id="xpack.alertingUI.sections.actionAdd.flyoutTitle"
                 />
               </h3>
             </EuiTitle>
@@ -89,22 +160,53 @@ export const ActionAdd = ({ actionType }: Props) => {
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {executeResultsError && executeResultsError[action.id] && (
-          <Fragment>
-            <SectionError
-              title={
-                <FormattedMessage
-                  id="xpack.alertingUI.sections.actionAdd.accordion.simulateResultsErrorTitle"
-                  defaultMessage="Error testing action"
-                />
-              }
-              error={executeResultsError[action.id]}
-            />
-            <EuiSpacer size="s" />
-          </Fragment>
-        )}
         <EuiForm>
-          <FieldsComponent action={action} errors={{}} hasErrors={hasErrors}>
+          {serverError && (
+            <Fragment>
+              <SectionError
+                title={
+                  <FormattedMessage
+                    id="xpack.alertingUI.sections.actionAdd.saveActionErrorTitle"
+                    defaultMessage="Error saving action"
+                  />
+                }
+                error={serverError}
+              />
+              <EuiSpacer />
+            </Fragment>
+          )}
+          <ErrableFormRow
+            id="actionDescription"
+            label={
+              <FormattedMessage
+                id="xpack.alertingUI.sections.actionAdd.actionDescritionLabel"
+                defaultMessage="Description"
+              />
+            }
+            errorKey="description"
+            isShowingErrors={hasErrors && action.description !== undefined}
+            errors={errors}
+          >
+            <EuiFieldText
+              name="description"
+              data-test-subj="descriptionInput"
+              value={action.description || ''}
+              onChange={e => {
+                setActionProperty('description', e.target.value);
+              }}
+              onBlur={() => {
+                if (!action.description) {
+                  setActionProperty('description', '');
+                }
+              }}
+            />
+          </ErrableFormRow>
+          <FieldsComponent
+            action={action}
+            errors={errors}
+            editActionConfig={setActionConfigProperty}
+            hasErrors={hasErrors}
+          >
             {actionType.id === null ? (
               <Fragment>
                 <EuiCallOut
@@ -152,24 +254,7 @@ export const ActionAdd = ({ actionType }: Props) => {
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButton
-              type="submit"
-              isDisabled={hasErrors}
-              isLoading={isExecuting[action.id]}
-              data-test-subj="simulateActionButton"
-              onClick={async () => {
-                setIsExecuting({ [action.id]: true });
-                setExecuteResultsError(null);
-                setIsExecuting({ [action.id]: false });
-              }}
-            >
-              {i18n.translate('xpack.alertingUI.sections.actionAdd.testButtonLabel', {
-                defaultMessage: 'Test',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButton
               fill
               color="secondary"
@@ -180,11 +265,12 @@ export const ActionAdd = ({ actionType }: Props) => {
               isLoading={isSaving}
               onClick={async () => {
                 setIsSaving(true);
-                const savedAction = await onActionSave(action);
+                const savedAction = await onActionSave(http, action);
+                setIsSaving(false);
                 if (savedAction && savedAction.error) {
-                  setIsSaving(false);
                   return setServerError(savedAction.error);
                 }
+                setFlyoutVisibility(false);
               }}
             >
               <FormattedMessage
@@ -199,6 +285,21 @@ export const ActionAdd = ({ actionType }: Props) => {
   );
 };
 
-export async function onActionSave(action: Action): Promise<any> {
-  return [];
+export async function onActionSave(http: HttpServiceBase, action: Action): Promise<any> {
+  try {
+    const newAction = await saveAction({ http, action });
+    toastNotifications.addSuccess(
+      i18n.translate('xpack.alertingUI.sections.actionAdd.saveSuccessNotificationText', {
+        defaultMessage: "Saved '{actionName}'",
+        values: {
+          actionName: newAction.description,
+        },
+      })
+    );
+    return newAction;
+  } catch (error) {
+    return {
+      error,
+    };
+  }
 }

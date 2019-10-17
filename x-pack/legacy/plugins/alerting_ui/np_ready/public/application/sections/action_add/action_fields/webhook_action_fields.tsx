@@ -22,7 +22,7 @@ import { Action } from '../../../lib/api';
 
 interface Props {
   action: Action;
-  // editAction: (changedProperty: { key: string; value: any }) => void;
+  editActionConfig: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   hasErrors: boolean;
 }
@@ -31,15 +31,15 @@ const HTTP_VERBS = ['head', 'get', 'post', 'put', 'delete'];
 
 export const WebhookActionFields: React.FunctionComponent<Props> = ({
   action,
-  // editAction,
+  editActionConfig,
   errors,
   hasErrors,
 }) => {
   const { method, host, port, path, body, username, password }: any = action.config;
 
-  // useEffect(() => {
-  // editAction({ key: 'contentType', value: 'application/json' }); // set content-type for threshold watch to json by default
-  // }, []);
+  useEffect(() => {
+    editActionConfig('contentType', 'application/json'); // set content-type for threshold watch to json by default
+  }, []);
 
   return (
     <Fragment>
@@ -59,7 +59,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               data-test-subj="webhookMethodSelect"
               options={HTTP_VERBS.map(verb => ({ text: verb.toUpperCase(), value: verb }))}
               onChange={e => {
-                // editAction({ key: 'method', value: e.target.value });
+                editActionConfig('method', e.target.value);
               }}
             />
           </EuiFormRow>
@@ -85,11 +85,11 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               value={host || ''}
               data-test-subj="webhookHostInput"
               onChange={e => {
-                // editAction({ key: 'host', value: e.target.value });
+                editActionConfig('host', e.target.value);
               }}
               onBlur={() => {
                 if (!host) {
-                  // editAction({ key: 'host', value: '' });
+                  editActionConfig('host', '');
                 }
               }}
             />
@@ -117,11 +117,11 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               value={port || ''}
               data-test-subj="webhookPortInput"
               onChange={e => {
-                // editAction({ key: 'port', value: parseInt(e.target.value, 10) });
+                editActionConfig('port', parseInt(e.target.value, 10));
               }}
               onBlur={() => {
                 if (!port) {
-                  // editAction({ key: 'port', value: '' });
+                  editActionConfig('port', '');
                 }
               }}
             />
@@ -145,7 +145,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               value={path || ''}
               data-test-subj="webhookPathInput"
               onChange={e => {
-                // editAction({ key: 'path', value: e.target.value });
+                editActionConfig('path', e.target.value);
               }}
             />
           </EuiFormRow>
@@ -171,7 +171,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               value={username || ''}
               data-test-subj="webhookUsernameInput"
               onChange={e => {
-                // editAction({ key: 'username', value: e.target.value });
+                editActionConfig('username', e.target.value);
               }}
             />
           </ErrableFormRow>
@@ -195,7 +195,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               value={password || ''}
               data-test-subj="webhookPasswordInput"
               onChange={e => {
-                // editAction({ key: 'password', value: e.target.value });
+                editActionConfig('password', e.target.value);
               }}
             />
           </ErrableFormRow>
@@ -229,7 +229,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
           )}
           value={body || ''}
           onChange={(json: string) => {
-            // editAction({ key: 'body', value: json });
+            editActionConfig('body', json);
           }}
         />
       </ErrableFormRow>
