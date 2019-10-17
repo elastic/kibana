@@ -500,7 +500,6 @@ class FilterEditorUI extends Component<Props, State> {
             }
             showSaveQuery={this.props.showSaveQuery!}
             timeHistory={this.props.timeHistory!}
-            savedQueryService={this.props.savedQueryService}
             onChange={this.onSavedQuerySelected}
           />
         </EuiFlexItem>

@@ -149,7 +149,7 @@ function FilterBarUI(props: Props) {
           ownFocus={true}
         >
           <EuiFlexItem grow={false}>
-            <div style={{ width: 400 }}>
+            <div style={{ minWidth: 400 }}>
               <FilterEditor
                 filter={newFilter}
                 indexPatterns={props.indexPatterns}

@@ -25,6 +25,7 @@ import { EuiPopover } from '@elastic/eui';
 import { TimeHistoryContract } from 'ui/timefilter';
 import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/common/types';
+import { EuiButton } from '@elastic/eui';
 import { IndexPattern, Query, SavedQueryAttributes } from '../../../../../data/public';
 import { SearchBar } from '../../../search/search_bar/components/search_bar';
 import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
@@ -53,10 +54,10 @@ export const SavedQueryEditor: FunctionComponent<Props> = ({
   timeHistory,
   onChange,
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  // const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [currentfilters, setFilters] = useState([] as Filter[]); // change this if it ends up working to use the filters from the saved query passed in (the filter params)
-  const closePopover = () => setIsPopoverOpen(false);
-  const openPopover = () => setIsPopoverOpen(true);
+  // const closePopover = () => setIsPopoverOpen(false);
+  // const openPopover = () => setIsPopoverOpen(true);
   const onClearSavedQuery = () => {
     console.log('saved query cleared');
   };
@@ -86,43 +87,30 @@ export const SavedQueryEditor: FunctionComponent<Props> = ({
     onQueryChange({ dateRange: QBDQ.dateRange, query: QBDQ.query });
   };
   return (
-    <EuiPopover
-      id="SavedQueryFilterPopover"
-      button={
-        <EuiButtonEmpty size="xs" onClick={openPopover} iconType={'plusInCircleFilled'}>
-          View
-        </EuiButtonEmpty>
+    <SearchBar
+      indexPatterns={indexPatterns}
+      showFilterBar={true}
+      filters={currentfilters}
+      onFiltersUpdated={onFiltersUpdated}
+      showQueryInput={true}
+      query={
+        currentSavedQuery && currentSavedQuery.length > 0
+          ? {
+              language: currentSavedQuery[0].attributes.query.language,
+              query: currentSavedQuery[0].attributes.query.query,
+            }
+          : { language: uiSettings.get('search:queryLanguage'), query: '' }
       }
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      anchorPosition="rightCenter"
-    >
-      <div className="savedQueryFilterEditor">
-        <SearchBar
-          indexPatterns={indexPatterns}
-          showFilterBar={true}
-          filters={currentfilters}
-          onFiltersUpdated={onFiltersUpdated}
-          showQueryInput={true}
-          query={
-            currentSavedQuery && currentSavedQuery.length > 0
-              ? {
-                  language: currentSavedQuery[0].attributes.query.language,
-                  query: currentSavedQuery[0].attributes.query.query,
-                }
-              : { language: uiSettings.get('search:queryLanguage'), query: '' }
-          }
-          onQuerySubmit={onQueryChange}
-          showSaveQuery={showSaveQuery}
-          savedQuery={
-            currentSavedQuery && currentSavedQuery.length > 0 ? currentSavedQuery[0] : undefined
-          }
-          onClearSavedQuery={onClearSavedQuery}
-          onSavedQueryUpdated={updateSavedQuery}
-          showDatePicker={true}
-          timeHistory={timeHistory!}
-        />
-      </div>
-    </EuiPopover>
+      onQuerySubmit={onQueryChange}
+      showSaveQuery={showSaveQuery}
+      savedQuery={
+        currentSavedQuery && currentSavedQuery.length > 0 ? currentSavedQuery[0] : undefined
+      }
+      onClearSavedQuery={onClearSavedQuery}
+      onSavedQueryUpdated={updateSavedQuery}
+      showDatePicker={true}
+      timeHistory={timeHistory!}
+      customSubmitButton={<></>}
+    />
   );
 };
