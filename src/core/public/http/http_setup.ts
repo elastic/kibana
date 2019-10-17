@@ -164,7 +164,6 @@ export const setup = (
             return {
               ...httpResponse,
               ...((await interceptor.response(httpResponse, controller)) || {}),
-              request: httpResponse.request,
             };
           },
           async error => {
@@ -193,7 +192,7 @@ export const setup = (
                 throw error;
               }
 
-              return next;
+              return { ...next, request };
             } catch (err) {
               checkHalt(controller, err);
               throw err;
