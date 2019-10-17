@@ -4083,6 +4083,7 @@
     "xpack.code.repoItem.reindexConfirmTitle": "重新索引此存储库？",
     "xpack.code.repoItem.settingsButtonLabel": "设置",
     "xpack.code.repositoryManagement.repoImportedMessage": "此存储库已导入！",
+    "xpack.code.repositoryManagement.repoOtherSpaceImportedMessage": "此存储库已在其他空间导入！",
     "xpack.code.repositoryManagement.repoSubmittedMessage": "{name} 已成功提交！",
     "xpack.code.repoFileStatus.langugageServerIsInitializitingMessage": "语言服务器正在初始化。",
     "xpack.code.repoFileStatus.languageServerInitializedMessage": "语言服务器已初始化。",
