@@ -22,7 +22,7 @@ interface PathifyOptions {
   depth?: number;
 }
 
-interface PathifyResult {
+export interface PathifyResult {
   [key: string]: any;
 }
 

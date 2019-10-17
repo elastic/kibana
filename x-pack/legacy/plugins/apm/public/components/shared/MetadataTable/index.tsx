@@ -13,15 +13,17 @@ import {
   EuiFieldSearch
 } from '@elastic/eui';
 import React, { useState, useEffect, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { get, pick, isEmpty } from 'lodash';
 import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { DottedKeyValueTable, pathify } from '../DottedKeyValueTable';
+import { pathify } from '../DottedKeyValueTable';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { Section as SectionType } from './sections';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { APMError } from '../../../../typings/es_schemas/ui/APMError';
 import { Span } from '../../../../typings/es_schemas/ui/Span';
+import { HeightRetainer } from '../HeightRetainer';
+import { Section } from './Section';
 
 type Item = Transaction | APMError | Span;
 
@@ -56,7 +58,6 @@ const filterSections = (
           };
         }
       }
-
       return { ...section, data };
     })
     .filter(({ required, data }) => {
@@ -94,39 +95,33 @@ export function MetadataTable({ item, sections }: Props) {
           </ElasticDocsLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFieldSearch onChange={onSearchChange} />
+          <EuiFieldSearch onChange={onSearchChange} placeholder="Filter..." />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {filteredSections.map(section => (
-        <div key={section.key}>
-          <EuiTitle size="xs">
-            <h6>{section.label}</h6>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <Section propData={section.data} propKey={section.key} />
-          <EuiSpacer size="xl" />
-        </div>
-      ))}
+      <HeightRetainer>
+        {filteredSections.map(section => (
+          <div key={section.key}>
+            <EuiTitle size="xs">
+              <h6>{section.label}</h6>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <Section propData={section.data} />
+            <EuiSpacer size="xl" />
+          </div>
+        ))}
+        {filteredValue && isEmpty(filteredSections) && (
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                {i18n.translate(
+                  'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel', // todo caue: change it
+                  { defaultMessage: `No results for "${filteredValue}".` }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </HeightRetainer>
     </React.Fragment>
   );
-}
-
-function Section({
-  propData = {},
-  propKey
-}: {
-  propData?: Record<string, unknown>;
-  propKey?: string;
-}) {
-  if (isEmpty(propData)) {
-    return (
-      <EuiText size="s">
-        {i18n.translate(
-          'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
-          { defaultMessage: 'No data available' }
-        )}
-      </EuiText>
-    );
-  }
-  return <DottedKeyValueTable data={propData} skipPathify />;
 }
