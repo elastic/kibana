@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { useState, useDispatch } from '../../mappings_state';
 import { FieldsList, CreateField, EditField } from './fields';
@@ -44,9 +44,9 @@ export const DocumentFields = () => {
     return (
       <>
         <EuiSpacer />
-        <EuiButton onClick={addField} disabled={isDisabled}>
+        <EuiButtonEmpty disabled={isDisabled} onClick={addField} iconType="plusInCircleFilled">
           Add field
-        </EuiButton>
+        </EuiButtonEmpty>
       </>
     );
   };
