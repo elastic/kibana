@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -20,17 +20,17 @@ import { actionTypesSettings } from '../../../constants/action_types_settings';
 import { ActionType } from '../../../lib/api';
 
 interface Props {
-  actionTypes: Record<string, ActionType>;
+  actionTypesIndex: Record<string, ActionType> | undefined;
   createAction: (actionTypeItem: ActionType) => void;
 }
 
 export const AlertingActionsDropdown: React.FunctionComponent<Props> = ({
-  actionTypes,
+  actionTypesIndex,
   createAction,
 }) => {
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
-  const actions = Object.entries(!actionTypes ? [] : actionTypes).map(
+  const actions = Object.entries(!actionTypesIndex ? [] : actionTypesIndex).map(
     ([actionType, { id, name }]: any) => {
       const actionSettings = actionTypesSettings(id);
       const typeName = name;

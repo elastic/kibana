@@ -110,7 +110,7 @@ Object {
     "myIndex",
     "myIndex",
   ],
-  "terminate_after": 1,
+  "terminateAfter": 1,
 }
 `;
 

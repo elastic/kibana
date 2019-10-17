@@ -5,30 +5,18 @@
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import {
-  EuiPageContent,
-  EuiBasicTable,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldSearch,
-} from '@elastic/eui';
+import { EuiPageContent, EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
+import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { PageError } from '../../../components/page_error';
-import { Action, ActionType, loadActions, loadActionTypes } from '../../../lib/api';
+import { Action, ActionType, deleteActions, loadActions, loadActionTypes } from '../../../lib/api';
 import { ActionsContext } from '../../../context/app_context';
 import { useAppDependencies } from '../../../index';
 import { AlertingActionsDropdown } from './create_menu_popover';
 import { ActionAdd } from '../../action_add';
 
-interface ActionsListProps {
-  api: any;
-}
-interface Sorting {
-  field: string;
-  direction: 'asc' | 'desc';
-}
+type ActionTypeIndex = Record<string, ActionType>;
 interface Pagination {
   index: number;
   size: number;
@@ -36,81 +24,96 @@ interface Pagination {
 interface Data extends Action {
   actionType: ActionType['name'];
 }
-type ActionTypeIndex = Record<string, ActionType>;
 
-export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsListProps>> = ({
-  match: {
-    params: { api },
-  },
-  history,
-}) => {
+const canDelete = capabilities.get().actions.delete;
+
+export const ActionsList: React.FunctionComponent = () => {
   const {
     core: { http },
   } = useAppDependencies();
 
-  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex>({});
+  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
+  const [actions, setActions] = useState<Action[]>([]);
   const [data, setData] = useState<Data[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedItems, setSelectedItems] = useState<Data[]>([]);
+  const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
+  const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
+  const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
   const [errorCode, setErrorCode] = useState<number | null>(null);
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
-  const [sort, setSort] = useState<Sorting>({ field: 'actionTypeId', direction: 'asc' });
+  const [searchText, setSearchText] = useState<string | undefined>(undefined);
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
   const [actionType, setActionTypeId] = useState<ActionType | null>(null);
 
   useEffect(() => {
+    loadActionsTable();
+  }, [page, searchText]);
+
+  useEffect(() => {
     (async () => {
-      const actionTypes = await loadActionTypes({ http });
-      const index: ActionTypeIndex = {};
-      for (const actionTypeItem of actionTypes) {
-        index[actionTypeItem.id] = actionTypeItem;
+      try {
+        setIsLoadingActionTypes(true);
+        const actionTypes = await loadActionTypes({ http });
+        const index: ActionTypeIndex = {};
+        for (const actionTypeItem of actionTypes) {
+          index[actionTypeItem.id] = actionTypeItem;
+        }
+        setActionTypesIndex(index);
+      } catch (e) {
+        setErrorCode(e.response.status);
+      } finally {
+        setIsLoadingActionTypes(false);
       }
-      setActionTypesIndex(index);
     })();
   }, []);
 
   useEffect(() => {
-    const updatedData: Data[] = [];
-    for (const action of data) {
-      updatedData.push({
+    // Avoid flickering before action types load
+    if (typeof actionTypesIndex === 'undefined') {
+      return;
+    }
+    const updatedData = actions.map(action => {
+      return {
         ...action,
         actionType: actionTypesIndex[action.actionTypeId]
           ? actionTypesIndex[action.actionTypeId].name
           : action.actionTypeId,
-      });
-    }
+      };
+    });
     setData(updatedData);
-  }, [actionTypesIndex]);
+  }, [actions, actionTypesIndex]);
 
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      setErrorCode(null);
-      try {
-        const actionsResponse = await loadActions({ http, sort, page });
-        const updatedData = actionsResponse.data.map(
-          (action: Action): Data => ({
-            ...action,
-            actionType: actionTypesIndex[action.actionTypeId]
-              ? actionTypesIndex[action.actionTypeId].name
-              : action.actionTypeId,
-          })
-        );
-        setData(updatedData);
-        setTotalItemCount(actionsResponse.total);
-      } catch (e) {
-        setErrorCode(e.response.status);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [sort, page]);
+  async function loadActionsTable() {
+    setIsLoadingActions(true);
+    setErrorCode(null);
+    try {
+      const actionsResponse = await loadActions({ http, page, searchText });
+      setActions(actionsResponse.data);
+      setTotalItemCount(actionsResponse.total);
+    } catch (e) {
+      setErrorCode(e.response.status);
+    } finally {
+      setIsLoadingActions(false);
+    }
+  }
+
+  async function deleteItems(items: Data[]) {
+    setIsDeletingActions(true);
+    await deleteActions({ http, ids: items.map(item => item.id) });
+    await loadActionsTable();
+    setIsDeletingActions(false);
+  }
+
+  async function deleteSelectedItems() {
+    await deleteItems(selectedItems);
+  }
 
   const actionsTableColumns = [
     {
       field: 'description',
       name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.descriptionHeader',
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.description',
         {
           defaultMessage: 'Description',
         }
@@ -121,7 +124,7 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     {
       field: 'actionType',
       name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.actionTypeHeader',
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actionType',
         {
           defaultMessage: 'Action Type',
         }
@@ -131,11 +134,33 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
     },
     {
       field: 'config',
-      name: i18n.translate('xpack.alertingUI.sections.actionsList.actionsListTable.configHeader', {
-        defaultMessage: 'Config',
-      }),
+      name: i18n.translate(
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.config',
+        { defaultMessage: 'Config' }
+      ),
       sortable: false,
       truncateText: false,
+    },
+    {
+      name: i18n.translate(
+        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions',
+        { defaultMessage: 'Actions' }
+      ),
+      actions: [
+        {
+          name: i18n.translate(
+            'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions.deleteActionName',
+            { defaultMessage: 'Delete' }
+          ),
+          description: i18n.translate(
+            'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions.deleteActionDescription',
+            { defaultMessage: 'Delete this action' }
+          ),
+          type: 'icon',
+          icon: 'trash',
+          onClick: (item: Data) => deleteItems([item]),
+        },
+      ],
     },
   ];
 
@@ -155,24 +180,54 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
   } else {
     content = (
       <Fragment>
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem>
-            <EuiFieldSearch
-              fullWidth
-              placeholder="Search action"
-              aria-label="Use aria labels when no actual label is in use"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+        <EuiSearchBar
+          onChange={({ queryText }: { queryText: string }) => setSearchText(queryText)}
+          filters={[
+            {
+              type: 'field_value_selection',
+              field: 'type',
+              name: i18n.translate('xpack.alertingUI.sections.actionsList.filters.typeName', {
+                defaultMessage: 'Type',
+              }),
+              multiSelect: 'or',
+              options: Object.values(actionTypesIndex || {}).map(actionTypeItem => ({
+                value: actionTypeItem.id,
+                name: actionTypeItem.name,
+              })),
+            },
+          ]}
+          toolsRight={[
+            <EuiButton
+              key="delete"
+              iconType="trash"
+              color="danger"
+              isDisabled={selectedItems.length === 0 || !canDelete}
+              onClick={deleteSelectedItems}
+              title={
+                canDelete
+                  ? undefined
+                  : i18n.translate('xpack.alertingUI.sections.actionsList.buttons.deleteTitle', {
+                      defaultMessage: 'Unable to delete saved objects',
+                    })
+              }
+            >
+              <FormattedMessage
+                id="xpack.alertingUI.sections.actionsList.buttons.deleteLabel"
+                defaultMessage="Delete"
+              />
+            </EuiButton>,
             <AlertingActionsDropdown
-              actionTypes={actionTypesIndex}
+              key="create-action"
+              actionTypesIndex={actionTypesIndex}
               createAction={createAction}
-            ></AlertingActionsDropdown>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            ></AlertingActionsDropdown>,
+          ]}
+        ></EuiSearchBar>
+
+        <EuiSpacer size="s" />
 
         <EuiBasicTable
-          loading={isLoading}
+          loading={isLoadingActions || isLoadingActionTypes || isDeletingActions}
           items={data}
           itemId="id"
           columns={actionsTableColumns}
@@ -183,21 +238,18 @@ export const ActionsList: React.FunctionComponent<RouteComponentProps<ActionsLis
             'data-test-subj': 'cell',
           })}
           data-test-subj="actionsTable"
-          sorting={{ sort }}
           pagination={{
             pageIndex: page.index,
             pageSize: page.size,
             totalItemCount,
           }}
-          onChange={({
-            sort: changedSort,
-            page: changedPage,
-          }: {
-            sort: Sorting;
-            page: Pagination;
-          }) => {
+          onChange={({ page: changedPage }: { page: Pagination }) => {
             setPage(changedPage);
-            setSort(changedSort);
+          }}
+          selection={{
+            onSelectionChange(updatedSelectedItemsList: Data[]) {
+              setSelectedItems(updatedSelectedItemsList);
+            },
           }}
         />
       </Fragment>
@@ -236,11 +288,11 @@ export const ContentWrapper = ({
   children: React.ReactNode;
 }) => {
   return (
-    <EuiPageContent>
+    <Fragment>
       <EuiSpacer size="s" />
       <ActionsContext.Provider value={{ flyoutVisible, setFlyoutVisibility }}>
         {children}
       </ActionsContext.Provider>
-    </EuiPageContent>
+    </Fragment>
   );
 };

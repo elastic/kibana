@@ -23,7 +23,7 @@ const REACT_ROOT_ID = 'alertingRoot';
 export class ActionsPlugin implements Plugin<Setup, Start> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(coreSetup: CoreSetup, pluginsSetup: any): Setup {
+  public setup(core: CoreSetup, plugins: any): Setup {
     /*
       The code below would be replacing for current:
       uiExports: {
@@ -32,7 +32,7 @@ export class ActionsPlugin implements Plugin<Setup, Start> {
     */
     const {
       management: { getSection },
-    } = pluginsSetup;
+    } = plugins;
 
     const kbnSection = getSection('kibana');
     kbnSection.register('alerting', {
@@ -44,9 +44,9 @@ export class ActionsPlugin implements Plugin<Setup, Start> {
     });
   }
 
-  public start(coreStart: CoreStart, pluginsStart: any) {
+  public start(core: CoreStart, plugins: any) {
     textService.init(i18n);
-    breadcrumbService.init(coreStart.chrome, pluginsStart.management.breadcrumb);
+    breadcrumbService.init(core.chrome, plugins.management.breadcrumb);
 
     const unmountReactApp = (): void => {
       const elem = document.getElementById(REACT_ROOT_ID);
@@ -83,7 +83,7 @@ export class ActionsPlugin implements Plugin<Setup, Start> {
             unmountReactApp();
             const elReactRoot = document.getElementById(REACT_ROOT_ID);
             if (elReactRoot) {
-              renderReact(elReactRoot, coreStart, pluginsStart);
+              renderReact(elReactRoot, core, plugins);
             }
           });
         };

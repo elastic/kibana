@@ -33,8 +33,8 @@ export async function loadActionTypes({
 
 export interface LoadActionsOpts {
   http: HttpServiceBase;
-  sort: { field: string; direction: 'asc' | 'desc' };
   page: { index: number; size: number };
+  searchText?: string;
 }
 
 export interface LoadActionsResponse {
@@ -46,15 +46,15 @@ export interface LoadActionsResponse {
 
 export async function loadActions({
   http,
-  sort,
   page,
+  searchText,
 }: LoadActionsOpts): Promise<LoadActionsResponse> {
   return http.get(`${BASE_ACTION_API_PATH}/_find`, {
     query: {
-      sort_field: sort.field,
-      sort_order: sort.direction,
       page: page.index + 1,
       per_page: page.size,
+      search_fields: searchText ? 'description' : undefined,
+      search: searchText,
     },
   });
 }
@@ -70,4 +70,13 @@ export async function saveAction({
   return http.post(`${BASE_ACTION_API_PATH}`, {
     body: JSON.stringify(action),
   });
+}
+
+export interface DeleteActionsOpts {
+  ids: string[];
+  http: HttpServiceBase;
+}
+
+export async function deleteActions({ ids, http }: DeleteActionsOpts): Promise<void> {
+  await Promise.all(ids.map(id => http.delete(`${BASE_ACTION_API_PATH}/${id}`)));
 }

@@ -152,18 +152,16 @@ exports[`EmptyState component does not render empty state with appropriate base 
                         id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                         values={
                           Object {
-                            "configureHeartbeatLink": <EuiLink
-                              color="primary"
+                            "configureHeartbeatLink": <ForwardRef
                               href="foo/app/kibana#/home/tutorial/uptimeMonitors"
                               target="_blank"
-                              type="button"
                             >
                               <FormattedMessage
                                 defaultMessage="Configure Heartbeat"
                                 id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                 values={Object {}}
                               />
-                            </EuiLink>,
+                            </ForwardRef>,
                           }
                         }
                       />
@@ -246,26 +244,22 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                 id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                                 values={
                                   Object {
-                                    "configureHeartbeatLink": <EuiLink
-                                      color="primary"
+                                    "configureHeartbeatLink": <ForwardRef
                                       href="foo/app/kibana#/home/tutorial/uptimeMonitors"
                                       target="_blank"
-                                      type="button"
                                     >
                                       <FormattedMessage
                                         defaultMessage="Configure Heartbeat"
                                         id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                         values={Object {}}
                                       />
-                                    </EuiLink>,
+                                    </ForwardRef>,
                                   }
                                 }
                               >
                                 <EuiLink
-                                  color="primary"
                                   href="foo/app/kibana#/home/tutorial/uptimeMonitors"
                                   target="_blank"
-                                  type="button"
                                 >
                                   <a
                                     className="euiLink euiLink--primary"
@@ -622,18 +616,16 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                         id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                         values={
                           Object {
-                            "configureHeartbeatLink": <EuiLink
-                              color="primary"
+                            "configureHeartbeatLink": <ForwardRef
                               href="foo/app/kibana#/home/tutorial/uptimeMonitors"
                               target="_blank"
-                              type="button"
                             >
                               <FormattedMessage
                                 defaultMessage="Configure Heartbeat"
                                 id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                 values={Object {}}
                               />
-                            </EuiLink>,
+                            </ForwardRef>,
                           }
                         }
                       />
@@ -716,26 +708,22 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
                                 values={
                                   Object {
-                                    "configureHeartbeatLink": <EuiLink
-                                      color="primary"
+                                    "configureHeartbeatLink": <ForwardRef
                                       href="foo/app/kibana#/home/tutorial/uptimeMonitors"
                                       target="_blank"
-                                      type="button"
                                     >
                                       <FormattedMessage
                                         defaultMessage="Configure Heartbeat"
                                         id="xpack.uptime.emptyState.configureHeartbeatLinkText"
                                         values={Object {}}
                                       />
-                                    </EuiLink>,
+                                    </ForwardRef>,
                                   }
                                 }
                               >
                                 <EuiLink
-                                  color="primary"
                                   href="foo/app/kibana#/home/tutorial/uptimeMonitors"
                                   target="_blank"
-                                  type="button"
                                 >
                                   <a
                                     className="euiLink euiLink--primary"

@@ -53,11 +53,11 @@ export interface UptimeAppProps {
 
 const Application = (props: UptimeAppProps) => {
   const {
+    autocomplete,
     basePath,
     canSave,
     client,
     darkMode,
-    autocomplete,
     i18n: i18nCore,
     isApmAvailable,
     isInfraAvailable,
@@ -176,24 +176,23 @@ const Application = (props: UptimeAppProps) => {
                           <EuiSpacer size="s" />
                           <Switch>
                             <Route
-                              exact
-                              path="/"
+                              path="/monitor/:monitorId/:location?"
                               render={routerProps => (
-                                <OverviewPage
-                                  basePath={basePath}
-                                  autocomplete={autocomplete}
-                                  logOverviewPageLoad={logOverviewPageLoad}
+                                <MonitorPage
+                                  logMonitorPageLoad={logMonitorPageLoad}
+                                  query={client.query}
                                   setBreadcrumbs={setBreadcrumbs}
                                   {...routerProps}
                                 />
                               )}
                             />
                             <Route
-                              path="/monitor/:monitorId/:location?"
+                              path="/"
                               render={routerProps => (
-                                <MonitorPage
-                                  logMonitorPageLoad={logMonitorPageLoad}
-                                  query={client.query}
+                                <OverviewPage
+                                  autocomplete={autocomplete}
+                                  basePath={basePath}
+                                  logOverviewPageLoad={logOverviewPageLoad}
                                   setBreadcrumbs={setBreadcrumbs}
                                   {...routerProps}
                                 />

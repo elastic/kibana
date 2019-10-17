@@ -6,5 +6,5 @@
 
 export { init } from './init';
 export { ActionsPlugin, ActionTypeExecutorOptions, ActionType } from './types';
-export { Action, ActionsClient } from './actions_client';
+export { ActionsClient } from './actions_client';
 export { PluginSetupContract, PluginStartContract } from './plugin';

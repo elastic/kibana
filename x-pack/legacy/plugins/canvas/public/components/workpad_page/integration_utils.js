@@ -8,12 +8,11 @@ import { shallowEqual } from 'recompose';
 import { getNodes, getSelectedPage } from '../../state/selectors/workpad';
 import { addElement, removeElements, setMultiplePositions } from '../../state/actions/elements';
 import { selectToplevelNodes } from '../../state/actions/transient';
-import { matrixToAngle } from '../../lib/aeroelastic/matrix';
 import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
 import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions';
-import { isGroupId, elementToShape } from './positioning_utils';
-
-export * from './positioning_utils';
+import { matrixToAngle } from '../../lib/aeroelastic/matrix';
+import { isGroupId, elementToShape } from './utils';
+export * from './utils';
 
 const shapeToElement = shape => ({
   left: shape.transformMatrix[12] - shape.a,

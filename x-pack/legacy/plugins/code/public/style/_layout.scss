@@ -195,3 +195,9 @@
 .code-symbol-container {
   white-space: nowrap;
 }
+
+.codeBreadcrumbs {
+  .euiPopover__anchor {
+    margin-top: $euiSizeXS;
+  }
+}

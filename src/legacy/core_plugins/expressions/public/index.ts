@@ -17,14 +17,4 @@
  * under the License.
  */
 
-// /// Define plugin function
-import { ExpressionsPlugin as Plugin } from './plugin';
-
-export function plugin() {
-  return new Plugin();
-}
-
-// /// Export types & static code
-
-/** @public types */
-export * from './expressions';
+export * from './np_ready/public/index';

@@ -2,7 +2,7 @@
 [[xpack-dashboard-only-mode]]
 == Dashboard-only mode
 
-deprecated[7.4.0, Using the `kibana_dashboard_only_user` role is deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.]
+deprecated[7.4.0, "Using the `kibana_dashboard_only_user` role is deprecated. Use <<kibana-feature-privileges,feature privileges>> instead."]
 
 In dashboard-only mode, users have access to only the *Dashboard* app. 
 Users can view and filter the dashboards, but cannot create, edit, or delete

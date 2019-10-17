@@ -5,9 +5,9 @@
  */
 
 import _ from 'lodash';
-import { IndexPatternPrivateState, IndexPatternLayer, IndexPattern } from './indexpattern';
 import { isColumnTransferable } from './operations';
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
+import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 
 export function updateColumnParam<
   C extends IndexPatternColumn & { params: object },
@@ -158,12 +158,6 @@ export function getColumnOrder(columns: Record<string, IndexPatternColumn>): str
     })
     .map(([id]) => id)
     .concat(metrics.map(([id]) => id));
-}
-
-export function isLayerTransferable(layer: IndexPatternLayer, newIndexPattern: IndexPattern) {
-  return Object.values(layer.columns).every(column =>
-    isColumnTransferable(column, newIndexPattern)
-  );
 }
 
 export function updateLayerIndexPattern(

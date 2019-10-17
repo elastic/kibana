@@ -26,6 +26,12 @@ export interface FilterState {
   store: FilterStateStore;
 }
 
+type FilterFormatterFunction = (value: any) => string;
+export interface FilterValueFormatter {
+  convert: FilterFormatterFunction;
+  getConverterFor: (type: string) => FilterFormatterFunction;
+}
+
 export interface FilterMeta {
   // index and type are optional only because when you create a new filter, there are no defaults
   index?: string;
@@ -34,7 +40,7 @@ export interface FilterMeta {
   negate: boolean;
   alias: string | null;
   key?: string;
-  value?: string;
+  value?: string | ((formatter?: FilterValueFormatter) => string);
   params?: any;
 }
 

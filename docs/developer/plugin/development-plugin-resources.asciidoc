@@ -28,13 +28,13 @@ node scripts/generate_plugin my_plugin_name # replace "my_plugin_name" with your
 The Kibana directory must be named `kibana`, and your plugin directory should be located in the root of `kibana` in a `plugins` directory, for example:
 
 ["source","shell"]
------------
+----
 .
 └── kibana
     └── plugins
         ├── foo-plugin
         └── bar-plugin
---------
+----
 
 [float]
 ==== References in the code

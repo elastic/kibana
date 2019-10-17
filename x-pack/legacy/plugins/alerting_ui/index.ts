@@ -28,7 +28,6 @@ export function alertingUI(kibana: any) {
         .default();
     },
     uiExports: {
-      // styleSheetPaths: resolve(__dirname, 'public/np_ready/public/index.scss'),
       hacks: ['plugins/alerting_ui/hacks/register'],
       managementSections: ['plugins/alerting_ui'],
     },

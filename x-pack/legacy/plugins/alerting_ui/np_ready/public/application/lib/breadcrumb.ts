@@ -5,13 +5,7 @@
  */
 
 import { textService } from './text';
-import {
-  linkToHome,
-  linkToAlerts,
-  linkToActions,
-  linkToNotifications,
-  linkToActivityLogs,
-} from '../constants';
+import { linkToHome, linkToActions } from '../constants';
 
 class BreadcrumbService {
   private chrome: any;
@@ -23,10 +17,7 @@ class BreadcrumbService {
   } = {
     management: [],
     home: [],
-    alerts: [],
     actions: [],
-    notifications: [],
-    activity_logs: [],
   };
 
   public init(chrome: any, managementBreadcrumb: any): void {
@@ -41,32 +32,11 @@ class BreadcrumbService {
         href: linkToHome(),
       },
     ];
-    this.breadcrumbs.alerts = [
-      ...this.breadcrumbs.alerts,
-      {
-        text: textService.breadcrumbs.alerts,
-        href: linkToAlerts(),
-      },
-    ];
     this.breadcrumbs.actions = [
-      ...this.breadcrumbs.actions,
+      ...this.breadcrumbs.home,
       {
         text: textService.breadcrumbs.actions,
         href: linkToActions(),
-      },
-    ];
-    this.breadcrumbs.activity_logs = [
-      ...this.breadcrumbs.home,
-      {
-        text: textService.breadcrumbs.activity_logs,
-        href: linkToActivityLogs(),
-      },
-    ];
-    this.breadcrumbs.notifications = [
-      ...this.breadcrumbs.home,
-      {
-        text: textService.breadcrumbs.notifications,
-        href: linkToNotifications(),
       },
     ];
   }

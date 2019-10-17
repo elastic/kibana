@@ -74,7 +74,7 @@ export class Plugin {
             all: ['action', 'action_task_params'],
             read: [],
           },
-          ui: [],
+          ui: ['save', 'show', 'delete'],
           api: ['actions-read', 'actions-all'],
         },
         read: {
@@ -82,7 +82,7 @@ export class Plugin {
             all: ['action_task_params'],
             read: ['action'],
           },
-          ui: [],
+          ui: ['show'],
           api: ['actions-read'],
         },
       },

@@ -6,8 +6,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import { registerRouter } from './lib/navigation';
-import { BASE_PATH, Section } from './constants';
+import { BASE_PATH, Section, DEFAULT_SECTION } from './constants';
 import { AlertsUIHome } from './home';
 
 class ShareRouter extends Component {
@@ -21,13 +20,6 @@ class ShareRouter extends Component {
   };
   constructor(props: any, context?: any) {
     super(props, context);
-    this.registerRouter();
-  }
-
-  registerRouter() {
-    // Share the router with the app without requiring React or context.
-    const { router } = this.context;
-    registerRouter(router);
   }
 
   render() {
@@ -36,7 +28,7 @@ class ShareRouter extends Component {
 }
 
 export const App = (api: any) => {
-  const sections: Section[] = ['alerts', 'actions', 'notifications', 'activity_logs'];
+  const sections: Section[] = ['actions'];
 
   const sectionsRegex = sections.join('|');
 
@@ -50,6 +42,6 @@ export const App = (api: any) => {
 export const AppWithoutRouter = ({ sectionsRegex }: any) => (
   <Switch>
     <Route exact path={`${BASE_PATH}/:section(${sectionsRegex})`} component={AlertsUIHome} />
-    <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/alerts`} />
+    <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
   </Switch>
 );

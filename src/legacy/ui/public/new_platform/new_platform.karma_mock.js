@@ -31,6 +31,12 @@ export const npSetup = {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
+      __LEGACY: {
+        renderers: {
+          register: () => undefined,
+          get: () => null,
+        },
+      },
     },
     data: {
     },
