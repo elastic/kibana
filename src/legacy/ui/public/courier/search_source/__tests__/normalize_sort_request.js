@@ -71,7 +71,7 @@ describe('SearchSource#normalizeSortRequest', function () {
   it('should enable script based sorting', function () {
     const fieldName = 'script string';
     const direction = 'desc';
-    const indexField = indexPattern.fields.byName[fieldName];
+    const indexField = indexPattern.fields.getByName(fieldName);
 
     const sortState = {};
     sortState[fieldName] = direction;

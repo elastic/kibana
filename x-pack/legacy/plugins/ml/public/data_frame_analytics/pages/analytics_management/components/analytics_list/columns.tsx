@@ -20,10 +20,12 @@ import {
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
   getDataFrameAnalyticsProgress,
+  isDataFrameAnalyticsFailed,
+  isDataFrameAnalyticsRunning,
+  isDataFrameAnalyticsStopped,
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
   DataFrameAnalyticsStats,
-  DATA_FRAME_TASK_STATE,
 } from './common';
 import { getActions } from './actions';
 
@@ -32,6 +34,7 @@ enum TASK_STATE_COLOR {
   failed = 'danger',
   reindexing = 'primary',
   started = 'primary',
+  starting = 'primary',
   stopped = 'hollow',
 }
 
@@ -41,7 +44,7 @@ export const getTaskStateBadge = (
 ) => {
   const color = TASK_STATE_COLOR[state];
 
-  if (state === DATA_FRAME_TASK_STATE.FAILED && reason !== undefined) {
+  if (isDataFrameAnalyticsFailed(state) && reason !== undefined) {
     return (
       <EuiToolTip content={reason}>
         <EuiBadge className="mlTaskStateBadge" color={color}>
@@ -91,10 +94,10 @@ export const progressColumn = {
         {!isBatchTransform && (
           <Fragment>
             <EuiFlexItem style={{ width: '40px' }} grow={false}>
-              {item.stats.state === DATA_FRAME_TASK_STATE.STARTED && (
+              {isDataFrameAnalyticsRunning(item.stats.state) && (
                 <EuiProgress color="primary" size="m" />
               )}
-              {item.stats.state === DATA_FRAME_TASK_STATE.STOPPED && (
+              {isDataFrameAnalyticsStopped(item.stats.state) && (
                 <EuiProgress value={0} max={100} color="primary" size="m" />
               )}
             </EuiFlexItem>

@@ -21,20 +21,25 @@ import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
-import { JsonFlyout } from './json_flyout';
+import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
+import { JOB_TYPE } from '../../../common/job_creator/util/constants';
 import { isSingleMetricJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './job_details';
 import { DetectorChart } from './detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
-import { convertToAdvancedJob, resetJob } from '../../../common/job_creator/util/general';
+import {
+  convertToAdvancedJob,
+  resetJob,
+  advancedStartDatafeed,
+} from '../../../common/job_creator/util/general';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
     JobCreatorContext
   );
   const [progress, setProgress] = useState(resultsLoader.progress);
-  const [showJsonFlyout, setShowJsonFlyout] = useState(false);
   const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
   const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
@@ -44,11 +49,36 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }, []);
 
   async function start() {
-    setShowJsonFlyout(false);
+    if (jobCreator.type === JOB_TYPE.ADVANCED) {
+      await startAdvanced();
+    } else {
+      await startInline();
+    }
+  }
+
+  async function startInline() {
     setCreatingJob(true);
     try {
       const jr = await jobCreator.createAndStartJob();
       setJobRunner(jr);
+    } catch (error) {
+      // catch and display all job creation errors
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
+          defaultMessage: `Job creation error`,
+        }),
+        text: error.message,
+      });
+      setCreatingJob(false);
+    }
+  }
+
+  async function startAdvanced() {
+    setCreatingJob(true);
+    try {
+      await jobCreator.createJob();
+      await jobCreator.createDatafeed();
+      advancedStartDatafeed(jobCreator);
     } catch (error) {
       // catch and display all job creation errors
       toastNotifications.addDanger({
@@ -69,10 +99,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       isSingleMetricJobCreator(jobCreator) === true ? 'timeseriesexplorer' : 'explorer'
     );
     window.open(url, '_blank');
-  }
-
-  function toggleJsonFlyout() {
-    setShowJsonFlyout(!showJsonFlyout);
   }
 
   function clickResetJob() {
@@ -125,25 +151,26 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
             {creatingJob === false && (
               <Fragment>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={toggleJsonFlyout}
+                  <JsonEditorFlyout
                     isDisabled={progress > 0}
-                    data-test-subj="mlJobWizardButtonPreviewJobJson"
-                  >
-                    <FormattedMessage
-                      id="xpack.ml.newJob.wizard.summaryStep.previewJsonButton"
-                      defaultMessage="Preview job JSON"
-                    />
-                  </EuiButtonEmpty>
+                    jobEditorMode={EDITOR_MODE.READONLY}
+                    datafeedEditorMode={EDITOR_MODE.READONLY}
+                  />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={convertToAdvanced}>
-                    <FormattedMessage
-                      id="xpack.ml.newJob.wizard.summaryStep.convertToAdvancedButton"
-                      defaultMessage="Convert to advanced job"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                {jobCreator.type === JOB_TYPE.ADVANCED ? (
+                  <EuiFlexItem grow={false}>
+                    <DatafeedPreviewFlyout isDisabled={false} />
+                  </EuiFlexItem>
+                ) : (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty onClick={convertToAdvanced}>
+                      <FormattedMessage
+                        id="xpack.ml.newJob.wizard.summaryStep.convertToAdvancedButton"
+                        defaultMessage="Convert to advanced job"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
               </Fragment>
             )}
             {progress > 0 && (
@@ -172,9 +199,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
               </Fragment>
             )}
           </EuiFlexGroup>
-          {showJsonFlyout && (
-            <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />
-          )}
         </Fragment>
       )}
     </Fragment>

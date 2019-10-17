@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import fileSaver from 'file-saver';
+import chrome from 'ui/chrome';
+import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../common/lib/constants';
 import { ErrorStrings } from '../../i18n';
 // @ts-ignore untyped local
 import { notify } from './notify';
 // @ts-ignore untyped local
 import * as workpadService from './workpad_service';
+import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
 
 const { downloadWorkpad: strings } = ErrorStrings;
 
@@ -19,5 +22,37 @@ export const downloadWorkpad = async (workpadId: string) => {
     fileSaver.saveAs(jsonBlob, `canvas-workpad-${workpad.name}-${workpad.id}.json`);
   } catch (err) {
     notify.error(err, { title: strings.getDownloadFailureErrorMessage() });
+  }
+};
+
+export const downloadRenderedWorkpad = async (renderedWorkpad: CanvasRenderedWorkpad) => {
+  try {
+    const jsonBlob = new Blob([JSON.stringify(renderedWorkpad)], { type: 'application/json' });
+    fileSaver.saveAs(
+      jsonBlob,
+      `canvas-embed-workpad-${renderedWorkpad.name}-${renderedWorkpad.id}.json`
+    );
+  } catch (err) {
+    notify.error(err, { title: strings.getDownloadRenderedWorkpadFailureErrorMessage() });
+  }
+};
+
+export const downloadRuntime = async () => {
+  try {
+    const basePath = chrome.getBasePath();
+    const path = `${basePath}${API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD}`;
+    window.open(path);
+    return;
+  } catch (err) {
+    notify.error(err, { title: strings.getDownloadRuntimeFailureErrorMessage() });
+  }
+};
+
+export const downloadZippedRuntime = async (data: any) => {
+  try {
+    const zip = new Blob([data], { type: 'octet/stream' });
+    fileSaver.saveAs(zip, 'canvas-workpad-embed.zip');
+  } catch (err) {
+    notify.error(err, { title: strings.getDownloadZippedRuntimeFailureErrorMessage() });
   }
 };

@@ -167,7 +167,7 @@ Modal.propType = {
   title: PropTypes.string
 };
 
-class ValidateJob extends Component {
+export class ValidateJob extends Component {
   constructor(props) {
     super(props);
     this.state = getDefaultState();
@@ -329,5 +329,3 @@ ValidateJob.propTypes = {
   setIsValid: PropTypes.func,
   idFilterList: PropTypes.array,
 };
-
-export { ValidateJob };

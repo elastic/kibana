@@ -55,6 +55,7 @@ export {
 export {
   Field,
   FieldType,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,

@@ -46,17 +46,15 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
             id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <EuiLink
-                  color="primary"
+                "indexPatternLink": <ForwardRef
                   href=""
-                  type="button"
                 >
                   <FormattedMessage
                     defaultMessage="create a new index pattern"
                     id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </EuiLink>,
+                </ForwardRef>,
               }
             }
           />
@@ -365,17 +363,15 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
             id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <EuiLink
-                  color="primary"
+                "indexPatternLink": <ForwardRef
                   href=""
-                  type="button"
                 >
                   <FormattedMessage
                     defaultMessage="create a new index pattern"
                     id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </EuiLink>,
+                </ForwardRef>,
               }
             }
           />
@@ -528,17 +524,15 @@ Array [
         id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
         values={
           Object {
-            "indexPatternLink": <EuiLink
-              color="primary"
+            "indexPatternLink": <ForwardRef
               href=""
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="create a new index pattern"
                 id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                 values={Object {}}
               />
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />
@@ -591,6 +585,7 @@ exports[`Flyout should render import step 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -618,6 +613,7 @@ exports[`Flyout should render import step 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         labelType="label"
       >

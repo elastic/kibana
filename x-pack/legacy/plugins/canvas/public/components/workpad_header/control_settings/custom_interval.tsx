@@ -17,7 +17,7 @@ const { WorkpadHeaderCustomInterval: strings } = ComponentStrings;
 interface Props {
   gutterSize: FlexGroupGutterSize;
   buttonSize: ButtonSize;
-  onSubmit: (interval: number | undefined) => void;
+  onSubmit: (interval: number) => void;
   defaultValue: any;
 }
 
@@ -32,8 +32,9 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
     <form
       onSubmit={ev => {
         ev.preventDefault();
-
-        onSubmit(refreshInterval);
+        if (!isInvalid && refreshInterval) {
+          onSubmit(refreshInterval);
+        }
       }}
     >
       <EuiFlexGroup gutterSize={gutterSize}>
