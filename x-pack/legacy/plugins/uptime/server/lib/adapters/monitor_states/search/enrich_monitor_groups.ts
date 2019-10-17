@@ -327,7 +327,7 @@ const getHistogramForMonitors = async (
                 fixed_interval: getHistogramInterval(
                   queryContext.dateRangeStart,
                   queryContext.dateRangeEnd
-                ),
+                ).intervalFormatted,
                 missing: 0,
               },
               aggs: {
