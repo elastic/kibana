@@ -100,15 +100,18 @@ exports[`render correctly with empty query string 1`] = `
                     "value": "file",
                   },
                   Object {
-                    "inputDisplay": <EuiText
-                      size="s"
-                    >
+                    "inputDisplay": <React.Fragment>
                       <EuiIcon
-                        type="branch"
+                        type="test-file-stub"
                       />
                        
-                      Search Commits
-                    </EuiText>,
+                      <EuiText
+                        className="eui-displayInlineBlock"
+                        size="s"
+                      >
+                        Search Commits
+                      </EuiText>
+                    </React.Fragment>,
                     "value": "commit",
                   },
                 ]
@@ -179,15 +182,18 @@ exports[`render correctly with empty query string 1`] = `
                           "value": "file",
                         },
                         Object {
-                          "inputDisplay": <EuiText
-                            size="s"
-                          >
+                          "inputDisplay": <React.Fragment>
                             <EuiIcon
-                              type="branch"
+                              type="test-file-stub"
                             />
                              
-                            Search Commits
-                          </EuiText>,
+                            <EuiText
+                              className="eui-displayInlineBlock"
+                              size="s"
+                            >
+                              Search Commits
+                            </EuiText>
+                          </React.Fragment>,
                           "value": "commit",
                         },
                       ]
@@ -281,15 +287,18 @@ exports[`render correctly with empty query string 1`] = `
                               "value": "file",
                             },
                             Object {
-                              "inputDisplay": <EuiText
-                                size="s"
-                              >
+                              "inputDisplay": <React.Fragment>
                                 <EuiIcon
-                                  type="branch"
+                                  type="test-file-stub"
                                 />
                                  
-                                Search Commits
-                              </EuiText>,
+                                <EuiText
+                                  className="eui-displayInlineBlock"
+                                  size="s"
+                                >
+                                  Search Commits
+                                </EuiText>
+                              </React.Fragment>,
                               "value": "commit",
                             },
                           ]
@@ -835,15 +844,18 @@ exports[`render correctly with input query string changed 1`] = `
                         "value": "file",
                       },
                       Object {
-                        "inputDisplay": <EuiText
-                          size="s"
-                        >
+                        "inputDisplay": <React.Fragment>
                           <EuiIcon
-                            type="branch"
+                            type="test-file-stub"
                           />
                            
-                          Search Commits
-                        </EuiText>,
+                          <EuiText
+                            className="eui-displayInlineBlock"
+                            size="s"
+                          >
+                            Search Commits
+                          </EuiText>
+                        </React.Fragment>,
                         "value": "commit",
                       },
                     ]
@@ -914,15 +926,18 @@ exports[`render correctly with input query string changed 1`] = `
                               "value": "file",
                             },
                             Object {
-                              "inputDisplay": <EuiText
-                                size="s"
-                              >
+                              "inputDisplay": <React.Fragment>
                                 <EuiIcon
-                                  type="branch"
+                                  type="test-file-stub"
                                 />
                                  
-                                Search Commits
-                              </EuiText>,
+                                <EuiText
+                                  className="eui-displayInlineBlock"
+                                  size="s"
+                                >
+                                  Search Commits
+                                </EuiText>
+                              </React.Fragment>,
                               "value": "commit",
                             },
                           ]
@@ -1016,15 +1031,18 @@ exports[`render correctly with input query string changed 1`] = `
                                   "value": "file",
                                 },
                                 Object {
-                                  "inputDisplay": <EuiText
-                                    size="s"
-                                  >
+                                  "inputDisplay": <React.Fragment>
                                     <EuiIcon
-                                      type="branch"
+                                      type="test-file-stub"
                                     />
                                      
-                                    Search Commits
-                                  </EuiText>,
+                                    <EuiText
+                                      className="eui-displayInlineBlock"
+                                      size="s"
+                                    >
+                                      Search Commits
+                                    </EuiText>
+                                  </React.Fragment>,
                                   "value": "commit",
                                 },
                               ]
