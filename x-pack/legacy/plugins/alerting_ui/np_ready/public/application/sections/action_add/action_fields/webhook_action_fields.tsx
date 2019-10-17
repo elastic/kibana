@@ -3,11 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment } from 'react';
 
 import {
-  EuiCodeEditor,
-  EuiFieldNumber,
   EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
@@ -15,7 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiBasicTable,
+  EuiCodeEditor,
+  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
@@ -24,6 +23,7 @@ import { Action } from '../../../lib/api';
 interface Props {
   action: Action;
   editActionConfig: (property: string, value: any) => void;
+  editActionJSONConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   hasErrors: boolean;
@@ -34,12 +34,14 @@ const HTTP_VERBS = ['post', 'put'];
 export const WebhookActionFields: React.FunctionComponent<Props> = ({
   action,
   editActionConfig,
+  editActionJSONConfig,
   editActionSecrets,
   errors,
   hasErrors,
 }) => {
   const { user, password }: any = action.secrets;
   const { method, url, headers }: any = action.config;
+  editActionConfig('method', 'post'); // set method to POST by default
 
   return (
     <Fragment>
@@ -155,13 +157,13 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
         })}
         fullWidth
       >
-        <EuiFieldText
+        <EuiTextArea
           fullWidth
           name="headers"
-          value={headers || ''}
-          data-test-subj="webhookHeadersInput"
+          value={headers}
+          data-test-subj="headersTextarea"
           onChange={e => {
-            editActionSecrets('headers', e.target.value);
+            editActionJSONConfig('headers', e.target.value);
           }}
         />
       </EuiFormRow>

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useContext, useState, useCallback, useReducer, useEffect } from 'react';
-import { isEqual } from 'lodash';
 import { HttpServiceBase } from 'kibana/public';
 import { toastNotifications } from 'ui/notify';
 import {
@@ -41,6 +40,7 @@ import { SectionError, ErrableFormRow } from '../../../application/components/pa
 import { actionTypesSettings, BUILDIN_ACTION_TYPES } from '../../constants/action_types_settings';
 import { useAppDependencies } from '../..';
 import { ActionModel } from '../../models/action';
+import { actionReducer } from './action_reducer';
 
 const actionFieldsComponentMap = {
   [BUILDIN_ACTION_TYPES.LOGGING]: LoggingActionFields,
@@ -55,67 +55,6 @@ interface Props {
   actionType: ActionType;
   refreshList: () => void;
 }
-
-const actionReducer = (state: any, actionItem: any) => {
-  const { command, payload } = actionItem;
-  const { action } = state;
-
-  switch (command) {
-    case 'setAction':
-      return {
-        ...state,
-        action: payload,
-      };
-    case 'setProperty': {
-      const { property, value } = payload;
-      if (isEqual(action[property], value)) {
-        return state;
-      } else {
-        return {
-          ...state,
-          action: new ActionModel({
-            ...action,
-            [property]: value,
-          }),
-        };
-      }
-    }
-    case 'setConfigProperty': {
-      const { property, value } = payload;
-      if (isEqual(action.config[property], value)) {
-        return state;
-      } else {
-        return {
-          ...state,
-          action: new ActionModel({
-            ...action,
-            config: {
-              ...action.config,
-              [property]: value,
-            },
-          }),
-        };
-      }
-    }
-    case 'setSecretsProperty': {
-      const { property, value } = payload;
-      if (isEqual(action.secrets[property], value)) {
-        return state;
-      } else {
-        return {
-          ...state,
-          action: new ActionModel({
-            ...action,
-            secrets: {
-              ...action.secrets,
-              [property]: value,
-            },
-          }),
-        };
-      }
-    }
-  }
-};
 
 export const ActionAdd = ({ actionType, refreshList }: Props) => {
   const {
@@ -133,6 +72,10 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
 
   const setActionConfigProperty = (property: string, value: any) => {
     dispatch({ command: 'setConfigProperty', payload: { property, value } });
+  };
+
+  const editActionJSONConfig = (property: string, value: any) => {
+    dispatch({ command: 'setConfigJSONProperty', payload: { property, value } });
   };
 
   const setActionSecretsProperty = (property: string, value: any) => {
@@ -232,6 +175,7 @@ export const ActionAdd = ({ actionType, refreshList }: Props) => {
             errors={errors}
             editActionConfig={setActionConfigProperty}
             editActionSecrets={setActionSecretsProperty}
+            editActionJSONConfig={editActionJSONConfig}
             hasErrors={hasErrors}
           >
             {actionType.id === null ? (
