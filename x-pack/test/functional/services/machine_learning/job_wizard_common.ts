@@ -17,7 +17,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
   }
 
   function advancedSectionSelector(subSelector?: string) {
-    const subj = ' mlJobWizardAdvancedSection';
+    const subj = 'mlJobWizardAdvancedSection';
     return !subSelector ? subj : `${subj} > ${subSelector}`;
   }
 
