@@ -50,7 +50,7 @@ Data Table:: Display your raw data or aggregation results in a tabular format.
 
 //TODO add data table image
 
-Metric:: The latest number in a data series.
+Metric:: Dislay the latest number in a data series.
 
 //TODO add metric image
 
@@ -60,22 +60,76 @@ Metric:: The latest number in a data series.
 
 To create your Lens visualizations, use the Lens visualization builder.
 
-. Drag and drop the fields you want to display on the *Create a visualization* window.
+[float]
+[[change-index]]
+==== Change the index
 
-. To change the type of visualization, click on the *Suggestions* windows.
+With Lens, you can change your index right from the Lens visualization builder. 
+
+In the editor on the left, click *change*, then select the index.
+
+//TODO insert image
 
 [float]
-[[lens-tutorial]]
-=== Lens tutorial
+[[choose-your-data]]
+==== Choose the data you want to display
 
-To create your first Lens visualization, use the following tutorial where you'll
-create...
+Choose from the data fields in the editor on the left. 
+
+//TODO insert image
+
+If you want to see the top values of a field, click *i* next to the field.
+
+//TODO insert image
+
+To narrow the data fields that are displayed:
+
+* Use *Search for fields*.
+
+//TODO insert image
+
+* Click *Fields filtered*, then click the filter type.
+
+//TODO insert image
 
 [float]
-[[lens-before-you-begin]]
-==== Before you begin
+[[add-data]]
+==== Add the data you want to display
 
-For this tutorial, you'll need to add the...
+To add data to the Lens visualization builder, you drag and drop the data fields to one of these locations:
 
+* *Create a visualization* window
 
+//TODO insert image
 
+* *X-axis* and *Y-axis* fields
+
+//TODO insert image
+
+[float]
+[[change-visualization-type]]
+==== Change the visualization type
+
+If you want to display your data in a different visualization, use one of the following options:
+
+* Click *change* in the editor on the right
+
+//TODO insert image
+
+* Click the *Suggestions*
+
+//TODO insert image
+
+When you've finished making changes to the visualization, *Save* it.
+
+[float]
+[[lens-next-steps]]
+==== Next steps
+
+Add your Lens visualizations to:
+
+* <<discover, Discover>>
+
+* <<dashboard, Dashboard>>
+
+* <<canvas, Canvas>>
