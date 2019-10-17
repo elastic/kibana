@@ -31,7 +31,7 @@ export const createReactOverlays = (services: KibanaServices): KibanaReactOverla
 
   const openFlyout: KibanaReactOverlays['openFlyout'] = (node, options?) => {
     checkCoreService();
-    return services.overlays!.openFlyout(<>{node}</>, options);
+    return services.overlays!.openFlyout(mountForComponent(<>{node}</>), options);
   };
 
   const openModal: KibanaReactOverlays['openModal'] = (node, options?) => {

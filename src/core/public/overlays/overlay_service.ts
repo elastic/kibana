@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { FlyoutService } from './flyout';
 import { ModalService } from './modal';
 import { I18nStart } from '../i18n';
@@ -77,7 +75,7 @@ export interface OverlayStart {
   /** {@link OverlayBannersStart} */
   banners: OverlayBannersStart;
   openFlyout: (
-    flyoutChildren: React.ReactNode,
+    flyoutChildren: MountPoint,
     flyoutProps?: {
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;

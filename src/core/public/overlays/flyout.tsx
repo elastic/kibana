@@ -25,6 +25,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../i18n';
 import { OverlayRef } from './overlay_service';
+import { MountPoint } from './types';
+import { MountWrapper } from './utils';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -76,12 +78,12 @@ export class FlyoutService {
    * Opens a flyout panel with the given component inside. You can use
    * `close()` on the returned FlyoutRef to close the flyout.
    *
-   * @param flyoutChildren - Mounts the children inside a flyout panel
+   * @param flyoutMount - Mounts the children inside a flyout panel
    * @return {FlyoutRef} A reference to the opened flyout panel.
    */
   public openFlyout = (
     i18n: I18nStart,
-    flyoutChildren: React.ReactNode,
+    flyoutMount: MountPoint,
     flyoutProps: {
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;
@@ -107,7 +109,7 @@ export class FlyoutService {
     render(
       <i18n.Context>
         <EuiFlyout {...flyoutProps} onClose={() => flyout.close()}>
-          {flyoutChildren}
+          <MountWrapper mount={flyoutMount} />
         </EuiFlyout>
       </i18n.Context>,
       this.targetDomElement

@@ -18,6 +18,7 @@
  */
 import React from 'react';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
+import { mountForComponent } from '../../../../../../../kibana_react/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
@@ -39,18 +40,20 @@ export async function openAddPanelFlyout(options: {
     SavedObjectFinder,
   } = options;
   const flyoutSession = overlays.openFlyout(
-    <AddPanelFlyout
-      container={embeddable}
-      onClose={() => {
-        if (flyoutSession) {
-          flyoutSession.close();
-        }
-      }}
-      getFactory={getFactory}
-      getAllFactories={getAllFactories}
-      notifications={notifications}
-      SavedObjectFinder={SavedObjectFinder}
-    />,
+    mountForComponent(
+      <AddPanelFlyout
+        container={embeddable}
+        onClose={() => {
+          if (flyoutSession) {
+            flyoutSession.close();
+          }
+        }}
+        getFactory={getFactory}
+        getAllFactories={getAllFactories}
+        notifications={notifications}
+        SavedObjectFinder={SavedObjectFinder}
+      />
+    ),
     {
       'data-test-subj': 'addPanelFlyout',
     }

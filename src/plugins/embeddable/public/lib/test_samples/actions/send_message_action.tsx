@@ -39,7 +39,7 @@ export function createSendMessageAction(overlays: CoreStart['overlays']) {
     const greeting = `Hello, ${context.embeddable.getOutput().fullName}`;
 
     const content = message ? `${greeting}. ${message}` : greeting;
-    overlays.openFlyout(<EuiFlyoutBody>{content}</EuiFlyoutBody>);
+    overlays.openFlyout(mountForComponent(<EuiFlyoutBody>{content}</EuiFlyoutBody>));
   };
 
   return createAction<ActionContext>({
