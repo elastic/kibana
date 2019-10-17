@@ -5,7 +5,7 @@
  */
 
 import { uniq, indexBy } from 'lodash';
-import React, { useState, useEffect, memo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
   // @ts-ignore
   EuiHighlight,
@@ -23,7 +23,6 @@ import {
   EuiSwitch,
   EuiFacetButton,
   EuiIcon,
-  EuiProgress,
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -40,6 +39,7 @@ import {
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
+import { Loader } from '../loader';
 
 export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
   changeIndexPattern: (
@@ -479,38 +479,3 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 };
 
 export const MemoizedDataPanel = memo(InnerIndexPatternDataPanel);
-
-function Loader(props: { load: () => Promise<unknown>; loadDeps: unknown[] }) {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const prevRequest = useRef<Promise<unknown> | undefined>(undefined);
-  const nextRequest = useRef<(() => void) | undefined>(undefined);
-
-  useEffect(function performLoad() {
-    if (prevRequest.current) {
-      nextRequest.current = performLoad;
-      return;
-    }
-
-    setIsProcessing(true);
-    prevRequest.current = props
-      .load()
-      .catch(() => {})
-      .then(() => {
-        const reload = nextRequest.current;
-        prevRequest.current = undefined;
-        nextRequest.current = undefined;
-
-        if (reload) {
-          reload();
-        } else {
-          setIsProcessing(false);
-        }
-      });
-  }, props.loadDeps);
-
-  if (!isProcessing) {
-    return null;
-  }
-
-  return <EuiProgress size="xs" color="accent" position="absolute" />;
-}
