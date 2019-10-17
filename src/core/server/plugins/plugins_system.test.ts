@@ -43,7 +43,8 @@ function createPlugin(
     required = [],
     optional = [],
     server = true,
-  }: { required?: string[]; optional?: string[]; server?: boolean } = {}
+    ui = true,
+  }: { required?: string[]; optional?: string[]; server?: boolean; ui?: boolean } = {}
 ) {
   return new PluginWrapper({
     path: 'some-path',
@@ -55,7 +56,7 @@ function createPlugin(
       requiredPlugins: required,
       optionalPlugins: optional,
       server,
-      ui: true,
+      ui,
     },
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,
@@ -362,6 +363,29 @@ test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
       "order-4",
     ]
   `);
+});
+
+test('`uiPlugins` returns only ui plugin dependencies', async () => {
+  const plugins = [
+    createPlugin('ui-plugin', {
+      required: ['req-ui', 'req-no-ui'],
+      optional: ['opt-ui', 'opt-no-ui'],
+      ui: true,
+      server: false,
+    }),
+    createPlugin('req-ui', { ui: true, server: false }),
+    createPlugin('req-no-ui', { ui: false, server: true }),
+    createPlugin('opt-ui', { ui: true, server: false }),
+    createPlugin('opt-no-ui', { ui: false, server: true }),
+  ];
+
+  plugins.forEach(plugin => {
+    pluginsSystem.addPlugin(plugin);
+  });
+
+  const plugin = pluginsSystem.uiPlugins().internal.get('ui-plugin')!;
+  expect(plugin.requiredPlugins).toEqual(['req-ui']);
+  expect(plugin.optionalPlugins).toEqual(['opt-ui']);
 });
 
 test('can start without plugins', async () => {
