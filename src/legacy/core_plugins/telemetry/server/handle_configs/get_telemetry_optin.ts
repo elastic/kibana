@@ -38,8 +38,9 @@ import { getOldOptInSetting } from './handle_old_monitoring_configs';
  * specific language governing permissions and limitations
  * under the License.
  */
+import { getTelemetryEnabled } from './get_telemetry_enabled';
 
-export async function getTelemetryOptIn(request: any) {
+export async function getTelemetryOptInFromRequest(request: any) {
   const isRequestingApplication = request.path.startsWith('/app');
 
   // Prevent interstitial screens (such as the space selector) from prompting for telemetry
@@ -68,5 +69,9 @@ export async function getTelemetryOptIn(request: any) {
 }
 
 export function getTelemetryOptIn(config: Legacy.KibanaConfig, requst: any) {
-  return getOldOptInSetting(config);
+  return (
+    getTelemetryEnabled(config) &&
+    getOldOptInSetting(config) &&
+    getTelemetryOptInFromRequest(request)
+  );
 }

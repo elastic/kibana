@@ -20,9 +20,7 @@
 import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { getTelemetryOptInService, isUnauthenticated } from '../services';
-// @ts-ignore
-import { Telemetry } from './telemetry';
+import { getTelemetryOptInService, isUnauthenticated, TelemetrySender } from '../services';
 
 function telemetryInit($injector: any) {
   const telemetryOptInService = getTelemetryOptInService();
@@ -35,7 +33,7 @@ function telemetryInit($injector: any) {
       return;
     }
 
-    const sender = new Telemetry($injector, telemetryOptInService.fetchTelemetry);
+    const sender = new TelemetrySender(telemetryOptInService);
     sender.start();
   }
 }

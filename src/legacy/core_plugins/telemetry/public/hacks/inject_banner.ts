@@ -17,29 +17,30 @@
  * under the License.
  */
 
-import React from 'react';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+import chrome from 'ui/chrome';
+import { renderBanner } from '../components/render_banner';
+import { getTelemetryOptInService, isUnauthenticated } from '../services';
 
-import { banners } from 'ui/notify';
+export function injectBanner() {
+  const telemetryOptInService = getTelemetryOptInService();
 
-import { clickBanner } from './click_banner';
-import { OptInBanner } from '../../components/opt_in_banner_component';
+  // and no banner for non-logged in users
+  if (isUnauthenticated()) {
+    return;
+  }
 
-/**
- * Render the Telemetry Opt-in banner.
- *
- * @param {Object} telemetryOptInService The telemetry opt-in service.
- * @param {Object} _banners Banners singleton, which can be overridden for tests.
- */
-export function renderBanner(telemetryOptInService, { _banners = banners } = {}) {
-  const bannerId = _banners.add({
-    component: (
-      <OptInBanner
-        optInClick={optIn => clickBanner(telemetryOptInService, optIn)}
-        fetchTelemetry={telemetryOptInService.fetchExample}
-      />
-    ),
-    priority: 10000
-  });
+  // and no banner on status page
+  if (chrome.getApp().id === 'status_page') {
+    return;
+  }
 
-  telemetryOptInService.setBannerId(bannerId);
+  if (telemetryOptInService.getShouldShowBanner()) {
+    setTimeout(() => {
+      renderBanner(telemetryOptInService);
+    });
+  }
 }
+
+uiModules.get('telemetry/hacks').run(injectBanner);

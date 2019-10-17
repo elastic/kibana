@@ -17,31 +17,26 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
+import '../../services/telemetry_opt_in.test.mocks';
 import { renderBanner } from './render_banner';
-import { getTelemetryOptInService, isUnauthenticated } from '../../services';
-import { npStart } from 'ui/new_platform';
 
-async function asyncInjectBanner() {
-  const telemetryOptInService = getTelemetryOptInService();
+describe('render_banner', () => {
+  it('adds a banner to banners with priority of 10000', () => {
+    const bannerID = 'brucer-banner';
 
-  // and no banner for non-logged in users
-  if (isUnauthenticated()) {
-    return;
-  }
+    const telemetryOptInProvider = { setBannerId: jest.fn() };
+    const banners = { add: jest.fn().mockReturnValue(bannerID) };
+    const fetchTelemetry = jest.fn();
 
-  // and no banner on status page
-  if (chrome.getApp().id === 'status_page') {
-    return;
-  }
+    renderBanner(telemetryOptInProvider, fetchTelemetry, { _banners: banners });
 
-  renderBanner(telemetryOptInService);
-}
+    expect(banners.add).toBeCalledTimes(1);
+    expect(fetchTelemetry).toBeCalledTimes(0);
+    expect(telemetryOptInProvider.setBannerId).toBeCalledWith(bannerID);
 
-export function injectBanner() {
-  const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-  const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
-  if (telemetryEnabled && telemetryBanner) {
-    asyncInjectBanner();
-  }
-}
+    const bannerConfig = banners.add.mock.calls[0][0];
+
+    expect(bannerConfig.component).not.toBe(undefined);
+    expect(bannerConfig.priority).toBe(10000);
+  });
+});

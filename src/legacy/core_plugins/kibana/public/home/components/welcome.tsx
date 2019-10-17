@@ -46,9 +46,8 @@ import { trackUiMetric, METRIC_TYPE } from '../kibana_services';
 
 interface Props {
   urlBasePath: string;
-  onSkip: () => {};
+  onSkip: () => void;
   telemetryOptInService: TelemetryOptInService;
-  shouldShowTelemetryOptIn: boolean;
 }
 interface State {
   step: number;
@@ -72,6 +71,7 @@ export class Welcome extends React.PureComponent<Props, State> {
     const path = chrome.addBasePath('#/home/tutorial_directory/sampleData');
     window.location.href = path;
   }
+
   private async handleTelemetrySelection(confirm: boolean) {
     const metricName = `telemetryOptIn${confirm ? 'Confirm' : 'Decline'}`;
     trackUiMetric(METRIC_TYPE.CLICK, metricName);
@@ -91,8 +91,10 @@ export class Welcome extends React.PureComponent<Props, State> {
   };
 
   componentDidMount() {
+    const { telemetryOptInService } = this.props;
+    const shouldShowTelemetryOptIn = telemetryOptInService.getOptInNotifications();
     trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    if (this.props.shouldShowTelemetryOptIn) {
+    if (shouldShowTelemetryOptIn) {
       trackUiMetric(METRIC_TYPE.COUNT, 'welcomeScreenWithTelemetryOptIn');
     }
     document.addEventListener('keydown', this.hideOnEsc);
@@ -103,8 +105,9 @@ export class Welcome extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { urlBasePath, shouldShowTelemetryOptIn, telemetryOptInService } = this.props;
+    const { urlBasePath, telemetryOptInService } = this.props;
     const { step } = this.state;
+    const shouldShowTelemetryOptIn = telemetryOptInService.getOptInNotifications();
 
     return (
       <EuiPortal>

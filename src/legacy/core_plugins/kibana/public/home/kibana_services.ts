@@ -17,22 +17,31 @@
  * under the License.
  */
 
+// @ts-ignore
 import { uiModules } from 'ui/modules';
-import { npStart } from 'ui/new_platform';
+import chrome from 'ui/chrome';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
-import { getTelemetryOptInService } from '../../../telemetry/public/services';
+import {
+  getTelemetryOptInService,
+  TelemetryOptInService,
+} from '../../../telemetry/public/services';
+import { KEY_ENABLE_WELCOME } from './common/constants';
 
-export let indexPatternService;
-export let shouldShowTelemetryOptIn;
-export let telemetryOptInService;
-
+export let indexPatternService: string;
+export let telemetryOptInService: TelemetryOptInService;
+export let isWelcomeScreenEnabled: boolean = false;
 export const trackUiMetric = createUiStatsReporter('Kibana_home');
 export { METRIC_TYPE };
 
-uiModules.get('kibana').run(($injector) => {
-  const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-  const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
+uiModules.get('kibana').run(($injector: any) => {
   telemetryOptInService = getTelemetryOptInService();
-  shouldShowTelemetryOptIn = telemetryEnabled && telemetryBanner && !telemetryOptInService.getOptIn();
+  isWelcomeScreenEnabled = !(
+    chrome.getInjected('disableWelcomeScreen') ||
+    localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
+  );
+  if (isWelcomeScreenEnabled) {
+    telemetryOptInService.setShouldShowBanner(false);
+    telemetryOptInService.setShouldShowWelcomeCard(true);
+  }
   indexPatternService = $injector.get('indexPatterns');
 });

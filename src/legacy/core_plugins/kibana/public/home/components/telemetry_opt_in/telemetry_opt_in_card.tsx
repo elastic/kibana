@@ -19,11 +19,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  // @ts-ignore
-  EuiCard,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiCard, EuiButton } from '@elastic/eui';
 import { OptInMessage } from '../../../../../telemetry/public/components/opt_in_message';
 
 export interface Props {

@@ -18,12 +18,8 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { Synopsis } from './synopsis';
-import { AddData } from './add_data';
+// @ts-ignore
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-
 import {
   EuiButton,
   EuiPage,
@@ -37,28 +33,54 @@ import {
   EuiPageBody,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { Synopsis } from './synopsis';
+// @ts-ignore
+import { AddData } from './add_data';
+import { KEY_ENABLE_WELCOME } from '../common/constants';
+import { TelemetryOptInService } from '../../../../telemetry/public/services';
 
 import { Welcome } from './welcome';
-import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-const KEY_ENABLE_WELCOME = 'home:welcome:show';
+import { isWelcomeScreenEnabled } from '../kibana_services';
 
-export class Home extends Component {
-  constructor(props) {
-    super(props);
+export interface Directory {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  path: string;
+  showOnHomePage: boolean;
+  category: string;
+}
+interface Props {
+  directories: Directory[];
+  telemetryOptInService: TelemetryOptInService;
+  apmUiEnabled: boolean;
+  find: any;
+  localStorage: WindowLocalStorage;
+  urlBasePath: string;
+  mlEnabled: boolean;
+  addBasePath: any;
+}
 
-    const isWelcomeEnabled = !(chrome.getInjected('disableWelcomeScreen') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
+interface State {
+  isLoading: boolean;
+  isNewKibanaInstance: boolean;
+  isWelcomeEnabled: boolean;
+}
 
-    this.state = {
-      // If welcome is enabled, we wait for loading to complete
-      // before rendering. This prevents an annoying flickering
-      // effect where home renders, and then a few ms after, the
-      // welcome screen fades in.
-      isLoading: isWelcomeEnabled,
-      isNewKibanaInstance: false,
-      isWelcomeEnabled,
-    };
-  }
+export class Home extends Component<Props, State> {
+  _isMounted: boolean = false;
+  readonly state: State = {
+    // If welcome is enabled, we wait for loading to complete
+    // before rendering. This prevents an annoying flickering
+    // effect where home renders, and then a few ms after, the
+    // welcome screen fades in.
+    isLoading: isWelcomeScreenEnabled,
+    isNewKibanaInstance: false,
+    isWelcomeEnabled: isWelcomeScreenEnabled,
+  };
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -106,10 +128,12 @@ export class Home extends Component {
 
   skipWelcome = () => {
     this.props.localStorage.setItem(KEY_ENABLE_WELCOME, 'false');
-    this._isMounted && this.setState({ isWelcomeEnabled: false });
+    if (this._isMounted) {
+      this.setState({ isWelcomeEnabled: false });
+    }
   };
 
-  renderDirectories = category => {
+  renderDirectories = (category: string) => {
     const { addBasePath, directories } = this.props;
     return directories
       .filter(directory => {
@@ -135,13 +159,9 @@ export class Home extends Component {
     return (
       <EuiPage restrictWidth={1200}>
         <EuiPageBody className="eui-displayBlock">
-
           <EuiScreenReaderOnly>
             <h1>
-              <FormattedMessage
-                id="kbn.home.welcomeHomePageHeader"
-                defaultMessage="Kibana home"
-              />
+              <FormattedMessage id="kbn.home.welcomeHomePageHeader" defaultMessage="Kibana home" />
             </h1>
           </EuiScreenReaderOnly>
 
@@ -245,23 +265,3 @@ export class Home extends Component {
     return this.renderNormal();
   }
 }
-
-Home.propTypes = {
-  telemetryOptInService: PropTypes.object.isRequired,
-  directories: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
-      category: PropTypes.string.isRequired,
-    })
-  ),
-  apmUiEnabled: PropTypes.bool.isRequired,
-  find: PropTypes.func.isRequired,
-  localStorage: PropTypes.object.isRequired,
-  urlBasePath: PropTypes.string.isRequired,
-  mlEnabled: PropTypes.bool.isRequired,
-};

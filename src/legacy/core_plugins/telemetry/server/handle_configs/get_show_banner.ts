@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { TelemetryPlugin } from './plugin';
-import * as constants from '../common/constants';
-import * as handleConfig from './handle_configs';
+import { Legacy } from 'kibana';
+import { getOldShowBannerSettings } from './handle_old_monitoring_configs';
 
-export { telemetryCollectionManager } from './collection_manager';
+export function getShowBanner(config: Legacy.KibanaConfig, telemetryOptedIn: boolean | null) {
+  const optInNotifications = config.get('telemetry.optInNotifications');
+  const userOptedIn = telemetryOptedIn !== null;
 
-export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
-  new TelemetryPlugin();
-
-export { constants, handleConfig };
+  return optInNotifications && !userOptedIn && getOldShowBannerSettings(config);
+}

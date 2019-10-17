@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Telemetry } from './telemetry';
+import { TelemetrySender } from './telemetry_sender';
 import {
   REPORT_INTERVAL_MS,
   LOCALSTORAGE_KEY,
@@ -30,7 +30,7 @@ describe('telemetry class', () => {
     { cluster_uuid: 'fake-456' },
   ];
   const telemetryUrl = 'https://not.a.valid.url.0';
-  const mockFetchTelemetry = () => Promise.resolve({ data: clusters });
+  const mockFetchTelemetry = () => Promise.resolve(clusters);
   // returns a function that behaves like the injector by fetching the requested key from the object directly
   // for example:
   // { '$http': jest.fn() } would be how to mock the '$http' injector value
@@ -49,7 +49,7 @@ describe('telemetry class', () => {
         telemetryOptedIn: true,
         telemetryUrl,
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect(telemetry._storage).toBe(injector.localStorage);
       expect(telemetry._$http).toBe(injector.$http);
@@ -73,7 +73,7 @@ describe('telemetry class', () => {
         telemetryOptedIn: true,
         telemetryUrl,
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect(telemetry._storage).toBe(injector.localStorage);
       expect(telemetry._$http).toBe(injector.$http);
@@ -97,7 +97,7 @@ describe('telemetry class', () => {
       }
     };
     const lastReport = Date.now();
-    const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+    const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
     telemetry._lastReport = lastReport;
 
     telemetry._saveToBrowser();
@@ -117,7 +117,7 @@ describe('telemetry class', () => {
         },
         telemetryOptedIn: null, // not yet opted in
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect(telemetry._checkReportStatus()).toBe(false);
     });
@@ -129,7 +129,7 @@ describe('telemetry class', () => {
         },
         telemetryOptedIn: false, // opted out explicitly
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect(telemetry._checkReportStatus()).toBe(false);
     });
@@ -143,7 +143,7 @@ describe('telemetry class', () => {
         },
         telemetryOptedIn: true,
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect(telemetry._checkReportStatus()).toBe(false);
     });
@@ -155,7 +155,7 @@ describe('telemetry class', () => {
         },
         telemetryOptedIn: true,
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect(telemetry._checkReportStatus()).toBe(true);
     });
@@ -167,7 +167,7 @@ describe('telemetry class', () => {
         },
         telemetryOptedIn: true,
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect(telemetry._checkReportStatus()).toBe(true);
     });
@@ -179,7 +179,7 @@ describe('telemetry class', () => {
         },
         telemetryOptedIn: true,
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect(telemetry._checkReportStatus()).toBe(true);
     });
@@ -191,7 +191,7 @@ describe('telemetry class', () => {
         },
         telemetryOptedIn: true,
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect(telemetry._checkReportStatus()).toBe(true);
     });
@@ -207,7 +207,7 @@ describe('telemetry class', () => {
         },
         telemetryOptedIn: true,
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
       telemetry._sending = true;
 
       return expect(telemetry._sendIfDue()).resolves.toBe(false);
@@ -220,7 +220,7 @@ describe('telemetry class', () => {
         },
         telemetryOptedIn: false, // opted out
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       return expect(telemetry._sendIfDue()).resolves.toBe(false);
     });
@@ -236,7 +236,7 @@ describe('telemetry class', () => {
         telemetryOptedIn: true,
         telemetryUrl,
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect.hasAssertions();
 
@@ -278,7 +278,7 @@ describe('telemetry class', () => {
         telemetryOptedIn: true,
         telemetryUrl,
       };
-      const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+      const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
       expect.hasAssertions();
 
@@ -313,7 +313,7 @@ describe('telemetry class', () => {
       },
       telemetryOptedIn: false, // opted out
     };
-    const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
+    const telemetry = new TelemetrySender(mockInjectorFromObject(injector), mockFetchTelemetry);
 
     clearInterval(telemetry.start());
   });

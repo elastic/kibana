@@ -76,9 +76,14 @@ const telemetry = (kibana: any) => {
         },
       },
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
+        const config = request.server.config();
+        const telemetryOptedIn = await handleConfig.getTelemetryOptIn(config, request);
+        const telemetryBanner = handleConfig.getShowBanner(config, telemetryOptedIn);
+
         return {
           ...originalInjectedVars,
-          telemetryOptedIn: handleConfig.getTelemetryOptIn(config, request),
+          telemetryOptedIn,
+          telemetryBanner,
         };
       },
       injectDefaultVars(server: Server) {
@@ -87,11 +92,11 @@ const telemetry = (kibana: any) => {
           telemetryEnabled: handleConfig.getTelemetryEnabled(config),
           telemetryUrl: handleConfig.getTelemetryUrl(config),
           telemetryOptInNotifications: config.get('telemetry.optInNotifications'),
-          telemetryBanner: handleConfig.getShowBanner(config),
+          telemetryBanner: null,
           telemetryOptedIn: null,
         };
       },
-      hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
+      hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/inject_banner'],
       mappings,
     },
     init(server: Server) {

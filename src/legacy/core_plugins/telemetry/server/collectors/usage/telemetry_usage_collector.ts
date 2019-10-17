@@ -24,7 +24,7 @@ import { dirname, join } from 'path';
 
 // look for telemetry.yml in the same places we expect kibana.yml
 import { ensureDeepObject } from './ensure_deep_object';
-import { getStaticTelemetryConfigPath } from '../../handle_config';
+import { getStaticTelemetryConfigPath } from '../../handle_configs';
 
 /**
  * The maximum file size before we ignore it (note: this limit is arbitrary).

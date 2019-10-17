@@ -57,22 +57,20 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
     hasPrivilegeToRead: false,
   };
 
-  componentDidMount() {
-    this.props
-      .fetchTelemetry()
-      .then(response =>
-        this.setState({
-          data: Array.isArray(response) ? response : null,
-          isLoading: false,
-          hasPrivilegeToRead: true,
-        })
-      )
-      .catch(err => {
-        this.setState({
-          isLoading: false,
-          hasPrivilegeToRead: err.status !== 403,
-        });
+  async componentDidMount() {
+    try {
+      const data = await this.props.fetchTelemetry();
+      this.setState({
+        data: Array.isArray(data) ? data : null,
+        isLoading: false,
+        hasPrivilegeToRead: true,
       });
+    } catch (err) {
+      this.setState({
+        isLoading: false,
+        hasPrivilegeToRead: err.status !== 403,
+      });
+    }
   }
 
   renderBody({ data, isLoading, hasPrivilegeToRead }: State) {

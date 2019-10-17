@@ -35,16 +35,41 @@ export function getTelemetryOptInService() {
 
 export function createTelemetryOptInService() {
   const { http, injectedMetadata } = npStart.core;
+  const optInNotifications = injectedMetadata.getInjectedVar(
+    'telemetryOptInNotifications'
+  ) as boolean;
   let currentOptInStatus = injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
+  let shouldShowWelcomeCard = optInNotifications;
+  let shouldShowBanner =
+    optInNotifications && (injectedMetadata.getInjectedVar('telemetryBanner') as boolean);
   let bannerId: string | null = null;
 
   setCanTrackUiMetrics(currentOptInStatus);
   const provider = {
-    getBannerId: () => bannerId,
-    getOptIn: () => currentOptInStatus,
-    setBannerId(id: string) {
+    // getEnabled: () => {
+    //   return injectedMetadata.getInjectedVar('telemetryEnabled') as boolean;
+    // },
+    getOptInNotifications: (): boolean => {
+      const isOptedIn = provider.getOptIn();
+      return !isOptedIn && optInNotifications;
+    },
+    setShouldShowWelcomeCard: (enabled: boolean) => {
+      shouldShowWelcomeCard = enabled;
+    },
+    getShouldShowWelcomeCard: () => {
+      return shouldShowWelcomeCard;
+    },
+    setShouldShowBanner: (enabled: boolean) => {
+      shouldShowBanner = enabled;
+    },
+    getShouldShowBanner: (): boolean => {
+      return shouldShowBanner;
+    },
+    getBannerId: (): string | null => bannerId,
+    setBannerId(id: string): void {
       bannerId = id;
     },
+    getOptIn: () => currentOptInStatus,
     setOptIn: async (enabled: boolean) => {
       setCanTrackUiMetrics(enabled);
 
@@ -62,10 +87,9 @@ export function createTelemetryOptInService() {
             defaultMessage: 'An error occured while trying to set the usage statistics preference.',
           }),
         });
-        return false;
       }
 
-      return true;
+      return currentOptInStatus;
     },
     fetchExample: () => provider.fetchTelemetry({ unencrypted: true }),
     fetchTelemetry: async ({ unencrypted = false } = {}): Promise<any[]> => {

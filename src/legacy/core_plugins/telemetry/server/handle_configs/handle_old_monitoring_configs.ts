@@ -23,10 +23,9 @@ import { swallowError } from './util';
 
 export function getOldShowBannerSettings(config: Legacy.KibanaConfig) {
   const CONFIG_SHOW_BANNER = 'xPackMonitoring:showBanner';
-
   const oldShowSetting = swallowError(() => config.get(CONFIG_SHOW_BANNER));
 
-  if (oldShowSetting !== null) {
+  if (typeof oldShowSetting === 'boolean') {
     return oldShowSetting;
   }
 

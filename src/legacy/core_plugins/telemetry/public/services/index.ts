@@ -19,3 +19,4 @@
 
 export { getTelemetryOptInService, TelemetryOptInService } from './telemetry_opt_in';
 export { isUnauthenticated } from './path';
+export { TelemetrySender } from './telemetry_sender';

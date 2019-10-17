@@ -17,8 +17,4 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-
-import { injectBanner } from './welcome_banner';
-
-uiModules.get('telemetry/hacks').run(injectBanner);
+export { renderBanner } from './render_banner';

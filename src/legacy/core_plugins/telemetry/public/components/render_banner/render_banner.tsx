@@ -17,12 +17,31 @@
  * under the License.
  */
 
-import { Legacy } from 'kibana';
-import { getOldShowBannerSettings } from './handle_old_monitoring_configs';
+import React from 'react';
+// @ts-ignore
+import { banners } from 'ui/notify';
+// @ts-ignore
+import { clickBanner } from './click_banner';
+import { OptInBanner } from '../opt_in_banner_component';
+import { TelemetryOptInService } from '../../services';
 
-export async function getShowBanner(config: Legacy.KibanaConfig) {
-  const optInNotifications = config.get('telemetry.optInNotifications');
-  const userSetOptIn = config.get('telemetryOptedIn') !== null;
+export function renderBanner(
+  telemetryOptInService: TelemetryOptInService,
+  { _banners = banners } = {}
+): void {
+  const shouldShowBanner = telemetryOptInService.getShouldShowBanner();
+  if (!shouldShowBanner) {
+    return;
+  }
+  const bannerId = _banners.add({
+    component: (
+      <OptInBanner
+        optInClick={optIn => clickBanner(telemetryOptInService, optIn)}
+        fetchTelemetry={telemetryOptInService.fetchExample}
+      />
+    ),
+    priority: 10000,
+  });
 
-  return optInNotifications && !userSetOptIn && (await getOldShowBannerSettings(config));
+  telemetryOptInService.setBannerId(bannerId);
 }

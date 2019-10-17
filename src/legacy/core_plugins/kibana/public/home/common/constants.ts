@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { injectBanner } from './inject_banner';
+export const KEY_ENABLE_WELCOME = 'home:welcome:show';
