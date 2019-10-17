@@ -169,11 +169,14 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                   )}
                 </KpiHostDetailsQuery>
 
+                <EuiSpacer />
+
                 <SiemNavigation
                   navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
                   display="default"
                   showBorder={true}
                 />
+
                 <EuiSpacer />
               </StickyContainer>
             ) : (

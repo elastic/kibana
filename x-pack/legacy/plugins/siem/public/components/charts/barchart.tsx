@@ -71,6 +71,7 @@ export const BarChartBaseComponent = React.memo<{
         const seriesType = SeriesType.BAR;
 
         if (checkIfAllTheDataInTheSeriesAreValid) {
+          // TODO: Cleanup after PR is merged https://github.com/elastic/elastic-charts/issues/420
           const splitSeries = getUniqueSplitSeries(series.value);
 
           return (
