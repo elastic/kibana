@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
   EuiCode,
 } from '@elastic/eui';
 
@@ -21,6 +22,7 @@ import { useForm, Form, OnFormUpdateArg } from '../../../../shared_imports';
 import { OnUpdateHandler } from '../../../../../json_editor';
 import { useDispatch } from '../../../../mappings_state';
 import { Field, NormalizedField } from '../../../../types';
+import { fieldSerializer, fieldDeserializer } from '../../../../lib';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
 import { FieldSettingsJsonEditor } from './field_settings_json_editor';
@@ -32,7 +34,11 @@ interface Props {
 }
 
 export const EditField = React.memo(({ field }: Props) => {
-  const { form } = useForm<Field>({ defaultValue: field.source });
+  const { form } = useForm<Field>({
+    defaultValue: { ...field.source },
+    serializer: fieldSerializer,
+    deserializer: fieldDeserializer,
+  });
   const dispatch = useDispatch();
 
   const fieldsSettings = useRef<Parameters<OnUpdateHandler>[0] | undefined>(undefined);
@@ -113,7 +119,7 @@ export const EditField = React.memo(({ field }: Props) => {
   };
 
   const {
-    source: { name, type, ...fieldsSettingsDefault },
+    source: { name, type, subType, ...fieldsSettingsDefault },
   } = field;
 
   return (
@@ -140,7 +146,7 @@ export const EditField = React.memo(({ field }: Props) => {
               FormWrapper={formWrapper}
               onSubmit={getSubmitForm(updateField)}
             >
-              <EditFieldHeaderForm />
+              <EditFieldHeaderForm defaultValue={field.source} />
             </Form>
             <FieldSettingsJsonEditor
               onUpdate={onFieldsSettingsUpdate}

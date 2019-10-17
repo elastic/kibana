@@ -6,10 +6,24 @@
 import React, { useEffect } from 'react';
 import { EuiButtonEmpty, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { useForm, Form, SelectField, UseField, FieldConfig } from '../../../shared_imports';
-import { FIELD_TYPES_OPTIONS, PARAMETERS_DEFINITION } from '../../../constants';
+import {
+  useForm,
+  Form,
+  FormDataProvider,
+  SelectField,
+  UseField,
+  FieldConfig,
+} from '../../../shared_imports';
+
+import {
+  DATA_TYPE_DEFINITION,
+  FIELD_TYPES_OPTIONS,
+  PARAMETERS_DEFINITION,
+} from '../../../constants';
+
 import { useDispatch } from '../../../mappings_state';
-import { Field, ParameterName } from '../../../types';
+import { fieldSerializer } from '../../../lib';
+import { Field, ParameterName, MainType } from '../../../types';
 import { NameParameter } from '../field_parameters';
 
 const formWrapper = (props: any) => <form {...props} />;
@@ -22,7 +36,7 @@ interface Props {
 }
 
 export const CreateField = React.memo(({ isCancelable = true }: Props) => {
-  const { form } = useForm<Field>();
+  const { form } = useForm<Field>({ serializer: fieldSerializer });
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -50,42 +64,81 @@ export const CreateField = React.memo(({ isCancelable = true }: Props) => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });
   };
 
+  const renderFormFields = (type: MainType) => {
+    const typeDefinition = DATA_TYPE_DEFINITION[type];
+
+    return (
+      <EuiFlexGroup gutterSize="s">
+        {/* Field name */}
+        <EuiFlexItem>
+          <NameParameter />
+        </EuiFlexItem>
+
+        {/* Field type */}
+        <EuiFlexItem>
+          <UseField
+            path="type"
+            config={getFieldConfig('type')}
+            component={SelectField}
+            componentProps={{
+              euiFieldProps: {
+                options: FIELD_TYPES_OPTIONS,
+              },
+            }}
+          />
+        </EuiFlexItem>
+
+        {/* Field sub type (if any) */}
+        {typeDefinition && typeDefinition.subTypes && (
+          <EuiFlexItem grow={false}>
+            <UseField
+              path="subType"
+              defaultValue={typeDefinition.subTypes.types[0]}
+              config={{
+                ...getFieldConfig('type'),
+                label: typeDefinition.subTypes.label,
+              }}
+              component={SelectField}
+              componentProps={{
+                euiFieldProps: {
+                  options: typeDefinition.subTypes.types.map(subType => ({
+                    value: subType,
+                    text: subType,
+                  })),
+                  hasNoInitialSelection: false,
+                },
+              }}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  };
+
+  const renderFormActions = () => (
+    <EuiFlexGroup gutterSize="s">
+      {isCancelable && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiButton color="primary" fill onClick={submitForm} type="submit">
+          Add
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <NameParameter />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <UseField
-                path="type"
-                config={getFieldConfig('type')}
-                component={SelectField}
-                componentProps={{
-                  euiFieldProps: {
-                    options: FIELD_TYPES_OPTIONS,
-                  },
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            {isCancelable && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill onClick={submitForm} type="submit">
-                Add
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        <FormDataProvider pathsToWatch="type">
+          {({ type }) => {
+            return <EuiFlexItem grow={false}>{renderFormFields(type)}</EuiFlexItem>;
+          }}
+        </FormDataProvider>
+        <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
       </EuiFlexGroup>
     </Form>
   );

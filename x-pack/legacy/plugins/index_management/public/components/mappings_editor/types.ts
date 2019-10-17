@@ -96,6 +96,7 @@ export interface Fields {
 export interface Field {
   name: string;
   type: DataType;
+  subType?: SubType;
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: { [key: string]: Omit<Field, 'name'> };
 }

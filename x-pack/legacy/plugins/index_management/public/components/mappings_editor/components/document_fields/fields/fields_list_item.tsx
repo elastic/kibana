@@ -12,7 +12,6 @@ import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
 import { NormalizedField } from '../../../types';
-import { MAX_DEPTH_DEFAULT_EDITOR } from '../../../constants';
 
 interface Props {
   field: NormalizedField;
@@ -39,7 +38,8 @@ export const FieldsListItem = ({ field, treeDepth = 0 }: Props) => {
     nestedDepth,
     isExpanded,
   } = field;
-  const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
+  const isAddFieldBtnDisabled = false; // For now, we never disable the Add Child button.
+  // const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
   const indent = `${nestedDepth * INDENT_SIZE}px`;
   const indentChild = `${(nestedDepth + 1) * INDENT_SIZE}px`;
 

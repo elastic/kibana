@@ -11,3 +11,5 @@ export * from './data_types_definition';
 export * from './parameters_definition';
 
 export * from './mappings_editor';
+
+export * from './default_values';

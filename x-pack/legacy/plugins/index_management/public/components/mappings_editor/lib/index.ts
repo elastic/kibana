@@ -6,4 +6,6 @@
 
 export * from './utils';
 
+export * from './serializers';
+
 export * from './validators';
