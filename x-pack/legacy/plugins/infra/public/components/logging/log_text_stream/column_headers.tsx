@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { transparentize } from 'polished';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import {
@@ -20,6 +21,8 @@ import {
   LogEntryColumnWidths,
 } from './log_entry_column';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
+import { WithLogPosition } from '../../../containers/logs/with_log_position';
+import { localizedDate } from '../../../utils/formatters/datetime';
 
 export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnConfiguration[];
@@ -30,13 +33,16 @@ export const LogColumnHeaders: React.FunctionComponent<{
       {columnConfigurations.map(columnConfiguration => {
         if (isTimestampLogColumnConfiguration(columnConfiguration)) {
           return (
-            <LogColumnHeader
-              columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
-              data-test-subj="logColumnHeader timestampLogColumnHeader"
-              key={columnConfiguration.timestampColumn.id}
-            >
-              Timestamp
-            </LogColumnHeader>
+            <WithLogPosition key={columnConfiguration.timestampColumn.id}>
+              {({ firstVisiblePosition }) => (
+                <LogColumnHeader
+                  columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
+                  data-test-subj="logColumnHeader timestampLogColumnHeader"
+                >
+                  {firstVisiblePosition ? localizedDate(firstVisiblePosition.time) : 'Timestamp'}
+                </LogColumnHeader>
+              )}
+            </WithLogPosition>
           );
         } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
           return (
@@ -83,13 +89,16 @@ const LogColumnHeadersWrapper = euiStyled.div.attrs({
   justify-content: flex-start;
   overflow: hidden;
   padding-right: ${ASSUMED_SCROLLBAR_WIDTH}px;
+  border-bottom: ${props => props.theme.eui.euiBorderThin};
+  box-shadow: 0 2px 2px -1px ${props => transparentize(0.3, props.theme.eui.euiColorLightShade)};
+  position: relative;
+  z-index: 1;
 `;
 
 const LogColumnHeaderWrapper = LogEntryColumn.extend.attrs({
   role: 'columnheader',
 })`
   align-items: center;
-  border-bottom: ${props => props.theme.eui.euiBorderThick};
   display: flex;
   flex-direction: row;
   height: 32px;
