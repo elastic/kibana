@@ -5,7 +5,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-
+import { get } from 'lodash/fp';
 import {
   Direction,
   FlowTarget,
@@ -147,7 +147,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: {
         ...state[networkType].queries,
         [tableType]: {
-          ...state[networkType].queries[tableType],
+          ...get([networkType, 'queries', tableType], state),
           ...updates,
         },
       },
