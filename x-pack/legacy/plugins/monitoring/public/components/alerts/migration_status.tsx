@@ -16,42 +16,50 @@ import {
   EuiCallOut,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ActionResult } from '../../../../actions/server/types';
+import { Alert } from '../../../../alerting/server/types';
 import { toggleSetupMode, getSetupModeState, addSetupModeCallback } from '../../lib/setup_mode';
 import {
   ALERT_ACTION_TYPE_EMAIL,
-  CLUSTER_ALERTS_TO_BLACKLIST,
-  CLUSTER_ALERT_ID_TO_KIBANA_ALERT_TYPE_ID
+  NUMBER_OF_LEGACY_CLUSTER_ALERTS,
+  KIBANA_ALERTING_ENABLED,
 } from '../../../common/constants';
 import { CreateActionModal } from './create_action_modal';
 import { SelectActionModal } from './select_action.modal';
+import { EmailActionData } from './manage_email_action';
 
-// Note: This is currently not rendered
-export function MigrationStatus({ clusterUuid }) {
+interface MigrationStatusProps {
+  clusterUuid: string;
+}
+
+export const MigrationStatus: React.FC<MigrationStatusProps> = (props: MigrationStatusProps) => {
+  const { clusterUuid } = props;
+
   const [setupModeEnabled, setSetupModeEnabled] = React.useState(getSetupModeState().enabled);
   const [isCreating, setIsCreating] = React.useState(false);
   const [showCallOut, setShowCallOut] = React.useState(false);
   const [showCreate, setShowCreate] = React.useState(false);
-  const [kibanaAlerts, setKibanaAlerts] = React.useState([]);
+  const [kibanaAlerts, setKibanaAlerts] = React.useState<Alert[]>([]);
   const [emailActions, setEmailActions] = React.useState([]);
   const [showCreateActionModal, setShowCreateActionModal] = React.useState(false);
   const [showEditActionModal, setShowEditActionModal] = React.useState(false);
-  const [editAction, setEditAction] = React.useState(false);
+  const [editAction, setEditAction] = React.useState<ActionResult | null>(null);
   const [showSelectActionModal, setShowSelectActionModal] = React.useState(false);
   const [selectedEmailActionId, setSelectedEmailActionId] = React.useState(null);
 
   React.useEffect(() => {
     async function fetchMigrationStatus() {
-      const kibanaAlerts = await kfetch({ method: 'GET', pathname: `/api/alert/_find` });
+      const alerts = await kfetch({ method: 'GET', pathname: `/api/alert/_find` });
 
-      setKibanaAlerts(kibanaAlerts.data);
+      setKibanaAlerts(alerts.data);
       await fetchEmailActions();
 
-      if (kibanaAlerts.total === 0) {
+      if (alerts.total === 0) {
         if (setupModeEnabled) {
           setShowCreate(true);
           setShowCallOut(false);
-        }
-        else {
+        } else {
           setShowCreate(false);
           setShowCallOut(true);
         }
@@ -66,12 +74,16 @@ export function MigrationStatus({ clusterUuid }) {
   async function fetchEmailActions() {
     const kibanaActions = await kfetch({
       method: 'GET',
-      pathname: `/api/action/_find`
+      pathname: `/api/action/_find`,
     });
 
-    const emailActions = kibanaActions.data.filter(action => action.actionTypeId === ALERT_ACTION_TYPE_EMAIL);
-    emailActions.length && setSelectedEmailActionId(emailActions[0].id);
-    setEmailActions(emailActions);
+    const actions = kibanaActions.data.filter(
+      (action: ActionResult) => action.actionTypeId === ALERT_ACTION_TYPE_EMAIL
+    );
+    if (actions.length > 0) {
+      setSelectedEmailActionId(actions[0].id);
+    }
+    setEmailActions(actions);
   }
 
   async function createKibanaAlerts() {
@@ -80,18 +92,15 @@ export function MigrationStatus({ clusterUuid }) {
     const { alerts } = await kfetch({
       method: 'POST',
       pathname: `/api/monitoring/v1/clusters/${clusterUuid}/alerts`,
-      body: JSON.stringify({ selectedEmailActionId })
+      body: JSON.stringify({ selectedEmailActionId }),
     });
 
     setIsCreating(false);
     setShowCreate(false);
-    setKibanaAlerts([
-      ...kibanaAlerts,
-      ...alerts,
-    ]);
+    setKibanaAlerts([...kibanaAlerts, ...alerts]);
   }
 
-  async function createEmailAction(data) {
+  async function createEmailAction(data: EmailActionData) {
     if (editAction) {
       await kfetch({
         method: 'PUT',
@@ -99,20 +108,21 @@ export function MigrationStatus({ clusterUuid }) {
         body: JSON.stringify({
           description: editAction.description,
           config: omit(data, ['user', 'password']),
-          secrets: pick(data, ['user', 'password'])
-        })
+          secrets: pick(data, ['user', 'password']),
+        }),
       });
-    }
-    else {
+    } else {
       await kfetch({
         method: 'POST',
         pathname: '/api/action',
         body: JSON.stringify({
-          description: 'Sends an email',
+          description: i18n.translate('xpack.monitoring.alerts.actions.emailAction.description', {
+            defaultMessage: 'Kibana alerting is up to date!',
+          }),
           actionTypeId: ALERT_ACTION_TYPE_EMAIL,
           config: omit(data, ['user', 'password']),
-          secrets: pick(data, ['user', 'password'])
-        })
+          secrets: pick(data, ['user', 'password']),
+        }),
       });
     }
 
@@ -122,8 +132,7 @@ export function MigrationStatus({ clusterUuid }) {
   function selectAction() {
     if (emailActions.length === 0) {
       setShowCreateActionModal(true);
-    }
-    else {
+    } else {
       setShowSelectActionModal(true);
     }
   }
@@ -136,7 +145,7 @@ export function MigrationStatus({ clusterUuid }) {
     return (
       <CreateActionModal
         onClose={() => setShowCreateActionModal(false)}
-        createEmailAction={async data => {
+        createEmailAction={async (data: EmailActionData) => {
           await createEmailAction(data);
           setShowCreateActionModal(false);
           setShowEditActionModal(false);
@@ -158,7 +167,7 @@ export function MigrationStatus({ clusterUuid }) {
         emailActions={emailActions}
         onClose={() => setShowSelectActionModal(false)}
         createKibanaAlerts={createKibanaAlerts}
-        onClickEdit={action => {
+        onClickEdit={(action: ActionResult) => {
           setShowSelectActionModal(false);
           setEditAction(action);
           setShowEditActionModal(true);
@@ -170,19 +179,16 @@ export function MigrationStatus({ clusterUuid }) {
   }
 
   function renderContent() {
-    const missingAlerts = CLUSTER_ALERTS_TO_BLACKLIST.filter(clusterAlert => {
-      if (kibanaAlerts.find(alert => alert.alertTypeId === CLUSTER_ALERT_ID_TO_KIBANA_ALERT_TYPE_ID[clusterAlert])) {
-        return false;
-      }
-      return true;
-    });
+    const missingAlertCount = NUMBER_OF_LEGACY_CLUSTER_ALERTS - kibanaAlerts.length;
 
-    if (missingAlerts.length === 0) {
+    if (missingAlertCount === 0) {
       if (setupModeEnabled) {
         return (
           <EuiCallOut
             color="success"
-            title="Kibana alerting is up to date!"
+            title={i18n.translate('xpack.monitoring.alerts.migrate.upToDate', {
+              defaultMessage: 'Kibana alerting is up to date!',
+            })}
             iconType="flag"
             size="s"
           />
@@ -190,18 +196,19 @@ export function MigrationStatus({ clusterUuid }) {
       }
     }
 
+    const needToMigrateLabel = i18n.translate('xpack.monitoring.alerts.migrate.needToMigrate', {
+      defaultMessage: 'Migrate cluster alerts to Kibana alerting',
+    });
     if (showCreate) {
       return (
-        <EuiCallOut
-          color="warning"
-          title="Migrate cluster alerts to Kibana alerting"
-          iconType="flag"
-        >
-          <p>
-            There are existing cluster alerts that are eligible to migrate to Kibana alerting! Click the button below to migrate.
-          </p>
+        <EuiCallOut color="warning" title={needToMigrateLabel} iconType="flag">
           <EuiButton onClick={selectAction} isLoading={isCreating}>
-            Migrate {missingAlerts.length} cluster alert(s) to Kibana alerting
+            {i18n.translate('xpack.monitoring.alerts.migrate.migrateActionBtn', {
+              defaultMessage: 'Migrate {missingAlertCount} cluster alert(s) to Kibana alerting',
+              values: {
+                missingAlertCount,
+              },
+            })}
           </EuiButton>
           {renderCreateActionModal()}
           {renderSelectActionModal()}
@@ -211,13 +218,23 @@ export function MigrationStatus({ clusterUuid }) {
 
     if (showCallOut) {
       return (
-        <EuiCallOut
-          color="warning"
-          title="Migrate cluster alert to Kibana alerting"
-        >
+        <EuiCallOut color="warning" title={needToMigrateLabel}>
           <p>
-            Some cluster alerts need to be migrated to Kibana alerting.&nbsp;
-            <EuiLink onClick={() => toggleSetupMode(true)}>Enter Setup mode</EuiLink> to start the process.
+            {i18n.translate('xpack.monitoring.alerts.migrate.outsideOfSetupModeText', {
+              defaultMessage: 'Some cluster alerts need to be migrated to Kibana alerting.',
+              values: {
+                missingAlertCount,
+              },
+            })}
+            &nbsp;
+            <EuiLink onClick={() => toggleSetupMode(true)}>
+              {i18n.translate('xpack.monitoring.alerts.migrate.outsideOfSetupModeLinkText', {
+                defaultMessage: 'Enter Setup mode to start the process.',
+                values: {
+                  missingAlertCount,
+                },
+              })}
+            </EuiLink>
           </p>
         </EuiCallOut>
       );
@@ -226,23 +243,29 @@ export function MigrationStatus({ clusterUuid }) {
     return null;
   }
 
+  if (!KIBANA_ALERTING_ENABLED) {
+    return null;
+  }
+
   const content = renderContent();
   if (content) {
     return (
       <Fragment>
         <EuiTitle>
-          <h4>Kibana Alerting</h4>
+          <h4>
+            {i18n.translate('xpack.monitoring.alerts.migrate.title', {
+              defaultMessage: 'Kibana alerting',
+            })}
+          </h4>
         </EuiTitle>
-        <EuiSpacer/>
+        <EuiSpacer />
         <EuiFlexGroup>
-          <EuiFlexItem grow={true}>
-            {content}
-          </EuiFlexItem>
+          <EuiFlexItem grow={true}>{content}</EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer/>
+        <EuiSpacer />
       </Fragment>
     );
   }
 
   return null;
-}
+};

@@ -46,61 +46,6 @@ async function createAlerts(alertsClient, { selectedEmailActionId, clusterUuid }
   return createdAlerts;
 }
 
-// async function blacklistClusterAlertsIfAvailable(req) {
-//   const BLACKLIST = {
-//     'cluster_alerts.management.blacklist': CLUSTER_ALERTS_TO_BLACKLIST
-//   };
-
-//   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
-//   const readResponse = await callWithRequest(req, 'cluster.getSettings', {
-//     includeDefaults: true
-//   });
-
-//   const exporters = {
-//     persistent: {},
-//     transient: {}
-//   };
-
-//   for (const source of ['persistent', 'transient', 'defaults']) {
-//     const sourcedExporters = get(readResponse[source], 'xpack.monitoring.exporters');
-//     if (sourcedExporters) {
-//       const newSource = source === 'defaults' ? 'persistent' : source;
-//       exporters[newSource] = {
-//         xpack: {
-//           monitoring: {
-//             exporters: Object.keys(sourcedExporters).reduce((accum, exporterName) => ({
-//               ...accum,
-//               [exporterName]: {
-//                 ...sourcedExporters[exporterName],
-//                 ...BLACKLIST
-//               }
-//             }), {})
-//           }
-//         }
-//       };
-//     }
-//   }
-
-//   if (Object.keys(exporters.persistent).length === 0 && Object.keys(exporters.transient).length === 0) {
-//     // Add a local one, as it is the default
-//     exporters.persistent = {
-//       xpack: {
-//         monitoring: {
-//           exporters: {
-//             local: {
-//               type: 'local',
-//               ...BLACKLIST
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-
-//   await callWithRequest(req, 'cluster.putSettings', {
-//     body: exporters
-//   });
-// }
 
 export function createKibanaAlertsRoute(server) {
   server.route({
@@ -122,7 +67,6 @@ export function createKibanaAlertsRoute(server) {
         return headers.response().code(404);
       }
 
-      // await blacklistClusterAlertsIfAvailable(req);
       const alerts = await createAlerts(alertsClient, { ...req.params, ...req.payload });
       return { alerts };
     }
