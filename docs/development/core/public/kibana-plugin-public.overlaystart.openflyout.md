@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
+openFlyout: (flyoutChildren: MountPoint, flyoutProps?: {
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
     }) => OverlayRef;

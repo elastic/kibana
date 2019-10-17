@@ -109,8 +109,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpStart](./kibana-plugin-public.httpstart.md) | See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |
 |  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IToasts](./kibana-plugin-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-public.toastsapi.md)<!-- -->. |
-|  [OverlayBannerMount](./kibana-plugin-public.overlaybannermount.md) | A function that will mount the banner inside the provided element. |
-|  [OverlayBannerUnmount](./kibana-plugin-public.overlaybannerunmount.md) | A function that will unmount the banner from the element. |
+|  [MountPoint](./kibana-plugin-public.mountpoint.md) | A function that will mount the banner inside the provided element. |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-public.pluginopaqueid.md) |  |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
@@ -122,4 +121,5 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
 |  [ToastsStart](./kibana-plugin-public.toastsstart.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
 |  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
+|  [UnmountCallback](./kibana-plugin-public.unmountcallback.md) | A function that will unmount the element previously mounted by the associated [MountPoint](./kibana-plugin-public.mountpoint.md) |
 

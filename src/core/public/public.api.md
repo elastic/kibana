@@ -616,6 +616,9 @@ export interface LegacyNavLink {
     url: string;
 }
 
+// @public
+export type MountPoint = (element: HTMLElement) => UnmountCallback;
+
 // @public (undocumented)
 export interface NotificationsSetup {
     // (undocumented)
@@ -628,12 +631,9 @@ export interface NotificationsStart {
     toasts: ToastsStart;
 }
 
-// @public
-export type OverlayBannerMount = (element: HTMLElement) => OverlayBannerUnmount;
-
 // @public (undocumented)
 export interface OverlayBannersStart {
-    add(mount: OverlayBannerMount, priority?: number): string;
+    add(mount: MountPoint, priority?: number): string;
     // Warning: (ae-forgotten-export) The symbol "OverlayBanner" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
@@ -641,11 +641,9 @@ export interface OverlayBannersStart {
     // (undocumented)
     getComponent(): JSX.Element;
     remove(id: string): boolean;
-    replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): string;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "OverlayBannerMount"
+    replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 }
-
-// @public
-export type OverlayBannerUnmount = () => void;
 
 // @public
 export interface OverlayRef {
@@ -658,12 +656,12 @@ export interface OverlayStart {
     // (undocumented)
     banners: OverlayBannersStart;
     // (undocumented)
-    openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
+    openFlyout: (flyoutChildren: MountPoint, flyoutProps?: {
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
     }) => OverlayRef;
     // (undocumented)
-    openModal: (modalChildren: React.ReactNode, modalProps?: {
+    openModal: (modalChildren: MountPoint, modalProps?: {
         className?: string;
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
@@ -990,6 +988,9 @@ export interface UiSettingsState {
     // (undocumented)
     [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
 }
+
+// @public
+export type UnmountCallback = () => void;
 
 
 ```
