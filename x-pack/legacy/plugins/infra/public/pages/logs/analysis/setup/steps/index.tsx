@@ -22,6 +22,7 @@ type SetupHandler = (
 interface AnalysisSetupStepsProps {
   availableIndices: string[];
   cleanupAndSetup: SetupHandler;
+  errorMessages: string[];
   setup: SetupHandler;
   setupStatus: SetupStatus;
   viewResults: () => void;
@@ -30,6 +31,7 @@ interface AnalysisSetupStepsProps {
 export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps> = ({
   availableIndices,
   cleanupAndSetup: cleanupAndSetupModule,
+  errorMessages,
   setup: setupModule,
   setupStatus,
   viewResults,
@@ -41,7 +43,6 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
     setEndTime,
     startTime,
     endTime,
-    selectedIndexNames,
     selectedIndices,
     setSelectedIndices,
     validationErrors,
@@ -74,11 +75,11 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
       }),
       children: (
         <SetupProcess
-          indices={selectedIndexNames}
+          cleanupAndSetup={cleanupAndSetup}
+          errorMessages={errorMessages}
+          setup={setup}
           setupStatus={setupStatus}
           viewResults={viewResults}
-          setup={setup}
-          cleanupAndSetup={cleanupAndSetup}
         />
       ),
       status:

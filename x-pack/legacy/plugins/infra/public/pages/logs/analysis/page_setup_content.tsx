@@ -31,6 +31,7 @@ type SetupHandler = (
 interface AnalysisSetupContentProps {
   availableIndices: string[];
   cleanupAndSetup: SetupHandler;
+  errorMessages: string[];
   setup: SetupHandler;
   setupStatus: SetupStatus;
   viewResults: () => void;
@@ -39,6 +40,7 @@ interface AnalysisSetupContentProps {
 export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
   availableIndices,
   cleanupAndSetup,
+  errorMessages,
   setup,
   setupStatus,
   viewResults,
@@ -76,10 +78,11 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
             <EuiSpacer />
             <AnalysisSetupSteps
               availableIndices={availableIndices}
-              setup={setup}
               cleanupAndSetup={cleanupAndSetup}
-              viewResults={viewResults}
+              errorMessages={errorMessages}
+              setup={setup}
               setupStatus={setupStatus}
+              viewResults={viewResults}
             />
           </EuiPageContentBody>
         </AnalysisPageContent>

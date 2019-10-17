@@ -147,6 +147,7 @@ export const useLogAnalysisJobs = ({
     fetchJobStatus,
     isLoadingSetupStatus,
     jobStatus: statusState.jobStatus,
+    lastSetupErrorMessages: statusState.lastSetupErrorMessages,
     cleanupAndSetup,
     setup: setupMlModule,
     setupMlModuleRequest,

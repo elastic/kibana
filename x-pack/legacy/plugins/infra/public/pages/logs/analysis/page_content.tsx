@@ -24,6 +24,7 @@ export const AnalysisPageContent = () => {
     availableIndices,
     cleanupAndSetup,
     fetchJobStatus,
+    lastSetupErrorMessages,
     setup,
     setupStatus,
     viewResults,
@@ -56,8 +57,9 @@ export const AnalysisPageContent = () => {
     return (
       <AnalysisSetupContent
         availableIndices={availableIndices}
-        setup={setup}
         cleanupAndSetup={cleanupAndSetup}
+        errorMessages={lastSetupErrorMessages}
+        setup={setup}
         setupStatus={setupStatus}
         viewResults={viewResults}
       />
