@@ -105,9 +105,9 @@ export class AxisLabels {
 
       selection.selectAll('.tick text')
         .text(function (d) {
-          const par = d3.select(this.parentNode).node();
+          const parentNode = d3.select(this.parentNode).node();
           const currentTickCenter = scaleStartPad + (config.isHorizontal() ? self.axisScale.scale(d) : maxSize - self.axisScale.scale(d));
-          const currentTickSize = (config.isHorizontal() ? par.getBBox().width : par.getBBox().height) * padding;
+          const currentTickSize = (config.isHorizontal() ? parentNode.getBBox().width : parentNode.getBBox().height) * padding;
           const currentTickHalfSize = currentTickSize / 2;
           const currentTickStartEdge = currentTickCenter - currentTickHalfSize;
           const currentTickEndEdge = currentTickCenter + currentTickHalfSize;

@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }) {
       await inspector.expectTableData(expectedChartData);
     });
 
-    describe.skip('switch between Y axis scale types', () => {
+    describe('switch between Y axis scale types', () => {
       before(initBarChart);
       const axisId = 'ValueAxis-1';
 
