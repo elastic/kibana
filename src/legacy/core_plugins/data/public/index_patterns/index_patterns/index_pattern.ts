@@ -23,10 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { fieldFormats } from 'ui/registry/field_formats';
 // @ts-ignore
 import { expandShorthand } from 'ui/utils/mapping_setup';
-import { findObjectByTitle } from 'ui/saved_objects';
+
 import { NotificationsSetup, SavedObjectsClientContract } from 'src/core/public';
 import { SavedObjectNotFound, DuplicateField } from '../../../../../../plugins/kibana_utils/public';
-
+import { findIndexPatternByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../errors';
 import { Field, FieldList, FieldType, FieldListInterface } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
@@ -387,9 +387,8 @@ export class IndexPattern implements StaticIndexPattern {
       return response.id;
     };
 
-    const potentialDuplicateByTitle = await findObjectByTitle(
+    const potentialDuplicateByTitle = await findIndexPatternByTitle(
       this.savedObjectsClient,
-      type,
       this.title
     );
     // If there is potentially duplicate title, just create it
