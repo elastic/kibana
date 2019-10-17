@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EsQuerySortValue, SortDirection } from '../../../../../../ui/public/courier/types';
+import { EsQuerySortValue, SortDirection } from '../../../../../../../ui/public/courier/types';
 
 /**
  * Returns `EsQuerySort` which is used to sort records in the ES query
