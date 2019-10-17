@@ -31,17 +31,16 @@ export function createTaskStoreUpdateBuffer(store: TaskStore, logger: Logger): T
       store
         .bulkUpdate(pluck(tasks, 'task'))
         .then(updateResult => {
-          updateResult.forEach(updatedTask => {
+          updateResult.forEach(
             either(
-              updatedTask,
               task => {
                 taskById[task.id].onSuccess(task);
               },
               ({ task, error }) => {
                 taskById[task.id].onFailure({ task, error });
               }
-            );
-          });
+            )
+          );
         })
         .catch(ex => {
           logger.error(

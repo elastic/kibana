@@ -54,6 +54,29 @@ describe('TaskPool', () => {
     sinon.assert.notCalled(shouldNotRun);
   });
 
+  test('should log when marking a Task as running fails', async () => {
+    const logger = mockLogger();
+    const pool = new TaskPool({
+      maxWorkers: 2,
+      logger,
+    });
+
+    const taskFailedToMarkAsRunning = mockTask();
+    taskFailedToMarkAsRunning.markTaskAsRunning.mockImplementation(async () => {
+      throw new Error(`[Task] Mark Task as running has failed miserably`);
+    });
+
+    const result = await pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()]);
+
+    expect(logger.error.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "Failed to mark Task [object Object] as running: [Task] Mark Task as running has failed miserably",
+      ]
+    `);
+
+    expect(result).toBeTruthy();
+  });
+
   test('clears up capacity when a task completes', async () => {
     const pool = new TaskPool({
       maxWorkers: 1,
@@ -197,7 +220,7 @@ describe('TaskPool', () => {
     return {
       isExpired: false,
       cancel: async () => undefined,
-      markTaskAsRunning: async () => true,
+      markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),
     };
   }

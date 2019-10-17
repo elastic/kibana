@@ -51,13 +51,14 @@ export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T,
 }
 
 export function either<T, E, R>(
-  result: Result<T, E>,
   onOk: (value: T) => R,
   onErr: (value: E) => R
-): R {
-  if (isOk(result)) {
-    return onOk(result.value);
-  } else {
-    return onErr(result.error);
-  }
+): (result: Result<T, E>) => R {
+  return (result: Result<T, E>) => {
+    if (isOk(result)) {
+      return onOk(result.value);
+    } else {
+      return onErr(result.error);
+    }
+  };
 }

@@ -11,6 +11,8 @@
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 
+import { either, asErr, asOk, Ok, Err } from './lib/result_type';
+
 interface Opts {
   maxWorkers: number;
   logger: Logger;
@@ -80,24 +82,32 @@ export class TaskPool {
             .markTaskAsRunning()
             .then(
               (hasTaskBeenMarkAsRunning: boolean) =>
-                [task, hasTaskBeenMarkAsRunning] as [TaskRunner, boolean]
+                asOk([task, hasTaskBeenMarkAsRunning]) as Ok<[TaskRunner, boolean]>
             )
+            .catch((ex: Error) => asErr([task, ex]) as Err<[TaskRunner, Error]>)
         )
       );
 
-      taskRunResults.forEach(([task, hasTaskBeenMarkAsRunning]) => {
-        if (hasTaskBeenMarkAsRunning) {
-          this.running.add(task);
-          task
-            .run()
-            .catch(err => {
-              this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
-            })
-            .then(() => this.running.delete(task));
-        } else {
-          this.logger.warn(`Failed to mark Task ${task} as running`);
-        }
-      });
+      taskRunResults.forEach(
+        either(
+          ([task, hasTaskBeenMarkAsRunning]) => {
+            if (hasTaskBeenMarkAsRunning) {
+              this.running.add(task);
+              task
+                .run()
+                .catch(err => {
+                  this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
+                })
+                .then(() => this.running.delete(task));
+            } else {
+              this.logger.warn(`Failed to mark Task ${task} as running`);
+            }
+          },
+          ([task, ex]) => {
+            this.logger.error(`Failed to mark Task ${task} as running: ${ex.message}`);
+          }
+        )
+      );
     }
 
     if (leftOverTasks.length) {
