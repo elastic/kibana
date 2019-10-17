@@ -5,7 +5,7 @@
  */
 
 export interface CommitInfo {
-  updated: Date;
+  updated: string;
   message: string;
   committer: string;
   committerEmail?: string;

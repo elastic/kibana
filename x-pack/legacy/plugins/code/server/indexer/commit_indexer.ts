@@ -104,6 +104,7 @@ export class CommitIndexer extends AbstractIndexer {
       this.commits = (await this.gitOps.log(this.repoUri, HEAD, Number.MAX_SAFE_INTEGER)).map(c => {
         const [message, ...body] = c.message.split('\n');
         return {
+          repoUri: this.repoUri,
           author: {
             name: c.author,
             email: c.authorEmail,
