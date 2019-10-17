@@ -156,7 +156,7 @@ describe('Task Store Buffer', () => {
 
       return Promise.all([
         expect(buffer.update(task1)).resolves.toMatchObject(incrementAttempts(task1)),
-        expect(buffer.update(task2)).rejects.toMatchObject(errorAttempts(task2)),
+        expect(buffer.update(task2)).rejects.toMatchObject(errorAttempts(task2).error),
         expect(buffer.update(task3)).resolves.toMatchObject(incrementAttempts(task3)),
       ]).then(() => {
         expect(mockStore.bulkUpdate).toHaveBeenCalledTimes(1);

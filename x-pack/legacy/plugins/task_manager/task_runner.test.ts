@@ -10,6 +10,7 @@ import { minutesFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
+import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -421,6 +422,74 @@ describe('TaskManagerRunner', () => {
     expect(instance.retryAt.getTime()).toEqual(
       new Date(nextRetry.getTime() + timeoutMinutes * 60 * 1000).getTime()
     );
+  });
+
+  test('it returns false when markTaskAsRunning fails due to VERSION_CONFLICT_STATUS', async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(1, 3);
+    const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
+    const timeoutMinutes = 1;
+    const getRetryStub = sinon.stub().returns(nextRetry);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        interval: undefined,
+      },
+      definitions: {
+        bar: {
+          timeout: `${timeoutMinutes}m`,
+          getRetry: getRetryStub,
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    store.update = sinon
+      .stub()
+      .throws(
+        SavedObjectsErrorHelpers.decorateConflictError(new Error('repo error')).output.payload
+      );
+
+    expect(await runner.markTaskAsRunning()).toEqual(false);
+  });
+
+  test('it throw when markTaskAsRunning fails for unexpected reasons', async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(1, 3);
+    const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
+    const timeoutMinutes = 1;
+    const getRetryStub = sinon.stub().returns(nextRetry);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        interval: undefined,
+      },
+      definitions: {
+        bar: {
+          timeout: `${timeoutMinutes}m`,
+          getRetry: getRetryStub,
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    store.update = sinon
+      .stub()
+      .throws(SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id').output.payload);
+
+    return expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(`
+              Object {
+                "error": "Not Found",
+                "message": "Saved object [type/id] not found",
+                "statusCode": 404,
+              }
+            `);
   });
 
   test('uses getRetry (returning true) to set retryAt when defined', async () => {

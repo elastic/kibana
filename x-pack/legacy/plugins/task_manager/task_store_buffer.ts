@@ -18,7 +18,7 @@ export function createTaskStoreUpdateBuffer(store: TaskStore, logger: Logger): T
   const storeUpdateBuffer = new Subject<{
     task: ConcreteTaskInstance;
     onSuccess: (task: ConcreteTaskInstance) => void;
-    onFailure: (error: BulkUpdateTaskFailureResult) => void;
+    onFailure: (error: BulkUpdateTaskFailureResult['error']) => void;
   }>();
 
   storeUpdateBuffer
@@ -37,7 +37,7 @@ export function createTaskStoreUpdateBuffer(store: TaskStore, logger: Logger): T
                 taskById[task.id].onSuccess(task);
               },
               ({ task, error }) => {
-                taskById[task.id].onFailure({ task, error });
+                taskById[task.id].onFailure(error);
               }
             )
           );

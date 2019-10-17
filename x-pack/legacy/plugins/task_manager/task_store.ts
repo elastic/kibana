@@ -299,6 +299,7 @@ export class TaskStore {
 
     return docs;
   }
+
   /**
    * Updates the specified doc in the index, returning the doc
    * with its version up to date.
