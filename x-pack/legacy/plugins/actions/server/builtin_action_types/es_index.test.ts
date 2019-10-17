@@ -37,7 +37,7 @@ beforeEach(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionType.id).toEqual(ACTION_TYPE_ID);
-    expect(actionType.name).toEqual('index');
+    expect(actionType.name).toEqual('Index');
   });
 });
 

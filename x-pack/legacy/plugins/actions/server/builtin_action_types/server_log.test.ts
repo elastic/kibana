@@ -25,7 +25,7 @@ beforeAll(() => {
 describe('get()', () => {
   test('returns action type', () => {
     expect(actionType.id).toEqual(ACTION_TYPE_ID);
-    expect(actionType.name).toEqual('server-log');
+    expect(actionType.name).toEqual('Server Log');
   });
 });
 

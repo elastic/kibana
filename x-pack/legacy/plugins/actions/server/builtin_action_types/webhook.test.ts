@@ -31,7 +31,7 @@ beforeAll(() => {
 describe('actionType', () => {
   test('exposes the action as `webhook` on its Id and Name', () => {
     expect(actionType.id).toEqual('.webhook');
-    expect(actionType.name).toEqual('webhook');
+    expect(actionType.name).toEqual('Webhook');
   });
 });
 
