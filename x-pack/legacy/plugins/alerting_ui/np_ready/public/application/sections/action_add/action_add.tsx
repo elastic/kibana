@@ -53,6 +53,7 @@ const actionFieldsComponentMap = {
 
 interface Props {
   actionType: ActionType;
+  refreshList: () => void;
 }
 
 const actionReducer = (state: any, actionItem: any) => {
@@ -116,7 +117,7 @@ const actionReducer = (state: any, actionItem: any) => {
   }
 };
 
-export const ActionAdd = ({ actionType }: Props) => {
+export const ActionAdd = ({ actionType, refreshList }: Props) => {
   const {
     core: { http },
   } = useAppDependencies();
@@ -294,6 +295,7 @@ export const ActionAdd = ({ actionType }: Props) => {
                   return setServerError(savedAction.error);
                 }
                 setFlyoutVisibility(false);
+                refreshList();
               }}
             >
               <FormattedMessage

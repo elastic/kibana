@@ -258,16 +258,12 @@ export const ActionsList: React.FunctionComponent = () => {
 
   let flyout = null;
   if (actionType) {
-    flyout = <ActionAdd actionType={actionType} />;
+    flyout = <ActionAdd actionType={actionType} refreshList={loadActionsTable} />;
   }
 
   return (
     <section data-test-subj="actionsList">
-      <ContentWrapper
-        setFlyoutVisibility={setFlyoutVisibility}
-        flyoutVisible={flyoutVisible}
-        createAction={createAction}
-      >
+      <ContentWrapper setFlyoutVisibility={setFlyoutVisibility} flyoutVisible={flyoutVisible}>
         <EuiSpacer size="m" />
         {content}
         {flyout}
@@ -279,12 +275,10 @@ export const ActionsList: React.FunctionComponent = () => {
 export const ContentWrapper = ({
   flyoutVisible,
   setFlyoutVisibility,
-  createAction,
   children,
 }: {
   flyoutVisible: boolean;
   setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-  createAction: (actionType: ActionType) => void;
   children: React.ReactNode;
 }) => {
   return (
