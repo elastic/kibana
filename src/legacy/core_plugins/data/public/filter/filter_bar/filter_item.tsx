@@ -173,7 +173,7 @@ class FilterItemUI extends Component<Props, State> {
         id: 1,
         width: 420,
         content: (
-          <div>
+          <div style={{ minWidth: 400 }}>
             <FilterEditor
               filter={filter}
               indexPatterns={this.props.indexPatterns}

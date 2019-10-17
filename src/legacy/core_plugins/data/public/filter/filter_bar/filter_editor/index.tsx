@@ -479,11 +479,13 @@ class FilterEditorUI extends Component<Props, State> {
         : selectedSavedQuery[0];
     this.setState(state => ({ ...state, selectedSavedQuery, params }));
   };
-
+  public onChange = () => {};
   private renderSavedQueryEditor() {
     return (
       <SearchBarEditor
-        currentSavedQuery={this.state.selectedSavedQuery}
+        currentSavedQuery={
+          this.state.selectedSavedQuery ? this.state.selectedSavedQuery[0] : undefined
+        }
         uiSettings={this.props.uiSettings}
         indexPatterns={
           this.state.selectedIndexPattern
@@ -493,6 +495,7 @@ class FilterEditorUI extends Component<Props, State> {
         showSaveQuery={this.props.showSaveQuery!}
         timeHistory={this.props.timeHistory!}
         onSelectionChange={this.onSavedQuerySelected}
+        onChange={this.onChange}
       />
     );
   }
@@ -628,16 +631,6 @@ class FilterEditorUI extends Component<Props, State> {
   private onParamsChange = (params: any) => {
     this.setState({ params });
   };
-
-  // private onSavedQueryChange = (selectedSavedQuery: SavedQuery[], savedQueries: SavedQuery[]) => {
-  //   set the selected saved query to the params?
-  //   const params =
-  //     get(this.state.selectedSavedQuery && this.state.selectedSavedQuery[0], 'id') ===
-  //     get(selectedSavedQuery[0], 'id')
-  //       ? this.state.params
-  //       : selectedSavedQuery[0];
-  //   this.setState(state => ({ ...state, selectedSavedQuery, params }));
-  // };
 
   private onQueryDslChange = (queryDsl: string) => {
     this.setState({ queryDsl });
