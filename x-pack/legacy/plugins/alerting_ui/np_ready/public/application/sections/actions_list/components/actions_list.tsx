@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
+// @ts-ignore: EuiSearchBar not defined in TypeScript yet
 import { EuiPageContent, EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
