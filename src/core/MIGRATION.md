@@ -423,7 +423,7 @@ export default (kibana) => {
         }
       }
 
-      // HTTP functionality from core
+      // HTTP functionality from legacy
       server.route({
         path: '/api/demo_plugin/search',
         method: 'POST',
@@ -450,8 +450,13 @@ We now move this logic into a new plugin definition, which is based off of the c
 // server/plugin.ts
 import { ElasticsearchPlugin } from '../elasticsearch';
 
-interface CoreSetup {
+// note: We use a name unique to our plugin for this type since our shimmed interface is not 100%
+// compatible with NP's CoreSetup.
+interface DemoPluginCoreSetup {
   elasticsearch: ElasticsearchPlugin // note: Elasticsearch is in Core in NP, rather than a plugin
+  http: {
+    route: Legacy.Server['route']    // note: NP uses `http.createRouter()`
+  }
 }
 
 interface FooSetup {
@@ -465,7 +470,7 @@ interface PluginsSetup {
 export type DemoPluginSetup = ReturnType<Plugin['setup']>;
 
 export class Plugin {
-  public setup(core: CoreSetup, plugins: PluginsSetup) {
+  public setup(core: DemoPluginCoreSetup, plugins: PluginsSetup) {
     const serverFacade: ServerFacade = {
       plugins: {
         // We're still using the legacy Elasticsearch here, but we're now accessing it
@@ -475,8 +480,9 @@ export class Plugin {
       }
     }
 
-    // HTTP functionality from legacy platform, accessed in the NP convention, just like Elasticsearch above.
-    core.http.route({ // note: we know routes will be created on core.http
+    // HTTP functionality from legacy platform, accessed in a way that's compatible with
+    // NP conventions even if not 100% the same
+    core.http.route({
       path: '/api/demo_plugin/search',
       method: 'POST',
       async handler(request) {

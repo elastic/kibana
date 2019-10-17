@@ -150,15 +150,18 @@ This interface has a different API with slightly different behaviors.
   not have native support for converting Boom exceptions into HTTP responses.
 
 ### Route Registration
+Because of the incompatibility between the legacy and New Platform HTTP Route
+API's it might be helpful to break up your migration work into several stages.
 
+#### 1. Legacy route registration
 ```ts
-// Legacy route registration
+// legacy/plugins/myplugin/index.ts
 import Joi from 'joi';
 
 new kibana.Plugin({
   init(server) {
     server.route({
-      path: '/api/my-plugin/my-route',
+      path: '/api/demoplugin/search',
       method: 'POST',
       options: {
         validate: {
@@ -173,9 +176,89 @@ new kibana.Plugin({
     });
   }
 });
+```
 
+#### 2. New Platform shim using legacy router
+Create a New Platform shim and inject the legacy `server.route` into your
+plugin's setup function. This shim isn't exactly the same as the New
+Platform's API's but it allows us to leave all of our route registration
+untouched. 
 
-// New Platform equivalent
+```ts
+// legacy/plugins/demoplugin/index.ts
+import { Plugin } from './server/plugin';
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      // core shim
+      const coreSetup = {
+        http: {
+          route: server.route
+        },
+      };
+
+      new Plugin().setup(coreSetup);
+    }
+  }
+}
+```
+```ts
+// legacy/plugins/demoplugin/server/plugin.ts
+export interface DemoPluginCoreSetup {
+  http: {
+    route: Legacy.Server['route'];
+  };
+};
+export class Plugin {
+  public setup(core: DemoPluginCoreSetup, plugins: DemoPluginsSetup) {
+    // HTTP functionality from legacy platform, accessed in a way that's
+    // compatible with NP conventions even if not 100% the same
+    core.http.route({
+      path: '/api/demoplugin/search',
+      method: 'POST',
+      options: {
+        validate: {
+          payload: Joi.object({
+            field1: Joi.string().required(),
+          }),
+        }
+      },
+      async handler(req) {
+        return { message: `Received field1: ${req.payload.field1}` };
+      },
+    });
+  }
+}
+```
+
+#### 3. New Platform shim using New Platform router
+We now switch our shim to use the real New Platform HTTP API's in our
+`coreSetup` instead of relying on the legacy `server.route`. Since our plugin
+is now using the New Platform API's we are guaranteed that our HTTP route
+handling is 100% compatible with the New Platform. As a result, we will also
+have adapt our route registration accordingly.
+```ts
+// legacy/plugins/demoplugin/index.ts
+import { Plugin } from './server/plugin';
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      // core shim
+      const coreSetup = {
+        http: server.newPlatform.setup.core.http,
+      };
+
+      new Plugin().setup(coreSetup);
+    }
+  }
+}
+```
+```ts
+// legacy/plugins/demoplugin/server/plugin.ts
 import { schema } from '@kbn/config-schema';
 
 class Plugin {
@@ -183,7 +266,39 @@ class Plugin {
     const router = core.http.createRouter();
     router.post(
       {
-        path: '/api/my-plugin/my-route',
+        path: '/api/demoplugin/search',
+        validate: {
+          body: schema.object({
+            field1: schema.string(),
+          }),
+        }
+      },
+      (context, req, res) => {
+        return res.ok({
+          body: {
+            message: `Received field1: ${req.body.field1}`
+          }
+        });
+      }
+    )
+  }
+}
+```
+
+#### 4. New Platform plugin
+As the final step we delete the shim and move all our code into a New Platform
+plugin. Since we were already consuming the New Platform API's no code changes
+are necessary inside `plugin.ts`.
+```ts
+// plugins/demoplugin/server/plugin.ts
+import { schema } from '@kbn/config-schema';
+
+class Plugin {
+  public setup(core) {
+    const router = core.http.createRouter();
+    router.post(
+      {
+        path: '/api/demoplugin/search',
         validate: {
           body: schema.object({
             field1: schema.string(),
