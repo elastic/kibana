@@ -18,11 +18,12 @@ export default function ({ getService, getPageObjects }) {
 
   describe('hybrid index pattern', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
-    //we add the Date.now() to avoid name collision.
-    const rollupJobName = `hybrid-index-pattern-test-rollup-job-` + Date.now();
+    //we add the Date.now() to avoid name collision if you run the tests locally back to back.
+    const rollupJobName = `hybrid-index-pattern-test-rollup-job-${Date.now()}`;
     const rollupTargetIndexName = `rollup-target-data`;
     const regularIndexPrefix = `regular-index`;
     const rollupSourceIndexPrefix = `rollup-source-data`;
+    const rollupIndexPatternName = `${regularIndexPrefix}*,${rollupTargetIndexName}`;
     const now = new Date();
     const pastDates = [
       datemath.parse('now-1d', { forceNow: now }),
@@ -72,23 +73,18 @@ export default function ({ getService, getPageObjects }) {
         await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
       });
 
-      //Add data for today as live data.
-      const futureDates = [
-        datemath.parse('now', { forceNow: now })
-      ];
-
       //Index live data to be used in the test.
-      await futureDates.map(async (day) => {
-        await es.index(mockIndices(day, regularIndexPrefix));
-      });
+      await es.index(mockIndices(datemath.parse('now', { forceNow: now }), regularIndexPrefix));
 
       await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.createIndexPattern(`${regularIndexPrefix}*,${rollupTargetIndexName}`, '@timestamp', false);
+      await PageObjects.settings.createIndexPattern(rollupIndexPatternName, '@timestamp', false);
 
 
       await PageObjects.settings.clickKibanaIndexPatterns();
-      const indexPatternList = await PageObjects.settings.getIndexPatternList();
-      expect(indexPatternList.length).to.be(1);
+      const indexPattern = (await PageObjects.settings.getIndexPatternList()).pop();
+      const indexPatternText = await indexPattern.getVisibleText();
+      expect(indexPatternText).to.contain(rollupIndexPatternName);
+      expect(indexPatternText).to.contain('Rollup');
     });
 
     after(async () => {
@@ -97,9 +93,10 @@ export default function ({ getService, getPageObjects }) {
         path: `/_rollup/job/${rollupJobName}`,
         method: 'DELETE',
       });
-      await es.indices.delete({ index: 'rollup*' });
-      await es.indices.delete({ index: 'regular-index*' });
-      await es.indices.delete({ index: 'hybrid*' });
+
+      await es.indices.delete({ index: rollupTargetIndexName });
+      await es.indices.delete({ index: `${regularIndexPrefix}*` });
+      await es.indices.delete({ index: `${rollupSourceIndexPrefix}*` });
       await esArchiver.load('empty_kibana');
     });
   });

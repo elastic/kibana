@@ -59,8 +59,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       //Delete all data indices that were created.
-      await es.indices.delete({ index: 'rollup*' });
-      await es.indices.delete({ index: `${rollupSourceIndexPattern}` });
+      await es.indices.delete({ index: targetIndexName });
+      await es.indices.delete({ index: rollupSourceIndexPattern });
       await esArchiver.load('empty_kibana');
     });
   });
