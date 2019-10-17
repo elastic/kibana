@@ -17,11 +17,11 @@ import {
   MonitorPageTitle,
   Ping,
   Snapshot,
-  HistogramDataPoint,
   GetSnapshotHistogramQueryArgs,
 } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
+import { GetHistogramResult } from '../../../common/domain_types';
 
 export type UMSnapshotResolver = UMResolver<
   Snapshot | Promise<Snapshot>,
@@ -61,7 +61,7 @@ export type UMGetMontiorPageTitleResolver = UMResolver<
 >;
 
 export type UMGetSnapshotHistogram = UMResolver<
-  HistogramDataPoint[] | Promise<HistogramDataPoint[]>,
+  GetHistogramResult | Promise<GetHistogramResult>,
   any,
   GetSnapshotHistogramQueryArgs,
   UMContext
@@ -101,7 +101,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       resolver,
       { dateRangeStart, dateRangeEnd, filters, monitorId, statusFilter },
       { req }
-    ): Promise<HistogramDataPoint[]> {
+    ): Promise<GetHistogramResult> {
       return await libs.pings.getPingHistogram(
         req,
         dateRangeStart,

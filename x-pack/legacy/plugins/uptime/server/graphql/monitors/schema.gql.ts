@@ -120,6 +120,11 @@ export const monitorsSchema = gql`
     monitors: [LatestMonitor!]
   }
 
+  type GetHistogramResult {
+    histogram: [HistogramDataPoint]!
+    interval: UnsignedInteger!
+  }
+
   type MonitorPageTitle {
     id: String!
     url: String
@@ -147,7 +152,7 @@ export const monitorsSchema = gql`
       filters: String
       statusFilter: String
       monitorId: String
-    ): [HistogramDataPoint!]!
+    ): GetHistogramResult
 
     getMonitorChartsData(
       monitorId: String!
