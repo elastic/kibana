@@ -14,9 +14,9 @@ import {
   METRIC_AGG_TYPE,
 } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
-import { aggregations } from './aggregations';
+import { aggregations, mlOnlyAggregations } from './aggregations';
 
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,
@@ -118,7 +118,7 @@ class FieldsService {
       }
     }
 
-    const aggs = cloneDeep(aggregations);
+    const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
     const fields: Field[] = await this.createFields();
 
     return await combineFieldsAndAggs(fields, aggs, rollupFields);
@@ -140,11 +140,20 @@ async function combineFieldsAndAggs(
 
   aggs.forEach(a => {
     if (a.type === METRIC_AGG_TYPE) {
-      switch (a.dslName) {
-        case ES_AGGREGATION.COUNT:
-          // count doesn't take any fields, so break here
+      switch (a.id) {
+        case ML_JOB_AGGREGATION.COUNT:
+        case ML_JOB_AGGREGATION.HIGH_COUNT:
+        case ML_JOB_AGGREGATION.LOW_COUNT:
+        case ML_JOB_AGGREGATION.NON_ZERO_COUNT:
+        case ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT:
+        case ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT:
+        case ML_JOB_AGGREGATION.RARE:
+        case ML_JOB_AGGREGATION.FREQ_RARE:
+        case ML_JOB_AGGREGATION.TIME_OF_DAY:
+        case ML_JOB_AGGREGATION.TIME_OF_WEEK:
+          // functions which do not take any fields, so break here
           break;
-        case ES_AGGREGATION.CARDINALITY:
+        case ML_JOB_AGGREGATION.DISTINCT_COUNT:
           // distinct count (i.e. cardinality) takes keywords, ips
           // as well as numerical fields
           keywordFields.forEach(f => {
@@ -165,7 +174,7 @@ async function combineFieldsAndAggs(
   });
 
   return {
-    aggs: filterAggs(aggs),
+    aggs,
     fields: filterFields(fields),
   };
 }
@@ -175,11 +184,6 @@ function filterFields(fields: Field[]): Field[] {
   return fields.filter(
     f => f.aggs && (f.aggs.length > 0 || (f.aggs.length === 0 && f.type === ES_FIELD_TYPES.DATE))
   );
-}
-
-// remove aggs that have no fields associated to them
-function filterAggs(aggs: Aggregation[]): Aggregation[] {
-  return aggs.filter(a => a.fields && a.fields.length > 0);
 }
 
 // returns a mix function that is used to cross-reference aggs and fields.

@@ -17,7 +17,7 @@ import { getChartSettings, defaultChartSettings } from '../../../charts/common/s
 import { MetricSelector } from './metric_selector';
 import { SplitFieldSelector } from '../split_field';
 import { ChartGrid } from './chart_grid';
-import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 interface Props {
   setIsValid: (na: boolean) => void;

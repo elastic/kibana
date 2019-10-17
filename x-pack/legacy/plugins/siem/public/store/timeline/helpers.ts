@@ -121,7 +121,6 @@ export const addTimelineToStore = ({
   ...timelineById,
   [id]: {
     ...timeline,
-    show: true,
     isLoading: timelineById[id].isLoading,
   },
 });

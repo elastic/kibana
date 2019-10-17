@@ -57,18 +57,16 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
           id="xpack.ml.validateJob.modal.linkToJobTipsText"
           values={
             Object {
-              "mlJobTipsLink": <EuiLink
-                color="primary"
+              "mlJobTipsLink": <ForwardRef
                 href="https://www.elastic.co/guide/en/kibana/jest-metadata-mock-branch/job-tips.html"
                 target="_blank"
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Machine Learning Job Tips"
                   id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
                   values={Object {}}
                 />
-              </EuiLink>,
+              </ForwardRef>,
             }
           }
         />
@@ -145,18 +143,16 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
           id="xpack.ml.validateJob.modal.linkToJobTipsText"
           values={
             Object {
-              "mlJobTipsLink": <EuiLink
-                color="primary"
+              "mlJobTipsLink": <ForwardRef
                 href="https://www.elastic.co/guide/en/kibana/jest-metadata-mock-branch/job-tips.html"
                 target="_blank"
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Machine Learning Job Tips"
                   id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
                   values={Object {}}
                 />
-              </EuiLink>,
+              </ForwardRef>,
             }
           }
         />

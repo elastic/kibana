@@ -20,4 +20,5 @@
 export {
   getSortedObjectsForExport,
   SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
 } from './get_sorted_objects_for_export';
