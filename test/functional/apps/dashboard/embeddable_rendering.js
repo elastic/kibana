@@ -105,6 +105,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
+    after(async () => {
       // Get rid of the timestamp added in this test, as well any global or app state.
       const currentUrl = await browser.getCurrentUrl();
       const newUrl = currentUrl.replace(/\?.*$/, '');

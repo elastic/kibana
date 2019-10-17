@@ -35,6 +35,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
+    after(async () => {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });

@@ -35,6 +35,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
     });
 
+    after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
     it('causes panels to reload when refresh is clicked', async () => {
       await esArchiver.unload('dashboard/current/data');
 

@@ -40,6 +40,13 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
+    after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
     after(async function () {
       await browser.setWindowSize(1300, 900);
     });

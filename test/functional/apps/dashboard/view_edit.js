@@ -35,6 +35,13 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
     it('create new dashboard opens in edit mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();

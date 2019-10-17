@@ -34,6 +34,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
 
+    after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
     it('hides the chrome', async () => {
       const isChromeVisible = await PageObjects.common.isChromeVisible();
       expect(isChromeVisible).to.be(true);

@@ -34,6 +34,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
 
+    after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
     it('option not available in edit mode', async () => {
       await PageObjects.dashboard.switchToEditMode();
       const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();

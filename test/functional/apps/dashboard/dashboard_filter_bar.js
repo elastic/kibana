@@ -37,6 +37,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
+    after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
     describe('Add a filter bar', function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();

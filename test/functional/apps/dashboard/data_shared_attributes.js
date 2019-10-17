@@ -37,6 +37,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.waitForRenderComplete();
     });
 
+    after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
     it('should have data-shared-items-count set to the number of embeddables on the dashboard', async () => {
       await retry.try(async () => {
         const sharedItemsCount = await PageObjects.dashboard.getSharedItemsCount();

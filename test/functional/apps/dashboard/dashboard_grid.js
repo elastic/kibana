@@ -27,9 +27,20 @@ export default function ({ getService, getPageObjects }) {
   describe('dashboard grid', function () {
 
     before(async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.initTests({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data',
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.dashboard.switchToEditMode();
+    });
+
+    after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
     });
 
     describe('move panel', () => {

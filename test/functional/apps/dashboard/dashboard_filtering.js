@@ -45,6 +45,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
+    after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
     describe('adding a filter that excludes all data', () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();

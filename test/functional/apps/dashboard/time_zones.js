@@ -40,6 +40,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
+    after(async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSettings();
       await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'UTC');

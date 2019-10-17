@@ -37,6 +37,13 @@ export default function ({ getService, getPageObjects }) {
       originalTitles = await PageObjects.dashboard.getPanelTitles();
     });
 
+    after(async () => {
+      await PageObjects.dashboard.cleanAfterTest({
+        kibanaIndex: 'dashboard/current/kibana',
+        dataIndex: 'dashboard/current/data'
+      });
+    });
+
     it('should be able to hide all panel titles', async () => {
       await PageObjects.dashboard.checkHideTitle();
       await retry.try(async () => {
