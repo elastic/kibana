@@ -20,60 +20,44 @@
 import React, { FunctionComponent, useState } from 'react';
 import { SavedQuery } from '@kbn/es-query/src/filters/lib/saved_query_filter';
 import { UiSettingsClientContract } from 'kibana/public';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
 import { TimeHistoryContract } from 'ui/timefilter';
 import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/common/types';
-import { EuiButton } from '@elastic/eui';
-import { IndexPattern, Query, SavedQueryAttributes } from '../../../../../data/public';
+import { IndexPattern, Query } from '../../..';
 import { SearchBar } from '../../../search/search_bar/components/search_bar';
-import { SavedQueryService } from '../../../search/search_bar/lib/saved_query_service';
-/*
-TODO: figure out how to import and use the Stateful SearchBar. So far, the following cause webpack errors:
-// import { SearchBarProps } from '../../../../../../core_plugins/data/public';
-// import { start as data } from '../../../../../data/public/legacy';
-// import { start as data } from '../../../legacy';
-// const { SearchBar } = data.ui;
 
-Take a look at the graph app implementation: x-pack/legacy/plugins/graph/public/components/app.tsx
-*/
 interface Props {
   uiSettings: UiSettingsClientContract;
   currentSavedQuery?: SavedQuery[];
   indexPatterns: IndexPattern[];
   showSaveQuery: boolean;
   timeHistory?: TimeHistoryContract; // I need some other way of accessing timeHistory rather than passing it down all the way from the search bar
-  onChange: (selectedSavedQuery: SavedQuery[]) => void;
+  onSelectionChange: (selectedSavedQuery: SavedQuery[]) => void;
+  onChange: (item: any) => void;
 }
-export const SavedQueryEditor: FunctionComponent<Props> = ({
+export const SearchBarEditor: FunctionComponent<Props> = ({
   uiSettings,
   currentSavedQuery,
   indexPatterns,
   showSaveQuery,
   timeHistory,
+  onSelectionChange,
   onChange,
 }) => {
-  // const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [currentfilters, setFilters] = useState([] as Filter[]); // change this if it ends up working to use the filters from the saved query passed in (the filter params)
-  // const closePopover = () => setIsPopoverOpen(false);
-  // const openPopover = () => setIsPopoverOpen(true);
   const onClearSavedQuery = () => {
-    console.log('saved query cleared');
+    // console.log('saved query cleared');
   };
   const onQueryChange = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
-    console.log('query changed with queryAndDateRange:', queryAndDateRange);
+    // console.log('query changed with queryAndDateRange:', queryAndDateRange);
     return queryAndDateRange;
   };
   const onFiltersUpdated = (filters: Filter[]) => {
-    // I'm not getting filters on loading a saved query
-    console.log('filtersUpdated, filters?', filters);
     setFilters(filters);
   };
-  // WIP
+
   const updateSavedQuery = (item: SavedQuery) => {
-    console.log('items in updateSavedQuery:', item);
-    const newTimeFilter = { to: '', from: '' };
+    // console.log('items in updateSavedQuery:', item);
     const QBDQ = {
       filters: item.attributes.filters ? item.attributes.filters : undefined,
       query: item.attributes.query,
@@ -87,30 +71,32 @@ export const SavedQueryEditor: FunctionComponent<Props> = ({
     onQueryChange({ dateRange: QBDQ.dateRange, query: QBDQ.query });
   };
   return (
-    <SearchBar
-      indexPatterns={indexPatterns}
-      showFilterBar={true}
-      filters={currentfilters}
-      onFiltersUpdated={onFiltersUpdated}
-      showQueryInput={true}
-      query={
-        currentSavedQuery && currentSavedQuery.length > 0
-          ? {
-              language: currentSavedQuery[0].attributes.query.language,
-              query: currentSavedQuery[0].attributes.query.query,
-            }
-          : { language: uiSettings.get('search:queryLanguage'), query: '' }
-      }
-      onQuerySubmit={onQueryChange}
-      showSaveQuery={showSaveQuery}
-      savedQuery={
-        currentSavedQuery && currentSavedQuery.length > 0 ? currentSavedQuery[0] : undefined
-      }
-      onClearSavedQuery={onClearSavedQuery}
-      onSavedQueryUpdated={updateSavedQuery}
-      showDatePicker={true}
-      timeHistory={timeHistory!}
-      customSubmitButton={<></>}
-    />
+    <div className="savedQueryFilterEditor">
+      <SearchBar
+        indexPatterns={indexPatterns}
+        showFilterBar={true}
+        filters={currentfilters}
+        onFiltersUpdated={onFiltersUpdated}
+        showQueryInput={true}
+        query={
+          currentSavedQuery && currentSavedQuery.length > 0
+            ? {
+                language: currentSavedQuery[0].attributes.query.language,
+                query: currentSavedQuery[0].attributes.query.query,
+              }
+            : { language: uiSettings.get('search:queryLanguage'), query: '' }
+        }
+        onQuerySubmit={onQueryChange}
+        showSaveQuery={showSaveQuery}
+        savedQuery={
+          currentSavedQuery && currentSavedQuery.length > 0 ? currentSavedQuery[0] : undefined
+        }
+        onClearSavedQuery={onClearSavedQuery}
+        onSavedQueryUpdated={updateSavedQuery}
+        showDatePicker={true}
+        timeHistory={timeHistory!}
+        customSubmitButton={<></>}
+      />
+    </div>
   );
 };

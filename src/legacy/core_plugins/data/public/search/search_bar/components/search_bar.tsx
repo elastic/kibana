@@ -82,6 +82,8 @@ export interface SearchBarOwnProps {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+
+  onQueryChange?: (payload: { dateRange: TimeRange; query?: Query }) => void;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -300,6 +302,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       dateRangeFrom: queryAndDateRange.dateRange.from,
       dateRangeTo: queryAndDateRange.dateRange.to,
     });
+    if (this.props.onQueryChange) {
+      this.props.onQueryChange(queryAndDateRange);
+    }
   };
 
   public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
