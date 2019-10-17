@@ -11,6 +11,7 @@ import {
   EuiFlyoutFooter,
   EuiTitle,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCode,
@@ -148,14 +149,14 @@ export const EditField = React.memo(({ field }: Props) => {
           </EuiFlyoutBody>
 
           <EuiFlyoutFooter>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiButton onClick={getSubmitForm(updateField)} type="submit">
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={getSubmitForm(updateField)} type="submit">
                   Update
                 </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButton onClick={cancel}>Cancel</EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
