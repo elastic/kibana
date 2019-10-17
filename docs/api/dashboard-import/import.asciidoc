@@ -35,7 +35,7 @@ Use the complete response body from the <<dashboard-api-export, Export dashboard
 ==== Response code
 
 `200`::
-  Indicates a successful call, even if there are errors importing individual saved objects. If there ar errors, the error information is returned in the response body on an object-by-object basis.
+  Indicates a successful call, even if there are errors importing individual saved objects. If there are errors, the error information is returned in the response body on an object-by-object basis.
 
 [[dashboard-api-import-example]]
 ==== Example
