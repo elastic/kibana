@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { pick } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
@@ -37,6 +38,17 @@ interface StartDeps {
   targetDomElement: HTMLElement;
 }
 
+const castToStartContract = (api: ToastsApi) =>
+  pick(api, [
+    'get$',
+    'add',
+    'remove',
+    'addSuccess',
+    'addWarning',
+    'addDanger',
+    'addError',
+  ]) as ToastsStart;
+
 /**
  * {@link IToasts}
  * @public
@@ -55,7 +67,8 @@ export class ToastsService {
 
   public setup({ uiSettings }: SetupDeps) {
     this.api = new ToastsApi({ uiSettings });
-    return this.api!;
+
+    return this.api;
   }
 
   public start({ i18n, overlays, targetDomElement }: StartDeps) {
@@ -72,7 +85,7 @@ export class ToastsService {
       targetDomElement
     );
 
-    return this.api!;
+    return castToStartContract(this.api!);
   }
 
   public stop() {
