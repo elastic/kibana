@@ -44,15 +44,15 @@ export const ipRangeBucketAgg = new BucketAggType({
   name: BUCKET_TYPES.IP_RANGE,
   title: ipRangeTitle,
   createFilter: createFilterIpRange,
-  getKey: function (bucket, key, agg): IpRangeKey {
+  getKey(bucket, key, agg): IpRangeKey {
     if (agg.params.ipRangeType === 'mask') {
       return { type: 'mask', mask: key };
     }
     return { type: 'range', from: bucket.from, to: bucket.to };
   },
-  getFormat: function (agg) {
+  getFormat(agg) {
     const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('ip'));
-    const IpRangeFormat = FieldFormat.from(function (range: IpRangeKey) {
+    const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
       return ipRange.toString(range, formatter);
     });
     return new IpRangeFormat();

@@ -46,12 +46,12 @@ export const dateRangeBucketAgg = new BucketAggType({
   name: BUCKET_TYPES.DATE_RANGE,
   title: dateRangeTitle,
   createFilter: createFilterDateRange,
-  getKey: function ({ from, to }): DateRangeKey {
+  getKey({ from, to }): DateRangeKey {
     return { from, to };
   },
-  getFormat: function (agg) {
+  getFormat(agg) {
     const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
-    const DateRangeFormat = FieldFormat.from(function (range: DateRangeKey) {
+    const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
       return dateRange.toString(range, formatter);
     });
     return new DateRangeFormat();
