@@ -145,14 +145,20 @@ export const ActionsList: React.FunctionComponent = () => {
       ),
       actions: [
         {
+          enabled: () => canDelete,
           name: i18n.translate(
             'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions.deleteActionName',
             { defaultMessage: 'Delete' }
           ),
-          description: i18n.translate(
-            'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions.deleteActionDescription',
-            { defaultMessage: 'Delete this action' }
-          ),
+          description: canDelete
+            ? i18n.translate(
+                'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions.deleteActionDescription',
+                { defaultMessage: 'Delete this action' }
+              )
+            : i18n.translate(
+                'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions.deleteActionDisabledDescription',
+                { defaultMessage: 'Unable to delete actions' }
+              ),
           type: 'icon',
           icon: 'trash',
           onClick: (item: Data) => deleteItems([item]),
@@ -198,9 +204,10 @@ export const ActionsList: React.FunctionComponent = () => {
               title={
                 canDelete
                   ? undefined
-                  : i18n.translate('xpack.alertingUI.sections.actionsList.buttons.deleteTitle', {
-                      defaultMessage: 'Unable to delete saved objects',
-                    })
+                  : i18n.translate(
+                      'xpack.alertingUI.sections.actionsList.buttons.deleteDisabledTitle',
+                      { defaultMessage: 'Unable to delete actions' }
+                    )
               }
             >
               <FormattedMessage
