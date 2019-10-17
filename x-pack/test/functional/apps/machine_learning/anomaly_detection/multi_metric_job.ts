@@ -221,6 +221,12 @@ export default function({ getService }: FtrProviderContext) {
       );
     });
 
+    it('job creation has detector results', async () => {
+      for (let i = 0; i < aggAndFieldIdentifiers.length; i++) {
+        await ml.api.assertDetectorResultsExist(jobId, i);
+      }
+    });
+
     it('job cloning clicks the clone action and loads the multi metric wizard', async () => {
       await ml.jobTable.clickCloneJobAction(jobId);
       await ml.jobTypeSelection.assertMultiMetricJobWizardOpen();
@@ -350,6 +356,12 @@ export default function({ getService }: FtrProviderContext) {
         getExpectedCounts(jobIdClone),
         getExpectedModelSizeStats(jobIdClone)
       );
+    });
+
+    it('job cloning has detector results', async () => {
+      for (let i = 0; i < aggAndFieldIdentifiers.length; i++) {
+        await ml.api.assertDetectorResultsExist(jobId, i);
+      }
     });
   });
 }

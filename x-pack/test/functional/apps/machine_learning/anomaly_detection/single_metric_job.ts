@@ -202,6 +202,10 @@ export default function({ getService }: FtrProviderContext) {
       );
     });
 
+    it('job creation has detector results', async () => {
+      await ml.api.assertDetectorResultsExist(jobId, 0);
+    });
+
     it('job cloning clicks the clone action and loads the single metric wizard', async () => {
       await ml.jobTable.clickCloneJobAction(jobId);
       await ml.jobTypeSelection.assertSingleMetricJobWizardOpen();
@@ -317,6 +321,10 @@ export default function({ getService }: FtrProviderContext) {
         getExpectedCounts(jobIdClone),
         getExpectedModelSizeStats(jobIdClone)
       );
+    });
+
+    it('job cloning has detector results', async () => {
+      await ml.api.assertDetectorResultsExist(jobId, 0);
     });
 
     it('job deletion has results for the job before deletion', async () => {

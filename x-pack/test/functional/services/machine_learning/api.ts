@@ -68,6 +68,54 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async hasDetectorResults(jobId: string, detectorIndex: number): Promise<boolean> {
+      const response = await es.search({
+        index: '.ml-anomalies-*',
+        body: {
+          size: 1,
+          query: {
+            bool: {
+              must: [
+                {
+                  match: {
+                    job_id: jobId,
+                  },
+                },
+                {
+                  match: {
+                    result_type: 'record',
+                  },
+                },
+                {
+                  match: {
+                    detector_index: detectorIndex,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      return response.hits.hits.length > 0;
+    },
+
+    async assertDetectorResultsExist(jobId: string, detectorIndex: number) {
+      await retry.waitForWithTimeout(
+        `results for detector ${detectorIndex} on job ${jobId} to exist`,
+        30 * 1000,
+        async () => {
+          if ((await this.hasDetectorResults(jobId, detectorIndex)) === true) {
+            return true;
+          } else {
+            throw new Error(
+              `expected results for detector ${detectorIndex} on job '${jobId}' to exist`
+            );
+          }
+        }
+      );
+    },
+
     async deleteIndices(indices: string) {
       log.debug(`Deleting indices: '${indices}'...`);
       const deleteResponse = await es.indices.delete({
