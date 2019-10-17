@@ -17,20 +17,5 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { BaseParamType } from '../../param_types/base';
-import { OptionedParamType } from '../../param_types/optioned';
-
-describe('Optioned', function () {
-
-  describe('constructor', function () {
-    it('it is an instance of BaseParamType', function () {
-      const aggParam = new OptionedParamType({
-        name: 'some_param',
-        type: 'optioned'
-      });
-
-      expect(aggParam).to.be.a(BaseParamType);
-    });
-  });
-});
+export { FieldMappingSpec, MappingObject } from './types';
+export { expandShorthand } from './mapping_setup';

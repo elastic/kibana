@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isValidJson } from '../utils';
+import { isValidJson } from './utils';
 
 jest.mock('ui/new_platform');
 
@@ -29,23 +29,23 @@ const input = {
 describe('AggType utils', () => {
   describe('isValidJson', () => {
     it('should return true when empty string', () => {
-      expect(isValidJson('')).toBe(true);
+      expect(isValidJson('')).toBeTruthy();
     });
 
     it('should return true when undefine', () => {
-      expect(isValidJson(undefined as any)).toBe(true);
+      expect(isValidJson(undefined as any)).toBeTruthy();
     });
 
     it('should return false when invalid string', () => {
-      expect(isValidJson(input.invalid)).toBe(false);
+      expect(isValidJson(input.invalid)).toBeFalsy();
     });
 
     it('should return true when valid string', () => {
-      expect(isValidJson(input.valid)).toBe(true);
+      expect(isValidJson(input.valid)).toBeTruthy();
     });
 
     it('should return false if a number', () => {
-      expect(isValidJson('0')).toBe(false);
+      expect(isValidJson('0')).toBeFalsy();
     });
   });
 });
