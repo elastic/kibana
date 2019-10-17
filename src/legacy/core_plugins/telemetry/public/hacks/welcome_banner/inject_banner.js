@@ -18,19 +18,25 @@
  */
 
 import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
 
+import { fetchTelemetry } from '../fetch_telemetry';
 import { renderBanner } from './render_banner';
-import { getTelemetryOptInService, isUnauthenticated } from '../../services';
+import { shouldShowBanner } from './should_show_banner';
+import { TelemetryOptInProvider, isUnauthenticated } from '../../services';
+import { npStart } from 'ui/new_platform';
 
 /**
  * Add the Telemetry opt-in banner if the user has not already made a decision.
  *
  * Note: this is an async function, but Angular fails to use it as one. Its usage does not need to be awaited,
  * and thus it can be wrapped in the run method to just be a normal, non-async function.
+ *
+ * @param {Object} $injector The Angular injector
  */
-async function asyncInjectBanner() {
-  const telemetryOptInService = getTelemetryOptInService();
+async function asyncInjectBanner($injector) {
+  const Private = $injector.get('Private');
+  const telemetryOptInProvider = Private(TelemetryOptInProvider);
+  const config = $injector.get('config');
 
   // and no banner for non-logged in users
   if (isUnauthenticated()) {
@@ -42,16 +48,23 @@ async function asyncInjectBanner() {
     return;
   }
 
-  renderBanner(telemetryOptInService);
+  // determine if the banner should be displayed
+  if (await shouldShowBanner(telemetryOptInProvider, config)) {
+    const $http = $injector.get('$http');
+
+    renderBanner(telemetryOptInProvider, () => fetchTelemetry($http, { unencrypted: true }));
+  }
 }
 
 /**
  * Add the Telemetry opt-in banner when appropriate.
+ *
+ * @param {Object} $injector The Angular injector
  */
-export function injectBanner() {
+export function injectBanner($injector) {
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
   const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
   if (telemetryEnabled && telemetryBanner) {
-    asyncInjectBanner();
+    asyncInjectBanner($injector);
   }
 }

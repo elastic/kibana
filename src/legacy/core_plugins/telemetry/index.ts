@@ -76,6 +76,14 @@ const telemetry = (kibana: any) => {
           isNamespaceAgnostic: true,
         },
       },
+      async replaceInjectedVars(originalInjectedVars: any, request: any) {
+        const telemetryOptedIn = await getTelemetryOptIn(request);
+
+        return {
+          ...originalInjectedVars,
+          telemetryOptedIn,
+        };
+      },
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {

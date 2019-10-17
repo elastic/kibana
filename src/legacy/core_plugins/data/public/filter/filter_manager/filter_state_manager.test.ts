@@ -22,11 +22,9 @@ import sinon from 'sinon';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 
-import { IndexPatterns } from '../../index_patterns';
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { FilterManager } from './filter_manager';
-import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 
 import { coreMock } from '../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
@@ -44,11 +42,7 @@ describe('filter_state_manager', () => {
   beforeEach(() => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
-    const indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(
-      (indexPatterns as unknown) as IndexPatterns,
-      setupMock.uiSettings
-    );
+    filterManager = new FilterManager(setupMock.uiSettings);
   });
 
   describe('app_state_undefined', () => {
@@ -81,7 +75,7 @@ describe('filter_state_manager', () => {
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
 
-      await filterManager.setFilters([f1, f2]);
+      filterManager.setFilters([f1, f2]);
 
       sinon.assert.notCalled(appStateStub.save);
       sinon.assert.calledOnce(globalStateStub.save);
@@ -89,16 +83,21 @@ describe('filter_state_manager', () => {
   });
 
   describe('app_state_defined', () => {
+    let filterStateManager: FilterStateManager;
     beforeEach(() => {
       // FilterStateManager is tested indirectly.
       // Therefore, we don't need it's instance.
-      new FilterStateManager(
+      filterStateManager = new FilterStateManager(
         globalStateStub,
         () => {
           return appStateStub;
         },
         filterManager
       );
+    });
+
+    afterEach(() => {
+      filterStateManager.destroy();
     });
 
     test('should update filter manager global filters', done => {
@@ -123,27 +122,27 @@ describe('filter_state_manager', () => {
       }, 100);
     });
 
-    test('should update URL when filter manager filters are set', async () => {
+    test('should update URL when filter manager filters are set', () => {
       appStateStub.save = sinon.stub();
       globalStateStub.save = sinon.stub();
 
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
 
-      await filterManager.setFilters([f1, f2]);
+      filterManager.setFilters([f1, f2]);
 
       sinon.assert.calledOnce(appStateStub.save);
       sinon.assert.calledOnce(globalStateStub.save);
     });
 
-    test('should update URL when filter manager filters are added', async () => {
+    test('should update URL when filter manager filters are added', () => {
       appStateStub.save = sinon.stub();
       globalStateStub.save = sinon.stub();
 
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
 
-      await filterManager.addFilters([f1, f2]);
+      filterManager.addFilters([f1, f2]);
 
       sinon.assert.calledOnce(appStateStub.save);
       sinon.assert.calledOnce(globalStateStub.save);
@@ -156,13 +155,13 @@ describe('filter_state_manager', () => {
      ** would cause filter state manager detects those changes
      ** And triggers *another* filter manager update.
      */
-    test('should NOT re-trigger filter manager', async done => {
+    test('should NOT re-trigger filter manager', done => {
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       filterManager.setFilters([f1]);
       const setFiltersSpy = sinon.spy(filterManager, 'setFilters');
 
       f1.meta.negate = true;
-      await filterManager.setFilters([f1]);
+      filterManager.setFilters([f1]);
 
       setTimeout(() => {
         expect(setFiltersSpy.callCount).toEqual(1);

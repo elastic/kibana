@@ -27,24 +27,20 @@ import { OptInBanner } from '../../components/opt_in_banner_component';
 /**
  * Render the Telemetry Opt-in banner.
  *
- * @param {Object} telemetryOptInService The telemetry opt-in service.
+ * @param {Object} telemetryOptInProvider The telemetry opt-in provider.
+ * @param {Function} fetchTelemetry Function to pull telemetry on demand.
  * @param {Object} _banners Banners singleton, which can be overridden for tests.
  */
-export function renderBanner(telemetryOptInService, { _banners = banners } = {}) {
-  const showingWelcomeCard = telemetryOptInService.getShowWelcomeCard();
-  console.log('showingWelcomeCard::', showingWelcomeCard);
-  if (showingWelcomeCard) {
-    return;
-  }
+export function renderBanner(telemetryOptInProvider, fetchTelemetry, { _banners = banners } = {}) {
   const bannerId = _banners.add({
     component: (
       <OptInBanner
-        optInClick={optIn => clickBanner(telemetryOptInService, optIn)}
-        fetchTelemetry={telemetryOptInService.fetchExample}
+        optInClick={optIn => clickBanner(telemetryOptInProvider, optIn)}
+        fetchTelemetry={fetchTelemetry}
       />
     ),
     priority: 10000
   });
 
-  telemetryOptInService.setBannerId(bannerId);
+  telemetryOptInProvider.setBannerId(bannerId);
 }

@@ -23,45 +23,25 @@ import { toastNotifications } from 'ui/notify';
 import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 
-export type TelemetryOptInService = ReturnType<typeof createTelemetryOptInService>;
-let telemetryOptInService: TelemetryOptInService;
+let bannerId: string | null = null;
+let currentOptInStatus = false;
 
-function createTelemetryOptInService() {
-  const { http, injectedMetadata } = npStart.core;
-  const initalOptIn = injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
-
-  let currentOptInStatus = initalOptIn;
-  let userConfigShowOptIn = false;
-  let bannerId: string | null = null;
-  let showWelcomeCard = false;
-  let showBanner = false;
+export function TelemetryOptInProvider($injector: any, chrome: any) {
+  currentOptInStatus = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
 
   setCanTrackUiMetrics(currentOptInStatus);
   const provider = {
-    getShowOptInNotifications: () => userConfigShowOptIn,
-    getShowBanner: () => userConfigShowOptIn && showBanner,
-    getShowWelcomeCard: () => userConfigShowOptIn && showWelcomeCard,
-    setShowOptInNotifications: (show: boolean) => {
-      userConfigShowOptIn = show;
-    },
-    setShowWelcomeCard: (show: boolean) => {
-      showWelcomeCard = show;
-    },
-    setShowBanner: (show: boolean) => {
-      showBanner = show;
-    },
     getBannerId: () => bannerId,
+    getOptIn: () => currentOptInStatus,
     setBannerId(id: string) {
       bannerId = id;
     },
-    getOptIn: () => currentOptInStatus,
     setOptIn: async (enabled: boolean) => {
       setCanTrackUiMetrics(enabled);
+      const $http = $injector.get('$http');
 
       try {
-        await http.post('/api/telemetry/v2/optIn', {
-          body: JSON.stringify({ enabled }),
-        });
+        await $http.post(chrome.addBasePath('/api/telemetry/v2/optIn'), { enabled });
         currentOptInStatus = enabled;
       } catch (error) {
         toastNotifications.addError(error, {
@@ -77,28 +57,19 @@ function createTelemetryOptInService() {
 
       return true;
     },
-    fetchExample: () => provider.fetchTelemetry({ unencrypted: true }),
-    fetchTelemetry: async ({ unencrypted = false } = {}) => {
-      return await http.post('/api/telemetry/v2/clusters/_stats', {
-        body: JSON.stringify({
-          unencrypted,
-          timeRange: {
-            min: moment()
-              .subtract(20, 'minutes')
-              .toISOString(),
-            max: moment().toISOString(),
-          },
-        }),
+    fetchExample: async () => {
+      const $http = $injector.get('$http');
+      return $http.post(chrome.addBasePath(`/api/telemetry/v2/clusters/_stats`), {
+        unencrypted: true,
+        timeRange: {
+          min: moment()
+            .subtract(20, 'minutes')
+            .toISOString(),
+          max: moment().toISOString(),
+        },
       });
     },
   };
 
   return provider;
-}
-
-export function getTelemetryOptInService(): TelemetryOptInService {
-  if (!telemetryOptInService) {
-    telemetryOptInService = createTelemetryOptInService();
-  }
-  return telemetryOptInService;
 }

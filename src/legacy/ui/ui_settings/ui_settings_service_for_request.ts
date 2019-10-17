@@ -18,10 +18,9 @@
  */
 
 import { Legacy } from 'kibana';
+import { IUiSettingsClient } from 'src/core/server';
 import { uiSettingsServiceFactory } from './ui_settings_service_factory';
-import { IUiSettingsClient, UiSettingsServiceOptions } from './ui_settings_service';
 
-type Options = Pick<UiSettingsServiceOptions, 'getDefaults' | 'overrides'>;
 /**
  *  Get/create an instance of UiSettingsService bound to a specific request.
  *  Each call is cached (keyed on the request object itself) and subsequent
@@ -36,16 +35,8 @@ type Options = Pick<UiSettingsServiceOptions, 'getDefaults' | 'overrides'>;
  */
 export function getUiSettingsServiceForRequest(
   server: Legacy.Server,
-  request: Legacy.Request,
-  options: Options
+  request: Legacy.Request
 ): IUiSettingsClient {
-  const { getDefaults, overrides } = options;
-
-  const uiSettingsService = uiSettingsServiceFactory(server, {
-    getDefaults,
-    overrides,
-    savedObjectsClient: request.getSavedObjectsClient(),
-  });
-
-  return uiSettingsService;
+  const savedObjectsClient = request.getSavedObjectsClient();
+  return uiSettingsServiceFactory(server, { savedObjectsClient });
 }
