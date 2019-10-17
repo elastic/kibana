@@ -96,14 +96,12 @@ pipeline {
         }
       }
       steps{
-        dir("${BASE_DIR}/${CYPRESS_DIR}"){
+        dir("${BASE_DIR}"){
           sh '''
-            USER_ID="$(id -u):$(id -g)" \
-            docker-compose up --build \
-                              --abort-on-container-exit \
-                              --exit-code-from cypress \
-                              --remove-orphans \
-                              cypress'''
+            docker build --tag cypress ${CYPRESS_DIR}/ci
+            docker run --rm -t --user "$(id -u):$(id -g)" \
+                    -v `pwd`:/app --network="host" \
+                    --name cypress cypress'''
         }
       }
       post {

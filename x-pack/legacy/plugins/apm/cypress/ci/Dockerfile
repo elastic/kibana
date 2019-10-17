@@ -18,7 +18,5 @@ RUN apt-get -qq update \
     --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
-## host.docker.internal is not available in native docker installations
-RUN localhost=$(dig +short host.docker.internal) \
-  && [ -n "${localhost}" ] && echo "${localhost} localhost" >> /etc/hosts || true \
-  && cat /etc/hosts
+COPY entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
