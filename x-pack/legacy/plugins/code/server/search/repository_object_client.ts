@@ -20,6 +20,7 @@ import {
   RepositoryIndexStatusReservedField,
   RepositoryRandomPathReservedField,
   RepositoryReservedField,
+  RepositorySearchIndexWithScope,
 } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 
@@ -54,9 +55,20 @@ export class RepositoryObjectClient {
     return await this.getRepositoryObject(repoUri, RepositoryRandomPathReservedField);
   }
 
+  public async getRepositories(uris: string[]): Promise<Repository[]> {
+    if (uris.length === 0) {
+      return [];
+    }
+    return this.getRepositoriesInternal(RepositorySearchIndexWithScope(uris));
+  }
+
   public async getAllRepositories(): Promise<Repository[]> {
+    return await this.getRepositoriesInternal(`${RepositoryIndexNamePrefix}*`);
+  }
+
+  private async getRepositoriesInternal(index: string) {
     const res = await this.esClient.search({
-      index: `${RepositoryIndexNamePrefix}*`,
+      index,
       body: {
         query: {
           exists: {
