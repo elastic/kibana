@@ -8,6 +8,10 @@ import { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { idx } from '@kbn/elastic-idx';
+import { ml } from '../../services/ml_api_service';
+import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
+import { RegressionEvaluateResponse } from '../common';
 
 export type IndexName = string;
 export type IndexPattern = string;
@@ -24,6 +28,12 @@ interface RegressionAnalysis {
   };
 }
 
+export interface Eval {
+  meanSquaredError: number | '';
+  rSquared: number | '';
+  error: null | string;
+}
+
 export interface RegressionEvaluateResponse {
   regression: {
     mean_squared_error: {
@@ -37,6 +47,12 @@ export interface RegressionEvaluateResponse {
 
 interface GenericAnalysis {
   [key: string]: Record<string, any>;
+}
+
+interface LoadEvaluateResult {
+  success: boolean;
+  eval: RegressionEvaluateResponse | null;
+  error: string | null;
 }
 
 type AnalysisConfig = OutlierAnalysis | RegressionAnalysis | GenericAnalysis;
@@ -58,7 +74,7 @@ export const getAnalysisType = (analysis: AnalysisConfig) => {
 };
 
 export const getDependentVar = (analysis: AnalysisConfig) => {
-  let depVar;
+  let depVar = '';
   if (isRegressionAnalysis(analysis)) {
     depVar = analysis.regression.dependent_variable;
   }
@@ -151,4 +167,63 @@ export const useRefreshAnalyticsList = (
       refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.LOADING);
     },
   };
+};
+
+const DEFAULT_SIG_FIGS = 3;
+
+export function getValuesFromResponse(response: RegressionEvaluateResponse) {
+  let meanSquaredError = idx(response, _ => _.regression.mean_squared_error.error) as number;
+  if (meanSquaredError) {
+    meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));
+  }
+
+  let rSquared = idx(response, _ => _.regression.r_squared.value) as number;
+  if (rSquared) {
+    rSquared = Number(rSquared.toPrecision(DEFAULT_SIG_FIGS));
+  }
+
+  return { meanSquaredError, rSquared };
+}
+
+export const loadEvalData = async ({
+  isTraining,
+  index,
+  dependentVariable,
+}: {
+  isTraining: boolean;
+  index: string;
+  dependentVariable: string;
+}) => {
+  const results: LoadEvaluateResult = { success: false, eval: null, error: null };
+
+  const config = {
+    index,
+    query: {
+      term: {
+        'ml.is_training': {
+          value: isTraining,
+        },
+      },
+    },
+    evaluation: {
+      regression: {
+        actual_field: dependentVariable,
+        predicted_field: `ml.${dependentVariable}_prediction`,
+        metrics: {
+          r_squared: {},
+          mean_squared_error: {},
+        },
+      },
+    },
+  };
+
+  try {
+    const evalResult = await ml.dataFrameAnalytics.evaluateDataFrameAnalytics(config);
+    results.success = true;
+    results.eval = evalResult;
+    return results;
+  } catch (e) {
+    results.error = getErrorMessage(e);
+    return results;
+  }
 };

@@ -8,11 +8,14 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { elasticLogo } from '../lib/elastic_logo';
 import { isValidUrl } from '../../common/lib/url';
+import { RendererStrings } from '../../i18n';
+
+const { image: strings } = RendererStrings;
 
 export const image = () => ({
   name: 'image',
-  displayName: 'Image',
-  help: 'Render an image',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const dataurl = isValidUrl(config.dataurl) ? config.dataurl : elasticLogo;

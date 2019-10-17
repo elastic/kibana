@@ -9,4 +9,10 @@
  * Detection UI. Added as part of: https://github.com/elastic/kibana/pull/39678/files
  *
  */
-export const mlModules: string[] = ['siem_auditbeat', 'siem_winlogbeat'];
+export const mlModules: string[] = [
+  'siem_auditbeat',
+  'siem_auditbeat_auth',
+  'siem_packetbeat',
+  'siem_winlogbeat',
+  'siem_winlogbeat_auth',
+];
