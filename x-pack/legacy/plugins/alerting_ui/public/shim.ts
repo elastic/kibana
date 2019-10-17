@@ -5,6 +5,7 @@
  */
 
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { capabilities } from 'ui/capabilities';
 import { CoreStart } from 'kibana/public';
 
 export interface AppPlugins {
@@ -12,6 +13,9 @@ export interface AppPlugins {
     sections: typeof management;
     getSection(): any;
     breadcrumb: any;
+  };
+  capabilities: {
+    get: () => any;
   };
 }
 
@@ -28,6 +32,7 @@ export function createShim() {
       },
     },
     pluginsStart: {
+      capabilities,
       management: {
         breadcrumb: MANAGEMENT_BREADCRUMB,
       },

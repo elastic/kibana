@@ -7,7 +7,6 @@
 import React, { Fragment, useState, useEffect } from 'react';
 // @ts-ignore: EuiSearchBar not defined in TypeScript yet
 import { EuiPageContent, EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
-import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PageError } from '../../../components/page_error';
@@ -25,12 +24,12 @@ interface Data extends Action {
   actionType: ActionType['name'];
 }
 
-const canDelete = capabilities.get().actions.delete;
-
 export const ActionsList: React.FunctionComponent = () => {
   const {
     core: { http },
+    plugins: { capabilities },
   } = useAppDependencies();
+  const canDelete = capabilities.get().actions.delete;
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [actions, setActions] = useState<Action[]>([]);
