@@ -39,7 +39,7 @@ export type PolicyUpdatedEvent =
   | {
       type: 'created';
       policyId: string;
-      paylod: any;
+      payload: any;
     }
   | {
       type: 'updated';
