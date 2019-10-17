@@ -28,10 +28,10 @@ import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
 // @ts-ignore
 import { fieldFormats } from '../../../registry/field_formats';
-// @ts-ignore
 import { dateRange } from '../../../utils/date_range';
-// @ts-ignore
 import { ipRange } from '../../../utils/ip_range';
+import { DateRangeKey } from '../../../agg_types/buckets/date_range';
+import { IpRangeKey } from '../../../agg_types/buckets/ip_range';
 
 interface TermsFieldFormatParams {
   otherBucketLabel: string;
@@ -116,14 +116,14 @@ export const getFormat: FormatFactory = (mapping = {}) => {
     return new RangeFormat();
   } else if (id === 'date_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
-    const DateRangeFormat = FieldFormat.from((range: any) => {
+    const DateRangeFormat = FieldFormat.from((range: DateRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
       return dateRange.toString(range, format.convert.bind(format));
     });
     return new DateRangeFormat();
   } else if (id === 'ip_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
-    const IpRangeFormat = FieldFormat.from((range: any) => {
+    const IpRangeFormat = FieldFormat.from((range: IpRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
       return ipRange.toString(range, format.convert.bind(format));
     });
